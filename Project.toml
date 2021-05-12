@@ -1,0 +1,8 @@
+name = "psychic"
+uuid = "a62fb48f-9a70-4c9b-9e83-c6e4bcffc727"
+authors = ["avocadojesus <jgarbey@gmail.com>"]
+version = "0.1.0"
+
+[deps]
+Debugger = "31a5f54b-26ea-5ae9-a837-f05ce5417438"
+LibPQ = "194296ae-ab2e-5f79-8cd4-7183a0a5a0d1"
