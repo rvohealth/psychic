@@ -119,6 +119,9 @@ CREATE TABLE ${tableName} (
   ${
     columns.map(column => {
       switch(column.type) {
+      case 'array':
+        return `${column.name} ${column.datatype.toUpperCase()} []` + this._constraints(column)
+
       case 'boolean':
         return `${column.name} BOOLEAN` + this._constraints(column)
 
@@ -221,6 +224,7 @@ INSERT INTO ${tableName}
 `,
       rows.map(row => Object.values(row).map(v => {
         if (v.constructor.name === 'Moment') return v.toISOString()
+        if (Array.isArray(v)) return `{${v.join(', ')}}`
         return v
       }))
     )

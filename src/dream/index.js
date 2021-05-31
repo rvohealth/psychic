@@ -416,6 +416,9 @@ class Dream {
           const attribute = this[attributeName]
           // console.log(columnType, typeof attribute, attribute)
           switch(columnType) {
+          case 'array':
+            return Array.isArray(attribute)
+
           case 'boolean':
             return typeof attribute === 'boolean'
 

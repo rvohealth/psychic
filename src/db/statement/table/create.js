@@ -14,6 +14,14 @@ export default class CreateTableStatement {
     return this._columns
   }
 
+  array(columnName, datatype) {
+    this.columns.push({
+      type: 'array',
+      name: columnName,
+      datatype,
+    })
+  }
+
   bool(columnName) {
     this.columns.push({
       type: 'boolean',
