@@ -1,4 +1,5 @@
 import moment from 'moment'
+import { validate as validateUUID } from 'uuid'
 import jwt from 'jsonwebtoken'
 import pluralize from 'pluralize'
 import bcrypt from 'bcrypt'
@@ -428,6 +429,9 @@ class Dream {
 
           case 'timestamp':
             return moment(attribute).isValid()
+
+          case 'uuid':
+            return validateUUID(attribute)
 
           default:
             throw 'OTHER'

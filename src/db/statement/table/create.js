@@ -51,4 +51,12 @@ export default class CreateTableStatement {
       name: columnName,
     })
   }
+
+  uuid(columnName) {
+    this.columns.push({
+      type: 'uuid',
+      name: columnName,
+    })
+  }
+
 }

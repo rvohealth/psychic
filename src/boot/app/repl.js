@@ -1,6 +1,7 @@
 import fs from 'fs'
+import 'dist/boot/globals/all'
+import 'dist/boot/globals/repl'
 import 'dist/boot/language-extensions'
-import 'dist/boot/globals'
 import 'dist/app/pkg/repl.pkg'
 import packagedDreams from 'dist/app/pkg/dreams.pkg'
 import packagedChannels from 'dist/app/pkg/channels.pkg'

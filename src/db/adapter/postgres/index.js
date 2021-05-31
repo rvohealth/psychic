@@ -135,6 +135,9 @@ CREATE TABLE ${tableName} (
       case 'timestamp':
         return `${column.name} TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP`
 
+      case 'uuid':
+        return `${column.name} uuid` + this._constraints(column)
+
       default:
         throw 'UNHANDLED TYPE ' + column.type
       }
@@ -340,6 +343,8 @@ SET ${Object.keys(attributes).map(attribute => `${attribute}='${attributes[attri
     let str = ''
     if (column.primary) str += ' PRIMARY KEY'
     if (column.primary || column.unique) str += ' UNIQUE'
+    // if (column.type === 'uuid' && !column.default) column.default = 'uuid_generate_v4()'
+    if (column.default) str += ` DEFAULT ${column.default}`
     return str
   }
 
