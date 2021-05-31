@@ -427,6 +427,7 @@ class Dream {
             return typeof attribute === 'number'
 
           case 'char':
+          case 'varchar':
           case 'string':
             return typeof attribute === 'string' &&
               !!attribute.length

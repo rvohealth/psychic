@@ -150,6 +150,9 @@ CREATE TABLE ${tableName} (
       case 'uuid':
         return `${column.name} uuid` + this._constraints(column)
 
+      case 'varchar':
+        return `${column.name} VARCHAR(${typeof column.length === 'number' ? column.length : 255})`
+
       default:
         throw 'UNHANDLED TYPE ' + column.type
       }

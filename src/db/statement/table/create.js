@@ -88,4 +88,10 @@ export default class CreateTableStatement {
     })
   }
 
+  varchar(columnName) {
+    this.columns.push({
+      type: 'varchar',
+      name: columnName,
+    })
+  }
 }
