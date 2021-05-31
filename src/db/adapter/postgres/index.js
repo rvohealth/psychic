@@ -137,6 +137,9 @@ CREATE TABLE ${tableName} (
       case 'int':
         return `${column.name} serial` + this._constraints(column)
 
+      case 'json':
+        return `${column.name} JSON` + this._constraints(column)
+
       case 'string':
       case 'text':
         return `${column.name} TEXT` + this._constraints(column)

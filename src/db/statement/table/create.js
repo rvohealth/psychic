@@ -59,6 +59,13 @@ export default class CreateTableStatement {
     })
   }
 
+  json(columnName) {
+    this.columns.push({
+      type: 'json',
+      name: columnName,
+    })
+  }
+
   string(columnName, { length }={}) {
     this.columns.push({
       type: 'text',

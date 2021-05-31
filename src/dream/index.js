@@ -426,6 +426,9 @@ class Dream {
           case 'int':
             return typeof attribute === 'number'
 
+          case 'json':
+            return typeof attribute === 'object'
+
           case 'char':
           case 'varchar':
           case 'string':
