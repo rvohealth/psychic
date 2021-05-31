@@ -15,6 +15,7 @@ import HasManyThrough from 'src/dream/association/has-many-through'
 import BelongsTo from 'src/dream/association/belongs-to'
 import DBAuthentication from 'src/dream/authentication/db'
 import PresenceCheckFailed from 'src/error/dream/validation/presence-check-failed'
+import { validatePresence } from 'src/helpers/validation'
 
 class Dream {
   static get isDream() {
@@ -412,53 +413,14 @@ class Dream {
 
       const attrIsPresentAccessors = {
         get: () => {
-          const columnType = config.columnType(this.table, attributeName)
-          const attribute = this[attributeName]
-          // console.log(columnType, typeof attribute, attribute)
-          switch(columnType) {
-          case 'array':
-            return Array.isArray(attribute)
-
-          case 'boolean':
-            return typeof attribute === 'boolean'
-
-          case 'float':
-          case 'int':
-            return typeof attribute === 'number'
-
-          case 'json':
-            return typeof attribute === 'object'
-
-          case 'char':
-          case 'varchar':
-          case 'string':
-            return typeof attribute === 'string' &&
-              !!attribute.length
-
-          case 'time':
-            if (!attribute) return false
-            return /\d{1,2}:\d{1,2}:\d{1,2}/.test(attribute)
-
-          case 'date':
-          case 'timestamp':
-            if (!attribute) return false
-            return moment(attribute).isValid()
-
-          case 'uuid':
-            return validateUUID(attribute)
-
-          default:
-            throw 'OTHER'
-          }
-        },
-        set: val => {
-          this._attributes[attributeName] = val
+          return validatePresence(this.table, attributeName, this[attributeName])
         },
         configurable: true,
       }
       Object.defineProperty(this, `${attributeName}IsPresent`, attrIsPresentAccessors)
       if (camelCased !== attributeName)
         Object.defineProperty(this, `${camelCased}IsPresent`, attrIsPresentAccessors)
+
     })
   }
 

@@ -51,6 +51,13 @@ export default class CreateTableStatement {
     })
   }
 
+  hstore(columnName) {
+    this.columns.push({
+      type: 'hstore',
+      name: columnName,
+    })
+  }
+
   int(columnName, { length }={}) {
     this.columns.push({
       type: 'int',

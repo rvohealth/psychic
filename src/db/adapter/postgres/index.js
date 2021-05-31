@@ -134,6 +134,9 @@ CREATE TABLE ${tableName} (
       case 'float':
         return `${column.name} FLOAT` + this._constraints(column)
 
+      case 'hstore':
+        return `${column.name} HSTORE` + this._constraints(column)
+
       case 'int':
         return `${column.name} serial` + this._constraints(column)
 
@@ -237,11 +240,24 @@ INSERT INTO ${tableName}
   VALUES %L
   RETURNING *
 `,
-      rows.map(row => Object.values(row).map(v => {
-        if (v.constructor.name === 'Moment') return v.toISOString()
-        if (Array.isArray(v)) return `{${v.join(', ')}}`
-        return v
-      }))
+      rows.map(row =>
+        Object
+          .keys(row)
+          .map(key => {
+            const columnType = config.columnType(tableName, key)
+            const v = row[key]
+            if (v.constructor.name === 'Moment') return v.toISOString()
+            if (Array.isArray(v)) return `{${v.join(', ')}}`
+            if (columnType === 'hstore') return Object
+              .keys(v)
+              .map(hstoreKey => {
+                return `"${hstoreKey}" => "${v[hstoreKey]}"`
+              })
+              .join(',\n')
+            // if (config.columnType())
+            return v
+          })
+      )
     )
 
     const result = await this.runSQL(sql)
