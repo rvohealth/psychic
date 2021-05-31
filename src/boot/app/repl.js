@@ -1,4 +1,5 @@
 import fs from 'fs'
+import 'dist/boot/language-extensions'
 import 'dist/boot/globals'
 import 'dist/app/pkg/repl.pkg'
 import packagedDreams from 'dist/app/pkg/dreams.pkg'

@@ -1,3 +1,4 @@
+import 'src/boot/language-extensions'
 import psychic from 'src/singletons/psychic'
 import Migrate from 'src/migrate'
 import _Channel from 'src/channel'
