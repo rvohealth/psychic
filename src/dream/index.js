@@ -14,6 +14,7 @@ import BelongsTo from 'src/dream/association/belongs-to'
 import DBAuthentication from 'src/dream/authentication/db'
 import PresenceCheckFailed from 'src/error/dream/validation/presence-check-failed'
 import UniqueCheckFailed from 'src/error/dream/validation/unique-check-failed'
+import InclusionCheckFailed from 'src/error/dream/validation/inclusion-check-failed'
 import { validatePresence, validateUnique } from 'src/helpers/validation'
 
 class Dream {
@@ -456,6 +457,12 @@ class Dream {
             !(await this[column + 'IsUnique']())
         )
           throw new UniqueCheckFailed(`Failed to check presence for column ${this.table}.${column}`)
+
+        if (
+          validation.inclusion &&
+            !validation.inclusion.includes(this[column])
+        )
+          throw new InclusionCheckFailed(`expected ${this[column]} in ${validation.inclusion}`)
       }
     }
   }
