@@ -15,6 +15,7 @@ import DBAuthentication from 'src/dream/authentication/db'
 import PresenceCheckFailed from 'src/error/dream/validation/presence-check-failed'
 import UniqueCheckFailed from 'src/error/dream/validation/unique-check-failed'
 import InclusionCheckFailed from 'src/error/dream/validation/inclusion-check-failed'
+import ExclusionCheckFailed from 'src/error/dream/validation/exclusion-check-failed'
 import { validatePresence, validateUnique } from 'src/helpers/validation'
 
 class Dream {
@@ -463,6 +464,12 @@ class Dream {
             !validation.inclusion.includes(this[column])
         )
           throw new InclusionCheckFailed(`expected ${this[column]} in ${validation.inclusion}`)
+
+        if (
+          validation.exclusion &&
+            validation.exclusion.includes(this[column])
+        )
+          throw new ExclusionCheckFailed(`expected ${this[column]} in ${validation.exclusion}`)
       }
     }
   }
