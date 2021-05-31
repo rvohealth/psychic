@@ -72,16 +72,16 @@ class Config {
     return `config/schema.json`
   }
 
+  get schema() {
+    return JSON.parse(fs.readFileSync(this.schemaPath))
+  }
+
   get channels() {
     return this._channels
   }
 
   get dreamPath() {
     return `${this.root}dist/dreams`
-  }
-
-  get schema() {
-    return JSON.parse(fs.readFileSync(this.schemaPath))
   }
 
   get dreams() {
@@ -108,6 +108,16 @@ class Config {
 
   projection(projectionName) {
     return this.projections[pascalCase(projectionName)]
+  }
+
+  columnType(tableName, columnName) {
+    const columnSchema = this.columnSchema(tableName, columnName)
+    return columnSchema?.type
+  }
+
+  columnSchema(tableName, columnName) {
+    // errors!
+    return this.tableSchema(tableName).columns[columnName]
   }
 
   tableSchema(name) {

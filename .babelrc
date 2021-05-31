@@ -6,6 +6,7 @@
   "plugins": [
     "@babel/plugin-transform-runtime",
     "@babel/plugin-proposal-optional-chaining",
+    "require-context-hook",
     [
       "module-resolver",
       {

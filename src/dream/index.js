@@ -1,3 +1,4 @@
+import moment from 'moment'
 import jwt from 'jsonwebtoken'
 import pluralize from 'pluralize'
 import bcrypt from 'bcrypt'
@@ -12,6 +13,7 @@ import HasMany from 'src/dream/association/has-many'
 import HasManyThrough from 'src/dream/association/has-many-through'
 import BelongsTo from 'src/dream/association/belongs-to'
 import DBAuthentication from 'src/dream/authentication/db'
+import PresenceCheckFailed from 'src/error/dream/validation/presence-check-failed'
 
 class Dream {
   static get isDream() {
@@ -142,6 +144,7 @@ class Dream {
     this._afterDestroy = []
     this._beforeUpdate = []
     this._afterUpdate = []
+    this._validations = {}
     this._resetAttributes(attributes)
     this.initialize()
   }
@@ -309,6 +312,7 @@ class Dream {
 
   async save() {
     await this._runHooksFor('beforeSave')
+    await this._runValidations()
 
     if (this.isNewRecord) {
       await this._runHooksFor('beforeCreate')
@@ -363,6 +367,12 @@ class Dream {
     return await this.save()
   }
 
+  validates(column, opts) {
+    this._validations[column] = this._validations[column] || []
+    this._validations[column].push(opts)
+    return this
+  }
+
   _association(resourceName) {
     return this._associations[resourceName]
   }
@@ -386,26 +396,51 @@ class Dream {
 
   _defineAttributeAccessors() {
     Object.keys(this.constructor.schema).forEach(attributeName => {
-      Object.defineProperty(this, attributeName, {
+      const camelCased = camelCase(attributeName)
+
+      const attrAccessors = {
         get: () => this.attribute(attributeName),
         set: val => {
           this._attributes[attributeName] = val
         },
         configurable: true,
-      })
-
-      const camelCased = camelCase(attributeName)
-      if (camelCased !== attributeName) {
-        Object.defineProperty(this, camelCased, {
-          get: () => {
-            return this.attribute(attributeName)
-          },
-          set: val => {
-            this._attributes[attributeName] = val
-          },
-          configurable: true,
-        })
       }
+      Object.defineProperty(this, attributeName, attrAccessors)
+      if (camelCased !== attributeName)
+        Object.defineProperty(this, camelCased, attrAccessors)
+
+      const attrIsPresentAccessors = {
+        get: () => {
+          const columnType = config.columnType(this.table, attributeName)
+          const attribute = this[attributeName]
+          // console.log(columnType, typeof attribute, attribute)
+          switch(columnType) {
+          case 'boolean':
+            return typeof attribute === 'boolean'
+
+          case 'float':
+          case 'int':
+            return typeof attribute === 'number'
+
+          case 'string':
+            return typeof attribute === 'string' &&
+              !!attribute.length
+
+          case 'timestamp':
+            return moment(attribute).isValid()
+
+          default:
+            throw 'OTHER'
+          }
+        },
+        set: val => {
+          this._attributes[attributeName] = val
+        },
+        configurable: true,
+      }
+      Object.defineProperty(this, `${attributeName}IsPresent`, attrIsPresentAccessors)
+      if (camelCased !== attributeName)
+        Object.defineProperty(this, `${camelCased}IsPresent`, attrIsPresentAccessors)
     })
   }
 
@@ -418,6 +453,17 @@ class Dream {
         configurable: true,
       })
     })
+  }
+
+  async _runValidations() {
+    for (const column in this._validations) {
+      const validations = this._validations[column]
+      for (const i in validations) {
+        const validation = validations[i]
+        if (validation.presence && !this[column + 'IsPresent'])
+          throw new PresenceCheckFailed(`Failed to check presence for column ${this.table}.${column}`)
+      }
+    }
   }
 }
 

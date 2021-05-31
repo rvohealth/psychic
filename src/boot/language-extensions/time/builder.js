@@ -9,6 +9,18 @@ export default class TimeBuilder {
     return this._metric
   }
 
+  // i know this is abusing getters, but it makes for cleaner api :)
+  get ago() {
+    return moment()
+      .subtract(this.number, this.metric)
+  }
+
+  get fromNow() {
+    return moment()
+      .add(this.number, this.metric)
+  }
+  // end: abusing getters
+
   constructor() {
     this._number =  null
     this._metric = null
@@ -48,15 +60,5 @@ export default class TimeBuilder {
     this._number = number
     this._metric = 'years'
     return this
-  }
-
-  ago() {
-    return moment()
-      .subtract(this.number, this.metric)
-  }
-
-  fromNow() {
-    return moment()
-      .add(this.number, this.metric)
   }
 }

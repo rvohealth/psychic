@@ -122,6 +122,9 @@ CREATE TABLE ${tableName} (
       case 'boolean':
         return `${column.name} BOOLEAN` + this._constraints(column)
 
+      case 'float':
+        return `${column.name} FLOAT` + this._constraints(column)
+
       case 'int':
         return `${column.name} serial` + this._constraints(column)
 
@@ -213,7 +216,10 @@ INSERT INTO ${tableName}
   VALUES %L
   RETURNING *
 `,
-      rows.map(row => Object.values(row))
+      rows.map(row => Object.values(row).map(v => {
+        if (v.constructor.name === 'Moment') return v.toISOString()
+        return v
+      }))
     )
 
     const result = await this.runSQL(sql)
