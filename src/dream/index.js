@@ -431,7 +431,9 @@ class Dream {
             return typeof attribute === 'string' &&
               !!attribute.length
 
+          case 'date':
           case 'timestamp':
+            if (!attribute) return false
             return moment(attribute).isValid()
 
           case 'uuid':

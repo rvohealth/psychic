@@ -125,6 +125,9 @@ CREATE TABLE ${tableName} (
       case 'char':
         return `${column.name} CHAR(${typeof column.length === 'number' ? column.length : 1})`
 
+      case 'date':
+        return `${column.name} DATE`
+
       case 'boolean':
         return `${column.name} BOOLEAN` + this._constraints(column)
 
