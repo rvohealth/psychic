@@ -29,6 +29,13 @@ export default class CreateTableStatement {
     })
   }
 
+  char(columnName) {
+    this.columns.push({
+      type: 'char',
+      name: columnName,
+    })
+  }
+
   float(columnName, { length }={}) {
     this.columns.push({
       type: 'float',

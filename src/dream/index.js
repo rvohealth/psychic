@@ -426,6 +426,7 @@ class Dream {
           case 'int':
             return typeof attribute === 'number'
 
+          case 'char':
           case 'string':
             return typeof attribute === 'string' &&
               !!attribute.length
