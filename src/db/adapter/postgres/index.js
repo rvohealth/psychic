@@ -141,6 +141,9 @@ CREATE TABLE ${tableName} (
       case 'text':
         return `${column.name} TEXT` + this._constraints(column)
 
+      case 'time':
+        return `${column.name} TIME` + this._constraints(column)
+
       case 'timestamp':
         return `${column.name} TIMESTAMP WITH TIME ZONE DEFAULT CURRENT_TIMESTAMP`
 

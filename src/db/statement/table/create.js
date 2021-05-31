@@ -67,6 +67,13 @@ export default class CreateTableStatement {
     })
   }
 
+  time(columnName) {
+    this.columns.push({
+      type: 'time',
+      name: columnName,
+    })
+  }
+
   timestamp(columnName) {
     this.columns.push({
       type: 'timestamp',

@@ -431,6 +431,10 @@ class Dream {
             return typeof attribute === 'string' &&
               !!attribute.length
 
+          case 'time':
+            if (!attribute) return false
+            return /\d{1,2}:\d{1,2}:\d{1,2}/.test(attribute)
+
           case 'date':
           case 'timestamp':
             if (!attribute) return false
