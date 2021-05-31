@@ -1,5 +1,3 @@
-import moment from 'moment'
-import { validate as validateUUID } from 'uuid'
 import jwt from 'jsonwebtoken'
 import pluralize from 'pluralize'
 import bcrypt from 'bcrypt'
@@ -15,7 +13,8 @@ import HasManyThrough from 'src/dream/association/has-many-through'
 import BelongsTo from 'src/dream/association/belongs-to'
 import DBAuthentication from 'src/dream/authentication/db'
 import PresenceCheckFailed from 'src/error/dream/validation/presence-check-failed'
-import { validatePresence } from 'src/helpers/validation'
+import UniqueCheckFailed from 'src/error/dream/validation/unique-check-failed'
+import { validatePresence, validateUnique } from 'src/helpers/validation'
 
 class Dream {
   static get isDream() {
@@ -421,6 +420,12 @@ class Dream {
       if (camelCased !== attributeName)
         Object.defineProperty(this, `${camelCased}IsPresent`, attrIsPresentAccessors)
 
+      const attrIsUnique = async () => {
+        return await validateUnique(this.constructor, attributeName, this[attributeName])
+      }
+      this[attributeName + 'IsUnique'] = attrIsUnique
+      if (camelCased !== attributeName)
+        this[camelCased + 'IsUnique'] = attrIsUnique
     })
   }
 
@@ -440,8 +445,17 @@ class Dream {
       const validations = this._validations[column]
       for (const i in validations) {
         const validation = validations[i]
-        if (validation.presence && !this[column + 'IsPresent'])
+        if (
+          validation.presence &&
+            !this[column + 'IsPresent']
+        )
           throw new PresenceCheckFailed(`Failed to check presence for column ${this.table}.${column}`)
+
+        if (
+          validation.unique &&
+            !(await this[column + 'IsUnique']())
+        )
+          throw new UniqueCheckFailed(`Failed to check presence for column ${this.table}.${column}`)
       }
     }
   }

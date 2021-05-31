@@ -1,8 +1,9 @@
 import moment from 'moment'
 import { validate as validateUUID } from 'uuid'
+import db from 'src/db'
 import config from 'src/config'
 
-export const validatePresence = function(tableName, attributeName, attribute) {
+export function validatePresence(tableName, attributeName, attribute) {
   const columnType = config.columnType(tableName, attributeName)
   switch(columnType) {
   case 'array':
@@ -40,4 +41,13 @@ export const validatePresence = function(tableName, attributeName, attribute) {
   default:
     throw 'OTHER'
   }
+}
+
+export async function validateUnique(dreamClass, attributeName, attribute) {
+  const results = await db
+    .select('*')
+    .from(dreamClass.table)
+    .where({ [attributeName]: attribute })
+    .all()
+  return results.length === 0
 }
