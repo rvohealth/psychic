@@ -62,6 +62,14 @@ class Dream {
     return results
   }
 
+  static async find(id) {
+    return new Query(this)
+      .select('*')
+      .from(this.table)
+      .where({ id })
+      .first()
+  }
+
   static async first() {
     const result = await new Query(this)
       .select('*')
@@ -208,9 +216,13 @@ class Dream {
     return this
   }
 
-  async authTokenFor(identifyingColumn) {
+  async authTokenFor(idAndPasswordStr) {
     // should throw error app secret is not set.
-    const token = jwt.sign({ identifyingColumn, id: this.id }, process.env.PSYCHIC_SECRET || 'PLEASE_CHANGE_ME')
+    const token = jwt.sign({
+      key: idAndPasswordStr,
+      dreamClass: this.constructor.name,
+      id: this.id,
+    }, process.env.PSYCHIC_SECRET || 'PLEASE_CHANGE_ME')
     return token
   }
 

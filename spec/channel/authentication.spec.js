@@ -16,7 +16,7 @@ describe('Channel#authenticates', () => {
 
     class TestUserChannel extends Channel {
       initialize() {
-        this.authenticates('test-user', { against: 'email' })
+        this.authenticates('test-user', { against: 'email:password', as: 'currentUser' })
       }
     }
 
@@ -56,6 +56,7 @@ describe('Channel#authenticates', () => {
     })
 
     jest.spyOn(jwt, 'sign').mockReturnValue('fishman_token')
+    jest.spyOn(jwt, 'sign').mockReturnValue('fishman_token')
 
     await db.createTable('test_users', t => {
       t.string('email')
@@ -68,7 +69,7 @@ describe('Channel#authenticates', () => {
     const testUser = new TestUser({ email: 'fishman', password: 'jones', otherpassword: 'simba' })
     await testUser.save()
 
-    const vision = create('crystalBall.vision', 'test-users/sign-in', 'signIn', {
+    const vision = create('crystalBall.vision', 'test-users/auth', 'auth', {
       params: {
         email: 'fishman',
         password: 'jones',
@@ -76,12 +77,22 @@ describe('Channel#authenticates', () => {
     })
     const channel = new TestUserChannel(vision)
 
-    const spy = jest.fn()
-    channel.response.json = spy
-    await channel.signIn()
+    const jsonSpy = jest.fn()
+    const cookieSpy = jest.fn()
+    channel.response.json = jsonSpy
+    channel.response.cookie = cookieSpy
+    await channel.auth()
 
-    expect(spy).toHaveBeenCalledWith({ token: 'fishman_token' })
+    expect(jsonSpy).toHaveBeenCalledWith({ token: 'your token has been set as an httpOnly cookie' })
     expect(jwt.sign).toHaveBeenCalledWith({ identifyingColumn: 'email', id: 1 }, 'black cats are the coolest')
+    expect(cookieSpy).toHaveBeenCalledWith(
+      'currentUser',
+      'fishman_token',
+      {
+        maxAge: 1000 * 60 * 60 * 24 * 30, // 30 days
+        httpOnly: true,
+      },
+    )
   })
 })
 

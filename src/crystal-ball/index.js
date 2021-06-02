@@ -1,5 +1,7 @@
 import fs from 'fs'
 import express from 'express'
+import cookieParser from 'cookie-parser'
+import cors from 'cors'
 import config from 'src/config'
 import Namespace from 'src/crystal-ball/namespace'
 import l from 'src/singletons/l'
@@ -37,25 +39,42 @@ export default class CrystalBall {
     return this.namespace.namespaces
   }
 
+  get server() {
+    return this._server
+  }
+
   constructor() {
     this._channels = {}
     this._app = express()
+    this.app.use(cookieParser())
+    this.app.use(express.json())
+
+    if (process.env.CORE_TEST)
+      this.app.use(cors({
+        credentials: true,
+      }))
+
     this._namespace = new Namespace(null, '', this._app)
   }
 
-  async gaze() {
+  async gaze(port) {
     await this.boot()
-    this.app.listen(config.port, () => {
-      l.log('express connected')
+    this._server = this.app.listen(port || config.port, () => {
+      if (!process.env.CORE_TEST)
+        l.log('express connected')
     })
+  }
+
+  closeConnection() {
+    this.server?.close()
   }
 
   async boot() {
     // this loads routes from user
     if (fs.existsSync('app'))
       await import('dist/boot/app/crystal-ball')
-    else
-      throw 'Only meant for use with real app'
+    // else
+    //   throw 'Only meant for use with real app'
       // await import('dist/boot/crystal-ball')
 
     if (config.routeCB)

@@ -10,7 +10,8 @@
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly",
     "uuid": "readonly",
-    "now": "readonly"
+    "now": "readonly",
+    "context": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2020,

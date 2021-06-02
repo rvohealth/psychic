@@ -1,5 +1,4 @@
-import 'src/boot/globals/all'
-import 'src/boot/language-extensions'
+import 'src/boot/all'
 import psychic from 'src/singletons/psychic'
 import Migrate from 'src/migrate'
 import _Channel from 'src/channel'

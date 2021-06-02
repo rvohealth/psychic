@@ -11,28 +11,18 @@ class Config {
       return `src/template`
   }
 
-  get env() {
-    if (process.env.CORE_TEST) return 'test'
-    return process.env.NODE_ENV || 'development'
+  get authKeys() {
+    return this._authKeys
   }
 
-  get root() {
-    if (process.env.CORE_TEST) return 'testapp/'
-    // temporary
-    // if (fs.existsSync('src'))
-      return ``
-
-    // return 'node_modules/psychic/'
-    // throw 'NEED TO HANDLE REAL CASE'
+  get channels() {
+    return this._channels
   }
 
-  get psychicPath() {
-    if (!fs.existsSync('app')) return ''
-    return 'node_modules/psychic/'
-  }
-
-  get version() {
-    return '0.0.0'
+  get cookies() {
+    return {
+      maxAge: process.env.COOKIE_MAX_AGE || 1000 * 60 * 60 * 24 * 30, // 30 days
+    }
   }
 
   get dbConfig() {
@@ -59,8 +49,34 @@ class Config {
     return 'int'
   }
 
+  get dreamPath() {
+    return `${this.root}dist/dreams`
+  }
+
+  get dreams() {
+    console.log('zam', this._dreams)
+    // if (process.env.CORE_TEST) throw 'Stub this in tests'
+    // loaded at boot to prevent circular deps
+    return this._dreams
+  }
+
+  get env() {
+    if (process.env.CORE_TEST) return 'test'
+    return process.env.NODE_ENV || 'development'
+  }
+
   get port() {
     return process.env.PSYCHIC_PORT || 777
+  }
+
+  get psychicPath() {
+    if (!fs.existsSync('app')) return ''
+    return 'node_modules/psychic/'
+  }
+
+  get root() {
+    if (process.env.CORE_TEST) return 'testapp/'
+    return ``
   }
 
   get schemaPath() {
@@ -76,18 +92,8 @@ class Config {
     return JSON.parse(fs.readFileSync(this.schemaPath))
   }
 
-  get channels() {
-    return this._channels
-  }
-
-  get dreamPath() {
-    return `${this.root}dist/dreams`
-  }
-
-  get dreams() {
-    // if (process.env.CORE_TEST) throw 'Stub this in tests'
-    // loaded at boot to prevent circular deps
-    return this._dreams
+  get version() {
+    return '0.0.0'
   }
 
   get projections() {
@@ -102,12 +108,19 @@ class Config {
     return this._routeCB
   }
 
-  dream(dreamName) {
-    return this.dreams[snakeCase(dreamName)]
+  constructor() {
+    this._dreams = {}
+    this._channels = {}
+    this._authKeys = {}
+    this._routeCB = null
   }
 
-  projection(projectionName) {
-    return this.projections[pascalCase(projectionName)]
+  // must be called before app loads!
+  boot(dreams, channels, projections, routeCB) {
+    this._dreams = dreams
+    this._channels = channels
+    this._projections = projections
+    this._routeCB = routeCB
   }
 
   columnType(tableName, columnName) {
@@ -120,6 +133,18 @@ class Config {
     return this.tableSchema(tableName).columns[columnName]
   }
 
+  dream(dreamName) {
+    return this.dreams[snakeCase(dreamName)]
+  }
+
+  projection(projectionName) {
+    return this.projections[pascalCase(projectionName)]
+  }
+
+  registerAuthKey(authKey, route) {
+    this._authKeys[authKey] = route
+  }
+
   tableSchema(name) {
     const tabelized = snakeCase(pluralize(name))
     if (!this.schema[tabelized]) throw `unrecognized table ${tabelized}`
@@ -128,21 +153,7 @@ class Config {
       columns: this.schema[tabelized],
     }
   }
-
-  // must be called before app loads!
-  boot(dreams, channels, projections, routeCB) {
-    this._dreams = dreams
-    this._channels = channels
-    this._projections = projections
-    this._routeCB = routeCB
-  }
-
-  constructor() {
-    this._dreams = {}
-    this._channels = {}
-    this._routeCB = null
-  }
 }
 
-const configSingleton = new Config()
-export default configSingleton
+const config = new Config()
+export default config

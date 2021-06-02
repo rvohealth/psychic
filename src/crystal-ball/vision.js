@@ -1,4 +1,8 @@
 export default class Vision {
+  get auth() {
+    return this._auth
+  }
+
   get request() {
     return this._expressRequest
   }
@@ -20,5 +24,10 @@ export default class Vision {
     this._method = method
     this._expressRequest = expressRequest
     this._expressResponse = expressResponse
+    this._auth = {}
+  }
+
+  setAuth(key, dream) {
+    this._auth[key] = dream
   }
 }

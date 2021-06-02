@@ -18,6 +18,10 @@ export default class Channel {
     return config.dream(dreamName)
   }
 
+  get authentications() {
+    return this._authentications
+  }
+
   get projection() {
     if (this.constructor.projection) return this.constructor.projection
     if (this.constructor.assumedDreamClass)
@@ -30,7 +34,11 @@ export default class Channel {
   }
 
   get params() {
-    return this.request.params
+    return {
+      ...this.request.params || {},
+      ...this.request.query || {},
+      ...this.request.body || {}
+    }
   }
 
   get request() {
@@ -47,23 +55,49 @@ export default class Channel {
 
   constructor(vision) {
     this._vision = vision
+    this._authentications = {}
 
     // errors!
     if (this.initialize) this.initialize()
   }
 
-  authenticates(dreamName, { against }={}) {
+  authenticates(dreamName, opts) {
     const DreamClass = config.dream(snakeCase(camelCase(dreamName)))
+    if (!DreamClass) throw `Failed to look up dream class for ${dreamName} (lookup at ${snakeCase(camelCase(dreamName))})`
+    const authKey = opts.as || `current${DreamClass.name}`
 
-    this.signIn = async () => {
-      if (!against) throw `eventually do automatic lookup of first authentication and grab identifyingColumn`
+    this._authentications[authKey] = { ...opts, DreamClass }
+    Object.defineProperty(this, authKey, {
+      get: () => this.vision.auth[authKey],
+      configurable: true,
+    })
+
+    this.auth = async () => {
+      if (!opts.against) throw `eventually do automatic lookup of first authentication and grab identifyingColumn`
+      if (!opts.against.split(':').length > 1) throw 'against must be passed as "id_column:password_column"'
+      const [ identifyingColumn, passwordColumn ] = opts.against.split(':')
+
       const dream = await DreamClass
-        .where({ [against]: this.request.params[against] })
+        .where({ [identifyingColumn]: this.params[identifyingColumn] })
         .first()
 
-      if (!dream) throw new NotFound()
-      if (!(await dream.authenticate(against, this.params.password))) throw new Unauthorized()
-      return this.json({ token: await dream.authTokenFor(against) })
+      if (!dream)
+        throw new NotFound()
+
+      if (!(await dream.authenticate(identifyingColumn, this.params[passwordColumn])))
+        throw new Unauthorized()
+
+      const token = await dream.authTokenFor(opts.against)
+      this.response.cookie(
+        authKey,
+        token,
+        {
+          maxAge: config.cookies.maxAge,
+          httpOnly: true,
+        },
+      )
+
+      return this.json({ token: 'your token has been set as an httpOnly cookie' })
     }
   }
 

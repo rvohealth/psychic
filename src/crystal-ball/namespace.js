@@ -1,3 +1,4 @@
+import jwt from 'jsonwebtoken'
 import pluralize from 'pluralize'
 import pascalCase from 'src/helpers/pascalCase'
 import camelCase from 'src/helpers/camelCase'
@@ -14,6 +15,8 @@ export default class Namespace {
     this._namespaces = {}
     this._routeKey = routeKey
     this._routes = {}
+    this._givenType = null
+    this._givenKey = null
 
     // handles default case where routeKey is null
     this._prefix = routeKey ?
@@ -28,6 +31,14 @@ export default class Namespace {
   get channelName() {
     if (!this.routeKey) return null
     return pascalCase(pluralize(this.routeKey)) + 'Channel'
+  }
+
+  get givenType() {
+    return this._givenType
+  }
+
+  get givenKey() {
+    return this._givenKey
   }
 
   get namespaces() {
@@ -57,13 +68,23 @@ export default class Namespace {
       )
   }
 
-  auth(opts={}) {
+  auth(authKey, opts={}) {
     const channelParamName = paramCase(this.channelName.replace(/Channel$/, ''))
+    opts.authKey = authKey
     return this.post('auth', `${channelParamName}#auth`, opts)
   }
 
   delete(route, path, opts) {
     return this.run('delete', route, path, opts)
+  }
+
+  given(givenStr, cb) {
+    const [ givenType, givenKey ] = givenStr.split(':')
+    this._givenType = givenType
+    this._givenKey = givenKey
+    cb(this)
+    this._givenType = null
+    this._givenKey = null
   }
 
   get(route, path, opts) {
@@ -139,33 +160,85 @@ export default class Namespace {
     throw `unrecognize path type ${path}`
   }
 
-  addRouteForChannel(route, httpMethod, channel, method, { _isResource }={}) {
+  addRouteForChannel(route, httpMethod, channel, method, { authKey, _isResource }={}) {
     const fullRoute = `${this.prefix}/${route}`
     const parsedRoute = parseRoute(fullRoute)
     const key = `${httpMethod}:${parsedRoute.key}`
-    this._routes[key] = {
+    const routeObj = {
       route,
       httpMethod,
       channel,
       method,
       parsed: parsedRoute,
       isResource: _isResource,
+      authKey,
     }
 
+    this._routes[key] = routeObj
+
+    if (authKey)
+      config.registerAuthKey(authKey, routeObj)
+
+    const { givenType, givenKey } = this
     this.app[httpMethod](fullRoute, async (req, res) => {
       const vision = new Vision(route, method, req, res)
+      const channelInstance = new channel(vision)
+
+      if (givenType) {
+        let payload
+        let DreamClass
+        let dream
+        switch(givenType) {
+        case 'auth':
+          if (!req.cookies[givenKey]) return res
+            .status(401)
+            .send(`Missing auth credentials for ${givenKey}`)
+
+          payload = jwt.decode(req.cookies[givenKey], process.env.PSYCHIC_SECRET)
+          if (!payload)
+            return res.status(401).send(`Invalid credentials`)
+
+          DreamClass = config.dream(payload.dreamClass)
+          if (!DreamClass)
+            return res.status(401).send(`Invalid credentials`)
+
+          dream = await DreamClass.find(payload.id)
+          if (!dream)
+            return res.status(401).send(`Invalid credentials`)
+
+          vision.setAuth(givenKey, dream)
+          break
+
+        default:
+          throw `unrecognized given type ${givenType}`
+        }
+      }
 
       // add error handling here
-      await new channel(vision)[method]()
+       try {
+         await channelInstance[method]()
+       } catch(error) {
+         if (error.constructor.statusCode) {
+           return res.status(error.constructor.statusCode).send(error.message)
+         }
+
+         if (process.env.CORE_TEST)
+           throw error
+
+         return res.status(500).send("Whoops, Something went wrong...")
+       }
     })
   }
 
   parseStringPath(path) {
-    const [ channel, method ] = path.split('#')
-    const channelName = pascalCase(channel)
+    const [ channelNameRaw, method ] = path.split('#')
+    const channelName = pascalCase(channelNameRaw)
+    const channel = config.channels[channelName]?.default
+    if (!channel) throw `Missing channel for route ${path} (expected ${channelName})`
+
     return {
       type: 'string',
-      channel: config.channels[channelName].default,
+      channel,
       method: camelCase(method),
     }
   }

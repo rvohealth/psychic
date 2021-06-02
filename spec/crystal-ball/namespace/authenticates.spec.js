@@ -39,18 +39,23 @@ describe('Namespace#authenticates', () => {
 
   it ('adds auth route to namespace', async () => {
     jest.spyOn(config, 'routeCB', 'get').mockReturnValue(cr => {
-      // why here~!?!?!?
       jest.spyOn(config, 'channels', 'get').mockReturnValue({
-        'TestUsers': TestUsersChannel,
+        'TestUsers': { default: TestUsersChannel },
       })
 
       cr.resource('test-users', { only: 'create' }, testUsers => {
-        testUsers.auth()
+        testUsers.auth('currentUser')
       })
     })
 
     expect(CrystalBall.routes.length).toBe(2)
     expect(CrystalBall.routes.find(r => r.parsed.key === 'test-users' && r.httpMethod === 'post').isResource).toBe(true)
-    expect(!!CrystalBall.routes.filter(r => r.parsed.key === 'test-users/auth' && r.httpMethod === 'post').length).toBe(true)
+    expect(
+      !!CrystalBall.routes.filter(r =>
+        r.parsed.key === 'test-users/auth' &&
+        r.httpMethod === 'post' &&
+        r.authKey === 'currentUser'
+      ).length
+    ).toBe(true)
   })
 })

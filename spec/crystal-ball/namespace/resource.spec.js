@@ -10,40 +10,41 @@ describe('Namespace#resource', () => {
   class TestUsersChannel extends Channel {
   }
 
-  jest.spyOn(config, 'dreams', 'get').mockReturnValue({
-    'test_user': TestUser,
-  })
+  beforeEach(() => {
+    jest.spyOn(config, 'dreams', 'get').mockReturnValue({
+      'test_user': TestUser,
+    })
 
-  jest.spyOn(config, 'schema', 'get').mockReturnValue({
-    test_users: {
-      id: {
-        type: 'int',
-        name: 'id',
-        primary: true,
-        unique: true
-      },
-      email: {
-        type: 'string',
-        name: 'email',
-      },
-      password: {
-        type: 'string',
-        name: 'password',
-      },
-      password_digest: {
-        type: 'string',
-        name: 'password_digest',
-      },
-    }
+    jest.spyOn(config, 'channels', 'get').mockReturnValue({
+      'TestUsers': { default: TestUsersChannel },
+    })
+
+    jest.spyOn(config, 'schema', 'get').mockReturnValue({
+      test_users: {
+        id: {
+          type: 'int',
+          name: 'id',
+          primary: true,
+          unique: true
+        },
+        email: {
+          type: 'string',
+          name: 'email',
+        },
+        password: {
+          type: 'string',
+          name: 'password',
+        },
+        password_digest: {
+          type: 'string',
+          name: 'password_digest',
+        },
+      }
+    })
   })
 
   it ('sets up create, put, patch, show, index, delete routes', async () => {
     jest.spyOn(config, 'routeCB', 'get').mockReturnValue(cr => {
-      // why here~!?!?!?
-      jest.spyOn(config, 'channels', 'get').mockReturnValue({
-        'TestUsers': TestUsersChannel,
-      })
-
       cr.resource('test-users')
     })
 
@@ -59,10 +60,6 @@ describe('Namespace#resource', () => {
   describe ('when only is passed', () => {
     it ('limits routes to the allowlist passed', () => {
       jest.spyOn(config, 'routeCB', 'get').mockReturnValue(cr => {
-        jest.spyOn(config, 'channels', 'get').mockReturnValue({
-          'TestUsers': TestUsersChannel,
-        })
-
         cr.resource('test-users', { only: ['create', 'update'] })
       })
 
@@ -76,10 +73,6 @@ describe('Namespace#resource', () => {
   describe ('when except is passed', () => {
     it ('limits routes to subtract the denylist passed', () => {
       jest.spyOn(config, 'routeCB', 'get').mockReturnValue(cr => {
-        jest.spyOn(config, 'channels', 'get').mockReturnValue({
-          'TestUsers': TestUsersChannel,
-        })
-
         cr.resource('test-users', { except: ['create', 'update'] })
       })
 
@@ -93,10 +86,6 @@ describe('Namespace#resource', () => {
   describe ('when a callback is passed', () => {
     it ('calls callback, applying all routes as additional methods to resource', () => {
       jest.spyOn(config, 'routeCB', 'get').mockReturnValue(cr => {
-        jest.spyOn(config, 'channels', 'get').mockReturnValue({
-          'TestUsers': TestUsersChannel,
-        })
-
         cr.resource('test-users', { only: ['create'] }, testUsers => {
           testUsers.post('fishmen', 'test-users#fishmen')
         })
