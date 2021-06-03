@@ -93,6 +93,7 @@ describe('CrystalBall Requests: auth endpoint', () => {
 
     crystalBall.closeConnection()
   })
+
   context ('with invalid credentials', () => {
     it ('returns 401', async () => {
       const crystalBall = new CrystalBall()

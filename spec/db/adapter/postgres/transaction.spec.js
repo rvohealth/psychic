@@ -1,9 +1,27 @@
 import PostgresAdapter from 'src/db/adapter/postgres'
 import db from 'src/db'
+import config from 'src/config'
 
 const postgres = new PostgresAdapter()
 
 describe('PostgresAdapter#db#transaction', () => {
+  beforeEach(() => {
+    jest.spyOn(config, 'schema', 'get').mockReturnValue({
+      users: {
+        id: {
+          type: 'int',
+          name: 'id',
+          primary: true,
+          unique: true
+        },
+        email: {
+          type: 'string',
+          name: 'email',
+        },
+      }
+    })
+  })
+
   it ('inserts into table', async () => {
     await db.createTable('users', t => {
       t.string('email')
@@ -16,7 +34,7 @@ describe('PostgresAdapter#db#transaction', () => {
     expect(await postgres.count('users')).toBe(1)
   })
 
-  describe ('when an error occurs mid-transaction', () => {
+  context ('when an error occurs mid-transaction', () => {
     it ('rolls back queries', async () => {
       await db.createTable('users', t => {
         t.string('email')

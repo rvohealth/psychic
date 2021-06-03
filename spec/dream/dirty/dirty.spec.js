@@ -6,10 +6,6 @@ import db from 'src/db'
 describe('Dream#dirty', () => {
   it ("detects when attributes have been updated", async () => {
     class ZebraFace extends Dream {}
-    await db.createTable('zebra_faces', t => {
-      t.int('num_stripes')
-    })
-    await db.insert('zebra_faces', [ { num_stripes: 30 } ])
 
     jest.spyOn(config, 'schema', 'get').mockReturnValue({
       zebra_faces: {
@@ -25,6 +21,11 @@ describe('Dream#dirty', () => {
         },
       }
     })
+
+    await db.createTable('zebra_faces', t => {
+      t.int('num_stripes')
+    })
+    await db.insert('zebra_faces', [{ num_stripes: 30 }])
 
     const zebraFace = await ZebraFace.first()
 

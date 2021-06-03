@@ -1,20 +1,36 @@
 import PostgresAdapter from 'src/db/adapter/postgres'
 import db from 'src/db'
+import config from 'src/config'
 
 let postgres = new PostgresAdapter()
 
 describe('PostgresAdapter#db#renameColumn', () => {
   it ('renames column', async () => {
-    await db.createTable('users', t => {
+    jest.spyOn(config, 'schema', 'get').mockReturnValue({
+      test_users: {
+        id: {
+          type: 'int',
+          name: 'id',
+          primary: true,
+          unique: true
+        },
+        email: {
+          type: 'string',
+          name: 'email',
+        },
+      }
+    })
+
+    await db.createTable('test_users', t => {
       t.string('email')
     })
-    await postgres.insert('users', [{ email: 'fishman' }])
+    await postgres.insert('test_users', [{ email: 'fishman' }])
 
-    expect(await postgres.hasColumn('users', 'email')).toBe(true)
-    expect(await postgres.hasColumn('users', 'tacos')).toBe(false)
-    await postgres.renameColumn('users', 'email', 'tacos')
-    expect(await postgres.hasColumn('users', 'email')).toBe(false)
-    expect(await postgres.hasColumn('users', 'tacos')).toBe(true)
+    expect(await postgres.hasColumn('test_users', 'email')).toBe(true)
+    expect(await postgres.hasColumn('test_users', 'tacos')).toBe(false)
+    await postgres.renameColumn('test_users', 'email', 'tacos')
+    expect(await postgres.hasColumn('test_users', 'email')).toBe(false)
+    expect(await postgres.hasColumn('test_users', 'tacos')).toBe(true)
   })
 })
 

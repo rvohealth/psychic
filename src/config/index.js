@@ -89,6 +89,7 @@ class Config {
   }
 
   get schema() {
+    if (process.env.CORE_TEST) return {} // stub in individual specs
     return JSON.parse(fs.readFileSync(this.schemaPath))
   }
 

@@ -26,6 +26,10 @@ class DB {
     return await this.adapter.changeDefault(tableName, columnName, newDefault)
   }
 
+  async closeConnection() {
+    return await this.adapter.closeConnection()
+  }
+
   async columnInfo(tableName, columnName) {
     return await this.adapter.columnInfo(tableName, columnName)
   }

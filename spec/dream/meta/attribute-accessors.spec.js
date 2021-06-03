@@ -6,10 +6,6 @@ import db from 'src/db'
 describe('Dream#attribute (i.e. user.email)', () => {
   it ("returns the db value of that attribute", async () => {
     class ZebraFace extends Dream {}
-    await db.createTable('zebra_faces', t => {
-      t.int('num_stripes')
-    })
-    await db.insert('zebra_faces', [ { num_stripes: 30 } ])
 
     jest.spyOn(config, 'schema', 'get').mockReturnValue({
       zebra_faces: {
@@ -25,6 +21,11 @@ describe('Dream#attribute (i.e. user.email)', () => {
         },
       }
     })
+
+    await db.createTable('zebra_faces', t => {
+      t.int('num_stripes')
+    })
+    await db.insert('zebra_faces', [ { num_stripes: 30 } ])
 
     const zebraFace = await ZebraFace.first()
     expect(zebraFace.num_stripes).toBe(30)

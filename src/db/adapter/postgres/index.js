@@ -1,36 +1,40 @@
+import { Client } from 'pg'
 import formatSQL from 'pg-format'
-import client from 'src/db/singletons/client'
-import rootClient from 'src/db/singletons/root-client'
 import MissingTableName from 'src/error/db/adapter/missing-table-name'
 import config from 'src/config'
 
 class PostgresAdapter {
   async client() {
-    if (this._client) return this._client
-
-    this._client = client
-    if (!client._connected) await client.connect()
+    const client = new Client({
+      database: config.dbName,
+      // user: 'dbuser',
+      // host: 'database.server.com',
+      // password: 'secretpassword',
+      // port: 3211,
+    })
+    await client.connect()
     return client
   }
 
   async withRootConnection(cb) {
     const client = await this.rootClient()
     const result = await cb(client)
+    await client.end()
     return result
   }
 
   async withConnection(cb) {
     const client = await this.client()
     const result = await cb(client)
+    await client.end()
     return result
   }
 
   async rootClient() {
-    if (this._rootClient) return this._rootClient
-
-    this._rootClient = rootClient
-    if (!rootClient._connected) await rootClient.connect()
-    return rootClient
+    // if (this._rootClient) return this._rootClient
+    const client = new Client()
+    await client.connect()
+    return client
   }
 
   async runRootSQL(sqlString) {
@@ -69,6 +73,14 @@ ALTER COLUMN ${columnName}
 SET DEFAULT '${defaultValue}'
 `
     return await this.runSQL(sql)
+  }
+
+  async closeConnection() {
+    const client = await this.client()
+    await client.end()
+
+    const rootClient = await this.rootClient()
+    return await rootClient.end()
   }
 
   async columnDefault(tableName, columnName) {

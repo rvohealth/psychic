@@ -1,6 +1,7 @@
 import { jest } from '@jest/globals'
 import RunMigration from 'src/migrate/run'
 import db from 'src/db'
+import config from 'src/config'
 
 let runMigrations = new RunMigration()
 const upSpy1 = jest.fn()
@@ -16,6 +17,26 @@ describe('RunMigration#run', () => {
       t.string('name')
       t.timestamp('created_at')
     })
+
+    jest.spyOn(config, 'schema', 'get').mockReturnValue({
+      migrations: {
+        id: {
+          type: 'int',
+          name: 'id',
+          primary: true,
+          unique: true
+        },
+        name: {
+          type: 'string',
+          name: 'name',
+        },
+        created_at: {
+          type: 'timestamp',
+          name: 'created_at',
+        },
+      },
+    })
+
   })
 
   it ('passes along to db', async () => {

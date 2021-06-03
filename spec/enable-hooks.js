@@ -14,4 +14,5 @@ beforeEach(async () => {
 
 afterEach(async () => {
   SchemaWriter.destroy()
+  await db.closeConnection()
 })
