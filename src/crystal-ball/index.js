@@ -9,13 +9,13 @@ import l from 'src/singletons/l'
 export default class CrystalBall {
   static get routes() {
     const crystalBall = new CrystalBall()
-    config.routeCB(crystalBall.namespace)
+    config.routeCB(crystalBall)
     return crystalBall.routes
   }
 
   static get namespaces() {
     const crystalBall = new CrystalBall()
-    config.routeCB(crystalBall.namespace)
+    config.routeCB(crystalBall)
     return crystalBall.namespaces
   }
 
@@ -24,19 +24,23 @@ export default class CrystalBall {
   }
 
   get routes() {
-    return this.namespace.routes
+    return this.currentNamespace.routes
   }
 
   get channels() {
     return config.channels
   }
 
-  get namespace() {
-    return this._namespace
+  get currentNamespace() {
+    return this._cachedNamespaces[this._cachedNamespaces.length - 1]
+  }
+
+  get lastNamespace() {
+    return this._cachedNamespaces[this._cachedNamespaces.length - 2]
   }
 
   get namespaces() {
-    return this.namespace.namespaces
+    return this.currentNamespace.namespaces
   }
 
   get server() {
@@ -54,7 +58,8 @@ export default class CrystalBall {
         credentials: true,
       }))
 
-    this._namespace = new Namespace(null, '', this._app)
+    this._cachedNamespaces = []
+    this._setCurrentNamespace(new Namespace(null, '', this._app))
   }
 
   async gaze(port) {
@@ -78,6 +83,64 @@ export default class CrystalBall {
       // await import('dist/boot/crystal-ball')
 
     if (config.routeCB)
-      config.routeCB(this.namespace)
+      config.routeCB(this)
+  }
+
+  namespace(namespace, cb) {
+    console.log("NEW NAMESPACE", namespace)
+    const ns = new Namespace(namespace, this.currentNamespace.prefix, this.app)
+    this._setCurrentNamespace(ns)
+    this.currentNamespace.namespace(namespace)
+    cb(this)
+    this._unsetCurrentNamespace()
+    return this
+  }
+
+  auth(authKey, opts) {
+    return this.currentNamespace.auth(authKey, opts)
+  }
+
+  delete(route, path, opts) {
+    return this.currentNamespace.delete(route, path, opts)
+  }
+
+  given(givenStr, cb) {
+    return this.currentNamespace.given(givenStr, cb)
+  }
+
+  get(route, path, opts) {
+    return this.currentNamespace.get(route, path, opts)
+  }
+
+  patch(route, path, opts) {
+    return this.currentNamespace.patch(route, path, opts)
+  }
+
+  post(route, path, opts) {
+    return this.currentNamespace.post(route, path, opts)
+  }
+
+  put(route, path, opts) {
+    return this.currentNamespace.put(route, path, opts)
+  }
+
+  resource(resourceName, opts, cb=null) {
+    if (cb) {
+      const namespace = this.currentNamespace.resource(resourceName, opts, cb)
+      this._setCurrentNamespace(namespace)
+      cb(this)
+      this._unsetCurrentNamespace()
+
+    } else {
+      return this.currentNamespace.resource(resourceName, opts)
+    }
+  }
+
+  _setCurrentNamespace(namespace) {
+    this._cachedNamespaces.push(namespace)
+  }
+
+  _unsetCurrentNamespace() {
+    this._cachedNamespaces.pop()
   }
 }

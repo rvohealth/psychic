@@ -69,6 +69,8 @@ export default class Namespace {
   }
 
   auth(authKey, opts={}) {
+    if (!this.channelName)
+      console.log('hal', this.routeKey)
     const channelParamName = paramCase(this.channelName.replace(/Channel$/, ''))
     opts.authKey = authKey
     return this.post('auth', `${channelParamName}#auth`, opts)
@@ -91,10 +93,8 @@ export default class Namespace {
     return this.run('get', route, path, opts)
   }
 
-  namespace(namespace, cb) {
-    const ns = new Namespace(namespace, this.prefix, this.app)
-    this._namespaces[namespace] = ns
-    cb(ns)
+  namespace(namespace) {
+    this._namespaces[namespace.routeKey] = namespace
     return this
   }
 
@@ -137,8 +137,13 @@ export default class Namespace {
     if (only.includes('delete') && !except.includes('delete'))
       this.delete(resourcePath, `${channelName}#delete`, { _isResource: true })
 
-    if (cb)
-      this.namespace(pluralized, cb)
+    if (cb) {
+      const ns = new Namespace(pluralized, this.prefix, this.app)
+      this.namespace(ns)
+      return ns
+    }
+
+    return true
   }
 
   run(httpMethod, route, path, opts) {
@@ -157,7 +162,7 @@ export default class Namespace {
   // move these route helpers to class
   parsePath(path) {
     if (typeof path === 'string') return this.parseStringPath(path)
-    throw `unrecognize path type ${path}`
+    throw `unrecognized path type ${path}`
   }
 
   addRouteForChannel(route, httpMethod, channel, method, { authKey, _isResource }={}) {

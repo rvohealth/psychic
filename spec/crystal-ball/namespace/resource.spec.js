@@ -44,8 +44,8 @@ describe('Namespace#resource', () => {
   })
 
   it ('sets up create, put, patch, show, index, delete routes', async () => {
-    jest.spyOn(config, 'routeCB', 'get').mockReturnValue(cr => {
-      cr.resource('test-users')
+    jest.spyOn(config, 'routeCB', 'get').mockReturnValue(r => {
+      r.resource('test-users')
     })
 
     expect(CrystalBall.routes.length).toBe(6)
@@ -59,8 +59,8 @@ describe('Namespace#resource', () => {
 
   describe ('when only is passed', () => {
     it ('limits routes to the allowlist passed', () => {
-      jest.spyOn(config, 'routeCB', 'get').mockReturnValue(cr => {
-        cr.resource('test-users', { only: ['create', 'update'] })
+      jest.spyOn(config, 'routeCB', 'get').mockReturnValue(r => {
+        r.resource('test-users', { only: ['create', 'update'] })
       })
 
       expect(CrystalBall.routes.length).toBe(3)
@@ -72,8 +72,8 @@ describe('Namespace#resource', () => {
 
   describe ('when except is passed', () => {
     it ('limits routes to subtract the denylist passed', () => {
-      jest.spyOn(config, 'routeCB', 'get').mockReturnValue(cr => {
-        cr.resource('test-users', { except: ['create', 'update'] })
+      jest.spyOn(config, 'routeCB', 'get').mockReturnValue(r => {
+        r.resource('test-users', { except: ['create', 'update'] })
       })
 
       expect(CrystalBall.routes.length).toBe(3)
@@ -85,9 +85,9 @@ describe('Namespace#resource', () => {
 
   describe ('when a callback is passed', () => {
     it ('calls callback, applying all routes as additional methods to resource', () => {
-      jest.spyOn(config, 'routeCB', 'get').mockReturnValue(cr => {
-        cr.resource('test-users', { only: ['create'] }, testUsers => {
-          testUsers.post('fishmen', 'test-users#fishmen')
+      jest.spyOn(config, 'routeCB', 'get').mockReturnValue(r => {
+        r.resource('test-users', { only: ['create'] }, () => {
+          r.post('fishmen', 'test-users#fishmen')
         })
       })
 

@@ -56,12 +56,12 @@ describe('CrystalBall Requests: auth endpoint', () => {
     })
 
     jest.spyOn(config, 'routeCB', 'get').mockReturnValue(r => {
-      r.resource('test-users', { only: 'create' }, testUsers => {
-        testUsers.auth('currentUser')
+      r.resource('test-users', { only: 'create' }, () => {
+        r.auth('currentUser')
       })
 
-      r.given('auth:currentUser', withUser => {
-        withUser.get('authtest', 'test-users#authtest')
+      r.given('auth:currentUser', () => {
+        r.get('authtest', 'test-users#authtest')
       })
     })
 

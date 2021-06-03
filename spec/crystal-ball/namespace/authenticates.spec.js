@@ -38,13 +38,13 @@ describe('Namespace#authenticates', () => {
   })
 
   it ('adds auth route to namespace', async () => {
-    jest.spyOn(config, 'routeCB', 'get').mockReturnValue(cr => {
+    jest.spyOn(config, 'routeCB', 'get').mockReturnValue(r => {
       jest.spyOn(config, 'channels', 'get').mockReturnValue({
         'TestUsers': { default: TestUsersChannel },
       })
 
-      cr.resource('test-users', { only: 'create' }, testUsers => {
-        testUsers.auth('currentUser')
+      r.resource('test-users', { only: 'create' }, () => {
+        r.auth('currentUser')
       })
     })
 
