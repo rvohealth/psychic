@@ -28,8 +28,8 @@ class Config {
   get dbConfig() {
     if (process.env.CORE_TEST) return { test: { name: 'psychic_core_test' } }
 
-    if (!this._dbConfig && fs.existsSync('../../../../config/database.json'))
-      this._dbConfig = fs.readFileSync('../../../../config/database.json')
+    if (!this._dbConfig && fs.existsSync('config/database.json'))
+      this._dbConfig = JSON.parse(fs.readFileSync('config/database.json'))
 
     if (!this._dbConfig)
       this._dbConfig = {
@@ -62,7 +62,12 @@ class Config {
 
   get env() {
     if (process.env.CORE_TEST) return 'test'
-    return process.env.NODE_ENV || 'development'
+    return process.env.PSYCHIC_ENV || process.env.NODE_ENV || 'development'
+  }
+
+  get pkgPath() {
+    if (this.env === 'CORE_DEVELOPMENT') return 'src/pkg'
+    return 'dist/app/pkg'
   }
 
   get port() {
@@ -107,6 +112,14 @@ class Config {
 
   get routeCB() {
     return this._routeCB
+  }
+
+  get wssPort() {
+    return process.env.PSYCHIC_WSS_PORT || 778
+  }
+
+  get wssUrl() {
+    return `ws://localhost:${this.wssPort}/`
   }
 
   constructor() {

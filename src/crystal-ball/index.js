@@ -1,4 +1,5 @@
 import fs from 'fs'
+import WebSocket from 'ws'
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
@@ -47,6 +48,10 @@ export default class CrystalBall {
     return this._server
   }
 
+  get wss() {
+    return this._wss
+  }
+
   constructor() {
     this._channels = {}
     this._app = express()
@@ -67,6 +72,14 @@ export default class CrystalBall {
     this._server = this.app.listen(port || config.port, () => {
       if (!process.env.CORE_TEST)
         l.log('express connected')
+    })
+
+    this._wss = new WebSocket.Server({ port: config.wssPort })
+    this._wss.on('connection', (ws, request, client) => {
+      ws.on('message', msg => {
+        console.log(request)
+        console.log(`Received message ${msg} from user ${client}`)
+      })
     })
   }
 

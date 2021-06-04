@@ -20,4 +20,12 @@ export default class Common {
   delete(...args) {
     return axios.delete(...args)
   }
+
+  broadcast() {
+    const socket = new WebSocket('wss://localhost:778')
+    socket.onOpen = event => {
+      console.log('opened', event)
+      socket.send('fishmans message')
+    }
+  }
 }

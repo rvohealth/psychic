@@ -1,38 +1,53 @@
 import fs from 'fs'
-import migrations from 'src/pkg/migrations.pkg'
+// import migrations from 'src/pkg/migrations.pkg'
 import db from 'src/db'
 import config from 'src/config'
+import Migration from 'src/migrate'
+import CreateTableStatement from 'src/db/statement/table/create'
 
 export default class RunMigration {
-  get migrations() {
-    return migrations
+  async migrations() {
+    return (await import(config.pkgPath + '/migrations.pkg')).default
   }
 
   async run() {
     await this._beforeAll()
+    const migrations = await this.migrations()
+    console.log('RUNNING', migrations)
 
-    const files = Object.keys(this.migrations)
+    const files = Object.keys(migrations)
     for (const fileName of files) {
-      const migration = this.migrations[fileName]
+      const migration = migrations[fileName]
+      console.log('FILE', migration, fileName)
       const alreadyRun = await this._migrationAlreadyRun(fileName)
 
       this._lockMigration({ fileName, alreadyRun })
 
       await this._beforeMigration()
-      await migration.up()
+      await migration.up(new Migration())
       await this._afterMigration(fileName, alreadyRun)
 
       this._unlockMigration()
     }
-
-    // await Promise.all(promises)
 
     return true
   }
 
   async _beforeAll() {
     // await db.create()
-    await db.createMigrationsIfNotExists()
+    console.log(config.schema)
+    if (!config.schema.migrations) {
+      await db.createTable('migrations', t => {
+        t.string('name')
+        t.timestamp('created_at')
+      })
+
+      const statement = new CreateTableStatement('migrations')
+      statement.string('name')
+      statement.timestamp('created_at')
+      new Migration().schema.createTable('migrations', statement.columns)
+    }
+    // await db.createMigrationsIfNotExists()
   }
 
   async _beforeMigration() {

@@ -59,6 +59,7 @@ export default class NewAppProgram extends CLIProgram {
 
     pkgjson.scripts.psybuild = "NODE_PATH=./node_modules/psychic/ node ./node_modules/psychic/make/for-app.js && " +
       "NODE_PATH=. ./node_modules/.bin/babel app -d dist/app --copy-files &&" +
+      "NODE_PATH=. ./node_modules/.bin/babel db -d dist/db --copy-files &&" +
       "NODE_PATH=. ./node_modules/.bin/babel config -d dist/config --copy-files &&" +
       "NODE_PATH=. ./node_modules/.bin/babel bin -d dist/bin --copy-files &&" +
       "NODE_PATH=./node_modules/psychic/ ./node_modules/psychic/node_modules/.bin/babel app -d dist/app --copy-files && " +
