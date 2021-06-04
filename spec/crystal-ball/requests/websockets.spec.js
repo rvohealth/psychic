@@ -91,7 +91,7 @@ describe('CrystalBall Websockets', () => {
     response = await fetch('authtest')
     expect(response.status).toBe(200)
 
-    crystalBall.closeConnection()
+    await crystalBall.closeConnection()
   })
 
   context ('with invalid credentials', () => {
@@ -107,7 +107,7 @@ describe('CrystalBall Websockets', () => {
       }
 
       expect(error.response.status).toBe(401)
-      crystalBall.closeConnection()
+      await crystalBall.closeConnection()
     })
   })
 })

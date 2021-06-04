@@ -41,7 +41,7 @@ describe('RunMigration#run', () => {
 
   it ('passes along to db', async () => {
     jest.spyOn(db, 'insert').mockReturnValue({})
-    jest.spyOn(runMigrations, 'migrations', 'get').mockReturnValue(migrations)
+    jest.spyOn(runMigrations, 'migrations').mockReturnValue(migrations)
 
     await runMigrations.run()
     expect(migrations['01_create_bruisers.js'].up).toHaveBeenCalled()
@@ -57,7 +57,7 @@ describe('RunMigration#run', () => {
     expect(await db.count('migrations').do()).toBe(2)
 
     jest.clearAllMocks()
-    jest.spyOn(runMigrations, 'migrations', 'get').mockReturnValue(migrations)
+    jest.spyOn(runMigrations, 'migrations').mockReturnValue(migrations)
     jest.spyOn(db, 'insert').mockReturnValue({})
 
     await runMigrations.run()

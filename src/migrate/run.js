@@ -13,12 +13,10 @@ export default class RunMigration {
   async run() {
     await this._beforeAll()
     const migrations = await this.migrations()
-    console.log('RUNNING', migrations)
 
     const files = Object.keys(migrations)
     for (const fileName of files) {
       const migration = migrations[fileName]
-      console.log('FILE', migration, fileName)
       const alreadyRun = await this._migrationAlreadyRun(fileName)
 
       this._lockMigration({ fileName, alreadyRun })
@@ -35,7 +33,6 @@ export default class RunMigration {
 
   async _beforeAll() {
     // await db.create()
-    console.log(config.schema)
     if (!config.schema.migrations) {
       await db.createTable('migrations', t => {
         t.string('name')

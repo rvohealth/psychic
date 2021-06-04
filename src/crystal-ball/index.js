@@ -1,3 +1,7 @@
+import { execSync } from 'child_process'
+import {
+  createHttpTerminator,
+} from 'http-terminator'
 import fs from 'fs'
 import WebSocket from 'ws'
 import express from 'express'
@@ -48,6 +52,10 @@ export default class CrystalBall {
     return this._server
   }
 
+  get serverKiller() {
+    return this._serverKiller
+  }
+
   get wss() {
     return this._wss
   }
@@ -73,18 +81,41 @@ export default class CrystalBall {
       if (!process.env.CORE_TEST)
         l.log('express connected')
     })
+    this._serverKiller = createHttpTerminator({
+      server: this.server,
+    })
 
     this._wss = new WebSocket.Server({ port: config.wssPort })
     this._wss.on('connection', (ws, request, client) => {
+      console.log('CONNECTED')
+      this._wsss = ws
       ws.on('message', msg => {
         console.log(request)
         console.log(`Received message ${msg} from user ${client}`)
       })
     })
+
+    process.on('SIGTERM', async () => {
+      await this.closeConnection()
+    })
   }
 
-  closeConnection() {
-    this.server?.close()
+  closeWS() {
+    return new Promise(accept => {
+      if (!this._wss) return accept()
+      for(const client of this._wss.clients) {
+        client.close()
+      }
+      this._wss?.close(() => {
+        accept()
+      })
+    })
+  }
+
+  async closeConnection() {
+    await this.serverKiller.terminate()
+    await this.closeWS()
+    return true
   }
 
   async boot() {

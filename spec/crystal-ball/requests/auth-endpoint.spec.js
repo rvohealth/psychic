@@ -91,7 +91,7 @@ describe('CrystalBall Requests: auth endpoint', () => {
     response = await fetch('authtest')
     expect(response.status).toBe(200)
 
-    crystalBall.closeConnection()
+    await crystalBall.closeConnection()
   })
 
   context ('with invalid credentials', () => {
@@ -107,7 +107,7 @@ describe('CrystalBall Requests: auth endpoint', () => {
       }
 
       expect(error.response.status).toBe(401)
-      crystalBall.closeConnection()
+      await crystalBall.closeConnection()
     })
   })
 })
