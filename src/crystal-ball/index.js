@@ -1,5 +1,5 @@
 import io from 'socket.io'
-import { execSync } from 'child_process'
+import jwt from 'jsonwebtoken'
 import {
   createHttpTerminator,
 } from 'http-terminator'
@@ -105,47 +105,69 @@ export default class CrystalBall {
 
     this._io = io(this._ioServer, {
       cors: {
-        origin: "http://localhost:3000",
+        origin: config.frontEndUrl,
         methods: ["GET", "POST"],
-        allowedHeaders: ["my-custom-header"],
+        allowedHeaders: ['psy-auth-tokens'],
         credentials: true,
       }
     })
+    this._ioServerKiller = createHttpTerminator({
+      server: this.ioServer,
+    })
 
-    this._io.on('connection', socket => {
-      console.log('YAMS')
-      socket.on('message', msg => {
-        console.log(`Received message: "${msg}" from user`)
+    this.io.on('connection', socket => {
+      socket.psy = {
+        auth: {},
+      }
+
+      socket.on('psy/auth', async ({ token, key }={}) => {
+        if (!token) throw `Missing required token for WS token auth`
+        if (!key) throw `Missing required key for WS token auth`
+
+        const payload = jwt.decode(token, process.env.PSYCHIC_SECRET)
+        if (!payload) throw 'Failed to identify auth token'
+
+        const DreamClass = config.dream(payload.dreamClass)
+        if (!DreamClass) throw 'Failed to identify auth token'
+
+        const dream = await DreamClass.find(payload.id)
+        if (!dream) throw `The resource attempting to auth with does not exist`
+
+        socket.join(`auth:${key}:${dream.id}`)
+        socket.psy.auth[key] = dream
+
+        this.transmit(key, dream.id, 'shipmonk', { fish: 10 })
       })
     })
     this.ioServer.listen(config.wssPort)
-
-    // this._wss = new WebSocket.Server({ port: config.wssPort })
-    // this._wss.on('connection', (ws, request, client) => {
-    //   this._wsss = ws
-    //   ws.on('message', msg => {
-    //     console.log('CRIM', ws.handshake)
-    //     console.log(`Received message ${msg} from user ${client}`)
-    //   })
-    // })
 
     process.on('SIGTERM', async () => {
       await this.closeConnection()
     })
   }
 
+  transmit(authKey, id, messageKey, message) {
+    console.log('ZIMMIN', `auth:${authKey}:${id}`)
+    this.io.to(`auth:${authKey}:${id}`).emit(messageKey, message)
+    // console.log('ZIMMER', this.io.engine.clients)
+    // this.io.sockets.forEach(socket => {
+    //   console.log('sSSSSAMM', socket)
+    // })
+  }
+
   closeWS() {
-    return new Promise(accept => {
-      if (!this._io) return accept()
-      this._wss?.close(() => {
-        accept()
-      })
-    })
+    // return new Promise(accept => {
+    //   if (!this._io) return accept()
+    //   this._wss?.close(() => {
+    //     accept()
+    //   })
+    // })
   }
 
   async closeConnection() {
     await this.serverKiller.terminate()
-    await this.closeWS()
+    await this.ioServerKiller.terminate()
+    // await this.closeWS()
     return true
   }
 
@@ -162,7 +184,6 @@ export default class CrystalBall {
   }
 
   namespace(namespace, cb) {
-    console.log("NEW NAMESPACE", namespace)
     const ns = new Namespace(namespace, this.currentNamespace.prefix, this.app)
     this._setCurrentNamespace(ns)
     this.currentNamespace.namespace(namespace)
