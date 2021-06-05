@@ -7,6 +7,7 @@ import paramCase from 'src/helpers/paramCase'
 import { parseRoute } from 'src/helpers/route'
 import config from 'src/config'
 import Vision from 'src/crystal-ball/vision'
+import l from 'src/singletons/l'
 
 export default class Namespace {
   constructor(routeKey, prefix, app) {
@@ -223,9 +224,10 @@ export default class Namespace {
        try {
          await channelInstance[method]()
        } catch(error) {
-         if (error.constructor.statusCode) {
+         l.error(`An error occurred: ${error.constructor.name}: ${error.message || error}`)
+
+         if (error.constructor.statusCode)
            return res.status(error.constructor.statusCode).send(error.message)
-         }
 
          if (process.env.CORE_TEST)
            throw error

@@ -17,6 +17,12 @@ export default class L {
     this._animator = new LogAnimator()
   }
 
+  error(error) {
+    this.log(error?.message || error, { level: 'error' })
+    this.log('stack trace:')
+    this.log(error.stack)
+  }
+
   end() {
     this.animator.stop()
   }

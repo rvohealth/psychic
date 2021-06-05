@@ -193,6 +193,7 @@ class Dream {
       for (const key in this._authentications.db) {
         if (!!identifyingColumn && key.split('::')[0] !== identifyingColumn) continue
         const authentication = this._authentications.db[key]
+        // console.log('ZIMMEBOY', password, authentication.passwordColumn, this)
         if (await bcrypt.compare(password, this[authentication.passwordColumn + '_digest']))
           return true
       }

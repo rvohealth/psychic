@@ -1,9 +1,10 @@
+import io from 'socket.io'
 import { execSync } from 'child_process'
 import {
   createHttpTerminator,
 } from 'http-terminator'
 import fs from 'fs'
-import WebSocket from 'ws'
+import { createServer } from 'http'
 import express from 'express'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
@@ -56,8 +57,12 @@ export default class CrystalBall {
     return this._serverKiller
   }
 
-  get wss() {
-    return this._wss
+  get io() {
+    return this._io
+  }
+
+  get ioServer() {
+    return this._ioServer
   }
 
   constructor() {
@@ -66,10 +71,10 @@ export default class CrystalBall {
     this.app.use(cookieParser())
     this.app.use(express.json())
 
-    if (process.env.CORE_TEST)
-      this.app.use(cors({
-        credentials: true,
-      }))
+    this.app.use(cors({
+      credentials: true,
+      origin: '*'//config.frontEndUrl,
+    }))
 
     this._cachedNamespaces = []
     this._setCurrentNamespace(new Namespace(null, '', this._app))
@@ -85,15 +90,44 @@ export default class CrystalBall {
       server: this.server,
     })
 
-    this._wss = new WebSocket.Server({ port: config.wssPort })
-    this._wss.on('connection', (ws, request, client) => {
-      console.log('CONNECTED')
-      this._wsss = ws
-      ws.on('message', msg => {
-        console.log(request)
-        console.log(`Received message ${msg} from user ${client}`)
+    this._ioServer = createServer((req, res) => {
+      // Set CORS headers
+      res.setHeader('Access-Control-Allow-Origin', '*');
+      res.setHeader('Access-Control-Request-Method', '*');
+      res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
+      res.setHeader('Access-Control-Allow-Headers', '*');
+      if ( req.method === 'OPTIONS' ) {
+        res.writeHead(200);
+        res.end();
+        return;
+      }
+    })
+
+    this._io = io(this._ioServer, {
+      cors: {
+        origin: "http://localhost:3000",
+        methods: ["GET", "POST"],
+        allowedHeaders: ["my-custom-header"],
+        credentials: true,
+      }
+    })
+
+    this._io.on('connection', socket => {
+      console.log('YAMS')
+      socket.on('message', msg => {
+        console.log(`Received message: "${msg}" from user`)
       })
     })
+    this.ioServer.listen(config.wssPort)
+
+    // this._wss = new WebSocket.Server({ port: config.wssPort })
+    // this._wss.on('connection', (ws, request, client) => {
+    //   this._wsss = ws
+    //   ws.on('message', msg => {
+    //     console.log('CRIM', ws.handshake)
+    //     console.log(`Received message ${msg} from user ${client}`)
+    //   })
+    // })
 
     process.on('SIGTERM', async () => {
       await this.closeConnection()
@@ -102,10 +136,7 @@ export default class CrystalBall {
 
   closeWS() {
     return new Promise(accept => {
-      if (!this._wss) return accept()
-      for(const client of this._wss.clients) {
-        client.close()
-      }
+      if (!this._io) return accept()
       this._wss?.close(() => {
         accept()
       })

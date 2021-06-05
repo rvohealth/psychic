@@ -34,6 +34,7 @@ export default class RunMigration {
   async _beforeAll() {
     // await db.create()
     if (!config.schema.migrations) {
+      await db.dropTable('migrations')
       await db.createTable('migrations', t => {
         t.string('name')
         t.timestamp('created_at')

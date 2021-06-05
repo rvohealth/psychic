@@ -74,7 +74,7 @@ export default class NewAppProgram extends CLIProgram {
       await execp(`cd ${path} && yarn add babel-eslint eslint-config-react-app -D`)
 
       l.logStatus('adding non-dev dependencies...')
-      await execp(`cd ${path} && yarn add axios --silent`)
+      await execp(`cd ${path} && yarn add axios socket.io-client --silent`)
 
       l.logStatus('installing yarn dependencies...', { level: 'warn' })
       await execp(`cd ${path} && yarn install --silent`)

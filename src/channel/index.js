@@ -82,7 +82,7 @@ export default class Channel {
         .first()
 
       if (!dream)
-        throw new NotFound()
+        throw new Unauthorized()
 
       if (!(await dream.authenticate(identifyingColumn, this.params[passwordColumn])))
         throw new Unauthorized()
@@ -97,7 +97,7 @@ export default class Channel {
         },
       )
 
-      return this.json({ token: 'your token has been set as an httpOnly cookie' })
+      return this.json({ token })
     }
   }
 

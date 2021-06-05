@@ -1,31 +1,37 @@
 import axios from 'axios'
 
 export default class Common {
-  get(...args) {
+  static get(...args) {
     return axios.get(...args)
   }
 
-  post(...args) {
-    return axios.post(...args)
+  static post(url, data, opts) {
+    return axios.post(this._url(url), data, opts)
   }
 
-  put(...args) {
+  static put(...args) {
     return axios.put(...args)
   }
 
-  patch(...args) {
+  static patch(...args) {
     return axios.patch(...args)
   }
 
-  delete(...args) {
+  static delete(...args) {
     return axios.delete(...args)
   }
 
-  broadcast() {
+  static broadcast() {
+    // fix hardcoding with generated frontend psy module
     const socket = new WebSocket('wss://localhost:778')
     socket.onOpen = event => {
       console.log('opened', event)
       socket.send('fishmans message')
     }
+  }
+
+  static _url(url) {
+    // fix hardcoding with generated frontend psy module
+    return `http://localhost:777/${url.replace(/^\//, '')}`
   }
 }

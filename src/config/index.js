@@ -54,10 +54,13 @@ class Config {
   }
 
   get dreams() {
-    console.log('zam', this._dreams)
     // if (process.env.CORE_TEST) throw 'Stub this in tests'
     // loaded at boot to prevent circular deps
     return this._dreams
+  }
+
+  get frontEndUrl() {
+    return 'http://localhost:3000'
   }
 
   get env() {
@@ -148,7 +151,8 @@ class Config {
   }
 
   dream(dreamName) {
-    return this.dreams[snakeCase(dreamName)]
+    const dream = this.dreams[snakeCase(dreamName)]
+    return dream.default || dream
   }
 
   projection(projectionName) {

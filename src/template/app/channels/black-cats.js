@@ -9,4 +9,8 @@ export default class BlackCats extends Channel {
   async show() {
     this.json({ black_cat: await BlackCat.first() })
   }
+
+  async hamburgers() {
+    this.json({ ham: 10 })
+  }
 }
