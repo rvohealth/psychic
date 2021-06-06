@@ -135,8 +135,6 @@ export default class CrystalBall {
 
         socket.join(`auth:${key}:${dream.id}`)
         socket.psy.auth[key] = dream
-
-        this.transmit(key, dream.id, 'shipmonk', { fish: 10 })
       })
     })
     this.ioServer.listen(config.wssPort)
@@ -147,12 +145,9 @@ export default class CrystalBall {
   }
 
   transmit(authKey, id, messageKey, message) {
-    console.log('ZIMMIN', `auth:${authKey}:${id}`)
-    this.io.to(`auth:${authKey}:${id}`).emit(messageKey, message)
-    // console.log('ZIMMER', this.io.engine.clients)
-    // this.io.sockets.forEach(socket => {
-    //   console.log('sSSSSAMM', socket)
-    // })
+    this.io
+      .to(`auth:${authKey}:${id}`)
+      .emit(messageKey, message)
   }
 
   closeWS() {
@@ -185,8 +180,8 @@ export default class CrystalBall {
 
   namespace(namespace, cb) {
     const ns = new Namespace(namespace, this.currentNamespace.prefix, this.app)
+    this.currentNamespace.namespace(ns)
     this._setCurrentNamespace(ns)
-    this.currentNamespace.namespace(namespace)
     cb(this)
     this._unsetCurrentNamespace()
     return this

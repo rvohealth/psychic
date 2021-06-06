@@ -70,8 +70,6 @@ export default class Namespace {
   }
 
   auth(authKey, opts={}) {
-    if (!this.channelName)
-      console.log('hal', this.routeKey)
     const channelParamName = paramCase(this.channelName.replace(/Channel$/, ''))
     opts.authKey = authKey
     return this.post('auth', `${channelParamName}#auth`, opts)

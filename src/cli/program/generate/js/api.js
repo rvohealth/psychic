@@ -114,7 +114,7 @@ export default class ${className}API {
     const methodName = ['put', 'patch'].includes(route.httpMethod) ?
       route.httpMethod :
       route.method
-    return methodName
+    return methodName.replace(/-channel$/, '')
   }
 
   params(route) {
