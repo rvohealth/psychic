@@ -1,4 +1,5 @@
 import axios from 'axios'
+import io from 'src/psy/singletons/io'
 
 export default class Common {
   static get(...args) {
@@ -21,13 +22,8 @@ export default class Common {
     return axios.delete(...args)
   }
 
-  static broadcast() {
-    // fix hardcoding with generated frontend psy module
-    const socket = new WebSocket('wss://localhost:778')
-    socket.onOpen = event => {
-      console.log('opened', event)
-      socket.send('fishmans message')
-    }
+  static emit(msg) {
+    io.emit(msg)
   }
 
   static _url(url) {

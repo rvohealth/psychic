@@ -99,14 +99,25 @@ export default class ${className}API {
     })
     const methodName = this.routeMethodName(route)
 
-    return ({
-      methodName,
-      text:
+    let text =
 `\
   static ${methodName}(${params}) {
     return common.${route.httpMethod}(\`${path}\`, opts)
   }
 `
+    if (route.authKey)
+      text =
+`\
+  static async ${methodName}(${params}) {
+    const response = await common.${route.httpMethod}(\`${path}\`, opts)
+    common.emit('psy/auth', { token: response.data.token, key: '${route.authKey}' })
+    return response
+  }
+`
+
+    return ({
+      methodName,
+      text,
     })
   }
 
