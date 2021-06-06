@@ -120,7 +120,7 @@ export default class CrystalBall {
 
       this.wsRoutes.forEach(route => {
         socket.on(route.fullRoute.replace(/^\//, ''), async params => {
-          const vision = new WSVision(route.route, route.method, params)
+          const vision = new WSVision(route.route, route.method, params, { socket, io: this.io })
           const channelInstance = new route.channel(vision)
 
           // add error handling here
