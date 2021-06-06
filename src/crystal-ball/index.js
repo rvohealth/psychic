@@ -65,6 +65,10 @@ export default class CrystalBall {
     return this._ioServer
   }
 
+  get ioServerKiller() {
+    return this._ioServerKiller
+  }
+
   constructor() {
     this._channels = {}
     this._app = express()
@@ -103,7 +107,7 @@ export default class CrystalBall {
       }
     })
 
-    this._io = io(this._ioServer, {
+    this._io = io(this.ioServer, {
       cors: {
         origin: config.frontEndUrl,
         methods: ["GET", "POST"],
@@ -160,6 +164,12 @@ export default class CrystalBall {
   }
 
   async closeConnection() {
+    // try {
+    //   this.io.close()
+    // } catch(error) {
+    //   // do nothing
+    // }
+
     await this.serverKiller.terminate()
     await this.ioServerKiller.terminate()
     // await this.closeWS()

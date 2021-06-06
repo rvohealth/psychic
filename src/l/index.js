@@ -18,6 +18,8 @@ export default class L {
   }
 
   error(error) {
+    if (process.env.CORE_TEST) return
+
     this.log(error?.message || error, { level: 'error' })
     this.log('stack trace:')
     this.log(error.stack)
