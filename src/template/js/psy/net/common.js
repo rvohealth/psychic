@@ -2,24 +2,27 @@ import axios from 'axios'
 import io from 'psy/singletons/io'
 
 export default class Common {
-  static get(...args) {
-    return axios.get(...args)
+  static get(url, params, axiosConfig) {
+    return axios.get(this._url(url), {
+      ...axiosConfig,
+      params,
+    })
   }
 
-  static post(url, data, opts) {
-    return axios.post(this._url(url), data, opts)
+  static post(url, data, axiosConfig) {
+    return axios.post(this._url(url), data, axiosConfig)
   }
 
-  static put(...args) {
-    return axios.put(...args)
+  static put(url, data, axiosConfig) {
+    return axios.put(this._url(url), data, axiosConfig)
   }
 
-  static patch(...args) {
-    return axios.patch(...args)
+  static patch(url, data, axiosConfig) {
+    return axios.patch(this._url(url), data, axiosConfig)
   }
 
-  static delete(...args) {
-    return axios.delete(...args)
+  static delete(url, axiosConfig) {
+    return axios.delete(this._url(url), axiosConfig)
   }
 
   static emit(path, msg) {
