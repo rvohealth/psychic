@@ -60,7 +60,7 @@ export default class GenerateJSAPI {
 
     Object.keys(files)
       .forEach(fileName => {
-        const className = files[fileName].route.channel.name
+        const className = files[fileName].route.channel.name.replace(/Channel$/, '')
         const imports =
 `\
 import common from 'psy/api/common'
@@ -88,12 +88,12 @@ export default class ${className}API {
   }
 
   filename(route) {
-    return route.channel.paramName
+    return route.channel.paramName.replace(/-channel$/, '')
   }
 
   endpoint(route) {
     const params = this.params(route)
-    let path = route.route
+    let path = route.fullRoute
     route.parsed.params.forEach(param => {
       path = path.replace(`:${param.name}`, '${' + param.name +'}')
     })
@@ -128,7 +128,14 @@ export default class ${className}API {
     let pathSegments = route.parsed.segments
       .filter(segment => !/^:/.test(segment))
 
+    // pop method from path
     pathSegments.pop()
+
+    // if it belongs to a resource, path should segment both method and resource name,
+    // so that /api/v1/users/auth
+    // becomes /api/v1
+    if (route.belongsToResource)
+      pathSegments.pop()
 
     return pathSegments
   }

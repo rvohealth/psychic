@@ -154,25 +154,9 @@ export default class CrystalBall {
       .emit(messageKey, message)
   }
 
-  closeWS() {
-    // return new Promise(accept => {
-    //   if (!this._io) return accept()
-    //   this._wss?.close(() => {
-    //     accept()
-    //   })
-    // })
-  }
-
   async closeConnection() {
-    // try {
-    //   this.io.close()
-    // } catch(error) {
-    //   // do nothing
-    // }
-
     await this.serverKiller.terminate()
     await this.ioServerKiller.terminate()
-    // await this.closeWS()
     return true
   }
 

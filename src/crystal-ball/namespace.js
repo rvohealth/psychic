@@ -10,7 +10,7 @@ import Vision from 'src/crystal-ball/vision'
 import l from 'src/singletons/l'
 
 export default class Namespace {
-  constructor(routeKey, prefix, app) {
+  constructor(routeKey, prefix, app, { belongsToResource }={}) {
     this._app = app
     this._channels = {}
     this._namespaces = {}
@@ -18,6 +18,7 @@ export default class Namespace {
     this._routes = {}
     this._givenType = null
     this._givenKey = null
+    this._belongsToResource = !!belongsToResource
 
     // handles default case where routeKey is null
     this._prefix = routeKey ?
@@ -27,6 +28,10 @@ export default class Namespace {
 
   get app() {
     return this._app
+  }
+
+  get belongsToResource() {
+    return this._belongsToResource
   }
 
   get channelName() {
@@ -137,7 +142,7 @@ export default class Namespace {
       this.delete(resourcePath, `${channelName}#delete`, { _isResource: true })
 
     if (cb) {
-      const ns = new Namespace(pluralized, this.prefix, this.app)
+      const ns = new Namespace(pluralized, this.prefix, this.app, { belongsToResource: true })
       this.namespace(ns)
       return ns
     }
@@ -170,10 +175,12 @@ export default class Namespace {
     const key = `${httpMethod}:${parsedRoute.key}`
     const routeObj = {
       route,
+      fullRoute,
       httpMethod,
       channel,
       method,
       parsed: parsedRoute,
+      belongsToResource: this.belongsToResource,
       isResource: _isResource,
       authKey,
     }
