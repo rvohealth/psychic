@@ -7,8 +7,8 @@ export default class GenerateJSAPI {
     if (!fs.existsSync('src/psy'))
       fs.mkdirSync('src/psy')
 
-    if (!fs.existsSync('src/psy/api'))
-      fs.mkdirSync('src/psy/api')
+    if (!fs.existsSync('src/psy/net'))
+      fs.mkdirSync('src/psy/net')
 
     this.generateForRoutes(CrystalBall.routes)
     this.generateForNamespaces(CrystalBall.namespaces)
@@ -37,9 +37,9 @@ export default class GenerateJSAPI {
               ''
           ) +
           `${this.filename(route)}.js`
-        const filePath = 'src/psy/api/' + relativePath
+        const filePath = 'src/psy/net/' + relativePath
 
-        let path = 'src/psy/api'
+        let path = 'src/psy/net'
         pathSegments.forEach((segment, index) => {
           const isFilename = index === route.parsed.segments.length
           path += `/${segment}`
@@ -63,7 +63,7 @@ export default class GenerateJSAPI {
         const className = files[fileName].route.channel.name.replace(/Channel$/, '')
         const imports =
 `\
-import common from 'psy/api/common'
+import common from 'psy/net/common'
 
 export default class ${className}API {
 `

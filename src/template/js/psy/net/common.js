@@ -1,5 +1,5 @@
 import axios from 'axios'
-import io from 'src/psy/singletons/io'
+import io from 'psy/singletons/io'
 
 export default class Common {
   static get(...args) {
@@ -22,8 +22,8 @@ export default class Common {
     return axios.delete(...args)
   }
 
-  static emit(msg) {
-    io.emit(msg)
+  static emit(path, msg) {
+    io.emit(path, msg)
   }
 
   static _url(url) {
