@@ -10,6 +10,7 @@ import cookieParser from 'cookie-parser'
 import cors from 'cors'
 import config from 'src/config'
 import Namespace from 'src/crystal-ball/namespace'
+import WSVision from 'src/crystal-ball/vision/ws'
 import l from 'src/singletons/l'
 
 export default class CrystalBall {
@@ -41,6 +42,11 @@ export default class CrystalBall {
     return this._cachedNamespaces[this._cachedNamespaces.length - 1]
   }
 
+  get httpRoutes() {
+    return this.routes
+      .filter(r => !r.isWS)
+  }
+
   get lastNamespace() {
     return this._cachedNamespaces[this._cachedNamespaces.length - 2]
   }
@@ -69,6 +75,11 @@ export default class CrystalBall {
     return this._ioServerKiller
   }
 
+  get wsRoutes() {
+    return this.routes
+      .filter(r => r.isWS)
+  }
+
   constructor() {
     this._channels = {}
     this._app = express()
@@ -79,20 +90,6 @@ export default class CrystalBall {
       credentials: true,
       origin: '*'//config.frontEndUrl,
     }))
-
-    this._cachedNamespaces = []
-    this._setCurrentNamespace(new Namespace(null, '', this._app))
-  }
-
-  async gaze(port) {
-    await this.boot()
-    this._server = this.app.listen(port || config.port, () => {
-      if (!process.env.CORE_TEST)
-        l.log('express connected')
-    })
-    this._serverKiller = createHttpTerminator({
-      server: this.server,
-    })
 
     this._ioServer = createServer((req, res) => {
       // Set CORS headers
@@ -109,20 +106,39 @@ export default class CrystalBall {
 
     this._io = io(this.ioServer, {
       cors: {
-        origin: config.frontEndUrl,
+        origin: '*',//config.frontEndUrl,
         methods: ["GET", "POST"],
         allowedHeaders: ['psy-auth-tokens'],
         credentials: true,
       }
-    })
-    this._ioServerKiller = createHttpTerminator({
-      server: this.ioServer,
     })
 
     this.io.on('connection', socket => {
       socket.psy = {
         auth: {},
       }
+
+      this.wsRoutes.forEach(route => {
+        socket.on(route.fullRoute.replace(/^\//, ''), async params => {
+          const vision = new WSVision(route.route, route.method, params)
+          const channelInstance = new route.channel(vision)
+
+          // add error handling here
+           try {
+             await channelInstance[route.method]()
+           } catch(error) {
+             l.error(`An error occurred: ${error.constructor.name}: ${error.message || error}`)
+
+             if (error.constructor.statusCode)
+               throw `Socket Error: ${error.constructor.name} (${error.constructor.statusCode})`
+
+             if (process.env.CORE_TEST)
+               throw error
+
+             throw `Whoops, something went wrong...`
+           }
+        })
+      })
 
       socket.on('psy/auth', async ({ token, key }={}) => {
         if (!token) throw `Missing required token for WS token auth`
@@ -141,7 +157,27 @@ export default class CrystalBall {
         socket.psy.auth[key] = dream
       })
     })
-    this.ioServer.listen(config.wssPort)
+
+    this._ioServerKiller = createHttpTerminator({
+      server: this.ioServer,
+    })
+
+    this._cachedNamespaces = []
+    this._setCurrentNamespace(new Namespace(null, '', this.app, this.io))
+  }
+
+  async gaze(port) {
+    await this.boot()
+    this._server = this.app.listen(port || config.port, () => {
+      if (!process.env.CORE_TEST)
+        l.log('express connected')
+    })
+    this._serverKiller = createHttpTerminator({
+      server: this.server,
+    })
+
+    this.ioServer.listen(config.wssPort, () => {
+    })
 
     process.on('SIGTERM', async () => {
       await this.closeConnection()
@@ -173,7 +209,7 @@ export default class CrystalBall {
   }
 
   namespace(namespace, cb) {
-    const ns = new Namespace(namespace, this.currentNamespace.prefix, this.app)
+    const ns = new Namespace(namespace, this.currentNamespace.prefix, this.app, this.io)
     this.currentNamespace.namespace(ns)
     this._setCurrentNamespace(ns)
     cb(this)
@@ -219,6 +255,10 @@ export default class CrystalBall {
     } else {
       return this.currentNamespace.resource(resourceName, opts)
     }
+  }
+
+  ws(route, path, opts) {
+    return this.currentNamespace.ws(route, path, opts)
   }
 
   _setCurrentNamespace(namespace) {

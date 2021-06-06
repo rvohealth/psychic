@@ -3,14 +3,6 @@ export default class Vision {
     return this._auth
   }
 
-  get request() {
-    return this._expressRequest
-  }
-
-  get response() {
-    return this._expressResponse
-  }
-
   get route() {
     return this._route
   }
@@ -19,11 +11,9 @@ export default class Vision {
     return this._method
   }
 
-  constructor(route, method, expressRequest, expressResponse) {
+  constructor(route, method) {
     this._route = route
     this._method = method
-    this._expressRequest = expressRequest
-    this._expressResponse = expressResponse
     this._auth = {}
   }
 

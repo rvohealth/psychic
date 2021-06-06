@@ -1,25 +1,20 @@
+import { jest } from '@jest/globals'
 import CrystalBall from 'src/crystal-ball'
 import Dream from 'src/dream'
 import Channel from 'src/channel'
 import config from 'src/config'
 import db from 'src/db'
 
-import { fetch, post } from 'spec/helpers/request'
+import { emit } from 'spec/helpers/request'
+const spy = jest.fn()
 
 describe('CrystalBall Websockets', () => {
   class TestUser extends Dream {
-    initialize() {
-      this.authenticates('email', 'secret')
-    }
   }
 
   class TestUsersChannel extends Channel {
-    initialize() {
-      this.authenticates('test-user', { against: 'email:secret', as: 'currentUser' })
-    }
-
-    authtest() {
-      this.json({ auth: 'test' })
+    zimbo() {
+      spy(this.params)
     }
   }
 
@@ -56,12 +51,8 @@ describe('CrystalBall Websockets', () => {
     })
 
     jest.spyOn(config, 'routeCB', 'get').mockReturnValue(r => {
-      r.resource('test-users', { only: 'create' }, () => {
-        r.auth('currentUser')
-      })
-
-      r.given('auth:currentUser', () => {
-        r.get('authtest', 'test-users#authtest')
+      r.resource('test-users', { only: [] }, () => {
+        r.ws('zimbo', 'test-users#zimbo')
       })
     })
 
@@ -73,42 +64,11 @@ describe('CrystalBall Websockets', () => {
     await TestUser.create({ email: 'fishman', secret: 'zim' })
   })
 
-  it ('permits access to otherwise-gated route', async () => {
+  it ('allows ws request', async () => {
     const crystalBall = new CrystalBall()
     await crystalBall.gaze()
-
-    let error = null
-    try {
-      await fetch('authtest')
-    } catch(e) {
-      error = e
-    }
-
-    expect(error.response.status).toBe(401)
-    let response = await post('test-users/auth', { email: 'fishman', secret: 'zim' })
-    expect(response.status).toBe(200)
-
-    response = await fetch('authtest')
-    expect(response.status).toBe(200)
-
-    await crystalBall.closeConnection()
-  })
-
-  context ('with invalid credentials', () => {
-    it ('returns 401', async () => {
-      const crystalBall = new CrystalBall()
-      await crystalBall.gaze()
-
-      let error = null
-      try {
-        await post('test-users/auth', { email: 'fishman', secret: 'zzim' })
-      } catch(e) {
-        error = e
-      }
-
-      expect(error.response.status).toBe(401)
-      await crystalBall.closeConnection()
-    })
+    await emit('test-users/zimbo', { fish: 10 })
+    expect(spy).toHaveBeenCalledWith({ fish: 10 })
   })
 })
 

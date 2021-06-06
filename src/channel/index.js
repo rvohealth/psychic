@@ -34,11 +34,7 @@ export default class Channel {
   }
 
   get params() {
-    return {
-      ...this.request.params || {},
-      ...this.request.query || {},
-      ...this.request.body || {}
-    }
+    return this.vision.params
   }
 
   get request() {

@@ -83,7 +83,7 @@ describe('Channel#authenticates', () => {
     channel.response.cookie = cookieSpy
     await channel.auth()
 
-    expect(jsonSpy).toHaveBeenCalledWith({ token: 'your token has been set as an httpOnly cookie' })
+    expect(jsonSpy).toHaveBeenCalledWith({ token: 'fishman_token' })
     expect(jwt.sign).toHaveBeenCalledWith({ key: 'email:password', id: 1, dreamClass: 'TestUser' }, 'black cats are the coolest')
     expect(cookieSpy).toHaveBeenCalledWith(
       'currentUser',

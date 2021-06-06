@@ -6,12 +6,14 @@ import snakeCase from 'src/helpers/snakeCase'
 import paramCase from 'src/helpers/paramCase'
 import { parseRoute } from 'src/helpers/route'
 import config from 'src/config'
-import Vision from 'src/crystal-ball/vision'
+import HTTPVision from 'src/crystal-ball/vision/http'
+import WSVision from 'src/crystal-ball/vision/ws'
 import l from 'src/singletons/l'
 
 export default class Namespace {
-  constructor(routeKey, prefix, app, { belongsToResource }={}) {
+  constructor(routeKey, prefix, app, io, { belongsToResource }={}) {
     this._app = app
+    this._io = io
     this._channels = {}
     this._namespaces = {}
     this._routeKey = routeKey
@@ -45,6 +47,10 @@ export default class Namespace {
 
   get givenKey() {
     return this._givenKey
+  }
+
+  get io() {
+    return this._io
   }
 
   get namespaces() {
@@ -114,6 +120,10 @@ export default class Namespace {
     return this.run('put', route, path, opts)
   }
 
+  ws(route, path, opts) {
+    return this.run('ws', route, path, { ...opts, isWS: true })
+  }
+
   resource(resourceName, { only, except }={}, cb=null) {
     only = only || this.resourceMethods
     except = except || []
@@ -142,7 +152,7 @@ export default class Namespace {
       this.delete(resourcePath, `${channelName}#delete`, { _isResource: true })
 
     if (cb) {
-      const ns = new Namespace(pluralized, this.prefix, this.app, { belongsToResource: true })
+      const ns = new Namespace(pluralized, this.prefix, this.app, this.io, { belongsToResource: true })
       this.namespace(ns)
       return ns
     }
@@ -169,7 +179,7 @@ export default class Namespace {
     throw `unrecognized path type ${path}`
   }
 
-  addRouteForChannel(route, httpMethod, channel, method, { authKey, _isResource }={}) {
+  addRouteForChannel(route, httpMethod, channel, method, { authKey, _isResource, isWS }={}) {
     const fullRoute = `${this.prefix}/${route}`
     const parsedRoute = parseRoute(fullRoute)
     const key = `${httpMethod}:${parsedRoute.key}`
@@ -183,6 +193,7 @@ export default class Namespace {
       belongsToResource: this.belongsToResource,
       isResource: _isResource,
       authKey,
+      isWS,
     }
 
     this._routes[key] = routeObj
@@ -190,10 +201,29 @@ export default class Namespace {
     if (authKey)
       config.registerAuthKey(authKey, routeObj)
 
+    // eventually move this to crystal ball layer.
+    if (!isWS)
+      this._addHTTP(routeObj)
+  }
+
+  parseStringPath(path) {
+    const [ channelNameRaw, method ] = path.split('#')
+    const channelName = pascalCase(channelNameRaw)
+    const channel = config.channels[channelName]?.default
+    if (!channel) throw `Missing channel for route ${path} (expected ${channelName})`
+
+    return {
+      type: 'string',
+      channel,
+      method: camelCase(method),
+    }
+  }
+
+  _addHTTP(routeObj) {
     const { givenType, givenKey } = this
-    this.app[httpMethod](fullRoute, async (req, res) => {
-      const vision = new Vision(route, method, req, res)
-      const channelInstance = new channel(vision)
+    this.app[routeObj.httpMethod](routeObj.fullRoute, async (req, res) => {
+      const vision = new HTTPVision(routeObj.route, routeObj.method, req, res)
+      const channelInstance = new routeObj.channel(vision)
 
       if (givenType) {
         let payload
@@ -227,7 +257,7 @@ export default class Namespace {
 
       // add error handling here
        try {
-         await channelInstance[method]()
+         await channelInstance[routeObj.method]()
        } catch(error) {
          l.error(`An error occurred: ${error.constructor.name}: ${error.message || error}`)
 
@@ -240,18 +270,5 @@ export default class Namespace {
          return res.status(500).send("Whoops, Something went wrong...")
        }
     })
-  }
-
-  parseStringPath(path) {
-    const [ channelNameRaw, method ] = path.split('#')
-    const channelName = pascalCase(channelNameRaw)
-    const channel = config.channels[channelName]?.default
-    if (!channel) throw `Missing channel for route ${path} (expected ${channelName})`
-
-    return {
-      type: 'string',
-      channel,
-      method: camelCase(method),
-    }
   }
 }
