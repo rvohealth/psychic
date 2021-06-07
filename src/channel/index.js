@@ -4,8 +4,6 @@ import snakeCase from 'src/helpers/snakeCase'
 import camelCase from 'src/helpers/camelCase'
 import config from 'src/config'
 import Projection from 'src/projection'
-
-import NotFound from 'src/error/crystal-ball/not-found'
 import Unauthorized from 'src/error/crystal-ball/unauthorized'
 
 export default class Channel {
@@ -95,6 +93,10 @@ export default class Channel {
 
       return this.json({ token })
     }
+  }
+
+  emit(to, data) {
+    this.vision.emit(to, data)
   }
 
   json(obj, opts) {

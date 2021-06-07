@@ -1,4 +1,5 @@
 import Vision from 'src/crystal-ball/vision'
+import { emit } from 'src/helpers/ws'
 
 export default class WSVision extends Vision {
   constructor(route, method, params, { io, socket }) {
@@ -18,6 +19,10 @@ export default class WSVision extends Vision {
 
   get params() {
     return this._params
+  }
+
+  emit(to, path, data) {
+    return emit(this.io, to, path, data)
   }
 
   json() {

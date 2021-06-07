@@ -29,6 +29,10 @@ export default class Common {
     io.emit(path, msg)
   }
 
+  static on(path, cb) {
+    io.on(path, cb)
+  }
+
   static _url(url) {
     // fix hardcoding with generated frontend psy module
     return `http://localhost:777/${url.replace(/^\//, '')}`

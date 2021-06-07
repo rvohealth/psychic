@@ -106,7 +106,7 @@ export default class CrystalBall {
 
     this._io = io(this.ioServer, {
       cors: {
-        origin: '*',//config.frontEndUrl,
+        origin: config.frontEndUrl,
         methods: ["GET", "POST"],
         allowedHeaders: ['psy-auth-tokens'],
         credentials: true,
@@ -155,6 +155,9 @@ export default class CrystalBall {
 
         socket.join(`auth:${key}:${dream.id}`)
         socket.psy.auth[key] = dream
+
+        console.log('EMITTING BACK...')
+        socket.emit('psy/authed')
       })
     })
 
