@@ -49,6 +49,10 @@ class Config {
     return 'int'
   }
 
+  get dbSeedCB() {
+    return this._dbSeedCB
+  }
+
   get dreamPath() {
     return `${this.root}dist/dreams`
   }
@@ -59,13 +63,13 @@ class Config {
     return this._dreams
   }
 
-  get frontEndUrl() {
-    return 'http://localhost:3000'
-  }
-
   get env() {
     if (process.env.CORE_TEST) return 'test'
     return process.env.PSYCHIC_ENV || process.env.NODE_ENV || 'development'
+  }
+
+  get frontEndUrl() {
+    return 'http://localhost:3000'
   }
 
   get pkgPath() {
@@ -80,6 +84,14 @@ class Config {
   get psychicPath() {
     if (!fs.existsSync('app')) return ''
     return 'node_modules/psychic/'
+  }
+
+  get redisConfig() {
+    return this._redisConfig
+  }
+
+  get redisPort() {
+    return this.redisConfig.port || '999'
   }
 
   get root() {
@@ -133,11 +145,20 @@ class Config {
   }
 
   // must be called before app loads!
-  boot(dreams, channels, projections, routeCB) {
+  boot({
+    dbSeedCB,
+    dreams,
+    channels,
+    redisConfig,
+    routeCB,
+    projections,
+  }) {
+    this._dbSeedCB = dbSeedCB
     this._dreams = dreams
     this._channels = channels
-    this._projections = projections
+    this._redisConfig = redisConfig
     this._routeCB = routeCB
+    this._projections = projections
   }
 
   columnType(tableName, columnName) {

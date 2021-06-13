@@ -1,3 +1,4 @@
+import pluralize from 'pluralize'
 import Association from 'src/dream/association'
 import db from 'src/db'
 import config from 'src/config'
@@ -21,10 +22,6 @@ export default class BelongsTo extends Association {
 
   get associationTable() {
     return config.tableSchema(this.association).name
-  }
-
-  get foreignKey() {
-    return this._foreignKey
   }
 
   constructor(resourceName, associationResourceName, {

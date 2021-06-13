@@ -71,10 +71,11 @@ describe('Dream#emits', () => {
 
   it ('emits to esp', async () => {
     const iceCream = await FavoriteIceCream.first()
-    await iceCream.emit('user', { fish: 10 })
+    await iceCream.emit('user', '/ice-cream/updated', { fish: 10 })
 
     expect(esp.transmit).toHaveBeenCalledWith('ws:to:authToken', {
       to: 'currentUser',
+      path: 'ice-cream/updated',
       id: iceCream.userId,
       data: {
         fish: 10,

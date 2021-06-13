@@ -161,8 +161,10 @@ export default class CrystalBall {
         socket.emit('psy/authed')
       })
 
-      esp.on('ws:to:authToken', payload => {
-        emit(this.io, `auth:${payload.to}:${payload.id}`, 'testws', payload.data)
+      esp.on('ws:to:authToken', ({ to, id, path, data }) => {
+        // using emit helper also captures wildcard cases and emits to all sockets
+        // with registered auth token (though currently the implementation needs work).
+        emit(this.io, `auth:${to}:${id}`, path, data)
       })
     })
 

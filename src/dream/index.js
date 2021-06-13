@@ -273,18 +273,19 @@ class Dream {
     return this
   }
 
-  async emit(relationName, message=null) {
+  async emit(relationName, path, message=null) {
     const emitRecord = this._emitsTo[relationName]
     if (!emitRecord) throw `must instantiate relation using 'emitsTo' in initialize`
 
     // since association could be deeply nested, safest thing to do here is to fetch the association.
+    console.log('HAM', relationName, this._associations)
     const association = await this[relationName]()
     if (!association) return // no error here, since we simply don't emit to non-existant associations
-    console.log("SMINOLI", association)
 
     esp.transmit('ws:to:authToken', {
       to: emitRecord.as,
       id: association.id,
+      path: path.replace(/^\//, ''),
       data: message,
     })
   }

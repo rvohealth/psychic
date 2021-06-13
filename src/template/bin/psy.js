@@ -2,10 +2,19 @@ import psychic, { CLI } from 'psychic'
 import packagedDreams from 'app/pkg/dreams.pkg'
 import packagedChannels from 'app/pkg/channels.pkg'
 import packagedProjections from 'app/pkg/projections.pkg'
-import routesCB from 'config/routes'
+import redisConfig from 'config/redis'
+import routeCB from 'config/routes'
+import dbSeedCB from 'db/seed'
 
 async function runCLI() {
-  psychic.boot(packagedDreams, packagedChannels, packagedProjections, routesCB)
+  psychic.boot({
+    dreams: packagedDreams,
+    channels: packagedChannels,
+    projections: packagedProjections,
+    dbSeedCB,
+    redisConfig,
+    routeCB,
+  })
 
   const cli = new CLI()
   await cli.run()

@@ -1,6 +1,7 @@
 import RunMigration from 'src/migrate/run'
 import CLIProgram from 'src/cli/program'
 import db from 'src/db'
+import config from 'src/config'
 import l from 'src/singletons/l'
 
 export default class DBCLIProgram extends CLIProgram {
@@ -8,6 +9,7 @@ export default class DBCLIProgram extends CLIProgram {
     if (args.command === 'create') return await this.create()
     if (args.command === 'drop') return await this.drop()
     if (args.command === 'migrate') return await this.migrate()
+    if (args.command === 'seed') return await this.seed()
     throw `unhandled command ${args.command}`
   }
 
@@ -37,6 +39,12 @@ export default class DBCLIProgram extends CLIProgram {
 
   async migrate() {
     await new RunMigration().run()
+    if (!process.env.CORE_TEST)
+      process.exit()
+  }
+
+  async seed() {
+    await config.dbSeedCB()
     if (!process.env.CORE_TEST)
       process.exit()
   }

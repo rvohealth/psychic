@@ -8,6 +8,6 @@ export default class BlackCat extends Dream {
   }
 
   async testEmitting() {
-    await this.emit('user', { fish: 10 })
+    await this.emit('user', 'testws', { fish: 10 })
   }
 }

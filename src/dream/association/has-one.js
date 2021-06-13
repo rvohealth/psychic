@@ -23,10 +23,6 @@ export default class HasOne extends Association {
     return config.tableSchema(this.association).name
   }
 
-  get foreignKey() {
-    return this._foreignKey
-  }
-
   constructor(resourceName, associationResourceName, {
     foreignKey,
   }) {
