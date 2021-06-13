@@ -120,6 +120,12 @@ export default class NewAppProgram extends CLIProgram {
     } else {
       l.logStatus('hot swap app folder...')
       this.replaceFile('src/template/app', path + '/app')
+
+      l.logStatus('copy App.js')
+      await fse.copy('src/template/js/App.js', path + '/src/App.js')
+
+      l.logStatus('copy template/js/psy to src/psy...')
+      await fse.copy('src/template/js/psy', path + '/src/psy')
     }
   }
 

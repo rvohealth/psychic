@@ -17,6 +17,7 @@ import UniqueCheckFailed from 'src/error/dream/validation/unique-check-failed'
 import InclusionCheckFailed from 'src/error/dream/validation/inclusion-check-failed'
 import ExclusionCheckFailed from 'src/error/dream/validation/exclusion-check-failed'
 import { validatePresence, validateUnique } from 'src/helpers/validation'
+import esp from 'src/singletons/esp'
 
 class Dream {
   static get isDream() {
@@ -143,18 +144,19 @@ class Dream {
   }
 
   constructor(attributes={}) {
+    this._afterCreate = []
+    this._afterDestroy = []
+    this._afterUpdate = []
+    this._afterSave = []
     this._associations = {}
     this._authentications = {
       db: {},
     }
-    this._beforeSave = []
-    this._afterSave = []
     this._beforeCreate = []
-    this._afterCreate = []
     this._beforeDestroy = []
-    this._afterDestroy = []
+    this._beforeSave = []
     this._beforeUpdate = []
-    this._afterUpdate = []
+    this._emitsTo = {}
     this._validations = {}
     this._resetAttributes(attributes)
     this.initialize()
@@ -249,15 +251,42 @@ class Dream {
 
     this[resourceName] = async () =>
       new association.associationDreamClass(
-        await association.query(this.id)
+        await association.query(this[association.foreignKey])
       )
 
     this[camelCase(resourceName)] = async () =>
       new association.associationDreamClass(
-        await association.query(this.id)
+        await association.query(this[association.foreignKey])
       )
 
     return this
+  }
+
+  emitsTo(relationName, opts) {
+    if (!opts.as) throw `must pass 'as' in second argument`
+    if (!this._association(relationName)) throw `relationName must be a valid association. make sure your association was delared in initialize.`
+
+    this._emitsTo[relationName] = {
+      to: relationName,
+      ...opts,
+    }
+    return this
+  }
+
+  async emit(relationName, message=null) {
+    const emitRecord = this._emitsTo[relationName]
+    if (!emitRecord) throw `must instantiate relation using 'emitsTo' in initialize`
+
+    // since association could be deeply nested, safest thing to do here is to fetch the association.
+    const association = await this[relationName]()
+    if (!association) return // no error here, since we simply don't emit to non-existant associations
+    console.log("SMINOLI", association)
+
+    esp.transmit('ws:to:authToken', {
+      to: emitRecord.as,
+      id: association.id,
+      data: message,
+    })
   }
 
   async destroy() {

@@ -3,7 +3,10 @@ import BlackCat from 'app/dreams/black-cat'
 
 export default class BlackCats extends Channel {
   async index() {
-    this.json(await BlackCat.all())
+    const blackCat = await BlackCat.first()
+    await blackCat.testEmitting()
+
+    this.json({ fish: 10 })
   }
 
   async show() {

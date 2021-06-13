@@ -12,6 +12,8 @@ import config from 'src/config'
 import Namespace from 'src/crystal-ball/namespace'
 import WSVision from 'src/crystal-ball/vision/ws'
 import l from 'src/singletons/l'
+import esp from 'src/singletons/esp'
+import { emit } from 'src/helpers/ws'
 
 export default class CrystalBall {
   static get routes() {
@@ -156,8 +158,11 @@ export default class CrystalBall {
         socket.join(`auth:${key}:${dream.id}`)
         socket.psy.auth[key] = dream
 
-        console.log('EMITTING BACK...')
         socket.emit('psy/authed')
+      })
+
+      esp.on('ws:to:authToken', payload => {
+        emit(this.io, `auth:${payload.to}:${payload.id}`, 'testws', payload.data)
       })
     })
 

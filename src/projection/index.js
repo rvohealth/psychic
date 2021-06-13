@@ -17,17 +17,18 @@ export default class Projection {
   _applyFilters(attributes) {
     if (!this.constructor.attributes) return attributes
 
-    return this.constructor.attributes.reduce((agg, attr) => {
-      if (attributes[attr])
-        agg[attr] = attributes[attr]
+    return this.constructor.attributes
+      .reduce((agg, attr) => {
+        if (attributes[attr])
+          agg[attr] = attributes[attr]
 
-      else if (typeof this[attr] === 'function')
-        agg[attr] = this[attr]()
+        else if (typeof this[attr] === 'function')
+          agg[attr] = this[attr]()
 
-      else
-        agg[attr] = this[attr]
+        else
+          agg[attr] = this[attr]
 
-      return agg
-    }, {})
+        return agg
+      }, {})
   }
 }
