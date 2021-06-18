@@ -176,6 +176,10 @@ class Config {
     return dream.default || dream
   }
 
+  lookup(className) {
+    return this.dream(className)
+  }
+
   projection(projectionName) {
     return this.projections[pascalCase(projectionName)]
   }

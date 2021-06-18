@@ -13,10 +13,13 @@ export default class Now extends SpawnEvent {
       methodName = args[1]
       _args = args[2]
 
-      if (typeof classOrInstance[methodName] === 'function')
-        this.addClassMethod(classOrInstance, methodName, _args)
+      if (typeof classOrInstance === 'string')
+        this.addStaticMethod(classOrInstance, methodName, _args)
 
-      else if(typeof classOrInstance.prototype[methodName] === 'function')
+      else if (typeof classOrInstance[methodName] === 'function')
+        this.addStaticMethod(classOrInstance.name, methodName, _args)
+
+      else if (typeof classOrInstance.prototype[methodName] === 'function')
         this.addInstanceMethod(classOrInstance, methodName, _args)
 
       break
@@ -33,15 +36,14 @@ export default class Now extends SpawnEvent {
   addFunction() {
   }
 
-  addClassMethod(klass, methodName, args) {
-    const jobName = this._generateName(`${klass}.${methodName}.${JSON.stringify(args)}`, '0')
-    klass[methodName].apply(klass, args)
+  addStaticMethod(className, methodName, args) {
+    const jobName = this._generateName(`${className}.${methodName}.${JSON.stringify(args)}`, '0')
     this._bree.add({
       name: jobName,
-      path: path.join(__dirname.replace(/\/src\//, '/dist/'), 'jobs', 'basic.js'),
+      path: path.join(this._jobsPath, 'static-method.js'),
       timeout: 0,
       worker: {
-        argv: [klass.name, methodName, ...args],
+        argv: [className, methodName, ...args],
         // argv: [cb.toString(), ...args],
       },
     })

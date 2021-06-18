@@ -11,6 +11,7 @@
     "SharedArrayBuffer": "readonly",
     "bg": "readonly",
     "context": "readonly",
+    "lookup": "readonly",
     "md5": "readonly",
     "now": "readonly",
     "spawn": "readonly",

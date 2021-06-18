@@ -1,5 +1,4 @@
-import psychic, { config } from 'dist'
-console.log('LOADED ME', process.argv)
+import psychic from 'dist'
 const className = process.argv[2]
 const methodName = process.argv[3]
 const args = process.argv.slice(4)
@@ -26,6 +25,7 @@ const klass = lookup(className)
 if (typeof klass[methodName] !== 'function')
   throw `${methodName} is not a static method of class: ${klass}`
 
+console.log(`RUNNING: ${className}.${methodName}(${args.join(', ')})`)
 klass[methodName].apply(klass, args)
 // console.log(args.slice(2), config.dream('TestUser'))
 // const cb = new Function('return ' + cbStr)()

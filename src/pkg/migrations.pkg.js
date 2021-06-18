@@ -1,5 +1,7 @@
-import * as module0 from 'dist/testapp/db/migrate/01-create-test-users.js'
+import * as module0 from 'src/template/db/migrate/01_create_black_cats.js'
+import * as module1 from 'src/template/db/migrate/02_create_users.js'
 const migrations = {
-  "01-create-test-users.js": module0,
+  "01_create_black_cats.js": module0,
+  "02_create_users.js": module1,
 }
 export default migrations
