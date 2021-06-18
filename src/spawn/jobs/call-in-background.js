@@ -1,4 +1,14 @@
+// a note about this file:
+// this is much like schrodinger's cat (sp? who cares.)
+// basically, as soon as you log, the script will output that and die.
+// this means that you cannot have multiple console logs in this script,
+// and as soon as you log, that's it for your script, it will not run any further.
+// not sure if this is part of web workers, or part of bree, either way, would love to
+// fix, but in the mean time be sparing with console logs here to avoid confusion.
+
+import { parentPort } from 'worker_threads'
 import psychic from 'dist'
+import l from 'dist/singletons/l'
 
 // this is all packaged with the for-specs.js makefile
 import packagedDreams from 'dist/app/pkg/dreams.pkg.js'
@@ -10,6 +20,7 @@ import dbSeedCB from 'dist/db/seed.js'
 
 // error handling
 const {
+  jobName,
   className,
   methodName,
   args,
@@ -19,6 +30,17 @@ const {
   constructorArgs, // instance only
   cbString, // annonymous function only
 } = JSON.parse(process.argv[2])
+
+function cancel() {
+  // do cleanup here
+  if (parentPort) parentPort.postMessage('cancelled')
+  else process.exit(0)
+}
+
+function exit() {
+  // do cleanup here
+  process.exit(0)
+}
 
 psychic.boot({
   dreams: packagedDreams,
@@ -40,36 +62,40 @@ async function _apply() {
     if (typeof klass[methodName] !== 'function')
       throw `${methodName} is not a static method of class: ${klass}`
 
-    console.log(`RUNNING: ${className}.${methodName}(${args.join(', ')})`)
     return await klass[methodName].apply(klass, args)
 
   case 'instance':
     if (isDream && dreamId !== null && dreamId !== undefined) {
       dream = await klass.find(dreamId)
-      console.log(`RUNNING: ${className}(:${dreamId})#${methodName}(${args.join(', ')})`)
       return await dream[methodName].apply(dream, args)
 
     } else {
-      console.log(`RUNNING: ${className}(:${args.join(', ')})#${methodName}(${args.join(', ')})`)
       const instance = new klass(constructorArgs)
       return await instance[methodName].apply(instance, args)
     }
 
   case 'annonymous':
     cb = new Function('return ' + cbString)()
-    cb.apply(cb, args)
-    break
+    return await cb.apply(cb, args)
 
   default:
     throw `Undefined approach in call-in-background worker`
   }
-
 }
 
 _apply()
   .then((...results) => {
-    console.log('DONE', results)
+    l.log(`Finished running job ${jobName}: results: ${results}`)
+    exit()
   })
   .catch(error => {
-    console.log('ERRRORRRR', error)
+    l.error('ERRRORRRR', error)
+    exit()
   })
+
+if (parentPort)
+  parentPort
+    .once('message', message => {
+      console.log('CANCELING')
+      if (message === 'cancel') return cancel()
+    })

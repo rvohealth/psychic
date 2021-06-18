@@ -5,6 +5,7 @@ export default class Event {
     bree,
   }) {
     this._bree = bree
+    this._jobCounter = 0
   }
 
   get _jobsPath() {
@@ -17,6 +18,7 @@ export default class Event {
   }
 
   _generateName(cb, identifier) {
-    return md5(cb.toString() + '::' + identifier)
+    this._jobCounter += 1
+    return md5(cb.toString() + '::' + identifier + '::' + this._jobCounter)
   }
 }
