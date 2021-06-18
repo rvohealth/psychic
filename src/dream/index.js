@@ -127,6 +127,10 @@ class Dream {
     return this.constructor.isDream
   }
 
+  get isDreamInstance() {
+    return true
+  }
+
   get persisted() {
     return !!this.id
   }

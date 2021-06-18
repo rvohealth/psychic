@@ -1,30 +1,38 @@
-import path from 'path'
 import SpawnEvent from 'src/spawn/event'
 
 export default class Now extends SpawnEvent {
   add(...args) {
     let classOrInstance,
       methodName,
-      _args
+      _args,
+      opts
 
     switch(args.length) {
+    case 4:
+      classOrInstance = args[0]
+      methodName = args[1]
+      _args = args[2]
+      opts = args[3]
+
+      if (opts.instance || opts.dream)
+        this.addInstanceMethod(classOrInstance, methodName, _args, opts.constructorArgs)
+      else
+        this.addStaticMethod(classOrInstance?.name || classOrInstance, methodName, _args)
+
+      break
+
     case 3:
       classOrInstance = args[0]
       methodName = args[1]
       _args = args[2]
 
-      if (typeof classOrInstance === 'string')
-        this.addStaticMethod(classOrInstance, methodName, _args)
-
-      else if (typeof classOrInstance[methodName] === 'function')
-        this.addStaticMethod(classOrInstance.name, methodName, _args)
-
-      else if (typeof classOrInstance.prototype[methodName] === 'function')
+      if (classOrInstance.isDreamInstance)
         this.addInstanceMethod(classOrInstance, methodName, _args)
-
+      else
+        this.addStaticMethod(classOrInstance?.name || classOrInstance, methodName, _args)
       break
 
-    case 1:
+    case 2:
       this.addFunction(args[0], args[1])
       break
 
@@ -56,6 +64,35 @@ export default class Now extends SpawnEvent {
     this._bree.start()
   }
 
-  addInstanceMethod() {
+  addInstanceMethod(classNameOrInstance, methodName, args, constructorArgs=[]) {
+    let className = classNameOrInstance
+    let dreamId = null
+    let isDream = false
+    if (classNameOrInstance.isDream && classNameOrInstance.id !== undefined && classNameOrInstance.id !== null) {
+      className = classNameOrInstance.constructor.name
+      dreamId = classNameOrInstance.id
+      isDream = true
+    }
+
+    const jobName = this._generateName(`${className}.${methodName}.${JSON.stringify(args)}`, '0')
+    const payload = JSON.stringify({
+      jobName,
+      className,
+      methodName,
+      args,
+      isDream,
+      dreamId,
+      constructorArgs,
+      approach: 'instance',
+    })
+    this._bree.add({
+      name: jobName,
+      path: this._jobPath('call-in-background'),
+      timeout: 0,
+      worker: {
+        argv: [ payload ],
+      },
+    })
+    this._bree.start()
   }
 }
