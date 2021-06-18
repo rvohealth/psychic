@@ -12,6 +12,10 @@ export default class Event {
     return path.join(__dirname.replace(/\/src\//, '/dist/'), 'jobs')
   }
 
+  _jobPath(jobName) {
+    return path.join(this._jobsPath, `${jobName}.js`)
+  }
+
   _generateName(cb, identifier) {
     return md5(cb.toString() + '::' + identifier)
   }
