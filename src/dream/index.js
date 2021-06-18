@@ -278,7 +278,6 @@ class Dream {
     if (!emitRecord) throw `must instantiate relation using 'emitsTo' in initialize`
 
     // since association could be deeply nested, safest thing to do here is to fetch the association.
-    console.log('HAM', relationName, this._associations)
     const association = await this[relationName]()
     if (!association) return // no error here, since we simply don't emit to non-existant associations
 

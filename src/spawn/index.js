@@ -1,5 +1,6 @@
 import path from 'path'
 import Bree from 'bree'
+import Now from 'src/spawn/now'
 
 // see https://github.com/breejs/bree for scheduling api, since this is a light-weight
 // wrapper around it.
@@ -28,22 +29,20 @@ export default class Spawn {
     this._bree.start()
   }
 
-  now(cb, ...args) {
-    const name = this._name(cb, '0')
-    this._bree.add({
-      name,
-      path: () => {
-        const cbStr = process.argv[2]
-        const args = process.argv.slice(3)
-        const cb = new Function('return ' + cbStr)()
-        cb.apply(null, args)
-      }, // this is how you pass cb to bree currently (though they dont recommend it).
-      timeout: 0,
-      worker: {
-        argv: [cb.toString(), ...args],
-      },
-    })
-    this._bree.start()
+  now(...args) {
+    return new Now({
+      bree: this._bree,
+    }).add(...args)
+    // const name = this._name(cb, '0')
+    // this._bree.add({
+    //   name,
+    //   path: path.join(__dirname, 'jobs', 'basic.js'),
+    //   timeout: 0,
+    //   worker: {
+    //     argv: [cb.toString(), ...args],
+    //   },
+    // })
+    // this._bree.start()
   }
 
   on(date, cb, data=null) {

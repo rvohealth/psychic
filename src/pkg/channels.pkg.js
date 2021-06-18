@@ -1,7 +1,5 @@
-import * as channel0 from 'src/template/app/channels/black-cats.js'
-import * as channel1 from 'src/template/app/channels/users.js'
+import * as channel0 from 'dist/testapp/app/channels/test-users.js'
 const channels = {
-  "BlackCats": channel0,
-  "Users": channel1,
+  "TestUsers": channel0,
 }
 export default channels

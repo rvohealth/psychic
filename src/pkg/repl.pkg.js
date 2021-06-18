@@ -1,4 +1,2 @@
-import BlackCat from 'src/template/app/dreams/black-cat.js'
-import User from 'src/template/app/dreams/user.js'
-global.BlackCat = BlackCat
-global.User = User
+import TestUser from 'dist/testapp/app/dreams/test-user.js'
+global.TestUser = TestUser

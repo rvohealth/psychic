@@ -1,0 +1,14 @@
+{
+  "development": {
+    "name": "psychic_core_test_app_development"
+  },
+  "staging": {
+    "name": "psychic_core_test_app_staging"
+  },
+  "test": {
+    "name": "psychic_core_test_app_test"
+  },
+  "production": {
+    "name": "psychic_core_test_app_production"
+  }
+}
