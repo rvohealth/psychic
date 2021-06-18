@@ -9,9 +9,12 @@
   "globals": {
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly",
-    "uuid": "readonly",
+    "bg": "readonly",
+    "context": "readonly",
+    "md5": "readonly",
     "now": "readonly",
-    "context": "readonly"
+    "spawn": "readonly",
+    "uuid": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2020,
