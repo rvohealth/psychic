@@ -38,12 +38,19 @@ export default class Now extends SpawnEvent {
 
   addStaticMethod(className, methodName, args) {
     const jobName = this._generateName(`${className}.${methodName}.${JSON.stringify(args)}`, '0')
+    const payload = {
+      jobName,
+      className,
+      methodName,
+      args,
+      approach: 'static',
+    }
     this._bree.add({
       name: jobName,
-      path: path.join(this._jobsPath, 'static-method.js'),
+      path: path.join(this._jobsPath, 'call-in-background.js'),
       timeout: 0,
       worker: {
-        argv: [className, methodName, ...args],
+        argv: [JSON.stringify(payload)],
         // argv: [cb.toString(), ...args],
       },
     })

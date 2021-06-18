@@ -1,7 +1,14 @@
 import psychic from 'dist'
-const className = process.argv[2]
-const methodName = process.argv[3]
-const args = process.argv.slice(4)
+
+const payload = JSON.parse(process.argv[2])
+const {
+  className,
+  methodName,
+  args
+} = payload
+// const className = process.argv[2]
+// const methodName = process.argv[3]
+// const args = process.argv.slice(4)
 
 // this is all packaged with the for-specs.js makefile
 import packagedDreams from 'dist/app/pkg/dreams.pkg.js'
@@ -37,6 +44,3 @@ _apply()
   .catch(error => {
     console.log('ERRRORRRR', error)
   })
-// console.log(args.slice(2), config.dream('TestUser'))
-// const cb = new Function('return ' + cbStr)()
-// cb.apply(null, args)
