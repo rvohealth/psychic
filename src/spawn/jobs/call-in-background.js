@@ -16,7 +16,8 @@ const {
   approach,
   isDream,
   dreamId,
-  constructorArgs,
+  constructorArgs, // instance only
+  cbString, // annonymous function only
 } = JSON.parse(process.argv[2])
 
 psychic.boot({
@@ -31,7 +32,9 @@ psychic.boot({
 const klass = lookup(className)
 
 async function _apply() {
-  let dream
+  let dream,
+    cb
+
   switch(approach) {
   case 'static':
     if (typeof klass[methodName] !== 'function')
@@ -53,6 +56,8 @@ async function _apply() {
     }
 
   case 'annonymous':
+    cb = new Function('return ' + cbString)()
+    cb.apply(cb, args)
     break
 
   default:
