@@ -26,4 +26,4 @@ global.spawn = spawn
 global.bg = (...args) => spawn.now(...args)
 global.loadYaml = loadYaml
 global.lookup = (...args) => config.lookup(...args)
-global.ENV = dotenv.parse(fs.readFileSync('.env.development'))
+global.ENV = process.env.CORE_TEST ? {} : dotenv.parse(fs.readFileSync('.env.development'))

@@ -1,0 +1,9 @@
+protocols:
+  email:
+    default:
+      host: "smtp.example.com"
+      port: 587
+      secure: false
+      auth:
+        user: ENV::GMAIL_AUTH_USERNAME
+        pass: ENV::GMAIL_AUTH_PASSWORD

@@ -15,6 +15,7 @@ import packagedDreams from 'dist/app/pkg/dreams.pkg.js'
 import packagedChannels from 'dist/app/pkg/channels.pkg.js'
 import packagedProjections from 'dist/app/pkg/projections.pkg.js'
 import redisConfig from 'dist/config/redis.json'
+import dbConfig from 'dist/config/database.json'
 import routeCB from 'dist/config/routes.js'
 import dbSeedCB from 'dist/db/seed.js'
 
@@ -54,6 +55,7 @@ async function _apply() {
     dreams: packagedDreams,
     channels: packagedChannels,
     projections: packagedProjections,
+    dbConfig,
     dbSeedCB,
     redisConfig,
     routeCB,

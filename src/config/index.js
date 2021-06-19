@@ -26,24 +26,12 @@ class Config {
     }
   }
 
-  get dbConfig() {
-    if (process.env.CORE_TEST) return { test: { name: 'psychic_core_test' } }
-
-    if (!this._dbConfig && fs.existsSync('config/database.json'))
-      this._dbConfig = JSON.parse(fs.readFileSync('config/database.json'))
-
-    if (!this._dbConfig)
-      this._dbConfig = {
-        development: {
-          name: 'psychic_core_development',
-        }
-      }
-
-    return this._dbConfig
+  get db() {
+    return this._db
   }
 
   get dbName() {
-    return this.dbConfig[this.env].name
+    return this.db[this.env].name
   }
 
   get dbIdType() {
@@ -151,6 +139,7 @@ class Config {
 
   // must be called before app loads!
   boot({
+    dbConfig,
     dbSeedCB,
     dreams,
     channels,
@@ -159,6 +148,7 @@ class Config {
     projections,
     messagesConfig,
   }) {
+    this._db = dbConfig,
     this._dbSeedCB = dbSeedCB
     this._dreams = dreams
     this._channels = channels
@@ -206,7 +196,6 @@ class Config {
   }
 
   _configureMessages() {
-    console.log(this.messageConfig)
   }
 }
 

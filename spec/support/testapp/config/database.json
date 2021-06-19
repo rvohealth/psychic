@@ -6,7 +6,7 @@
     "name": "psychic_core_test_app_staging"
   },
   "test": {
-    "name": "psychic_core_test_app_test"
+    "name": "psychic_core_test"
   },
   "production": {
     "name": "psychic_core_test_app_production"

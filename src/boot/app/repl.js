@@ -7,7 +7,8 @@ import config from 'src/config'
 import packagedDreams from 'dist/app/pkg/dreams.pkg'
 import packagedChannels from 'dist/app/pkg/channels.pkg'
 import packagedProjections from 'dist/app/pkg/projections.pkg'
-import redisConfig from 'dist/config/redis'
+import redisConfig from 'dist/config/redis.json'
+import dbConfig from 'dist/config/database.json'
 import routeCB from 'dist/config/routes'
 
 async function loadRepl() {
@@ -18,6 +19,7 @@ async function loadRepl() {
     dreams: packagedDreams,
     channels: packagedChannels,
     projections: packagedProjections,
+    dbConfig,
     dbSeedCB,
     redisConfig,
     routeCB,
