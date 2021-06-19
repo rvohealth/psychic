@@ -8,12 +8,12 @@ import packagedDreams from 'dist/app/pkg/dreams.pkg'
 import packagedChannels from 'dist/app/pkg/channels.pkg'
 import packagedProjections from 'dist/app/pkg/projections.pkg'
 import redisConfig from 'dist/config/redis.json'
-import dbConfig from 'dist/config/database.json'
 import routeCB from 'dist/config/routes'
 
 async function loadRepl() {
   const ascii = fs.readFileSync(`${config.psychicPath}src/boot/ascii.txt`).toString()
   const messagesConfig = await loadYaml('dist/config/messages')
+  const dbConfig = await loadYaml('dist/config/database')
 
   config.boot({
     dreams: packagedDreams,

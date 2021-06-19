@@ -15,7 +15,6 @@ import packagedDreams from 'dist/app/pkg/dreams.pkg.js'
 import packagedChannels from 'dist/app/pkg/channels.pkg.js'
 import packagedProjections from 'dist/app/pkg/projections.pkg.js'
 import redisConfig from 'dist/config/redis.json'
-import dbConfig from 'dist/config/database.json'
 import routeCB from 'dist/config/routes.js'
 import dbSeedCB from 'dist/db/seed.js'
 
@@ -50,6 +49,7 @@ async function _apply() {
     cb
 
   const messagesConfig = await loadYaml('dist/config/messages')
+  const dbConfig = await loadYaml('dist/config/database')
 
   psychic.boot({
     dreams: packagedDreams,
