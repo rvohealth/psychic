@@ -6,7 +6,6 @@ import SchemaWriter from 'src/migrate/schema-writer'
 import packagedDreams from 'spec/support/testapp/app/pkg/dreams.pkg.js'
 import packagedChannels from 'spec/support/testapp/app/pkg/channels.pkg.js'
 import packagedProjections from 'spec/support/testapp/app/pkg/projections.pkg.js'
-import redisConfig from 'spec/support/testapp/config/redis.json'
 import routeCB from 'spec/support/testapp/config/routes.js'
 import dbSeedCB from 'spec/support/testapp/db/seed.js'
 
@@ -17,6 +16,7 @@ beforeAll(async () => {
 beforeEach(async () => {
   const messagesConfig = await loadYaml('spec/support/testapp/config/messages')
   const dbConfig = await loadYaml('spec/support/testapp/config/database')
+  const redisConfig = await loadYaml('spec/support/testapp/config/redis')
 
   config.boot({
     dreams: packagedDreams,
