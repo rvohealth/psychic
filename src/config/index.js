@@ -1,5 +1,6 @@
 import fs from 'fs'
 import pluralize from 'pluralize'
+import nodemailer from 'nodemailer'
 import snakeCase from 'src/helpers/snakeCase'
 import pascalCase from 'src/helpers/pascalCase'
 
@@ -86,12 +87,12 @@ class Config {
     return 'node_modules/psychic/'
   }
 
-  get redisConfig() {
+  get redis() {
     return this._redisConfig
   }
 
   get redisPort() {
-    return this.redisConfig.port || '999'
+    return this.redis.port || '999'
   }
 
   get root() {
@@ -111,6 +112,10 @@ class Config {
   get schema() {
     if (process.env.CORE_TEST) return {} // stub in individual specs
     return JSON.parse(fs.readFileSync(this.schemaPath))
+  }
+
+  get messages() {
+    return this._messagesConfig
   }
 
   get version() {
@@ -152,6 +157,7 @@ class Config {
     redisConfig,
     routeCB,
     projections,
+    messagesConfig,
   }) {
     this._dbSeedCB = dbSeedCB
     this._dreams = dreams
@@ -159,6 +165,8 @@ class Config {
     this._redisConfig = redisConfig
     this._routeCB = routeCB
     this._projections = projections
+    this._messagesConfig = messagesConfig
+    this._configureMessages()
   }
 
   columnType(tableName, columnName) {
@@ -195,6 +203,10 @@ class Config {
       name: tabelized,
       columns: this.schema[tabelized],
     }
+  }
+
+  _configureMessages() {
+    console.log(this.messageConfig)
   }
 }
 

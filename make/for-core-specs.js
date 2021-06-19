@@ -83,7 +83,7 @@ function packageREPL() {
   const originalPath = 'spec/support/testapp/app/dreams'
   const dreamsPath = 'dist/app/dreams'
 
-  fs.readdirSync(dreamsPath).forEach(async file => {
+  fs.readdirSync(originalPath).forEach(async file => {
     const className = pascalCase(file.replace(/\.js$/, ''))
     imports += `import ${className} from '${dreamsPath}/${file}'\n`
     globals += `global.${className} = ${className}\n`

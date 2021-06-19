@@ -10,17 +10,24 @@ import packagedProjections from 'dist/app/pkg/projections.pkg'
 import redisConfig from 'dist/config/redis'
 import routeCB from 'dist/config/routes'
 
-const ascii = fs.readFileSync(`${config.psychicPath}src/boot/ascii.txt`).toString()
-config.boot({
-  dreams: packagedDreams,
-  channels: packagedChannels,
-  projections: packagedProjections,
-  dbSeedCB,
-  redisConfig,
-  routeCB,
-})
+async function loadRepl() {
+  const ascii = fs.readFileSync(`${config.psychicPath}src/boot/ascii.txt`).toString()
+  const messagesConfig = await loadYaml('dist/config/messages')
 
-console.log(ascii)
-console.log(`-------------------`)
-console.log('psychic version 0.0')
-console.log(`-------------------`)
+  config.boot({
+    dreams: packagedDreams,
+    channels: packagedChannels,
+    projections: packagedProjections,
+    dbSeedCB,
+    redisConfig,
+    routeCB,
+    messagesConfig,
+  })
+
+  console.log(ascii)
+  console.log(`-------------------`)
+  console.log('psychic version 0.0')
+  console.log(`-------------------`)
+}
+
+loadRepl()

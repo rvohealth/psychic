@@ -7,10 +7,12 @@
   },
   "extends": "eslint:recommended",
   "globals": {
+    "ENV": "readonly",
     "Atomics": "readonly",
     "SharedArrayBuffer": "readonly",
     "bg": "readonly",
     "context": "readonly",
+    "loadYaml": "readonly",
     "lookup": "readonly",
     "md5": "readonly",
     "now": "readonly",

@@ -42,20 +42,23 @@ function exit() {
   process.exit(0)
 }
 
-psychic.boot({
-  dreams: packagedDreams,
-  channels: packagedChannels,
-  projections: packagedProjections,
-  dbSeedCB,
-  redisConfig,
-  routeCB,
-})
-
 const klass = lookup(className)
 
 async function _apply() {
   let dream,
     cb
+
+  const messagesConfig = await loadYaml('dist/config/messages')
+
+  psychic.boot({
+    dreams: packagedDreams,
+    channels: packagedChannels,
+    projections: packagedProjections,
+    dbSeedCB,
+    redisConfig,
+    routeCB,
+    messagesConfig,
+  })
 
   switch(approach) {
   case 'static':

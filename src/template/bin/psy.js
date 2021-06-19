@@ -7,6 +7,8 @@ import routeCB from 'config/routes'
 import dbSeedCB from 'db/seed'
 
 async function runCLI() {
+  const messagesConfig = await loadYaml('dist/config/messages')
+
   psychic.boot({
     dreams: packagedDreams,
     channels: packagedChannels,
@@ -14,6 +16,7 @@ async function runCLI() {
     dbSeedCB,
     redisConfig,
     routeCB,
+    messagesConfig,
   })
 
   const cli = new CLI()

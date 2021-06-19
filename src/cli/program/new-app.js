@@ -121,6 +121,9 @@ export default class NewAppProgram extends CLIProgram {
       l.logStatus('hot swap app folder...')
       this.replaceFile('src/template/app', path + '/app')
 
+      l.logStatus('hot swap config folder...')
+      this.replaceFile('src/template/config', path + '/config')
+
       l.logStatus('copy App.js')
       await fse.copy('src/template/js/App.js', path + '/src/App.js')
 
