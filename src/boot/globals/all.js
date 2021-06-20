@@ -7,6 +7,16 @@ import spawn from 'src/singletons/spawn'
 import config from 'src/config'
 import loadYaml from 'src/helpers/load-yaml'
 
+function loadEnv() {
+  if (process.env.CORE_TEST)
+    return {
+      ...dotenv.parse(fs.readFileSync('src/template/.env.test')),
+      ...dotenv.parse(fs.readFileSync('.env')),
+    }
+
+  return dotenv.parse(fs.readFileSync('.env.development'))
+}
+
 global.md5 = function(str) {
   return crypto
     .createHash('md5')
@@ -26,4 +36,4 @@ global.spawn = spawn
 global.bg = (...args) => spawn.now(...args)
 global.loadYaml = loadYaml
 global.lookup = (...args) => config.lookup(...args)
-global.ENV = process.env.CORE_TEST ? {} : dotenv.parse(fs.readFileSync('.env.development'))
+global.ENV = loadEnv()

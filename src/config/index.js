@@ -1,8 +1,8 @@
 import fs from 'fs'
 import pluralize from 'pluralize'
-import nodemailer from 'nodemailer'
 import snakeCase from 'src/helpers/snakeCase'
 import pascalCase from 'src/helpers/pascalCase'
+import transports from 'src/singletons/transports'
 
 class Config {
   get appRoot() {
@@ -31,7 +31,23 @@ class Config {
   }
 
   get dbName() {
-    return this.db[this.env].name
+    return this.db[this.env]?.name
+  }
+
+  get dbPassword() {
+    return this.db[this.env]?.password
+  }
+
+  get dbPort() {
+    return this.db[this.env]?.port
+  }
+
+  get dbHost() {
+    return this.db[this.env]?.host
+  }
+
+  get dbUsername() {
+    return this.db[this.env]?.username
   }
 
   get dbIdType() {
@@ -47,8 +63,6 @@ class Config {
   }
 
   get dreams() {
-    // if (process.env.CORE_TEST) throw 'Stub this in tests'
-    // loaded at boot to prevent circular deps
     return this._dreams
   }
 
@@ -59,6 +73,11 @@ class Config {
 
   get frontEndUrl() {
     return 'http://localhost:3000'
+  }
+
+  get localStoragePath() {
+    if (ENV.CORE_TEST) return 'tmp/storage/spec'
+    return 'storage'
   }
 
   get pkgPath() {
@@ -85,7 +104,7 @@ class Config {
 
   get root() {
     if (process.env.CORE_TEST) return 'testapp/'
-    return ``
+    return ''
   }
 
   get schemaPath() {
@@ -147,6 +166,7 @@ class Config {
     routeCB,
     projections,
     messagesConfig,
+    telekinesisConfig,
   }) {
     this._db = dbConfig,
     this._dbSeedCB = dbSeedCB
@@ -156,7 +176,9 @@ class Config {
     this._routeCB = routeCB
     this._projections = projections
     this._messagesConfig = messagesConfig
-    this._configureMessages()
+    this._telekinesisConfig = telekinesisConfig
+
+    transports.setConfig(messagesConfig)
   }
 
   columnType(tableName, columnName) {
@@ -189,13 +211,11 @@ class Config {
   tableSchema(name) {
     const tabelized = snakeCase(pluralize(name))
     if (!this.schema[tabelized]) throw `unrecognized table ${tabelized}`
+
     return {
       name: tabelized,
       columns: this.schema[tabelized],
     }
-  }
-
-  _configureMessages() {
   }
 }
 

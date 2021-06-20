@@ -14,6 +14,7 @@ async function loadRepl() {
   const messagesConfig = await loadYaml('dist/config/messages')
   const dbConfig = await loadYaml('dist/config/database')
   const redisConfig = await loadYaml('dist/config/redis')
+  const telekinesisConfig = await loadYaml('dist/config/telekinesis')
 
   config.boot({
     dreams: packagedDreams,
@@ -24,6 +25,7 @@ async function loadRepl() {
     redisConfig,
     routeCB,
     messagesConfig,
+    telekinesisConfig,
   })
 
   console.log(ascii)

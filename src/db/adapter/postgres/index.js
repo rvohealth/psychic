@@ -1,3 +1,4 @@
+import bluebird from 'bluebird'
 import { Client } from 'pg'
 import formatSQL from 'pg-format'
 import MissingTableName from 'src/error/db/adapter/missing-table-name'
@@ -6,11 +7,12 @@ import config from 'src/config'
 class PostgresAdapter {
   async client() {
     const client = new Client({
+      Promise: bluebird,
       database: config.dbName,
-      // user: 'dbuser',
-      // host: 'database.server.com',
-      // password: 'secretpassword',
-      // port: 3211,
+      user: config.dbUsername,
+      password: config.dbPassword,
+      host: config.dbHost || 'localhost',
+      port: parseInt(config.dbPort) || 5432,
     })
     await client.connect()
     return client
@@ -32,25 +34,46 @@ class PostgresAdapter {
 
   async rootClient() {
     // if (this._rootClient) return this._rootClient
-    const client = new Client()
+    const client = new Client({
+      Promise: bluebird,
+      user: config.dbUsername,
+      password: config.dbPassword,
+      database: 'postgres',
+      host: config.dbHost || 'localhost',
+      port: parseInt(config.dbPort) || 5432,
+    })
     await client.connect()
     return client
   }
 
   async runRootSQL(sqlString) {
     return await this.withRootConnection(async client => {
+      let response
+      const stack = new Error().stack
+
       try {
-        const response = await client.query(sqlString)
-        return response
+        response = await client.query(sqlString)
       } catch(error) {
-        // do nothing
+        // uncomment when debugging
+        // console.error(stack)
+        throw error
       }
+
+      return response
     })
   }
 
   async runSQL(sqlString) {
     const r = await this.withConnection(async client => {
-      const d = await client.query(sqlString)
+      let d
+      const stack = new Error().stack
+      try {
+        d = await client.query(sqlString)
+      } catch(error) {
+        console.error(stack)
+        throw error
+      }
+
       return d
     })
     return r

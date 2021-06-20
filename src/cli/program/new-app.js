@@ -122,7 +122,13 @@ export default class NewAppProgram extends CLIProgram {
       this.replaceFile('src/template/app', path + '/app')
 
       l.logStatus('hot swap config folder...')
-      this.replaceFile('src/template/config', path + '/config')
+      this.replaceFile('src/template/config/database.yml', path + '/config/database.yml')
+      this.replaceFile('src/template/config/messages.yml', path + '/config/messages.yml')
+      this.replaceFile('src/template/config/redis.yml', path + '/config/redis.yml')
+
+      // only replace schema if not there, so don't have to rerun migrations
+      if (!(await fileExists('src/template/config/schema.json')))
+        this.replaceFile('src/template/config/schema.json', path + '/config/schema.json')
 
       l.logStatus('copy App.js')
       await fse.copy('src/template/js/App.js', path + '/src/App.js')

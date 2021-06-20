@@ -50,6 +50,7 @@ async function _apply() {
   const messagesConfig = await loadYaml('dist/config/messages')
   const dbConfig = await loadYaml('dist/config/database')
   const redisConfig = await loadYaml('dist/config/redis')
+  const telekinesisConfig = await loadYaml('dist/config/telekinesis')
 
   psychic.boot({
     dreams: packagedDreams,
@@ -60,6 +61,7 @@ async function _apply() {
     redisConfig,
     routeCB,
     messagesConfig,
+    telekinesisConfig,
   })
 
   switch(approach) {

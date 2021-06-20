@@ -1,11 +1,27 @@
 development:
   name: psychic_core_test_app_development
+  username: 'ENV::PSYCHIC_CORE_DB_USERNAME'
+  password: 'ENV::PSYCHIC_CORE_DB_PASSWORD'
+  host: 'ENV::PSYCHIC_CORE_DB_HOST'
+  port: 'ENV::PSYCHIC_CORE_DB_PORT'
 
 staging:
   name: psychic_core_test_app_staging
+  username: 'ENV::PSYCHIC_CORE_DB_USERNAME'
+  password: 'ENV::PSYCHIC_CORE_DB_PASSWORD'
+  host: 'ENV::PSYCHIC_CORE_DB_HOST'
+  port: 'ENV::PSYCHIC_CORE_DB_PORT'
 
 test:
   name: psychic_core_test
+  username: 'ENV::PSYCHIC_CORE_DB_USERNAME'
+  password: 'ENV::PSYCHIC_CORE_DB_PASSWORD'
+  host: 'ENV::PSYCHIC_CORE_DB_HOST'
+  port: 'ENV::PSYCHIC_CORE_DB_PORT'
 
 production:
   name: psychic_core_test_app_production
+  username: 'ENV::PSYCHIC_CORE_DB_USERNAME'
+  password: 'ENV::PSYCHIC_CORE_DB_PASSWORD'
+  host: 'ENV::PSYCHIC_CORE_DB_HOST'
+  port: 'ENV::PSYCHIC_CORE_DB_PORT'

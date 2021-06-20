@@ -1,0 +1,18 @@
+development:
+  default:
+    adapter: local
+
+test:
+  default:
+    adapter: local
+
+staging:
+  default:
+    adapter: s3
+    auth:
+
+production:
+  default:
+    adapter: s3
+    auth:
+

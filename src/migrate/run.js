@@ -32,7 +32,6 @@ export default class RunMigration {
   }
 
   async _beforeAll() {
-    // await db.create()
     if (!config.schema.migrations) {
       await db.dropTable('migrations')
       await db.createTable('migrations', t => {
@@ -45,7 +44,32 @@ export default class RunMigration {
       statement.timestamp('created_at')
       new Migration().schema.createTable('migrations', statement.columns)
     }
-    // await db.createMigrationsIfNotExists()
+
+    if (!config.schema.psychic_storage_records) {
+      await db.dropTable('psychic_storage_records')
+      await db.createTable('psychic_storage_records', t => {
+        t.uuid('uuid')
+        t.string('name')
+        t.string('path')
+        t.string('extension')
+        t.string('telekinesis_id')
+        t.string('adapter')
+        t.int('size')
+        t.timestamp('created_at')
+      })
+      console.log('HERE', await db.columnInfo('psychic_storage_records', 'telekinesis_id'))
+
+      const statement = new CreateTableStatement('psychic_storage_records')
+      statement.uuid('uuid')
+      statement.string('name')
+      statement.string('path')
+      statement.string('extension')
+      statement.string('telekinesis_id')
+      statement.string('adapter')
+      statement.int('size')
+      statement.timestamp('created_at')
+      new Migration().schema.createTable('psychic_storage_records', statement.columns)
+    }
   }
 
   async _beforeMigration() {

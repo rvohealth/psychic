@@ -6,7 +6,7 @@
   "scripts": {
     "test": "npm run buildspec && NODE_PATH=. CORE_TEST=true node --experimental-vm-modules ./node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles",
     "build": "NODE_PATH=. node ./make/for-core-development.js && NODE_PATH=. ./node_modules/.bin/babel src -d dist --copy-files",
-    "buildspec": "NODE_PATH=. node ./make/for-core-specs.js && NODE_PATH=. ./node_modules/.bin/babel src -d dist --copy-files && NODE_PATH=. ./node_modules/.bin/babel spec/support/testapp -d dist/app --copy-files",
+    "buildspec": "NODE_PATH=. node ./make/for-core-specs.js && NODE_PATH=. ./node_modules/.bin/babel src -d dist --copy-files && NODE_PATH=. ./node_modules/.bin/babel spec/support/testapp -d dist/testapp --copy-files",
     "psy": "npm run build --scripts-prepend-node-path --silent && clear && NODE_PATH=./ node ./dist/cli/run.js"
   },
   "engines": {
@@ -53,7 +53,7 @@
     "babel-plugin-wildcard": "^7.0.0",
     "bcrypt": "^5.0.1",
     "bcryptjs": "2.4.3",
-    "bluebird": "^3.5.0",
+    "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
     "bree": "^6.2.0",
     "chalk": "^4.1.1",
@@ -91,6 +91,7 @@
     "redis": "^3.1.2",
     "socket.io": "^4.1.2",
     "socket.io-client": "^4.1.2",
+    "twilio": "^3.64.0",
     "utf-8-validate": "^5.0.5",
     "uuid": "^8.3.2",
     "ws": "^7.4.6"

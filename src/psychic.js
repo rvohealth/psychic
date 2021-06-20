@@ -1,5 +1,6 @@
 import CrystalBall from 'src/crystal-ball'
 import config from 'src/config'
+import transports from 'src/singletons/transports'
 
 export default class Psychic {
   get crystalBall() {
@@ -20,5 +21,9 @@ export default class Psychic {
 
   seek(cb) {
     cb(this.crystalBall)
+  }
+
+  async message(transportKey, opts) {
+    return transports.send(transportKey, opts)
   }
 }

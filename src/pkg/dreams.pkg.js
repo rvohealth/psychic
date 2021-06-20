@@ -1,5 +1,7 @@
-import * as dream0 from 'dist/app/dreams/test-user.js'
+import * as dream0 from 'src/template/app/dreams/black-cat.js'
+import * as dream1 from 'src/template/app/dreams/user.js'
 const dreams = {
-  "test_user": dream0,
+  "black_cat": dream0,
+  "user": dream1,
 }
 export default dreams
