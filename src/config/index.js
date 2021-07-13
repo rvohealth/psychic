@@ -141,6 +141,10 @@ class Config {
     return this._routeCB
   }
 
+  get telekinesisConfig() {
+    return this._telekinesisConfig[this.env]
+  }
+
   get wssPort() {
     return process.env.PSYCHIC_WSS_PORT || 778
   }
@@ -216,6 +220,10 @@ class Config {
       name: tabelized,
       columns: this.schema[tabelized],
     }
+  }
+
+  telekinesisConfigFor(key) {
+    return this.telekinesisConfig[key]
   }
 }
 

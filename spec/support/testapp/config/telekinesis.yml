@@ -2,17 +2,58 @@ development:
   default:
     adapter: local
 
+  remote:
+    adapter: s3
+    bucket: ENV::PSYCHIC_CORE_AWS_BUCKET
+    region: ENV::PSYCHIC_CORE_AWS_REGION
+    auth:
+      access_key_id: ENV::PSYCHIC_CORE_AWS_ACCESS_KEY_ID
+      secret_access_key: ENV::PSYCHIC_CORE_AWS_SECRET_ACCESS_KEY
+
 test:
   default:
     adapter: local
 
+  remote:
+    adapter: s3
+    bucket: ENV::PSYCHIC_CORE_AWS_BUCKET
+    region: ENV::PSYCHIC_CORE_AWS_REGION
+    auth:
+      access_key_id: ENV::PSYCHIC_CORE_AWS_ACCESS_KEY_ID
+      secret_access_key: ENV::PSYCHIC_CORE_AWS_SECRET_ACCESS_KEY
+
+
 staging:
   default:
     adapter: s3
+    bucket: ENV::PSYCHIC_CORE_AWS_BUCKET
+    region: ENV::PSYCHIC_CORE_AWS_REGION
     auth:
+      access_key_id: ENV::PSYCHIC_CORE_AWS_ACCESS_KEY_ID
+      secret_access_key: ENV::PSYCHIC_CORE_AWS_SECRET_ACCESS_KEY
+
+  remote:
+    adapter: s3
+    bucket: ENV::PSYCHIC_CORE_AWS_BUCKET
+    region: ENV::PSYCHIC_CORE_AWS_REGION
+    auth:
+      access_key_id: ENV::PSYCHIC_CORE_AWS_ACCESS_KEY_ID
+      secret_access_key: ENV::PSYCHIC_CORE_AWS_SECRET_ACCESS_KEY
 
 production:
   default:
     adapter: s3
+    bucket: ENV::PSYCHIC_CORE_AWS_BUCKET
+    region: ENV::PSYCHIC_CORE_AWS_REGION
     auth:
+      access_key_id: ENV::PSYCHIC_CORE_AWS_ACCESS_KEY_ID
+      secret_access_key: ENV::PSYCHIC_CORE_AWS_SECRET_ACCESS_KEY
+
+  remote:
+    adapter: s3
+    bucket: ENV::PSYCHIC_CORE_AWS_BUCKET
+    region: ENV::PSYCHIC_CORE_AWS_REGION
+    auth:
+      access_key_id: ENV::PSYCHIC_CORE_AWS_ACCESS_KEY_ID
+      secret_access_key: ENV::PSYCHIC_CORE_AWS_SECRET_ACCESS_KEY
 

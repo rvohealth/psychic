@@ -281,7 +281,8 @@ INSERT INTO ${tableName}
           .map(key => {
             const columnType = config.columnType(tableName, key)
             const v = row[key]
-            if (v.constructor.name === 'Moment') return v.toISOString()
+
+            if (v?.constructor?.name === 'Moment') return v.toISOString()
             if (Array.isArray(v)) return `{${v.join(', ')}}`
             if (columnType === 'hstore') return Object
               .keys(v)

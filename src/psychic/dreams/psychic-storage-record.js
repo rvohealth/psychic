@@ -1,8 +1,7 @@
 import path from 'path'
-import { stat, copyFile } from 'fs/promises'
+import { stat } from 'fs/promises'
 import fileExists from 'src/helpers/file-exists'
 import Dream from 'src/dream'
-import config from 'src/config'
 
 export default class PsychicStorageRecord extends Dream {
   get fileName() {
@@ -24,8 +23,6 @@ export default class PsychicStorageRecord extends Dream {
         this.size = stats.size
 
         this.uuid = id
-
-        await copyFile(this.path, config.localStoragePath + '/' + id + info.ext)
       })
   }
 }

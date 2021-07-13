@@ -47,6 +47,8 @@
     "supertest": "^4.0.2"
   },
   "dependencies": {
+    "@aws-sdk/client-s3": "^3.21.0",
+    "@aws-sdk/s3-request-presigner": "^3.21.0",
     "@babel/preset-react": "^7.13.13",
     "axios": "^0.21.1",
     "babel-plugin-require-context-hook": "^1.0.0",
