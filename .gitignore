@@ -2,3 +2,5 @@ node_modules/
 dist/
 testappdist/
 tmp/
+.undodir
+.env
