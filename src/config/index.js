@@ -3,6 +3,7 @@ import pluralize from 'pluralize'
 import snakeCase from 'src/helpers/snakeCase'
 import pascalCase from 'src/helpers/pascalCase'
 import transports from 'src/singletons/transports'
+import telekineticBridges from 'src/singletons/telekinetic-bridges'
 
 class Config {
   get appRoot() {
@@ -142,6 +143,8 @@ class Config {
   }
 
   get telekinesisConfig() {
+    if (!this._telekinesisConfig) console.trace()
+    if (!this._telekinesisConfig) throw `config not booted yet`
     return this._telekinesisConfig[this.env]
   }
 
@@ -183,6 +186,7 @@ class Config {
     this._telekinesisConfig = telekinesisConfig
 
     transports.setConfig(messagesConfig)
+    telekineticBridges.setConfig(telekinesisConfig[this.env])
   }
 
   columnType(tableName, columnName) {
