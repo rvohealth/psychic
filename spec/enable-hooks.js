@@ -43,7 +43,7 @@ beforeEach(async () => {
   jest.clearAllMocks()
   jest.restoreAllMocks()
   await db.dropAllTables()
-  await rmdir('tmp/storage/spec/*', { recursive: true })
+  // await rmdir('tmp/storage/spec/*', { recursive: true })
 })
 
 afterEach(async () => {
