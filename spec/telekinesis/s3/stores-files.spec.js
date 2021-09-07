@@ -12,6 +12,7 @@ describe ('Telekinesis#store (S3)', () => {
     const telekinesis = new Telekinesis({
       key: 'remote',
       adapter: 's3',
+      config: config.telekinesisConfig.remote,
     })
 
     await db.createTable('psychic_storage_records', t => {

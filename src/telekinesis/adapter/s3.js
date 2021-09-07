@@ -6,34 +6,25 @@ import {
 } from '@aws-sdk/client-s3'
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 import TelekineticAdapter from 'src/telekinesis/adapter'
-import config from 'src/config'
 
 export default class S3TelekineticAdapter extends TelekineticAdapter {
-  initialize(telekinesisKey) {
-    this._telekinesisKey = telekinesisKey
-    const telekinesisConfig = this.config
-
+  initialize() {
     this._client = new S3Client({
-      region: telekinesisConfig.region,
+      region: this.config.region,
       credentials: {
-        accessKeyId: telekinesisConfig.auth.access_key_id,
-        secretAccessKey: telekinesisConfig.auth.secret_access_key,
+        accessKeyId: this.config.auth.access_key_id,
+        secretAccessKey: this.config.auth.secret_access_key,
       },
     })
-  }
-
-  get config() {
-    return config.telekinesisConfigFor(this._telekinesisKey)
   }
 
   // not sure if telekinesisKey should be part of file path yet...
   async putObject(record, path, telekinesisKey='default', opts={}) {
     const buffer = await readFile(path)
-    const telekinesisConfig = this.config
 
     const command = new PutObjectCommand({
       Body: buffer,
-      Bucket: telekinesisConfig.bucket,
+      Bucket: this.config.bucket,
       Key: record.fileName,
       ...opts,
     })
@@ -50,7 +41,6 @@ export default class S3TelekineticAdapter extends TelekineticAdapter {
       Bucket: this.config.bucket,
       Key: path,
     })
-    console.log(command)
 
     return await this._client.send(command)
   }

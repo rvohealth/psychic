@@ -2,17 +2,17 @@ import LocalTelekineticAdapter from 'src/telekinesis/adapter/local'
 import S3TelekineticAdapter from 'src/telekinesis/adapter/s3'
 
 export default class Telekinesis {
-  constructor({ key, adapter }) {
+  constructor({ key, config, adapter }) {
     this._key = key
     this._adapterType = adapter
 
     switch(adapter) {
     case 'local':
-      this._adapter = new LocalTelekineticAdapter(key)
+      this._adapter = new LocalTelekineticAdapter(key, config)
       break
 
     case 's3':
-      this._adapter = new S3TelekineticAdapter(key)
+      this._adapter = new S3TelekineticAdapter(key, config)
       break
 
     default:

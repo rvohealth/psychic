@@ -2,11 +2,21 @@ import path from 'path'
 import PsychicStorageRecord from 'src/psychic/dreams/psychic-storage-record'
 
 export default class TelekineticAdapter {
+  get config() {
+    return this._config
+  }
+
+  get telekinesisKey() {
+    return this.telekinesisKey
+  }
+
   // define in child class
   initialize() {}
 
-  constructor(key) {
-    this.initialize(key)
+  constructor(key, config) {
+    this._telekinesisKey = key
+    this._config = config
+    this.initialize()
   }
 
   fileInfo(filePath) {

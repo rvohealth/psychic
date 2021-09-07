@@ -9,15 +9,15 @@ export default class TelekineticBridges {
   // config is booted? Likely it would be less confusing that way, since this way we can have
   // the singleton instance floating around unconfigured within the app.
   setConfig(telekinesisConfig) {
-    console.log('SHWAM', telekinesisConfig)
     this._telekinesisConfig = telekinesisConfig
 
     Object
       .keys(telekinesisConfig)
       .forEach(telekinesisKey => {
         const _config = telekinesisConfig[telekinesisKey]
-       this._bridges[telekinesisKey] = new Telekinesis({
+        this._bridges[telekinesisKey] = new Telekinesis({
           key: telekinesisKey,
+          config: _config,
           adapter: _config.adapter,
         })
       })
