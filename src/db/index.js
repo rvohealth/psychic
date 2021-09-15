@@ -15,12 +15,12 @@ class DB {
     return new DBTableOperations()
   }
 
-  async create() {
-    return await this.adapter.createDB()
-  }
-
   async addColumn(tableName, columnName, dataType, constraints) {
     return await this.adapter.addColumn(tableName, columnName, dataType, constraints)
+  }
+
+  async create() {
+    return await this.adapter.createDB()
   }
 
   async changeDefault(tableName, columnName, newDefault) {

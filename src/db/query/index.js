@@ -91,14 +91,6 @@ export default class Query {
     return await this.do()
   }
 
-  async first() {
-    const results = await this.limit(1).do()
-    if (results[0])
-      return results[0]
-
-    return null
-  }
-
   count() {
     this._count = true
     return this
@@ -109,27 +101,40 @@ export default class Query {
     return this
   }
 
-  select(...fields) {
-    if (!this._select)
-      this._select = fields
-    else
-      this._select = [
-        ...this._select,
-        ...fields,
-      ]
-    return this
+  async first() {
+    const results = await this.limit(1).do()
+    if (results[0])
+      return results[0]
+
+    return null
   }
 
-  update(tableName, fields) {
-    if (typeof fields !== 'object') throw `Invalid type ${typeof fields} for fields`
-    this._tableName = tableName
-    this._update = fields
+  fetch(_fetch) {
+    if (!_fetch) throw new InvalidFetchClause(_fetch)
+    this._fetch = _fetch
     return this
   }
 
   from(from) {
     if (!from) throw new InvalidFromClause(from)
     this._from = from
+    return this
+  }
+
+  fullOuterJoin(tableName, on) {
+    if (typeof on === 'object') return this.join(tableName, { ...on, type: 'full outer' })
+    return this.join(tableName, on, { type: 'full outer' })
+  }
+
+  group(group) {
+    if (!group) throw new InvalidGroupClause(group)
+    this._group = group
+    return this
+  }
+
+  having(having) {
+    if (!having) throw new InvalidHavingClause(having)
+    this._having = having
     return this
   }
 
@@ -150,40 +155,9 @@ export default class Query {
     return this
   }
 
-  rightOuterJoin(tableName, on) {
-    if (typeof on === 'object') return this.join(tableName, { ...on, type: 'right outer' })
-    return this.join(tableName, on, { type: 'right outer' })
-  }
-
   leftOuterJoin(tableName, on) {
     if (typeof on === 'object') return this.join(tableName, { ...on, type: 'left outer' })
     return this.join(tableName, on, { type: 'left outer' })
-  }
-
-  fullOuterJoin(tableName, on) {
-    if (typeof on === 'object') return this.join(tableName, { ...on, type: 'full outer' })
-    return this.join(tableName, on, { type: 'full outer' })
-  }
-
-  where(where) {
-    if (!where) throw new InvalidWhereClause(where)
-    this._where = {
-      ...(this._where || {}),
-      ...where,
-    }
-    return this
-  }
-
-  group(group) {
-    if (!group) throw new InvalidGroupClause(group)
-    this._group = group
-    return this
-  }
-
-  having(having) {
-    if (!having) throw new InvalidHavingClause(having)
-    this._having = having
-    return this
   }
 
   order(order) {
@@ -204,14 +178,40 @@ export default class Query {
     return this
   }
 
-  fetch(_fetch) {
-    if (!_fetch) throw new InvalidFetchClause(_fetch)
-    this._fetch = _fetch
+  rightOuterJoin(tableName, on) {
+    if (typeof on === 'object') return this.join(tableName, { ...on, type: 'right outer' })
+    return this.join(tableName, on, { type: 'right outer' })
+  }
+
+  select(...fields) {
+    if (!this._select)
+      this._select = fields
+    else
+      this._select = [
+        ...this._select,
+        ...fields,
+      ]
+    return this
+  }
+
+  update(tableName, fields) {
+    if (typeof fields !== 'object') throw `Invalid type ${typeof fields} for fields`
+    this._tableName = tableName
+    this._update = fields
     return this
   }
 
   valueFor(field) {
     if (this[`_${field}`] === undefined) throw `invalid field ${field}. Pass a valid Query param, like select, where, etc...`
     return this[`_${field}`]
+  }
+
+  where(where) {
+    if (!where) throw new InvalidWhereClause(where)
+    this._where = {
+      ...(this._where || {}),
+      ...where,
+    }
+    return this
   }
 }

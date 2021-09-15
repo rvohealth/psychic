@@ -255,7 +255,8 @@ export default class Namespace {
         }
       }
 
-      // add error handling here
+       // main block where channels are connected to routes
+       // add error handling here
        try {
          await channelInstance[routeObj.method]()
        } catch(error) {
@@ -267,7 +268,7 @@ export default class Namespace {
          if (process.env.CORE_TEST)
            throw error
 
-         return res.status(500).send("Whoops, Something went wrong...")
+         return res.status(500).send('Whoops, Something went wrong...')
        }
     })
   }

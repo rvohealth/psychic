@@ -45,15 +45,6 @@ class Dream {
     this._table = tableName
   }
 
-  static async count() {
-    return await db.count(this.table).do()
-  }
-
-  static async create(attributes) {
-    const newRecord = new this(attributes)
-    return await newRecord.save()
-  }
-
   static async all() {
     const results = await new Query(this)
       .select('*')
@@ -61,6 +52,15 @@ class Dream {
       .all()
 
     return results
+  }
+
+  static async count() {
+    return await db.count(this.table).do()
+  }
+
+  static async create(attributes) {
+    const newRecord = new this(attributes)
+    return await newRecord.save()
   }
 
   static async find(id) {
