@@ -1,16 +1,7 @@
-import util from 'util'
-import { exec } from 'child_process'
-import {
-  copyFile,
-  readFile,
-  writeFile,
-} from 'fs/promises'
-import fse from 'fs-extra'
-import fileExists from 'src/helpers/file-exists'
+import File from 'src/helpers/file'
 import CLIProgram from 'src/cli/program'
 import l from 'src/singletons/l'
-
-const execp = util.promisify(exec)
+import exec from 'src/helpers/exec'
 
 export default class NewAppProgram extends CLIProgram {
   async run(args) {
@@ -23,19 +14,19 @@ export default class NewAppProgram extends CLIProgram {
   async new(args) {
     const path = `../` + (args.args[0] || 'black-cat')
     const quick = args.args[1] === 'quick'
-    const fromScratch = !(await fileExists(path))
+    const fromScratch = !(await File.exists(path))
 
     if (fromScratch) {
       l.logStatus('running npx create-react-app (this may take a while)...')
-      await execp(`npx create-react-app ${path} --template redux --silent`)
+      await exec(`npx create-react-app ${path} --template redux --silent`)
     }
 
     l.logStatus('build psychic foundation...')
-    this.buildPsychicAppFoundation(path)
+    await this.buildPsychicAppFoundation(path)
 
     l.logStatus('add custom npm scripts to package.json...')
-    const psychicPkgjson = JSON.parse(await readFile('./package.json'))
-    const pkgjson = JSON.parse(await readFile(path + '/package.json'))
+    const psychicPkgjson = JSON.parse(await File.read('./package.json'))
+    const pkgjson = JSON.parse(await File.read(path + '/package.json'))
 
     pkgjson.dependencies = {
       ...pkgjson.dependencies,
@@ -67,79 +58,79 @@ export default class NewAppProgram extends CLIProgram {
       "./node_modules/psychic/node_modules/.bin/babel app -d dist/app --copy-files &&" +
       "./node_modules/psychic/node_modules/.bin/babel config -d dist/config --copy-files"
 
-    await writeFile(path + '/package.json', JSON.stringify(pkgjson, null, 2))
+    await File.write(path + '/package.json', JSON.stringify(pkgjson, null, 2))
 
     if (!quick || fromScratch) {
       l.logStatus('adding eslint, babel-eslint...')
-      await execp(`cd ${path} && yarn add babel-eslint eslint-config-react-app -D`)
+      await exec(`cd ${path} && yarn add babel-eslint eslint-config-react-app -D`)
 
       l.logStatus('adding non-dev dependencies...')
-      await execp(`cd ${path} && yarn add axios socket.io-client --silent`)
+      await exec(`cd ${path} && yarn add axios socket.io-client --silent`)
 
       l.logStatus('installing yarn dependencies...', { level: 'warn' })
-      await execp(`cd ${path} && yarn install --silent`)
+      await exec(`cd ${path} && yarn install --silent`)
     }
 
-    if ((await fileExists(path + '/node_modules/psychic'))) {
+    if ((await File.exists(path + '/node_modules/psychic'))) {
       l.logStatus('selectively copy src and make folder...')
-      await fse.copy('./src', path + '/node_modules/psychic/src')
-      await fse.copy('./make', path + '/node_modules/psychic/make')
+      await File.copy('./src', path + '/node_modules/psychic/src')
+      await File.copy('./make', path + '/node_modules/psychic/make')
 
       l.logStatus('build current app...')
-      await execp('yarn run build')
+      await exec('yarn run build')
 
       l.logStatus('copy rebuilt dist folder...')
-      await fse.copy('./dist', path + '/node_modules/psychic/dist')
+      await File.copy('./dist', path + '/node_modules/psychic/dist')
 
     } else {
       l.logStatus('copy psychic app to node_modules (temporarily, until we have npm up and running)...')
-      await fse.copy('./', path + '/node_modules/psychic')
+      await File.copy('./', path + '/node_modules/psychic')
     }
 
     if (!quick || fromScratch) {
       l.logStatus('installing deps...')
-      await execp(`cd ${path}/node_modules/psychic && yarn install --silent`)
+      await exec(`cd ${path}/node_modules/psychic && yarn install --silent`)
     }
 
     l.logStatus('copying .babelrc...')
-    await copyFile('./.babelrc', path + '/.babelrc')
+    await File.copy('./.babelrc', path + '/.babelrc')
 
     l.logStatus('Done building app!')
     l.end()
   }
 
   async buildPsychicAppFoundation(path) {
-    if (!(await fileExists(path + '/app'))) {
+    if (!(await File.exists(path + '/app'))) {
       l.logStatus('carve out new app structure...')
-      await fse.copy('src/template', path)
+      await File.copy('src/template', path)
 
       l.logStatus('copy and remove js folder')
-      await fse.copy(path + '/js', path + '/src/')
-      await fse.remove(`${path}/js`)
+      await File.copy(path + '/js', path + '/src/')
+      await File.rm(`${path}/js`)
 
     } else {
       l.logStatus('hot swap app folder...')
-      this.replaceFile('src/template/app', path + '/app')
+      File.replace('src/template/app', path + '/app')
 
       l.logStatus('hot swap config folder...')
-      this.replaceFile('src/template/config/database.yml', path + '/config/database.yml')
-      this.replaceFile('src/template/config/messages.yml', path + '/config/messages.yml')
-      this.replaceFile('src/template/config/redis.yml', path + '/config/redis.yml')
+      File.replace('src/template/config/database.yml', path + '/config/database.yml')
+      File.replace('src/template/config/messages.yml', path + '/config/messages.yml')
+      File.replace('src/template/config/redis.yml', path + '/config/redis.yml')
 
       // only replace schema if not there, so don't have to rerun migrations
-      if (!(await fileExists('src/template/config/schema.json')))
-        this.replaceFile('src/template/config/schema.json', path + '/config/schema.json')
+      if (!(await File.exists('src/template/config/schema.json')))
+        File.replace('src/template/config/schema.json', path + '/config/schema.json')
 
       l.logStatus('copy App.js')
-      await fse.copy('src/template/js/App.js', path + '/src/App.js')
+      await File.copy('src/template/js/App.js', path + '/src/App.js')
 
       l.logStatus('copy template/js/psy to src/psy...')
-      await fse.copy('src/template/js/psy', path + '/src/psy')
+      await File.copy('src/template/js/psy', path + '/src/psy')
     }
   }
 
   async replaceFile(file, newPath) {
-    if ((await fileExists(newPath))) await execp('rm -rf ' + newPath)
-    await fse.copy(file, newPath)
+    if ((await File.exists(newPath))) await exec('rm -rf ' + newPath)
+    await File.copy(file, newPath)
   }
 }
