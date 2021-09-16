@@ -21,6 +21,7 @@ export default class DBCLIProgram extends CLIProgram {
     }
 
     await db.createMigrationsIfNotExists()
+
     if (!process.env.CORE_TEST)
       process.exit()
   }
