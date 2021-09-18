@@ -4,6 +4,10 @@ Array.prototype.uniq = function() {
   return [...new Set(this)]
 }
 
+String.prototype.capitalize = function() {
+  return this.charAt(0).toUpperCase() + this.slice(1)
+}
+
 Object.defineProperty(Array.prototype, 'first', {
   get: function() {
     return this[0]

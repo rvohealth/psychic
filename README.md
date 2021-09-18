@@ -46,7 +46,7 @@ trance
 [x] psy db:rollback
 [x] psy spec
 [x] psy generate:migration migration_name
-[ ] psy generate:dream dream_name
+[x] psy generate:dream dream_name
 [ ] psy generate:channel controller_name
 [ ] psy generate:projection projection_name
 
