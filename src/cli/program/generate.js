@@ -1,4 +1,5 @@
 import CLIProgram from 'src/cli/program'
+import GenerateChannel from 'src/cli/program/generate/channel'
 import GenerateDream from 'src/cli/program/generate/dream'
 import GenerateJSAPI from 'src/cli/program/generate/js/api'
 import GenerateMigration from 'src/cli/program/generate/migration'
@@ -6,6 +7,9 @@ import GenerateMigration from 'src/cli/program/generate/migration'
 export default class GenerateCLIProgram extends CLIProgram {
   async run(args) {
     switch(args.command) {
+    case 'channel':
+      return await new GenerateChannel().generate(args.args)
+
     case 'dream':
       return await new GenerateDream().generate(args.args)
 
