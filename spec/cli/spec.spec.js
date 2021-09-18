@@ -1,4 +1,3 @@
-// import { jest } from '@jest/globals'
 import SpecCLIProgram from 'src/cli/program/spec'
 import * as spawn from 'src/helpers/spawn'
 
