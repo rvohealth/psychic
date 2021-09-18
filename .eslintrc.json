@@ -17,7 +17,7 @@
     "md5": "readonly",
     "now": "readonly",
     "spawn": "readonly",
-    "spy": "readonly",
+    "posess": "readonly",
     "uuid": "readonly"
   },
   "parserOptions": {

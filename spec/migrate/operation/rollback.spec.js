@@ -18,7 +18,7 @@ describe('RollbackMigration#rollback', () => {
       t.timestamp('created_at')
     })
 
-    spy(config, 'schema', 'get').returning({
+    posess(config, 'schema', 'get').returning({
       migrations: {
         id: {
           type: 'int',
@@ -39,8 +39,8 @@ describe('RollbackMigration#rollback', () => {
   })
 
   it ('runs the down function of the migration, assuming step: 1 when not passed explicitly', async () => {
-    spy(rollbackMigrations, 'migrations').returning(migrations)
-    spy(rollbackMigrations, 'migrationAlreadyRun').returning(true)
+    posess(rollbackMigrations, 'migrations').returning(migrations)
+    posess(rollbackMigrations, 'migrationAlreadyRun').returning(true)
 
     await db.insert('migrations', [{ name: '02_create_meowmix.js' }, { name: '01_create_bruisers.js' }])
     expect(await db.count('migrations').where({ name: '02_create_meowmix.js' }).do()).toBe(1)
@@ -57,8 +57,8 @@ describe('RollbackMigration#rollback', () => {
       await db.insert('migrations', [{ name: '02_create_meowmix.js' }, { name: '01_create_bruisers.js' }])
       expect(await db.count('migrations').do()).toBe(2)
 
-      spy(rollbackMigrations, 'migrations').returning(migrations)
-      spy(rollbackMigrations, 'migrationAlreadyRun').returning(true)
+      posess(rollbackMigrations, 'migrations').returning(migrations)
+      posess(rollbackMigrations, 'migrationAlreadyRun').returning(true)
 
       await rollbackMigrations.rollback({ step: 2 })
       expect(migrations['02_create_meowmix.js'].down).toHaveBeenCalled()

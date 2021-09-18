@@ -4,6 +4,7 @@ import MigrateCLIProgram from 'src/cli/program/migrate.js'
 import GazeCLIProgram from 'src/cli/program/gaze'
 import GenerateCLIProgram from 'src/cli/program/generate'
 import NewAppProgram from 'src/cli/program/new-app'
+import SpecCLIProgram from 'src/cli/program/spec'
 
 export default class CLI {
   get args() {
@@ -30,6 +31,10 @@ export default class CLI {
 
     case 'new':
       return new NewAppProgram()
+
+    case 'spec':
+      return new SpecCLIProgram()
+
     default:
       throw `Unkown program ${this.args.program}`
     }

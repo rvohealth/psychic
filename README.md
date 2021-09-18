@@ -165,7 +165,11 @@ trance
 
 ## L
 ## Messages
+
 ## Migrations
+[x] #run
+[x] #rollback
+
 ## Projections
 ## Spawns
 ## Telekinesis

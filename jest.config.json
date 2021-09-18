@@ -1,5 +1,5 @@
 {
-  "testRegex": "((\\.|/*.)(spec))\\.js?$",
+  "testRegex": "((\\.)(spec))\\.js?$",
   "setupFiles": [
     "jest-plugin-context/setup",
     "spec/spec-helper.js"
