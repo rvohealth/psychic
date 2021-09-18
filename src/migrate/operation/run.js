@@ -1,4 +1,3 @@
-import fs from 'fs'
 // import migrations from 'src/pkg/migrations.pkg'
 import db from 'src/db'
 import config from 'src/config'
@@ -11,22 +10,28 @@ export default class RunMigration extends MigrateOperation {
     return (await import(config.pkgPath + '/migrations.pkg')).default
   }
 
-  async run() {
+  async run({ step }={}) {
     await this._beforeAll()
     const migrations = await this.migrations()
 
     const files = Object.keys(migrations)
+    let numMigrations = 0
     for (const fileName of files) {
       const migration = migrations[fileName]
-      const alreadyRun = await this._migrationAlreadyRun(fileName)
+      const alreadyRun = await this.migrationAlreadyRun(fileName)
 
-      this._lockMigration({ fileName, alreadyRun })
+      this.lockMigration({ fileName, alreadyRun })
 
       await this._beforeMigration()
-      await migration.up(new Migration())
-      await this._afterMigration(fileName, alreadyRun)
 
-      this._unlockMigration()
+      if (!step || numMigrations < step) {
+        await migration.up(new Migration())
+        await this._afterMigration(fileName, alreadyRun, { step })
+        numMigrations += 1
+      }
+
+
+      this.unlockMigration()
     }
 
     return true
@@ -47,7 +52,9 @@ export default class RunMigration extends MigrateOperation {
     }
 
     if (!config.schema.psychic_storage_records) {
-      await db.dropTable('psychic_storage_records')
+      if ((await db.tableExists('psychic_storage_records')))
+        await db.dropTable('psychic_storage_records')
+
       await db.createTable('psychic_storage_records', t => {
         t.uuid('uuid')
         t.string('name')
@@ -62,7 +69,6 @@ export default class RunMigration extends MigrateOperation {
         t.int('size')
         t.timestamp('created_at')
       })
-      console.log('HERE', await db.columnInfo('psychic_storage_records', 'telekinesis_id'))
 
       const statement = new CreateTableStatement('psychic_storage_records')
       statement.uuid('uuid')

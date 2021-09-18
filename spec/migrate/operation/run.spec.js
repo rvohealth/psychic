@@ -63,6 +63,17 @@ describe('RunMigration#run', () => {
     await runMigrations.run()
 
     expect(db.insert).not.toHaveBeenCalled()
-    expect(db.insert).not.toHaveBeenCalled()
+  })
+
+  it ('responds to step argument', async () => {
+    jest.clearAllMocks()
+    jest.spyOn(runMigrations, 'migrations').mockReturnValue(migrations)
+    jest.spyOn(db, 'insert').mockReturnValue({})
+
+    await runMigrations.run({ step: 1 })
+
+    expect(db.insert).toHaveBeenCalledTimes(1)
+    expect(db.insert).toHaveBeenCalledWith('migrations', [{ name: '01_create_bruisers.js' }])
+    expect(db.insert).not.toHaveBeenCalledWith('migrations', [{ name: '02_create_meowmix.js' }])
   })
 })
