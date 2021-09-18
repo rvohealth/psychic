@@ -47,8 +47,8 @@ trance
 [x] psy spec
 [x] psy generate:migration migration_name
 [x] psy generate:dream dream_name
-[ ] psy generate:channel controller_name
-[ ] psy generate:projection projection_name
+[x] psy generate:channel channel_name
+[x] psy generate:projection projection_name
 
 ## Channels (Controllers)
 [ ] #json

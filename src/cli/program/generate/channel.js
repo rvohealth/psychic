@@ -1,7 +1,7 @@
 import l from 'src/singletons/l'
 import File from 'src/helpers/file'
 
-export default class GenerateDream {
+export default class GenerateChannel {
   async generate(args) {
     const [ channelName ] = args
     const filepath = `app/channels/${channelName}.js`

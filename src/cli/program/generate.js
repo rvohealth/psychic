@@ -3,6 +3,7 @@ import GenerateChannel from 'src/cli/program/generate/channel'
 import GenerateDream from 'src/cli/program/generate/dream'
 import GenerateJSAPI from 'src/cli/program/generate/js/api'
 import GenerateMigration from 'src/cli/program/generate/migration'
+import GenerateProjection from 'src/cli/program/generate/projection'
 
 export default class GenerateCLIProgram extends CLIProgram {
   async run(args) {
@@ -18,6 +19,9 @@ export default class GenerateCLIProgram extends CLIProgram {
 
     case 'migration':
       return await new GenerateMigration().generate(args.args)
+
+    case 'projection':
+      return await new GenerateProjection().generate(args.args)
 
     default:
       throw `unhandled program ${args.command} for generate command`
