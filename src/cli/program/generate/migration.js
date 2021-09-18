@@ -15,7 +15,7 @@ export default class GenerateMigration {
   async generate(args) {
     const timestamp = moment().format(`YYYYMMDDHHmmss`)
     const [ filename ] = args
-    const filepath = `db/migrate/${timestamp}-${filename}.js`
+    const filepath = `db/migrate/${timestamp}-${filename.hyphenize()}.js`
 
     await File.write(filepath, template)
 

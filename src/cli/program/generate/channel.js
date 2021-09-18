@@ -4,7 +4,7 @@ import File from 'src/helpers/file'
 export default class GenerateChannel {
   async generate(args) {
     const [ channelName ] = args
-    const filepath = `app/channels/${channelName}.js`
+    const filepath = `app/channels/${channelName.hyphenize()}.js`
 
     await File.write(filepath, channelTemplate(channelName))
 
@@ -20,7 +20,7 @@ function channelTemplate(channelName) {
 `
 import { Channel } from 'psychic'
 
-export default class ${channelName.capitalize()}Channel extends Channel {
+export default class ${channelName.pascalize()}Channel extends Channel {
 }
 `
   )

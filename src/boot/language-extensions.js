@@ -8,6 +8,23 @@ String.prototype.capitalize = function() {
   return this.charAt(0).toUpperCase() + this.slice(1)
 }
 
+String.prototype.hyphenize = function() {
+  return this
+    .replace(/[\s_]/, '-')
+    .replace(/([A-Z][a-z]+)/g, str => '-' + str.uncapitalize())
+}
+
+String.prototype.pascalize = function() {
+  return this.hyphenize()
+    .split('-')
+    .map(word => word.capitalize())
+    .join('')
+}
+
+String.prototype.uncapitalize = function() {
+  return this.charAt(0).toLowerCase() + this.slice(1)
+}
+
 Object.defineProperty(Array.prototype, 'first', {
   get: function() {
     return this[0]

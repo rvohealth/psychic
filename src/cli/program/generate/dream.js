@@ -13,7 +13,7 @@ export default class GenerateDream {
 
   async _generateDream(args) {
     const [ dreamname ] = args
-    const filepath = `app/dreams/${dreamname}.js`
+    const filepath = `app/dreams/${dreamname.hyphenize()}.js`
 
     await File.write(filepath, dreamTemplate(dreamname))
 
@@ -24,7 +24,7 @@ export default class GenerateDream {
   async _generateMigration(args) {
     const timestamp = moment().format(`YYYYMMDDHHmmss`)
     const [ dreamname ] = args
-    const filepath = `db/migrate/${timestamp}-create-${dreamname}.js`
+    const filepath = `db/migrate/${timestamp}-create-${dreamname.hyphenize()}.js`
 
     await File.write(filepath, migrationTemplate(dreamname))
 
@@ -53,7 +53,7 @@ function dreamTemplate(name) {
 `
 import psychic, { Dream } from 'psychic'
 
-export default class ${name.capitalize()} extends Dream {
+export default class ${name.pascalize()} extends Dream {
 }
 `
   )

@@ -15,11 +15,9 @@ export default class GenerateJSAPI {
   // recursively read all nested namespaces
   // this looks like it should be broken, investigate later!
   async generateForNamespaces(namespaces) {
-    Object
-      .keys(namespaces)
-      .forEach(namespace => {
-        this.generateForNamespaces(namespaces[namespace].namespaces)
-      })
+    for (const namespace in Object.keys(namespaces)) {
+      await this.generateForNamespaces(namespaces[namespace].namespaces)
+    }
   }
 
   async generateForRoutes(routes) {

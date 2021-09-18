@@ -4,7 +4,7 @@ import File from 'src/helpers/file'
 export default class GenerateProjection {
   async generate(args) {
     const [ projectionName ] = args
-    const filepath = `app/projections/${projectionName}.js`
+    const filepath = `app/projections/${projectionName.hyphenize()}.js`
 
     await File.mkdirUnlessExists('app/projections')
     await File.write(filepath, projectionTemplate(projectionName))
@@ -21,7 +21,7 @@ function projectionTemplate(projectionName) {
 `
 import { Projection } from 'psychic'
 
-export default class ${projectionName.capitalize()}Projection extends Projection {
+export default class ${projectionName.pascalize()}Projection extends Projection {
 }
 `
   )

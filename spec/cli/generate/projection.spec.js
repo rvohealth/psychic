@@ -5,7 +5,7 @@ const template =
 `
 import { Projection } from 'psychic'
 
-export default class FishmanProjection extends Projection {
+export default class FishmanDogbonesProjection extends Projection {
 }
 `
 
@@ -16,9 +16,9 @@ describe('cli program g:projection <name>', () => {
     File.write = eavesdrop()
     File.mkdirUnlessExists = eavesdrop()
 
-    await generateCLIProgram.run({ command: 'projection', args: ['fishman'] })
+    await generateCLIProgram.run({ command: 'projection', args: ['fishman_dogbones'] })
 
     expect(File.mkdirUnlessExists).toHaveBeenCalledWith('app/projections')
-    expect(File.write).toHaveBeenCalledWith('app/projections/fishman.js', template)
+    expect(File.write).toHaveBeenCalledWith('app/projections/fishman-dogbones.js', template)
   })
 })

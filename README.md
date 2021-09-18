@@ -49,6 +49,7 @@ trance
 [x] psy generate:dream dream_name
 [x] psy generate:channel channel_name
 [x] psy generate:projection projection_name
+[ ] psy generate:js projection_name
 
 ## Channels (Controllers)
 [ ] #json
