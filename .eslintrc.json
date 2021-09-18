@@ -12,11 +12,13 @@
     "SharedArrayBuffer": "readonly",
     "bg": "readonly",
     "context": "readonly",
+    "eavesdrop": "readonly",
     "loadYaml": "readonly",
     "lookup": "readonly",
     "md5": "readonly",
     "now": "readonly",
     "spawn": "readonly",
+    "stringContaining": "readonly",
     "posess": "readonly",
     "uuid": "readonly"
   },
