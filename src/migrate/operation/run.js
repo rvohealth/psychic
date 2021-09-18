@@ -2,7 +2,7 @@ import fs from 'fs'
 // import migrations from 'src/pkg/migrations.pkg'
 import db from 'src/db'
 import config from 'src/config'
-import Migration from 'src/migrate'
+import Migration from 'src/migrate/migration'
 import MigrateOperation from 'src/migrate/operation'
 import CreateTableStatement from 'src/db/statement/table/create'
 

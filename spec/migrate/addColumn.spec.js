@@ -1,10 +1,10 @@
 import { jest } from '@jest/globals'
-import Migrate from 'src/migrate'
+import Migration from 'src/migrate/migration'
 import db from 'src/db'
 
-let migrate = new Migrate()
+let migrate = new Migration()
 
-describe('Migrate#addColumn', () => {
+describe('Migration#addColumn', () => {
   it ('passes along to db', async () => {
     const spy = jest.spyOn(db, 'addColumn').mockReturnValue({})
 

@@ -1,13 +1,13 @@
 import { jest } from '@jest/globals'
-import Migrate from 'src/migrate'
+import Migration from 'src/migrate/migration'
 import db from 'src/db'
 
-let migrate = new Migrate()
+let migrate = new Migration()
 const cb = t => {
   t.string('email')
 }
 
-describe('Migrate#table#create', () => {
+describe('Migration#table#create', () => {
   it ('passes statements along to database layer for processing', async () => {
     const spy = jest.spyOn(db, 'createTable')
 
