@@ -1,22 +1,20 @@
 import fs from 'fs'
 import l from 'src/singletons/l'
 import CrystalBall from 'src/crystal-ball'
+import File from 'src/helpers/file'
 
 export default class GenerateJSAPI {
-  generate() {
-    if (!fs.existsSync('src/psy'))
-      fs.mkdirSync('src/psy')
+  async generate() {
+    await File.mkdirUnlessExists('src/spy')
+    await File.mkdirUnlessExists('src/spy/net')
 
-    if (!fs.existsSync('src/psy/net'))
-      fs.mkdirSync('src/psy/net')
-
-    this.generateForRoutes(CrystalBall.routes)
-    this.generateForNamespaces(CrystalBall.namespaces)
+    await this.generateForRoutes(CrystalBall.routes)
+    await this.generateForNamespaces(CrystalBall.namespaces)
   }
 
   // recursively read all nested namespaces
   // this looks like it should be broken, investigate later!
-  generateForNamespaces(namespaces) {
+  async generateForNamespaces(namespaces) {
     Object
       .keys(namespaces)
       .forEach(namespace => {
@@ -24,67 +22,65 @@ export default class GenerateJSAPI {
       })
   }
 
-  generateForRoutes(routes) {
+  async generateForRoutes(routes) {
     const files = {}
-    Object
-      .values(routes)
-      .forEach(route => {
-        const pathSegments = this.pathSegments(route)
-        const relativePath =
-          (
-            pathSegments.length > 0 ?
-              pathSegments.join('/') + '/' :
-              ''
-          ) +
-          `${this.filename(route)}.js`
-        const filePath = 'src/psy/net/' + relativePath
+    for (const route of Object.values(routes)) {
+      const pathSegments = this.pathSegments(route)
+      const relativePath =
+        (
+          pathSegments.length > 0 ?
+            pathSegments.join('/') + '/' :
+            ''
+        ) +
+        `${this.filename(route)}.js`
+      const filePath = 'src/psy/net/' + relativePath
 
-        let path = 'src/psy/net'
-        pathSegments.forEach((segment, index) => {
-          const isFilename = index === route.parsed.segments.length
-          path += `/${segment}`
+      let path = 'src/psy/net'
+      let index = 0
+      for (const segment of pathSegments) {
+        const isFilename = index === route.parsed.segments.length
+        path += `/${segment}`
 
-          if (!isFilename && !fs.existsSync(path)) {
-            l.log(`making dir ${path}...`)
-            fs.mkdirSync(path)
-          }
-        })
+        if (!isFilename && !fs.existsSync(path)) {
+          l.log(`making dir ${path}...`)
+          await File.mkdir(path)
+        }
+        index++
+      }
 
-        l.log(`writing api file: ${relativePath.replace(/\.js$/, '')}.${this.routeMethodName(route)}...`)
-        if (fs.existsSync(filePath))
-          fs.unlinkSync(filePath)
+      l.log(`writing api file: ${relativePath.replace(/\.js$/, '')}.${this.routeMethodName(route)}...`)
+      await File.unlinkUnlessExists(filePath)
 
-        files[filePath] = files[filePath] || { route, endpoints: [] }
-        files[filePath].endpoints.push(this.endpoint(route))
-      })
+      files[filePath] = files[filePath] || { route, endpoints: [] }
+      files[filePath].endpoints.push(this.endpoint(route))
+    }
 
-    Object.keys(files)
-      .forEach(fileName => {
-        const className = files[fileName].route.channel.name.replace(/Channel$/, '')
-        const imports =
+    for (const fileName of Object.keys(files)) {
+      const className = files[fileName].route.channel.name.replace(/Channel$/, '')
+      const imports =
 `\
 import common from 'psy/net/common'
 
 export default class ${className}API {
 `
-        const endpoints = files[fileName].endpoints
-          .sort((a, b) => {
-            if (a.methodName < b.methodName) return -1
-            if (a.methodName > b.methodName) return 1
-            return 0
-          })
-          .map(endpoint => endpoint.text)
-          .join('\n')
+      const endpoints = files[fileName].endpoints
+        .sort((a, b) => {
+          if (a.methodName < b.methodName) return -1
+          if (a.methodName > b.methodName) return 1
+          return 0
+        })
+        .map(endpoint => endpoint.text)
+        .join('\n')
 
-        fs.writeFileSync(
-          fileName,
-          imports +
-            endpoints +
+      await File.write(
+        fileName,
+        imports +
+          endpoints +
 `\
 }
 `
-          )
-      })
+      )
+    }
   }
 
   filename(route) {

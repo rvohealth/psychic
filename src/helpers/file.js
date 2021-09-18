@@ -1,6 +1,8 @@
 import {
+  mkdir,
   readFile,
   writeFile,
+  unlink,
 } from 'fs/promises'
 import fse from 'fs-extra'
 import fileExists from 'src/helpers/file-exists'
@@ -13,6 +15,16 @@ class File {
 
   static async exists(arg1) {
     return (await fileExists(arg1))
+  }
+
+  static async mkdir(arg1) {
+    await mkdir(arg1)
+  }
+
+  static async mkdirUnlessExists(arg1) {
+    const exists = await File.exists(arg1)
+    if (!exists)
+      await mkdir(arg1)
   }
 
   static async read(arg1) {
@@ -30,6 +42,16 @@ class File {
 
   static async write(arg1, arg2) {
     await writeFile(arg1, arg2)
+  }
+
+  static async unlink(arg1) {
+    await unlink(arg1)
+  }
+
+  static async unlinkUnlessExists(arg1) {
+    const exists = await File.exists(arg1)
+    if (!exists)
+      await File.unlink(arg1)
   }
 }
 

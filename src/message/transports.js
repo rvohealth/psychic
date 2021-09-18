@@ -62,7 +62,7 @@ export default class Transports {
       .forEach(transportKey => {
         const _config = messagesConfig.protocols.email[transportKey]
 
-        switch(_config.adapter) {
+        switch(_config?.adapter) {
         case 'nodemailer':
         case null:
         case undefined:
@@ -81,13 +81,14 @@ export default class Transports {
       .forEach(transportKey => {
         const _config = messagesConfig.protocols.sms[transportKey]
 
-        switch(_config.adapter) {
+        switch(_config?.adapter) {
         case 'twilio':
           this._transports.sms[transportKey] = new TwilioSMSTransport(_config)
           break
 
         default:
-          throw `unrecognized sms adapter type ${_config.adapter}`
+          console.log('invalid config for SMS. ignoring for now...')
+          // throw `unrecognized sms adapter type ${_config.adapter}`
         }
       })
   }
