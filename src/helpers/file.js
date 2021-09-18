@@ -16,7 +16,7 @@ class File {
   }
 
   static async read(arg1) {
-    await readFile(arg1)
+    return (await readFile(arg1))
   }
 
   static async replace(arg1, arg2) {

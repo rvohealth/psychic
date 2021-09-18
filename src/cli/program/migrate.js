@@ -1,5 +1,5 @@
 import CLIProgram from 'src/cli/program/index.js'
-import RunMigration from 'src/migrate/run'
+import RunMigration from 'src/migrate/operation/run'
 
 export default class MigrateCLIProgram extends CLIProgram {
   async run(args) {

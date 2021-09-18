@@ -3,9 +3,10 @@ import fs from 'fs'
 import db from 'src/db'
 import config from 'src/config'
 import Migration from 'src/migrate'
+import MigrateOperation from 'src/migrate/operation'
 import CreateTableStatement from 'src/db/statement/table/create'
 
-export default class RunMigration {
+export default class RunMigration extends MigrateOperation {
   async migrations() {
     return (await import(config.pkgPath + '/migrations.pkg')).default
   }
@@ -89,22 +90,5 @@ export default class RunMigration {
       await db.insert('migrations', [{ name }])
 
     return true
-  }
-
-  async _migrationAlreadyRun(fileName) {
-    const response = await db
-      .select('*')
-      .from('migrations')
-      .where({ name: fileName })
-      .do()
-    return !!response.length
-  }
-
-  _lockMigration(migrationData) {
-    fs.writeFileSync(config.currentMigrationPath, JSON.stringify(migrationData))
-  }
-
-  _unlockMigration() {
-    fs.unlinkSync(config.currentMigrationPath)
   }
 }

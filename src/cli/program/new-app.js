@@ -25,8 +25,8 @@ export default class NewAppProgram extends CLIProgram {
     await this.buildPsychicAppFoundation(path)
 
     l.logStatus('add custom npm scripts to package.json...')
-    const psychicPkgjson = JSON.parse(await File.read('./package.json'))
-    const pkgjson = JSON.parse(await File.read(path + '/package.json'))
+    const psychicPkgjson = JSON.parse((await File.read('./package.json')))
+    const pkgjson = JSON.parse((await File.read(path + '/package.json')))
 
     pkgjson.dependencies = {
       ...pkgjson.dependencies,
@@ -127,10 +127,5 @@ export default class NewAppProgram extends CLIProgram {
       l.logStatus('copy template/js/psy to src/psy...')
       await File.copy('src/template/js/psy', path + '/src/psy')
     }
-  }
-
-  async replaceFile(file, newPath) {
-    if ((await File.exists(newPath))) await exec('rm -rf ' + newPath)
-    await File.copy(file, newPath)
   }
 }

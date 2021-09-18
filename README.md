@@ -43,7 +43,7 @@ trance
 [x] psy app:new app_name (--db=[postgres,sqlite,mysql,mongodb])
 [x] psy db:create
 [x] psy db:migrate
-[ ] psy db:rollback
+[x] psy db:rollback
 [ ] psy spec
 [ ] psy generate:migration migration_name
 [ ] psy generate:dream dream_name

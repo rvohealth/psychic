@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals'
-import RunMigration from 'src/migrate/run'
+import RunMigration from 'src/migrate/operation/run'
 import db from 'src/db'
 import config from 'src/config'
 

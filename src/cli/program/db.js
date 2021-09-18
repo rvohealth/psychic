@@ -1,4 +1,5 @@
-import RunMigration from 'src/migrate/run'
+import RunMigration from 'src/migrate/operation/run'
+import RollbackMigration from 'src/migrate/operation/rollback'
 import CLIProgram from 'src/cli/program'
 import db from 'src/db'
 import config from 'src/config'
@@ -40,12 +41,21 @@ export default class DBCLIProgram extends CLIProgram {
 
   async migrate() {
     await new RunMigration().run()
+
+    if (!process.env.CORE_TEST)
+      process.exit()
+  }
+
+  async rollback() {
+    await new RollbackMigration().rollback()
+
     if (!process.env.CORE_TEST)
       process.exit()
   }
 
   async seed() {
     await config.dbSeedCB()
+
     if (!process.env.CORE_TEST)
       process.exit()
   }
