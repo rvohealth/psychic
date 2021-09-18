@@ -1,5 +1,5 @@
 import 'src/boot/all'
-import fileExists from 'src/helpers/file-exists'
+import 'src/boot/globals/spec'
 
 process.env.CORE_TEST = ENV.CORE_TEST = true
 process.env.PSYCHIC_SECRET = ENV.PSYCHIC_SECRET = 'black cats are the coolest'

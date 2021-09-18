@@ -54,8 +54,7 @@ class PostgresAdapter {
       try {
         response = await client.query(sqlString)
       } catch(error) {
-        // uncomment when debugging
-        // console.error(stack)
+        console.error(stack)
         throw error
       }
 

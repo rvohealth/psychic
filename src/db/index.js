@@ -2,7 +2,6 @@ import PostgresAdapter from 'src/db/adapter/postgres'
 import DBTableOperations from 'src/db/operations/table'
 import Query from 'src/db/query'
 import CreateTableStatement from 'src/db/statement/table/create'
-import config from 'src/config'
 
 class DB {
   get adapter() {
