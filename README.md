@@ -66,7 +66,7 @@ trance
 [x] #patch
 [x] #options
 [x] #auth
-[ ] #given
+[x] #given
 [ ] #resource
 [ ] #ws
 
