@@ -7,9 +7,10 @@ import paramCase from 'src/helpers/paramCase'
 import { parseRoute } from 'src/helpers/route'
 import config from 'src/config'
 import HTTPVision from 'src/crystal-ball/vision/http'
-import WSVision from 'src/crystal-ball/vision/ws'
 import l from 'src/singletons/l'
 import Psyclass from 'src/psychic/psyclass'
+
+import UnrecognizedRouteError from 'src/error/crystal-ball/namespace/unrecognized-route'
 
 export default class Namespace extends Psyclass {
   constructor(routeKey, prefix, app, io, { belongsToResource }={}) {
@@ -169,9 +170,10 @@ export default class Namespace extends Psyclass {
 
   run(httpMethod, route, path, opts) {
     path = this.parsePath(path)
+
     switch(path.type) {
     case 'string':
-      this.addRouteForChannel(route, httpMethod, path.channel, path.method, opts)
+      this.addRouteForChannel(httpMethod, route, path.channel, path.method, opts)
       break
 
     default:
@@ -182,11 +184,12 @@ export default class Namespace extends Psyclass {
 
   // move these route helpers to class
   parsePath(path) {
-    if (typeof path === 'string') return this.parseStringPath(path)
+    if (typeof path === 'string')
+      return this.parseStringPath(path)
     throw `unrecognized path type ${path}`
   }
 
-  addRouteForChannel(route, httpMethod, channel, method, { authKey, _isResource, isWS }={}) {
+  addRouteForChannel(httpMethod, route, channel, method, { authKey, _isResource, isWS }={}) {
     const fullRoute = `${this.prefix}/${route}`
     const parsedRoute = parseRoute(fullRoute)
     const key = `${httpMethod}:${parsedRoute.key}`
@@ -217,7 +220,9 @@ export default class Namespace extends Psyclass {
     const [ channelNameRaw, method ] = path.split('#')
     const channelName = pascalCase(channelNameRaw)
     const channel = config.channels[channelName]?.default
-    if (!channel) throw `Missing channel for route ${path} (expected ${channelName})`
+
+    if (!channel)
+      throw new UnrecognizedRouteError(path, channelName, method)
 
     return {
       type: 'string',

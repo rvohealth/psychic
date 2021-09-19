@@ -70,6 +70,21 @@ trance
 [x] #resource
 [x] #ws
 
+### CrystalBall::Namespace
+[ ] #auth
+[ ] #addRouteForChannel
+[x] #get
+[x] #delete
+[ ] #given
+[ ] #namespace
+[x] #post
+[x] #put
+[x] #patch
+[x] #options
+[ ] #resource
+[x] #run
+[ ] #ws
+
 ## Visions
 [ ] #json
 
