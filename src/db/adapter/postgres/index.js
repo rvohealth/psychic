@@ -54,7 +54,7 @@ class PostgresAdapter {
       try {
         response = await client.query(sqlString)
       } catch(error) {
-        console.error(stack)
+        if (!ENV.CORE_TEST) console.error(stack)
         throw error
       }
 
@@ -69,7 +69,7 @@ class PostgresAdapter {
       try {
         d = await client.query(sqlString)
       } catch(error) {
-        console.error(stack)
+        if (!ENV.CORE_TEST) console.error(stack)
         throw error
       }
 
