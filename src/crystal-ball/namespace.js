@@ -111,6 +111,10 @@ export default class Namespace extends Psyclass {
     return this
   }
 
+  options(route, path, opts) {
+    return this.run('options', route, path, opts)
+  }
+
   patch(route, path, opts) {
     return this.run('patch', route, path, opts)
   }

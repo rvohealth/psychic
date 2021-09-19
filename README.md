@@ -60,11 +60,11 @@ trance
 ## Crystal Ball (Routing)
 [x] #namespace
 [x] #get
-[ ] #delete
-[ ] #post
-[ ] #put
-[ ] #patch
-[ ] #options
+[x] #delete
+[x] #post
+[x] #put
+[x] #patch
+[x] #options
 [ ] #auth
 [ ] #given
 [ ] #resource

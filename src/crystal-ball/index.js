@@ -240,6 +240,10 @@ export default class CrystalBall {
     return this
   }
 
+  options(route, path, opts) {
+    return this.currentNamespace.options(route, path, opts)
+  }
+
   patch(route, path, opts) {
     return this.currentNamespace.patch(route, path, opts)
   }
