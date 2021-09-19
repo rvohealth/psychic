@@ -95,8 +95,8 @@ export default class Channel {
     }
   }
 
-  emit(to, data) {
-    this.vision.emit(to, data)
+  emit(to, path, data) {
+    this.vision.emit(to, path, data)
   }
 
   json(obj, opts) {
