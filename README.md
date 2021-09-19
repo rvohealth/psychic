@@ -68,7 +68,7 @@ trance
 [x] #auth
 [x] #given
 [x] #resource
-[ ] #ws
+[x] #ws
 
 ## Visions
 [ ] #json
