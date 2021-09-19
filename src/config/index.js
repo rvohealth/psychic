@@ -201,7 +201,7 @@ class Config {
 
   dream(dreamName) {
     const dream = this.dreams[snakeCase(dreamName)]
-    return dream.default || dream
+    return dream?.default || dream
   }
 
   lookup(className) {

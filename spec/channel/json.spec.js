@@ -2,7 +2,7 @@ import { create } from 'spec/factories'
 import Channel from 'src/channel'
 
 describe('Channel#json', () => {
-  it ('passes object to JSON.stringify', async () => {
+  it ('passes object to vision for encoding', async () => {
     class TestUserChannel extends Channel {}
     const vision = create('crystalBall.vision', 'test-users', 'index', {})
     const channel = new TestUserChannel(vision)

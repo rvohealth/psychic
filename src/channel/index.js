@@ -104,7 +104,7 @@ export default class Channel {
   }
 
   project(obj, projection=this.projection) {
-    if (this.projection) return new projection(obj).cast()
+    if (projection) return new projection(obj).cast()
     return new Projection(obj).cast()
   }
 }

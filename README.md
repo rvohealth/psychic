@@ -54,8 +54,8 @@ trance
 ## Channels (Controllers)
 [x] #json
 [x] #authenticates
-[ ] #emit
-[ ] #project
+[x] #emit
+[x] #project
 
 ## Crystal Ball (Routing)
 [ ] #namespace
