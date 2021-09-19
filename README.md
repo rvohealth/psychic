@@ -67,7 +67,7 @@ trance
 [x] #options
 [x] #auth
 [x] #given
-[ ] #resource
+[x] #resource
 [ ] #ws
 
 ## Visions
