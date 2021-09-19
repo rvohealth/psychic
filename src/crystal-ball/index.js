@@ -3,7 +3,6 @@ import jwt from 'jsonwebtoken'
 import {
   createHttpTerminator,
 } from 'http-terminator'
-import fs from 'fs'
 import { createServer } from 'http'
 import express from 'express'
 import cookieParser from 'cookie-parser'
@@ -14,6 +13,7 @@ import WSVision from 'src/crystal-ball/vision/ws'
 import l from 'src/singletons/l'
 import esp from 'src/singletons/esp'
 import { emit } from 'src/helpers/ws'
+import File from 'src/helpers/file'
 
 export default class CrystalBall {
   static get routes() {
@@ -176,55 +176,18 @@ export default class CrystalBall {
     this._setCurrentNamespace(new Namespace(null, '', this.app, this.io))
   }
 
-  async gaze(port) {
-    await this.boot()
-    this._server = this.app.listen(port || config.port, () => {
-      if (!process.env.CORE_TEST)
-        l.log('express connected')
-    })
-    this._serverKiller = createHttpTerminator({
-      server: this.server,
-    })
+  async boot() {
+    if (File.exists('app'))
+      await import('dist/boot/app/crystal-ball')
 
-    this.ioServer.listen(config.wssPort, () => {
-    })
-
-    process.on('SIGTERM', async () => {
-      await this.closeConnection()
-    })
-  }
-
-  transmit(authKey, id, messageKey, message) {
-    this.io
-      .to(`auth:${authKey}:${id}`)
-      .emit(messageKey, message)
+    if (config.routeCB)
+      config.routeCB(this)
   }
 
   async closeConnection() {
     await this.serverKiller.terminate()
     await this.ioServerKiller.terminate()
     return true
-  }
-
-  async boot() {
-    // this loads routes from user
-    if (fs.existsSync('app'))
-      await import('dist/boot/app/crystal-ball')
-    // else
-    //   throw 'Only meant for use with real app'
-      // await import('dist/boot/crystal-ball')
-
-    if (config.routeCB)
-      config.routeCB(this)
-  }
-
-  namespace(namespace, cb) {
-    const ns = new Namespace(namespace, this.currentNamespace.prefix, this.app, this.io)
-    this.currentNamespace.namespace(ns)
-    this._setCurrentNamespace(ns)
-    cb(this)
-    this._unsetCurrentNamespace()
-    return this
   }
 
   auth(authKey, opts) {
@@ -235,12 +198,46 @@ export default class CrystalBall {
     return this.currentNamespace.delete(route, path, opts)
   }
 
+  async gaze(port) {
+    await this.boot()
+
+    this._server = this.app.listen(port || config.port, () => {
+      if (!process.env.CORE_TEST)
+        l.log('express connected')
+    })
+
+    this._serverKiller = createHttpTerminator({
+      server: this.server,
+    })
+
+    this.ioServer.listen(config.wssPort, () => {
+      if (!process.env.CORE_TEST)
+        l.log('wss connected')
+    })
+
+    process.on('SIGTERM', async () => {
+      if (!process.env.CORE_TEST)
+        l.log('shutting down server')
+
+      await this.closeConnection()
+    })
+  }
+
   given(givenStr, cb) {
     return this.currentNamespace.given(givenStr, cb)
   }
 
   get(route, path, opts) {
     return this.currentNamespace.get(route, path, opts)
+  }
+
+  namespace(namespace, cb) {
+    const ns = new Namespace(namespace, this.currentNamespace.prefix, this.app, this.io)
+    this.currentNamespace.namespace(ns)
+    this._setCurrentNamespace(ns)
+    cb(this)
+    this._unsetCurrentNamespace()
+    return this
   }
 
   patch(route, path, opts) {
@@ -265,6 +262,12 @@ export default class CrystalBall {
     } else {
       return this.currentNamespace.resource(resourceName, opts)
     }
+  }
+
+  transmit(authKey, id, messageKey, message) {
+    this.io
+      .to(`auth:${authKey}:${id}`)
+      .emit(messageKey, message)
   }
 
   ws(route, path, opts) {
