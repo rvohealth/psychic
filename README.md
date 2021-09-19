@@ -58,8 +58,8 @@ trance
 [x] #project
 
 ## Crystal Ball (Routing)
-[ ] #namespace
-[ ] #get
+[x] #namespace
+[x] #get
 [ ] #delete
 [ ] #post
 [ ] #put

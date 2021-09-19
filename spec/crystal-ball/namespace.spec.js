@@ -1,43 +1,7 @@
 import CrystalBall from 'src/crystal-ball'
 import Namespace from 'src/crystal-ball/namespace'
-import Dream from 'src/dream'
-import Channel from 'src/channel'
-import config from 'src/config'
 
 describe('CrystalBall#namespace', () => {
-  class TestUser extends Dream {
-  }
-
-  class TestUsersChannel extends Channel {
-  }
-
-  jest.spyOn(config, 'dreams', 'get').mockReturnValue({
-    'test_user': TestUser,
-  })
-
-  jest.spyOn(config, 'schema', 'get').mockReturnValue({
-    test_users: {
-      id: {
-        type: 'int',
-        name: 'id',
-        primary: true,
-        unique: true
-      },
-      email: {
-        type: 'string',
-        name: 'email',
-      },
-      password: {
-        type: 'string',
-        name: 'password',
-      },
-      password_digest: {
-        type: 'string',
-        name: 'password_digest',
-      },
-    }
-  })
-
   it ('sets the current namespace, calls the callback method, and then unsets the current' +
     'namespace, returning the crystal ball for chainability', async () => {
     const crystalBall = new CrystalBall()
