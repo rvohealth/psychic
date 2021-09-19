@@ -177,7 +177,7 @@ export default class CrystalBall {
   }
 
   async boot() {
-    if (File.exists('app'))
+    if (await File.exists('app'))
       await import('dist/boot/app/crystal-ball')
 
     if (config.routeCB)
@@ -232,7 +232,7 @@ export default class CrystalBall {
   }
 
   namespace(namespace, cb) {
-    const ns = new Namespace(namespace, this.currentNamespace.prefix, this.app, this.io)
+    const ns = Namespace.new(namespace, this.currentNamespace.prefix, this.app, this.io)
     this.currentNamespace.namespace(ns)
     this._setCurrentNamespace(ns)
     cb(this)

@@ -9,9 +9,12 @@ import config from 'src/config'
 import HTTPVision from 'src/crystal-ball/vision/http'
 import WSVision from 'src/crystal-ball/vision/ws'
 import l from 'src/singletons/l'
+import Psyclass from 'src/psychic/psyclass'
 
-export default class Namespace {
+export default class Namespace extends Psyclass {
   constructor(routeKey, prefix, app, io, { belongsToResource }={}) {
+    super()
+
     this._app = app
     this._io = io
     this._channels = {}
