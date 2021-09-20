@@ -71,7 +71,7 @@ trance
 [x] #ws
 
 ### CrystalBall::Namespace
-[ ] #auth
+[x] #auth
 [ ] #addRouteForChannel
 [x] #get
 [x] #delete

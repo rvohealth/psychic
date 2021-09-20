@@ -85,7 +85,8 @@ export default class Namespace extends Psyclass {
   }
 
   auth(authKey, opts={}) {
-    const channelParamName = paramCase(this.channelName.replace(/Channel$/, ''))
+    const channelName = opts.channel || this.channelName.replace(/Channel$/, '')
+    const channelParamName = paramCase(channelName)
     opts.authKey = authKey
     return this.post('auth', `${channelParamName}#auth`, opts)
   }
