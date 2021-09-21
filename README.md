@@ -72,23 +72,44 @@ trance
 
 ### CrystalBall::Namespace
 [x] #auth
-[ ] #addRouteForChannel
+[x] #addRouteForChannel
 [x] #get
 [x] #delete
-[ ] #given
-[ ] #namespace
+[x] #given
+[x] #namespace
 [x] #post
 [x] #put
 [x] #patch
 [x] #options
-[ ] #resource
+[x] #resource
 [x] #run
-[ ] #ws
+[x] #ws
 
 ## Visions
-[ ] #json
+[x] #json
 
 ## DB
+[x] #addColumn
+[x] #create
+[x] #changeDefault
+[x] #columnInfo
+[x] #count
+[x] #createTable
+[x] #delete
+[x] #drop
+[x] #dropColumn
+[ ] #dropTable
+[ ] #dropAllTables
+[ ] #hasColumn
+[ ] #insert
+[x] #renameColumn
+[x] #renameTable
+[ ] #select
+[ ] #tableExists
+[ ] #transaction
+[ ] #update
+
+## Postgres Adapter
 [ ] #addColumn
 [ ] #create
 [ ] #changeDefault

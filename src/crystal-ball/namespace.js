@@ -5,10 +5,11 @@ import camelCase from 'src/helpers/camelCase'
 import snakeCase from 'src/helpers/snakeCase'
 import paramCase from 'src/helpers/paramCase'
 import { parseRoute } from 'src/helpers/route'
-import config from 'src/config'
+import config from 'src/singletons/config'
 import HTTPVision from 'src/crystal-ball/vision/http'
 import l from 'src/singletons/l'
 import Psyclass from 'src/psychic/psyclass'
+import InvalidGivenType from 'src/error/crystal-ball/namespace/invalid-given-type'
 
 import UnrecognizedRouteError from 'src/error/crystal-ball/namespace/unrecognized-route'
 
@@ -31,6 +32,10 @@ export default class Namespace extends Psyclass {
       `${prefix}/${routeKey}` :
       prefix
   }
+
+  static VALID_GIVEN_TYPES = [
+    'auth',
+  ]
 
   get app() {
     return this._app
@@ -97,11 +102,13 @@ export default class Namespace extends Psyclass {
 
   given(givenStr, cb) {
     const [ givenType, givenKey ] = givenStr.split(':')
-    this._givenType = givenType
-    this._givenKey = givenKey
+
+    if (!this.constructor.VALID_GIVEN_TYPES.includes(givenType))
+      throw new InvalidGivenType(givenType, givenKey)
+
+    this.setCurrentGivenType(givenType, givenKey)
     cb(this)
-    this._givenType = null
-    this._givenKey = null
+    this.unsetCurrentGivenType()
   }
 
   get(route, path, opts) {
@@ -232,9 +239,24 @@ export default class Namespace extends Psyclass {
     }
   }
 
+  setCurrentGivenType(givenType, givenKey) {
+    this._givenType = givenType
+    this._givenKey = givenKey
+  }
+
+  unsetCurrentGivenType() {
+    this._givenType = null
+    this._givenKey = null
+  }
+
   _addHTTP(routeObj) {
+    this.app[routeObj.httpMethod](routeObj.fullRoute, this._buildHTTPResponse(routeObj))
+  }
+
+  _buildHTTPResponse(routeObj) {
     const { givenType, givenKey } = this
-    this.app[routeObj.httpMethod](routeObj.fullRoute, async (req, res) => {
+
+    return async (req, res) => {
       const vision = new HTTPVision(routeObj.route, routeObj.method, req, res)
       const channelInstance = new routeObj.channel(vision)
 
@@ -268,21 +290,21 @@ export default class Namespace extends Psyclass {
         }
       }
 
-       // main block where channels are connected to routes
-       // add error handling here
-       try {
-         await channelInstance[routeObj.method]()
-       } catch(error) {
-         l.error(`An error occurred: ${error.constructor.name}: ${error.message || error}`)
+      // main block where channels are connected to routes
+      // add better error handling here
+      try {
+        await channelInstance[routeObj.method]()
+      } catch(error) {
+        l.error(`An error occurred: ${error.constructor.name}: ${error.message || error}`)
 
-         if (error.constructor.statusCode)
-           return res.status(error.constructor.statusCode).send(error.message)
+        if (error.constructor.statusCode)
+          return res.status(error.constructor.statusCode).send(error.message)
 
-         if (process.env.CORE_TEST)
-           throw error
+        if (process.env.CORE_TEST)
+          throw error
 
-         return res.status(500).send('Whoops, Something went wrong...')
-       }
-    })
+        return res.status(500).send('Whoops, Something went wrong...')
+      }
+    }
   }
 }

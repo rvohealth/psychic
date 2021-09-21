@@ -1,6 +1,6 @@
 import CrystalBall from 'src/crystal-ball'
 import Channel from 'src/channel'
-import config from 'src/config'
+import config from 'src/singletons/config'
 
 describe('CrystalBall#options', () => {
   class FishmenChannel extends Channel {

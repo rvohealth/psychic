@@ -2,7 +2,7 @@ import bluebird from 'bluebird'
 import { Client } from 'pg'
 import formatSQL from 'pg-format'
 import MissingTableName from 'src/error/db/adapter/missing-table-name'
-import config from 'src/config'
+import config from 'src/singletons/config'
 
 class PostgresAdapter {
   async client() {

@@ -1,5 +1,5 @@
-import db from 'src/db'
-import config from 'src/config'
+import db from 'src/singletons/db'
+import config from 'src/singletons/config'
 import Dream from 'src/dream'
 
 describe('association: HasOne', () => {

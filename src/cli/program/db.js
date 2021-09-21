@@ -1,7 +1,7 @@
 import Migrate from 'src/migrate'
 import CLIProgram from 'src/cli/program'
-import db from 'src/db'
-import config from 'src/config'
+import db from 'src/singletons/db'
+import config from 'src/singletons/config'
 import l from 'src/singletons/l'
 
 export default class DBCLIProgram extends CLIProgram {

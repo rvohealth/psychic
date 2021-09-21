@@ -4,8 +4,8 @@ import {
 import { readFile } from 'fs/promises'
 import { jest } from '@jest/globals'
 import Telekinesis from 'src/telekinesis'
-import config from 'src/config'
-import db from 'src/db'
+import config from 'src/singletons/config'
+import db from 'src/singletons/db'
 
 describe ('Telekinesis#store (S3)', () => {
   it ('stores file within s3, creating new psychic storage record', async () => {

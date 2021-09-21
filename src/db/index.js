@@ -18,10 +18,6 @@ class DB {
     return await this.adapter.addColumn(tableName, columnName, dataType, constraints)
   }
 
-  async create() {
-    return await this.adapter.createDB()
-  }
-
   async changeDefault(tableName, columnName, newDefault) {
     return await this.adapter.changeDefault(tableName, columnName, newDefault)
   }
@@ -40,8 +36,20 @@ class DB {
       .from(tableName)
   }
 
+  async create() {
+    return await this.adapter.createDB()
+  }
+
+  async createIfNotExists() {
+    try {
+      return await this.adapter.createDB()
+    } catch (error) {
+      // do nothing intentionally
+    }
+  }
+
   async createTable(tableName, cb) {
-    const statement = new CreateTableStatement(tableName)
+    const statement = CreateTableStatement.new(tableName)
 
     if (cb)
       cb(statement)
@@ -54,11 +62,11 @@ class DB {
   }
 
   delete(tableName) {
-    return new Query().delete(tableName)
+    return Query.new().delete(tableName)
   }
 
   async drop() {
-    this.adapter.dropDB()
+    return await this.adapter.dropDB()
   }
 
   async dropColumn(tableName, columnName) {
@@ -106,4 +114,4 @@ class DB {
   }
 }
 
-export default new DB()
+export default DB

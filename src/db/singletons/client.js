@@ -1,5 +1,5 @@
 import pg from 'pg'
-import config from 'src/config'
+import config from 'src/singletons/config'
 const { Client } = pg
 global.__psychic_pg_client = global.__psychic_pg_client || new Client({
   database: config.dbName,

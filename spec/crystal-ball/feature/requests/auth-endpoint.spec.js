@@ -1,8 +1,8 @@
 import CrystalBall from 'src/crystal-ball'
 import Dream from 'src/dream'
 import Channel from 'src/channel'
-import config from 'src/config'
-import db from 'src/db'
+import config from 'src/singletons/config'
+import db from 'src/singletons/db'
 
 import { fetch, post } from 'spec/helpers/request'
 

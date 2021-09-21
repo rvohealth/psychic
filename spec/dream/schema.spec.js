@@ -1,5 +1,5 @@
 import Dream from 'src/dream'
-import config from 'src/config'
+import config from 'src/singletons/config'
 
 describe('Dream.schema', () => {
   it ('returns the schema from config', async () => {

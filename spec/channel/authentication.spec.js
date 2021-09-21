@@ -3,8 +3,8 @@ import { jest } from '@jest/globals'
 import { create } from 'spec/factories'
 import Channel from 'src/channel'
 import Dream from 'src/dream'
-import config from 'src/config'
-import db from 'src/db'
+import config from 'src/singletons/config'
+import db from 'src/singletons/db'
 
 describe('Channel#authenticates', () => {
   it ("leverages associated model to handle authentication", async () => {

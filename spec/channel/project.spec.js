@@ -2,8 +2,8 @@ import { create } from 'spec/factories'
 import Channel from 'src/channel'
 import Projection from 'src/projection'
 import Dream from 'src/dream'
-import db from 'src/db'
-import config from 'src/config'
+import db from 'src/singletons/db'
+import config from 'src/singletons/config'
 
 class ZebraFace extends Dream {}
 

@@ -1,3 +1,4 @@
+import Psyclass from 'src/psychic/psyclass'
 import PostgresAdapter from 'src/db/adapter/postgres'
 import InvalidWhereClause from 'src/error/db/invalid-where-clause'
 import InvalidFromClause from 'src/error/db/invalid-from-clause'
@@ -8,8 +9,9 @@ import InvalidLimitClause from 'src/error/db/invalid-limit-clause'
 import InvalidOffsetClause from 'src/error/db/invalid-offset-clause'
 import InvalidFetchClause from 'src/error/db/invalid-fetch-clause'
 
-export default class Query {
+export default class Query extends Psyclass {
   constructor(dreamClass=null) {
+    super()
     this._dreamClass = dreamClass
     this._count = false
     this._delete = null

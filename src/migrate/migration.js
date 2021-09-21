@@ -1,8 +1,8 @@
 import fs from 'fs'
-import db from 'src/db'
+import db from 'src/singletons/db'
 import CreateTableStatement from 'src/db/statement/table/create'
 import SchemaWriter from 'src/migrate/schema-writer'
-import config from 'src/config'
+import config from 'src/singletons/config'
 
 export default class Migration {
   constructor() {

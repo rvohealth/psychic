@@ -1,7 +1,7 @@
 import CrystalBall from 'src/crystal-ball'
 import Dream from 'src/dream'
 import Channel from 'src/channel'
-import config from 'src/config'
+import config from 'src/singletons/config'
 
 describe('Namespace#resource', () => {
   class TestUser extends Dream {

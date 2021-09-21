@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals'
 import Dream from 'src/dream'
-import db from 'src/db'
-import config from 'src/config'
+import db from 'src/singletons/db'
+import config from 'src/singletons/config'
 
 describe('Dream.all', () => {
   it ('fetches all records from db', async () => {

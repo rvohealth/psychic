@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals'
 import RollbackMigration from 'src/migrate/operation/rollback'
-import db from 'src/db'
-import config from 'src/config'
+import db from 'src/singletons/db'
+import config from 'src/singletons/config'
 
 let rollbackMigrations = new RollbackMigration()
 const downSpy1 = jest.fn()

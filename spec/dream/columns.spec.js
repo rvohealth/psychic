@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals'
 import Dream from 'src/dream'
-import config from 'src/config'
+import config from 'src/singletons/config'
 
 describe('Dream.columns', () => {
   it ("returns the table's columns", async () => {

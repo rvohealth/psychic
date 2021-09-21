@@ -1,5 +1,6 @@
 import Vision from 'src/crystal-ball/vision'
 import { emit } from 'src/helpers/ws'
+import CannotCallJSON from 'src/error/crystal-ball/vision/ws/cannot-call-json'
 
 export default class WSVision extends Vision {
   constructor(route, method, params, { io, socket }) {
@@ -26,6 +27,6 @@ export default class WSVision extends Vision {
   }
 
   json() {
-    throw `json is not implemented for web socket endpoints. use '.emit instead'`
+    throw new CannotCallJSON()
   }
 }

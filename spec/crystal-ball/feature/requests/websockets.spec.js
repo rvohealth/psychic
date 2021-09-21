@@ -2,8 +2,8 @@ import { jest } from '@jest/globals'
 import CrystalBall from 'src/crystal-ball'
 import Dream from 'src/dream'
 import Channel from 'src/channel'
-import config from 'src/config'
-import db from 'src/db'
+import config from 'src/singletons/config'
+import db from 'src/singletons/db'
 
 import { emit } from 'spec/helpers/request'
 const spy = jest.fn()

@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals'
 import Query from 'src/db/query'
-import db from 'src/db'
+import db from 'src/singletons/db'
 
 describe('DB#count', () => {
   it ('passes along args to db', async () => {

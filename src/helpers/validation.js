@@ -1,7 +1,7 @@
 import moment from 'moment'
 import { validate as validateUUID } from 'uuid'
-import db from 'src/db'
-import config from 'src/config'
+import db from 'src/singletons/db'
+import config from 'src/singletons/config'
 
 export function validatePresence(tableName, attributeName, attribute) {
   const columnType = config.columnType(tableName, attributeName)

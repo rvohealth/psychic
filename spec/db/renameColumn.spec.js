@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals'
-import db from 'src/db'
+import db from 'src/singletons/db'
 
 describe('DB#renameColumn', () => {
   it ('renames column', async () => {

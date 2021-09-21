@@ -1,4 +1,4 @@
-import db from 'src/db'
+import db from 'src/singletons/db'
 import DBCLIProgram from 'src/cli/program/db'
 
 const dbCLIProgram = new DBCLIProgram()

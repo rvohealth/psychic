@@ -1,9 +1,9 @@
 import { jest } from '@jest/globals'
-import db from 'src/db'
-import config from 'src/config'
+import db from 'src/singletons/db'
+import config from 'src/singletons/config'
 import SchemaWriter from 'src/migrate/schema-writer'
 import fileExists from 'src/helpers/file-exists'
-import { mkdir, rmdir } from 'fs/promises'
+import { mkdir } from 'fs/promises'
 
 import packagedDreams from 'spec/support/testapp/app/pkg/dreams.pkg.js'
 import packagedChannels from 'spec/support/testapp/app/pkg/channels.pkg.js'
@@ -42,11 +42,12 @@ beforeEach(async () => {
 
   jest.clearAllMocks()
   jest.restoreAllMocks()
+
+  await db.createIfNotExists()
   await db.dropAllTables()
   // await rmdir('tmp/storage/spec/*', { recursive: true })
 })
 
 afterEach(async () => {
   SchemaWriter.destroy()
-  await db.closeConnection()
 })

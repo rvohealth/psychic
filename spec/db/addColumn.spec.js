@@ -1,12 +1,11 @@
 import { jest } from '@jest/globals'
-import db from 'src/db'
+import db from 'src/singletons/db'
 
 describe('DB#addColumn adds column', () => {
-  it ('passes fetch to the underlying adapter', async () => {
+  it ('calls addColumn on the underlying adapter', async () => {
     const spy = jest.fn()
-    const adapterSpy = jest.spyOn(db, 'adapter', 'get').mockReturnValue({ addColumn: spy })
+    posess(db, 'adapter', 'get').returning({ addColumn: spy, closeConnection: () => {} })
     await db.addColumn('users', 'zimbo', 'text', { primary: true })
     expect(spy).toHaveBeenCalledWith('users', 'zimbo', 'text', { primary: true })
-    adapterSpy.mockRestore()
   })
 })

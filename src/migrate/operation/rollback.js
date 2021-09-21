@@ -1,4 +1,4 @@
-import db from 'src/db'
+import db from 'src/singletons/db'
 import Migration from 'src/migrate/migration'
 import MigrateOperation from 'src/migrate/operation'
 

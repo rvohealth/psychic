@@ -1,7 +1,9 @@
-import config from 'src/config'
+import config from 'src/singletons/config'
+import Psyclass from 'src/psychic/psyclass'
 
-export default class CreateTableStatement {
+export default class CreateTableStatement extends Psyclass {
   constructor() {
+    super()
     this._columns = [{
       type: config.dbIdType,
       name: 'id',

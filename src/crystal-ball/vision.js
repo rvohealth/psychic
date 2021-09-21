@@ -1,3 +1,5 @@
+import Projection from 'src/projection'
+
 export default class Vision {
   get auth() {
     return this._auth
@@ -19,5 +21,10 @@ export default class Vision {
 
   setAuth(key, dream) {
     this._auth[key] = dream
+  }
+
+  project(obj, projection=this.projection) {
+    if (projection) return new projection(obj).cast()
+    return new Projection(obj).cast()
   }
 }
