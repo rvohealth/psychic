@@ -1,81 +1,115 @@
 import bluebird from 'bluebird'
-import { Client } from 'pg'
+import { Pool, Client } from 'pg'
 import formatSQL from 'pg-format'
 import MissingTableName from 'src/error/db/adapter/missing-table-name'
 import config from 'src/singletons/config'
 
 class PostgresAdapter {
-  async client() {
-    const client = new Client({
+  pool() {
+    if (this._pool) return this._pool
+
+    this._pool = new Pool({
       Promise: bluebird,
+
+      idleTimeoutMillis: 10,
+      connectionTimeoutMillis: 100,
+      allowExitOnIdle: true,
+
       database: config.dbName,
       user: config.dbUsername,
       password: config.dbPassword,
       host: config.dbHost || 'localhost',
       port: parseInt(config.dbPort) || 5432,
+      max: 300,
     })
-    await client.connect()
-    return client
+
+    return this._pool
   }
 
-  async withRootConnection(cb) {
-    const client = await this.rootClient()
-    const result = await cb(client)
-    await client.end()
-    return result
-  }
+  rootPool() {
+    if (this._rootPool) return this._rootPool
 
-  async withConnection(cb) {
-    const client = await this.client()
-    const result = await cb(client)
-    await client.end()
-    return result
-  }
+    this._rootPool = new Pool({
 
-  async rootClient() {
-    // if (this._rootClient) return this._rootClient
-    const client = new Client({
+      idleTimeoutMillis: 30000,
+      connectionTimeoutMillis: 10000,
+
       Promise: bluebird,
       user: config.dbUsername,
       password: config.dbPassword,
       database: 'postgres',
       host: config.dbHost || 'localhost',
       port: parseInt(config.dbPort) || 5432,
+      max: 300,
     })
-    await client.connect()
-    return client
+
+    return this._rootPool
   }
 
+  async flush() {
+    await this.pool().end()
+    await this.rootPool().end()
+  }
+
+  // async client() {
+  //   return await this.pool().connect()
+  // }
+
+  // async rootClient() {
+  //   return await this.rootPool().connect()
+  // }
+
+  // async withRootConnection(cb) {
+  //   const client = await this.rootClient()
+  //   const result = await cb(client)
+  //   // await client.release()
+  //   return result
+  // }
+
+  // async withConnection(cb) {
+  //   const client = await this.client()
+  //   const result = await cb(client)
+  //   // await client.release()
+  //   return result
+  // }
+
   async runRootSQL(sqlString) {
-    return await this.withRootConnection(async client => {
+    // return await this.withRootConnection(async client => {
       let response
       const stack = new Error().stack
+      const client = await this.rootPool().connect()
 
       try {
         response = await client.query(sqlString)
       } catch(error) {
         if (!ENV.CORE_TEST) console.error(stack)
         throw error
+      } finally {
+        await client.release()
       }
 
       return response
-    })
+    // })
   }
 
   async runSQL(sqlString) {
-    const r = await this.withConnection(async client => {
-      let d
+    // const r = await this.withConnection(async client => {
+      let response
       const stack = new Error().stack
+      const client = await this.pool().connect()
+
       try {
-        d = await client.query(sqlString)
+        response = await client.query(sqlString)
       } catch(error) {
         if (!ENV.CORE_TEST) console.error(stack)
         throw error
+      } finally {
+        await client.release()
       }
 
-      return d
-    })
-    return r
+      return response
+    // })
+    // return r
   }
 
   async addColumn(tableName, columnName, dataType, constraints) {
@@ -98,11 +132,11 @@ SET DEFAULT '${defaultValue}'
   }
 
   async closeConnection() {
-    const client = await this.client()
-    await client.end()
+    // const client = await this.client()
+    // await client.end()
 
-    const rootClient = await this.rootClient()
-    return await rootClient.end()
+    // const rootClient = await this.rootClient()
+    // return await rootClient.end()
   }
 
   async columnDefault(tableName, columnName) {

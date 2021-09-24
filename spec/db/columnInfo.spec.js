@@ -1,4 +1,4 @@
-import db from 'src/singletons/db'
+import db from 'src/db'
 
 describe('DB#columnInfo', () => {
   it ('calls columnInfo on underlying adapter', async () => {

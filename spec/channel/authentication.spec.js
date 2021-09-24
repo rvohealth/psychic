@@ -4,7 +4,7 @@ import { create } from 'spec/factories'
 import Channel from 'src/channel'
 import Dream from 'src/dream'
 import config from 'src/singletons/config'
-import db from 'src/singletons/db'
+import db from 'src/db'
 
 describe('Channel#authenticates', () => {
   it ("leverages associated model to handle authentication", async () => {

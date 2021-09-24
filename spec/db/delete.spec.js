@@ -1,4 +1,4 @@
-import db from 'src/singletons/db'
+import db from 'src/db'
 import Query from 'src/db/query'
 
 describe('DB#delete', () => {

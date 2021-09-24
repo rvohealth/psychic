@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals'
 import Migration from 'src/migrate/migration'
-import db from 'src/singletons/db'
+import db from 'src/db'
 
 let migrate = new Migration()
 

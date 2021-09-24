@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals'
-import db from 'src/singletons/db'
+import db from 'src/db'
 
 describe('DB#dropColumn drops column', () => {
   it ('passes dropColumn to the underlying adapter', async () => {

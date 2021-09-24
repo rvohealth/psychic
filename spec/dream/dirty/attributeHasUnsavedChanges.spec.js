@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals'
 import Dream from 'src/dream'
 import config from 'src/singletons/config'
-import db from 'src/singletons/db'
+import db from 'src/db'
 
 describe('Dream#attributeHasUnsavedChanges (i.e. user.emailHasUnsavedChanges)', () => {
   it ("detects when attributes have been updated", async () => {

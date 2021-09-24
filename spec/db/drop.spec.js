@@ -1,4 +1,4 @@
-import db from 'src/singletons/db'
+import db from 'src/db'
 import PostgresAdapter from 'src/db/adapter/postgres'
 
 describe('DB#drop', () => {

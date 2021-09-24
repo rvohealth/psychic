@@ -4,7 +4,7 @@ import {
 import { jest } from '@jest/globals'
 import Telekinesis from 'src/telekinesis'
 import config from 'src/singletons/config'
-import db from 'src/singletons/db'
+import db from 'src/db'
 
 describe ('Telekinesis#retrieve (S3)', () => {
   it ('retrieves the object from s3 using valid signed url', async () => {

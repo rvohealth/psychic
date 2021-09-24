@@ -81,6 +81,10 @@ class DB {
     return await this.adapter.dropAllTables()
   }
 
+  async flush() {
+    return await this.adapter.flush()
+  }
+
   async hasColumn(tableName, columnName) {
     return await this.adapter.hasColumn(tableName, columnName)
   }
@@ -114,4 +118,4 @@ class DB {
   }
 }
 
-export default DB
+export default new DB()

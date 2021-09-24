@@ -1,5 +1,5 @@
 // import migrations from 'src/pkg/migrations.pkg'
-import db from 'src/singletons/db'
+import db from 'src/db'
 import config from 'src/singletons/config'
 import Migration from 'src/migrate/migration'
 import MigrateOperation from 'src/migrate/operation'

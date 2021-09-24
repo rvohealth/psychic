@@ -1,4 +1,4 @@
-import db from 'src/singletons/db'
+import db from 'src/db'
 import CreateTableStatement from 'src/db/statement/table/create'
 
 describe('DB#createTable', () => {

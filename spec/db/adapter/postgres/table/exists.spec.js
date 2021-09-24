@@ -1,5 +1,5 @@
 import PostgresAdapter from 'src/db/adapter/postgres'
-import db from 'src/singletons/db'
+import db from 'src/db'
 
 let postgres = new PostgresAdapter()
 

@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals'
-import db from 'src/singletons/db'
+import db from 'src/db'
 
 describe('DB#addColumn adds column', () => {
   it ('calls addColumn on the underlying adapter', async () => {

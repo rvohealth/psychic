@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals'
-import db from 'src/singletons/db'
+import db from 'src/db'
 
 describe('DB#create', () => {
   it ('creates a new DB based on the underlying app configuration', async () => {

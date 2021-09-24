@@ -1,6 +1,6 @@
 import Migrate from 'src/migrate'
 import CLIProgram from 'src/cli/program'
-import db from 'src/singletons/db'
+import db from 'src/db'
 import config from 'src/singletons/config'
 import l from 'src/singletons/l'
 
