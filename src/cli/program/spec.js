@@ -1,5 +1,6 @@
 import CLIProgram from 'src/cli/program'
 import spawn from 'src/helpers/spawn'
+import Dir from 'src/helpers/dir'
 
 export default class SpecCLIProgram extends CLIProgram {
   async run(args) {
@@ -8,9 +9,14 @@ export default class SpecCLIProgram extends CLIProgram {
   }
 
   async spec(args) {
-    const command = args ?
-      `yarn test ${args.join(' ')}` :
-      'yarn test'
-    await spawn(command, [], { shell: true, stdio: 'inherit' })
+    if (args?.length)
+      await spawn(`yarn test ${args.join(' ')} --forceExit`, [], { shell: true, stdio: 'inherit' })
+
+    else {
+      for (const folder of await Dir.readdir('spec')) {
+        if (await Dir.isDir(`spec/${folder}`))
+          await spawn(`yarn test ./spec/${folder} --forceExit`, [], { shell: true, stdio: 'inherit' })
+      }
+    }
   }
 }

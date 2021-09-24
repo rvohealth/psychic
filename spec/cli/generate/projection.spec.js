@@ -1,5 +1,5 @@
 import GenerateCLIProgram from 'src/cli/program/generate'
-import File from 'src/helpers/file'
+import Dir from 'src/helpers/dir'
 
 const template =
 `
@@ -13,12 +13,12 @@ const generateCLIProgram = new GenerateCLIProgram()
 
 describe('cli program g:projection <name>', () => {
   it ('generates a new projection in the projections folder with the passed name', async () => {
-    File.write = eavesdrop()
-    File.mkdirUnlessExists = eavesdrop()
+    const writeSpy = posess(Dir, 'write').returning(true)
+    const mkdirUnlessExistsSpy = posess(Dir, 'mkdirUnlessExists').returning(true)
 
     await generateCLIProgram.run({ command: 'projection', args: ['fishman_dogbones'] })
 
-    expect(File.mkdirUnlessExists).toHaveBeenCalledWith('app/projections')
-    expect(File.write).toHaveBeenCalledWith('app/projections/fishman-dogbones.js', template)
+    expect(mkdirUnlessExistsSpy).toHaveBeenCalledWith('app/projections')
+    expect(writeSpy).toHaveBeenCalledWith('app/projections/fishman-dogbones.js', template)
   })
 })

@@ -1,6 +1,13 @@
-import util from 'util'
 import { spawn } from 'child_process'
 
-const spawnp = util.promisify(spawn)
+export default function spawnp(...args) {
+  return new Promise((accept, reject) => {
+    const child = spawn(...args)
 
-export default spawnp
+    child.on('exit', () => {
+      accept()
+    })
+
+    // TODO: handle error!
+  })
+}
