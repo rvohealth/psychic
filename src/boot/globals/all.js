@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 import spawn from 'src/singletons/spawn'
 import config from 'src/config'
 import loadYaml from 'src/helpers/load-yaml'
+import include from 'src/helpers/include'
 
 function loadEnv() {
   if (process.env.CORE_TEST)
@@ -32,8 +33,10 @@ global.uuid = function() {
   return v4uuid()
 }
 
-global.spawn = spawn
 global.bg = (...args) => spawn.now(...args)
+global.include = include
 global.loadYaml = loadYaml
 global.lookup = (...args) => config.lookup(...args)
+global.spawn = spawn
+
 global.ENV = loadEnv()
