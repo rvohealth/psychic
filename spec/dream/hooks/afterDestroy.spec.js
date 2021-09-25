@@ -1,0 +1,12 @@
+import { create } from 'spec/factories'
+
+describe('Dream#afterDestroy', () => {
+  it ('stores callback in private array for later execution', async () => {
+    const TestUser = create('dream.testUser', {})
+    const cb = () => {}
+    const dream = new TestUser()
+    dream.afterDestroy(cb)
+    expect(dream._afterDestroy).toEqual([ cb ])
+  })
+})
+

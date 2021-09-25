@@ -1,6 +1,6 @@
 import fs from 'fs'
 import db from 'src/db'
-import config from 'src/singletons/config'
+import config from 'src/config'
 
 class MigrateOperation {
   async migrationAlreadyRun(fileName) {

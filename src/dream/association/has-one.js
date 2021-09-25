@@ -1,6 +1,6 @@
 import Association from 'src/dream/association'
 import db from 'src/db'
-import config from 'src/singletons/config'
+import config from 'src/config'
 
 export default class HasOne extends Association {
   get base() {

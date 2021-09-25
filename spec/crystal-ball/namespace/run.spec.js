@@ -1,7 +1,7 @@
 import CrystalBall from 'src/crystal-ball'
 import Namespace from 'src/crystal-ball/namespace'
 import Channel from 'src/channel'
-import config from 'src/singletons/config'
+import config from 'src/config'
 import UnrecognizedRouteError from 'src/error/crystal-ball/namespace/unrecognized-route'
 
 describe('CrystalBall::Namespace#run', () => {

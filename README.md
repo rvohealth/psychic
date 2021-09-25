@@ -98,84 +98,83 @@ trance
 [x] #delete
 [x] #drop
 [x] #dropColumn
-[ ] #dropTable
-[ ] #dropAllTables
-[ ] #hasColumn
-[ ] #insert
+[x] #dropTable
+[x] #dropAllTables
+[x] #hasColumn
+[x] #insert
 [x] #renameColumn
 [x] #renameTable
-[ ] #select
-[ ] #tableExists
-[ ] #transaction
-[ ] #update
+[x] #select
+[x] #tableExists
+[x] #transaction
+[x] #update
 
 ## Postgres Adapter
-[ ] #addColumn
-[ ] #create
-[ ] #changeDefault
-[ ] #columnInfo
-[ ] #count
-[ ] #createTable
-[ ] #createTable
-[ ] #delete
-[ ] #drop
-[ ] #dropColumn
-[ ] #dropTable
-[ ] #dropAllTables
-[ ] #hasColumn
-[ ] #insert
-[ ] #renameColumn
-[ ] #renameTable
-[ ] #select
-[ ] #tableExists
-[ ] #transaction
-[ ] #update
+[x] #addColumn
+[x] #changeDefault
+[x] #columnInfo
+[x] #count
+[x] #createDB
+[x] #createTable
+[x] #delete
+[x] #drop
+[x] #dropColumn
+[x] #dropTable
+[x] #dropAllTables
+[x] #hasColumn
+[x] #insert
+[x] #renameColumn
+[x] #renameTable
+[x] #select
+[x] #tableExists
+[x] #transaction
+[x] #update
 
 ### Queries
-[ ] #all
-[ ] #count
+> Note: These are not currently unit-tested, but have spec coverage through postgres adapter specs.
+[x] #all
 [ ] #do
-[ ] #count
-[ ] #delete
+[x] #count
+[x] #delete
 [ ] #first
-[ ] #fetch
-[ ] #from
+[x] #fetch
+[x] #from
 [ ] #fullOuterJoin
-[ ] #group
-[ ] #having
-[ ] #join
-[ ] #leftOuterJoin
-[ ] #order
-[ ] #limit
+[x] #group
+[x] #having
+[x] #join
+[x] #leftOuterJoin
+[x] #order
+[x] #limit
 [ ] #offset
-[ ] #rightOuterJoin
-[ ] #select
-[ ] #update
+[x] #rightOuterJoin
+[x] #select
+[x] #update
 [ ] #valueFor
-[ ] #where
+[x] #where
 
 ## Dreams (ORM)
-[ ] .all
-[ ] .count
-[ ] .create
-[ ] .find
-[ ] .findBy
-[ ] .first
-[ ] .select
-[ ] .where
-[ ] #afterCreate
-[ ] #afterDestroy
-[ ] #afterSave
-[ ] #afterUpdate
-[ ] #authenticate
-[ ] #authenticateAll
-[ ] #authenticateFor
-[ ] #authenticates
-[ ] #authTokenFor
-[ ] #beforeCreate
-[ ] #beforeDestroy
-[ ] #beforeSave
-[ ] #beforeUpdate
+[x] .all
+[x] .count
+[x] .create
+[x] .find
+[x] .findBy
+[x] .first
+[x] .select
+[x] .where
+[x] #afterCreate
+[x] #afterDestroy
+[x] #afterSave
+[x] #afterUpdate
+[x] #authenticate
+[x] #authenticateAll
+[x] #authenticateFor
+[x] #authenticates
+[x] #authTokenFor
+[x] #beforeCreate
+[x] #beforeDestroy
+[x] #beforeSave
+[x] #beforeUpdate
 [ ] #belongsTo
 [ ] #emitsTo
 [ ] #emit

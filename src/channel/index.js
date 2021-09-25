@@ -2,7 +2,7 @@ import pluralize from 'pluralize'
 import paramCase from 'src/helpers/paramCase'
 import snakeCase from 'src/helpers/snakeCase'
 import camelCase from 'src/helpers/camelCase'
-import config from 'src/singletons/config'
+import config from 'src/config'
 import Projection from 'src/projection'
 import Unauthorized from 'src/error/crystal-ball/unauthorized'
 

@@ -1,5 +1,5 @@
 import fs from 'fs'
-import config from 'src/singletons/config'
+import config from 'src/config'
 
 export default class SchemaWriter {
   static get schemaExists() {

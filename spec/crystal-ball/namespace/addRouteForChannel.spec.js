@@ -1,6 +1,6 @@
 import CrystalBall from 'src/crystal-ball'
 import Namespace from 'src/crystal-ball/namespace'
-import config from 'src/singletons/config'
+import config from 'src/config'
 
 describe('CrystalBall::Namespace#addRouteForChannel', () => {
   context ('when route is a standard http route', () => {

@@ -1,4 +1,5 @@
 import l from 'src/singletons/l'
+import Dir from 'src/helpers/dir'
 import File from 'src/helpers/file'
 
 export default class GenerateProjection {
@@ -6,7 +7,7 @@ export default class GenerateProjection {
     const [ projectionName ] = args
     const filepath = `app/projections/${projectionName.hyphenize()}.js`
 
-    await File.mkdirUnlessExists('app/projections')
+    await Dir.mkdirUnlessExists('app/projections')
     await File.write(filepath, projectionTemplate(projectionName))
 
     if (!process.env.CORE_TEST) {

@@ -1,7 +1,7 @@
 import { jest } from '@jest/globals'
 import RunMigration from 'src/migrate/operation/run'
 import db from 'src/db'
-import config from 'src/singletons/config'
+import config from 'src/config'
 
 let runMigrations = new RunMigration()
 const upSpy1 = jest.fn()

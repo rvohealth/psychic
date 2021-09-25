@@ -5,7 +5,7 @@ import _Channel from 'src/channel'
 import _CLI from 'src/cli'
 import _Dream from 'src/dream'
 import _Projection from 'src/projection'
-import _config from 'src/singletons/config'
+import _config from 'src/config'
 
 export const Channel = _Channel
 export const CLI = _CLI

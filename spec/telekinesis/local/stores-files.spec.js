@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals'
 import Telekinesis from 'src/telekinesis'
-import config from 'src/singletons/config'
+import config from 'src/config'
 import db from 'src/db'
 import fileExists from 'src/helpers/file-exists'
 

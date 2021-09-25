@@ -1,6 +1,6 @@
 import { create } from 'spec/factories'
 import Dream from 'src/dream'
-import config from 'src/singletons/config'
+import config from 'src/config'
 
 class TestUser extends Dream {}
 

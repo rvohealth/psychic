@@ -1,5 +1,5 @@
 import db from 'src/db'
-import config from 'src/singletons/config'
+import config from 'src/config'
 import Dream from 'src/dream'
 import Projection from 'src/projection'
 

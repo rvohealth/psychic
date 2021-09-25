@@ -1,6 +1,6 @@
 import { jest } from '@jest/globals'
 import db from 'src/db'
-import config from 'src/singletons/config'
+import config from 'src/config'
 import SchemaWriter from 'src/migrate/schema-writer'
 import fileExists from 'src/helpers/file-exists'
 import { mkdir } from 'fs/promises'

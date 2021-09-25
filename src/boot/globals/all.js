@@ -4,7 +4,7 @@ import moment from 'moment'
 import crypto from 'crypto'
 import dotenv from 'dotenv'
 import spawn from 'src/singletons/spawn'
-import config from 'src/singletons/config'
+import config from 'src/config'
 import loadYaml from 'src/helpers/load-yaml'
 
 function loadEnv() {

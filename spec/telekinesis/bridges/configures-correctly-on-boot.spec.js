@@ -1,4 +1,4 @@
-import config from 'src/singletons/config'
+import config from 'src/config'
 import telekineticBridges from 'src/singletons/telekinetic-bridges'
 
 describe ('Telekinesis#retrieve (S3)', () => {

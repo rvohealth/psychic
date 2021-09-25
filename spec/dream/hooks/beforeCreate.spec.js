@@ -1,44 +1,12 @@
-import db from 'src/db'
-import config from 'src/singletons/config'
-import Dream from 'src/dream'
+import { create } from 'spec/factories'
 
-describe('Dream hooks: beforeCreate', () => {
-  class User extends Dream {
-    initialize() {
-      this.beforeCreate(() => {
-        this.originalFavoriteIceCreamFlavor = 'chocolate'
-      })
-    }
-  }
-
-  beforeEach(async () => {
-    jest.spyOn(config, 'dreams', 'get').mockReturnValue({
-      'user': User,
-    })
-    jest.spyOn(config, 'schema', 'get').mockReturnValue({
-      users: {
-        id: {
-          type: 'int',
-          name: 'id',
-          primary: true,
-          unique: true
-        },
-        email: {
-          type: 'string',
-          name: 'email',
-        },
-      },
-    })
-
-    await db.createTable('users', t => {
-      t.string('email')
-      t.string('favorite_ice_cream_flavor')
-      t.string('original_favorite_ice_cream_flavor')
-    })
-  })
-
-  it ('runs prior to saving', async () => {
-    const user = await User.create({ favoriteIceCreamFlavor: 'cherry' })
-    expect(user.originalFavoriteIceCreamFlavor).toBe('chocolate')
+describe('Dream#beforeCreate', () => {
+  it ('stores callback in private array for later execution', async () => {
+    const TestUser = create('dream.testUser', {})
+    const cb = () => {}
+    const dream = new TestUser()
+    dream.beforeCreate(cb)
+    expect(dream._beforeCreate).toEqual([ cb ])
   })
 })
+

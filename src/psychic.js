@@ -1,5 +1,5 @@
 import CrystalBall from 'src/crystal-ball'
-import config from 'src/singletons/config'
+import config from 'src/config'
 import transports from 'src/singletons/transports'
 
 export default class Psychic {

@@ -3,7 +3,7 @@ import Channel from 'src/channel'
 import Projection from 'src/projection'
 import Dream from 'src/dream'
 import db from 'src/db'
-import config from 'src/singletons/config'
+import config from 'src/config'
 
 class ZebraFace extends Dream {}
 

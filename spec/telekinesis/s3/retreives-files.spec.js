@@ -3,7 +3,7 @@ import {
 } from '@aws-sdk/client-s3'
 import { jest } from '@jest/globals'
 import Telekinesis from 'src/telekinesis'
-import config from 'src/singletons/config'
+import config from 'src/config'
 import db from 'src/db'
 
 describe ('Telekinesis#retrieve (S3)', () => {

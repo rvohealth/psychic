@@ -4,7 +4,7 @@ import bcrypt from 'bcrypt'
 import Query from 'src/db/query'
 import snakeCase from 'src/helpers/snakeCase'
 import camelCase from 'src/helpers/camelCase'
-import config from 'src/singletons/config'
+import config from 'src/config'
 import db from 'src/db'
 import HasOne from 'src/dream/association/has-one'
 import HasOneThrough from 'src/dream/association/has-one-through'
@@ -46,7 +46,7 @@ class Dream {
   }
 
   static async all() {
-    const results = await new Query(this)
+    const results = await Query.new(this)
       .select('*')
       .from(this.table)
       .all()
@@ -64,15 +64,23 @@ class Dream {
   }
 
   static async find(id) {
-    return new Query(this)
+    return Query.new(this)
       .select('*')
       .from(this.table)
       .where({ id })
       .first()
   }
 
+  static async findBy(obj) {
+    return Query.new(this)
+      .select('*')
+      .from(this.table)
+      .where(obj)
+      .first()
+  }
+
   static async first() {
-    const result = await new Query(this)
+    const result = await Query.new(this)
       .select('*')
       .from(this.table)
       .first()
@@ -183,7 +191,6 @@ class Dream {
   }
 
   async authenticate(...args) {
-    if (args.length === 3) return this.authenticateFor(...args)
     if (args.length === 1) return this.authenticateAll(...args)
     return this.authenticateFor(...args)
   }
@@ -198,8 +205,8 @@ class Dream {
     case 'db':
       for (const key in this._authentications.db) {
         if (!!identifyingColumn && key.split('::')[0] !== identifyingColumn) continue
+
         const authentication = this._authentications.db[key]
-        // console.log('ZIMMEBOY', password, authentication.passwordColumn, this)
         if (await bcrypt.compare(password, this[authentication.passwordColumn + '_digest']))
           return true
       }

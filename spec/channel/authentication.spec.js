@@ -3,7 +3,7 @@ import { jest } from '@jest/globals'
 import { create } from 'spec/factories'
 import Channel from 'src/channel'
 import Dream from 'src/dream'
-import config from 'src/singletons/config'
+import config from 'src/config'
 import db from 'src/db'
 
 describe('Channel#authenticates', () => {

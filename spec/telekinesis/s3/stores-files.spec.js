@@ -4,7 +4,7 @@ import {
 import { readFile } from 'fs/promises'
 import { jest } from '@jest/globals'
 import Telekinesis from 'src/telekinesis'
-import config from 'src/singletons/config'
+import config from 'src/config'
 import db from 'src/db'
 
 describe ('Telekinesis#store (S3)', () => {
