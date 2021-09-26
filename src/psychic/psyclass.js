@@ -7,10 +7,12 @@ class Psyclass {
 
   static include(...mixins) {
     include(this, ...mixins)
+    return this
   }
 
   include(...mixins) {
     include(this, ...mixins)
+    return this
   }
 }
 

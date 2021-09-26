@@ -13,7 +13,6 @@ import HooksProvider from 'src/dream/concerns/hooks'
 import QueryProvider from 'src/dream/concerns/query'
 import AssociationsProvider from 'src/dream/concerns/associations'
 import AttributesProvider from 'src/dream/concerns/attributes'
-import DirtyProvider from 'src/dream/concerns/dirty'
 
 class Dream extends Psyclass {
   constructor(attributes={}) {
@@ -61,35 +60,6 @@ class Dream extends Psyclass {
 
   static set table(tableName) {
     this._table = tableName
-  }
-
-  get attributes() {
-    return this._attributes
-  }
-
-  get attributeNames() {
-    return Object.keys(this._attributes)
-  }
-
-  get originalAttributes() {
-    return this._originalAttributes
-  }
-
-  get schema() {
-    return this.constructor.schema
-  }
-
-  get dirty() {
-    return !!this.attributeNames.filter(name => this.hasUnsavedAttribute(name)).length
-  }
-
-  get dirtyAttributes() {
-    return this.attributeNames
-      .filter(name => this.hasUnsavedAttribute(name))
-      .reduce((agg, name) => {
-        agg[name] = this.attribute(name)
-        return agg
-      }, {})
   }
 
   get isDream() {
@@ -186,11 +156,11 @@ class Dream extends Psyclass {
   }
 }
 
-Dream.include(QueryProvider)
-Dream.include(AttributesProvider)
-Dream.include(DirtyProvider)
-Dream.include(AssociationsProvider)
-Dream.include(AuthenticationProvider)
-Dream.include(HooksProvider)
-
 export default Dream
+  .include(
+    AttributesProvider,
+    QueryProvider,
+    AssociationsProvider,
+    AuthenticationProvider,
+    HooksProvider,
+  )

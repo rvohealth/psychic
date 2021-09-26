@@ -1,9 +1,50 @@
 import camelCase from 'src/helpers/camelCase'
 import { validatePresence, validateUnique } from 'src/helpers/validation'
 
-export default class AttributesProvider {
+class AttributesProvider {
+  get attributes() {
+    return this._attributes
+  }
+
+  get attributeNames() {
+    return Object.keys(this._attributes)
+  }
+
+  get originalAttributes() {
+    return this._originalAttributes
+  }
+
+  get schema() {
+    return this.constructor.schema
+  }
+
+  get dirty() {
+    return !!this.attributeNames.filter(name => this.hasUnsavedAttribute(name)).length
+  }
+
+  get dirtyAttributes() {
+    return this.attributeNames
+      .filter(name => this.hasUnsavedAttribute(name))
+      .reduce((agg, name) => {
+        agg[name] = this.attribute(name)
+        return agg
+      }, {})
+  }
+
   attribute(name) {
     return this.attributes[name]
+  }
+
+  hasUnsavedAttribute(attributeName) {
+    if (this.isNewRecord) return true
+
+    if (this.originalAttributes[attributeName])
+      return this.originalAttributes[attributeName] !== this.attribute(attributeName)
+
+    if (!this.originalAttributes[attributeName] && this.attribute(attributeName) !== undefined)
+      return true
+
+    return false
   }
 
   setAttributes(attributes) {
@@ -49,6 +90,17 @@ export default class AttributesProvider {
     })
   }
 
+  _defineDirtyAccessors() {
+    Object.keys(this.constructor.schema).forEach(attributeName => {
+      const camelCased = camelCase(attributeName)
+      const key = `${camelCased}HasUnsavedChanges`
+      Object.defineProperty(this, key, {
+        get: () => this.hasUnsavedAttribute(attributeName),
+        configurable: true,
+      })
+    })
+  }
+
   _resetAttributes(attributes) {
     this._attributes = attributes
     this._originalAttributes = { ...attributes }
@@ -56,3 +108,5 @@ export default class AttributesProvider {
     this._defineDirtyAccessors()
   }
 }
+
+export default AttributesProvider
