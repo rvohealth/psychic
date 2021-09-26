@@ -25,6 +25,7 @@ class Dream extends mix(Psyclass).with(
   constructor(attributes={}) {
     super(attributes)
 
+    this._associations = {}
     this.initialize()
   }
 

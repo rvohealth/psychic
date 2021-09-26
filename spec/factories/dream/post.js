@@ -1,31 +1,35 @@
 import Dream from 'src/dream'
 import config from 'src/config'
 
-export default function buildTestUser() {
-  class TestUser extends Dream {}
+export default function buildPost() {
+  class Post extends Dream {}
 
   const currentDreams = config.dreams
   posess(config, 'dreams', 'get').returning({
     ...currentDreams,
-    'test_user': TestUser,
+    'post': Post,
   })
 
   const currentSchema = config.schema
   posess(config, 'schema', 'get').returning({
     ...currentSchema,
-    test_users: {
+    posts: {
       id: {
         type: 'int',
         name: 'id',
         primary: true,
         unique: true
       },
-      email: {
+      test_user_id: {
+        type: 'int',
+        name: 'test_user_id',
+      },
+      body: {
         type: 'string',
-        name: 'email',
+        name: 'body',
       },
     },
   })
 
-  return TestUser
+  return Post
 }

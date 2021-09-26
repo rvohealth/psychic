@@ -1,6 +1,7 @@
+import Psyclass from 'src/psychic/psyclass'
 import pluralize from 'pluralize'
 
-export default class Association {
+export default class Association extends Psyclass {
   get defaultForeignKey() {
     return pluralize.singular(this.associationTable) + '_id'
   }

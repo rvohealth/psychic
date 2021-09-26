@@ -3,7 +3,7 @@ import { create } from 'spec/factories'
 describe('Dream#authenticates', () => {
   it ('registers authentication type and stores callback function in beforeSave to' +
     'ensure password column is encrypted', async () => {
-    const TestUser = create('dream.testUser', {})
+    const TestUser = create('dream.TestUser', {})
     const dream = new TestUser()
     const opts = {}
     const spy = posess(dream, 'beforeSave').returning(true)

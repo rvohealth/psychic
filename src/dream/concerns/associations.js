@@ -4,6 +4,7 @@ import HasMany from 'src/dream/association/has-many'
 import HasManyThrough from 'src/dream/association/has-many-through'
 import BelongsTo from 'src/dream/association/belongs-to'
 import camelCase from 'src/helpers/camelCase'
+import InvalidThroughArgument from 'src/error/dream/association/invalid-through-argument'
 
 const AssociationsProvider = superclass => class extends superclass {
   constructor(...args) {
@@ -12,69 +13,63 @@ const AssociationsProvider = superclass => class extends superclass {
     this._associations = {}
   }
 
-  belongsTo(resourceName, opts) {
-    const association = new BelongsTo(this.resourceName, resourceName, opts)
+  belongsTo(resourceName, opts={}) {
+    const association = BelongsTo.new(this.resourceName, resourceName, opts)
     this._addAssociation(association)
 
-    this[resourceName] = async () =>
+    const cb = async () =>
       new association.associationDreamClass(
         await association.query(this[association.foreignKey])
       )
 
-    this[camelCase(resourceName)] = async () =>
-      new association.associationDreamClass(
-        await association.query(this[association.foreignKey])
-      )
+    this[resourceName] = cb
+    this[camelCase(resourceName)] = cb
 
     return this
   }
 
-  hasOne(resourceName, opts) {
+  hasOne(resourceName, opts={}) {
     if (opts.through) {
-      if (!this._association(opts.through)) throw `Missing intermediary association for ${opts.through}. make sure to declare association before through association`
+      if (!this._association(opts.through)) throw new InvalidThroughArgument()
       opts.through = this._association(opts.through)
     }
 
     const association = opts.through ?
-      new HasOneThrough(this.resourceName, resourceName, opts) :
-      new HasOne(this.resourceName, resourceName, opts)
+      HasOneThrough.new(this.resourceName, resourceName, opts) :
+      HasOne.new(this.resourceName, resourceName, opts)
 
     this._addAssociation(association)
 
-    this[resourceName] = async () =>
+    const cb = async () =>
       new association.associationDreamClass(
         await association.query(this.id)
       )
 
-    this[camelCase(resourceName)] = async () =>
-      new association.associationDreamClass(
-        await association.query(this.id)
-      )
+    this[resourceName] = cb
+    this[camelCase(resourceName)] = cb
 
     return this
   }
 
-  hasMany(resourceName, opts) {
+  hasMany(resourceName, opts={}) {
     if (opts.through) {
-      if (!this._association(opts.through)) throw `Missing intermediary association for ${opts.through}. make sure to declare association before through association`
+      if (!this._association(opts.through)) throw new InvalidThroughArgument()
       opts.through = this._association(opts.through)
     }
 
     const association = opts.through ?
-      new HasManyThrough(this.resourceName, resourceName, opts) :
-      new HasMany(this.resourceName, resourceName, opts)
+      HasManyThrough.new(this.resourceName, resourceName, opts) :
+      HasMany.new(this.resourceName, resourceName, opts)
 
     this._addAssociation(association)
 
-    this[resourceName] = async () => {
+    const cb = async () => {
       const results = await association.query(this.id)
       return results.map(result => new association.associationDreamClass(result))
     }
 
-    this[camelCase(resourceName)] = async () => {
-      const results = await association.query(this.id)
-      return results.map(result => new association.associationDreamClass(result))
-    }
+    this[resourceName] = cb
+    this[camelCase(resourceName)] = cb
 
     return this
   }

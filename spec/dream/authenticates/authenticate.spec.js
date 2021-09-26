@@ -3,7 +3,7 @@ import { create } from 'spec/factories'
 describe('Dream#authenticate', () => {
   it ('registers authentication type and stores callback function in beforeSave to' +
     'ensure password column is encrypted', async () => {
-    const TestUser = create('dream.testUser')
+    const TestUser = create('dream.TestUser')
     const dream = new TestUser()
     const opts = {}
     const spy = posess(dream, 'authenticateFor').returning(true)
@@ -13,7 +13,7 @@ describe('Dream#authenticate', () => {
 
   context ('only one argument is passed', () => {
     it ('calls authenticateAll instead', async () => {
-      const TestUser = create('dream.testUser')
+      const TestUser = create('dream.TestUser')
       const dream = new TestUser()
       const spy = posess(dream, 'authenticateAll').returning(true)
       dream.authenticate('password')

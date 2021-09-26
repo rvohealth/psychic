@@ -3,7 +3,7 @@ import { create } from 'spec/factories'
 
 describe('Dream#authenticateFor', () => {
   it ('validates a correct password', async () => {
-    const TestUser = create('dream.testUser')
+    const TestUser = create('dream.TestUser')
     const dream = new TestUser()
     const spy = posess(bcrypt, 'compare').returning(true)
     dream._authentications.db = {
@@ -21,7 +21,7 @@ describe('Dream#authenticateFor', () => {
 
   context ('with an invalid password', () => {
     it ('returns false', async () => {
-      const TestUser = create('dream.testUser')
+      const TestUser = create('dream.TestUser')
       const dream = new TestUser()
       const spy = posess(bcrypt, 'compare').returning(false)
       dream._authentications.db = {

@@ -175,12 +175,12 @@ trance
 [x] #beforeDestroy
 [x] #beforeSave
 [x] #beforeUpdate
-[ ] #belongsTo
+[x] #belongsTo
 [ ] #emitsTo
 [ ] #emit
 [ ] #destroy
-[ ] #hasOne
-[ ] #hasMany
+[x] #hasOne
+[x] #hasMany
 [ ] #save
 [ ] #attribute
 [ ] #hasUnsavedAttribute

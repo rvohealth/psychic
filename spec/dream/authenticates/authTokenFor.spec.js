@@ -3,7 +3,7 @@ import { create } from 'spec/factories'
 
 describe('Dream#authTokenFor', () => {
   it ('', async () => {
-    const TestUser = create('dream.testUser')
+    const TestUser = create('dream.TestUser')
     const dream = new TestUser()
     const spy = posess(jwt, 'sign').returning({ fish: 10 })
     dream.id = 12345
