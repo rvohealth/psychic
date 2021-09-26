@@ -2,7 +2,7 @@ import Query from 'src/db/query'
 import db from 'src/db'
 import snakeCase from 'src/helpers/snakeCase'
 
-class QueryProvider {
+const QueryProvider = superclass => class extends superclass {
   static async all() {
     const results = await Query.new(this)
       .select('*')

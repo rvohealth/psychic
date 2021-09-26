@@ -1,7 +1,13 @@
 import camelCase from 'src/helpers/camelCase'
 import { validatePresence, validateUnique } from 'src/helpers/validation'
 
-class AttributesProvider {
+const AttributesProvider = superclass => class extends superclass {
+  constructor(attributes, ...args) {
+    super(attributes, ...args)
+
+    this._resetAttributes(attributes)
+  }
+
   get attributes() {
     return this._attributes
   }

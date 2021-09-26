@@ -1,166 +1,49 @@
-import pluralize from 'pluralize'
-import snakeCase from 'src/helpers/snakeCase'
-import config from 'src/config'
-import PresenceCheckFailed from 'src/error/dream/validation/presence-check-failed'
-import UniqueCheckFailed from 'src/error/dream/validation/unique-check-failed'
-import InclusionCheckFailed from 'src/error/dream/validation/inclusion-check-failed'
-import ExclusionCheckFailed from 'src/error/dream/validation/exclusion-check-failed'
-import esp from 'src/singletons/esp'
 import Psyclass from 'src/psychic/psyclass'
-
 import AuthenticationProvider from 'src/dream/concerns/authentication'
 import HooksProvider from 'src/dream/concerns/hooks'
 import QueryProvider from 'src/dream/concerns/query'
 import AssociationsProvider from 'src/dream/concerns/associations'
 import AttributesProvider from 'src/dream/concerns/attributes'
+import ActiveModelProvider from 'src/dream/concerns/active-model'
+import WSProvider from 'src/dream/concerns/ws'
+import ValidationsProvider from 'src/dream/concerns/validations'
 
-class Dream extends Psyclass {
+import mix from 'src/helpers/mix'
+
+class Dream extends mix(Psyclass).with(
+  ActiveModelProvider,
+  AttributesProvider,
+  QueryProvider,
+  AssociationsProvider,
+  AuthenticationProvider,
+  HooksProvider,
+  WSProvider,
+  ValidationsProvider,
+) {
   constructor(attributes={}) {
-    super()
-
-    this._afterCreate = []
-    this._afterDestroy = []
-    this._afterUpdate = []
-    this._afterSave = []
-    this._associations = {}
-    this._authentications = {
-      db: {},
-    }
-    this._beforeCreate = []
-    this._beforeDestroy = []
-    this._beforeSave = []
-    this._beforeUpdate = []
-    this._emitsTo = {}
-    this._validations = {}
-    this._resetAttributes(attributes)
+    super(attributes)
 
     this.initialize()
   }
 
+  // deprecate
   static get isDream() {
     return true
   }
 
-  static get columns() {
-    return config.schema[this.table]
-  }
-
-  static get resourceName() {
-    return snakeCase(this.name)
-  }
-
-  static get schema() {
-    return config.schema[this.table]
-  }
-
-  static get table() {
-    if (this._table) return this._table
-    return pluralize(snakeCase(this.name))
-  }
-
-  static set table(tableName) {
-    this._table = tableName
-  }
-
+  // deprecate
   get isDream() {
     return this.constructor.isDream
   }
 
+  // deprecate
   get isDreamInstance() {
     return true
-  }
-
-  get persisted() {
-    return !!this.id
-  }
-
-  get resourceName() {
-    return this.constructor.resourceName
-  }
-
-  get table() {
-    return this.constructor.table
-  }
-
-  get isNewRecord() {
-    return !this.persisted
-  }
-
-  emitsTo(relationName, opts) {
-    if (!opts.as) throw `must pass 'as' in second argument`
-    if (!this._association(relationName)) throw `relationName must be a valid association. make sure your association was delared in initialize.`
-
-    this._emitsTo[relationName] = {
-      to: relationName,
-      ...opts,
-    }
-    return this
-  }
-
-  async emit(relationName, path, message=null) {
-    const emitRecord = this._emitsTo[relationName]
-    if (!emitRecord) throw `must instantiate relation using 'emitsTo' in initialize`
-
-    // since association could be deeply nested, safest thing to do here is to fetch the association.
-    const association = await this[relationName]()
-    if (!association) return // no error here, since we simply don't emit to non-existant associations
-
-    esp.transmit('ws:to:authToken', {
-      to: emitRecord.as,
-      id: association.id,
-      path: path.replace(/^\//, ''),
-      data: message,
-    })
   }
 
   initialize() {
     // define in child class
   }
-
-  validates(column, opts) {
-    this._validations[column] = this._validations[column] || []
-    this._validations[column].push(opts)
-    return this
-  }
-
-  async _runValidations() {
-    for (const column in this._validations) {
-      const validations = this._validations[column]
-      for (const i in validations) {
-        const validation = validations[i]
-        if (
-          validation.presence &&
-            !this[column + 'IsPresent']
-        )
-          throw new PresenceCheckFailed(`Failed to check presence for column ${this.table}.${column}`)
-
-        if (
-          validation.unique &&
-            !(await this[column + 'IsUnique']())
-        )
-          throw new UniqueCheckFailed(`Failed to check presence for column ${this.table}.${column}`)
-
-        if (
-          validation.inclusion &&
-            !validation.inclusion.includes(this[column])
-        )
-          throw new InclusionCheckFailed(`expected ${this[column]} in ${validation.inclusion}`)
-
-        if (
-          validation.exclusion &&
-            validation.exclusion.includes(this[column])
-        )
-          throw new ExclusionCheckFailed(`expected ${this[column]} in ${validation.exclusion}`)
-      }
-    }
-  }
 }
 
 export default Dream
-  .include(
-    AttributesProvider,
-    QueryProvider,
-    AssociationsProvider,
-    AuthenticationProvider,
-    HooksProvider,
-  )

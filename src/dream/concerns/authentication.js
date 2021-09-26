@@ -2,7 +2,15 @@ import jwt from 'jsonwebtoken'
 import bcrypt from 'bcrypt'
 import DBAuthentication from 'src/dream/authentication/db'
 
-export default class AuthenticationProvider {
+const AuthenticationProvider = superclass => class extends superclass {
+  constructor(...args) {
+    super(...args)
+
+    this._authentications = {
+      db: {},
+    }
+  }
+
   async authenticate(...args) {
     if (args.length === 1) return this.authenticateAll(...args)
     return this.authenticateFor(...args)
@@ -53,3 +61,5 @@ export default class AuthenticationProvider {
     return token
   }
 }
+
+export default AuthenticationProvider

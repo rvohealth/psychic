@@ -1,4 +1,17 @@
-class ModelHookProvider {
+const ModelHookProvider = superclass => class extends superclass {
+  constructor(...args) {
+    super(...args)
+
+    this._beforeCreate = []
+    this._beforeDestroy = []
+    this._beforeSave = []
+    this._beforeUpdate = []
+    this._afterCreate = []
+    this._afterDestroy = []
+    this._afterUpdate = []
+    this._afterSave = []
+  }
+
   async afterCreate(cb) {
     this._afterCreate.push(cb)
   }

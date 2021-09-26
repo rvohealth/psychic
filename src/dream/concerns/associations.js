@@ -5,7 +5,13 @@ import HasManyThrough from 'src/dream/association/has-many-through'
 import BelongsTo from 'src/dream/association/belongs-to'
 import camelCase from 'src/helpers/camelCase'
 
-export default class Associations {
+const AssociationsProvider = superclass => class extends superclass {
+  constructor(...args) {
+    super(...args)
+
+    this._associations = {}
+  }
+
   belongsTo(resourceName, opts) {
     const association = new BelongsTo(this.resourceName, resourceName, opts)
     this._addAssociation(association)
@@ -81,3 +87,5 @@ export default class Associations {
     this._associations[association.association] = association
   }
 }
+
+export default AssociationsProvider
