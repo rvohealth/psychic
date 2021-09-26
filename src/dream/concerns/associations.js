@@ -84,7 +84,7 @@ const AssociationsProvider = superclass => class extends superclass {
   }
 
   _addAssociation(association) {
-    this._associations[association.association] = association
+    this._associations[association.resourceName] = association
   }
 }
 

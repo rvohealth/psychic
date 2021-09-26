@@ -11,16 +11,12 @@ export default class HasOne extends Association {
     return config.tableSchema(this.base).name
   }
 
-  get association() {
-    return this._association
-  }
-
   get associationDreamClass() {
-    return config.dream(this.association)
+    return config.dream(this.resourceName)
   }
 
   get associationTable() {
-    return config.tableSchema(this.association).name
+    return config.tableSchema(this.resourceName).name
   }
 
   constructor(resourceName, associationResourceName, {
@@ -28,7 +24,7 @@ export default class HasOne extends Association {
   }) {
     super()
     this._base = resourceName
-    this._association = associationResourceName
+    this._resourceName = associationResourceName
     this._foreignKey = foreignKey
   }
 
