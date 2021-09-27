@@ -64,7 +64,7 @@ const QueryProvider = superclass => class extends superclass {
     await this._runHooksFor('beforeDestroy')
 
     await db
-      .delete('users')
+      .delete(this.table)
       .where({ id: this.id })
       .do()
 
