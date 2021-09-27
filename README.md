@@ -176,8 +176,8 @@ trance
 [x] #beforeSave
 [x] #beforeUpdate
 [x] #belongsTo
-[ ] #emitsTo
-[ ] #emit
+[x] #emitsTo
+[x] #emit
 [ ] #destroy
 [x] #hasOne
 [x] #hasMany

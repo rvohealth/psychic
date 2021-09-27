@@ -11,7 +11,7 @@ import config from 'src/config'
 import Namespace from 'src/crystal-ball/namespace'
 import WSVision from 'src/crystal-ball/vision/ws'
 import l from 'src/singletons/l'
-import esp from 'src/singletons/esp'
+import esp from 'src/esp'
 import { emit } from 'src/helpers/ws'
 import File from 'src/helpers/file'
 

@@ -1,6 +1,6 @@
 import InvalidEventType from 'src/error/esp/invalid-event-type'
 
-export default class ESP {
+class ESP {
   static EVENT_TYPES = [
     'ws:to:authToken',
   ]
@@ -39,3 +39,5 @@ export default class ESP {
       throw new InvalidEventType(eventType)
   }
 }
+
+export default new ESP()

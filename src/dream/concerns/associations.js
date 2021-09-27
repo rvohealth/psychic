@@ -75,6 +75,7 @@ const AssociationsProvider = superclass => class extends superclass {
   }
 
   _association(resourceName) {
+    if (!resourceName) return null
     return this._associations[resourceName]
   }
 

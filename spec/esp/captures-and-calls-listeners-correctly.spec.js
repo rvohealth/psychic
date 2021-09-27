@@ -1,5 +1,5 @@
 import { jest } from '@jest/globals'
-import esp from 'src/singletons/esp'
+import esp from 'src/esp'
 
 describe('esp: captures and calls listeners correctly', () => {
   it ('fires listeners, passing payload', () => {

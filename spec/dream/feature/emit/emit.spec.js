@@ -2,7 +2,7 @@ import { jest } from '@jest/globals'
 import db from 'src/db'
 import config from 'src/config'
 import Dream from 'src/dream'
-import esp from 'src/singletons/esp'
+import esp from 'src/esp'
 
 describe('Dream#emits', () => {
   class User extends Dream {
