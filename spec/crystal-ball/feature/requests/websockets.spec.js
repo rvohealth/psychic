@@ -5,7 +5,7 @@ import Channel from 'src/channel'
 import config from 'src/config'
 import db from 'src/db'
 
-import { emit } from 'spec/helpers/request'
+import { emit } from 'spec/support/helpers/request'
 const spy = jest.fn()
 
 describe('CrystalBall Websockets', () => {

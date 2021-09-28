@@ -5,15 +5,15 @@ class ESP {
     'ws:to:authToken',
   ]
 
-  get listeners() {
-    return this._listeners
-  }
-
   constructor() {
     this._listeners = {}
     this.constructor.EVENT_TYPES.forEach(eventType => {
       this._listeners[eventType] = []
     })
+  }
+
+  get listeners() {
+    return this._listeners
   }
 
   transmit(eventType, payload) {

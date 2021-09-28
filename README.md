@@ -189,12 +189,12 @@ trance
 [x] #validates
 
 ## ESP
-[ ] #transmit
-[ ] #on
-[ ] #listenersFor
+[x] #transmit
+[x] #on
+[x] #listenersFor
 
 ## Helpers
-[ ] #camelCase
+[x] #camelCase
 [ ] #capitalize
 [ ] #fileExists
 [ ] #loadYaml
