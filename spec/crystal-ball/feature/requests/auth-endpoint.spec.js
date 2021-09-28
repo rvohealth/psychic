@@ -4,7 +4,7 @@ import Channel from 'src/channel'
 import config from 'src/config'
 import db from 'src/db'
 
-import { fetch, post } from 'spec/suppport/helpers/request'
+import { fetch, post } from 'spec/support/helpers/request'
 
 describe('CrystalBall Requests: auth endpoint', () => {
   class TestUser extends Dream {
