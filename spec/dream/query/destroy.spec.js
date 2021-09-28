@@ -2,7 +2,7 @@ import { create } from 'spec/factories'
 import Query from 'src/db/query'
 
 describe('Dream#destroy', () => {
-  it ('calls to Query interface correctly', async () => {
+  it ('calls to Query interface correctly, applying callbacks before and after', async () => {
     const TestUser = create('dream.TestUser')
     const user = new TestUser()
     const query = new Query()

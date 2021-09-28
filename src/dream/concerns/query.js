@@ -79,7 +79,9 @@ const QueryProvider = superclass => class extends superclass {
     if (this.isNewRecord) {
       await this._runHooksFor('beforeCreate')
 
-      const newModel = new this.constructor(await db.insert(this.table, snakeCase({ ...this.dirtyAttributes })))
+      const newModel = new this.constructor(
+        await db.insert(this.table, snakeCase({ ...this.dirtyAttributes }))
+      )
       this._resetAttributes(newModel.attributes)
 
       await this._runHooksFor('afterCreate')
