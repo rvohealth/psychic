@@ -185,8 +185,8 @@ trance
 [x] #attribute
 [x] #hasUnsavedAttribute
 [x] #setAttributes
-[ ] #update
-[ ] #validates
+[x] #update
+[x] #validates
 
 ## ESP
 [ ] #transmit

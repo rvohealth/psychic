@@ -1,2 +1,1 @@
-export default class DreamValidation {
-}
+export default class DreamValidation {}
