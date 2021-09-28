@@ -182,8 +182,8 @@ trance
 [x] #hasOne
 [x] #hasMany
 [x] #save
-[ ] #attribute
-[ ] #hasUnsavedAttribute
+[x] #attribute
+[x] #hasUnsavedAttribute
 [ ] #setAttributes
 [ ] #update
 [ ] #validates
