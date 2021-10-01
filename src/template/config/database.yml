@@ -1,11 +1,11 @@
 development:
-  name: psychic_test_app_development
+  name: 'ENV::DB_NAME'
 
 staging:
-  name: psychic_test_app_staging
+  name: 'ENV::DB_NAME'
 
 test:
-  name: psychic_test_app_test
+  name: 'ENV::DB_NAME'
 
 production:
-  name: psychic_test_app_production
+  name: 'ENV::DB_NAME'

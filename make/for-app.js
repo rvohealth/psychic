@@ -39,6 +39,9 @@ function packageDreams() {
   let finalExport = 'const dreams = {'
 
   fs.readdirSync('app/dreams').forEach(async (file, index) => {
+    const isJSFile = /\.js$/.test(file)
+    if (!isJSFile) return
+
     imports += `import * as dream${index} from 'app/dreams/${file}'\n`
     finalExport += `\n  "${snakeCase(file.replace(/\.js$/, ''))}": dream${index},`
   })
@@ -52,6 +55,9 @@ function packageChannels() {
   const channelsPath = 'app/channels'
 
   fs.readdirSync(channelsPath).forEach(async (file, index) => {
+    const isJSFile = /\.js$/.test(file)
+    if (!isJSFile) return
+
     imports += `import * as channel${index} from '${channelsPath}/${file}'\n`
     finalExport += `\n  "${pascalCase(file.replace(/\.js$/, ''))}": channel${index},`
   })
@@ -65,6 +71,9 @@ function packageProjections() {
   const channelsPath = 'app/projections'
 
   fs.readdirSync(channelsPath).forEach(async (file, index) => {
+    const isJSFile = /\.js$/.test(file)
+    if (!isJSFile) return
+
     imports += `import * as projection${index} from '${channelsPath}/${file}'\n`
     finalExport += `\n  "${pascalCase(file.replace(/\.js$/, ''))}": projection${index},`
   })
@@ -77,6 +86,9 @@ function packageREPL() {
   let globals = ''
   const dreamsPath = 'app/dreams'
   fs.readdirSync(dreamsPath).forEach(async file => {
+    const isJSFile = /\.js$/.test(file)
+    if (!isJSFile) return
+
     const className = pascalCase(file.replace(/\.js$/, ''))
     imports += `import ${className} from '${dreamsPath}/${file}'\n`
     globals += `global.${className} = ${className}\n`

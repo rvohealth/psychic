@@ -1,5 +1,5 @@
 import bluebird from 'bluebird'
-import { Pool, Client } from 'pg'
+import { Pool } from 'pg'
 import formatSQL from 'pg-format'
 import MissingTableName from 'src/error/db/adapter/missing-table-name'
 import config from 'src/config'

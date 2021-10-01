@@ -59,6 +59,7 @@
     "bluebird": "^3.7.2",
     "body-parser": "^1.19.0",
     "bree": "^6.2.0",
+    "bull": "^3.29.2",
     "chalk": "^4.1.1",
     "compression": "^1.6.2",
     "cookie-parser": "^1.4.5",
