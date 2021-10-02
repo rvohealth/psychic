@@ -58,6 +58,13 @@ export default class NewAppProgram extends CLIProgram {
       "./node_modules/psychic/node_modules/.bin/babel app -d dist/app --copy-files &&" +
       "./node_modules/psychic/node_modules/.bin/babel config -d dist/config --copy-files"
 
+    // pkgjson.scripts.buildspec = "NODE_PATH=. node ./make/for-core-specs.js && NODE_PATH=. ./node_modules/.bin/babel src -d dist --copy-files && NODE_PATH=. ./node_modules/.bin/babel spec/support/testapp -d dist/testapp --copy-files"
+    pkgjson.scripts.buildspec = "NODE_PATH=. ./node_modules/.bin/babel src -d dist --copy-files && NODE_PATH=. ./node_modules/.bin/babel app -d dist/app --copy-files"
+
+    pkgjson.scripts.test = "NODE_PATH=. npm run psybuild && " +
+      "clear && " +
+      "npm run buildspec && NODE_PATH=. node --experimental-vm-modules ./node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles"
+
     await File.write(path + '/package.json', JSON.stringify(pkgjson, null, 2))
 
     if (!quick || fromScratch) {
@@ -93,7 +100,6 @@ export default class NewAppProgram extends CLIProgram {
     }
 
     l.logStatus('copying .babelrc...')
-    await File.copy('./.babelrc', path + '/.babelrc')
 
     l.logStatus('updating gitignore...')
     await File.append(`${path}/.gitignore`, "\n# psychic")

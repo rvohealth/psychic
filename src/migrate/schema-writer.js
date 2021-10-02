@@ -1,14 +1,15 @@
 import fs from 'fs'
 import config from 'src/config'
+import File from 'src/helpers/file'
 
 export default class SchemaWriter {
   static get schemaExists() {
     return fs.existsSync(config.schemaPath)
   }
 
-  static destroy() {
+  static async destroy() {
     if (this.schemaExists)
-      fs.unlinkSync(config.schemaPath)
+      await File.unlink(config.schemaPath)
   }
 
   constructor() {

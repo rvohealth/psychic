@@ -1,32 +1,23 @@
+// this file is imported by the user, and is not used by the Psychic Core testing framework
+
+import 'src/boot/all'
+import 'src/boot/globals/spec'
+
 import { jest } from '@jest/globals'
-import db from 'src/db'
-import config from 'src/config'
-import SchemaWriter from 'src/migrate/schema-writer'
-import fileExists from 'src/helpers/file-exists'
-import { mkdir } from 'fs/promises'
+import { SchemaWriter, config, db } from 'psychic'
 
-import packagedDreams from 'spec/support/testapp/app/pkg/dreams.pkg.js'
-import packagedChannels from 'spec/support/testapp/app/pkg/channels.pkg.js'
-import packagedProjections from 'spec/support/testapp/app/pkg/projections.pkg.js'
-import routeCB from 'spec/support/testapp/config/routes.js'
-import dbSeedCB from 'spec/support/testapp/db/seed.js'
-
-beforeAll(async () => {
-  if (! (await fileExists('tmp')))
-    await mkdir('tmp')
-
-  if (! (await fileExists('tmp/storage')))
-    await mkdir('tmp/storage')
-
-  if (! (await fileExists('tmp/storage/spec')))
-    await mkdir('tmp/storage/spec')
-})
+import packagedDreams from 'app/pkg/dreams.pkg.js'
+import packagedChannels from 'app/pkg/channels.pkg.js'
+import packagedProjections from 'app/pkg/projections.pkg.js'
+import routeCB from 'config/routes.js'
+import dbSeedCB from 'db/seed.js'
+console.log('BOLEROOOOOOO')
 
 beforeEach(async () => {
-  const messagesConfig = await loadYaml('spec/support/testapp/config/messages')
-  const dbConfig = await loadYaml('spec/support/testapp/config/database')
-  const redisConfig = await loadYaml('spec/support/testapp/config/redis')
-  const telekinesisConfig = await loadYaml('spec/support/testapp/config/telekinesis')
+  const messagesConfig = await loadYaml('config/messages')
+  const dbConfig = await loadYaml('config/database')
+  const redisConfig = await loadYaml('config/redis')
+  const telekinesisConfig = await loadYaml('config/telekinesis')
 
   config.boot({
     dreams: packagedDreams,
