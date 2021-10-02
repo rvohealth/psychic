@@ -95,6 +95,11 @@ export default class NewAppProgram extends CLIProgram {
     l.logStatus('copying .babelrc...')
     await File.copy('./.babelrc', path + '/.babelrc')
 
+    l.logStatus('updating gitignore...')
+    await File.append(`${path}/.gitignore`, "\n# psychic")
+    await File.append(`${path}/.gitignore`, "\n/dist")
+    await File.append(`${path}/.gitignore`, "\n/app/pkg")
+
     l.logStatus('Done building app!')
     l.end()
   }

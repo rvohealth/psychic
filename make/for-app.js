@@ -27,6 +27,9 @@ function packageMigrations() {
   const migrationsPath = 'db/migrate'
 
   fs.readdirSync(migrationsPath).forEach(async (file, index) => {
+    const isJSFile = /\.js$/.test(file)
+    if (!isJSFile) return
+
     imports += `import * as module${index} from '${migrationsPath}/${file}'\n`
     finalExport += `\n  "${file}": module${index},`
   })

@@ -23,6 +23,7 @@ describe('cli program app:new', () => {
       File.rm = jest.fn()
       File.write = jest.fn()
       File.read = jest.fn().mockImplementation(async () => JSON.stringify(packageJson))
+      File.append = eavesdrop().returning(true)
 
       const newAppProgram = new NewAppProgram()
       await newAppProgram.new({ args: ['fishman'] })
@@ -44,6 +45,7 @@ describe('cli program app:new', () => {
       expect(execSpy).toHaveBeenCalledWith(`cd ../fishman/node_modules/psychic && yarn install --silent`)
 
       expect(File.copy).toHaveBeenCalledWith('./.babelrc', '../fishman/.babelrc')
+      expect(File.append).toHaveBeenCalledWith('./.gitignore', '/dist')
     })
   })
 })
