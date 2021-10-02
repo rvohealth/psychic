@@ -5,6 +5,7 @@ import GazeCLIProgram from 'src/cli/program/gaze'
 import GenerateCLIProgram from 'src/cli/program/generate'
 import NewAppProgram from 'src/cli/program/new-app'
 import SpecCLIProgram from 'src/cli/program/spec'
+import ListenCLIProgram from 'src/cli/program/listen'
 
 export default class CLI {
   get args() {
@@ -25,6 +26,10 @@ export default class CLI {
     case 'gen':
     case 'g':
       return new GenerateCLIProgram()
+
+    case 'listen':
+    case 'start':
+      return new ListenCLIProgram()
 
     case 'migrate':
       return new MigrateCLIProgram()

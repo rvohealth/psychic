@@ -15,8 +15,8 @@ class Psyfs {
   }
 
   static async replace(arg1, arg2) {
-    if ((await File.exists(arg2))) await exec('rm -rf ' + arg2)
-    await File.copy(arg1, arg2)
+    if ((fileExists(arg2))) await exec('rm -rf ' + arg2)
+    await Psyfs.copy(arg1, arg2)
   }
 
   static async rm(arg1) {
@@ -27,10 +27,10 @@ class Psyfs {
     await unlink(arg1)
   }
 
-  static async unlinkUnlessExists(arg1) {
-    const exists = await File.exists(arg1)
-    if (!exists)
-      await File.unlink(arg1)
+  static async unlinkIfExists(arg1) {
+    const exists = await Psyfs.exists(arg1)
+    if (exists)
+      await Psyfs.unlink(arg1)
   }
 }
 

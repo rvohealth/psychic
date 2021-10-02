@@ -3,6 +3,7 @@ import {
   readdir,
   lstat,
 } from 'fs/promises'
+import fileExists from 'src/helpers/file-exists'
 import Psyfs from 'src/helpers/psyfs'
 
 class Dir extends Psyfs {
@@ -20,7 +21,7 @@ class Dir extends Psyfs {
   }
 
   static async mkdirUnlessExists(arg1) {
-    const exists = await File.exists(arg1)
+    const exists = await fileExists(arg1)
     if (!exists)
       await mkdir(arg1)
   }

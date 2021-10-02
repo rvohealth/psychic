@@ -26,18 +26,25 @@ export default class GenerateDream {
     const [ dreamname ] = args
     const filepath = `db/migrate/${timestamp}-create-${dreamname.hyphenize()}.js`
 
-    await File.write(filepath, migrationTemplate(dreamname))
+    await File.write(filepath, migrationTemplate(dreamname, args.slice(1)))
 
     if (!process.env.CORE_TEST)
       l.log(`wrote migration to: ${filepath}`)
   }
 }
 
-function migrationTemplate(name) {
+function migrationTemplate(name, args=[]) {
+  let fieldsString = ''
+  args.forEach(arg => {
+    const [ type, fieldName ] = arg.split(':')
+    fieldsString += `    t.${type}('${fieldName}')\n`
+  })
+
   return (
-`
+`\
 export async function up(m) {
   await m.createTable('${name}', t => {
+${fieldsString.replace(/\n$/, '')}
   })
 }
 
@@ -50,7 +57,7 @@ export async function down(m) {
 
 function dreamTemplate(name) {
   return (
-`
+`\
 import psychic, { Dream } from 'psychic'
 
 export default class ${name.pascalize()} extends Dream {

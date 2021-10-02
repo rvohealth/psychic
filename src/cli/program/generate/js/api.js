@@ -2,11 +2,12 @@ import fs from 'fs'
 import l from 'src/singletons/l'
 import CrystalBall from 'src/crystal-ball'
 import File from 'src/helpers/file'
+import Dir from 'src/helpers/dir'
 
 export default class GenerateJSAPI {
   async generate() {
-    await File.mkdirUnlessExists('src/spy')
-    await File.mkdirUnlessExists('src/spy/net')
+    await Dir.mkdirUnlessExists('src/spy')
+    await Dir.mkdirUnlessExists('src/spy/net')
 
     await this.generateForRoutes(CrystalBall.routes)
     await this.generateForNamespaces(CrystalBall.namespaces)
@@ -15,9 +16,10 @@ export default class GenerateJSAPI {
   // recursively read all nested namespaces
   // this looks like it should be broken, investigate later!
   async generateForNamespaces(namespaces) {
-    for (const namespace in Object.keys(namespaces)) {
-      await this.generateForNamespaces(namespaces[namespace].namespaces)
-    }
+    // console.log(namespaces)
+    // for (const namespace in Object.keys(namespaces)) {
+    //   await this.generateForNamespaces(namespaces[namespace].namespaces)
+    // }
   }
 
   async generateForRoutes(routes) {
@@ -41,13 +43,13 @@ export default class GenerateJSAPI {
 
         if (!isFilename && !fs.existsSync(path)) {
           l.log(`making dir ${path}...`)
-          await File.mkdir(path)
+          await Dir.mkdir(path)
         }
         index++
       }
 
       l.log(`writing api file: ${relativePath.replace(/\.js$/, '')}.${this.routeMethodName(route)}...`)
-      await File.unlinkUnlessExists(filePath)
+      await File.unlinkIfExists(filePath)
 
       files[filePath] = files[filePath] || { route, endpoints: [] }
       files[filePath].endpoints.push(this.endpoint(route))
