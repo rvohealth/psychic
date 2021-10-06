@@ -1,2 +1,2 @@
-import 'psychic/spec/hooks'
-console.log('SPEC HOOKS')
+import { specHooks } from 'psychic'
+specHooks()

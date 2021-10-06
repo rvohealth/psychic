@@ -1,9 +1,18 @@
-{
-  "presets": [
+module.exports = {
+  presets: [
+    // [
+    //   "@babel/preset-env",
+    //   {
+    //     targets: {
+    //       node: 'current'
+    //     }
+    //   }
+    // ],
+
     "@babel/preset-env",
     "@babel/preset-react"
   ],
-  "plugins": [
+  plugins: [
     "@babel/plugin-transform-runtime",
     "@babel/plugin-proposal-optional-chaining",
     "@babel/plugin-syntax-jsx",

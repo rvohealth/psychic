@@ -28,6 +28,8 @@ export default class NewAppProgram extends CLIProgram {
     const psychicPkgjson = JSON.parse((await File.read('./package.json')))
     const pkgjson = JSON.parse((await File.read(path + '/package.json')))
 
+    pkgjson.type = 'module'
+
     pkgjson.dependencies = {
       ...pkgjson.dependencies,
       ...psychicPkgjson.dependencies,
