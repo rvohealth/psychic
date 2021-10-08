@@ -1,11 +1,14 @@
+import pluralize from 'pluralize'
+import snakeCase from 'src/helpers/snakeCase'
 import l from 'src/singletons/l'
 import File from 'src/helpers/file'
 import moment from 'moment'
 
 export default class GenerateDream {
   async generate(args) {
-    await this._generateDream(args)
-    await this._generateMigration(args)
+    await this._generateDream(JSON.parse(JSON.stringify(args)))
+    await this._generateMigration(JSON.parse(JSON.stringify(args)))
+    await this._generateSpec(JSON.parse(JSON.stringify(args)))
 
     if (!process.env.CORE_TEST)
       return process.exit()
@@ -18,18 +21,28 @@ export default class GenerateDream {
     await File.write(filepath, dreamTemplate(dreamname))
 
     if (!process.env.CORE_TEST)
-      l.log(`wrote migration to: ${filepath}`)
+      l.log(`wrote new dream to: ${filepath}`)
   }
 
   async _generateMigration(args) {
     const timestamp = moment().format(`YYYYMMDDHHmmss`)
     const [ dreamname ] = args
-    const filepath = `db/migrate/${timestamp}-create-${dreamname.hyphenize()}.js`
+    const filepath = `db/migrate/${timestamp}-create-${pluralize(dreamname.hyphenize())}.js`
 
     await File.write(filepath, migrationTemplate(dreamname, args.slice(1)))
 
     if (!process.env.CORE_TEST)
-      l.log(`wrote migration to: ${filepath}`)
+      l.log(`wrote new migration to: ${filepath}`)
+  }
+
+  async _generateSpec(args) {
+    const [ dreamname ] = args
+    const filepath = `spec/dreams/${dreamname.hyphenize()}.spec.js`
+
+    await File.write(filepath, specTemplate(dreamname))
+
+    if (!process.env.CORE_TEST)
+      l.log(`wrote new spec to: ${filepath}`)
   }
 }
 
@@ -40,16 +53,18 @@ function migrationTemplate(name, args=[]) {
     fieldsString += `    t.${type}('${fieldName}')\n`
   })
 
+  const pluralizedName = pluralize(snakeCase(name))
+
   return (
 `\
 export async function up(m) {
-  await m.createTable('${name}', t => {
+  await m.createTable('${pluralizedName}', t => {
 ${fieldsString.replace(/\n$/, '')}
   })
 }
 
 export async function down(m) {
-  await m.dropTable('${name}')
+  await m.dropTable('${pluralizedName}')
 }
 `
   )
@@ -62,6 +77,17 @@ import psychic, { Dream } from 'psychic'
 
 export default class ${name.pascalize()} extends Dream {
 }
+`
+  )
+}
+
+function specTemplate(name) {
+  return (
+`\
+import ${name.pascalize()} from 'app/dreams/${name.hyphenize()}'
+
+describe ('${name.pascalize()}', () => {
+})
 `
   )
 }

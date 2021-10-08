@@ -10,32 +10,32 @@ describe('cli program g:migration <name>', () => {
 `\
 import psychic, { Dream } from 'psychic'
 
-export default class Fishman extends Dream {
+export default class User extends Dream {
 }
 `
 
     File.write = eavesdrop()
-    await generateCLIProgram.run({ command: 'dream', args: ['fishman'] })
-    expect(File.write).toHaveBeenCalledWith(expect.stringContaining('app/dreams/fishman.js'), template)
+    await generateCLIProgram.run({ command: 'dream', args: ['user'] })
+    expect(File.write).toHaveBeenCalledWith(expect.stringContaining('app/dreams/user.js'), template)
   })
 
   it ('generates a new file in the migrations folder with the passed name', async () => {
     const template =
 `\
 export async function up(m) {
-  await m.createTable('fishman', t => {
+  await m.createTable('users', t => {
 
   })
 }
 
 export async function down(m) {
-  await m.dropTable('fishman')
+  await m.dropTable('users')
 }
 `
 
     File.write = eavesdrop()
-    await generateCLIProgram.run({ command: 'dream', args: ['fishman'] })
-    expect(File.write).toHaveBeenCalledWith(expect.stringContaining('create-fishman.js'), template.toString())
+    await generateCLIProgram.run({ command: 'dream', args: ['users'] })
+    expect(File.write).toHaveBeenCalledWith(expect.stringContaining('create-users.js'), template.toString())
   })
 
   context ('when text attributes are passed', () => {
@@ -43,20 +43,34 @@ export async function down(m) {
       const template =
 `\
 export async function up(m) {
-  await m.createTable('fishman', t => {
+  await m.createTable('users', t => {
     t.text('snapman')
-    t.text('fishman')
+    t.text('grabman')
   })
 }
 
 export async function down(m) {
-  await m.dropTable('fishman')
+  await m.dropTable('users')
 }
 `
 
       File.write = eavesdrop()
-      await generateCLIProgram.run({ command: 'dream', args: ['fishman', 'text:snapman', 'text:fishman'] })
-      expect(File.write).toHaveBeenCalledWith(expect.stringContaining('create-fishman.js'), template.toString())
+      await generateCLIProgram.run({ command: 'dream', args: ['user', 'text:snapman', 'text:grabman'] })
+      expect(File.write).toHaveBeenCalledWith(expect.stringContaining('create-users.js'), template.toString())
     })
+  })
+
+  it ('generates a new file in the spec folder with the passed name', async () => {
+    const template =
+`\
+import User from 'app/dreams/user'
+
+describe ('User', () => {
+})
+`
+
+    File.write = eavesdrop()
+    await generateCLIProgram.run({ command: 'dream', args: ['user'] })
+    expect(File.write).toHaveBeenCalledWith('spec/dreams/user.spec.js', template.toString())
   })
 })

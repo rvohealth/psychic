@@ -31,6 +31,7 @@ export default class NewAppProgram extends CLIProgram {
     pkgjson.dependencies = {
       ...pkgjson.dependencies,
       ...psychicPkgjson.dependencies,
+      psychic: 'git+https://avocadojesus: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@github.com/psychic.git',
     }
 
     pkgjson.devDependencies = {
@@ -69,7 +70,7 @@ export default class NewAppProgram extends CLIProgram {
 
     if (!quick || fromScratch) {
       l.logStatus('adding eslint, babel-eslint...')
-      await exec(`cd ${path} && yarn add babel-eslint eslint-config-react-app -D`)
+      await exec(`cd ${path} && yarn add babel-eslint eslint-config-react-app babel-plugin-module-resolver -D`)
 
       l.logStatus('adding non-dev dependencies...')
       await exec(`cd ${path} && yarn add axios socket.io-client --silent`)
