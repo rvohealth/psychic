@@ -76,14 +76,10 @@ class PostgresAdapter {
   async runRootSQL(sqlString) {
     // return await this.withRootConnection(async client => {
       let response
-      const stack = new Error().stack
       const client = await this.rootPool().connect()
 
       try {
         response = await client.query(sqlString)
-      } catch(error) {
-        if (!ENV.CORE_TEST) console.error(stack)
-        throw error
       } finally {
         await client.release()
       }

@@ -8,7 +8,7 @@ import _Dream from 'src/dream'
 import _Projection from 'src/projection'
 import _config from 'src/config'
 import _db from 'src/db'
-import _specHooks from 'spec/hooks'
+import _specHooks from 'src/psyspec/hooks'
 
 export const Channel = _Channel
 export const CLI = _CLI

@@ -1,5 +1,5 @@
-import * as projection0 from 'src/template/app/projections/black-cat.js'
+import * as projection0 from 'src/template/app/projections/.gitkeep'
 const projections = {
-  "BlackCat": projection0,
+  "Gitkeep": projection0,
 }
 export default projections

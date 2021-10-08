@@ -11,10 +11,14 @@ export default class TelekineticBridges {
   setConfig(telekinesisConfig) {
     this._telekinesisConfig = telekinesisConfig
 
+    if (typeof telekinesisConfig !== 'object') return
+
     Object
       .keys(telekinesisConfig)
       .forEach(telekinesisKey => {
         const _config = telekinesisConfig[telekinesisKey]
+        if (!_config) return
+
         this._bridges[telekinesisKey] = new Telekinesis({
           key: telekinesisKey,
           config: _config,

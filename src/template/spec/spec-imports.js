@@ -1,2 +1,1 @@
-// import 'psychic/spec/imports'
-console.log('SPEC IMPORTS')
+// add imports here to provide for spec runners

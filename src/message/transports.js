@@ -87,7 +87,7 @@ export default class Transports {
           break
 
         default:
-          console.log('invalid config for SMS. ignoring for now...')
+          // console.log('invalid config for SMS. ignoring for now...')
           // throw `unrecognized sms adapter type ${_config.adapter}`
         }
       })

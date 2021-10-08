@@ -7,7 +7,6 @@ import { jest } from '@jest/globals'
 import { SchemaWriter, config, db } from 'psychic'
 
 export default function specHooks() {
-  console.log('BOLEROOOOOOO')
   beforeEach(async () => {
     const messagesConfig = await loadYaml('config/messages')
     const dbConfig = await loadYaml('config/database')
@@ -35,7 +34,7 @@ export default function specHooks() {
     jest.restoreAllMocks()
 
     await db.createIfNotExists()
-    await db.dropAllTables()
+    // await db.dropAllTables()
     // await rmdir('tmp/storage/spec/*', { recursive: true })
   })
 
