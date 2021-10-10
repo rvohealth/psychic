@@ -42,7 +42,7 @@ export default class RunMigration extends MigrateOperation {
     if (!config.schema.migrations) {
       try {
         await db.dropTable('migrations')
-      } catch {
+      } catch (error) {
         // do nothing
       }
 
