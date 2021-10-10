@@ -113,6 +113,10 @@ class DB {
     return await this.adapter.transaction(cb)
   }
 
+  async truncateAll() {
+    return await this.adapter.truncateAll()
+  }
+
   update(tableName, fields) {
     return new Query().update(tableName, fields)
   }

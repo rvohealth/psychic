@@ -1,26 +1,11 @@
 import { jest } from '@jest/globals'
-import { SchemaWriter, config, db } from 'psychic'
-
-console.log('FROM HOOKS', SchemaWriter)
-// import fileExists from 'src/helpers/file-exists'
-// import { mkdir } from 'fs/promises'
+import { config, db } from 'psychic'
 
 import packagedDreams from 'app/pkg/dreams.pkg.js'
 import packagedChannels from 'app/pkg/channels.pkg.js'
 import packagedProjections from 'app/pkg/projections.pkg.js'
 import routeCB from 'config/routes.js'
 import dbSeedCB from 'db/seed.js'
-
-// beforeAll(async () => {
-//   if (! (await fileExists('tmp')))
-//     await mkdir('tmp')
-
-//   if (! (await fileExists('tmp/storage')))
-//     await mkdir('tmp/storage')
-
-//   if (! (await fileExists('tmp/storage/spec')))
-//     await mkdir('tmp/storage/spec')
-// })
 
 beforeEach(async () => {
   const messagesConfig = await loadYaml('config/messages')
@@ -42,13 +27,12 @@ beforeEach(async () => {
 
   jest.clearAllMocks()
   jest.restoreAllMocks()
-  // await rmdir('tmp/storage/spec/*', { recursive: true })
 })
 
-// afterEach(async () => {
-//   await SchemaWriter.destroy()
-//   // await db.flush()
-// })
+afterEach(async () => {
+  await db.flush()
+  await db.truncateAll()
+})
 
 // // https://stackoverflow.com/questions/50121134/how-do-i-fail-a-test-in-jest-when-an-uncaught-promise-rejection-occurs
 // // this helps point to underlying failure in code
