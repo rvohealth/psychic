@@ -12,6 +12,7 @@ export default class RunMigration extends MigrateOperation {
 
   async run({ step }={}) {
     await this._beforeAll()
+
     const migrations = await this.migrations()
 
     const files = Object.keys(migrations)
@@ -39,7 +40,12 @@ export default class RunMigration extends MigrateOperation {
 
   async _beforeAll() {
     if (!config.schema.migrations) {
-      await db.dropTable('migrations')
+      try {
+        await db.dropTable('migrations')
+      } catch {
+        // do nothing
+      }
+
       await db.createTable('migrations', t => {
         t.string('name')
         t.timestamp('created_at')
@@ -48,6 +54,7 @@ export default class RunMigration extends MigrateOperation {
       const statement = new CreateTableStatement('migrations')
       statement.string('name')
       statement.timestamp('created_at')
+      console.log('create schema')
       new Migration().schema.createTable('migrations', statement.columns)
     }
 
