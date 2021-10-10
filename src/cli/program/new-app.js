@@ -79,26 +79,26 @@ export default class NewAppProgram extends CLIProgram {
       await exec(`cd ${path} && yarn install --silent`)
     }
 
-    if ((await File.exists(path + '/node_modules/psychic'))) {
-      l.logStatus('selectively copy src and make folder...')
-      await File.copy('./src', path + '/node_modules/psychic/src')
-      await File.copy('./make', path + '/node_modules/psychic/make')
+    // if ((await File.exists(path + '/node_modules/psychic'))) {
+    //   l.logStatus('selectively copy src and make folder...')
+    //   await File.copy('./src', path + '/node_modules/psychic/src')
+    //   await File.copy('./make', path + '/node_modules/psychic/make')
 
-      l.logStatus('build current app...')
-      await exec('yarn run build')
+    //   l.logStatus('build current app...')
+    //   await exec('yarn run build')
 
-      l.logStatus('copy rebuilt dist folder...')
-      await File.copy('./dist', path + '/node_modules/psychic/dist')
+    //   l.logStatus('copy rebuilt dist folder...')
+    //   await File.copy('./dist', path + '/node_modules/psychic/dist')
 
-    } else {
-      l.logStatus('copy psychic app to node_modules (temporarily, until we have npm up and running)...')
-      await File.copy('./', path + '/node_modules/psychic')
-    }
+    // } else {
+    //   l.logStatus('copy psychic app to node_modules (temporarily, until we have npm up and running)...')
+    //   await File.copy('./', path + '/node_modules/psychic')
+    // }
 
-    if (!quick || fromScratch) {
-      l.logStatus('installing deps...')
-      await exec(`cd ${path}/node_modules/psychic && yarn install --silent`)
-    }
+    // if (!quick || fromScratch) {
+    l.logStatus('installing deps...')
+    await exec(`cd ${path}/node_modules/psychic && yarn install --silent`)
+    // }
 
     l.logStatus('copying .babelrc...')
 
