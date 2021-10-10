@@ -1,5 +1,7 @@
 import { jest } from '@jest/globals'
 import { SchemaWriter, config, db } from 'psychic'
+
+console.log('FROM HOOKS', SchemaWriter)
 // import fileExists from 'src/helpers/file-exists'
 // import { mkdir } from 'fs/promises'
 
