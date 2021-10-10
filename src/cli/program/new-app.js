@@ -31,7 +31,7 @@ export default class NewAppProgram extends CLIProgram {
     pkgjson.dependencies = {
       ...pkgjson.dependencies,
       ...psychicPkgjson.dependencies,
-      psychic: 'git+https://avocadojesus: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@github.com/psychic.git',
+      psychic: 'git+ssh://git@github.com/avocadojesus/psychic.git#dev',
     }
 
     pkgjson.devDependencies = {
