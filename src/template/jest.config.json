@@ -1,5 +1,6 @@
 {
   "testRegex": "((\\.)(spec))\\.js?$",
+  "testEnvironment": "jest-environment-node",
   "setupFiles": [
     "jest-plugin-context/setup",
     "spec/spec-imports.js"
