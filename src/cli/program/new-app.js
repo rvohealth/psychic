@@ -41,9 +41,11 @@ export default class NewAppProgram extends CLIProgram {
 
     pkgjson.main = 'node_modules/psychic/dist/index.js'
 
-    pkgjson.scripts.psy = "NODE_PATH=. npm run psybuild --scripts-prepend-node-path --silent && " +
-      "clear && " +
-      "NODE_PATH=. node ./dist/bin/psy.js"
+    pkgjson.scripts.psy = "NODE_PATH=. node ./dist/bin/psy.js"
+
+    // pkgjson.scripts.psy = "NODE_PATH=. npm run psybuild --scripts-prepend-node-path --silent && " +
+    //   "clear && " +
+    //   "NODE_PATH=. node ./dist/bin/psy.js"
 
     pkgjson.scripts.trance = "NODE_PATH=. npm run psybuild && " +
       "clear && " +
@@ -62,9 +64,11 @@ export default class NewAppProgram extends CLIProgram {
     // pkgjson.scripts.buildspec = "NODE_PATH=. node ./make/for-core-specs.js && NODE_PATH=. ./node_modules/.bin/babel src -d dist --copy-files && NODE_PATH=. ./node_modules/.bin/babel spec/support/testapp -d dist/testapp --copy-files"
     pkgjson.scripts.buildspec = "NODE_PATH=. ./node_modules/.bin/babel src -d dist --copy-files && NODE_PATH=. ./node_modules/.bin/babel app -d dist/app --copy-files"
 
-    pkgjson.scripts.test = "NODE_PATH=. npm run psybuild && " +
-      "clear && " +
-      "npm run buildspec && NODE_PATH=. node --experimental-vm-modules ./node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles"
+    pkgjson.scripts.test = "npm run buildspec && NODE_PATH=. node --experimental-vm-modules ./node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles"
+
+    // pkgjson.scripts.test = "NODE_PATH=. npm run psybuild && " +
+    //   "clear && " +
+    //   "npm run buildspec && NODE_PATH=. node --experimental-vm-modules ./node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles"
 
     await File.write(path + '/package.json', JSON.stringify(pkgjson, null, 2))
 
