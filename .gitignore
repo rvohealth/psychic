@@ -1,4 +1,5 @@
 node_modules/
+dist
 testappdist/
 tmp/migrate/*
 tmp/spec/*

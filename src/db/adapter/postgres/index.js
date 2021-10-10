@@ -8,8 +8,6 @@ class PostgresAdapter {
   pool() {
     if (this._pool) return this._pool
 
-    console.log("DB NAME:", config.dbName)
-
     this._pool = new Pool({
       Promise: bluebird,
 
