@@ -5,11 +5,11 @@ console.log('FROM HOOKS', SchemaWriter)
 // import fileExists from 'src/helpers/file-exists'
 // import { mkdir } from 'fs/promises'
 
-// import packagedDreams from 'spec/support/testapp/app/pkg/dreams.pkg.js'
-// import packagedChannels from 'spec/support/testapp/app/pkg/channels.pkg.js'
-// import packagedProjections from 'spec/support/testapp/app/pkg/projections.pkg.js'
-// import routeCB from 'spec/support/testapp/config/routes.js'
-// import dbSeedCB from 'spec/support/testapp/db/seed.js'
+import packagedDreams from 'app/pkg/dreams.pkg.js'
+import packagedChannels from 'app/pkg/channels.pkg.js'
+import packagedProjections from 'app/pkg/projections.pkg.js'
+import routeCB from 'config/routes.js'
+import dbSeedCB from 'db/seed.js'
 
 // beforeAll(async () => {
 //   if (! (await fileExists('tmp')))
@@ -22,31 +22,31 @@ console.log('FROM HOOKS', SchemaWriter)
 //     await mkdir('tmp/storage/spec')
 // })
 
-// beforeEach(async () => {
-//   const messagesConfig = await loadYaml('spec/support/testapp/config/messages')
-//   const dbConfig = await loadYaml('spec/support/testapp/config/database')
-//   const redisConfig = await loadYaml('spec/support/testapp/config/redis')
-//   const telekinesisConfig = await loadYaml('spec/support/testapp/config/telekinesis')
+beforeEach(async () => {
+  const messagesConfig = await loadYaml('config/messages')
+  const dbConfig = await loadYaml('config/database')
+  const redisConfig = await loadYaml('config/redis')
+  const telekinesisConfig = await loadYaml('config/telekinesis')
 
-//   config.boot({
-//     dreams: packagedDreams,
-//     channels: packagedChannels,
-//     projections: packagedProjections,
-//     dbConfig,
-//     dbSeedCB,
-//     redisConfig,
-//     routeCB,
-//     messagesConfig,
-//     telekinesisConfig,
-//   })
+  config.boot({
+    dreams: packagedDreams,
+    channels: packagedChannels,
+    projections: packagedProjections,
+    dbConfig,
+    dbSeedCB,
+    redisConfig,
+    routeCB,
+    messagesConfig,
+    telekinesisConfig,
+  })
 
-//   jest.clearAllMocks()
-//   jest.restoreAllMocks()
+  jest.clearAllMocks()
+  jest.restoreAllMocks()
 
-//   await db.createIfNotExists()
-//   await db.dropAllTables()
-//   // await rmdir('tmp/storage/spec/*', { recursive: true })
-// })
+  await db.createIfNotExists()
+  await db.dropAllTables()
+  // await rmdir('tmp/storage/spec/*', { recursive: true })
+})
 
 // afterEach(async () => {
 //   await SchemaWriter.destroy()

@@ -68,6 +68,7 @@ class Config {
   }
 
   get env() {
+    console.log(process.env.NODE_ENV)
     if (process.env.CORE_TEST) return 'test'
     return process.env.PSYCHIC_ENV || process.env.NODE_ENV || 'development'
   }
