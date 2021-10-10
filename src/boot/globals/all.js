@@ -14,6 +14,9 @@ function loadEnv() {
       ...dotenv.parse(fs.readFileSync('.env')),
     }
 
+  if (process.env.NODE_ENV === 'test')
+    return dotenv.parse(fs.readFileSync('.env.test'))
+
   return dotenv.parse(fs.readFileSync('.env.development'))
 }
 
