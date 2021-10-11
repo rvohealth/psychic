@@ -68,14 +68,8 @@ export default class NewAppProgram extends CLIProgram {
 
     await File.write(path + '/package.json', JSON.stringify(pkgjson, null, 2))
 
-    l.logStatus('installing psychic deps...')
-    await exec(`cd ${path}/node_modules/psychic && yarn install --silent`)
-
     l.logStatus('installing yarn dependencies...', { level: 'warn' })
     await exec(`cd ${path} && yarn install --silent`)
-
-    l.logStatus('running psybuild...', { level: 'warn' })
-    await exec(`cd ${path} && yarn run psybuild`)
 
     l.logStatus('adding eslint, babel-eslint...')
     await exec(`cd ${path} && yarn add babel-eslint eslint-config-react-app babel-plugin-module-resolver -D`)
@@ -85,6 +79,12 @@ export default class NewAppProgram extends CLIProgram {
 
     l.logStatus('installing yarn dependencies...', { level: 'warn' })
     await exec(`cd ${path} && yarn install --silent`)
+
+    l.logStatus('installing psychic deps...', { level: 'warn' })
+    await exec(`cd ${path}/node_modules/psychic && yarn install --silent`)
+
+    l.logStatus('running psybuild...', { level: 'warn' })
+    await exec(`cd ${path} && yarn run psybuild`)
 
     // if ((await File.exists(path + '/node_modules/psychic'))) {
     //   l.logStatus('selectively copy src and make folder...')
