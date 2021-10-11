@@ -47,7 +47,7 @@ export default class NewAppProgram extends CLIProgram {
       "clear && " +
       "NODE_PATH=. node -i --experimental-repl-await -e 'require(\"./node_modules/psychic/dist/boot/app/repl.js\")'"
 
-    pkgjson.scripts.prepare = "NODE_PATH=. npm run psybuild"
+    pkgjson.scripts.prepare = null
 
     pkgjson.scripts.psybuild = "NODE_PATH=./node_modules/psychic/ node ./node_modules/psychic/make/for-app.js && " +
       "NODE_PATH=. ./node_modules/.bin/babel app -d dist/app --copy-files &&" +
@@ -68,16 +68,23 @@ export default class NewAppProgram extends CLIProgram {
 
     await File.write(path + '/package.json', JSON.stringify(pkgjson, null, 2))
 
-    if (!quick || fromScratch) {
-      l.logStatus('adding eslint, babel-eslint...')
-      await exec(`cd ${path} && yarn add babel-eslint eslint-config-react-app babel-plugin-module-resolver -D`)
+    l.logStatus('installing psychic deps...')
+    await exec(`cd ${path}/node_modules/psychic && yarn install --silent`)
 
-      l.logStatus('adding non-dev dependencies...')
-      await exec(`cd ${path} && yarn add axios socket.io-client --silent`)
+    l.logStatus('installing yarn dependencies...', { level: 'warn' })
+    await exec(`cd ${path} && yarn install --silent`)
 
-      l.logStatus('installing yarn dependencies...', { level: 'warn' })
-      await exec(`cd ${path} && yarn install --silent`)
-    }
+    l.logStatus('running psybuild...', { level: 'warn' })
+    await exec(`cd ${path} && yarn run psybuild`)
+
+    l.logStatus('adding eslint, babel-eslint...')
+    await exec(`cd ${path} && yarn add babel-eslint eslint-config-react-app babel-plugin-module-resolver -D`)
+
+    l.logStatus('adding non-dev dependencies...')
+    await exec(`cd ${path} && yarn add axios socket.io-client --silent`)
+
+    l.logStatus('installing yarn dependencies...', { level: 'warn' })
+    await exec(`cd ${path} && yarn install --silent`)
 
     // if ((await File.exists(path + '/node_modules/psychic'))) {
     //   l.logStatus('selectively copy src and make folder...')
@@ -96,11 +103,7 @@ export default class NewAppProgram extends CLIProgram {
     // }
 
     // if (!quick || fromScratch) {
-    l.logStatus('installing deps...')
-    await exec(`cd ${path}/node_modules/psychic && yarn install --silent`)
     // }
-
-    l.logStatus('copying .babelrc...')
 
     l.logStatus('updating gitignore...')
     await File.append(`${path}/.gitignore`, "\n# psychic")
