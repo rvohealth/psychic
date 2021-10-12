@@ -25,6 +25,7 @@ export default class NewAppProgram extends CLIProgram {
     const pkgjson = JSON.parse((await File.read(path + '/package.json')))
 
     pkgjson.dependencies = {
+      ...pkgjson.dependencies,
       ...psychicPkgjson.dependencies,
       psychic: 'git+ssh://git@github.com/avocadojesus/psychic.git#dev',
     }
