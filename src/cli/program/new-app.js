@@ -19,10 +19,9 @@ export default class NewAppProgram extends CLIProgram {
 
     l.logStatus('add custom npm scripts to package.json...')
     const psychicPkgjson = JSON.parse((await File.read('./package.json')))
-    const pkgjson = JSON.parse((await File.read(path + '/package.json')))
+    const pkgjson = { ...psychicPkgjson }
 
     pkgjson.dependencies = {
-      ...pkgjson.dependencies,
       ...psychicPkgjson.dependencies,
       psychic: 'git+ssh://git@github.com/avocadojesus/psychic.git#dev',
     }
@@ -89,32 +88,11 @@ export default class NewAppProgram extends CLIProgram {
   }
 
   async buildPsychicAppFoundation(path) {
-    if (!(await File.exists(path + '/app'))) {
-      l.logStatus('carve out new app structure...')
-      await File.copy('src/template', path)
+    l.logStatus('carve out new app structure...')
+    await File.copy('src/template', path)
 
-      l.logStatus('copy and remove js folder')
-      await File.copy(path + '/js', path + '/src/')
-      await File.rm(`${path}/js`)
-
-    } else {
-      l.logStatus('hot swap app folder...')
-      File.replace('src/template/app', path + '/app')
-
-      l.logStatus('hot swap config folder...')
-      File.replace('src/template/config/database.yml', path + '/config/database.yml')
-      File.replace('src/template/config/messages.yml', path + '/config/messages.yml')
-      File.replace('src/template/config/redis.yml', path + '/config/redis.yml')
-
-      // only replace schema if not there, so don't have to rerun migrations
-      if (!(await File.exists('src/template/config/schema.json')))
-        File.replace('src/template/config/schema.json', path + '/config/schema.json')
-
-      l.logStatus('copy App.js')
-      await File.copy('src/template/js/App.js', path + '/src/App.js')
-
-      l.logStatus('copy template/js/psy to src/psy...')
-      await File.copy('src/template/js/psy', path + '/src/psy')
-    }
+    l.logStatus('copy and remove js folder')
+    await File.copy(path + '/js', path + '/src/')
+    await File.rm(`${path}/js`)
   }
 }
