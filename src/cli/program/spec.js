@@ -14,9 +14,20 @@ export default class SpecCLIProgram extends CLIProgram {
 
     else {
       for (const folder of await Dir.readdir('spec')) {
-        if (await Dir.isDir(`spec/${folder}`))
+        if (folder === 'features') continue
+
+        const isDir = await Dir.isDir(`spec/${folder}`)
+        const isEmpty = await Dir.isEmpty(`spec/${folder}`)
+        if (isDir && !isEmpty)
           await spawn(`yarn test ./spec/${folder} --forceExit`, [], { shell: true, stdio: 'inherit' })
       }
+
+      const hasStoriesDir = await Dir.isDir('spec/stories')
+      const hasStories = await Dir.isEmpty('spec/stories')
+
+      if (!hasStoriesDir || !hasStories) return
+
+      await spawn(`yarn run psy spec/stories --forceExit`, [], { shell: true, stdio: 'inherit' })
     }
   }
 }

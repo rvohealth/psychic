@@ -2,6 +2,7 @@ import {
   mkdir,
   readdir,
   lstat,
+  opendir,
 } from 'fs/promises'
 import fileExists from 'src/helpers/file-exists'
 import Psyfs from 'src/helpers/psyfs'
@@ -12,6 +13,18 @@ class Dir extends Psyfs {
       const stat = await lstat(path)
       return stat.isDirectory()
     } catch (e) {
+      return false
+    }
+  }
+
+  static async isEmpty(path) {
+    try {
+      const directory = await opendir(path)
+      const entry = await directory.read()
+      await directory.close()
+
+      return entry === null
+    } catch (error) {
       return false
     }
   }

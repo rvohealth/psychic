@@ -5,6 +5,7 @@ import GazeCLIProgram from 'src/cli/program/gaze'
 import GenerateCLIProgram from 'src/cli/program/generate'
 import NewAppProgram from 'src/cli/program/new-app'
 import SpecCLIProgram from 'src/cli/program/spec'
+import StoriesCLIProgram from 'src/cli/program/stories'
 import ListenCLIProgram from 'src/cli/program/listen'
 
 export default class CLI {
@@ -39,6 +40,10 @@ export default class CLI {
 
     case 'spec':
       return new SpecCLIProgram()
+
+    case 'features':
+    case 'stories':
+      return new StoriesCLIProgram()
 
     default:
       throw `Unkown program ${this.args.program}`

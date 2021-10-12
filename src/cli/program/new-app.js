@@ -58,6 +58,10 @@ export default class NewAppProgram extends CLIProgram {
       "clear && " +
       "npm run buildspec && NODE_PATH=. node --experimental-vm-modules ./node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles"
 
+    pkgjson.scripts.stories = "NODE_PATH=. npm run psybuild && " +
+      "clear && " +
+      "npm run buildspec && NODE_PATH=. node --experimental-vm-modules ./node_modules/.bin/jest --config ./jest.stories.config.json --runInBand --detectOpenHandles"
+
     await File.write(path + '/package.json', JSON.stringify(pkgjson, null, 2))
 
     l.logStatus('installing yarn dependencies...', { level: 'warn' })

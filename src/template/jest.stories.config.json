@@ -1,0 +1,13 @@
+{
+  "testRegex": "((\\.)(spec))\\.js?$",
+  "testEnvironment": "jest-environment-node",
+  "setupFiles": [
+    "jest-plugin-context/setup",
+    "spec/spec-imports.js"
+  ],
+  "setupFilesAfterEnv": ["./spec/spec-hooks.js"],
+  "resetMocks": true,
+  "transform": {
+    "^.+\\.(js|jsx)$": "babel-jest"
+  }
+}
