@@ -14,12 +14,15 @@ export default class NewAppProgram extends CLIProgram {
   async new(args) {
     const path = `../` + (args.args[0] || 'black-cat')
 
+    l.logStatus('running npx create-react-app (this may take a while)...')
+    await exec(`npx create-react-app ${path} --template redux --silent`)
+
     l.logStatus('build psychic foundation...')
     await this.buildPsychicAppFoundation(path)
 
     l.logStatus('add custom npm scripts to package.json...')
     const psychicPkgjson = JSON.parse((await File.read('./package.json')))
-    const pkgjson = { ...psychicPkgjson }
+    const pkgjson = JSON.parse((await File.read(path + '/package.json')))
 
     pkgjson.dependencies = {
       ...psychicPkgjson.dependencies,
