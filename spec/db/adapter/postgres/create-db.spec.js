@@ -23,7 +23,7 @@ describe('PostgresAdapter.db#create', () => {
   describe ('no db name is passed', () => {
     it ('uses db name from env', async () => {
       await postgres.createDB()
-      expect(spy).toHaveBeenCalledWith('CREATE DATABASE psychic_core_test')
+      expect(spy).toHaveBeenCalledWith('CREATE DATABASE psychic_core_development')
     })
   })
 })
