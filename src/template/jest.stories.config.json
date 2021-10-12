@@ -2,10 +2,9 @@
   "testRegex": "((\\.)(spec))\\.js?$",
   "testEnvironment": "jest-environment-jsdom",
   "setupFiles": [
-    "jest-plugin-context/setup",
-    "spec/spec-imports.js"
+    "jest-plugin-context/setup"
   ],
-  "setupFilesAfterEnv": ["./spec/spec-hooks.js"],
+  "setupFilesAfterEnv": ["./spec/stories/spec-hooks.js"],
   "resetMocks": true,
   "transform": {
     "^.+\\.(js|jsx)$": "babel-jest"
