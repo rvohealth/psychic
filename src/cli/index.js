@@ -43,6 +43,7 @@ export default class CLI {
 
     case 'features':
     case 'stories':
+    case 'story':
       return new StoriesCLIProgram()
 
     default:
