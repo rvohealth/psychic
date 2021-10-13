@@ -13,6 +13,7 @@
     "bg": "readonly",
     "context": "readonly",
     "eavesdrop": "readonly",
+    "factory": "readonly",
     "include": "readonly",
     "loadYaml": "readonly",
     "lookup": "readonly",

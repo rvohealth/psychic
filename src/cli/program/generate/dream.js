@@ -91,4 +91,3 @@ describe ('${name.pascalize()}', () => {
 `
   )
 }
-

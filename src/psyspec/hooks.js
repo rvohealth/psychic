@@ -1,6 +1,7 @@
 // this file is imported by the user, and is not used by the Psychic Core testing framework
 
 import 'src/boot/all'
+import 'src/boot/globals/core-spec'
 import 'src/boot/globals/spec'
 
 import { jest } from '@jest/globals'

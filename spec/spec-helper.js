@@ -1,5 +1,5 @@
 import 'src/boot/all'
-import 'src/boot/globals/spec'
+import 'src/boot/globals/core-spec'
 
 process.env.CORE_TEST = ENV.CORE_TEST = true
 process.env.PSYCHIC_SECRET = ENV.PSYCHIC_SECRET = 'black cats are the coolest'

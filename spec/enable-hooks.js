@@ -10,6 +10,7 @@ import packagedChannels from 'spec/support/testapp/app/pkg/channels.pkg.js'
 import packagedProjections from 'spec/support/testapp/app/pkg/projections.pkg.js'
 import routeCB from 'spec/support/testapp/config/routes.js'
 import dbSeedCB from 'spec/support/testapp/db/seed.js'
+import 'spec/factories'
 
 beforeAll(async () => {
   if (! (await fileExists('tmp')))
