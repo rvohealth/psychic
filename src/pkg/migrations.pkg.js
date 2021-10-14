@@ -1,5 +1,5 @@
-import * as module0 from 'src/template/db/migrate/.gitkeep'
+import * as module0 from 'dist/testapp/db/migrate/01-create-test-users.js'
 const migrations = {
-  ".gitkeep": module0,
+  "01-create-test-users.js": module0,
 }
 export default migrations
