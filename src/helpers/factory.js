@@ -1,3 +1,5 @@
+class InvalidDreamClass extends Error {}
+
 class Factory {
   static dreams = {}
 
@@ -6,7 +8,10 @@ class Factory {
   }
 
   static async create(dreamName, attrs) {
-    console.log(dreamName, attrs, this.dreams)
+    const dreamClass = this.dreams[dreamName]
+    if (!dreamClass) throw new InvalidDreamClass(dreamName)
+
+    return await dreamClass.create(attrs)
   }
 }
 
