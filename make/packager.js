@@ -16,7 +16,9 @@ class Packager {
     const channelsPath = `${this.prefix}app/channels`
 
     fs.readdirSync(originalPath).forEach(async (file, index) => {
-      if (file === '.gitkeep') return
+      const isJSFile = /\.js$/.test(file)
+      if (!isJSFile) return
+
       imports += `import * as channel${index} from '${channelsPath}/${file}'\n`
       finalExport += `\n  "${pascalCase(file.replace(/\.js$/, ''))}": channel${index},`
     })
@@ -31,7 +33,9 @@ class Packager {
     const dreamsPath = `${this.prefix}app/dreams`
 
     fs.readdirSync(originalPath).forEach(async (file, index) => {
-      if (file === '.gitkeep') return
+      const isJSFile = /\.js$/.test(file)
+      if (!isJSFile) return
+
       imports += `import * as dream${index} from '${dreamsPath}/${file}'\n`
       finalExport += `\n  "${snakeCase(file.replace(/\.js$/, ''))}": dream${index},`
     })
@@ -46,6 +50,9 @@ class Packager {
     const migrationsPath = `${this.prefix}db/migrate`
 
     fs.readdirSync(originalPath).forEach(async (file, index) => {
+      const isJSFile = /\.js$/.test(file)
+      if (!isJSFile) return
+
       imports += `import * as module${index} from '${migrationsPath}/${file}'\n`
       finalExport += `\n  "${file}": module${index},`
     })
@@ -60,7 +67,9 @@ class Packager {
     const channelsPath = `${this.prefix}app/projections`
 
     fs.readdirSync(originalPath).forEach(async (file, index) => {
-      if (file === '.gitkeep') return
+      const isJSFile = /\.js$/.test(file)
+      if (!isJSFile) return
+
       imports += `import * as projection${index} from '${channelsPath}/${file}'\n`
       finalExport += `\n  "${pascalCase(file.replace(/\.js$/, ''))}": projection${index},`
     })
@@ -75,7 +84,9 @@ class Packager {
     const dreamsPath = `${this.prefix}app/dreams`
 
     fs.readdirSync(originalPath).forEach(async file => {
-      if (file === '.gitkeep') return
+      const isJSFile = /\.js$/.test(file)
+      if (!isJSFile) return
+
       const className = pascalCase(file.replace(/\.js$/, ''))
       imports += `import ${className} from '${dreamsPath}/${file}'\n`
       globals += `global.${className} = ${className}\n`
