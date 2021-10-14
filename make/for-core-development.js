@@ -1,12 +1,7 @@
-import packageMigrations from './packageMigrations'
-import packageDreams from './packageDreams'
-import packageChannels from './packageChannels'
-import packageProjections from './packageProjections'
-import packageREPL from './packageREPL'
+import Packager from './packager'
+const packager = new Packager({
+  appDir: 'src/',
+  prefix: 'src/template/',
+})
 
-packageMigrations('src/template/')
-packageDreams('src/template/')
-packageChannels('src/template/')
-packageProjections('src/template/')
-packageREPL('src/template/')
-
+packager.run()

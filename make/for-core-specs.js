@@ -1,11 +1,8 @@
-import packageMigrations from './packageMigrations'
-import packageDreams from './packageDreams'
-import packageChannels from './packageChannels'
-import packageProjections from './packageProjections'
-import packageREPL from './packageREPL'
+import Packager from './packager'
+const packager = new Packager({
+  appDir: 'src/',
+  prefix: 'src/template/',
+  originalPathPrefix: 'spec/support/testapp/',
+})
 
-packageMigrations('dist/testapp/', 'spec/support/testapp/')
-packageDreams('dist/testapp/', 'spec/support/testapp/')
-packageChannels('dist/testapp/', 'spec/support/testapp/')
-packageProjections('dist/testapp/', 'spec/support/testapp/')
-packageREPL('dist/testapp/', 'spec/support/testapp/')
+packager.run()
