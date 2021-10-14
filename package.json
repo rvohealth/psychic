@@ -4,11 +4,6 @@
   "description": "MVC web framework that knows what you're thinking. written in nodejs",
   "private": true,
   "main": "dist/index.js",
-  "exports": {
-    ".": "./dist/index.js",
-    "./cabbage": "./dist/cabbage.js",
-    "./package.json": "./package.json"
-  },
   "scripts": {
     "test": "npm run buildspec && NODE_PATH=. CORE_TEST=true node --experimental-vm-modules ./node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles",
     "build": "NODE_PATH=. node ./make/for-core-development.js && NODE_PATH=. ./node_modules/.bin/babel src -d dist --copy-files",
