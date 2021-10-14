@@ -1,4 +1,4 @@
-import 'psychic/psyspec'
+import { Factory } from 'psychic/psyspec'
 import { jest } from '@jest/globals'
 import { config, db } from 'psychic'
 
