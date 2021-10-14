@@ -24,7 +24,7 @@ beforeEach(async () => {
     }
   }
 
-  jest.spyOn(config, 'schema', 'get').mockReturnValue(mockSchema)
+  posess(config, 'schema', 'get').returning(mockSchema)
 })
 
 describe ('Factory', () => {
@@ -38,7 +38,17 @@ describe ('Factory', () => {
     it ('creates a new dream in db', async () => {
       const user = await Factory.create('user', { email: 'fishman' })
       expect(user.constructor).toBe(User)
+      expect(user.email).toBe('fishman')
       expect(user.persisted).toBe(true)
+    })
+  })
+
+  describe ('#build', () => {
+    it ('returns a new, non-persisted instance of the dream', async () => {
+      const user = await Factory.build('user', { email: 'fishman' })
+      expect(user.constructor).toBe(User)
+      expect(user.email).toBe('fishman')
+      expect(user.persisted).toBe(false)
     })
   })
 })
