@@ -8,7 +8,7 @@ class Factory {
   }
 
   static async create(dreamName, attrs) {
-    const dreamClass = this.dreams[dreamName]
+    const dreamClass = this.dreams[dreamName]?.default
     if (!dreamClass) throw new InvalidDreamClass(dreamName)
 
     console.log(dreamClass, dreamName, this.dreams, this.dreams[dreamName])
