@@ -3,7 +3,7 @@ import pascalCase from './helpers/pascalCase'
 import snakeCase from './helpers/snakeCase'
 
 class Packager {
-  constructor({ prefix, originalPathPrefix, appDir }) {
+  constructor({ prefix, originalPathPrefix, appDir }={}) {
     this.prefix = prefix || ''
     this.originalPathPrefix = originalPathPrefix || null
     this.appDir = appDir || 'app/'
