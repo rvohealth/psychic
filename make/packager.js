@@ -56,8 +56,8 @@ class Packager {
   packageProjections() {
     let imports = ''
     let finalExport = 'const projections = {'
-    const originalPath = `${this.originalPathPrefix || this.prefix}/app/projections`
-    const channelsPath = `${this.prefix}/app/projections`
+    const originalPath = `${this.originalPathPrefix || this.prefix}app/projections`
+    const channelsPath = `${this.prefix}app/projections`
 
     fs.readdirSync(originalPath).forEach(async (file, index) => {
       if (file === '.gitkeep') return
@@ -71,8 +71,8 @@ class Packager {
   packageREPL() {
     let imports = ''
     let globals = ''
-    const originalPath = `${this.originalPathPrefix || this.prefix}/app/dreams`
-    const dreamsPath = `${this.prefix}/app/dreams`
+    const originalPath = `${this.originalPathPrefix || this.prefix}app/dreams`
+    const dreamsPath = `${this.prefix}app/dreams`
 
     fs.readdirSync(originalPath).forEach(async file => {
       if (file === '.gitkeep') return
