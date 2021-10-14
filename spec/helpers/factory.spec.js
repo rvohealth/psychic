@@ -30,7 +30,9 @@ beforeEach(async () => {
 describe ('Factory', () => {
   beforeEach(() => {
     Factory.boot({
-      user: User,
+      user: {
+        default: User,
+      }
     })
   })
 

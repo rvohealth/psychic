@@ -11,8 +11,14 @@ class Factory {
     const dreamClass = this.dreams[dreamName]?.default
     if (!dreamClass) throw new InvalidDreamClass(dreamName)
 
-    console.log(dreamClass, dreamName, this.dreams, this.dreams[dreamName])
     return await dreamClass.create(attrs)
+  }
+
+  static async build(dreamName, attrs) {
+    const dreamClass = this.dreams[dreamName]?.default
+    if (!dreamClass) throw new InvalidDreamClass(dreamName)
+
+    return await dreamClass.new(attrs)
   }
 }
 
