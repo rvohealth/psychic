@@ -1,3 +1,4 @@
-import _specHooks from 'src/psyspec/hooks'
+import 'src/boot/globals/core-spec'
+import 'src/boot/globals/spec'
 
-export const specHooks = _specHooks
+console.log('FROM PSYSPEC')

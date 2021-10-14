@@ -1,0 +1,4 @@
+{
+  "internal": true,
+  "main": "../dist/psyspec/index.js"
+}
