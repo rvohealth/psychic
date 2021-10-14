@@ -1,14 +1,12 @@
 class Factory {
-  static async dreams() {
-    if (this._dreams) return this._dreams
+  static dreams = {}
 
-    this._dreams = await import('app/pkg/dreams.pkg.js')
-    return this._dreams
+  static boot(dreamsConfig) {
+    this.dreams = dreamsConfig
   }
 
   static async create(dreamName, attrs) {
-    const dreams = await this.dreams()
-    console.log(dreamName, attrs, dreams)
+    console.log(dreamName, attrs, this.dreams)
   }
 }
 

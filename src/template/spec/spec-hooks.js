@@ -14,6 +14,8 @@ beforeEach(async () => {
   const redisConfig = await loadYaml('config/redis')
   const telekinesisConfig = await loadYaml('config/telekinesis')
 
+  Factory.boot(packagedDreams)
+
   config.boot({
     dreams: packagedDreams,
     channels: packagedChannels,
