@@ -1,3 +1,4 @@
+import fs from 'fs'
 import {
   open,
   readFile,
@@ -26,6 +27,10 @@ class File extends Psyfs {
 
   static async write(arg1, arg2, options) {
     await writeFile(arg1, arg2, options)
+  }
+
+  static stream(path, opts) {
+    return fs.createWriteStream(path, opts)
   }
 }
 

@@ -1,5 +1,6 @@
 import io from 'socket.io'
 import jwt from 'jsonwebtoken'
+import morgan from 'morgan'
 import {
   createHttpTerminator,
 } from 'http-terminator'
@@ -85,6 +86,11 @@ export default class CrystalBall {
   constructor() {
     this._channels = {}
     this._app = express()
+
+    this.app.use(morgan('combined', {
+      stream: File.stream(`${__dirname}/${process.env.NODE_ENV}.log`, { flags: 'a' }),
+    }))
+
     this.app.use(cookieParser())
     this.app.use(express.json())
 
