@@ -11,7 +11,7 @@ async function runCLI() {
   const version = pkgjson.version
   const ascii = fs.readFileSync(`${config.psychicPath}src/psychic/boot/ascii/small.txt`).toString()
   l.logLiteral(chalk.grey(ascii))
-  l.logLiteral(chalk.bgGrey.white(`  version ${version}`))
+  l.logLiteral('  ' + chalk.bgGreen.white(`version ${version}`))
 
   const cli = new CLI()
   await cli.run()
