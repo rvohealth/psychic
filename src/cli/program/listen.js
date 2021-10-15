@@ -3,6 +3,6 @@ import spawn from 'src/helpers/spawn'
 
 export default class ListenCLIProgram extends CLIProgram {
   async run() {
-    await spawn(`concurrently "yarn run listen" "sleep 5 && yarn run gaze"`, [], { shell: true, stdio: 'inherit' })
+    await spawn(`concurrently "yarn run gaze"`, [], { shell: true, stdio: 'inherit' })
   }
 }
