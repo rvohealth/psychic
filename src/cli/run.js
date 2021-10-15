@@ -18,7 +18,7 @@ async function runCLI() {
   l.logPermanently(chalk.grey(ascii))
   l.logPermanently(
     "\n " +
-      chalk.magenta("\u1F52E psychic") +
+      chalk.magenta("\u+1F52E psychic") +
       chalk.bgBlack.white(` version ${chalk.green(version)} `) +
       "\n"
   )
