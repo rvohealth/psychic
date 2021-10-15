@@ -6201,11 +6201,6 @@ hide-powered-by@1.1.0:
   resolved "https://registry.npmjs.org/hide-powered-by/-/hide-powered-by-1.1.0.tgz"
   integrity sha512-Io1zA2yOA1YJslkr+AJlWSf2yWFkKjvkcL9Ni1XSUqnGLr/qRQe2UI3Cn/J9MsJht7yEVCe0SscY1HgVMujbgg==
 
-hoek@4.x.x:
-  version "4.2.1"
-  resolved "https://registry.npmjs.org/hoek/-/hoek-4.2.1.tgz"
-  integrity sha512-QLg82fGkfnJ/4iy1xZ81/9SIJiq1NGFUMGs6ParyjBZr6jW2Ufj/snDqTHixNlHdPNwN2RLVD0Pi3igeK9+JfA==
-
 homedir-polyfill@^1.0.1:
   version "1.0.3"
   resolved "https://registry.npmjs.org/homedir-polyfill/-/homedir-polyfill-1.0.3.tgz"
@@ -7002,11 +6997,6 @@ isarray@1.0.0, isarray@~1.0.0:
   resolved "https://registry.npmjs.org/isarray/-/isarray-1.0.0.tgz"
   integrity sha1-u5NdSFgsuhaMBoNJV6VKPgcSTxE=
 
-isemail@2.x.x:
-  version "2.2.1"
-  resolved "https://registry.npmjs.org/isemail/-/isemail-2.2.1.tgz"
-  integrity sha1-A1PT2aYpUQgMJiwqoKQrjqjp4qY=
-
 isexe@^2.0.0:
   version "2.0.0"
   resolved "https://registry.npmjs.org/isexe/-/isexe-2.0.0.tgz"
@@ -7121,11 +7111,6 @@ istanbul-reports@^3.0.2:
   dependencies:
     html-escaper "^2.0.0"
     istanbul-lib-report "^3.0.0"
-
-items@2.x.x:
-  version "2.1.2"
-  resolved "https://registry.npmjs.org/items/-/items-2.1.2.tgz"
-  integrity sha512-kezcEqgB97BGeZZYtX/MA8AG410ptURstvnz5RAgyFZ8wQFPMxHY8GpTq+/ZHKT3frSlIthUq7EvLt9xn3TvXg==
 
 jest-changed-files@^26.6.2:
   version "26.6.2"
@@ -7538,16 +7523,6 @@ jest@26.6.0:
     "@jest/core" "^26.6.0"
     import-local "^3.0.2"
     jest-cli "^26.6.0"
-
-joi@^10.4.1:
-  version "10.6.0"
-  resolved "https://registry.npmjs.org/joi/-/joi-10.6.0.tgz"
-  integrity sha512-hBF3LcqyAid+9X/pwg+eXjD2QBZI5eXnBFJYaAkH4SK3mp9QSRiiQnDYlmlz5pccMvnLcJRS4whhDOTCkmsAdQ==
-  dependencies:
-    hoek "4.x.x"
-    isemail "2.x.x"
-    items "2.x.x"
-    topo "2.x.x"
 
 js-git@^0.7.8:
   version "0.7.8"
@@ -11817,13 +11792,6 @@ token-stream@0.0.1:
   version "0.0.1"
   resolved "https://registry.npmjs.org/token-stream/-/token-stream-0.0.1.tgz"
   integrity sha1-zu78cXp2xDFvEm0LnbqlXX598Bo=
-
-topo@2.x.x:
-  version "2.0.2"
-  resolved "https://registry.npmjs.org/topo/-/topo-2.0.2.tgz"
-  integrity sha1-zVYVdSU5BXwNwEkaYhw7xvvh0YI=
-  dependencies:
-    hoek "4.x.x"
 
 toposort@^2.0.2:
   version "2.0.2"
