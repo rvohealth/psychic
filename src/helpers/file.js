@@ -25,6 +25,11 @@ class File extends Psyfs {
     return (await readFile(arg1))
   }
 
+  static async touch(path) {
+    if (await File.exists(path)) return
+    await File.write(path)
+  }
+
   static async write(arg1, arg2, options) {
     await writeFile(arg1, arg2, options)
   }

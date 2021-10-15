@@ -87,8 +87,11 @@ export default class CrystalBall {
     this._channels = {}
     this._app = express()
 
+    const logPath = `log/${process.env.NODE_ENV}.crystalball.log`
+    File.touch(logPath)
+
     this.app.use(morgan('combined', {
-      stream: File.stream(`${__dirname}/${process.env.NODE_ENV}.log`, { flags: 'a' }),
+      stream: File.stream(logPath, { flags: 'a' }),
     }))
 
     this.app.use(cookieParser())
