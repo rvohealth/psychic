@@ -10,10 +10,10 @@
   "scripts": {
     "test": "npm run buildspec && NODE_PATH=. CORE_TEST=true node --experimental-vm-modules node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles",
     "testquickly": "NODE_PATH=. CORE_TEST=true node --experimental-vm-modules node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles",
-    "copyhelpers": "NODE_PATH=. babel src/helpers -d .dist/make/helpers --copy-files --quiet",
-    "copymake": "npm run copyhelpers && NODE_PATH=. babel make -d .dist/make --copy-files --quiet",
-    "build": "npm run copymake && NODE_PATH=. babel src -d .dist --copy-files --quiet",
-    "buildspec": "npm run copymake && NODE_PATH=. node ./.dist/make/for-core-specs.js && NODE_PATH=. babel src -d .dist --copy-files --quiet && NODE_PATH=. babel spec/support/testapp -d .dist/testapp --copy-files --quiet",
+    "copyhelpers": "NODE_PATH=. npx babel src/helpers -d .dist/make/helpers --copy-files --quiet",
+    "copymake": "npm run copyhelpers && NODE_PATH=. npx babel make -d .dist/make --copy-files --quiet",
+    "build": "npm run copymake && NODE_PATH=. npx babel src -d .dist --copy-files --quiet",
+    "buildspec": "npm run copymake && NODE_PATH=. node ./.dist/make/for-core-specs.js && NODE_PATH=. npx babel src -d .dist --copy-files --quiet && NODE_PATH=. npx babel spec/support/testapp -d .dist/testapp --copy-files --quiet",
     "prepare": "npm run build --scripts-prepend-node-path --silent",
     "psy": "npm run build --scripts-prepend-node-path --silent && clear && NODE_PATH=./ node ./.dist/cli/run.js"
   },
