@@ -74,6 +74,7 @@
     "bull": "^3.29.2",
     "chalk": "^4.1.1",
     "compression": "^1.6.2",
+    "concurrently": "^6.3.0",
     "cookie-parser": "^1.4.5",
     "cors": "^2.8.5",
     "cross-env": "^6.0.3",
