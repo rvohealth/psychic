@@ -15,7 +15,7 @@ async function runCLI() {
     .replace(/\n$/, '')
 
   l.logLiteral(chalk.grey(ascii))
-  l.logLiteral('  ' + chalk.bgGrey.white(` version ${chalk.green(version)} `))
+  l.logLiteral(' ' + chalk.bgGrey.white(` version ${chalk.green(version)} `))
 
   const cli = new CLI()
   await cli.run()
