@@ -17,7 +17,7 @@ async function runCLI() {
 
   // l.logLiteral(chalk.grey(ascii))
   l.logLiteral(
-    " " +
+    "\n " +
       chalk.magenta('psychic') +
       chalk.bgBlack.white(` version ${chalk.green(version)} `) +
       "\n"
