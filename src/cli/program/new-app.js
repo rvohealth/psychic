@@ -24,7 +24,7 @@ export default class NewAppProgram extends CLIProgram {
     await this.buildPsychicAppFoundation(path)
 
     l.logStatus('add custom npm scripts to package.json...')
-    const psychicPkgjson = JSON.parse((await File.read('./package.json')))
+    const psychicPkgjson = JSON.parse((await File.read('~/.config/yarn/global/node_modules/psychic/package.json')))
     const pkgjson = JSON.parse((await File.read(path + '/package.json')))
 
     pkgjson.dependencies = {
