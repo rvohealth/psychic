@@ -39,7 +39,7 @@ export default class L {
     )
   }
 
-  logLiteral(thing, { level }={}) {
+  logPermanently(thing, { level }={}) {
     const color = chalk[this._colorFromLevel(level)]
     this._logs.push({ text: thing.replace(/\n$/, ''), literal: true })
     console.log(color(thing))

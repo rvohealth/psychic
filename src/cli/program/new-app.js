@@ -12,7 +12,7 @@ export default class NewAppProgram extends CLIProgram {
   }
 
   async new(args) {
-    l.logLiteral(" running psy generate:app...\n\n")
+    l.logPermanently(" running psy generate:app...\n\n")
 
     const path = `../` + (args.args[0] || 'black-cat')
 

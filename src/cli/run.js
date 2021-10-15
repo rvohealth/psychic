@@ -15,8 +15,8 @@ async function runCLI() {
   //   .toString()
   //   .replace(/\n$/, '')
 
-  // l.logLiteral(chalk.grey(ascii))
-  l.logLiteral(
+  // l.logPermanently(chalk.grey(ascii))
+  l.logPermanently(
     "\n " +
       chalk.magenta('psychic') +
       chalk.bgBlack.white(` version ${chalk.green(version)} `) +
