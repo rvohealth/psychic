@@ -1,4 +1,5 @@
 node_modules/
+src/pkg
 .dist
 testappdist/
 tmp/migrate/*
