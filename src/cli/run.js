@@ -14,7 +14,7 @@ async function runCLI() {
     .toString()
 
   l.logLiteral(chalk.grey(ascii))
-  l.logLiteral(' ' + chalk.bgGrey.white(` version ${chalk.green(version)} ` + "\n"))
+  l.logLiteral(' ' + chalk.bgBlack.white(` version ${chalk.green(version)} ` + "\n"))
 
   const cli = new CLI()
   await cli.run()
