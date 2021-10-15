@@ -15,5 +15,6 @@
         "extensions": [".js"]
       }
     ]
-  ]
+  ],
+  "sourceMaps": "inline"
 }
