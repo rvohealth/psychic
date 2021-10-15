@@ -1,5 +1,3 @@
-import pluralize from 'pluralize'
-import snakeCase from 'src/helpers/snakeCase'
 import config from 'src/config'
 
 const ActiveModelProvider = superclass => class extends superclass {
@@ -8,7 +6,7 @@ const ActiveModelProvider = superclass => class extends superclass {
   }
 
   static get resourceName() {
-    return snakeCase(this.name)
+    return this.name.snakeify()
   }
 
   static get schema() {
@@ -17,7 +15,7 @@ const ActiveModelProvider = superclass => class extends superclass {
 
   static get table() {
     if (this._table) return this._table
-    return pluralize(snakeCase(this.name))
+    return this.name.snakeify().pluralize()
   }
 
   static set table(tableName) {

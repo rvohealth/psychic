@@ -1,6 +1,6 @@
 import dotenv from 'dotenv'
-import '.dist/psychic/boot/globals/all'
-import '.dist/psychic/boot/language-extensions'
+import 'src/psychic/boot/globals/all'
+import 'src/psychic/boot/language-extensions/index'
 
 dotenv.config()
 

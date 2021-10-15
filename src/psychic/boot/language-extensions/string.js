@@ -6,6 +6,7 @@ import paramCase from 'src/helpers/paramCase'
 import pascalCase from 'src/helpers/pascalCase'
 import snakeCase from 'src/helpers/snakeCase'
 
+
 String.prototype.capitalize = function() {
   return capitalize(this)
 }

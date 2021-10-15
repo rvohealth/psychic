@@ -1,4 +1,8 @@
 import { jest } from '@jest/globals'
+
+import 'src/psychic/boot/all'
+import 'src/psychic/boot/globals/core-spec'
+
 import db from 'src/db'
 import config from 'src/config'
 import SchemaWriter from 'src/migrate/schema-writer'
@@ -10,7 +14,12 @@ import packagedChannels from 'spec/support/testapp/app/pkg/channels.pkg.js'
 import packagedProjections from 'spec/support/testapp/app/pkg/projections.pkg.js'
 import routeCB from 'spec/support/testapp/config/routes.js'
 import dbSeedCB from 'spec/support/testapp/db/seed.js'
+
 import 'spec/factories'
+
+process.env.CORE_TEST = ENV.CORE_TEST = true
+process.env.PSYCHIC_SECRET = ENV.PSYCHIC_SECRET = 'black cats are the coolest'
+process.env.PSYCHIC_WSS_PORT = ENV.PSYCHIC_WSS_PORT = 889
 
 beforeAll(async () => {
   if (! (await fileExists('tmp')))
