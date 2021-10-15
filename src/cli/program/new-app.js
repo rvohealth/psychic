@@ -41,7 +41,7 @@ export default class NewAppProgram extends CLIProgram {
 
     pkgjson.scripts.trance = "NODE_PATH=. npm run psybuild && " +
       "clear && " +
-      "NODE_PATH=. node -i --experimental-repl-await -e 'require(\"./node_modules/psychic/.dist/boot/app/repl.js\")'"
+      "NODE_PATH=. node -i --experimental-repl-await -e 'require(\"./node_modules/psychic/.dist/psychic/boot/app/repl.js\")'"
 
     pkgjson.scripts.prepare = null
 
@@ -98,7 +98,7 @@ export default class NewAppProgram extends CLIProgram {
 
   async buildPsychicAppFoundation(path) {
     l.logStatus('carve out new app structure...')
-    await File.copy('src/template', path)
+    await File.copy('src/psychic/template', path)
 
     l.logStatus('copy and remove js folder')
     await File.copy(path + '/js', path + '/src/')

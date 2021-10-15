@@ -1,6 +1,6 @@
 import fs from 'fs'
-import '.dist/boot/globals/repl'
-import '.dist/boot/all'
+import '.dist/psychic/boot/globals/repl'
+import '.dist/psychic/boot/all'
 import '.dist/app/pkg/repl.pkg'
 import dbSeedCB from '.dist/db/seed'
 import config from 'src/config'

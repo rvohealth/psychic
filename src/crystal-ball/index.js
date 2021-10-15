@@ -178,7 +178,7 @@ export default class CrystalBall {
 
   async boot() {
     if (await File.exists('app'))
-      await import('.dist/boot/app/crystal-ball')
+      await import('.dist/psychic/boot/app/crystal-ball')
 
     if (config.routeCB)
       config.routeCB(this)

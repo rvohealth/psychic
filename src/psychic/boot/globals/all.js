@@ -10,7 +10,7 @@ import include from 'src/helpers/include'
 function loadEnv() {
   if (process.env.CORE_TEST)
     return {
-      ...dotenv.parse(fs.readFileSync('src/template/.env.test')),
+      ...dotenv.parse(fs.readFileSync('src/psychic/template/.env.test')),
       ...dotenv.parse(fs.readFileSync('.env')),
     }
 
