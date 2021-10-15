@@ -65,7 +65,7 @@ class Dir extends Psyfs {
             !ignoreHidden ||
             (ignoreHidden && !/^\./.test(item))
           )
-            files.push(path + '/' + item)
+            files.push(item)
         }
       }
       return files
