@@ -3,6 +3,7 @@ import fs from 'fs'
 import CLI from './index.js'
 import config from 'src/config'
 import l from 'src/singletons/l'
+import File from 'src/helpers/file'
 import 'src/psychic/boot/globals/all'
 
 async function runCLI() {
