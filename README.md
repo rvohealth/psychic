@@ -40,6 +40,15 @@ trance
 ```
 
 
+### Installing globally (while in dev mode)
+```sh
+yarn global add git+ssh://git@github.com/avocadojesus/psychic.git#dev
+
+# and add to zsh/bash profile
+export PATH="$PATH:$(yarn global bin)"
+```
+
+
 ## API
 
 ## Core CLI (for operating core library)
