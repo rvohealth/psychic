@@ -5,7 +5,7 @@
   "private": true,
   "main": ".dist/index.js",
   "bin": {
-    "psy": ".dist/bin/psy.js"
+    "psy": "bin/psy.js"
   },
   "scripts": {
     "test": "npm run buildspec && NODE_PATH=. CORE_TEST=true node --experimental-vm-modules node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles",
