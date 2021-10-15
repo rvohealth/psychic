@@ -9,6 +9,15 @@ class Packager {
     this.appDir = appDir || 'app/'
   }
 
+  run() {
+    // TODO: asyncify
+    this.packageMigrations()
+    this.packageDreams()
+    this.packageChannels()
+    this.packageProjections()
+    this.packageREPL()
+  }
+
   packageChannels() {
     let imports = ''
     let finalExport = 'const channels = {'
@@ -92,15 +101,6 @@ class Packager {
       globals += `global.${className} = ${className}\n`
     })
     fs.writeFileSync(`${this.appDir}pkg/repl.pkg.js`, imports + globals)
-  }
-
-  run() {
-    // TODO: asyncify
-    this.packageMigrations()
-    this.packageDreams()
-    this.packageChannels()
-    this.packageProjections()
-    this.packageREPL()
   }
 }
 
