@@ -56,8 +56,9 @@ export default class Channel {
   }
 
   authenticates(dreamName, opts) {
-    const DreamClass = config.dream(snakeCase(camelCase(dreamName)))
-    if (!DreamClass) throw `Failed to look up dream class for ${dreamName} (lookup at ${snakeCase(camelCase(dreamName))})`
+    const snakeifiedDream = dreamName.camelize().snakeify()
+    const DreamClass = config.dream(snakeifiedDream)
+    if (!DreamClass) throw `Failed to look up dream class for ${dreamName} (lookup at ${snakeifiedDream})`
     const authKey = opts.as || `current${DreamClass.name}`
 
     this._authentications[authKey] = { ...opts, DreamClass }

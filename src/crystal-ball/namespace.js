@@ -1,9 +1,4 @@
 import jwt from 'jsonwebtoken'
-import pluralize from 'pluralize'
-import pascalCase from 'src/helpers/pascalCase'
-import camelCase from 'src/helpers/camelCase'
-import snakeCase from 'src/helpers/snakeCase'
-import paramCase from 'src/helpers/paramCase'
 import { parseRoute } from 'src/helpers/route'
 import config from 'src/config'
 import HTTPVision from 'src/crystal-ball/vision/http'
@@ -47,7 +42,7 @@ export default class Namespace extends Psyclass {
 
   get channelName() {
     if (!this.routeKey) return null
-    return pascalCase(pluralize(this.routeKey)) + 'Channel'
+    return this.routeKey.pluralize().pascalize() + 'Channel'
   }
 
   get givenType() {
@@ -91,7 +86,7 @@ export default class Namespace extends Psyclass {
 
   auth(authKey, opts={}) {
     const channelName = opts.channel || this.channelName.replace(/Channel$/, '')
-    const channelParamName = paramCase(channelName)
+    const channelParamName = channelName.hyphenize()
     opts.authKey = authKey
     return this.post('auth', `${channelParamName}#auth`, opts)
   }
@@ -144,8 +139,8 @@ export default class Namespace extends Psyclass {
     only = only || this.resourceMethods
     except = except || []
 
-    const channelName = snakeCase(resourceName)
-    const pluralized = pluralize(snakeCase(resourceName).replace('_', '-'))
+    const channelName = resourceName.snakeify()
+    const pluralized = resourceName.snakeify().replace('_', '-').pluralize()
     const resourcePath = `${pluralized}/:id`
     const collectionPath = pluralized
 
@@ -226,7 +221,7 @@ export default class Namespace extends Psyclass {
 
   parseStringPath(path) {
     const [ channelNameRaw, method ] = path.split('#')
-    const channelName = pascalCase(channelNameRaw)
+    const channelName = channelNameRaw.pascalize()
     const channel = config.channels[channelName]?.default
 
     if (!channel)
@@ -235,7 +230,7 @@ export default class Namespace extends Psyclass {
     return {
       type: 'string',
       channel,
-      method: camelCase(method),
+      method: method.camelize(),
     }
   }
 

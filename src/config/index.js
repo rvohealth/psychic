@@ -1,7 +1,4 @@
 import fs from 'fs'
-import pluralize from 'pluralize'
-import snakeCase from 'src/helpers/snakeCase'
-import pascalCase from 'src/helpers/pascalCase'
 import transports from 'src/singletons/transports'
 import telekineticBridges from 'src/singletons/telekinetic-bridges'
 
@@ -200,7 +197,7 @@ class Config {
   }
 
   dream(dreamName) {
-    const dream = this.dreams[snakeCase(dreamName)]
+    const dream = this.dreams[dreamName.snakeify()]
     return dream?.default || dream
   }
 
@@ -209,7 +206,7 @@ class Config {
   }
 
   projection(projectionName) {
-    return this.projections[pascalCase(projectionName)]
+    return this.projections[projectionName.pascalize()]
   }
 
   registerAuthKey(authKey, route) {
@@ -217,7 +214,7 @@ class Config {
   }
 
   tableSchema(name) {
-    const tabelized = snakeCase(pluralize(name))
+    const tabelized = name.pluralize().snakeify()
     if (!this.schema[tabelized]) throw `unrecognized table ${tabelized}`
 
     return {

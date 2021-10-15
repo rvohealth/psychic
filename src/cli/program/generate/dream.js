@@ -1,5 +1,3 @@
-import pluralize from 'pluralize'
-import snakeCase from 'src/helpers/snakeCase'
 import l from 'src/singletons/l'
 import File from 'src/helpers/file'
 import moment from 'moment'
@@ -27,7 +25,7 @@ export default class GenerateDream {
   async _generateMigration(args) {
     const timestamp = moment().format(`YYYYMMDDHHmmss`)
     const [ dreamname ] = args
-    const filepath = `db/migrate/${timestamp}-create-${pluralize(dreamname.hyphenize())}.js`
+    const filepath = `db/migrate/${timestamp}-create-${dreamname.hyphenize().pluralize()}.js`
 
     await File.write(filepath, migrationTemplate(dreamname, args.slice(1)))
 
@@ -53,7 +51,7 @@ function migrationTemplate(name, args=[]) {
     fieldsString += `    t.${type}('${fieldName}')\n`
   })
 
-  const pluralizedName = pluralize(snakeCase(name))
+  const pluralizedName = name.snakeify().pluralize()
 
   return (
 `\
