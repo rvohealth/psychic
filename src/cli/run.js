@@ -10,12 +10,12 @@ async function runCLI() {
   const pkgjson = JSON.parse((await File.read('package.json')))
   const version = pkgjson.version
 
-  // const ascii = fs
-  //   .readFileSync(`${config.psychicPath}src/psychic/boot/ascii/small.txt`)
-  //   .toString()
-  //   .replace(/\n$/, '')
+  const ascii = fs
+    .readFileSync(`${config.psychicPath}src/psychic/boot/ascii/small.txt`)
+    .toString()
+    .replace(/\n$/, '')
 
-  // l.logPermanently(chalk.grey(ascii))
+  l.logPermanently(chalk.grey(ascii))
   l.logPermanently(
     "\n " +
       chalk.magenta('psychic') +
