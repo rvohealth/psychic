@@ -25,6 +25,7 @@
   "license": "MIT",
   "devDependencies": {
     "coveralls": "^3.0.0",
+    "husky": "^7.0.2",
     "jest": "26.6.0",
     "jest-date": "^1.1.4",
     "jest-plugin-context": "^2.9.0",
