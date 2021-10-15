@@ -204,12 +204,12 @@ export default class CrystalBall {
     return this.currentNamespace.delete(route, path, opts)
   }
 
-  async gaze(port) {
+  async gaze(port=config.port) {
     await this.boot()
 
-    this._server = this.app.listen(port || config.port, () => {
+    this._server = this.app.listen(port, () => {
       if (!process.env.CORE_TEST)
-        l.log('express connected')
+        l.log(`express connected on port ${port}`)
     })
 
     this._serverKiller = createHttpTerminator({
@@ -218,7 +218,7 @@ export default class CrystalBall {
 
     this.ioServer.listen(config.wssPort, () => {
       if (!process.env.CORE_TEST)
-        l.log('wss connected')
+        l.log(`wss connected on port ${config.wssPort}`)
     })
 
     process.on('SIGTERM', async () => {
