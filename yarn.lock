@@ -2507,11 +2507,6 @@
   dependencies:
     "@types/istanbul-lib-report" "*"
 
-"@types/joi@^14.3.3":
-  version "14.3.4"
-  resolved "https://registry.npmjs.org/@types/joi/-/joi-14.3.4.tgz"
-  integrity sha512-1TQNDJvIKlgYXGNIABfgFp9y0FziDpuGrd799Q5RcnsDu+krD+eeW/0Fs5PHARvWWFelOhIG2OPCo6KbadBM4A==
-
 "@types/json5@^0.0.29":
   version "0.0.29"
   resolved "https://registry.npmjs.org/@types/json5/-/json5-0.0.29.tgz"
@@ -5306,14 +5301,6 @@ expect@^26.6.2:
     jest-matcher-utils "^26.6.2"
     jest-message-util "^26.6.2"
     jest-regex-util "^26.0.0"
-
-express-validation@^1.0.2:
-  version "1.0.3"
-  resolved "https://registry.npmjs.org/express-validation/-/express-validation-1.0.3.tgz"
-  integrity sha512-mtegbSCoplU5DpBLF3XpeudQD22Jv6Dmo4Tmxn2wxnWaMw4hmV1BjpkxCW2jXAV1q/2R70qKLauDEQzTN1uTGA==
-  dependencies:
-    "@types/joi" "^14.3.3"
-    lodash "^4.17.15"
 
 express@^4.17.1:
   version "4.17.1"

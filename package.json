@@ -83,7 +83,6 @@
     "eslint-plugin-import": "^2.2.0",
     "esm": "^3.2.25",
     "express": "^4.17.1",
-    "express-validation": "^1.0.2",
     "fs-extra": "^10.0.0",
     "helmet": "^3.5.0",
     "http-status": "^1.0.1",
