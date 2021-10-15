@@ -3,7 +3,6 @@ import spawn from 'src/helpers/spawn'
 
 export default class ListenCLIProgram extends CLIProgram {
   async run() {
-    spawn(`yarn run psy gaze`, [], { shell: true, stdio: 'inherit' })
-    spawn(`yarn start`, [], { shell: true, stdio: 'inherit' })
+    await spawn(`pm2 ecosystem`, [], { shell: true, stdio: 'inherit' })
   }
 }
