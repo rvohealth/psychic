@@ -1,12 +1,10 @@
 node_modules/
-src/pkg
 log
 .dist
-testappdist/
 tmp/migrate/*
 tmp/spec/*
 tmp/storage/*
-.undodir
 .env
 .env.development
 .env.test
+app/pkg

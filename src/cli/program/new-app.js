@@ -87,11 +87,6 @@ export default class NewAppProgram extends CLIProgram {
     l.logStatus('running psybuild...', { level: 'warn' })
     await exec(`cd ${path} && yarn run psybuild`)
 
-    l.logStatus('updating gitignore...')
-    await File.append(`${path}/.gitignore`, "\n# psychic")
-    await File.append(`${path}/.gitignore`, "\n/.dist")
-    await File.append(`${path}/.gitignore`, "\n/app/pkg")
-
     l.logStatus('Done building app!')
     l.end()
   }
