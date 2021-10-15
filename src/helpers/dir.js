@@ -17,11 +17,14 @@ class Dir extends Psyfs {
     }
   }
 
-  static async isEmpty(path) {
+  static async isEmpty(path, { ignoreHidden }={}) {
     try {
       const directory = await opendir(path)
       const entry = await directory.read()
       await directory.close()
+
+      if (ignoreHidden && /^\./.test(entry?.name || ''))
+        return false
 
       return entry === null
     } catch (error) {
@@ -39,8 +42,36 @@ class Dir extends Psyfs {
       await mkdir(arg1)
   }
 
-  static async readdir(...args) {
-    return await readdir(...args)
+  static async readdir(path, { onlyDirs, onlyFiles, ignoreHidden }={}) {
+    const items = await readdir(path)
+
+    if (onlyDirs) {
+      const dirs = []
+      for (const item of items) {
+        if (await Dir.isDir(path + '/' + item))
+          if (
+            !ignoreHidden ||
+            (ignoreHidden && !/^\./.test(item))
+          )
+            dirs.push(item)
+      }
+      return dirs
+
+    } else if (onlyFiles) {
+      const files = []
+      for (const item of items) {
+        if (!await Dir.isDir(path + '/' + item)) {
+          if (
+            !ignoreHidden ||
+            (ignoreHidden && !/^\./.test(item))
+          )
+            files.push(path + '/' + item)
+        }
+      }
+      return files
+
+    } else
+      return items
   }
 }
 
