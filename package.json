@@ -18,7 +18,7 @@
     "psy": "npm run build --scripts-prepend-node-path --silent && clear && NODE_PATH=./ node ./.dist/cli/run.js"
   },
   "engines": {
-    "node": ">=8",
+    "node": ">=16.8.0",
     "yarn": "*"
   },
   "author": "",
