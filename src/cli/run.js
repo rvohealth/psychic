@@ -3,10 +3,10 @@ import fs from 'fs'
 import CLI from './index.js'
 import config from 'src/config'
 import l from 'src/singletons/l'
-import 'src/boot/globals/all'
+import 'src/psychic/boot/globals/all'
 
 async function runCLI() {
-  const ascii = fs.readFileSync(`${config.psychicPath}src/boot/ascii.txt`).toString()
+  const ascii = fs.readFileSync(`${config.psychicPath}src/psychic/boot/ascii.txt`).toString()
   l.logLiteral(chalk.grey(ascii))
 
   const cli = new CLI()

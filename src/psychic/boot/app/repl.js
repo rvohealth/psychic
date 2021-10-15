@@ -10,7 +10,7 @@ import packagedProjections from '.dist/app/pkg/projections.pkg'
 import routeCB from '.dist/config/routes'
 
 async function loadRepl() {
-  const ascii = fs.readFileSync(`${config.psychicPath}src/boot/ascii.txt`).toString()
+  const ascii = fs.readFileSync(`${config.psychicPath}src/psychic/boot/ascii.txt`).toString()
   const messagesConfig = await loadYaml('.dist/config/messages')
   const dbConfig = await loadYaml('.dist/config/database')
   const redisConfig = await loadYaml('.dist/config/redis')

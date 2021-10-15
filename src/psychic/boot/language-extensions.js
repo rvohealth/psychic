@@ -1,4 +1,4 @@
-import TimeBuilder from 'src/boot/language-extensions/time/builder'
+import TimeBuilder from 'src/psychic/boot/language-extensions/time/builder'
 
 Array.prototype.uniq = function() {
   return [...new Set(this)]

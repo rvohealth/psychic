@@ -1,4 +1,4 @@
-import 'src/boot/all'
+import 'src/psychic/boot/all'
 import psychic from 'src/singletons/psychic'
 import Migration from 'src/migrate/migration'
 import _SchemaWriter from 'src/migrate/schema-writer'
