@@ -1,4 +1,4 @@
-import { Channel } from '../../../../dist'
+import { Channel } from '../../../../.dist'
 
 export default class TestUsersChannel extends Channel {
   create() {

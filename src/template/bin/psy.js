@@ -6,10 +6,10 @@ import routeCB from 'config/routes'
 import dbSeedCB from 'db/seed'
 
 async function runCLI() {
-  const messagesConfig = await loadYaml('dist/config/messages')
-  const dbConfig = await loadYaml('dist/config/database')
-  const redisConfig = await loadYaml('dist/config/redis')
-  const telekinesisConfig = await loadYaml('dist/config/telekinesis')
+  const messagesConfig = await loadYaml('.dist/config/messages')
+  const dbConfig = await loadYaml('.dist/config/database')
+  const redisConfig = await loadYaml('.dist/config/redis')
+  const telekinesisConfig = await loadYaml('.dist/config/telekinesis')
 
   psychic.boot({
     dreams: packagedDreams,

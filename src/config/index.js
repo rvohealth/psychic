@@ -60,7 +60,7 @@ class Config {
   }
 
   get dreamPath() {
-    return `${this.root}dist/dreams`
+    return `${this.root}.dist/dreams`
   }
 
   get dreams() {
@@ -83,7 +83,7 @@ class Config {
 
   get pkgPath() {
     if (this.env === 'CORE_DEVELOPMENT') return 'src/pkg'
-    return 'dist/app/pkg'
+    return '.dist/app/pkg'
   }
 
   get port() {

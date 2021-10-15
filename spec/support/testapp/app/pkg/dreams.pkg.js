@@ -1,4 +1,4 @@
-import * as dream0 from 'dist/testapp/app/dreams/test-user.js'
+import * as dream0 from '.dist/testapp/app/dreams/test-user.js'
 const dreams = {
   "test_user": dream0,
 }

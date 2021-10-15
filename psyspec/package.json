@@ -1,4 +1,4 @@
 {
   "internal": true,
-  "main": "../dist/psyspec/index.js"
+  "main": "../.dist/psyspec/index.js"
 }

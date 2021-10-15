@@ -35,28 +35,28 @@ export default class NewAppProgram extends CLIProgram {
       ...psychicPkgjson.devDependencies,
     }
 
-    pkgjson.main = 'node_modules/psychic/dist/index.js'
+    pkgjson.main = 'node_modules/psychic/.dist/index.js'
 
-    pkgjson.scripts.psy = "NODE_PATH=. node ./dist/bin/psy.js"
+    pkgjson.scripts.psy = "NODE_PATH=. node ./.dist/bin/psy.js"
 
     pkgjson.scripts.trance = "NODE_PATH=. npm run psybuild && " +
       "clear && " +
-      "NODE_PATH=. node -i --experimental-repl-await -e 'require(\"./node_modules/psychic/dist/boot/app/repl.js\")'"
+      "NODE_PATH=. node -i --experimental-repl-await -e 'require(\"./node_modules/psychic/.dist/boot/app/repl.js\")'"
 
     pkgjson.scripts.prepare = null
 
-    pkgjson.scripts.psybuild = "NODE_PATH=./node_modules/psychic/ node ./node_modules/psychic/dist/make/for-app.js && " +
-      "NODE_PATH=. ./node_modules/.bin/babel app -d dist/app --copy-files &&" +
-      "NODE_PATH=. ./node_modules/.bin/babel db -d dist/db --copy-files &&" +
-      "NODE_PATH=. ./node_modules/.bin/babel config -d dist/config --copy-files &&" +
-      "NODE_PATH=. ./node_modules/.bin/babel bin -d dist/bin --copy-files &&" +
-      "NODE_PATH=./node_modules/psychic/ ./node_modules/psychic/node_modules/.bin/babel app -d dist/app --copy-files && " +
-      "NODE_PATH=./node_modules/psychic/ ./node_modules/psychic/node_modules/.bin/babel config -d dist/config --copy-files && " +
-      "./node_modules/psychic/node_modules/.bin/babel app -d dist/app --copy-files &&" +
-      "./node_modules/psychic/node_modules/.bin/babel config -d dist/config --copy-files"
+    pkgjson.scripts.psybuild = "NODE_PATH=./node_modules/psychic/ node ./node_modules/psychic/.dist/make/for-app.js && " +
+      "NODE_PATH=. ./node_modules/.bin/babel app -d .dist/app --copy-files &&" +
+      "NODE_PATH=. ./node_modules/.bin/babel db -d .dist/db --copy-files &&" +
+      "NODE_PATH=. ./node_modules/.bin/babel config -d .dist/config --copy-files &&" +
+      "NODE_PATH=. ./node_modules/.bin/babel bin -d .dist/bin --copy-files &&" +
+      "NODE_PATH=./node_modules/psychic/ ./node_modules/psychic/node_modules/.bin/babel app -d .dist/app --copy-files && " +
+      "NODE_PATH=./node_modules/psychic/ ./node_modules/psychic/node_modules/.bin/babel config -d .dist/config --copy-files && " +
+      "./node_modules/psychic/node_modules/.bin/babel app -d .dist/app --copy-files &&" +
+      "./node_modules/psychic/node_modules/.bin/babel config -d .dist/config --copy-files"
 
-    // pkgjson.scripts.buildspec = "NODE_PATH=. node ./make/for-core-specs.js && NODE_PATH=. ./node_modules/.bin/babel src -d dist --copy-files && NODE_PATH=. ./node_modules/.bin/babel spec/support/testapp -d dist/testapp --copy-files"
-    pkgjson.scripts.buildspec = "NODE_PATH=. ./node_modules/.bin/babel src -d dist --copy-files && NODE_PATH=. ./node_modules/.bin/babel app -d dist/app --copy-files"
+    // pkgjson.scripts.buildspec = "NODE_PATH=. node ./make/for-core-specs.js && NODE_PATH=. ./node_modules/.bin/babel src -d .dist --copy-files && NODE_PATH=. ./node_modules/.bin/babel spec/support/testapp -d .dist/testapp --copy-files"
+    pkgjson.scripts.buildspec = "NODE_PATH=. ./node_modules/.bin/babel src -d .dist --copy-files && NODE_PATH=. ./node_modules/.bin/babel app -d .dist/app --copy-files"
 
     pkgjson.scripts.test = "NODE_PATH=. npm run psybuild && " +
       "clear && " +
@@ -88,7 +88,7 @@ export default class NewAppProgram extends CLIProgram {
 
     l.logStatus('updating gitignore...')
     await File.append(`${path}/.gitignore`, "\n# psychic")
-    await File.append(`${path}/.gitignore`, "\n/dist")
+    await File.append(`${path}/.gitignore`, "\n/.dist")
     await File.append(`${path}/.gitignore`, "\n/app/pkg")
 
     l.logStatus('Done building app!')

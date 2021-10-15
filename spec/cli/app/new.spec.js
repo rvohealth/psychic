@@ -45,7 +45,7 @@ describe('cli program app:new', () => {
       expect(execSpy).toHaveBeenCalledWith(`cd ../fishman/node_modules/psychic && yarn install --silent`)
 
       expect(File.copy).toHaveBeenCalledWith('./.babelrc', '../fishman/.babelrc')
-      expect(File.append).toHaveBeenCalledWith('./.gitignore', '/dist')
+      expect(File.append).toHaveBeenCalledWith('./.gitignore', '/.dist')
     })
   })
 })
