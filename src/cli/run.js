@@ -6,7 +6,7 @@ import l from 'src/singletons/l'
 import 'src/psychic/boot/globals/all'
 
 async function runCLI() {
-  const ascii = fs.readFileSync(`${config.psychicPath}src/psychic/boot/ascii/medium.txt`).toString()
+  const ascii = fs.readFileSync(`${config.psychicPath}src/psychic/boot/ascii/small.txt`).toString()
   l.logLiteral(chalk.grey(ascii))
 
   const cli = new CLI()
