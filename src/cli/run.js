@@ -9,7 +9,11 @@ import 'src/psychic/boot/globals/all'
 async function runCLI() {
   const pkgjson = JSON.parse((await File.read('package.json')))
   const version = pkgjson.version
-  const ascii = fs.readFileSync(`${config.psychicPath}src/psychic/boot/ascii/small.txt`).toString()
+  const ascii = fs
+    .readFileSync(`${config.psychicPath}src/psychic/boot/ascii/small.txt`)
+    .toString()
+    .replace(/\n$/, '')
+
   l.logLiteral(chalk.grey(ascii))
   l.logLiteral('  ' + chalk.bgGrey.white(` version ${chalk.green(version)} `))
 
