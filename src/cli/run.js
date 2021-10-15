@@ -20,7 +20,7 @@ async function runCLI() {
     ' ' +
       chalk.magenta('psychic') +
       chalk.bgBlack.white(` version ${chalk.green(version)} `) +
-      "\n"
+      "\n\n"
   )
 
   const cli = new CLI()
