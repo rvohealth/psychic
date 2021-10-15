@@ -14,7 +14,8 @@ export default class NewAppProgram extends CLIProgram {
   async new(args) {
     l.logPermanently(" running psy generate:app...\n\n")
 
-    const path = `../` + (args.args[0] || 'black-cat')
+    const path = args.args[0]
+    if (!path) throw "Must pass an app name when calling, i.e. psy new:app appname"
 
     l.logStatus('running npx create-react-app (this may take a while)...')
     await exec(`npx create-react-app ${path} --template redux --silent`)
