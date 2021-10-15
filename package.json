@@ -55,7 +55,6 @@
     "cors": "^2.8.5",
     "cross-env": "^6.0.3",
     "dotenv": "^10.0.0",
-    "dotenv-safe": "^6.0.0",
     "eslint": "^7.2.0",
     "eslint-config-airbnb-base": "14.2.1",
     "eslint-plugin-flowtype": "^5.2.0",
