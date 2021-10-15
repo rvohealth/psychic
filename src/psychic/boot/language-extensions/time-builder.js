@@ -1,43 +1,4 @@
-import TimeBuilder from 'src/psychic/boot/language-extensions/time/builder'
-
-Array.prototype.uniq = function() {
-  return [...new Set(this)]
-}
-
-String.prototype.capitalize = function() {
-  return this.charAt(0).toUpperCase() + this.slice(1)
-}
-
-String.prototype.hyphenize = function() {
-  return this
-    .replace(/[\s_]/, '-')
-    .replace(/([A-Z][a-z]+)/g, str => '-' + str.uncapitalize())
-}
-
-String.prototype.pascalize = function() {
-  return this.hyphenize()
-    .split('-')
-    .map(word => word.capitalize())
-    .join('')
-}
-
-String.prototype.uncapitalize = function() {
-  return this.charAt(0).toLowerCase() + this.slice(1)
-}
-
-Object.defineProperty(Array.prototype, 'first', {
-  get: function() {
-    return this[0]
-  },
-  configurable: true,
-})
-
-Object.defineProperty(Array.prototype, 'last', {
-  get: function() {
-    return this[this.length - 1]
-  },
-  configurable: true,
-})
+import TimeBuilder from 'src/helpers/time-builder'
 
 const timebuilderGetterFor = (method) => {
   return {
@@ -47,6 +8,7 @@ const timebuilderGetterFor = (method) => {
     configurable: true,
   }
 }
+
 Object.defineProperty(Number.prototype, 'second', timebuilderGetterFor('seconds'))
 Object.defineProperty(Number.prototype, 'seconds', timebuilderGetterFor('seconds'))
 Object.defineProperty(Number.prototype, 'minute', timebuilderGetterFor('minutes'))
