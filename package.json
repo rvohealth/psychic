@@ -24,13 +24,7 @@
   "author": "",
   "license": "MIT",
   "devDependencies": {
-    "apidoc": "^0.17.5",
-    "chai": "^4.1.0",
-    "chai-as-promised": "^7.1.1",
     "coveralls": "^3.0.0",
-    "factory-bot": "^6.3.1",
-    "factory-girl": "^5.0.4",
-    "fishery": "^1.4.0",
     "husky": "^3.0.7",
     "jest": "26.6.0",
     "jest-date": "^1.1.4",
