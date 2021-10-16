@@ -1,5 +1,5 @@
 node_modules/
-log
+log/!.gitkeep
 .dist
 tmp/migrate/*
 tmp/spec/*
