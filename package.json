@@ -8,7 +8,7 @@
     "./": "./src/"
   },
   "bin": {
-    "psy": ".dist/cli/run.js"
+    "psy": ".dist/bin/psy.js"
   },
   "scripts": {
     "test": "npm run buildspec &&  CORE_TEST=true node --experimental-vm-modules node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles",
