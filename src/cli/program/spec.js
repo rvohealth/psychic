@@ -14,8 +14,9 @@ export default class SpecCLIProgram extends CLIProgram {
 
     else {
       let command = 'test'
+      const dirIgnoreList = ['features', 'support', 'factories']
       for (const folder of await Dir.readdir('spec', { onlyDirs: true, ignoreHidden: true })) {
-        if (folder === 'features') continue
+        if (dirIgnoreList.includes(folder)) continue
 
         const isEmpty = await Dir.isEmpty(`spec/${folder}`, { ignoreHidden: true })
         if (!isEmpty) {
