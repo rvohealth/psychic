@@ -98,8 +98,37 @@ export default class NewAppProgram extends CLIProgram {
   async buildPsychicAppFoundation(path) {
     l.logStatus('carve out new app structure...')
     await File.copy('src/psychic/template', path)
-    await File.touch(`${path}/.env.development`)
-    await File.touch(`${path}/.env.test`)
+    await File.touch(
+      `${path}/.env.development`,
+`\
+NODE_ENV=development
+PSYCHIC_ENV=development
+PSYCHIC_SECRET=development_secret_123
+GMAIL_AUTH_USERNAME=youremail@gmail.com
+GMAIL_AUTH_PASSWORD=yourgooglepassword
+DB_NAME=yourdbname
+DB_USERNAME=yourusername
+DB_PASSWORD=yourpassword
+`
+    )
+
+    await File.touch(
+      `${path}/.env.test`,
+`\
+NODE_ENV=test
+PSYCHIC_ENV=test
+PSYCHIC_SECRET=test_secret_123
+TWILIO_SMS_PHONE=1112223333
+TWILIO_SID=ACabcde123834bdjhfgjhf83487jhasj27
+TWILIO_AUTH_TOKEN=3bc462945eb4b7ec51d41803a1608f88
+TWILIO_AUTH_TOKEN=asdjkfh9374jbf8348734jgfu3476477
+GMAIL_AUTH_USERNAME=youremail@gmail.com
+GMAIL_AUTH_PASSWORD=yourgooglepassword
+DB_NAME=yourdbname_test
+DB_USERNAME=yourusername
+DB_PASSWORD=yourpassword
+`
+    )
 
     l.logStatus('copy and remove js folder')
     await File.copy(path + '/js', path + '/src/')
