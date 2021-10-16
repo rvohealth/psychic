@@ -17,6 +17,7 @@ function loadEnv() {
   if (process.env.NODE_ENV === 'test')
     return dotenv.parse(fs.readFileSync('.env.test'))
 
+  console.log('RUH ROOOHHHH', __dirname, __filename)
   return dotenv.parse(fs.readFileSync('.env.development'))
 }
 
