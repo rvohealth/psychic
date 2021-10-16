@@ -21,7 +21,7 @@ function loadEnv() {
     return dotenv.parse(fs.readFileSync('.env.test'))
 
   console.log('RUH ROOOHHHH', __dirname, __filename, path.resolve(__dirname, '../../../..'))
-  return dotenv.parse(fs.readFileSync('.env.development'))
+  return dotenv.parse(fs.readFileSync(path.resolve(__dirname, '../../../../.env.development')
 }
 
 global.md5 = function(str) {
