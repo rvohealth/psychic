@@ -1,4 +1,5 @@
 import File from 'src/helpers/file'
+import Dir from 'src/helpers/dir'
 import CLIProgram from 'src/cli/program'
 import l from 'src/singletons/l'
 import exec from 'src/helpers/exec'
@@ -132,6 +133,8 @@ DB_PASSWORD=yourpassword
 
     l.logStatus('copy and remove js folder')
     await File.copy(path + '/js', path + '/src/')
+    await Dir.mkdir(`${path}/log`)
+    await Dir.touch(`${path}/log/.gitkeep`)
     await File.rm(`${path}/js`)
   }
 }
