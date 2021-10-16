@@ -7,4 +7,4 @@ console.log(
   process.argv,
   process.argv.slice(2)
 )
-// spawn(`cd ${path.resolve(__dirname, '../../')} && yarn run psy ${process.argv.join(' ')}`, [], { shell: true, stdio: 'inherit' })
+spawn(`cd ${path.resolve(__dirname, '../../')} && yarn run psy ${process.argv.slice(2).join(' ')}`, [], { shell: true, stdio: 'inherit' })
