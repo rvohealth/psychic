@@ -98,8 +98,8 @@ export default class NewAppProgram extends CLIProgram {
   async buildPsychicAppFoundation(path) {
     l.logStatus('carve out new app structure...')
     await File.copy('src/psychic/template', path)
-    await File.copy('src/psychic/template/.env.development', path)
-    await File.copy('src/psychic/template/.env.test', path)
+    await File.touch(`${path}/.env.development`)
+    await File.touch(`${path}/.env.test`)
 
     l.logStatus('copy and remove js folder')
     await File.copy(path + '/js', path + '/src/')
