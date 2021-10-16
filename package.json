@@ -14,7 +14,7 @@
     "copymake": "npm run copyhelpers && NODE_PATH=. ./node_modules/.bin/babel make -d .dist/make --copy-files --quiet",
     "build": "npm run copymake && NODE_PATH=. ./node_modules/.bin/babel src -d .dist --copy-files --quiet",
     "buildspec": "npm run copymake && NODE_PATH=. node ./.dist/make/for-core-specs.js && NODE_PATH=. ./node_modules/.bin/babel src -d .dist --copy-files --quiet && NODE_PATH=. ./node_modules/.bin/babel spec/support/testapp -d .dist/testapp --copy-files --quiet",
-    "prepare": "npm run build --scripts-prepend-node-path --silent",
+    "prepare": "npm run build --scripts-prepend-node-path --silent && ./.dist/make/post-install.js",
     "psy": "npm run build --scripts-prepend-node-path --silent && clear && NODE_PATH=./ node ./.dist/cli/run.js"
   },
   "engines": {
