@@ -9,6 +9,7 @@ export default class GenerateJSAPI {
     await Dir.mkdirUnlessExists('src/spy')
     await Dir.mkdirUnlessExists('src/spy/net')
 
+    console.log('YOUR ROUTES MALADY,.', CrystalBall.routes, CrystalBall.namespaces)
     await this.generateForRoutes(CrystalBall.routes)
     await this.generateForNamespaces(CrystalBall.namespaces)
   }
