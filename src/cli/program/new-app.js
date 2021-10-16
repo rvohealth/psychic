@@ -15,7 +15,7 @@ export default class NewAppProgram extends CLIProgram {
     l.logPermanently(" running psy generate:app...\n\n")
 
     const _path = args.args[0]
-    if (!path) throw "Must pass an app name when calling, i.e. psy new:app appname"
+    if (!_path) throw "Must pass an app name when calling, i.e. psy new:app appname"
     const path = `${process.env.ORIGINAL_PWD}/${_path}`
     l.logPermanently("BRIMMMMMMMM")
     l.logPermanently(path)
