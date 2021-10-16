@@ -11,6 +11,7 @@
     [
       "module-resolver",
       {
+        "cwd": "babelrc",
         "root": ["./"],
         "extensions": [".js"]
       }
