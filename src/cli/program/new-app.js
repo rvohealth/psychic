@@ -17,8 +17,6 @@ export default class NewAppProgram extends CLIProgram {
     const _path = args.args[0]
     if (!_path) throw "Must pass an app name when calling, i.e. psy new:app appname"
     const path = `${process.env.ORIGINAL_PWD}/${_path}`
-    l.logPermanently("BRIMMMMMMMM")
-    l.logPermanently(path)
 
     l.logStatus('running npx create-react-app (this may take a while)...')
     await exec(`npx create-react-app ${path} --template redux --silent`)
@@ -100,6 +98,8 @@ export default class NewAppProgram extends CLIProgram {
   async buildPsychicAppFoundation(path) {
     l.logStatus('carve out new app structure...')
     await File.copy('src/psychic/template', path)
+    await File.copy('src/psychic/template/.env.development', path)
+    await File.copy('src/psychic/template/.env.test', path)
 
     l.logStatus('copy and remove js folder')
     await File.copy(path + '/js', path + '/src/')
