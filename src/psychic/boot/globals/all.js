@@ -1,5 +1,6 @@
 import { v4 as v4uuid } from 'uuid'
 import fs from 'fs'
+import path from 'path'
 import moment from 'moment'
 import crypto from 'crypto'
 import dotenv from 'dotenv'
@@ -17,7 +18,7 @@ function loadEnv() {
   if (process.env.NODE_ENV === 'test')
     return dotenv.parse(fs.readFileSync('.env.test'))
 
-  console.log('RUH ROOOHHHH', __dirname, __filename)
+  console.log('RUH ROOOHHHH', __dirname, __filename, path.resolve(__dirname, '../../../..'))
   return dotenv.parse(fs.readFileSync('.env.development'))
 }
 
