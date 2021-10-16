@@ -9,6 +9,8 @@ import loadYaml from 'src/helpers/load-yaml'
 import include from 'src/helpers/include'
 
 function loadEnv() {
+  process.env.NODE_PATH = path.resolve(__dirname, '../../../..')
+
   if (process.env.CORE_TEST)
     return {
       ...dotenv.parse(fs.readFileSync('src/psychic/template/.env.test')),
