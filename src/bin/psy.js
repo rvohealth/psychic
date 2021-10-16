@@ -1,4 +1,5 @@
 #!/usr/bin/env node
 
+import path from 'path'
 import spawn from 'src/helpers/spawn'
-spawn(`yarn run psy`, [], { shell: true, stdio: 'inherit' })
+spawn(`cd ${path.resolve(__dirname, '../../')} && yarn run psy`, [], { shell: true, stdio: 'inherit' })
