@@ -18,7 +18,8 @@ export default class NewAppProgram extends CLIProgram {
     if (!path) throw "Must pass an app name when calling, i.e. psy new:app appname"
     l.logPermanently("BRIMMMMMMMM")
     l.logPermanently(path)
-    l.logPermanently(process.env.ORIGINAL_CWD, process.env.INIT_CWD)
+    l.logPermanently(process.env.ORIGINAL_CWD)
+    l.logPermanently(process.env.INIT_CWD)
 
 //     l.logStatus('running npx create-react-app (this may take a while)...')
 //     await exec(`npx create-react-app ${path} --template redux --silent`)
