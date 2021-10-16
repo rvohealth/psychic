@@ -1,6 +1,7 @@
 import fs from 'fs'
 import transports from 'src/singletons/transports'
 import telekineticBridges from 'src/singletons/telekinetic-bridges'
+import phantomManager from 'src/phantom/manager'
 
 class Config {
   get appRoot() {
@@ -100,6 +101,18 @@ class Config {
     return this.redis.port || '999'
   }
 
+  get redishost() {
+    return this.redis.host || 'localhost'
+  }
+
+  get redisDB() {
+    return this.redis.db || 0
+  }
+
+  get redisPassword() {
+    return this.redis.password || ''
+  }
+
   get root() {
     if (process.env.CORE_TEST) return 'testapp/'
     return ''
@@ -171,6 +184,7 @@ class Config {
     projections,
     messagesConfig,
     telekinesisConfig,
+    phantomsConfig,
   }) {
     this._db = dbConfig,
     this._dbSeedCB = dbSeedCB
@@ -181,9 +195,11 @@ class Config {
     this._projections = projections
     this._messagesConfig = messagesConfig
     this._telekinesisConfig = telekinesisConfig
+    this._phantomsConfig = phantomsConfig
 
     transports.setConfig(messagesConfig)
     telekineticBridges.setConfig(telekinesisConfig[this.env])
+    phantomManager.setConfig(phantomsConfig)
   }
 
   columnType(tableName, columnName) {

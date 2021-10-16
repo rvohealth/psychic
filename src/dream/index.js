@@ -8,6 +8,7 @@ import IsDream from 'src/dream/concerns/is-dream'
 import QueryProvider from 'src/dream/concerns/query'
 import ValidationsProvider from 'src/dream/concerns/validations'
 import WSProvider from 'src/dream/concerns/ws'
+import PhantomizeProvider from 'src/dream/concerns/phantomize'
 
 import mix from 'src/helpers/mix'
 
@@ -21,6 +22,7 @@ class Dream extends mix(Psyclass).with(
   QueryProvider,
   ValidationsProvider,
   WSProvider,
+  PhantomizeProvider,
 ) {
   constructor(attributes={}) {
     super(attributes)

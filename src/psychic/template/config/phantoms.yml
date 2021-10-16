@@ -1,0 +1,49 @@
+# this is where you define queues, which under the hood are essentially what
+# our phantoms are using to pop in and out of existence
+#
+# e.g.
+# urgent:
+#   repeat:
+#     cron: 15 3 * * *
+#     create_client:
+#       type: client | subscriber | bclient
+#     limiter:
+#       max: MAX_NUM_JOBS_PROCESSED
+#       duration: NUM_MILLISECONDS_PER_MAX_REACHED
+#       bounce_back: false # (default)
+#       groupKey: your.group
+#     redis:
+#       port: 6379 # (default)
+#       host: localhost # (default)
+#       db: 0 # (default)
+#       password: my_pass
+#     prefix: bull # prefix for all queue keys.
+#     job_options:
+#       priority: 1 # 1 is highest priority, with no maximum
+#       delay: 200 # ms to wait before running
+#       attempts: 10
+#       repeat:
+#         cron: 0 * * * *
+#         tz: +8
+#         start_date: date
+#         end_date: date
+#         limit: max_num_repeats
+#         every: 500 # (milliseconds)
+#         count: 5 # start value for iteration
+#         readonly_key: my.queue
+#
+#       backoff: 10
+#       lifo: false # (default)
+#       timeout: 20000
+#       job_id: ONLY_SET_IF_YOU_NEED_TO
+#       remove_on_complete: false
+#       remove_on_fail: false
+#       stack_trace_limit: 500
+#     settings:
+#       lock_duration: 30000
+#       lock_renew_time: 15000
+#       stalled_interval: 30000
+#       max_stalled_count: 1
+#       guard_interval: 5000
+#       retry_process_delay: 5000
+#       drain_delay: 5
