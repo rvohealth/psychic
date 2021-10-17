@@ -17,7 +17,7 @@ export default class GenerateChannel {
 
 function channelTemplate(channelName) {
   return (
-`
+`\
 import { Channel } from 'psychic'
 
 export default class ${channelName.pascalize()}Channel extends Channel {
