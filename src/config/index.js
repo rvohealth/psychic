@@ -101,7 +101,7 @@ class Config {
     return this.redis.port || '999'
   }
 
-  get redishost() {
+  get redisHost() {
     return this.redis.host || 'localhost'
   }
 

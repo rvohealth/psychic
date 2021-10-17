@@ -10,6 +10,10 @@ alias trance="yarn run trance"
 
 ### Clone repo and get going
 ```sh
+# OSX
+brew install redis
+brew services start redis
+
 cd ~/Sites
 git clone https://github.com/avocadojesus/psychic
 cd Sites/psychic
