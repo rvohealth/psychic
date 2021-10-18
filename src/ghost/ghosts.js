@@ -24,7 +24,7 @@ class Ghosts extends Psyclass {
   }
 
   setConfig(ghostConfig) {
-    this._buildInternalQueues()
+    this.#buildInternalQueues()
 
     if (!ghostConfig || typeof ghostConfig !== 'object') return
 
@@ -58,27 +58,27 @@ class Ghosts extends Psyclass {
     })
   }
 
-  _buildInternalQueues() {
-    this._buildDefaultQueue()
-    this._buildDreamStaticQueue()
-    this._buildDreamInstanceQueue()
+  #buildInternalQueues() {
+    this.#buildDefaultQueue()
+    this.#buildDreamStaticQueue()
+    this.#buildDreamInstanceQueue()
   }
 
-  _buildDreamStaticQueue() {
+  #buildDreamStaticQueue() {
     const queueConf = this.constructor.internalQueueConf
     this.queues['__psy_dream.static'] = queueConf
     this.queues['__psy_dream.static'].queue = new Queue('__psy.dream.static', queueConf.config)
     this.queues['__psy_dream.static'].queue.process(this._processDreamStaticMethod)
   }
 
-  _buildDreamInstanceQueue() {
+  #buildDreamInstanceQueue() {
     const queueConf = this.constructor.internalQueueConf
     this.queues['__psy_dream.instance'] = queueConf
     this.queues['__psy_dream.instance'].queue = new Queue('__psy.dream.instance', queueConf.config)
     this.queues['__psy_dream.instance'].queue.process(this._processDreamInstanceMethod)
   }
 
-  _buildDefaultQueue() {
+  #buildDefaultQueue() {
     this.queues['__psy_default'] = {
       config: {
         redis: Ghosts.redisConfig,
