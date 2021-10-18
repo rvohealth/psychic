@@ -4,8 +4,9 @@ import Dream from 'src/dream'
 
 describe('association: HasOne', () => {
   class User extends Dream {
-    initialize() {
-      this.hasOne('favorite_ice_cream', { foreignKey: 'user_id' })
+    static {
+      User
+        .hasOne('favorite_ice_cream', { foreignKey: 'user_id' })
     }
   }
 

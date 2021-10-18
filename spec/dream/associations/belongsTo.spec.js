@@ -12,18 +12,19 @@ describe('Dream#belongsTo', () => {
 
     posess(BelongsTo, 'new').returning(belongsToStub)
 
-    expect(post._associations).toEqual({})
+    expect(Post._associations).toEqual({})
     expect(post.test_user).toBe(undefined)
     expect(post.testUser).toBe(undefined)
 
-    post.belongsTo('test_user')
+    Post.belongsTo('test_user')
 
-    expect(post._associations).toEqual({
+    expect(Post._associations).toEqual({
       test_user: belongsToStub,
     })
 
-    expect(post.test_user.constructor.name).toBe('Function')
-    expect(post.testUser.constructor.name).toBe('Function')
-    expect(post.testUser).toBe(post.test_user)
+    const post2 = Post.new()
+    expect(post2.test_user.constructor.name).toBe('Function')
+    expect(post2.testUser.constructor.name).toBe('Function')
+    expect(post2.testUser).toBe(post.test_user)
   })
 })

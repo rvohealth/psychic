@@ -4,14 +4,16 @@ import Dream from 'src/dream'
 
 describe('association: HasMany', () => {
   class User extends Dream {
-    initialize() {
-      this.hasMany('favorite_ice_creams', { foreignKey: 'user_id' })
+    static {
+      User
+        .hasMany('favorite_ice_creams', { foreignKey: 'user_id' })
     }
   }
 
   class FavoriteIceCream extends Dream {
-    initialize() {
-      this.belongsTo('user', { primaryKey: 'user_id' })
+    static {
+      FavoriteIceCream
+        .belongsTo('user', { primaryKey: 'user_id' })
     }
   }
 

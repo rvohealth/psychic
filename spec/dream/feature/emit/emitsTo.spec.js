@@ -4,16 +4,20 @@ import Dream from 'src/dream'
 
 describe('Dream#emitsTo', () => {
   class User extends Dream {
-    initialize() {
-      this
+    static {
+      User
         .hasOne('favorite_ice_cream', { foreignKey: 'user_id', inverseOf: 'user' })
     }
   }
 
   class FavoriteIceCream extends Dream {
+    static {
+      FavoriteIceCream
+        .belongsTo('user', { primaryKey: 'user_id', inverseOf: 'favorite_ice_cream' })
+    }
+
     initialize() {
       this
-        .belongsTo('user', { primaryKey: 'user_id', inverseOf: 'favorite_ice_cream' })
         .emitsTo('user', { as: 'currentUser' })
     }
   }

@@ -4,15 +4,15 @@ import Dream from 'src/dream'
 
 describe('association: BelongsTo', () => {
   class User extends Dream {
-    initialize() {
-      this
+    static {
+      User
         .hasOne('favorite_ice_cream', { foreignKey: 'user_id', inverseOf: 'user' })
     }
   }
 
   class FavoriteIceCream extends Dream {
-    initialize() {
-      this
+    static {
+      FavoriteIceCream
         .belongsTo('user', { primaryKey: 'user_id', inverseOf: 'favorite_ice_cream' })
     }
   }

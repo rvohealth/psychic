@@ -4,24 +4,24 @@ import Dream from 'src/dream'
 
 describe('association: HasManyThrough hasOne', () => {
   class User extends Dream {
-    initialize() {
-      this
+    static {
+      User
         .hasOne('favorite_ice_cream', { foreignKey: 'user_id' })
         .hasMany('favorite_toppings', { through: 'favorite_ice_cream' })
     }
   }
 
   class FavoriteIceCream extends Dream {
-    initialize() {
-      this
+    static {
+      FavoriteIceCream
         .hasMany('favorite_toppings', { foreignKey: 'favorite_ice_cream_id' })
         .belongsTo('user', { primaryKey: 'user_id' })
     }
   }
 
   class FavoriteTopping extends Dream {
-    initialize() {
-      this
+    static {
+      FavoriteTopping
         .belongsTo('favorite_ice_cream', { primaryKey: 'favorite_ice_cream_id' })
     }
   }

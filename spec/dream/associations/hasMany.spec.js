@@ -8,25 +8,26 @@ describe('Dream#hasMany', () => {
     const Post = create('dream.Post')
     const post = Post.new()
     const hasManyStub = {
-      fish: 10,
+      fish: 30,
       resourceName: 'test_user',
     }
 
     posess(HasMany, 'new').returning(hasManyStub)
 
-    expect(post._associations).toEqual({})
+    expect(Post._associations).toEqual({})
     expect(post.test_user).toBe(undefined)
     expect(post.testUser).toBe(undefined)
 
-    post.hasMany('test_user')
+    Post.hasMany('test_user')
 
-    expect(post._associations).toEqual({
+    expect(Post._associations).toEqual({
       test_user: hasManyStub,
     })
 
-    expect(post.test_user.constructor.name).toBe('Function')
-    expect(post.testUser.constructor.name).toBe('Function')
-    expect(post.testUser).toBe(post.test_user)
+    const post2 = Post.new()
+    expect(post2.test_user.constructor.name).toBe('Function')
+    expect(post2.testUser.constructor.name).toBe('Function')
+    expect(post2.testUser).toBe(post.test_user)
   })
 
   context ('through is specified', () => {
@@ -36,12 +37,11 @@ describe('Dream#hasMany', () => {
       create('dream.MotherInLaw')
 
       const user = TestUser.new()
-      expect(user._associations).toEqual({})
 
-      user.hasMany('spouse')
+      TestUser.hasMany('spouse')
 
       const hasManyThroughStub = {
-        fish: 10,
+        fish: 20,
         resourceName: 'mother_in_law',
       }
       posess(HasManyThrough, 'new').returning(hasManyThroughStub)
@@ -49,13 +49,14 @@ describe('Dream#hasMany', () => {
       expect(user.mother_in_law).toBe(undefined)
       expect(user.motherInLaw).toBe(undefined)
 
-      user.hasMany('mother_in_law', { through: 'spouse' })
+      TestUser.hasMany('mother_in_law', { through: 'spouse' })
 
-      expect(user._associations.mother_in_law).toEqual(hasManyThroughStub)
+      expect(TestUser._associations.mother_in_law).toEqual(hasManyThroughStub)
 
-      expect(user.mother_in_law.constructor.name).toBe('Function')
-      expect(user.motherInLaw.constructor.name).toBe('Function')
-      expect(user.motherInLaw).toBe(user.mother_in_law)
+      const user2 = TestUser.new()
+      expect(user2.mother_in_law.constructor.name).toBe('Function')
+      expect(user2.motherInLaw.constructor.name).toBe('Function')
+      expect(user2.motherInLaw).toBe(user.mother_in_law)
     })
 
     context ('when through is invalid', () => {
@@ -68,7 +69,7 @@ describe('Dream#hasMany', () => {
         expect(user._associations).toEqual({})
 
         expect(() => {
-          user.hasMany('spouse', { through: 'somethingundefined' })
+          TestUser.hasMany('spouse', { through: 'somethingundefined' })
         }).toThrow(InvalidThroughArgument)
       })
     })
