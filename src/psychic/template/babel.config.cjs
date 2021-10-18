@@ -30,5 +30,6 @@ module.exports = {
         "extensions": [".js"]
       }
     ]
-  ]
+  ],
+  "sourceMaps": "inline"
 }
