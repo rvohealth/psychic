@@ -1,7 +1,7 @@
 import fs from 'fs'
 import transports from 'src/singletons/transports'
 import telekineticBridges from 'src/singletons/telekinetic-bridges'
-import phantomManager from 'src/phantom/manager'
+import ghosts from 'src/ghost/ghosts'
 
 class Config {
   get appRoot() {
@@ -184,7 +184,7 @@ class Config {
     projections,
     messagesConfig,
     telekinesisConfig,
-    phantomsConfig,
+    ghostsConfig,
   }) {
     this._db = dbConfig,
     this._dbSeedCB = dbSeedCB
@@ -195,11 +195,11 @@ class Config {
     this._projections = projections
     this._messagesConfig = messagesConfig
     this._telekinesisConfig = telekinesisConfig
-    this._phantomsConfig = phantomsConfig
+    this._ghostsConfig = ghostsConfig
 
     transports.setConfig(messagesConfig)
     telekineticBridges.setConfig(telekinesisConfig[this.env])
-    phantomManager.setConfig(phantomsConfig)
+    ghosts.setConfig(ghostsConfig)
   }
 
   columnType(tableName, columnName) {

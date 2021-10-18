@@ -1,5 +1,5 @@
 # this is where you define queues, which under the hood are essentially what
-# our phantoms are using to pop in and out of existence
+# our ghosts are using to pop in and out of existence
 #
 # e.g.
 # urgent:

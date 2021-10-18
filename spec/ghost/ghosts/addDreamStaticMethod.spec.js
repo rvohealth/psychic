@@ -1,9 +1,9 @@
 import db from 'src/db'
 import config from 'src/config'
 import Dream from 'src/dream'
-import phantomManager from 'src/phantom/manager'
+import ghosts from 'src/ghost/ghosts'
 
-describe('PhantomManager#addStaticDreamMethod', () => {
+describe('Ghosts#addDreamStaticMethod', () => {
   class TestUser extends Dream {
     coolidge() {
       console.log('COOLIDGEEEEE')
@@ -37,6 +37,6 @@ describe('PhantomManager#addStaticDreamMethod', () => {
   })
 
   it ('calls static method in bg', async () => {
-    phantomManager.addStaticDreamMethod('TestUser', 'coolidge', 'a', 'b', 'c')
+    ghosts.addDreamStaticMethod('TestUser', 'coolidge', 'a', 'b', 'c')
   })
 })

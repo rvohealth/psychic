@@ -2,7 +2,7 @@ import Queue from 'bull'
 import Psyclass from 'src/psychic/psyclass'
 import config from 'src/config'
 
-class PhantomManager extends Psyclass {
+class Ghosts extends Psyclass {
   constructor() {
     super()
     this.queues = {}
@@ -23,13 +23,13 @@ class PhantomManager extends Psyclass {
     }
   }
 
-  setConfig(phantomConfig) {
+  setConfig(ghostConfig) {
     this._buildInternalQueues()
 
-    if (!phantomConfig || typeof phantomConfig !== 'object') return
+    if (!ghostConfig || typeof ghostConfig !== 'object') return
 
-    Object.keys(phantomConfig).forEach(queueName => {
-      this.queues[queueName].config = phantomConfig[queueName]
+    Object.keys(ghostConfig).forEach(queueName => {
+      this.queues[queueName].config = ghostConfig[queueName]
       this.queues[queueName].queue = new Queue(queueName, this.queues[queueName])
     })
   }
@@ -39,7 +39,7 @@ class PhantomManager extends Psyclass {
     return this.queues[queueName].queue
   }
 
-  addInstanceDreamMethod(dreamName, id, methodName, ...args) {
+  addDreamInstanceMethod(dreamName, id, methodName, ...args) {
     const queue = this.queue('dream.instance', true)
     queue.add({
       dreamName,
@@ -49,7 +49,7 @@ class PhantomManager extends Psyclass {
     })
   }
 
-  addStaticDreamMethod(dreamName, methodName, ...args) {
+  addDreamStaticMethod(dreamName, methodName, ...args) {
     const queue = this.queue('dream.static', true)
     queue.add({
       dreamName,
@@ -68,58 +68,60 @@ class PhantomManager extends Psyclass {
     const queueConf = this.constructor.internalQueueConf
     this.queues['__psy_dream.static'] = queueConf
     this.queues['__psy_dream.static'].queue = new Queue('__psy.dream.static', queueConf.config)
-
-    this.queues['__psy_dream.static'].queue.process(async (job, done) => {
-      const { dreamName, methodName, args } = job.data
-      const dreamKlass = config.dream(dreamName)
-
-      if (!dreamKlass) throw `Dream not found: ${dreamName}`
-      if (!dreamKlass[methodName]) throw `${dreamKlass.name}.${methodName} is not a function`
-
-      if (dreamKlass[methodName].constructor.name === 'AsyncFunction')
-        await dreamKlass[methodName](...args)
-      else
-        dreamKlass[methodName](...args)
-
-      done()
-    })
+    this.queues['__psy_dream.static'].queue.process(this._processDreamStaticMethod)
   }
 
   _buildDreamInstanceQueue() {
     const queueConf = this.constructor.internalQueueConf
     this.queues['__psy_dream.instance'] = queueConf
     this.queues['__psy_dream.instance'].queue = new Queue('__psy.dream.instance', queueConf.config)
-
-    this.queues['__psy_dream.instance'].queue.process(async (job, done) => {
-      const { dreamName, id, methodName, args } = job.data
-      const dreamKlass = config.dream(dreamName)
-
-      if (!dreamKlass) throw `Dream not found: ${dreamName}`
-      if (!dreamKlass.prototype[methodName]) throw `${dreamKlass.name}#${methodName} is not a function`
-
-      const record = await dreamKlass.find(id)
-      if (!record) throw `${dreamKlass} with id: ${id} was not found`
-
-      if (dreamKlass.prototype[methodName].constructor.name === 'AsyncFunction')
-        await record[methodName](...args)
-      else
-        record[methodName](...args)
-
-      done()
-    })
+    this.queues['__psy_dream.instance'].queue.process(this._processDreamInstanceMethod)
   }
 
   _buildDefaultQueue() {
     this.queues['__psy_default'] = {
       config: {
-        redis: PhantomManager.redisConfig,
+        redis: Ghosts.redisConfig,
       }
     }
     this.queues['__psy_default'].queue =
       new Queue('__psy.default', this.queues['__psy_default'].config)
   }
+
+  async _processDreamStaticMethod(job, done) {
+    const { dreamName, methodName, args } = job.data
+    const dreamKlass = config.dream(dreamName)
+
+    if (!dreamKlass) throw `Dream not found: ${dreamName}`
+    if (!dreamKlass[methodName]) throw `${dreamKlass.name}.${methodName} is not a function`
+
+    if (dreamKlass[methodName].constructor.name === 'AsyncFunction')
+      await dreamKlass[methodName](...args)
+    else
+      dreamKlass[methodName](...args)
+
+    done()
+  }
+
+  async _processDreamInstanceMethod(job, done) {
+    const { dreamName, id, methodName, args } = job.data
+    const dreamKlass = config.dream(dreamName)
+
+    if (!dreamKlass) throw `Dream not found: ${dreamName}`
+    if (!dreamKlass.prototype[methodName]) throw `${dreamKlass.name}#${methodName} is not a function`
+
+    const record = await dreamKlass.find(id)
+    if (!record) throw `${dreamKlass} with id: ${id} was not found`
+
+    if (dreamKlass.prototype[methodName].constructor.name === 'AsyncFunction')
+      await record[methodName](...args)
+    else
+      record[methodName](...args)
+
+    done()
+  }
 }
 
-const phantomManager = new PhantomManager()
+const ghostManager = new Ghosts()
 
-export default phantomManager
+export default ghostManager

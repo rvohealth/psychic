@@ -37,7 +37,7 @@ beforeEach(async () => {
   const dbConfig = await loadYaml('spec/support/testapp/config/database')
   const redisConfig = await loadYaml('spec/support/testapp/config/redis')
   const telekinesisConfig = await loadYaml('spec/support/testapp/config/telekinesis')
-  const phantomsConfig = await loadYaml('spec/support/testapp/config/phantoms')
+  const ghostsConfig = await loadYaml('spec/support/testapp/config/ghosts')
 
   config.boot({
     dreams: packagedDreams,
@@ -49,7 +49,7 @@ beforeEach(async () => {
     routeCB,
     messagesConfig,
     telekinesisConfig,
-    phantomsConfig,
+    ghostsConfig,
   })
 
   jest.clearAllMocks()

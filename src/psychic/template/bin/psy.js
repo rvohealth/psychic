@@ -10,7 +10,7 @@ async function runCLI() {
   const dbConfig = await loadYaml('.dist/config/database')
   const redisConfig = await loadYaml('.dist/config/redis')
   const telekinesisConfig = await loadYaml('.dist/config/telekinesis')
-  const phantomsConfig = await loadYaml('config/phantoms')
+  const ghostsConfig = await loadYaml('config/ghosts')
 
   psychic.boot({
     dreams: packagedDreams,
@@ -22,7 +22,7 @@ async function runCLI() {
     routeCB,
     messagesConfig,
     telekinesisConfig,
-    phantomsConfig,
+    ghostsConfig,
   })
 
   const cli = new CLI()
