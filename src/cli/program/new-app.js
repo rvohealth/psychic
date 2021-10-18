@@ -48,7 +48,7 @@ export default class NewAppProgram extends CLIProgram {
 
     pkgjson.scripts.trance = "NODE_PATH=. npm run psybuild && " +
       "clear && " +
-      "NODE_PATH=. node -i --experimental-repl-await -e 'require(\"./node_modules/psychic/.dist/psychic/boot/app/repl.js\")'"
+      "NODE_PATH=. node -i --experimental-repl-await -e 'require(\"./node_modules/psychic/.dist/psychic/boot/app/index.js\")'"
 
     pkgjson.scripts.prepare = null
 
