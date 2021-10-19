@@ -8,6 +8,7 @@
     "@babel/plugin-proposal-do-expressions",
     "@babel/plugin-proposal-async-do-expressions",
     "@babel/plugin-proposal-class-static-block",
+    "@babel/plugin-syntax-jsx",
     ["@babel/plugin-proposal-class-properties"],
     ["@babel/plugin-proposal-private-methods"],
     "require-context-hook",
