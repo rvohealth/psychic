@@ -1,9 +1,9 @@
-{
-  "presets": [
+module.exports = {
+  presets: [
     "@babel/preset-env",
     "@babel/preset-react"
   ],
-  "plugins": [
+  plugins: [
     "@babel/plugin-transform-runtime",
     "@babel/plugin-proposal-do-expressions",
     "@babel/plugin-proposal-async-do-expressions",
@@ -15,12 +15,10 @@
     [
       "module-resolver",
       {
-        "cwd": "babelrc",
-        "root": ["./"],
+        "root": ["."],
         "extensions": [".js"]
       }
     ]
   ],
   "sourceMaps": "inline"
 }
-
