@@ -20,7 +20,8 @@ export default class NewAppProgram extends CLIProgram {
     const path = `${process.env.ORIGINAL_PWD}/${_path}`
 
     l.logStatus('running npx create-react-app (this may take a while)...')
-    await exec(`npx create-react-app ${path} --template redux --silent`)
+    await Dir.copy(`src/psychic/create-react-app-template ${path}`)
+    // await exec(`npx create-react-app ${path} --template redux --silent`)
 
     l.logStatus('build psychic foundation...')
     await this.buildPsychicAppFoundation(path)

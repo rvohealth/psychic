@@ -10,3 +10,4 @@ tmp/storage/*
 .env
 .env.development
 .env.test
+src/psychic/create-react-app-template/node_modules
