@@ -32,7 +32,7 @@ describe('cli program app:new', () => {
     it ('creates a new app with the specified name, assuming postgres db', async () => {
       expect(execSpy).toHaveBeenCalledWith(`npx create-react-app ../fishman --template redux --silent`)
 
-      expect(File.copy).toHaveBeenCalledWith('src/psychic/template', '../fishman')
+      expect(File.copy).toHaveBeenCalledWith('template/psychic-app', '../fishman')
       expect(File.copy).toHaveBeenCalledWith('../fishman/js', '../fishman/src/')
       expect(File.rm).toHaveBeenCalledWith('../fishman/js')
 

@@ -1,0 +1,34 @@
+{
+  "env": {
+    "node": true,
+    "browser": true,
+    "es6": true,
+    "jest": true
+  },
+  "extends": "eslint:recommended",
+  "globals": {
+    "ENV": "readonly",
+    "Atomics": "readonly",
+    "SharedArrayBuffer": "readonly",
+    "bg": "readonly",
+    "context": "readonly",
+    "eavesdrop": "readonly",
+    "factory": "readonly",
+    "include": "readonly",
+    "loadYaml": "readonly",
+    "lookup": "readonly",
+    "md5": "readonly",
+    "now": "readonly",
+    "spawn": "readonly",
+    "stringContaining": "readonly",
+    "posess": "readonly",
+    "uuid": "readonly"
+  },
+  "parserOptions": {
+    "ecmaVersion": 2020,
+    "sourceType": "module"
+  },
+  "rules": {
+  },
+  "parser": "@babel/eslint-parser"
+}

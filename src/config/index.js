@@ -8,7 +8,7 @@ class Config {
     if (fs.existsSync('app'))
       return 'app'
     else
-      return `src/psychic/template`
+      return `template/psychic-app`
   }
 
   get authKeys() {
@@ -122,7 +122,7 @@ class Config {
     if (process.env.CORE_TEST) return 'tmp/spec/schema.json'
 
     if (!fs.existsSync('app'))
-      return `src/psychic/template/config/schema.json`
+      return `template/psychic-app/config/schema.json`
 
     return `config/schema.json`
   }

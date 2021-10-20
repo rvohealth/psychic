@@ -9,41 +9,40 @@ export default class SpecCLIProgram extends CLIProgram {
   }
 
   async spec(args) {
-    await spawn(`jest --listTests | xargs -L 1 -P 0 jest`)
-    // if (args?.length)
-    //   await spawn(`yarn test ${args.join(' ')} --forceExit`, [], { shell: true, stdio: 'inherit' })
+    if (args?.length)
+      await spawn(`yarn test ${args.join(' ')} --forceExit`, [], { shell: true, stdio: 'inherit' })
 
-    // else {
-    //   let command = 'test'
-    //   const dirIgnoreList = ['features', 'support', 'factories']
-    //   for (const folder of await Dir.readdir('spec', { onlyDirs: true, ignoreHidden: true })) {
-    //     if (dirIgnoreList.includes(folder)) continue
+    else {
+      let command = 'test'
+      const dirIgnoreList = ['features', 'support', 'factories']
+      for (const folder of await Dir.readdir('spec', { onlyDirs: true, ignoreHidden: true })) {
+        if (dirIgnoreList.includes(folder)) continue
 
-    //     const isEmpty = await Dir.isEmpty(`spec/${folder}`, { ignoreHidden: true })
-    //     if (!isEmpty) {
-    //       await spawn(`yarn ${command} ./spec/${folder} --forceExit`, [], { shell: true, stdio: 'inherit' })
-    //       command = 'testquickly'
-    //     }
-    //   }
+        const isEmpty = await Dir.isEmpty(`spec/${folder}`, { ignoreHidden: true })
+        if (!isEmpty) {
+          await spawn(`yarn ${command} ./spec/${folder} --forceExit`, [], { shell: true, stdio: 'inherit' })
+          command = 'testquickly'
+        }
+      }
 
-    //   const files = await Dir.readdir('spec', { onlyFiles: true, ignoreHidden: true })
-    //   const specFiles = files
-    //     .filter(file => /\.spec\.js$/.test(file))
-    //     .map(file => `spec/${file}`)
+      const files = await Dir.readdir('spec', { onlyFiles: true, ignoreHidden: true })
+      const specFiles = files
+        .filter(file => /\.spec\.js$/.test(file))
+        .map(file => `spec/${file}`)
 
-    //   if (specFiles.length > 0)
-    //     await spawn(
-    //       `yarn ${command} --findRelatedTests ${specFiles.join(' ')} --forceExit`,
-    //       [],
-    //       { shell: true, stdio: 'inherit' }
-    //     )
+      if (specFiles.length > 0)
+        await spawn(
+          `yarn ${command} --findRelatedTests ${specFiles.join(' ')} --forceExit`,
+          [],
+          { shell: true, stdio: 'inherit' }
+        )
 
-    //   const hasStoriesDir = await Dir.isDir('spec/stories')
-    //   const hasStories = await Dir.isEmpty('spec/stories')
+      const hasStoriesDir = await Dir.isDir('spec/stories')
+      const hasStories = await Dir.isEmpty('spec/stories')
 
-    //   if (!hasStoriesDir || !hasStories) return
+      if (!hasStoriesDir || !hasStories) return
 
-    //   await spawn(`yarn run psy spec/stories --forceExit`, [], { shell: true, stdio: 'inherit' })
-    // }
+      await spawn(`yarn run psy spec/stories --forceExit`, [], { shell: true, stdio: 'inherit' })
+    }
   }
 }
