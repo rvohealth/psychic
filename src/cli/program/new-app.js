@@ -20,7 +20,7 @@ export default class NewAppProgram extends CLIProgram {
     const path = `${process.env.ORIGINAL_PWD}/${_path}`
 
     l.logStatus('copying react template to new path')
-    await Dir.copy('template/create-react-app-template', path)
+    await Dir.copy('template/create-react-app', path)
     // await exec(`npx create-react-app ${path} --template redux --silent`)
 
     l.logStatus('build psychic foundation...')
