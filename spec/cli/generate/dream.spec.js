@@ -8,7 +8,7 @@ describe('cli program g:migration <name>', () => {
   it ('generates a new file in the dreams folder with the passed name', async () => {
     const template =
 `\
-import psychic, { Dream } from 'psychic'
+import { Dream } from 'psychic'
 
 export default class User extends Dream {
 }

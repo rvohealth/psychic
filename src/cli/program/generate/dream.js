@@ -71,7 +71,7 @@ export async function down(m) {
 function dreamTemplate(name) {
   return (
 `\
-import psychic, { Dream } from 'psychic'
+import { Dream } from 'psychic'
 
 export default class ${name.pascalize()} extends Dream {
 }
