@@ -34,9 +34,8 @@ beforeEach(async () => {
 
 describe ('ghost', () => {
   it ('returns a Ghost', () => {
-    const _ghost = ghost(User, 'fishman', { fish: 10 })
     const spy = posess(ghosts, 'addStaticMethod').returning(true)
-    _ghost.spawn()
+    ghost(User, 'fishman', { fish: 10 })
     expect(spy).toHaveBeenCalledWith(User, 'fishman', { fish: 10 })
   })
 })

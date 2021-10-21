@@ -1,7 +1,7 @@
 import Ghost from 'src/ghost'
 
 function ghost(...args) {
-  return new Ghost(...args)
+  return Ghost.spawn(...args)
 }
 
 export default ghost

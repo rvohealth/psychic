@@ -36,7 +36,6 @@ class Ghosts extends Psyclass {
 
   queue(queueName, internal=false) {
     if (internal) queueName = `__psy_${queueName}`
-    console.log(queueName, this.queues)
     return this.queues[queueName]?.queue
   }
 
