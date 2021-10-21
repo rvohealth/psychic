@@ -12,7 +12,6 @@ describe('Dream.emit', () => {
     const spy = posess(esp, 'transmit')
     Post
       .belongsTo('testUser')
-    post
       .emitsTo('testUser', { as: 'currentUser' })
 
     posess(user, '_association').returning(true)
@@ -44,7 +43,6 @@ describe('Dream.emit', () => {
 
       Post
         .belongsTo('testUser')
-      post
         .emitsTo('testUser', { as: 'currentUser' })
 
       posess(user, '_association').returning(true)

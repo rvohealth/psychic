@@ -4,13 +4,9 @@ import InvalidEmitsToRelationNameArgument from 'src/error/dream/ws/emits-to/inva
 import InvalidEmitRelationNameArgument from 'src/error/dream/ws/emits/invalid-relation-name-argument'
 
 const WSProvider = superclass => class extends superclass {
-  constructor(...args) {
-    super(...args)
+  static _emitsTo = {}
 
-    this._emitsTo = {}
-  }
-
-  emitsTo(relationName, opts={}) {
+  static emitsTo(relationName, opts={}) {
     if (!this._association(relationName)) throw new InvalidEmitsToRelationNameArgument()
     if (!opts.as) throw new InvalidEmitsToAsArgument()
 
@@ -22,7 +18,7 @@ const WSProvider = superclass => class extends superclass {
   }
 
   async emit(relationName, path, message=null) {
-    const emitRecord = this._emitsTo[relationName]
+    const emitRecord = this.constructor._emitsTo[relationName]
     if (!emitRecord) throw new InvalidEmitRelationNameArgument()
 
     // since association could be deeply nested, safest thing to do here is to fetch the association.

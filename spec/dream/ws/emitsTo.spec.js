@@ -5,14 +5,13 @@ import InvalidRelationNameArgument from 'src/error/dream/ws/emits-to/invalid-rel
 describe('Dream.emitsTo', () => {
   it ('stores configuration wihtin instance', async () => {
     const TestUser = create('dream.TestUser')
-    const user = new TestUser()
-    posess(user, '_association').returning(true)
+    posess(TestUser, '_association').returning(true)
 
-    expect(user._emitsTo).toEqual({})
+    expect(TestUser._emitsTo).toEqual({})
 
-    user.emitsTo('fishman', { as: 'currentFishman', fish: 10 })
+    TestUser.emitsTo('fishman', { as: 'currentFishman', fish: 10 })
 
-    expect(user._emitsTo).toEqual({
+    expect(TestUser._emitsTo).toEqual({
       fishman: {
         as: 'currentFishman',
         to: 'fishman',
@@ -24,13 +23,10 @@ describe('Dream.emitsTo', () => {
   context ('as is not passed', () => {
     it ('throws an exception', async () => {
       const TestUser = create('dream.TestUser')
-      const user = new TestUser()
-      posess(user, '_association').returning(true)
-
-      expect(user._emitsTo).toEqual({})
+      posess(TestUser, '_association').returning(true)
 
       expect(() => {
-        user.emitsTo('fishman', { fish: 10 })
+        TestUser.emitsTo('fishman', { fish: 10 })
       }).toThrow(InvalidAsArgument)
     })
   })
@@ -38,12 +34,9 @@ describe('Dream.emitsTo', () => {
   context ('relationName is not passed', () => {
     it ('throws an exception', async () => {
       const TestUser = create('dream.TestUser')
-      const user = new TestUser()
-
-      expect(user._emitsTo).toEqual({})
 
       expect(() => {
-        user.emitsTo()
+        TestUser.emitsTo()
       }).toThrow(InvalidRelationNameArgument)
     })
   })

@@ -8,8 +8,8 @@ import { fetch, post } from 'spec/support/helpers/request'
 
 describe('CrystalBall Requests: auth endpoint', () => {
   class TestUser extends Dream {
-    initialize() {
-      this.authenticates('email', 'secret')
+    static {
+      TestUser.authenticates('email', 'secret')
     }
   }
 

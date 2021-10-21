@@ -3,6 +3,11 @@ import spawn from 'src/helpers/spawn'
 import Dir from 'src/helpers/dir'
 
 export default class SpecCLIProgram extends CLIProgram {
+  constructor() {
+    super()
+    this._testCommand = 'test'
+  }
+
   async run(args) {
     if (args.command === null) return await this.spec(args.args)
     throw `unhandled command ${args.command}`
@@ -13,17 +18,9 @@ export default class SpecCLIProgram extends CLIProgram {
       await spawn(`yarn test ${args.join(' ')} --forceExit`, [], { shell: true, stdio: 'inherit' })
 
     else {
-      let command = 'test'
-      const dirIgnoreList = ['features', 'support', 'factories']
-      for (const folder of await Dir.readdir('spec', { onlyDirs: true, ignoreHidden: true })) {
-        if (dirIgnoreList.includes(folder)) continue
-
-        const isEmpty = await Dir.isEmpty(`spec/${folder}`, { ignoreHidden: true })
-        if (!isEmpty) {
-          await spawn(`yarn ${command} ./spec/${folder} --forceExit`, [], { shell: true, stdio: 'inherit' })
-          command = 'testquickly'
-        }
-      }
+      await this.#runForDir('spec')
+      await this.#runForDir('spec/db', { bypassIgnore: true })
+      await this.#runForDir('spec/dream', { bypassIgnore: true })
 
       const files = await Dir.readdir('spec', { onlyFiles: true, ignoreHidden: true })
       const specFiles = files
@@ -32,7 +29,7 @@ export default class SpecCLIProgram extends CLIProgram {
 
       if (specFiles.length > 0)
         await spawn(
-          `yarn ${command} --findRelatedTests ${specFiles.join(' ')} --forceExit`,
+          `yarn ${this._testCommand} --findRelatedTests ${specFiles.join(' ')} --forceExit`,
           [],
           { shell: true, stdio: 'inherit' }
         )
@@ -43,6 +40,19 @@ export default class SpecCLIProgram extends CLIProgram {
       if (!hasStoriesDir || !hasStories) return
 
       await spawn(`yarn run psy spec/stories --forceExit`, [], { shell: true, stdio: 'inherit' })
+    }
+  }
+
+  async #runForDir(path, { bypassIgnore }={}) {
+    const dirIgnoreList = ['features', 'db', 'dream', 'support', 'factories']
+    for (const folder of await Dir.readdir(path, { onlyDirs: true, ignoreHidden: true })) {
+      if (dirIgnoreList.includes(folder) && !bypassIgnore) continue
+
+      const isEmpty = await Dir.isEmpty(`${folder}`, { ignoreHidden: true })
+      if (!isEmpty) {
+        await spawn(`yarn ${this._testCommand} ./${folder}/* --forceExit`, [], { shell: true, stdio: 'inherit' })
+        this._testCommand = 'testquickly'
+      }
     }
   }
 }

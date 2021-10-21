@@ -7,7 +7,7 @@ of an authenticated dream instance.
 
 e.g.
 
-initialize() {
+static {
   this
     .belongsTo('user')
     .emitsTo('user', { as: 'currentUser' })

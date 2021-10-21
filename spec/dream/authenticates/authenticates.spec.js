@@ -6,8 +6,8 @@ describe('Dream#authenticates', () => {
     const TestUser = create('dream.TestUser', {})
     const dream = new TestUser()
     const opts = {}
-    const spy = posess(dream, 'beforeSave').returning(true)
-    dream.authenticates('email', 'password', opts)
+    const spy = posess(TestUser, 'beforeSave').returning(true)
+    TestUser.authenticates('email', 'password', opts)
     expect(dream._authentications.db['email::password'].identifyingColumn).toBe('email')
     expect(dream._authentications.db['email::password'].passwordColumn).toBe('password')
 

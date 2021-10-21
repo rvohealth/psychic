@@ -16,10 +16,6 @@ describe('Dream#emits', () => {
     static {
       FavoriteIceCream
         .belongsTo('user', { primaryKey: 'user_id', inverseOf: 'favorite_ice_cream' })
-    }
-
-    initialize() {
-      this
         .emitsTo('user', { as: 'currentUser' })
     }
   }
