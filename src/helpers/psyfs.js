@@ -23,6 +23,12 @@ class Psyfs {
     await fse.remove(arg1)
   }
 
+  static async rmIfExists(arg1) {
+    const exists = await Psyfs.exists(arg1)
+    if (exists)
+      await Psyfs.rm(arg1)
+  }
+
   static async unlink(arg1) {
     await unlink(arg1)
   }

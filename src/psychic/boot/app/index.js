@@ -16,6 +16,7 @@ async function loadRepl() {
   const redisConfig = await loadYaml('.dist/config/redis')
   const telekinesisConfig = await loadYaml('.dist/config/telekinesis')
   const ghostsConfig = await loadYaml('config/ghosts')
+  const pathsConfig = await loadYaml('config/paths')
 
   config.boot({
     dreams: packagedDreams,
@@ -23,6 +24,7 @@ async function loadRepl() {
     projections: packagedProjections,
     dbConfig,
     dbSeedCB,
+    pathsConfig,
     redisConfig,
     routeCB,
     messagesConfig,

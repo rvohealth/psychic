@@ -14,6 +14,7 @@ import packagedChannels from 'spec/support/testapp/app/pkg/channels.pkg.js'
 import packagedProjections from 'spec/support/testapp/app/pkg/projections.pkg.js'
 import routeCB from 'spec/support/testapp/config/routes.js'
 import dbSeedCB from 'spec/support/testapp/db/seed.js'
+import Dir from 'src/helpers/dir'
 
 import 'spec/factories'
 
@@ -38,6 +39,7 @@ beforeEach(async () => {
   const redisConfig = await loadYaml('spec/support/testapp/config/redis')
   const telekinesisConfig = await loadYaml('spec/support/testapp/config/telekinesis')
   const ghostsConfig = await loadYaml('spec/support/testapp/config/ghosts')
+  const pathsConfig = await loadYaml('spec/support/testapp/config/paths')
 
   config.boot({
     dreams: packagedDreams,
@@ -45,6 +47,7 @@ beforeEach(async () => {
     projections: packagedProjections,
     dbConfig,
     dbSeedCB,
+    pathsConfig,
     redisConfig,
     routeCB,
     messagesConfig,
@@ -57,11 +60,13 @@ beforeEach(async () => {
 
   await db.createIfNotExists()
   await db.dropAllTables()
+  await Dir.mkdirUnlessExists('tmp/spec/psy')
   // await rmdir('tmp/storage/spec/*', { recursive: true })
 })
 
 afterEach(async () => {
   await SchemaWriter.destroy()
+  await Dir.rmIfExists('tmp/spec/psy')
   // await db.flush()
 })
 

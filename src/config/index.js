@@ -93,6 +93,11 @@ class Config {
     return 'node_modules/psychic/'
   }
 
+  get psyJsPath() {
+    if (process.env.CORE_TEST) return 'tmp/spec/psy'
+    return this._paths.psy_js || 'src/psy'
+  }
+
   get redis() {
     return this._redisConfig
   }
@@ -179,6 +184,7 @@ class Config {
     dbSeedCB,
     dreams,
     channels,
+    pathsConfig,
     redisConfig,
     routeCB,
     projections,
@@ -196,6 +202,7 @@ class Config {
     this._messagesConfig = messagesConfig
     this._telekinesisConfig = telekinesisConfig
     this._ghostsConfig = ghostsConfig
+    this._pathsConfig = pathsConfig
 
     transports.setConfig(messagesConfig)
     telekineticBridges.setConfig(telekinesisConfig[this.env])

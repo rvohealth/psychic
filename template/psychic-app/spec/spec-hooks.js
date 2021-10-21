@@ -14,6 +14,7 @@ beforeEach(async () => {
   const redisConfig = await loadYaml('config/redis')
   const telekinesisConfig = await loadYaml('config/telekinesis')
   const ghostsConfig = await loadYaml('config/ghosts')
+  const pathsConfig = await loadYaml('config/paths')
 
   Factory.boot(packagedDreams)
 
@@ -23,6 +24,7 @@ beforeEach(async () => {
     projections: packagedProjections,
     dbConfig,
     dbSeedCB,
+    pathsConfig,
     redisConfig,
     routeCB,
     messagesConfig,

@@ -3,13 +3,14 @@ import l from 'src/singletons/l'
 import CrystalBall from 'src/crystal-ball'
 import File from 'src/helpers/file'
 import Dir from 'src/helpers/dir'
+import config from 'src/config'
+import path from 'path'
 
 export default class GenerateJSAPI {
   async generate() {
-    await Dir.mkdirUnlessExists('src/spy')
-    await Dir.mkdirUnlessExists('src/spy/net')
+    await Dir.mkdirUnlessExists(config.psyJsPath)
+    await Dir.mkdirUnlessExists(path.join(config.psyJsPath, 'net'))
 
-    console.log('YOUR ROUTES MALADY,.', CrystalBall.routes, CrystalBall.namespaces)
     await this.generateForRoutes(CrystalBall.routes)
     await this.generateForNamespaces(CrystalBall.namespaces)
   }
@@ -17,9 +18,9 @@ export default class GenerateJSAPI {
   // recursively read all nested namespaces
   // this looks like it should be broken, investigate later!
   async generateForNamespaces(namespaces) {
-    for (const namespace in Object.keys(namespaces)) {
-      await this.generateForNamespaces(namespaces[namespace].namespaces)
-    }
+    // for (const namespace in Object.keys(namespaces)) {
+    //   await this.generateForNamespaces(namespaces[namespace].namespaces)
+    // }
   }
 
   async generateForRoutes(routes) {
@@ -33,17 +34,17 @@ export default class GenerateJSAPI {
             ''
         ) +
         `${this.filename(route)}.js`
-      const filePath = 'src/psy/net/' + relativePath
+      const filePath = path.join(config.psyJsPath, 'net', relativePath)
 
-      let path = 'src/psy/net'
+      let _path = path.join(config.psyJsPath, 'net')
       let index = 0
       for (const segment of pathSegments) {
         const isFilename = index === route.parsed.segments.length
-        path += `/${segment}`
+        _path += `/${segment}`
 
         if (!isFilename && !fs.existsSync(path)) {
           l.log(`making dir ${path}...`)
-          await Dir.mkdir(path)
+          await Dir.mkdir(_path)
         }
         index++
       }
@@ -118,7 +119,7 @@ export default class ${className}API {
   }
 
   routeMethodName(route) {
-    const methodName = ['put', 'patch'].includes(route.httpMethod) ?
+    const methodName = route.isResource && ['put', 'patch'].includes(route.httpMethod) ?
       route.httpMethod :
       route.method
     return methodName.replace(/-channel$/, '')
