@@ -6,6 +6,7 @@ import dotenv from 'dotenv'
 import config from 'src/config'
 import loadYaml from 'src/helpers/load-yaml'
 import include from 'src/helpers/include'
+import ghost from 'src/helpers/ghost'
 
 function loadEnv() {
   if (process.env.CORE_TEST)
@@ -35,6 +36,7 @@ global.uuid = function() {
   return v4uuid()
 }
 
+global.ghost = ghost
 global.include = include
 global.loadYaml = loadYaml
 global.lookup = (...args) => config.lookup(...args)

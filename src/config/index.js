@@ -244,4 +244,7 @@ class Config {
   }
 }
 
-export default new Config()
+const config = global.__psychic__config || new Config()
+global.__psychic__config = config
+
+export default config

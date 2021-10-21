@@ -36,7 +36,8 @@ class Ghosts extends Psyclass {
 
   queue(queueName, internal=false) {
     if (internal) queueName = `__psy_${queueName}`
-    return this.queues[queueName].queue
+    console.log(queueName, this.queues)
+    return this.queues[queueName]?.queue
   }
 
   addDreamInstanceMethod(dreamName, id, methodName, ...args) {
@@ -58,10 +59,27 @@ class Ghosts extends Psyclass {
     })
   }
 
+  addStaticMethod(klass, methodName, ...args) {
+    const queue = this.queue('static', true)
+    queue.add({
+      klass,
+      methodName,
+      args,
+    })
+  }
+
   #buildInternalQueues() {
     this.#buildDefaultQueue()
+    this.#buildStaticQueue()
     this.#buildDreamStaticQueue()
     this.#buildDreamInstanceQueue()
+  }
+
+  #buildStaticQueue() {
+    const queueConf = this.constructor.internalQueueConf
+    this.queues['__psy_static'] = queueConf
+    this.queues['__psy_static'].queue = new Queue('__psy.static', queueConf.config)
+    this.queues['__psy_static'].queue.process(this._processDreamStaticMethod)
   }
 
   #buildDreamStaticQueue() {
@@ -86,6 +104,18 @@ class Ghosts extends Psyclass {
     }
     this.queues['__psy_default'].queue =
       new Queue('__psy.default', this.queues['__psy_default'].config)
+  }
+
+  async _processStaticMethod(job, done) {
+    const { klass, methodName, args } = job.data
+    if (!klass[methodName]) throw `${klass.name}.${methodName} is not a function`
+
+    if (klass[methodName].constructor.name === 'AsyncFunction')
+      await klass[methodName](...args)
+    else
+      klass[methodName](...args)
+
+    done()
   }
 
   async _processDreamStaticMethod(job, done) {
@@ -122,6 +152,7 @@ class Ghosts extends Psyclass {
   }
 }
 
-const ghostManager = new Ghosts()
+const ghosts = global.__psychic__ghosts || new Ghosts()
+global.__psychic__ghosts = ghosts
 
-export default ghostManager
+export default ghosts
