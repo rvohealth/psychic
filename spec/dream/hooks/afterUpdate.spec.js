@@ -6,7 +6,7 @@ describe('Dream#afterUpdate', () => {
     const cb = () => {}
     const dream = new TestUser()
     dream.afterUpdate(cb)
-    expect(dream._afterUpdate).toEqual([ cb ])
+    expect(dream.constructor._afterUpdate).toEqual([ cb ])
   })
 })
 

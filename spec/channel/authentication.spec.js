@@ -9,8 +9,9 @@ import db from 'src/db'
 describe('Channel#authenticates', () => {
   it ("leverages associated model to handle authentication", async () => {
     class TestUser extends Dream {
-      initialize() {
-        this.authenticates('email', 'password')
+      static {
+        TestUser
+          .authenticates('email', 'password')
       }
     }
 

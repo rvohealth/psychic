@@ -6,7 +6,7 @@ describe('Dream#afterDestroy', () => {
     const cb = () => {}
     const dream = new TestUser()
     dream.afterDestroy(cb)
-    expect(dream._afterDestroy).toEqual([ cb ])
+    expect(dream.constructor._afterDestroy).toEqual([ cb ])
   })
 })
 

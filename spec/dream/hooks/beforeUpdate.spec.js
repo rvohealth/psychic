@@ -6,7 +6,7 @@ describe('Dream#beforeUpdate', () => {
     const cb = () => {}
     const dream = new TestUser()
     dream.beforeUpdate(cb)
-    expect(dream._beforeUpdate).toEqual([ cb ])
+    expect(dream.constructor._beforeUpdate).toEqual([ cb ])
   })
 })
 

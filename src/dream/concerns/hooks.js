@@ -1,52 +1,81 @@
 const ModelHookProvider = superclass => class extends superclass {
-  constructor(...args) {
-    super(...args)
+  static _beforeCreate = []
+  static _beforeDestroy = []
+  static _beforeSave = []
+  static _beforeUpdate = []
+  static _afterCreate = []
+  static _afterDestroy = []
+  static _afterUpdate = []
+  static _afterSave = []
 
-    this._beforeCreate = []
-    this._beforeDestroy = []
-    this._beforeSave = []
-    this._beforeUpdate = []
-    this._afterCreate = []
-    this._afterDestroy = []
-    this._afterUpdate = []
-    this._afterSave = []
-  }
-
-  async afterCreate(cb) {
+  static async afterCreate(cb) {
     this._afterCreate.push(cb)
   }
 
-  async afterDestroy(cb) {
+  static async afterDestroy(cb) {
     this._afterDestroy.push(cb)
   }
 
-  async afterSave(cb) {
+  static async afterSave(cb) {
     this._afterSave.push(cb)
   }
 
-  async afterUpdate(cb) {
+  static async afterUpdate(cb) {
     this._afterUpdate.push(cb)
   }
 
-  async beforeCreate(cb) {
+  static async beforeCreate(cb) {
     this._beforeCreate.push(cb)
   }
 
-  async beforeDestroy(cb) {
+  static async beforeDestroy(cb) {
     this._beforeDestroy.push(cb)
   }
 
-  async beforeSave(cb) {
+  static async beforeSave(cb) {
     this._beforeSave.push(cb)
   }
 
-  async beforeUpdate(cb) {
+  static async beforeUpdate(cb) {
     this._beforeUpdate.push(cb)
   }
 
+  async afterCreate(cb) {
+    this.constructor._afterCreate.push(cb)
+  }
+
+  async afterDestroy(cb) {
+    this.constructor._afterDestroy.push(cb)
+  }
+
+  async afterSave(cb) {
+    this.constructor._afterSave.push(cb)
+  }
+
+  async afterUpdate(cb) {
+    this.constructor._afterUpdate.push(cb)
+  }
+
+  async beforeCreate(cb) {
+    this.constructor._beforeCreate.push(cb)
+  }
+
+  async beforeDestroy(cb) {
+    this.constructor._beforeDestroy.push(cb)
+  }
+
+  async beforeSave(cb) {
+    this.constructor._beforeSave.push(cb)
+  }
+
+  async beforeUpdate(cb) {
+    this.constructor._beforeUpdate.push(cb)
+  }
+
   async _runHooksFor(hookType) {
-    for (const cb of this[`_${hookType}`]) {
-      await cb()
+    for (const cb of this.constructor[`_${hookType}`]) {
+      const _cb = cb.bind(this)
+      await _cb()
     }
   }
 }

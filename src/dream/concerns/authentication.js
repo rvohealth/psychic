@@ -3,12 +3,12 @@ import bcrypt from 'bcrypt'
 import DBAuthentication from 'src/dream/authentication/db'
 
 const AuthenticationProvider = superclass => class extends superclass {
-  constructor(...args) {
-    super(...args)
+  static _authentications = {
+    db: {},
+  }
 
-    this._authentications = {
-      db: {},
-    }
+  get _authentications() {
+    return this.constructor._authentications
   }
 
   async authenticate(...args) {
@@ -38,11 +38,11 @@ const AuthenticationProvider = superclass => class extends superclass {
     }
   }
 
-  authenticates(identifyingColumn, passwordColumn, opts) {
+  static authenticates(identifyingColumn, passwordColumn, opts) {
     this._authentications.db[`${identifyingColumn}::${passwordColumn}`] =
       new DBAuthentication(identifyingColumn, passwordColumn, opts)
 
-    this.beforeSave(async () => {
+    this.beforeSave(async function() {
       if (this[`${passwordColumn}HasUnsavedChanges`]) {
         this[`${passwordColumn}_digest`] = await bcrypt.hash(this[passwordColumn], 11)
       }

@@ -30,6 +30,8 @@ export default class L {
   }
 
   log(thing, { level }={}) {
+    if (process.env.CORE_TEST) return
+
     this._logs.push({ text: thing, literal: false })
     const color = chalk[this._colorFromLevel(level)]
     const statusColor = level ? color : chalk.bgMagenta.yellow

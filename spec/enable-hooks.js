@@ -34,6 +34,8 @@ beforeAll(async () => {
 })
 
 beforeEach(async () => {
+  await Dir.rmIfExists('tmp/spec/psy')
+
   const messagesConfig = await loadYaml('spec/support/testapp/config/messages')
   const dbConfig = await loadYaml('spec/support/testapp/config/database')
   const redisConfig = await loadYaml('spec/support/testapp/config/redis')

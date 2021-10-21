@@ -6,7 +6,7 @@ describe('Dream#beforeDestroy', () => {
     const cb = () => {}
     const dream = new TestUser()
     dream.beforeDestroy(cb)
-    expect(dream._beforeDestroy).toEqual([ cb ])
+    expect(dream.constructor._beforeDestroy).toEqual([ cb ])
   })
 })
 

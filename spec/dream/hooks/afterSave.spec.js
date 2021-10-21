@@ -6,7 +6,7 @@ describe('Dream#afterSave', () => {
     const cb = () => {}
     const dream = new TestUser()
     dream.afterSave(cb)
-    expect(dream._afterSave).toEqual([ cb ])
+    expect(dream.constructor._afterSave).toEqual([ cb ])
   })
 })
 

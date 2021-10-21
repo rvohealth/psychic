@@ -6,8 +6,8 @@ import db from 'src/db'
 describe('Dream.columns', () => {
   it ("validates the users password against an auto-calculated digest", async () => {
     class TestUser extends Dream {
-      initialize() {
-        this
+      static {
+        TestUser
           .authenticates('email', 'password')
           .authenticates('email', 'otherpassword')
       }
