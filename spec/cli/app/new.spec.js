@@ -77,6 +77,7 @@ const REQUIRED_PACKAGES = {
   "axios": "^0.21.1",
   "babel-plugin-module-resolver": "^4.1.0",
   "babel-plugin-require-context-hook": "^1.0.0",
+  "psychic": "git+ssh://git@github.com/avocadojesus/psychic.git#dev",
 }
 
 const REQUIRED_DEV_PACKAGES = {

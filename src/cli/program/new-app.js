@@ -27,18 +27,42 @@ export default class NewAppProgram extends CLIProgram {
     await this.buildPsychicAppFoundation(path, _path)
 
     // l.logStatus('add custom npm scripts to package.json...')
-    const psychicPkgjson = JSON.parse((await File.read('package.json')))
     const pkgjson = JSON.parse((await File.read(path + '/package.json')))
 
     pkgjson.dependencies = {
       ...pkgjson.dependencies,
-      ...psychicPkgjson.dependencies,
-      psychic: 'git+ssh://git@github.com/avocadojesus/psychic.git#dev',
+      "@babel/cli": "^7.13.0",
+      "@babel/core": "^7.13.0",
+      "@babel/eslint-parser": "^7.13.0",
+      "@babel/node": "^7.13.0",
+      "@babel/plugin-proposal-async-do-expressions": "^7.13.0",
+      "@babel/plugin-proposal-do-expressions": "^7.13.0",
+      "@babel/plugin-transform-runtime": "^7.13.0",
+      "@babel/plugin-syntax-jsx": "^7.12.17",
+      "@babel/preset-env": "^7.13.0",
+      "@babel/preset-react": "^7.13.0",
+      "@reduxjs/toolkit": "^1.5.1",
+      "@testing-library/jest-dom": "^4.2.4",
+      "@testing-library/react": "^9.3.2",
+      "@testing-library/user-event": "^7.1.2",
+      "react": "^17.0.2",
+      "react-dom": "^17.0.2",
+      "react-redux": "^7.2.3",
+      "react-scripts": "4.0.3",
+      "axios": "^0.21.1",
+      "babel-plugin-module-resolver": "^4.1.0",
+      "babel-plugin-require-context-hook": "^1.0.0",
+      "psychic": "git+ssh://git@github.com/avocadojesus/psychic.git#dev",
     }
 
     pkgjson.devDependencies = {
       ...pkgjson.devDependencies,
-      ...psychicPkgjson.devDependencies,
+      "coveralls": "^3.0.0",
+      "husky": "^7.0.2",
+      "jest": "27.3.0",
+      "jest-date": "^1.1.4",
+      "jest-plugin-context": "^2.9.0",
+      "nyc": "^14.1.1",
     }
 
     pkgjson.main = 'node_modules/psychic/.dist/index.js'
