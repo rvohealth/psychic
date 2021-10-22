@@ -1,6 +1,6 @@
 node_modules/
 src/pkg
-log
+log/*
 .dist
 testappdist/
 tmp/migrate/*

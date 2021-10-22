@@ -73,6 +73,11 @@ class Dir extends Psyfs {
     } else
       return items
   }
+
+  // TODO: add alias
+  static async read(path, opts) {
+    return await Dir.readdir(path, opts)
+  }
 }
 
 export default Dir

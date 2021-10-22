@@ -11,7 +11,7 @@ import ghost from 'src/helpers/ghost'
 function loadEnv() {
   if (process.env.CORE_TEST)
     return {
-      ...dotenv.parse(fs.readFileSync('template/psychic-app/.env.test')),
+      ...dotenv.parse(fs.readFileSync('spec/support/testapp/.env.test')),
       ...dotenv.parse(fs.readFileSync('.env')),
     }
 

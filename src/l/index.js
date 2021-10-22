@@ -42,12 +42,16 @@ export default class L {
   }
 
   logPermanently(thing, { level }={}) {
+    if (process.env.CORE_TEST) return
+
     const color = chalk[this._colorFromLevel(level)]
     this._logs.push({ text: thing.replace(/\n$/, ''), literal: true })
     console.log(color(thing))
   }
 
   logStatus(thing, { level }={}) {
+    if (process.env.CORE_TEST) return
+
     const color = chalk[this._colorFromLevel(level)]
     const statusColor = level ? color : chalk.bgMagenta.yellow
     this.animator.animate(

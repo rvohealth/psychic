@@ -13,8 +13,19 @@ class File extends Psyfs {
     await file.appendFile(text)
   }
 
+  static async contains(filename, text) {
+    const contents = await File.read(filename)
+    return new RegExp(text).test(contents.toString())
+  }
+
   static async exists(arg1) {
     return (await fileExists(arg1))
+  }
+
+  static async isDuplicate(filePath1, filePath2) {
+    const file1 = await File.read(filePath1)
+    const file2 = await File.read(filePath2)
+    return file1.toString() === file2.toString()
   }
 
   static async open(filename, flags) {

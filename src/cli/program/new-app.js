@@ -24,9 +24,9 @@ export default class NewAppProgram extends CLIProgram {
     // await exec(`npx create-react-app ${path} --template redux --silent`)
 
     l.logStatus('build psychic foundation...')
-    await this.buildPsychicAppFoundation(path)
+    await this.buildPsychicAppFoundation(path, _path)
 
-    l.logStatus('add custom npm scripts to package.json...')
+    // l.logStatus('add custom npm scripts to package.json...')
     const psychicPkgjson = JSON.parse((await File.read('package.json')))
     const pkgjson = JSON.parse((await File.read(path + '/package.json')))
 
@@ -99,7 +99,7 @@ export default class NewAppProgram extends CLIProgram {
     l.end()
   }
 
-  async buildPsychicAppFoundation(path) {
+  async buildPsychicAppFoundation(path, appName) {
     l.logStatus('carve out new app structure...')
     await File.copy('template/psychic-app', path)
     await File.touch(
@@ -110,7 +110,7 @@ PSYCHIC_ENV=development
 PSYCHIC_SECRET=development_secret_123
 GMAIL_AUTH_USERNAME=youremail@gmail.com
 GMAIL_AUTH_PASSWORD=yourgooglepassword
-DB_NAME=yourdbname
+DB_NAME=${appName}
 DB_USERNAME=yourusername
 DB_PASSWORD=yourpassword
 `
@@ -128,7 +128,7 @@ TWILIO_AUTH_TOKEN=3bc462945eb4b7ec51d41803a1608f88
 TWILIO_AUTH_TOKEN=asdjkfh9374jbf8348734jgfu3476477
 GMAIL_AUTH_USERNAME=youremail@gmail.com
 GMAIL_AUTH_PASSWORD=yourgooglepassword
-DB_NAME=yourdbname_test
+DB_NAME=${appName}_test
 DB_USERNAME=yourusername
 DB_PASSWORD=yourpassword
 `
@@ -136,8 +136,6 @@ DB_PASSWORD=yourpassword
 
     l.logStatus('copy and remove js folder')
     await File.copy(path + '/js', path + '/src/')
-    await Dir.mkdir(`${path}/log`)
-    await File.touch(`${path}/log/.gitkeep`)
     await File.rm(`${path}/js`)
   }
 }
