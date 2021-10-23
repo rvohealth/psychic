@@ -2,6 +2,7 @@ import l from 'src/singletons/l'
 import File from 'src/helpers/file'
 import config from 'src/config'
 import moment from 'moment'
+import GenerateSignInComponent from 'src/cli/program/generate/js/components/sign-in'
 
 class ArgsParser {
   constructor(args) {
@@ -41,7 +42,9 @@ export default class GenerateAuth {
     // await this._generateDream(_args.dreamName, _args.keyField, _args.passwordField)
     // await this._generateMigration(_args.dreamName, _args.keyField, _args.passwordField)
     // await this._generateChannel(_args.dreamName, _args.keyField, _args.passwordField)
-    await this._generateSpec(_args.dreamName)
+    // await this._generateSpec(_args.dreamName)
+
+    await this._generateSignInComponent(_args.dreamName, _args.keyField, _args.passwordField)
 
     if (!process.env.CORE_TEST)
       return process.exit()
@@ -115,6 +118,10 @@ ${dreamTemplate(dreamName, keyField, passwordField)}
       await File.write(config.pathTo(filepath), specTemplate(dreamName))
       l.log(`wrote new spec to: ${filepath}`)
     }
+  }
+
+  async _generateSignInComponent(dreamName, keyField, passwordField) {
+    return GenerateSignInComponent.generate(dreamName, keyField, passwordField)
   }
 }
 
