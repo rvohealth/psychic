@@ -52,10 +52,6 @@ describe('Namespace#get', () => {
           type: 'string',
           name: 'password',
         },
-        password_digest: {
-          type: 'string',
-          name: 'password_digest',
-        },
       }
     })
   })

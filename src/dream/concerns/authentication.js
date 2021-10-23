@@ -28,7 +28,7 @@ const AuthenticationProvider = superclass => class extends superclass {
         if (!!identifyingColumn && key.split('::')[0] !== identifyingColumn) continue
 
         const authentication = this._authentications.db[key]
-        if (await bcrypt.compare(password, this[authentication.passwordColumn + '_digest']))
+        if (await bcrypt.compare(password, this[authentication.passwordColumn]))
           return true
       }
       return false
@@ -44,7 +44,7 @@ const AuthenticationProvider = superclass => class extends superclass {
 
     this.beforeSave(async function() {
       if (this[`${passwordColumn}HasUnsavedChanges`]) {
-        this[`${passwordColumn}_digest`] = await bcrypt.hash(this[passwordColumn], 11)
+        this[`${passwordColumn}`] = await bcrypt.hash(this[passwordColumn], 11)
       }
     })
 

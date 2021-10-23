@@ -12,7 +12,7 @@ describe('Dream#authenticateFor', () => {
         passwordColumn: 'password',
       },
     }
-    dream.password_digest = '294gy3u4gr5h3vt'
+    dream.password = '294gy3u4gr5h3vt'
 
     const result = await dream.authenticateFor('email', 'p@ssw0rd')
     expect(spy).toHaveBeenCalledWith('p@ssw0rd', '294gy3u4gr5h3vt')
@@ -30,7 +30,7 @@ describe('Dream#authenticateFor', () => {
           passwordColumn: 'password',
         },
       }
-      dream.password_digest = '294gy3u4gr5h3vt'
+      dream.password = '294gy3u4gr5h3vt'
 
       const result = await dream.authenticateFor('email', 'incorrect')
       expect(spy).toHaveBeenCalledWith('incorrect', '294gy3u4gr5h3vt')

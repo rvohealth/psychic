@@ -26,10 +26,6 @@ describe('PostgresAdapter#db#count', () => {
           type: 'string',
           name: 'secret',
         },
-        secret_digest: {
-          type: 'string',
-          name: 'secret_digest',
-        },
       }
     })
 

@@ -2,7 +2,7 @@ import GenerateCLIProgram from 'src/cli/program/generate'
 import File from 'src/helpers/file'
 
 const template =
-`
+`\
 import { Channel } from 'psychic'
 
 export default class FishmanChannel extends Channel {

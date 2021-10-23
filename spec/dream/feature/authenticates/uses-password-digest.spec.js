@@ -29,17 +29,9 @@ describe('Dream.columns', () => {
           type: 'text',
           name: 'password',
         },
-        password_digest: {
-          type: 'text',
-          name: 'password_digest',
-        },
         otherpassword: {
           type: 'text',
-          name: 'password',
-        },
-        otherpassword_digest: {
-          type: 'text',
-          name: 'otherpassword_digest',
+          name: 'otherpassword',
         },
       }
     })
@@ -47,9 +39,7 @@ describe('Dream.columns', () => {
     await db.createTable('test_users', t => {
       t.string('email')
       t.string('password')
-      t.string('password_digest')
       t.string('otherpassword')
-      t.string('otherpassword_digest')
     })
 
     const testUser = new TestUser({ email: 'fishman', password: 'jones', otherpassword: 'simba' })

@@ -48,10 +48,6 @@ describe('CrystalBall Requests: auth endpoint', () => {
           type: 'string',
           name: 'secret',
         },
-        secret_digest: {
-          type: 'string',
-          name: 'secret_digest',
-        },
       }
     })
 
@@ -68,7 +64,6 @@ describe('CrystalBall Requests: auth endpoint', () => {
     await db.createTable('test_users', t => {
       t.string('email')
       t.string('secret')
-      t.string('secret_digest')
     })
     await TestUser.create({ email: 'fishman', secret: 'zim' })
   })
