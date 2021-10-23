@@ -58,6 +58,7 @@ export default class NewAppProgram extends CLIProgram {
     await File.touch(
       `${path}/.env.development`,
 `\
+SKIP_PREFLIGHT_CHECK=true
 NODE_ENV=development
 PSYCHIC_ENV=development
 PSYCHIC_SECRET=development_secret_123
@@ -72,6 +73,7 @@ DB_PASSWORD=yourpassword
     await File.touch(
       `${path}/.env.test`,
 `\
+SKIP_PREFLIGHT_CHECK=true
 NODE_ENV=test
 PSYCHIC_ENV=test
 PSYCHIC_SECRET=test_secret_123
