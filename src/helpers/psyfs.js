@@ -11,7 +11,11 @@ class Psyfs {
   }
 
   static async exists(arg1) {
-    return (await fileExists(arg1))
+    return await fileExists(arg1)
+  }
+
+  static async doesNotExist(arg1) {
+    return !(await this.exists(arg1))
   }
 
   static async replace(arg1, arg2) {

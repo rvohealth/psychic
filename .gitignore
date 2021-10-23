@@ -6,6 +6,7 @@ testappdist/
 tmp/migrate/*
 tmp/spec/*
 tmp/storage/*
+tmp/integrationtestapp
 .undodir
 .env
 .env.development

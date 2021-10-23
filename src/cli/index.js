@@ -8,6 +8,7 @@ import SpecCLIProgram from 'src/cli/program/spec'
 import IntegrationSpecCLIProgram from 'src/cli/program/integration-spec'
 import StoriesCLIProgram from 'src/cli/program/stories'
 import ListenCLIProgram from 'src/cli/program/listen'
+import BuildintspecCLIProgram from 'src/cli/program/buildintspec'
 
 export default class CLI {
   get args() {
@@ -18,6 +19,9 @@ export default class CLI {
 
   get program() {
     switch(this.args.program) {
+    case 'buildintspec':
+      return new BuildintspecCLIProgram()
+
     case 'db':
       return new DBCLIProgram()
 
