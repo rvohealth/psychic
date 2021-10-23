@@ -1,4 +1,5 @@
 import CLIProgram from 'src/cli/program'
+import GenerateAuth from 'src/cli/program/generate/auth'
 import GenerateChannel from 'src/cli/program/generate/channel'
 import GenerateDream from 'src/cli/program/generate/dream'
 import GenerateJSAPI from 'src/cli/program/generate/js/api'
@@ -8,6 +9,9 @@ import GenerateProjection from 'src/cli/program/generate/projection'
 export default class GenerateCLIProgram extends CLIProgram {
   async run(args) {
     switch(args.command) {
+    case 'auth':
+      return await new GenerateAuth().generate(args.args)
+
     case 'channel':
       return await new GenerateChannel().generate(args.args)
 

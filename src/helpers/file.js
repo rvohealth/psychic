@@ -19,7 +19,7 @@ class File extends Psyfs {
   }
 
   static async exists(arg1) {
-    return (await fileExists(arg1))
+    return await fileExists(arg1)
   }
 
   static async isDuplicate(filePath1, filePath2) {

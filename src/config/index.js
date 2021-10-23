@@ -1,4 +1,5 @@
 import fs from 'fs'
+import path from 'path'
 import transports from 'src/singletons/transports'
 import telekineticBridges from 'src/singletons/telekinetic-bridges'
 import ghosts from 'src/ghost/ghosts'
@@ -17,6 +18,11 @@ class Config {
 
   get channels() {
     return this._channels
+  }
+
+  get routesPath() {
+    if (process.env.CORE_TEST) return 'spec/support/testapp/config/routes'
+    return 'config/routes'
   }
 
   get cookies() {
@@ -66,7 +72,7 @@ class Config {
   }
 
   get env() {
-    if (process.env.CORE_TEST) return 'test'
+    if (ENV.CORE_TEST) return 'test'
     return process.env.PSYCHIC_ENV || process.env.NODE_ENV || 'development'
   }
 
@@ -119,7 +125,7 @@ class Config {
   }
 
   get root() {
-    if (process.env.CORE_TEST) return 'testapp/'
+    if (process.env.CORE_TEST) return 'spec/support/testapp'
     return ''
   }
 
@@ -226,6 +232,10 @@ class Config {
 
   lookup(className) {
     return this.dream(className)
+  }
+
+  pathTo(file) {
+    return path.join(this.root, file)
   }
 
   projection(projectionName) {

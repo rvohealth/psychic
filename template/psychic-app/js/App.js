@@ -1,32 +1,15 @@
-import { useEffect } from 'react'
-// import usersAPI from 'psy/net/api/v1/users'
-// import blackCatsAPI from 'psy/net/api/v1/black-cats'
-import psy from 'psy'
-import './App.css'
+import React from 'react'
+import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import Home from 'pages/Home'
 
-function App() {
-  useEffect(() => {
-    async function doit() {
-      // psy.on('psy/authed', async () => {
-      //   console.log('successfully authenticated!')
-      //   const response = await blackCatsAPI.index()
-      //   console.log('BLACK CATS', response)
-      // })
-
-      // psy.on('testws', data => {
-      //   console.log('TEST WSRESPONSE', data)
-      // })
-
-      // const response = await usersAPI.auth({ email: 'jim', password: 'fishman' })
-      // console.log(response)
-    }
-
-    doit()
-  }, [])
-
+export default function App() {
   return (
-    <div>PSYYYYCHIC</div>
+    <Router>
+      <Switch>
+        <Route exact path="/">
+          <Home />
+        </Route>
+      </Switch>
+    </Router>
   )
 }
-
-export default App

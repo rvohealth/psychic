@@ -7,7 +7,7 @@ import config from 'src/config'
 import db from 'src/db'
 
 describe('Channel#authenticates', () => {
-  it ("leverages associated model to handle authentication", async () => {
+  it ('leverages associated model to handle authentication', async () => {
     class TestUser extends Dream {
       static {
         TestUser

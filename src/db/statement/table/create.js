@@ -76,6 +76,10 @@ export default class CreateTableStatement extends Psyclass {
   }
 
   string(columnName, { length }={}) {
+    this.text(columnName, { length })
+  }
+
+  text(columnName, { length }={}) {
     this.columns.push({
       type: 'text',
       name: columnName,
@@ -95,6 +99,11 @@ export default class CreateTableStatement extends Psyclass {
       type: 'timestamp',
       name: columnName,
     })
+  }
+
+  timestamps() {
+    this.timestamp('created_at')
+    this.timestamp('updated_at')
   }
 
   uuid(columnName) {

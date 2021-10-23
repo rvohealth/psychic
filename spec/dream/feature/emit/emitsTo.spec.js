@@ -67,7 +67,7 @@ describe('Dream#emitsTo', () => {
 
   it ('stores emit config for use later', async () => {
     const iceCream = await FavoriteIceCream.first()
-    expect(iceCream._emitsTo['user']).toEqual({ to: 'user', as: 'currentUser' })
+    expect(iceCream.constructor._emitsTo['user']).toEqual({ to: 'user', as: 'currentUser' })
   })
 })
 
