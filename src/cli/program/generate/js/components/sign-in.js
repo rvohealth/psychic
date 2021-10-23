@@ -29,7 +29,7 @@ export default function SignIn() {
       />
 
       <button
-        onClick={() => {
+        onClick={async () => {
           const response = await authAPI.auth(${keyField}, ${passwordField})
           console.log(response)
         }}

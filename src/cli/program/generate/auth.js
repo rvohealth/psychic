@@ -38,11 +38,11 @@ export default class GenerateAuth {
   async generate(args) {
     const _args = new ArgsParser(args)
 
-    // await this._addRoute(_args.dreamName)
-    // await this._generateDream(_args.dreamName, _args.keyField, _args.passwordField)
-    // await this._generateMigration(_args.dreamName, _args.keyField, _args.passwordField)
-    // await this._generateChannel(_args.dreamName, _args.keyField, _args.passwordField)
-    // await this._generateSpec(_args.dreamName)
+    await this._addRoute(_args.dreamName)
+    await this._generateDream(_args.dreamName, _args.keyField, _args.passwordField)
+    await this._generateMigration(_args.dreamName, _args.keyField, _args.passwordField)
+    await this._generateChannel(_args.dreamName, _args.keyField, _args.passwordField)
+    await this._generateSpec(_args.dreamName)
 
     await this._generateSignInComponent(_args.dreamName, _args.keyField, _args.passwordField)
 
