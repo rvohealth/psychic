@@ -39,13 +39,18 @@ export default class SpecCLIProgram extends CLIProgram {
 
       if (!hasStoriesDir || !hasStories) return
 
-      await spawn(`yarn run psy spec/stories --forceExit`, [], { shell: true, stdio: 'inherit' })
+      if (!process.env.CORE_TEST)
+        await spawn(`yarn run psy spec/stories --forceExit`, [], { shell: true, stdio: 'inherit' })
+
+      await spawn(`yarn run psy intspec --forceExit`, [], { shell: true, stdio: 'inherit' })
     }
   }
 
   async #runForDir(path, { bypassIgnore }={}) {
+    const reallyIgnore = ['integration']
     const dirIgnoreList = ['features', 'db', 'dream', 'support', 'factories']
     for (const folder of await Dir.readdir(path, { onlyDirs: true, ignoreHidden: true })) {
+      if (reallyIgnore.includes(folder)) continue
       if (dirIgnoreList.includes(folder) && !bypassIgnore) continue
 
       const isEmpty = await Dir.isEmpty(`${folder}`, { ignoreHidden: true })

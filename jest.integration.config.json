@@ -1,8 +1,9 @@
 {
   "testRegex": "((\\.)(spec))\\.js?$",
-  "setupFiles": [
-    "jest-plugin-context/setup"
-  ],
+  "globals": {
+    "URL": "http://localhost:33333"
+  },
   "setupFilesAfterEnv": ["./spec/integration/integration-config.js"],
-  "resetMocks": true
+  "resetMocks": true,
+  "preset": "jest-puppeteer"
 }

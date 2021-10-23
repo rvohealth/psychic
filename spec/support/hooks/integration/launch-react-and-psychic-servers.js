@@ -11,15 +11,39 @@ jest.setTimeout(30000)
 beforeAll(async () => {
   _reactServer = spawn(
     `cd ./tmp/integrationtestapp && \
-      BROWSER=none yarn run start`,
+      BROWSER=none PORT=33333 yarn run start`,
     [],
-    { shell: true, stdio: 'inherit' }
+    {
+      shell: true,
+      stdio: 'inherit',
+    }
   )
-  // _psychicServer = spawn('cd ./tmp/integrationtestapp && PSYCHIC_PORT=111 PSYCHIC_WSS_PORT=222 yarn run psy gaze', [], { shell: true, stdio: 'inherit' })
-  await sleep(20000)
+
+  _psychicServer = spawn(
+    `cd ./tmp/integrationtestapp && \
+      yarn run psy gaze`,
+    [],
+    {
+      shell: true,
+      stdio: 'inherit',
+      // need to pass env this way for psychic for some reason...
+      env: {
+        CORE_INTEGRATION_TEST: true,
+        PSYCHIC_PORT: 11111,
+        PSYCHIC_WSS_PORT: 22222,
+        JEST_PUPPETEER_CONFIG: process.env.DRIVER ?
+          `.jest-puppeteer.${process.env.DRIVER}.config.js` :
+          '.jest-puppeteer.config.js',
+      }
+    }
+  )
+
+  // would love to remove, but need event bindings for when yarn and
+  // psychic servers are finished to do that
+  await sleep(5000)
 })
 
 afterAll(async () => {
-  // kill(_reactServer.pid)
-  // kill(_psychicServer.pid)
+  kill(_reactServer.pid)
+  kill(_psychicServer.pid)
 })

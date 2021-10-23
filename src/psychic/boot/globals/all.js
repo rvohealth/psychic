@@ -9,6 +9,12 @@ import include from 'src/helpers/include'
 import ghost from 'src/helpers/ghost'
 
 function loadEnv() {
+  if (process.env.CORE_INTEGRATION_TEST)
+    return {
+      ...dotenv.parse(fs.readFileSync('tmp/integrationtestapp/.env.test')),
+      ...dotenv.parse(fs.readFileSync('.env')),
+    }
+
   if (process.env.CORE_TEST)
     return {
       ...dotenv.parse(fs.readFileSync('spec/support/testapp/.env.test')),

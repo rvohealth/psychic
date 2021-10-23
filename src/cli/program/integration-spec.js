@@ -8,8 +8,34 @@ export default class IntegrationSpecCLIProgram extends CLIProgram {
 
   async intspec(args) {
     if (args?.length)
-      await spawn(`yarn run integration-spec-untargeted ${args.join(' ')} --forceExit`, [], { shell: true, stdio: 'inherit' })
+      await spawn(
+        `npm run integration-spec-untargeted ${args.join(' ')} --forceExit`,
+        [],
+        {
+          shell: true,
+          stdio: 'inherit',
+          env: {
+            ...process.env,
+            JEST_PUPPETEER_CONFIG: process.env.DRIVER ?
+              `.jest-puppeteer.${process.env.DRIVER}.config.js` :
+              '.jest-puppeteer.config.js',
+          },
+        }
+      )
     else
-      await spawn(`yarn run integration-spec --forceExit`, [], { shell: true, stdio: 'inherit' })
+      await spawn(
+        `npm run integration-spec --forceExit`,
+        [],
+        {
+          shell: true,
+          stdio: 'inherit',
+          env: {
+            ...process.env,
+            JEST_PUPPETEER_CONFIG: process.env.DRIVER ?
+              `.jest-puppeteer.${process.env.DRIVER}.config.js` :
+              '.jest-puppeteer.config.js',
+          },
+        }
+      )
   }
 }

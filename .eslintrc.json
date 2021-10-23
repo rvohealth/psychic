@@ -23,7 +23,9 @@
     "spawn": "readonly",
     "stringContaining": "readonly",
     "posess": "readonly",
-    "uuid": "readonly"
+    "uuid": "readonly",
+    "page": "readonly",
+    "browser": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2020,
