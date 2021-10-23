@@ -211,8 +211,7 @@ export default class CrystalBall {
     await this.boot()
 
     this._server = this.app.listen(port, () => {
-      if (!process.env.CORE_TEST)
-        l.log(`express connected on port ${port}`)
+      l.log(`express connected on port ${port}`)
     })
 
     this._serverKiller = createHttpTerminator({
@@ -220,14 +219,11 @@ export default class CrystalBall {
     })
 
     this.ioServer.listen(config.wssPort, () => {
-      if (!process.env.CORE_TEST)
-        l.log(`wss connected on port ${config.wssPort}`)
+      l.log(`wss connected on port ${config.wssPort}`)
     })
 
     process.on('SIGTERM', async () => {
-      if (!process.env.CORE_TEST)
-        l.log('shutting down server')
-
+      l.log('shutting down server')
       await this.closeConnection()
     })
   }

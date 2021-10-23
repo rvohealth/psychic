@@ -18,7 +18,8 @@
     "buildspec": "npm run copymake &&  node ./.dist/make/for-core-specs.js &&  ./node_modules/.bin/babel src -d .dist --copy-files --quiet &&  ./node_modules/.bin/babel spec/support/testapp -d .dist/testapp --copy-files --quiet",
     "buildintspec": "npm run buildspec && npm run psy buildintspec",
     "prepare": "npm run build --scripts-prepend-node-path --silent &&  node ./.dist/make/post-install.js",
-    "psy": "npm run build --scripts-prepend-node-path --silent && clear && node ./.dist/cli/run.js"
+    "psy": "npm run build --scripts-prepend-node-path --silent && clear && node ./.dist/cli/run.js",
+    "stop": "taskkill -F -IM node.exe"
   },
   "engines": {
     "node": ">=16.8.0",
@@ -83,6 +84,7 @@
     "redis": "^3.1.2",
     "socket.io": "^4.1.2",
     "socket.io-client": "^4.1.2",
+    "tree-kill": "^1.2.2",
     "twilio": "^3.64.0",
     "uuid": "^8.3.2",
     "ws": "^7.4.6"
