@@ -48,6 +48,9 @@ export default class NewAppProgram extends CLIProgram {
     l.logStatus('running psybuild...', { level: 'warn' })
     await exec(`cd ${path} && yarn run psybuild`)
 
+    l.logStatus('initializing git', { level: 'warn' })
+    await exec(`cd ${path} && git init && git add --all && git commit -am "psy init"`)
+
     l.logStatus('Done building app!')
     l.end()
   }
