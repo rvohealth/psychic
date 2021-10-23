@@ -4,6 +4,6 @@
     "jest-plugin-context/setup",
     "./spec/spec-helper.js"
   ],
-  "setupFilesAfterEnv": ["./spec/enable-hooks.js"],
+  "setupFilesAfterEnv": ["./spec/spec-config.js"],
   "resetMocks": true
 }

@@ -9,7 +9,9 @@
   },
   "scripts": {
     "test": "npm run buildspec &&  CORE_TEST=true node --experimental-vm-modules node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles",
-    "testquickly": " CORE_TEST=true node --experimental-vm-modules node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles",
+    "testquickly": "CORE_TEST=true node --experimental-vm-modules node_modules/.bin/jest --config ./jest.config.json --runInBand --detectOpenHandles",
+    "integration-spec": "CORE_TEST=true node --experimental-vm-modules node_modules/.bin/jest ./spec/integration/* --config jest.integration.config.json",
+    "integration-spec-untargeted": "CORE_TEST=true node --experimental-vm-modules node_modules/.bin/jest --config jest.integration.config.json",
     "copyhelpers": " ./node_modules/.bin/babel src/helpers -d .dist/make/helpers --copy-files --quiet",
     "copymake": "npm run copyhelpers &&  ./node_modules/.bin/babel make -d .dist/make --copy-files --quiet",
     "build": "npm run copymake &&  ./node_modules/.bin/babel src -d .dist --copy-files --quiet",

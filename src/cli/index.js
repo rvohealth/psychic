@@ -5,6 +5,7 @@ import GazeCLIProgram from 'src/cli/program/gaze'
 import GenerateCLIProgram from 'src/cli/program/generate'
 import NewAppProgram from 'src/cli/program/new-app'
 import SpecCLIProgram from 'src/cli/program/spec'
+import IntegrationSpecCLIProgram from 'src/cli/program/integration-spec'
 import StoriesCLIProgram from 'src/cli/program/stories'
 import ListenCLIProgram from 'src/cli/program/listen'
 
@@ -27,6 +28,11 @@ export default class CLI {
     case 'gen':
     case 'g':
       return new GenerateCLIProgram()
+
+    case 'intspec':
+    case 'integration-spec':
+    case 'integrations':
+      return new IntegrationSpecCLIProgram()
 
     case 'listen':
     case 'start':
