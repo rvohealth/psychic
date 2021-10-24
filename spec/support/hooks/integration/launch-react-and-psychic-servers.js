@@ -10,18 +10,17 @@ jest.setTimeout(30000)
 
 beforeAll(async () => {
   _reactServer = spawn(
-    `cd ./tmp/integrationtestapp && \
-      BROWSER=none PORT=33333 npm run start`,
+    `BROWSER=none PORT=33333 npm run start`,
     [],
     {
+      cwd: './tmp/integrationtestapp',
       shell: true,
       stdio: 'inherit',
     }
   )
 
   _psychicServer = spawn(
-    `cd ./tmp/integrationtestapp && \
-      npm run psy gaze`,
+    `npm run psy gaze`,
     [],
     {
       shell: true,

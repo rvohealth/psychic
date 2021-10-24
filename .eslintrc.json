@@ -29,7 +29,8 @@
     "browser": "readonly",
     "goto": "readonly",
     "baseUrl": "readonly",
-    "resetApp": "readonly"
+    "resetIntegrationApp": "readonly",
+    "runPsyCommand": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2020,

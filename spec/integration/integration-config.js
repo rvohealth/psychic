@@ -11,5 +11,5 @@ import 'spec/support/hooks/clarify-spec-failures'
 import 'spec/support/hooks/integration/launch-react-and-psychic-servers'
 
 beforeEach(async () => {
-  await resetApp()
+  await resetIntegrationApp()
 })
