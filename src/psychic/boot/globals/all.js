@@ -9,10 +9,14 @@ import include from 'src/helpers/include'
 import ghost from 'src/helpers/ghost'
 
 function loadEnv() {
-  console.log('CCCWWWWDDDDDD', process.cwd())
+  if (process.env.CORE_INTEGRATION_BUT_USING_ROOT_PATH)
+    return {
+      ...dotenv.parse(fs.readFileSync('tmp/integrationtestapp/.env.test')),
+    }
+
   if (process.env.CORE_INTEGRATION_TEST)
     return {
-      ...dotenv.parse(fs.readFileSync('.env.test')),
+      ...dotenv.parse(fs.readFileSync('tmp/integrationtestapp/.env.test')),
     }
 
   if (process.env.CORE_TEST)

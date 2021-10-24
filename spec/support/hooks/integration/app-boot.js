@@ -19,6 +19,7 @@ beforeEach(async () => {
   const ghostsConfig = await loadYaml('tmp/integrationtestapp/config/ghosts')
   const pathsConfig = await loadYaml('tmp/integrationtestapp/config/paths')
 
+
   config.boot({
     dreams: packagedDreams,
     channels: packagedChannels,
