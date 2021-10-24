@@ -33,9 +33,10 @@ export default class CLI {
     case 'g':
       return new GenerateCLIProgram()
 
+    case 'ispec':
     case 'intspec':
-    case 'integration-spec':
     case 'integrations':
+    case 'integration-spec':
       return new IntegrationSpecCLIProgram()
 
     case 'listen':

@@ -9,6 +9,7 @@ import include from 'src/helpers/include'
 import ghost from 'src/helpers/ghost'
 
 function loadEnv() {
+  console.log('CCCWWWWDDDDDD', process.cwd())
   if (process.env.CORE_INTEGRATION_TEST)
     return {
       ...dotenv.parse(fs.readFileSync('.env.test')),
