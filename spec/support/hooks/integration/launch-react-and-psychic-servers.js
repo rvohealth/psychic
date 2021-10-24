@@ -11,7 +11,7 @@ jest.setTimeout(30000)
 beforeAll(async () => {
   _reactServer = spawn(
     `cd ./tmp/integrationtestapp && \
-      BROWSER=none PORT=33333 yarn run start`,
+      BROWSER=none PORT=33333 npm run start`,
     [],
     {
       shell: true,
@@ -21,7 +21,7 @@ beforeAll(async () => {
 
   _psychicServer = spawn(
     `cd ./tmp/integrationtestapp && \
-      yarn run psy gaze`,
+      npm run psy gaze`,
     [],
     {
       shell: true,
@@ -40,7 +40,7 @@ beforeAll(async () => {
 
   // would love to remove, but need event bindings for when yarn and
   // psychic servers are finished to do that
-  await sleep(5000)
+  await sleep(10000)
 })
 
 afterAll(async () => {

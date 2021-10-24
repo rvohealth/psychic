@@ -24,8 +24,12 @@
     "stringContaining": "readonly",
     "posess": "readonly",
     "uuid": "readonly",
+
     "page": "readonly",
-    "browser": "readonly"
+    "browser": "readonly",
+    "goto": "readonly",
+    "baseUrl": "readonly",
+    "resetApp": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2020,

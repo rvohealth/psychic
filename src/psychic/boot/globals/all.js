@@ -10,8 +10,9 @@ import ghost from 'src/helpers/ghost'
 
 function loadEnv() {
   if (process.env.CORE_INTEGRATION_TEST)
+    // in this case, cwd is tmp/integrationtestapp
     return {
-      ...dotenv.parse(fs.readFileSync('tmp/integrationtestapp/.env.test')),
+      ...dotenv.parse(fs.readFileSync('.env.test')),
       ...dotenv.parse(fs.readFileSync('.env')),
     }
 
