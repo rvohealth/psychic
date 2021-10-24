@@ -10,9 +10,11 @@ import ghost from 'src/helpers/ghost'
 
 function loadEnv() {
   if (process.env.CORE_INTEGRATION_BUT_USING_ROOT_PATH)
-    return {
-      ...dotenv.parse(fs.readFileSync('tmp/integrationtestapp/.env.test')),
-    }
+    if (fs.existsSync('tmp/integrationtestapp/.env.test'))
+      return {
+        ...dotenv.parse(fs.readFileSync('tmp/integrationtestapp/.env.test')),
+      }
+    else return '.env.test'
 
   if (process.env.CORE_INTEGRATION_TEST)
     return {
