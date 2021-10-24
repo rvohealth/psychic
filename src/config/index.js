@@ -21,7 +21,7 @@ class Config {
   }
 
   get routesPath() {
-    if (process.env.CORE_TEST) return 'spec/support/testapp/config/routes'
+    if (process.env.CORE_TEST && !process.env.CORE_INTEGRATION_TEST) return 'spec/support/testapp/config/routes'
     return 'config/routes'
   }
 
