@@ -16,7 +16,7 @@
     "copymake": "npm run copyhelpers &&  ./node_modules/.bin/babel make -d .dist/make --copy-files --quiet",
     "build": "npm run copymake &&  ./node_modules/.bin/babel src -d .dist --copy-files --quiet",
     "buildspec": "npm run copymake &&  node ./.dist/make/for-core-specs.js &&  ./node_modules/.bin/babel src -d .dist --copy-files --quiet &&  ./node_modules/.bin/babel spec/support/testapp -d .dist/testapp --copy-files --quiet",
-    "buildintspec": "npm run killintegrationservers && npm run buildspec && npm run psy buildintspec",
+    "buildintspec": "npm run killintegrationservers && npm run copymake && node ./.dist/make/for-core-integration-specs.js && ./node_modules/.bin/babel src -d .dist --copy-files --quiet &&  ./node_modules/.bin/babel tmp/integrationtestapp -d .dist/testapp --copy-files --quiet",
     "killintegrationservers": "kill -9 $(lsof -t -i :11111) || true && kill -9 $(lsof -t -i :22222) || true && kill -9 $(lsof -t -i :33333) || true",
     "prepare": "npm run build --scripts-prepend-node-path --silent &&  node ./.dist/make/post-install.js",
     "psy": "npm run build --scripts-prepend-node-path --silent && clear && node ./.dist/cli/run.js",
