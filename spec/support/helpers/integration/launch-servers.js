@@ -6,9 +6,7 @@ import sleep from 'src/helpers/sleep'
 let _reactServer = global.__psyspec__reactServer = null
 let _psychicServer = global.__psyspec__psychicServer = null
 
-jest.setTimeout(30000)
-
-beforeAll(async () => {
+export async function launchServers() {
   _reactServer = spawn(
     `BROWSER=none PORT=33333 npm run start`,
     [],
@@ -40,9 +38,12 @@ beforeAll(async () => {
   // would love to remove, but need event bindings for when yarn and
   // psychic servers are finished to do that
   await sleep(10000)
-})
+}
 
-afterAll(async () => {
-  kill(_reactServer.pid)
-  kill(_psychicServer.pid)
-})
+export async function killServers() {
+  if (_reactServer.pid)
+    kill(_reactServer.pid)
+
+  if (_psychicServer.pid)
+    kill(_psychicServer.pid)
+}

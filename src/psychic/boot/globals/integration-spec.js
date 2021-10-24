@@ -7,8 +7,15 @@ async function goto(url) {
 }
 
 async function resetIntegrationApp() {
-  await Dir.rm('tmp/integrationtestapp/app')
-  await Dir.copy('template/psychic-app/app', 'tmp/integrationtestapp/app')
+  const dirsToReplace = [
+    'app',
+    'config',
+  ]
+
+  for (const dir of dirsToReplace) {
+    await Dir.rm(`tmp/integrationtestapp/${dir}`)
+    await Dir.copy(`template/psychic-app/${dir}`, `tmp/integrationtestapp/${dir}`)
+  }
 
   await File.rm('tmp/integrationtestapp/src/App.js')
   await Dir.copy('template/psychic-app/js/App.js', 'tmp/integrationtestapp/src/App.js')
@@ -23,9 +30,9 @@ async function resetIntegrationApp() {
   })
 }
 
-async function runPsyCommand(command) {
+async function runPsyCommand(command, opts={}) {
   await spawn(
-    `CORE_INTEGRATION_TEST=true npm run psy g:auth`,
+    command,
     [],
     {
       shell: true,
@@ -34,12 +41,31 @@ async function runPsyCommand(command) {
       env: {
         ...process.env,
         CORE_INTEGRATION_TEST: true,
-      }
+      },
+      ...opts,
     }
   )
+}
+
+async function swapIntegrationFiles(path) {
+  const files = await Dir.read(path, { onlyFiles: true })
+  for (const file of files) {
+    await File.rm(`tmp/integrationtestapp/${file}`)
+    await File.copy(`${path}/${file}`, `tmp/integrationtestapp/${file}`)
+  }
+
+  const dirs = await Dir.read(path, { onlyDirs: true })
+  for (const dir of dirs) {
+    const files = await Dir.read(`${path}/${dir}`, { onlyFiles: true })
+    for (const file of files) {
+      await File.rm(`tmp/integrationtestapp/${dir}/${file}`)
+      await File.copy(`${path}/${dir}/${file}`, `tmp/integrationtestapp/${dir}/${file}`)
+    }
+  }
 }
 
 global.goto = goto
 global.baseUrl = 'http://localhost:33333'
 global.resetIntegrationApp = resetIntegrationApp
 global.runPsyCommand = runPsyCommand
+global.swapIntegrationFiles = swapIntegrationFiles

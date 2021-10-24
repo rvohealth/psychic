@@ -30,7 +30,9 @@
     "goto": "readonly",
     "baseUrl": "readonly",
     "resetIntegrationApp": "readonly",
-    "runPsyCommand": "readonly"
+    "runPsyCommand": "readonly",
+    "swapIntegrationFiles": "readonly",
+    "unswapIntegrationFiles": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2020,
