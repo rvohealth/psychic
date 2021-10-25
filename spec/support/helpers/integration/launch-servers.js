@@ -41,9 +41,9 @@ export async function launchServers() {
 }
 
 export async function killServers() {
-  if (_reactServer.pid)
+  if (_reactServer?.pid)
     kill(_reactServer.pid)
 
-  if (_psychicServer.pid)
+  if (_psychicServer?.pid)
     kill(_psychicServer.pid)
 }

@@ -12,7 +12,9 @@ export default class GenerateJSAPI {
     await Dir.mkdirUnlessExists(path.join(config.psyJsPath, 'net'))
 
     await this.generateForRoutes(CrystalBall.routes)
-    await this.generateForNamespaces(CrystalBall.namespaces)
+    // await this.generateForNamespaces(CrystalBall.namespaces)
+    if (!process.env.CORE_TEST)
+      return process.exit()
   }
 
   // recursively read all nested namespaces

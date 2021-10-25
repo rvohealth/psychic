@@ -7,12 +7,11 @@ import 'src/psychic/boot/globals/integration-spec'
 
 import 'spec/factories'
 import 'spec/support/extensions/to-throw-async'
-
+import 'spec/support/hooks/clarify-spec-failures'
 
 // import 'spec/support/hooks/integration/app-boot'
 import 'spec/support/hooks/build-tmp-storage'
 import 'spec/support/hooks/cleanup-between-integration-specs'
-import 'spec/support/hooks/clarify-spec-failures'
 
 jest.setTimeout(30000)
 
