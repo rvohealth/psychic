@@ -4,7 +4,7 @@ import config from 'src/config'
 export default class GenerateSignInComponent {
   static async generate(dreamName, namespace, keyField, passwordField) {
     if (!keyField) throw 'MISSING KEY'
-    if (!keyField) throw 'MISSING PASS'
+    if (!passwordField) throw 'MISSING PASS'
 
     const template =
 `\

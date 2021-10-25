@@ -15,7 +15,7 @@ describe('Landing on home page of boiler-plate react app', () => {
     await killServers()
   })
 
-  it('should have content "Psychic"', async () => {
+  it('should allow sign in from auth boilerplate', async () => {
     await goto(baseUrl)
     await sleep(10000)
   })
