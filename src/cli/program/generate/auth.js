@@ -123,8 +123,8 @@ ${dreamTemplate(dreamName, keyField, passwordField)}
     }
   }
 
-  async _generateSignInComponent(dreamName, keyField, passwordField) {
-    return GenerateSignInComponent.generate(dreamName, keyField, passwordField)
+  async _generateSignInComponent(dreamName, namespace, keyField, passwordField) {
+    return GenerateSignInComponent.generate(dreamName, namespace, keyField, passwordField)
   }
 }
 

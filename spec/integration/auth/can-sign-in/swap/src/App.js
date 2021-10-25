@@ -1,6 +1,6 @@
 import React from 'react'
 import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
-import SignIn from 'components/SignIn'
+import SignIn from 'tmp/integrationtestapp/src/components/SignIn'
 
 export default function App() {
   return (
