@@ -32,7 +32,7 @@ export default function SignIn() {
 
       <button
         onClick={async () => {
-          const response = await ${apiName}.auth(${keyField}, ${passwordField})
+          const response = await ${apiName}.auth({ ${keyField}, ${passwordField} })
           console.log(response)
         }}
       >Submit</button>

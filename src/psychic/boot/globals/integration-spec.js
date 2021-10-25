@@ -64,6 +64,60 @@ async function swapIntegrationFiles(path) {
   }
 }
 
+async function find(text) {
+  let button
+  try {
+    [button] = await page.$x(`//button[contains(text(), '${text}')]`)
+  } catch {
+    throw 'Failed to find button'
+  }
+
+  console.log(button)
+  return button
+}
+
+async function click(selector, opts) {
+  try {
+    await page.click(selector, opts)
+  } catch {
+    await clickByText(selector)
+  }
+}
+
+async function fillIn(selector, text) {
+  try {
+    await page.focus(selector)
+  } catch {
+    await page.focus(`input[name=${selector}]`)
+  }
+
+  await page.keyboard.type(text)
+}
+
+
+
+
+const escapeXpathString = str => {
+  const splitedQuotes = str.replace(/'/g, `', "'", '`);
+  return `concat('${splitedQuotes}', '')`;
+}
+
+async function clickByText(text, { elementType }={}) {
+  const escapedText = escapeXpathString(text)
+  const linkHandlers = await page.$x(`//${elementType || 'button'}[contains(text(), ${escapedText})]`)
+
+  if (linkHandlers.length > 0) {
+    await linkHandlers[0].click()
+  } else {
+    throw new Error(`Link not found: ${text}`)
+  }
+}
+
+
+
+global.click = click
+global.fillIn = fillIn
+global.find = find
 global.goto = goto
 global.baseUrl = 'http://localhost:33333'
 global.resetIntegrationApp = resetIntegrationApp

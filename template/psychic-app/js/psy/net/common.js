@@ -1,5 +1,6 @@
 import axios from 'axios'
 import io from 'psy/singletons/io'
+import { serverUrl } from 'config/endpoints'
 
 export default class Common {
   static get(url, params, axiosConfig) {
@@ -35,6 +36,6 @@ export default class Common {
 
   static _url(url) {
     // fix hardcoding with generated frontend psy module
-    return `http://localhost:777/${url.replace(/^\//, '')}`
+    return `${serverUrl}/${url.replace(/^\//, '')}`
   }
 }

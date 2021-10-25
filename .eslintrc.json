@@ -25,14 +25,15 @@
     "posess": "readonly",
     "uuid": "readonly",
 
-    "page": "readonly",
-    "browser": "readonly",
-    "goto": "readonly",
     "baseUrl": "readonly",
+    "browser": "readonly",
+    "click": "readonly",
+    "fillIn": "readonly",
+    "goto": "readonly",
+    "page": "readonly",
     "resetIntegrationApp": "readonly",
     "runPsyCommand": "readonly",
-    "swapIntegrationFiles": "readonly",
-    "unswapIntegrationFiles": "readonly"
+    "swapIntegrationFiles": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2020,
