@@ -3,6 +3,9 @@ import config from 'src/config'
 
 export default class GenerateSignInComponent {
   static async generate(dreamName, namespace, keyField, passwordField) {
+    if (!keyField) throw 'MISSING KEY'
+    if (!keyField) throw 'MISSING PASS'
+
     const template =
 `\
 import React, { useState } from 'react'
