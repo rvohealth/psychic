@@ -44,7 +44,10 @@ export default class GenerateAuth {
     await this._generateChannel(_args.dreamName, _args.keyField, _args.passwordField)
     await this._generateSpec(_args.dreamName)
 
-    await this._generateSignInComponent(_args.dreamName, _args.keyField, _args.passwordField)
+    // TODO: add support for namespaced routes, leaving blank for now
+    const namespace = null
+
+    await this._generateSignInComponent(_args.dreamName, namespace, _args.keyField, _args.passwordField)
 
     if (!process.env.CORE_TEST)
       return process.exit()

@@ -2,11 +2,11 @@ import File from 'src/helpers/file'
 import config from 'src/config'
 
 export default class GenerateSignInComponent {
-  static async generate(dreamName, keyField, passwordField) {
+  static async generate(dreamName, namespace, keyField, passwordField) {
     const template =
 `\
 import React, { useState } from 'react'
-import authAPI from 'psy/net/auth'
+import ${dreamName.camelize()}API from 'psy/net/${namespace ? namespace + '/' : ''}${dreamName}'
 
 export default function SignIn() {
   const [ ${keyField}, set${keyField.pascalize()} ] = useState('')
