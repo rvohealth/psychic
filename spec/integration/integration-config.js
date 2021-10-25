@@ -16,5 +16,6 @@ import 'spec/support/hooks/cleanup-between-integration-specs'
 jest.setTimeout(30000)
 
 beforeEach(async () => {
+  await swapIntegrationFiles('spec/integration/swap')
   await resetIntegrationApp()
 })
