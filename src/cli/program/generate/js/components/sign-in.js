@@ -3,13 +3,12 @@ import config from 'src/config'
 
 export default class GenerateSignInComponent {
   static async generate(dreamName, namespace, keyField, passwordField) {
-    if (!keyField) throw 'MISSING KEY'
-    if (!passwordField) throw 'MISSING PASS'
+    const apiName = `${dreamName.camelize().pluralize()}API`
 
     const template =
 `\
 import React, { useState } from 'react'
-import ${dreamName.camelize()}API from 'psy/net/${namespace ? namespace + '/' : ''}${dreamName.pluralize()}'
+import ${apiName} from 'psy/net/${namespace ? namespace + '/' : ''}${dreamName.pluralize()}'
 
 export default function SignIn() {
   const [ ${keyField}, set${keyField.pascalize()} ] = useState('')
@@ -33,7 +32,7 @@ export default function SignIn() {
 
       <button
         onClick={async () => {
-          const response = await authAPI.auth(${keyField}, ${passwordField})
+          const response = await ${apiName}.auth(${keyField}, ${passwordField})
           console.log(response)
         }}
       >Submit</button>
