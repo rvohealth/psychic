@@ -9,7 +9,7 @@ export default class GenerateSignInComponent {
     const template =
 `\
 import React, { useState } from 'react'
-import ${dreamName.camelize()}API from 'psy/net/${namespace ? namespace + '/' : ''}${dreamName}'
+import ${dreamName.camelize()}API from 'psy/net/${namespace ? namespace + '/' : ''}${dreamName.pluralize()}'
 
 export default function SignIn() {
   const [ ${keyField}, set${keyField.pascalize()} ] = useState('')
