@@ -135,12 +135,12 @@ ${dreamTemplate(dreamName, keyField, passwordField)}
 
   async _generateSignInComponent(dreamName, namespace, keyField, passwordField) {
     await GenerateSignInComponent.generate(dreamName, namespace, keyField, passwordField)
-    l.log(`wrote new sign in component to: ${filepath}`)
+    l.log(`wrote new sign in component to: src/components/SignIn.js`)
   }
 
   async _generateSignUpComponent(dreamName, namespace, keyField, passwordField) {
     await GenerateSignUpComponent.generate(dreamName, namespace, keyField, passwordField)
-    l.log(`wrote new sign up component to: ${filepath}`)
+    l.log(`wrote new sign up component to: src/components/SignUp.js')
   }
 }
 
