@@ -34,29 +34,29 @@ export default class UsersChannel extends Channel {
     this.authenticates('user', { against: 'gmail:secret', as: 'currentUser' })
   }
 
-  create() {
+  async create() {
     const user = await User.create(this.paramsFor(User))
     this.json(user)
   }
 
-  update() {
+  async update() {
     const user = await User.find(this.params.id)
     await user.update(this.paramsFor(User))
     this.json(user)
   }
 
-  delete() {
+  async delete() {
     const user = await User.find(this.params.id)
     await user.delete()
     this.json({ id: user.id })
   }
 
-  index() {
+  async index() {
     const users = await User.all()
     this.json(users)
   }
 
-  show() {
+  async show() {
     const user = await User.find(this.params.id)
     this.json(user)
   }

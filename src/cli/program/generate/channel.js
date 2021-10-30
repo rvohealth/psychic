@@ -24,7 +24,7 @@ function routeTemplate(channelName, routeName) {
 
   case 'create':
     return `
-  create() {
+  async create() {
     const ${dreamName} = await ${dreamName.pascalize()}.create(this.paramsFor(${dreamName.pascalize()}))
     this.json(${dreamName})
   }
@@ -32,7 +32,7 @@ function routeTemplate(channelName, routeName) {
 
   case 'update':
     return `
-  update() {
+  async update() {
     const ${dreamName} = await ${dreamName.pascalize()}.find(this.params.id)
     await ${dreamName}.update(this.paramsFor(${dreamName.pascalize()}))
     this.json(${dreamName})
@@ -41,7 +41,7 @@ function routeTemplate(channelName, routeName) {
 
   case 'delete':
     return `
-  delete() {
+  async delete() {
     const ${dreamName} = await ${dreamName.pascalize()}.find(this.params.id)
     await ${dreamName}.delete()
     this.json({ id: ${dreamName}.id })
@@ -50,7 +50,7 @@ function routeTemplate(channelName, routeName) {
 
   case 'index':
     return `
-  index() {
+  async index() {
     const ${dreamName.pluralize()} = await ${dreamName.pascalize()}.all()
     this.json(${dreamName.pluralize()})
   }
@@ -58,7 +58,7 @@ function routeTemplate(channelName, routeName) {
 
   case 'show':
     return `
-  show() {
+  async show() {
     const ${dreamName} = await ${dreamName.pascalize()}.find(this.params.id)
     this.json(${dreamName})
   }
@@ -68,7 +68,7 @@ function routeTemplate(channelName, routeName) {
     if (/:/.test(routeName)) return ''
 
     return `
-  ${routeName}() {
+  async ${routeName}() {
   }
 `
   }
