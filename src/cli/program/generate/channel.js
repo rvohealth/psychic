@@ -9,11 +9,10 @@ export default class GenerateChannel {
     const filepath = `app/channels/${channelName.hyphenize()}.js`
 
     await File.write(config.pathTo(filepath), channelTemplate(...args))
+    l.log(`wrote channel to: ${config.pathTo(filepath)}`)
 
-    if (!process.env.CORE_TEST) {
-      l.log(`wrote channel to: ${filepath}`)
+    if (!process.env.CORE_TEST && !process.env.CORE_INTEGRATION_TEST)
       return process.exit()
-    }
   }
 }
 

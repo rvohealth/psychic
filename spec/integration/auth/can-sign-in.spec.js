@@ -1,5 +1,6 @@
 import sleep from 'src/helpers/sleep'
 import File from 'src/helpers/file'
+import Dir from 'src/helpers/dir'
 import { launchServers, killServers } from 'spec/support/helpers/integration/launch-servers'
 
 jest.setTimeout(60 * 1000)
@@ -7,6 +8,7 @@ jest.setTimeout(60 * 1000)
 describe('Landing on home page of boiler-plate react app', () => {
   beforeEach(async () => {
     await runPsyCommand(`CORE_INTEGRATION_TEST=true npm run psy g:auth`)
+    console.log('COMPONENTS:', await Dir.read('tmp/integrationtestapp/src/components'))
     await runPsyCommand(`CORE_INTEGRATION_TEST=true npm run psy g:js`)
     await swapIntegrationFiles('spec/integration/auth/can-sign-in/swap')
     await swapIntegrationFiles('spec/integration/swap')

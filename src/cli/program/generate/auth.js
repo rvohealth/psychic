@@ -43,7 +43,6 @@ export default class GenerateAuth {
     await this._addRoutes(_args.dreamName)
     await this._generateDream(_args.dreamName, _args.keyField, _args.passwordField)
     await this._generateMigration(_args.dreamName, _args.keyField, _args.passwordField)
-    await this._generateChannel(_args.dreamName, _args.keyField, _args.passwordField)
     await this._generateSpec(_args.dreamName)
 
     // TODO: add support for namespaced routes, leaving blank for now
@@ -52,6 +51,7 @@ export default class GenerateAuth {
     await this._generateSignInComponent(_args.dreamName, namespace, _args.keyField, _args.passwordField)
     await this._generateSignUpComponent(_args.dreamName, namespace, _args.keyField, _args.passwordField)
 
+    await this._generateChannel(_args.dreamName, _args.keyField, _args.passwordField)
     if (!process.env.CORE_TEST)
       return process.exit()
   }
@@ -62,11 +62,11 @@ export default class GenerateAuth {
       dreamName.pluralize(),
       `key:${keyField}`,
       `password:${passwordField}`,
-      'create',
       'auth',
+      'create',
     ]
 
-    if (await File.exists(filepath)) {
+    if (await File.exists(config.pathTo(filepath))) {
       l.log(
 `\
 
@@ -82,7 +82,6 @@ ${channelTemplate(...args)} ])
       )
     } else {
       await new GenerateChannel().generate(args)
-      l.log(`wrote new dream to: ${filepath}`)
     }
   }
 
@@ -136,10 +135,12 @@ ${dreamTemplate(dreamName, keyField, passwordField)}
 
   async _generateSignInComponent(dreamName, namespace, keyField, passwordField) {
     await GenerateSignInComponent.generate(dreamName, namespace, keyField, passwordField)
+    l.log(`wrote new sign in component to: ${filepath}`)
   }
 
   async _generateSignUpComponent(dreamName, namespace, keyField, passwordField) {
     await GenerateSignUpComponent.generate(dreamName, namespace, keyField, passwordField)
+    l.log(`wrote new sign up component to: ${filepath}`)
   }
 }
 
