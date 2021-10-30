@@ -19,9 +19,9 @@ describe('Landing on home page of boiler-plate react app', () => {
 
   it('should allow sign in from auth boilerplate', async () => {
     await goto(`${baseUrl}/signup`)
-    await fillIn('email', 'fishman')
-    await fillIn('password', 'fishman')
-    await click('Submit')
+    // await fillIn('email', 'fishman')
+    // await fillIn('password', 'fishman')
+    // await click('Submit')
 
     // await goto(`${baseUrl}/signin`)
     // await fillIn('email', 'fishman')
