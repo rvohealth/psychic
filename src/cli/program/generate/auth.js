@@ -3,6 +3,7 @@ import File from 'src/helpers/file'
 import config from 'src/config'
 import moment from 'moment'
 import GenerateSignInComponent from 'src/cli/program/generate/js/components/sign-in'
+import GenerateSignUpComponent from 'src/cli/program/generate/js/components/sign-up'
 
 class ArgsParser {
   constructor(args) {
@@ -38,7 +39,7 @@ export default class GenerateAuth {
   async generate(args) {
     const _args = new ArgsParser(args)
 
-    await this._addRoute(_args.dreamName)
+    await this._addRoutes(_args.dreamName)
     await this._generateDream(_args.dreamName, _args.keyField, _args.passwordField)
     await this._generateMigration(_args.dreamName, _args.keyField, _args.passwordField)
     await this._generateChannel(_args.dreamName, _args.keyField, _args.passwordField)
@@ -48,6 +49,7 @@ export default class GenerateAuth {
     const namespace = null
 
     await this._generateSignInComponent(_args.dreamName, namespace, _args.keyField, _args.passwordField)
+    await this._generateSignUpComponent(_args.dreamName, namespace, _args.keyField, _args.passwordField)
 
     if (!process.env.CORE_TEST)
       return process.exit()
@@ -106,7 +108,7 @@ ${dreamTemplate(dreamName, keyField, passwordField)}
     l.log(`wrote new migration to: ${filepath}`)
   }
 
-  async _addRoute(dreamName) {
+  async _addRoutes(dreamName) {
     const newRoutes = await addRoutes(dreamName)
     await File.write(config.routesPath + '.js', newRoutes)
     l.log(`wrote new route to: ${config.routesPath}.js`)
@@ -125,6 +127,10 @@ ${dreamTemplate(dreamName, keyField, passwordField)}
 
   async _generateSignInComponent(dreamName, namespace, keyField, passwordField) {
     return GenerateSignInComponent.generate(dreamName, namespace, keyField, passwordField)
+  }
+
+  async _generateSignUpComponent(dreamName, namespace, keyField, passwordField) {
+    return GenerateSignUpComponent.generate(dreamName, namespace, keyField, passwordField)
   }
 }
 
