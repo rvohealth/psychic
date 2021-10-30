@@ -131,13 +131,7 @@ ${dreamTemplate(dreamName, keyField, passwordField)}
   }
 
   async _generateSignUpComponent(dreamName, namespace, keyField, passwordField) {
-    await GenerateSignUpComponent.generate([
-      dreamName,
-      `key:${keyField}`,
-      `password:${passwordField}`,
-      'create',
-      'auth',
-    ])
+    await GenerateSignUpComponent.generate(dreamName, namespace, keyField, passwordField)
   }
 }
 
@@ -162,14 +156,13 @@ export async function down(m) {
 }
 
 async function channelTemplate(dreamName, keyField, passwordField) {
-  await new GenerateChannel().generate(
+  await new GenerateChannel().generate([
     dreamName.pluralize(),
     `key:${keyField}`,
     `password:${passwordField}`,
     'create',
     'auth',
-    'signout',
-  )
+  ])
 }
 
 
