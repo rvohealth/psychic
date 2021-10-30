@@ -140,7 +140,7 @@ ${dreamTemplate(dreamName, keyField, passwordField)}
 
   async _generateSignUpComponent(dreamName, namespace, keyField, passwordField) {
     await GenerateSignUpComponent.generate(dreamName, namespace, keyField, passwordField)
-    l.log(`wrote new sign up component to: src/components/SignUp.js')
+    l.log(`wrote new sign up component to: src/components/SignUp.js`)
   }
 }
 
