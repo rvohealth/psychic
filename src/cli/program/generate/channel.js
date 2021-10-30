@@ -1,13 +1,14 @@
 import l from 'src/singletons/l'
 import File from 'src/helpers/file'
 import pluralize from 'pluralize'
+import config from 'src/config'
 
 export default class GenerateChannel {
   async generate(args) {
     const [ channelName ] = args
     const filepath = `app/channels/${channelName.hyphenize()}.js`
 
-    await File.write(filepath, channelTemplate(...args))
+    await File.write(config.pathTo(filepath), channelTemplate(...args))
 
     if (!process.env.CORE_TEST) {
       l.log(`wrote channel to: ${filepath}`)

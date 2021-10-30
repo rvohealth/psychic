@@ -75,7 +75,7 @@ Could not write to ${config.pathTo(filepath)}
 make sure to add an authentication block to ${config.pathTo(filepath)}
 e.g
 
-${channelTemplate(args)} ])
+${channelTemplate(...args)} ])
 }
 `,
         { level: 'warning' }
