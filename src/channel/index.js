@@ -1,7 +1,5 @@
 import pluralize from 'pluralize'
 import paramCase from 'src/helpers/paramCase'
-import snakeCase from 'src/helpers/snakeCase'
-import camelCase from 'src/helpers/camelCase'
 import config from 'src/config'
 import Projection from 'src/projection'
 import Unauthorized from 'src/error/crystal-ball/unauthorized'
@@ -94,6 +92,18 @@ export default class Channel {
 
       return this.json({ token })
     }
+
+    this.signout = async () => {
+      this.response.cookie(
+        authKey,
+        '', // set to a blank string, then set max age to 0 to remove immediately
+        {
+          maxAge: 0,
+          httpOnly: true,
+        },
+      )
+      this.json({ signedOut: true })
+    }
   }
 
   emit(to, path, data) {
@@ -107,5 +117,19 @@ export default class Channel {
   project(obj, projection=this.projection) {
     if (projection) return new projection(obj).cast()
     return new Projection(obj).cast()
+  }
+
+  paramsFor(dreamClass) {
+    if (!dreamClass) throw 'Missing required argument "dreamClass"'
+
+    // TODO: use config to drive timestamp and id fields
+    const ignoreFields = ['id', 'createdAt', 'updatedAt']
+
+    const params = {}
+    Object.keys(config.schema[dreamClass.table]).forEach(attribute => {
+      if (this.params[attribute] && !ignoreFields.includes(attribute))
+        params[attribute] = this.params[attribute]
+    })
+    return params
   }
 }

@@ -4,6 +4,7 @@ import config from 'src/config'
 import moment from 'moment'
 import GenerateSignInComponent from 'src/cli/program/generate/js/components/sign-in'
 import GenerateSignUpComponent from 'src/cli/program/generate/js/components/sign-up'
+import GenerateChannel from 'src/cli/program/generate/channel'
 
 class ArgsParser {
   constructor(args) {
@@ -154,18 +155,14 @@ export async function down(m) {
   )
 }
 
-function channelTemplate(name, keyField, passwordField) {
-  return (
-`\
-import { Channel } from 'psychic'
-
-export default class ${name.pascalize().pluralize()} extends Channel {
-  initialize() {
-    this
-      .authenticates('${keyField}', '${passwordField}')
-  }
-}
-`
+function channelTemplate(dreamName, keyField, passwordField) {
+  GenerateChannel.generate(
+    dreamName.pluralize(),
+    `key:${keyField}`,
+    `password:${passwordField}`,
+    'create',
+    'auth',
+    'signout',
   )
 }
 
