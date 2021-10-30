@@ -131,7 +131,13 @@ ${dreamTemplate(dreamName, keyField, passwordField)}
   }
 
   async _generateSignUpComponent(dreamName, namespace, keyField, passwordField) {
-    await GenerateSignUpComponent.generate(dreamName, namespace, keyField, passwordField)
+    await GenerateSignUpComponent.generate([
+      dreamName,
+      `key:${keyField}`,
+      `password:${passwordField}`,
+      'create',
+      'auth',
+    ])
   }
 }
 
