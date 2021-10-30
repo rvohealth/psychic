@@ -97,7 +97,7 @@ import ${pluralize.singular(channelName.pascalize())} from 'app/dreams/${plurali
   return ''
 }
 
-function channelTemplate(channelName, ...routes) {
+export function channelTemplate(channelName, ...routes) {
   return (
 `\
 import { Channel } from 'psychic'

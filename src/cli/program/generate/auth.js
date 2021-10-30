@@ -4,7 +4,7 @@ import config from 'src/config'
 import moment from 'moment'
 import GenerateSignInComponent from 'src/cli/program/generate/js/components/sign-in'
 import GenerateSignUpComponent from 'src/cli/program/generate/js/components/sign-up'
-import GenerateChannel from 'src/cli/program/generate/channel'
+import GenerateChannel, { channelTemplate } from 'src/cli/program/generate/channel'
 
 class ArgsParser {
   constructor(args) {
@@ -58,6 +58,13 @@ export default class GenerateAuth {
 
   async _generateChannel(dreamName, keyField, passwordField) {
     const filepath = `app/channels/${dreamName.hyphenize().pluralize()}.js`
+    const args = [
+      dreamName.pluralize(),
+      `key:${keyField}`,
+      `password:${passwordField}`,
+      'create',
+      'auth',
+    ]
 
     if (await File.exists(filepath)) {
       l.log(
@@ -68,12 +75,13 @@ Could not write to ${config.pathTo(filepath)}
 make sure to add an authentication block to ${config.pathTo(filepath)}
 e.g
 
-${channelTemplate(dreamName, keyField, passwordField)}
+${channelTemplate(args)} ])
+}
 `,
         { level: 'warning' }
       )
     } else {
-      await File.write(config.pathTo(filepath), channelTemplate(dreamName, keyField, passwordField))
+      await new GenerateChannel().generate(args)
       l.log(`wrote new dream to: ${filepath}`)
     }
   }
@@ -153,16 +161,6 @@ export async function down(m) {
 }
 `
   )
-}
-
-async function channelTemplate(dreamName, keyField, passwordField) {
-  await new GenerateChannel().generate([
-    dreamName.pluralize(),
-    `key:${keyField}`,
-    `password:${passwordField}`,
-    'create',
-    'auth',
-  ])
 }
 
 
