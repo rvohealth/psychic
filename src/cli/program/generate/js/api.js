@@ -109,7 +109,7 @@ export default class ${className}API {
 `\
   static async ${methodName}(${params}) {
     const response = await common.${route.httpMethod}(\`${path}\`, opts)
-    common.emit('psy/auth', { token: response.data.token, key: '${route.authKey}' })
+    // common.emit('psy/auth', { token: response.data.token, key: '${route.authKey}' })
     return response
   }
 `

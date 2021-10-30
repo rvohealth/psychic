@@ -33,7 +33,8 @@
     "page": "readonly",
     "resetIntegrationApp": "readonly",
     "runPsyCommand": "readonly",
-    "swapIntegrationFiles": "readonly"
+    "swapIntegrationFiles": "readonly",
+    "transpile": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2020,

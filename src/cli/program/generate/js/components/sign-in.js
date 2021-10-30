@@ -18,22 +18,26 @@ export default function SignIn() {
     <div className='sign-in'>
       <input
         name='${keyField}'
-        onChange={ value => {
-          set${keyField.pascalize()}(value)
+        onChange={ event => {
+          set${keyField.pascalize()}(event.target.value)
         }}
       />
 
       <input
         name='${passwordField}'
-        onChange={ value => {
-          set${passwordField.pascalize()}(value)
+        onChange={ event => {
+          set${passwordField.pascalize()}(event.target.value)
         }}
       />
 
       <button
         onClick={async () => {
-          const response = await ${apiName}.auth({ ${keyField}, ${passwordField} })
-          console.log(response)
+          try {
+            const response = await ${apiName}.auth({ ${keyField}, ${passwordField} })
+            console.log(response)
+          } catch(error) {
+            console.error('AXIOS ERROR:', error)
+          }
         }}
       >Submit</button>
     </div>

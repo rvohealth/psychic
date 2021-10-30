@@ -54,6 +54,7 @@ async function swapIntegrationFiles(path) {
     await File.copy(`${path}/${file}`, `tmp/integrationtestapp/${file}`)
   }
 
+  //TODO: simplify with recursion
   const dirs = await Dir.read(path, { onlyDirs: true })
   for (const dir of dirs) {
     const files = await Dir.read(`${path}/${dir}`, { onlyFiles: true })
@@ -61,7 +62,20 @@ async function swapIntegrationFiles(path) {
       await File.rm(`tmp/integrationtestapp/${dir}/${file}`)
       await File.copy(`${path}/${dir}/${file}`, `tmp/integrationtestapp/${dir}/${file}`)
     }
+
+    const nestedDirs = await Dir.read(`${path}/${dir}`, { onlyDirs: true })
+    for (const nestedDir of nestedDirs) {
+      const files = await Dir.read(`${path}/${dir}/${nestedDir}`, { onlyFiles: true })
+      for (const file of files) {
+        await File.rm(`tmp/integrationtestapp/${dir}/${nestedDir}/${file}`)
+        await File.copy(`${path}/${dir}/${nestedDir}/${file}`, `tmp/integrationtestapp/${dir}/${nestedDir}/${file}`)
+      }
+    }
   }
+}
+
+async function transpile() {
+  await spawn(`npm run buildintspec`, [], { shell: true, stdio: 'inherit' })
 }
 
 async function find(text) {
@@ -123,3 +137,4 @@ global.baseUrl = 'http://localhost:33333'
 global.resetIntegrationApp = resetIntegrationApp
 global.runPsyCommand = runPsyCommand
 global.swapIntegrationFiles = swapIntegrationFiles
+global.transpile = transpile
