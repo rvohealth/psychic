@@ -29,6 +29,7 @@ export async function launchServers() {
         CORE_INTEGRATION_TEST: true,
         PSYCHIC_PORT: 11111,
         PSYCHIC_WSS_PORT: 22222,
+        DB_NAME: 'psy_integration_test',
         JEST_PUPPETEER_CONFIG: process.env.DRIVER ?
           `.jest-puppeteer.${process.env.DRIVER}.config.js` :
           '.jest-puppeteer.config.js',
