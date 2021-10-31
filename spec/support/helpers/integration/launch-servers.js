@@ -21,6 +21,7 @@ export async function launchServers() {
     `npm run psy gaze`,
     [],
     {
+      cwd: './tmp/integrationtestapp',
       shell: true,
       stdio: 'inherit',
       // need to pass env this way for psychic for some reason...

@@ -38,6 +38,7 @@ class Config {
   }
 
   get dbName() {
+    console.log("BRAMIN", this.env, this.db)
     return this.db[this.env]?.name
   }
 
