@@ -210,7 +210,6 @@ export default class CrystalBall {
   async gaze(port=config.port) {
     await this.boot()
 
-    console.log("HAMMIN IT JOHNSON STYLE", port)
     this._server = this.app.listen(port, () => {
       l.log(`express connected on port ${port}`)
     })
