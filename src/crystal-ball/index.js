@@ -104,14 +104,14 @@ export default class CrystalBall {
 
     this._ioServer = createServer((req, res) => {
       // Set CORS headers
-      res.setHeader('Access-Control-Allow-Origin', '*');
-      res.setHeader('Access-Control-Request-Method', '*');
-      res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET');
-      res.setHeader('Access-Control-Allow-Headers', '*');
+      res.setHeader('Access-Control-Allow-Origin', '*')
+      res.setHeader('Access-Control-Request-Method', '*')
+      res.setHeader('Access-Control-Allow-Methods', 'OPTIONS, GET')
+      res.setHeader('Access-Control-Allow-Headers', '*')
       if ( req.method === 'OPTIONS' ) {
-        res.writeHead(200);
-        res.end();
-        return;
+        res.writeHead(200)
+        res.end()
+        return
       }
     })
 
@@ -210,6 +210,7 @@ export default class CrystalBall {
   async gaze(port=config.port) {
     await this.boot()
 
+    console.log("HAMMIN IT JOHNSON STYLE", port)
     this._server = this.app.listen(port, () => {
       l.log(`express connected on port ${port}`)
     })

@@ -7,15 +7,15 @@ let _reactServer = global.__psyspec__reactServer = null
 let _psychicServer = global.__psyspec__psychicServer = null
 
 export async function launchServers() {
-  _reactServer = spawn(
-    `BROWSER=none PORT=33333 npm run start`,
-    [],
-    {
-      cwd: './tmp/integrationtestapp',
-      shell: true,
-      stdio: 'inherit',
-    }
-  )
+  // _reactServer = spawn(
+  //   `BROWSER=none PORT=33333 npm run start`,
+  //   [],
+  //   {
+  //     cwd: './tmp/integrationtestapp',
+  //     shell: true,
+  //     stdio: 'inherit',
+  //   }
+  // )
 
   _psychicServer = spawn(
     `npm run psy gaze`,
