@@ -44,6 +44,7 @@ const AuthenticationProvider = superclass => class extends superclass {
 
     this.beforeSave(async function() {
       if (this[`${passwordColumn}HasUnsavedChanges`]) {
+        console.log("HALLOOOOOO", this[passwordColumn], passwordColumn)
         this[`${passwordColumn}`] = await bcrypt.hash(this[passwordColumn], 11)
       }
     })
