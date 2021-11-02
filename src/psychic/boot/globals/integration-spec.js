@@ -24,10 +24,10 @@ async function resetIntegrationApp() {
     'components',
   ]
 
-  srcDirsToReplace.forEach( async dirName => {
+  for (const dirName of srcDirsToReplace) {
     await Dir.rm(`tmp/integrationtestapp/src/${dirName}`)
     await Dir.copy(`template/psychic-app/js/${dirName}`, `tmp/integrationtestapp/src/${dirName}`)
-  })
+  }
 }
 
 async function runPsyCommand(command, opts={}) {
