@@ -39,6 +39,10 @@ class Config {
 
   get dbName() {
     console.log("BRAMIN", this.env, this.db)
+    if (!this.db) {
+      console.trace()
+      throw "CALLING DBNAME BEFORE BOOT"
+    }
     return this.db[this.env]?.name
   }
 
