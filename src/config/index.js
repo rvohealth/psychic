@@ -38,11 +38,7 @@ class Config {
   }
 
   get dbName() {
-    console.log("BRAMIN", this.env, this.db)
-    if (!this.db) {
-      console.trace()
-      throw "CALLING DBNAME BEFORE BOOT"
-    }
+    if (process.env.CORE_INTEGRATION_TEST) return 'psy_core_integration'
     return this.db[this.env]?.name
   }
 
