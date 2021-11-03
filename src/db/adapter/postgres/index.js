@@ -89,8 +89,6 @@ class PostgresAdapter {
   }
 
   async runSQL(sqlString) {
-    console.log('CALLING SQL STRING:', sqlString)
-    console.trace()
     // const r = await this.withConnection(async client => {
       let response
       const stack = new Error().stack
