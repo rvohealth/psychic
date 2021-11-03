@@ -8,6 +8,7 @@ class PostgresAdapter {
   pool() {
     if (this._pool) return this._pool
 
+    console.trace()
     this._pool = new Pool({
       Promise: bluebird,
 
