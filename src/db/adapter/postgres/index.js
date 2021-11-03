@@ -157,9 +157,9 @@ WHERE table_name='${tableName}' AND column_name='${columnName}'
     return parseInt(response.rows[0].count || 0)
   }
 
-  async createDB(dbName) {
-    console.log(`ABPOUT TO CREATE DB: ${dbName} ${config.dbName}`)
-    const sql = this.formatSQL("CREATE DATABASE " + dbName || config.dbName)
+  async createDB(dbName=config.dbName) {
+    console.log(`ABPOUT TO CREATE DB: ${dbName}`)
+    const sql = this.formatSQL("CREATE DATABASE " + dbName)
     return await this.runRootSQL(sql)
   }
 
@@ -265,8 +265,8 @@ DROP COLUMN ${columnName}
     return await this.runSQL(sql)
   }
 
-  async dropDB(dbName) {
-    const sql = this.formatSQL("DROP DATABASE " + dbName || config.dbName)
+  async dropDB(dbName=config.dbName) {
+    const sql = this.formatSQL("DROP DATABASE " + dbName)
     let response
     try {
       response = await this.runRootSQL(sql)
