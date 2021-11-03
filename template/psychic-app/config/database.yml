@@ -1,19 +1,11 @@
 development:
   name: 'ENV::DB_NAME'
-  username: 'ENV::DB_USERNAME'
-  password: 'ENV::DB_PASSWORD'
 
 staging:
   name: 'ENV::DB_NAME'
-  username: 'ENV::DB_USERNAME'
-  password: 'ENV::DB_PASSWORD'
 
 test:
   name: 'ENV::DB_NAME'
-  username: 'ENV::DB_USERNAME'
-  password: 'ENV::DB_PASSWORD'
 
 production:
   name: 'ENV::DB_NAME'
-  username: 'ENV::DB_USERNAME'
-  password: 'ENV::DB_PASSWORD'
