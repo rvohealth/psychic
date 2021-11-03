@@ -12,7 +12,7 @@ export default function App() {
         </Route>
 
         <Route exact path="/login">
-          <SignUp />
+          <SignIn />
         </Route>
       </Switch>
     </Router>

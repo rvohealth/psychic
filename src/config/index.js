@@ -38,7 +38,6 @@ class Config {
   }
 
   get dbName() {
-    console.log('FROM dbName', this.env, this.db)
     return this.db[this.env]?.name
   }
 
