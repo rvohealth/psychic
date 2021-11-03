@@ -15,7 +15,9 @@ function loadEnv() {
       return {
         ...dotenv.parse(fs.readFileSync('tmp/integrationtestapp/.env.test')),
       }
-    else return '.env.test'
+    else return {
+      ...dotenv.parse(fs.readFileSync('env.test')),
+    }
 
   if (process.env.CORE_INTEGRATION_TEST)
     return {
