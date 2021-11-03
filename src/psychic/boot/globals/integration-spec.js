@@ -28,6 +28,8 @@ async function resetIntegrationApp() {
     await Dir.rm(`tmp/integrationtestapp/src/${dirName}`)
     await Dir.copy(`template/psychic-app/js/${dirName}`, `tmp/integrationtestapp/src/${dirName}`)
   }
+
+  console.log("FILE CONTENTS after reset:", (await File.read('tmp/integrationtestapp/config/database.yml')).toString())
 }
 
 async function runPsyCommand(command, opts={}) {
@@ -72,6 +74,8 @@ async function swapIntegrationFiles(path) {
       }
     }
   }
+
+  console.log("FILE CONTENTS after swap:", (await File.read('tmp/integrationtestapp/config/database.yml')).toString())
 }
 
 async function transpile() {

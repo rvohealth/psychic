@@ -38,27 +38,22 @@ class Config {
   }
 
   get dbName() {
-    if (process.env.CORE_INTEGRATION_TEST) return 'psy_core_integration'
     return this.db[this.env]?.name
   }
 
   get dbPassword() {
-    if (process.env.CORE_INTEGRATION_TEST) return 'password'
     return this.db[this.env]?.password
   }
 
   get dbPort() {
-    if (process.env.CORE_INTEGRATION_TEST) return 5444
     return this.db[this.env]?.port
   }
 
   get dbHost() {
-    if (process.env.CORE_INTEGRATION_TEST) 'localhost'
     return this.db[this.env]?.host
   }
 
   get dbUsername() {
-    if (process.env.CORE_INTEGRATION_TEST) return 'psychic'
     return this.db[this.env]?.username
   }
 
