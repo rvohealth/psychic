@@ -14,13 +14,7 @@ export default class DBCLIProgram extends CLIProgram {
   }
 
   async create() {
-    try {
-      await db.create()
-    } catch(_) {
-      console.error("CATCHING DB CREATE ERROR:", _)
-      // ignoring error intentionally here, need a createIfNotExists
-    }
-
+    await db.createIfNotExists()
     await db.createMigrationsIfNotExists()
 
     if (!process.env.CORE_TEST)
