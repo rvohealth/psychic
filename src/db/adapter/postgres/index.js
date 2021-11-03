@@ -158,6 +158,7 @@ WHERE table_name='${tableName}' AND column_name='${columnName}'
   }
 
   async createDB(dbName) {
+    console.log(`ABPOUT TO CREATE DB: ${dbName} ${config.dbName}`)
     const sql = this.formatSQL("CREATE DATABASE " + dbName || config.dbName)
     return await this.runRootSQL(sql)
   }
