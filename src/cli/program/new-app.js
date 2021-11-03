@@ -20,7 +20,6 @@ export default class NewAppProgram extends CLIProgram {
     if (!_path) throw "Must pass an app name when calling, i.e. psy new:app appname"
     const path = `${process.env.ORIGINAL_PWD || '.'}/${_path}`
     const appName = _path.split('/').last
-    l.logPermanently(`APPNAME: ${appName} ${_path.split('/')} ${_path.split('/').last} ${_path.split('/')[_path.split('/').length - 1]}`)
 
     l.logStatus('copying react template to new path')
     await Dir.copy('template/create-react-app', path)

@@ -6,7 +6,8 @@ import CLI from './index.js'
 import config from 'src/config'
 import l from 'src/singletons/l'
 import File from 'src/helpers/file'
-import 'src/psychic/boot/all'
+import 'src/psychic/boot/globals/all'
+import 'src/psychic/boot/language-extensions/index'
 
 async function runCLI() {
   const pkgjson = JSON.parse((await File.read('package.json')))
