@@ -8,7 +8,6 @@ class PostgresAdapter {
   pool() {
     if (this._pool) return this._pool
 
-    console.trace()
     this._pool = new Pool({
       Promise: bluebird,
 
@@ -90,6 +89,8 @@ class PostgresAdapter {
   }
 
   async runSQL(sqlString) {
+    console.log('CALLING SQL STRING:', sqlString)
+    console.trace()
     // const r = await this.withConnection(async client => {
       let response
       const stack = new Error().stack
