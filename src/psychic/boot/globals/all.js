@@ -9,6 +9,7 @@ import include from 'src/helpers/include'
 import ghost from 'src/helpers/ghost'
 
 function loadEnv() {
+  console.log('ENV: ', process.env)
   if (process.env.CORE_INTEGRATION_BUT_USING_ROOT_PATH)
     if (fs.existsSync('tmp/integrationtestapp/.env.test'))
       return {
