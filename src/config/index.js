@@ -76,6 +76,7 @@ class Config {
 
   get env() {
     if (ENV.CORE_TEST) return 'test'
+    if (ENV.CORE_INTEGRATION_TEST) return 'development'
     return process.env.PSYCHIC_ENV || process.env.NODE_ENV || 'development'
   }
 
