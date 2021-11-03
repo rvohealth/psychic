@@ -26,10 +26,10 @@ export async function launchServers() {
       stdio: 'inherit',
       // need to pass env this way for psychic for some reason...
       env: {
-        CORE_INTEGRATION_TEST: true,
+        // CORE_INTEGRATION_TEST: false,
         PSYCHIC_PORT: 11111,
         PSYCHIC_WSS_PORT: 22222,
-        DB_NAME: 'psy_integration_test',
+        // DB_NAME: 'psy_integration_test',
         JEST_PUPPETEER_CONFIG: process.env.DRIVER ?
           `.jest-puppeteer.${process.env.DRIVER}.config.js` :
           '.jest-puppeteer.config.js',
