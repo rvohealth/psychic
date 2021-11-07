@@ -97,7 +97,7 @@ import { Dream } from 'psychic'
 export default class ${name.pascalize()} extends Dream {
   static do {
     this
-${ args.map(arg => dreamStaticBlock(name, arg)).join("\n") }
+${ args.map(arg => dreamStaticBlock(name, arg)).compact().join("\n") }
   }
 }
 `
@@ -147,6 +147,6 @@ function dreamStaticBlock(dreamname, arg) {
     return `      .hasMany('${associationName.hyphenize()}')`
 
   default:
-    throw 'HAMBURGERZZZ'
+    return null
   }
 }

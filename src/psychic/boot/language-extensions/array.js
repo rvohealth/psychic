@@ -2,6 +2,10 @@ Array.prototype.uniq = function() {
   return [...new Set(this)]
 }
 
+Array.prototype.compact = function () {
+  return this.filter(el => el !== null)
+}
+
 Array.prototype.insert = function (index, item) {
   this.splice(index, 0, item)
 }
