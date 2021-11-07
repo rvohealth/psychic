@@ -101,6 +101,7 @@ export default class CrystalBall {
       credentials: true,
       origin: '*'//config.frontEndUrl,
     }))
+    this.app.options('*', cors())
 
     this._ioServer = createServer((req, res) => {
       // Set CORS headers
