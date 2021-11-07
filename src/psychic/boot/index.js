@@ -37,7 +37,7 @@ export default class Boot {
     this.packagedProjections ||= await import(`${this.pkgRoot}app/pkg/projections.pkg.js`)
     this.routeCB ||= await import(`${this.pkgRoot}config/routes.js`)
     this.dbSeedCB ||= await import(`${this.pkgRoot}db/seed.js`)
-    console.log('^^^^^^^^^^^^^^^', this.routeCB)
+    console.log('^^^^^^^^^^^^^^^', this.routeCB.default)
 
     config.boot({
       dreams: this.packagedDreams,
