@@ -100,7 +100,7 @@ export default class CrystalBall {
     this.app.use(cors({
       credentials: true,
       // origin: '*'//config.frontEndUrl,
-      origin: ['http://localhost:3333', 'http://localhost:11111', '*'],
+      origin: ['http://localhost:33333', 'http://localhost:11111', '*'],
     }))
     this.app.options('*', cors())
 
