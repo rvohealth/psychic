@@ -3,7 +3,7 @@ import Dir from 'src/helpers/dir'
 import File from 'src/helpers/file'
 
 async function goto(url) {
-  await page.goto(url)
+  await page.goto(`${baseUrl}/${url}`)
 }
 
 async function resetIntegrationApp() {

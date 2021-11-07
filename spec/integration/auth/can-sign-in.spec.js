@@ -24,19 +24,19 @@ describe('Landing on home page of boiler-plate react app', () => {
   })
 
   it('should allow sign in from auth boilerplate', async () => {
-    await goto(`${baseUrl}/signup`)
+    await goto('signup')
     await fillIn('email', 'fishman')
     await fillIn('password', 'fishman')
     await click('Submit')
     await sleep(500)
 
-    await goto(`${baseUrl}/login`)
+    await goto('login')
     await fillIn('email', 'fishman')
     await fillIn('password', 'fishman')
     await click('Submit')
     await expect(page).toMatch('Authed via WS')
 
-    await goto(`${baseUrl}/authtest`)
+    await goto('authtest')
     await expect(page).toMatch('Authtest')
     await expect(page).toMatch('Auth was successful')
   })
