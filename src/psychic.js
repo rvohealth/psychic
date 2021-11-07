@@ -1,6 +1,7 @@
 import CrystalBall from 'src/crystal-ball'
 import config from 'src/config'
 import transports from 'src/singletons/transports'
+import Boot from 'src/psychic/boot'
 
 export default class Psychic {
   get crystalBall() {
@@ -11,12 +12,12 @@ export default class Psychic {
     this._crystalBall = new CrystalBall()
   }
 
-  async gaze() {
-    await this.crystalBall.gaze()
+  async boot(prefix=null) {
+    await new Boot(prefix).boot()
   }
 
-  boot(...args) {
-    return config.boot(...args)
+  async gaze() {
+    await this.crystalBall.gaze()
   }
 
   seek(cb) {

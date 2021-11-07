@@ -1,6 +1,6 @@
 import { Factory } from 'psychic/psyspec'
 import { jest } from '@jest/globals'
-import { config, db } from 'psychic'
+import psychic, { config, db } from 'psychic'
 
 import packagedDreams from 'app/pkg/dreams.pkg.js'
 import packagedChannels from 'app/pkg/channels.pkg.js'
@@ -9,28 +9,8 @@ import routeCB from 'config/routes.js'
 import dbSeedCB from 'db/seed.js'
 
 beforeEach(async () => {
-  const messagesConfig = await loadYaml('config/messages')
-  const dbConfig = await loadYaml('config/database')
-  const redisConfig = await loadYaml('config/redis')
-  const telekinesisConfig = await loadYaml('config/telekinesis')
-  const ghostsConfig = await loadYaml('config/ghosts')
-  const pathsConfig = await loadYaml('config/paths')
-
+  await psychic.boot()
   Factory.boot(packagedDreams)
-
-  config.boot({
-    dreams: packagedDreams,
-    channels: packagedChannels,
-    projections: packagedProjections,
-    dbConfig,
-    dbSeedCB,
-    pathsConfig,
-    redisConfig,
-    routeCB,
-    messagesConfig,
-    telekinesisConfig,
-    ghostsConfig,
-  })
 
   jest.clearAllMocks()
   jest.restoreAllMocks()
