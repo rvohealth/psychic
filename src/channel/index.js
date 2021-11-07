@@ -3,6 +3,7 @@ import paramCase from 'src/helpers/paramCase'
 import config from 'src/config'
 import Projection from 'src/projection'
 import Unauthorized from 'src/error/crystal-ball/unauthorized'
+import esp from 'src/esp'
 
 export default class Channel {
   static get paramName() {
@@ -89,6 +90,8 @@ export default class Channel {
           httpOnly: true,
         },
       )
+
+      esp.emit({ token, key: authKey })
 
       return this.json({ token })
     }
