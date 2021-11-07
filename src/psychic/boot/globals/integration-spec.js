@@ -108,10 +108,7 @@ async function fillIn(selector, text) {
   await page.keyboard.type(text)
 }
 
-
-
-
-const escapeXpathString = str => {
+function escapeXpathString(str) {
   const splitedQuotes = str.replace(/'/g, `', "'", '`);
   return `concat('${splitedQuotes}', '')`;
 }
@@ -126,8 +123,6 @@ async function clickByText(text, { elementType }={}) {
     throw new Error(`Link not found: ${text}`)
   }
 }
-
-
 
 global.click = click
 global.fillIn = fillIn
