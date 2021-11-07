@@ -252,11 +252,9 @@ export default class Namespace extends Psyclass {
     const { givenType, givenKey } = this
 
     return async (req, res) => {
-      console.log('HERE I AM 1')
       const vision = new HTTPVision(routeObj.route, routeObj.method, req, res)
       const channelInstance = new routeObj.channel(vision)
 
-      console.log('HERE I AM 2')
       if (givenType) {
         let payload
         let DreamClass
@@ -287,7 +285,6 @@ export default class Namespace extends Psyclass {
         }
       }
 
-      console.log('HERE I AM 3', routeObj, channelInstance)
       // main block where channels are connected to routes
       // add better error handling here
       try {

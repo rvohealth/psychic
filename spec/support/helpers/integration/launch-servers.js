@@ -28,6 +28,7 @@ export async function launchServers() {
       env: {
         ...process.env,
         // CORE_INTEGRATION_TEST: true,
+        FRONT_END_PORT: 33333,
         PSYCHIC_PORT: 11111,
         PSYCHIC_WSS_PORT: 22222,
         DB_NAME: 'integrationtestapp',

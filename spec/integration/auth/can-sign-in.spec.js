@@ -4,8 +4,6 @@ import {
   killServers
 } from 'spec/support/helpers/integration/launch-servers'
 
-jest.setTimeout(60 * 1000)
-
 describe('Landing on home page of boiler-plate react app', () => {
   beforeEach(async () => {
     await runPsyCommand(`psy g:auth`)
@@ -37,7 +35,7 @@ describe('Landing on home page of boiler-plate react app', () => {
     await fillIn('password', 'fishman')
     await click('Submit')
 
-    await sleep(500)
+    await sleep(5000)
     await goto(`${baseUrl}/authtest`)
     await expect(page).toMatch('Authtest')
     await expect(page).toMatch('Auth was successful')

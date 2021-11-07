@@ -14,7 +14,7 @@ import 'spec/support/hooks/clarify-spec-failures'
 import 'spec/support/hooks/build-tmp-storage'
 import 'spec/support/hooks/cleanup-between-integration-specs'
 
-jest.setTimeout(30000)
+jest.setTimeout(60 * 1000)
 
 beforeEach(async () => {
   await resetIntegrationApp()

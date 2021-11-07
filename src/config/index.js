@@ -80,7 +80,15 @@ class Config {
   }
 
   get frontEndUrl() {
-    return 'http://localhost:3000'
+    return `${this.frontEndHost}:${this.frontEndPort}`
+  }
+
+  get frontEndHost() {
+    return 'http://localhost'
+  }
+
+  get frontEndPort() {
+    return process.env.FRONT_END_PORT || 3000
   }
 
   get localStoragePath() {
