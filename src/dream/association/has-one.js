@@ -19,6 +19,10 @@ export default class HasOne extends Association {
     return config.tableSchema(this.resourceName).name
   }
 
+  get idField() {
+    return this.associationDreamClass.idField
+  }
+
   constructor(resourceName, associationResourceName, {
     foreignKey,
   }) {
@@ -37,6 +41,9 @@ export default class HasOne extends Association {
   }
 
   applyToHasOne(query, associationForeignKey) {
-    return query.join(this.associationTable, `${this.associationTable}.${this.foreignKey} = ${this.baseTable}.id`)
+    return query.join(
+      this.associationTable,
+      `${this.associationTable}.${this.foreignKey} = ${this.baseTable}.${this.idField}`
+    )
   }
 }

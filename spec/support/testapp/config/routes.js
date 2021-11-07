@@ -8,6 +8,7 @@ export default r => {
   r.namespace('testapi', () => {
     r.namespace('v1', () => {
       r.get('namespacetest', 'tests#namespacetest')
+      r.resource('test_users')
     })
   })
 }

@@ -1,4 +1,5 @@
 import Vision from 'src/crystal-ball/vision'
+import Params from 'src/crystal-ball/params'
 
 export default class HTTPVision extends Vision {
   constructor(route, method, expressRequest, expressResponse) {
@@ -16,11 +17,11 @@ export default class HTTPVision extends Vision {
   }
 
   get params() {
-    return {
-      ...this.request.params || {},
-      ...this.request.query || {},
-      ...this.request.body || {},
-    }
+    return Params.new({
+      body: this.request.body,
+      query: this.request.query,
+      uri: this.request.uri,
+    })
   }
 
   json(obj, { projection }={}) {

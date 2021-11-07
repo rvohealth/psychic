@@ -1,14 +1,15 @@
 // import { jest } from '@jest/globals'
+import Params from 'src/crystal-ball/params'
 
 export function buildRequest(params={}) {
   {
-    const res = {}
-    // replace the following () => res
+    const req = {}
+    // replace the following () => req
     // with your function stub/mock of choice
-    // making sure they still return `res`
-    res.status = () => res
-    res.json = () => res
-    res.params = params
-    return res;
+    // making sure they still return `req`
+    req.status = () => req
+    req.json = () => req
+    req.body = params
+    return req;
   }
 }

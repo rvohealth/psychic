@@ -100,6 +100,7 @@ class Packager {
       imports += `import ${className} from '${dreamsPath}/${file}'\n`
       globals += `global.${className} = ${className}\n`
     })
+
     fs.writeFileSync(`${this.appDir}pkg/repl.pkg.js`, imports + globals)
   }
 }

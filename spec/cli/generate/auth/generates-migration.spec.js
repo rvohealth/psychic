@@ -8,16 +8,12 @@ describe('cli program g:auth dream:user key:email password:password', () => {
     it ('generates a new file in the migrations folder with defaults for password and key', async () => {
       const template =
 `\
-export async function up(m) {
+export async function change(m) {
   await m.createTable('users', t => {
     t.string('email')
     t.string('password')
     t.timestamps()
   })
-}
-
-export async function down(m) {
-  await m.dropTable('users')
 }
 `
 
@@ -31,16 +27,12 @@ export async function down(m) {
     it ('uses passed dream name, key and password fields accordingly', async () => {
       const template =
 `\
-export async function up(m) {
+export async function change(m) {
   await m.createTable('consumers', t => {
     t.string('email_account')
     t.string('secret')
     t.timestamps()
   })
-}
-
-export async function down(m) {
-  await m.dropTable('consumers')
 }
 `
 

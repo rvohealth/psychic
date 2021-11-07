@@ -78,6 +78,8 @@ export default class Query extends Psyclass {
       results = await this.adapter.select(this._select, {
         ...this.statement,
       })
+
+      if (this._count) return results.length
       if (this.dreamClass) return results.map(result => new this.dreamClass(result))
       return results
 

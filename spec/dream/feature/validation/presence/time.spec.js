@@ -5,8 +5,8 @@ import PresenceCheckFailed from 'src/error/dream/validation/presence-check-faile
 
 describe('Dream#validates presence (time)', () => {
   class TestUser extends Dream {
-    initialize() {
-      this
+    static {
+      TestUser
         .validates('signed_up_at', { presence: true })
     }
   }

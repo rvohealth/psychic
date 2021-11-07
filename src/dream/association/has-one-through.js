@@ -20,9 +20,13 @@ export default class HasOneThrough extends Association {
     return config.tableSchema(this.resourceName).name
   }
 
+  get idField() {
+    return this.associationDreamClass.idField
+  }
+
   get throughKey() {
     // id of associated through
-    return `${this.associationTable}.${pluralize.singular(this.through.associationTable)}_id`
+    return `${this.associationTable}.${pluralize.singular(this.through.associationTable)}_${this.through.idField}`
   }
 
   // note, through is stores as an association (i.e. HasMany, HasOne, etc...)
@@ -43,7 +47,7 @@ export default class HasOneThrough extends Association {
     const query = db
       .select(`${this.associationTable}.*`)
       .from(this.associationTable)
-      .join(this.baseTable, `${this.baseTable}.id = ${id}`)
+      .join(this.baseTable, `${this.baseTable}.${this.idField} = ${id}`)
 
     this.through.applyToHasOne(query, this.throughKey)
 

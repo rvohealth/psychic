@@ -12,24 +12,35 @@
     "SharedArrayBuffer": "readonly",
     "bg": "readonly",
     "context": "readonly",
+    "Dir": "readonly",
     "eavesdrop": "readonly",
     "factory": "readonly",
+    "File": "readonly",
     "ghost": "readonly",
     "include": "readonly",
     "loadYaml": "readonly",
     "lookup": "readonly",
     "md5": "readonly",
     "now": "readonly",
+    "posess": "readonly",
+    "sleep": "readonly",
     "spawn": "readonly",
     "stringContaining": "readonly",
-    "posess": "readonly",
-    "uuid": "readonly"
+    "uuid": "readonly",
+
+    "baseUrl": "readonly",
+    "browser": "readonly",
+    "click": "readonly",
+    "fillIn": "readonly",
+    "goto": "readonly",
+    "page": "readonly"
   },
   "parserOptions": {
     "ecmaVersion": 2020,
     "sourceType": "module"
   },
   "rules": {
+    "import/no-anonymous-default-export": "off"
   },
   "parser": "@babel/eslint-parser"
 }

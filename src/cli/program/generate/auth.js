@@ -149,16 +149,12 @@ function migrationTemplate(name, keyField, passwordField) {
 
   return (
 `\
-export async function up(m) {
+export async function change(m) {
   await m.createTable('${pluralizedName}', t => {
     t.string('${keyField}')
     t.string('${passwordField}')
     t.timestamps()
   })
-}
-
-export async function down(m) {
-  await m.dropTable('${pluralizedName}')
 }
 `
   )

@@ -4,10 +4,13 @@ import Dream from 'src/dream'
 
 describe('Dream hooks: afterCreate', () => {
   class User extends Dream {
-    initialize() {
-      this.afterCreate(() => {
-        this.originalFavoriteIceCreamFlavor = 'chocolate'
-      })
+    static {
+      User
+        .afterCreate('setOriginalFlavor')
+    }
+
+    setOriginalFlavor() {
+      this.originalFavoriteIceCreamFlavor = 'chocolate'
     }
   }
 

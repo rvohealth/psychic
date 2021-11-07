@@ -10,6 +10,7 @@ export default class Boot {
       packagedProjections,
       routeCB,
       dbSeedCB,
+      inflectionsCB,
     }={}
   ) {
     this.routePrefix = routePrefix ?
@@ -22,6 +23,7 @@ export default class Boot {
     this.packagedProjections = packagedProjections
     this.routeCB = routeCB
     this.dbSeedCB = dbSeedCB
+    this.inflectionsCB = inflectionsCB
   }
 
   async boot() {
@@ -36,8 +38,8 @@ export default class Boot {
     this.packagedChannels ||= (await import(`${this.pkgRoot}app/pkg/channels.pkg.js`)).default
     this.packagedProjections ||= (await import(`${this.pkgRoot}app/pkg/projections.pkg.js`)).default
     this.routeCB ||= (await import(`${this.pkgRoot}config/routes.js`)).default
+    this.inflectionsCB ||= (await import(`${this.pkgRoot}config/inflections.js`)).default
     this.dbSeedCB ||= (await import(`${this.pkgRoot}db/seed.js`)).default
-    console.log('^^^^^^^^^^^^^^^', "NIPPLEMAN", this.routeCB)
 
     config.boot({
       dreams: this.packagedDreams,
@@ -45,6 +47,7 @@ export default class Boot {
       projections: this.packagedProjections,
       routeCB: this.routeCB,
       dbSeedCB: this.dbSeedCB,
+      inflectionsCB: this.inflectionsCB,
       dbConfig,
       pathsConfig,
       redisConfig,

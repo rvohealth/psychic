@@ -8,39 +8,18 @@ export default class GenerateSignInComponent {
     const template =
 `\
 import React, { useState } from 'react'
-import ${apiName} from 'psy/net/${namespace ? namespace + '/' : ''}${dreamName.pluralize()}'
+import psy from 'psy'
 
 export default function SignIn() {
   const [ ${keyField}, set${keyField.pascalize()} ] = useState('')
   const [ ${passwordField}, set${passwordField.pascalize()} ] = useState('')
 
-  return (
-    <div className='sign-in'>
-      <input
-        name='${keyField}'
-        onChange={ event => {
-          set${keyField.pascalize()}(event.target.value)
-        }}
-      />
-
-      <input
-        name='${passwordField}'
-        onChange={ event => {
-          set${passwordField.pascalize()}(event.target.value)
-        }}
-      />
-
-      <button
-        onClick={async () => {
-          try {
-            const response = await ${apiName}.auth({ ${keyField}, ${passwordField} })
-            console.log(response)
-          } catch(error) {
-            console.error('AXIOS ERROR:', error)
-          }
-        }}
-      >Submit</button>
-    </div>
+  return withForm('psy:${namespace}/${dreamName.hyphenize()}', f =>
+    <f.blank>
+      <f.email name='${keyField}' />
+      <f.password name='${passwordField}' />
+      <f.submit />
+    </f.blank>
   )
 }
 `

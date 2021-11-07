@@ -5,8 +5,8 @@ import PresenceCheckFailed from 'src/error/dream/validation/presence-check-faile
 
 describe('Dream#validates presence (char)', () => {
   class TestUser extends Dream {
-    initialize() {
-      this
+    static {
+      TestUser
         .validates('favorite_letter', { presence: true })
     }
   }

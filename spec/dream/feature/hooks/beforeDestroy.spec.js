@@ -4,10 +4,11 @@ import Dream from 'src/dream'
 
 describe('Dream hooks: beforeDestroy', () => {
   class User extends Dream {
-    initialize() {
-      this.beforeDestroy(async () => {
-        await db.insert('zimbazoos', { nonsense: 'zigloo' })
-      })
+    static {
+      User
+        .beforeDestroy(async () => {
+          await db.insert('zimbazoos', { nonsense: 'zigloo' })
+        })
     }
   }
 

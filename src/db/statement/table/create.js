@@ -6,7 +6,7 @@ export default class CreateTableStatement extends Psyclass {
     super()
     this._columns = [{
       type: config.dbIdType,
-      name: 'id',
+      name: config.dbIdField,
       primary: true,
       unique: true,
     }]

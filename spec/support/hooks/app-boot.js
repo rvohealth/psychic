@@ -4,6 +4,7 @@ import packagedDreams from 'spec/support/testapp/app/pkg/dreams.pkg.js'
 import packagedChannels from 'spec/support/testapp/app/pkg/channels.pkg.js'
 import packagedProjections from 'spec/support/testapp/app/pkg/projections.pkg.js'
 import routeCB from 'spec/support/testapp/config/routes.js'
+import inflectionsCB from 'spec/support/testapp/config/inflections.js'
 import dbSeedCB from 'spec/support/testapp/db/seed.js'
 import Boot from 'src/psychic/boot'
 
@@ -22,6 +23,7 @@ beforeEach(async () => {
       packagedProjections,
       routeCB,
       dbSeedCB,
+      inflectionsCB,
     }
   ).boot()
 
@@ -31,6 +33,7 @@ beforeEach(async () => {
   await db.createIfNotExists()
   await db.dropAllTables()
   await Dir.mkdirUnlessExists('tmp/spec/psy')
+  await Dir.mkdirUnlessExists('tmp/spec/psy/slices')
   // await rmdir('tmp/storage/spec/*', { recursive: true })
 })
 

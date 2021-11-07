@@ -2,6 +2,7 @@ import esp from 'src/esp'
 import InvalidEmitsToAsArgument from 'src/error/dream/ws/emits-to/invalid-as-argument'
 import InvalidEmitsToRelationNameArgument from 'src/error/dream/ws/emits-to/invalid-relation-name-argument'
 import InvalidEmitRelationNameArgument from 'src/error/dream/ws/emits/invalid-relation-name-argument'
+import config from 'src/config'
 
 const WSProvider = superclass => class extends superclass {
   static _emitsTo = {}
@@ -27,7 +28,7 @@ const WSProvider = superclass => class extends superclass {
 
     esp.transmit('ws:to:authToken', {
       to: emitRecord.as,
-      id: association.id,
+      [this.idField]: association.id,
       path: path.replace(/^\//, ''),
       data: message,
     })

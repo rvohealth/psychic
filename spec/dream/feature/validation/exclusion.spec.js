@@ -5,8 +5,8 @@ import ExclusionCheckFailed from 'src/error/dream/validation/exclusion-check-fai
 
 describe('Dream#validates inclusion', () => {
   class TestUser extends Dream {
-    initialize() {
-      this
+    static {
+      TestUser
         .validates('mood', { exclusion: ['sassy', 'crabby'] })
     }
   }

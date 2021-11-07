@@ -3,16 +3,12 @@ import File from 'src/helpers/file'
 
 const template =
 `
-export async function up(m) {
+export async function change(m) {
   m.createTable('test-users', t => {
     t.belongsTo('johnson')
     t.belongsTo('johnson2')
     t.belongsTo('johnson3')
   })
-}
-
-export async function down(m) {
-  m.dropTable('test-users')
 }
 `
 

@@ -4,16 +4,16 @@ import InclusionCheckFailed from 'src/error/dream/validation/inclusion-check-fai
 import ExclusionCheckFailed from 'src/error/dream/validation/exclusion-check-failed'
 
 const ValidationsProvider = superclass => class extends superclass {
-  constructor(...args) {
-    super(...args)
+  static _validations = {}
 
-    this._validations = {}
-  }
-
-  validates(column, opts) {
+  static validates(column, opts) {
     this._validations[column] = this._validations[column] || []
     this._validations[column].push(opts)
     return this
+  }
+
+  get _validations() {
+    return this.constructor._validations
   }
 
   async _runValidations() {

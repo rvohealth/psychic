@@ -52,6 +52,11 @@ yarn global add git+ssh://git@github.com/avocadojesus/psychic.git#dev
 export PATH="$PATH:$(yarn global bin)"
 ```
 
+## TODO
+[ ] Dream.destroyAll
+[ ] Dream.updateAll
+[ ] format validation
+
 
 ## API
 
@@ -66,7 +71,7 @@ export PATH="$PATH:$(yarn global bin)"
 [x] psy generate:dream dream_name
 [x] psy generate:channel channel_name
 [x] psy generate:projection projection_name
-[ ] psy generate:js
+[ ] psy generate:net
 
 ## Channels (Controllers)
 [x] #json

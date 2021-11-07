@@ -19,6 +19,10 @@ export default class BelongsTo extends Association {
     return config.tableSchema(this.resourceName).name
   }
 
+  get idField() {
+    return this.associationDreamClass.idField
+  }
+
   constructor(resourceName, associationResourceName, {
     foreignKey,
   }) {
@@ -32,11 +36,14 @@ export default class BelongsTo extends Association {
     return db
       .select('*')
       .from(this.associationTable)
-      .where({ id })
+      .where({ [this.idField]: id })
       .first()
   }
 
   applyToHasOne(query, associationForeignKey) {
-    return query.join(this.associationTable, `${this.associationTable}.id = ${associationForeignKey}`)
+    return query.join(
+      this.associationTable,
+      `${this.associationTable}.${this.idField} = ${associationForeignKey}`
+    )
   }
 }

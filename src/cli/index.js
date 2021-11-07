@@ -9,6 +9,8 @@ import IntegrationSpecCLIProgram from 'src/cli/program/integration-spec'
 import StoriesCLIProgram from 'src/cli/program/stories'
 import ListenCLIProgram from 'src/cli/program/listen'
 import BuildintspecCLIProgram from 'src/cli/program/buildintspec'
+import TranceCLIProgram from 'src/cli/program/trance'
+import RunCLIProgram from 'src/cli/program/run'
 
 export default class CLI {
   get args() {
@@ -49,6 +51,9 @@ export default class CLI {
     case 'new':
       return new NewAppProgram()
 
+    case 'run':
+      return new RunCLIProgram()
+
     case 'spec':
       return new SpecCLIProgram()
 
@@ -56,6 +61,10 @@ export default class CLI {
     case 'stories':
     case 'story':
       return new StoriesCLIProgram()
+
+    case 'trance':
+    case 't':
+      return new TranceCLIProgram()
 
     default:
       throw `Unkown program ${this.args.program}`

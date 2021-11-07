@@ -22,14 +22,11 @@ export default class User extends Dream {
   it ('generates a new file in the migrations folder with the passed name', async () => {
     const template =
 `\
-export async function up(m) {
+export async function change(m) {
   await m.createTable('users', t => {
 
+    t.timestamps()
   })
-}
-
-export async function down(m) {
-  await m.dropTable('users')
 }
 `
 
@@ -42,15 +39,12 @@ export async function down(m) {
     it ('adds them to template', async () => {
       const template =
 `\
-export async function up(m) {
+export async function change(m) {
   await m.createTable('users', t => {
     t.text('snapman')
     t.text('grabman')
+    t.timestamps()
   })
-}
-
-export async function down(m) {
-  await m.dropTable('users')
 }
 `
 

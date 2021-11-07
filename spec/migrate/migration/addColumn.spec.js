@@ -1,4 +1,3 @@
-import { jest } from '@jest/globals'
 import Migration from 'src/migrate/migration'
 import db from 'src/db'
 
@@ -6,10 +5,14 @@ let migrate = new Migration()
 
 describe('Migration#addColumn', () => {
   it ('passes along to db', async () => {
-    const spy = jest.spyOn(db, 'addColumn').mockReturnValue({})
-
+    const spy = posess(db, 'addColumn').returning({})
     await migrate.addColumn('users', 'email', 'text', {})
     expect(spy).toHaveBeenCalledWith('users', 'email', 'text', {})
-    spy.mockRestore()
+  })
+
+  it ('passes options to db', async () => {
+    const spy = posess(db, 'addColumn').returning({})
+    await migrate.addColumn('users', 'account_balance', 'float', { precision: 3 })
+    expect(spy).toHaveBeenCalledWith('users', 'account_balance', 'float', { precision: 3 })
   })
 })

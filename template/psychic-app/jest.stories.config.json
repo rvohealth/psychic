@@ -1,13 +1,9 @@
 {
   "testRegex": "((\\.)(spec))\\.js?$",
-  "testEnvironment": "jest-environment-jsdom",
-  "setupFiles": [
-    "jest-plugin-context/setup",
-    "spec/stories/spec-imports.js"
-  ],
+  "globals": {
+    "URL": "http://localhost:33333"
+  },
   "setupFilesAfterEnv": ["./spec/stories/spec-hooks.js"],
   "resetMocks": true,
-  "transform": {
-    "^.+\\.(js|jsx)$": "babel-jest"
-  }
+  "preset": "jest-puppeteer"
 }

@@ -1,15 +1,15 @@
-import fs from 'fs'
 import l from 'src/singletons/l'
 import CrystalBall from 'src/crystal-ball'
 import File from 'src/helpers/file'
 import Dir from 'src/helpers/dir'
 import config from 'src/config'
 import path from 'path'
+import GenerateDreamSlice from 'src/cli/program/generate/js/components/dream-slice'
+import GenerateStore from 'src/cli/program/generate/js/components/store'
 
 export default class GenerateJSAPI {
   async generate() {
-    await Dir.mkdirUnlessExists(config.psyJsPath)
-    await Dir.mkdirUnlessExists(path.join(config.psyJsPath, 'net'))
+    await Dir.mkdirUnlessExists(path.join(config.psyJsPath, 'net'), { recursive: true })
 
     await this.generateForRoutes(CrystalBall.routes)
     // await this.generateForNamespaces(CrystalBall.namespaces)
@@ -28,28 +28,12 @@ export default class GenerateJSAPI {
   async generateForRoutes(routes) {
     const files = {}
     for (const route of Object.values(routes)) {
-      const pathSegments = this.pathSegments(route)
-      const relativePath =
-        (
-          pathSegments.length > 0 ?
-            pathSegments.join('/') + '/' :
-            ''
-        ) +
-        `${this.filename(route)}.js`
-      const filePath = path.join(config.psyJsPath, 'net', relativePath)
+      const pathSegments = route.namespaceSegments
+      const relativePath = pathSegments.join('/')
+      const filename = `${this.filename(route)}.js`
+      const filePath = path.join(config.psyJsPath, 'net', relativePath, filename)
 
-      let _path = path.join(config.psyJsPath, 'net')
-      let index = 0
-      for (const segment of pathSegments) {
-        const isFilename = index === route.parsed.segments.length
-        _path += `/${segment}`
-
-        if (!isFilename && !fs.existsSync(path)) {
-          l.log(`making dir ${path}...`)
-          await Dir.mkdir(_path)
-        }
-        index++
-      }
+      await Dir.mkdir(path.join(config.psyJsPath, 'net', relativePath), { recursive: true })
 
       l.log(`writing api file: ${relativePath.replace(/\.js$/, '')}.${this.routeMethodName(route)}...`)
       await File.unlinkIfExists(filePath)
@@ -83,7 +67,22 @@ export default class ${className}API {
 }
 `
       )
+
+      const route = files[fileName].route
+      const dream = route.channel.assumedDreamClass
+      if (route.isResource) {
+        await GenerateDreamSlice.generate(
+          dream.resourceName,
+          {
+            routes: routes.filter(r => r.channel === route.channel && r.prefix === route.prefix),
+            namespace: route.prefix,
+            attributes: dream.defaultAttributes,
+          }
+        )
+      }
     }
+
+    await GenerateStore.generate(routes)
   }
 
   filename(route) {
@@ -131,21 +130,5 @@ export default class ${className}API {
       .concat({ name: 'opts' })
       .map(param => param.name)
       .join(', ')
-  }
-
-  pathSegments(route) {
-    let pathSegments = route.parsed.segments
-      .filter(segment => !/^:/.test(segment))
-
-    // pop method from path
-    pathSegments.pop()
-
-    // if it belongs to a resource, path should segment both method and resource name,
-    // so that /api/v1/users/auth
-    // becomes /api/v1
-    if (route.belongsToResource)
-      pathSegments.pop()
-
-    return pathSegments
   }
 }

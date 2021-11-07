@@ -13,9 +13,9 @@ export default class TestsAPI {
 }
 `
 
-describe('cli program g:js', () => {
+describe('cli program g:net', () => {
   it ('generates namespaced routes correctly', async () => {
-    await generateCLIProgram.run({ command: 'js', args: [] })
+    await generateCLIProgram.run({ command: 'net', args: [] })
     const file = await File.read('tmp/spec/psy/net/testapi/v1/tests.js')
     expect(file.toString()).toEqual(expectedRouteTemplate)
   })

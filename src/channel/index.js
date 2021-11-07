@@ -6,6 +6,10 @@ import Unauthorized from 'src/error/crystal-ball/unauthorized'
 import esp from 'src/esp'
 
 export default class Channel {
+  static get resourceName() {
+    return this.name.replace(/Channel$/, '').hyphenize()
+  }
+
   static get paramName() {
     return paramCase(this.name)
   }

@@ -23,8 +23,7 @@ describe('Dream#belongsTo', () => {
     })
 
     const post2 = Post.new()
-    expect(post2.test_user.constructor.name).toBe('Function')
-    expect(post2.testUser.constructor.name).toBe('Function')
-    expect(post2.testUser).toBe(post.test_user)
+    expect(typeof post2.test_user).toBe('function')
+    expect(typeof post2.testUser).toBe('function')
   })
 })

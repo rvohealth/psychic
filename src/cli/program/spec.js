@@ -19,20 +19,17 @@ export default class SpecCLIProgram extends CLIProgram {
 
     else {
       await this.#runForDir('spec')
-      await this.#runForDir('spec/db', { bypassIgnore: true })
+      await this.#runForDir('spec/db/adapter/postgres/addColumn', { bypassIgnore: true })
+      await this.#runForDir('spec/db/adapter/postgres/createTable', { bypassIgnore: true })
+      await this.#runForDir('spec/db/adapter/postgres/delete', { bypassIgnore: true })
+      await this.#runForDir('spec/db/adapter/postgres/select', { bypassIgnore: true })
+      await this.#runForDir('spec/db/adapter/postgres/table', { bypassIgnore: true })
+      await this.#runForDir('spec/db/adapter/postgres/update', { bypassIgnore: true })
+      await this.#runForDir('spec/db/delete', { bypassIgnore: true })
+      await this.#runForDir('spec/db/select', { bypassIgnore: true })
+      await this.#runForDir('spec/db/update', { bypassIgnore: true })
+      await this.#runForFilesInDir('spec/db')
       await this.#runForDir('spec/dream', { bypassIgnore: true })
-
-      const files = await Dir.readdir('spec', { onlyFiles: true, ignoreHidden: true })
-      const specFiles = files
-        .filter(file => /\.spec\.js$/.test(file))
-        .map(file => `spec/${file}`)
-
-      if (specFiles.length > 0)
-        await spawn(
-          `yarn ${this._testCommand} --findRelatedTests ${specFiles.join(' ')} --forceExit`,
-          [],
-          { shell: true, stdio: 'inherit' }
-        )
 
       const hasStoriesDir = await Dir.isDir('spec/stories')
       const hasStories = await Dir.isEmpty('spec/stories')
@@ -59,5 +56,21 @@ export default class SpecCLIProgram extends CLIProgram {
         this._testCommand = 'testquickly'
       }
     }
+
+    await this.#runForFilesInDir(path)
+  }
+
+  async #runForFilesInDir(path) {
+    const files = await Dir.readdir(path, { onlyFiles: true, ignoreHidden: true })
+    const specFiles = files
+      .filter(file => /\.spec\.js$/.test(file))
+      .map(file => `${path}/${file}`)
+
+    if (specFiles.length > 0)
+      await spawn(
+        `yarn ${this._testCommand} --findRelatedTests ${specFiles.join(' ')} --forceExit`,
+        [],
+        { shell: true, stdio: 'inherit' }
+      )
   }
 }

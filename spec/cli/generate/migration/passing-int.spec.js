@@ -3,15 +3,11 @@ import File from 'src/helpers/file'
 
 const template =
 `
-export async function up(m) {
+export async function change(m) {
   m.createTable('test-users', t => {
     t.int('johnson')
     t.int('johnson2')
   })
-}
-
-export async function down(m) {
-  m.dropTable('test-users')
 }
 `
 

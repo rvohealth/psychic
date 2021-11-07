@@ -33,9 +33,9 @@ export default class TestUsersAPI {
 }
 `
 
-describe('cli program g:js', () => {
+describe('cli program g:net', () => {
   it ('generates resource api file correctly', async () => {
-    await generateCLIProgram.run({ command: 'js', args: [] })
+    await generateCLIProgram.run({ command: 'net', args: [] })
     const file = await File.read('tmp/spec/psy/net/test-users.js')
     expect(file.toString()).toEqual(expectedRouteTemplate)
   })

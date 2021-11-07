@@ -27,8 +27,14 @@ class File extends Psyfs {
     return (await open(filename, flags))
   }
 
-  static async read(arg1) {
-    return (await readFile(arg1))
+  static async read(arg1, { text }={}) {
+    const results = await readFile(arg1)
+    if (text) return results.toString()
+    return results
+  }
+
+  static async text(path) {
+    return await this.read(path, { text: true })
   }
 
   static async touch(path, contents='') {
@@ -37,7 +43,11 @@ class File extends Psyfs {
   }
 
   static async write(arg1, arg2, options) {
-    await writeFile(arg1, arg2, options)
+    try {
+      await writeFile(arg1, arg2, options)
+    } catch(error) {
+      console.error(error)
+    }
   }
 
   static stream(path, opts) {

@@ -20,14 +20,15 @@ class PkgjsonBuilder {
       "@testing-library/jest-dom": "^4.2.4",
       "@testing-library/react": "^9.3.2",
       "@testing-library/user-event": "^7.1.2",
+      "axios": "^0.21.1",
+      "babel-plugin-module-resolver": "^4.1.0",
+      "babel-plugin-require-context-hook": "^1.0.0",
+      "nested-combine-reducers": "^2.0.0",
+      "psychic": "git+ssh://git@github.com/avocadojesus/psychic.git#dev",
       "react": "^17.0.2",
       "react-dom": "^17.0.2",
       "react-redux": "^7.2.3",
       "react-scripts": "4.0.3",
-      "axios": "^0.21.1",
-      "babel-plugin-module-resolver": "^4.1.0",
-      "babel-plugin-require-context-hook": "^1.0.0",
-      "psychic": "git+ssh://git@github.com/avocadojesus/psychic.git#dev",
     }
 
     pkgjson.devDependencies = {
@@ -37,7 +38,11 @@ class PkgjsonBuilder {
       "jest": "27.3.0",
       "jest-date": "^1.1.4",
       "jest-plugin-context": "^2.9.0",
+      "jest-puppeteer": "^6.0.0",
       "nyc": "^14.1.1",
+      "puppeteer": "^10.4.0",
+      "puppeteer-core": "^10.4.0",
+      "tree-kill": "^1.2.2"
     }
 
     pkgjson.main = 'node_modules/psychic/.dist/index.js'
@@ -72,7 +77,8 @@ class PkgjsonBuilder {
 
     pkgjson.scripts.stories = "NODE_PATH=. npm run psybuild && " +
       "clear && " +
-      "npm run buildspec && NODE_PATH=. node --experimental-vm-modules ./node_modules/.bin/jest --config ./jest.stories.config.json --runInBand --detectOpenHandles"
+      "npm run buildspec && " +
+      "NODE_PATH=. node --experimental-vm-modules ./node_modules/.bin/jest --config ./jest.stories.config.json --runInBand --forceExit"
 
     return pkgjson
   }

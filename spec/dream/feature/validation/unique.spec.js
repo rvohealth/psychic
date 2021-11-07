@@ -5,8 +5,8 @@ import UniqueCheckFailed from 'src/error/dream/validation/unique-check-failed'
 
 describe('Dream#validates unique', () => {
   class TestUser extends Dream {
-    initialize() {
-      this
+    static {
+      TestUser
         .validates('email', { unique: true })
     }
   }

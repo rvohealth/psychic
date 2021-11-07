@@ -7021,6 +7021,11 @@ negotiator@0.6.2, negotiator@^0.6.2:
   resolved "https://registry.npmjs.org/negotiator/-/negotiator-0.6.2.tgz"
   integrity sha512-hZXc7K2e+PgeI1eDBe/10Ard4ekbfrrqG8Ep+8Jmf4JID2bNg7NvCPOZN+kfF574pFQI7mum2AUqDidoKqcTOw==
 
+nested-combine-reducers@^2.0.0:
+  version "2.0.0"
+  resolved "https://registry.yarnpkg.com/nested-combine-reducers/-/nested-combine-reducers-2.0.0.tgz#ae044b09502fef9554f55669646abae1ee2e58d2"
+  integrity sha512-Fxezp3s1Ij4O449lNUnTgSzOBmqNBTqtkuo/VSNVYSJJo+HtfbKfEHUM+qZMSeJd0XucM/ngmES73mR8QwMuow==
+
 nested-error-stacks@^2.0.0:
   version "2.1.0"
   resolved "https://registry.npmjs.org/nested-error-stacks/-/nested-error-stacks-2.1.0.tgz"

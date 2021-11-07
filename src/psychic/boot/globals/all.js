@@ -7,6 +7,9 @@ import config from 'src/config'
 import loadYaml from 'src/helpers/load-yaml'
 import include from 'src/helpers/include'
 import ghost from 'src/helpers/ghost'
+import File from 'src/helpers/file'
+import Dir from 'src/helpers/dir'
+import sleep from 'src/helpers/sleep'
 
 function loadEnv() {
   if (process.env.CORE_INTEGRATION_BUT_USING_ROOT_PATH)
@@ -50,9 +53,12 @@ global.uuid = function() {
   return v4uuid()
 }
 
+global.File = File
+global.Dir = Dir
 global.ghost = ghost
 global.include = include
 global.loadYaml = loadYaml
 global.lookup = (...args) => config.lookup(...args)
+global.sleep = sleep
 
 global.ENV = loadEnv()

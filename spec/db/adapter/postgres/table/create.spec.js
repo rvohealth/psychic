@@ -25,7 +25,7 @@ describe('PostgresAdapter.db#create', () => {
     expect(spy).toHaveBeenCalledWith(
 `
 CREATE TABLE users (
-  id serial PRIMARY KEY UNIQUE,
+  id SERIAL PRIMARY KEY UNIQUE,
   email TEXT,
   password TEXT
 )

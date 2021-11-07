@@ -1,11 +1,10 @@
-import { jest } from '@jest/globals'
 import db from 'src/db'
 import Query from 'src/db/query'
 
 describe('DB#select handles count', () => {
   it ('passes fetch to the underlying adapter', async () => {
-    const spy = jest.fn()
-    const adapterSpy = jest.spyOn(Query.prototype, 'adapter', 'get').mockReturnValue({ select: spy })
+    const spy = eavesdrop()
+    const adapterSpy = posess(Query.prototype, 'adapter', 'get').returning({ select: spy })
     await db
       .count('users')
       .do()

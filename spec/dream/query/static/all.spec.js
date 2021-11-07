@@ -1,4 +1,5 @@
 import Dream from 'src/dream'
+import Collection from 'src/dream/collection'
 import Query from 'src/db/query'
 
 describe('Dream.all', () => {
@@ -8,10 +9,10 @@ describe('Dream.all', () => {
     posess(Dream, 'table', 'get').returning('fishmen')
     const selectSpy = posess(query, 'select').returning(query)
     const fromSpy = posess(query, 'from').returning(query)
-    const allSpy = posess(query, 'all').returning({ fish: 10 })
+    const allSpy = posess(query, 'all').returning([{ fish: 10 }])
 
     const result = await Dream.all()
-    expect(result).toEqual({ fish: 10 })
+    expect(result).toEqual(new Collection(Dream, [{ fish: 10 }]))
     expect(selectSpy).toHaveBeenCalledWith('*')
     expect(fromSpy).toHaveBeenCalledWith('fishmen')
     expect(allSpy).toHaveBeenCalled()

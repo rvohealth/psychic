@@ -1,11 +1,13 @@
+import Psyclass from 'src/psychic/psyclass'
 import fs from 'fs'
 import db from 'src/db'
 import CreateTableStatement from 'src/db/statement/table/create'
 import SchemaWriter from 'src/migrate/schema-writer'
 import config from 'src/config'
 
-export default class Migration {
+export default class Migration extends Psyclass {
   constructor() {
+    super()
     this._schema = new SchemaWriter()
   }
 

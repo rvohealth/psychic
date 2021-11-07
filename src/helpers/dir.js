@@ -6,6 +6,7 @@ import {
 } from 'fs/promises'
 import fileExists from 'src/helpers/file-exists'
 import Psyfs from 'src/helpers/psyfs'
+import l from 'src/singletons/l'
 
 class Dir extends Psyfs {
   static async isDir(path) {
@@ -32,14 +33,25 @@ class Dir extends Psyfs {
     }
   }
 
-  static async mkdir(arg1) {
-    await mkdir(arg1)
+  static async mkdir(path, { recursive }={}) {
+    if (recursive) return await this.mkdirRecursive(path)
+    await mkdir(path)
   }
 
-  static async mkdirUnlessExists(arg1) {
+  static async mkdirRecursive(path) {
+    const pathSegments = path.split('/')
+    const paths = []
+
+    for (const segment of pathSegments) {
+      paths.push(segment)
+      await this.mkdirUnlessExists(paths.join('/'))
+    }
+  }
+
+  static async mkdirUnlessExists(arg1, { recursive }={}) {
     const exists = await fileExists(arg1)
     if (!exists)
-      await mkdir(arg1)
+      await this.mkdir(arg1, { recursive })
   }
 
   static async readdir(path, { onlyDirs, onlyFiles, ignoreHidden }={}) {

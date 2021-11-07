@@ -1,10 +1,12 @@
 import spawn from 'src/helpers/spawn'
 import Dir from 'src/helpers/dir'
 import File from 'src/helpers/file'
-
-async function goto(url) {
-  await page.goto(`${baseUrl}/${url}`)
-}
+import {
+  goto,
+  fillIn,
+  find,
+  click,
+} from 'src/psyspec/story/helpers/browser'
 
 async function resetIntegrationApp() {
   const dirsToReplace = [
@@ -47,6 +49,21 @@ async function runPsyCommand(command, opts={}) {
   )
 }
 
+async function runStory(path) {
+  await spawn(
+    `npm run psy stories ${path}`,
+    [],
+    {
+      shell: true,
+      stdio: 'inherit',
+      cwd: 'tmp/integrationtestapp',
+      env: {
+        ...process.env,
+      },
+    }
+  )
+}
+
 async function swapIntegrationFiles(path) {
   const files = await Dir.read(path, { onlyFiles: true })
   for (const file of files) {
@@ -78,52 +95,6 @@ async function transpile() {
   await spawn(`npm run buildintspec`, [], { shell: true, stdio: 'inherit' })
 }
 
-async function find(text) {
-  let button
-  try {
-    [button] = await page.$x(`//button[contains(text(), '${text}')]`)
-  } catch {
-    throw 'Failed to find button'
-  }
-
-  console.log(button)
-  return button
-}
-
-async function click(selector, opts) {
-  try {
-    await page.click(selector, opts)
-  } catch {
-    await clickByText(selector)
-  }
-}
-
-async function fillIn(selector, text) {
-  try {
-    await page.focus(selector)
-  } catch {
-    await page.focus(`input[name=${selector}]`)
-  }
-
-  await page.keyboard.type(text)
-}
-
-function escapeXpathString(str) {
-  const splitedQuotes = str.replace(/'/g, `', "'", '`);
-  return `concat('${splitedQuotes}', '')`;
-}
-
-async function clickByText(text, { elementType }={}) {
-  const escapedText = escapeXpathString(text)
-  const linkHandlers = await page.$x(`//${elementType || 'button'}[contains(text(), ${escapedText})]`)
-
-  if (linkHandlers.length > 0) {
-    await linkHandlers[0].click()
-  } else {
-    throw new Error(`Link not found: ${text}`)
-  }
-}
-
 global.click = click
 global.fillIn = fillIn
 global.find = find
@@ -131,5 +102,6 @@ global.goto = goto
 global.baseUrl = 'http://localhost:33333'
 global.resetIntegrationApp = resetIntegrationApp
 global.runPsyCommand = runPsyCommand
+global.runStory = runStory
 global.swapIntegrationFiles = swapIntegrationFiles
 global.transpile = transpile

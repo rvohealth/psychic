@@ -34,6 +34,10 @@ String.prototype.singular = function() {
   return pluralize.singular(this)
 }
 
+String.prototype.singularize = function() {
+  return this.singular()
+}
+
 String.prototype.uncapitalize = function() {
   return uncapitalize(this)
 }
@@ -41,3 +45,12 @@ String.prototype.uncapitalize = function() {
 String.prototype.unpluralize = function() {
   return pluralize.singular(this)
 }
+
+Object.defineProperty(String.prototype, 'presence', {
+  get: function() {
+    const denylist = ['', null, undefined]
+    return denylist.includes(this) ? null : this
+  },
+  configurable: true,
+})
+

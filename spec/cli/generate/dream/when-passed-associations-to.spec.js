@@ -36,15 +36,11 @@ export default class Comment extends Dream {
   it ('generates a new file in the migrations folder with the passed name', async () => {
     const template =
 `\
-export async function up(m) {
+export async function change(m) {
   await m.createTable('comments', t => {
     t.belongsTo('user')
     t.timestamps()
   })
-}
-
-export async function down(m) {
-  await m.dropTable('comments')
 }
 `
 

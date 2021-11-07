@@ -32,8 +32,8 @@ export default class TestsAPI {
 describe('cli program g:channel <name>', () => {
   it ('generates a new channel in the channels folder with the passed name', async () => {
     await generateCLIProgram.run({ command: 'js', args: [] })
-    const file = await File.read('tmp/spec/psy/net/tests.js')
-    expect(file.toString()).toEqual(expectedRouteTemplate)
+    const text = await File.text('tmp/spec/psy/net/tests.js')
+    expect(text).toEqual(expectedRouteTemplate)
   })
 })
 

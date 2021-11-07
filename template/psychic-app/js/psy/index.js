@@ -1,8 +1,13 @@
 import common from 'psy/net/common'
+import withForm from 'psy/components/form'
 
 class Psychic {
   on(path, cb) {
     common.on(path, cb)
+  }
+
+  withForm(cb) {
+    return withForm(cb)
   }
 }
 

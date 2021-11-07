@@ -20,6 +20,7 @@ export default class GenerateCLIProgram extends CLIProgram {
       return await new GenerateDream().generate(args.args)
 
     case 'js':
+    case 'net':
       return await new GenerateJSAPI().generate(args.args)
 
     case 'migration':

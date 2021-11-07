@@ -1,5 +1,6 @@
 import db from 'src/db'
 import Migration from 'src/migrate/migration'
+import InverseMigration from 'src/migrate/inverse-migration'
 import MigrateOperation from 'src/migrate/operation'
 
 export default class RollbackMigration extends MigrateOperation {
@@ -31,7 +32,11 @@ export default class RollbackMigration extends MigrateOperation {
 
   async rollbackMigrations(migrations) {
     for (const alreadyRunMigration of migrations) {
-      await alreadyRunMigration.down(new Migration())
+      if (typeof alreadyRunMigration.down === 'function')
+        await alreadyRunMigration.down(new Migration())
+      else
+        await alreadyRunMigration.change(InverseMigration.new())
+
       await db
         .delete('migrations')
         .where({ name: alreadyRunMigration.name })

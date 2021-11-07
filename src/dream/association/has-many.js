@@ -20,6 +20,10 @@ export default class HasMany extends Association {
     return config.tableSchema(this.resourceName).name
   }
 
+  get idField() {
+    return this.associationDreamClass.idField
+  }
+
   constructor(resourceName, associationResourceName, {
     foreignKey,
   }) {

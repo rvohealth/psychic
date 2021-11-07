@@ -1,5 +1,4 @@
 import CrystalBall from 'src/crystal-ball'
-import config from 'src/config'
 import transports from 'src/singletons/transports'
 import Boot from 'src/psychic/boot'
 

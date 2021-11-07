@@ -4,13 +4,9 @@ import fileExists from 'src/helpers/file-exists'
 import Dream from 'src/dream'
 
 export default class PsychicStorageRecord extends Dream {
-  get fileName() {
-    return `${this.uuid}.${this.extension}`
-  }
-
-  initialize() {
-    this
-      .beforeCreate(async () => {
+  static {
+    PsychicStorageRecord
+      .beforeCreate(async function() {
         if (!this.path) throw `Must pass a path to a file to create a storage record`
         if (! (await fileExists(this.path))) throw `Unable to locate file ${this.path}. Please pass a valid file path`
         const id = uuid()
@@ -24,5 +20,9 @@ export default class PsychicStorageRecord extends Dream {
 
         this.uuid = id
       })
+  }
+
+  get fileName() {
+    return `${this.uuid}.${this.extension}`
   }
 }

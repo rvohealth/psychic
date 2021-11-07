@@ -2,7 +2,6 @@ import l from 'src/singletons/l'
 import File from 'src/helpers/file'
 import moment from 'moment'
 
-
 export default class GenerateMigration {
   async generate(args) {
     const [ filename, ...columns ] = args
@@ -22,14 +21,10 @@ function generateMigrationTemplate(filename, columns) {
 
   return (
 `
-export async function up(m) {
+export async function change(m) {
   m.createTable('${filename.hyphenize().pluralize()}', t => {
 ${ columns.map(column => columnString(column)).join("\n") }
   })
-}
-
-export async function down(m) {
-  m.dropTable('${filename.hyphenize().pluralize()}')
 }
 ` )
 }

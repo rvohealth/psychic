@@ -4,8 +4,8 @@ import config from 'src/config'
 import HTTPVision from 'src/crystal-ball/vision/http'
 import l from 'src/singletons/l'
 import Psyclass from 'src/psychic/psyclass'
+import Route from 'src/crystal-ball/route'
 import InvalidGivenType from 'src/error/crystal-ball/namespace/invalid-given-type'
-
 import UnrecognizedRouteError from 'src/error/crystal-ball/namespace/unrecognized-route'
 
 export default class Namespace extends Psyclass {
@@ -193,30 +193,24 @@ export default class Namespace extends Psyclass {
   }
 
   addRouteForChannel(httpMethod, route, channel, method, { authKey, _isResource, isWS }={}) {
-    const fullRoute = `${this.prefix}/${route}`
-    const parsedRoute = parseRoute(fullRoute)
-    const key = `${httpMethod}:${parsedRoute.key}`
-    const routeObj = {
-      route,
-      fullRoute,
+    const _route = new Route(
       httpMethod,
+      route,
       channel,
       method,
-      parsed: parsedRoute,
-      belongsToResource: this.belongsToResource,
-      isResource: _isResource,
-      authKey,
-      isWS,
-    }
+      {
+        authKey,
+        belongsToResource: this.belongsToResource,
+        isResource: _isResource,
+        isWS,
+        prefix: this.prefix,
+      })
+    this._routes[_route.routeKey] = _route
 
-    this._routes[key] = routeObj
-
-    if (authKey)
-      config.registerAuthKey(authKey, routeObj)
+    if (authKey) config.registerAuthKey(authKey, _route)
 
     // eventually move this to crystal ball layer.
-    if (!isWS)
-      this._addHTTP(routeObj)
+    if (!isWS) this._addHTTP(_route)
   }
 
   parseStringPath(path) {
@@ -244,16 +238,16 @@ export default class Namespace extends Psyclass {
     this._givenKey = null
   }
 
-  _addHTTP(routeObj) {
-    this.app[routeObj.httpMethod](routeObj.fullRoute, this._buildHTTPResponse(routeObj))
+  _addHTTP(route) {
+    this.app[route.httpMethod](route.fullRoute, this._buildHTTPResponse(route))
   }
 
-  _buildHTTPResponse(routeObj) {
+  _buildHTTPResponse(route) {
     const { givenType, givenKey } = this
 
     return async (req, res) => {
-      const vision = new HTTPVision(routeObj.route, routeObj.method, req, res)
-      const channelInstance = new routeObj.channel(vision)
+      const vision = new HTTPVision(route.route, route.method, req, res)
+      const channelInstance = new route.channel(vision)
 
       if (givenType) {
         let payload
@@ -288,7 +282,7 @@ export default class Namespace extends Psyclass {
       // main block where channels are connected to routes
       // add better error handling here
       try {
-        await channelInstance[routeObj.method]()
+        await channelInstance[route.method]()
       } catch(error) {
         l.error(`An error occurred: ${error.constructor.name}: ${error.message || error}`)
 

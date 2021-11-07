@@ -3,14 +3,10 @@ import File from 'src/helpers/file'
 
 const template =
 `
-export async function up(m) {
+export async function change(m) {
   m.createTable('test-users', t => {
     t.hstore('johnson')
   })
-}
-
-export async function down(m) {
-  m.dropTable('test-users')
 }
 `
 

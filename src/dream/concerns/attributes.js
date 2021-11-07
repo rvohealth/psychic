@@ -1,7 +1,22 @@
 import camelCase from 'src/helpers/camelCase'
 import { validatePresence, validateUnique } from 'src/helpers/validation'
+import config from 'src/config'
 
 const AttributesProvider = superclass => class extends superclass {
+  static get idField() {
+    return config.dbIdField
+  }
+
+  static get defaultAttributes() {
+    const attrs = {}
+    Object
+      .keys(config.schema[this.table])
+      .forEach(name => {
+        attrs[name] = null
+      })
+    return attrs
+  }
+
   constructor(attributes, ...args) {
     super(attributes, ...args)
 
@@ -14,6 +29,18 @@ const AttributesProvider = superclass => class extends superclass {
 
   get attributeNames() {
     return Object.keys(this._attributes)
+  }
+
+  get defaultAttributes() {
+    return this.constructor.defaultAttributes
+  }
+
+  get idField() {
+    return this.constructor.idField
+  }
+
+  get id() {
+    return this.attribute(this.idField)
   }
 
   get originalAttributes() {

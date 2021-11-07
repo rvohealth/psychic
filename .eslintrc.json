@@ -12,14 +12,17 @@
     "SharedArrayBuffer": "readonly",
     "bg": "readonly",
     "context": "readonly",
+    "Dir": "readonly",
     "eavesdrop": "readonly",
     "factory": "readonly",
+    "File": "readonly",
     "ghost": "readonly",
     "include": "readonly",
     "loadYaml": "readonly",
     "lookup": "readonly",
     "md5": "readonly",
     "now": "readonly",
+    "sleep": "readonly",
     "spawn": "readonly",
     "stringContaining": "readonly",
     "posess": "readonly",
@@ -33,6 +36,7 @@
     "page": "readonly",
     "resetIntegrationApp": "readonly",
     "runPsyCommand": "readonly",
+    "runStory": "readonly",
     "swapIntegrationFiles": "readonly",
     "transpile": "readonly"
   },
@@ -41,6 +45,7 @@
     "sourceType": "module"
   },
   "rules": {
+    "import/no-anonymous-default-export": "off"
   },
   "parser": "@babel/eslint-parser"
 }

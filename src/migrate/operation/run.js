@@ -26,7 +26,7 @@ export default class RunMigration extends MigrateOperation {
       await this._beforeMigration()
 
       if (!step || numMigrations < step) {
-        await migration.up(new Migration())
+        await this.doMigration(migration)
         await this._afterMigration(fileName, alreadyRun, { step })
         numMigrations += 1
       }
@@ -36,6 +36,13 @@ export default class RunMigration extends MigrateOperation {
     }
 
     return true
+  }
+
+  async doMigration(migration) {
+    let method = 'up'
+    if (typeof migration.up !== 'function') method = 'change'
+
+    await migration[method](Migration.new())
   }
 
   async _beforeAll() {

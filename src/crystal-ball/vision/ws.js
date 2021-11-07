@@ -1,6 +1,7 @@
 import Vision from 'src/crystal-ball/vision'
 import { emit } from 'src/helpers/ws'
 import CannotCallJSON from 'src/error/crystal-ball/vision/ws/cannot-call-json'
+import Params from 'src/crystal-ball/params'
 
 export default class WSVision extends Vision {
   constructor(route, method, params, { io, socket }) {
@@ -19,7 +20,7 @@ export default class WSVision extends Vision {
   }
 
   get params() {
-    return this._params
+    return new Params({ body: this._params })
   }
 
   emit(to, path, data) {

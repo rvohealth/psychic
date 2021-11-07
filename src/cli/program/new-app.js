@@ -103,7 +103,22 @@ DB_PASSWORD=yourpassword
 `
     )
 
-    l.logStatus('copy and remove js folder')
+    await File.touch(
+      `${path}/.env.test`,
+`\
+node_modules/
+log/!.gitkeep
+.dist
+tmp/migrate/*
+tmp/spec/*
+tmp/storage/*
+.env
+.env.development
+.env.test
+app/pkg
+`
+    )
+
     await File.copy(path + '/js', path + '/src/')
     await File.rm(`${path}/js`)
   }

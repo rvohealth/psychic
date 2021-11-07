@@ -1,6 +1,7 @@
 import Query from 'src/db/query'
 import db from 'src/db'
 import snakeCase from 'src/helpers/snakeCase'
+import Collection from 'src/dream/collection'
 
 const QueryProvider = superclass => class extends superclass {
   static async all() {
@@ -9,7 +10,7 @@ const QueryProvider = superclass => class extends superclass {
       .from(this.table)
       .all()
 
-    return results
+    return new Collection(this, results)
   }
 
   static async count() {
@@ -25,7 +26,7 @@ const QueryProvider = superclass => class extends superclass {
     return Query.new(this)
       .select('*')
       .from(this.table)
-      .where({ id })
+      .where({ [this.idField]: id })
       .first()
   }
 
@@ -65,7 +66,7 @@ const QueryProvider = superclass => class extends superclass {
 
     await db
       .delete(this.table)
-      .where({ id: this.id })
+      .where({ [this.idField]: this.id })
       .do()
 
     await this._runHooksFor('afterDestroy')
@@ -91,7 +92,7 @@ const QueryProvider = superclass => class extends superclass {
 
       const results = await db
         .update(this.table, { ...this.dirtyAttributes })
-        .where({ id: this.id })
+        .where({ [this.idField]: this.id })
         .do()
 
       this._resetAttributes(results[0])

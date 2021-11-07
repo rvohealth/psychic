@@ -3,7 +3,6 @@ import HasOneThrough from 'src/dream/association/has-one-through'
 import HasMany from 'src/dream/association/has-many'
 import HasManyThrough from 'src/dream/association/has-many-through'
 import BelongsTo from 'src/dream/association/belongs-to'
-import camelCase from 'src/helpers/camelCase'
 import InvalidThroughArgument from 'src/error/dream/association/invalid-through-argument'
 
 const AssociationsProvider = superclass => class extends superclass {
@@ -24,8 +23,8 @@ const AssociationsProvider = superclass => class extends superclass {
       )
     }
 
-    this.prototype[resourceName] = cb
-    this.prototype[camelCase(resourceName)] = cb
+    this.prototype[resourceName.camelize()] = cb
+    this.alias(resourceName, { to: resourceName.camelize(), strict: false })
 
     return this
   }
@@ -48,8 +47,8 @@ const AssociationsProvider = superclass => class extends superclass {
       )
     }
 
-    this.prototype[resourceName] = cb
-    this.prototype[camelCase(resourceName)] = cb
+    this.prototype[resourceName.camelize()] = cb
+    this.alias(resourceName, { to: resourceName.camelize(), strict: false })
 
     return this
   }
@@ -71,8 +70,8 @@ const AssociationsProvider = superclass => class extends superclass {
       return results.map(result => new association.associationDreamClass(result))
     }
 
-    this.prototype[resourceName] = cb
-    this.prototype[camelCase(resourceName)] = cb
+    this.prototype[resourceName.camelize()] = cb
+    this.alias(resourceName, { to: resourceName.camelize(), strict: false })
 
     return this
   }

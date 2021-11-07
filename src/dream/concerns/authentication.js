@@ -56,7 +56,7 @@ const AuthenticationProvider = superclass => class extends superclass {
     const token = jwt.sign({
       key: idAndPasswordStr,
       dreamClass: this.constructor.name,
-      id: this.id,
+      [this.idField]: this.id,
     }, process.env.PSYCHIC_SECRET || 'PLEASE_CHANGE_ME')
     return token
   }

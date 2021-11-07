@@ -73,15 +73,11 @@ function migrationTemplate(name, args=[]) {
 
   return (
 `\
-export async function up(m) {
+export async function change(m) {
   await m.createTable('${pluralizedName}', t => {
 ${fieldsString.replace(/\n$/, '')}
     t.timestamps()
   })
-}
-
-export async function down(m) {
-  await m.dropTable('${pluralizedName}')
 }
 `
   )

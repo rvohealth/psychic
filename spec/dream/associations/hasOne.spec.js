@@ -27,7 +27,6 @@ describe('Dream#hasOne', () => {
     const post2 = Post.new()
     expect(post2.test_user.constructor.name).toBe('Function')
     expect(post2.testUser.constructor.name).toBe('Function')
-    expect(post2.testUser).toBe(post.test_user)
   })
 
   context ('through is specified', () => {
@@ -56,7 +55,6 @@ describe('Dream#hasOne', () => {
       const user2 = TestUser.new()
       expect(user2.mother_in_law.constructor.name).toBe('Function')
       expect(user2.motherInLaw.constructor.name).toBe('Function')
-      expect(user2.motherInLaw).toBe(user.mother_in_law)
     })
 
     context ('when through is invalid', () => {
