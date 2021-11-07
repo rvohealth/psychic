@@ -8,21 +8,21 @@ describe('cli program g:channel <name>', () => {
 `\
 import { Channel } from 'psychic'
 
-
 export default class FishmanChannel extends Channel {
-
-
 }
 `
 
   it ('generates a new channel in the channels folder with the passed name', async () => {
     File.write = eavesdrop()
     await generateCLIProgram.run({ command: 'channel', args: ['fishman'] })
-    expect(File.write).toHaveBeenCalledWith('app/channels/fishman.js', template)
+    expect(File.write).toHaveBeenCalledWith(
+      expect.stringContaining('app/channels/fishman.js'),
+      template
+    )
   })
 })
 
-describe ('cli program g:channel users key:gmail password:secret create auth update delete index show', () => {
+describe ('cli program g:channel users key:gmail password:secret create auth update delete index show randomroute', () => {
   it ('uses all passed args to generate templated endpoints', async () => {
     const template =
 `\
@@ -60,6 +60,10 @@ export default class UsersChannel extends Channel {
     const user = await User.find(this.params.id)
     this.json(user)
   }
+
+  async randomroute() {
+    this.json({})
+  }
 }
 `
     File.write = eavesdrop()
@@ -73,8 +77,12 @@ export default class UsersChannel extends Channel {
       'delete',
       'index',
       'show',
+      'randomroute',
       ]
     })
-    expect(File.write).toHaveBeenCalledWith('app/channels/users.js', template.toString())
+    expect(File.write).toHaveBeenCalledWith(
+      expect.stringContaining('app/channels/users.js'),
+      template.toString()
+    )
   })
 })

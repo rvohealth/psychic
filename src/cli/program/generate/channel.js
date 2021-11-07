@@ -69,6 +69,7 @@ function routeTemplate(channelName, routeName) {
 
     return `
   async ${routeName}() {
+    this.json({})
   }
 `
   }
@@ -83,7 +84,8 @@ function initializeTemplate(channelName, ...routes) {
     return `\
   initialize() {
     this.authenticates('${dreamName}', { against: '${keyField}:${passField}', as: 'current${dreamName.pascalize()}' })
-  }`
+  }
+`
 
   return ''
 }
@@ -91,7 +93,7 @@ function initializeTemplate(channelName, ...routes) {
 function importStatements(channelName, ...routes) {
   if (routes.includes('auth'))
     return `\
-import ${pluralize.singular(channelName.pascalize())} from 'app/dreams/${pluralize.singular(channelName).hyphenize()}'\
+import ${pluralize.singular(channelName.pascalize())} from 'app/dreams/${pluralize.singular(channelName).hyphenize()}'
 `
 
   return ''
@@ -101,11 +103,11 @@ export function channelTemplate(channelName, ...routes) {
   return (
 `\
 import { Channel } from 'psychic'
-${importStatements(channelName, ...routes)}
+${importStatements(channelName, ...routes)}\
 
 export default class ${channelName.pascalize()}Channel extends Channel {
-${initializeTemplate(channelName, ...routes)}
-${routes.map(route => routeTemplate(channelName, route)).join("").replace(/\n$/, '')}
+${initializeTemplate(channelName, ...routes)}\
+${routes.map(route => routeTemplate(channelName, route)).join("")}\
 }
 `
   )
