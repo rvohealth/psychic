@@ -1,8 +1,27 @@
+import config from 'src/config'
+
 export default class Boot {
-  initialize(routePrefix=null) {
+  constructor(
+    routePrefix=null,
+    {
+      pkgRoot,
+      packagedDreams,
+      packagedChannels,
+      packagedProjections,
+      routeCB,
+      dbSeedCB,
+    }={}
+  ) {
     this.routePrefix = routePrefix ?
       routePrefix.replace(/\/$/, '') + '/' :
       ''
+
+    this.pkgRoot = (pkgRoot || '.dist').replace(/\/$/, '') + '/'
+    this.packagedDreams = packagedDreams
+    this.packagedChannels = packagedChannels
+    this.packagedProjections = packagedProjections
+    this.routeCB = routeCB
+    this.dbSeedCB = dbSeedCB
   }
 
   async boot() {
@@ -12,22 +31,22 @@ export default class Boot {
     const telekinesisConfig = await loadYaml(`${this.routePrefix}config/telekinesis`)
     const ghostsConfig = await loadYaml(`${this.routePrefix}config/ghosts`)
     const pathsConfig = await loadYaml(`${this.routePrefix}config/paths`)
-    const packagedDreams = await import(`${this.routePrefix}.dist/app/pkg/dreams.pkg.js`)
-    const packagedChannels = await import(`${this.routePrefix}.dist/app/pkg/channels.pkg.js`)
-    const packagedProjections = await import(`${this.routePrefix}.dist/app/pkg/projections.pkg.js`)
-    const routeCB = await import(`${this.routePrefix}.dist/config/routes.js`)
-    const dbSeedCB = await import(`${this.routePrefix}.dist/db/seed.js`)
-    const config = await import('src/config')
+
+    this.packagedDreams ||= await import(`${this.pkgRoot}app/pkg/dreams.pkg.js`)
+    this.packagedChannels ||= await import(`${this.pkgRoot}app/pkg/channels.pkg.js`)
+    this.packagedProjections ||= await import(`${this.pkgRoot}app/pkg/projections.pkg.js`)
+    this.routeCB ||= await import(`${this.pkgRoot}config/routes.js`)
+    this.dbSeedCB ||= await import(`${this.pkgRoot}db/seed.js`)
 
     config.boot({
-      dreams: packagedDreams,
-      channels: packagedChannels,
-      projections: packagedProjections,
+      dreams: this.packagedDreams,
+      channels: this.packagedChannels,
+      projections: this.packagedProjections,
+      routeCB: this.routeCB,
+      dbSeedCB: this.dbSeedCB,
       dbConfig,
-      dbSeedCB,
       pathsConfig,
       redisConfig,
-      routeCB,
       messagesConfig,
       telekinesisConfig,
       ghostsConfig,
