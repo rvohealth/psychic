@@ -1,20 +1,23 @@
 import sleep from 'src/helpers/sleep'
-import { launchServers, killServers } from 'spec/support/helpers/integration/launch-servers'
+import {
+  launchServers,
+  killServers
+} from 'spec/support/helpers/integration/launch-servers'
 
 jest.setTimeout(60 * 1000)
 
 describe('Landing on home page of boiler-plate react app', () => {
   beforeEach(async () => {
-    await runPsyCommand(`CORE_INTEGRATION_TEST=true npm run psy g:auth`)
-    await runPsyCommand(`CORE_INTEGRATION_TEST=true npm run psy g:dream blog belongsto:user string:name`)
-    await runPsyCommand(`CORE_INTEGRATION_TEST=true npm run psy g:route get authtest authtest#sayhi given:currentUser`)
-    await runPsyCommand(`CORE_INTEGRATION_TEST=true npm run psy g:channel authtest sayhi`)
-    await runPsyCommand(`CORE_INTEGRATION_TEST=true npm run psy g:js`)
+    await runPsyCommand(`psy g:auth`)
+    await runPsyCommand(`psy g:dream blog belongsto:user string:name`)
+    await runPsyCommand(`psy g:route get authtest authtest#sayhi given:currentUser`)
+    await runPsyCommand(`psy g:channel authtest sayhi`)
+    await runPsyCommand(`psy g:js`)
     await swapIntegrationFiles('spec/integration/auth/can-sign-in/swap')
     await swapIntegrationFiles('spec/integration/swap')
-    await runPsyCommand(`CORE_INTEGRATION_TEST=true npm run psy db:drop`)
-    await runPsyCommand(`CORE_INTEGRATION_TEST=true npm run psy db:create`)
-    await runPsyCommand(`CORE_INTEGRATION_TEST=true npm run psy db:migrate`)
+    await runPsyCommand(`psy db:drop`)
+    await runPsyCommand(`psy db:create`)
+    await runPsyCommand(`psy db:migrate`)
     await launchServers()
   })
 
@@ -27,18 +30,16 @@ describe('Landing on home page of boiler-plate react app', () => {
     await fillIn('email', 'fishman')
     await fillIn('password', 'fishman')
     await click('Submit')
+    await sleep(500)
 
-    // await sleep(5000)
-    // await goto(`${baseUrl}/login`)
-    // await fillIn('email', 'fishman')
-    // await fillIn('password', 'fishman')
-    // await click('Submit')
+    await goto(`${baseUrl}/login`)
+    await fillIn('email', 'fishman')
+    await fillIn('password', 'fishman')
+    await click('Submit')
 
-    // await sleep(5000)
-    // await goto(`${baseUrl}/authtest`)
-    // await expect(page).toMatch('Authtest')
-
-    await sleep(20000)
-    // await expect(page).toMatch('Auth was successful')
+    await sleep(500)
+    await goto(`${baseUrl}/authtest`)
+    await expect(page).toMatch('Authtest')
+    await expect(page).toMatch('Auth was successful')
   })
 })

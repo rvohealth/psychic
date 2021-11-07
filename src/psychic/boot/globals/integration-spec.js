@@ -32,7 +32,7 @@ async function resetIntegrationApp() {
 
 async function runPsyCommand(command, opts={}) {
   await spawn(
-    command,
+    `npm run ${command}`,
     [],
     {
       shell: true,
