@@ -18,7 +18,7 @@ export async function launchServers() {
   )
 
   _psychicServer = spawn(
-    `npm run psy gaze`,
+    `node_modules/.bin/npm run psy gaze`,
     [],
     {
       cwd: './tmp/integrationtestapp',
@@ -26,7 +26,8 @@ export async function launchServers() {
       stdio: 'inherit',
       // need to pass env this way for psychic for some reason...
       env: {
-        CORE_INTEGRATION_TEST: true,
+        ...process.env,
+        // CORE_INTEGRATION_TEST: true,
         PSYCHIC_PORT: 11111,
         PSYCHIC_WSS_PORT: 22222,
         DB_NAME: 'integrationtestapp',

@@ -1,20 +1,15 @@
 import React from 'react'
-import { BrowserRouter as Router, Route, Switch } from 'react-router-dom'
+import { BrowserRouter as Router, Route, Routes } from 'react-router-dom'
 import SignIn from './components/SignIn'
 import SignUp from './components/SignUp'
 
 export default function App() {
   return (
     <Router>
-      <Switch>
-        <Route exact path="/signup">
-          <SignUp />
-        </Route>
-
-        <Route exact path="/login">
-          <SignIn />
-        </Route>
-      </Switch>
+      <Routes>
+        <Route path="/signup" element={<SignUp />}/>
+        <Route exact path="/login" element={<SignIn />}/>
+      </Routes>
     </Router>
   )
 }
