@@ -19,7 +19,7 @@ describe('cli program g:route <httpmethod> <uri> (given:<authName>)', () => {
 
     const route = (
 `\
-  r.given('currentUser', () => {
+  r.given('auth:currentUser', () => {
     r.get('fish/johnson', 'boys#toMen')
   })
 `

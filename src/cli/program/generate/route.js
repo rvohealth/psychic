@@ -55,7 +55,7 @@ async function addRoute(args) {
   if (args.given)
     line =
 `\
-  r.given('${args.given}', () => {
+  r.given('auth:${args.given}', () => {
     r.${args.httpMethod}('${args.uri}', '${args.controllerRouteMethodString}')
   })
 `
