@@ -11,7 +11,7 @@ describe('cli program g:migration <name> belongsto:<association>', () => {
 import { Dream } from 'psychic'
 
 export default class Comment extends Dream {
-  static do {
+  static {
     this
       .belongsTo('user')
       .hasOne('post')

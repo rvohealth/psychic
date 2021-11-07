@@ -95,7 +95,7 @@ function dreamTemplate(name, args=[]) {
 import { Dream } from 'psychic'
 
 export default class ${name.pascalize()} extends Dream {
-  static do {
+  static {
     this
 ${ args.map(arg => dreamStaticBlock(name, arg)).compact().join("\n") }
   }
