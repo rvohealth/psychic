@@ -24,6 +24,13 @@ export default class CreateTableStatement extends Psyclass {
     })
   }
 
+  belongsTo(columnName) {
+    this.columns.push({
+      type: 'int',
+      name: columnName,
+    })
+  }
+
   bool(columnName) {
     this.columns.push({
       type: 'boolean',

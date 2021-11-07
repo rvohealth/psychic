@@ -44,7 +44,7 @@ class DB {
     try {
       return await this.adapter.createDB()
     } catch (error) {
-      console.error("CATCHING DB CREATE ERROR:", error)
+      // console.error("CATCHING DB CREATE ERROR:", error)
       // do nothing intentionally
     }
   }

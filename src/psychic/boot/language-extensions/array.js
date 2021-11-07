@@ -16,6 +16,13 @@ Array.prototype.insertAfter = function (str, item) {
   this.splice(strIndex + 1, 0, item)
 }
 
+Object.defineProperty(Array.prototype, 'empty', {
+  get: function() {
+    return this.length === 0
+  },
+  configurable: true,
+})
+
 Object.defineProperty(Array.prototype, 'first', {
   get: function() {
     return this[0]
