@@ -3,6 +3,7 @@ import InvalidEventType from 'src/error/esp/invalid-event-type'
 class ESP {
   static EVENT_TYPES = [
     'ws:to:authToken',
+    'psy:authed',
   ]
 
   constructor() {
