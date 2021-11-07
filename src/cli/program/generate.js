@@ -5,6 +5,7 @@ import GenerateDream from 'src/cli/program/generate/dream'
 import GenerateJSAPI from 'src/cli/program/generate/js/api'
 import GenerateMigration from 'src/cli/program/generate/migration'
 import GenerateProjection from 'src/cli/program/generate/projection'
+import GenerateRoute from 'src/cli/program/generate/route'
 
 export default class GenerateCLIProgram extends CLIProgram {
   async run(args) {
@@ -26,6 +27,9 @@ export default class GenerateCLIProgram extends CLIProgram {
 
     case 'projection':
       return await new GenerateProjection().generate(args.args)
+
+    case 'route':
+      return await new GenerateRoute().generate(args.args)
 
     default:
       throw `unhandled program ${args.command} for generate command`
