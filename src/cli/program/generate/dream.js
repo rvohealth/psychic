@@ -76,6 +76,7 @@ function migrationTemplate(name, args=[]) {
 export async function up(m) {
   await m.createTable('${pluralizedName}', t => {
 ${fieldsString.replace(/\n$/, '')}
+    t.timestamps()
   })
 }
 

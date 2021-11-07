@@ -33,12 +33,13 @@ export default class Comment extends Dream {
     expect(File.write).toHaveBeenCalledWith('app/dreams/comment.js', template)
   })
 
-  it.only ('generates a new file in the migrations folder with the passed name', async () => {
+  it ('generates a new file in the migrations folder with the passed name', async () => {
     const template =
 `\
 export async function up(m) {
   await m.createTable('comments', t => {
     t.belongsTo('user')
+    t.timestamps()
   })
 }
 
