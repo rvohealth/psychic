@@ -99,8 +99,7 @@ export default class CrystalBall {
 
     this.app.use(cors({
       credentials: true,
-      // origin: '*'//config.frontEndUrl,
-      origin: ['http://localhost:33333', 'http://localhost:11111', '*'],
+      origin: config.frontEndUrl,
     }))
     this.app.options('*', cors())
 
@@ -154,7 +153,6 @@ export default class CrystalBall {
       })
 
       esp.on('psy:authed', async ({ token, key }={}) => {
-        console.log('PSY/AUTHED CALLED, EMITTING TO WS LAYER NOW')
         if (!token) throw `Missing required token for WS token auth`
         if (!key) throw `Missing required key for WS token auth`
 
