@@ -34,8 +34,8 @@ describe('Landing on home page of boiler-plate react app', () => {
     await fillIn('email', 'fishman')
     await fillIn('password', 'fishman')
     await click('Submit')
+    await expect(page).toMatch('Authed via WS')
 
-    await sleep(5000)
     await goto(`${baseUrl}/authtest`)
     await expect(page).toMatch('Authtest')
     await expect(page).toMatch('Auth was successful')
