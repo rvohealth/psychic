@@ -36,7 +36,7 @@ describe('Landing on home page of boiler-plate react app', () => {
     await goto(`${baseUrl}/authtest`)
     await expect(page).toMatch('Authtest')
 
-    await sleep(5000)
+    await sleep(15000)
     await expect(page).toMatch('Auth was successful')
   })
 })
