@@ -91,7 +91,7 @@ export default class Channel {
         },
       )
 
-      esp.emit({ token, key: authKey })
+      esp.transmit({ token, key: authKey })
 
       return this.json({ token })
     }
