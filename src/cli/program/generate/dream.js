@@ -13,10 +13,10 @@ export default class GenerateDream {
   }
 
   async _generateDream(args) {
-    const [ dreamname ] = args
+    const [ dreamname, ...fields ] = args
     const filepath = `app/dreams/${dreamname.hyphenize()}.js`
 
-    await File.write(filepath, dreamTemplate(dreamname))
+    await File.write(filepath, dreamTemplate(dreamname, fields))
 
     if (!process.env.CORE_TEST)
       l.log(`wrote new dream to: ${filepath}`)
@@ -48,7 +48,25 @@ function migrationTemplate(name, args=[]) {
   let fieldsString = ''
   args.forEach(arg => {
     const [ type, fieldName ] = arg.split(':')
-    fieldsString += `    t.${type}('${fieldName}')\n`
+
+    switch(type) {
+    case 'belongsto':
+    case 'belongsTo':
+    case 'belongs_to':
+      fieldsString += `    t.belongsTo('${fieldName}')\n`
+      break
+
+    case 'hasone':
+    case 'hasOne':
+    case 'has_one':
+    case 'hasmany':
+    case 'hasMany':
+    case 'has_many':
+      break
+
+    default:
+      fieldsString += `    t.${type}('${fieldName}')\n`
+    }
   })
 
   const pluralizedName = name.snakeify().pluralize()
@@ -68,7 +86,24 @@ export async function down(m) {
   )
 }
 
-function dreamTemplate(name) {
+function dreamTemplate(name, args=[]) {
+  if (args.empty) return blankDreamTemplate(name)
+
+  return (
+`\
+import { Dream } from 'psychic'
+
+export default class ${name.pascalize()} extends Dream {
+  static do {
+    this
+${ args.map(arg => dreamStaticBlock(name, arg)).join("\n") }
+  }
+}
+`
+  )
+}
+
+function blankDreamTemplate(name) {
   return (
 `\
 import { Dream } from 'psychic'
@@ -88,4 +123,29 @@ describe ('${name.pascalize()}', () => {
 })
 `
   )
+}
+
+function dreamStaticBlock(dreamname, arg) {
+  const [associationType, associationName] = arg.split(':')
+  if (!associationType || !associationName) throw `invalid association ${arg}`
+
+  switch(associationType) {
+  case 'belongsto':
+  case 'belongsTo':
+  case 'belongs_to':
+    return `      .belongsTo('${associationName.hyphenize()}')`
+
+  case 'hasone':
+  case 'hasOne':
+  case 'has_one':
+    return `      .hasOne('${associationName.hyphenize()}')`
+
+  case 'hasmany':
+  case 'hasMany':
+  case 'has_many':
+    return `      .hasMany('${associationName.hyphenize()}')`
+
+  default:
+    throw 'HAMBURGERZZZ'
+  }
 }
