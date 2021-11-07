@@ -2,6 +2,8 @@ import axios from 'axios'
 import io from 'psy/singletons/io'
 import { serverUrl } from 'config/endpoints'
 
+axios.defaults.withCredentials = true
+
 export default class Common {
   static async get(url, params, conf) {
     return await axios.get(this._url(url), {
