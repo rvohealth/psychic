@@ -37,6 +37,7 @@ class Config extends mix(Psyclass).with(
     this._channels = {}
     this._authKeys = {}
     this._routeCB = null
+    this._pathsConfig = {}
   }
 
   // must be called before app loads!
