@@ -7,7 +7,7 @@ export default class GenerateSignInComponent {
     const template =
 `\
 import { createAsyncThunk, createSlice, createAction, PayloadAction } from '@reduxjs/toolkit'
-import ${dreamName.pascalize()}API from 'psy/net${namespace.presence ? namespace : ''}/${dreamName.hyphenize()}'
+import ${dreamName.pascalize()}API from 'psy/net${namespace.presence ? namespace : ''}/${dreamName.pluralize().hyphenize()}'
 
 ${
   routes
