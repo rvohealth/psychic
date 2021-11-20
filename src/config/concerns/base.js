@@ -33,7 +33,8 @@ const BaseConfigProvider = superclass => class extends superclass {
   get psyJsPath() {
     if (process.env.CORE_INTEGRATION_TEST) return 'src/psy'
     if (process.env.CORE_TEST) return 'tmp/spec/psy'
-    return this._pathsConfig.psy_js || 'src/psy'
+    return 'src/psy'
+    // return this._pathsConfig?.psy_js || 'src/psy'
   }
 
   get root() {
