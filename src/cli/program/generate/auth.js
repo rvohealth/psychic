@@ -192,9 +192,12 @@ async function addRoutes(name) {
   const lines = routeFile.toString().split("\n")
 
   const authRoutes = [
-    `r.post('${name.pluralize()}', '${name.pluralize()}#create')`,
-    `r.post('auth', '${name.pluralize()}#auth')`,
-    `r.delete('auth', '${name.pluralize()}#signout')`,
+`
+r.resource('${name.pluralize()}', { only: ['create'] }, () => {
+  r.post('auth', '${name.pluralize()}#auth')
+  r.delete('auth', '${name.pluralize()}#signout')
+})
+`
   ]
 
   authRoutes.forEach(line => {

@@ -42,12 +42,17 @@ class File extends Psyfs {
     await File.write(path, contents)
   }
 
-  static async write(arg1, arg2, options) {
+  static async write(path, content, options) {
     try {
-      await writeFile(arg1, arg2, options)
+      await writeFile(path, content, options)
     } catch(error) {
       console.error(error)
     }
+  }
+
+  static async overwrite(path, content) {
+    await this.unlinkIfExists(path)
+    await this.write(path, content)
   }
 
   static stream(path, opts) {

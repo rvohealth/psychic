@@ -22,8 +22,8 @@ export default nestedCombineReducers({
 ${routeReducerString(storePaths)}\
 })
 `
-    const filePath = path.join(config.psyJsPath, 'store.js')
-    await File.write(path.join(filePath), template)
+    const filePath = path.join(config.psyJsPath, 'psy', 'store.js')
+    await File.overwrite(path.join(filePath), template)
   }
 }
 
