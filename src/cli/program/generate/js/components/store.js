@@ -28,7 +28,9 @@ ${routeReducerString(storePaths)}\
 }
 
 function reducerImportString(route) {
-  return `import ${reducerName(route)} from 'psy${route.prefix}/${route.channel.resourceName}'`
+  const str =
+`import ${reducerName(route)}Reducer from 'psy${route.prefix || ''}/${route.channel.resourceName.singularize()}'`
+  return str
 }
 
 function routeReducerString(storePaths, spaces=[]) {

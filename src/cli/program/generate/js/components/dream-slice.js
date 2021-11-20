@@ -20,7 +20,7 @@ const mergeAction = createAction('psy:${prefix}#merge')
 const setAction = createAction('psy:${prefix}#set')
 const pushAction = createAction('psy:${prefix}#push')
 const filterAction = createAction('psy:${prefix}#filter')
-const deleteAction = createAction('psy:${prefix}#delete')
+const removeAction = createAction('psy:${prefix}#remove')
 const truncateAction = createAction('psy:${prefix}#truncate')
 
 const initialState = {
@@ -59,7 +59,7 @@ const ${dreamName.camelize()}Slice = createSlice({
         ...filter,
       }
     },
-    delete(state, id) {
+    remove(state, id) {
       state.index = [
         ...state.index.filter(${dreamName.camelize()} => ${dreamName.camelize()}.id !== id),
       ]
@@ -99,7 +99,7 @@ ${
       }
     })
 
-    builder.addCase(deleteAction, (state, action) => {
+    builder.addCase(removeAction, (state, action) => {
       state.index = [
         ...state.index.filter(${dreamName.camelize()} => ${dreamName.camelize()}.id !== action.payload),
       ]
@@ -111,7 +111,7 @@ ${
   },
 })
 
-export const { update, set, push, delete, filter, truncate } = ${dreamName.camelize()}Slice.actions
+export const { update, set, push, remove, filter, truncate } = ${dreamName.camelize()}Slice.actions
 export default ${dreamName.camelize()}Slice.reducer
 `
     const filePath = path.join(config.psyJsPath, 'slices', namespace)
@@ -166,7 +166,7 @@ export const show${dreamName.pascalize()} = createAsyncThunk(
 `
       break
 
-    case 'delete':
+    case 'remove':
 `\
 export const delete${dreamName.pascalize()} = createAsyncThunk(
   '${prefix}#delete',

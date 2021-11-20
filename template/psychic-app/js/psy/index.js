@@ -1,5 +1,5 @@
 import common from 'psy/net/common'
-import withForm from 'psy/components/form'
+import _withForm from 'psy/components/form'
 
 class Psychic {
   on(path, cb) {
@@ -7,7 +7,7 @@ class Psychic {
   }
 
   withForm(cb) {
-    return withForm(cb)
+    return _withForm(cb)
   }
 }
 
@@ -16,3 +16,4 @@ const psychic = global.__psychic_globals_psychic_instance =
   new Psychic()
 
 export default psychic
+export const withForm = _withForm
