@@ -1,14 +1,13 @@
 import get from 'lodash'
+import store from 'psy/store'
 
 export default function withForm(action, cb) {
-  const dispatch = useDispatch()
-  return cb(new PsyForm(action, { dispatch }))
+  return cb(new PsyForm(action))
 }
 
 class PsyForm {
-  constructor(action, { dispatch }) {
+  constructor(action) {
     this.action = new Action(action)
-    this.dispatch = dispatch
     this.data = {}
   }
 
@@ -70,7 +69,7 @@ class PsyForm {
         name={opts.name}
         onChange={ event => {
           this.data[opts.name] = event.target.value
-          this.dispatch({
+          store?.dispatch({
             type: `${this.action.path}#merge`,
             payload: {
               [opts.name]: event.target.value,
@@ -162,7 +161,7 @@ class PsyForm {
   }
 
   send() {
-    this.dispatch({
+    store?.dispatch({
       type: this.action.string,
       payload: this.data,
     })
