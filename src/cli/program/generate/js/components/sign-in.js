@@ -3,12 +3,9 @@ import config from 'src/config'
 
 export default class GenerateSignInComponent {
   static async generate(dreamName, namespace, keyField, passwordField) {
-    const apiName = `${dreamName.camelize().pluralize()}API`
-
     const template =
 `\
-import React, { useState } from 'react'
-import psy from 'psy'
+import { withForm } from 'psy'
 
 export default function SignIn() {
   const [ ${keyField}, set${keyField.pascalize()} ] = useState('')
