@@ -11,6 +11,7 @@ export default class GenerateStore {
 
     const template =
 `\
+import { createStore } from 'redux'
 import { nestedCombineReducers } from 'nested-combine-reducers'
 ${
   uniqRoutes
@@ -18,9 +19,9 @@ ${
     .join("\n")
 }
 
-export default nestedCombineReducers({
+export default createStore(nestedCombineReducers({
 ${routeReducerString(storePaths)}\
-})
+}))
 `
     const filePath = path.join(config.psyJsPath, 'store.js')
     await File.overwrite(path.join(filePath), template)

@@ -1,189 +1,4 @@
-import get from 'lodash'
 import store from 'psy/store'
-
-export default function withForm(action, cb) {
-  return cb(new PsyForm(action))
-}
-
-class PsyForm {
-  constructor(action) {
-    this.action = new Action(action)
-    this.data = {}
-  }
-
-  blank(opts) {
-    return <div>{opts.children}</div>
-  }
-
-  checkbox(opts) {
-    return this.input({
-      ...opts,
-      type: 'checkbox',
-    })
-  }
-
-  color(opts) {
-    return this.input({
-      ...opts,
-      type: 'color',
-    })
-  }
-
-  date(opts) {
-    // TODO: build out date selector component
-    return (
-      <div>
-        ${this.hidden(opts)}
-      </div>
-    )
-  }
-
-  datetime(opts) {
-    // TODO: build out datetime selector component
-    return (
-      <div>
-        ${this.hidden(opts)}
-      </div>
-    )
-  }
-
-  email(opts) {
-    return this.input({
-      type: 'email',
-      ...opts,
-    })
-  }
-
-  hidden(opts) {
-    return this.input({
-      type: 'hidden',
-      ...opts,
-    })
-  }
-
-  input(opts) {
-    const type = opts.type || 'text'
-    return (
-      <input
-        type={type}
-        name={opts.name}
-        onChange={ event => {
-          this.data[opts.name] = event.target.value
-          store?.dispatch({
-            type: `${this.action.path}#merge`,
-            payload: {
-              [opts.name]: event.target.value,
-            },
-          })
-        }}
-        {...opts}
-      />
-    )
-  }
-
-  label(opts) {
-    return (
-      <label
-        for={opts.name}
-        {...opts}
-      >
-        {opts.children}
-      </label>
-    )
-  }
-
-  month(opts) {
-    // TODO: build out month selector component
-    return (
-      <div>
-        ${this.hidden(opts)}
-      </div>
-    )
-  }
-
-  number(opts) {
-    return this.input({
-      type: 'number',
-      ...opts,
-    })
-  }
-
-  password(opts) {
-    return this.input({
-      ...opts,
-      type: 'password',
-    })
-  }
-
-  phone(opts) {
-    return this.input({
-      type: 'tel',
-      ...opts,
-    })
-  }
-
-  range(opts) {
-    return this.input({
-      ...opts,
-      type: 'range',
-    })
-  }
-
-  radio(opts) {
-    return this.input({
-      ...opts,
-      type: 'radio',
-    })
-  }
-
-  search(opts) {
-    return this.input({
-      ...opts,
-      type: 'text',
-    })
-  }
-
-  tel(opts) {
-    return this.phone(opts)
-  }
-
-  text(opts) {
-    return this.input(opts)
-  }
-
-  time(opts) {
-    // TODO: build out time selector component
-    return (
-      <div>
-        ${this.hidden(opts)}
-      </div>
-    )
-  }
-
-  send() {
-    store?.dispatch({
-      type: this.action.string,
-      payload: this.data,
-    })
-  }
-
-  submit(opts) {
-    return (
-      <button
-        onClick={ () => {
-          this.send()
-        }}
-      >{opts.text || 'Submit'}</button>
-    )
-  }
-
-  url(opts) {
-    return this.input({
-      type: 'url',
-      ...opts,
-    })
-  }
-}
 
 class Action {
   get changeType() {
@@ -200,6 +15,9 @@ class Action {
 
     case 'delete':
       return 'delete'
+
+    default:
+      return null
     }
   }
 
@@ -215,3 +33,190 @@ class Action {
     this.string = actionString
   }
 }
+
+const withForm = (action, cb) => {
+  const data = {}
+  action = new Action(action)
+
+  class PsyForm {
+    static blank(opts) {
+      return <div>{opts.children}</div>
+    }
+
+    static checkbox(opts) {
+      return input({
+        ...opts,
+        type: 'checkbox',
+      })
+    }
+
+    static color(opts) {
+      return input({
+        ...opts,
+        type: 'color',
+      })
+    }
+
+    static date(opts) {
+      // TODO: build out date selector component
+      return (
+        <div>
+        </div>
+      )
+    }
+
+    static datetime(opts) {
+      // TODO: build out datetime selector component
+      return (
+        <div>
+        </div>
+      )
+    }
+
+    static email(opts={}) {
+      return input({
+        type: 'email',
+        ...opts,
+      })
+    }
+
+    static hidden(opts) {
+      return input({
+        type: 'hidden',
+        ...opts,
+      })
+    }
+
+    static input(opts={}) {
+      return input(opts)
+    }
+
+    static label(opts) {
+      return (
+        <label
+          for={opts.name}
+          {...opts}
+        >
+          {opts.children}
+        </label>
+      )
+    }
+
+    static month(opts) {
+      // TODO: build out month selector component
+      return (
+        <div>
+        </div>
+      )
+    }
+
+    static number(opts) {
+      return input({
+        type: 'number',
+        ...opts,
+      })
+    }
+
+    static password(opts) {
+      return input({
+        ...opts,
+        type: 'password',
+      })
+    }
+
+    static phone(opts) {
+      return input({
+        type: 'tel',
+        ...opts,
+      })
+    }
+
+    static range(opts) {
+      return input({
+        ...opts,
+        type: 'range',
+      })
+    }
+
+    static radio(opts) {
+      return input({
+        ...opts,
+        type: 'radio',
+      })
+    }
+
+    static search(opts) {
+      return input({
+        ...opts,
+        type: 'text',
+      })
+    }
+
+    static tel(opts) {
+      return input({
+        type: 'tel',
+        ...opts,
+      })
+    }
+
+    static text(opts) {
+      return input(opts)
+    }
+
+    static time(opts) {
+      // TODO: build out time selector component
+      return (
+        <div>
+        </div>
+      )
+    }
+
+    static submit(opts) {
+      return (
+        <button
+          onClick={ () => {
+            send()
+          }}
+        >{opts.text || 'Submit'}</button>
+      )
+    }
+
+    static url(opts) {
+      return input({
+        type: 'url',
+        ...opts,
+      })
+    }
+  }
+
+  function input(opts) {
+    const type = opts.type || 'text'
+    return (
+      <input
+        type={type}
+        name={opts.name}
+        onChange={ event => {
+          data[opts.name] = event.target.value
+          store?.dispatch({
+            type: `${action.path}#merge`,
+            payload: {
+              [opts.name]: event.target.value,
+            },
+          })
+        }}
+        {...opts}
+      />
+    )
+  }
+
+  function send() {
+    store?.dispatch({
+      type: action.string,
+      payload: data,
+    })
+  }
+
+  return cb(PsyForm)
+}
+
+export default withForm
