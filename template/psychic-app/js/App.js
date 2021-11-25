@@ -6,9 +6,7 @@ import Home from 'pages/Home'
 export default function App() {
   return (
     <Psychic>
-      <Route exact path="/">
-        <Home />
-      </Route>
+      <Route exact path="/" element={ <Home /> } />
     </Psychic>
   )
 }
