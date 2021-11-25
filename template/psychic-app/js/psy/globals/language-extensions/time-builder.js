@@ -1,4 +1,4 @@
-import TimeBuilder from 'src/helpers/time-builder'
+import TimeBuilder from 'psychic/helpers/time-builder'
 
 const timebuilderGetterFor = (method) => {
   return {
