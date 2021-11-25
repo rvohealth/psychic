@@ -40,7 +40,8 @@
     "sourceType": "module"
   },
   "rules": {
-    "import/no-anonymous-default-export": "off"
+    "import/no-anonymous-default-export": "off",
+    "no-extend-native": "off"
   },
   "parser": "@babel/eslint-parser"
 }
