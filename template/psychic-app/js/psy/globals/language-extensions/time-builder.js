@@ -1,6 +1,6 @@
-import TimeBuilder from 'psychic/helpers/time-builder'
+import { TimeBuilder } from 'psychic/helpers'
 
-const timebuilderGetterFor = (method) => {
+const timebuilderGetterFor = method => {
   return {
     get: function() {
       return new TimeBuilder()[method](this)

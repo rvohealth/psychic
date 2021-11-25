@@ -1,6 +1,6 @@
 import TimeBuilder from 'src/helpers/time-builder'
 
-const timebuilderGetterFor = (method) => {
+const timebuilderGetterFor = method => {
   return {
     get: function() {
       return new TimeBuilder()[method](this)

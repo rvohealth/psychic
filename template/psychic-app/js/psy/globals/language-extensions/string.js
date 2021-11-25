@@ -1,10 +1,12 @@
-import pluralize from 'psychic/helpers/pluralize'
-import capitalize from 'psychic/helpers/capitalize'
-import uncapitalize from 'psychic/helpers/uncapitalize'
-import camelCase from 'psychic/helpers/camelCase'
-import paramCase from 'psychic/helpers/paramCase'
-import pascalCase from 'psychic/helpers/pascalCase'
-import snakeCase from 'psychic/helpers/snakeCase'
+import {
+  camelCase,
+  capitalize,
+  paramCase,
+  pascalCase,
+  pluralize,
+  snakeCase,
+  uncapitalize,
+} from 'psychic/helpers'
 
 String.prototype.capitalize = function() {
   return capitalize(this)
