@@ -1,4 +1,4 @@
-import 'src/psychic/boot/all'
+import 'src/psychic/boot/server'
 import 'src/psychic/boot/globals/core-spec'
 
 import 'spec/factories'

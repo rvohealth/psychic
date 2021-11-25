@@ -1,5 +1,5 @@
 import '.dist/psychic/boot/globals/repl'
-import '.dist/psychic/boot/all'
+import '.dist/psychic/boot/server'
 import '.dist/app/pkg/repl.pkg'
 import config from 'src/config'
 import Boot from 'src/psychic/boot'

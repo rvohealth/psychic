@@ -62,3 +62,4 @@ global.lookup = (...args) => config.lookup(...args)
 global.sleep = sleep
 
 global.ENV = loadEnv()
+
