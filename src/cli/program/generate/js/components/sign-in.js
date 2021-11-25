@@ -11,7 +11,7 @@ export default function SignIn() {
   const [ ${keyField}, set${keyField.pascalize()} ] = useState('')
   const [ ${passwordField}, set${passwordField.pascalize()} ] = useState('')
 
-  return withForm('psy:${namespace}/${dreamName.hyphenize()}', f =>
+  return withForm('psy:${namespace ? `${namespace}/` : ''}${dreamName.hyphenize()}', f =>
     <f.blank>
       <f.email name='${keyField}' />
       <f.password name='${passwordField}' />
