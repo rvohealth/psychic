@@ -6,6 +6,7 @@ import config from 'src/config'
 import path from 'path'
 import GenerateDreamSlice from 'src/cli/program/generate/js/components/dream-slice'
 import GenerateStore from 'src/cli/program/generate/js/components/store'
+import GenerateRoutes from 'src/cli/program/generate/js/components/routes'
 
 export default class GenerateJSAPI {
   async generate() {
@@ -83,6 +84,7 @@ export default class ${className}API {
     }
 
     await GenerateStore.generate(routes)
+    await GenerateRoutes.generate(routes)
   }
 
   filename(route) {

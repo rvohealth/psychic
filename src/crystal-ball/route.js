@@ -26,6 +26,13 @@ class Route extends Psyclass {
     return this.namespaceSegments.join('/')
   }
 
+  get resourceName() {
+    if (!this.isResource) return null
+    const resourceName = this.channel?.assumedDreamClass?.resourceName
+    if (resourceName) return resourceName
+    return this.unnamedSegments.last
+  }
+
   get parsedRoute() {
     return parseRoute(this.fullRoute)
   }
@@ -38,8 +45,22 @@ class Route extends Psyclass {
     return `${this.httpMethod}:${this.parsedRoute.key}`
   }
 
+  get hasUriSegments() {
+    return this.uriSegments.any
+  }
+
   get segments() {
     return this.parsed.segments
+  }
+
+  get uriSegments() {
+    return this.segments
+      .filter(segment => /^:/.test(segment))
+      .map(segment => segment.replace(/^:/, ''))
+  }
+
+  get unnamedSegments() {
+    return this.segments.filter(segment => !/^:/.test(segment))
   }
 
   constructor(httpMethod, route, channel, method, {

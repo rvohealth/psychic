@@ -50,6 +50,19 @@ Array.prototype.insertAfter = function (str, item) {
   this.splice(strIndex + 1, 0, item)
 }
 
+Array.prototype.withoutLast = function () {
+  const newArr = [...this]
+  newArr.splice(-1)
+  return newArr
+}
+
+Object.defineProperty(Array.prototype, 'any', {
+  get: function() {
+    return !this.empty
+  },
+  configurable: true,
+})
+
 Object.defineProperty(Array.prototype, 'empty', {
   get: function() {
     return this.length === 0
