@@ -1,4 +1,5 @@
 import CLIProgram from 'src/cli/program'
+import CrystalBall from 'src/crystal-ball'
 import GenerateAuth from 'src/cli/program/generate/auth'
 import GenerateChannel from 'src/cli/program/generate/channel'
 import GenerateDream from 'src/cli/program/generate/dream'
@@ -6,6 +7,7 @@ import GenerateJSAPI from 'src/cli/program/generate/js/api'
 import GenerateMigration from 'src/cli/program/generate/migration'
 import GenerateProjection from 'src/cli/program/generate/projection'
 import GenerateRoute from 'src/cli/program/generate/route'
+import GenerateRoutes from 'src/cli/program/generate/js/components/routes'
 
 export default class GenerateCLIProgram extends CLIProgram {
   async run(args) {
@@ -31,6 +33,17 @@ export default class GenerateCLIProgram extends CLIProgram {
 
     case 'route':
       return await new GenerateRoute().generate(args.args)
+
+    case 'server-routes':
+      return await GenerateRoutes.generate(CrystalBall.routes, {
+        path: do {
+          if (process.env.CORE_TEST)
+            'spec/support/testapp/app/pkg/routes.pkg.js'
+
+          else
+            'app/pkg/routes.pkg.js'
+        }
+      })
 
     default:
       throw `unhandled program ${args.command} for generate command`

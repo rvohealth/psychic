@@ -4,7 +4,7 @@ import config from 'src/config'
 // NOTE: this file generates client routes by scanning routes on server
 // (it is not a file that generates backend routes)
 export default class GenerateRoutes {
-  static async generate(routes) {
+  static async generate(routes, opts={}) {
     const routeObject = buildRouteObject(routes)
     const template =
 `\
@@ -12,7 +12,7 @@ export default {
 ${routeString(routeObject)}
 }
 `
-    const filePath = path.join(config.psyJsPath, 'routes.js')
+    const filePath = opts.path || path.join(config.psyJsPath, 'routes.js')
     await File.overwrite(path.join(filePath), template)
   }
 }
