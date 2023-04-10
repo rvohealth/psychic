@@ -8,15 +8,15 @@
   "scripts": {
     "build": "rm -rf dist && npx tsc",
     "copy:models": "npx ts-node ./.dream/bin/copy-models.ts",
-    "db:create": "yarn --cwd=node_modules/dream db:create",
-    "db:drop": "yarn --cwd=node_modules/dream db:drop",
-    "db:migrate": "yarn --cwd=node_modules/dream db:migrate",
-    "sync": "yarn --cwd=node_modules/dream sync",
-    "console": "yarn build && npx ts-node --project ./tsconfig.json ./src/conf/repl.ts",
+    "db:create": "yarn --cwd=node_modules/dream dream db:create",
+    "db:drop": "yarn --cwd=node_modules/dream dream db:drop",
+    "db:migrate": "yarn --cwd=node_modules/dream dream db:migrate",
+    "sync": "yarn --cwd=node_modules/dream dream sync",
+    "console": "yarn build && npx ts-node --project ./tsconfig.json ./test-app/conf/repl.ts",
     "postinstall": "rm -rf ./node_modules/dream/test-app && yarn --cwd=node_modules/dream build"
   },
   "dependencies": {
-    "dream": "https://github.com/avocadojesus/dream.git#720b0ab",
+    "dream": "https://github.com/avocadojesus/dream.git#f5e826a",
     "ts-node": "^10.9.1",
     "typescript": "^5.0.4"
   },

@@ -1,4 +1,4 @@
-models_path: 'src/app/models'
-migrations_path: 'src/db/migrations'
-schema_path: 'src/db/schema.ts'
-dream_config_path: 'src/conf/dream.ts'
+models_path: 'test-app/app/models'
+migrations_path: 'test-app/db/migrations'
+schema_path: 'test-app/db/schema.ts'
+dream_config_path: 'test-app/conf/dream.ts'

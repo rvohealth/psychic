@@ -1,4 +1,4 @@
-import '../helpers/loadEnv'
+import '../../src/helpers/loadEnv'
 import * as repl from 'node:repl'
 
 const replServer = repl.start('> ')
