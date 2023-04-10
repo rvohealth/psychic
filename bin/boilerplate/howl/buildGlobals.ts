@@ -1,0 +1,80 @@
+#!/usr/bin/node
+
+import { HowlController, HowlModel, pathifyNestedObject } from 'howl'
+import * as fs from 'fs'
+
+export default async function buildGlobals() {
+  const models = await modelIndex()
+  const controllers = await controllerIndex()
+  buildGlobalsFor('models', models)
+  buildGlobalsFor('controllers', controllers)
+}
+
+async function buildGlobalsFor(kind: string, data: { [key: string]: any }) {
+  const pathifiedData = pathifyNestedObject(data)
+  const content = `\
+import '../db/connection'
+${
+  Object
+    .keys(pathifiedData)
+    .filter(fullPath => !/\.js$/.test(fullPath))
+    .map(fullPath => {
+      const construct = pathifiedData[fullPath]
+      return `import ${construct.name} from '../app/${kind}/${fullPath}'`
+    })
+    .join("\n")
+}
+
+export default {
+  ${
+    Object
+      .keys(pathifiedData)
+      .map(fullPath => {
+        const constructor = pathifiedData[fullPath]
+        return `'${fullPath}': ${constructor.name},`
+      })
+      .join("\n  ")
+  }
+}
+`
+
+  fs.writeFileSync(rootPath() + `/.howl/${kind}.ts`, content)
+}
+
+async function controllerIndex() {
+  return await buildRecursiveIndex<typeof HowlController>('controllers')
+}
+
+async function modelIndex(nestedPath='') {
+  return await buildRecursiveIndex<typeof HowlModel>('models')
+}
+
+interface RecursiveObject<T> { [key: string]: T | RecursiveObject<T> }
+async function buildRecursiveIndex<T>(
+  kind: string,
+  nestedPath='',
+) {
+  const sanitizedFullNestedPath = nestedPath.replace(/\/$/, '')
+  const kindPath = rootPath() + `/app/${kind}${nestedPath ? `/${sanitizedFullNestedPath}` : ''}`
+  const kindFiles = fs.readdirSync(kindPath)
+  const kindIndex: RecursiveObject<T>={}
+
+  let currentDir = kindPath
+  for (const file of kindFiles) {
+    if (fs.lstatSync(currentDir + '/' + file).isDirectory()) {
+      kindIndex[file] = await buildRecursiveIndex(kind, `${nestedPath}/${file}`)
+    } else {
+      const importedFile = await import(kindPath + '/' + file)
+      const key = file.replace(/\.ts$/, '')
+      kindIndex[key] = importedFile.default as T
+    }
+  }
+
+  return kindIndex
+}
+
+function rootPath() {
+  return process.cwd() + '/src'
+}
+
+buildGlobals()

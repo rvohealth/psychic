@@ -11,7 +11,6 @@ export type Timestamp = ColumnType<DateTime>;
 export interface Users {
   id: Generated<number>;
   name: string | null;
-  type: string | null;
   email: string;
   password: string;
   created_at: Generated<Timestamp>;
@@ -26,7 +25,6 @@ export interface DB {
 export interface UserOpts {
   id?:  Generated<number>;
   name?:  string | null;
-  type?:  string | null;
   email?:  string;
   password?:  string;
   createdAt?:  Generated<Timestamp>;
@@ -34,7 +32,7 @@ export interface UserOpts {
 } 
 
 
-export const UserColumns = ['id', 'name', 'type', 'email', 'password', 'created_at', 'updated_at']
+export const UserColumns = ['id', 'name', 'email', 'password', 'created_at', 'updated_at']
 
 export interface DBOpts {
   users: UserOpts
