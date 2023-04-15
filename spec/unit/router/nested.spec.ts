@@ -1,10 +1,10 @@
 import * as supertest from 'supertest'
-import HowlServer from '../../../src/server'
+import PsychicServer from '../../../src/server'
 
-describe('HowlRouter', () => {
+describe('PsychicRouter', () => {
   describe('nested routes', () => {
     it('can direct nested routes to their respective controllers', async () => {
-      const server = new HowlServer()
+      const server = new PsychicServer()
       await server.boot()
 
       const res = await supertest(server.app).get('/api-ping').expect(200)
@@ -13,7 +13,7 @@ describe('HowlRouter', () => {
     })
 
     it('can direct namespaced routes to their respective controllers', async () => {
-      const server = new HowlServer()
+      const server = new PsychicServer()
       await server.boot()
 
       const res = await supertest(server.app).get('/api/v1/ping').expect(200)

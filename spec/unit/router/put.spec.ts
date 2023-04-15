@@ -1,10 +1,10 @@
 import * as supertest from 'supertest'
-import HowlServer from '../../../src/server'
+import PsychicServer from '../../../src/server'
 
-describe('HowlRouter', () => {
+describe('PsychicRouter', () => {
   describe('#put', () => {
     it('can direct put requests to controller', async () => {
-      const server = new HowlServer()
+      const server = new PsychicServer()
       await server.boot()
 
       const res = await supertest(server.app).put('/ping').expect(200)

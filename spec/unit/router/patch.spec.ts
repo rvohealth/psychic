@@ -1,10 +1,10 @@
 import * as supertest from 'supertest'
-import HowlServer from '../../../src/server'
+import PsychicServer from '../../../src/server'
 
-describe('HowlRouter', () => {
+describe('PsychicRouter', () => {
   describe('#patch', () => {
     it('can direct patch requests to controller', async () => {
-      const server = new HowlServer()
+      const server = new PsychicServer()
       await server.boot()
 
       const res = await supertest(server.app).patch('/ping').expect(200)

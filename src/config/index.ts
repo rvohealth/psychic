@@ -1,12 +1,12 @@
 import * as fs from 'fs'
 import { Application } from 'express'
-import HowlController from '../controller'
-import HowlDir from '../helpers/howldir'
+import PsychicController from '../controller'
+import PsychicDir from '../helpers/howldir'
 import readAppConfig from './helpers/readAppConfig'
 
-export default class HowlConfig {
+export default class PsychicConfig {
   public app: Application
-  public controllers: { [key: string]: typeof HowlController } = {}
+  public controllers: { [key: string]: typeof PsychicController } = {}
   public apiOnly: boolean = false
   public useWs: boolean = false
   public useRedis: boolean = false
@@ -86,6 +86,6 @@ export default class HowlConfig {
     const inflections = await import(this.confPath + '/inflections.ts')
     await inflections.default()
 
-    this.controllers = await HowlDir.controllers()
+    this.controllers = await PsychicDir.controllers()
   }
 }

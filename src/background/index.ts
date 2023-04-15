@@ -125,12 +125,12 @@ export class Background {
 
       case 'BackgroundJobQueueModelInstanceJob':
         if (filepath) {
-          const HowlModelClass = (await import(filePath(filepath)))?.default as
+          const DreamModelClass = (await import(filePath(filepath)))?.default as
             | DreamModel<any, any>
             | undefined
-          if (!HowlModelClass) return
+          if (!DreamModelClass) return
 
-          const modelInstance = await HowlModelClass.find(id)
+          const modelInstance = await DreamModelClass.find(id)
           if (!modelInstance) return
 
           await (modelInstance as any)[method as string](...args)

@@ -1,13 +1,13 @@
-import HowlServer from '../../../src/server'
-import HowlRouter from '../../../src/router'
+import PsychicServer from '../../../src/server'
+import PsychicRouter from '../../../src/router'
 
-describe('HowlRouter', () => {
+describe('PsychicRouter', () => {
   describe('resources', () => {
-    let server: HowlServer
-    let router: HowlRouter
+    let server: PsychicServer
+    let router: PsychicRouter
     beforeEach(() => {
-      server = new HowlServer()
-      router = new HowlRouter(server.app, server.config)
+      server = new PsychicServer()
+      router = new PsychicRouter(server.app, server.config)
       jest.spyOn(server.app, 'get')
       jest.spyOn(server.app, 'post')
       jest.spyOn(server.app, 'put')

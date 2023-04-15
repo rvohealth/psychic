@@ -1,9 +1,9 @@
 import { BeforeCreate, BeforeUpdate } from 'dream'
-import HowlController from '../../../src/controller'
+import PsychicController from '../../../src/controller'
 import Params from '../../../src/server/params'
 import User from '../models/user'
 
-export default class UsersController extends HowlController {
+export default class UsersController extends PsychicController {
   static {
     this.before('authenticate', { only: ['authPing'] })
   }

@@ -1,6 +1,7 @@
 #!/usr/bin/node
 
-import { HowlController, HowlModel, pathifyNestedObject } from 'howl'
+import { DreamModel } from 'dream'
+import { PsychicController, pathifyNestedObject } from 'howl'
 import * as fs from 'fs'
 
 export default async function buildGlobals() {
@@ -14,27 +15,21 @@ async function buildGlobalsFor(kind: string, data: { [key: string]: any }) {
   const pathifiedData = pathifyNestedObject(data)
   const content = `\
 import '../db/connection'
-${
-  Object
-    .keys(pathifiedData)
-    .filter(fullPath => !/\.js$/.test(fullPath))
-    .map(fullPath => {
-      const construct = pathifiedData[fullPath]
-      return `import ${construct.name} from '../app/${kind}/${fullPath}'`
-    })
-    .join("\n")
-}
+${Object.keys(pathifiedData)
+  .filter(fullPath => !/\.js$/.test(fullPath))
+  .map(fullPath => {
+    const construct = pathifiedData[fullPath]
+    return `import ${construct.name} from '../app/${kind}/${fullPath}'`
+  })
+  .join('\n')}
 
 export default {
-  ${
-    Object
-      .keys(pathifiedData)
-      .map(fullPath => {
-        const constructor = pathifiedData[fullPath]
-        return `'${fullPath}': ${constructor.name},`
-      })
-      .join("\n  ")
-  }
+  ${Object.keys(pathifiedData)
+    .map(fullPath => {
+      const constructor = pathifiedData[fullPath]
+      return `'${fullPath}': ${constructor.name},`
+    })
+    .join('\n  ')}
 }
 `
 
@@ -42,22 +37,21 @@ export default {
 }
 
 async function controllerIndex() {
-  return await buildRecursiveIndex<typeof HowlController>('controllers')
+  return await buildRecursiveIndex<typeof PsychicController>('controllers')
 }
 
-async function modelIndex(nestedPath='') {
-  return await buildRecursiveIndex<typeof HowlModel>('models')
+async function modelIndex(nestedPath = '') {
+  return await buildRecursiveIndex<typeof DreamModel<any, any>>('models')
 }
 
-interface RecursiveObject<T> { [key: string]: T | RecursiveObject<T> }
-async function buildRecursiveIndex<T>(
-  kind: string,
-  nestedPath='',
-) {
+interface RecursiveObject<T> {
+  [key: string]: T | RecursiveObject<T>
+}
+async function buildRecursiveIndex<T>(kind: string, nestedPath = '') {
   const sanitizedFullNestedPath = nestedPath.replace(/\/$/, '')
   const kindPath = rootPath() + `/app/${kind}${nestedPath ? `/${sanitizedFullNestedPath}` : ''}`
   const kindFiles = fs.readdirSync(kindPath)
-  const kindIndex: RecursiveObject<T>={}
+  const kindIndex: RecursiveObject<T> = {}
 
   let currentDir = kindPath
   for (const file of kindFiles) {

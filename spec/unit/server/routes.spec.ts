@@ -1,6 +1,6 @@
 import PsychicServer from '../../../src/server'
 
-describe('HowlServer', () => {
+describe('PsychicServer', () => {
   describe('#routes', () => {
     it('can direct delete requests to controller', async () => {
       const server = new PsychicServer()

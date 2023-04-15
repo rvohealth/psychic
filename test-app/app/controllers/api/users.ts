@@ -1,6 +1,6 @@
-import HowlController from '../../../../src/controller'
+import PsychicController from '../../../../src/controller'
 
-export default class ApiUsersController extends HowlController {
+export default class ApiUsersController extends PsychicController {
   public ping() {
     this.ok('hellonestedworld')
   }

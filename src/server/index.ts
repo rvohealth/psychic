@@ -3,23 +3,22 @@ import * as express from 'express'
 import { Application } from 'express'
 import * as cors from 'cors'
 import * as cookieParser from 'cookie-parser'
-import PsychicRouter from '../router'
-import HowlConfig from '../config'
+import PsychicConfig from '../config'
 import log from '../log'
 import Cable from '../cable'
 import filePath from '../config/helpers/filePath'
 import ReactServer from '../server/react'
-import HowlRouter from '../router'
+import PsychicRouter from '../router'
 
-export default class HowlServer {
+export default class PsychicServer {
   public app: Application
   public cable: Cable
-  public config: HowlConfig
+  public config: PsychicConfig
   public reactServer: ReactServer
   private booted = false
   constructor() {
     this.buildApp()
-    this.config = new HowlConfig(this.app)
+    this.config = new PsychicConfig(this.app)
   }
 
   public get routes() {
@@ -100,7 +99,7 @@ export default class HowlServer {
   }
 
   private async buildRoutes() {
-    const r = new HowlRouter(this.app, this.config)
+    const r = new PsychicRouter(this.app, this.config)
     const routesPath = this.config.root + '/conf/routes.ts'
     const routes = (await import(routesPath)).default
     routes(r)

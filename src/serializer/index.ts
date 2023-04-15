@@ -1,4 +1,4 @@
-export default class HowlSerializer {
+export default class PsychicSerializer {
   private static _attributes: string[] = []
 
   public static attribute(...attrs: string[]) {
@@ -21,12 +21,12 @@ export default class HowlSerializer {
   }
 
   public renderMany(): { [key: string]: any }[] {
-    return (this.data as any[]).map(d => new (this.constructor as typeof HowlSerializer)(d).render())
+    return (this.data as any[]).map(d => new (this.constructor as typeof PsychicSerializer)(d).render())
   }
 
   public renderOne() {
     const returnObj: { [key: string]: any } = {}
-    const staticSelf: typeof HowlSerializer = this.constructor as typeof HowlSerializer
+    const staticSelf: typeof PsychicSerializer = this.constructor as typeof PsychicSerializer
     staticSelf._attributes.forEach(attr => {
       returnObj[attr] = this.data[attr]
     })

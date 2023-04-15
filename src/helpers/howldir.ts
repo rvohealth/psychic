@@ -1,12 +1,12 @@
 import { DreamModel } from 'dream'
 import filePath from '../config/helpers/filePath'
-import HowlController from '../controller'
-import HowlSerializer from '../serializer'
+import PsychicController from '../controller'
+import PsychicSerializer from '../serializer'
 
 let _models: { [key: string]: DreamModel<any, any> }
-let _controllers: { [key: string]: typeof HowlController }
-let _serializers: { [key: string]: typeof HowlSerializer }
-export default class HowlDir {
+let _controllers: { [key: string]: typeof PsychicController }
+let _serializers: { [key: string]: typeof PsychicSerializer }
+export default class PsychicDir {
   public static async models() {
     if (_models) return _models
     return await this.loadModels()
@@ -26,7 +26,7 @@ export default class HowlDir {
 
   public static async loadControllers() {
     _controllers = (await import(filePath('.howl/controllers'))).default as {
-      [key: string]: typeof HowlController
+      [key: string]: typeof PsychicController
     }
     return _controllers
   }
@@ -38,7 +38,7 @@ export default class HowlDir {
 
   public static async loadSerializers() {
     _serializers = (await import(filePath('.howl/serializers'))).default as {
-      [key: string]: typeof HowlSerializer
+      [key: string]: typeof PsychicSerializer
     }
     return _serializers
   }

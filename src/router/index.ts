@@ -6,17 +6,17 @@ import Unauthorized from '../error/http/unauthorized'
 import Forbidden from '../error/http/forbidden'
 import UnprocessableEntity from '../error/http/unprocessable-entity'
 import NotFound from '../error/http/not-found'
-import HowlConfig from '../config'
+import PsychicConfig from '../config'
 import log from '../log'
 import getModelByPath from '../config/helpers/getModelByPath'
-import HowlController from '../controller'
+import PsychicController from '../controller'
 import { DreamModel, ValidationError } from 'dream'
 
-export default class HowlRouter {
+export default class PsychicRouter {
   public app: Application
-  public config: HowlConfig
+  public config: PsychicConfig
   protected currentNamespaces: string[] = []
-  constructor(app: Application, config: HowlConfig) {
+  constructor(app: Application, config: PsychicConfig) {
     this.app = app
     this.config = config
   }
@@ -58,8 +58,10 @@ export default class HowlRouter {
     })
   }
 
-  public namespace(path: string, cb: (router: HowlNestedRouter) => void) {
-    const nestedRouter = new HowlNestedRouter(this.app, this.config, { namespaces: this.currentNamespaces })
+  public namespace(path: string, cb: (router: PsychicNestedRouter) => void) {
+    const nestedRouter = new PsychicNestedRouter(this.app, this.config, {
+      namespaces: this.currentNamespaces,
+    })
     this.currentNamespaces.push(path)
     cb(nestedRouter)
     this.currentNamespaces.pop()
@@ -68,8 +70,8 @@ export default class HowlRouter {
 
   public resources(
     path: string,
-    optionsOrCb?: ResourcesOptions | ((router: HowlNestedRouter) => void),
-    cb?: (router: HowlNestedRouter) => void
+    optionsOrCb?: ResourcesOptions | ((router: PsychicNestedRouter) => void),
+    cb?: (router: PsychicNestedRouter) => void
   ) {
     if (cb) {
       if (typeof optionsOrCb === 'function')
@@ -83,8 +85,8 @@ export default class HowlRouter {
 
   public resource(
     path: string,
-    optionsOrCb?: ResourcesOptions | ((router: HowlNestedRouter) => void),
-    cb?: (router: HowlNestedRouter) => void
+    optionsOrCb?: ResourcesOptions | ((router: PsychicNestedRouter) => void),
+    cb?: (router: PsychicNestedRouter) => void
   ) {
     if (cb) {
       if (typeof optionsOrCb === 'function')
@@ -96,8 +98,10 @@ export default class HowlRouter {
     }
   }
 
-  private _resources(path: string, options?: ResourcesOptions, cb?: (router: HowlNestedRouter) => void) {
-    const nestedRouter = new HowlNestedRouter(this.app, this.config, { namespaces: this.currentNamespaces })
+  private _resources(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
+    const nestedRouter = new PsychicNestedRouter(this.app, this.config, {
+      namespaces: this.currentNamespaces,
+    })
 
     const only = options?.only
     const except = options?.except
@@ -122,8 +126,8 @@ export default class HowlRouter {
     this.app.use(routePath(path), nestedRouter.router)
   }
 
-  private _resource(path: string, options?: ResourcesOptions, cb?: (router: HowlNestedRouter) => void) {
-    const nestedRouter = new HowlNestedRouter(this.app, this.config)
+  private _resource(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
+    const nestedRouter = new PsychicNestedRouter(this.app, this.config)
     const { only, except } = options || {}
     let resourceMethods: ResourceMethodType[] = ResourceMethods
 
@@ -227,7 +231,7 @@ export default class HowlRouter {
   }
 
   public _initializeController(
-    ControllerClass: typeof HowlController,
+    ControllerClass: typeof PsychicController,
     req: Request,
     res: Response,
     user?: DreamModel<any, any> | null
@@ -243,11 +247,11 @@ export default class HowlRouter {
   }
 }
 
-export class HowlNestedRouter extends HowlRouter {
+export class PsychicNestedRouter extends PsychicRouter {
   public router: Router
   constructor(
     app: Application,
-    config: HowlConfig,
+    config: PsychicConfig,
     {
       namespaces = [],
     }: {

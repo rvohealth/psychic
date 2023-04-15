@@ -1,4 +1,4 @@
-import HowlRouter, { HowlNestedRouter } from '../router'
+import PsychicRouter, { PsychicNestedRouter } from '../router'
 import { ResourceMethodType } from './types'
 
 export function routePath(routePath: string) {
@@ -12,7 +12,7 @@ export function resourcePath(routePath: string) {
 export function applyResourcesAction(
   path: string,
   action: ResourceMethodType,
-  routingMechanism: HowlRouter | HowlNestedRouter
+  routingMechanism: PsychicRouter | PsychicNestedRouter
 ) {
   switch (action) {
     case 'index':
@@ -43,7 +43,7 @@ export function applyResourcesAction(
 export function applyResourceAction(
   path: string,
   action: ResourceMethodType,
-  routingMechanism: HowlRouter | HowlNestedRouter
+  routingMechanism: PsychicRouter | PsychicNestedRouter
 ) {
   switch (action) {
     case 'update':

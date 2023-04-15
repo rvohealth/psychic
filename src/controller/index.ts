@@ -6,13 +6,13 @@ import UnprocessableEntity from '../error/http/unprocessable-entity'
 import Session from '../session'
 import controllerHooks from '../controller/hooks'
 import NotFound from '../error/http/not-found'
-import HowlConfig from '../config'
-import HowlSerializer from '../serializer'
+import PsychicConfig from '../config'
+import PsychicSerializer from '../serializer'
 import getControllerKey from '../config/helpers/getControllerKey'
 import background from '../background'
 import getModelKey from '../config/helpers/getModelKey'
 
-export default class HowlController {
+export default class PsychicController {
   public static before(
     methodName: string,
     opts: {
@@ -27,7 +27,7 @@ export default class HowlController {
 
   public static serializes(ModelClass: DreamModel<any, any>) {
     return {
-      with: (SerializerClass: typeof HowlSerializer) => {
+      with: (SerializerClass: typeof PsychicSerializer) => {
         controllerSerializerIndex.add(this, SerializerClass, ModelClass)
         return this
       },
@@ -40,7 +40,7 @@ export default class HowlController {
 
   public static async background(methodName: string, ...args: any[]) {
     return await background.staticMethod(this, methodName, {
-      filepath: `app/controllers/${await (this as typeof HowlController).controllerPath()}`,
+      filepath: `app/controllers/${await (this as typeof PsychicController).controllerPath()}`,
       args,
     })
   }
@@ -49,7 +49,7 @@ export default class HowlController {
   public res: Response
   public session: Session
   public user: DreamModel<any, any> | null
-  public config: HowlConfig
+  public config: PsychicConfig
   constructor(
     req: Request,
     res: Response,
@@ -57,7 +57,7 @@ export default class HowlController {
       config,
       user = null,
     }: {
-      config: HowlConfig
+      config: PsychicConfig
       user: DreamModel<any, any> | null
     }
   ) {
@@ -94,10 +94,10 @@ export default class HowlController {
   public json(data: any) {
     let modelForLookup: any | null = null
     if (Array.isArray(data)) {
-      if (data[0]?.isHowlModelInstance) {
+      if (data[0]?.isDreamInstance) {
         modelForLookup = data[0] as any
       }
-    } else if (data?.isHowlModelInstance) {
+    } else if (data?.isDreamInstance) {
       modelForLookup = data as any
     }
 
@@ -155,23 +155,26 @@ export default class HowlController {
 }
 
 export class ControllerSerializerIndex {
-  public associations: [typeof HowlController, typeof HowlSerializer, DreamModel<any, any>][] = []
+  public associations: [typeof PsychicController, typeof PsychicSerializer, DreamModel<any, any>][] = []
 
   public add(
-    ControllerClass: typeof HowlController,
-    SerializerClass: typeof HowlSerializer,
+    ControllerClass: typeof PsychicController,
+    SerializerClass: typeof PsychicSerializer,
     ModelClass: DreamModel<any, any>
   ) {
     this.associations.push([ControllerClass, SerializerClass, ModelClass])
   }
 
-  public lookupModel(ControllerClass: typeof HowlController, ModelClass: DreamModel<any, any>) {
+  public lookupModel(ControllerClass: typeof PsychicController, ModelClass: DreamModel<any, any>) {
     return this.associations.find(
       association => association[0] === ControllerClass && association[2] === ModelClass
     )
   }
 
-  public lookupSerializer(ControllerClass: typeof HowlController, SerializerClass: typeof HowlSerializer) {
+  public lookupSerializer(
+    ControllerClass: typeof PsychicController,
+    SerializerClass: typeof PsychicSerializer
+  ) {
     return this.associations.find(
       association => association[0] === ControllerClass && association[1] === SerializerClass
     )

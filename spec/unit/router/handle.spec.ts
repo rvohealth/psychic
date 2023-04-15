@@ -1,17 +1,17 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import HowlServer from '../../../src/server'
-import HowlRouter from '../../../src/router'
+import PsychicServer from '../../../src/server'
+import PsychicRouter from '../../../src/router'
 import UsersController from '../../../test-app/app/controllers/users'
 
-describe('HowlRouter#handle', () => {
-  let server: HowlServer
-  let router: HowlRouter
+describe('PsychicRouter#handle', () => {
+  let server: PsychicServer
+  let router: PsychicRouter
   const req = getMockReq({ body: {} })
   const res = getMockRes().res
   beforeEach(async () => {
-    server = new HowlServer()
+    server = new PsychicServer()
     await server.boot()
-    router = new HowlRouter(server.app, server.config)
+    router = new PsychicRouter(server.app, server.config)
   })
 
   it('calls the matching method on a corresponding controller', async () => {
