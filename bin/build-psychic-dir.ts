@@ -8,7 +8,7 @@ async function buildPsychicDir() {
   fs.mkdirSync(rootPath() + '/.psy')
 
   // otherwise, we use the buildGlobals provided by our core spec layer
-  const boilerplateSubpath = process.env.CORE_DEVELOPMENT === '1' ? 'howl-core-dev' : 'howl'
+  const boilerplateSubpath = process.env.CORE_DEVELOPMENT === '1' ? 'psychic-core-dev' : 'psychic'
 
   fs.writeFileSync(
     rootPath() + '/.psy/buildGlobals.ts',
