@@ -33,7 +33,7 @@ export default {
 }
 `
 
-  fs.writeFileSync(rootPath() + `/.howl/${kind}.ts`, content)
+  fs.writeFileSync(rootPath() + `/.psy/${kind}.ts`, content)
 }
 
 async function controllerIndex() {

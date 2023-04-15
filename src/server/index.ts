@@ -40,7 +40,7 @@ export default class PsychicServer {
       `
     }
 
-    await import(filePath('.howl/init'))
+    await import(filePath('.psy/init'))
     await this.buildRoutes()
 
     if (this.config.useWs) this.cable = new Cable(this.app)

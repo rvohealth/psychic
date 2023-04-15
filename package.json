@@ -9,7 +9,7 @@
     "build": "rm -rf dist && npx tsc",
     "dream": "yarn --cwd=node_modules/dream dream",
     "build-dev": "CORE_DEVELOPMENT=1 ts-node ./bin/build-psychic-dir.ts  && yarn build && yarn build-globals-dev",
-    "build-globals-dev": "CORE_DEVELOPMENT=1 ts-node ./test-app/.howl/buildGlobals.ts",
+    "build-globals-dev": "CORE_DEVELOPMENT=1 ts-node ./test-app/.psy/buildGlobals.ts",
     "copy:models": "npx ts-node ./.dream/bin/copy-models.ts",
     "db:create": "yarn --cwd=node_modules/dream dream db:create",
     "db:drop": "yarn --cwd=node_modules/dream dream db:drop",

@@ -25,7 +25,7 @@ export default class PsychicDir {
   }
 
   public static async loadControllers() {
-    _controllers = (await import(filePath('.howl/controllers'))).default as {
+    _controllers = (await import(filePath('.psy/controllers'))).default as {
       [key: string]: typeof PsychicController
     }
     return _controllers
@@ -37,7 +37,7 @@ export default class PsychicDir {
   }
 
   public static async loadSerializers() {
-    _serializers = (await import(filePath('.howl/serializers'))).default as {
+    _serializers = (await import(filePath('.psy/serializers'))).default as {
       [key: string]: typeof PsychicSerializer
     }
     return _serializers

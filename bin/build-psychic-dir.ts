@@ -3,24 +3,23 @@
 import * as fs from 'fs'
 
 async function buildPsychicDir() {
-  if (fs.existsSync(rootPath() + '/.howl'))
-    fs.rmSync(rootPath() + '/.howl/', { force: true, recursive: true })
+  if (fs.existsSync(rootPath() + '/.psy')) fs.rmSync(rootPath() + '/.psy/', { force: true, recursive: true })
 
-  fs.mkdirSync(rootPath() + '/.howl')
+  fs.mkdirSync(rootPath() + '/.psy')
 
   // otherwise, we use the buildGlobals provided by our core spec layer
-  const boilerplateSubpath = process.env.CORE_DEVELOPMENT === '1' ? 'howl-core-dev' : 'howll'
+  const boilerplateSubpath = process.env.CORE_DEVELOPMENT === '1' ? 'howl-core-dev' : 'howl'
 
   fs.writeFileSync(
-    rootPath() + '/.howl/buildGlobals.ts',
+    rootPath() + '/.psy/buildGlobals.ts',
     fs.readFileSync(__dirname + `/boilerplate/${boilerplateSubpath}/buildGlobals.ts`)
   )
-  fs.writeFileSync(rootPath() + '/.howl/init.ts', fs.readFileSync(__dirname + '/boilerplate/shared/init.ts'))
+  fs.writeFileSync(rootPath() + '/.psy/init.ts', fs.readFileSync(__dirname + '/boilerplate/shared/init.ts'))
 
   const cacheFiles = [
-    rootPath() + '/.howl/models.ts',
-    rootPath() + '/.howl/controllers.ts',
-    rootPath() + '/.howl/services.ts',
+    rootPath() + '/.psy/models.ts',
+    rootPath() + '/.psy/controllers.ts',
+    rootPath() + '/.psy/services.ts',
   ]
 
   cacheFiles.forEach(filePath => {

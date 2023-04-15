@@ -1,7 +1,7 @@
 #!/usr/bin/node
 
 // Note:
-// this is a version of the <app-path>/src/.howl/buildGlobals.ts file
+// this is a version of the <app-path>/src/.psy/buildGlobals.ts file
 // adapted specifically to work with the test-app directory, rather
 // than looking to the <project root>/src.o
 //
@@ -44,7 +44,7 @@ export default {
 }
 `
 
-  fs.writeFileSync(rootPath() + `/.howl/${kind}.ts`, content)
+  fs.writeFileSync(rootPath() + `/.psy/${kind}.ts`, content)
 }
 
 async function controllerIndex() {
