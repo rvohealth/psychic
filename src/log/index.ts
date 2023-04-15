@@ -37,7 +37,5 @@ export class Logger {
   }
 }
 
-global.__howl_logger = new Logger()
-const log = global.__howl_logger
-
+const log = new Logger()
 export default log
