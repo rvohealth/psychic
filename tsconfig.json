@@ -1,12 +1,15 @@
 {
+  "ts-node": {
+    "ignore": [],
+    "include": ["src/**/*", "test-app/**/*", "node_modules/dream/src/**/*"]
+  },
   "compilerOptions": {
-    "module": "commonjs",
+    "module": "CommonJS",
     "target": "ESNext",
-    "declaration": true,
     "strict": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
-    "resolveJsonModule": true,
+    // "resolveJsonModule": true,
 
     /* do not require all properties to be initialized in constructor */
     "strictPropertyInitialization": false,
@@ -18,5 +21,6 @@
     "rootDir": "./",
     "outDir": "./dist"
   },
-  "include": ["src/**/*"]
+  "ignore": [],
+  "include": ["src/**/*", "test-app/**/*"]
 }

@@ -68,7 +68,5 @@ export class ControllerHook {
   }
 }
 
-global.__howl_controller_hooks ||= new ControllerHooks()
-
-const controllerHooks = global.__howl_controller_hooks
+const controllerHooks = new ControllerHooks()
 export default controllerHooks

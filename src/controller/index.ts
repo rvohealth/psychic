@@ -178,5 +178,4 @@ export class ControllerSerializerIndex {
   }
 }
 
-global.__howl_controller_serializer_index ||= new ControllerSerializerIndex()
-export const controllerSerializerIndex = global.__howl_controller_serializer_index
+export const controllerSerializerIndex = new ControllerSerializerIndex()

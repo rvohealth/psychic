@@ -140,7 +140,5 @@ export class Background {
   }
 }
 
-global.__howl_background_queue ||= new Background()
-const background = global.__howl_background_queue
-
+const background = new Background()
 export default background
