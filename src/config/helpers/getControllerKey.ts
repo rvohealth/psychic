@@ -1,4 +1,4 @@
-import PsychicDir from '../../helpers/howldir'
+import PsychicDir from '../../helpers/psychicdir'
 import PsychicController from '../../controller'
 
 export default async function getControllerKey(ControllerClass: typeof PsychicController) {

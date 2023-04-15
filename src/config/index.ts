@@ -1,7 +1,7 @@
 import * as fs from 'fs'
 import { Application } from 'express'
 import PsychicController from '../controller'
-import PsychicDir from '../helpers/howldir'
+import PsychicDir from '../helpers/psychicdir'
 import readAppConfig from './helpers/readAppConfig'
 
 export default class PsychicConfig {
