@@ -7,7 +7,7 @@ export default class DBError extends Error {
 
   public get message() {
     return `
-      A Database error occured, causing howl to crash. The message recieved was:
+      A Database error occured, causing psychic to crash. The message recieved was:
         ${this._message}
     `
   }

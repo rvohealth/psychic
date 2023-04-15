@@ -78,7 +78,7 @@ export default class PsychicServer {
       await new Promise(async accept => {
         this.app.listen(port, async () => {
           log.welcome(port)
-          await log.write(`howl dev server started at port ${port}`)
+          await log.write(`psychic dev server started at port ${port}`)
 
           if (withReact) await log.write(`react dev server on port ${reactPort}`)
           accept({})

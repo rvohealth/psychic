@@ -5,7 +5,7 @@ export default () => {
     port: process.env.DB_PORT || 5432,
     username: process.env.DB_USER || 'postgres',
     password: process.env.DB_PASSWORD || '',
-    database: process.env.DB_NAME || 'howl_core_dev',
+    database: process.env.DB_NAME || 'psychic_core_dev',
   }
 
   return {
@@ -15,7 +15,7 @@ export default () => {
 
     test: {
       ...defaults,
-      database: process.env.DB_NAME || 'howl_core_test',
+      database: process.env.DB_NAME || 'psychic_core_test',
     },
 
     production: {

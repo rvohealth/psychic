@@ -1,7 +1,7 @@
 #!/usr/bin/node
 
 import { DreamModel } from 'dream'
-import { PsychicController, pathifyNestedObject } from 'howl'
+import { PsychicController, pathifyNestedObject } from 'psychic'
 import * as fs from 'fs'
 
 export default async function buildGlobals() {

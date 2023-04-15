@@ -7,7 +7,7 @@ export default class RouterError extends HttpError {
 
   public get message() {
     return `
-      A Router error occured, causing howl to crash. The message recieved was:
+      A Router error occured, causing psychic to crash. The message recieved was:
         ${this._message}
     `
   }

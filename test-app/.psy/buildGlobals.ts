@@ -8,7 +8,7 @@
 // It is not meant to be exported out of the core development environment.
 // If you are adding something here that is integral to the functionality
 // of the app, you will also need to write it (or something similar)
-// in the bin/boilerplate/howl/buildGlobals.ts file
+// in the bin/boilerplate/psychic/buildGlobals.ts file
 //
 import { DreamModel } from 'dream'
 import * as fs from 'fs'

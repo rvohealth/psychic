@@ -1,6 +1,6 @@
 import generateDreamContent from '../../../src/helpers/cli/generateDreamContent'
 
-describe('howl generate:model <name> [...attributes]', () => {
+describe('psy generate:model <name> [...attributes]', () => {
   context('when provided with a pascalized table name', () => {
     it('generates a dream model with multiple string fields', async () => {
       const res = generateDreamContent('MealTypes', [], { useUUID: false })

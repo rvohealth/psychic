@@ -81,7 +81,7 @@ export default class Cable {
         log.welcome(port)
 
         await log.write('socket server started')
-        await log.write(`howl dev server started at port ${port}`)
+        await log.write(`psychic dev server started at port ${port}`)
         if (withReact) await log.write(`react server started at port ${reactPort}`)
 
         accept(true)

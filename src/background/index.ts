@@ -25,13 +25,13 @@ export class Background {
     ObjectClass: any,
     method: string,
     {
-      filepath, // filepath means a file within the app that is consuming howl
-      howlpath, // howlpath means a file within the howl infrastructure
+      filepath, // filepath means a file within the app that is consuming psychic
+      psychicpath, // psychicpath means a file within the psychic infrastructure
       importKey,
       args = [],
     }: {
       filepath?: string
-      howlpath?: string
+      psychicpath?: string
       importKey?: string
       args?: any[]
     }
@@ -40,7 +40,7 @@ export class Background {
     this.queue!.add('BackgroundJobQueueStaticJob', {
       className: ObjectClass.name,
       filepath,
-      howlpath,
+      psychicpath,
       importKey,
       method,
       args,
@@ -51,14 +51,14 @@ export class Background {
     ObjectClass: any,
     method: string,
     {
-      filepath, // filepath means a file within the app that is consuming howl
-      howlpath, // howlpath means a file within the howl infrastructure
+      filepath, // filepath means a file within the app that is consuming psychic
+      psychicpath, // psychicpath means a file within the psychic infrastructure
       importKey,
       args = [],
       constructorArgs = [],
     }: {
       filepath?: string
-      howlpath?: string
+      psychicpath?: string
       importKey?: string
       args?: any[]
       constructorArgs?: any[]
@@ -68,7 +68,7 @@ export class Background {
     this.queue!.add('BackgroundJobQueueInstanceJob', {
       className: ObjectClass.name,
       filepath,
-      howlpath,
+      psychicpath,
       importKey,
       method,
       args,
