@@ -33,6 +33,6 @@ function rootPath() {
   if (process.env.CORE_DEVELOPMENT === '1') {
     return `${process.cwd()}/test-app`
   } else {
-    return process.cwd() + '/src'
+    return process.cwd() + '../../src'
   }
 }
