@@ -13,7 +13,7 @@ import setCoreDevelopmentFlag, { coreSuffix } from './cli/helpers/setCoreDevelop
 const program = new Command()
 
 program
-  .command('sync:all')
+  .command('sync:existing')
   .description('generates the .psy folder, which is used by psychic to ingest your app')
   .option('--core', 'sets core to true')
   .action(async () => {
@@ -28,6 +28,20 @@ program
     // this command also ensures that files on your machine are synced over.
     // this behavior should probably be separated out.
     await sspawn(`yarn dream sync:existing`)
+  })
+
+program
+  .command('sync:all')
+  .description('generates the .psy folder, which is used by psychic to ingest your app')
+  .option('--core', 'sets core to true')
+  .action(async () => {
+    try {
+      await fs.statfs('./node_modules/dream/test-app')
+      console.log('test-app still present in dream installation, removing...')
+      await fs.rm('./node_modules/dream/test-app', { recursive: true, force: true })
+    } catch (error) {
+      // intentionally ignore, since we expect this dir to be empty.
+    }
 
     await sspawn(`yarn psy sync:psydir${coreSuffix(program.args)}`)
     // await sspawn(`yarn dream build:all`)
