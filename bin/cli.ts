@@ -27,7 +27,7 @@ program
 
     // this command also ensures that files on your machine are synced over.
     // this behavior should probably be separated out.
-    await sspawn(`yarn psy copy:boilerplate`)
+    await sspawn(`yarn dream sync:existing`)
 
     await sspawn(`yarn psy sync:psydir${coreSuffix(program.args)}`)
     // await sspawn(`yarn dream build:all`)
@@ -135,15 +135,6 @@ program
   )
   .action(async () => {
     await sspawn(`yarn dream db:drop`)
-  })
-
-program
-  .command('copy:boilerplate')
-  .description(
-    'copies a boilerplate template for schema.ts and dream.ts, which are both provided to the dream framework'
-  )
-  .action(async () => {
-    await sspawn(`yarn dream copy:boilerplate`)
   })
 
 program
