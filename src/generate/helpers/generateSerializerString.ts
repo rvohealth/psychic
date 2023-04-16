@@ -15,17 +15,17 @@ export default async function generateSerializerString(controllerName: string, a
 
   if (!attrs.length)
     return `\
-import { HowlSerializer } from 'howl'
+import { PsychicSerializer } from 'psychic'
 
-export default class ${pascalize(pluralize.singular(controllerName))}Serializer extends HowlSerializer {
+export default class ${pascalize(pluralize.singular(controllerName))}Serializer extends PsychicSerializer {
   static {
   }
 }`
 
   return `\
-import { HowlSerializer } from 'howl'
+import { PsychicSerializer } from 'psychic'
 
-export default class ${pascalize(pluralize.singular(controllerName))}Serializer extends HowlSerializer {
+export default class ${pascalize(pluralize.singular(controllerName))}Serializer extends PsychicSerializer {
   static {
     this
       .attributes(

@@ -1,6 +1,6 @@
 import generateSerializerString from '../../../../src/generate/helpers/generateSerializerString'
 
-describe('howl generate:serializer <name> [...attributes]', () => {
+describe('psy generate:serializer <name> [...attributes]', () => {
   context('when provided attributes', () => {
     context('when serializer matches a pluralized version of a model', () => {
       it('generates a serializer adding requested attributes, as well as those on the model discovered', async () => {
@@ -8,9 +8,9 @@ describe('howl generate:serializer <name> [...attributes]', () => {
 
         expect(res).toEqual(
           `\
-import { HowlSerializer } from 'howl'
+import { PsychicSerializer } from 'psychic'
 
-export default class UserSerializer extends HowlSerializer {
+export default class UserSerializer extends PsychicSerializer {
   static {
     this
       .attributes(

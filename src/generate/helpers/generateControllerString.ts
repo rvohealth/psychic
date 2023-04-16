@@ -8,7 +8,7 @@ import getModelKey from '../../config/helpers/getModelKey'
 
 export default async function generateControllerString(controllerName: string, methods: string[] = []) {
   const crudMethods = ['create', 'index', 'show', 'update', 'destroy']
-  const howlImports: string[] = ['HowlController', 'Params']
+  const psyImports: string[] = ['PsychicController', 'Params']
   const additionalImports: string[] = []
   let hasCrudMethod = false
 
@@ -116,11 +116,11 @@ import ${ModelClass.name} from 'app/models/${await getModelKey(ModelClass as Dre
     .map(n => capitalize(n))
     .join('')
   return `\
-import { ${howlImports.join(', ')} } from 'howl'${
+import { ${psyImports.join(', ')} } from 'psychic'${
     !!additionalImports.length ? '\n' + additionalImports.join('\n') : ''
   }
 
-export default class ${pascalize(pluralize(pascalizedControllerName))}Controller extends HowlController {
+export default class ${pascalize(pluralize(pascalizedControllerName))}Controller extends PsychicController {
 ${methodDefs.join('\n\n')}${privateDefs.length ? '\n\n' + privateDefs.join('\n\n') : ''}
 }\
 `

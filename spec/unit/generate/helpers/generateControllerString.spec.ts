@@ -1,6 +1,6 @@
 import generateControllerString from '../../../../src/generate/helpers/generateControllerString'
 
-describe('howl generate:controller <name> [...methods]', () => {
+describe('psy generate:controller <name> [...methods]', () => {
   context('when provided methods', () => {
     context('when controller matches a pluralized version of a model', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', async () => {
@@ -15,10 +15,10 @@ describe('howl generate:controller <name> [...methods]', () => {
 
         expect(res).toEqual(
           `\
-import { HowlController, Params } from 'howl'
+import { PsychicController, Params } from 'psychic'
 import User from 'app/models/user'
 
-export default class UsersController extends HowlController {
+export default class UsersController extends PsychicController {
   public async create() {
     const user = await User.create(this.userParams)
     this.ok(user)
@@ -65,9 +65,9 @@ export default class UsersController extends HowlController {
 
       expect(res).toEqual(
         `\
-import { HowlController, Params } from 'howl'
+import { PsychicController, Params } from 'psychic'
 
-export default class ApiV1UsersController extends HowlController {
+export default class ApiV1UsersController extends PsychicController {
 
 }\
 `

@@ -18,7 +18,7 @@ class Env {
     // if (!process.env.APP_ENCRYPTION_KEY) missingEnvs.push('APP_ENCRYPTION_KEY')
 
     // if (!!missingEnvs.length)
-    //   throw `Must make sure the following env vars are set before starting the howl server: \n${missingEnvs.join(",\n  ")}`
+    //   throw `Must make sure the following env vars are set before starting the psychic server: \n${missingEnvs.join(",\n  ")}`
   }
 }
 

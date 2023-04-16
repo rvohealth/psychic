@@ -28,7 +28,7 @@ export default async function generateSerializer(
   // we don't need this value, just doing it so we can discard the file name and
   // thus only have the filepath left. This helps us handle a case where one wants
   // to generate a nested serializer, like so:
-  //    howl g:serializer api/v1/users
+  //    psy g:serializer api/v1/users
   const serializerActualFilename = serializerPathParts.pop()
 
   const serializerPath = `${serializerBasePath}/${serializerFilename}.ts`

@@ -23,7 +23,7 @@ export default async function generateController(
   // we don't need this value, just doing it so we can discard the file name and
   // thus only have the filepath left. This helps us handle a case where one wants
   // to generate a nested controller, like so:
-  //    howl g:controller api/v1/users
+  //    psy g:controller api/v1/users
   const controllerActualFilename = controllerPathParts.pop()
 
   const controllerPath = `${controllerBasePath}/${controllerFilename}.ts`
