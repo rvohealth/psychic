@@ -18,7 +18,7 @@ export default async function generateResource(
   // await generateModel(modelName, attributes, { rootPath, allowExit: false })
 
   // rebuild the model layer so controller and serializer builders
-  // can read .howl/models.ts and get back the newly-generated model
+  // can read .psy/models.ts and get back the newly-generated model
   console.log('rebuilding paths...')
   await sspawn('yarn build')
 
