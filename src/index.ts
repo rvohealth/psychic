@@ -6,6 +6,7 @@ export {
   dream,
   DreamModel,
   DreamModelInstance,
+  Column,
   BelongsTo,
   HasMany,
   HasOne,
