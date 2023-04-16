@@ -17,7 +17,7 @@ describe('background (app singleton)', () => {
         className: 'User',
         id: user.id,
         method: 'checkPassword',
-        howlpath: undefined,
+        psychicpath: undefined,
         importKey: undefined,
         filepath: 'app/models/user',
         args: ['howyadoin'],

@@ -16,7 +16,7 @@ describe('background (app singleton)', () => {
       expect(background.queue!.add).toHaveBeenCalledWith('BackgroundJobQueueStaticJob', {
         className: 'User',
         method: 'checkPassword',
-        howlpath: undefined,
+        psychicpath: undefined,
         importKey: undefined,
         filepath: 'app/models/user',
         args: ['howyadoin'],
