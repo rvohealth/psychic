@@ -25,6 +25,8 @@ export default class User extends Dream {
   @Column('datetime')
   public updated_at: Date
 
+  public static backgroundTest() {}
+
   @BeforeCreate()
   @BeforeUpdate()
   public async hashPass() {

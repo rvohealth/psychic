@@ -13,7 +13,7 @@ export default class PsychicDir {
   }
 
   public static async loadModels() {
-    _models = (await import(filePath('.dream/sync/models'))).default as {
+    _models = (await import(filePath('../.dream/sync/models'))).default as {
       [key: string]: DreamModel<any, any>
     }
     return _models
