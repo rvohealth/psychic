@@ -25,6 +25,9 @@ program
       // intentionally ignore, since we expect this dir to be empty.
     }
 
+    // this command also ensures that files on your machine are synced over.
+    // this behavior should probably be separated out.
+    await sspawn(`yarn dream copy:boilerplate`)
     await sspawn(`yarn psy sync:psydir${coreSuffix(program.args)}`)
     // await sspawn(`yarn dream build:all`)
   })
