@@ -58,7 +58,7 @@ export default class PsychicController {
       user = null,
     }: {
       config: PsychicConfig
-      user: DreamModel<any, any> | null
+      user?: DreamModel<any, any> | null
     }
   ) {
     this.req = req

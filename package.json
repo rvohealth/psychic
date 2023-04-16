@@ -17,7 +17,7 @@
     "sync": "yarn --cwd=node_modules/dream dream build:all",
     "c": "yarn console",
     "console": "NODE_ENV=development npx ts-node --project ./tsconfig.json ./test-app/conf/repl.ts",
-    "uspec": "yarn build-dev && CORE_DEVELOPMENT=1 jest --config=./spec/unit/jest.config.js --runInBand",
+    "uspec": "yarn build-dev && CORE_DEVELOPMENT=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "postinstall": "rm -rf ./node_modules/dream/test-app && yarn --cwd=node_modules/dream dream copy:boilerplate && yarn --cwd=node_modules/dream build"
   },
   "dependencies": {

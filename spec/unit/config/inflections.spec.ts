@@ -1,12 +1,12 @@
-import HowlConfig from '../../../src/config'
-import HowlServer from '../../../src/server'
+import PsychicConfig from '../../../src/config'
+import PsychicServer from '../../../src/server'
 import * as pluralize from 'pluralize'
 
-describe('HowlConfig', () => {
-  let config: HowlConfig
+describe('PsychicConfig', () => {
+  let config: PsychicConfig
 
   beforeEach(() => {
-    config = new HowlConfig(new HowlServer().app)
+    config = new PsychicConfig(new PsychicServer().app)
   })
 
   it('loads inflections.ts', async () => {

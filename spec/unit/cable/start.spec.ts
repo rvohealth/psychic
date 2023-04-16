@@ -1,14 +1,14 @@
 import * as http from 'http'
 import Cable from '../../../src/cable'
-import HowlServer from '../../../src/server'
+import PsychicServer from '../../../src/server'
 import { Server } from 'http'
 
 describe('cable#start', () => {
-  let server: HowlServer
+  let server: PsychicServer
   let cable: Cable
   let httpServer: any
   beforeEach(async () => {
-    server = new HowlServer()
+    server = new PsychicServer()
     cable = new Cable(server.app)
     httpServer = http.createServer(server.app)
     await cable.connect()
