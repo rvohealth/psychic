@@ -25,7 +25,7 @@ export default class PsychicConfig {
 
   public get root() {
     if (process.env.CORE_DEVELOPMENT === '1') return __dirname + '/../../test-app'
-    return __dirname + '/../../../../../src'
+    return __dirname + '/../../../../src'
   }
 
   public get appPath() {
