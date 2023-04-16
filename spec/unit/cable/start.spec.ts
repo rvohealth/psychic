@@ -35,7 +35,7 @@ describe('cable#start', () => {
     expect(cable.io.on).toHaveBeenCalled()
   })
 
-  context('howl is configured for redis as well', () => {
+  context('psychic is configured for redis as well', () => {
     it('creates additional redis bindings', async () => {
       // TODO: add coverage here.
     })
