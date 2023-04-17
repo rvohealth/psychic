@@ -18,7 +18,7 @@ import '../db/connection'
 ${Object.keys(pathifiedData)
   .filter(fullPath => !/\.js$/.test(fullPath))
   .map(fullPath => {
-    const construct = pathifiedData[fullPath]
+    const construct = (pathifiedData as any)[fullPath]
     return `import ${construct.name} from '../app/${kind}/${fullPath}'`
   })
   .join('\n')}
@@ -26,7 +26,7 @@ ${Object.keys(pathifiedData)
 export default {
   ${Object.keys(pathifiedData)
     .map(fullPath => {
-      const constructor = pathifiedData[fullPath]
+      const constructor = (pathifiedData as any)[fullPath]
       return `'${fullPath}': ${constructor.name},`
     })
     .join('\n  ')}
