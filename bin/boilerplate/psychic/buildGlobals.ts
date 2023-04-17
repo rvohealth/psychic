@@ -15,7 +15,7 @@ async function buildGlobalsFor(kind: string, data: { [key: string]: any }) {
   const pathifiedData = pathifyNestedObject(data)
   const content = `\
 import '../db/connection'
-${Object.keys(pathifiedData)
+${(Object.keys(pathifiedData) as any[])
   .filter(fullPath => !/\.js$/.test(fullPath))
   .map(fullPath => {
     const construct = pathifiedData[fullPath]
@@ -24,7 +24,7 @@ ${Object.keys(pathifiedData)
   .join('\n')}
 
 export default {
-  ${Object.keys(pathifiedData)
+  ${(Object.keys(pathifiedData) as any[])
     .map(fullPath => {
       const constructor = pathifiedData[fullPath]
       return `'${fullPath}': ${constructor.name},`
