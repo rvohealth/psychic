@@ -68,7 +68,7 @@ async function buildRecursiveIndex<T>(kind: string, nestedPath = '') {
 }
 
 function rootPath() {
-  return process.cwd() + '/src'
+  return process.cwd() + '../../src'
 }
 
 buildGlobals()
