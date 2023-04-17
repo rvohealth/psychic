@@ -25,6 +25,7 @@ ${(Object.keys(pathifiedData) as any[])
 
 export default {
   ${(Object.keys(pathifiedData) as any[])
+    .filter(fullPath => /\.ts$/.test(fullPath))
     .map(fullPath => {
       const constructor = (pathifiedData as any)[fullPath]
       return `'${fullPath}': ${constructor.name},`
