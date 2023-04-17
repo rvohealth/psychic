@@ -23,7 +23,7 @@ export default async function buildGlobals() {
 }
 
 async function buildGlobalsFor(kind: string, data: { [key: string]: any }) {
-  const pathifiedData = pathifyNestedObject(data)
+  const pathifiedData = pathifyNestedObject(data) as { [key: string]: any }
   const content = `\
 ${(Object.keys(pathifiedData) as any[])
   .filter(fullPath => !/\.js$/.test(fullPath))
