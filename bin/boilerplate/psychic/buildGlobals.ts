@@ -13,6 +13,7 @@ export default async function buildGlobals() {
 
 async function buildGlobalsFor(kind: string, data: { [key: string]: any }) {
   const pathifiedData = pathifyNestedObject(data) as { [key: string]: any }
+  console.log('DATRA:', pathifiedData)
   const content = `\
 import '../db/connection'
 ${(Object.keys(pathifiedData) as any[])
