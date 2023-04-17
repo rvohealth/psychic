@@ -36,10 +36,10 @@ program
   .option('--core', 'sets core to true')
   .action(async () => {
     const coreDevFlag = setCoreDevelopmentFlag(program.args)
-    const srcDir = coreDevFlag ? 'test-app' : 'src'
+    const srcDir = coreDevFlag ? './test-app' : '../../src/.psy'
     await sspawn(`${coreDevFlag}ts-node ./bin/build-psychic-dir.ts`)
     await sspawn(`yarn build`)
-    await sspawn(`${coreDevFlag}ts-node ./${srcDir}/.psy/buildGlobals.ts`)
+    await sspawn(`${coreDevFlag}ts-node ${srcDir}/.psy/buildGlobals.ts`)
   })
 
 program
