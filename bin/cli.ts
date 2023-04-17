@@ -26,6 +26,7 @@ program
     }
 
     await sspawn(`yarn psy sync:psydir${coreSuffix(program.args)}`)
+    // TODO: figure out why this throws DB error
     // await sspawn(`yarn dream sync:all`)
   })
 
