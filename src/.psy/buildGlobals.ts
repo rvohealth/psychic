@@ -14,7 +14,6 @@ export default async function buildGlobals() {
 async function buildGlobalsFor(kind: string, data: { [key: string]: any }) {
   const pathifiedData = pathifyNestedObject(data)
   const content = `\
-import '../db/connection'
 ${Object.keys(pathifiedData)
   .filter(fullPath => !/\.js$/.test(fullPath))
   .map(fullPath => {
