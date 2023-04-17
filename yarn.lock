@@ -1544,9 +1544,9 @@ dotenv@^16.0.3:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.3.tgz#115aec42bac5053db3c456db30cc243a5a836a07"
   integrity sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==
 
-"dream@https://github.com/avocadojesus/dream.git#4eceb41":
+"dream@https://github.com/avocadojesus/dream.git#4643047":
   version "0.0.0"
-  resolved "https://github.com/avocadojesus/dream.git#4eceb412b9dd80237c3315b4fd95cb94e30373c4"
+  resolved "https://github.com/avocadojesus/dream.git#46430479818919ab9dbdf573ceaa022fe9df6652"
   dependencies:
     "@types/luxon" "^3.3.0"
     "@types/pg" "^8.6.6"

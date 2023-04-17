@@ -26,7 +26,7 @@ program
     }
 
     await sspawn(`yarn psy sync:psydir${coreSuffix(program.args)}`)
-    // await sspawn(`yarn dream build:all`)
+    // await sspawn(`yarn dream sync:all`)
   })
 
 program
@@ -86,33 +86,33 @@ program
   })
 
 program
-  .command('build:types')
-  .alias('build:all')
-  .description('runs yarn dream build:schema, then yarn dream build:associations')
+  .command('sync:types')
+  .alias('sync:all')
+  .description('runs yarn dream sync:schema, then yarn dream sync:associations')
   .option('--core', 'sets core to true')
   .action(async () => {
-    await sspawn(`yarn dream build:schema${coreSuffix(program.args)}`)
-    await sspawn(`yarn dream build:associations${coreSuffix(program.args)}`)
+    await sspawn(`yarn dream sync:schema${coreSuffix(program.args)}`)
+    await sspawn(`yarn dream sync:associations${coreSuffix(program.args)}`)
   })
 
 program
-  .command('build:schema')
+  .command('sync:schema')
   .alias('sync')
   .alias('introspect')
   .description(
     'introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration'
   )
   .action(async () => {
-    await sspawn(`yarn dream build:schema`)
+    await sspawn(`yarn dream sync:schema`)
   })
 
 program
-  .command('build:associations')
+  .command('sync:associations')
   .description(
     'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.'
   )
   .action(async () => {
-    await sspawn(`yarn dream build:associations`)
+    await sspawn(`yarn dream sync:associations`)
   })
 
 program
@@ -144,7 +144,7 @@ program
     // setCoreDevelopmentFlag(program.args)
     // const files = program.args.filter(arg => /\.spec\.ts$/.test(arg))
     // if (process.env.CORE_DEVELOPMENT === '1') {
-    //   await sspawn(`yarn dream build:all --core`)
+    //   await sspawn(`yarn dream sync:all --core`)
     //   await sspawn(`CORE_DEVELOPMENT=1 jest --runInBand --forceExit ${files.join(' ')}`)
     // } else {
     //   throw 'this command is not meant for use outside core development'
