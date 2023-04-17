@@ -13,11 +13,10 @@ export default async function buildGlobals() {
 
 async function buildGlobalsFor(kind: string, data: { [key: string]: any }) {
   const pathifiedData = pathifyNestedObject(data) as { [key: string]: any }
-  console.log('DATRA:', pathifiedData)
   const content = `\
 import '../db/connection'
 ${(Object.keys(pathifiedData) as any[])
-  .filter(fullPath => !/\.js$/.test(fullPath))
+  .filter(fullPath => /\.ts$/.test(fullPath))
   .map(fullPath => {
     const construct = (pathifiedData as any)[fullPath]
     return `import ${construct.name} from '../app/${kind}/${fullPath}'`
