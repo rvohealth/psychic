@@ -8,6 +8,7 @@
   "scripts": {
     "psy": "npx ts-node ./bin/cli.ts",
     "dream": "yarn --cwd=node_modules/dream dream",
+    "dev": "CORE_DEVELOPMENT=1 NODE_ENV=development ts-node ./test-app/main.ts",
     "build": "rm -rf dist && npx tsc",
     "db:create": "yarn dream db:create",
     "db:drop": "yarn dream db:drop",

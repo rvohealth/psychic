@@ -10,7 +10,7 @@ export class Logger {
   }
 
   public puts(text: string, color = 'magentaBright') {
-    console.log('  ' + (colors as any)[color](text).split('\n').join('\n  '))
+    console.log((colors as any)[color](text).split('\n').join('\n  '))
   }
 
   public async write(text: string, color?: string) {

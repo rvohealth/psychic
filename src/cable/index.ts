@@ -1,3 +1,4 @@
+import * as colors from 'colorette'
 import { Application } from 'express'
 import { createClient, RedisClientType } from 'redis'
 import { Server } from 'socket.io'
@@ -80,9 +81,13 @@ export default class Cable {
       this.http.listen(port, async () => {
         log.welcome(port)
 
-        await log.write('socket server started')
-        await log.write(`psychic dev server started at port ${port}`)
-        if (withReact) await log.write(`react server started at port ${reactPort}`)
+        await log.write('\n')
+        await log.write(colors.cyan('socket server started                                      '))
+        await log.write(
+          colors.cyan(`psychic dev server started at port ${colors.bgBlueBright(colors.green(port))}`)
+        )
+        if (withReact) await log.write(`react server started at port ${colors.cyan(reactPort)}`)
+        await log.write('\n')
 
         accept(true)
       })
