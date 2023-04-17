@@ -41,7 +41,7 @@ async function controllerIndex() {
 }
 
 async function modelIndex(nestedPath = '') {
-  return await buildRecursiveIndex<typeof DreamModel<any, any>>('models')
+  return await buildRecursiveIndex<DreamModel<any, any>>('models')
 }
 
 interface RecursiveObject<T> {
