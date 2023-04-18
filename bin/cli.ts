@@ -13,54 +13,18 @@ import setCoreDevelopmentFlag, { coreSuffix } from './cli/helpers/setCoreDevelop
 const program = new Command()
 
 program
-  .command('sync:all')
-  .description('generates the .psy folder, which is used by psychic to ingest your app')
-  .option('--core', 'sets core to true')
+  .command('dream')
+  .description('calls to the underlying dream cli')
   .action(async () => {
-    try {
-      await fs.stat('./node_modules/dream/test-app')
-      console.log('test-app still present in dream installation, removing...')
-      await fs.rm('./node_modules/dream/test-app', { recursive: true, force: true })
-    } catch (error) {
-      // intentionally ignore, since we expect this dir to be empty.
-    }
-
-    await sspawn(`yarn psy sync:psydir${coreSuffix(program.args)}`)
-    // TODO: figure out why this throws DB error
-    // await sspawn(`yarn dream sync:all`)
+    await sspawn(`yarn dream ${program.args.slice(1, program.args.length).join(' ')}`)
   })
 
 program
   .command('clean')
   .description('cleans up existing test infrastructure from psychic and dream installations')
   .action(async () => {
+    console.log('removing test infrastructure...')
     await sspawn(`rm -rf ./node_modules/dream/test-app && rm -rf ./node_modules/psychic/test-app`)
-  })
-
-program
-  .command('sync:psydir')
-  .description('generates the .psy folder, which is used by psychic to ingest your app')
-  .option('--core', 'sets core to true')
-  .action(async () => {
-    const coreDevFlag = setCoreDevelopmentFlag(program.args)
-    const srcDir = coreDevFlag ? './test-app' : '../../src'
-    await sspawn(`${coreDevFlag}ts-node ./bin/build-psychic-dir.ts`)
-    await sspawn(`yarn build`)
-    await sspawn(`${coreDevFlag}ts-node ${srcDir}/.psy/buildGlobals.ts`)
-  })
-
-program
-  .command('copy:models')
-  .description('builds internal index for models')
-  .action(async () => {
-    await sspawn(`npx ts-node ./.dream/bin/copy-models.ts`)
-  })
-
-program
-  .command('dream')
-  .description('calls to the underlying dream cli')
-  .action(async () => {
-    await sspawn(`yarn dream ${program.args.slice(1, program.args.length).join(' ')}`)
   })
 
 program
@@ -94,6 +58,36 @@ program
   })
 
 program
+  .command('sync:all')
+  .description('generates the .psy folder, which is used by psychic to ingest your app')
+  .option('--core', 'sets core to true')
+  .action(async () => {
+    try {
+      await fs.stat('./node_modules/dream/test-app')
+      console.log('test-app still present in dream installation, removing...')
+      await fs.rm('./node_modules/dream/test-app', { recursive: true, force: true })
+    } catch (error) {
+      // intentionally ignore, since we expect this dir to be empty.
+    }
+
+    await sspawn(`yarn psy sync:psydir${coreSuffix(program.args)}`)
+    // TODO: figure out why this throws DB error
+    // await sspawn(`yarn dream sync:all`)
+  })
+
+program
+  .command('sync:psydir')
+  .description('generates the .psy folder, which is used by psychic to ingest your app')
+  .option('--core', 'sets core to true')
+  .action(async () => {
+    const coreDevFlag = setCoreDevelopmentFlag(program.args)
+    const srcDir = coreDevFlag ? './test-app' : '../../src'
+    await sspawn(`${coreDevFlag}ts-node ./bin/build-psychic-dir.ts`)
+    await sspawn(`yarn build`)
+    await sspawn(`${coreDevFlag}ts-node ${srcDir}/.psy/buildGlobals.ts`)
+  })
+
+program
   .command('sync:types')
   .alias('sync:all')
   .description('runs yarn dream sync:schema, then yarn dream sync:associations')
@@ -121,6 +115,13 @@ program
   )
   .action(async () => {
     await sspawn(`yarn dream sync:associations`)
+  })
+
+program
+  .command('copy:models')
+  .description('builds internal index for models')
+  .action(async () => {
+    await sspawn(`npx ts-node ./.dream/bin/copy-models.ts`)
   })
 
 program
