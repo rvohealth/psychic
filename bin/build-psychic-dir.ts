@@ -9,7 +9,6 @@ async function buildPsychicDir() {
 
   // otherwise, we use the buildGlobals provided by our core spec layer
   const boilerplateSubpath = process.env.CORE_DEVELOPMENT === '1' ? 'psychic-core-dev' : 'psychic'
-  console.log('BOILERPLATE PATH', boilerplateSubpath)
 
   fs.writeFileSync(
     rootPath() + '/.psy/buildGlobals.ts',

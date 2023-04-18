@@ -23,8 +23,17 @@ program
   .command('clean')
   .description('cleans up existing test infrastructure from psychic and dream installations')
   .action(async () => {
-    console.log('removing test infrastructure...')
-    await sspawn(`rm -rf ./node_modules/dream/test-app && rm -rf ./node_modules/psychic/test-app`)
+    console.log('removing dream test infrastructure...')
+    await fs.rm(`./node_modules/dream/test-app`, {
+      recursive: true,
+      force: true,
+    })
+
+    console.log('removing psychic test infrastructure...')
+    await fs.rm(`./node_modules/psychic/test-app`, {
+      recursive: true,
+      force: true,
+    })
   })
 
 program
