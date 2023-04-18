@@ -5,6 +5,9 @@
   "author": "avocadojesus <jgarbey@gmail.com>",
   "license": "MIT",
   "private": true,
+  "bin": {
+    "psy": "npx ts-node ./bin/global-cli.ts"
+  },
   "scripts": {
     "psy": "npx ts-node ./bin/cli.ts",
     "dream": "yarn --cwd=node_modules/dream dream",
