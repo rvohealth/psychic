@@ -24,13 +24,13 @@ program
   .description('cleans up existing test infrastructure from psychic and dream installations')
   .action(async () => {
     console.log('removing dream test infrastructure...')
-    await fs.rm(`./node_modules/dream/test-app`, {
+    await fs.rm(`../../node_modules/dream/test-app`, {
       recursive: true,
       force: true,
     })
 
     console.log('removing psychic test infrastructure...')
-    await fs.rm(`./node_modules/psychic/test-app`, {
+    await fs.rm(`../../node_modules/psychic/test-app`, {
       recursive: true,
       force: true,
     })
