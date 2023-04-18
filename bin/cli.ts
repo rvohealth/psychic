@@ -18,7 +18,7 @@ program
   .option('--core', 'sets core to true')
   .action(async () => {
     try {
-      await fs.statfs('./node_modules/dream/test-app')
+      await fs.stat('./node_modules/dream/test-app')
       console.log('test-app still present in dream installation, removing...')
       await fs.rm('./node_modules/dream/test-app', { recursive: true, force: true })
     } catch (error) {
