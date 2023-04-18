@@ -6,12 +6,12 @@
 // https://github.com/tj/commander.js#quick-start
 
 import { Command } from 'commander'
-import yarncmd from './global-cli/yarncmd'
-import dreamcmd from './global-cli/dreamcmd'
-import newPsychicApp from './global-cli/newPsychicApp'
-import generateResource from '../src/generate/resource'
-import sspawn from '../src/helpers/sspawn'
-import generateController from '../src/generate/controller'
+import yarncmd from './yarncmd'
+import dreamcmd from './dreamcmd'
+import newPsychicApp from './newPsychicApp'
+import generateResource from '../generate/resource'
+import sspawn from '../helpers/sspawn'
+import generateController from '../generate/controller'
 
 const program = new Command()
 

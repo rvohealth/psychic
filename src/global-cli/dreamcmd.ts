@@ -1,5 +1,5 @@
 import { Command } from 'commander'
-import sspawn from '../../src/helpers/sspawn'
+import sspawn from '../helpers/sspawn'
 
 export default function dreamcmd(
   program: Command,

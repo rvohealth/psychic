@@ -1,4 +1,4 @@
-import { snakeify } from 'psychic'
+import snakeify from '../helpers/snakeify'
 
 export default class EnvBuilder {
   public static build({ env, appName }: { env: 'test' | 'development' | 'production'; appName: string }) {
