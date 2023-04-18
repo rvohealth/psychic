@@ -31,6 +31,13 @@ program
   })
 
 program
+  .command('clean')
+  .description('cleans up existing test infrastructure from psychic and dream installations')
+  .action(async () => {
+    await sspawn(`rm -rf ./node_modules/dream/test-app && rm -rf ./node_modules/psychic/test-app`)
+  })
+
+program
   .command('sync:psydir')
   .description('generates the .psy folder, which is used by psychic to ingest your app')
   .option('--core', 'sets core to true')
