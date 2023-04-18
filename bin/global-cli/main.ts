@@ -9,9 +9,7 @@ import { Command } from 'commander'
 import yarncmd from './yarncmd'
 import dreamcmd from './dreamcmd'
 import newPsychicApp from './newPsychicApp'
-import generateResource from '../generate/resource'
-import sspawn from '../helpers/sspawn'
-import generateController from '../generate/controller'
+import sspawn from './sspawn'
 
 const program = new Command()
 
@@ -37,8 +35,7 @@ program
   .description('create a controller, model, migration, and serializer for a resource')
   .argument('<name>', 'name of the resource')
   .action(async () => {
-    const [_, name, ...attributes] = program.args
-    await generateResource(name, attributes)
+    await sspawn(`yarn psy g:resource ${program.args.join(' ')}`)
   })
 
 program
@@ -47,8 +44,7 @@ program
   .description('g:controller <name> [...methods] create a new psychic controller')
   .argument('<name>', 'name of the controller')
   .action(async () => {
-    const [_, name, ...methods] = program.args
-    await generateController(name, methods)
+    await sspawn(`yarn psy g:controller ${program.args.join(' ')}`)
   })
 
 program

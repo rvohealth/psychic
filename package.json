@@ -6,10 +6,11 @@
   "license": "MIT",
   "private": true,
   "bin": {
-    "psy": "./dist/src/global-cli/main.js"
+    "psy": "./dist/bin/global-cli/main.js"
   },
   "scripts": {
     "build": "rm -rf dist && npx tsc",
+    "build:cli": "npx tsc -p ./tsconfig.global-cli.json",
     "psy": "npx ts-node ./bin/cli.ts",
     "dream": "yarn --cwd=node_modules/dream dream",
     "dev": "CORE_DEVELOPMENT=1 NODE_ENV=development ts-node ./test-app/main.ts",
@@ -19,7 +20,7 @@
     "sync-core": "yarn psy sync:all --core && yarn dream sync:all",
     "uspec": "yarn sync-core && CORE_DEVELOPMENT=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "fspec": "yarn sync-core && CORE_DEVELOPMENT=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
-    "postinstall": "yarn build"
+    "postinstall": "yarn build:cli"
   },
   "dependencies": {
     "@socket.io/redis-adapter": "^8.1.0",

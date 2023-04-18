@@ -1,8 +1,4 @@
 {
-  "ts-node": {
-    "ignore": [],
-    "include": ["src/**/*", "test-app/**/*", "node_modules/dream/src/**/*"]
-  },
   "compilerOptions": {
     "module": "CommonJS",
     "target": "ESNext",
@@ -22,5 +18,5 @@
     "outDir": "./dist"
   },
   "ignore": [],
-  "include": ["src/**/*", "test-app/**/*", "bin/global-cli"]
+  "include": ["bin/global-cli/**/*"]
 }

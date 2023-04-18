@@ -2,8 +2,8 @@ import * as fs from 'fs'
 import ConfBuilder from './confBuilder'
 import copyRecursive from './copyRecursive'
 import EnvBuilder from './envBuilder'
-import sspawn from '../helpers/sspawn'
-import logo from '../config/logo'
+import sspawn from './sspawn'
+import logo from './logo'
 
 export default async function newHowlApp(
   appName: string,
