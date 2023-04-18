@@ -50,7 +50,6 @@ interface RecursiveObject<T> {
 async function buildRecursiveIndex<T>(kind: string, nestedPath = '') {
   const sanitizedFullNestedPath = nestedPath.replace(/\/$/, '')
   const kindPath = rootPath() + `/app/${kind}${nestedPath ? `/${sanitizedFullNestedPath}` : ''}`
-  console.log('KIND PATH:', kindPath)
   const kindFiles = fs.readdirSync(kindPath)
   const kindIndex: RecursiveObject<T> = {}
 
