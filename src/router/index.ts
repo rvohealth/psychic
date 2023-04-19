@@ -184,6 +184,7 @@ export default class PsychicRouter {
       }
     }
 
+    console.log('DEBUG!!!', this.config)
     const ControllerClass = this.config.controllers[controllerPath]
     if (!ControllerClass) {
       res.status(501).send(`
