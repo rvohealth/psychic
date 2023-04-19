@@ -1,0 +1,26 @@
+{
+  "ts-node": {
+    "ignore": [],
+    "include": ["src/**/*", "test-app/**/*", "node_modules/dream/src/**/*"]
+  },
+  "compilerOptions": {
+    "module": "CommonJS",
+    "target": "ESNext",
+    "strict": true,
+    "noImplicitAny": true,
+    "experimentalDecorators": true,
+    // "resolveJsonModule": true,
+
+    /* do not require all properties to be initialized in constructor */
+    "strictPropertyInitialization": false,
+
+    /* with esnext as target, need to specify this so that Object.defineProperty works */
+    "useDefineForClassFields": false,
+
+    /* rootDir and outDir together help maintain dist/src folder */
+    "rootDir": "./",
+    "outDir": "./dist"
+  },
+  "ignore": [],
+  "include": ["src/**/*", "test-app/**/*", "bin/global-cli"]
+}

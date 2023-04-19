@@ -1,0 +1,5 @@
+models_path: 'test-app/app/models'
+migrations_path: 'test-app/db/migrations'
+associations_path: 'test-app/db/associations.ts'
+schema_path: 'test-app/db/schema.ts'
+dream_config_path: 'test-app/conf/dream.ts'

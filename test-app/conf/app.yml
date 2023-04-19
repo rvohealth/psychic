@@ -1,0 +1,5 @@
+psychic:
+  redis: true
+  ws: true
+  api_only: false
+  use_uuids: true

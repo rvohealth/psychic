@@ -1,9 +1,0 @@
-{
-  "testRegex": "((\\.)(spec))\\.js?$",
-  "setupFiles": [
-    "jest-plugin-context/setup",
-    "./spec/spec-helper.js"
-  ],
-  "setupFilesAfterEnv": ["./spec/spec-config.js"],
-  "resetMocks": true
-}
