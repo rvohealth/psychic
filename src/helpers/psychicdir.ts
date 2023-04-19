@@ -32,7 +32,6 @@ export default class PsychicDir {
       /\.ts$/.test(path)
     )
     for (const controllerPath of controllerPaths) {
-      console.log('CONTROLLER: ', controllerPath, await import(controllerPath))
       const ControllerClass = (await import(controllerPath)).default as typeof PsychicController
       const controllerKey = controllerPath.replace(/^.*app\/controllers\//, '').replace(/\.ts$/, '')
       _controllers[controllerKey] = ControllerClass
