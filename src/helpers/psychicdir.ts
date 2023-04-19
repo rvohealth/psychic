@@ -1,4 +1,6 @@
 import { DreamModel } from 'dream'
+import * as fs from 'fs/promises'
+import * as path from 'path'
 import filePath from '../config/helpers/filePath'
 import PsychicController from '../controller'
 import PsychicSerializer from '../serializer'
@@ -25,8 +27,12 @@ export default class PsychicDir {
   }
 
   public static async loadControllers() {
-    _controllers = (await import(filePath('.psy/controllers'))).default as {
-      [key: string]: typeof PsychicController
+    _controllers = {}
+    const controllerPaths = await getFiles(await filePath('app/controllers'))
+    for (const controllerPath of controllerPaths) {
+      const ControllerClass = (await import(controllerPath)).default as typeof PsychicController
+      const controllerKey = controllerPath.replace(/^.*app\/controllers\//, '').replace(/\.ts$/, '')
+      _controllers[controllerKey] = ControllerClass
     }
     return _controllers
   }
@@ -42,4 +48,15 @@ export default class PsychicDir {
     }
     return _serializers
   }
+}
+
+async function getFiles(dir: string): Promise<string[]> {
+  const dirents = await fs.readdir(dir, { withFileTypes: true })
+  const files = await Promise.all(
+    (dirents as any[]).map(dirent => {
+      const res = path.resolve(dir, dirent.name)
+      return dirent.isDirectory() ? getFiles(res) : res
+    })
+  )
+  return Array.prototype.concat(...files)
 }
