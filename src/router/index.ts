@@ -162,29 +162,6 @@ export default class PsychicRouter {
   ) {
     const [controllerPath, action] = controllerActionString.split('#')
 
-    let user: any = null
-    const authToken = this.authToken(req)
-    if (authToken) {
-      try {
-        const payload = Encrypt.decode(authToken)
-        const id = payload?.id
-        const modelPath = payload?.modelKey
-        if (id && modelPath) {
-          const ModelClass = await getModelByPath(modelPath)
-          if (ModelClass) {
-            user = await ModelClass.find(id)
-          } else {
-            log.error('unable to locate a model class matching the path: ' + modelPath)
-          }
-        } else {
-          log.error('Failed to extract id and modelPath from auth payload: ' + payload)
-        }
-      } catch (error) {
-        log.error('Failed to decode auth token: ' + authToken + '. Error thrown: ' + error)
-      }
-    }
-
-    console.log('DEBUG!!!', this.config, process.cwd())
     const ControllerClass = this.config.controllers[controllerPath]
     if (!ControllerClass) {
       res.status(501).send(`
@@ -194,7 +171,7 @@ export default class PsychicRouter {
       return
     }
 
-    const controller = this._initializeController(ControllerClass, req, res, user)
+    const controller = this._initializeController(ControllerClass, req, res)
 
     if (!(controller as any)[action]) {
       res.status(501).send(`
@@ -231,20 +208,10 @@ export default class PsychicRouter {
     }
   }
 
-  public _initializeController(
-    ControllerClass: typeof PsychicController,
-    req: Request,
-    res: Response,
-    user?: DreamModel<any, any> | null
-  ) {
+  public _initializeController(ControllerClass: typeof PsychicController, req: Request, res: Response) {
     return new ControllerClass(req, res, {
       config: this.config,
-      user: user || null,
     })
-  }
-
-  public authToken(req: Request) {
-    return req.cookies[this.config.authSessionKey]
   }
 }
 

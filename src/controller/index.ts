@@ -48,23 +48,19 @@ export default class PsychicController {
   public req: Request
   public res: Response
   public session: Session
-  public user: DreamModel<any, any> | null
   public config: PsychicConfig
   constructor(
     req: Request,
     res: Response,
     {
       config,
-      user = null,
     }: {
       config: PsychicConfig
-      user?: DreamModel<any, any> | null
     }
   ) {
     this.req = req
     this.res = res
     this.config = config
-    this.user = user
     this.session = new Session(res)
   }
 
@@ -131,10 +127,6 @@ export default class PsychicController {
       if (hook.isStatic) await (this.constructor as any)[hook.methodName]()
       else await (this as any)[hook.methodName]()
     }
-  }
-
-  public authenticate() {
-    if (!this.user) this.unauthorized()
   }
 
   public unprocessableEntity(data: { [key: string]: any } = {}) {
