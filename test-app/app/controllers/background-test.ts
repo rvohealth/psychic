@@ -1,6 +1,6 @@
-import PsychicController from '../../../src/controller'
+import ApplicationController from './application'
 
-export default class BackgroundTestController extends PsychicController {
+export default class BackgroundTestController extends ApplicationController {
   public static async doSomething() {
     this.background('doSomethingInBackground', 1, '2')
   }
