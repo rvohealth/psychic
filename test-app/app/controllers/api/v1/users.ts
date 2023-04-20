@@ -1,6 +1,6 @@
-import PsychicController from '../../../../../src/controller'
+import ApplicationController from '../../application'
 
-export default class ApiV1UsersController extends PsychicController {
+export default class ApiV1UsersController extends ApplicationController {
   public ping() {
     this.ok('hellodoublenestedworld')
   }
