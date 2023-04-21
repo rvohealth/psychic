@@ -15,8 +15,12 @@ export default class PsychicDir {
   }
 
   public static async loadModels() {
-    _models = (await import(filePath('../.dream/sync/models'))).default as {
-      [key: string]: DreamModel<any, any>
+    _models = {}
+    const modelPaths = (await getFiles(await filePath('app/models'))).filter(path => /\.ts$/.test(path))
+    for (const modelPath of modelPaths) {
+      const ModelClass = (await import(modelPath)).default as DreamModel<any, any>
+      const modelKey = modelPath.replace(/^.*app\/models\//, '').replace(/\.ts$/, '')
+      _models[modelKey] = ModelClass
     }
     return _models
   }
