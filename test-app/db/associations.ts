@@ -1,10 +1,10 @@
 export default {
+  "howyadoins": {},
   "users": {}
 }
 
 export interface SyncedAssociations {
-    "users": {
-}
-   
+  "howyadoins": {},
+  "users": {}
 }
   

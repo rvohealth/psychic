@@ -57,7 +57,7 @@ import ${ModelClass.name} from 'app/models/${await getModelKey(ModelClass as Dre
         if (ModelClass)
           return `\
   public async show() {
-    const ${camelize(ModelClass.name)} = await ${ModelClass.name}.findOne({ where: { id: this.params.id } })
+    const ${camelize(ModelClass.name)} = await ${ModelClass.name}.find(this.params.id)
     this.ok(${camelize(ModelClass.name)})
   }`
         else
@@ -69,7 +69,7 @@ import ${ModelClass.name} from 'app/models/${await getModelKey(ModelClass as Dre
         if (ModelClass)
           return `\
   public async update() {
-    const ${camelize(ModelClass.name)} = await ${ModelClass.name}.findOne({ where: { id: this.params.id } })
+    const ${camelize(ModelClass.name)} = await ${ModelClass.name}.find(this.params.id)
     await ${camelize(ModelClass.name)}.update(this.${camelize(ModelClass.name)}Params)
     this.ok(${camelize(ModelClass.name)})
   }`
@@ -82,7 +82,7 @@ import ${ModelClass.name} from 'app/models/${await getModelKey(ModelClass as Dre
         if (ModelClass)
           return `\
   public async destroy() {
-    const ${camelize(ModelClass.name)} = await ${ModelClass.name}.findOne({ where: { id: this.params.id } })
+    const ${camelize(ModelClass.name)} = await ${ModelClass.name}.find(this.params.id)
     await ${camelize(ModelClass.name)}.destroy()
     this.ok()
   }`

@@ -4,11 +4,10 @@ import PsychicDir from '../../helpers/psychicdir'
 import { DreamModel } from 'dream'
 
 export default async function generateSerializerString(controllerName: string, attributes: string[] = []) {
-  const additionalImports: string[] = []
-  let hasCrudMethod = false
   const models = await PsychicDir.loadModels()
+  const relatedModelName = pluralize.singular(pascalize(controllerName))
   const ModelClass = Object.values(models).find(
-    ModelClass => (ModelClass as DreamModel<any, any>).name === pluralize.singular(pascalize(controllerName))
+    ModelClass => (ModelClass as DreamModel<any, any>).name === relatedModelName
   ) as DreamModel<any, any> | null
 
   const attrs = [...(ModelClass as DreamModel<any, any>).columns, ...attributes]

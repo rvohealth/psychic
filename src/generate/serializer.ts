@@ -16,8 +16,9 @@ export default async function generateSerializer(
 ) {
   const thisfs = fs ? fs : await import('fs/promises')
 
+  const srcPath = process.env.CORE_DEVELOPMENT === '1' ? 'test-app' : 'src'
   const serializerString = await generateSerializerString(pluralize(serializerName), attributes)
-  const serializerBasePath = `${rootPath}/src/app/serializers`
+  const serializerBasePath = `${rootPath}/${srcPath}/app/serializers`
   const serializerFilename = `${hyphenize(pluralize(serializerName))}`
   const serializerPathParts = serializerName.split('/')
 
@@ -44,7 +45,7 @@ export default async function generateSerializer(
   await thisfs.writeFile(serializerPath, serializerString)
 
   if (process.env.NODE_ENV !== 'test' && allowExit) {
-    console.log('done!')
+    console.log('done generating serializer')
     process.exit()
   }
 }

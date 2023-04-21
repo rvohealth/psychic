@@ -40,7 +40,7 @@ export default async function generateController(
   await thisfs.writeFile(controllerPath, controllerString)
 
   if (process.env.NODE_ENV !== 'test' && allowExit) {
-    console.log('done!')
+    console.log('done generating controller')
     process.exit()
   }
 }

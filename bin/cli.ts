@@ -8,7 +8,10 @@
 import { Command } from 'commander'
 import * as fs from 'fs/promises'
 import sspawn from '../src/helpers/sspawn'
+import generateResource from '../src/generate/resource'
 import setCoreDevelopmentFlag, { coreSuffix } from './cli/helpers/setCoreDevelopmentFlag'
+import generateSerializer from '../src/generate/serializer'
+import generateController from '../src/generate/controller'
 
 const program = new Command()
 
@@ -41,7 +44,7 @@ program
   .alias('generate:model')
   .alias('g:model')
   .alias('g:dream')
-  .description('generate dream <name> [...attributes] create a new dream')
+  .description('generate:model <name> [...attributes] create a new dream')
   .argument('<name>', 'name of the dream')
   .action(async () => {
     const [_, name, ...attributes] = program.args
@@ -56,6 +59,49 @@ program
   .action(async () => {
     const [_, name] = program.args
     await sspawn(`yarn dream g:migration ${name}`)
+  })
+
+program
+  .command('generate:resource')
+  .alias('g:resource')
+  .description(
+    'generate:resource <name> [...attributes] create a new dream, migration, controller, and serializer'
+  )
+  .argument('<name>', 'name of the migration')
+  .option('--core', 'sets core to true')
+  .action(async () => {
+    const [_, name, ...attributes] = program.args
+    await generateResource(name, attributes)
+  })
+
+program
+  .command('generate:controller')
+  .alias('g:controller')
+  .description(
+    'generate:controller <name> [...methods] create a new controller, autodefining method stubs for passed methods'
+  )
+  .argument('<name>', 'name of the migration')
+  .option('--core', 'sets core to true')
+  .action(async () => {
+    const [_, name, ...methods] = program.args
+    await generateController(
+      name,
+      methods.filter(method => !['--core'].includes(method))
+    )
+  })
+
+program
+  .command('generate:serializer')
+  .alias('g:serializer')
+  .description('generate:serializer <name> [...attributes] create a new serializer')
+  .argument('<name>', 'name of the migration')
+  .option('--core', 'sets core to true')
+  .action(async () => {
+    const [_, name, ...attributes] = program.args
+    await generateSerializer(
+      name,
+      attributes.filter(attr => !['--core'].includes(attr))
+    )
   })
 
 program

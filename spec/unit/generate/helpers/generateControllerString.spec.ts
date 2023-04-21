@@ -30,18 +30,18 @@ export default class UsersController extends PsychicController {
   }
 
   public async show() {
-    const user = await User.findOne({ where: { id: this.params.id } })
+    const user = await User.find(this.params.id)
     this.ok(user)
   }
 
   public async update() {
-    const user = await User.findOne({ where: { id: this.params.id } })
+    const user = await User.find(this.params.id)
     await user.update(this.userParams)
     this.ok(user)
   }
 
   public async destroy() {
-    const user = await User.findOne({ where: { id: this.params.id } })
+    const user = await User.find(this.params.id)
     await user.destroy()
     this.ok()
   }
