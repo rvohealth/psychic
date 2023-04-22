@@ -138,7 +138,6 @@ program
     const coreDevFlag = setCoreDevelopmentFlag(program.args)
     const srcDir = coreDevFlag ? './test-app' : '../../src'
     await sspawn(`${coreDevFlag}ts-node ./bin/build-psychic-dir.ts`)
-    await sspawn(`yarn build`)
     await sspawn(`${coreDevFlag}ts-node ${srcDir}/.psy/buildGlobals.ts`)
   })
 
