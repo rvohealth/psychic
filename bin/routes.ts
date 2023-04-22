@@ -2,14 +2,15 @@ import env from '../src/env'
 import PsychicServer from '../src/server'
 
 env.load()
+
+if (process.env.CORE_DEVELOPMENT === '1') {
+} else {
+  process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/../../src'
+}
+
 ;(async function () {
   const server = new PsychicServer()
   await server.boot()
-
-  if (process.env.CORE_DEVELOPMENT === '1') {
-  } else {
-    process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/../../src'
-  }
 
   const routes = await server.routes()
   routes.forEach(route => {
