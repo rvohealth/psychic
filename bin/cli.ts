@@ -173,6 +173,17 @@ program
   })
 
 program
+  .command('routes')
+  .description(
+    'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.'
+  )
+  .option('--core', 'sets core to true')
+  .action(async () => {
+    const coreDevFlag = setCoreDevelopmentFlag(program.args)
+    await sspawn(`${coreDevFlag}ts-node ./bin/routes.ts`)
+  })
+
+program
   .command('copy:models')
   .description('builds internal index for models')
   .action(async () => {

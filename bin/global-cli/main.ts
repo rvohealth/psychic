@@ -65,6 +65,14 @@ program
     await sspawn(`yarn dream g:migration ${program.args.join(' ')}`)
   })
 
+program
+  .command('routes')
+  .alias('routes:list')
+  .description('lists the routes known by your application')
+  .action(async () => {
+    await sspawn(`yarn psy routes`)
+  })
+
 dreamcmd(program, 'db:create', 'creates the database')
 dreamcmd(program, 'db:drop', 'drops the database')
 dreamcmd(program, 'db:migrate', 'runs migrations')

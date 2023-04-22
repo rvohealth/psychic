@@ -21,10 +21,12 @@ export default class PsychicServer {
     this.config = new PsychicConfig(this.app)
   }
 
-  public get routes() {
-    return (this.app._router.stack as any[])
-      .filter(r => r.route)
-      .flatMap(r => Object.keys(r.route.methods).map(key => `${key.toUpperCase()} ${r.route.path}`))
+  public async routes() {
+    const r = new PsychicRouter(this.app, this.config)
+    const routesPath = this.config.root + '/conf/routes.ts'
+    const routesCB = (await import(routesPath)).default
+    routesCB(r)
+    return r.routes
   }
 
   public async boot() {
@@ -101,7 +103,7 @@ export default class PsychicServer {
   private async buildRoutes() {
     const r = new PsychicRouter(this.app, this.config)
     const routesPath = this.config.root + '/conf/routes.ts'
-    const routes = (await import(routesPath)).default
-    routes(r)
+    const routesCB = (await import(routesPath)).default
+    routesCB(r)
   }
 }

@@ -15,6 +15,7 @@ import { DreamModel, ValidationError } from 'dream'
 export default class PsychicRouter {
   public app: Application
   public config: PsychicConfig
+  public routes: RouteConfig[] = []
   protected currentNamespaces: string[] = []
   constructor(app: Application, config: PsychicConfig) {
     this.app = app
@@ -53,6 +54,11 @@ export default class PsychicRouter {
   public crud(httpMethod: HttpMethod, path: string, controllerActionString: string) {
     const fullPath = this.prefixWithNamespaces(path)
     const fullControllerActionString = this.prefixWithNamespaces(controllerActionString)
+    this.routes.push({
+      httpMethod,
+      path,
+      controllerActionString,
+    })
     this.app[httpMethod](routePath(fullPath), async (req, res) => {
       await this.handle(fullControllerActionString, { req, res })
     })
@@ -234,4 +240,10 @@ export class PsychicNestedRouter extends PsychicRouter {
   public get routingMechanism() {
     return this.router
   }
+}
+
+export interface RouteConfig {
+  controllerActionString: string
+  path: string
+  httpMethod: string
 }
