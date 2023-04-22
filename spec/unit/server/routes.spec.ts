@@ -5,7 +5,15 @@ describe('PsychicServer', () => {
     it('can direct delete requests to controller', async () => {
       const server = new PsychicServer()
       await server.boot()
-      expect(server.routes).toContain('GET /ping')
+      expect(await server.routes()).toEqual(
+        expect.arrayContaining([
+          expect.objectContaining({
+            httpMethod: 'get',
+            path: 'ping',
+            controllerActionString: 'users#ping',
+          }),
+        ])
+      )
     })
   })
 })
