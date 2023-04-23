@@ -97,7 +97,7 @@ program
 
     if (process.env.CORE_DEVELOPMENT === '1') {
     } else {
-      process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/../../src'
+      process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/src'
     }
 
     await generateController(
