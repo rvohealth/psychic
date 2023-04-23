@@ -7,7 +7,7 @@ export default async function generateSerializer(
   serializerName: string,
   attributes: string[],
   {
-    rootPath = process.cwd(),
+    rootPath = process.env.CORE_DEVELOPMENT === '1' ? process.cwd() : process.cwd() + '/../..',
     allowExit = true,
   }: {
     rootPath?: string
