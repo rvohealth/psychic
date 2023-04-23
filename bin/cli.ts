@@ -94,6 +94,12 @@ program
   .option('--core', 'sets core to true')
   .action(async () => {
     const [_, name, ...methods] = program.args
+
+    if (process.env.CORE_DEVELOPMENT === '1') {
+    } else {
+      process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/../../src'
+    }
+
     await generateController(
       name,
       methods.filter(method => !['--core'].includes(method))
