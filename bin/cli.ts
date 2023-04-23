@@ -63,6 +63,12 @@ program
   .action(async () => {
     const [_, name] = program.args
     await sspawn(`yarn dream g:migration ${name}`)
+
+    if (process.env.CORE_DEVELOPMENT === '1') {
+      await sspawn(`yarn dream g:migration ${name}`)
+    } else {
+      await sspawn(`yarn --cwd=../../node_modules/dream dream g:migration ${name}`)
+    }
   })
 
 program
