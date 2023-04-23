@@ -21,6 +21,7 @@ export default async function generateResource(
   await sspawn('yarn --cwd=../../node_modules/dream dream db:migrate')
 
   if (args.includes('--core')) {
+    console.log('--core argument provided, setting now')
     process.env.CORE_DEVELOPMENT = '1'
   }
 
