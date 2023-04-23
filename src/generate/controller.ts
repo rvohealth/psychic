@@ -7,7 +7,7 @@ export default async function generateController(
   controllerName: string,
   methods: string[],
   {
-    rootPath = process.cwd(),
+    rootPath = process.env.CORE_DEVELOPMENT === '1' ? process.cwd() : process.cwd() + '/../..',
     allowExit = true,
   }: {
     rootPath?: string
