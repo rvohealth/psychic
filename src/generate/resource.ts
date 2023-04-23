@@ -7,7 +7,7 @@ export default async function generateResource(
   modelName: string,
   args: string[],
   {
-    rootPath = process.cwd(),
+    rootPath = process.env.CORE_DEVELOPMENT === '1' ? process.cwd() : process.cwd() + '/../..',
   }: {
     rootPath?: string
   } = {}

@@ -48,7 +48,11 @@ program
   .argument('<name>', 'name of the dream')
   .action(async () => {
     const [_, name, ...attributes] = program.args
-    await sspawn(`yarn dream g:model ${name} ${attributes.join(' ')}`)
+    if (process.env.CORE_DEVELOPMENT === '1') {
+      await sspawn(`yarn dream g:model ${name} ${attributes.join(' ')}`)
+    } else {
+      await sspawn(`yarn --cwd=../../node_modules/dream dream g:model ${name} ${attributes.join(' ')}`)
+    }
   })
 
 program
