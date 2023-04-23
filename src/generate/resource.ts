@@ -13,12 +13,12 @@ export default async function generateResource(
   } = {}
 ) {
   const attributes = args.filter(attr => !['--core'].includes(attr))
-  await sspawn(`yarn dream g:model ${modelName} ${attributes.join(' ')}`)
+  await sspawn(`yarn --cwd=../../node_modules/dream dream g:model ${modelName} ${attributes.join(' ')}`)
 
   // rebuild the model layer so controller and serializer builders
   // can read .psy/models.ts and get back the newly-generated model
   console.log('running migrations...')
-  await sspawn('yarn dream db:migrate')
+  await sspawn('yarn --cwd=../../node_modules/dream dream db:migrate')
 
   if (args.includes('--core')) {
     process.env.CORE_DEVELOPMENT = '1'
