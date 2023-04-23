@@ -16,7 +16,7 @@ export default async function generateController(
 ) {
   const thisfs = fs ? fs : await import('fs/promises')
   const controllerString = await generateControllerString(pluralize(controllerName), methods)
-  const srcPath = process.env.CORE_DEVELOPMENT === '1' ? 'test-app' : 'src'
+  const srcPath = process.env.CORE_DEVELOPMENT === '1' ? 'test-app' : '../../src'
   const controllerBasePath = `${rootPath}/${srcPath}/app/controllers`
   const controllerFilename = `${hyphenize(pluralize(controllerName))}`
   const controllerPathParts = controllerName.split('/')
