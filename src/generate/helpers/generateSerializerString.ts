@@ -11,7 +11,7 @@ export default async function generateSerializerString(controllerName: string, a
     ModelClass => (ModelClass as DreamModel<any, any>).name === relatedModelName
   ) as DreamModel<any, any> | null
 
-  const attrs = [...(ModelClass as DreamModel<any, any>).columns, ...attributes]
+  const attrs = [...((ModelClass as DreamModel<any, any>)?.columns || []), ...attributes]
 
   if (!attrs.length)
     return `\
