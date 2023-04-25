@@ -5,7 +5,6 @@ import { DreamModel } from 'dream'
 
 export default async function generateSerializerString(controllerName: string, attributes: string[] = []) {
   const models = await PsychicDir.loadModels()
-  console.log('DEBUG MODELS', models)
   const relatedModelName = pluralize.singular(pascalize(controllerName))
   const ModelClass = Object.values(models).find(
     ModelClass => (ModelClass as DreamModel<any, any>).name === relatedModelName

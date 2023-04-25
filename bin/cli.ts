@@ -23,6 +23,20 @@ program
   })
 
 program
+  .command('spec')
+  .description('runs all specs if no spec is provided. If a spec is provided, it will run that spec.')
+  .action(async () => {
+    const [_, file] = program.args
+    if (!file) {
+      await sspawn(`yarn uspec && yarn fspec`)
+    } else if (/spec\/features\//.test(file)) {
+      await sspawn(`yarn fspec ${file}`)
+    } else {
+      await sspawn(`yarn uspec ${file}`)
+    }
+  })
+
+program
   .command('clean')
   .description('cleans up existing test infrastructure from psychic and dream installations')
   .action(async () => {
