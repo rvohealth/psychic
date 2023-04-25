@@ -16,6 +16,7 @@
     "db:create": "yarn dream db:create",
     "db:drop": "yarn dream db:drop",
     "db:migrate": "yarn dream db:migrate",
+    "console": "yarn psy console --core",
     "sync-core": "yarn psy sync:all --core && yarn dream sync:models",
     "uspec": "yarn sync-core && CORE_DEVELOPMENT=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "fspec": "yarn sync-core && CORE_DEVELOPMENT=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit"
