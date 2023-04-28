@@ -1,10 +1,12 @@
 export default {
-  "howyadoins": {},
   "users": {}
 }
 
 export interface SyncedAssociations {
-  "howyadoins": {},
   "users": {}
+}
+
+export interface SyncedBelongsToAssociations {
+  "users": false
 }
   

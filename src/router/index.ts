@@ -8,9 +8,8 @@ import UnprocessableEntity from '../error/http/unprocessable-entity'
 import NotFound from '../error/http/not-found'
 import PsychicConfig from '../config'
 import log from '../log'
-import getModelByPath from '../config/helpers/getModelByPath'
 import PsychicController from '../controller'
-import { DreamModel, ValidationError } from 'dream'
+import { ValidationError } from 'dream'
 
 export default class PsychicRouter {
   public app: Application

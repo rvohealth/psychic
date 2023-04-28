@@ -3,7 +3,7 @@ import pascalize from '../../../src/helpers/pascalize'
 import camelize from '../../../src/helpers/camelize'
 import PsychicDir from '../../../src/helpers/psychicdir'
 import capitalize from '../../../src/helpers/capitalize'
-import { DreamModel } from 'dream'
+import { Dream } from 'dream'
 import getModelKey from '../../config/helpers/getModelKey'
 
 export default async function generateControllerString(controllerName: string, methods: string[] = []) {
@@ -14,13 +14,13 @@ export default async function generateControllerString(controllerName: string, m
 
   const models = await PsychicDir.loadModels()
   const ModelClass = Object.values(models).find(
-    ModelClass => (ModelClass as DreamModel<any, any>).name === pluralize.singular(pascalize(controllerName))
-  ) as DreamModel<any, any> | null
+    ModelClass => (ModelClass as typeof Dream).name === pluralize.singular(pascalize(controllerName))
+  ) as typeof Dream | null
 
   if (ModelClass)
     additionalImports.push(
       `\
-import ${ModelClass.name} from 'app/models/${await getModelKey(ModelClass as DreamModel<any, any>)}'`
+import ${ModelClass.name} from 'app/models/${await getModelKey(ModelClass as typeof Dream)}'`
     )
 
   const methodDefs = methods.map(methodName => {
@@ -104,7 +104,7 @@ import ${ModelClass.name} from 'app/models/${await getModelKey(ModelClass as Dre
     privateDefs.push(
       `\
   private get ${singularName}Params() {
-    return Params.restrict(this.params?.${singularName}, [${ModelClass.columns
+    return Params.restrict(this.params?.${singularName}, [${ModelClass.columns()
         .map(attr => `'${attr}'`)
         .join(', ')}])
   }`

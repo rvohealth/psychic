@@ -2,7 +2,7 @@ import { Job, Queue, Worker } from 'bullmq'
 import filePath from '../config/helpers/filePath'
 import redisOptions from '../config/helpers/redisOptions'
 import readAppConfig from '../config/helpers/readAppConfig'
-import { DreamModel, DreamModelInstance } from 'dream'
+import { Dream } from 'dream'
 import getModelKey from '../config/helpers/getModelKey'
 
 export class Background {
@@ -77,7 +77,7 @@ export class Background {
   }
 
   public async modelInstanceMethod(
-    modelInstance: DreamModelInstance<any, any>,
+    modelInstance: Dream,
     method: string,
     {
       importKey,
@@ -88,7 +88,7 @@ export class Background {
     }
   ) {
     await this.connect()
-    const modelPath = await getModelKey(modelInstance.constructor as DreamModel<any, any>)
+    const modelPath = await getModelKey(modelInstance.constructor as typeof Dream)
     this.queue!.add('BackgroundJobQueueModelInstanceJob', {
       className: modelInstance.constructor.name,
       id: modelInstance.primaryKeyValue,
@@ -125,9 +125,7 @@ export class Background {
 
       case 'BackgroundJobQueueModelInstanceJob':
         if (filepath) {
-          const DreamModelClass = (await import(filePath(filepath)))?.default as
-            | DreamModel<any, any>
-            | undefined
+          const DreamModelClass = (await import(filePath(filepath)))?.default as typeof Dream | undefined
           if (!DreamModelClass) return
 
           const modelInstance = await DreamModelClass.find(id)

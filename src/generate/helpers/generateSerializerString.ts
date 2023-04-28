@@ -1,16 +1,16 @@
 import * as pluralize from 'pluralize'
 import pascalize from '../../helpers/pascalize'
 import PsychicDir from '../../helpers/psychicdir'
-import { DreamModel } from 'dream'
+import { Dream } from 'dream'
 
 export default async function generateSerializerString(controllerName: string, attributes: string[] = []) {
   const models = await PsychicDir.loadModels()
   const relatedModelName = pluralize.singular(pascalize(controllerName))
   const ModelClass = Object.values(models).find(
-    ModelClass => (ModelClass as DreamModel<any, any>).name === relatedModelName
-  ) as DreamModel<any, any> | null
+    ModelClass => (ModelClass as typeof Dream).name === relatedModelName
+  ) as typeof Dream | null
 
-  const attrs = [...((ModelClass as DreamModel<any, any>)?.columns || []), ...attributes]
+  const attrs = [...((ModelClass as typeof Dream)?.columns() || []), ...attributes]
 
   if (!attrs.length)
     return `\

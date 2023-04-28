@@ -10,7 +10,7 @@
 // of the app, you will also need to write it (or something similar)
 // in the bin/boilerplate/psychic/buildGlobals.ts file
 //
-import { DreamModel } from 'dream'
+import { Dream } from 'dream'
 import * as fs from 'fs'
 import PsychicController from '../../src/controller'
 import pathifyNestedObject from '../../src/helpers/pathifyNestedObject'
@@ -52,7 +52,7 @@ async function controllerIndex() {
 }
 
 async function modelIndex(nestedPath = '') {
-  return await buildRecursiveIndex<DreamModel<any, any>>('models')
+  return await buildRecursiveIndex<Dream>('models')
 }
 
 interface RecursiveObject<T> {

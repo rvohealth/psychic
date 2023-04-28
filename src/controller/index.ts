@@ -1,4 +1,4 @@
-import { DreamModel } from 'dream'
+import { Dream } from 'dream'
 import { Request, Response } from 'express'
 import Forbidden from '../error/http/forbidden'
 import Unauthorized from '../error/http/unauthorized'
@@ -25,7 +25,7 @@ export default class PsychicController {
     return this
   }
 
-  public static serializes(ModelClass: DreamModel<any, any>) {
+  public static serializes(ModelClass: typeof Dream) {
     return {
       with: (SerializerClass: typeof PsychicSerializer) => {
         controllerSerializerIndex.add(this, SerializerClass, ModelClass)
@@ -79,7 +79,7 @@ export default class PsychicController {
   public async startSession(user: any) {
     return this.cookie(this.config.authSessionKey, {
       id: user.id,
-      modelKey: await getModelKey(user.constructor as DreamModel<any, any>),
+      modelKey: await getModelKey(user.constructor as typeof Dream),
     })
   }
 
@@ -147,17 +147,17 @@ export default class PsychicController {
 }
 
 export class ControllerSerializerIndex {
-  public associations: [typeof PsychicController, typeof PsychicSerializer, DreamModel<any, any>][] = []
+  public associations: [typeof PsychicController, typeof PsychicSerializer, typeof Dream][] = []
 
   public add(
     ControllerClass: typeof PsychicController,
     SerializerClass: typeof PsychicSerializer,
-    ModelClass: DreamModel<any, any>
+    ModelClass: typeof Dream
   ) {
     this.associations.push([ControllerClass, SerializerClass, ModelClass])
   }
 
-  public lookupModel(ControllerClass: typeof PsychicController, ModelClass: DreamModel<any, any>) {
+  public lookupModel(ControllerClass: typeof PsychicController, ModelClass: typeof Dream) {
     return this.associations.find(
       association => association[0] === ControllerClass && association[2] === ModelClass
     )

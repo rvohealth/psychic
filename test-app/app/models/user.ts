@@ -1,8 +1,10 @@
-import { BeforeCreate, BeforeUpdate, Column, Validates, dream } from 'dream'
+import { Dream, BeforeCreate, BeforeUpdate, Column, Validates } from 'dream'
 import Hash from '../../../src/encryption/hash'
-
-const Dream = dream('users')
 export default class User extends Dream {
+  public get table() {
+    return 'users' as const
+  }
+
   @Column('number')
   public id: number
 

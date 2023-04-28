@@ -1,6 +1,6 @@
 #!/usr/bin/node
 
-import { DreamModel } from 'dream'
+import { Dream } from 'dream'
 import { PsychicController, pathifyNestedObject } from 'psychic'
 import * as fs from 'fs'
 
@@ -40,7 +40,7 @@ async function controllerIndex() {
 }
 
 async function modelIndex(nestedPath = '') {
-  return await buildRecursiveIndex<DreamModel<any, any>>('models')
+  return await buildRecursiveIndex<typeof Dream>('models')
 }
 
 interface RecursiveObject<T> {
