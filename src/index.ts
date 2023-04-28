@@ -3,7 +3,7 @@ export const pluralize = _pluralize
 
 export {
   db,
-  dream,
+  Dream,
   Column,
   BelongsTo,
   HasMany,
