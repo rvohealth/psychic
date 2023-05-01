@@ -104,7 +104,7 @@ import ${ModelClass.name} from 'app/models/${await getModelKey(ModelClass as typ
     privateDefs.push(
       `\
   private get ${singularName}Params() {
-    return Params.restrict(this.params?.${singularName}, [${ModelClass.columns()
+    return Params.restrict(this.params?.${singularName}, [${(ModelClass.columns() as string[])
         .map(attr => `'${attr}'`)
         .join(', ')}])
   }`

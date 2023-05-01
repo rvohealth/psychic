@@ -1,31 +1,22 @@
-import { Dream, BeforeCreate, BeforeUpdate, Column, Validates } from 'dream'
+import { Dream, BeforeCreate, BeforeUpdate, Validates } from 'dream'
 import Hash from '../../../src/encryption/hash'
 export default class User extends Dream {
   public get table() {
     return 'users' as const
   }
 
-  @Column('number')
   public id: number
+  public name: string
+  public created_at: Date
+  public updated_at: Date
 
   @Validates('contains', '@')
   @Validates('presence')
-  @Column('string')
   public email: string
 
-  @Column('string')
-  public name: string
-
   @Validates('length', { min: 4, max: 18 })
-  @Column('string')
   public password_digest: string
   public password?: string | null
-
-  @Column('datetime')
-  public created_at: Date
-
-  @Column('datetime')
-  public updated_at: Date
 
   public static backgroundTest() {}
 

@@ -10,7 +10,7 @@ export default async function generateSerializerString(controllerName: string, a
     ModelClass => (ModelClass as typeof Dream).name === relatedModelName
   ) as typeof Dream | null
 
-  const attrs = [...((ModelClass as typeof Dream)?.columns() || []), ...attributes]
+  const attrs = [...((ModelClass as typeof Dream)?.columns() || []), ...attributes] as string[]
 
   if (!attrs.length)
     return `\
