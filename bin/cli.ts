@@ -27,12 +27,13 @@ program
   .description('runs all specs if no spec is provided. If a spec is provided, it will run that spec.')
   .action(async () => {
     const [_, file] = program.args
+    const cwdStr = program.args.includes('--core') ? ' ' : ' --cwd=../../ '
     if (!file) {
-      await sspawn(`yarn uspec && yarn fspec`)
+      await sspawn(`yarn${cwdStr}uspec && yarn${cwdStr}fspec`)
     } else if (/spec\/features\//.test(file)) {
-      await sspawn(`yarn fspec ${file}`)
+      await sspawn(`yarn${cwdStr}fspec ${file}`)
     } else {
-      await sspawn(`yarn uspec ${file}`)
+      await sspawn(`yarn${cwdStr}uspec ${file}`)
     }
   })
 
