@@ -244,24 +244,6 @@ program
   })
 
 program
-  .command('spec')
-  .description(
-    'copies a boilerplate template for schema.ts and dream.ts, which are both provided to the dream framework'
-  )
-  .option('--core', 'sets core to true')
-  .action(async () => {
-    console.log(program.args)
-    // setCoreDevelopmentFlag(program.args)
-    // const files = program.args.filter(arg => /\.spec\.ts$/.test(arg))
-    // if (process.env.CORE_DEVELOPMENT === '1') {
-    //   await sspawn(`yarn dream sync:all --core`)
-    //   await sspawn(`CORE_DEVELOPMENT=1 jest --runInBand --forceExit ${files.join(' ')}`)
-    // } else {
-    //   throw 'this command is not meant for use outside core development'
-    // }
-  })
-
-program
   .command('console')
   .description('initiates a repl, loading the models from the development test-app into scope for easy use')
   .option('--core', 'sets core to true')
