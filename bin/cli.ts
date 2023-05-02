@@ -111,7 +111,6 @@ program
 
     if (process.env.CORE_DEVELOPMENT === '1') {
     } else {
-      console.log(`SETTING OVERRIDDEN_ROOT_PATH to ${process.cwd() + '/../../src'}`)
       process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/../../src'
     }
 
@@ -132,7 +131,6 @@ program
 
     if (process.env.CORE_DEVELOPMENT === '1') {
     } else {
-      console.log(`SETTING OVERRIDDEN_ROOT_PATH to ${process.cwd() + '/../../src'}`)
       process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/../../src'
     }
 
