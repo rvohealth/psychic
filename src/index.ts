@@ -4,7 +4,6 @@ export const pluralize = _pluralize
 export {
   db,
   Dream,
-  Column,
   BelongsTo,
   HasMany,
   HasOne,
