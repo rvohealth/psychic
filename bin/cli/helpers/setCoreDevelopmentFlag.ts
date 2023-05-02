@@ -8,5 +8,5 @@ export default function setCoreDevelopmentFlag(programArgs: string[]) {
 }
 
 export function coreSuffix(programArgs: string[]) {
-  return setCoreDevelopmentFlag(programArgs) ? ' --core' : ''
+  return programArgs.includes('--core') ? ' --core' : ''
 }
