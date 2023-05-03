@@ -4,3 +4,4 @@ dist
 .dream
 logs/!.gitignore
 test-app/logs/*
+.node-version
