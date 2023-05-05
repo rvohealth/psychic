@@ -15,9 +15,9 @@ export default class UserSerializer extends PsychicSerializer {
     this
       .attributes(
         'id',
-        'name',
         'email',
         'password_digest',
+        'name',
         'created_at',
         'updated_at',
         'logged_in_at'

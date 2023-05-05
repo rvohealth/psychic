@@ -32,9 +32,7 @@ export default class PsychicDir {
 
   public static async loadControllers() {
     _controllers = {}
-    const controllerPaths = (await getFiles(await filePath('app/controllers'))).filter(path =>
-      /\.ts$/.test(path)
-    )
+    const controllerPaths = (await getFiles(filePath('app/controllers'))).filter(path => /\.ts$/.test(path))
     for (const controllerPath of controllerPaths) {
       const ControllerClass = (await import(controllerPath)).default as typeof PsychicController
       const controllerKey = controllerPath.replace(/^.*app\/controllers\//, '').replace(/\.ts$/, '')

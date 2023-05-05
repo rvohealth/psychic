@@ -1,13 +1,13 @@
-import ApiUsersController from '../app/controllers/api/users'
-import ApiV1UsersController from '../app/controllers/api/v1/users'
-import ApplicationController from '../app/controllers/application'
-import BackgroundTestController from '../app/controllers/background-test'
-import UsersController from '../app/controllers/users'
+import ApiUsers from '../app/controllers/Api/Users'
+import ApiV1Users from '../app/controllers/Api/V1/Users'
+import Application from '../app/controllers/Application'
+import BackgroundTest from '../app/controllers/BackgroundTest'
+import Users from '../app/controllers/Users'
 
 export default {
-  'api/users': ApiUsersController,
-  'api/v1/users': ApiV1UsersController,
-  'application': ApplicationController,
-  'background-test': BackgroundTestController,
-  'users': UsersController,
+  'Api/Users': ApiUsers,
+  'Api/V1/Users': ApiV1Users,
+  'Application': Application,
+  'BackgroundTest': BackgroundTest,
+  'Users': Users,
 }

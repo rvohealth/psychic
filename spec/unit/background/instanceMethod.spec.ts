@@ -1,5 +1,5 @@
 import background from '../../../src/background'
-import User from '../../../test-app/app/models/user'
+import User from '../../../test-app/app/models/User'
 
 describe('background (app singleton)', () => {
   describe('#instanceMethod', () => {
@@ -10,7 +10,7 @@ describe('background (app singleton)', () => {
       jest.spyOn(background.queue!, 'add').mockImplementation(async () => undefined)
 
       await background.instanceMethod(User, 'checkPassword', {
-        filepath: 'app/models/user',
+        filepath: 'app/models/User',
         args: ['howyadoin'],
       })
 
@@ -20,7 +20,7 @@ describe('background (app singleton)', () => {
         psychicpath: undefined,
         importKey: undefined,
         constructorArgs: [],
-        filepath: 'app/models/user',
+        filepath: 'app/models/User',
         args: ['howyadoin'],
       })
     })

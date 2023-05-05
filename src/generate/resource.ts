@@ -4,6 +4,7 @@ import generateSerializer from './serializer'
 import sspawn from '../helpers/sspawn'
 
 export default async function generateResource(
+  route: string,
   modelName: string,
   args: string[],
   {
@@ -27,9 +28,7 @@ export default async function generateResource(
 
   console.log('Generating controller...')
   await sspawn(
-    `npx ts-node --transpile-only bin/cli.ts g:controller ${pluralize(
-      modelName
-    )} create index show update destroy`
+    `npx ts-node --transpile-only bin/cli.ts g:controller ${route} ${modelName} create index show update destroy`
   )
   // await generateController(pluralize(modelName), ['create', 'index', 'show', 'update', 'destroy'], {
   //   rootPath,

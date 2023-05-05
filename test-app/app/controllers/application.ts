@@ -1,5 +1,5 @@
 import PsychicController from '../../../src/controller'
-import User from '../models/user'
+import User from '../models/User'
 
 export default class ApplicationController extends PsychicController {
   public user: User

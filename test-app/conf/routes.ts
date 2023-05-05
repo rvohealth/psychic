@@ -1,24 +1,24 @@
 import PsychicRouter from '../../src/router'
 
 export default (r: PsychicRouter) => {
-  r.get('ping', 'users#ping')
-  r.post('ping', 'users#ping')
-  r.put('ping', 'users#ping')
-  r.patch('ping', 'users#ping')
-  r.delete('ping', 'users#ping')
-  r.get('auth-ping', 'users#authPing')
-  r.get('api-ping', 'api/users#ping')
+  r.get('ping', 'Users#ping')
+  r.post('ping', 'Users#ping')
+  r.put('ping', 'Users#ping')
+  r.patch('ping', 'Users#ping')
+  r.delete('ping', 'Users#ping')
+  r.get('auth-ping', 'Users#authPing')
+  r.get('api-ping', 'Api/Users#ping')
 
   r.namespace('api', r => {
-    r.get('ping', 'users#ping')
+    r.get('ping', 'Users#ping')
     r.namespace('v1', r => {
-      r.get('ping', 'users#ping')
+      r.get('ping', 'Users#ping')
     })
   })
 
-  r.post('login', 'users#login')
+  r.post('login', 'Users#login')
   r.resources('users', { only: ['create', 'index'] })
 
-  r.get('route-exists-but-controller-doesnt', 'nonexistent-controller#someMethod')
-  r.get('controller-exists-but-method-doesnt', 'users#thisRouteDoesntExist')
+  r.get('route-exists-but-controller-doesnt', 'NonexistentController#someMethod')
+  r.get('controller-exists-but-method-doesnt', 'Users#thisRouteDoesntExist')
 }

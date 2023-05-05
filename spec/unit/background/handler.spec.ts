@@ -1,5 +1,5 @@
 import background from '../../../src/background'
-import User from '../../../test-app/app/models/user'
+import User from '../../../test-app/app/models/User'
 
 describe('background (app singleton)', () => {
   describe('#handler', () => {
@@ -11,7 +11,7 @@ describe('background (app singleton)', () => {
           name: 'BackgroundJobQueueStaticJob',
           data: {
             method: 'backgroundTest',
-            filepath: 'app/models/user',
+            filepath: 'app/models/User',
             args: ['bottlarum'],
           },
         } as any)
@@ -32,7 +32,7 @@ describe('background (app singleton)', () => {
             id: user.id,
             method: 'checkPassword',
             constructorArgs: [],
-            filepath: 'app/models/user',
+            filepath: 'app/models/User',
             args: ['bottlarum'],
           },
         } as any)
@@ -53,7 +53,7 @@ describe('background (app singleton)', () => {
             id: user.id,
             method: 'checkPassword',
             constructorArgs: [],
-            filepath: 'app/models/user',
+            filepath: 'app/models/User',
             args: ['bottlarum'],
           },
         } as any)

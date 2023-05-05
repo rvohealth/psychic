@@ -14,6 +14,7 @@ import { Dream } from 'dream'
 import * as fs from 'fs'
 import PsychicController from '../../src/controller'
 import pathifyNestedObject from '../../src/helpers/pathifyNestedObject'
+import pascalize from '../../src/helpers/pascalize'
 
 export default async function buildGlobals() {
   const models = await modelIndex()
@@ -29,7 +30,7 @@ ${(Object.keys(pathifiedData) as any[])
   .filter(fullPath => !/\.js$/.test(fullPath))
   .map(fullPath => {
     const construct = (pathifiedData as any)[fullPath]
-    return `import ${construct.name} from '../app/${kind}/${fullPath}'`
+    return `import ${pascalize(fullPath)} from '../app/${kind}/${fullPath}'`
   })
   .join('\n')}
 
@@ -38,7 +39,7 @@ export default {
     .filter(fullPath => !/\.js$/.test(fullPath))
     .map(fullPath => {
       const constructor = (pathifiedData as any)[fullPath]
-      return `'${fullPath}': ${constructor.name},`
+      return `'${fullPath}': ${pascalize(fullPath)},`
     })
     .join('\n  ')}
 }

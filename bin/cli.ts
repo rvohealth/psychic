@@ -92,23 +92,24 @@ program
   .description(
     'generate:resource <name> [...attributes] create a new dream, migration, controller, and serializer'
   )
-  .argument('<name>', 'name of the migration')
+  .argument('<route>', 'route path')
+  .argument('<modelName>', 'model name')
   .option('--core', 'sets core to true')
   .action(async () => {
-    const [_, name, ...attributes] = program.args
-    await generateResource(name, attributes)
+    const [_, route, modelName, ...attributes] = program.args
+    await generateResource(route, modelName, attributes)
   })
 
 program
   .command('generate:controller')
   .alias('g:controller')
   .description(
-    'generate:controller <name> [...methods] create a new controller, autodefining method stubs for passed methods'
+    'generate:controller <route> [...methods] create a new controller, autodefining method stubs for passed methods'
   )
-  .argument('<name>', 'name of the migration')
+  .argument('<route>', 'route path')
   .option('--core', 'sets core to true')
   .action(async () => {
-    const [_, name, ...methods] = program.args
+    const [_, route, ...methods] = program.args
 
     if (process.env.CORE_DEVELOPMENT === '1') {
     } else {
@@ -116,7 +117,8 @@ program
     }
 
     await generateController(
-      name,
+      route,
+      null,
       methods.filter(method => !['--core'].includes(method))
     )
   })

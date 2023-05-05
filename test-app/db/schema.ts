@@ -8,6 +8,15 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 
 export type Timestamp = ColumnType<DateTime>;
 
+export interface HealthUsers {
+  id: Generated<number>;
+  email: string | null;
+  password_digest: string | null;
+  name: string | null;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+}
+
 export interface Users {
   id: Generated<number>;
   name: string | null;
@@ -18,12 +27,15 @@ export interface Users {
 }
 
 export interface DB {
+  health_users: HealthUsers;
   users: Users;
 }
 
 
+export const HealthUserColumns = ['id', 'email', 'password_digest', 'name', 'created_at', 'updated_at']
 export const UserColumns = ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
 
 export const DBColumns = {
+  health_users: HealthUserColumns,
   users: UserColumns
 }

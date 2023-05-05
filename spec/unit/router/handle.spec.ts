@@ -1,7 +1,7 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import PsychicServer from '../../../src/server'
 import PsychicRouter from '../../../src/router'
-import UsersController from '../../../test-app/app/controllers/users'
+import UsersController from '../../../test-app/app/controllers/Users'
 
 describe('PsychicRouter#handle', () => {
   let server: PsychicServer
@@ -16,8 +16,8 @@ describe('PsychicRouter#handle', () => {
 
   it('calls the matching method on a corresponding controller', async () => {
     jest.spyOn(UsersController.prototype, 'ping')
-    router.get('users', 'users#ping')
-    await router.handle('users#ping', { req, res })
+    router.get('users', 'Users#ping')
+    await router.handle('Users#ping', { req, res })
     expect(UsersController.prototype.ping).toHaveBeenCalled()
   })
 })

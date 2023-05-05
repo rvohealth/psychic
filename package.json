@@ -17,7 +17,8 @@
     "db:drop": "yarn dream db:drop",
     "db:migrate": "yarn dream db:migrate",
     "console": "yarn psy console --core",
-    "sync-core": "yarn psy sync:all --core && yarn dream sync:models",
+    "postinstall": "yarn dream sync:existing",
+    "sync-core": "yarn psy sync:all --core && yarn dream sync:associations",
     "uspec": "yarn sync-core && CORE_DEVELOPMENT=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "fspec": "yarn sync-core && CORE_DEVELOPMENT=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit"
   },
@@ -37,7 +38,7 @@
     "colorette": "^2.0.19",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "dream": "https://avocadojesus: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@github.com/avocadojesus/dream.git#eace729",
+    "dream": "https://avocadojesus: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@github.com/avocadojesus/dream.git#685de64",
     "express": "^4.18.2",
     "jest": "^29.5.0",
     "jsonwebtoken": "^9.0.0",

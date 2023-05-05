@@ -1,5 +1,5 @@
 import background from '../../../src/background'
-import User from '../../../test-app/app/models/user'
+import User from '../../../test-app/app/models/User'
 
 describe('background (app singleton)', () => {
   describe('.staticMethod', () => {
@@ -10,7 +10,7 @@ describe('background (app singleton)', () => {
       jest.spyOn(background.queue!, 'add').mockImplementation(() => {})
 
       await background.staticMethod(User, 'checkPassword', {
-        filepath: 'app/models/user',
+        filepath: 'app/models/User',
         args: ['howyadoin'],
       })
       expect(background.queue!.add).toHaveBeenCalledWith('BackgroundJobQueueStaticJob', {
@@ -18,7 +18,7 @@ describe('background (app singleton)', () => {
         method: 'checkPassword',
         psychicpath: undefined,
         importKey: undefined,
-        filepath: 'app/models/user',
+        filepath: 'app/models/User',
         args: ['howyadoin'],
       })
     })

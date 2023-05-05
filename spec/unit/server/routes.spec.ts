@@ -10,7 +10,7 @@ describe('PsychicServer', () => {
           expect.objectContaining({
             httpMethod: 'get',
             path: 'ping',
-            controllerActionString: 'users#ping',
+            controllerActionString: 'Users#ping',
           }),
         ])
       )

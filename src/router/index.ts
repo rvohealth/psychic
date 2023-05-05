@@ -10,6 +10,7 @@ import PsychicConfig from '../config'
 import log from '../log'
 import PsychicController from '../controller'
 import { ValidationError } from 'dream'
+import pascalize from '../helpers/pascalize'
 
 export default class PsychicRouter {
   public app: Application
@@ -45,14 +46,19 @@ export default class PsychicRouter {
     this.crud('delete', path, controllerActionString)
   }
 
-  private prefixWithNamespaces(str: string) {
+  private prefixModelNameWithNamespaces(str: string) {
+    if (!this.currentNamespaces.length) return str
+    return this.currentNamespaces.map(str => pascalize(str)).join('/') + '/' + str
+  }
+
+  private prefixPathWithNamespaces(str: string) {
     if (!this.currentNamespaces.length) return str
     return this.currentNamespaces.join('/') + '/' + str
   }
 
   public crud(httpMethod: HttpMethod, path: string, controllerActionString: string) {
-    const fullPath = this.prefixWithNamespaces(path)
-    const fullControllerActionString = this.prefixWithNamespaces(controllerActionString)
+    const fullPath = this.prefixPathWithNamespaces(path)
+    const fullControllerActionString = this.prefixModelNameWithNamespaces(controllerActionString)
     this.routes.push({
       httpMethod,
       path,

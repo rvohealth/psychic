@@ -1,4 +1,4 @@
-import ApplicationController from '../application'
+import ApplicationController from '../Application'
 
 export default class ApiUsersController extends ApplicationController {
   public ping() {

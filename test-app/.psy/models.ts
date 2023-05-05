@@ -1,5 +1,7 @@
-import User from '../app/models/user'
+import HealthUser from '../app/models/Health/User'
+import User from '../app/models/User'
 
 export default {
-  'user': User,
+  'Health/User': HealthUser,
+  'User': User,
 }

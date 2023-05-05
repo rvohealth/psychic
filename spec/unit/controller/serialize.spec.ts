@@ -2,7 +2,7 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import PsychicController from '../../../src/controller'
 import PsychicConfig from '../../../src/config'
 import PsychicServer from '../../../src/server'
-import User from '../../../test-app/app/models/user'
+import User from '../../../test-app/app/models/User'
 import PsychicSerializer from '../../../src/serializer'
 
 describe('PsychicController', () => {

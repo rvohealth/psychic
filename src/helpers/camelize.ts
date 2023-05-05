@@ -1,6 +1,6 @@
+import pascalize from './pascalize'
 import uncapitalize from './uncapitalize'
 
-const camelize = (str: string) =>
-  uncapitalize(str.replace(/([-_][a-z])/g, group => group.toUpperCase().replace('-', '').replace('_', '')))
+const camelize = (str: string) => uncapitalize(pascalize(str))
 
 export default camelize
