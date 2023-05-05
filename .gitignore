@@ -5,3 +5,4 @@ dist
 logs/!.gitignore
 test-app/logs/*
 .node-version
+.DS_Store

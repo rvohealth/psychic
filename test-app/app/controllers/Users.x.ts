@@ -1,5 +1,5 @@
 import Params from '../../../src/server/params'
-import User from '../models/User'
+import User from '../models/User.x'
 import ApplicationController from './Application'
 
 export default class UsersController extends ApplicationController {
