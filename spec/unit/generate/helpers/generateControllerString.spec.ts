@@ -4,14 +4,13 @@ describe('psy generate:controller <name> [...methods]', () => {
   context('when provided methods', () => {
     context('passing a model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', async () => {
-        const res = await generateControllerString('api/V1/users', 'ApiV1UsersController', 'User', [
-          'create',
-          'index',
-          'show',
-          'update',
-          'destroy',
-          'login',
-        ])
+        const res = await generateControllerString(
+          'api/V1/users',
+          'ApiV1UsersController',
+          'User',
+          ['create', 'index', 'show', 'update', 'destroy', 'login'],
+          ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
+        )
 
         expect(res).toEqual(
           `\
@@ -64,7 +63,8 @@ export default class ApiV1UsersController extends PsychicController {
           'api/v1/health/users',
           'ApiV1HealthUsersController',
           'Health/User',
-          ['create', 'index', 'show', 'update', 'destroy', 'login']
+          ['create', 'index', 'show', 'update', 'destroy', 'login'],
+          ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
         )
 
         expect(res).toEqual(
@@ -103,8 +103,8 @@ export default class ApiV1HealthUsersController extends PsychicController {
   public async login() {
   }
 
-  private get healthUserParams() {
-    return Params.restrict(this.params?.healthUser, ['id', 'email', 'password_digest', 'name', 'created_at', 'updated_at'])
+  private get userParams() {
+    return Params.restrict(this.params?.user, ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at'])
   }
 }\
 `

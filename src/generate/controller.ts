@@ -12,9 +12,11 @@ export default async function generateController(
   {
     rootPath = process.env.CORE_DEVELOPMENT === '1' ? process.cwd() : process.cwd() + '/../..',
     allowExit = true,
+    attributes,
   }: {
     rootPath?: string
     allowExit?: boolean
+    attributes?: string[]
   } = {}
 ) {
   const thisfs = fs ? fs : await import('fs/promises')
@@ -27,7 +29,13 @@ export default async function generateController(
     .map(str => pascalize(str))
     .join('/')
   const controllerPathParts = controllerFilename.split('/').slice(0, -1)
-  const controllerString = await generateControllerString(route, controllerName, modelName, methods)
+  const controllerString = await generateControllerString(
+    route,
+    controllerName,
+    modelName,
+    methods,
+    attributes
+  )
 
   // if they are generating a nested controller path,
   // we need to make sure the nested directories exist

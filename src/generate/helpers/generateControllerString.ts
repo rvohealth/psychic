@@ -9,51 +9,35 @@ import getModelKey from '../../config/helpers/getModelKey'
 export default async function generateControllerString(
   route: string,
   controllerName: string,
-  modelName: string | null,
-  methods: string[] = []
+  fullyQualifiedModelName: string | null,
+  methods: string[] = [],
+  attributes: string[] | null = []
 ) {
   const crudMethods = ['create', 'index', 'show', 'update', 'destroy']
   const psyImports: string[] = ['PsychicController', 'Params']
   const additionalImports: string[] = []
   let hasCrudMethod = false
 
-  let modelClass: typeof Dream | null = null
+  let modelName: string | undefined
 
-  if (modelName) {
-    const models = await PsychicDir.loadModels()
-    const modelKey = Object.keys(models).find(modelKey => {
-      const userProvided = pluralize.singular(
-        modelName
-          .split('/')
-          .map(str => pascalize(str))
-          .join('/')
-      )
-
-      return modelKey === userProvided
-    }) as string | null
-    if (modelKey) modelClass = models[modelKey] as typeof Dream | null
-  }
-
-  if (modelClass)
+  if (fullyQualifiedModelName) {
+    modelName = fullyQualifiedModelName.split('/').pop()
     additionalImports.push(
       `\
-import ${modelClass.name} from '${routeDepthToRelativePath(route)}/models/${await getModelKey(
-        modelClass as typeof Dream
-      )}'`
+import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQualifiedModelName}'`
     )
+  }
 
   const methodDefs = methods.map(methodName => {
     if (crudMethods.includes(methodName)) hasCrudMethod = true
 
     switch (methodName) {
       case 'create':
-        if (modelClass)
+        if (modelName)
           return `\
   public async create() {
-    const ${camelize(modelClass.name)} = await ${modelClass.name}.create(this.${camelize(
-            modelClass.name
-          )}Params)
-    this.ok(${camelize(modelClass.name)})
+    const ${camelize(modelName)} = await ${modelName}.create(this.${camelize(modelName)}Params)
+    this.ok(${camelize(modelName)})
   }`
         else
           return `\
@@ -61,11 +45,11 @@ import ${modelClass.name} from '${routeDepthToRelativePath(route)}/models/${awai
   }`
 
       case 'index':
-        if (modelClass)
+        if (modelName)
           return `\
   public async index() {
-    const ${pluralize(camelize(modelClass.name))} = await ${modelClass.name}.all()
-    this.ok(${pluralize(camelize(modelClass.name))})
+    const ${pluralize(camelize(modelName))} = await ${modelName}.all()
+    this.ok(${pluralize(camelize(modelName))})
   }`
         else
           return `\
@@ -73,11 +57,11 @@ import ${modelClass.name} from '${routeDepthToRelativePath(route)}/models/${awai
   }`
 
       case 'show':
-        if (modelClass)
+        if (modelName)
           return `\
   public async show() {
-    const ${camelize(modelClass.name)} = await ${modelClass.name}.find(this.params.id)
-    this.ok(${camelize(modelClass.name)})
+    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
+    this.ok(${camelize(modelName)})
   }`
         else
           return `\
@@ -85,12 +69,12 @@ import ${modelClass.name} from '${routeDepthToRelativePath(route)}/models/${awai
   }`
 
       case 'update':
-        if (modelClass)
+        if (modelName)
           return `\
   public async update() {
-    const ${camelize(modelClass.name)} = await ${modelClass.name}.find(this.params.id)
-    await ${camelize(modelClass.name)}.update(this.${camelize(modelClass.name)}Params)
-    this.ok(${camelize(modelClass.name)})
+    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
+    await ${camelize(modelName)}.update(this.${camelize(modelName)}Params)
+    this.ok(${camelize(modelName)})
   }`
         else
           return `\
@@ -98,11 +82,11 @@ import ${modelClass.name} from '${routeDepthToRelativePath(route)}/models/${awai
   }`
 
       case 'destroy':
-        if (modelClass)
+        if (modelName)
           return `\
   public async destroy() {
-    const ${camelize(modelClass.name)} = await ${modelClass.name}.find(this.params.id)
-    await ${camelize(modelClass.name)}.destroy()
+    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
+    await ${camelize(modelName)}.destroy()
     this.ok()
   }`
         else
@@ -118,14 +102,13 @@ import ${modelClass.name} from '${routeDepthToRelativePath(route)}/models/${awai
   })
 
   const privateDefs: string[] = []
-  if (modelName && modelClass && hasCrudMethod) {
+  if (modelName && hasCrudMethod) {
+    attributes ||= []
     const singularName = pluralize.singular(camelize(modelName))
     privateDefs.push(
       `\
   private get ${singularName}Params() {
-    return Params.restrict(this.params?.${singularName}, [${(modelClass.columns() as string[])
-        .map(attr => `'${attr}'`)
-        .join(', ')}])
+    return Params.restrict(this.params?.${singularName}, [${attributes.map(attr => `'${attr}'`).join(', ')}])
   }`
     )
   }

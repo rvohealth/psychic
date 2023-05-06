@@ -13,13 +13,12 @@ export default async function generateResource(
     rootPath?: string
   } = {}
 ) {
-  const attributes = args.filter(attr => !['--core'].includes(attr))
-  await sspawn(`yarn --cwd=../../node_modules/dream dream g:model ${modelName} ${attributes.join(' ')}`)
+  const attributesWithTypes = args.filter(attr => !['--core'].includes(attr))
+  const attributes = attributesWithTypes.map(str => str.split(':')[0])
 
-  // rebuild the model layer so controller and serializer builders
-  // can read .psy/models.ts and get back the newly-generated model
-  console.log('running migrations...')
-  await sspawn('yarn --cwd=../../node_modules/dream dream db:migrate')
+  await sspawn(
+    `yarn --cwd=../../node_modules/dream dream g:model ${modelName} ${attributesWithTypes.join(' ')}`
+  )
 
   if (args.includes('--core')) {
     console.log('--core argument provided, setting now')
@@ -27,18 +26,13 @@ export default async function generateResource(
   }
 
   console.log('Generating controller...')
-  await sspawn(
-    `npx ts-node --transpile-only bin/cli.ts g:controller ${route} ${modelName} create index show update destroy`
-  )
-  // await generateController(pluralize(modelName), ['create', 'index', 'show', 'update', 'destroy'], {
-  //   rootPath,
-  //   allowExit: false,
-  // })
+  await generateController(route, modelName, ['create', 'index', 'show', 'update', 'destroy'], {
+    allowExit: false,
+    attributes,
+  })
 
   console.log('Generating serializer...')
-  // await sspawn(`yarn psy g:serializer ${modelName} ${attributes.join(' ')}`)
-  await sspawn(`npx ts-node --transpile-only bin/cli.ts g:serializer ${modelName} ${args.join(' ')}`)
-  // await generateSerializer(modelName, attributes, { rootPath, allowExit: false })
+  await generateSerializer(modelName, attributes, { allowExit: false })
 
   console.log('finished generating resource!')
   // if (process.env.NODE_ENV !== 'test') process.exit()
