@@ -1,5 +1,5 @@
 import background from '../../../src/background'
-import BackgroundTestController from '../../../test-app/app/controllers/BackgroundTest'
+import BackgroundTestController from '../../../test-app/app/controllers/BackgroundTestController'
 
 // NOTE: instance methods are intentionally left off here, since backgrounding an instance method on
 // a controller would force you to background the request object itself, which doesn't make sense.
@@ -14,7 +14,7 @@ describe('PsychicController background methods', () => {
         BackgroundTestController,
         'doSomethingInBackground',
         {
-          filepath: 'app/controllers/BackgroundTest',
+          filepath: 'app/controllers/BackgroundTestController',
           args: [1, '2'],
         }
       )

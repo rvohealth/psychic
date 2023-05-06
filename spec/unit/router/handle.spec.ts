@@ -1,7 +1,7 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import PsychicServer from '../../../src/server'
 import PsychicRouter from '../../../src/router'
-import UsersController from '../../../test-app/app/controllers/Users'
+import UsersController from '../../../test-app/app/controllers/UsersController'
 
 describe('PsychicRouter#handle', () => {
   let server: PsychicServer

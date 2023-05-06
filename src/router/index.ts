@@ -173,7 +173,7 @@ export default class PsychicRouter {
   ) {
     const [controllerPath, action] = controllerActionString.split('#')
 
-    const ControllerClass = this.config.controllers[controllerPath]
+    const ControllerClass = this.config.controllers[controllerPath + 'Controller']
     if (!ControllerClass) {
       res.status(501).send(`
         The controller you are attempting to load was not found:
