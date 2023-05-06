@@ -6,12 +6,11 @@ export default async function generateController(
   route: string,
   fullyQualifiedModelName: string | null = null,
   methods: string[],
+  attributes: string[] = [],
   {
     rootPath = process.env.CORE_DEVELOPMENT === '1' ? process.cwd() : process.cwd() + '/../..',
-    attributes,
   }: {
     rootPath?: string
-    attributes?: string[]
   } = {}
 ) {
   await fileWriter(route, 'Controller', '.ts', 'app/controllers', rootPath, generateControllerString, [

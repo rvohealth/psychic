@@ -2,7 +2,7 @@ import generateSerializerString from './helpers/generateSerializerString'
 import fileWriter from './helpers/fileWriter'
 
 export default async function generateSerializer(
-  serializerName: string,
+  fullyQualifiedModelName: string,
   attributes: string[],
   {
     rootPath = process.env.CORE_DEVELOPMENT === '1' ? process.cwd() : process.cwd() + '/../..',
@@ -13,13 +13,13 @@ export default async function generateSerializer(
   } = {}
 ) {
   await fileWriter(
-    serializerName,
+    fullyQualifiedModelName,
     'Serializer',
     '.ts',
     'app/serializers',
     rootPath,
     generateSerializerString,
-    [attributes]
+    [fullyQualifiedModelName, attributes]
   )
 
   console.log('done generating serializer')

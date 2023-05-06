@@ -5,17 +5,10 @@ import { Dream } from 'dream'
 
 export default async function generateSerializerString(
   serializerClassName: string,
+  fullyQualifiedModelName: string,
   attributes: string[] = []
 ) {
-  const models = await PsychicDir.loadModels()
-  const relatedModelName = pluralize.singular(pascalize(serializerClassName))
-  const ModelClass = Object.values(models).find(
-    ModelClass => (ModelClass as typeof Dream).name === relatedModelName
-  ) as typeof Dream | null
-
-  const attrs = [...((ModelClass as typeof Dream)?.columns() || []), ...attributes] as string[]
-
-  if (!attrs.length)
+  if (!attributes.length)
     return `\
 import { PsychicSerializer } from 'psychic'
 
@@ -31,7 +24,7 @@ export default class ${serializerClassName} extends PsychicSerializer {
   static {
     this
       .attributes(
-        ${attrs.map(attr => `'${attr}'`).join(',\n        ')}
+        ${attributes.map(attr => `'${attr}'`).join(',\n        ')}
       )
   }
 }\
