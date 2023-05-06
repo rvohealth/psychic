@@ -16,6 +16,7 @@ export default async function generateSerializer(
     fullyQualifiedModelName,
     'Serializer',
     '.ts',
+    false,
     'app/serializers',
     rootPath,
     generateSerializerString,

@@ -6,6 +6,7 @@ export default async function fileWriter(
   filePath: string,
   filePostfix: 'Controller' | 'Serializer',
   fileExtension: '.ts' | '.spec.ts',
+  pluralizeBeforePostfix: boolean,
   directoryPrefix: 'app/controllers' | 'app/serializers' | 'spec/unit/controllers' | 'spec/unit/serializers',
   rootPath: string | null = null,
   contentFunction: (...args: any[]) => Promise<string> | string,
@@ -14,7 +15,9 @@ export default async function fileWriter(
   const thisfs = fs ? fs : await import('fs/promises')
   const srcPath = process.env.CORE_DEVELOPMENT === '1' ? 'test-app' : 'src'
   const newfileBasePath = `${rootPath}/${srcPath}/${directoryPrefix}`
-  const fullyQualifiedNewfileClassName = `${pluralize(filePath)}${filePostfix}`
+  const fullyQualifiedNewfileClassName = pluralizeBeforePostfix
+    ? `${pluralize(filePath)}${filePostfix}`
+    : `${filePath}${filePostfix}`
   const newfileClassName = pascalize(fullyQualifiedNewfileClassName)
   const filepathRelativeToTypeRoot = fullyQualifiedNewfileClassName
     .split('/')

@@ -13,7 +13,7 @@ export default async function generateController(
     rootPath?: string
   } = {}
 ) {
-  await fileWriter(route, 'Controller', '.ts', 'app/controllers', rootPath, generateControllerString, [
+  await fileWriter(route, 'Controller', '.ts', true, 'app/controllers', rootPath, generateControllerString, [
     route,
     fullyQualifiedModelName,
     methods,
@@ -24,6 +24,7 @@ export default async function generateController(
     route,
     'Controller',
     '.spec.ts',
+    true,
     'spec/unit/controllers',
     rootPath,
     generateBlankSpecContent
