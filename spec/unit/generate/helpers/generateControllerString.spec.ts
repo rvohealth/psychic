@@ -4,7 +4,7 @@ describe('psy generate:controller <name> [...methods]', () => {
   context('when provided methods', () => {
     context('passing a model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', async () => {
-        const res = await generateControllerString('api/20230505/users', 'User', [
+        const res = await generateControllerString('api/V1/users', 'ApiV1UsersController', 'User', [
           'create',
           'index',
           'show',
@@ -18,7 +18,7 @@ describe('psy generate:controller <name> [...methods]', () => {
 import { PsychicController, Params } from 'psychic'
 import User from '../../../models/User'
 
-export default class Api20230505UsersController extends PsychicController {
+export default class ApiV1UsersController extends PsychicController {
   public async create() {
     const user = await User.create(this.userParams)
     this.ok(user)
@@ -60,14 +60,12 @@ export default class Api20230505UsersController extends PsychicController {
 
     context('passing a namespaced model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', async () => {
-        const res = await generateControllerString('api/v1/health/users', 'Health/User', [
-          'create',
-          'index',
-          'show',
-          'update',
-          'destroy',
-          'login',
-        ])
+        const res = await generateControllerString(
+          'api/v1/health/users',
+          'ApiV1HealthUsersController',
+          'Health/User',
+          ['create', 'index', 'show', 'update', 'destroy', 'login']
+        )
 
         expect(res).toEqual(
           `\
@@ -117,7 +115,10 @@ export default class ApiV1HealthUsersController extends PsychicController {
 
   context('when provided with a nested path', () => {
     it('generates a controller with pascal-cased naming', async () => {
-      const res = await generateControllerString('api/v1/users', null, ['hello', 'world'])
+      const res = await generateControllerString('api/v1/users', 'ApiV1UsersController', null, [
+        'hello',
+        'world',
+      ])
 
       expect(res).toEqual(
         `\
