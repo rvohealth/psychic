@@ -2,6 +2,8 @@ import * as pluralize from 'pluralize'
 import * as fs from 'fs/promises'
 import generateControllerString from './helpers/generateControllerString'
 import pascalize from '../helpers/pascalize'
+import generateBlankSpec from './controllerSpec'
+import generateControllerSpec from './controllerSpec'
 
 export default async function generateController(
   route: string,
@@ -30,6 +32,9 @@ export default async function generateController(
 
   const controllerPath = `${controllerBasePath}/${controllerFilename}.ts`
   console.log(`generating controller: ${controllerPath}`)
+
+  const controllerName = `${pascalize(pluralize(route))}Controller`
+  await generateControllerSpec(controllerName)
 
   // if they are generating a nested controller path,
   // we need to make sure the nested directories exist
