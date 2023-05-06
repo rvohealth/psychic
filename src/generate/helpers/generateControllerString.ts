@@ -8,6 +8,7 @@ import getModelKey from '../../config/helpers/getModelKey'
 
 export default async function generateControllerString(
   route: string,
+  controllerName: string,
   modelName: string | null,
   methods: string[] = []
 ) {
@@ -138,7 +139,7 @@ import { ${psyImports.join(', ')} } from 'psychic'${
     !!additionalImports.length ? '\n' + additionalImports.join('\n') : ''
   }
 
-export default class ${pascalize(pluralize(pascalizedRoute))}Controller extends PsychicController {
+export default class ${controllerName} extends PsychicController {
 ${methodDefs.join('\n\n')}${privateDefs.length ? '\n\n' + privateDefs.join('\n\n') : ''}
 }\
 `

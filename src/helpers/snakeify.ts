@@ -15,5 +15,8 @@ export default function snakeify(str: any): string {
   return str
     .replace(/(?:^|\.?)([A-Z])/g, (_: string, y: string) => '_' + y.toLowerCase())
     .replace(/^_/, '')
+    .replace(/\//g, '_')
+    .replace(/-/g, '_')
+    .replace(/_+/g, '_')
     .toLowerCase()
 }

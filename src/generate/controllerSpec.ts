@@ -10,11 +10,13 @@ export default async function generateControllerSpec(
   } = {}
 ) {
   const specPath = `${rootPath}/spec/unit/controllers/${controllerName}.spec.ts`
+  const specDirPath = specPath.split('/').slice(0, -1).join('/')
   const relativeSpecPath = specPath.replace(new RegExp(`^.*spec/unit`), 'spec/unit')
   const thisfs = fs ? fs : await import('fs/promises')
 
   try {
     console.log(`generating spec: ${relativeSpecPath}`)
+    await thisfs.mkdir(specDirPath, { recursive: true })
     await thisfs.writeFile(specPath, generateBlankSpecContent(controllerName))
   } catch (error) {
     const err = `

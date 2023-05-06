@@ -110,6 +110,7 @@ program
   .option('--core', 'sets core to true')
   .action(async () => {
     const [_, route, ...methods] = program.args
+    setCoreDevelopmentFlag(program.args)
 
     if (process.env.CORE_DEVELOPMENT === '1') {
     } else {
