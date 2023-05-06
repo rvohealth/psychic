@@ -3,9 +3,12 @@ import pascalize from '../../helpers/pascalize'
 import PsychicDir from '../../helpers/psychicdir'
 import { Dream } from 'dream'
 
-export default async function generateSerializerString(controllerName: string, attributes: string[] = []) {
+export default async function generateSerializerString(
+  serializerClassName: string,
+  attributes: string[] = []
+) {
   const models = await PsychicDir.loadModels()
-  const relatedModelName = pluralize.singular(pascalize(controllerName))
+  const relatedModelName = pluralize.singular(pascalize(serializerClassName))
   const ModelClass = Object.values(models).find(
     ModelClass => (ModelClass as typeof Dream).name === relatedModelName
   ) as typeof Dream | null
@@ -16,7 +19,7 @@ export default async function generateSerializerString(controllerName: string, a
     return `\
 import { PsychicSerializer } from 'psychic'
 
-export default class ${pascalize(pluralize.singular(controllerName))}Serializer extends PsychicSerializer {
+export default class ${serializerClassName} extends PsychicSerializer {
   static {
   }
 }`
@@ -24,7 +27,7 @@ export default class ${pascalize(pluralize.singular(controllerName))}Serializer 
   return `\
 import { PsychicSerializer } from 'psychic'
 
-export default class ${pascalize(pluralize.singular(controllerName))}Serializer extends PsychicSerializer {
+export default class ${serializerClassName} extends PsychicSerializer {
   static {
     this
       .attributes(

@@ -25,14 +25,11 @@ export default async function generateResource(
     process.env.CORE_DEVELOPMENT = '1'
   }
 
-  console.log('Generating controller...')
   await generateController(route, modelName, ['create', 'index', 'show', 'update', 'destroy'], {
-    allowExit: false,
     attributes,
   })
 
-  console.log('Generating serializer...')
-  await generateSerializer(modelName, attributes, { allowExit: false })
+  await generateSerializer(modelName, attributes)
 
   console.log('finished generating resource!')
   // if (process.env.NODE_ENV !== 'test') process.exit()

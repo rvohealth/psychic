@@ -17,13 +17,6 @@ export interface HealthUsers {
   updated_at: Timestamp;
 }
 
-export interface HelloWorldHowAreYous {
-  id: Generated<number>;
-  name: string | null;
-  created_at: Timestamp;
-  updated_at: Timestamp;
-}
-
 export interface Users {
   id: Generated<number>;
   name: string | null;
@@ -35,17 +28,14 @@ export interface Users {
 
 export interface DB {
   health_users: HealthUsers;
-  hello_world_how_are_yous: HelloWorldHowAreYous;
   users: Users;
 }
 
 
 export const HealthUserColumns = ['id', 'email', 'password_digest', 'name', 'created_at', 'updated_at']
-export const HelloWorldHowAreYousColumns = ['id', 'name', 'created_at', 'updated_at']
 export const UserColumns = ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
 
 export const DBColumns = {
   health_users: HealthUserColumns,
-  hello_world_how_are_yous: HelloWorldHowAreYousColumns,
   users: UserColumns
 }

@@ -5,8 +5,8 @@ describe('psy generate:controller <name> [...methods]', () => {
     context('passing a model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', async () => {
         const res = await generateControllerString(
-          'api/V1/users',
           'ApiV1UsersController',
+          'api/V1/users',
           'User',
           ['create', 'index', 'show', 'update', 'destroy', 'login'],
           ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
@@ -60,8 +60,8 @@ export default class ApiV1UsersController extends PsychicController {
     context('passing a namespaced model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', async () => {
         const res = await generateControllerString(
-          'api/v1/health/users',
           'ApiV1HealthUsersController',
+          'api/v1/health/users',
           'Health/User',
           ['create', 'index', 'show', 'update', 'destroy', 'login'],
           ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
@@ -115,7 +115,7 @@ export default class ApiV1HealthUsersController extends PsychicController {
 
   context('when provided with a nested path', () => {
     it('generates a controller with pascal-cased naming', async () => {
-      const res = await generateControllerString('api/v1/users', 'ApiV1UsersController', null, [
+      const res = await generateControllerString('ApiV1UsersController', 'api/v1/users', null, [
         'hello',
         'world',
       ])

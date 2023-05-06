@@ -7,8 +7,8 @@ import { Dream } from 'dream'
 import getModelKey from '../../config/helpers/getModelKey'
 
 export default async function generateControllerString(
+  controllerClassName: string,
   route: string,
-  controllerName: string,
   fullyQualifiedModelName: string | null,
   methods: string[] = [],
   attributes: string[] | null = []
@@ -122,7 +122,7 @@ import { ${psyImports.join(', ')} } from 'psychic'${
     !!additionalImports.length ? '\n' + additionalImports.join('\n') : ''
   }
 
-export default class ${controllerName} extends PsychicController {
+export default class ${controllerClassName} extends PsychicController {
 ${methodDefs.join('\n\n')}${privateDefs.length ? '\n\n' + privateDefs.join('\n\n') : ''}
 }\
 `
