@@ -7,7 +7,7 @@ describe('a visitor attempts to hit an unauthed route', () => {
     await server.boot()
   })
 
-  it('accepts the request', async () => {
-    request.agent(server.app).get('/non-existent-route').expect(501)
+  it('returns 404', async () => {
+    await request.agent(server.app).get('/non-existent-route').expect(404)
   })
 })

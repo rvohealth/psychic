@@ -7,7 +7,7 @@ describe('a visitor attempts to hit an authed route (while being unauthenticated
     await server.boot()
   })
 
-  it('accepts the request', async () => {
-    request.agent(server.app).get('/auth-ping').expect(401)
+  it('returns 404', async () => {
+    await request.agent(server.app).get('/auth-ping').expect(401)
   })
 })

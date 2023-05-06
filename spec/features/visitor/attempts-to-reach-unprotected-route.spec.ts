@@ -8,6 +8,6 @@ describe('a visitor attempts to hit an unauthed route', () => {
   })
 
   it('accepts the request', async () => {
-    request.agent(server.app).get('/ping').expect(200)
+    await request.agent(server.app).get('/ping').expect(200)
   })
 })
