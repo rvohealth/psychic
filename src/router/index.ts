@@ -1,6 +1,11 @@
 import { Application, Request, Response, Router } from 'express'
 import { HttpMethod, ResourceMethods, ResourceMethodType, ResourcesOptions } from './types'
-import { applyResourceAction, applyResourcesAction, routePath } from '../router/helpers'
+import {
+  applyResourceAction,
+  applyResourcesAction,
+  routePath,
+  sanitizedControllerPath,
+} from '../router/helpers'
 import Encrypt from '../encryption/encrypt'
 import Unauthorized from '../error/http/unauthorized'
 import Forbidden from '../error/http/forbidden'
@@ -173,7 +178,7 @@ export default class PsychicRouter {
   ) {
     const [controllerPath, action] = controllerActionString.split('#')
 
-    const ControllerClass = this.config.controllers[controllerPath + 'Controller']
+    const ControllerClass = this.config.controllers[sanitizedControllerPath(controllerPath)]
     if (!ControllerClass) {
       res.status(501).send(`
         The controller you are attempting to load was not found:

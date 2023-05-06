@@ -12,7 +12,8 @@ export default (r: PsychicRouter) => {
   r.namespace('api', r => {
     r.get('ping', 'Users#ping')
     r.namespace('v1', r => {
-      r.get('ping', 'Users#ping')
+      r.get('ping', 'UsersController#ping')
+      r.resources('users', { only: ['index'] })
     })
   })
 
