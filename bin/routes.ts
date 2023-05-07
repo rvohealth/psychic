@@ -2,12 +2,6 @@ import env from '../src/env'
 import PsychicServer from '../src/server'
 
 env.load()
-
-if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
-} else {
-  process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/../../src'
-}
-
 ;(async function () {
   const server = new PsychicServer()
   await server.boot()

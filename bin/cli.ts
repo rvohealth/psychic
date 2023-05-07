@@ -112,11 +112,6 @@ program
     const [_, route, ...methods] = program.args
     setCoreDevelopmentFlag(program.args)
 
-    if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
-    } else {
-      process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/../../src'
-    }
-
     await generateController(
       route,
       null,
@@ -132,11 +127,6 @@ program
   .option('--core', 'sets core to true')
   .action(async () => {
     const [_, name, ...attributes] = program.args
-
-    if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
-    } else {
-      process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/../../src'
-    }
 
     await generateSerializer(
       name,
