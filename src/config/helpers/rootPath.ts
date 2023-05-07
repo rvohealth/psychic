@@ -4,7 +4,7 @@ export default function rootPath({ dist = true }: { dist?: boolean } = {}) {
   // being run from the node_modules/psychic dir (so we don't have to copy it over)
   if (process.env.OVERRIDDEN_ROOT_PATH) return process.env.OVERRIDDEN_ROOT_PATH
 
-  if (process.env.CORE_DEVELOPMENT === '1') return process.cwd() + '/test-app'
+  if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') return process.cwd() + '/test-app'
   if (dist) return process.cwd() + '/src'
 
   return process.cwd() + '/src'

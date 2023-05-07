@@ -63,7 +63,7 @@ program
   .argument('<name>', 'name of the dream')
   .action(async () => {
     const [_, name, ...attributes] = program.args
-    if (process.env.CORE_DEVELOPMENT === '1') {
+    if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
       await sspawn(`yarn dream g:model ${name} ${attributes.join(' ')}`)
     } else {
       await sspawn(`yarn --cwd=../../node_modules/dream dream g:model ${name} ${attributes.join(' ')}`)
@@ -79,7 +79,7 @@ program
     const [_, name] = program.args
     await sspawn(`yarn dream g:migration ${name}`)
 
-    if (process.env.CORE_DEVELOPMENT === '1') {
+    if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
       await sspawn(`yarn dream g:migration ${name}`)
     } else {
       await sspawn(`yarn --cwd=../../node_modules/dream dream g:migration ${name}`)
@@ -112,7 +112,7 @@ program
     const [_, route, ...methods] = program.args
     setCoreDevelopmentFlag(program.args)
 
-    if (process.env.CORE_DEVELOPMENT === '1') {
+    if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
     } else {
       process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/../../src'
     }
@@ -133,7 +133,7 @@ program
   .action(async () => {
     const [_, name, ...attributes] = program.args
 
-    if (process.env.CORE_DEVELOPMENT === '1') {
+    if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
     } else {
       process.env.OVERRIDDEN_ROOT_PATH = process.cwd() + '/../../src'
     }
@@ -242,7 +242,7 @@ program
   .option('--core', 'sets core to true')
   .action(async () => {
     setCoreDevelopmentFlag(program.args)
-    if (process.env.CORE_DEVELOPMENT === '1') {
+    if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
       await sspawn(`NODE_ENV=development npx ts-node --project ./tsconfig.json ./test-app/conf/repl.ts`)
     } else {
       await sspawn(`NODE_ENV=development npx ts-node --project ./tsconfig.json ./src/conf/repl.ts`)

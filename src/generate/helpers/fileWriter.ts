@@ -13,7 +13,7 @@ export default async function fileWriter(
   contentFunctionAttrs: any[] = []
 ) {
   const thisfs = fs ? fs : await import('fs/promises')
-  const srcPath = process.env.CORE_DEVELOPMENT === '1' ? 'test-app' : 'src'
+  const srcPath = process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? 'test-app' : 'src'
   const newfileBasePath = `${rootPath}/${srcPath}/${directoryPrefix}`
   const fullyQualifiedNewfileClassName = pluralizeBeforePostfix
     ? `${pluralize(filePath)}${filePostfix}`

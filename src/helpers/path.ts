@@ -46,7 +46,7 @@ export function projectRootPath({
 }: { filepath?: string; omitDirname?: boolean } = {}) {
   const dirname = omitDirname ? undefined : __dirname
 
-  if (process.env.CORE_DEVELOPMENT === '1') {
+  if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
     return path.join(...compact([dirname, '..', '..', filepath]))
   } else {
     return path.join(...compact([dirname, '..', '..', '..', '..', filepath]))

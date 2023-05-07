@@ -8,7 +8,7 @@ export default async function generateResource(
   fullyQualifiedModelName: string,
   args: string[],
   {
-    rootPath = process.env.CORE_DEVELOPMENT === '1' ? process.cwd() : process.cwd() + '/../..',
+    rootPath = process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? process.cwd() : process.cwd() + '/../..',
   }: {
     rootPath?: string
   } = {}
@@ -24,7 +24,7 @@ export default async function generateResource(
 
   if (args.includes('--core')) {
     console.log('--core argument provided, setting now')
-    process.env.CORE_DEVELOPMENT = '1'
+    process.env.PSYCHIC_CORE_DEVELOPMENT = '1'
   }
 
   await generateController(

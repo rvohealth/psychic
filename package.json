@@ -12,14 +12,14 @@
     "build": "rm -rf dist && npx tsc",
     "psy": "npx ts-node ./bin/cli.ts",
     "dream": "rm -rf node_modules/dream/test-app && yarn --cwd=node_modules/dream dream",
-    "dev": "CORE_DEVELOPMENT=1 NODE_ENV=development ts-node ./test-app/main.ts",
+    "dev": "PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=development ts-node ./test-app/main.ts",
     "db:create": "yarn dream db:create",
     "db:drop": "yarn dream db:drop",
     "db:migrate": "yarn dream db:migrate",
     "console": "yarn psy console --core",
     "sync-core": "yarn psy sync:all --core && yarn dream sync:associations",
-    "uspec": "yarn sync-core && CORE_DEVELOPMENT=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
-    "fspec": "yarn sync-core && CORE_DEVELOPMENT=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit"
+    "uspec": "yarn sync-core && PSYCHIC_CORE_DEVELOPMENT=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
+    "fspec": "yarn sync-core && PSYCHIC_CORE_DEVELOPMENT=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit"
   },
   "dependencies": {
     "@jest-mock/express": "^2.0.1",
