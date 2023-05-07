@@ -1,3 +1,4 @@
+// DEPRECATED
 export default function rootPath({ dist = true }: { dist?: boolean } = {}) {
   // OVERRIDDEN_ROOT_PATH is a hack, because sometimes (as in the case of bin/routes.ts) we have
   // a file that is running as though it were within a consuming app, but is actually

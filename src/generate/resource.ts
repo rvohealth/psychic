@@ -6,12 +6,7 @@ import sspawn from '../helpers/sspawn'
 export default async function generateResource(
   route: string,
   fullyQualifiedModelName: string,
-  args: string[],
-  {
-    rootPath = process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? process.cwd() : process.cwd() + '/../..',
-  }: {
-    rootPath?: string
-  } = {}
+  args: string[]
 ) {
   const attributesWithTypes = args.filter(attr => !['--core'].includes(attr))
   const attributes = attributesWithTypes.map(str => str.split(':')[0])

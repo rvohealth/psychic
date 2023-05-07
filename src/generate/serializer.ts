@@ -1,15 +1,14 @@
 import generateSerializerString from './helpers/generateSerializerString'
 import fileWriter from './helpers/fileWriter'
+import absoluteFilePath from '../helpers/absoluteFilePath'
 
 export default async function generateSerializer(
   fullyQualifiedModelName: string,
   attributes: string[],
   {
-    rootPath = process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? process.cwd() : process.cwd() + '/../..',
-    allowExit = true,
+    rootPath = absoluteFilePath(''),
   }: {
     rootPath?: string
-    allowExit?: boolean
   } = {}
 ) {
   await fileWriter(

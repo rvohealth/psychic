@@ -9,6 +9,7 @@ import Cable from '../cable'
 import filePath from '../config/helpers/filePath'
 import ReactServer from '../server/react'
 import PsychicRouter from '../router'
+import absoluteSrcPath from '../helpers/absoluteSrcPath'
 
 export default class PsychicServer {
   public app: Application
@@ -23,7 +24,7 @@ export default class PsychicServer {
 
   public async routes() {
     const r = new PsychicRouter(this.app, this.config)
-    const routesPath = this.config.root + '/conf/routes.ts'
+    const routesPath = absoluteSrcPath('conf/routes.ts')
     const routesCB = (await import(routesPath)).default
     routesCB(r)
     return r.routes
@@ -101,7 +102,7 @@ export default class PsychicServer {
 
   private async buildRoutes() {
     const r = new PsychicRouter(this.app, this.config)
-    const routesPath = this.config.root + '/conf/routes.ts'
+    const routesPath = absoluteSrcPath('conf/routes.ts')
     const routesCB = (await import(routesPath)).default
     routesCB(r)
   }

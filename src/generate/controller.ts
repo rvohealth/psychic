@@ -1,6 +1,7 @@
 import fileWriter from './helpers/fileWriter'
 import generateControllerString from './helpers/generateControllerString'
 import generateBlankSpecContent from './helpers/generateBlankSpecContent'
+import absoluteFilePath from '../helpers/absoluteFilePath'
 
 export default async function generateController(
   route: string,
@@ -8,7 +9,7 @@ export default async function generateController(
   methods: string[],
   attributes: string[] = [],
   {
-    rootPath = process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? process.cwd() : process.cwd() + '/../..',
+    rootPath = absoluteFilePath(''),
   }: {
     rootPath?: string
   } = {}
