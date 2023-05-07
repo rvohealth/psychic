@@ -7,7 +7,7 @@ export default function readAppConfig() {
   if (_appConfig) return _appConfig
 
   const appYmlPath = absoluteSrcPath('conf/app.yml')
-  console.log('APP YAML PATH: ', appYmlPath)
+  console.log('APP YAML PATH: ', appYmlPath, process.env)
   const buffer = fs.readFileSync(appYmlPath, 'utf8')
   _appConfig = YAML.parse(buffer)?.psychic || {
     ws: false,
