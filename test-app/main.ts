@@ -1,4 +1,3 @@
-import './.psy/init'
 import env from '../src/env'
 import PsychicServer from '../src/server'
 

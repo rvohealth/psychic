@@ -154,7 +154,7 @@ program
 
 program
   .command('sync:all')
-  .description('generates the .psy folder, which is used by psychic to ingest your app')
+  .description('cleans up installation files')
   .option('--core', 'sets core to true')
   .action(async () => {
     try {
@@ -165,20 +165,9 @@ program
       // intentionally ignore, since we expect this dir to be empty.
     }
 
-    await sspawn(`yarn psy sync:psydir${coreSuffix(program.args)}`)
-    // TODO: figure out why this throws DB error
+    // TODO: figure out why this throws DB error. For now, this is manually run by the
+    // consuming app.
     // await sspawn(`yarn dream sync:all`)
-  })
-
-program
-  .command('sync:psydir')
-  .description('generates the .psy folder, which is used by psychic to ingest your app')
-  .option('--core', 'sets core to true')
-  .action(async () => {
-    const coreDevFlag = setCoreDevelopmentFlag(program.args)
-    const srcDir = coreDevFlag ? './test-app' : '../../src'
-    await sspawn(`${coreDevFlag}ts-node ./bin/build-psychic-dir.ts`)
-    await sspawn(`${coreDevFlag}ts-node ${srcDir}/.psy/buildGlobals.ts`)
   })
 
 program

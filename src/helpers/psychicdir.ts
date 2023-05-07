@@ -47,8 +47,12 @@ export default class PsychicDir {
   }
 
   public static async loadSerializers() {
-    _serializers = (await import(filePath('.psy/serializers'))).default as {
-      [key: string]: typeof PsychicSerializer
+    _serializers = {}
+    const serializerPaths = (await getFiles(filePath('app/serializers'))).filter(path => /\.ts$/.test(path))
+    for (const serializerPath of serializerPaths) {
+      const serializerClass = (await import(serializerPath)).default as typeof PsychicSerializer
+      const serializerKey = serializerPath.replace(/^.*app\/serializers\//, '').replace(/\.ts$/, '')
+      _serializers[serializerKey] = serializerClass
     }
     return _serializers
   }
