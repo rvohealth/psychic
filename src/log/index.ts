@@ -16,6 +16,7 @@ export class Logger {
   public async write(text: string, color?: string) {
     this.puts(text, color)
     const thisFs = fs ? fs : await import('fs')
+    console.log('FROM LOGGER:', process.env, logPath())
     return await thisFs.promises.appendFile(logPath(), this.header + text + '\n')
   }
 
