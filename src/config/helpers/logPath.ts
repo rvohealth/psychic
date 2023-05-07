@@ -1,4 +1,3 @@
-import rootPath from '../../config/helpers/rootPath'
 import absoluteFilePath from '../../helpers/absoluteFilePath'
 
 export default function logPath() {
