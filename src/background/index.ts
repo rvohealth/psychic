@@ -1,9 +1,9 @@
 import { Job, Queue, Worker } from 'bullmq'
-import filePath from '../config/helpers/filePath'
 import redisOptions from '../config/helpers/redisOptions'
 import readAppConfig from '../config/helpers/readAppConfig'
 import { Dream } from 'dream'
 import getModelKey from '../config/helpers/getModelKey'
+import absoluteSrcPath from '../helpers/absoluteSrcPath'
 
 export class Background {
   public queue: Queue | null = null
@@ -106,7 +106,7 @@ export class Background {
     switch (jobType) {
       case 'BackgroundJobQueueStaticJob':
         if (filepath) {
-          const ObjectClass = (await import(filePath(filepath)))?.[importKey || 'default']
+          const ObjectClass = (await import(absoluteSrcPath(filepath)))?.[importKey || 'default']
           if (!ObjectClass) return
 
           await ObjectClass[method as string](...args)
@@ -115,7 +115,7 @@ export class Background {
 
       case 'BackgroundJobQueueInstanceJob':
         if (filepath) {
-          const ObjectClass = (await import(filePath(filepath)))?.[importKey || 'default']
+          const ObjectClass = (await import(absoluteSrcPath(filepath)))?.[importKey || 'default']
           if (!ObjectClass) return
 
           const instance = new ObjectClass(...constructorArgs)
@@ -125,7 +125,9 @@ export class Background {
 
       case 'BackgroundJobQueueModelInstanceJob':
         if (filepath) {
-          const DreamModelClass = (await import(filePath(filepath)))?.default as typeof Dream | undefined
+          const DreamModelClass = (await import(absoluteSrcPath(filepath)))?.default as
+            | typeof Dream
+            | undefined
           if (!DreamModelClass) return
 
           const modelInstance = await DreamModelClass.find(id)

@@ -1,7 +1,6 @@
 import rootPath from '../../config/helpers/rootPath'
+import absoluteFilePath from '../../helpers/absoluteFilePath'
 
 export default function logPath() {
-  if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') return rootPath() + `/logs/log.${process.env.NODE_ENV}`
-
-  return rootPath() + `/../logs/log.${process.env.NODE_ENV}`
+  return absoluteFilePath(`/logs/log.${process.env.NODE_ENV}`)
 }

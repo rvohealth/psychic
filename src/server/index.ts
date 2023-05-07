@@ -6,7 +6,6 @@ import * as cookieParser from 'cookie-parser'
 import PsychicConfig from '../config'
 import log from '../log'
 import Cable from '../cable'
-import filePath from '../config/helpers/filePath'
 import ReactServer from '../server/react'
 import PsychicRouter from '../router'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
@@ -96,7 +95,7 @@ export default class PsychicServer {
     this.app.use(cookieParser())
     this.app.use(express.json())
 
-    const getCorsOptions = (await import(filePath('conf/cors'))).default
+    const getCorsOptions = (await import(absoluteSrcPath('conf/cors'))).default
     this.app.use(cors(await getCorsOptions()))
   }
 

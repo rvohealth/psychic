@@ -1,9 +1,9 @@
 import { Dream } from 'dream'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import filePath from '../config/helpers/filePath'
 import PsychicController from '../controller'
 import PsychicSerializer from '../serializer'
+import absoluteSrcPath from './absoluteSrcPath'
 
 let _models: { [key: string]: typeof Dream }
 let _controllers: { [key: string]: typeof PsychicController }
@@ -16,7 +16,9 @@ export default class PsychicDir {
 
   public static async loadModels() {
     _models = {}
-    const modelPaths = (await getFiles(await filePath('app/models'))).filter(path => /\.ts$/.test(path))
+    const modelPaths = (await getFiles(await absoluteSrcPath('app/models'))).filter(path =>
+      /\.ts$/.test(path)
+    )
     for (const modelPath of modelPaths) {
       const ModelClass = (await import(modelPath)).default as typeof Dream
       const modelKey = modelPath.replace(/^.*app\/models\//, '').replace(/\.ts$/, '')
@@ -32,7 +34,9 @@ export default class PsychicDir {
 
   public static async loadControllers() {
     _controllers = {}
-    const controllerPaths = (await getFiles(filePath('app/controllers'))).filter(path => /\.ts$/.test(path))
+    const controllerPaths = (await getFiles(absoluteSrcPath('app/controllers'))).filter(path =>
+      /\.ts$/.test(path)
+    )
     for (const controllerPath of controllerPaths) {
       const ControllerClass = (await import(controllerPath)).default as typeof PsychicController
       const controllerKey = controllerPath.replace(/^.*app\/controllers\//, '').replace(/\.ts$/, '')
@@ -48,7 +52,9 @@ export default class PsychicDir {
 
   public static async loadSerializers() {
     _serializers = {}
-    const serializerPaths = (await getFiles(filePath('app/serializers'))).filter(path => /\.ts$/.test(path))
+    const serializerPaths = (await getFiles(absoluteSrcPath('app/serializers'))).filter(path =>
+      /\.ts$/.test(path)
+    )
     for (const serializerPath of serializerPaths) {
       const serializerClass = (await import(serializerPath)).default as typeof PsychicSerializer
       const serializerKey = serializerPath.replace(/^.*app\/serializers\//, '').replace(/\.ts$/, '')

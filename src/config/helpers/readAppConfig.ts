@@ -1,12 +1,12 @@
 import * as fs from 'fs'
 import * as YAML from 'yaml'
-import rootPath from '../../config/helpers/rootPath'
+import absoluteSrcPath from '../../helpers/absoluteSrcPath'
 
 let _appConfig: AppConfig | null = null
 export default function readAppConfig() {
   if (_appConfig) return _appConfig
 
-  const appYmlPath = rootPath() + '/conf/app.yml'
+  const appYmlPath = absoluteSrcPath('conf/app.yml')
   const buffer = fs.readFileSync(appYmlPath, 'utf8')
   _appConfig = YAML.parse(buffer)?.psychic || {
     ws: false,
