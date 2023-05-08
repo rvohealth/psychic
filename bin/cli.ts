@@ -157,10 +157,9 @@ program
       // intentionally ignore, since we expect this dir to be empty.
     }
 
-    await sspawn(`yarn dream sync:existing${coreSuffix(program.args)}`)
-
     // TODO: figure out why this throws DB error. For now, this is manually run by the
     // consuming app.
+    // await sspawn(`yarn dream sync:existing${coreSuffix(program.args)}`)
     // await sspawn(`yarn dream sync:all`)
   })
 
