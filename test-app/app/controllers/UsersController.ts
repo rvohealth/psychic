@@ -20,6 +20,11 @@ export default class UsersController extends ApplicationController {
     this.ok(this.beforeAllTestContent)
   }
 
+  public async failedToSaveTest() {
+    // @ts-ignore
+    await User.create({ email: 'how@yadoin', password: 'howyadoin', created_at: 'invalid date' })
+  }
+
   public async create() {
     const user = await User.create(this.userParams)
     this.ok(user)

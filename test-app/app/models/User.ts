@@ -1,4 +1,4 @@
-import { Dream, BeforeCreate, BeforeUpdate, Validates } from 'dream'
+import { Dream, BeforeCreate, BeforeUpdate, Validates, Virtual } from 'dream'
 import Hash from '../../../src/encryption/hash'
 export default class User extends Dream {
   public get table() {
@@ -14,9 +14,9 @@ export default class User extends Dream {
   @Validates('presence')
   public email: string
 
-  @Validates('length', { min: 4, max: 18 })
-  public password_digest: string
+  @Virtual()
   public password?: string | null
+  public password_digest: string
 
   public static backgroundTest() {}
 
