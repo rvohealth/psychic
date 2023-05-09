@@ -22,14 +22,23 @@ export default async function generateResource(
     process.env.PSYCHIC_CORE_DEVELOPMENT = '1'
   }
 
+  const controllerAttributes = attributesWithTypes
+    .filter(attr => isColumn(attr))
+    .map(attr => attr.split(':')[0]!)
+
   await generateController(
     route,
     fullyQualifiedModelName,
     ['create', 'index', 'show', 'update', 'destroy'],
-    attributes
+    controllerAttributes
   )
   await generateSerializer(fullyQualifiedModelName, attributes)
 
   console.log('finished generating resource!')
   // if (process.env.NODE_ENV !== 'test') process.exit()
+}
+
+function isColumn(attribute: string) {
+  const [_, columnType] = attribute.split(':')
+  return !['belongs_to', 'has_one', 'has_many'].includes(columnType)
 }
