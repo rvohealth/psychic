@@ -6,13 +6,15 @@
 // https://github.com/tj/commander.js#quick-start
 
 import { Command } from 'commander'
-import * as fs from 'fs/promises'
 import sspawn from '../src/helpers/sspawn'
 import generateResource from '../src/generate/resource'
-import setCoreDevelopmentFlag, { coreSuffix } from './cli/helpers/setCoreDevelopmentFlag'
+import setCoreDevelopmentFlag from './cli/helpers/setCoreDevelopmentFlag'
 import generateSerializer from '../src/generate/serializer'
 import generateController from '../src/generate/controller'
 import hijackRootForCLI from './cli/helpers/hijackRootForCLI'
+import yarncmdRunByAppConsumer from './cli/helpers/yarncmdRunByAppConsumer'
+import ensureStableAppBuild from './cli/helpers/ensureStableAppBuild'
+import omitCoreArg from './cli/helpers/omitCoreArg'
 
 hijackRootForCLI()
 const program = new Command()
@@ -21,21 +23,24 @@ program
   .command('dream')
   .description('calls to the underlying dream cli')
   .action(async () => {
-    await sspawn(`yarn dream ${program.args.slice(1, program.args.length).join(' ')}`)
+    const filteredArgs = program.args.slice(1, -1).filter(arg => !['--core'].includes(arg))
+    await sspawn(yarncmdRunByAppConsumer(`dream ${filteredArgs.join(' ')}`, omitCoreArg(program.args)))
   })
 
 program
   .command('spec')
   .description('runs all specs if no spec is provided. If a spec is provided, it will run that spec.')
   .action(async () => {
+    await ensureStableAppBuild(program.args)
+
     const [_, file] = program.args
-    const cwdStr = program.args.includes('--core') ? ' ' : ' --cwd=../../ '
     if (!file) {
-      await sspawn(`yarn${cwdStr}uspec && yarn${cwdStr}fspec`)
+      await sspawn(yarncmdRunByAppConsumer('uspec', program.args))
+      await sspawn(yarncmdRunByAppConsumer('fspec', program.args))
     } else if (/spec\/features\//.test(file)) {
-      await sspawn(`yarn${cwdStr}fspec ${file}`)
+      await sspawn(yarncmdRunByAppConsumer(`fspec ${file}`, program.args))
     } else {
-      await sspawn(`yarn${cwdStr}uspec ${file}`)
+      await sspawn(yarncmdRunByAppConsumer(`uspec ${file}`, program.args))
     }
   })
 
@@ -43,17 +48,8 @@ program
   .command('clean')
   .description('cleans up existing test infrastructure from psychic and dream installations')
   .action(async () => {
-    console.log('removing dream test infrastructure...')
-    await fs.rm(`../../node_modules/dream/test-app`, {
-      recursive: true,
-      force: true,
-    })
-
-    console.log('removing psychic test infrastructure...')
-    await fs.rm(`../../node_modules/psychic/test-app`, {
-      recursive: true,
-      force: true,
-    })
+    console.log('cleaning up psychic installation')
+    await ensureStableAppBuild(program.args)
   })
 
 program
@@ -64,12 +60,12 @@ program
   .description('generate:model <name> [...attributes] create a new dream')
   .argument('<name>', 'name of the dream')
   .action(async () => {
+    await ensureStableAppBuild(program.args)
+
     const [_, name, ...attributes] = program.args
-    if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
-      await sspawn(`yarn dream g:model ${name} ${attributes.join(' ')}`)
-    } else {
-      await sspawn(`yarn --cwd=../../node_modules/dream dream g:model ${name} ${attributes.join(' ')}`)
-    }
+    await sspawn(
+      yarncmdRunByAppConsumer(`dream g:model ${name} ${attributes.join(' ')}`, omitCoreArg(program.args))
+    )
   })
 
 program
@@ -78,14 +74,10 @@ program
   .description('g:migration <name> create a new dream migration')
   .argument('<name>', 'name of the migration')
   .action(async () => {
-    const [_, name] = program.args
-    await sspawn(`yarn dream g:migration ${name}`)
+    await ensureStableAppBuild(program.args)
 
-    if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
-      await sspawn(`yarn dream g:migration ${name}`)
-    } else {
-      await sspawn(`yarn --cwd=../../node_modules/dream dream g:migration ${name}`)
-    }
+    const [_, name] = program.args
+    await sspawn(yarncmdRunByAppConsumer(`dream g:model ${name}`, omitCoreArg(program.args)))
   })
 
 program
@@ -141,7 +133,8 @@ program
   .description('db:migrate runs any outstanding database migrations')
   .option('--core', 'sets core to true')
   .action(async () => {
-    await sspawn(`yarn dream db:migrate${coreSuffix(program.args)}`)
+    await ensureStableAppBuild(program.args)
+    await sspawn(yarncmdRunByAppConsumer(`dream db:migrate`, omitCoreArg(program.args)))
   })
 
 program
@@ -149,18 +142,8 @@ program
   .description('cleans up installation files')
   .option('--core', 'sets core to true')
   .action(async () => {
-    try {
-      await fs.stat('./node_modules/dream/test-app')
-      console.log('test-app still present in dream installation, removing...')
-      await fs.rm('./node_modules/dream/test-app', { recursive: true, force: true })
-    } catch (error) {
-      // intentionally ignore, since we expect this dir to be empty.
-    }
-
-    // TODO: figure out why this throws DB error. For now, this is manually run by the
-    // consuming app.
-    // await sspawn(`yarn dream sync:existing${coreSuffix(program.args)}`)
-    // await sspawn(`yarn dream sync:all`)
+    await ensureStableAppBuild(program.args)
+    await sspawn(yarncmdRunByAppConsumer(`dream sync:all`, omitCoreArg(program.args)))
   })
 
 program
@@ -169,8 +152,8 @@ program
   .description('runs yarn dream sync:schema, then yarn dream sync:associations')
   .option('--core', 'sets core to true')
   .action(async () => {
-    await sspawn(`yarn dream sync:schema${coreSuffix(program.args)}`)
-    await sspawn(`yarn dream sync:associations${coreSuffix(program.args)}`)
+    await sspawn(yarncmdRunByAppConsumer(`dream sync:schema`, omitCoreArg(program.args)))
+    await sspawn(yarncmdRunByAppConsumer(`dream sync:associations`, omitCoreArg(program.args)))
   })
 
 program
@@ -181,7 +164,7 @@ program
     'introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration'
   )
   .action(async () => {
-    await sspawn(`yarn dream sync:schema`)
+    await sspawn(yarncmdRunByAppConsumer(`dream sync:schema`, omitCoreArg(program.args)))
   })
 
 program
@@ -190,7 +173,7 @@ program
     'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.'
   )
   .action(async () => {
-    await sspawn(`yarn dream sync:associations`)
+    await sspawn(yarncmdRunByAppConsumer(`dream sync:associations`, omitCoreArg(program.args)))
   })
 
 program
@@ -217,7 +200,7 @@ program
     'creates a new database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars'
   )
   .action(async () => {
-    await sspawn(`yarn dream db:create`)
+    await sspawn(yarncmdRunByAppConsumer(`dream db:create`, omitCoreArg(program.args)))
   })
 
 program
@@ -226,7 +209,7 @@ program
     'drops the database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars'
   )
   .action(async () => {
-    await sspawn(`yarn dream db:drop`)
+    await sspawn(yarncmdRunByAppConsumer(`dream db:drop`, omitCoreArg(program.args)))
   })
 
 program
