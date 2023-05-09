@@ -36,8 +36,8 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async create() {
-    const ${camelize(modelName)} = await ${modelName}.create(this.${camelize(modelName)}Params)
-    this.ok(${camelize(modelName)})
+//    const ${camelize(modelName)} = await ${modelName}.create(this.${camelize(modelName)}Params)
+//    this.ok(${camelize(modelName)})
   }`
         else
           return `\
@@ -48,8 +48,8 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async index() {
-    const ${pluralize(camelize(modelName))} = await ${modelName}.all()
-    this.ok(${pluralize(camelize(modelName))})
+//    const ${pluralize(camelize(modelName))} = await ${modelName}.all()
+//    this.ok(${pluralize(camelize(modelName))})
   }`
         else
           return `\
@@ -60,8 +60,8 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async show() {
-    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
-    this.ok(${camelize(modelName)})
+//    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
+//    this.ok(${camelize(modelName)})
   }`
         else
           return `\
@@ -72,9 +72,9 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async update() {
-    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
-    await ${camelize(modelName)}.update(this.${camelize(modelName)}Params)
-    this.ok(${camelize(modelName)})
+//    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
+//    await ${camelize(modelName)}.update(this.${camelize(modelName)}Params)
+//    this.ok(${camelize(modelName)})
   }`
         else
           return `\
@@ -85,9 +85,9 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async destroy() {
-    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
-    await ${camelize(modelName)}.destroy()
-    this.ok()
+//    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
+//    await ${camelize(modelName)}.destroy()
+//    this.ok()
   }`
         else
           return `\

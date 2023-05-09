@@ -19,30 +19,30 @@ import User from '../../../models/User'
 
 export default class ApiV1UsersController extends PsychicController {
   public async create() {
-    const user = await User.create(this.userParams)
-    this.ok(user)
+//    const user = await User.create(this.userParams)
+//    this.ok(user)
   }
 
   public async index() {
-    const users = await User.all()
-    this.ok(users)
+//    const users = await User.all()
+//    this.ok(users)
   }
 
   public async show() {
-    const user = await User.find(this.params.id)
-    this.ok(user)
+//    const user = await User.find(this.params.id)
+//    this.ok(user)
   }
 
   public async update() {
-    const user = await User.find(this.params.id)
-    await user.update(this.userParams)
-    this.ok(user)
+//    const user = await User.find(this.params.id)
+//    await user.update(this.userParams)
+//    this.ok(user)
   }
 
   public async destroy() {
-    const user = await User.find(this.params.id)
-    await user.destroy()
-    this.ok()
+//    const user = await User.find(this.params.id)
+//    await user.destroy()
+//    this.ok()
   }
 
   public async login() {
@@ -74,30 +74,30 @@ import User from '../../../../models/Health/User'
 
 export default class ApiV1HealthUsersController extends PsychicController {
   public async create() {
-    const user = await User.create(this.userParams)
-    this.ok(user)
+//    const user = await User.create(this.userParams)
+//    this.ok(user)
   }
 
   public async index() {
-    const users = await User.all()
-    this.ok(users)
+//    const users = await User.all()
+//    this.ok(users)
   }
 
   public async show() {
-    const user = await User.find(this.params.id)
-    this.ok(user)
+//    const user = await User.find(this.params.id)
+//    this.ok(user)
   }
 
   public async update() {
-    const user = await User.find(this.params.id)
-    await user.update(this.userParams)
-    this.ok(user)
+//    const user = await User.find(this.params.id)
+//    await user.update(this.userParams)
+//    this.ok(user)
   }
 
   public async destroy() {
-    const user = await User.find(this.params.id)
-    await user.destroy()
-    this.ok()
+//    const user = await User.find(this.params.id)
+//    await user.destroy()
+//    this.ok()
   }
 
   public async login() {
