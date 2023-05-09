@@ -9,7 +9,7 @@ export default async function generateResource(
   args: string[]
 ) {
   const attributesWithTypes = args.filter(attr => !['--core'].includes(attr))
-  const attributes = attributesWithTypes.map(str => str.split(':')[0])
+  const columnAttributes = attributesWithTypes.filter(attr => isColumn(attr)).map(attr => attr.split(':')[0]!)
 
   await sspawn(
     `yarn --cwd=../../node_modules/dream dream g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(
@@ -22,19 +22,13 @@ export default async function generateResource(
     process.env.PSYCHIC_CORE_DEVELOPMENT = '1'
   }
 
-  const controllerAttributes = attributesWithTypes
-    .filter(attr => isColumn(attr))
-    .map(attr => attr.split(':')[0]!)
-
   await generateController(
     route,
     fullyQualifiedModelName,
     ['create', 'index', 'show', 'update', 'destroy'],
-    controllerAttributes
+    columnAttributes
   )
-  await generateSerializer(fullyQualifiedModelName, attributes)
-
-  console.log('finished generating resource!')
+  await generateSerializer(fullyQualifiedModelName, columnAttributes)
   // if (process.env.NODE_ENV !== 'test') process.exit()
 }
 

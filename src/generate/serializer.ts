@@ -21,6 +21,4 @@ export default async function generateSerializer(
     generateSerializerString,
     [fullyQualifiedModelName, attributes]
   )
-
-  console.log('done generating serializer')
 }

@@ -30,6 +30,4 @@ export default async function generateController(
     rootPath,
     generateBlankSpecContent
   )
-
-  console.log('done generating controller')
 }
