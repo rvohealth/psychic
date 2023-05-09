@@ -18,7 +18,7 @@ describe('a visitor attempts to save a record', () => {
           password: 'howyadoin',
         },
       })
-      .expect(200)
+      .expect(201)
     expect(await User.where({ email: 'how@yadoin' }).count()).toEqual(1)
   })
 

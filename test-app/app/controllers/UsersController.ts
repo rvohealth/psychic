@@ -27,7 +27,7 @@ export default class UsersController extends ApplicationController {
 
   public async create() {
     const user = await User.create(this.userParams)
-    this.ok(user)
+    this.created(user)
   }
 
   public async index() {

@@ -116,6 +116,16 @@ export default class PsychicController {
     return this.json(data)
   }
 
+  public created(data: any = {}) {
+    this.res.status(201)
+    return this.json(data)
+  }
+
+  public noContent(data: any = {}) {
+    this.res.status(204)
+    return this.json(data)
+  }
+
   public async runAction(action: string) {
     await this.runBeforeActionsFor(action)
     await (this as any)[action]()
