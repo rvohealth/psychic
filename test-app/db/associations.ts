@@ -15,7 +15,7 @@ export interface SyncedBelongsToAssociations {
   
 
 export interface VirtualColumns {
-  "health_users": [],
+  "health_users": false,
   "users": [
     "password"
   ]

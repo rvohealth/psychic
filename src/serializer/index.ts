@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon'
 export default class PsychicSerializer {
   private static _attributes: string[] = []
 
@@ -28,7 +29,16 @@ export default class PsychicSerializer {
     const returnObj: { [key: string]: any } = {}
     const staticSelf: typeof PsychicSerializer = this.constructor as typeof PsychicSerializer
     staticSelf._attributes.forEach(attr => {
-      returnObj[attr] = this.data[attr]
+      const [attributeField, attributeType] = attr.split(':')
+      switch (attributeType) {
+        case 'date':
+          const fieldValue: DateTime | undefined = this.data[attributeField]
+          returnObj[attributeField] = fieldValue?.toFormat('yyyy-MM-dd')
+          break
+
+        default:
+          returnObj[attributeField] = this.data[attributeField]
+      }
     })
     return returnObj
   }

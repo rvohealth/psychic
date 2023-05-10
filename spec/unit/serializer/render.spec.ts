@@ -1,3 +1,4 @@
+import { DateTime } from 'luxon'
 import PsychicSerializer from '../../../src/serializer'
 
 describe('PsychicSerializer#render', () => {
@@ -29,5 +30,19 @@ describe('PsychicSerializer#render', () => {
     }
     const serializer = new MySerializer({ email: 'abc', password: 'james' })
     expect(serializer.render()).toEqual({ email: 'abc' })
+  })
+
+  context('with decorated attributes', () => {
+    context('one of the fields is a date', () => {
+      it('renders unique format for dates', () => {
+        class MySerializer extends PsychicSerializer {
+          static {
+            this.attributes('created_at:date')
+          }
+        }
+        const serializer = new MySerializer({ created_at: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
+        expect(serializer.render()).toEqual({ created_at: '2002-10-02' })
+      })
+    })
   })
 })
