@@ -5,6 +5,7 @@ import ApplicationController from './ApplicationController'
 export default class UsersController extends ApplicationController {
   static {
     this.before('authenticate', { only: ['authPing'] })
+    this.before('setBeforeAllTestContent')
   }
 
   public ping() {
@@ -15,9 +16,18 @@ export default class UsersController extends ApplicationController {
     this.ok('authed')
   }
 
+  public beforeAllTest() {
+    this.ok(this.beforeAllTestContent)
+  }
+
+  public async failedToSaveTest() {
+    // @ts-ignore
+    await User.create({ email: 'how@yadoin', password: 'howyadoin', created_at: 'invalid date' })
+  }
+
   public async create() {
     const user = await User.create(this.userParams)
-    this.ok(user)
+    this.created(user)
   }
 
   public async index() {
@@ -31,6 +41,11 @@ export default class UsersController extends ApplicationController {
 
     await this.startSession(user)
     this.ok()
+  }
+
+  public beforeAllTestContent = 'before all action was NOT called for all'
+  public setBeforeAllTestContent() {
+    this.beforeAllTestContent = 'before all action was called for all!'
   }
 
   private get userParams() {

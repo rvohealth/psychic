@@ -9,6 +9,10 @@ export default (r: PsychicRouter) => {
   r.get('auth-ping', 'Users#authPing')
   r.get('api-ping', 'Api/Users#ping')
 
+  // hooks tests
+  r.get('users-before-all-test', 'Users#beforeAllTest')
+  r.post('failed-to-save-test', 'Users#failedToSaveTest')
+
   r.namespace('api', r => {
     r.get('ping', 'Users#ping')
     r.namespace('v1', r => {

@@ -13,3 +13,10 @@ export interface SyncedBelongsToAssociations {
   "users": false
 }
   
+
+export interface VirtualColumns {
+  "health_users": false,
+  "users": [
+    "password"
+  ]
+}

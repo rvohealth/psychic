@@ -4,7 +4,7 @@ export default class Params {
     if (!params) return permitted
 
     allowed.forEach(field => {
-      permitted[field] = params[field]
+      if (params[field] !== undefined) permitted[field] = params[field]
     })
     return permitted
   }

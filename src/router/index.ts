@@ -220,6 +220,13 @@ export default class PsychicRouter {
         case UnprocessableEntity:
           res.status(422).json((err as any).data)
           break
+
+        default:
+          res.status(500).send(`
+            An unexpected error has caused this request to crash.
+              error:
+                ${err}
+          `)
       }
     }
   }
