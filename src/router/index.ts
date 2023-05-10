@@ -14,7 +14,7 @@ import NotFound from '../error/http/not-found'
 import PsychicConfig from '../config'
 import log from '../log'
 import PsychicController from '../controller'
-import { FailedToSaveDream, ValidationError } from 'dream'
+import { ValidationError } from 'dream'
 import pascalize from '../helpers/pascalize'
 
 export default class PsychicRouter {
@@ -215,14 +215,6 @@ export default class PsychicRouter {
           res.status(422).json({
             errors,
           })
-          break
-
-        case FailedToSaveDream:
-          const message =
-            process.env.NODE_ENV === 'production'
-              ? 'Failed to save dream.'
-              : `Failed to save dream. the following error occurred: ${err}`
-          res.status(422).json(message)
           break
 
         case UnprocessableEntity:
