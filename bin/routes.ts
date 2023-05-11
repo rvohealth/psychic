@@ -18,7 +18,7 @@ env.load()
     const endOfExpression = route.controllerActionString
     const desiredSpaceCount = 110
     const spaces = ' '.repeat(
-      Math.max(Math.min(desiredSpaceCount - beginningOfExpression.length - endOfExpression.length, 0), 110)
+      Math.min(Math.max(desiredSpaceCount - beginningOfExpression.length - endOfExpression.length, 0), 110)
     )
 
     const expression = `${beginningOfExpression}${spaces}${endOfExpression}`

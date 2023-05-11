@@ -8,7 +8,7 @@ describe('a visitor attempts to save a record', () => {
     await server.boot()
   })
 
-  it('returns 200', async () => {
+  it('returns 201', async () => {
     await request
       .agent(server.app)
       .post('/users')

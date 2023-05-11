@@ -14,11 +14,12 @@ describe('PsychicRouter', () => {
       router.resources('users', r => {
         r.resources('pets')
       })
+      router.commit()
       expect(router.routes).toEqual(
         expect.arrayContaining([
           {
             httpMethod: 'put',
-            path: 'users/:id/pets/:id',
+            path: '/users/:id/pets/:id',
             controllerActionString: 'Users/Pets#update',
           },
         ])

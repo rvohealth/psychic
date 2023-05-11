@@ -18,12 +18,13 @@ import log from '../log'
 import PsychicController from '../controller'
 import { ValidationError } from 'dream'
 import pascalize from '../helpers/pascalize'
+import RouteManager from './route-manager'
 
+const routeManager = new RouteManager()
 export default class PsychicRouter {
   public app: Application
   public config: PsychicConfig
-  private _routes: RouteConfig[] = []
-  protected currentNamespaces: string[] = []
+  public currentNamespaces: string[] = []
   constructor(app: Application, config: PsychicConfig) {
     this.app = app
     this.config = config
@@ -34,7 +35,20 @@ export default class PsychicRouter {
   }
 
   public get routes() {
-    return [...this._routes]
+    return routeManager.routes
+  }
+
+  public reset() {
+    routeManager.routes = []
+  }
+
+  // this is called after all routes have been processed.
+  public commit() {
+    this.routes.forEach(route => {
+      this.app[route.httpMethod](routePath(route.path), async (req, res) => {
+        await this.handle(route.controllerActionString, { req, res })
+      })
+    })
   }
 
   get(path: string, controllerActionString: string) {
@@ -71,35 +85,14 @@ export default class PsychicRouter {
 
   private prefixPathWithNamespaces(str: string) {
     if (!this.currentNamespaces.length) return str
-    return this.currentNamespaces.join('/') + '/' + str
-  }
-
-  public addRoute({
-    httpMethod,
-    path,
-    controllerActionString,
-  }: {
-    httpMethod: string
-    path: string
-    controllerActionString: string
-  }) {
-    this._routes.push({
-      httpMethod,
-      path,
-      controllerActionString,
-    })
+    return '/' + this.currentNamespaces.join('/') + '/' + str
   }
 
   public crud(httpMethod: HttpMethod, path: string, controllerActionString: string) {
-    const fullPath = this.prefixPathWithNamespaces(path)
-    const fullControllerActionString = this.prefixControllerActionStringWithNamespaces(controllerActionString)
-    this.addRoute({
+    routeManager.addRoute({
       httpMethod,
-      path,
-      controllerActionString,
-    })
-    this.app[httpMethod](routePath(fullPath), async (req, res) => {
-      await this.handle(fullControllerActionString, { req, res })
+      path: this.prefixPathWithNamespaces(path),
+      controllerActionString: this.prefixControllerActionStringWithNamespaces(controllerActionString),
     })
   }
 
@@ -109,9 +102,6 @@ export default class PsychicRouter {
     })
 
     this.runNestedCallbacks(namespace, nestedRouter, cb)
-    this.absorbRoutes(nestedRouter, namespace)
-
-    this.app.use(routePath(namespace), nestedRouter.router)
   }
 
   public resources(
@@ -166,21 +156,6 @@ export default class PsychicRouter {
     })
 
     this.runNestedCallbacks(path, nestedRouter, cb, { asMember: true })
-    this.absorbRoutes(nestedRouter, this.currentNamespaces.join('/'))
-
-    this.app.use(routePath(path), nestedRouter.router)
-  }
-
-  private absorbRoutes(nestedRouter: PsychicNestedRouter, namespace?: string) {
-    nestedRouter.routes.forEach(route => {
-      this.addRoute({
-        httpMethod: route.httpMethod,
-        path: namespace ? namespacedRoute(namespace, route.path) : route.path,
-        controllerActionString: namespace
-          ? namespacedControllerActionString(namespace, route.controllerActionString)
-          : route.controllerActionString,
-      })
-    })
   }
 
   private runNestedCallbacks(
@@ -220,9 +195,6 @@ export default class PsychicRouter {
     })
 
     this.runNestedCallbacks(path, nestedRouter, cb)
-    this.absorbRoutes(nestedRouter)
-
-    this.app.use(routePath(path), nestedRouter.router)
   }
 
   public async handle(
@@ -316,10 +288,4 @@ export class PsychicNestedRouter extends PsychicRouter {
   public get routingMechanism() {
     return this.router
   }
-}
-
-export interface RouteConfig {
-  controllerActionString: string
-  path: string
-  httpMethod: string
 }
