@@ -1,3 +1,4 @@
+import * as colors from 'colorette'
 import env from '../src/env'
 import PsychicServer from '../src/server'
 
@@ -7,7 +8,7 @@ env.load()
   await server.boot()
 
   const routes = await server.routes()
-  routes.forEach(route => {
+  routes.forEach((route, i) => {
     const method = route.httpMethod.toUpperCase()
     const numMethodSpaces = 8 - method.length
 
@@ -17,7 +18,10 @@ env.load()
     const endOfExpression = route.controllerActionString
     const desiredSpaceCount = 110
     const spaces = ' '.repeat(desiredSpaceCount - beginningOfExpression.length - endOfExpression.length)
-    console.log(`${beginningOfExpression}${spaces}${endOfExpression}`)
+
+    const expression = `${beginningOfExpression}${spaces}${endOfExpression}`
+    const colorizedExpression = i % 2 ? colors.bgWhite(colors.black(expression)) : expression
+    console.log(colorizedExpression)
   })
   process.exit()
 })()
