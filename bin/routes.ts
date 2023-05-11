@@ -17,6 +17,11 @@ env.load()
   expressions.forEach(([beginning, end], i) => {
     const openingSpaces = ' '.repeat(desiredFirstGapSpaceCount - beginning.length)
     const partialExpression = `${beginning}${openingSpaces}${end}`
+    console.log(
+      desiredLastGapSpaceCount,
+      partialExpression,
+      desiredLastGapSpaceCount - partialExpression.length
+    )
     const closingSpaces = ' '.repeat(desiredLastGapSpaceCount - partialExpression.length)
     const expression = `${partialExpression}${closingSpaces}`
     const colorizedExpression = i % 2 ? colors.bgWhite(colors.black(expression)) : expression
