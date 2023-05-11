@@ -57,9 +57,16 @@ export default class PsychicRouter {
     this.crud('delete', path, controllerActionString)
   }
 
-  private prefixModelNameWithNamespaces(str: string) {
+  private prefixControllerActionStringWithNamespaces(str: string) {
     if (!this.currentNamespaces.length) return str
-    return this.currentNamespaces.map(str => pascalize(str)).join('/') + '/' + str
+    return (
+      this.currentNamespaces
+        .filter(n => !/^:/.test(n))
+        .map(str => pascalize(str))
+        .join('/') +
+      '/' +
+      str
+    )
   }
 
   private prefixPathWithNamespaces(str: string) {
@@ -85,7 +92,7 @@ export default class PsychicRouter {
 
   public crud(httpMethod: HttpMethod, path: string, controllerActionString: string) {
     const fullPath = this.prefixPathWithNamespaces(path)
-    const fullControllerActionString = this.prefixModelNameWithNamespaces(controllerActionString)
+    const fullControllerActionString = this.prefixControllerActionStringWithNamespaces(controllerActionString)
     this.addRoute({
       httpMethod,
       path,
@@ -101,7 +108,7 @@ export default class PsychicRouter {
       namespaces: this.currentNamespaces,
     })
 
-    this.applyNamespace(namespace, nestedRouter, cb)
+    this.runNestedCallbacks(namespace, nestedRouter, cb)
     this.absorbRoutes(nestedRouter, namespace)
 
     this.app.use(routePath(namespace), nestedRouter.router)
@@ -117,7 +124,7 @@ export default class PsychicRouter {
         throw 'cannot pass a function as a second arg when passing 3 args'
       this._resources(path, optionsOrCb as ResourcesOptions, cb)
     } else {
-      if (typeof optionsOrCb === 'function') this._resources(path, undefined, cb)
+      if (typeof optionsOrCb === 'function') this._resources(path, undefined, optionsOrCb)
       else this._resources(path, optionsOrCb, undefined)
     }
   }
@@ -158,8 +165,8 @@ export default class PsychicRouter {
       applyResourcesAction(path, action, nestedRouter)
     })
 
-    this.applyNamespace(path, nestedRouter, cb)
-    this.absorbRoutes(nestedRouter)
+    this.runNestedCallbacks(path, nestedRouter, cb, { asMember: true })
+    this.absorbRoutes(nestedRouter, this.currentNamespaces.join('/'))
 
     this.app.use(routePath(path), nestedRouter.router)
   }
@@ -176,14 +183,23 @@ export default class PsychicRouter {
     })
   }
 
-  private applyNamespace(
+  private runNestedCallbacks(
     namespace: string,
     nestedRouter: PsychicNestedRouter,
-    cb?: (router: PsychicNestedRouter) => void
+    cb?: (router: PsychicNestedRouter) => void,
+    {
+      asMember = false,
+    }: {
+      asMember?: boolean
+    } = {}
   ) {
     this.currentNamespaces.push(namespace)
+    if (asMember) this.currentNamespaces.push(':id')
+
     if (cb) cb(nestedRouter)
+
     this.currentNamespaces.pop()
+    if (asMember) this.currentNamespaces.pop()
   }
 
   private _resource(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
@@ -203,7 +219,7 @@ export default class PsychicRouter {
       applyResourceAction(path, action, nestedRouter)
     })
 
-    this.applyNamespace(path, nestedRouter, cb)
+    this.runNestedCallbacks(path, nestedRouter, cb)
     this.absorbRoutes(nestedRouter)
 
     this.app.use(routePath(path), nestedRouter.router)

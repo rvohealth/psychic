@@ -19,6 +19,9 @@ export default (r: PsychicRouter) => {
       r.get('ping', 'Users#ping')
       r.resources('users', { only: ['index'] })
     })
+    r.resources('users', r => {
+      r.resources('pets')
+    })
   })
 
   r.post('login', 'Users#login')

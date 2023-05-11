@@ -22,6 +22,7 @@ export function namespacedControllerActionString(namespace: string, controllerAc
   return [
     namespace
       .split('/')
+      .filter(part => !/^:/.test(part))
       .map(part => pascalize(part))
       .join('/'),
     controllerActionString,

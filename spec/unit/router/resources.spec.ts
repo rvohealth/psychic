@@ -52,7 +52,7 @@ describe('PsychicRouter', () => {
         router.resources('users', { except: ['index', 'show', 'create', 'update'] }, r => {
           r.get('hello', 'Users#hello')
         })
-        expect(server.app.get).toHaveBeenCalledWith('/users/hello', expect.any(Function))
+        expect(server.app.get).toHaveBeenCalledWith('/users/:id/hello', expect.any(Function))
       })
 
       it('successfully applies nested resources', () => {
@@ -61,7 +61,7 @@ describe('PsychicRouter', () => {
             r.get('count', 'Friends#count')
           })
         })
-        expect(server.app.get).toHaveBeenCalledWith('/users/friends/count', expect.any(Function))
+        expect(server.app.get).toHaveBeenCalledWith('/users/:id/friends/:id/count', expect.any(Function))
       })
     })
   })
