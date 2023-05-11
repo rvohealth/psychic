@@ -17,7 +17,9 @@ env.load()
     }`
     const endOfExpression = route.controllerActionString
     const desiredSpaceCount = 110
-    const spaces = ' '.repeat(desiredSpaceCount - beginningOfExpression.length - endOfExpression.length)
+    const spaces = ' '.repeat(
+      Math.max(Math.min(desiredSpaceCount - beginningOfExpression.length - endOfExpression.length, 0), 110)
+    )
 
     const expression = `${beginningOfExpression}${spaces}${endOfExpression}`
     const colorizedExpression = i % 2 ? colors.bgWhite(colors.black(expression)) : expression
