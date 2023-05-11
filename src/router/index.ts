@@ -67,7 +67,7 @@ export default class PsychicRouter {
     return this.currentNamespaces.join('/') + '/' + str
   }
 
-  private addRoute({
+  public addRoute({
     httpMethod,
     path,
     controllerActionString,
@@ -101,17 +101,8 @@ export default class PsychicRouter {
       namespaces: this.currentNamespaces,
     })
 
-    this.currentNamespaces.push(namespace)
-    cb(nestedRouter)
-    this.currentNamespaces.pop()
-
-    nestedRouter.routes.forEach(route => {
-      this.addRoute({
-        httpMethod: route.httpMethod,
-        path: namespacedRoute(namespace, route.path),
-        controllerActionString: namespacedControllerActionString(namespace, route.controllerActionString),
-      })
-    })
+    this.applyNamespace(namespace, nestedRouter, cb)
+    this.absorbRoutes(nestedRouter, namespace)
 
     this.app.use(routePath(namespace), nestedRouter.router)
   }
@@ -167,11 +158,32 @@ export default class PsychicRouter {
       applyResourcesAction(path, action, nestedRouter)
     })
 
-    this.currentNamespaces.push(path)
-    if (cb) cb(nestedRouter)
-    this.currentNamespaces.pop()
+    this.applyNamespace(path, nestedRouter, cb)
+    this.absorbRoutes(nestedRouter)
 
     this.app.use(routePath(path), nestedRouter.router)
+  }
+
+  private absorbRoutes(nestedRouter: PsychicNestedRouter, namespace?: string) {
+    nestedRouter.routes.forEach(route => {
+      this.addRoute({
+        httpMethod: route.httpMethod,
+        path: namespace ? namespacedRoute(namespace, route.path) : route.path,
+        controllerActionString: namespace
+          ? namespacedControllerActionString(namespace, route.controllerActionString)
+          : route.controllerActionString,
+      })
+    })
+  }
+
+  private applyNamespace(
+    namespace: string,
+    nestedRouter: PsychicNestedRouter,
+    cb?: (router: PsychicNestedRouter) => void
+  ) {
+    this.currentNamespaces.push(namespace)
+    if (cb) cb(nestedRouter)
+    this.currentNamespaces.pop()
   }
 
   private _resource(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
@@ -191,9 +203,8 @@ export default class PsychicRouter {
       applyResourceAction(path, action, nestedRouter)
     })
 
-    this.currentNamespaces.push(path)
-    if (cb) cb(nestedRouter)
-    this.currentNamespaces.pop()
+    this.applyNamespace(path, nestedRouter, cb)
+    this.absorbRoutes(nestedRouter)
 
     this.app.use(routePath(path), nestedRouter.router)
   }
