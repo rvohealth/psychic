@@ -59,5 +59,5 @@ function calculateNumSpacesInLastGap(expressions: [string, string][]) {
     if (expression.length > desiredSpaceCount) desiredSpaceCount = expression.length
   })
 
-  return desiredSpaceCount
+  return desiredSpaceCount + 1
 }
