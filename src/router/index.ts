@@ -3,6 +3,8 @@ import { HttpMethod, ResourceMethods, ResourceMethodType, ResourcesOptions } fro
 import {
   applyResourceAction,
   applyResourcesAction,
+  namespacedControllerActionString,
+  namespacedRoute,
   routePath,
   sanitizedControllerPath,
 } from '../router/helpers'
@@ -20,7 +22,7 @@ import pascalize from '../helpers/pascalize'
 export default class PsychicRouter {
   public app: Application
   public config: PsychicConfig
-  public routes: RouteConfig[] = []
+  private _routes: RouteConfig[] = []
   protected currentNamespaces: string[] = []
   constructor(app: Application, config: PsychicConfig) {
     this.app = app
@@ -29,6 +31,10 @@ export default class PsychicRouter {
 
   public get routingMechanism(): Application | Router {
     return this.app
+  }
+
+  public get routes() {
+    return [...this._routes]
   }
 
   get(path: string, controllerActionString: string) {
@@ -61,10 +67,26 @@ export default class PsychicRouter {
     return this.currentNamespaces.join('/') + '/' + str
   }
 
+  private addRoute({
+    httpMethod,
+    path,
+    controllerActionString,
+  }: {
+    httpMethod: string
+    path: string
+    controllerActionString: string
+  }) {
+    this._routes.push({
+      httpMethod,
+      path,
+      controllerActionString,
+    })
+  }
+
   public crud(httpMethod: HttpMethod, path: string, controllerActionString: string) {
     const fullPath = this.prefixPathWithNamespaces(path)
     const fullControllerActionString = this.prefixModelNameWithNamespaces(controllerActionString)
-    this.routes.push({
+    this.addRoute({
       httpMethod,
       path,
       controllerActionString,
@@ -74,14 +96,24 @@ export default class PsychicRouter {
     })
   }
 
-  public namespace(path: string, cb: (router: PsychicNestedRouter) => void) {
+  public namespace(namespace: string, cb: (router: PsychicNestedRouter) => void) {
     const nestedRouter = new PsychicNestedRouter(this.app, this.config, {
       namespaces: this.currentNamespaces,
     })
-    this.currentNamespaces.push(path)
+
+    this.currentNamespaces.push(namespace)
     cb(nestedRouter)
     this.currentNamespaces.pop()
-    this.app.use(routePath(path), nestedRouter.router)
+
+    nestedRouter.routes.forEach(route => {
+      this.addRoute({
+        httpMethod: route.httpMethod,
+        path: namespacedRoute(namespace, route.path),
+        controllerActionString: namespacedControllerActionString(namespace, route.path),
+      })
+    })
+
+    this.app.use(routePath(namespace), nestedRouter.router)
   }
 
   public resources(
