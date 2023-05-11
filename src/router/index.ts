@@ -109,7 +109,7 @@ export default class PsychicRouter {
       this.addRoute({
         httpMethod: route.httpMethod,
         path: namespacedRoute(namespace, route.path),
-        controllerActionString: namespacedControllerActionString(namespace, route.path),
+        controllerActionString: namespacedControllerActionString(namespace, route.controllerActionString),
       })
     })
 

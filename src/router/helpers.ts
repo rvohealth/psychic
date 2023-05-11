@@ -11,7 +11,7 @@ export function resourcePath(routePath: string) {
 }
 
 export function sanitizedControllerPath(controllerName: string) {
-  return controllerName.replace(/Controller$/, '') + 'Controller'
+  return controllerName + 'Controller'
 }
 
 export function namespacedRoute(namespace: string, route: string) {

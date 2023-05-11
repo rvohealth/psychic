@@ -16,7 +16,7 @@ export default (r: PsychicRouter) => {
   r.namespace('api', r => {
     r.get('ping', 'Users#ping')
     r.namespace('v1', r => {
-      r.get('ping', 'UsersController#ping')
+      r.get('ping', 'Users#ping')
       r.resources('users', { only: ['index'] })
     })
   })
@@ -24,6 +24,6 @@ export default (r: PsychicRouter) => {
   r.post('login', 'Users#login')
   r.resources('users', { only: ['create', 'index'] })
 
-  r.get('route-exists-but-controller-doesnt', 'NonexistentController#someMethod')
+  r.get('route-exists-but-controller-doesnt', 'Nonexistent#someMethod')
   r.get('controller-exists-but-method-doesnt', 'Users#thisRouteDoesntExist')
 }
