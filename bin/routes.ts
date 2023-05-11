@@ -11,11 +11,14 @@ env.load()
   const routes = await server.routes()
   const expressions = buildExpressions(routes)
 
-  const desiredSpaceCount = calculateNumDesiredSpaces(expressions)
+  const desiredFirstGapSpaceCount = calculateNumSpacesInFirstGap(expressions)
+  const desiredLastGapSpaceCount = calculateNumSpacesInLastGap(expressions)
 
   expressions.forEach(([beginning, end], i) => {
-    const spaces = ' '.repeat(desiredSpaceCount - beginning.length)
-    const expression = `${beginning}${spaces}${end}`
+    const openingSpaces = ' '.repeat(desiredFirstGapSpaceCount - beginning.length)
+    const partialExpression = `${beginning}${openingSpaces}${end}`
+    const closingSpaces = ' '.repeat(desiredLastGapSpaceCount - partialExpression.length)
+    const expression = `${partialExpression}${closingSpaces}`
     const colorizedExpression = i % 2 ? colors.bgWhite(colors.black(expression)) : expression
     console.log(colorizedExpression)
   })
@@ -36,7 +39,7 @@ function buildExpressions(routes: RouteConfig[]): [string, string][] {
   })
 }
 
-function calculateNumDesiredSpaces(expressions: [string, string][]) {
+function calculateNumSpacesInFirstGap(expressions: [string, string][]) {
   let desiredSpaceCount = 0
   expressions.forEach(expression => {
     if (expression[0].length > desiredSpaceCount) desiredSpaceCount = expression[0].length
@@ -44,4 +47,17 @@ function calculateNumDesiredSpaces(expressions: [string, string][]) {
 
   const gapSpaces = 3
   return desiredSpaceCount + gapSpaces
+}
+
+function calculateNumSpacesInLastGap(expressions: [string, string][]) {
+  const desiredFirstGapSpaceCount = calculateNumSpacesInFirstGap(expressions)
+
+  let desiredSpaceCount = 0
+  expressions.forEach(([beginning, end]) => {
+    const spaces = desiredFirstGapSpaceCount - beginning.length
+    const expression = `${beginning}${spaces}${end}`
+    if (expression.length > desiredSpaceCount) desiredSpaceCount = expression.length
+  })
+
+  return desiredSpaceCount
 }
