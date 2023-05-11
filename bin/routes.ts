@@ -8,7 +8,12 @@ env.load()
 
   const routes = await server.routes()
   routes.forEach(route => {
-    const beginningOfExpression = `${route.httpMethod.toUpperCase()} ${route.path}`
+    const method = route.httpMethod.toUpperCase()
+    const numMethodSpaces = 8 - method.length
+
+    const beginningOfExpression = `${route.httpMethod.toUpperCase()}${' '.repeat(numMethodSpaces)}${
+      route.path
+    }`
     const endOfExpression = route.controllerActionString
     const desiredSpaceCount = 110
     const spaces = ' '.repeat(desiredSpaceCount - beginningOfExpression.length - endOfExpression.length)
