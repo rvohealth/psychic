@@ -10,6 +10,24 @@ export function resourcePath(routePath: string) {
   return `/${routePath}/:id`
 }
 
+export function sanitizedControllerPath(controllerName: string) {
+  return controllerName.replace(/Controller$/, '') + 'Controller'
+}
+
+export function namespacedRoute(namespace: string, route: string) {
+  return [namespace, route].join('/')
+}
+
+export function namespacedControllerActionString(namespace: string, controllerActionString: string) {
+  return [
+    namespace
+      .split('/')
+      .map(part => pascalize(part))
+      .join('/'),
+    controllerActionString,
+  ].join('/')
+}
+
 export function applyResourcesAction(
   path: string,
   action: ResourceMethodType,
@@ -63,8 +81,4 @@ export function applyResourceAction(
     default:
       throw `unsupported resource method type: ${action}`
   }
-}
-
-export function sanitizedControllerPath(controllerName: string) {
-  return controllerName.replace(/Controller$/, '') + 'Controller'
 }
