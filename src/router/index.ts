@@ -17,6 +17,9 @@ import { ValidationError } from 'dream'
 import RouteManager from './route-manager'
 import pluralize = require('pluralize')
 import { pascalize, snakeify } from 'dream'
+import BadRequest from '../error/http/bad-request'
+import InternalServerError from '../error/http/internal-server-error'
+import NotImplemented from '../error/http/not-implemented'
 
 export default class PsychicRouter {
   public app: Application
@@ -270,6 +273,9 @@ export default class PsychicRouter {
         case Unauthorized:
         case Forbidden:
         case NotFound:
+        case BadRequest:
+        case InternalServerError:
+        case NotImplemented:
           res.sendStatus((err as any).status)
           break
 

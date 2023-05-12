@@ -11,6 +11,8 @@ import PsychicSerializer from '../serializer'
 import getControllerKey from '../config/helpers/getControllerKey'
 import background from '../background'
 import getModelKey from '../config/helpers/getModelKey'
+import BadRequest from '../error/http/bad-request'
+import InternalServerError from '../error/http/internal-server-error'
 
 export default class PsychicController {
   public static before(
@@ -121,9 +123,58 @@ export default class PsychicController {
     return this.json(data)
   }
 
+  public accepted(data: any = {}) {
+    this.res.status(202)
+    return this.json(data)
+  }
+
   public noContent(data: any = {}) {
     this.res.status(204)
     return this.json(data)
+  }
+
+  // 400
+  public badRequest(data: { [key: string]: any } = {}) {
+    throw new BadRequest(
+      'The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).',
+      data
+    )
+  }
+
+  // 422
+  public unprocessableEntity(data: { [key: string]: any } = {}) {
+    throw new UnprocessableEntity('The data passed contained an invalid shape', data)
+  }
+
+  // 401
+  public unauthorized() {
+    throw new Unauthorized('Authorization required')
+  }
+
+  // 403
+  public forbidden() {
+    throw new Forbidden('Forbidden')
+  }
+
+  // 404
+  public notFound() {
+    throw new NotFound('The resource you requested could not be found')
+  }
+
+  // 500
+  public internalServerError(data: { [key: string]: any } = {}) {
+    throw new InternalServerError(
+      'The server has encountered a situation it does not know how to handle.',
+      data
+    )
+  }
+
+  // 501
+  public notImplemented(data: { [key: string]: any } = {}) {
+    throw new InternalServerError(
+      'The request method is not supported by the server and cannot be handled. The only methods that servers are required to support (and therefore that must not return this code) are GET and HEAD',
+      data
+    )
   }
 
   public async runAction(action: string) {
@@ -137,22 +188,6 @@ export default class PsychicController {
       if (hook.isStatic) await (this.constructor as any)[hook.methodName]()
       else await (this as any)[hook.methodName]()
     }
-  }
-
-  public unprocessableEntity(data: { [key: string]: any } = {}) {
-    throw new UnprocessableEntity('The data passed contained an invalid shape', data)
-  }
-
-  public unauthorized() {
-    throw new Unauthorized('Authorization required')
-  }
-
-  public forbidden() {
-    throw new Forbidden('Forbidden')
-  }
-
-  public notFound() {
-    throw new NotFound('The resource you requested could not be found')
   }
 }
 
