@@ -5,6 +5,7 @@ import { Dream } from 'dream'
 import getModelKey from '../config/helpers/getModelKey'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
+import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
 
 export class Background {
   public queue: Queue | null = null
@@ -107,7 +108,10 @@ export class Background {
     switch (jobType) {
       case 'BackgroundJobQueueStaticJob':
         if (filepath) {
-          const ObjectClass = (await import(absoluteSrcPath(filepath)))?.[importKey || 'default']
+          const ObjectClass = await importFileWithNamedExport(
+            absoluteSrcPath(filepath),
+            importKey || 'default'
+          )
           if (!ObjectClass) return
 
           await ObjectClass[method as string](...args)
@@ -116,7 +120,10 @@ export class Background {
 
       case 'BackgroundJobQueueInstanceJob':
         if (filepath) {
-          const ObjectClass = (await import(absoluteSrcPath(filepath)))?.[importKey || 'default']
+          const ObjectClass = await importFileWithNamedExport(
+            absoluteSrcPath(filepath),
+            importKey || 'default'
+          )
           if (!ObjectClass) return
 
           const instance = new ObjectClass(...constructorArgs)
