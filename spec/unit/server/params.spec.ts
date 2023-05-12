@@ -28,4 +28,18 @@ describe('Params', () => {
       })
     })
   })
+
+  describe('#casing', () => {
+    it('works together with restrict to snakeify attribute keys when ingesting params', () => {
+      expect(Params.casing('snake').restrict({ HelloWorld: 'HowAreYou' }, ['hello_world'])).toEqual({
+        hello_world: 'HowAreYou',
+      })
+    })
+
+    it('works together with restrict to camelize attribute keys when ingesting params', () => {
+      expect(Params.casing('camel').restrict({ hello_world: 'HowAreYou' }, ['helloWorld'])).toEqual({
+        helloWorld: 'HowAreYou',
+      })
+    })
+  })
 })
