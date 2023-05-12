@@ -1,9 +1,10 @@
 import { Dream } from 'dream'
-import * as fs from 'fs/promises'
-import * as path from 'path'
+import fs from 'fs/promises'
+import path from 'path'
 import PsychicController from '../controller'
 import PsychicSerializer from '../serializer'
 import absoluteSrcPath from './absoluteSrcPath'
+import importFileWithDefault from './importFileWithDefault'
 
 let _models: { [key: string]: typeof Dream }
 let _controllers: { [key: string]: typeof PsychicController }
@@ -20,7 +21,7 @@ export default class PsychicDir {
       /\.ts$/.test(path)
     )
     for (const modelPath of modelPaths) {
-      const ModelClass = (await import(modelPath)).default as typeof Dream
+      const ModelClass = (await importFileWithDefault(modelPath)) as typeof Dream
       const modelKey = modelPath.replace(/^.*app\/models\//, '').replace(/\.ts$/, '')
       _models[modelKey] = ModelClass
     }
@@ -38,7 +39,7 @@ export default class PsychicDir {
       /\.ts$/.test(path)
     )
     for (const controllerPath of controllerPaths) {
-      const ControllerClass = (await import(controllerPath)).default as typeof PsychicController
+      const ControllerClass = (await importFileWithDefault(controllerPath)) as typeof PsychicController
       const controllerKey = controllerPath.replace(/^.*app\/controllers\//, '').replace(/\.ts$/, '')
       _controllers[controllerKey] = ControllerClass
     }
@@ -56,7 +57,7 @@ export default class PsychicDir {
       /\.ts$/.test(path)
     )
     for (const serializerPath of serializerPaths) {
-      const serializerClass = (await import(serializerPath)).default as typeof PsychicSerializer
+      const serializerClass = (await importFileWithDefault(serializerPath)) as typeof PsychicSerializer
       const serializerKey = serializerPath.replace(/^.*app\/serializers\//, '').replace(/\.ts$/, '')
       _serializers[serializerKey] = serializerClass
     }

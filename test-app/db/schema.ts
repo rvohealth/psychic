@@ -6,7 +6,8 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Timestamp = ColumnType<DateTime>;
+export type Timestamp = ColumnType<DateTime>
+export type IdType = string | number | bigint | undefined;
 
 export interface HealthUsers {
   id: Generated<number>;
@@ -32,10 +33,55 @@ export interface DB {
 }
 
 
+
 export const HealthUserColumns = ['id', 'email', 'password_digest', 'name', 'created_at', 'updated_at']
 export const UserColumns = ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
+
+export interface HealthUserAttributes {
+  id: number
+  email: string | null
+  password_digest: string | null
+  name: string | null
+  created_at: DateTime
+  updated_at: DateTime
+}  
+
+export interface UserAttributes {
+  id: number
+  name: string | null
+  email: string
+  password_digest: string
+  created_at: DateTime
+  updated_at: DateTime
+}  
+
+
+export const HealthUsersTypeCache = {
+  id: 'Generated<number>',
+  email: 'string|null',
+  password_digest: 'string|null',
+  name: 'string|null',
+  created_at: 'Timestamp',
+  updated_at: 'Timestamp'
+}  
+
+export const UsersTypeCache = {
+  id: 'Generated<number>',
+  name: 'string|null',
+  email: 'string',
+  password_digest: 'string',
+  created_at: 'Generated<Timestamp>',
+  updated_at: 'Generated<Timestamp>'
+}  
+
+
 
 export const DBColumns = {
   health_users: HealthUserColumns,
   users: UserColumns
+}
+
+export const DBTypeCache = {
+  health_users: HealthUsersTypeCache,
+  users: UsersTypeCache
 }

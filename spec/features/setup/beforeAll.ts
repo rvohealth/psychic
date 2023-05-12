@@ -1,5 +1,5 @@
 import '../../../src/helpers/loadEnv'
-// import * as devServer from 'jest-dev-server'
+// import devServer from 'jest-dev-server'
 
 export default async function () {
   // await devServer.setup({

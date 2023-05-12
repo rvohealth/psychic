@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt'
+import bcrypt from 'bcrypt'
 import Hash from '../../../src/encryption/hash'
 
 // TODO: finish spec, ensuring that encryption key is passed

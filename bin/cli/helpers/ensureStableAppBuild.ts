@@ -1,4 +1,4 @@
-import * as fs from 'fs/promises'
+import fs from 'fs/promises'
 import maybeSyncExisting from './maybeSyncExisting'
 
 export default async function ensureStableAppBuild(programArgs: string[]) {

@@ -1,4 +1,4 @@
-import * as jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 import Encrypt from '../../../src/encryption/encrypt'
 
 const originalEncryptionKey = process.env.APP_ENCRYPTION_KEY

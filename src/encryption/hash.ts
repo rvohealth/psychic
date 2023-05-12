@@ -1,4 +1,4 @@
-import * as bcrypt from 'bcrypt'
+import bcrypt from 'bcrypt'
 
 export default class Hash {
   static SALT_ROUNDS = 11

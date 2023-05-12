@@ -4,6 +4,7 @@ import readAppConfig from '../config/helpers/readAppConfig'
 import { Dream } from 'dream'
 import getModelKey from '../config/helpers/getModelKey'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
+import importFileWithDefault from '../helpers/importFileWithDefault'
 
 export class Background {
   public queue: Queue | null = null
@@ -125,7 +126,7 @@ export class Background {
 
       case 'BackgroundJobQueueModelInstanceJob':
         if (filepath) {
-          const DreamModelClass = (await import(absoluteSrcPath(filepath)))?.default as
+          const DreamModelClass = (await importFileWithDefault(absoluteSrcPath(filepath))) as
             | typeof Dream
             | undefined
           if (!DreamModelClass) return

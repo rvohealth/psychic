@@ -1,4 +1,4 @@
-import * as jwt from 'jsonwebtoken'
+import jwt from 'jsonwebtoken'
 
 export default class Encrypt {
   public static sign(data: any) {

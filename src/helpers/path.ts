@@ -1,8 +1,9 @@
-import * as path from 'path'
-import * as YAML from 'yaml'
+import path from 'path'
+import YAML from 'yaml'
 import { promises as fs } from 'fs'
 import compact from './compact'
 import absoluteFilePath from './absoluteFilePath'
+import importFileWithDefault from './importFileWithDefault'
 
 export async function loadFile(filepath: string) {
   return await fs.readFile(filepath)
@@ -33,7 +34,7 @@ let _dreamConfigCache: DreamConfig | null = null
 export async function loadDreamConfigFile() {
   if (_dreamConfigCache) return _dreamConfigCache
 
-  const dreamConfig = (await import(await dreamsConfigPath())).default as DreamConfig
+  const dreamConfig = (await importFileWithDefault(await dreamsConfigPath())) as DreamConfig
 
   // TODO: validate shape of payload!
 

@@ -1,5 +1,5 @@
-import * as fs from 'fs'
-import * as YAML from 'yaml'
+import fs from 'fs'
+import YAML from 'yaml'
 import absoluteSrcPath from '../../helpers/absoluteSrcPath'
 
 let _appConfig: AppConfig | null = null

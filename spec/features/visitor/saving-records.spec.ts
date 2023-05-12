@@ -1,4 +1,4 @@
-import * as request from 'supertest'
+import request from 'supertest'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
 const server = new PsychicServer()

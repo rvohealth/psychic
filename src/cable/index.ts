@@ -1,13 +1,14 @@
-import * as colors from 'colorette'
+import colors from 'colorette'
 import { Application } from 'express'
 import { createClient, RedisClientType } from 'redis'
 import { createAdapter } from '@socket.io/redis-adapter'
-import * as http from 'http'
-import * as socketio from 'socket.io'
+import http from 'http'
+import socketio from 'socket.io'
 import log from '../log'
 import redisOptions from '../config/helpers/redisOptions'
 import readAppConfig from '../config/helpers/readAppConfig'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
+import importFileWithDefault from '../helpers/importFileWithDefault'
 
 export default class Cable {
   public app: Application
@@ -43,13 +44,13 @@ export default class Cable {
 
     let startDef: (socket: socketio.Server) => Promise<void>
     try {
-      startDef = (await import(absoluteSrcPath('conf/ws/start')))?.default
+      startDef = await importFileWithDefault(absoluteSrcPath('conf/ws/start'))
       if (startDef) await startDef(this.io!)
     } catch (error) {}
 
     let connectDef: (socket: socketio.Socket) => Promise<void>
     try {
-      connectDef = (await import(absoluteSrcPath('conf/ws/connect')))?.default
+      connectDef = await importFileWithDefault(absoluteSrcPath('conf/ws/connect'))
     } catch (error) {}
 
     this.io!.on('connection', async socket => {

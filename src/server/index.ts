@@ -1,14 +1,15 @@
 import { db } from 'dream'
-import * as express from 'express'
+import express from 'express'
 import { Application } from 'express'
-import * as cors from 'cors'
-import * as cookieParser from 'cookie-parser'
+import cors from 'cors'
+import cookieParser from 'cookie-parser'
 import PsychicConfig from '../config'
 import log from '../log'
 import Cable from '../cable'
 import ReactServer from '../server/react'
 import PsychicRouter from '../router'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
+import importFileWithDefault from '../helpers/importFileWithDefault'
 
 export default class PsychicServer {
   public app: Application
@@ -24,7 +25,7 @@ export default class PsychicServer {
   public async routes() {
     const r = new PsychicRouter(this.app, this.config)
     const routesPath = absoluteSrcPath('conf/routes.ts')
-    const routesCB = (await import(routesPath)).default
+    const routesCB = await importFileWithDefault(routesPath)
     routesCB(r)
     return r.routes
   }
@@ -95,14 +96,14 @@ export default class PsychicServer {
     this.app.use(cookieParser())
     this.app.use(express.json())
 
-    const getCorsOptions = (await import(absoluteSrcPath('conf/cors'))).default
+    const getCorsOptions = await importFileWithDefault(absoluteSrcPath('conf/cors'))
     this.app.use(cors(await getCorsOptions()))
   }
 
   private async buildRoutes() {
     const r = new PsychicRouter(this.app, this.config)
     const routesPath = absoluteSrcPath('conf/routes.ts')
-    const routesCB = (await import(routesPath)).default
+    const routesCB = await importFileWithDefault(routesPath)
     routesCB(r)
     r.commit()
   }

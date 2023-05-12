@@ -1,9 +1,10 @@
-import * as fs from 'fs'
+import fs from 'fs'
 import { Application } from 'express'
 import PsychicController from '../controller'
 import PsychicDir from '../helpers/psychicdir'
 import readAppConfig from './helpers/readAppConfig'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
+import importFileWithDefault from '../helpers/importFileWithDefault'
 
 export default class PsychicConfig {
   public app: Application
@@ -59,28 +60,28 @@ export default class PsychicConfig {
   public async boot() {
     // await new IntegrityChecker().check()
 
-    const appConfig = await import(absoluteSrcPath('conf/env/all.ts'))
-    await appConfig.default(this)
+    const appConfig = await importFileWithDefault(absoluteSrcPath('conf/env/all.ts'))
+    await appConfig(this)
 
     switch (process.env.NODE_ENV) {
       case 'development':
-        const devConfig = await import(absoluteSrcPath('conf/env/dev.ts'))
-        await devConfig.default(this)
+        const devConfig = await importFileWithDefault(absoluteSrcPath('conf/env/dev.ts'))
+        await devConfig(this)
         break
 
       case 'production':
-        const prodConfig = await import(absoluteSrcPath('conf/env/prod.ts'))
-        await prodConfig.default(this)
+        const prodConfig = await importFileWithDefault(absoluteSrcPath('conf/env/prod.ts'))
+        await prodConfig(this)
         break
 
       case 'test':
-        const testConfig = await import(absoluteSrcPath('conf/env/testing.ts'))
-        await testConfig.default(this)
+        const testConfig = await importFileWithDefault(absoluteSrcPath('conf/env/testing.ts'))
+        await testConfig(this)
         break
     }
 
-    const inflections = await import(absoluteSrcPath('conf/inflections.ts'))
-    await inflections.default()
+    const inflections = await importFileWithDefault(absoluteSrcPath('conf/inflections.ts'))
+    await inflections()
 
     this.controllers = await PsychicDir.controllers()
   }

@@ -1,4 +1,4 @@
-import * as http from 'http'
+import http from 'http'
 import Cable from '../../../src/cable'
 import PsychicServer from '../../../src/server'
 import { Server } from 'http'

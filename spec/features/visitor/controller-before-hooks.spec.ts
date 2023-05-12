@@ -1,4 +1,4 @@
-import * as supertest from 'supertest'
+import supertest from 'supertest'
 import PsychicServer from '../../../src/server'
 const server = new PsychicServer()
 

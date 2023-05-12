@@ -1,4 +1,4 @@
-import * as pluralize from 'pluralize'
+import pluralize from 'pluralize'
 import generateController from './controller'
 import generateSerializer from './serializer'
 import sspawn from '../helpers/sspawn'

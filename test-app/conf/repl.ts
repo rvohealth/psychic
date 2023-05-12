@@ -1,5 +1,5 @@
 // import '../../src/helpers/loadEnv'
-// import * as repl from 'node:repl'
+// import repl from 'node:repl'
 
 // const replServer = repl.start('> ')
 // export default (async function () {
@@ -10,17 +10,18 @@
 // })()
 
 import '../../src/helpers/loadEnv'
-import * as repl from 'node:repl'
-import * as fs from 'fs/promises'
-import * as path from 'path'
-// import * as models from '../app/models'
+import repl from 'node:repl'
+import fs from 'fs/promises'
+import path from 'path'
+import importFileWithDefault from '../../src/helpers/importFileWithDefault'
+// import models from '../app/models'
 
 const replServer = repl.start('> ')
 export default (async function () {
   const dreamPaths = await getFiles('./test-app/app/models')
   for (const dreamPath of dreamPaths) {
     const importablePath = dreamPath.replace(/.*\/test-app/, '..')
-    const DreamClass = (await import(importablePath)).default
+    const DreamClass = await importFileWithDefault(importablePath)
     replServer.context[(DreamClass as any).name] = DreamClass
   }
 })()

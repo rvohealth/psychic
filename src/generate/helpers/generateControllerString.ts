@@ -1,4 +1,4 @@
-import * as pluralize from 'pluralize'
+import pluralize from 'pluralize'
 import pascalize from '../../../src/helpers/pascalize'
 import camelize from '../../../src/helpers/camelize'
 import PsychicDir from '../../../src/helpers/psychicdir'

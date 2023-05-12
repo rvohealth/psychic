@@ -1,6 +1,6 @@
 import PsychicConfig from '../../../src/config'
 import PsychicServer from '../../../src/server'
-import * as pluralize from 'pluralize'
+import pluralize from 'pluralize'
 
 describe('PsychicConfig', () => {
   let config: PsychicConfig

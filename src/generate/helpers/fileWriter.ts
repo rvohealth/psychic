@@ -1,5 +1,5 @@
-import * as pluralize from 'pluralize'
-import * as fs from 'fs/promises'
+import pluralize from 'pluralize'
+import fs from 'fs/promises'
 import pascalize from '../../helpers/pascalize'
 
 export default async function fileWriter(

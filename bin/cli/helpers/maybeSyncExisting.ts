@@ -1,5 +1,5 @@
-import * as fs from 'fs/promises'
-import * as path from 'path'
+import fs from 'fs/promises'
+import path from 'path'
 import sspawn from '../../../src/helpers/sspawn'
 import yarncmdRunByAppConsumer from './yarncmdRunByAppConsumer'
 

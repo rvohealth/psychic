@@ -1,4 +1,4 @@
-import * as _pluralize from 'pluralize'
+import _pluralize from 'pluralize'
 export const pluralize = _pluralize
 
 export {
