@@ -1,3 +1,4 @@
+import compact from '../helpers/compact'
 import pascalize from '../helpers/pascalize'
 import PsychicRouter, { PsychicNestedRouter } from '../router'
 import { ResourceMethodType } from './types'
@@ -15,17 +16,25 @@ export function sanitizedControllerPath(controllerName: string) {
 }
 
 export function namespacedRoute(namespace: string, route: string) {
-  return [namespace, route].join('/')
+  return (
+    '/' +
+    compact([namespace || null, route])
+      .join('/')
+      .replace(/^\//, '')
+  )
 }
 
 export function namespacedControllerActionString(namespace: string, controllerActionString: string) {
   return [
     namespace
       .split('/')
+      .filter(part => !/^:/.test(part))
       .map(part => pascalize(part))
       .join('/'),
     controllerActionString,
-  ].join('/')
+  ]
+    .join('/')
+    .replace(/^\//, '')
 }
 
 export function applyResourcesAction(
@@ -66,16 +75,15 @@ export function applyResourceAction(
 ) {
   switch (action) {
     case 'update':
-      routingMechanism.put(path, `${path}#update`)
-      routingMechanism.patch(path, `${path}#update`)
+      routingMechanism.put(path, `${pascalize(path)}#update`)
       break
 
     case 'show':
-      routingMechanism.get(path, `${path}#show`)
+      routingMechanism.get(path, `${pascalize(path)}#show`)
       break
 
     case 'delete':
-      routingMechanism.delete(path, `${path}#delete`)
+      routingMechanism.delete(path, `${pascalize(path)}#destroy`)
       break
 
     default:

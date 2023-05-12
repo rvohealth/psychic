@@ -30,17 +30,19 @@ program
 program
   .command('spec')
   .description('runs all specs if no spec is provided. If a spec is provided, it will run that spec.')
+  .option('--fast', 'skips setup')
   .action(async () => {
     await ensureStableAppBuild(program.args)
+    const fastFlag = program.args.includes('--fast') ? ':fast' : ''
 
     const [_, file] = program.args
     if (!file) {
-      await sspawn(yarncmdRunByAppConsumer('uspec', program.args))
-      await sspawn(yarncmdRunByAppConsumer('fspec', program.args))
+      await sspawn(yarncmdRunByAppConsumer(`uspec${fastFlag}`, program.args))
+      await sspawn(yarncmdRunByAppConsumer(`fspec${fastFlag}`, program.args))
     } else if (/spec\/features\//.test(file)) {
-      await sspawn(yarncmdRunByAppConsumer(`fspec ${file}`, program.args))
+      await sspawn(yarncmdRunByAppConsumer(`fspec${fastFlag} ${file}`, program.args))
     } else {
-      await sspawn(yarncmdRunByAppConsumer(`uspec ${file}`, program.args))
+      await sspawn(yarncmdRunByAppConsumer(`uspec${fastFlag} ${file}`, program.args))
     }
   })
 

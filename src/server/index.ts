@@ -104,5 +104,6 @@ export default class PsychicServer {
     const routesPath = absoluteSrcPath('conf/routes.ts')
     const routesCB = (await import(routesPath)).default
     routesCB(r)
+    r.commit()
   }
 }
