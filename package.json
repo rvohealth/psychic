@@ -39,7 +39,7 @@
     "colorette": "^2.0.19",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "dream": "https://avocadojesus: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@github.com/avocadojesus/dream.git#387960d",
+    "dream": "https://avocadojesus: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@github.com/avocadojesus/dream.git#de70d9d",
     "express": "^4.18.2",
     "jest": "^29.5.0",
     "jsonwebtoken": "^9.0.0",
