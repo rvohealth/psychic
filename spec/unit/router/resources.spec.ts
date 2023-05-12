@@ -68,7 +68,7 @@ describe('PsychicRouter', () => {
         })
         router.commit()
 
-        expect(server.app.get).toHaveBeenCalledWith('/users/:id/friends/:id/count', expect.any(Function))
+        expect(server.app.get).toHaveBeenCalledWith('/users/:user_id/friends/:id/count', expect.any(Function))
       })
     })
   })

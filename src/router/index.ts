@@ -16,12 +16,14 @@ import PsychicController from '../controller'
 import { ValidationError } from 'dream'
 import pascalize from '../helpers/pascalize'
 import RouteManager from './route-manager'
+import pluralize = require('pluralize')
+import snakeify from '../helpers/snakeify'
 
 const routeManager = new RouteManager()
 export default class PsychicRouter {
   public app: Application
   public config: PsychicConfig
-  public currentNamespaces: string[] = []
+  public currentNamespaces: NamespaceConfig[] = []
   constructor(app: Application, config: PsychicConfig) {
     this.app = app
     this.config = config
@@ -37,6 +39,10 @@ export default class PsychicRouter {
 
   public reset() {
     routeManager.routes = []
+  }
+
+  private get currentNamespacePaths() {
+    return this.currentNamespaces.map(n => n.namespace)
   }
 
   // this is called after all routes have been processed.
@@ -71,7 +77,7 @@ export default class PsychicRouter {
   private prefixControllerActionStringWithNamespaces(str: string) {
     if (!this.currentNamespaces.length) return str
     return (
-      this.currentNamespaces
+      this.currentNamespacePaths
         .filter(n => !/^:/.test(n))
         .map(str => pascalize(str))
         .join('/') +
@@ -82,7 +88,7 @@ export default class PsychicRouter {
 
   private prefixPathWithNamespaces(str: string) {
     if (!this.currentNamespaces.length) return str
-    return '/' + this.currentNamespaces.join('/') + '/' + str
+    return '/' + this.currentNamespacePaths.join('/') + '/' + str
   }
 
   public crud(httpMethod: HttpMethod, path: string, controllerActionString: string) {
@@ -148,11 +154,12 @@ export default class PsychicRouter {
       ) as ResourceMethodType[]
     }
 
+    this.makeRoomForNewIdParam(nestedRouter)
     resourceMethods.forEach(action => {
       applyResourcesAction(path, action, nestedRouter)
     })
 
-    this.runNestedCallbacks(path, nestedRouter, cb, { asMember: true })
+    this.runNestedCallbacks(path, nestedRouter, cb, { asMember: true, resourceful: true })
   }
 
   private runNestedCallbacks(
@@ -161,17 +168,54 @@ export default class PsychicRouter {
     cb?: (router: PsychicNestedRouter) => void,
     {
       asMember = false,
+      resourceful = false,
     }: {
       asMember?: boolean
+      resourceful?: boolean
     } = {}
   ) {
-    this.currentNamespaces.push(namespace)
-    if (asMember) this.currentNamespaces.push(':id')
+    this.addNamespace(namespace, resourceful, nestedRouter)
+
+    if (asMember) {
+      this.addNamespace(':id', resourceful, nestedRouter)
+    }
 
     if (cb) cb(nestedRouter)
 
+    this.removeLastNamespace(nestedRouter)
+    if (asMember) this.removeLastNamespace(nestedRouter)
+  }
+
+  private addNamespace(namespace: string, resourceful: boolean, nestedRouter?: PsychicNestedRouter) {
+    this.currentNamespaces = [
+      ...this.currentNamespaces,
+      {
+        namespace,
+        resourceful,
+      },
+    ]
+
+    if (nestedRouter) nestedRouter.currentNamespaces = this.currentNamespaces
+  }
+
+  private removeLastNamespace(nestedRouter?: PsychicNestedRouter) {
     this.currentNamespaces.pop()
-    if (asMember) this.currentNamespaces.pop()
+    if (nestedRouter) nestedRouter.currentNamespaces = this.currentNamespaces
+  }
+
+  private makeRoomForNewIdParam(nestedRouter?: PsychicNestedRouter) {
+    this.currentNamespaces = [
+      ...this.currentNamespaces.map((namespace, index) => {
+        const previousNamespace = this.currentNamespaces[index - 1]
+        if (namespace.namespace === ':id' && previousNamespace) {
+          return {
+            ...namespace,
+            namespace: `:${snakeify(pluralize.singular(previousNamespace.namespace))}_id`,
+          }
+        } else return namespace
+      }),
+    ]
+    if (nestedRouter) nestedRouter.currentNamespaces = this.currentNamespaces
   }
 
   private _resource(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
@@ -274,7 +318,7 @@ export class PsychicNestedRouter extends PsychicRouter {
     {
       namespaces = [],
     }: {
-      namespaces?: string[]
+      namespaces?: NamespaceConfig[]
     } = {}
   ) {
     super(app, config)
@@ -285,4 +329,9 @@ export class PsychicNestedRouter extends PsychicRouter {
   public get routingMechanism() {
     return this.router
   }
+}
+
+export interface NamespaceConfig {
+  namespace: string
+  resourceful: boolean
 }
