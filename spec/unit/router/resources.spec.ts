@@ -8,7 +8,6 @@ describe('PsychicRouter', () => {
     beforeEach(() => {
       server = new PsychicServer()
       router = new PsychicRouter(server.app, server.config)
-      router.reset()
       jest.spyOn(server.app, 'get')
       jest.spyOn(server.app, 'post')
       jest.spyOn(server.app, 'put')

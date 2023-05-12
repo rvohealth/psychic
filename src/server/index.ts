@@ -25,7 +25,6 @@ export default class PsychicServer {
     const r = new PsychicRouter(this.app, this.config)
     const routesPath = absoluteSrcPath('conf/routes.ts')
     const routesCB = (await import(routesPath)).default
-    r.reset()
     routesCB(r)
     return r.routes
   }
@@ -102,7 +101,6 @@ export default class PsychicServer {
 
   private async buildRoutes() {
     const r = new PsychicRouter(this.app, this.config)
-    r.reset()
     const routesPath = absoluteSrcPath('conf/routes.ts')
     const routesCB = (await import(routesPath)).default
     routesCB(r)

@@ -19,11 +19,11 @@ import RouteManager from './route-manager'
 import pluralize = require('pluralize')
 import snakeify from '../helpers/snakeify'
 
-const routeManager = new RouteManager()
 export default class PsychicRouter {
   public app: Application
   public config: PsychicConfig
   public currentNamespaces: NamespaceConfig[] = []
+  public routeManager: RouteManager = new RouteManager()
   constructor(app: Application, config: PsychicConfig) {
     this.app = app
     this.config = config
@@ -34,11 +34,7 @@ export default class PsychicRouter {
   }
 
   public get routes() {
-    return routeManager.routes
-  }
-
-  public reset() {
-    routeManager.routes = []
+    return this.routeManager.routes
   }
 
   private get currentNamespacePaths() {
@@ -89,7 +85,7 @@ export default class PsychicRouter {
   }
 
   public crud(httpMethod: HttpMethod, path: string, controllerActionString: string) {
-    routeManager.addRoute({
+    this.routeManager.addRoute({
       httpMethod,
       path: this.prefixPathWithNamespaces(path),
       controllerActionString: this.prefixControllerActionStringWithNamespaces(controllerActionString),
@@ -97,7 +93,7 @@ export default class PsychicRouter {
   }
 
   public namespace(namespace: string, cb: (router: PsychicNestedRouter) => void) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, {
+    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
       namespaces: this.currentNamespaces,
     })
 
@@ -135,7 +131,7 @@ export default class PsychicRouter {
   }
 
   private _resources(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, {
+    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
       namespaces: this.currentNamespaces,
     })
 
@@ -216,7 +212,7 @@ export default class PsychicRouter {
   }
 
   private _resource(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config)
+    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager)
     const { only, except } = options || {}
     let resourceMethods: ResourceMethodType[] = ResourceMethods
 
@@ -312,6 +308,7 @@ export class PsychicNestedRouter extends PsychicRouter {
   constructor(
     app: Application,
     config: PsychicConfig,
+    routeManager: RouteManager,
     {
       namespaces = [],
     }: {
@@ -321,6 +318,7 @@ export class PsychicNestedRouter extends PsychicRouter {
     super(app, config)
     this.router = Router()
     this.currentNamespaces = namespaces
+    this.routeManager = routeManager
   }
 
   public get routingMechanism() {
