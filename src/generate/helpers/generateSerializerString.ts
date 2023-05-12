@@ -1,8 +1,3 @@
-import pluralize from 'pluralize'
-import pascalize from '../../helpers/pascalize'
-import PsychicDir from '../../helpers/psychicdir'
-import { Dream } from 'dream'
-
 export default async function generateSerializerString(
   serializerClassName: string,
   fullyQualifiedModelName: string,

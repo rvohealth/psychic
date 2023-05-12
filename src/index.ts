@@ -20,6 +20,13 @@ export {
   STI,
   Scope,
   ValidationError,
+  IdType,
+  capitalize,
+  uncapitalize,
+  camelize,
+  pascalize,
+  snakeify,
+  hyphenize,
 } from 'dream'
 
 export { default as PsychicController } from './controller'
@@ -44,7 +51,3 @@ export { default as background } from './background'
 export { default as generateResource } from './generate/resource'
 export { default as generateController } from './generate/controller'
 export { default as pathifyNestedObject } from './helpers/pathifyNestedObject'
-export { default as camelize } from './helpers/camelize'
-export { default as pascalize } from './helpers/pascalize'
-export { default as snakeify } from './helpers/snakeify'
-export { default as hyphenize } from './helpers/hyphenize'

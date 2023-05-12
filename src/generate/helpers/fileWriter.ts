@@ -1,6 +1,6 @@
 import pluralize from 'pluralize'
 import fs from 'fs/promises'
-import pascalize from '../../helpers/pascalize'
+import { pascalize } from 'dream'
 
 export default async function fileWriter(
   filePath: string,

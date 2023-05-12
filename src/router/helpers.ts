@@ -1,5 +1,4 @@
-import compact from '../helpers/compact'
-import pascalize from '../helpers/pascalize'
+import { pascalize, compact } from 'dream'
 import PsychicRouter, { PsychicNestedRouter } from '../router'
 import { ResourceMethodType } from './types'
 

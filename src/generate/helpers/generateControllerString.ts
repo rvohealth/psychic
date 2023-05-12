@@ -1,10 +1,5 @@
 import pluralize from 'pluralize'
-import pascalize from '../../../src/helpers/pascalize'
-import camelize from '../../../src/helpers/camelize'
-import PsychicDir from '../../../src/helpers/psychicdir'
-import capitalize from '../../../src/helpers/capitalize'
-import { Dream } from 'dream'
-import getModelKey from '../../config/helpers/getModelKey'
+import { camelize, capitalize } from 'dream'
 
 export default async function generateControllerString(
   controllerClassName: string,

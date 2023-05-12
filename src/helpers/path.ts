@@ -1,7 +1,5 @@
-import path from 'path'
 import YAML from 'yaml'
 import { promises as fs } from 'fs'
-import compact from './compact'
 import absoluteFilePath from './absoluteFilePath'
 import importFileWithDefault from './importFileWithDefault'
 

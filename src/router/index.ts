@@ -14,10 +14,9 @@ import PsychicConfig from '../config'
 import log from '../log'
 import PsychicController from '../controller'
 import { ValidationError } from 'dream'
-import pascalize from '../helpers/pascalize'
 import RouteManager from './route-manager'
 import pluralize = require('pluralize')
-import snakeify from '../helpers/snakeify'
+import { pascalize, snakeify } from 'dream'
 
 export default class PsychicRouter {
   public app: Application
