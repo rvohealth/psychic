@@ -74,16 +74,13 @@ export default class PsychicRouter {
     this.crud('delete', path, controllerActionString)
   }
 
-  private prefixControllerActionStringWithNamespaces(str: string) {
-    if (!this.currentNamespaces.length) return str
-    return (
-      this.currentNamespacePaths
-        .filter(n => !/^:/.test(n))
-        .map(str => pascalize(str))
-        .join('/') +
-      '/' +
-      str
+  private prefixControllerActionStringWithNamespaces(controllerActionString: string) {
+    const [controllerName] = controllerActionString.split('#')
+    const filteredNamespaces = this.currentNamespaces.filter(
+      n => !/^:/.test(n.namespace) && !(n.resourceful && pascalize(n.namespace) === controllerName)
     )
+    if (!filteredNamespaces.length) return controllerActionString
+    return filteredNamespaces.map(str => pascalize(str.namespace)).join('/') + '/' + controllerActionString
   }
 
   private prefixPathWithNamespaces(str: string) {

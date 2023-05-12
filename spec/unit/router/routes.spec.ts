@@ -25,5 +25,21 @@ describe('PsychicRouter', () => {
         ])
       )
     })
+
+    it('correctly applies nested crud routes within resources', async () => {
+      router.resources('users', r => {
+        r.get('pets', 'Users#pets')
+      })
+      router.commit()
+      expect(router.routes).toEqual(
+        expect.arrayContaining([
+          {
+            httpMethod: 'get',
+            path: '/users/:id/pets',
+            controllerActionString: 'Users#pets',
+          },
+        ])
+      )
+    })
   })
 })
