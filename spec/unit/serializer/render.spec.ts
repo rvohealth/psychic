@@ -1,5 +1,6 @@
 import { DateTime } from 'luxon'
 import PsychicSerializer from '../../../src/serializer'
+import User from '../../../test-app/app/models/User'
 
 describe('PsychicSerializer#render', () => {
   it('renders a single attribute', () => {
@@ -42,6 +43,54 @@ describe('PsychicSerializer#render', () => {
         }
         const serializer = new MySerializer({ created_at: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
         expect(serializer.render()).toEqual({ created_at: '2002-10-02' })
+      })
+    })
+  })
+
+  context('with casing specified', () => {
+    context('snake casing is specified', () => {
+      it('renders all attribute keys in snake case', () => {
+        class MySerializer extends PsychicSerializer {
+          static {
+            this.attributes('created_at:date')
+          }
+        }
+        const serializer = new MySerializer({ createdAt: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
+        expect(serializer.casing('snake').render()).toEqual({ created_at: '2002-10-02' })
+      })
+    })
+
+    context('camel casing is specified', () => {
+      it('renders all attribute keys in camel case', () => {
+        class MySerializer extends PsychicSerializer {
+          static {
+            this.attributes('createdAt:date')
+          }
+        }
+        const serializer = new MySerializer({ created_at: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
+        expect(serializer.casing('camel').render()).toEqual({ createdAt: '2002-10-02' })
+      })
+    })
+  })
+
+  context('when passed a dream instance', () => {
+    class MySerializer extends PsychicSerializer {
+      static {
+        this.attributes('email')
+      }
+    }
+
+    it('serializes the attributes of the dream', async () => {
+      const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
+      const serializer = new MySerializer(user)
+      expect(serializer.render()).toEqual({ email: 'how@yadoin' })
+    })
+
+    context('given an array of dream instances', () => {
+      it('renders all passed dreams to the shape specified by the serializer', async () => {
+        const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
+        const serializer = new MySerializer([user])
+        expect(serializer.render()).toEqual([{ email: 'how@yadoin' }])
       })
     })
   })
