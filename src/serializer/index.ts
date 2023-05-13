@@ -77,10 +77,11 @@ export default class PsychicSerializer {
       }
     })
     ;(this.constructor as typeof PsychicSerializer).delegateStatements.forEach(delegateStatement => {
-      returnObj[delegateStatement.field] = this.applyDelegation(delegateStatement)
+      returnObj[this.applyCasingToField(delegateStatement.field)] = this.applyDelegation(delegateStatement)
     })
     ;(this.constructor as typeof PsychicSerializer).associationStatements.forEach(associationStatement => {
-      returnObj[associationStatement.field] = this.applyAssociation(associationStatement)
+      returnObj[this.applyCasingToField(associationStatement.field)] =
+        this.applyAssociation(associationStatement)
     })
     return returnObj
   }

@@ -195,6 +195,22 @@ describe('PsychicSerializer#render', () => {
         const serializer = new PetSerializer(pet)
         expect(serializer.render()).toEqual({ email: 'how@yadoin' })
       })
+
+      context('with casing', () => {
+        it('returns the delegated attributes in the correct casing in the payload', async () => {
+          class PetSerializer extends PsychicSerializer {
+            @Delegate('user')
+            public updated_at: string
+          }
+
+          const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
+          const pet = await Pet.create({ user, name: 'aster', species: 'cat' })
+          await pet.load('user')
+
+          const serializer = new PetSerializer(pet)
+          expect(serializer.casing('camel').render()).toEqual({ updatedAt: user.updated_at })
+        })
+      })
     })
   })
 })
