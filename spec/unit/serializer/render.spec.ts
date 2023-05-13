@@ -59,21 +59,10 @@ describe('PsychicSerializer#render', () => {
       it('renders all attribute keys in snake case', () => {
         class MySerializer extends PsychicSerializer {
           @Attribute('date')
-          public created_at: string
+          public createdAt: string
         }
         const serializer = new MySerializer({ createdAt: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
         expect(serializer.casing('snake').render()).toEqual({ created_at: '2002-10-02' })
-      })
-
-      context('serializer has non-snake-cased attributes in definition', () => {
-        it('converts attributes to snake case as well', () => {
-          class MySerializer extends PsychicSerializer {
-            @Attribute('date')
-            public createdAt: string
-          }
-          const serializer = new MySerializer({ createdAt: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
-          expect(serializer.casing('snake').render()).toEqual({ created_at: '2002-10-02' })
-        })
       })
     })
 
@@ -81,21 +70,10 @@ describe('PsychicSerializer#render', () => {
       it('renders all attribute keys in camel case', () => {
         class MySerializer extends PsychicSerializer {
           @Attribute('date')
-          public createdAt: string
+          public created_at: string
         }
         const serializer = new MySerializer({ created_at: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
         expect(serializer.casing('camel').render()).toEqual({ createdAt: '2002-10-02' })
-      })
-
-      context('serializer has non-camel-cased attributes in definition', () => {
-        it('converts attributes to camel case as well', () => {
-          class MySerializer extends PsychicSerializer {
-            @Attribute('date')
-            public created_at: string
-          }
-          const serializer = new MySerializer({ created_at: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
-          expect(serializer.casing('camel').render()).toEqual({ createdAt: '2002-10-02' })
-        })
       })
     })
   })

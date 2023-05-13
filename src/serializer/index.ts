@@ -14,14 +14,8 @@ export default class PsychicSerializer {
   }
 
   public get data() {
-    switch (this._casing) {
-      case 'camel':
-        return camelize(this._data)
-      case 'snake':
-        return snakeify(this._data)
-      default:
-        return this._data
-    }
+    if (Array.isArray(this._data)) return [...this._data]
+    return { ...this._data }
   }
 
   public get attributes() {
@@ -97,12 +91,11 @@ export default class PsychicSerializer {
 
   private getAttributeValue(attributeStatement: AttributeStatement) {
     const { field } = attributeStatement
-    const fieldWithCasing = this.applyCasingToField(field)
 
     if (attributeStatement.functional) {
-      return (this as any)[fieldWithCasing](this._data)
+      return (this as any)[field](this._data)
     } else {
-      return (this.data as any)[fieldWithCasing]
+      return (this.data as any)[field]
     }
   }
 
