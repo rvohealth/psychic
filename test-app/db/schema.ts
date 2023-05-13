@@ -6,6 +6,10 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
+export type Int8 = ColumnType<string, string | number | bigint, string | number | bigint>;
+
+export type SpeciesTypesEnum = "cat" | "noncat";
+
 export type Timestamp = ColumnType<DateTime>
 export type IdType = string | number | bigint | undefined;
 
@@ -14,6 +18,15 @@ export interface HealthUsers {
   email: string | null;
   password_digest: string | null;
   name: string | null;
+  created_at: Timestamp;
+  updated_at: Timestamp;
+}
+
+export interface Pets {
+  id: Generated<Int8>;
+  user_id: number;
+  name: string | null;
+  species: SpeciesTypesEnum | null;
   created_at: Timestamp;
   updated_at: Timestamp;
 }
@@ -29,12 +42,14 @@ export interface Users {
 
 export interface DB {
   health_users: HealthUsers;
+  pets: Pets;
   users: Users;
 }
 
 
 
 export const HealthUserColumns = ['id', 'email', 'password_digest', 'name', 'created_at', 'updated_at']
+export const PetColumns = ['id', 'user_id', 'name', 'species', 'created_at', 'updated_at']
 export const UserColumns = ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
 
 export interface HealthUserAttributes {
@@ -42,6 +57,15 @@ export interface HealthUserAttributes {
   email: string | null
   password_digest: string | null
   name: string | null
+  created_at: DateTime
+  updated_at: DateTime
+}  
+
+export interface PetAttributes {
+  id: IdType
+  user_id: number
+  name: string | null
+  species: SpeciesTypesEnum | null
   created_at: DateTime
   updated_at: DateTime
 }  
@@ -65,6 +89,15 @@ export const HealthUsersTypeCache = {
   updated_at: 'Timestamp'
 }  
 
+export const PetsTypeCache = {
+  id: 'Generated<Int8>',
+  user_id: 'number',
+  name: 'string|null',
+  species: 'SpeciesTypesEnum|null',
+  created_at: 'Timestamp',
+  updated_at: 'Timestamp'
+}  
+
 export const UsersTypeCache = {
   id: 'Generated<number>',
   name: 'string|null',
@@ -78,10 +111,12 @@ export const UsersTypeCache = {
 
 export const DBColumns = {
   health_users: HealthUserColumns,
+  pets: PetColumns,
   users: UserColumns
 }
 
 export const DBTypeCache = {
   health_users: HealthUsersTypeCache,
+  pets: PetsTypeCache,
   users: UsersTypeCache
 }

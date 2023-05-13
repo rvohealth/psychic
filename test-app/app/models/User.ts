@@ -1,5 +1,6 @@
-import { Dream, BeforeCreate, BeforeUpdate, Validates, Virtual } from 'dream'
+import { Dream, BeforeCreate, BeforeUpdate, Validates, Virtual, BelongsTo, HasMany } from 'dream'
 import Hash from '../../../src/encryption/hash'
+import Pet from './Pet'
 export default class User extends Dream {
   public get table() {
     return 'users' as const
@@ -17,6 +18,9 @@ export default class User extends Dream {
   @Virtual()
   public password?: string | null
   public password_digest: string
+
+  @HasMany(() => Pet)
+  public pets: Pet[]
 
   public static backgroundTest() {}
 

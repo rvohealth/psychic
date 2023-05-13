@@ -1,7 +1,10 @@
 import { DateTime } from 'luxon'
 import PsychicSerializer from '../../../src/serializer'
 import Attribute from '../../../src/serializer/decorators/attribute'
+import RendersMany from '../../../src/serializer/decorators/associations/renders-many'
+import RendersOne from '../../../src/serializer/decorators/associations/renders-one'
 import User from '../../../test-app/app/models/User'
+import Pet from '../../../test-app/app/models/Pet'
 
 describe('PsychicSerializer#render', () => {
   it('renders a single attribute', () => {
@@ -128,6 +131,53 @@ describe('PsychicSerializer#render', () => {
     it('serializes the attributes of the dream', async () => {
       const serializer = new MySerializer({ email: 'fish@fish' })
       expect(serializer.render()).toEqual({ email: 'fish#fish' })
+    })
+  })
+
+  context('when defined with an association', () => {
+    context('RendersMany', () => {
+      class UserSerializer extends PsychicSerializer {
+        @RendersMany(() => PetSerializer)
+        public pets: Pet[]
+      }
+
+      class PetSerializer extends PsychicSerializer {
+        @Attribute()
+        public name: string
+
+        @Attribute()
+        public species: string
+      }
+
+      it('identifies associations and serializes them using respecting serializers', async () => {
+        const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
+        await Pet.create({ user, name: 'aster', species: 'cat' })
+        await user.load('pets')
+
+        const serializer = new UserSerializer(user)
+        expect(serializer.render()).toEqual({ pets: [{ name: 'aster', species: 'cat' }] })
+      })
+    })
+
+    context('RendersOne', () => {
+      class UserSerializer extends PsychicSerializer {
+        @Attribute()
+        public email: string
+      }
+
+      class PetSerializer extends PsychicSerializer {
+        @RendersOne(() => UserSerializer)
+        public user: User
+      }
+
+      it('identifies associations and serializes them using respecting serializers', async () => {
+        const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
+        const pet = await Pet.create({ user, name: 'aster', species: 'cat' })
+        await pet.load('user')
+
+        const serializer = new PetSerializer(pet)
+        expect(serializer.render()).toEqual({ user: { email: 'how@yadoin' } })
+      })
     })
   })
 })
