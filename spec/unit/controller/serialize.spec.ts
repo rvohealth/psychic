@@ -4,6 +4,7 @@ import PsychicConfig from '../../../src/config'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
 import PsychicSerializer from '../../../src/serializer'
+import Attribute from '../../../src/serializer/decorators/attribute'
 
 describe('PsychicController', () => {
   describe('#serialize', () => {
@@ -13,9 +14,8 @@ describe('PsychicController', () => {
       const server = new PsychicServer()
       const config = new PsychicConfig(server.app)
       class MySerializer extends PsychicSerializer {
-        static {
-          this.attributes('email')
-        }
+        @Attribute()
+        public email: string
       }
       class MyController extends PsychicController {
         static {

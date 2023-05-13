@@ -1,17 +1,8 @@
 import { Dream, camelize, snakeify } from 'dream'
 import { DateTime } from 'luxon'
+import { AttributeStatement } from './decorators/attribute'
 export default class PsychicSerializer {
-  private static _attributes: string[] = []
-
-  public static attribute(...attrs: string[]) {
-    return this.attributes(...attrs)
-  }
-
-  public static attributes(...attrs: string[]) {
-    this._attributes = Array.from(new Set([...this._attributes, ...attrs]))
-    return this
-  }
-
+  public static attributeStatements: AttributeStatement[] = []
   public _data: { [key: string]: any } | Dream | ({ [key: string]: any } | Dream)[]
   private _casing: 'snake' | 'camel' | null = null
   constructor(data: any) {
@@ -30,20 +21,13 @@ export default class PsychicSerializer {
   }
 
   public get attributes() {
-    const staticSelf: typeof PsychicSerializer = this.constructor as typeof PsychicSerializer
-    const attributes = staticSelf._attributes
+    const attributes = (this.constructor as typeof PsychicSerializer).attributeStatements.map(s => s.field)
 
     switch (this._casing) {
       case 'camel':
-        return attributes.map(attr => {
-          const parts = attr.split(':')
-          return camelize(parts[0]) + ':' + parts.slice(1, parts.length).join(':')
-        })
+        return attributes.map(attr => camelize(attr))
       case 'snake':
-        return attributes.map(attr => {
-          const parts = attr.split(':')
-          return [snakeify(parts[0]), ...parts.slice(1, parts.length)].join(':')
-        })
+        return attributes.map(attr => snakeify(attr))
       default:
         return attributes
     }
@@ -66,17 +50,37 @@ export default class PsychicSerializer {
   public renderOne() {
     const returnObj: { [key: string]: any } = {}
     this.attributes.forEach(attr => {
-      const [attributeField, attributeType] = attr.split(':')
-      switch (attributeType) {
-        case 'date':
-          const fieldValue: DateTime | undefined = (this.data as any)[attributeField]
-          returnObj[attributeField] = fieldValue?.toFormat('yyyy-MM-dd')
-          break
+      const attributeStatement = (this.constructor as typeof PsychicSerializer).attributeStatements.find(
+        s =>
+          [attr, this.applyCasingToField(attr)].includes(s.field) ||
+          [attr, this.applyCasingToField(attr)].includes(this.applyCasingToField(s.field))
+      )
 
-        default:
-          returnObj[attributeField] = (this.data as any)[attributeField]
+      if (attributeStatement) {
+        const { field, renderAs } = attributeStatement
+        const fieldWithCasing = this.applyCasingToField(field)
+        switch (renderAs) {
+          case 'date':
+            const fieldValue: DateTime | undefined = (this.data as any)[fieldWithCasing]
+            returnObj[fieldWithCasing] = fieldValue?.toFormat('yyyy-MM-dd')
+            break
+
+          default:
+            returnObj[fieldWithCasing] = (this.data as any)[fieldWithCasing]
+        }
       }
     })
     return returnObj
+  }
+
+  private applyCasingToField(field: string) {
+    switch (this._casing) {
+      case 'camel':
+        return camelize(field)
+      case 'snake':
+        return snakeify(field)
+      default:
+        return field
+    }
   }
 }

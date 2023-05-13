@@ -1,13 +1,13 @@
 import { DateTime } from 'luxon'
 import PsychicSerializer from '../../../src/serializer'
+import Attribute from '../../../src/serializer/decorators/attribute'
 import User from '../../../test-app/app/models/User'
 
 describe('PsychicSerializer#render', () => {
   it('renders a single attribute', () => {
     class MySerializer extends PsychicSerializer {
-      static {
-        this.attribute('email')
-      }
+      @Attribute()
+      public email: string
     }
     const serializer = new MySerializer({ email: 'abc', password: '123' })
     expect(serializer.render()).toEqual({ email: 'abc' })
@@ -15,9 +15,11 @@ describe('PsychicSerializer#render', () => {
 
   it('renders multiple attributes', () => {
     class MySerializer extends PsychicSerializer {
-      static {
-        this.attributes('email', 'name')
-      }
+      @Attribute()
+      public email: string
+
+      @Attribute()
+      public name: string
     }
     const serializer = new MySerializer({ email: 'abc', name: 'james' })
     expect(serializer.render()).toEqual({ email: 'abc', name: 'james' })
@@ -25,9 +27,11 @@ describe('PsychicSerializer#render', () => {
 
   it('excludes hidden attributes', () => {
     class MySerializer extends PsychicSerializer {
-      static {
-        this.attributes('email', 'name')
-      }
+      @Attribute()
+      public email: string
+
+      @Attribute()
+      public name: string
     }
     const serializer = new MySerializer({ email: 'abc', password: 'james' })
     expect(serializer.render()).toEqual({ email: 'abc' })
@@ -37,9 +41,8 @@ describe('PsychicSerializer#render', () => {
     context('one of the fields is a date', () => {
       it('renders unique format for dates', () => {
         class MySerializer extends PsychicSerializer {
-          static {
-            this.attributes('created_at:date')
-          }
+          @Attribute('date')
+          public created_at: string
         }
         const serializer = new MySerializer({ created_at: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
         expect(serializer.render()).toEqual({ created_at: '2002-10-02' })
@@ -51,9 +54,8 @@ describe('PsychicSerializer#render', () => {
     context('snake casing is specified', () => {
       it('renders all attribute keys in snake case', () => {
         class MySerializer extends PsychicSerializer {
-          static {
-            this.attributes('created_at:date')
-          }
+          @Attribute('date')
+          public created_at: string
         }
         const serializer = new MySerializer({ createdAt: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
         expect(serializer.casing('snake').render()).toEqual({ created_at: '2002-10-02' })
@@ -62,9 +64,8 @@ describe('PsychicSerializer#render', () => {
       context('serializer has non-snake-cased attributes in definition', () => {
         it('converts attributes to snake case as well', () => {
           class MySerializer extends PsychicSerializer {
-            static {
-              this.attributes('createdAt:date')
-            }
+            @Attribute('date')
+            public createdAt: string
           }
           const serializer = new MySerializer({ createdAt: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
           expect(serializer.casing('snake').render()).toEqual({ created_at: '2002-10-02' })
@@ -75,9 +76,8 @@ describe('PsychicSerializer#render', () => {
     context('camel casing is specified', () => {
       it('renders all attribute keys in camel case', () => {
         class MySerializer extends PsychicSerializer {
-          static {
-            this.attributes('createdAt:date')
-          }
+          @Attribute('date')
+          public createdAt: string
         }
         const serializer = new MySerializer({ created_at: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
         expect(serializer.casing('camel').render()).toEqual({ createdAt: '2002-10-02' })
@@ -86,9 +86,8 @@ describe('PsychicSerializer#render', () => {
       context('serializer has non-camel-cased attributes in definition', () => {
         it('converts attributes to camel case as well', () => {
           class MySerializer extends PsychicSerializer {
-            static {
-              this.attributes('created_at:date')
-            }
+            @Attribute('date')
+            public created_at: string
           }
           const serializer = new MySerializer({ created_at: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
           expect(serializer.casing('camel').render()).toEqual({ createdAt: '2002-10-02' })
@@ -99,9 +98,8 @@ describe('PsychicSerializer#render', () => {
 
   context('when passed a dream instance', () => {
     class MySerializer extends PsychicSerializer {
-      static {
-        this.attributes('email')
-      }
+      @Attribute()
+      public email: string
     }
 
     it('serializes the attributes of the dream', async () => {
