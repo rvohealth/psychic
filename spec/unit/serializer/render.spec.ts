@@ -58,6 +58,18 @@ describe('PsychicSerializer#render', () => {
         const serializer = new MySerializer({ createdAt: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
         expect(serializer.casing('snake').render()).toEqual({ created_at: '2002-10-02' })
       })
+
+      context('serializer has non-snake-cased attributes in definition', () => {
+        it('converts attributes to snake case as well', () => {
+          class MySerializer extends PsychicSerializer {
+            static {
+              this.attributes('createdAt:date')
+            }
+          }
+          const serializer = new MySerializer({ createdAt: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
+          expect(serializer.casing('snake').render()).toEqual({ created_at: '2002-10-02' })
+        })
+      })
     })
 
     context('camel casing is specified', () => {
@@ -69,6 +81,18 @@ describe('PsychicSerializer#render', () => {
         }
         const serializer = new MySerializer({ created_at: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
         expect(serializer.casing('camel').render()).toEqual({ createdAt: '2002-10-02' })
+      })
+
+      context('serializer has non-camel-cased attributes in definition', () => {
+        it('converts attributes to camel case as well', () => {
+          class MySerializer extends PsychicSerializer {
+            static {
+              this.attributes('created_at:date')
+            }
+          }
+          const serializer = new MySerializer({ created_at: DateTime.fromFormat('2002-10-02', 'yyyy-MM-dd') })
+          expect(serializer.casing('camel').render()).toEqual({ createdAt: '2002-10-02' })
+        })
       })
     })
   })

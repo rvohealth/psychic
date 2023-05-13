@@ -29,6 +29,26 @@ export default class PsychicSerializer {
     }
   }
 
+  public get attributes() {
+    const staticSelf: typeof PsychicSerializer = this.constructor as typeof PsychicSerializer
+    const attributes = staticSelf._attributes
+
+    switch (this._casing) {
+      case 'camel':
+        return attributes.map(attr => {
+          const parts = attr.split(':')
+          return camelize(parts[0]) + ':' + parts.slice(1, parts.length).join(':')
+        })
+      case 'snake':
+        return attributes.map(attr => {
+          const parts = attr.split(':')
+          return [snakeify(parts[0]), ...parts.slice(1, parts.length)].join(':')
+        })
+      default:
+        return attributes
+    }
+  }
+
   public casing(casing: 'snake' | 'camel') {
     this._casing = casing
     return this
@@ -45,8 +65,7 @@ export default class PsychicSerializer {
 
   public renderOne() {
     const returnObj: { [key: string]: any } = {}
-    const staticSelf: typeof PsychicSerializer = this.constructor as typeof PsychicSerializer
-    staticSelf._attributes.forEach(attr => {
+    this.attributes.forEach(attr => {
       const [attributeField, attributeType] = attr.split(':')
       switch (attributeType) {
         case 'date':
