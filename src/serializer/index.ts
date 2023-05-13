@@ -3,7 +3,7 @@ import { DateTime } from 'luxon'
 import { AttributeStatement } from './decorators/attribute'
 export default class PsychicSerializer {
   public static attributeStatements: AttributeStatement[] = []
-  public _data: { [key: string]: any } | Dream | ({ [key: string]: any } | Dream)[]
+  private _data: { [key: string]: any } | Dream | ({ [key: string]: any } | Dream)[]
   private _casing: 'snake' | 'camel' | null = null
   constructor(data: any) {
     this._data = data
@@ -61,16 +61,27 @@ export default class PsychicSerializer {
         const fieldWithCasing = this.applyCasingToField(field)
         switch (renderAs) {
           case 'date':
-            const fieldValue: DateTime | undefined = (this.data as any)[fieldWithCasing]
+            const fieldValue: DateTime | undefined = this.getAttributeValue(attributeStatement)
             returnObj[fieldWithCasing] = fieldValue?.toFormat('yyyy-MM-dd')
             break
 
           default:
-            returnObj[fieldWithCasing] = (this.data as any)[fieldWithCasing]
+            returnObj[fieldWithCasing] = this.getAttributeValue(attributeStatement)
         }
       }
     })
     return returnObj
+  }
+
+  private getAttributeValue(attributeStatement: AttributeStatement) {
+    const { field, renderAs } = attributeStatement
+    const fieldWithCasing = this.applyCasingToField(field)
+
+    if (attributeStatement.functional) {
+      return (this as any)[fieldWithCasing](this._data)
+    } else {
+      return (this.data as any)[fieldWithCasing]
+    }
   }
 
   private applyCasingToField(field: string) {

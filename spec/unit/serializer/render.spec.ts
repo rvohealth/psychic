@@ -116,4 +116,18 @@ describe('PsychicSerializer#render', () => {
       })
     })
   })
+
+  context('when defined with a functional attribute', () => {
+    class MySerializer extends PsychicSerializer {
+      @Attribute()
+      public email(attributes: any) {
+        return attributes.email.replace(/@/, '#')
+      }
+    }
+
+    it('serializes the attributes of the dream', async () => {
+      const serializer = new MySerializer({ email: 'fish@fish' })
+      expect(serializer.render()).toEqual({ email: 'fish#fish' })
+    })
+  })
 })
