@@ -2,9 +2,11 @@ import { Dream, camelize, snakeify } from 'dream'
 import { DateTime } from 'luxon'
 import { AttributeStatement } from './decorators/attribute'
 import { AssociationStatement } from './decorators/associations/shared'
+import { DelegateStatement } from './decorators/delegate'
 export default class PsychicSerializer {
   public static attributeStatements: AttributeStatement[] = []
   public static associationStatements: AssociationStatement[] = []
+  public static delegateStatements: DelegateStatement[] = []
   private _data: { [key: string]: any } | Dream | ({ [key: string]: any } | Dream)[]
   private _casing: 'snake' | 'camel' | null = null
   constructor(data: any) {
@@ -74,6 +76,9 @@ export default class PsychicSerializer {
         }
       }
     })
+    ;(this.constructor as typeof PsychicSerializer).delegateStatements.forEach(delegateStatement => {
+      returnObj[delegateStatement.field] = this.applyDelegation(delegateStatement)
+    })
     ;(this.constructor as typeof PsychicSerializer).associationStatements.forEach(associationStatement => {
       returnObj[associationStatement.field] = this.applyAssociation(associationStatement)
     })
@@ -85,8 +90,12 @@ export default class PsychicSerializer {
     return new serializerClass((this._data as any)[associationStatement.field]).render()
   }
 
+  private applyDelegation(delegateStatement: DelegateStatement) {
+    return (this._data as any)[delegateStatement.delegateTo][delegateStatement.field]
+  }
+
   private getAttributeValue(attributeStatement: AttributeStatement) {
-    const { field, renderAs } = attributeStatement
+    const { field } = attributeStatement
     const fieldWithCasing = this.applyCasingToField(field)
 
     if (attributeStatement.functional) {

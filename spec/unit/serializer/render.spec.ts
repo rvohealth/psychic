@@ -5,6 +5,7 @@ import RendersMany from '../../../src/serializer/decorators/associations/renders
 import RendersOne from '../../../src/serializer/decorators/associations/renders-one'
 import User from '../../../test-app/app/models/User'
 import Pet from '../../../test-app/app/models/Pet'
+import Delegate from '../../../src/serializer/decorators/delegate'
 
 describe('PsychicSerializer#render', () => {
   it('renders a single attribute', () => {
@@ -177,6 +178,22 @@ describe('PsychicSerializer#render', () => {
 
         const serializer = new PetSerializer(pet)
         expect(serializer.render()).toEqual({ user: { email: 'how@yadoin' } })
+      })
+    })
+
+    context('with attribute delegations', () => {
+      it('returns the delegated attributes in the payload', async () => {
+        class PetSerializer extends PsychicSerializer {
+          @Delegate('user')
+          public email: string
+        }
+
+        const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
+        const pet = await Pet.create({ user, name: 'aster', species: 'cat' })
+        await pet.load('user')
+
+        const serializer = new PetSerializer(pet)
+        expect(serializer.render()).toEqual({ email: 'how@yadoin' })
       })
     })
   })
