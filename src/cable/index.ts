@@ -97,7 +97,12 @@ export default class Cable {
   public async bindToRedis() {
     const redisOpts = await redisOptions()
     const actualOpts = await redisOpts()
-    const pubClient = createClient({ socket: { ...actualOpts, port: actualOpts.port || 6379 } })
+    const creds =
+      process.env.DOCKER === '1'
+        ? { url: 'redis://redis:6379' }
+        : { socket: { ...actualOpts, port: actualOpts.port || 6379 } }
+
+    const pubClient = createClient(creds)
     const subClient = pubClient.duplicate()
 
     pubClient.on('error', error => {
