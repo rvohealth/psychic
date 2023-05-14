@@ -96,7 +96,7 @@ export default class Cable {
 
   public async bindToRedis() {
     const redisOpts = await redisOptions()
-    const actualOpts = redisOpts()
+    const actualOpts = await redisOpts()
     const pubClient = createClient({ socket: { ...actualOpts, port: actualOpts.port || 6379 } })
     const subClient = pubClient.duplicate()
 
