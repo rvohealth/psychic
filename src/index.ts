@@ -16,7 +16,6 @@ export {
   BeforeSave,
   BeforeUpdate,
   Validates,
-  Presence,
   STI,
   Scope,
   ValidationError,
@@ -43,6 +42,10 @@ export { default as log } from './log'
 export { default as PsychicRouter } from './router'
 export { default as PsychicServer } from './server'
 export { default as PsychicSerializer } from './serializer'
+export { default as Attribute } from './serializer/decorators/attribute'
+export { default as RendersMany } from './serializer/decorators/associations/renders-many'
+export { default as RendersOne } from './serializer/decorators/associations/renders-one'
+export { default as Delegate } from './serializer/decorators/delegate'
 export { default as Params } from './server/params'
 export { default as PsychicSession } from './session'
 export { UUID } from './config/types'

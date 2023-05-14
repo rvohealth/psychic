@@ -1,4 +1,4 @@
-import colors from 'colorette'
+import * as colors from 'colorette'
 import { Application } from 'express'
 import { createClient, RedisClientType } from 'redis'
 import { createAdapter } from '@socket.io/redis-adapter'
@@ -96,8 +96,10 @@ export default class Cable {
 
   public async bindToRedis() {
     const redisOpts = await redisOptions()
-    const actualOpts = redisOpts()
-    const pubClient = createClient({ socket: { ...actualOpts, port: actualOpts.port || 6379 } })
+    const actualOpts = await redisOpts()
+    const creds = { socket: { ...actualOpts, port: actualOpts.port || 6379 } }
+
+    const pubClient = createClient(creds)
     const subClient = pubClient.duplicate()
 
     pubClient.on('error', error => {

@@ -1,5 +1,5 @@
 import fs from 'fs'
-import colors from 'colorette'
+import * as colors from 'colorette'
 import logo from '../config/logo'
 import logPath from '../config/helpers/logPath'
 import { DateTime } from 'luxon'

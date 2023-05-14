@@ -1,4 +1,4 @@
-import colors from 'colorette'
+import * as colors from 'colorette'
 import env from '../src/env'
 import PsychicServer from '../src/server'
 import { RouteConfig } from '../src/router/route-manager'
