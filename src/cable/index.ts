@@ -99,7 +99,7 @@ export default class Cable {
     const actualOpts = await redisOpts()
     const creds =
       process.env.DOCKER === '1'
-        ? { url: 'redis://redis' }
+        ? { url: 'redis://redis', legacyMode: true }
         : { socket: { ...actualOpts, port: actualOpts.port || 6379 } }
 
     const pubClient = createClient(creds)
