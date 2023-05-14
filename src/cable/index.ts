@@ -1,4 +1,4 @@
-import colors from 'colorette'
+import * as colors from 'colorette'
 import { Application } from 'express'
 import { createClient, RedisClientType } from 'redis'
 import { createAdapter } from '@socket.io/redis-adapter'
