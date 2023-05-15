@@ -4,6 +4,7 @@ export const pluralize = _pluralize
 export {
   db,
   Dream,
+  DreamSerializer,
   BelongsTo,
   HasMany,
   HasOne,
@@ -41,7 +42,6 @@ export { default as UnprocessableEntity } from './error/http/unprocessable-entit
 export { default as log } from './log'
 export { default as PsychicRouter } from './router'
 export { default as PsychicServer } from './server'
-export { default as PsychicSerializer } from './serializer'
 export { default as Attribute } from './serializer/decorators/attribute'
 export { default as RendersMany } from './serializer/decorators/associations/renders-many'
 export { default as RendersOne } from './serializer/decorators/associations/renders-one'

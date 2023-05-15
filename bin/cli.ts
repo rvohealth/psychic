@@ -9,7 +9,6 @@ import { Command } from 'commander'
 import sspawn from '../src/helpers/sspawn'
 import generateResource from '../src/generate/resource'
 import setCoreDevelopmentFlag from './cli/helpers/setCoreDevelopmentFlag'
-import generateSerializer from '../src/generate/serializer'
 import generateController from '../src/generate/controller'
 import hijackRootForCLI from './cli/helpers/hijackRootForCLI'
 import yarncmdRunByAppConsumer from './cli/helpers/yarncmdRunByAppConsumer'
@@ -122,11 +121,11 @@ program
   .argument('<name>', 'name of the migration')
   .option('--core', 'sets core to true')
   .action(async () => {
-    const [_, name, ...attributes] = program.args
+    await ensureStableAppBuild(program.args)
 
-    await generateSerializer(
-      name,
-      attributes.filter(attr => !['--core'].includes(attr))
+    const [_, name, ...attributes] = program.args
+    await sspawn(
+      yarncmdRunByAppConsumer(`dream g:serializer ${name} ${attributes.join(' ')}`, omitCoreArg(program.args))
     )
   })
 

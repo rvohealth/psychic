@@ -1,9 +1,9 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
+import { DreamSerializer } from 'dream'
 import PsychicController from '../../../src/controller'
 import PsychicConfig from '../../../src/config'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
-import PsychicSerializer from '../../../src/serializer'
 import Attribute from '../../../src/serializer/decorators/attribute'
 
 describe('PsychicController', () => {
@@ -13,7 +13,7 @@ describe('PsychicController', () => {
       const res = getMockRes().res
       const server = new PsychicServer()
       const config = new PsychicConfig(server.app)
-      class MySerializer extends PsychicSerializer {
+      class MySerializer extends DreamSerializer {
         @Attribute()
         public email: string
       }

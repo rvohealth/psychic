@@ -1,14 +1,13 @@
-import { Dream } from 'dream'
+import { Dream, DreamSerializer } from 'dream'
 import fs from 'fs/promises'
 import path from 'path'
 import PsychicController from '../controller'
-import PsychicSerializer from '../serializer'
 import absoluteSrcPath from './absoluteSrcPath'
 import importFileWithDefault from './importFileWithDefault'
 
 let _models: { [key: string]: typeof Dream }
 let _controllers: { [key: string]: typeof PsychicController }
-let _serializers: { [key: string]: typeof PsychicSerializer }
+let _serializers: { [key: string]: typeof DreamSerializer }
 export default class PsychicDir {
   public static async models() {
     if (_models) return _models
@@ -57,7 +56,7 @@ export default class PsychicDir {
       /\.ts$/.test(path)
     )
     for (const serializerPath of serializerPaths) {
-      const serializerClass = (await importFileWithDefault(serializerPath)) as typeof PsychicSerializer
+      const serializerClass = (await importFileWithDefault(serializerPath)) as typeof DreamSerializer
       const serializerKey = serializerPath.replace(/^.*app\/serializers\//, '').replace(/\.ts$/, '')
       _serializers[serializerKey] = serializerClass
     }
