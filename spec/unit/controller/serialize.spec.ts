@@ -1,10 +1,9 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { DreamSerializer } from 'dream'
+import { DreamSerializer, Attribute } from 'dream'
 import PsychicController from '../../../src/controller'
 import PsychicConfig from '../../../src/config'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
-import Attribute from '../../../src/serializer/decorators/attribute'
 
 describe('PsychicController', () => {
   describe('#serialize', () => {
