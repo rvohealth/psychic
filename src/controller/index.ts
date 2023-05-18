@@ -1,4 +1,4 @@
-import { Dream } from 'dream'
+import { Dream, DreamSerializer } from 'dream'
 import { Request, Response } from 'express'
 import Forbidden from '../error/http/forbidden'
 import Unauthorized from '../error/http/unauthorized'
@@ -7,7 +7,6 @@ import Session from '../session'
 import controllerHooks from '../controller/hooks'
 import NotFound from '../error/http/not-found'
 import PsychicConfig from '../config'
-import PsychicSerializer from '../serializer'
 import getControllerKey from '../config/helpers/getControllerKey'
 import background from '../background'
 import getModelKey from '../config/helpers/getModelKey'
@@ -29,7 +28,7 @@ export default class PsychicController {
 
   public static serializes(ModelClass: typeof Dream) {
     return {
-      with: (SerializerClass: typeof PsychicSerializer) => {
+      with: (SerializerClass: typeof DreamSerializer) => {
         controllerSerializerIndex.add(this, SerializerClass, ModelClass)
         return this
       },
@@ -192,11 +191,11 @@ export default class PsychicController {
 }
 
 export class ControllerSerializerIndex {
-  public associations: [typeof PsychicController, typeof PsychicSerializer, typeof Dream][] = []
+  public associations: [typeof PsychicController, typeof DreamSerializer, typeof Dream][] = []
 
   public add(
     ControllerClass: typeof PsychicController,
-    SerializerClass: typeof PsychicSerializer,
+    SerializerClass: typeof DreamSerializer,
     ModelClass: typeof Dream
   ) {
     this.associations.push([ControllerClass, SerializerClass, ModelClass])
@@ -210,7 +209,7 @@ export class ControllerSerializerIndex {
 
   public lookupSerializer(
     ControllerClass: typeof PsychicController,
-    SerializerClass: typeof PsychicSerializer
+    SerializerClass: typeof DreamSerializer
   ) {
     return this.associations.find(
       association => association[0] === ControllerClass && association[1] === SerializerClass

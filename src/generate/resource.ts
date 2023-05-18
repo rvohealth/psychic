@@ -1,6 +1,5 @@
 import pluralize from 'pluralize'
 import generateController from './controller'
-import generateSerializer from './serializer'
 import sspawn from '../helpers/sspawn'
 
 export default async function generateResource(
@@ -28,7 +27,6 @@ export default async function generateResource(
     ['create', 'index', 'show', 'update', 'destroy'],
     columnAttributes
   )
-  await generateSerializer(fullyQualifiedModelName, columnAttributes)
   // if (process.env.NODE_ENV !== 'test') process.exit()
 }
 
