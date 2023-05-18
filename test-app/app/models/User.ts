@@ -1,9 +1,14 @@
 import { Dream, BeforeCreate, BeforeUpdate, Validates, Virtual, BelongsTo, HasMany } from 'dream'
 import Hash from '../../../src/encryption/hash'
 import Pet from './Pet'
+import UserSerializer from '../serializers/UserSerializer'
 export default class User extends Dream {
   public get table() {
     return 'users' as const
+  }
+
+  public get serializer() {
+    return UserSerializer
   }
 
   public id: number
