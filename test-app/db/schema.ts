@@ -119,4 +119,4 @@ export const DBTypeCache = {
   health_users: HealthUsersTypeCache,
   pets: PetsTypeCache,
   users: UsersTypeCache
-}
+} as Partial<Record<keyof DB, any>>
