@@ -102,6 +102,7 @@ export class Background {
   }
 
   public async handler(job: Job<any, any, string>) {
+    console.log('HANDLER RUN')
     const { id, method, args, constructorArgs, filepath, importKey } = job.data
     const jobType = job.name
 
