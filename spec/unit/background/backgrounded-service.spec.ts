@@ -37,46 +37,4 @@ describe('BackgroundedService', () => {
       args: ['bottlearum'],
     })
   })
-
-  // context('BackgroundJobQueueInstanceJob', () => {
-  //   it('calls the instance method, passing constructor args', async () => {
-  //     await background.connect()
-  //     const user = await User.create({ email: 'yo@ho', password_digest: 'bottlarum' })
-  //     jest.spyOn(User.prototype, 'checkPassword').mockResolvedValue(true)
-
-  //     await background.handler({
-  //       name: 'BackgroundJobQueueInstanceJob',
-  //       data: {
-  //         id: user.id,
-  //         method: 'checkPassword',
-  //         constructorArgs: [],
-  //         filepath: 'app/models/User',
-  //         args: ['bottlarum'],
-  //       },
-  //     } as any)
-
-  //     expect(User.prototype.checkPassword).toHaveBeenCalledWith('bottlarum')
-  //   })
-  // })
-
-  // context('BackgroundJobQueueModelInstanceJob', () => {
-  //   it('calls the instance method, passing constructor args', async () => {
-  //     await background.connect()
-  //     const user = await User.create({ email: 'yo@ho', password_digest: 'bottlarum' })
-  //     jest.spyOn(User, 'find').mockResolvedValue(user)
-  //     jest.spyOn(user, 'checkPassword').mockResolvedValue(true)
-  //     await background.handler({
-  //       name: 'BackgroundJobQueueModelInstanceJob',
-  //       data: {
-  //         id: user.id,
-  //         method: 'checkPassword',
-  //         constructorArgs: [],
-  //         filepath: 'app/models/User',
-  //         args: ['bottlarum'],
-  //       },
-  //     } as any)
-
-  //     expect(user.checkPassword).toHaveBeenCalledWith('bottlarum')
-  //   })
-  // })
 })
