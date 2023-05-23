@@ -10,6 +10,7 @@ import ReactServer from '../server/react'
 import PsychicRouter from '../router'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
+import { Server } from 'http'
 
 export default class PsychicServer {
   public app: Application
@@ -87,6 +88,27 @@ export default class PsychicServer {
         })
       })
     }
+
+    return true
+  }
+
+  public async serveForRequestSpecs(block: () => any) {
+    const port = process.env.PORT
+    if (!port) throw 'Missing `PORT` environment variable'
+
+    await this.boot()
+
+    let server: Server
+
+    await new Promise(async accept => {
+      server = this.app.listen(port, async () => {
+        accept({})
+      })
+    })
+
+    await block()
+
+    server!.close()
 
     return true
   }
