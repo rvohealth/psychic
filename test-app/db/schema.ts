@@ -24,7 +24,7 @@ export interface HealthUsers {
 
 export interface Pets {
   id: Generated<Int8>;
-  user_id: Int8;
+  user_id: number;
   name: string | null;
   species: SpeciesTypesEnum | null;
   created_at: Timestamp;
@@ -63,7 +63,7 @@ export interface HealthUserAttributes {
 
 export interface PetAttributes {
   id: IdType
-  user_id: IdType
+  user_id: number
   name: string | null
   species: SpeciesTypesEnum | null
   created_at: DateTime
@@ -91,7 +91,7 @@ export const HealthUsersTypeCache = {
 
 export const PetsTypeCache = {
   id: 'Generated<Int8>',
-  user_id: 'Int8',
+  user_id: 'number',
   name: 'string|null',
   species: 'SpeciesTypesEnum|null',
   created_at: 'Timestamp',

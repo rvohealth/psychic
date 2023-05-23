@@ -1,37 +1,7 @@
 import _pluralize from 'pluralize'
 export const pluralize = _pluralize
 
-export {
-  db,
-  Dream,
-  Delegate,
-  BelongsTo,
-  HasMany,
-  HasOne,
-  AfterCreate,
-  AfterDestroy,
-  AfterSave,
-  AfterUpdate,
-  BeforeCreate,
-  BeforeDestroy,
-  BeforeSave,
-  BeforeUpdate,
-  Validates,
-  STI,
-  Scope,
-  DreamSerializer,
-  RendersMany,
-  RendersOne,
-  Attribute,
-  ValidationError,
-  IdType,
-  capitalize,
-  uncapitalize,
-  camelize,
-  pascalize,
-  snakeify,
-  hyphenize,
-} from 'dream'
+export * from 'dream'
 
 export { default as PsychicController } from './controller'
 export { BeforeAction } from './controller/decorators'
