@@ -109,6 +109,12 @@ export const UsersTypeCache = {
 
 
 
+export interface InterpretedDB {
+  health_users: HealthUserAttributes,
+  pets: PetAttributes,
+  users: UserAttributes
+}
+
 export const DBColumns = {
   health_users: HealthUserColumns,
   pets: PetColumns,
