@@ -12,6 +12,8 @@ import background from '../background'
 import getModelKey from '../config/helpers/getModelKey'
 import BadRequest from '../error/http/bad-request'
 import InternalServerError from '../error/http/internal-server-error'
+import ServiceUnavailable from '../error/http/service-unavailable'
+import HttpStatusCodeMap, { HttpStatusSymbol } from '../error/http/status-codes'
 
 export default class PsychicController {
   public static before(
@@ -137,6 +139,25 @@ export default class PsychicController {
     return this.json(data)
   }
 
+  public status(status: number | HttpStatusSymbol) {
+    const resolvedStatus =
+      status.constructor === Number ? status : parseInt(HttpStatusCodeMap[status] as string)
+    return this.res.status(resolvedStatus)
+  }
+
+  public send(message: number | HttpStatusSymbol | string) {
+    if (message.constructor === Number) {
+      return this.res.status(message).send()
+    } else {
+      const statusLookup = HttpStatusCodeMap[message as any] as string
+      if (statusLookup) {
+        return this.res.status(parseInt(statusLookup)).send()
+      }
+    }
+
+    return this.res.send(message)
+  }
+
   // 400
   public badRequest(data: { [key: string]: any } = {}) {
     throw new BadRequest(
@@ -179,6 +200,11 @@ export default class PsychicController {
       'The request method is not supported by the server and cannot be handled. The only methods that servers are required to support (and therefore that must not return this code) are GET and HEAD',
       data
     )
+  }
+
+  // 503
+  public serviceUnavailable() {
+    throw new ServiceUnavailable('The service you requested is currently unavailable')
   }
 
   public async runAction(action: string) {

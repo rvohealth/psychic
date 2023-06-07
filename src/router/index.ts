@@ -20,6 +20,7 @@ import { pascalize, snakeify } from 'dream'
 import BadRequest from '../error/http/bad-request'
 import InternalServerError from '../error/http/internal-server-error'
 import NotImplemented from '../error/http/not-implemented'
+import ServiceUnavailable from '../error/http/service-unavailable'
 
 export default class PsychicRouter {
   public app: Application
@@ -276,6 +277,7 @@ export default class PsychicRouter {
         case BadRequest:
         case InternalServerError:
         case NotImplemented:
+        case ServiceUnavailable:
           res.sendStatus((err as any).status)
           break
 
