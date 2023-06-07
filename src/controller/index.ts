@@ -137,13 +137,13 @@ export default class PsychicController {
     return this.json(data)
   }
 
-  public status(status: number | HttpStatusSymbol) {
+  public $status(status: number | HttpStatusSymbol) {
     const resolvedStatus =
       status.constructor === Number ? status : parseInt(HttpStatusCodeMap[status] as string)
     return this.res.status(resolvedStatus)
   }
 
-  public send(message: number | HttpStatusSymbol | string) {
+  public $send(message: number | HttpStatusSymbol | string) {
     if (message.constructor === Number) {
       return this.res.status(message).send()
     } else {
