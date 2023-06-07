@@ -1,38 +1,3 @@
-export class ControllerHooks {
-  public hooks: ControllerHook[] = []
-
-  public add(
-    controllerClassName: string,
-    methodName: string,
-    {
-      isStatic = false,
-      only = [],
-      except = [],
-    }: {
-      isStatic?: boolean
-      only?: string[]
-      except?: string[]
-    } = {}
-  ) {
-    this.hooks.push(
-      new ControllerHook(controllerClassName, methodName, {
-        isStatic,
-        only,
-        except,
-      })
-    )
-  }
-
-  public for(controllerClassName: string, actionName: string, isStatic: boolean = false) {
-    return this.hooks.filter(
-      hook =>
-        hook.controllerClassName === controllerClassName &&
-        hook.isStatic === isStatic &&
-        hook.shouldFireForAction(actionName)
-    )
-  }
-}
-
 export class ControllerHook {
   public controllerClassName: string
   public methodName: string
@@ -67,6 +32,3 @@ export class ControllerHook {
     return true
   }
 }
-
-const controllerHooks = new ControllerHooks()
-export default controllerHooks

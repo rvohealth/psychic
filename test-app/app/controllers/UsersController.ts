@@ -1,13 +1,13 @@
+import { BeforeAction } from '../../../src/controller/decorators'
 import Params from '../../../src/server/params'
 import User from '../models/User'
 import ApplicationController from './ApplicationController'
 
+@BeforeAction({
+  only: ['authPing'],
+  methodName: 'authenticate',
+})
 export default class UsersController extends ApplicationController {
-  static {
-    this.before('authenticate', { only: ['authPing'] })
-    this.before('setBeforeAllTestContent')
-  }
-
   public ping() {
     this.ok('helloworld')
   }
@@ -43,10 +43,11 @@ export default class UsersController extends ApplicationController {
     this.ok()
   }
 
-  public beforeAllTestContent = 'before all action was NOT called for all'
+  @BeforeAction()
   public setBeforeAllTestContent() {
     this.beforeAllTestContent = 'before all action was called for all!'
   }
+  public beforeAllTestContent = 'before all action was NOT called for all'
 
   private get userParams() {
     return Params.restrict(this.params?.user, ['email', 'password'])

@@ -4,7 +4,6 @@ import Forbidden from '../error/http/forbidden'
 import Unauthorized from '../error/http/unauthorized'
 import UnprocessableEntity from '../error/http/unprocessable-entity'
 import Session from '../session'
-import controllerHooks from '../controller/hooks'
 import NotFound from '../error/http/not-found'
 import PsychicConfig from '../config'
 import getControllerKey from '../config/helpers/getControllerKey'
@@ -14,19 +13,14 @@ import BadRequest from '../error/http/bad-request'
 import InternalServerError from '../error/http/internal-server-error'
 import ServiceUnavailable from '../error/http/service-unavailable'
 import HttpStatusCodeMap, { HttpStatusSymbol } from '../error/http/status-codes'
+import { ControllerHook } from '../controller/hooks'
 
 export default class PsychicController {
-  public static before(
-    methodName: string,
-    opts: {
-      isStatic?: boolean
-      only?: string[]
-      except?: string[]
-    } = {}
-  ) {
-    controllerHooks.add(this.name, methodName, opts)
-    return this
+  public static get isPsychicController() {
+    return true
   }
+
+  public static controllerHooks: ControllerHook[] = []
 
   public static serializes(ModelClass: typeof Dream) {
     return {
@@ -46,6 +40,10 @@ export default class PsychicController {
       filepath: `app/controllers/${await (this as typeof PsychicController).controllerPath()}`,
       args,
     })
+  }
+
+  public get isPsychicControllerInstance() {
+    return true
   }
 
   public req: Request
@@ -217,7 +215,9 @@ export default class PsychicController {
   }
 
   public async runBeforeActionsFor(action: string) {
-    const beforeActions = controllerHooks.for(this.constructor.name, action)
+    const beforeActions = (this.constructor as typeof PsychicController).controllerHooks.filter(hook =>
+      hook.shouldFireForAction(action)
+    )
     for (const hook of beforeActions) {
       if (hook.isStatic) await (this.constructor as any)[hook.methodName]()
       else await (this as any)[hook.methodName]()
