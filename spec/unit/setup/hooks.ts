@@ -1,5 +1,4 @@
-import 'dream/spec-helpers'
-import truncate from '../../helpers/truncate'
+import { truncate } from 'dream/spec-helpers'
 
 beforeEach(async () => {
   await truncate()
