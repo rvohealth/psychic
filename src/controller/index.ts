@@ -158,6 +158,10 @@ export default class PsychicController {
     return this.res.send(message)
   }
 
+  public redirect(path: string) {
+    return this.res.redirect(path)
+  }
+
   // 400
   public badRequest(data: { [key: string]: any } = {}) {
     throw new BadRequest(
