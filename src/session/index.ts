@@ -1,15 +1,17 @@
-import { Response } from 'express'
+import { Request, Response } from 'express'
 import Encrypt from '../encryption/encrypt'
 
 export default class Session {
+  private req: Request
   private res: Response
-  constructor(res: Response) {
+  constructor(req: Request, res: Response) {
+    this.req = req
     this.res = res
   }
 
   public cookie(name: string, data?: string) {
     if (data) return this.setCookie(name, data)
-    return (this.res.cookie as any)[name]
+    return (this.req.cookies as any)[name]
   }
 
   private setCookie(name: string, data: string) {

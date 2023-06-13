@@ -62,7 +62,7 @@ export default class PsychicController {
     this.req = req
     this.res = res
     this.config = config
-    this.session = new Session(res)
+    this.session = new Session(req, res)
   }
 
   public get params() {
