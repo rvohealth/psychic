@@ -95,6 +95,10 @@ export default class PsychicServer {
     return true
   }
 
+  public stop() {
+    this.server?.close()
+  }
+
   public async serveForRequestSpecs(block: () => any) {
     const port = process.env.PORT
     if (!port) throw 'Missing `PORT` environment variable'
