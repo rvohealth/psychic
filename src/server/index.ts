@@ -17,6 +17,7 @@ export default class PsychicServer {
   public cable: Cable
   public config: PsychicConfig
   public reactServer: ReactServer
+  public server: Server
   private booted = false
   constructor() {
     this.buildApp()
@@ -79,7 +80,7 @@ export default class PsychicServer {
       await this.cable.start(port, { withReact, reactPort })
     } else {
       await new Promise(async accept => {
-        this.app.listen(port, async () => {
+        this.server = this.app.listen(port, async () => {
           log.welcome(port)
           await log.write(`psychic dev server started at port ${port}`)
 
