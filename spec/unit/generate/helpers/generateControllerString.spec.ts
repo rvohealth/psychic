@@ -14,35 +14,36 @@ describe('psy generate:controller <name> [...methods]', () => {
 
         expect(res).toEqual(
           `\
-import { PsychicController, Params } from 'psychic'
+import { Params } from 'psychic'
+import AuthedController from '../../AuthedController'
 import User from '../../../models/User'
 
-export default class ApiV1UsersController extends PsychicController {
+export default class ApiV1UsersController extends AuthedController {
   public async create() {
-//    const user = await User.create(this.userParams)
-//    this.ok(user)
+    //    const user = await User.create(this.userParams)
+    //    this.ok(user)
   }
 
   public async index() {
-//    const users = await User.all()
-//    this.ok(users)
+    //    const users = await User.all()
+    //    this.ok(users)
   }
 
   public async show() {
-//    const user = await User.find(this.params.id)
-//    this.ok(user)
+    //    const user = await User.find(this.params.id)
+    //    this.ok(user)
   }
 
   public async update() {
-//    const user = await User.find(this.params.id)
-//    await user.update(this.userParams)
-//    this.ok(user)
+    //    const user = await User.find(this.params.id)
+    //    await user.update(this.userParams)
+    //    this.ok(user)
   }
 
   public async destroy() {
-//    const user = await User.find(this.params.id)
-//    await user.destroy()
-//    this.ok()
+    //    const user = await User.find(this.params.id)
+    //    await user.destroy()
+    //    this.ok()
   }
 
   public async login() {
@@ -69,35 +70,36 @@ export default class ApiV1UsersController extends PsychicController {
 
         expect(res).toEqual(
           `\
-import { PsychicController, Params } from 'psychic'
+import { Params } from 'psychic'
+import AuthedController from '../../../AuthedController'
 import User from '../../../../models/Health/User'
 
-export default class ApiV1HealthUsersController extends PsychicController {
+export default class ApiV1HealthUsersController extends AuthedController {
   public async create() {
-//    const user = await User.create(this.userParams)
-//    this.ok(user)
+    //    const user = await User.create(this.userParams)
+    //    this.ok(user)
   }
 
   public async index() {
-//    const users = await User.all()
-//    this.ok(users)
+    //    const users = await User.all()
+    //    this.ok(users)
   }
 
   public async show() {
-//    const user = await User.find(this.params.id)
-//    this.ok(user)
+    //    const user = await User.find(this.params.id)
+    //    this.ok(user)
   }
 
   public async update() {
-//    const user = await User.find(this.params.id)
-//    await user.update(this.userParams)
-//    this.ok(user)
+    //    const user = await User.find(this.params.id)
+    //    await user.update(this.userParams)
+    //    this.ok(user)
   }
 
   public async destroy() {
-//    const user = await User.find(this.params.id)
-//    await user.destroy()
-//    this.ok()
+    //    const user = await User.find(this.params.id)
+    //    await user.destroy()
+    //    this.ok()
   }
 
   public async login() {
@@ -110,29 +112,59 @@ export default class ApiV1HealthUsersController extends PsychicController {
 `
         )
       })
+
+      context('the path is within the admin namespace', () => {
+        it('generates a controller using', async () => {
+          const res = await generateControllerString(
+            'Admin/NutritionLogEntriesController',
+            'admin/nutrition-log-entries',
+            'Nutrition/LogEntry',
+            ['create'],
+            ['id', 'calories']
+          )
+
+          expect(res).toEqual(
+            `\
+import { Params } from 'psychic'
+import AdminAuthedController from '../Admin/AuthedController'
+import LogEntry from '../../models/Nutrition/LogEntry'
+
+export default class AdminNutritionLogEntriesController extends AdminAuthedController {
+  public async create() {
+    //    const logEntry = await LogEntry.create(this.logEntryParams)
+    //    this.ok(logEntry)
+  }
+
+  private get logEntryParams() {
+    return Params.restrict(this.params?.logEntry, ['id', 'calories'])
+  }
+}`
+          )
+        })
+      })
     })
-  })
 
-  context('when provided with a nested path', () => {
-    it('generates a controller with pascal-cased naming', async () => {
-      const res = await generateControllerString('ApiV1UsersController', 'api/v1/users', null, [
-        'hello',
-        'world',
-      ])
+    context('when provided with a nested path', () => {
+      it('generates a controller with pascal-cased naming', async () => {
+        const res = await generateControllerString('ApiV1UsersController', 'api/v1/users', null, [
+          'hello',
+          'world',
+        ])
 
-      expect(res).toEqual(
-        `\
-import { PsychicController, Params } from 'psychic'
+        expect(res).toEqual(
+          `\
+import { Params } from 'psychic'
+import AuthedController from '../../AuthedController'
 
-export default class ApiV1UsersController extends PsychicController {
+export default class ApiV1UsersController extends AuthedController {
   public async hello() {
   }
 
   public async world() {
   }
-}\
-`
-      )
+}`
+        )
+      })
     })
   })
 })
