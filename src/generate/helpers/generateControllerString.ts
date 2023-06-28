@@ -138,7 +138,9 @@ ${methodDefs.join('\n\n')}${privateDefs.length ? '\n\n' + privateDefs.join('\n\n
 
 function routeDepthToRelativePath(route: string, subtractFromDepth: number = 0) {
   const depth = route.split('/').length
-  return Array(depth - subtractFromDepth)
-    .fill('..')
-    .join('/')
+  return (
+    Array(depth - subtractFromDepth)
+      .fill('..')
+      .join('/') || '.'
+  )
 }

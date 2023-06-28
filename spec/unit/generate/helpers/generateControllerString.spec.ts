@@ -6,7 +6,7 @@ describe('psy generate:controller <name> [...methods]', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', async () => {
         const res = await generateControllerString(
           'ApiV1UsersController',
-          'api/V1/users',
+          'users',
           'User',
           ['create', 'index', 'show', 'update', 'destroy', 'login'],
           ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
@@ -15,8 +15,8 @@ describe('psy generate:controller <name> [...methods]', () => {
         expect(res).toEqual(
           `\
 import { Params } from 'psychic'
-import AuthedController from '../../AuthedController'
-import User from '../../../models/User'
+import AuthedController from './AuthedController'
+import User from '../models/User'
 
 export default class ApiV1UsersController extends AuthedController {
   public async create() {
