@@ -5,9 +5,13 @@
 import path from 'path'
 
 export default function absoluteSrcPath(filePath: string) {
-  return process.env.PSYCHIC_CORE_DEVELOPMENT === '1'
-    ? path.join(process.cwd(), 'test-app', filePath)
-    : process.env.EXECUTED_ON_BEHALF_OF_CONSUMING_APP_BY_CLI === '1'
-    ? path.join(process.cwd(), '..', '..', 'src', filePath)
-    : path.join(process.cwd(), 'src', filePath)
+  const absPath =
+    process.env.PSYCHIC_CORE_DEVELOPMENT === '1'
+      ? path.join(process.cwd(), 'test-app', filePath)
+      : process.env.EXECUTED_ON_BEHALF_OF_CONSUMING_APP_BY_CLI === '1'
+      ? path.join(process.cwd(), '..', '..', 'src', filePath)
+      : path.join(process.cwd(), 'src', filePath)
+
+  const slash = path.sep
+  return absPath.replace(`${slash}api${slash}src${slash}src${slash}`, `${slash}api${slash}src${slash}`)
 }
