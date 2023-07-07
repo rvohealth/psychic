@@ -19,11 +19,13 @@ describe('Hash', () => {
       expect(bcrypt.hash).toHaveBeenCalledWith('how', 4)
     })
 
-    it('uses 11 salt rounds in production', () => {
-      process.env.NODE_ENV = 'production'
-      Hash.gen('how')
-      expect(bcrypt.hash).toHaveBeenCalledWith('how', 11)
-      process.env.NODE_ENV = 'test'
+    context('in production', () => {
+      it('uses longer salt', () => {
+        process.env.NODE_ENV = 'development'
+        Hash.gen('how')
+        expect(bcrypt.hash).toHaveBeenCalledWith('how', 11)
+        process.env.NODE_ENV = 'test'
+      })
     })
   })
 })
