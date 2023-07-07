@@ -1,7 +1,7 @@
 import bcrypt from 'bcrypt'
 
 export default class Hash {
-  static SALT_ROUNDS = 11
+  static SALT_ROUNDS = process.env.NODE_ENV === 'test' ? 4 : 11
 
   static async gen(plaintext: string) {
     return await bcrypt.hash(plaintext, this.SALT_ROUNDS)
