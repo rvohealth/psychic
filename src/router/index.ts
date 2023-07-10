@@ -166,6 +166,26 @@ export default class PsychicRouter {
     this.runNestedCallbacks(path, nestedRouter, cb, { asMember: true, resourceful: true })
   }
 
+  private _resource(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
+    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager)
+    const { only, except } = options || {}
+    let resourceMethods: ResourcesMethodType[] = ResourceMethods
+
+    if (only) {
+      resourceMethods = only
+    } else if (except) {
+      resourceMethods = ResourceMethods.filter(
+        m => !except.includes(m as ResourcesMethodType)
+      ) as ResourcesMethodType[]
+    }
+
+    resourceMethods.forEach(action => {
+      applyResourceAction(path, action, nestedRouter)
+    })
+
+    this.runNestedCallbacks(path, nestedRouter, cb)
+  }
+
   private runNestedCallbacks(
     namespace: string,
     nestedRouter: PsychicNestedRouter,
@@ -233,26 +253,6 @@ export default class PsychicRouter {
       }),
     ]
     if (nestedRouter) nestedRouter.currentNamespaces = this.currentNamespaces
-  }
-
-  private _resource(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager)
-    const { only, except } = options || {}
-    let resourceMethods: ResourcesMethodType[] = ResourceMethods
-
-    if (only) {
-      resourceMethods = only
-    } else if (except) {
-      resourceMethods = ResourceMethods.filter(
-        m => !except.includes(m as ResourcesMethodType)
-      ) as ResourcesMethodType[]
-    }
-
-    resourceMethods.forEach(action => {
-      applyResourceAction(path, action, nestedRouter)
-    })
-
-    this.runNestedCallbacks(path, nestedRouter, cb)
   }
 
   public async handle(
