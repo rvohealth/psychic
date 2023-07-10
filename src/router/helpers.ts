@@ -1,6 +1,6 @@
 import { pascalize, compact } from 'dream'
 import PsychicRouter, { PsychicNestedRouter } from '../router'
-import { ResourceMethodType } from './types'
+import { ResourcesMethodType } from './types'
 
 export function routePath(routePath: string) {
   return `/${routePath.replace(/^\//, '')}`
@@ -38,7 +38,7 @@ export function namespacedControllerActionString(namespace: string, controllerAc
 
 export function applyResourcesAction(
   path: string,
-  action: ResourceMethodType,
+  action: ResourcesMethodType,
   routingMechanism: PsychicRouter | PsychicNestedRouter
 ) {
   switch (action) {
@@ -69,7 +69,7 @@ export function applyResourcesAction(
 
 export function applyResourceAction(
   path: string,
-  action: ResourceMethodType,
+  action: ResourcesMethodType,
   routingMechanism: PsychicRouter | PsychicNestedRouter
 ) {
   switch (action) {

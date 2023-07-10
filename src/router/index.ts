@@ -1,5 +1,5 @@
 import { Application, Request, Response, Router } from 'express'
-import { HttpMethod, ResourceMethods, ResourceMethodType, ResourcesOptions } from './types'
+import { HttpMethod, ResourceMethods, ResourcesMethods, ResourcesMethodType, ResourcesOptions } from './types'
 import {
   applyResourceAction,
   applyResourcesAction,
@@ -148,14 +148,14 @@ export default class PsychicRouter {
 
     const only = options?.only
     const except = options?.except
-    let resourceMethods: ResourceMethodType[] = ResourceMethods
+    let resourceMethods: ResourcesMethodType[] = ResourcesMethods
 
     if (only) {
       resourceMethods = only
     } else if (except) {
-      resourceMethods = ResourceMethods.filter(
-        m => !except.includes(m as ResourceMethodType)
-      ) as ResourceMethodType[]
+      resourceMethods = ResourcesMethods.filter(
+        m => !except.includes(m as ResourcesMethodType)
+      ) as ResourcesMethodType[]
     }
 
     this.makeRoomForNewIdParam(nestedRouter)
@@ -238,14 +238,14 @@ export default class PsychicRouter {
   private _resource(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
     const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager)
     const { only, except } = options || {}
-    let resourceMethods: ResourceMethodType[] = ResourceMethods
+    let resourceMethods: ResourcesMethodType[] = ResourceMethods
 
     if (only) {
       resourceMethods = only
     } else if (except) {
       resourceMethods = ResourceMethods.filter(
-        m => !except.includes(m as ResourceMethodType)
-      ) as ResourceMethodType[]
+        m => !except.includes(m as ResourcesMethodType)
+      ) as ResourcesMethodType[]
     }
 
     resourceMethods.forEach(action => {
