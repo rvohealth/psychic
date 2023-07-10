@@ -2,8 +2,8 @@ import supertest from 'supertest'
 import PsychicServer from '../../../src/server'
 
 describe('PsychicRouter', () => {
-  describe('nested routes', () => {
-    it('can direct nested routes to their respective controllers', async () => {
+  describe('namespaced routes', () => {
+    it('can direct namespaced routes to their respective controllers', async () => {
       const server = new PsychicServer()
       await server.boot()
 

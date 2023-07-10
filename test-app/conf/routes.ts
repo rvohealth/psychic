@@ -24,6 +24,10 @@ export default (r: PsychicRouter) => {
     })
   })
 
+  r.scope('scoped-things', r => {
+    r.get('testing-scopes', 'ScopeTest#scopeTest')
+  })
+
   r.post('login', 'Users#login')
   r.resources('users', { only: ['create', 'index'] })
 

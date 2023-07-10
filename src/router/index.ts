@@ -76,7 +76,7 @@ export default class PsychicRouter {
   private prefixControllerActionStringWithNamespaces(controllerActionString: string) {
     const [controllerName] = controllerActionString.split('#')
     const filteredNamespaces = this.currentNamespaces.filter(
-      n => !/^:/.test(n.namespace) && !(n.resourceful && pascalize(n.namespace) === controllerName)
+      n => !n.isScope && !(n.resourceful && pascalize(n.namespace) === controllerName)
     )
     if (!filteredNamespaces.length) return controllerActionString
     return filteredNamespaces.map(str => pascalize(str.namespace)).join('/') + '/' + controllerActionString
@@ -101,6 +101,14 @@ export default class PsychicRouter {
     })
 
     this.runNestedCallbacks(namespace, nestedRouter, cb)
+  }
+
+  public scope(scope: string, cb: (router: PsychicNestedRouter) => void) {
+    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
+      namespaces: this.currentNamespaces,
+    })
+
+    this.runNestedCallbacks(scope, nestedRouter, cb, { treatNamespaceAsScope: true })
   }
 
   public resources(
@@ -165,15 +173,17 @@ export default class PsychicRouter {
     {
       asMember = false,
       resourceful = false,
+      treatNamespaceAsScope = false,
     }: {
       asMember?: boolean
       resourceful?: boolean
+      treatNamespaceAsScope?: boolean
     } = {}
   ) {
-    this.addNamespace(namespace, resourceful, nestedRouter)
+    this.addNamespace(namespace, resourceful, { nestedRouter, treatNamespaceAsScope })
 
     if (asMember) {
-      this.addNamespace(':id', resourceful, nestedRouter)
+      this.addNamespace(':id', resourceful, { nestedRouter, treatNamespaceAsScope: true })
     }
 
     if (cb) cb(nestedRouter)
@@ -182,12 +192,23 @@ export default class PsychicRouter {
     if (asMember) this.removeLastNamespace(nestedRouter)
   }
 
-  private addNamespace(namespace: string, resourceful: boolean, nestedRouter?: PsychicNestedRouter) {
+  private addNamespace(
+    namespace: string,
+    resourceful: boolean,
+    {
+      nestedRouter,
+      treatNamespaceAsScope,
+    }: {
+      nestedRouter?: PsychicNestedRouter
+      treatNamespaceAsScope?: boolean
+    } = {}
+  ) {
     this.currentNamespaces = [
       ...this.currentNamespaces,
       {
         namespace,
         resourceful,
+        isScope: treatNamespaceAsScope || false,
       },
     ]
 
@@ -336,4 +357,5 @@ export class PsychicNestedRouter extends PsychicRouter {
 export interface NamespaceConfig {
   namespace: string
   resourceful: boolean
+  isScope: boolean
 }
