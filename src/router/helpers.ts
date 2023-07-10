@@ -75,6 +75,7 @@ export function applyResourceAction(
   switch (action) {
     case 'update':
       routingMechanism.put(path, `${pascalize(path)}#update`)
+      routingMechanism.patch(path, `${pascalize(path)}#update`)
       break
 
     case 'show':

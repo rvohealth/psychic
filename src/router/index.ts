@@ -167,7 +167,10 @@ export default class PsychicRouter {
   }
 
   private _resource(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager)
+    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
+      namespaces: this.currentNamespaces,
+    })
+
     const { only, except } = options || {}
     let resourceMethods: ResourcesMethodType[] = ResourceMethods
 
