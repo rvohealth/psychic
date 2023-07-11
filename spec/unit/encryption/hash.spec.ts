@@ -16,7 +16,14 @@ describe('Hash', () => {
 
     it('signs the provided string using jwt', () => {
       Hash.gen('how')
+      expect(bcrypt.hash).toHaveBeenCalledWith('how', 4)
+    })
+
+    it('uses 11 salt rounds in production', () => {
+      process.env.NODE_ENV = 'production'
+      Hash.gen('how')
       expect(bcrypt.hash).toHaveBeenCalledWith('how', 11)
+      process.env.NODE_ENV = 'test'
     })
   })
 })
