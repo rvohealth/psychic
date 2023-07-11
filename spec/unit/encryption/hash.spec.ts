@@ -19,7 +19,7 @@ describe('Hash', () => {
       expect(bcrypt.hash).toHaveBeenCalledWith('how', 4)
     })
 
-    context('in production', () => {
+    context('in non-test env', () => {
       it('uses longer salt', () => {
         process.env.NODE_ENV = 'development'
         Hash.gen('how')
