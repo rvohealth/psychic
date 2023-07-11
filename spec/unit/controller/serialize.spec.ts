@@ -1,10 +1,11 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { DreamSerializer, Attribute } from 'dream'
+import { DreamSerializer, Attribute, Dream } from 'dream'
 import PsychicController from '../../../src/controller'
 import PsychicConfig from '../../../src/config'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
 import { Request, Response } from 'express'
+import { BeforeAction } from '../../../src/controller/decorators'
 
 describe('PsychicController', () => {
   describe('#serialize', () => {
@@ -71,6 +72,45 @@ describe('PsychicController', () => {
           { email: 'how@yadoin', name: 'fred' },
           { email: 'zed@zed', name: 'zed' },
         ])
+
+        await controller.show()
+      })
+    })
+
+    context('with default passthrough data set on the controller', () => {
+      class User2 extends User {
+        public get serializer() {
+          return User2Serializer as any
+        }
+      }
+
+      class User2Serializer extends DreamSerializer {
+        @Attribute()
+        public howyadoin() {
+          return this.passthroughData.howyadoin
+        }
+      }
+
+      class MyController extends PsychicController {
+        public async show() {
+          this.ok(await User2.first())
+        }
+
+        @BeforeAction()
+        public configure() {
+          this.serializerPassthrough({ howyadoin: 'howyadoin' })
+        }
+      }
+
+      beforeEach(async () => {
+        await User2.create({ email: 'how@yadoin', name: 'fred', password_digest: 'hello' })
+      })
+
+      it('passes the passthrough data through to the child serializers', async () => {
+        const controller = new MyController(req, res, { config })
+
+        await controller.runAction('show')
+        expect(res.json).toHaveBeenCalledWith({ howyadoin: 'howyadoin' })
 
         await controller.show()
       })

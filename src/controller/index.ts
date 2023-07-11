@@ -106,16 +106,28 @@ export default class PsychicController {
 
       const SerializerClass = lookup?.[1]
       if (SerializerClass) {
-        return this.res.json(new SerializerClass(data).render())
+        return this.res.json(
+          new SerializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
+        )
       } else {
         const modelSerializer = (modelForLookup as Dream).serializer
         if (modelSerializer) {
-          return this.res.json(new modelSerializer(data).render())
+          return this.res.json(
+            new modelSerializer(data).passthrough(this.defaultSerializerPassthrough).render()
+          )
         }
       }
     }
 
     return this.res.json(data)
+  }
+
+  protected defaultSerializerPassthrough: { [key: string]: any } = {}
+  public serializerPassthrough(passthrough: { [key: string]: any }) {
+    this.defaultSerializerPassthrough = {
+      ...this.defaultSerializerPassthrough,
+      ...passthrough,
+    }
   }
 
   public ok(data: any = {}) {
