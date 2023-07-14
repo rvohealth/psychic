@@ -3,25 +3,14 @@ import User from '../../../test-app/app/models/User'
 
 describe('background (app singleton)', () => {
   describe('.modelInstanceMethod', () => {
-    it('adds the model instance method to the worker queue', async () => {
+    it('instantiates the model and calls the specified method with the specified args', async () => {
       const user = await User.create({ email: 'ham@howyadoin', password_digest: 'coolidge' })
-      await background.connect()
+      jest.spyOn(User.prototype, '_testBackground')
 
-      // @ts-ignore
-      jest.spyOn(background.queue!, 'add').mockImplementation(() => {})
-
-      await background.modelInstanceMethod(user, 'checkPassword', {
+      await background.modelInstanceMethod(user, 'testBackground', {
         args: ['howyadoin'],
       })
-      expect(background.queue!.add).toHaveBeenCalledWith('BackgroundJobQueueModelInstanceJob', {
-        className: 'User',
-        id: user.id,
-        method: 'checkPassword',
-        psychicpath: undefined,
-        importKey: undefined,
-        filepath: 'app/models/User',
-        args: ['howyadoin'],
-      })
+      expect(User.prototype._testBackground).toHaveBeenCalledWith(user.id, 'howyadoin')
     })
   })
 })

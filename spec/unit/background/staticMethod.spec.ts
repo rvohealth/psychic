@@ -1,26 +1,15 @@
 import background from '../../../src/background'
-import User from '../../../test-app/app/models/User'
+import DummyService from '../../../test-app/app/services/DummyService'
 
 describe('background (app singleton)', () => {
   describe('.staticMethod', () => {
-    it('adds the static method to the worker queue', async () => {
-      await background.connect()
-
-      // @ts-ignore
-      jest.spyOn(background.queue!, 'add').mockImplementation(() => {})
-
-      await background.staticMethod(User, 'checkPassword', {
-        filepath: 'app/models/User',
-        args: ['howyadoin'],
+    it('calls the static method, passing args', async () => {
+      jest.spyOn(DummyService, 'classRunInBG').mockImplementation(() => {})
+      await background.staticMethod(DummyService, 'classRunInBG', {
+        filepath: 'test-app/app/services/DummyService.ts',
+        args: ['bottlearum'],
       })
-      expect(background.queue!.add).toHaveBeenCalledWith('BackgroundJobQueueStaticJob', {
-        className: 'User',
-        method: 'checkPassword',
-        psychicpath: undefined,
-        importKey: undefined,
-        filepath: 'app/models/User',
-        args: ['howyadoin'],
-      })
+      expect(DummyService.classRunInBG).toHaveBeenCalledWith('bottlearum')
     })
   })
 })

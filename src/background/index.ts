@@ -7,11 +7,26 @@ import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
 
+type JobTypes =
+  | 'BackgroundJobQueueStaticJob'
+  | 'BackgroundJobQueueInstanceJob'
+  | 'BackgroundJobQueueModelInstanceJob'
+
+export interface BackgroundJobData {
+  id?: any
+  method: any
+  args: any
+  constructorArgs?: any
+  filepath: string
+  importKey: any
+}
+
 export class Background {
   public queue: Queue | null = null
   public worker: Worker | null = null
 
   public async connect() {
+    if (process.env.NODE_ENV === 'test') return
     if (this.queue && this.worker) return
 
     const appConfig = readAppConfig()
@@ -28,21 +43,17 @@ export class Background {
     method: string,
     {
       filepath, // filepath means a file within the app that is consuming psychic
-      psychicpath, // psychicpath means a file within the psychic infrastructure
       importKey,
       args = [],
     }: {
-      filepath?: string
-      psychicpath?: string
+      filepath: string
       importKey?: string
       args?: any[]
     }
   ) {
     await this.connect()
-    this.queue!.add('BackgroundJobQueueStaticJob', {
-      className: ObjectClass.name,
+    await this.addToQueue('BackgroundJobQueueStaticJob', {
       filepath,
-      psychicpath,
       importKey,
       method,
       args,
@@ -54,23 +65,19 @@ export class Background {
     method: string,
     {
       filepath, // filepath means a file within the app that is consuming psychic
-      psychicpath, // psychicpath means a file within the psychic infrastructure
       importKey,
       args = [],
       constructorArgs = [],
     }: {
-      filepath?: string
-      psychicpath?: string
+      filepath: string
       importKey?: string
       args?: any[]
       constructorArgs?: any[]
     }
   ) {
     await this.connect()
-    this.queue!.add('BackgroundJobQueueInstanceJob', {
-      className: ObjectClass.name,
+    await this.addToQueue('BackgroundJobQueueInstanceJob', {
       filepath,
-      psychicpath,
       importKey,
       method,
       args,
@@ -91,8 +98,7 @@ export class Background {
   ) {
     await this.connect()
     const modelPath = await getModelKey(modelInstance.constructor as typeof Dream)
-    this.queue!.add('BackgroundJobQueueModelInstanceJob', {
-      className: modelInstance.constructor.name,
+    await this.addToQueue('BackgroundJobQueueModelInstanceJob', {
       id: modelInstance.primaryKeyValue,
       filepath: `app/models/${modelPath}`,
       importKey,
@@ -101,10 +107,15 @@ export class Background {
     })
   }
 
-  public async handler(job: Job<any, any, string>) {
-    const { id, method, args, constructorArgs, filepath, importKey } = job.data
-    const jobType = job.name
+  private async addToQueue(jobType: JobTypes, jobData: BackgroundJobData) {
+    if (process.env.NODE_ENV === 'test') await this.doWork(jobType, jobData)
+    else await this.queue!.add(jobType, jobData)
+  }
 
+  private async doWork(
+    jobType: JobTypes,
+    { id, method, args, constructorArgs, filepath, importKey }: BackgroundJobData
+  ) {
     switch (jobType) {
       case 'BackgroundJobQueueStaticJob':
         if (filepath) {
@@ -112,6 +123,7 @@ export class Background {
             absoluteSrcPath(filepath),
             importKey || 'default'
           )
+
           if (!ObjectClass) return
 
           await ObjectClass[method as string](...args)
@@ -145,6 +157,12 @@ export class Background {
         }
         break
     }
+  }
+
+  public async handler(job: Job<any, any, string>) {
+    const jobType = job.name as JobTypes
+
+    await this.doWork(jobType, job.data)
   }
 }
 

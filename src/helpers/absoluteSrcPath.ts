@@ -7,7 +7,7 @@ import path from 'path'
 export default function absoluteSrcPath(filePath: string) {
   const absPath =
     process.env.PSYCHIC_CORE_DEVELOPMENT === '1'
-      ? path.join(process.cwd(), 'test-app', filePath)
+      ? path.join(process.cwd(), 'test-app', filePath.replace('test-app/', ''))
       : process.env.EXECUTED_ON_BEHALF_OF_CONSUMING_APP_BY_CLI === '1'
       ? path.join(process.cwd(), '..', '..', 'src', filePath)
       : path.join(process.cwd(), 'src', filePath)

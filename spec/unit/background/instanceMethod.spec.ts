@@ -1,28 +1,16 @@
 import background from '../../../src/background'
-import User from '../../../test-app/app/models/User'
+import DummyService from '../../../test-app/app/services/DummyService'
 
 describe('background (app singleton)', () => {
   describe('#instanceMethod', () => {
-    it('adds the instance method to the worker queue', async () => {
-      await background.connect()
-
-      // @ts-ignore
-      jest.spyOn(background.queue!, 'add').mockImplementation(async () => undefined)
-
-      await background.instanceMethod(User, 'checkPassword', {
-        filepath: 'app/models/User',
-        args: ['howyadoin'],
+    it('calls the instance method, passing constructor args to the constructor and args to the instance method', async () => {
+      jest.spyOn(DummyService.prototype, 'instanceMethodToTest').mockImplementation(() => {})
+      await background.instanceMethod(DummyService, 'instanceRunInBG', {
+        args: ['bottlearum'],
+        constructorArgs: ['bottleawhiskey'],
+        filepath: 'test-app/app/services/DummyService.ts',
       })
-
-      expect(background.queue!.add).toHaveBeenCalledWith('BackgroundJobQueueInstanceJob', {
-        className: 'User',
-        method: 'checkPassword',
-        psychicpath: undefined,
-        importKey: undefined,
-        constructorArgs: [],
-        filepath: 'app/models/User',
-        args: ['howyadoin'],
-      })
+      expect(DummyService.prototype.instanceMethodToTest).toHaveBeenCalledWith('bottleawhiskey', 'bottlearum')
     })
   })
 })

@@ -40,4 +40,10 @@ export default class User extends Dream {
     if (!this.password_digest) return false
     return await Hash.check(password, this.password_digest)
   }
+
+  public async testBackground(arg: string) {
+    return await this._testBackground(this.id, arg)
+  }
+
+  public async _testBackground(userId: any, arg: string) {}
 }

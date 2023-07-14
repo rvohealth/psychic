@@ -14,10 +14,20 @@ export default function backgroundedService(filepath: string) {
       })
     }
 
-    public async background(methodName: string, ...args: any[]) {
-      return await background.instanceMethod(this.constructor, methodName, {
-        filepath: trimmedFilePath,
+    public async background(
+      methodName: string,
+      {
         args,
+        constructorArgs,
+      }: {
+        args?: any[]
+        constructorArgs?: any[]
+      } = {}
+    ) {
+      return await background.instanceMethod(this.constructor, methodName, {
+        args,
+        constructorArgs,
+        filepath: trimmedFilePath,
       })
     }
   }
