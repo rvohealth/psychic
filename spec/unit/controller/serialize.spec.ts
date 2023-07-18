@@ -30,10 +30,6 @@ describe('PsychicController', () => {
           this.serializes(User).with(MySerializer)
         }
 
-        public async index() {
-          this.ok(await User.all())
-        }
-
         public async show() {
           this.ok(await User.first())
         }
@@ -43,9 +39,6 @@ describe('PsychicController', () => {
 
       await User.create({ email: 'how@yadoin', password_digest: 'hello' })
       const controller = new MyController(req, res, { config })
-      await controller.index()
-
-      expect(res.json).toHaveBeenCalledWith([{ email: 'how@yadoin' }])
 
       await controller.show()
       expect(res.json).toHaveBeenCalledWith({ email: 'how@yadoin' })

@@ -112,6 +112,10 @@ export default class PsychicController {
       } else {
         const modelSerializer = (modelForLookup as Dream).serializer
         if (modelSerializer) {
+          if (Array.isArray(data))
+            return this.res.json(
+              data.map(d => new modelSerializer(d).passthrough(this.defaultSerializerPassthrough).render())
+            )
           return this.res.json(
             new modelSerializer(data).passthrough(this.defaultSerializerPassthrough).render()
           )
