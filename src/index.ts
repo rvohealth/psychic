@@ -1,8 +1,6 @@
 import _pluralize from 'pluralize'
 export const pluralize = _pluralize
 
-export * from 'dream'
-
 export { default as PsychicController } from './controller'
 export { BeforeAction } from './controller/decorators'
 export { default as PsychicConfig } from './config'
