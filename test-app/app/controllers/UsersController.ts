@@ -35,6 +35,10 @@ export default class UsersController extends ApplicationController {
     this.ok(users)
   }
 
+  public async hello() {
+    this.ok(`world ${this.params.id}`)
+  }
+
   public async login() {
     const user = await User.findBy({ email: this.params.email })
     if (!user || !(await user.checkPassword(this.params.password))) this.notFound()

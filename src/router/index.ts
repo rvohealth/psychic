@@ -116,14 +116,7 @@ export default class PsychicRouter {
     optionsOrCb?: ResourcesOptions | ((router: PsychicNestedRouter) => void),
     cb?: (router: PsychicNestedRouter) => void
   ) {
-    if (cb) {
-      if (typeof optionsOrCb === 'function')
-        throw 'cannot pass a function as a second arg when passing 3 args'
-      this._resources(path, optionsOrCb as ResourcesOptions, cb)
-    } else {
-      if (typeof optionsOrCb === 'function') this._resources(path, undefined, optionsOrCb)
-      else this._resources(path, optionsOrCb, undefined)
-    }
+    return this.makeResource(path, optionsOrCb, cb, true)
   }
 
   public resource(
@@ -131,62 +124,57 @@ export default class PsychicRouter {
     optionsOrCb?: ResourcesOptions | ((router: PsychicNestedRouter) => void),
     cb?: (router: PsychicNestedRouter) => void
   ) {
+    return this.makeResource(path, optionsOrCb, cb, false)
+  }
+
+  private makeResource(
+    path: string,
+    optionsOrCb: ResourcesOptions | ((router: PsychicNestedRouter) => void) | undefined,
+    cb: ((router: PsychicNestedRouter) => void) | undefined,
+    plural: boolean
+  ) {
     if (cb) {
       if (typeof optionsOrCb === 'function')
         throw 'cannot pass a function as a second arg when passing 3 args'
-      this._resource(path, optionsOrCb as ResourcesOptions, cb)
+      this._makeResource(path, optionsOrCb as ResourcesOptions, cb, plural)
     } else {
-      if (typeof optionsOrCb === 'function') this._resource(path, undefined, cb)
-      else this._resource(path, optionsOrCb, undefined)
+      if (typeof optionsOrCb === 'function') this._makeResource(path, undefined, optionsOrCb, plural)
+      else this._makeResource(path, optionsOrCb, undefined, plural)
     }
   }
 
-  private _resources(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
-      namespaces: this.currentNamespaces,
-    })
-
-    const only = options?.only
-    const except = options?.except
-    let resourceMethods: ResourcesMethodType[] = ResourcesMethods
-
-    if (only) {
-      resourceMethods = only
-    } else if (except) {
-      resourceMethods = ResourcesMethods.filter(
-        m => !except.includes(m as ResourcesMethodType)
-      ) as ResourcesMethodType[]
-    }
-
-    this.makeRoomForNewIdParam(nestedRouter)
-    resourceMethods.forEach(action => {
-      applyResourcesAction(path, action, nestedRouter)
-    })
-
-    this.runNestedCallbacks(path, nestedRouter, cb, { asMember: true, resourceful: true })
-  }
-
-  private _resource(path: string, options?: ResourcesOptions, cb?: (router: PsychicNestedRouter) => void) {
+  private _makeResource(
+    path: string,
+    options: ResourcesOptions | undefined,
+    cb: ((router: PsychicNestedRouter) => void) | undefined,
+    plural: boolean
+  ) {
     const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
       namespaces: this.currentNamespaces,
     })
 
     const { only, except } = options || {}
-    let resourceMethods: ResourcesMethodType[] = ResourceMethods
+    let resourceMethods: ResourcesMethodType[] = plural ? ResourcesMethods : ResourceMethods
 
     if (only) {
       resourceMethods = only
     } else if (except) {
-      resourceMethods = ResourceMethods.filter(
+      resourceMethods = resourceMethods.filter(
         m => !except.includes(m as ResourcesMethodType)
       ) as ResourcesMethodType[]
     }
 
+    if (plural) this.makeRoomForNewIdParam(nestedRouter)
+
     resourceMethods.forEach(action => {
-      applyResourceAction(path, action, nestedRouter)
+      if (plural) {
+        applyResourcesAction(path, action, nestedRouter)
+      } else {
+        applyResourceAction(path, action, nestedRouter)
+      }
     })
 
-    this.runNestedCallbacks(path, nestedRouter, cb)
+    this.runNestedCallbacks(path, nestedRouter, cb, { asMember: plural, resourceful: true })
   }
 
   private runNestedCallbacks(

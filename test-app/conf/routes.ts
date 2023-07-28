@@ -29,7 +29,13 @@ export default (r: PsychicRouter) => {
   })
 
   r.post('login', 'Users#login')
-  r.resources('users', { only: ['create', 'index'] })
+  r.resources('users', { only: ['create', 'index'] }, r => {
+    r.get('hello', 'Users#hello')
+  })
+
+  r.resource('greeter', { only: ['show'] }, r => {
+    r.get('hello', 'Greeter#hello')
+  })
 
   r.get('route-exists-but-controller-doesnt', 'Nonexistent#someMethod')
   r.get('controller-exists-but-method-doesnt', 'Users#thisRouteDoesntExist')
