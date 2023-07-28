@@ -1,5 +1,5 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { DreamSerializer, Attribute, Dream } from 'dream'
+import { DreamSerializer, Attribute } from 'dream'
 import PsychicController from '../../../src/controller'
 import PsychicConfig from '../../../src/config'
 import PsychicServer from '../../../src/server'
@@ -13,11 +13,13 @@ describe('PsychicController', () => {
     let res: Response
     let server: PsychicServer
     let config: PsychicConfig
+
     beforeEach(() => {
       req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
       res = getMockRes().res
       server = new PsychicServer()
       config = new PsychicConfig(server.app)
+      jest.spyOn(res, 'json')
     })
 
     it('serializes the data using the provided serializer', async () => {
@@ -34,8 +36,6 @@ describe('PsychicController', () => {
           this.ok(await User.first())
         }
       }
-
-      jest.spyOn(res, 'json')
 
       await User.create({ email: 'how@yadoin', password_digest: 'hello' })
       const controller = new MyController(req, res, { config })
@@ -67,6 +67,85 @@ describe('PsychicController', () => {
         ])
 
         await controller.show()
+      })
+
+      context('when the model is not a Dream', () => {
+        class GreetSerializer extends DreamSerializer {
+          @Attribute()
+          public greeting(): string {
+            return `${(this.data as Greeting).word} world`
+          }
+        }
+
+        class GreetSerializer2 extends DreamSerializer {
+          @Attribute()
+          public greeting(): string {
+            return `${(this.data as Greeting).word} goodbye`
+          }
+        }
+
+        class Greeting {
+          public word: string
+
+          constructor(word: string) {
+            this.word = word
+          }
+
+          public get serializer() {
+            return GreetSerializer
+          }
+        }
+
+        class Greeting2 {
+          public word: string
+
+          constructor(word: string) {
+            this.word = word
+          }
+
+          public get serializer() {
+            return GreetSerializer2
+          }
+        }
+
+        class MyController extends PsychicController {
+          public async index() {
+            this.ok([new Greeting('hello'), new Greeting('howdy')])
+          }
+
+          public async show() {
+            this.ok(new Greeting('hello'))
+          }
+        }
+
+        it('identifies serializer attached to model class and uses it to serialize the object', async () => {
+          const controller = new MyController(req, res, { config })
+          await controller.show()
+          expect(res.json).toHaveBeenCalledWith({ greeting: 'hello world' })
+        })
+
+        it('identifies serializer attached to model class and uses it to serialize each object in an array', async () => {
+          const controller = new MyController(req, res, { config })
+          await controller.index()
+          expect(res.json).toHaveBeenCalledWith([{ greeting: 'hello world' }, { greeting: 'howdy world' }])
+        })
+
+        context('with instances of different classes', () => {
+          class MyController2 extends PsychicController {
+            public async index() {
+              this.ok([new Greeting('hello'), new Greeting2('hello')])
+            }
+          }
+
+          it('allows rendering of different types in the same array', async () => {
+            const controller = new MyController2(req, res, { config })
+            await controller.index()
+            expect(res.json).toHaveBeenCalledWith([
+              { greeting: 'hello world' },
+              { greeting: 'hello goodbye' },
+            ])
+          })
+        })
       })
     })
 

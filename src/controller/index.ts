@@ -88,42 +88,20 @@ export default class PsychicController {
     return this.session.clearCookie(this.config.authSessionKey)
   }
 
+  private singleObjectJson(data: any) {
+    const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, data.constructor)
+
+    const SerializerClass = lookup?.[1] || data.serializer
+    if (SerializerClass) {
+      return new SerializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
+    }
+
+    return data
+  }
+
   public json(data: any) {
-    let modelForLookup: any | null = null
-    if (Array.isArray(data)) {
-      if (data[0]?.isDreamInstance) {
-        modelForLookup = data[0] as any
-      }
-    } else if (data?.isDreamInstance) {
-      modelForLookup = data as any
-    }
-
-    if (modelForLookup) {
-      const lookup = controllerSerializerIndex.lookupModel(
-        this.constructor as any,
-        modelForLookup.constructor
-      )
-
-      const SerializerClass = lookup?.[1]
-      if (SerializerClass) {
-        return this.res.json(
-          new SerializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
-        )
-      } else {
-        const modelSerializer = (modelForLookup as Dream).serializer
-        if (modelSerializer) {
-          if (Array.isArray(data))
-            return this.res.json(
-              data.map(d => new modelSerializer(d).passthrough(this.defaultSerializerPassthrough).render())
-            )
-          return this.res.json(
-            new modelSerializer(data).passthrough(this.defaultSerializerPassthrough).render()
-          )
-        }
-      }
-    }
-
-    return this.res.json(data)
+    if (Array.isArray(data)) return this.res.json(data.map(d => this.singleObjectJson(d)))
+    return this.res.json(this.singleObjectJson(data))
   }
 
   protected defaultSerializerPassthrough: { [key: string]: any } = {}
