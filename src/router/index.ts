@@ -164,7 +164,7 @@ export default class PsychicRouter {
       ) as ResourcesMethodType[]
     }
 
-    if (plural) this.makeRoomForNewIdParam(nestedRouter)
+    this.makeRoomForNewIdParam(nestedRouter)
 
     resourceMethods.forEach(action => {
       if (plural) {

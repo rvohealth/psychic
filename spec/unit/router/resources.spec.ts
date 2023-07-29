@@ -86,6 +86,19 @@ describe('PsychicRouter', () => {
           )
         })
       })
+
+      context('with nested resource', () => {
+        it('successfully applies nested resource', () => {
+          router.resources('users', { except: ['index', 'show', 'create', 'update'] }, r => {
+            r.resource('friend', {}, r => {
+              r.get('count', 'Friend#count')
+            })
+          })
+          router.commit()
+
+          expect(server.app.get).toHaveBeenCalledWith('/users/:user_id/friend/count', expect.any(Function))
+        })
+      })
     })
   })
 })
