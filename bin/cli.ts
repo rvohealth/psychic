@@ -154,6 +154,7 @@ program
   .option('--core', 'sets core to true')
   .action(async () => {
     await sspawn(yarncmdRunByAppConsumer(`dream sync:schema`, omitCoreArg(program.args)))
+    await sspawn(yarncmdRunByAppConsumer(`dream sync:schema`, omitCoreArg(program.args)))
     await sspawn(yarncmdRunByAppConsumer(`dream sync:associations`, omitCoreArg(program.args)))
   })
 
@@ -186,13 +187,6 @@ program
   .action(async () => {
     const coreDevFlag = setCoreDevelopmentFlag(program.args)
     await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/routes.ts`)
-  })
-
-program
-  .command('copy:models')
-  .description('builds internal index for models')
-  .action(async () => {
-    await sspawn(`npx ts-node ./.dream/bin/copy-models.ts`)
   })
 
 program
