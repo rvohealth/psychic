@@ -1,5 +1,5 @@
-
 import { DateTime } from 'luxon'
+import { IdType, Timestamp } from 'dream'
 import type { ColumnType } from "kysely";
 
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
@@ -10,8 +10,6 @@ export type Int8 = ColumnType<string, string | number | bigint, string | number 
 
 export type SpeciesTypesEnum = "cat" | "noncat";
 
-export type Timestamp = ColumnType<DateTime>
-export type IdType = string | number | bigint | undefined;
 
 export interface HealthUsers {
   id: Generated<number>;
@@ -45,7 +43,6 @@ export interface DB {
   pets: Pets;
   users: Users;
 }
-
 
 
 export const HealthUserColumns = ['id', 'email', 'password_digest', 'name', 'created_at', 'updated_at']
