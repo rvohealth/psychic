@@ -127,6 +127,17 @@ export default class PsychicRouter {
     return this.makeResource(path, optionsOrCb, cb, false)
   }
 
+  public collection(cb: (router: PsychicNestedRouter) => void) {
+    const replacedNamespaces = this.currentNamespaces.slice(0, this.currentNamespaces.length - 1)
+    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
+      namespaces: replacedNamespaces,
+    })
+    const currentNamespace = replacedNamespaces[replacedNamespaces.length - 1]
+    if (!currentNamespace) throw 'Must be within a resource to call the collection method'
+
+    cb(nestedRouter)
+  }
+
   private makeResource(
     path: string,
     optionsOrCb: ResourcesOptions | ((router: PsychicNestedRouter) => void) | undefined,
