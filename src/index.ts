@@ -23,3 +23,4 @@ export { default as backgroundedService } from './background/backgrounded-servic
 export { default as generateResource } from './generate/resource'
 export { default as generateController } from './generate/controller'
 export { default as pathifyNestedObject } from './helpers/pathifyNestedObject'
+export { default as route } from './helpers/route'

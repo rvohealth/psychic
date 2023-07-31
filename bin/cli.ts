@@ -139,23 +139,16 @@ program
   })
 
 program
-  .command('sync:all')
-  .description('cleans up installation files')
-  .option('--core', 'sets core to true')
-  .action(async () => {
-    await ensureStableAppBuild(program.args)
-    await sspawn(yarncmdRunByAppConsumer(`dream sync:all`, omitCoreArg(program.args)))
-  })
-
-program
   .command('sync:types')
   .alias('sync:all')
   .description('runs yarn dream sync:schema, then yarn dream sync:associations')
   .option('--core', 'sets core to true')
   .action(async () => {
     await sspawn(yarncmdRunByAppConsumer(`dream sync:schema`, omitCoreArg(program.args)))
-    await sspawn(yarncmdRunByAppConsumer(`dream sync:schema`, omitCoreArg(program.args)))
     await sspawn(yarncmdRunByAppConsumer(`dream sync:associations`, omitCoreArg(program.args)))
+
+    const coreDevFlag = setCoreDevelopmentFlag(program.args)
+    await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/sync-routes.ts`)
   })
 
 program

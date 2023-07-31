@@ -7,3 +7,5 @@ test-app/logs/*
 .node-version
 .DS_Store
 test-app/.psy/*
+src/sync/*
+!src/sync/.gitkeep
