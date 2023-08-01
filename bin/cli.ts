@@ -163,6 +163,13 @@ program
   })
 
 program
+  .command('sync:existing')
+  .description('syncs existing types to dream')
+  .action(async () => {
+    await sspawn(yarncmdRunByAppConsumer(`dream sync:existing`, omitCoreArg(program.args)))
+  })
+
+program
   .command('routes')
   .description(
     'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.'
