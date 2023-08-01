@@ -130,15 +130,6 @@ program
   })
 
 program
-  .command('db:migrate')
-  .description('db:migrate runs any outstanding database migrations')
-  .option('--core', 'sets core to true')
-  .action(async () => {
-    await ensureStableAppBuild(program.args)
-    await sspawn(yarncmdRunByAppConsumer(`dream db:migrate`, omitCoreArg(program.args)))
-  })
-
-program
   .command('sync:types')
   .alias('sync:all')
   .description('runs yarn dream sync:schema, then yarn dream sync:associations')
@@ -180,6 +171,18 @@ program
   .action(async () => {
     const coreDevFlag = setCoreDevelopmentFlag(program.args)
     await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/routes.ts`)
+  })
+
+program
+  .command('db:migrate')
+  .description('db:migrate runs any outstanding database migrations')
+  .option('--core', 'sets core to true')
+  .action(async () => {
+    await ensureStableAppBuild(program.args)
+    await sspawn(yarncmdRunByAppConsumer(`dream db:migrate`, omitCoreArg(program.args)))
+
+    const coreDevFlag = setCoreDevelopmentFlag(program.args)
+    await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/sync-routes.ts`)
   })
 
 program
