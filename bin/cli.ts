@@ -186,6 +186,18 @@ program
   })
 
 program
+  .command('db:reset')
+  .description('db:reset drops, creates, migrates, and seeds database, followed by a type sync')
+  .option('--core', 'sets core to true')
+  .action(async () => {
+    await ensureStableAppBuild(program.args)
+    await sspawn(yarncmdRunByAppConsumer(`dream db:reset`, omitCoreArg(program.args)))
+
+    const coreDevFlag = setCoreDevelopmentFlag(program.args)
+    await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/sync-routes.ts`)
+  })
+
+program
   .command('db:create')
   .description(
     'creates a new database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars'
