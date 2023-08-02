@@ -62,3 +62,9 @@ For more comprehensive documentation, please see [The official Psychic guides](N
   - [setup](#setup)
   - [feature specs](#feature-specs)
   - [unit specs](#unit-specs)
+
+# After `yarn install`
+
+```bash
+yarn dream sync:existing
+```
