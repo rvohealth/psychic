@@ -1570,9 +1570,9 @@ dotenv@^16.0.3:
   resolved "https://registry.yarnpkg.com/dotenv/-/dotenv-16.0.3.tgz#115aec42bac5053db3c456db30cc243a5a836a07"
   integrity sha512-7GO6HghkA5fYG9TYnNxi14/7K9f5occMlp3zXAuSxn7CKCxt9xbNWG7yF8hTCSUchlfWSe3uLmlPfigevRItzQ==
 
-"dream@https://avocadojesus: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@github.com/avocadojesus/dream.git#6acbaa2":
+"dream@https://avocadojesus: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@github.com/avocadojesus/dream.git#33d9011":
   version "0.0.0"
-  resolved "https://avocadojesus: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@github.com/avocadojesus/dream.git#6acbaa28889b3708fa383f0c9d746cdb2dd161b0"
+  resolved "https://avocadojesus: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@github.com/avocadojesus/dream.git#33d9011e8d429d8274530535ed06cfb91554ea18"
   dependencies:
     "@types/jest" "^29.5.0"
     "@types/lodash.sortby" "^4.7.7"
@@ -1593,6 +1593,7 @@ dotenv@^16.0.3:
     luxon "^3.3.0"
     pg "^8.10.0"
     pluralize "^8.0.0"
+    reflect-metadata "^0.1.13"
     ts-jest "^29.0.5"
     ts-node "^10.9.1"
     typescript "^5.0.3"
@@ -3171,6 +3172,11 @@ redis@^4.6.5:
     "@redis/json" "1.0.4"
     "@redis/search" "1.1.2"
     "@redis/time-series" "1.0.4"
+
+reflect-metadata@^0.1.13:
+  version "0.1.13"
+  resolved "https://registry.yarnpkg.com/reflect-metadata/-/reflect-metadata-0.1.13.tgz#67ae3ca57c972a2aa1642b10fe363fe32d49dc08"
+  integrity sha512-Ts1Y/anZELhSsjMcU605fU9RE4Oi3p5ORujwbIKXfWa+0Zxs510Qrmrce5/Jowq3cHSZSJqBjypxmHarc+vEWg==
 
 require-directory@^2.1.1:
   version "2.1.1"
