@@ -6,6 +6,7 @@ export default (r: PsychicRouter) => {
   r.put('ping', 'Users#ping')
   r.patch('ping', 'Users#ping')
   r.delete('ping', 'Users#ping')
+  r.options('ping', 'Users#ping')
   r.get('auth-ping', 'Users#authPing')
   r.get('api-ping', 'Api/Users#ping')
 
