@@ -6,6 +6,7 @@ import getModelKey from '../config/helpers/getModelKey'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
+import redisConnectionString from '../config/helpers/redisConnectionString'
 
 type JobTypes =
   | 'BackgroundJobQueueStaticJob'
@@ -33,9 +34,9 @@ export class Background {
 
     if (!appConfig?.redis) throw `attempting to use background jobs, but config.useRedis is not set to true.`
 
-    const connection = await redisOptions()
-    this.queue ||= new Queue('BackgroundJobQueue', { connection })
-    this.worker ||= new Worker('BackgroundJobQueue', job => this.handler(job), { connection })
+    const connectionString = await redisConnectionString('background_jobs')
+    this.queue ||= new Queue('BackgroundJobQueue', connectionString as any)
+    this.worker ||= new Worker('BackgroundJobQueue', connectionString as any)
   }
 
   public async staticMethod(

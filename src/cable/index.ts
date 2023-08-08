@@ -95,9 +95,16 @@ export default class Cable {
   }
 
   public async bindToRedis() {
-    const redisOpts = await redisOptions()
+    const redisOpts = await redisOptions('ws')
     const actualOpts = await redisOpts()
-    const creds = { socket: { ...actualOpts, port: actualOpts.port || 6379 } }
+    const creds = {
+      socket: {
+        ...actualOpts,
+        secure: undefined,
+        port: actualOpts.port ? parseInt(actualOpts.port) : 6379,
+        tls: (!!actualOpts.secure || undefined) as true,
+      },
+    }
 
     const pubClient = createClient(creds)
     const subClient = pubClient.duplicate()
