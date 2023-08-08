@@ -78,6 +78,7 @@ export default class PsychicServer {
       // cable starting will also start
       // an encapsulating http server
       await this.cable.start(port, { withReact, reactPort })
+      this.server = this.cable.http
     } else {
       await new Promise(async accept => {
         this.server = this.app.listen(port, async () => {
