@@ -137,9 +137,7 @@ program
   .action(async () => {
     await sspawn(yarncmdRunByAppConsumer(`dream sync:schema`, omitCoreArg(program.args)))
     await sspawn(yarncmdRunByAppConsumer(`dream sync:associations`, omitCoreArg(program.args)))
-
-    const coreDevFlag = setCoreDevelopmentFlag(program.args)
-    await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/sync-routes.ts`)
+    await maybeSyncRoutes()
   })
 
 program
@@ -176,8 +174,7 @@ program
   )
   .option('--core', 'sets core to true')
   .action(async () => {
-    const coreDevFlag = setCoreDevelopmentFlag(program.args)
-    await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/routes.ts`)
+    await syncRoutes()
   })
 
 program
@@ -187,9 +184,7 @@ program
   .action(async () => {
     await ensureStableAppBuild(program.args)
     await sspawn(yarncmdRunByAppConsumer(`dream db:migrate`, omitCoreArg(program.args)))
-
-    const coreDevFlag = setCoreDevelopmentFlag(program.args)
-    await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/sync-routes.ts`)
+    await maybeSyncRoutes()
   })
 
 program
@@ -199,9 +194,7 @@ program
   .action(async () => {
     await ensureStableAppBuild(program.args)
     await sspawn(yarncmdRunByAppConsumer(`dream db:reset`, omitCoreArg(program.args)))
-
-    const coreDevFlag = setCoreDevelopmentFlag(program.args)
-    await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/sync-routes.ts`)
+    await maybeSyncRoutes()
   })
 
 program
@@ -236,3 +229,14 @@ program
   })
 
 program.parse()
+
+async function maybeSyncRoutes() {
+  if (['development', 'test'].includes(process.env.NODE_ENV || '')) {
+    syncRoutes()
+  }
+}
+
+async function syncRoutes() {
+  const coreDevFlag = setCoreDevelopmentFlag(program.args)
+  await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/sync-routes.ts`)
+}
