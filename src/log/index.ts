@@ -15,8 +15,14 @@ export class Logger {
 
   public async write(text: string, color?: string) {
     this.puts(text, color)
-    const thisFs = fs ? fs : await import('fs')
-    return await thisFs.promises.appendFile(logPath(), this.header + text + '\n')
+
+    try {
+      const thisFs = fs ? fs : await import('fs')
+      return await thisFs.promises.appendFile(logPath(), this.header + text + '\n')
+    } catch (error) {
+      // don't fret about inability to write to log file, since this is normal if the
+      // file system is readonly.
+    }
   }
 
   public info(text: string) {
