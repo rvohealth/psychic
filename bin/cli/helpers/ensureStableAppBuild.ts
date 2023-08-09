@@ -2,6 +2,9 @@ import fs from 'fs/promises'
 import maybeSyncExisting from './maybeSyncExisting'
 
 export default async function ensureStableAppBuild(programArgs: string[]) {
+  if (!['development', 'test'].includes(process.env.NODE_ENV || '')) return
+
+  console.log('checking app for build stability...')
   await maybeSyncExisting(programArgs)
   await removeTestInfrastructureFor('dream')
   await removeTestInfrastructureFor('psychic')
