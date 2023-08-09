@@ -15,6 +15,7 @@ import hijackRootForCLI from './cli/helpers/hijackRootForCLI'
 import yarncmdRunByAppConsumer from './cli/helpers/yarncmdRunByAppConsumer'
 import ensureStableAppBuild from './cli/helpers/ensureStableAppBuild'
 import omitCoreArg from './cli/helpers/omitCoreArg'
+import syncRoutes, { maybeSyncRoutes } from './cli/helpers/syncRoutes'
 
 hijackRootForCLI()
 const program = new Command()
@@ -138,7 +139,7 @@ program
   .action(async () => {
     await sspawn(yarncmdRunByAppConsumer(`dream sync:schema`, omitCoreArg(program.args)))
     await sspawn(yarncmdRunByAppConsumer(`dream sync:associations`, omitCoreArg(program.args)))
-    await maybeSyncRoutes()
+    await maybeSyncRoutes(program.args)
   })
 
 program
@@ -186,7 +187,7 @@ program
   )
   .option('--core', 'sets core to true')
   .action(async () => {
-    await syncRoutes()
+    await syncRoutes(program.args)
   })
 
 program
@@ -194,12 +195,9 @@ program
   .description('db:migrate runs any outstanding database migrations')
   .option('--core', 'sets core to true')
   .action(async () => {
-    console.log('PSY DEBUG 1: db:migrate called')
     await ensureStableAppBuild(program.args)
-    console.log('PSY DEBUG 2: ensureStableAppBuild passed')
     await sspawn(yarncmdRunByAppConsumer(`dream db:migrate`, omitCoreArg(program.args)))
-    console.log('PSY DEBUG 3: db:migrate passed')
-    await maybeSyncRoutes()
+    await maybeSyncRoutes(program.args)
   })
 
 program
@@ -209,7 +207,7 @@ program
   .action(async () => {
     await ensureStableAppBuild(program.args)
     await sspawn(yarncmdRunByAppConsumer(`dream db:reset`, omitCoreArg(program.args)))
-    await maybeSyncRoutes()
+    await maybeSyncRoutes(program.args)
   })
 
 program
@@ -244,14 +242,3 @@ program
   })
 
 program.parse()
-
-async function maybeSyncRoutes() {
-  if (['development', 'test'].includes(process.env.NODE_ENV || '')) {
-    syncRoutes()
-  }
-}
-
-async function syncRoutes() {
-  const coreDevFlag = setCoreDevelopmentFlag(program.args)
-  await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/sync-routes.ts`)
-}
