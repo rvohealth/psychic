@@ -4,6 +4,8 @@ import sspawn from '../../../src/helpers/sspawn'
 import yarncmdRunByAppConsumer from './yarncmdRunByAppConsumer'
 
 export default async function maybeSyncExisting(programArgs: string[]) {
+  if (!['development', 'test'].includes(process.env.NODE_ENV || '')) return
+
   try {
     const pathToCheck = programArgs.includes('--core')
       ? path.join(process.cwd(), 'node_modules/dream/src/sync/schema.ts')
