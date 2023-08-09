@@ -11,6 +11,7 @@ import PsychicRouter from '../router'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import { Server } from 'http'
+import startPsychicServer from './helpers/startPsychicServer'
 
 export default class PsychicServer {
   public app: Application
@@ -54,7 +55,7 @@ export default class PsychicServer {
 
   // TODO: use config helper for fetching default port
   public async start(
-    port = process.env.PORT || 7777,
+    port = process.env.PORT ? parseInt(process.env.PORT) : 7777,
     {
       withReact = process.env.REACT === '1',
       reactPort = 3000,
@@ -81,14 +82,11 @@ export default class PsychicServer {
       this.server = this.cable.http
     } else {
       await new Promise(async accept => {
-        this.server = this.app.listen(port, async () => {
-          if (process.env.NODE_ENV !== 'test') {
-            log.welcome(port)
-            await log.write(`psychic dev server started at port ${port}`)
-            if (withReact) await log.write(`react dev server on port ${reactPort}`)
-          }
-
-          accept({})
+        this.server = await startPsychicServer({
+          app: this.app,
+          port,
+          withReact,
+          reactPort,
         })
       })
     }

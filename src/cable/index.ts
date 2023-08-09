@@ -9,6 +9,7 @@ import redisOptions from '../config/helpers/redisOptions'
 import readAppConfig from '../config/helpers/readAppConfig'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
+import { getPsychicHttpInstance } from '../server/helpers/startPsychicServer'
 
 export default class Cable {
   public app: Application
@@ -21,7 +22,9 @@ export default class Cable {
 
   public async connect() {
     if (this.io) return
-    this.http = http.createServer(this.app)
+    // for socket.io, we have to circumvent the normal process for starting a
+    // psychic server so that we can bind socket.io to the http instance.
+    this.http = getPsychicHttpInstance(this.app)
     this.io = new socketio.Server(this.http, { cors: { origin: '*' } })
 
     const appConfig = readAppConfig()
