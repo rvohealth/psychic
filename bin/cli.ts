@@ -193,8 +193,11 @@ program
   .description('db:migrate runs any outstanding database migrations')
   .option('--core', 'sets core to true')
   .action(async () => {
+    console.log('PSY DEBUG 1: db:migrate called')
     await ensureStableAppBuild(program.args)
+    console.log('PSY DEBUG 2: ensureStableAppBuild passed')
     await sspawn(yarncmdRunByAppConsumer(`dream db:migrate`, omitCoreArg(program.args)))
+    console.log('PSY DEBUG 3: db:migrate passed')
     await maybeSyncRoutes()
   })
 
