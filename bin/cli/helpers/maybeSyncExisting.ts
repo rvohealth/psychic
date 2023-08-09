@@ -2,9 +2,10 @@ import fs from 'fs/promises'
 import path from 'path'
 import sspawn from '../../../src/helpers/sspawn'
 import yarncmdRunByAppConsumer from './yarncmdRunByAppConsumer'
+import developmentOrTestEnv from './developmentOrTestEnv'
 
 export default async function maybeSyncExisting(programArgs: string[]) {
-  if (!['development', 'test'].includes(process.env.NODE_ENV || '')) return
+  if (!developmentOrTestEnv()) return
 
   try {
     const pathToCheck = programArgs.includes('--core')

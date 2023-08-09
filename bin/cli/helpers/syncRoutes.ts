@@ -1,8 +1,9 @@
 import sspawn from '../../../src/helpers/sspawn'
+import developmentOrTestEnv from './developmentOrTestEnv'
 import setCoreDevelopmentFlag from './setCoreDevelopmentFlag'
 
 export async function maybeSyncRoutes(args: string[]) {
-  if (['development', 'test'].includes(process.env.NODE_ENV || '')) {
+  if (developmentOrTestEnv()) {
     syncRoutes(args)
   }
 }
