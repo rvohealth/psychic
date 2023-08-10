@@ -167,6 +167,7 @@ program
   .description('syncs existing types to dream')
   .action(async () => {
     await sspawn(yarncmdRunByAppConsumer(`dream sync:existing`, omitCoreArg(program.args)))
+    await maybeSyncRoutes(program.args)
   })
 
 program
