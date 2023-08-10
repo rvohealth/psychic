@@ -5,7 +5,7 @@
 // commanderjs docs:
 // https://github.com/tj/commander.js#quick-start
 
-// import './cli/loadEnv'
+import './cli/loadEnv'
 import { Command } from 'commander'
 import sspawn from '../src/helpers/sspawn'
 import generateResource from '../src/generate/resource'
@@ -165,6 +165,7 @@ program
 program
   .command('sync:existing')
   .description('syncs existing types to dream')
+  .option('--core', 'sets core to true')
   .action(async () => {
     await sspawn(yarncmdRunByAppConsumer(`dream sync:existing`, omitCoreArg(program.args)))
     await maybeSyncRoutes(program.args)
