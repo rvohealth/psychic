@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && npx tsc",
-    "psy": "npx ts-node ./bin/cli.ts",
+    "psy": "NODE_ENV=development yarn dream sync:existing && npx ts-node ./bin/cli.ts",
     "dream": "rm -rf node_modules/dream/test-app && yarn --cwd=node_modules/dream dream",
     "dev": "PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=development ts-node ./test-app/main.ts",
     "db:create": "yarn dream db:create",
@@ -21,7 +21,7 @@
     "uspec:fast": "PSYCHIC_CORE_DEVELOPMENT=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "fspec": "yarn psy sync:all --core && PSYCHIC_CORE_DEVELOPMENT=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
     "fspec:fast": "PSYCHIC_CORE_DEVELOPMENT=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
-    "postinstall": "if [ ! -e .no-psychic-postinstall ]; then yarn psy sync:existing && yarn build; fi"
+    "postinstall": "if [ ! -e .no-psychic-postinstall ]; then yarn psy sync:routes && yarn build; fi"
   },
   "dependencies": {
     "@jest-mock/express": "^2.0.1",
@@ -39,7 +39,7 @@
     "colorette": "^2.0.19",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "dream": "https://avocadojesus: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@github.com/avocadojesus/dream.git#919f545",
+    "dream": "https://avocadojesus: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@github.com/avocadojesus/dream.git#b63669b",
     "express": "^4.18.2",
     "jest": "^29.5.0",
     "jsonwebtoken": "^9.0.0",
