@@ -28,18 +28,6 @@ export async function loadDreamYamlFile() {
   return config
 }
 
-let _dreamConfigCache: DreamConfig | null = null
-export async function loadDreamConfigFile() {
-  if (_dreamConfigCache) return _dreamConfigCache
-
-  const dreamConfig = (await importFileWithDefault(await dreamsConfigPath())) as DreamConfig
-
-  // TODO: validate shape of payload!
-
-  _dreamConfigCache = dreamConfig
-  return dreamConfig
-}
-
 export async function schemaPath() {
   const yamlConfig = await loadDreamYamlFile()
   return absoluteFilePath(yamlConfig.schema_path)
