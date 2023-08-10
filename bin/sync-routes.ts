@@ -1,10 +1,7 @@
-import * as colors from 'colorette'
 import path from 'path'
 import fs from 'fs/promises'
 import env from '../src/env'
 import PsychicServer from '../src/server'
-import { RouteConfig } from '../src/router/route-manager'
-import { absoluteFilePath, loadDreamYamlFile } from 'dream'
 
 env.load()
 ;(async function () {
