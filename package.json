@@ -10,7 +10,7 @@
   },
   "scripts": {
     "build": "rm -rf dist && npx tsc",
-    "psy": "NODE_ENV=development yarn dream sync:existing && npx ts-node ./bin/cli.ts",
+    "psy": "npx ts-node ./bin/cli.ts",
     "dream": "rm -rf node_modules/dream/test-app && yarn --cwd=node_modules/dream dream",
     "dev": "PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=development ts-node ./test-app/main.ts",
     "db:create": "yarn dream db:create",
