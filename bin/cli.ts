@@ -234,9 +234,7 @@ program
   .command('db:rollback')
   .option('--step <integer>', '--step <integer> number of steps back to travel')
   .option('--core', 'sets core to true')
-  .description(
-    'drops the database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars'
-  )
+  .description('rolls back your migrations, traveling back the number of steps specified')
   .action(async () => {
     await sspawn(yarncmdRunByAppConsumer(`dream db:rollback`, omitCoreArg(program.args)))
   })
