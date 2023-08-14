@@ -231,6 +231,17 @@ program
   })
 
 program
+  .command('db:rollback')
+  .option('--step <integer>', '--step <integer> number of steps back to travel')
+  .option('--core', 'sets core to true')
+  .description(
+    'drops the database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars'
+  )
+  .action(async () => {
+    await sspawn(yarncmdRunByAppConsumer(`dream db:rollback`, omitCoreArg(program.args)))
+  })
+
+program
   .command('console')
   .description('initiates a repl, loading the models from the development test-app into scope for easy use')
   .option('--core', 'sets core to true')
