@@ -21,7 +21,7 @@
     "uspec:fast": "PSYCHIC_CORE_DEVELOPMENT=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "fspec": "yarn psy sync:all --core && PSYCHIC_CORE_DEVELOPMENT=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
     "fspec:fast": "PSYCHIC_CORE_DEVELOPMENT=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
-    "postinstall": "if [ ! -e .no-psychic-postinstall ]; then yarn psy sync:routes && yarn build; else NODE_ENV=development yarn dream sync:existing; fi"
+    "postinstall": "if [ ! -e .no-psychic-postinstall ]; then yarn psy sync:routes && yarn build; fi"
   },
   "dependencies": {
     "@jest-mock/express": "^2.0.1",
