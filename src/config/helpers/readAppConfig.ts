@@ -9,6 +9,7 @@ export default function readAppConfig() {
   const appYmlPath = absoluteSrcPath('conf/app.yml')
   const buffer = fs.readFileSync(appYmlPath, 'utf8')
   _appConfig = YAML.parse(buffer)?.psychic || {
+    name: 'unknownapp',
     ws: false,
     redis: false,
     api_only: false,
@@ -19,6 +20,7 @@ export default function readAppConfig() {
 }
 
 export interface AppConfig {
+  name: string
   ws: boolean
   redis: boolean
   api_only: boolean

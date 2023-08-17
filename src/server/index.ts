@@ -12,6 +12,7 @@ import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import { Server } from 'http'
 import startPsychicServer from './helpers/startPsychicServer'
+import audit from 'express-requests-logger'
 
 export default class PsychicServer {
   public app: Application
@@ -27,7 +28,7 @@ export default class PsychicServer {
 
   public async routes() {
     const r = new PsychicRouter(this.app, this.config)
-    const routesPath = absoluteSrcPath('conf/routes.ts')
+    const routesPath = absoluteSrcPath('conf/routes')
     const routesCB = await importFileWithDefault(routesPath)
     routesCB(r)
     return r.routes
@@ -40,6 +41,7 @@ export default class PsychicServer {
     try {
       await this.config.boot()
     } catch (err) {
+      console.error(err)
       throw `
         Failed to boot psychic config. the error thrown was:
           ${err}
@@ -49,6 +51,7 @@ export default class PsychicServer {
     await this.buildRoutes()
 
     if (this.config.useWs) this.cable = new Cable(this.app)
+    this.config.cable = this.cable
 
     return true
   }
@@ -88,6 +91,7 @@ export default class PsychicServer {
           withReact,
           reactPort,
         })
+        accept({})
       })
     }
 
@@ -126,13 +130,18 @@ export default class PsychicServer {
 
     const getCorsOptions = await importFileWithDefault(absoluteSrcPath('conf/cors'))
     this.app.use(cors(await getCorsOptions()))
+
+    if (process.env.NODE_ENV !== 'test' || process.env.REQUEST_LOGGING === '1') {
+      const getLoggerOptions = await importFileWithDefault(absoluteSrcPath('conf/logs'))
+      this.app.use(audit(await getLoggerOptions()))
+    }
   }
 
   private async buildRoutes() {
     const r = new PsychicRouter(this.app, this.config)
-    const routesPath = absoluteSrcPath('conf/routes.ts')
+    const routesPath = absoluteSrcPath('conf/routes')
     const routesCB = await importFileWithDefault(routesPath)
-    routesCB(r)
+    await routesCB(r)
     r.commit()
   }
 }

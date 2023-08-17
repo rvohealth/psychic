@@ -1,6 +1,7 @@
-import sspawn from '../../../src/helpers/sspawn'
+import sspawn from './sspawn'
 import developmentOrTestEnv from './developmentOrTestEnv'
 import setCoreDevelopmentFlag from './setCoreDevelopmentFlag'
+import nodeOrTsnodeCmd from './nodeOrTsnodeCmd'
 
 export async function maybeSyncRoutes(args: string[]) {
   if (developmentOrTestEnv()) {
@@ -9,6 +10,5 @@ export async function maybeSyncRoutes(args: string[]) {
 }
 
 export default async function syncRoutes(args: string[]) {
-  const coreDevFlag = setCoreDevelopmentFlag(args)
-  await sspawn(`${coreDevFlag}ts-node --transpile-only ./bin/sync-routes.ts`)
+  await sspawn(nodeOrTsnodeCmd('src/bin/sync-routes.ts', args, { tsnodeFlags: ['--transpile-only'] }))
 }

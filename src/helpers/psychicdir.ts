@@ -17,11 +17,11 @@ export default class PsychicDir {
   public static async loadModels() {
     _models = {}
     const modelPaths = (await getFiles(await absoluteSrcPath('app/models'))).filter(path =>
-      /\.ts$/.test(path)
+      /\.[jt]s$/.test(path)
     )
     for (const modelPath of modelPaths) {
       const ModelClass = (await importFileWithDefault(modelPath)) as typeof Dream
-      const modelKey = modelPath.replace(/^.*app\/models\//, '').replace(/\.ts$/, '')
+      const modelKey = modelPath.replace(/^.*app\/models\//, '').replace(/\.[jt]s$/, '')
       _models[modelKey] = ModelClass
     }
     return _models
@@ -35,11 +35,11 @@ export default class PsychicDir {
   public static async loadControllers() {
     _controllers = {}
     const controllerPaths = (await getFiles(absoluteSrcPath('app/controllers'))).filter(path =>
-      /\.ts$/.test(path)
+      process.env.TS_SAFE === '1' ? /\.ts$/.test(path) : /\.js$/.test(path)
     )
     for (const controllerPath of controllerPaths) {
       const ControllerClass = (await importFileWithDefault(controllerPath)) as typeof PsychicController
-      const controllerKey = controllerPath.replace(/^.*app\/controllers\//, '').replace(/\.ts$/, '')
+      const controllerKey = controllerPath.replace(/^.*app\/controllers\//, '').replace(/\.[jt]s$/, '')
       _controllers[controllerKey] = ControllerClass
     }
     return _controllers
@@ -53,11 +53,11 @@ export default class PsychicDir {
   public static async loadSerializers() {
     _serializers = {}
     const serializerPaths = (await getFiles(absoluteSrcPath('app/serializers'))).filter(path =>
-      /\.ts$/.test(path)
+      /\.[jt]s$/.test(path)
     )
     for (const serializerPath of serializerPaths) {
       const serializerClass = (await importFileWithDefault(serializerPath)) as typeof DreamSerializer
-      const serializerKey = serializerPath.replace(/^.*app\/serializers\//, '').replace(/\.ts$/, '')
+      const serializerKey = serializerPath.replace(/^.*app\/serializers\//, '').replace(/\.[jt]s$/, '')
       _serializers[serializerKey] = serializerClass
     }
     return _serializers

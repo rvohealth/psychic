@@ -1,9 +1,7 @@
+import '../helpers/loadEnv'
 import * as colors from 'colorette'
-import env from '../src/env'
-import PsychicServer from '../src/server'
-import { RouteConfig } from '../src/router/route-manager'
-
-env.load()
+import PsychicServer from '../server'
+import { RouteConfig } from '../router/route-manager'
 ;(async function () {
   const server = new PsychicServer()
   await server.boot()

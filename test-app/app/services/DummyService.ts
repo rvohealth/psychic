@@ -1,9 +1,10 @@
+import fs from 'fs/promises'
 import backgroundedService from '../../../src/background/backgrounded-service'
-import User from '../models/User'
+import absoluteFilePath from '../../../src/helpers/absoluteFilePath'
 
 export default class DummyService extends backgroundedService(__filename) {
-  public static classRunInBG(arg: any) {
-    User.backgroundTest()
+  public static async classRunInBG(arg: any) {
+    await fs.writeFile(absoluteFilePath('spec/tmp.txt'), arg)
   }
 
   public constructorArg: any
@@ -12,9 +13,11 @@ export default class DummyService extends backgroundedService(__filename) {
     this.constructorArg = arg
   }
 
-  public instanceRunInBG(arg: any) {
-    this.instanceMethodToTest(this.constructorArg, arg)
+  public async instanceRunInBG(arg: any) {
+    await this.instanceMethodToTest(this.constructorArg, arg)
   }
 
-  public instanceMethodToTest(a: any, b: any) {}
+  public async instanceMethodToTest(a: any, b: any) {
+    await fs.writeFile(absoluteFilePath('spec/tmp.txt'), `${a},${b}`)
+  }
 }

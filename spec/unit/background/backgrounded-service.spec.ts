@@ -3,13 +3,13 @@ import DummyService from '../../../test-app/app/services/DummyService'
 
 describe('BackgroundedService', () => {
   it('calls the static method, passing args', async () => {
-    jest.spyOn(DummyService, 'classRunInBG').mockImplementation(() => {})
+    jest.spyOn(DummyService, 'classRunInBG').mockImplementation(async () => {})
     await DummyService.background('classRunInBG', 'bottlearum')
     expect(DummyService.classRunInBG).toHaveBeenCalledWith('bottlearum')
   })
 
   it('calls the instance method, passing constructor args to the constructor and args to the instance method', async () => {
-    jest.spyOn(DummyService.prototype, 'instanceMethodToTest').mockImplementation(() => {})
+    jest.spyOn(DummyService.prototype, 'instanceMethodToTest').mockImplementation(async () => {})
     await new DummyService('hello').background('instanceRunInBG', {
       args: ['bottlearum'],
       constructorArgs: ['bottleawhiskey'],

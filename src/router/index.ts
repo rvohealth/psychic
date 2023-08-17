@@ -6,22 +6,13 @@ import {
   routePath,
   sanitizedControllerPath,
 } from '../router/helpers'
-import Unauthorized from '../error/http/unauthorized'
-import Forbidden from '../error/http/forbidden'
-import UnprocessableEntity from '../error/http/unprocessable-entity'
-import NotFound from '../error/http/not-found'
 import PsychicConfig from '../config'
 import log from '../log'
 import PsychicController from '../controller'
 import { ValidationError } from 'dream'
 import RouteManager from './route-manager'
-import pluralize = require('pluralize')
 import { pascalize, snakeify } from 'dream'
-import BadRequest from '../error/http/bad-request'
-import InternalServerError from '../error/http/internal-server-error'
-import NotImplemented from '../error/http/not-implemented'
-import ServiceUnavailable from '../error/http/service-unavailable'
-
+import pluralize = require('pluralize')
 export default class PsychicRouter {
   public app: Application
   public config: PsychicConfig
@@ -297,18 +288,18 @@ export default class PsychicRouter {
     } catch (err) {
       if (process.env.NODE_ENV !== 'test') await log.error(err as string)
 
-      switch ((err as any).constructor) {
-        case Unauthorized:
-        case Forbidden:
-        case NotFound:
-        case BadRequest:
-        case InternalServerError:
-        case NotImplemented:
-        case ServiceUnavailable:
+      switch ((err as any).constructor?.name) {
+        case 'Unauthorized':
+        case 'Forbidden':
+        case 'NotFound':
+        case 'BadRequest':
+        case 'InternalServerError':
+        case 'NotImplemented':
+        case 'ServiceUnavailable':
           res.sendStatus((err as any).status)
           break
 
-        case ValidationError:
+        case 'ValidationError':
           const validationError = err as ValidationError
           const errors = validationError.errors || ([] as ValidationError[])
           res.status(422).json({
@@ -316,7 +307,7 @@ export default class PsychicRouter {
           })
           break
 
-        case UnprocessableEntity:
+        case 'UnprocessableEntity':
           res.status(422).json((err as any).data)
           break
 

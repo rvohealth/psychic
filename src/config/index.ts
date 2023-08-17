@@ -5,16 +5,19 @@ import PsychicDir from '../helpers/psychicdir'
 import readAppConfig from './helpers/readAppConfig'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
+import Cable from '../cable'
 
 export default class PsychicConfig {
   public app: Application
+  public cable?: Cable
   public controllers: { [key: string]: typeof PsychicController } = {}
   public apiOnly: boolean = false
   public useWs: boolean = false
   public useRedis: boolean = false
   public useUUIDs: boolean = false
-  constructor(app: Application) {
+  constructor(app: Application, { cable }: { cable?: Cable } = {}) {
     this.app = app
+    this.cable = cable
 
     const ymlConfig = readAppConfig()
     if (!ymlConfig) throw `Failed to read yaml config`
@@ -60,27 +63,27 @@ export default class PsychicConfig {
   public async boot() {
     // await new IntegrityChecker().check()
 
-    const appConfig = await importFileWithDefault(absoluteSrcPath('conf/env/all.ts'))
+    const appConfig = await importFileWithDefault(absoluteSrcPath('conf/env/all'))
     await appConfig(this)
 
     switch (process.env.NODE_ENV) {
       case 'development':
-        const devConfig = await importFileWithDefault(absoluteSrcPath('conf/env/dev.ts'))
+        const devConfig = await importFileWithDefault(absoluteSrcPath('conf/env/dev'))
         await devConfig(this)
         break
 
       case 'production':
-        const prodConfig = await importFileWithDefault(absoluteSrcPath('conf/env/prod.ts'))
+        const prodConfig = await importFileWithDefault(absoluteSrcPath('conf/env/prod'))
         await prodConfig(this)
         break
 
       case 'test':
-        const testConfig = await importFileWithDefault(absoluteSrcPath('conf/env/testing.ts'))
+        const testConfig = await importFileWithDefault(absoluteSrcPath('conf/env/testing'))
         await testConfig(this)
         break
     }
 
-    const inflections = await importFileWithDefault(absoluteSrcPath('conf/inflections.ts'))
+    const inflections = await importFileWithDefault(absoluteSrcPath('conf/inflections'))
     await inflections()
 
     this.controllers = await PsychicDir.controllers()

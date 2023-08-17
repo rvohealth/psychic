@@ -1,10 +1,11 @@
+import path from 'path'
 import background from '.'
 
 export default function backgroundedService(filepath: string) {
   const trimmedFilePath = filepath
     .replace(new RegExp(process.cwd()), '')
     .replace(/^\//, '')
-    .replace(/\.ts$/, '')
+    .replace(/\.[jt]s$/, '')
 
   return class BackgroundedService {
     public static async background(methodName: string, ...args: any[]) {

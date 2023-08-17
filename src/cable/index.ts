@@ -1,6 +1,6 @@
 import * as colors from 'colorette'
 import { Application } from 'express'
-import { createClient, RedisClientType } from 'redis'
+import { createClient, RedisClientOptions, RedisClientType } from 'redis'
 import { createAdapter } from '@socket.io/redis-adapter'
 import http from 'http'
 import socketio from 'socket.io'
@@ -25,6 +25,8 @@ export default class Cable {
     // for socket.io, we have to circumvent the normal process for starting a
     // psychic server so that we can bind socket.io to the http instance.
     this.http = getPsychicHttpInstance(this.app)
+
+    // TODO: allow origin to be specified by a config
     this.io = new socketio.Server(this.http, { cors: { origin: '*' } })
 
     const appConfig = readAppConfig()
@@ -56,7 +58,7 @@ export default class Cable {
       connectDef = await importFileWithDefault(absoluteSrcPath('conf/ws/connect'))
     } catch (error) {}
 
-    this.io!.on('connection', async socket => {
+    this.io!.on('connect', async socket => {
       log.puts('A user connected')
 
       if (connectDef) await connectDef(socket)
@@ -101,13 +103,15 @@ export default class Cable {
     const redisOpts = await redisOptions('ws')
     const actualOpts = await redisOpts()
     const creds = {
+      username: actualOpts.username,
+      password: actualOpts.password,
       socket: {
-        ...actualOpts,
-        secure: undefined,
+        host: actualOpts.host,
         port: actualOpts.port ? parseInt(actualOpts.port) : 6379,
         tls: (!!actualOpts.secure || undefined) as true,
+        rejectUnauthorized: !!actualOpts.secure,
       },
-    }
+    } as RedisClientOptions
 
     const pubClient = createClient(creds)
     const subClient = pubClient.duplicate()

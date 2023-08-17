@@ -10,8 +10,10 @@ import background from '../src/background'
 export async function backgroundJobCompletionPromise() {
   await background.connect()
   return new Promise(accept => {
-    background.worker!.addListener('completed', () => {
-      accept(undefined)
+    background.workers.forEach(worker => {
+      worker.addListener('completed', () => {
+        accept(undefined)
+      })
     })
   })
 }

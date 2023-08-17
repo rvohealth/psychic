@@ -1,12 +1,12 @@
-import { Job, Queue, Worker } from 'bullmq'
-import redisOptions from '../config/helpers/redisOptions'
+import { ConnectionOptions, Job, Queue, Worker } from 'bullmq'
 import readAppConfig from '../config/helpers/readAppConfig'
-import { Dream } from 'dream'
+import { Dream, pascalize } from 'dream'
 import getModelKey from '../config/helpers/getModelKey'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
-import redisConnectionString from '../config/helpers/redisConnectionString'
+import redisOptions, { PsychicRedisConnectionOptions } from '../config/helpers/redisOptions'
+import developmentOrTestEnv from '../../boot/cli/helpers/developmentOrTestEnv'
 
 type JobTypes =
   | 'BackgroundJobQueueStaticJob'
@@ -24,19 +24,42 @@ export interface BackgroundJobData {
 
 export class Background {
   public queue: Queue | null = null
-  public worker: Worker | null = null
+  public workers: Worker[] = []
 
   public async connect() {
     if (process.env.NODE_ENV === 'test') return
-    if (this.queue && this.worker) return
+    if (this.queue) return
 
     const appConfig = readAppConfig()
 
     if (!appConfig?.redis) throw `attempting to use background jobs, but config.useRedis is not set to true.`
 
-    const connectionString = await redisConnectionString('background_jobs')
-    this.queue ||= new Queue('BackgroundJobQueue', connectionString as any)
-    this.worker ||= new Worker('BackgroundJobQueue')
+    const getConnectionOptions = await redisOptions('background_jobs')
+    const connectionOptions = (await getConnectionOptions()) as PsychicRedisConnectionOptions
+    const bullConnectionOpts = {
+      host: connectionOptions.host,
+      username: connectionOptions.username,
+      password: connectionOptions.password,
+      port: connectionOptions.port ? parseInt(connectionOptions.port) : undefined,
+      tls: connectionOptions.secure
+        ? {
+            rejectUnauthorized: false,
+          }
+        : undefined,
+      connectTimeout: 5000,
+    } as ConnectionOptions
+
+    this.queue ||= new Queue(`${pascalize(appConfig.name)}BackgroundJobQueue`, {
+      connection: bullConnectionOpts,
+    })
+
+    for (let i = 0; i < (await workerCount()); i++) {
+      this.workers.push(
+        new Worker(`${pascalize(appConfig.name)}BackgroundJobQueue`, data => this.handler(data), {
+          connection: bullConnectionOpts,
+        })
+      )
+    }
   }
 
   public async staticMethod(
@@ -53,7 +76,7 @@ export class Background {
     }
   ) {
     await this.connect()
-    await this.addToQueue('BackgroundJobQueueStaticJob', {
+    await this.addToQueue(`BackgroundJobQueueStaticJob`, {
       filepath,
       importKey,
       method,
@@ -110,18 +133,25 @@ export class Background {
 
   private async addToQueue(jobType: JobTypes, jobData: BackgroundJobData) {
     if (process.env.NODE_ENV === 'test') await this.doWork(jobType, jobData)
-    else await this.queue!.add(jobType, jobData)
+    else {
+      await this.queue!.add(jobType, jobData)
+    }
   }
 
-  private async doWork(
+  public async doWork(
     jobType: JobTypes,
     { id, method, args, constructorArgs, filepath, importKey }: BackgroundJobData
   ) {
+    const trimmedFilePath = filepath
+      .replace(new RegExp(process.cwd()), '')
+      .replace(/^\//, '')
+      .replace(/\.[jt]s$/, '')
+
     switch (jobType) {
       case 'BackgroundJobQueueStaticJob':
         if (filepath) {
           const ObjectClass = await importFileWithNamedExport(
-            absoluteSrcPath(filepath),
+            absoluteSrcPath(trimmedFilePath),
             importKey || 'default'
           )
 
@@ -132,9 +162,9 @@ export class Background {
         break
 
       case 'BackgroundJobQueueInstanceJob':
-        if (filepath) {
+        if (trimmedFilePath) {
           const ObjectClass = await importFileWithNamedExport(
-            absoluteSrcPath(filepath),
+            absoluteSrcPath(trimmedFilePath),
             importKey || 'default'
           )
           if (!ObjectClass) return
@@ -145,8 +175,8 @@ export class Background {
         break
 
       case 'BackgroundJobQueueModelInstanceJob':
-        if (filepath) {
-          const DreamModelClass = (await importFileWithDefault(absoluteSrcPath(filepath))) as
+        if (trimmedFilePath) {
+          const DreamModelClass = (await importFileWithDefault(absoluteSrcPath(trimmedFilePath))) as
             | typeof Dream
             | undefined
           if (!DreamModelClass) return
@@ -165,6 +195,11 @@ export class Background {
 
     await this.doWork(jobType, job.data)
   }
+}
+
+async function workerCount() {
+  if (process.env.WORKER_COUNT) return parseInt(process.env.WORKER_COUNT)
+  return developmentOrTestEnv() ? 1 : 0
 }
 
 const background = new Background()

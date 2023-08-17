@@ -1,8 +1,9 @@
 import fs from 'fs/promises'
 import path from 'path'
-import sspawn from '../../../src/helpers/sspawn'
+import sspawn from './sspawn'
 import yarncmdRunByAppConsumer from './yarncmdRunByAppConsumer'
 import developmentOrTestEnv from './developmentOrTestEnv'
+import dreamjsOrDreamtsCmd from './dreamjsOrDreamtsCmd'
 
 export default async function maybeSyncExisting(programArgs: string[]) {
   if (!developmentOrTestEnv()) return
@@ -14,6 +15,6 @@ export default async function maybeSyncExisting(programArgs: string[]) {
     await fs.statfs(pathToCheck)
   } catch (_) {
     console.log('Missing schema file, resyncing app')
-    await sspawn(yarncmdRunByAppConsumer('dream sync:existing', programArgs))
+    await sspawn(dreamjsOrDreamtsCmd('sync:existing', programArgs))
   }
 }

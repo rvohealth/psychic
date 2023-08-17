@@ -1,8 +1,4 @@
 {
-  "ts-node": {
-    "ignore": [],
-    "include": ["src/**/*", "test-app/**/*", "node_modules/dream/src/**/*"]
-  },
   "compilerOptions": {
     "module": "CommonJS",
     "target": "ESNext",
@@ -10,6 +6,8 @@
     "noImplicitAny": true,
     "declaration": true,
     "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true,
     "esModuleInterop": true,
     // "resolveJsonModule": true,
 
@@ -23,6 +21,5 @@
     "rootDir": "./",
     "outDir": "./dist"
   },
-  "ignore": [],
-  "include": ["src/**/*", "test-app/**/*", "boot/**/*", "shared/**/*"]
+  "include": ["boot/**/*", "shared/**/*"]
 }
