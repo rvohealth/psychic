@@ -36,7 +36,7 @@ export class Background {
 
     const connectionString = await redisConnectionString('background_jobs')
     this.queue ||= new Queue('BackgroundJobQueue', connectionString as any)
-    this.worker ||= new Worker('BackgroundJobQueue', connectionString as any)
+    this.worker ||= new Worker('BackgroundJobQueue')
   }
 
   public async staticMethod(
