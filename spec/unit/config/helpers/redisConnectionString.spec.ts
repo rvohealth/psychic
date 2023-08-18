@@ -89,4 +89,14 @@ describe('redisConnectionString', () => {
       expect(await subject()).toEqual('redis://localhost:1234')
     })
   })
+
+  describe('context: with secure', () => {
+    beforeEach(() => {
+      secure = '1'
+    })
+
+    it('returns a rediss protocol', async () => {
+      expect(await subject()).toEqual('rediss://localhost:6379')
+    })
+  })
 })
