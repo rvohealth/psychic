@@ -53,8 +53,9 @@ export class Background {
       connection: bullConnectionOpts,
     })
 
-    for (let i = 0; i < (await workerCount()); i++) {
-      console.log('CREATING WORKER')
+    console.log('WORKER COUNT: ', workerCount())
+    for (let i = 0; i < workerCount(); i++) {
+      console.log('CREATING WORKER', i)
       this.workers.push(
         new Worker(`${pascalize(appConfig.name)}BackgroundJobQueue`, data => this.handler(data), {
           connection: bullConnectionOpts,
@@ -198,7 +199,7 @@ export class Background {
   }
 }
 
-async function workerCount() {
+function workerCount() {
   if (process.env.WORKER_COUNT) return parseInt(process.env.WORKER_COUNT)
   return developmentOrTestEnv() ? 1 : 0
 }
