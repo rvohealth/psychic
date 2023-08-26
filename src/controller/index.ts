@@ -204,7 +204,13 @@ export default class PsychicController {
   }
 
   public async runAction(action: string) {
-    await this.runBeforeActionsFor(action)
+    try {
+      await this.runBeforeActionsFor(action)
+    } catch (err) {
+      console.error(err)
+      this.internalServerError()
+    }
+
     await (this as any)[action]()
   }
 

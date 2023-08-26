@@ -9,10 +9,11 @@ import {
 import PsychicConfig from '../config'
 import log from '../log'
 import PsychicController from '../controller'
-import { ValidationError } from 'dream'
+import { ValidationError, developmentOrTestEnv } from 'dream'
 import RouteManager from './route-manager'
 import { pascalize, snakeify } from 'dream'
 import pluralize = require('pluralize')
+
 export default class PsychicRouter {
   public app: Application
   public config: PsychicConfig
@@ -312,11 +313,13 @@ export default class PsychicRouter {
           break
 
         default:
-          res.status(500).send(`
-            An unexpected error has caused this request to crash.
-              error:
-                ${err}
-          `)
+          const message = developmentOrTestEnv()
+            ? `An unexpected error has caused this request to crash.
+                error:
+                  ${err}`
+            : ''
+
+          res.status(500).send(message)
       }
     }
   }
