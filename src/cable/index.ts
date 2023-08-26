@@ -59,13 +59,25 @@ export default class Cable {
     } catch (error) {}
 
     this.io!.on('connect', async socket => {
-      log.puts('A user connected')
-
-      if (connectDef) await connectDef(socket)
-
-      socket.on('disconnect', function () {
-        log.puts('A user disconnected')
-      })
+      try {
+        if (connectDef) await connectDef(socket)
+      } catch (error) {
+        if (process.env.PSYCHIC_DANGEROUSLY_PERMIT_WS_EXCEPTIONS === '1') throw error
+        else {
+          console.error(`
+            An exception was caught in your websocket thread.
+            To prevent your server from crashing, we are rescuing this error here for you.
+            If you would like us to raise this exception, make sure to set
+  
+            PSYCHIC_DANGEROUSLY_PERMIT_WS_EXCEPTIONS=1
+  
+            the error received is:
+  
+            ${error}
+          `)
+          console.trace()
+        }
+      }
     })
 
     if (this.useRedis) await this.bindToRedis()
