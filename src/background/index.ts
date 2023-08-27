@@ -77,11 +77,42 @@ export class Background {
   ) {
     await this.connect()
     await this.addToQueue(`BackgroundJobQueueStaticJob`, {
-      filepath,
+      filepath: trimFilepath(filepath),
       importKey,
       method,
       args,
     })
+  }
+
+  public async scheduledMethod(
+    ObjectClass: any,
+    pattern: string,
+    method: string,
+    {
+      filepath, // filepath means a file within the app that is consuming psychic
+      importKey,
+      args = [],
+    }: {
+      filepath: string
+      importKey?: string
+      args?: any[]
+    }
+  ) {
+    await this.connect()
+    await this.queue!.add(
+      'BackgroundJobQueueStaticJob',
+      {
+        filepath: trimFilepath(filepath),
+        importKey,
+        method,
+        args,
+      },
+      {
+        repeat: {
+          pattern,
+        },
+      }
+    )
   }
 
   public async instanceMethod(
@@ -142,16 +173,11 @@ export class Background {
     jobType: JobTypes,
     { id, method, args, constructorArgs, filepath, importKey }: BackgroundJobData
   ) {
-    const trimmedFilePath = filepath
-      .replace(new RegExp(process.cwd()), '')
-      .replace(/^\//, '')
-      .replace(/\.[jt]s$/, '')
-
     switch (jobType) {
       case 'BackgroundJobQueueStaticJob':
         if (filepath) {
           const ObjectClass = await importFileWithNamedExport(
-            absoluteSrcPath(trimmedFilePath),
+            absoluteSrcPath(filepath),
             importKey || 'default'
           )
 
@@ -162,9 +188,9 @@ export class Background {
         break
 
       case 'BackgroundJobQueueInstanceJob':
-        if (trimmedFilePath) {
+        if (filepath) {
           const ObjectClass = await importFileWithNamedExport(
-            absoluteSrcPath(trimmedFilePath),
+            absoluteSrcPath(filepath),
             importKey || 'default'
           )
           if (!ObjectClass) return
@@ -175,8 +201,8 @@ export class Background {
         break
 
       case 'BackgroundJobQueueModelInstanceJob':
-        if (trimmedFilePath) {
-          const DreamModelClass = (await importFileWithDefault(absoluteSrcPath(trimmedFilePath))) as
+        if (filepath) {
+          const DreamModelClass = (await importFileWithDefault(absoluteSrcPath(filepath))) as
             | typeof Dream
             | undefined
           if (!DreamModelClass) return
@@ -200,6 +226,13 @@ export class Background {
 function workerCount() {
   if (process.env.WORKER_COUNT) return parseInt(process.env.WORKER_COUNT)
   return developmentOrTestEnv() ? 1 : 0
+}
+
+function trimFilepath(filepath: string) {
+  return filepath
+    .replace(/^\//, '')
+    .replace(process.cwd().replace(/^\//, ''), '')
+    .replace(/\.[jt]s$/, '')
 }
 
 const background = new Background()
