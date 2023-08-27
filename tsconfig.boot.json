@@ -7,9 +7,8 @@
     "declaration": true,
     "experimentalDecorators": true,
     "emitDecoratorMetadata": true,
-    "resolveJsonModule": true,
     "esModuleInterop": true,
-    // "resolveJsonModule": true,
+    "resolveJsonModule": true,
 
     /* do not require all properties to be initialized in constructor */
     "strictPropertyInitialization": false,

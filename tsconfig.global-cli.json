@@ -5,7 +5,7 @@
     "strict": true,
     "noImplicitAny": true,
     "experimentalDecorators": true,
-    // "resolveJsonModule": true,
+    "resolveJsonModule": true,
 
     /* do not require all properties to be initialized in constructor */
     "strictPropertyInitialization": false,
