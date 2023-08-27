@@ -16,6 +16,7 @@ import omitCoreArg from './cli/helpers/omitCoreArg'
 import syncRoutes, { maybeSyncRoutes } from './cli/helpers/syncRoutes'
 import nodeOrTsnodeCmd from './cli/helpers/nodeOrTsnodeCmd'
 import dreamjsOrDreamtsCmd from './cli/helpers/dreamjsOrDreamtsCmd'
+import developmentOrProdEnvString from './cli/helpers/developmentOrProdEnvString'
 
 hijackRootForCLI()
 const program = new Command()
@@ -38,7 +39,7 @@ program
   .description('builds the underlying dream and psychic apps')
   .action(async () => {
     const dreamCmd = `
-      NODE_ENV=development yarn --cwd=../../node_modules/dream build
+      NODE_ENV=${developmentOrProdEnvString()} yarn --cwd=../../node_modules/dream build
     `
     const psychicCmd = `
       echo \"export type RouteTypes = never\" > ./src/sync/routes.ts && \
