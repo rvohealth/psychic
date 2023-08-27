@@ -276,7 +276,7 @@ program
   )
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
-    await sspawn(dreamjsOrDreamtsCmd(`dream db:drop`, omitCoreArg(cmdargs())))
+    await sspawn(dreamjsOrDreamtsCmd(`db:drop`, omitCoreArg(cmdargs())))
   })
 
 program
@@ -286,7 +286,7 @@ program
   .option('--core', 'sets core to true')
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
-    await sspawn(dreamjsOrDreamtsCmd(`dream db:rollback`, omitCoreArg(cmdargs())))
+    await sspawn(dreamjsOrDreamtsCmd(`db:rollback`, omitCoreArg(cmdargs())))
   })
 
 program
