@@ -132,7 +132,7 @@ export class Background {
   ) {
     await this.connect()
     await this.addToQueue('BackgroundJobQueueInstanceJob', {
-      filepath,
+      filepath: trimFilepath(filepath),
       importKey,
       method,
       args,
@@ -229,9 +229,14 @@ function workerCount() {
 }
 
 function trimFilepath(filepath: string) {
+  if (!process.env.APP_ROOT_PATH)
+    throw `
+      [Psychic:] Must set APP_ROOT_PATH before calling trimFilepath
+    `
+
   return filepath
     .replace(/^\//, '')
-    .replace(process.cwd().replace(/^\//, ''), '')
+    .replace(process.env.APP_ROOT_PATH!.replace(/^\//, ''), '')
     .replace(/\.[jt]s$/, '')
 }
 
