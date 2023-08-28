@@ -2,11 +2,11 @@ import { ConnectionOptions, Job, Queue, Worker } from 'bullmq'
 import readAppConfig from '../config/helpers/readAppConfig'
 import { Dream, pascalize } from 'dream'
 import getModelKey from '../config/helpers/getModelKey'
-import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
 import redisOptions, { PsychicRedisConnectionOptions } from '../config/helpers/redisOptions'
 import developmentOrTestEnv from '../../boot/cli/helpers/developmentOrTestEnv'
+import absoluteFilePath from '../helpers/absoluteFilePath'
 
 type JobTypes =
   | 'BackgroundJobQueueStaticJob'
@@ -177,7 +177,7 @@ export class Background {
       case 'BackgroundJobQueueStaticJob':
         if (filepath) {
           const ObjectClass = await importFileWithNamedExport(
-            absoluteSrcPath(filepath),
+            absoluteFilePath(filepath),
             importKey || 'default'
           )
 
@@ -190,7 +190,7 @@ export class Background {
       case 'BackgroundJobQueueInstanceJob':
         if (filepath) {
           const ObjectClass = await importFileWithNamedExport(
-            absoluteSrcPath(filepath),
+            absoluteFilePath(filepath),
             importKey || 'default'
           )
           if (!ObjectClass) return
@@ -202,7 +202,7 @@ export class Background {
 
       case 'BackgroundJobQueueModelInstanceJob':
         if (filepath) {
-          const DreamModelClass = (await importFileWithDefault(absoluteSrcPath(filepath))) as
+          const DreamModelClass = (await importFileWithDefault(absoluteFilePath(filepath))) as
             | typeof Dream
             | undefined
           if (!DreamModelClass) return
