@@ -50,7 +50,7 @@ export default class ApiV1UsersController extends AuthedController {
   }
 
   private get userParams() {
-    return Params.restrict(this.params?.user, ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at'])
+    return Params.restrict(this.params?.user, ['id', 'name', 'email', 'passwordDigest', 'createdAt', 'updatedAt'])
   }
 }\
 `
@@ -106,7 +106,7 @@ export default class ApiV1HealthUsersController extends AuthedController {
   }
 
   private get userParams() {
-    return Params.restrict(this.params?.user, ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at'])
+    return Params.restrict(this.params?.user, ['id', 'name', 'email', 'passwordDigest', 'createdAt', 'updatedAt'])
   }
 }\
 `

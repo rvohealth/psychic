@@ -14,28 +14,28 @@ export type Timestamp = ColumnType<DateTime>
 export interface HealthUsers {
   id: Generated<number>;
   email: string | null;
-  password_digest: string | null;
+  passwordDigest: string | null;
   name: string | null;
-  created_at: Timestamp;
-  updated_at: Timestamp;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 
 export interface Pets {
   id: Generated<Int8>;
-  user_id: number;
+  userId: number;
   name: string | null;
   species: SpeciesTypesEnum | null;
-  created_at: Timestamp;
-  updated_at: Timestamp;
+  createdAt: Timestamp;
+  updatedAt: Timestamp;
 }
 
 export interface Users {
   id: Generated<number>;
   name: string | null;
   email: string;
-  password_digest: string;
-  created_at: Generated<Timestamp>;
-  updated_at: Generated<Timestamp>;
+  passwordDigest: string;
+  createdAt: Generated<Timestamp>;
+  updatedAt: Generated<Timestamp>;
 }
 
 export interface DB {
@@ -45,63 +45,63 @@ export interface DB {
 }
 
 
-export const HealthUserColumns = ['id', 'email', 'password_digest', 'name', 'created_at', 'updated_at']
-export const PetColumns = ['id', 'user_id', 'name', 'species', 'created_at', 'updated_at']
-export const UserColumns = ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
+export const HealthUserColumns = ['id', 'email', 'passwordDigest', 'name', 'createdAt', 'updatedAt']
+export const PetColumns = ['id', 'userId', 'name', 'species', 'createdAt', 'updatedAt']
+export const UserColumns = ['id', 'name', 'email', 'passwordDigest', 'createdAt', 'updatedAt']
 
 export interface HealthUserAttributes {
   id: number
   email: string | null
-  password_digest: string | null
+  passwordDigest: string | null
   name: string | null
-  created_at: DateTime
-  updated_at: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
 }  
 
 export interface PetAttributes {
   id: IdType
-  user_id: number
+  userId: number
   name: string | null
   species: SpeciesTypesEnum | null
-  created_at: DateTime
-  updated_at: DateTime
+  createdAt: DateTime
+  updatedAt: DateTime
 }  
 
 export interface UserAttributes {
   id: number
   name: string | null
   email: string
-  password_digest: string
-  created_at: DateTime
-  updated_at: DateTime
+  passwordDigest: string
+  createdAt: DateTime
+  updatedAt: DateTime
 }  
 
 
 export const HealthUsersTypeCache = {
   id: 'Generated<number>',
   email: 'string|null',
-  password_digest: 'string|null',
+  passwordDigest: 'string|null',
   name: 'string|null',
-  created_at: 'Timestamp',
-  updated_at: 'Timestamp'
+  createdAt: 'Timestamp',
+  updatedAt: 'Timestamp'
 }  
 
 export const PetsTypeCache = {
   id: 'Generated<Int8>',
-  user_id: 'number',
+  userId: 'number',
   name: 'string|null',
   species: 'SpeciesTypesEnum|null',
-  created_at: 'Timestamp',
-  updated_at: 'Timestamp'
+  createdAt: 'Timestamp',
+  updatedAt: 'Timestamp'
 }  
 
 export const UsersTypeCache = {
   id: 'Generated<number>',
   name: 'string|null',
   email: 'string',
-  password_digest: 'string',
-  created_at: 'Generated<Timestamp>',
-  updated_at: 'Generated<Timestamp>'
+  passwordDigest: 'string',
+  createdAt: 'Generated<Timestamp>',
+  updatedAt: 'Generated<Timestamp>'
 }  
 
 

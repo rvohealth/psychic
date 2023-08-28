@@ -37,7 +37,7 @@ describe('PsychicController', () => {
         }
       }
 
-      await User.create({ email: 'how@yadoin', password_digest: 'hello' })
+      await User.create({ email: 'how@yadoin', passwordDigest: 'hello' })
       const controller = new MyController(req, res, { config })
 
       await controller.show()
@@ -56,8 +56,8 @@ describe('PsychicController', () => {
           }
         }
 
-        await User.create({ email: 'how@yadoin', name: 'fred', password_digest: 'hello' })
-        await User.create({ email: 'zed@zed', name: 'zed', password_digest: 'hello' })
+        await User.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
+        await User.create({ email: 'zed@zed', name: 'zed', passwordDigest: 'hello' })
         const controller = new MyController(req, res, { config })
 
         await controller.index()
@@ -175,7 +175,7 @@ describe('PsychicController', () => {
       }
 
       beforeEach(async () => {
-        await User2.create({ email: 'how@yadoin', name: 'fred', password_digest: 'hello' })
+        await User2.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
       })
 
       it('passes the passthrough data through to the child serializers', async () => {

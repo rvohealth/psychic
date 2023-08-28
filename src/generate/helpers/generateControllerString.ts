@@ -116,7 +116,9 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
     privateDefs.push(
       `\
   private get ${singularName}Params() {
-    return Params.restrict(this.params?.${singularName}, [${attributes.map(attr => `'${attr}'`).join(', ')}])
+    return Params.restrict(this.params?.${singularName}, [${attributes
+        .map(attr => `'${camelize(attr)}'`)
+        .join(', ')}])
   }`
     )
   }

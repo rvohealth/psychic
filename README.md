@@ -66,18 +66,18 @@ For more comprehensive documentation, please see [The official Psychic guides](N
 # After `yarn install`
 
 ```bash
-APP_ROOT_PATH=$(pwd) yarn dream sync:existing
+yarn build-core
 ```
 
 To reset the database when devloping psychic:
 
 ```bash
-APP_ROOT_PATH=$(pwd) NODE_ENV=test yarn psy db:reset --core
+NODE_ENV=test yarn psycore db:reset
 ```
 
 To run specs:
 
 ```bash
-APP_ROOT_PATH=$(pwd) NODE_ENV=test yarn uspec
-APP_ROOT_PATH=$(pwd) NODE_ENV=test yarn fspec
+NODE_ENV=test yarn uspec
+NODE_ENV=test yarn fspec
 ```
