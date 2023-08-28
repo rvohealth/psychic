@@ -12,7 +12,7 @@
     "psy": "yarn psyts",
     "psyjs": "node ./dist/boot/cli.js",
     "psyts": "TS_SAFE=1 npx ts-node -r ./boot/cli/helpers/loadAppEnvFromBoot.ts boot/cli.ts",
-    "psycore": "APP_ROOT_PATH=$(pwd)/test-app yarn psyts",
+    "psycore": "PSYCHIC_CORE_DEVELOPMENT=1 APP_ROOT_PATH=$(pwd)/test-app yarn psyts",
     "build:package-json": "DREAM_OMIT_DIST_FOLDER=1 TS_SAFE=1 npx ts-node -r ./src/helpers/loadEnv.ts boot/adapt-package-json.ts",
     "build": "yarn build-boot && yarn psyts build && yarn build:package-json",
     "build-boot": "echo \"bootstrapping psychic cli...\" && rm -rf dist && rm -rf ./spec && rm -rf ./test-app && npx tsc -p ./tsconfig.boot.json && yarn build:package-json",
