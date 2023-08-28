@@ -90,8 +90,7 @@ program
   .action(async () => {
     const args = cmdargs()
     await ensureStableAppBuild(args)
-    const [_, name, ...attributes] = args
-    await sspawn(dreamjsOrDreamtsCmd('g:model', args, { cmdArgs: attributes }))
+    await sspawn(dreamjsOrDreamtsCmd('g:model', args, { cmdArgs: omitCoreArg(args) }))
   })
 
 program
@@ -287,7 +286,8 @@ program
   .option('--core', 'sets core to true')
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
-    await sspawn(dreamjsOrDreamtsCmd(`db:rollback`, omitCoreArg(cmdargs())))
+    const args = cmdargs()
+    await sspawn(dreamjsOrDreamtsCmd(`db:rollback`, args, { cmdArgs: omitCoreArg(args) }))
   })
 
 program
