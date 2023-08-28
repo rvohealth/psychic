@@ -13,8 +13,8 @@ export default class User extends Dream {
 
   public id: number
   public name: string
-  public created_at: Date
-  public updated_at: Date
+  public createdAt: Date
+  public updatedAt: Date
 
   @Validates('contains', '@')
   @Validates('presence')
@@ -22,7 +22,7 @@ export default class User extends Dream {
 
   @Virtual()
   public password?: string | null
-  public password_digest: string
+  public passwordDigest: string
 
   @HasMany(() => Pet)
   public pets: Pet[]
@@ -32,13 +32,13 @@ export default class User extends Dream {
   @BeforeCreate()
   @BeforeUpdate()
   public async hashPass() {
-    if (this.password) this.password_digest = await Hash.gen(this.password)
+    if (this.password) this.passwordDigest = await Hash.gen(this.password)
     this.password = undefined
   }
 
   public async checkPassword(password: string) {
-    if (!this.password_digest) return false
-    return await Hash.check(password, this.password_digest)
+    if (!this.passwordDigest) return false
+    return await Hash.check(password, this.passwordDigest)
   }
 
   public async testBackground(arg: string) {

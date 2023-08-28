@@ -11,10 +11,10 @@ export default class Pet extends Dream {
   public id: IdType
   public name: string
   public species: SpeciesTypesEnum
-  public created_at: DateTime
-  public updated_at: DateTime
+  public createdAt: DateTime
+  public updatedAt: DateTime
 
   @BelongsTo(() => User)
   public user: User
-  public user_id: IdType
+  public userId: IdType
 }

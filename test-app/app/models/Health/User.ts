@@ -8,8 +8,8 @@ export default class User extends Dream {
 
   public id: number
   public email: string
-  public hashed_password: string
+  public hashedPassword: string
   public name: string
-  public created_at: DateTime
-  public updated_at: DateTime
+  public createdAt: DateTime
+  public updatedAt: DateTime
 }
