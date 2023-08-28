@@ -3,6 +3,8 @@ import path from 'path'
 import fs from 'fs/promises'
 import PsychicServer from '../server'
 import { compact } from 'dream'
+import absoluteSrcPath from '../helpers/absoluteSrcPath'
+import psychicRootPath from '../config/helpers/psychicRootPath'
 ;(async function () {
   console.log('syncing routes...')
 
@@ -15,17 +17,8 @@ import { compact } from 'dream'
   ${routes.map(routeConf => `  | '/${routeConf.path.replace(/^\//, '')}'`).join('\n')}
   `
 
-  const filePath = path.join(
-    ...compact([
-      // __dirname,
-      // '..',
-      process.cwd(),
-      process.env.PSYCHIC_OMIT_DIST_FOLDER === '1' || process.env.TS_SAFE === '1' ? null : 'dist',
-      'src',
-      'sync',
-      'routes',
-    ])
-  )
+  const filePath = psychicRootPath({ filepath: 'src/sync/routes' })
+  console.log('ROOT PATH:', filePath)
   await fs.writeFile(filePath, fileStr)
 
   console.log('done syncing routes!')

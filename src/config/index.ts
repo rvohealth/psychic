@@ -63,8 +63,8 @@ export default class PsychicConfig {
   public async boot() {
     // await new IntegrityChecker().check()
 
-    const appConfig = await importFileWithDefault(absoluteSrcPath('conf/env/all'))
-    await appConfig(this)
+    const allConfig = await importFileWithDefault(absoluteSrcPath('conf/env/all'))
+    await allConfig(this)
 
     switch (process.env.NODE_ENV) {
       case 'development':

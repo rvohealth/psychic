@@ -1,5 +1,5 @@
 import background from '../../../src/background'
-import DummyService from '../../../dist/test-app/app/services/DummyService'
+import DummyService from '../../../test-app/app/services/DummyService'
 import readTmpFile from '../../helpers/readTmpFile'
 
 describe('background (app singleton)', () => {

@@ -234,11 +234,13 @@ function trimFilepath(filepath: string) {
       [Psychic:] Must set APP_ROOT_PATH before calling trimFilepath
     `
 
-  return filepath
+  const trimmed = filepath
     .replace(/^\//, '')
     .replace(process.env.APP_ROOT_PATH!.replace(/^\//, ''), '')
     .replace(/^dist/, '')
     .replace(/\.[jt]s$/, '')
+
+  return process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? trimmed.replace(/^test-app/, '') : trimmed
 }
 
 const background = new Background()
