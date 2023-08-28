@@ -18,7 +18,6 @@ import psychicRootPath from '../config/helpers/psychicRootPath'
   `
 
   const filePath = psychicRootPath({ filepath: 'src/sync/routes' })
-  console.log('ROOT PATH:', filePath)
   await fs.writeFile(filePath, fileStr)
 
   console.log('done syncing routes!')

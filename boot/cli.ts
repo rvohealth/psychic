@@ -31,10 +31,6 @@ program
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
     const [cmd, ...cmdArgs] = process.argv.slice(2, process.argv.length)
-    if (program.args.includes('--core')) {
-      console.log('BONANZQA!')
-      process.env.PSYCHIC_CORE_DEVELOPMENT = '1'
-    }
     await sspawn(dreamjsOrDreamtsCmd(cmd, omitCoreArg(program.args), { cmdArgs }))
   })
 
@@ -175,7 +171,6 @@ program
   .option('--core', 'sets core to true')
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
-    console.log('OH BOYUYYY!!!', process.env.PSYCHIC_CORE_DEVELOPMENT)
     const args = cmdargs()
     await sspawn(dreamjsOrDreamtsCmd('sync:schema', omitCoreArg(args)))
     await sspawn(dreamjsOrDreamtsCmd('sync:associations', omitCoreArg(args)))
