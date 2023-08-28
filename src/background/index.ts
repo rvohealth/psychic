@@ -237,6 +237,7 @@ function trimFilepath(filepath: string) {
   return filepath
     .replace(/^\//, '')
     .replace(process.env.APP_ROOT_PATH!.replace(/^\//, ''), '')
+    .replace(/^dist/, '')
     .replace(/\.[jt]s$/, '')
 }
 
