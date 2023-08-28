@@ -44,7 +44,8 @@ program
     const psychicCmd = `
       echo \"export type RouteTypes = never\" > ./src/sync/routes.ts && \
       echo \"building psychic app...\" && \
-      npx tsc -p ./tsconfig.build.json
+      npx tsc -p ./tsconfig.build.json && \
+      yarn psy sync:routes
     `
     await sspawn(dreamCmd)
     await sspawn(psychicCmd)
