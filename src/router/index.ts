@@ -9,7 +9,7 @@ import {
 import PsychicConfig from '../config'
 import log from '../log'
 import PsychicController from '../controller'
-import { ValidationError, developmentOrTestEnv } from 'dream'
+import { ValidationError, camelize, developmentOrTestEnv } from 'dream'
 import RouteManager from './route-manager'
 import { pascalize, snakeify } from 'dream'
 import pluralize = require('pluralize')
@@ -245,7 +245,7 @@ export default class PsychicRouter {
         if (namespace.namespace === ':id' && previousNamespace) {
           return {
             ...namespace,
-            namespace: `:${snakeify(pluralize.singular(previousNamespace.namespace))}_id`,
+            namespace: `:${camelize(pluralize.singular(previousNamespace.namespace))}Id`,
           }
         } else return namespace
       }),

@@ -81,7 +81,7 @@ describe('PsychicRouter', () => {
           router.commit()
 
           expect(server.app.get).toHaveBeenCalledWith(
-            '/users/:user_id/friends/:id/count',
+            '/users/:userId/friends/:id/count',
             expect.any(Function)
           )
         })
@@ -89,14 +89,17 @@ describe('PsychicRouter', () => {
 
       context('with nested resource', () => {
         it('successfully applies nested resource', () => {
-          router.resources('users', { except: ['index', 'show', 'create', 'update'] }, r => {
+          router.resources('user-settings', { except: ['index', 'show', 'create', 'update'] }, r => {
             r.resource('friend', {}, r => {
               r.get('count', 'Friend#count')
             })
           })
           router.commit()
 
-          expect(server.app.get).toHaveBeenCalledWith('/users/:user_id/friend/count', expect.any(Function))
+          expect(server.app.get).toHaveBeenCalledWith(
+            '/user-settings/:userSettingId/friend/count',
+            expect.any(Function)
+          )
         })
       })
     })
