@@ -66,7 +66,7 @@ For more comprehensive documentation, please see [The official Psychic guides](N
 # After `yarn install`
 
 ```bash
-yarn build-core
+yarn build:core
 ```
 
 To reset the database when devloping psychic:
