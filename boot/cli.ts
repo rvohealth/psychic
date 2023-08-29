@@ -291,6 +291,14 @@ program
   })
 
 program
+  .command('db:seed')
+  .description('seeds the database')
+  .option('--tsnode', 'runs the command using ts-node instead of node')
+  .action(async () => {
+    await sspawn(dreamjsOrDreamtsCmd(`db:seed`, omitCoreArg(cmdargs())))
+  })
+
+program
   .command('console')
   .description('initiates a repl, loading the models from the development test-app into scope for easy use')
   .option('--core', 'sets core to true')
