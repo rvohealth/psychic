@@ -19,7 +19,7 @@ describe('PsychicRouter', () => {
         expect.arrayContaining([
           {
             httpMethod: 'put',
-            path: '/users/:user_id/pets/:id',
+            path: '/users/:userId/pets/:id',
             controllerActionString: 'Users/Pets#update',
           },
         ])
