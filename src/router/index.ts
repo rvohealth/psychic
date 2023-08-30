@@ -173,6 +173,8 @@ export default class PsychicRouter {
 
     this.makeRoomForNewIdParam(nestedRouter)
 
+    this.runNestedCallbacks(path, nestedRouter, cb, { asMember: plural, resourceful: true })
+
     resourceMethods.forEach(action => {
       if (plural) {
         applyResourcesAction(path, action, nestedRouter)
@@ -180,8 +182,6 @@ export default class PsychicRouter {
         applyResourceAction(path, action, nestedRouter)
       }
     })
-
-    this.runNestedCallbacks(path, nestedRouter, cb, { asMember: plural, resourceful: true })
   }
 
   private runNestedCallbacks(
