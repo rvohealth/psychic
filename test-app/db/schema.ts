@@ -8,8 +8,8 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
 export type Int8 = ColumnType<string, string | number | bigint, string | number | bigint>;
 
 export type SpeciesTypesEnum = "cat" | "noncat";
-export type IdType = string | number | bigint | undefined
-export type Timestamp = ColumnType<DateTime>
+type IdType = string | number | bigint | undefined
+type Timestamp = ColumnType<DateTime>
 
 export interface HealthUsers {
   id: Generated<number>;
