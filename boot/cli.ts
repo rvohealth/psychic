@@ -60,7 +60,7 @@ program
     await ensureStableAppBuild(args)
     const fastFlag = args.includes('--fast') ? ':fast' : ''
 
-    const [_, file] = args
+    const [file] = args
     if (!file) {
       await sspawn(yarncmdRunByAppConsumer(`uspec${fastFlag}`, args))
       await sspawn(yarncmdRunByAppConsumer(`fspec${fastFlag}`, args))
@@ -102,7 +102,7 @@ program
   .action(async () => {
     const args = cmdargs()
     await ensureStableAppBuild(args)
-    const [_, name] = args
+    const [name] = args
     await sspawn(dreamjsOrDreamtsCmd('g:migration', omitCoreArg(args), { cmdArgs: [name] }))
   })
 
@@ -118,7 +118,7 @@ program
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
     const args = cmdargs()
-    const [_, route, modelName, ...attributes] = args
+    const [route, modelName, ...attributes] = args
     await sspawn(
       nodeOrTsnodeCmd('src/bin/generate-resource.ts', args, {
         fileArgs: [route, modelName, ...attributes],
@@ -137,7 +137,7 @@ program
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
     const args = cmdargs()
-    const [_, route, ...methods] = args
+    const [route, ...methods] = args
     await sspawn(
       nodeOrTsnodeCmd('src/bin/generate-controller.ts', args, {
         fileArgs: [route, ...methods],
@@ -156,7 +156,7 @@ program
     const args = cmdargs()
     await ensureStableAppBuild(args)
 
-    const [_, name, ...attributes] = args
+    const [name, ...attributes] = args
     await sspawn(
       nodeOrTsnodeCmd('src/bin/generate-serializer.ts', omitCoreArg(args), {
         fileArgs: [name, ...attributes],

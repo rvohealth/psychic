@@ -1,6 +1,7 @@
 import pluralize from 'pluralize'
 import fs from 'fs/promises'
-import { pascalize } from 'dream'
+import { pascalize, compact } from 'dream'
+import path from 'path'
 
 export default async function fileWriter(
   filePath: string,
@@ -14,8 +15,8 @@ export default async function fileWriter(
 ) {
   const thisfs = fs ? fs : await import('fs/promises')
   const srcPath =
-    fileExtension === '.spec.ts' ? '' : process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? 'test-app' : 'src'
-  const newfileBasePath = `${rootPath}/${srcPath}/${directoryPrefix}`
+    fileExtension === '.spec.ts' ? '' : process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? null : 'src'
+  const newfileBasePath = path.join(...compact([rootPath, srcPath, directoryPrefix]))
   const fullyQualifiedNewfileClassName = pluralizeBeforePostfix
     ? `${pluralize(filePath)}${filePostfix}`
     : `${filePath}${filePostfix}`

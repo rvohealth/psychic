@@ -9,5 +9,10 @@ export default function absoluteFilePath(filePath: string) {
     throw `
       [Psychic]: Must set APP_ROOT_PATH before using psychic
     `
+
+  if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
+    filePath = filePath.replace(/^[/]?test-app/, '')
+  }
+
   return path.join(process.env.APP_ROOT_PATH!, filePath)
 }
