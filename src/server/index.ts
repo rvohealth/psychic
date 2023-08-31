@@ -22,6 +22,7 @@ export default class PsychicServer {
   public server: Server
   private booted = false
   constructor() {
+    this.buildApp()
     this.config = new PsychicConfig(this.app)
   }
 
@@ -37,7 +38,8 @@ export default class PsychicServer {
     if (this.booted) return
     this.booted = true
 
-    await this.buildApp()
+    await this.initializeCors()
+    await this.initializeLogger()
 
     try {
       await this.config.boot()
@@ -124,14 +126,18 @@ export default class PsychicServer {
     return true
   }
 
-  public async buildApp() {
+  public buildApp() {
     this.app = express()
     this.app.use(cookieParser())
     this.app.use(express.json())
+  }
 
+  private async initializeCors() {
     const getCorsOptions = await importFileWithDefault(absoluteSrcPath('conf/cors'))
     this.app.use(cors(await getCorsOptions()))
+  }
 
+  private async initializeLogger() {
     if (process.env.NODE_ENV !== 'test' || process.env.REQUEST_LOGGING === '1') {
       const getLoggerOptions = await importFileWithDefault(absoluteSrcPath('conf/logs'))
       this.app.use(audit(await getLoggerOptions()))
