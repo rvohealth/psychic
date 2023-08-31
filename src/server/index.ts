@@ -22,7 +22,6 @@ export default class PsychicServer {
   public server: Server
   private booted = false
   constructor() {
-    this.buildApp()
     this.config = new PsychicConfig(this.app)
   }
 
@@ -37,6 +36,8 @@ export default class PsychicServer {
   public async boot() {
     if (this.booted) return
     this.booted = true
+
+    await this.buildApp()
 
     try {
       await this.config.boot()
