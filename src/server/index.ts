@@ -1,4 +1,4 @@
-import { db } from 'dream'
+import { loadModels } from 'dream'
 import express from 'express'
 import { Application } from 'express'
 import cors from 'cors'
@@ -71,6 +71,10 @@ export default class PsychicServer {
     } = {}
   ) {
     await this.boot()
+
+    // ensure models are loaded, since otherwise we will not properly
+    // boot our STI configurations within dream
+    await loadModels()
 
     if (withReact) {
       this.reactServer = new ReactServer()
