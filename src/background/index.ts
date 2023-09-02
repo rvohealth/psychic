@@ -1,6 +1,6 @@
 import { ConnectionOptions, Job, Queue, Worker } from 'bullmq'
 import readAppConfig from '../config/helpers/readAppConfig'
-import { Dream, pascalize } from 'dream'
+import { Dream, loadModels, pascalize } from 'dream'
 import getModelKey from '../config/helpers/getModelKey'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
@@ -31,6 +31,10 @@ export class Background {
     if (this.queue) return
 
     const appConfig = readAppConfig()
+
+    // ensure models are loaded, since otherwise we will not properly
+    // boot our STI configurations within dream
+    await loadModels()
 
     if (!appConfig?.redis) throw `attempting to use background jobs, but config.useRedis is not set to true.`
 
