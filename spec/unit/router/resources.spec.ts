@@ -63,6 +63,14 @@ describe('PsychicRouter', () => {
         })
       })
 
+      context('controller is passed', () => {
+        it('uses the passed controller instead of assuming', () => {
+          router.resources('users', { only: ['create'], controller: 'Howyadoin' })
+          router.commit()
+          expect(router.routes[0].controllerActionString).toEqual('Howyadoin#create')
+        })
+      })
+
       context('with nested resources', () => {
         it('successfully applies nested routes', () => {
           router.resources('users', { except: ['index', 'show', 'create', 'update'] }, r => {

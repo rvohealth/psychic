@@ -64,6 +64,14 @@ describe('PsychicRouter', () => {
         })
       })
 
+      context('controller is passed', () => {
+        it('uses the passed controller instead of assuming', () => {
+          router.resource('user', { only: ['update'], controller: 'Howyadoin' })
+          router.commit()
+          expect(router.routes[0].controllerActionString).toEqual('Howyadoin#update')
+        })
+      })
+
       context('with nested resources', () => {
         it('successfully applies namespaced resource routes', () => {
           router.namespace('api', r => {

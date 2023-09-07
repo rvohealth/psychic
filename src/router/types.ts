@@ -8,4 +8,5 @@ export const ResourceMethods = ['update', 'show', 'delete'] as ResourcesMethodTy
 export interface ResourcesOptions {
   only?: ResourcesMethodType[]
   except?: ResourcesMethodType[]
+  controller?: string
 }

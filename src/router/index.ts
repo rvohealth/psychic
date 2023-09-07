@@ -177,9 +177,9 @@ export default class PsychicRouter {
 
     resourceMethods.forEach(action => {
       if (plural) {
-        applyResourcesAction(path, action, nestedRouter)
+        applyResourcesAction(path, action, nestedRouter, options)
       } else {
-        applyResourceAction(path, action, nestedRouter)
+        applyResourceAction(path, action, nestedRouter, options)
       }
     })
   }

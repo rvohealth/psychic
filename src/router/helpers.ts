@@ -1,6 +1,7 @@
 import { pascalize, compact } from 'dream'
 import PsychicRouter, { PsychicNestedRouter } from '../router'
-import { ResourcesMethodType } from './types'
+import { ResourcesMethodType, ResourcesOptions } from './types'
+import { RouterOptions } from 'express'
 
 export function routePath(routePath: string) {
   return `/${routePath.replace(/^\//, '')}`
@@ -39,28 +40,30 @@ export function namespacedControllerActionString(namespace: string, controllerAc
 export function applyResourcesAction(
   path: string,
   action: ResourcesMethodType,
-  routingMechanism: PsychicRouter | PsychicNestedRouter
+  routingMechanism: PsychicRouter | PsychicNestedRouter,
+  options?: ResourcesOptions
 ) {
+  const controllerName = options?.controller || pascalize(path)
   switch (action) {
     case 'index':
-      routingMechanism.get(path, `${pascalize(path)}#index`)
+      routingMechanism.get(path, `${controllerName}#index`)
       break
 
     case 'create':
-      routingMechanism.post(path, `${pascalize(path)}#create`)
+      routingMechanism.post(path, `${controllerName}#create`)
       break
 
     case 'update':
-      routingMechanism.put(`${path}/:id`, `${pascalize(path)}#update`)
-      routingMechanism.patch(`${path}/:id`, `${pascalize(path)}#update`)
+      routingMechanism.put(`${path}/:id`, `${controllerName}#update`)
+      routingMechanism.patch(`${path}/:id`, `${controllerName}#update`)
       break
 
     case 'show':
-      routingMechanism.get(`${path}/:id`, `${pascalize(path)}#show`)
+      routingMechanism.get(`${path}/:id`, `${controllerName}#show`)
       break
 
     case 'delete':
-      routingMechanism.delete(`${path}/:id`, `${pascalize(path)}#destroy`)
+      routingMechanism.delete(`${path}/:id`, `${controllerName}#destroy`)
       break
     default:
       throw `unknown action: ${action}`
@@ -70,20 +73,22 @@ export function applyResourcesAction(
 export function applyResourceAction(
   path: string,
   action: ResourcesMethodType,
-  routingMechanism: PsychicRouter | PsychicNestedRouter
+  routingMechanism: PsychicRouter | PsychicNestedRouter,
+  options?: ResourcesOptions
 ) {
+  const controllerName = options?.controller || pascalize(path)
   switch (action) {
     case 'update':
-      routingMechanism.put(path, `${pascalize(path)}#update`)
-      routingMechanism.patch(path, `${pascalize(path)}#update`)
+      routingMechanism.put(path, `${controllerName}#update`)
+      routingMechanism.patch(path, `${controllerName}#update`)
       break
 
     case 'show':
-      routingMechanism.get(path, `${pascalize(path)}#show`)
+      routingMechanism.get(path, `${controllerName}#show`)
       break
 
     case 'delete':
-      routingMechanism.delete(path, `${pascalize(path)}#destroy`)
+      routingMechanism.delete(path, `${controllerName}#destroy`)
       break
 
     default:
