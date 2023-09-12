@@ -26,8 +26,9 @@ export default class Cable {
     // psychic server so that we can bind socket.io to the http instance.
     this.http = getPsychicHttpInstance(this.app)
 
-    // TODO: allow origin to be specified by a config
-    this.io = new socketio.Server(this.http, { cors: { origin: '*' } })
+    // TODO: AHHHHHH FIX THIS NOW allow origin to be specified by a config
+    // https://rvohealth.atlassian.net/browse/PDTC-2191
+    this.io = new socketio.Server(this.http, { cors: { origin: '*', credentials: true } })
 
     const appConfig = readAppConfig()
     if (!appConfig) throw `Failed to read app config`
