@@ -28,7 +28,8 @@ export default class Cable {
 
     // TODO: AHHHHHH FIX THIS NOW allow origin to be specified by a config
     // https://rvohealth.atlassian.net/browse/PDTC-2191
-    this.io = new socketio.Server(this.http, { cors: { origin: '*', credentials: true } })
+    const getCorsOptions = await importFileWithDefault(absoluteSrcPath('conf/cors'))
+    this.io = new socketio.Server(this.http, { cors: await getCorsOptions() })
 
     const appConfig = readAppConfig()
     if (!appConfig) throw `Failed to read app config`
