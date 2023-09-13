@@ -2,7 +2,8 @@ import { Dream, BeforeCreate, BeforeUpdate, Validates, Virtual, BelongsTo, HasMa
 import Hash from '../../../src/encryption/hash'
 import Pet from './Pet'
 import UserSerializer from '../serializers/UserSerializer'
-export default class User extends Dream {
+import ApplicationModel from './ApplicationModel'
+export default class User extends ApplicationModel {
   public get table() {
     return 'users' as const
   }

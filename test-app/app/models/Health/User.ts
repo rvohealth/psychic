@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
-import { Dream } from 'dream'
+import ApplicationModel from '../ApplicationModel'
 
-export default class User extends Dream {
+export default class User extends ApplicationModel {
   public get table() {
     return 'health_users' as const
   }
