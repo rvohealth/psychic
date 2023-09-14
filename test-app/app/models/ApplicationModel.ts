@@ -1,6 +1,10 @@
 import { Dream, Dreamconf } from 'dream'
-import { DBClass } from '../../db/schema'
-import SyncedAssociationsVal, { SyncedAssociations } from '../../db/associations'
+import { DBClass, DBColumns, DBTypeCache, InterpretedDBClass } from '../../db/schema'
+import SyncedAssociationsVal, {
+  SyncedAssociations,
+  SyncedBelongsToAssociations,
+  VirtualColumns,
+} from '../../db/associations'
 import dreamconf from '../../conf/dreamconf'
 
 export default class ApplicationModel extends Dream {
@@ -12,7 +16,15 @@ export default class ApplicationModel extends Dream {
     return SyncedAssociationsVal as SyncedAssociations
   }
 
-  public get dreamconf(): Dreamconf {
+  public get dreamconf(): Dreamconf<
+    DBClass,
+    InterpretedDBClass,
+    SyncedAssociations,
+    SyncedBelongsToAssociations,
+    VirtualColumns,
+    typeof DBColumns,
+    typeof DBTypeCache
+  > {
     return dreamconf
   }
 }
