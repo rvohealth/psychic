@@ -200,16 +200,6 @@ program
   })
 
 program
-  .command('sync:existing')
-  .description('syncs existing types to dream')
-  .option('--core', 'sets core to true')
-  .option('--tsnode', 'runs the command using ts-node instead of node')
-  .action(async () => {
-    await sspawn(dreamjsOrDreamtsCmd('sync:existing', omitCoreArg(cmdargs())))
-    await maybeSyncRoutes(cmdargs())
-  })
-
-program
   .command('routes')
   .description(
     'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.'

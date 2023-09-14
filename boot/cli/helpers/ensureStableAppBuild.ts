@@ -1,12 +1,10 @@
 import fs from 'fs/promises'
-import maybeSyncExisting from './maybeSyncExisting'
 import developmentOrTestEnv from './developmentOrTestEnv'
 
 export default async function ensureStableAppBuild(programArgs: string[]) {
   if (!developmentOrTestEnv()) return
 
   console.log('checking app for build stability...')
-  await maybeSyncExisting(programArgs)
   await removeTestInfrastructureFor('dream')
   await removeTestInfrastructureFor('psychic')
 }
