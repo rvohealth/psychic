@@ -42,7 +42,6 @@ program
       NODE_ENV=${developmentOrProdEnvString()} yarn --cwd=../../node_modules/dream build
     `
     const psychicCmd = `
-      echo \"export type RouteTypes = never\" > ./src/sync/routes.ts && \
       echo \"building psychic app...\" && \
       npx tsc -p ./tsconfig.build.json
     `
