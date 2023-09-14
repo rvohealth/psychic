@@ -31,8 +31,7 @@
     "uspec": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts sync:all --core && APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "uspec:fast": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "fspec": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts sync:all --core && APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
-    "fspec:fast": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
-    "postinstall": "if [ ! -e .no-psychic-postinstall ]; then yarn psyts sync:routes && yarn build; fi"
+    "fspec:fast": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit"
   },
   "dependencies": {
     "@jest-mock/express": "^2.0.1",
