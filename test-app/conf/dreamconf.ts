@@ -6,7 +6,15 @@ import SyncedAssociationsVal, {
 } from '../db/associations'
 import { DBClass, DBColumns, DBTypeCache, InterpretedDBClass } from '../db/schema'
 
-const dreamconf = new Dreamconf({
+const dreamconf = new Dreamconf<
+  DBClass,
+  InterpretedDBClass,
+  SyncedAssociations,
+  SyncedBelongsToAssociations,
+  VirtualColumns,
+  typeof DBColumns,
+  typeof DBTypeCache
+>({
   DB: new DBClass(),
   interpretedDB: new InterpretedDBClass(),
   syncedAssociations: SyncedAssociationsVal as SyncedAssociations,
