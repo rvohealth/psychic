@@ -38,6 +38,7 @@ export default class PsychicServer {
     this.booted = true
 
     await this.initializeCors()
+    await this.buildRoutes()
 
     try {
       await this.config.boot()
@@ -48,8 +49,6 @@ export default class PsychicServer {
           ${err}
       `
     }
-
-    await this.buildRoutes()
 
     if (this.config.useWs) this.cable = new Cable(this.app)
     this.config.cable = this.cable
