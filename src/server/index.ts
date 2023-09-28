@@ -12,7 +12,6 @@ import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import { Server } from 'http'
 import startPsychicServer from './helpers/startPsychicServer'
-import audit from 'express-requests-logger'
 
 export default class PsychicServer {
   public app: Application
@@ -39,7 +38,6 @@ export default class PsychicServer {
     this.booted = true
 
     await this.initializeCors()
-    await this.initializeLogger()
 
     try {
       await this.config.boot()
@@ -139,13 +137,6 @@ export default class PsychicServer {
   private async initializeCors() {
     const getCorsOptions = await importFileWithDefault(absoluteSrcPath('conf/cors'))
     this.app.use(cors(await getCorsOptions()))
-  }
-
-  private async initializeLogger() {
-    if (process.env.NODE_ENV !== 'test' || process.env.REQUEST_LOGGING === '1') {
-      const getLoggerOptions = await importFileWithDefault(absoluteSrcPath('conf/logs'))
-      this.app.use(audit(await getLoggerOptions()))
-    }
   }
 
   private async buildRoutes() {
