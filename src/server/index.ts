@@ -38,6 +38,8 @@ export default class PsychicServer {
     this.booted = true
 
     await this.initializeCors()
+    const bootCB = await importFileWithDefault(absoluteSrcPath('conf/boot'))
+    await bootCB(this.config)
 
     try {
       await this.config.boot()

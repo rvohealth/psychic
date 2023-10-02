@@ -1,3 +1,3 @@
-import { Application } from 'express'
+import PsychicConfig from '../../../src/config'
 
-export default (app: Application) => {}
+export default async (psyConf: PsychicConfig) => {}
