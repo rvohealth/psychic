@@ -1,4 +1,4 @@
-import { ConnectionOptions, Job, Queue, Worker } from 'bullmq'
+import { ConnectionOptions, Job, Queue, QueueOptions, Worker, WorkerOptions } from 'bullmq'
 import readAppConfig from '../config/helpers/readAppConfig'
 import { Dream, loadModels, pascalize } from 'dream'
 import getModelKey from '../config/helpers/getModelKey'
@@ -7,6 +7,7 @@ import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
 import redisOptions, { PsychicRedisConnectionOptions } from '../config/helpers/redisOptions'
 import developmentOrTestEnv from '../../boot/cli/helpers/developmentOrTestEnv'
 import absoluteFilePath from '../helpers/absoluteFilePath'
+import absoluteSrcPath from '../helpers/absoluteSrcPath'
 
 type JobTypes =
   | 'BackgroundJobQueueStaticJob'
@@ -53,14 +54,22 @@ export class Background {
       connectTimeout: 5000,
     } as ConnectionOptions
 
+    const queueOptsCB = await importFileWithDefault(absoluteSrcPath('conf/background/queue'))
+    const queueOptions: QueueOptions = await queueOptsCB()
+
     this.queue ||= new Queue(`${pascalize(appConfig.name)}BackgroundJobQueue`, {
       connection: bullConnectionOpts,
+      ...queueOptions,
     })
+
+    const workerOptsCB = await importFileWithDefault(absoluteSrcPath('conf/background/worker'))
+    const workerOptions: WorkerOptions = await workerOptsCB()
 
     for (let i = 0; i < workerCount(); i++) {
       this.workers.push(
         new Worker(`${pascalize(appConfig.name)}BackgroundJobQueue`, data => this.handler(data), {
           connection: bullConnectionOpts,
+          ...workerOptions,
         })
       )
     }
