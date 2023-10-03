@@ -13,7 +13,7 @@ jobs:
   uspecs:
     docker:
       - image: cimg/redis:6.2.6
-      - image: cimg/postgres:12.10
+      - image: cimg/postgres:13.9
         environment: # add POSTGRES environment variables.
           POSTGRES_USER: psychic
           POSTGRES_DB: psychic_core_test
@@ -50,7 +50,7 @@ jobs:
           command: dockerize -wait tcp://localhost:5432 -timeout 1m
       - run:
           name: 'Database migrate'
-          command: cd ~/project && APP_ROOT_PATH=$(pwd) yarn psy db:migrate
+          command: cd ~/project && APP_ROOT_PATH=$(pwd) yarn psycore db:migrate
       - run:
           name: 'Run unit specs'
           command: cd ~/project && APP_ROOT_PATH=$(pwd) yarn uspec
