@@ -6,7 +6,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   transform: { '^.+\\.tsx?$': 'ts-jest' },
-  transformIgnorePatterns: ['<rootDir>/node_modules/dream/src'],
+  transformIgnorePatterns: ['<rootDir>/node_modules/@rvohealth/dream/src'],
   setupFiles: ['jest-plugin-context/setup'],
   setupFilesAfterEnv: ['<rootDir>setup/hooks.ts'],
   globalSetup: '<rootDir>setup/beforeAll.ts',

@@ -11,7 +11,7 @@ export default async function generateResource(
   const columnAttributes = attributesWithTypes.filter(attr => isColumn(attr)).map(attr => attr.split(':')[0]!)
 
   await sspawn(
-    `yarn --cwd=../../node_modules/dream dream g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(
+    `yarn --cwd=../../node_modules/@rvohealth/dream dream g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(
       ' '
     )}`
   )

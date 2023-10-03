@@ -1,7 +1,7 @@
 {
   "ts-node": {
     "ignore": [],
-    "include": ["src/**/*", "test-app/**/*", "node_modules/dream/src/**/*"]
+    "include": ["src/**/*", "test-app/**/*", "node_modules/@rvohealth/dream/src/**/*"]
   },
   "compilerOptions": {
     "module": "CommonJS",

@@ -13,7 +13,7 @@ export default function dreamjsOrDreamtsCmd(
   const basepath = process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? '' : '../../'
   if (useTsnode) cmdArgs.push('--tsnode')
 
-  const fullcmd = `${coreDevFlag}${omitDistFromPathEnv}yarn --cwd=${basepath}node_modules/dream ${dreamCmd} ${cmd} ${cmdArgs.join(
+  const fullcmd = `${coreDevFlag}${omitDistFromPathEnv}yarn --cwd=${basepath}node_modules/@rvohealth/dream ${dreamCmd} ${cmd} ${cmdArgs.join(
     ' '
   )} `
 

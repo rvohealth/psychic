@@ -39,7 +39,7 @@ program
   .description('builds the underlying dream and psychic apps')
   .action(async () => {
     const dreamCmd = `
-      NODE_ENV=${developmentOrProdEnvString()} yarn --cwd=../../node_modules/dream build
+      NODE_ENV=${developmentOrProdEnvString()} yarn --cwd=../../node_modules/@rvohealth/dream build
     `
     const psychicCmd = `
       echo \"building psychic app...\" && \
