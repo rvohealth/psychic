@@ -1,5 +1,5 @@
 {
-  "name": "psychic",
+  "name": "@rvohealth/psychic",
   "version": "0.1.1",
   "main": "src/index.ts",
   "author": "avocadojesus <jgarbey@gmail.com>",
