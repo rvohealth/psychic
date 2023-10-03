@@ -40,7 +40,7 @@
   "dependencies": {
     "@jest-mock/express": "^2.0.1",
     "@rvohealth/dream": "^0.1.6",
-    "@socket.io/redis-adapter": "^8.1.0",
+    "@socket.io/redis-adapter": "^8.2.1",
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",
     "@types/cors": "^2.8.13",
@@ -61,7 +61,7 @@
     "jsonwebtoken": "^9.0.0",
     "pluralize": "^8.0.0",
     "redis": "^4.6.5",
-    "socket.io": "^4.6.1",
+    "socket.io": "^4.7.2",
     "supertest": "^6.3.3",
     "ts-jest": "^29.0.5",
     "ts-node": "^10.9.1",
