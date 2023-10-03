@@ -21,7 +21,7 @@ jobs:
           POSTGRES_PASSWORD: ''
     environment:
       NODE_ENV: test
-      PORT: 7778
+      PORT: 7777
       CHROME_PATH: /usr/bin/google-chrome
       DB_USER: psychic
       DB_PORT: 5432
@@ -71,7 +71,7 @@ jobs:
           POSTGRES_PASSWORD: ''
     environment:
       NODE_ENV: test
-      PORT: 7778
+      PORT: 7777
       CHROME_PATH: /usr/bin/google-chrome
       DB_USER: psychic
       DB_PORT: 5432
