@@ -29,10 +29,10 @@
     "db:drop": "yarn dream db:drop",
     "db:migrate": "yarn dream db:migrate",
     "console": "yarn psyts console --core",
-    "uspec": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts sync:all --core && APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
-    "uspec:fast": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
-    "fspec": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts sync:all --core && APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
-    "fspec:fast": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit"
+    "uspec:slow": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts sync:all --core && APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
+    "uspec": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
+    "fspec:slow": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts sync:all --core && APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
+    "fspec": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
