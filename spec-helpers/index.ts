@@ -1,4 +1,4 @@
-import 'dream/spec-helpers'
+import '@rvohealth/dream/spec-helpers'
 import background from '../src/background'
 
 // Example usage:
