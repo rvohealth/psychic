@@ -15,16 +15,16 @@ jobs:
       - image: cimg/redis:6.2.6
       - image: cimg/postgres:12.10
         environment: # add POSTGRES environment variables.
-          POSTGRES_USER: welloscentral
-          POSTGRES_DB: wellos_central_test
+          POSTGRES_USER: psychic
+          POSTGRES_DB: psychic_core_test
           POSTGRES_PASSWORD: ''
     environment:
       NODE_ENV: test
       PORT: 7778
       CHROME_PATH: /usr/bin/google-chrome
-      DB_USER: welloscentral
+      DB_USER: psychic
       DB_PORT: 5432
-      PRIMARY_DB_NAME: wellos_central_test
+      PRIMARY_DB_NAME: psychic_core_test
       PRIMARY_DB_HOST: localhost
       TZ: UTC
 
@@ -61,16 +61,16 @@ jobs:
       - image: cimg/redis:6.2.6
       - image: cimg/postgres:12.10
         environment: # add POSTGRES environment variables.
-          POSTGRES_USER: welloscentral
-          POSTGRES_DB: wellos_central_test
+          POSTGRES_USER: psychic
+          POSTGRES_DB: psychic_core_test
           POSTGRES_PASSWORD: ''
     environment:
       NODE_ENV: test
       PORT: 7778
       CHROME_PATH: /usr/bin/google-chrome
-      DB_USER: welloscentral
+      DB_USER: psychic
       DB_PORT: 5432
-      PRIMARY_DB_NAME: wellos_central_test
+      PRIMARY_DB_NAME: psychic_core_test
       PRIMARY_DB_HOST: localhost
       TZ: UTC
 
