@@ -1,4 +1,4 @@
-import { camelize, snakeify } from 'dream'
+import { camelize, snakeify } from '@rvohealth/dream'
 
 export default class Params {
   public static restrict<T extends typeof Params>(

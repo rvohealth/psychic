@@ -1,5 +1,5 @@
 import pluralize from 'pluralize'
-import { camelize, capitalize } from 'dream'
+import { camelize, capitalize } from '@rvohealth/dream'
 
 export default async function generateControllerString(
   controllerClassName: string,

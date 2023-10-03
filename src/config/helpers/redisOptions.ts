@@ -1,4 +1,4 @@
-import { hyphenize } from 'dream'
+import { hyphenize } from '@rvohealth/dream'
 import absoluteSrcPath from '../../helpers/absoluteSrcPath'
 import importFileWithDefault from '../../helpers/importFileWithDefault'
 

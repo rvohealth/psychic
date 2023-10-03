@@ -1,4 +1,4 @@
-import { loadModels } from 'dream'
+import { loadModels } from '@rvohealth/dream'
 import express from 'express'
 import { Application } from 'express'
 import cors from 'cors'

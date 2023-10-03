@@ -1,4 +1,4 @@
-import { pascalize, compact } from 'dream'
+import { pascalize, compact } from '@rvohealth/dream'
 import PsychicRouter, { PsychicNestedRouter } from '../router'
 import { ResourcesMethodType, ResourcesOptions } from './types'
 import { RouterOptions } from 'express'

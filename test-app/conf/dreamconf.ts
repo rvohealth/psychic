@@ -1,4 +1,4 @@
-import { Dreamconf } from 'dream'
+import { Dreamconf } from '@rvohealth/dream'
 import SyncedAssociationsVal, {
   SyncedAssociations,
   SyncedBelongsToAssociations,

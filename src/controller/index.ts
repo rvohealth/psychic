@@ -1,4 +1,4 @@
-import { Dream, DreamSerializer } from 'dream'
+import { Dream, DreamSerializer } from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import Forbidden from '../error/http/forbidden'
 import Unauthorized from '../error/http/unauthorized'

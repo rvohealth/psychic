@@ -1,5 +1,5 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { DreamSerializer, Attribute } from 'dream'
+import { DreamSerializer, Attribute } from '@rvohealth/dream'
 import PsychicController from '../../../src/controller'
 import PsychicConfig from '../../../src/config'
 import PsychicServer from '../../../src/server'

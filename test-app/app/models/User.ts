@@ -1,4 +1,4 @@
-import { Dream, BeforeCreate, BeforeUpdate, Validates, Virtual, BelongsTo, HasMany } from 'dream'
+import { Dream, BeforeCreate, BeforeUpdate, Validates, Virtual, BelongsTo, HasMany } from '@rvohealth/dream'
 import Hash from '../../../src/encryption/hash'
 import Pet from './Pet'
 import UserSerializer from '../serializers/UserSerializer'

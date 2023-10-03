@@ -1,4 +1,4 @@
-import { Dream, DreamSerializer } from 'dream'
+import { Dream, DreamSerializer } from '@rvohealth/dream'
 import fs from 'fs/promises'
 import path from 'path'
 import PsychicController from '../controller'

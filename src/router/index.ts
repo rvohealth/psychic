@@ -9,9 +9,9 @@ import {
 import PsychicConfig from '../config'
 import log from '../log'
 import PsychicController from '../controller'
-import { ValidationError, camelize, developmentOrTestEnv } from 'dream'
+import { ValidationError, camelize, developmentOrTestEnv } from '@rvohealth/dream'
 import RouteManager from './route-manager'
-import { pascalize, snakeify } from 'dream'
+import { pascalize, snakeify } from '@rvohealth/dream'
 import pluralize = require('pluralize')
 
 export default class PsychicRouter {

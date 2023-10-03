@@ -1,4 +1,4 @@
-import { Dream } from 'dream'
+import { Dream } from '@rvohealth/dream'
 import PsychicDir from '../../helpers/psychicdir'
 
 export default async function getModelKey(ModelClass: typeof Dream) {

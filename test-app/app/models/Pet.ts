@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { Dream, IdType, BelongsTo } from 'dream'
+import { Dream, IdType, BelongsTo } from '@rvohealth/dream'
 import User from './User'
 import { SpeciesTypesEnum } from '../../db/schema'
 import ApplicationModel from './ApplicationModel'

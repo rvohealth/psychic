@@ -2,7 +2,7 @@
 // if DREAM_CORE_DEVELOPMENT=1. Currently, we do it several ways, but this
 // would be the most stable moving forward, especially if we ever decide to
 // build to dist, since directory structures morph in those contexts.
-import { compact } from 'dream'
+import { compact } from '@rvohealth/dream'
 import path from 'path'
 
 export default function absoluteSrcPath(filePath: string) {

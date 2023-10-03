@@ -1,4 +1,4 @@
-import { Dream, Dreamconf } from 'dream'
+import { Dream, Dreamconf } from '@rvohealth/dream'
 import { DBClass, DBColumns, DBTypeCache, InterpretedDBClass } from '../../db/schema'
 import SyncedAssociationsVal, {
   SyncedAssociations,

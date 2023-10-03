@@ -1,4 +1,4 @@
-import { IdType } from 'dream'
+import { IdType } from '@rvohealth/dream'
 import { RouteTypes } from '../../conf/routeTypes'
 
 export default function route(routePath: RouteTypes, ...interpolationArgs: IdType[]) {

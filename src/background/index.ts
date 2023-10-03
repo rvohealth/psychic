@@ -1,6 +1,6 @@
 import { ConnectionOptions, Job, Queue, QueueOptions, Worker, WorkerOptions } from 'bullmq'
 import readAppConfig from '../config/helpers/readAppConfig'
-import { Dream, loadModels, pascalize } from 'dream'
+import { Dream, loadModels, pascalize } from '@rvohealth/dream'
 import getModelKey from '../config/helpers/getModelKey'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import importFileWithNamedExport from '../helpers/importFileWithNamedExport'

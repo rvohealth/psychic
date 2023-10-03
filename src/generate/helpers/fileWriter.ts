@@ -1,6 +1,6 @@
 import pluralize from 'pluralize'
 import fs from 'fs/promises'
-import { pascalize, compact } from 'dream'
+import { pascalize, compact } from '@rvohealth/dream'
 import path from 'path'
 
 export default async function fileWriter(
