@@ -42,7 +42,7 @@ jobs:
       - node/install-packages:
           pkg-manager: yarn
           app-dir: ~/project
-          cache-version: v7
+          cache-version: v8
       - run: sudo apt-get update
 
       # Here we make sure that the secondary container boots
