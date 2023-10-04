@@ -1,0 +1,11 @@
+apiVersion: backstage.io/v1alpha1
+kind: Component
+metadata:
+  name: psychic
+  description: psychic web framework
+  annotations:
+    github.com/project-slug: rvohealth/psychic
+spec:
+  type: library # can be one of: service, library, website, event-driven-service
+  lifecycle: production # can be one of: experimental, production, deprecated
+  owner: team-wellos # your existing tech team in Backstage, i.e. team-developer-platforms
