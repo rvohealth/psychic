@@ -689,12 +689,12 @@
   resolved "https://registry.yarnpkg.com/@redis/time-series/-/time-series-1.0.4.tgz#af85eb080f6934580e4d3b58046026b6c2b18717"
   integrity sha512-ThUIgo2U/g7cCuZavucQTQzA9g9JbDDY2f64u3AbAoz/8vE2lt2U37LamDUVChhaDA3IRT9R6VvJwqnUfTJzng==
 
-"@rvohealth/dream@^0.1.7":
-  version "0.1.7"
-  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.1.7/52b038116b7da1ac1ed6ea2e8e87ea30608d74b7#52b038116b7da1ac1ed6ea2e8e87ea30608d74b7"
-  integrity sha512-6FKSXJEg4MP4Zqp4uFK2LPKexevFgMgeIO66yPXl6SahpZtivqMjjxquyOCO1/TgW/YcGjpZ+aS6zVobSwChsQ==
+"@rvohealth/dream@^0.1.8":
+  version "0.1.8"
+  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.1.8/fe2c2a72159bbbb17c3b33e46f9e2d8dfb6bd49c#fe2c2a72159bbbb17c3b33e46f9e2d8dfb6bd49c"
+  integrity sha512-EAHaHoPK3zg+XerYFjxyxXkQQhGWicfrT4XgmqB8kIOcuVxUukeRb0s9a4DQzjR2imchY+hh8wMzu4Q3M+AniA==
   dependencies:
-    "@types/jest" "^29.5.0"
+    "@types/jest" "^29.5.5"
     "@types/lodash.isempty" "^4.4.7"
     "@types/lodash.sortby" "^4.7.7"
     "@types/lodash.uniq" "^4.5.7"
@@ -926,7 +926,7 @@
   dependencies:
     "@types/jest" "*"
 
-"@types/jest@*", "@types/jest@^29.5.0":
+"@types/jest@*":
   version "29.5.0"
   resolved "https://registry.yarnpkg.com/@types/jest/-/jest-29.5.0.tgz#337b90bbcfe42158f39c2fb5619ad044bbb518ac"
   integrity sha512-3Emr5VOl/aoBwnWcH/EFQvlSAmjV+XtV9GGu5mwdYew5vhQh0IUZx/60x0TzHDu09Bi7HMx10t/namdJw5QIcg==
