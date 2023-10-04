@@ -8,4 +8,4 @@ metadata:
 spec:
   type: library # can be one of: service, library, website, event-driven-service
   lifecycle: production # can be one of: experimental, production, deprecated
-  owner: unassigned # your existing tech team in Backstage, i.e. team-developer-platforms
+  owner: team-wellos # your existing tech team in Backstage, i.e. team-developer-platforms
