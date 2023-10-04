@@ -6,6 +6,6 @@ metadata:
   annotations:
     github.com/project-slug: rvohealth/psychic
 spec:
-  type: service # can be one of: service, library, website, event-driven-service
+  type: library # can be one of: service, library, website, event-driven-service
   lifecycle: production # can be one of: experimental, production, deprecated
   owner: unassigned # your existing tech team in Backstage, i.e. team-developer-platforms
