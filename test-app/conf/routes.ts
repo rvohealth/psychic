@@ -13,6 +13,7 @@ export default (r: PsychicRouter) => {
   // hooks tests
   r.get('users-before-all-test', 'Users#beforeAllTest')
   r.post('failed-to-save-test', 'Users#failedToSaveTest')
+  r.post('force-throw', 'Users#forceThrow')
 
   r.namespace('api', r => {
     r.get('ping', 'Users#ping')

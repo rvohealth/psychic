@@ -24,7 +24,18 @@ describe('a visitor attempts to save a record', () => {
 
   context('with a record that is invalid at DB level', () => {
     it('does not save, throws 422', async () => {
-      await request.agent(server.app).post('/failed-to-save-test').expect(500)
+      await request.agent(server.app).post('/failed-to-save-test').expect(422)
+    })
+  })
+
+  context('with a response that throws', () => {
+    // skipping until we can find a careful way in psychic to test this
+    // throwing an exception in this manner of testing will actually cause the supertest to crash
+    // without exception handler being thrown. This would be better-tested with puppeteer
+    it.skip('throws 500', async () => {
+      await server.serveForRequestSpecs(async () => {
+        await request.agent(server.app).post('/force-throw').expect(500)
+      })
       expect(await User.count()).toEqual(0)
     })
   })

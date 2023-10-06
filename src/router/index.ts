@@ -13,6 +13,9 @@ import { ValidationError, camelize, developmentOrTestEnv } from '@rvohealth/drea
 import RouteManager from './route-manager'
 import { pascalize, snakeify } from '@rvohealth/dream'
 import pluralize = require('pluralize')
+import absoluteSrcPath from '../helpers/absoluteSrcPath'
+import importFileWithDefault from '../helpers/importFileWithDefault'
+import server from '../../test-app/conf/server'
 
 export default class PsychicRouter {
   public app: Application
@@ -284,6 +287,13 @@ export default class PsychicRouter {
       return
     }
 
+    let serverErrorHandler = async (err: unknown, req: Request, res: Response) => {}
+    try {
+      serverErrorHandler = await importFileWithDefault(absoluteSrcPath('conf/hooks/server-error'))
+    } catch (_) {
+      // ok if this file isn't present
+    }
+
     try {
       await controller.runAction(action)
     } catch (err) {
@@ -311,7 +321,9 @@ export default class PsychicRouter {
           res.status(422).json((err as any).data)
           break
 
+        case 'InternalServerError':
         default:
+          await serverErrorHandler(err, req, res)
           throw err
       }
     }
