@@ -294,7 +294,6 @@ export default class PsychicRouter {
         case 'Forbidden':
         case 'NotFound':
         case 'BadRequest':
-        case 'InternalServerError':
         case 'NotImplemented':
         case 'ServiceUnavailable':
           res.sendStatus((err as any).status)
@@ -313,13 +312,7 @@ export default class PsychicRouter {
           break
 
         default:
-          const message = developmentOrTestEnv()
-            ? `An unexpected error has caused this request to crash.
-                error:
-                  ${err}`
-            : ''
-
-          res.status(500).send(message)
+          throw err
       }
     }
   }
