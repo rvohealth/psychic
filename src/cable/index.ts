@@ -82,7 +82,7 @@ export default class Cable {
 
     if (this.useRedis) await this.bindToRedis()
 
-    await this.listen({ port, withReact, reactPort })
+    await this.listen({ port: parseInt(port.toString()), withReact, reactPort })
   }
 
   public async listen({

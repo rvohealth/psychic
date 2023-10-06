@@ -26,7 +26,7 @@ describe('cable#start', () => {
 
   it('calls cable#listen to start http server and sidechain io server to it', async () => {
     await cable.start()
-    const port = process.env.CI_TEST_RUN === '1' ? '7777' : 7777
+    const port = 7777
     expect(cable.listen).toHaveBeenCalledWith({ port: port, withReact: false, reactPort: 3000 })
   })
 
