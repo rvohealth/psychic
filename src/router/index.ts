@@ -287,7 +287,7 @@ export default class PsychicRouter {
       return
     }
 
-    let serverErrorHandler = async (err: unknown, req: Request, res: Response) => {}
+    let serverErrorHandler: any = null
     try {
       serverErrorHandler = await importFileWithDefault(absoluteSrcPath('conf/hooks/server-error'))
     } catch (_) {
@@ -323,7 +323,8 @@ export default class PsychicRouter {
 
         case 'InternalServerError':
         default:
-          await serverErrorHandler(err, req, res)
+          if (serverErrorHandler) await serverErrorHandler(err, req, res)
+          else throw err
       }
     }
   }
