@@ -29,10 +29,7 @@ describe('a visitor attempts to save a record', () => {
   })
 
   context('with a response that throws', () => {
-    // skipping until we can find a careful way in psychic to test this
-    // throwing an exception in this manner of testing will actually cause the supertest to crash
-    // without exception handler being thrown. This would be better-tested with puppeteer
-    it.skip('throws 500', async () => {
+    it('throws 500', async () => {
       await server.serveForRequestSpecs(async () => {
         await request.agent(server.app).post('/force-throw').expect(500)
       })

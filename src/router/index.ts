@@ -324,7 +324,6 @@ export default class PsychicRouter {
         case 'InternalServerError':
         default:
           await serverErrorHandler(err, req, res)
-          throw err
       }
     }
   }
