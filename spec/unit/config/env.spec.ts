@@ -6,10 +6,10 @@ const devSpy = jest.fn()
 const prodSpy = jest.fn()
 const testingSpy = jest.fn()
 
-jest.mock('../../../test-app/conf/env/all', () => ({ default: allSpy }))
-jest.mock('../../../test-app/conf/env/dev', () => ({ default: devSpy }))
-jest.mock('../../../test-app/conf/env/prod', () => ({ default: prodSpy }))
-jest.mock('../../../test-app/conf/env/testing', () => ({ default: testingSpy }))
+jest.mock('../../../test-app/conf/hooks/all', () => ({ default: allSpy }))
+jest.mock('../../../test-app/conf/hooks/dev', () => ({ default: devSpy }))
+jest.mock('../../../test-app/conf/hooks/prod', () => ({ default: prodSpy }))
+jest.mock('../../../test-app/conf/hooks/testing', () => ({ default: testingSpy }))
 
 describe('PsychicConfig', () => {
   let config: PsychicConfig
@@ -18,12 +18,12 @@ describe('PsychicConfig', () => {
     config = new PsychicConfig(new PsychicServer().app)
   })
 
-  it('loads conf/env/all.ts', async () => {
+  it('loads conf/hooks/all.ts', async () => {
     await config.boot()
     expect(allSpy).toHaveBeenCalledWith(config)
   })
 
-  it('loads conf/env/testing.ts', async () => {
+  it('loads conf/hooks/testing.ts', async () => {
     await config.boot()
     expect(testingSpy).toHaveBeenCalledWith(config)
   })
@@ -37,7 +37,7 @@ describe('PsychicConfig', () => {
       process.env.NODE_ENV = 'test'
     })
 
-    it('loads conf/env/testing.ts', async () => {
+    it('loads conf/hooks/testing.ts', async () => {
       await config.boot()
       expect(devSpy).toHaveBeenCalledWith(config)
     })
@@ -52,7 +52,7 @@ describe('PsychicConfig', () => {
       process.env.NODE_ENV = 'test'
     })
 
-    it('loads conf/env/prod.ts', async () => {
+    it('loads conf/hooks/prod.ts', async () => {
       await config.boot()
       expect(prodSpy).toHaveBeenCalledWith(config)
     })

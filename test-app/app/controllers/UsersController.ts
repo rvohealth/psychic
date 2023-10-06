@@ -22,7 +22,11 @@ export default class UsersController extends ApplicationController {
 
   public async failedToSaveTest() {
     // @ts-ignore
-    await User.create({ email: 'how@yadoin', password: 'howyadoin', createdAt: 'invalid date' })
+    await User.create({ email: 'invalidemail', password: 'howyadoin' })
+  }
+
+  public async forceThrow() {
+    throw new Error('this should force a 500')
   }
 
   public async create() {

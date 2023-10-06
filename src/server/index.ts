@@ -37,7 +37,7 @@ export default class PsychicServer {
     if (this.booted) return
     this.booted = true
 
-    const bootCB = await importFileWithDefault(absoluteSrcPath('conf/boot'))
+    const bootCB = await importFileWithDefault(absoluteSrcPath('conf/hooks/boot'))
     await bootCB(this.config)
 
     await this.initializeCors()
@@ -54,7 +54,7 @@ export default class PsychicServer {
 
     await this.buildRoutes()
 
-    const afterRoutesCB = await importFileWithDefault(absoluteSrcPath('conf/after-routes'))
+    const afterRoutesCB = await importFileWithDefault(absoluteSrcPath('conf/hooks/after-routes'))
     await afterRoutesCB(this.config)
 
     if (this.config.useWs) this.cable = new Cable(this.app)
