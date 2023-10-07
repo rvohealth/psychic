@@ -9,13 +9,12 @@ import {
 import PsychicConfig from '../config'
 import log from '../log'
 import PsychicController from '../controller'
-import { ValidationError, camelize, developmentOrTestEnv } from '@rvohealth/dream'
+import { ValidationError, camelize } from '@rvohealth/dream'
 import RouteManager from './route-manager'
 import { pascalize, snakeify } from '@rvohealth/dream'
 import pluralize = require('pluralize')
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
-import server from '../../test-app/conf/server'
 
 export default class PsychicRouter {
   public app: Application
