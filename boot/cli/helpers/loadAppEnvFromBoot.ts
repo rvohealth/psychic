@@ -6,6 +6,6 @@ if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
   dotenv.config({ path: dotenvpath })
 } else {
   dotenv.config({
-    path: process.env.NODE_ENV === 'test' ? '../../.env.test' : '../../.env',
+    path: process.env.NODE_ENV === 'test' ? '../../../.env.test' : '../../../.env',
   })
 }
