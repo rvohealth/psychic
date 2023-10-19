@@ -1,4 +1,4 @@
-import { ConnectionOptions, Job, Queue, QueueOptions, Worker, WorkerOptions } from 'bullmq'
+import { ConnectionOptions, Job, Queue, QueueEvents, QueueOptions, Worker, WorkerOptions } from 'bullmq'
 import readAppConfig from '../config/helpers/readAppConfig'
 import { Dream, loadModels, pascalize } from '@rvohealth/dream'
 import getModelKey from '../config/helpers/getModelKey'
@@ -26,6 +26,7 @@ export interface BackgroundJobData {
 export class Background {
   public queue: Queue | null = null
   public workers: Worker[] = []
+  public queueEvents: QueueEvents
 
   public async connect() {
     if (process.env.NODE_ENV === 'test') return
@@ -61,6 +62,8 @@ export class Background {
       connection: bullConnectionOpts,
       ...queueOptions,
     })
+
+    this.queueEvents = new QueueEvents(this.queue.name, { connection: bullConnectionOpts })
 
     const workerOptsCB = await importFileWithDefault(absoluteSrcPath('conf/background/worker'))
     const workerOptions: WorkerOptions = await workerOptsCB()
