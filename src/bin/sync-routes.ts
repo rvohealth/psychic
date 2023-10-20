@@ -1,3 +1,4 @@
+import { uniq } from '@rvohealth/dream'
 import '../helpers/loadEnv'
 import fs from 'fs/promises'
 import PsychicServer from '../server'
@@ -11,7 +12,7 @@ import absoluteSrcPath from '../helpers/absoluteSrcPath'
   const routes = await server.routes()
   const fileStr = `\
   export type RouteTypes =
-  ${routes.map(routeConf => `  | '/${routeConf.path.replace(/^\//, '')}'`).join('\n')}
+  ${uniq(routes.map(routeConf => `  | '/${routeConf.path.replace(/^\//, '')}'`)).join('\n')}
   `
 
   const routeTypesPath = absoluteSrcPath('conf/routeTypes.ts')
