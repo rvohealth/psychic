@@ -253,7 +253,7 @@ function trimFilepath(filepath: string) {
   const trimmed = filepath
     .replace(/^\//, '')
     .replace(process.env.APP_ROOT_PATH!.replace(/^\//, ''), '')
-    .replace(/^dist/, '')
+    .replace(/^\/?dist/, '')
     .replace(/\.[jt]s$/, '')
 
   return process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? trimmed.replace(/^test-app/, '') : trimmed

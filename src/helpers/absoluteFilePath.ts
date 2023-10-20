@@ -14,5 +14,9 @@ export default function absoluteFilePath(filePath: string) {
     filePath = filePath.replace(/^[/]?test-app/, '')
   }
 
+  if (process.env.TS_SAFE !== '1') {
+    filePath = path.join('dist', filePath)
+  }
+
   return path.join(process.env.APP_ROOT_PATH!, filePath)
 }
