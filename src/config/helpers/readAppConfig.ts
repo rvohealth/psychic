@@ -1,7 +1,6 @@
 import fs from 'fs'
 import YAML from 'yaml'
 import absoluteSrcPath from '../../helpers/absoluteSrcPath'
-import absoluteFilePath from '../../helpers/absoluteFilePath'
 
 let _appConfig: AppConfig | null = null
 export default function readAppConfig() {
