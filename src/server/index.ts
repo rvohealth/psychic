@@ -1,4 +1,4 @@
-import { loadModels, dreamDbConnections } from '@rvohealth/dream'
+import { loadModels, closeAllDbConnections, dreamDbConnections } from '@rvohealth/dream'
 import express from 'express'
 import { Application } from 'express'
 import cors from 'cors'
@@ -12,7 +12,7 @@ import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import { Server } from 'http'
 import startPsychicServer from './helpers/startPsychicServer'
-import background from '../background'
+import background, { stopBackgroundWorkers } from '../background'
 
 export default class PsychicServer {
   public app: Application
@@ -107,21 +107,13 @@ export default class PsychicServer {
       })
     }
 
-    process.on('SIGINT', async () => {
-      try {
-        await Promise.all(background.workers.map(worker => worker.close()))
-        await Promise.all(Object.values(dreamDbConnections()).map(conn => conn.destroy()))
-        process.exit(0)
-      } catch (_) {
-        process.exit(1)
-      }
-    })
-
     return true
   }
 
-  public stop() {
+  public async stop() {
     this.server?.close()
+    await stopBackgroundWorkers()
+    await closeAllDbConnections()
   }
 
   public async serveForRequestSpecs(block: () => any) {
