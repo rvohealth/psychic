@@ -261,3 +261,7 @@ function trimFilepath(filepath: string) {
 
 const background = new Background()
 export default background
+
+export async function stopBackgroundWorkers() {
+  await Promise.all(background.workers.map(worker => worker.close()))
+}
