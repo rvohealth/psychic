@@ -76,10 +76,6 @@ export class Background {
         })
       )
     }
-
-    process.on('SIGINT', async () => {
-      await Promise.all(this.workers.map(worker => worker.close()))
-    })
   }
 
   public async staticMethod(

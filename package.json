@@ -24,7 +24,7 @@
     "dream": "rm -rf node_modules/@rvohealth/dream/test-app && yarn --cwd=node_modules/@rvohealth/dream dream",
     "dreamts": "rm -rf node_modules/@rvohealth/dream/test-app && yarn --cwd=node_modules/@rvohealth/dream dreamts",
     "dreamprod": "rm -rf ../../node_modules/@rvohealth/dream/test-app && yarn --cwd=../../node_modules/@rvohealth/dream dream",
-    "dev": "PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=development ts-node ./test-app/main.ts",
+    "dev": "APP_ROOT_PATH=$(pwd)/test-app TS_SAFE=1 PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=development ts-node ./test-app/main.ts",
     "db:create": "yarn dream db:create",
     "db:drop": "yarn dream db:drop",
     "db:migrate": "yarn dream db:migrate",
@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@jest-mock/express": "^2.0.1",
-    "@rvohealth/dream": "0.1.19",
+    "@rvohealth/dream": "0.1.20",
     "@socket.io/redis-adapter": "^8.2.1",
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",
