@@ -127,6 +127,8 @@ export class Background {
         repeat: {
           pattern,
         },
+        jobId: `${ObjectClass.prototype.constructor.name}:${method}`,
+
       }
     )
   }
