@@ -115,6 +115,15 @@ export class Background {
     }
   ) {
     await this.connect()
+    
+    // `jobId` is used to determine uniqueness along with name and repeat pattern.
+    // Since the name is really a job type and never changes, the `jobId` is the only
+    // way to allow multiple jobs with the same cron repeat pattern. Uniqueness will
+    // now be enforced by combining class name, method name, and cron repeat pattern.
+    //
+    // See: https://docs.bullmq.io/guide/jobs/repeatable
+    const jobId = `${ObjectClass.name}:${method}`
+
     await this.queue!.add(
       'BackgroundJobQueueStaticJob',
       {
@@ -127,8 +136,7 @@ export class Background {
         repeat: {
           pattern,
         },
-        jobId: `${ObjectClass.name}:${method}`,
-
+        jobId,
       }
     )
   }
