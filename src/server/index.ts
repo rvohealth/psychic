@@ -43,7 +43,6 @@ export default class PsychicServer {
 
     await this.initializeCors()
     await this.initializeJSON()
-    await this.initializeCookies()
 
     try {
       await this.config.boot()
@@ -141,16 +140,12 @@ export default class PsychicServer {
 
   public buildApp() {
     this.app = express()
+    this.app.use(cookieParser())
   }
 
   private async initializeCors() {
     const getCorsOptions = await importFileWithDefault(absoluteSrcPath('conf/cors'))
     this.app.use(cors(await getCorsOptions()))
-  }
-
-  private async initializeCookies() {
-    const getCookieOptions = await importFileWithDefault(absoluteSrcPath('conf/cookies'))
-    this.app.use(cookieParser(await getCookieOptions()))
   }
 
   private async initializeJSON() {
