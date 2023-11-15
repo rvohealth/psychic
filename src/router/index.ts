@@ -302,6 +302,7 @@ export default class PsychicRouter {
         case 'Unauthorized':
         case 'Forbidden':
         case 'NotFound':
+        case 'Conflict':
         case 'BadRequest':
         case 'NotImplemented':
         case 'ServiceUnavailable':

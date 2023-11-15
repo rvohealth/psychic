@@ -14,6 +14,7 @@ import InternalServerError from '../error/http/internal-server-error'
 import ServiceUnavailable from '../error/http/service-unavailable'
 import HttpStatusCodeMap, { HttpStatusSymbol } from '../error/http/status-codes'
 import { ControllerHook } from '../controller/hooks'
+import Conflict from '../error/http/conflict'
 
 export default class PsychicController {
   public static get isPsychicController() {
@@ -180,6 +181,11 @@ export default class PsychicController {
   // 404
   public notFound() {
     throw new NotFound('The resource you requested could not be found')
+  }
+
+  // 409
+  public conflict() {
+    throw new Conflict('A conflcit was detected while processing your request')
   }
 
   // 500
