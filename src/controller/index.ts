@@ -127,9 +127,8 @@ export default class PsychicController {
     return this.json(data)
   }
 
-  public noContent(data: any = {}) {
-    this.res.status(204)
-    return this.json(data)
+  public noContent() {
+    return this.res.sendStatus(204)
   }
 
   public setStatus(status: number | HttpStatusSymbol) {
