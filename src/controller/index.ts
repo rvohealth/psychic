@@ -70,15 +70,8 @@ export default class PsychicController {
     return {
       ...this.req.params,
       ...this.req.body,
-      ...this.query,
+      ...this.req.query,
     }
-  }
-
-  public get query() {
-    return Object.keys(this.req.query).reduce((agg, key) => {
-      agg[key] = decodeURIComponent(this.req.query[key] as string)
-      return agg
-    }, {} as any)
   }
 
   public cookie(name: string, data?: any) {
