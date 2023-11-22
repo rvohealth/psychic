@@ -50,7 +50,7 @@ export default class ApiV1UsersController extends AuthedController {
   }
 
   private get userParams() {
-    return Params.restrict(this.params?.user, ['id', 'name', 'email', 'passwordDigest', 'createdAt', 'updatedAt'])
+    return Params.restrict(this.params, ['id', 'name', 'email', 'passwordDigest', 'createdAt', 'updatedAt'])
   }
 }\
 `
@@ -106,7 +106,7 @@ export default class ApiV1HealthUsersController extends AuthedController {
   }
 
   private get userParams() {
-    return Params.restrict(this.params?.user, ['id', 'name', 'email', 'passwordDigest', 'createdAt', 'updatedAt'])
+    return Params.restrict(this.params, ['id', 'name', 'email', 'passwordDigest', 'createdAt', 'updatedAt'])
   }
 }\
 `
@@ -136,7 +136,7 @@ export default class AdminNutritionLogEntriesController extends AdminAuthedContr
   }
 
   private get logEntryParams() {
-    return Params.restrict(this.params?.logEntry, ['id', 'calories'])
+    return Params.restrict(this.params, ['id', 'calories'])
   }
 }`
           )
