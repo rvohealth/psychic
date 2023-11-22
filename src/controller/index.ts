@@ -90,6 +90,8 @@ export default class PsychicController {
   }
 
   private singleObjectJson(data: any) {
+    if (!data) return data
+
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, data.constructor)
 
     const SerializerClass = lookup?.[1] || data.serializer
