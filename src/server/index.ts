@@ -30,7 +30,7 @@ export default class PsychicServer {
     const r = new PsychicRouter(this.app, this.config)
     const routesPath = absoluteSrcPath('conf/routes')
     const routesCB = await importFileWithDefault(routesPath)
-    routesCB(r)
+    await routesCB(r)
     return r.routes
   }
 
