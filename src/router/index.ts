@@ -323,8 +323,20 @@ export default class PsychicRouter {
 
         case 'InternalServerError':
         default:
-          if (serverErrorHandler) await serverErrorHandler(err, req, res)
-          else throw err
+          if (serverErrorHandler) {
+            try {
+              await serverErrorHandler(err, req, res)
+            } catch (error) {
+              console.error(
+                `
+                  Something went wrong while attempting to call your custom server-error file.
+                  Psychic will rescue errors thrown here to prevent the server from crashing.
+                  The error thrown is:
+                `
+              )
+              console.error(error)
+            }
+          } else throw err
       }
     }
   }
