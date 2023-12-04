@@ -1,51 +1,40 @@
 import { describe as context } from '@jest/globals'
-import DummyService from '../../../test-app/app/services/DummyService'
-import UrgentDummyService from '../../../test-app/app/services/UrgentDummyService'
-import NotUrgentDummyService from '../../../test-app/app/services/NotUrgentDummyService'
-import LastDummyService from '../../../test-app/app/services/LastDummyService'
+import DummyScheduledService from '../../../test-app/app/services/DummyScheduledService'
+import DefaultDummyScheduledService from '../../../test-app/app/services/DefaultDummyScheduledService'
+import UrgentDummyScheduledService from '../../../test-app/app/services/UrgentDummyScheduledService'
+import NotUrgentDummyScheduledService from '../../../test-app/app/services/NotUrgentDummyScheduledService'
+import LastDummyScheduledService from '../../../test-app/app/services/LastDummyScheduledService'
 import background, { BackgroundQueuePriority } from '../../../src/background'
 
-describe('BackgroundedService', () => {
-  it('calls the static method, passing args', async () => {
-    jest.spyOn(DummyService, 'classRunInBG').mockImplementation(async () => {})
-    await DummyService.background('classRunInBG', 'bottlearum')
-    expect(DummyService.classRunInBG).toHaveBeenCalledWith('bottlearum')
-  })
-
-  it('calls the instance method, passing constructor args to the constructor and args to the instance method', async () => {
-    jest.spyOn(DummyService.prototype, 'instanceMethodToTest').mockImplementation(async () => {})
-    await new DummyService('hello').background('instanceRunInBG', {
-      args: ['bottlearum'],
-      constructorArgs: ['bottleawhiskey'],
-    })
-    expect(DummyService.prototype.instanceMethodToTest).toHaveBeenCalledWith('bottleawhiskey', 'bottlearum')
-  })
-
+describe('ScheduledService', () => {
   context('queue priority', () => {
     let subject = async () => {
-      await new serviceClass('hello').background('instanceRunInBG', {
-        args: ['bottlearum'],
-        constructorArgs: ['bottleawhiskey'],
-      })
+      await serviceClass.schedule('* * * * *', 'instanceRunInBG', 'bottlearum')
     }
     let serviceClass:
-      | typeof DummyService
-      | typeof UrgentDummyService
-      | typeof NotUrgentDummyService
-      | typeof LastDummyService
+      | typeof DummyScheduledService
+      | typeof DefaultDummyScheduledService
+      | typeof UrgentDummyScheduledService
+      | typeof NotUrgentDummyScheduledService
+      | typeof LastDummyScheduledService
 
     function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
       expect(background.queue!.add).toHaveBeenCalledWith(
-        'BackgroundJobQueueInstanceJob',
+        'BackgroundJobQueueStaticJob',
         {
           filepath: `/app/services/${serviceClass.name}`,
           args: ['bottlearum'],
-          constructorArgs: ['bottleawhiskey'],
-          priority: priority,
           importKey: undefined,
           method: 'instanceRunInBG',
+          priority,
         },
-        { priority: priorityLevel }
+        {
+          repeat: {
+            pattern: '* * * * *',
+          },
+          jobId: `${serviceClass.name}:instanceRunInBG`,
+          priority: priorityLevel,
+        }
       )
     }
 
@@ -62,9 +51,20 @@ describe('BackgroundedService', () => {
       process.env.REALLY_TEST_BACKGROUND_QUEUE = undefined
     })
 
+    context('with no priority specified', () => {
+      beforeEach(() => {
+        serviceClass = DummyScheduledService
+      })
+
+      it('uses priority 3', async () => {
+        await subject()
+        expectAddedToQueueWithPriority('not_urgent', 3)
+      })
+    })
+
     context('with a default priority', () => {
       beforeEach(() => {
-        serviceClass = DummyService
+        serviceClass = DefaultDummyScheduledService
       })
 
       it('uses priority 2', async () => {
@@ -75,7 +75,7 @@ describe('BackgroundedService', () => {
 
     context('with an urgent priority', () => {
       beforeEach(() => {
-        serviceClass = UrgentDummyService
+        serviceClass = UrgentDummyScheduledService
       })
 
       it('uses priority 1', async () => {
@@ -86,7 +86,7 @@ describe('BackgroundedService', () => {
 
     context('with a not_urgent priority', () => {
       beforeEach(() => {
-        serviceClass = NotUrgentDummyService
+        serviceClass = NotUrgentDummyScheduledService
       })
 
       it('uses priority 3', async () => {
@@ -97,7 +97,7 @@ describe('BackgroundedService', () => {
 
     context('with a last priority', () => {
       beforeEach(() => {
-        serviceClass = LastDummyService
+        serviceClass = LastDummyScheduledService
       })
 
       it('uses priority 4', async () => {
