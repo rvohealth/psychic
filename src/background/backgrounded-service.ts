@@ -1,12 +1,13 @@
 import path from 'path'
-import background from '.'
+import background, { BackgroundQueuePriority } from '.'
 
-export default function backgroundedService(filepath: string) {
+export default function backgroundedService(filepath: string, priority: BackgroundQueuePriority = 'default') {
   return class BackgroundedService {
     public static async background(methodName: string, ...args: any[]) {
       return await background.staticMethod(this, methodName, {
         filepath,
         args,
+        priority,
       })
     }
 
@@ -24,6 +25,7 @@ export default function backgroundedService(filepath: string) {
         args,
         constructorArgs,
         filepath,
+        priority,
       })
     }
   }

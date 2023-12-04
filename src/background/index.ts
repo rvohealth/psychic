@@ -21,15 +21,16 @@ export interface BackgroundJobData {
   constructorArgs?: any
   filepath: string
   importKey: any
+  priority: BackgroundQueuePriority
 }
 
 export class Background {
   public queue: Queue | null = null
-  public workers: Worker[] = []
   public queueEvents: QueueEvents
+  public workers: Worker[] = []
 
   public async connect() {
-    if (process.env.NODE_ENV === 'test') return
+    if (process.env.NODE_ENV === 'test' && process.env.REALLY_TEST_BACKGROUND_QUEUE !== '1') return
     if (this.queue) return
 
     const appConfig = readAppConfig()
@@ -62,7 +63,6 @@ export class Background {
       connection: bullConnectionOpts,
       ...queueOptions,
     })
-
     this.queueEvents = new QueueEvents(this.queue.name, { connection: bullConnectionOpts })
 
     const workerOptsCB = await importFileWithDefault(absoluteSrcPath('conf/background/worker'))
@@ -85,18 +85,21 @@ export class Background {
       filepath, // filepath means a file within the app that is consuming psychic
       importKey,
       args = [],
+      priority = 'default',
     }: {
       filepath: string
       importKey?: string
       args?: any[]
+      priority?: BackgroundQueuePriority
     }
   ) {
     await this.connect()
-    await this.addToQueue(`BackgroundJobQueueStaticJob`, {
+    await this._addToQueue(`BackgroundJobQueueStaticJob`, {
       filepath: trimFilepath(filepath),
       importKey,
       method,
       args,
+      priority,
     })
   }
 
@@ -108,14 +111,16 @@ export class Background {
       filepath, // filepath means a file within the app that is consuming psychic
       importKey,
       args = [],
+      priority = 'default',
     }: {
       filepath: string
       importKey?: string
       args?: any[]
+      priority?: BackgroundQueuePriority
     }
   ) {
     await this.connect()
-    
+
     // `jobId` is used to determine uniqueness along with name and repeat pattern.
     // Since the name is really a job type and never changes, the `jobId` is the only
     // way to allow multiple jobs with the same cron repeat pattern. Uniqueness will
@@ -131,12 +136,14 @@ export class Background {
         importKey,
         method,
         args,
+        priority,
       },
       {
         repeat: {
           pattern,
         },
         jobId,
+        priority: this.getPriorityForQueue(priority),
       }
     )
   }
@@ -149,20 +156,23 @@ export class Background {
       importKey,
       args = [],
       constructorArgs = [],
+      priority = 'default',
     }: {
       filepath: string
       importKey?: string
       args?: any[]
       constructorArgs?: any[]
+      priority?: BackgroundQueuePriority
     }
   ) {
     await this.connect()
-    await this.addToQueue('BackgroundJobQueueInstanceJob', {
+    await this._addToQueue('BackgroundJobQueueInstanceJob', {
       filepath: trimFilepath(filepath),
       importKey,
       method,
       args,
       constructorArgs,
+      priority,
     })
   }
 
@@ -172,26 +182,46 @@ export class Background {
     {
       importKey,
       args = [],
+      priority = 'default',
     }: {
       importKey?: string
       args?: any[]
+      priority?: BackgroundQueuePriority
     }
   ) {
     await this.connect()
     const modelPath = await getModelKey(modelInstance.constructor as typeof Dream)
-    await this.addToQueue('BackgroundJobQueueModelInstanceJob', {
+    await this._addToQueue('BackgroundJobQueueModelInstanceJob', {
       id: modelInstance.primaryKeyValue,
       filepath: `app/models/${modelPath}`,
       importKey,
       method,
       args,
+      priority,
     })
   }
 
-  private async addToQueue(jobType: JobTypes, jobData: BackgroundJobData) {
-    if (process.env.NODE_ENV === 'test') await this.doWork(jobType, jobData)
-    else {
-      await this.queue!.add(jobType, jobData)
+  // should be private, but public so we can test
+  public async _addToQueue(jobType: JobTypes, jobData: BackgroundJobData) {
+    if (process.env.NODE_ENV === 'test' && process.env.REALLY_TEST_BACKGROUND_QUEUE !== '1') {
+      await this.doWork(jobType, jobData)
+    } else {
+      await this.queue!.add(jobType, jobData, { priority: this.getPriorityForQueue(jobData.priority) })
+    }
+  }
+
+  private getPriorityForQueue(priority: BackgroundQueuePriority) {
+    switch (priority) {
+      case 'urgent':
+        return 1
+      case 'default':
+        return 2
+      case 'not_urgent':
+        return 3
+      case 'last':
+        return 4
+      default:
+        return 2
     }
   }
 
@@ -275,3 +305,5 @@ export default background
 export async function stopBackgroundWorkers() {
   await Promise.all(background.workers.map(worker => worker.close()))
 }
+
+export type BackgroundQueuePriority = 'default' | 'urgent' | 'not_urgent' | 'last'
