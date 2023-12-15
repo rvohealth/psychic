@@ -39,7 +39,7 @@
   },
   "dependencies": {
     "@jest-mock/express": "^2.0.1",
-    "@rvohealth/dream": "0.1.28",
+    "@rvohealth/dream": "0.1.29",
     "@socket.io/redis-adapter": "^8.2.1",
     "@types/bcrypt": "^5.0.0",
     "@types/cookie-parser": "^1.4.3",
