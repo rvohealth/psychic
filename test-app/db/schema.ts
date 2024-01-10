@@ -12,29 +12,29 @@ type IdType = string | number | bigint | undefined
 type Timestamp = ColumnType<DateTime>
 
 export interface HealthUsers {
-  id: Generated<number>;
-  email: string | null;
-  passwordDigest: string | null;
-  name: string | null;
   createdAt: Timestamp;
+  email: string | null;
+  id: Generated<number>;
+  name: string | null;
+  passwordDigest: string | null;
   updatedAt: Timestamp;
 }
 
 export interface Pets {
+  createdAt: Timestamp;
   id: Generated<Int8>;
-  userId: number;
   name: string | null;
   species: SpeciesTypesEnum | null;
-  createdAt: Timestamp;
   updatedAt: Timestamp;
+  userId: number;
 }
 
 export interface Users {
+  createdAt: Generated<Timestamp>;
+  email: string;
   id: Generated<number>;
   name: string | null;
-  email: string;
   passwordDigest: string;
-  createdAt: Generated<Timestamp>;
   updatedAt: Generated<Timestamp>;
 }
 
@@ -45,64 +45,64 @@ export interface DB {
 }
 
 
-export const HealthUserColumns = ['id', 'email', 'passwordDigest', 'name', 'createdAt', 'updatedAt']
-export const PetColumns = ['id', 'userId', 'name', 'species', 'createdAt', 'updatedAt']
-export const UserColumns = ['id', 'name', 'email', 'passwordDigest', 'createdAt', 'updatedAt']
+export const HealthUserColumns = ['createdAt', 'email', 'id', 'name', 'passwordDigest', 'updatedAt']
+export const PetColumns = ['createdAt', 'id', 'name', 'species', 'updatedAt', 'userId']
+export const UserColumns = ['createdAt', 'email', 'id', 'name', 'passwordDigest', 'updatedAt']
 
 export interface HealthUserAttributes {
-  id: number
-  email: string | null
-  passwordDigest: string | null
-  name: string | null
   createdAt: DateTime
+  email: string | null
+  id: number
+  name: string | null
+  passwordDigest: string | null
   updatedAt: DateTime
 }  
 
 export interface PetAttributes {
+  createdAt: DateTime
   id: IdType
-  userId: number
   name: string | null
   species: SpeciesTypesEnum | null
-  createdAt: DateTime
   updatedAt: DateTime
+  userId: number
 }  
 
 export interface UserAttributes {
+  createdAt: DateTime
+  email: string
   id: number
   name: string | null
-  email: string
   passwordDigest: string
-  createdAt: DateTime
   updatedAt: DateTime
 }  
 
 
-export const HealthUsersTypeCache = {
-  id: 'Generated<number>',
-  email: 'string|null',
-  passwordDigest: 'string|null',
-  name: 'string|null',
-  createdAt: 'Timestamp',
-  updatedAt: 'Timestamp'
-}  
+export const HealthUsersDBTypeMap = {
+  createdAt: 'timestamp without time zone',
+  email: 'character varying',
+  id: 'integer',
+  name: 'character varying',
+  passwordDigest: 'character varying',
+  updatedAt: 'timestamp without time zone'
+}
 
-export const PetsTypeCache = {
-  id: 'Generated<Int8>',
-  userId: 'number',
-  name: 'string|null',
-  species: 'SpeciesTypesEnum|null',
-  createdAt: 'Timestamp',
-  updatedAt: 'Timestamp'
-}  
+export const PetsDBTypeMap = {
+  createdAt: 'timestamp without time zone',
+  id: 'bigint',
+  name: 'character varying',
+  species: 'species_types_enum',
+  updatedAt: 'timestamp without time zone',
+  userId: 'integer'
+}
 
-export const UsersTypeCache = {
-  id: 'Generated<number>',
-  name: 'string|null',
-  email: 'string',
-  passwordDigest: 'string',
-  createdAt: 'Generated<Timestamp>',
-  updatedAt: 'Generated<Timestamp>'
-}  
+export const UsersDBTypeMap = {
+  createdAt: 'timestamp without time zone',
+  email: 'character varying',
+  id: 'integer',
+  name: 'character varying',
+  passwordDigest: 'character varying',
+  updatedAt: 'timestamp without time zone'
+}
 
 
 
@@ -131,7 +131,7 @@ export const DBColumns = {
 }
 
 export const DBTypeCache = {
-  health_users: HealthUsersTypeCache,
-  pets: PetsTypeCache,
-  users: UsersTypeCache
+  health_users: HealthUsersDBTypeMap,
+  pets: PetsDBTypeMap,
+  users: UsersDBTypeMap
 } as Partial<Record<keyof DB, any>>

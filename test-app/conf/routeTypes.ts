@@ -5,6 +5,7 @@
   | '/users-before-all-test'
   | '/failed-to-save-test'
   | '/force-throw'
+  | '/conflict'
   | '/api/ping'
   | '/api/v1/ping'
   | '/api/v1/users'
