@@ -12,11 +12,14 @@ export function BeforeAction(
   return function (target: any, methodName: string | symbol): any {
     if ((target as typeof PsychicController).isPsychicController) {
       if (!opts.methodName) throw 'Must pass methodName when calling beforeAction'
-      if (!Object.getOwnPropertyDescriptor(target, 'controllerHooks')) target.controllerHooks = []
+      if (!Object.getOwnPropertyDescriptor(target, 'controllerHooks'))
+        target.controllerHooks = [...target.controllerHooks]
+
       target.controllerHooks.push(new ControllerHook(target.name, opts.methodName!, opts))
     } else if ((target as PsychicController).isPsychicControllerInstance) {
       if (!Object.getOwnPropertyDescriptor(target.constructor, 'controllerHooks'))
-        target.constructor.controllerHooks = []
+        target.constructor.controllerHooks = [...target.constructor.controllerHooks]
+
       target.constructor.controllerHooks.push(
         new ControllerHook(target.constructor.name, methodName.toString(), opts)
       )

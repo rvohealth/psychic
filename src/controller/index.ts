@@ -219,6 +219,7 @@ export default class PsychicController {
     const beforeActions = (this.constructor as typeof PsychicController).controllerHooks.filter(hook =>
       hook.shouldFireForAction(action)
     )
+
     for (const hook of beforeActions) {
       if (hook.isStatic) await (this.constructor as any)[hook.methodName]()
       else await (this as any)[hook.methodName]()
