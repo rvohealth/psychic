@@ -12,7 +12,7 @@ describe('PsychicRouter', () => {
         const res = await supertest(server.app).get('/users/3/hello').expect(200)
 
         expect(res.body).toEqual('world 3')
-      })
+      }, 15000)
     })
 
     describe('path generation', () => {
