@@ -28,5 +28,34 @@ export default function backgroundedService(filepath: string, priority: Backgrou
         priority,
       })
     }
+
+    public static async backgroundWithDelay(delaySeconds: number, methodName: string, ...args: any[]) {
+      return await background.staticMethod(this, methodName, {
+        delaySeconds,
+        filepath,
+        args,
+        priority,
+      })
+    }
+
+    public async backgroundWithDelay(
+      delaySeconds: number,
+      methodName: string,
+      {
+        args,
+        constructorArgs,
+      }: {
+        args?: any[]
+        constructorArgs?: any[]
+      } = {}
+    ) {
+      return await background.instanceMethod(this.constructor, methodName, {
+        delaySeconds,
+        args,
+        constructorArgs,
+        filepath,
+        priority,
+      })
+    }
   }
 }

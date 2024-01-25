@@ -43,6 +43,14 @@ export default class PsychicController {
     })
   }
 
+  public static async backgroundWithDelay(delaySeconds: number, methodName: string, ...args: any[]) {
+    return await background.staticMethod(this, methodName, {
+      delaySeconds,
+      filepath: `app/controllers/${await (this as typeof PsychicController).controllerPath()}`,
+      args,
+    })
+  }
+
   public get isPsychicControllerInstance() {
     return true
   }

@@ -20,4 +20,22 @@ describe('PsychicController background methods', () => {
       )
     })
   })
+
+  describe('.backgroundWithDelay', () => {
+    it('adds the model static method to the worker queue', async () => {
+      // @ts-ignore
+      jest.spyOn(background, 'staticMethod').mockResolvedValue({})
+
+      await BackgroundTestController.backgroundWithDelay(3, 'doSomethingInBackground', 1, '2')
+      expect(background.staticMethod).toHaveBeenCalledWith(
+        BackgroundTestController,
+        'doSomethingInBackground',
+        {
+          delaySeconds: 3,
+          filepath: 'app/controllers/BackgroundTestController',
+          args: [1, '2'],
+        }
+      )
+    })
+  })
 })

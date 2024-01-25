@@ -98,5 +98,51 @@ describe('background (app singleton)', () => {
         })
       })
     })
+
+    context('delaySeconds', () => {
+      let subject = async () => {
+        await background.instanceMethod(DummyService, 'instanceRunInBG', {
+          args: ['bottlearum'],
+          constructorArgs: ['bottleawhiskey'],
+          filepath: 'test-app/app/services/DummyService.ts',
+          delaySeconds,
+        })
+      }
+      let delaySeconds: number
+
+      function expectAddedToQueueWithDelay(priority: BackgroundQueuePriority, delay: number) {
+        expect(background.queue!.add).toHaveBeenCalledWith(
+          'BackgroundJobQueueInstanceJob',
+          {
+            filepath: '/app/services/DummyService',
+            args: ['bottlearum'],
+            constructorArgs: ['bottleawhiskey'],
+            priority,
+            importKey: undefined,
+            method: 'instanceRunInBG',
+          },
+          { delay, priority: 2 }
+        )
+      }
+
+      beforeEach(async () => {
+        process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
+        await background.connect()
+
+        jest.spyOn(background.queue!, 'add').mockImplementation(() => {
+          return {} as any
+        })
+      })
+
+      afterEach(() => {
+        process.env.REALLY_TEST_BACKGROUND_QUEUE = undefined
+      })
+
+      it('sends the default priority to the queue', async () => {
+        delaySeconds = 30
+        await subject()
+        expectAddedToQueueWithDelay('default', 30000)
+      })
+    })
   })
 })

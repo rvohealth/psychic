@@ -82,11 +82,13 @@ export class Background {
     ObjectClass: any,
     method: string,
     {
+      delaySeconds,
       filepath, // filepath means a file within the app that is consuming psychic
       importKey,
       args = [],
       priority = 'default',
     }: {
+      delaySeconds?: number
       filepath: string
       importKey?: string
       args?: any[]
@@ -94,13 +96,17 @@ export class Background {
     }
   ) {
     await this.connect()
-    await this._addToQueue(`BackgroundJobQueueStaticJob`, {
-      filepath: trimFilepath(filepath),
-      importKey,
-      method,
-      args,
-      priority,
-    })
+    await this._addToQueue(
+      `BackgroundJobQueueStaticJob`,
+      {
+        filepath: trimFilepath(filepath),
+        importKey,
+        method,
+        args,
+        priority,
+      },
+      { delaySeconds }
+    )
   }
 
   public async scheduledMethod(
@@ -152,12 +158,14 @@ export class Background {
     ObjectClass: any,
     method: string,
     {
+      delaySeconds,
       filepath, // filepath means a file within the app that is consuming psychic
       importKey,
       args = [],
       constructorArgs = [],
       priority = 'default',
     }: {
+      delaySeconds?: number
       filepath: string
       importKey?: string
       args?: any[]
@@ -166,24 +174,30 @@ export class Background {
     }
   ) {
     await this.connect()
-    await this._addToQueue('BackgroundJobQueueInstanceJob', {
-      filepath: trimFilepath(filepath),
-      importKey,
-      method,
-      args,
-      constructorArgs,
-      priority,
-    })
+    await this._addToQueue(
+      'BackgroundJobQueueInstanceJob',
+      {
+        filepath: trimFilepath(filepath),
+        importKey,
+        method,
+        args,
+        constructorArgs,
+        priority,
+      },
+      { delaySeconds }
+    )
   }
 
   public async modelInstanceMethod(
     modelInstance: Dream,
     method: string,
     {
+      delaySeconds,
       importKey,
       args = [],
       priority = 'default',
     }: {
+      delaySeconds?: number
       importKey?: string
       args?: any[]
       priority?: BackgroundQueuePriority
@@ -191,22 +205,37 @@ export class Background {
   ) {
     await this.connect()
     const modelPath = await getModelKey(modelInstance.constructor as typeof Dream)
-    await this._addToQueue('BackgroundJobQueueModelInstanceJob', {
-      id: modelInstance.primaryKeyValue,
-      filepath: `app/models/${modelPath}`,
-      importKey,
-      method,
-      args,
-      priority,
-    })
+    await this._addToQueue(
+      'BackgroundJobQueueModelInstanceJob',
+      {
+        id: modelInstance.primaryKeyValue,
+        filepath: `app/models/${modelPath}`,
+        importKey,
+        method,
+        args,
+        priority,
+      },
+      { delaySeconds }
+    )
   }
 
   // should be private, but public so we can test
-  public async _addToQueue(jobType: JobTypes, jobData: BackgroundJobData) {
+  public async _addToQueue(
+    jobType: JobTypes,
+    jobData: BackgroundJobData,
+    {
+      delaySeconds,
+    }: {
+      delaySeconds?: number
+    }
+  ) {
     if (process.env.NODE_ENV === 'test' && process.env.REALLY_TEST_BACKGROUND_QUEUE !== '1') {
       await this.doWork(jobType, jobData)
     } else {
-      await this.queue!.add(jobType, jobData, { priority: this.getPriorityForQueue(jobData.priority) })
+      await this.queue!.add(jobType, jobData, {
+        delay: delaySeconds ? delaySeconds * 1000 : undefined,
+        priority: this.getPriorityForQueue(jobData.priority),
+      })
     }
   }
 
