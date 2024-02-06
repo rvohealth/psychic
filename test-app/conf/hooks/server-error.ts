@@ -8,5 +8,6 @@ export default async function onServerError(error: unknown, req: Request, res: R
                   ${error}`
     : ''
 
-  res.status(500).send(message)
+  if (!res.headersSent) res.status(500).send(message)
+  else if (developmentOrTestEnv()) throw error
 }

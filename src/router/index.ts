@@ -9,7 +9,7 @@ import {
 import PsychicConfig from '../config'
 import log from '../log'
 import PsychicController from '../controller'
-import { ValidationError, camelize } from '@rvohealth/dream'
+import { ValidationError, camelize, developmentOrTestEnv } from '@rvohealth/dream'
 import RouteManager from './route-manager'
 import { pascalize, snakeify } from '@rvohealth/dream'
 import pluralize = require('pluralize')
@@ -327,14 +327,23 @@ export default class PsychicRouter {
             try {
               await serverErrorHandler(err, req, res)
             } catch (error) {
-              console.error(
-                `
+              if (developmentOrTestEnv()) {
+                // In development and test, we want to throw so that, for example, double-setting of
+                // status headers throws an error in specs. We couldn't figure out how to write
+                // a spec for ensuring that such errors made it through because Supertest would
+                // respond with the first header sent, which was successful, and the exception only
+                // happened when Jest ended the spec.
+                throw error
+              } else {
+                console.error(
+                  `
                   Something went wrong while attempting to call your custom server-error file.
                   Psychic will rescue errors thrown here to prevent the server from crashing.
                   The error thrown is:
                 `
-              )
-              console.error(error)
+                )
+                console.error(error)
+              }
             }
           } else throw err
       }
