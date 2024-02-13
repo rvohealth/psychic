@@ -70,7 +70,7 @@ describe('background (app singleton)', () => {
           priority = 'urgent'
         })
 
-        it('sends the default priority to the queue', async () => {
+        it('sends the urgent priority to the queue', async () => {
           await subject()
           expectAddedToQueueWithPriority('urgent', 1)
         })
@@ -81,7 +81,7 @@ describe('background (app singleton)', () => {
           priority = 'not_urgent'
         })
 
-        it('sends the default priority to the queue', async () => {
+        it('sends the not_urgent priority to the queue', async () => {
           await subject()
           expectAddedToQueueWithPriority('not_urgent', 3)
         })
@@ -92,7 +92,7 @@ describe('background (app singleton)', () => {
           priority = 'last'
         })
 
-        it('sends the default priority to the queue', async () => {
+        it('sends the last priority to the queue', async () => {
           await subject()
           expectAddedToQueueWithPriority('last', 4)
         })
@@ -138,7 +138,7 @@ describe('background (app singleton)', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = undefined
       })
 
-      it('sends the default priority to the queue', async () => {
+      it('sets the delay in milliseconds', async () => {
         delaySeconds = 30
         await subject()
         expectAddedToQueueWithDelay('default', 30000)

@@ -1,4 +1,3 @@
-import path from 'path'
 import background, { BackgroundQueuePriority } from '.'
 
 export default function backgroundedService(filepath: string, priority: BackgroundQueuePriority = 'default') {

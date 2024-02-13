@@ -1,44 +1,25 @@
-import { describe as context } from '@jest/globals'
 import background, { BackgroundQueuePriority } from '../../../src/background'
-import User from '../../../test-app/app/models/User'
 
-describe('background (app singleton)', () => {
-  describe('.modelInstanceMethod', () => {
-    it('instantiates the model and calls the specified method with the specified args', async () => {
-      const user = await User.create({ email: 'ham@howyadoin', passwordDigest: 'coolidge' })
-      jest.spyOn(User.prototype, '_testBackground')
-
-      await background.modelInstanceMethod(user, 'testBackground', {
-        args: ['howyadoin'],
-      })
-      expect(User.prototype._testBackground).toHaveBeenCalledWith(user.id, 'howyadoin')
-    })
-  })
-
+describe('backgroundedFunction', () => {
   context('priority', () => {
-    let user: User
     let subject = async () => {
-      await background.modelInstanceMethod(user, 'testBackground', {
-        args: ['howyadoin'],
+      await background.func({
+        args: ['bottlearum'],
+        filepath: 'test-app/app/services/functions/dummyFunction.ts',
+        importKey: 'default',
         priority,
       })
     }
     let priority: BackgroundQueuePriority
 
-    beforeEach(async () => {
-      user = await User.create({ email: 'ham@howyadoin', passwordDigest: 'coolidge' })
-    })
-
     function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
       expect(background.queue!.add).toHaveBeenCalledWith(
-        'BackgroundJobQueueModelInstanceJob',
+        'BackgroundJobQueueFunctionJob',
         {
-          filepath: 'app/models/User',
-          id: user.id,
-          args: ['howyadoin'],
+          args: ['bottlearum'],
+          filepath: '/app/services/functions/dummyFunction',
+          importKey: 'default',
           priority,
-          importKey: undefined,
-          method: 'testBackground',
         },
         { priority: priorityLevel }
       )
@@ -103,29 +84,24 @@ describe('background (app singleton)', () => {
   })
 
   context('delaySeconds', () => {
-    let user: User
     let subject = async () => {
-      await background.modelInstanceMethod(user, 'testBackground', {
-        args: ['howyadoin'],
+      await background.func({
+        args: ['bottlearum'],
+        filepath: 'test-app/app/services/functions/dummyFunction.ts',
+        importKey: 'default',
         delaySeconds,
       })
     }
     let delaySeconds: number
 
-    beforeEach(async () => {
-      user = await User.create({ email: 'ham@howyadoin', passwordDigest: 'coolidge' })
-    })
-
-    function expectAddedToQueueWithDelay(priority: BackgroundQueuePriority, delay: number) {
+    function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, delay: number) {
       expect(background.queue!.add).toHaveBeenCalledWith(
-        'BackgroundJobQueueModelInstanceJob',
+        'BackgroundJobQueueFunctionJob',
         {
-          filepath: 'app/models/User',
-          id: user.id,
-          args: ['howyadoin'],
+          filepath: '/app/services/functions/dummyFunction',
+          args: ['bottlearum'],
+          importKey: 'default',
           priority,
-          importKey: undefined,
-          method: 'testBackground',
         },
         { delay, priority: 2 }
       )
@@ -145,9 +121,9 @@ describe('background (app singleton)', () => {
     })
 
     it('sets the delay in milliseconds', async () => {
-      delaySeconds = 20
+      delaySeconds = 25
       await subject()
-      expectAddedToQueueWithDelay('default', 20000)
+      expectAddedToQueueWithPriority('default', 25000)
     })
   })
 })

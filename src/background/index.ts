@@ -10,13 +10,14 @@ import absoluteFilePath from '../helpers/absoluteFilePath'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 
 type JobTypes =
+  | 'BackgroundJobQueueFunctionJob'
   | 'BackgroundJobQueueStaticJob'
   | 'BackgroundJobQueueInstanceJob'
   | 'BackgroundJobQueueModelInstanceJob'
 
 export interface BackgroundJobData {
   id?: any
-  method: any
+  method?: any
   args: any
   constructorArgs?: any
   filepath: string
@@ -76,6 +77,32 @@ export class Background {
         })
       )
     }
+  }
+
+  public async func({
+    delaySeconds,
+    filepath, // filepath means a file within the app that is consuming psychic
+    importKey,
+    args = [],
+    priority = 'default',
+  }: {
+    delaySeconds?: number
+    filepath: string
+    importKey: string
+    args?: any[]
+    priority?: BackgroundQueuePriority
+  }) {
+    await this.connect()
+    await this._addToQueue(
+      'BackgroundJobQueueFunctionJob',
+      {
+        filepath: trimFilepath(filepath),
+        importKey,
+        args,
+        priority,
+      },
+      { delaySeconds }
+    )
   }
 
   public async staticMethod(
@@ -259,6 +286,16 @@ export class Background {
     { id, method, args, constructorArgs, filepath, importKey }: BackgroundJobData
   ) {
     switch (jobType) {
+      case 'BackgroundJobQueueFunctionJob':
+        if (filepath) {
+          const func = await importFileWithNamedExport(absoluteFilePath(filepath), importKey)
+
+          if (!func) return
+
+          await func(...args)
+        }
+        break
+
       case 'BackgroundJobQueueStaticJob':
         if (filepath) {
           const ObjectClass = await importFileWithNamedExport(
