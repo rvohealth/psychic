@@ -1,6 +1,10 @@
+import { IdType } from '@rvohealth/dream'
 import background, { BackgroundQueuePriority } from '.'
 
-export default function backgroundedFunction<ArgsType extends any[]>(
+type BaseSimpleType = string | number | boolean | null | IdType
+type SimpleType = BaseSimpleType | Record<string, BaseSimpleType | Record<string, any>>
+
+export default function backgroundedFunction<ArgType extends SimpleType, ArgsType extends ArgType[]>(
   callbackFunction: (...args: ArgsType) => Promise<any>,
   {
     defaultExport = false,

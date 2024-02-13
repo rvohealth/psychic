@@ -689,10 +689,10 @@
   resolved "https://registry.yarnpkg.com/@redis/time-series/-/time-series-1.0.4.tgz#af85eb080f6934580e4d3b58046026b6c2b18717"
   integrity sha512-ThUIgo2U/g7cCuZavucQTQzA9g9JbDDY2f64u3AbAoz/8vE2lt2U37LamDUVChhaDA3IRT9R6VvJwqnUfTJzng==
 
-"@rvohealth/dream@0.1.52":
-  version "0.1.52"
-  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.1.52/27bcbd7b08c5847db573af953180df5c94ebd481#27bcbd7b08c5847db573af953180df5c94ebd481"
-  integrity sha512-91FURV91uEQNgAK7er1jfoLh+mAbRKeSALrkG08gt2f4Q72/K//sRGIyg6Y+MaW+k16bkdei2yOpRw+5baLT2g==
+"@rvohealth/dream@0.1.68":
+  version "0.1.68"
+  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.1.68/eec02ec74324aa5560a3523b232168281195b9a7#eec02ec74324aa5560a3523b232168281195b9a7"
+  integrity sha512-jbdkDpoV22zRbV7aZbjU2FZ4Yh0BrkZ/kOad+VoVbu4Ygm0kkhvOW00Q5/+ORSMY2x9B30IFrbxvawVH0RAB3Q==
   dependencies:
     "@types/jest" "^29.5.5"
     "@types/lodash.clonedeep" "^4.5.7"
@@ -719,7 +719,6 @@
     pluralize "^8.0.0"
     ts-jest "^29.1.1"
     ts-node "^10.9.1"
-    typescript "^5.0.3"
     yaml "^2.2.2"
 
 "@sinclair/typebox@^0.25.16":
@@ -3847,15 +3846,10 @@ type-is@~1.6.18:
     media-typer "0.3.0"
     mime-types "~2.1.24"
 
-typescript@^5.0.3:
+typescript@^5.3.3:
   version "5.3.3"
   resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.3.3.tgz#b3ce6ba258e72e6305ba66f5c9b452aaee3ffe37"
   integrity sha512-pXWcraxM0uxAS+tN0AG/BF2TyqmHO014Z070UsJ+pFvYuRSq8KH8DmWpnbXe0pEPDHXZV3FcAbJkijJ5oNEnWw==
-
-typescript@^5.0.4:
-  version "5.0.4"
-  resolved "https://registry.yarnpkg.com/typescript/-/typescript-5.0.4.tgz#b217fd20119bd61a94d4011274e0ab369058da3b"
-  integrity sha512-cW9T5W9xY37cc+jfEnaUvX91foxtHkza3Nw3wkoF4sSlKn0MONdkdEndig/qPBWXNkmplh3NzayQzCiHM4/hqw==
 
 uid2@1.0.0:
   version "1.0.0"
