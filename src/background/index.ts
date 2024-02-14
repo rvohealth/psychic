@@ -61,8 +61,8 @@ export class Background {
     const queueOptions: QueueOptions = await queueOptsCB()
 
     this.queue ||= new Queue(`${pascalize(appConfig.name)}BackgroundJobQueue`, {
-      connection: bullConnectionOpts,
       ...queueOptions,
+      connection: bullConnectionOpts,
     })
     this.queueEvents = new QueueEvents(this.queue.name, { connection: bullConnectionOpts })
 
@@ -72,8 +72,8 @@ export class Background {
     for (let i = 0; i < workerCount(); i++) {
       this.workers.push(
         new Worker(`${pascalize(appConfig.name)}BackgroundJobQueue`, data => this.handler(data), {
-          connection: bullConnectionOpts,
           ...workerOptions,
+          connection: bullConnectionOpts,
         })
       )
     }

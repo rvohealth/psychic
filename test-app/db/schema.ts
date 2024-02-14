@@ -5,7 +5,7 @@ export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
 
-export type Int8 = ColumnType<string, string | number | bigint, string | number | bigint>;
+export type Int8 = ColumnType<string, bigint | number | string, bigint | number | string>;
 
 export type SpeciesTypesEnum = "cat" | "noncat";
 export const SpeciesTypesEnumValues = [
@@ -50,9 +50,9 @@ export interface DB {
 }
 
 
-export const HealthUserColumns = ['createdAt', 'email', 'id', 'name', 'passwordDigest', 'updatedAt'] as const
-export const PetColumns = ['createdAt', 'id', 'name', 'species', 'updatedAt', 'userId'] as const
-export const UserColumns = ['createdAt', 'email', 'id', 'name', 'passwordDigest', 'updatedAt'] as const
+export const HealthUserColumns = new Set(['createdAt', 'email', 'id', 'name', 'passwordDigest', 'updatedAt'])
+export const PetColumns = new Set(['createdAt', 'id', 'name', 'species', 'updatedAt', 'userId'])
+export const UserColumns = new Set(['createdAt', 'email', 'id', 'name', 'passwordDigest', 'updatedAt'])
 
 export const AllColumns = ['createdAt', 'email', 'healthUsers', 'id', 'name', 'passwordDigest', 'pets', 'species', 'updatedAt', 'userId', 'users'] as const
 
