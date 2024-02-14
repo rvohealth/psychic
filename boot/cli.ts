@@ -164,7 +164,7 @@ program
   })
 
 program
-  .alias('generate:api')
+  .command('generate:api')
   .alias('g:api')
   .description('generate:api generates api types for client application')
   .option('--tsnode', 'runs the command using ts-node instead of node')
