@@ -6,6 +6,7 @@
     "noImplicitAny": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
+    "skipLibCheck": true,
 
     /* do not require all properties to be initialized in constructor */
     "strictPropertyInitialization": false,
