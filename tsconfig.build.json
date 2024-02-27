@@ -1,7 +1,7 @@
 {
   "compilerOptions": {
     "module": "CommonJS",
-    "target": "ESNext",
+    "target": "es2021",
     "strict": true,
     "noImplicitAny": true,
     "declaration": true,
