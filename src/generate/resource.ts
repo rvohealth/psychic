@@ -11,6 +11,12 @@ export default async function generateResource(
   const attributesWithTypes = args.filter(attr => !['--core'].includes(attr))
   const columnAttributes = attributesWithTypes.filter(attr => isColumn(attr)).map(attr => attr.split(':')[0]!)
 
+  console.log({
+    attributesWithTypes,
+    columnAttributes,
+    route: `g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(' ')}`,
+  })
+
   await sspawn(
     dreamjsOrDreamtsCmd(
       `g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(' ')}`,
