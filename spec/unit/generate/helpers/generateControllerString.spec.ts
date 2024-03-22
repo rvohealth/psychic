@@ -14,7 +14,7 @@ describe('psy generate:controller <name> [...methods]', () => {
 
         expect(res).toEqual(
           `\
-import { Params } from 'psychic'
+import { Params } from '@rvohealth/psychic'
 import AuthedController from './AuthedController'
 import User from '../models/User'
 
@@ -70,7 +70,7 @@ export default class ApiV1UsersController extends AuthedController {
 
         expect(res).toEqual(
           `\
-import { Params } from 'psychic'
+import { Params } from '@rvohealth/psychic'
 import AuthedController from '../../../AuthedController'
 import User from '../../../../models/Health/User'
 
@@ -125,7 +125,7 @@ export default class ApiV1HealthUsersController extends AuthedController {
 
           expect(res).toEqual(
             `\
-import { Params } from 'psychic'
+import { Params } from '@rvohealth/psychic'
 import AdminAuthedController from '../Admin/AuthedController'
 import LogEntry from '../../models/Nutrition/LogEntry'
 
@@ -153,7 +153,7 @@ export default class AdminNutritionLogEntriesController extends AdminAuthedContr
 
         expect(res).toEqual(
           `\
-import { Params } from 'psychic'
+import { Params } from '@rvohealth/psychic'
 import AuthedController from '../../AuthedController'
 
 export default class ApiV1UsersController extends AuthedController {
