@@ -8,7 +8,7 @@ export default async function generateResource(
   fullyQualifiedModelName: string,
   args: string[]
 ) {
-  const attributesWithTypes = args.filter(attr => !['--core'].includes(attr))
+  const attributesWithTypes = args.filter(attr => !/^--/.test(attr))
   const columnAttributes = attributesWithTypes.filter(attr => isColumn(attr)).map(attr => attr.split(':')[0]!)
 
   console.log({
