@@ -126,7 +126,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
     .map(n => capitalize(n))
     .join('')
   return `\
-import { ${psyImports.join(', ')} } from 'psychic'${
+import { ${psyImports.join(', ')} } from '@rvohealth/psychic'${
     !!additionalImports.length ? '\n' + additionalImports.join('\n') : ''
   }
 
