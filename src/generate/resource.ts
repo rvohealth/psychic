@@ -1,6 +1,7 @@
-import pluralize from 'pluralize'
 import generateController from './controller'
 import sspawn from '../helpers/sspawn'
+import dreamjsOrDreamtsCmd from '../../boot/cli/helpers/dreamjsOrDreamtsCmd'
+import omitCoreArg from '../../boot/cli/helpers/omitCoreArg'
 
 export default async function generateResource(
   route: string,
@@ -11,9 +12,10 @@ export default async function generateResource(
   const columnAttributes = attributesWithTypes.filter(attr => isColumn(attr)).map(attr => attr.split(':')[0]!)
 
   await sspawn(
-    `yarn --cwd=../../node_modules/@rvohealth/dream dream g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(
-      ' '
-    )}`
+    dreamjsOrDreamtsCmd(
+      `g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(' ')}`,
+      omitCoreArg(args)
+    )
   )
 
   if (args.includes('--core')) {
