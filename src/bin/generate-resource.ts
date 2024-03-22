@@ -1,7 +1,6 @@
 import generateResource from '../generate/resource'
 
 async function _generateResource() {
-  console.log(process.argv)
   let route = process.argv[2]
   let name = process.argv[3]
   // omit the last arg, since it is for some reason a clustering of all args put together,
