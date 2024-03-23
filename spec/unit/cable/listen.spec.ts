@@ -23,7 +23,7 @@ describe('cable#listen', () => {
 
   it('starts an http server', async () => {
     // patch this, difficult because listen method is using promise accept within http listener
-    // await cable.listen({ port: 7777, withReact: false, reactPort: 3000 })
+    // await cable.listen({ port: 7777, withFrontEndClient: false, frontEndPort: 3000 })
     // expect(cable.http.listen).toHaveBeenCalled()
   })
 })

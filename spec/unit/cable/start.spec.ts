@@ -27,7 +27,7 @@ describe('cable#start', () => {
   it('calls cable#listen to start http server and sidechain io server to it', async () => {
     await cable.start()
     const port = 7777
-    expect(cable.listen).toHaveBeenCalledWith({ port: port, withReact: false, reactPort: 3000 })
+    expect(cable.listen).toHaveBeenCalledWith({ port: port, withFrontEndClient: false, frontEndPort: 3000 })
   })
 
   it('attaches a socket io instance to the cable instance', async () => {

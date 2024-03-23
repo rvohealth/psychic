@@ -38,11 +38,11 @@ export default class Cable {
   public async start(
     port = process.env.PORT || 7777,
     {
-      withReact = false,
-      reactPort = 3000,
+      withFrontEndClient = false,
+      frontEndPort = 3000,
     }: {
-      withReact?: boolean
-      reactPort?: number
+      withFrontEndClient?: boolean
+      frontEndPort?: number
     } = {}
   ) {
     await this.connect()
@@ -68,11 +68,11 @@ export default class Cable {
             An exception was caught in your websocket thread.
             To prevent your server from crashing, we are rescuing this error here for you.
             If you would like us to raise this exception, make sure to set
-  
+
             PSYCHIC_DANGEROUSLY_PERMIT_WS_EXCEPTIONS=1
-  
+
             the error received is:
-  
+
             ${error}
           `)
           console.trace()
@@ -82,17 +82,17 @@ export default class Cable {
 
     if (this.useRedis) await this.bindToRedis()
 
-    await this.listen({ port: parseInt(port.toString()), withReact, reactPort })
+    await this.listen({ port: parseInt(port.toString()), withFrontEndClient, frontEndPort })
   }
 
   public async listen({
     port,
-    withReact,
-    reactPort,
+    withFrontEndClient,
+    frontEndPort,
   }: {
     port: number | string
-    withReact: boolean
-    reactPort: number
+    withFrontEndClient: boolean
+    frontEndPort: number
   }) {
     return new Promise(accept => {
       this.http.listen(port, async () => {
@@ -103,7 +103,7 @@ export default class Cable {
         await log.write(
           colors.cyan(`psychic dev server started at port ${colors.bgBlueBright(colors.green(port))}`)
         )
-        if (withReact) await log.write(`react server started at port ${colors.cyan(reactPort)}`)
+        if (withFrontEndClient) await log.write(`client server started at port ${colors.cyan(frontEndPort)}`)
         await log.write('\n')
 
         accept(true)

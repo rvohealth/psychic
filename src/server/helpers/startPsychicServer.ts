@@ -8,18 +8,18 @@ import { Server } from 'http'
 export default async function startPsychicServer({
   app,
   port,
-  withReact,
-  reactPort,
+  withFrontEndClient,
+  frontEndPort,
 }: {
   app: Application
   port: number
-  withReact: boolean
-  reactPort: number
+  withFrontEndClient: boolean
+  frontEndPort: number
 }): Promise<Server> {
   return await new Promise(async accept => {
     const httpOrHttps = getPsychicHttpInstance(app)
     const server = httpOrHttps.listen(port, async () => {
-      await welcomeMessage({ port, withReact, reactPort })
+      await welcomeMessage({ port, withFrontEndClient, frontEndPort })
       accept(server)
     })
   })
@@ -41,16 +41,16 @@ export function getPsychicHttpInstance(app: Application) {
 
 async function welcomeMessage({
   port,
-  withReact,
-  reactPort,
+  withFrontEndClient,
+  frontEndPort,
 }: {
   port: number
-  withReact: boolean
-  reactPort: number
+  withFrontEndClient: boolean
+  frontEndPort: number
 }) {
   if (process.env.NODE_ENV !== 'test') {
     log.welcome(port)
     await log.write(`psychic dev server started at port ${port}`)
-    if (withReact) await log.write(`react dev server on port ${reactPort}`)
+    if (withFrontEndClient) await log.write(`client dev server on port ${frontEndPort}`)
   }
 }
