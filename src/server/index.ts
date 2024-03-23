@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser'
 import PsychicConfig from '../config'
 import log from '../log'
 import Cable from '../cable'
-import ReactServer from '../server/react'
+import FrontEndClientServer from './front-end-client'
 import PsychicRouter from '../router'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
@@ -18,7 +18,7 @@ export default class PsychicServer {
   public app: Application
   public cable: Cable
   public config: PsychicConfig
-  public reactServer: ReactServer
+  public frontEndClient: FrontEndClientServer
   public server: Server
   private booted = false
   constructor() {
@@ -69,11 +69,11 @@ export default class PsychicServer {
   public async start(
     port = process.env.PORT ? parseInt(process.env.PORT) : 7777,
     {
-      withReact = process.env.REACT === '1',
-      reactPort = 3000,
+      withFrontEndClient = process.env.CLIENT === '1',
+      frontEndPort = 3000,
     }: {
-      withReact?: boolean
-      reactPort?: number
+      withFrontEndClient?: boolean
+      frontEndPort?: number
     } = {}
   ) {
     await this.boot()
@@ -82,27 +82,27 @@ export default class PsychicServer {
     // boot our STI configurations within dream
     await loadModels()
 
-    if (withReact) {
-      this.reactServer = new ReactServer()
-      this.reactServer.start(reactPort)
+    if (withFrontEndClient) {
+      this.frontEndClient = new FrontEndClientServer()
+      this.frontEndClient.start(frontEndPort)
 
       process.on('SIGTERM', async () => {
-        await this.reactServer?.stop()
+        await this.frontEndClient?.stop()
       })
     }
 
     if (this.config.useWs && this.cable) {
       // cable starting will also start
       // an encapsulating http server
-      await this.cable.start(port, { withReact, reactPort })
+      await this.cable.start(port, { withFrontEndClient, frontEndPort })
       this.server = this.cable.http
     } else {
       await new Promise(async accept => {
         this.server = await startPsychicServer({
           app: this.app,
           port,
-          withReact,
-          reactPort,
+          withFrontEndClient,
+          frontEndPort,
         })
         accept({})
       })
