@@ -15,7 +15,7 @@ describe('generateClientRoutes', () => {
       },
     ])
 
-    expect(str).toEqual(
+    expect(str).toContain(
       `\
 const apiRoutes = {
   api: {
@@ -32,8 +32,34 @@ const apiRoutes = {
       },
     },
   },
-}
+} as const
 export default apiRoutes`
+    )
+  })
+
+  it('generates necessary type helpers', async () => {
+    const str = await generateClientRoutes([
+      {
+        controllerActionString: 'Api/V1/Users#create',
+        httpMethod: 'post',
+        path: '/api/v1/users',
+      },
+      {
+        controllerActionString: 'Api/V1/Users#update',
+        httpMethod: 'put',
+        path: '/api/v1/users/:id',
+      },
+    ])
+
+    expect(str).toContain("import { Inc, Decrement, PathValue, Path, ArrayPath } from './type-helpers'")
+
+    expect(str).toContain(
+      `\
+export type DottedApiRoutePathsToParams<T extends keyof ParamsInterface = keyof ParamsInterface> = [
+  T,
+  ParamsInterface[T],
+]
+`
     )
   })
 
@@ -52,7 +78,7 @@ export default apiRoutes`
         },
       ])
 
-      expect(str).toEqual(
+      expect(str).toContain(
         `\
 const apiRoutes = {
   api: {
@@ -69,7 +95,7 @@ const apiRoutes = {
       },
     },
   },
-}
+} as const
 export default apiRoutes`
       )
     })
@@ -85,7 +111,7 @@ export default apiRoutes`
         },
       ])
 
-      expect(str).toEqual(
+      expect(str).toContain(
         `\
 const apiRoutes = {
   api: {
@@ -98,7 +124,7 @@ const apiRoutes = {
       },
     },
   },
-}
+} as const
 export default apiRoutes`
       )
     })
@@ -114,7 +140,7 @@ export default apiRoutes`
         },
       ])
 
-      expect(str).toEqual(
+      expect(str).toContain(
         `\
 const apiRoutes = {
   api: {
@@ -125,7 +151,7 @@ const apiRoutes = {
       },
     },
   },
-}
+} as const
 export default apiRoutes`
       )
     })
@@ -146,7 +172,7 @@ export default apiRoutes`
         },
       ])
 
-      expect(str).toEqual(
+      expect(str).toContain(
         `\
 const apiRoutes = {
   api: {
@@ -167,7 +193,7 @@ const apiRoutes = {
       },
     },
   },
-}
+} as const
 export default apiRoutes`
       )
     })
