@@ -1,7 +1,6 @@
 import YAML from 'yaml'
 import { promises as fs } from 'fs'
 import absoluteFilePath from './absoluteFilePath'
-import importFileWithDefault from './importFileWithDefault'
 
 export async function loadFile(filepath: string) {
   return await fs.readFile(filepath)
@@ -19,7 +18,7 @@ let _yamlCache: DreamYamlFile | null = null
 export async function loadDreamYamlFile() {
   if (_yamlCache) return _yamlCache
 
-  const file = await loadFile(absoluteFilePath('.dream.yml'))
+  const file = await loadFile(absoluteFilePath('.dream.yml', { purgeTestAppInCoreDevelopment: true }))
   const config = (await YAML.parse(file.toString())) as DreamYamlFile
 
   // TODO: validate shape of yaml file!
@@ -31,6 +30,15 @@ export async function loadDreamYamlFile() {
 export async function schemaPath() {
   const yamlConfig = await loadDreamYamlFile()
   return absoluteFilePath(yamlConfig.schema_path)
+}
+
+export async function clientApiPath() {
+  const yamlConfig = await loadDreamYamlFile()
+  const schemaPath = yamlConfig.client_api_schema_path
+  const schemaParts = schemaPath.split('/')
+  schemaParts.pop()
+
+  return absoluteFilePath(schemaParts.join('/'))
 }
 
 export async function modelsPath() {
@@ -53,6 +61,7 @@ export interface DreamYamlFile {
   migrations_path: string
   schema_path: string
   dream_config_path: string
+  client_api_schema_path: string
 }
 
 export interface DreamConfig {
