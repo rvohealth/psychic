@@ -62,7 +62,7 @@ export default class ApiV1UsersController extends AuthedController {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', async () => {
         const res = await generateControllerString(
           'ApiV1HealthUsersController',
-          'api/v1/health/users',
+          '/api/v1/health/users',
           'Health/User',
           ['create', 'index', 'show', 'update', 'destroy', 'login'],
           ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
