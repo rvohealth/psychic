@@ -17,7 +17,9 @@ export default async function generateClientRoutes(routes: RouteConfig[]) {
   return `\
 const apiRoutes = {${str}
 } as const
-export default apiRoutes`
+export default apiRoutes
+
+export type UriParam = string | number`
 }
 
 function recursivelyBuildRoutesObj({
@@ -73,7 +75,7 @@ ${spaces(numIterations)}${camelize(key)}: {`
 function clientPathFunc(paramSegments: string[], segments: string[]) {
   return `\
 ({ ${paramSegments.map(segment => segment.replace(/^:/, '')).join(', ')} }: { ${paramSegments
-    .map(segment => segment.replace(/^:/, '') + ': string')
+    .map(segment => segment.replace(/^:/, '') + ': UriParam')
     .join(', ')} }) => \`/${segments
     .map(segment => (/^:/.test(segment) ? `\$\{${segment.replace(/^:/, '')}\}` : segment))
     .join('/')

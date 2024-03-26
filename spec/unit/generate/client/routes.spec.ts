@@ -23,13 +23,15 @@ const apiRoutes = {
       users: {
         POST: '/api/v1/users',
         id: {
-          PUT: ({ id }: { id: string }) => \`/api/v1/users/\$\{id\}\`,
+          PUT: ({ id }: { id: UriParam }) => \`/api/v1/users/\$\{id\}\`,
         },
       },
     },
   },
 } as const
-export default apiRoutes`
+export default apiRoutes
+
+export type UriParam = string | number`
     )
   })
 
@@ -60,7 +62,9 @@ const apiRoutes = {
     },
   },
 } as const
-export default apiRoutes`
+export default apiRoutes
+
+export type UriParam = string | number`
       )
     })
   })
@@ -86,7 +90,9 @@ const apiRoutes = {
     },
   },
 } as const
-export default apiRoutes`
+export default apiRoutes
+
+export type UriParam = string | number`
       )
     })
   })
@@ -107,12 +113,14 @@ const apiRoutes = {
   api: {
     version: {
       users: {
-        POST: ({ version }: { version: string }) => \`/api/\$\{version\}/users\`,
+        POST: ({ version }: { version: UriParam }) => \`/api/\$\{version\}/users\`,
       },
     },
   },
 } as const
-export default apiRoutes`
+export default apiRoutes
+
+export type UriParam = string | number`
       )
     })
   })
@@ -144,13 +152,15 @@ const apiRoutes = {
     v2: {
       users: {
         id: {
-          PUT: ({ id }: { id: string }) => \`/api/v2/users/\$\{id\}\`,
+          PUT: ({ id }: { id: UriParam }) => \`/api/v2/users/\$\{id\}\`,
         },
       },
     },
   },
 } as const
-export default apiRoutes`
+export default apiRoutes
+
+export type UriParam = string | number`
       )
     })
   })
@@ -172,13 +182,15 @@ const apiRoutes = {
     are: {
       good: {
         arentThey: {
-          POST: ({ are, arentThey }: { are: string, arentThey: string }) => \`\/chalupas\/\$\{are\}/good/\$\{arentThey\}\`,
+          POST: ({ are, arentThey }: { are: UriParam, arentThey: UriParam }) => \`\/chalupas\/\$\{are\}/good/\$\{arentThey\}\`,
         },
       },
     },
   },
 } as const
-export default apiRoutes`
+export default apiRoutes
+
+export type UriParam = string | number`
       )
     })
   })
