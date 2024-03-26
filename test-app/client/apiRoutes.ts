@@ -40,23 +40,23 @@ const apiRoutes = {
     users: {
       userId: {
         pets: {
-          GET: ({ userId }: { userId: string }) => `/api/users/${userId}/pets`,
-          POST: ({ userId }: { userId: string }) => `/api/users/${userId}/pets`,
+          GET: ({ userId }: { userId: UriParam }) => `/api/users/${userId}/pets`,
+          POST: ({ userId }: { userId: UriParam }) => `/api/users/${userId}/pets`,
           id: {
-            PUT: ({ userId, id }: { userId: string, id: string }) => `/api/users/${userId}/pets/${id}`,
-            PATCH: ({ userId, id }: { userId: string, id: string }) => `/api/users/${userId}/pets/${id}`,
-            GET: ({ userId, id }: { userId: string, id: string }) => `/api/users/${userId}/pets/${id}`,
-            DELETE: ({ userId, id }: { userId: string, id: string }) => `/api/users/${userId}/pets/${id}`,
+            PUT: ({ userId, id }: { userId: UriParam, id: UriParam }) => `/api/users/${userId}/pets/${id}`,
+            PATCH: ({ userId, id }: { userId: UriParam, id: UriParam }) => `/api/users/${userId}/pets/${id}`,
+            GET: ({ userId, id }: { userId: UriParam, id: UriParam }) => `/api/users/${userId}/pets/${id}`,
+            DELETE: ({ userId, id }: { userId: UriParam, id: UriParam }) => `/api/users/${userId}/pets/${id}`,
           },
         },
       },
       GET: '/api/users',
       POST: '/api/users',
       id: {
-        PUT: ({ id }: { id: string }) => `/api/users/${id}`,
-        PATCH: ({ id }: { id: string }) => `/api/users/${id}`,
-        GET: ({ id }: { id: string }) => `/api/users/${id}`,
-        DELETE: ({ id }: { id: string }) => `/api/users/${id}`,
+        PUT: ({ id }: { id: UriParam }) => `/api/users/${id}`,
+        PATCH: ({ id }: { id: UriParam }) => `/api/users/${id}`,
+        GET: ({ id }: { id: UriParam }) => `/api/users/${id}`,
+        DELETE: ({ id }: { id: UriParam }) => `/api/users/${id}`,
       },
     },
   },
@@ -71,7 +71,7 @@ const apiRoutes = {
   users: {
     id: {
       hello: {
-        GET: ({ id }: { id: string }) => `/users/${id}/hello`,
+        GET: ({ id }: { id: UriParam }) => `/users/${id}/hello`,
       },
     },
     POST: '/users',
@@ -91,3 +91,5 @@ const apiRoutes = {
   },
 } as const
 export default apiRoutes
+
+export type UriParam = string | number
