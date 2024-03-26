@@ -3,7 +3,7 @@ import generateClientAPIModule from '../../../../src/generate/client/apiModule'
 describe('dream generate:model <name> [...attributes]', () => {
   context('when provided with a pascalized table name', () => {
     it('generates a dream model with multiple string fields', async () => {
-      const res = await generateClientAPIModule('User')
+      const res = await generateClientAPIModule('users', 'User')
       expect(res).toEqual(
         `\
 import { apiCall } from './common'
@@ -11,23 +11,23 @@ import { User } from './schema'
 
 export default class UsersAPI {
   public static index() {
-    return apiCall('users.index').send()
-  }
-
-  public static show(id: string) {
-    return apiCall('users.show', [id]).send()
+    return apiCall('users.GET').send()
   }
 
   public static create(body: Partial<User>) {
-    return apiCall('users.create').send({ body })
+    return apiCall('users.POST').send({ body })
+  }
+
+  public static show(id: string) {
+    return apiCall('users.id.GET', { id }).send()
   }
 
   public static update(id: string, body: Partial<User>) {
-    return apiCall('users.update', [id]).send({ body })
+    return apiCall('users.id.PATCH', { id }).send({ body })
   }
 
   public static destroy(id: string) {
-    return apiCall('users.destroy', [id]).send()
+    return apiCall('users.id.DELETE', { id }).send()
   }
 }\
 `
@@ -36,31 +36,31 @@ export default class UsersAPI {
   })
 
   it('produces valid association paths when the model being generated is namespaced', async () => {
-    const res = await generateClientAPIModule('api/v1/user')
+    const res = await generateClientAPIModule('/api/users', 'System/Main/User')
     expect(res).toEqual(
       `\
 import { apiCall } from '../../common'
 import { User } from '../../schema'
 
-export default class ApiV1UsersAPI {
+export default class SystemMainUsersAPI {
   public static index() {
-    return apiCall('api.v1.users.index').send()
-  }
-
-  public static show(id: string) {
-    return apiCall('api.v1.users.show', [id]).send()
+    return apiCall('api.users.GET').send()
   }
 
   public static create(body: Partial<User>) {
-    return apiCall('api.v1.users.create').send({ body })
+    return apiCall('api.users.POST').send({ body })
+  }
+
+  public static show(id: string) {
+    return apiCall('api.users.id.GET', { id }).send()
   }
 
   public static update(id: string, body: Partial<User>) {
-    return apiCall('api.v1.users.update', [id]).send({ body })
+    return apiCall('api.users.id.PATCH', { id }).send({ body })
   }
 
   public static destroy(id: string) {
-    return apiCall('api.v1.users.destroy', [id]).send()
+    return apiCall('api.users.id.DELETE', { id }).send()
   }
 }\
 `

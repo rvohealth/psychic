@@ -37,7 +37,7 @@ export default async function generateResource(
 
   const yamlConf = readAppConfig()
   if (!yamlConf?.api_only) {
-    const str = await generateClientAPIModule(fullyQualifiedModelName)
+    const str = await generateClientAPIModule(route, fullyQualifiedModelName)
     const filepath = (
       (await clientApiPath()) +
       '/' +
