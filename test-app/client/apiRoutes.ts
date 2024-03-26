@@ -1,203 +1,83 @@
-import { Inc, Decrement, PathValue, Path, ArrayPath } from './type-helpers'
 const apiRoutes = {
   ping: {
-    ping: {
-      path: '/ping',
-      method: 'options',
-    },
+    GET: '/ping',
+    POST: '/ping',
+    PUT: '/ping',
+    PATCH: '/ping',
+    DELETE: '/ping',
+    OPTIONS: '/ping',
   },
   authPing: {
-    authPing: {
-      path: '/auth-ping',
-      method: 'get',
-    },
+    GET: '/auth-ping',
   },
   apiPing: {
-    ping: {
-      path: '/api-ping',
-      method: 'get',
-    },
+    GET: '/api-ping',
   },
   usersBeforeAllTest: {
-    beforeAllTest: {
-      path: '/users-before-all-test',
-      method: 'get',
-    },
+    GET: '/users-before-all-test',
   },
   failedToSaveTest: {
-    failedToSaveTest: {
-      path: '/failed-to-save-test',
-      method: 'post',
-    },
+    POST: '/failed-to-save-test',
   },
   forceThrow: {
-    forceThrow: {
-      path: '/force-throw',
-      method: 'post',
-    },
+    POST: '/force-throw',
   },
   conflict: {
-    throwConflict: {
-      path: '/conflict',
-      method: 'get',
-    },
+    GET: '/conflict',
   },
   api: {
     ping: {
-      ping: {
-        path: '/api/ping',
-        method: 'get',
-      },
+      GET: '/api/ping',
     },
     v1: {
       ping: {
-        ping: {
-          path: '/api/v1/ping',
-          method: 'get',
-        },
+        GET: '/api/v1/ping',
       },
       users: {
-        index: {
-          path: '/api/v1/users',
-          method: 'get',
-        },
+        GET: '/api/v1/users',
       },
     },
     users: {
       pets: {
-        index: {
-          path: (userId: string) => `/api/users/${userId}/pets`,
-          method: 'get',
-        },
-        create: {
-          path: (userId: string) => `/api/users/${userId}/pets`,
-          method: 'post',
-        },
-        update: {
-          path: (userId: string, id: string) => `/api/users/${userId}/pets/${id}`,
-          method: 'patch',
-        },
-        show: {
-          path: (userId: string, id: string) => `/api/users/${userId}/pets/${id}`,
-          method: 'get',
-        },
-        destroy: {
-          path: (userId: string, id: string) => `/api/users/${userId}/pets/${id}`,
-          method: 'delete',
-        },
+        GET: (userId: string, id: string) => `/api/users/${userId}/pets/${id}`,
+        POST: (userId: string) => `/api/users/${userId}/pets`,
+        PUT: (userId: string, id: string) => `/api/users/${userId}/pets/${id}`,
+        PATCH: (userId: string, id: string) => `/api/users/${userId}/pets/${id}`,
+        DELETE: (userId: string, id: string) => `/api/users/${userId}/pets/${id}`,
       },
-      index: {
-        path: '/api/users',
-        method: 'get',
-      },
-      create: {
-        path: '/api/users',
-        method: 'post',
-      },
-      update: {
-        path: (id: string) => `/api/users/${id}`,
-        method: 'patch',
-      },
-      show: {
-        path: (id: string) => `/api/users/${id}`,
-        method: 'get',
-      },
-      destroy: {
-        path: (id: string) => `/api/users/${id}`,
-        method: 'delete',
-      },
+      GET: (id: string) => `/api/users/${id}`,
+      POST: '/api/users',
+      PUT: (id: string) => `/api/users/${id}`,
+      PATCH: (id: string) => `/api/users/${id}`,
+      DELETE: (id: string) => `/api/users/${id}`,
     },
   },
   scopedThings: {
     testingScopes: {
-      scopeTest: {
-        path: '/scoped-things/testing-scopes',
-        method: 'get',
-      },
+      GET: '/scoped-things/testing-scopes',
     },
   },
   login: {
-    login: {
-      path: '/login',
-      method: 'post',
-    },
+    POST: '/login',
   },
   users: {
     hello: {
-      hello: {
-        path: (id: string) => `/users/${id}/hello`,
-        method: 'get',
-      },
+      GET: (id: string) => `/users/${id}/hello`,
     },
-    create: {
-      path: '/users',
-      method: 'post',
-    },
-    index: {
-      path: '/users',
-      method: 'get',
-    },
+    POST: '/users',
+    GET: '/users',
   },
   greeter: {
     hello: {
-      hello: {
-        path: '/greeter/hello',
-        method: 'get',
-      },
+      GET: '/greeter/hello',
     },
-    show: {
-      path: '/greeter',
-      method: 'get',
-    },
+    GET: '/greeter',
   },
   routeExistsButControllerDoesnt: {
-    someMethod: {
-      path: '/route-exists-but-controller-doesnt',
-      method: 'get',
-    },
+    GET: '/route-exists-but-controller-doesnt',
   },
   controllerExistsButMethodDoesnt: {
-    thisRouteDoesntExist: {
-      path: '/controller-exists-but-method-doesnt',
-      method: 'get',
-    },
+    GET: '/controller-exists-but-method-doesnt',
   },
 } as const
 export default apiRoutes
-
-type PathsToStringProps<T> = T extends string
-  ? []
-  : {
-      [K in Extract<keyof T, string>]: T[K] extends { path: any; method: string }
-        ? [K]
-        : [K, ...PathsToStringProps<T[K]>]
-    }[Extract<keyof T, string>]
-
-type JoinAllButLast<T extends string[], D extends string, Index extends number> = T extends []
-  ? never
-  : T extends [infer F]
-  ? F
-  : T extends [infer F, ...infer R]
-  ? F extends string
-    ? Index extends T['length']
-      ? `${F}${D}${T[Decrement<Index> & string & keyof T]}`
-      : `${F}${D}${JoinAllButLast<Extract<R, string[]>, D, Inc<Index>>}`
-    : never
-  : string
-
-type ParamsInterface = {
-  [Key in JoinAllButLast<PathsToStringProps<typeof apiRoutes>, '.', 1> &
-    (Path<typeof apiRoutes> | ArrayPath<typeof apiRoutes>)]: PathValue<
-    typeof apiRoutes,
-    Key & (Path<typeof apiRoutes> | ArrayPath<typeof apiRoutes>)
-  >['path'] extends (...args: any) => any
-    ? Parameters<
-        PathValue<typeof apiRoutes, Key & (Path<typeof apiRoutes> | ArrayPath<typeof apiRoutes>)>['path']
-      >
-    : []
-}
-
-export type DottedApiRoutePathsToParams<T extends keyof ParamsInterface = keyof ParamsInterface> = [
-  T,
-  ParamsInterface[T],
-]

@@ -1,4 +1,4 @@
-import generateClientRoutes from '../../../src/generate/client/routes'
+import generateClientRoutes from '../../../../src/generate/client/routes'
 
 describe('generateClientRoutes', () => {
   it('generates expected route structure', async () => {
@@ -15,51 +15,21 @@ describe('generateClientRoutes', () => {
       },
     ])
 
-    expect(str).toContain(
+    expect(str).toEqual(
       `\
 const apiRoutes = {
   api: {
     v1: {
       users: {
-        create: {
-          path: '/api/v1/users',
-          method: 'post',
-        },
-        update: {
-          path: (id: string) => \`/api/v1/users/\$\{id\}\`,
-          method: 'put',
+        POST: '/api/v1/users',
+        id: {
+          PUT: ({ id }: { id: string }) => \`/api/v1/users/\$\{id\}\`,
         },
       },
     },
   },
 } as const
 export default apiRoutes`
-    )
-  })
-
-  it('generates necessary type helpers', async () => {
-    const str = await generateClientRoutes([
-      {
-        controllerActionString: 'Api/V1/Users#create',
-        httpMethod: 'post',
-        path: '/api/v1/users',
-      },
-      {
-        controllerActionString: 'Api/V1/Users#update',
-        httpMethod: 'put',
-        path: '/api/v1/users/:id',
-      },
-    ])
-
-    expect(str).toContain("import { Inc, Decrement, PathValue, Path, ArrayPath } from './type-helpers'")
-
-    expect(str).toContain(
-      `\
-export type DottedApiRoutePathsToParams<T extends keyof ParamsInterface = keyof ParamsInterface> = [
-  T,
-  ParamsInterface[T],
-]
-`
     )
   })
 
@@ -78,20 +48,14 @@ export type DottedApiRoutePathsToParams<T extends keyof ParamsInterface = keyof 
         },
       ])
 
-      expect(str).toContain(
+      expect(str).toEqual(
         `\
 const apiRoutes = {
   api: {
     v1: {
       users: {
-        create: {
-          path: '/api/v1/users',
-          method: 'post',
-        },
-        index: {
-          path: '/api/v1/users',
-          method: 'get',
-        },
+        POST: '/api/v1/users',
+        GET: '/api/v1/users',
       },
     },
   },
@@ -111,16 +75,13 @@ export default apiRoutes`
         },
       ])
 
-      expect(str).toContain(
+      expect(str).toEqual(
         `\
 const apiRoutes = {
   api: {
     versionOfYourDreams: {
       users: {
-        create: {
-          path: '/api/version-of-your-dreams/users',
-          method: 'post',
-        },
+        POST: '/api/version-of-your-dreams/users',
       },
     },
   },
@@ -131,7 +92,7 @@ export default apiRoutes`
   })
 
   context('with a uri param nested in the route', () => {
-    it('does not use for namespace', async () => {
+    it('includes param in namespace', async () => {
       const str = await generateClientRoutes([
         {
           controllerActionString: 'Api/V1/Users#create',
@@ -140,14 +101,13 @@ export default apiRoutes`
         },
       ])
 
-      expect(str).toContain(
+      expect(str).toEqual(
         `\
 const apiRoutes = {
   api: {
-    users: {
-      create: {
-        path: (version: string) => \`/api/\$\{version\}/users\`,
-        method: 'post',
+    version: {
+      users: {
+        POST: ({ version }: { version: string }) => \`/api/\$\{version\}/users\`,
       },
     },
   },
@@ -172,23 +132,47 @@ export default apiRoutes`
         },
       ])
 
-      expect(str).toContain(
+      expect(str).toEqual(
         `\
 const apiRoutes = {
   api: {
     v1: {
       users: {
-        create: {
-          path: '/api/v1/users',
-          method: 'post',
-        },
+        POST: '/api/v1/users',
       },
     },
     v2: {
       users: {
-        update: {
-          path: (id: string) => \`/api/v2/users/\$\{id\}\`,
-          method: 'put',
+        id: {
+          PUT: ({ id }: { id: string }) => \`/api/v2/users/\$\{id\}\`,
+        },
+      },
+    },
+  },
+} as const
+export default apiRoutes`
+      )
+    })
+  })
+
+  context('with multiple route params in a route', () => {
+    it('correctly adds multiple params to function call for route', async () => {
+      const str = await generateClientRoutes([
+        {
+          controllerActionString: 'Api/V1/Users#create',
+          httpMethod: 'post',
+          path: '/chalupas/:are/good/:arentThey',
+        },
+      ])
+
+      expect(str).toEqual(
+        `\
+const apiRoutes = {
+  chalupas: {
+    are: {
+      good: {
+        arentThey: {
+          POST: ({ are, arentThey }: { are: string, arentThey: string }) => \`\/chalupas\/\$\{are\}/good/\$\{arentThey\}\`,
         },
       },
     },
