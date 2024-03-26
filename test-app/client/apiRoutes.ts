@@ -1,3 +1,4 @@
+import { Inc, Decrement, PathValue, Path, ArrayPath } from './type-helpers'
 const apiRoutes = {
   ping: {
     ping: {
@@ -161,5 +162,42 @@ const apiRoutes = {
       method: 'get',
     },
   },
-}
+} as const
 export default apiRoutes
+
+type PathsToStringProps<T> = T extends string
+  ? []
+  : {
+      [K in Extract<keyof T, string>]: T[K] extends { path: any; method: string }
+        ? [K]
+        : [K, ...PathsToStringProps<T[K]>]
+    }[Extract<keyof T, string>]
+
+type JoinAllButLast<T extends string[], D extends string, Index extends number> = T extends []
+  ? never
+  : T extends [infer F]
+  ? F
+  : T extends [infer F, ...infer R]
+  ? F extends string
+    ? Index extends T['length']
+      ? `${F}${D}${T[Decrement<Index> & string & keyof T]}`
+      : `${F}${D}${JoinAllButLast<Extract<R, string[]>, D, Inc<Index>>}`
+    : never
+  : string
+
+type ParamsInterface = {
+  [Key in JoinAllButLast<PathsToStringProps<typeof apiRoutes>, '.', 1> &
+    (Path<typeof apiRoutes> | ArrayPath<typeof apiRoutes>)]: PathValue<
+    typeof apiRoutes,
+    Key & (Path<typeof apiRoutes> | ArrayPath<typeof apiRoutes>)
+  >['path'] extends (...args: any) => any
+    ? Parameters<
+        PathValue<typeof apiRoutes, Key & (Path<typeof apiRoutes> | ArrayPath<typeof apiRoutes>)>['path']
+      >
+    : []
+}
+
+export type DottedApiRoutePathsToParams<T extends keyof ParamsInterface = keyof ParamsInterface> = [
+  T,
+  ParamsInterface[T],
+]
