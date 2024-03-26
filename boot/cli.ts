@@ -17,6 +17,7 @@ import syncRoutes, { maybeSyncRoutes } from './cli/helpers/syncRoutes'
 import nodeOrTsnodeCmd from './cli/helpers/nodeOrTsnodeCmd'
 import dreamjsOrDreamtsCmd from './cli/helpers/dreamjsOrDreamtsCmd'
 import developmentOrProdEnvString from './cli/helpers/developmentOrProdEnvString'
+import readAppConfig from '../src/config/helpers/readAppConfig'
 
 hijackRootForCLI()
 const program = new Command()
@@ -206,8 +207,7 @@ program
   })
 
 program
-  .command('sync:types')
-  .alias('sync:all')
+  .command('sync')
   .description('runs yarn dream sync:schema, then yarn dream sync:associations')
   .option('--core', 'sets core to true')
   .option('--tsnode', 'runs the command using ts-node instead of node')
@@ -216,11 +216,20 @@ program
     await sspawn(dreamjsOrDreamtsCmd('sync:schema', omitCoreArg(args)))
     await sspawn(dreamjsOrDreamtsCmd('sync:associations', omitCoreArg(args)))
     await maybeSyncRoutes(args)
+
+    const appConf = readAppConfig()!
+    if (!appConf.api_only) {
+      await sspawn(dreamjsOrDreamtsCmd('g:api', args, { cmdArgs: omitCoreArg(args) }))
+      await sspawn(
+        nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
+          fileArgs: [],
+        })
+      )
+    }
   })
 
 program
   .command('sync:schema')
-  .alias('sync')
   .alias('introspect')
   .description(
     'introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration'

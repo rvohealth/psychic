@@ -1,7 +1,12 @@
+import * as fs from 'fs/promises'
 import generateController from './controller'
 import sspawn from '../helpers/sspawn'
 import dreamjsOrDreamtsCmd from '../../boot/cli/helpers/dreamjsOrDreamtsCmd'
 import omitCoreArg from '../../boot/cli/helpers/omitCoreArg'
+import { clientApiPath } from '../helpers/path'
+import readAppConfig from '../config/helpers/readAppConfig'
+import generateClientAPIModule from './client/apiModule'
+import pluralize from 'pluralize'
 
 export default async function generateResource(
   route: string,
@@ -29,6 +34,24 @@ export default async function generateResource(
     ['create', 'index', 'show', 'update', 'destroy'],
     columnAttributes
   )
+
+  const yamlConf = readAppConfig()
+  if (!yamlConf?.api_only) {
+    const str = await generateClientAPIModule(fullyQualifiedModelName)
+    const filepath = (
+      (await clientApiPath()) +
+      '/' +
+      pluralize(fullyQualifiedModelName) +
+      '.ts'
+    ).toLowerCase()
+
+    const pathParts = filepath.split('/')
+    pathParts.pop()
+
+    await fs.mkdir(pathParts.join('/'), { recursive: true })
+    await fs.writeFile(filepath, str)
+    console.log(`generating client api module: ${filepath}`)
+  }
   // if (process.env.NODE_ENV !== 'test') process.exit()
 }
 
