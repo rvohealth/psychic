@@ -54,21 +54,20 @@ function spaces(numIterations: number) {
   return spaces
 }
 
-function recursivelyBuildRoutesStr(routesObj: any, str: string, numIterations: number) {
-  Object.keys(routesObj).forEach(key => {
+function recursivelyBuildRoutesStr(routesObj: any, str: string, numIterations: number): string {
+  return Object.keys(routesObj).reduce((agg, key) => {
     if (typeof routesObj[key] === 'string') {
       const pathStr = /^\(/.test(routesObj[key]) ? routesObj[key] : `'${routesObj[key]}'`
 
-      str += `\n${spaces(numIterations)}${key}: ${pathStr},`
+      agg += `\n${spaces(numIterations)}${key}: ${pathStr},`
     } else {
-      str += `
+      agg += `
 ${spaces(numIterations)}${camelize(key)}: {`
-      str = recursivelyBuildRoutesStr(routesObj[key], str, numIterations + 1)
-      str += `\n${spaces(numIterations)}},`
+      agg = recursivelyBuildRoutesStr(routesObj[key], agg, numIterations + 1)
+      agg += `\n${spaces(numIterations)}},`
     }
-  })
-
-  return str
+    return agg
+  }, str)
 }
 
 function clientPathFunc(paramSegments: string[], segments: string[]) {
