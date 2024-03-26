@@ -10,7 +10,7 @@ export default async function generateClientRoutes(routes: RouteConfig[]) {
       .map(segment => segment.replace(/^:/, ''))
     const filteredSegments = segments.filter(segment => !/^:/.test(segment))
 
-    routesObj = recursivelyBuildRoutesObj({ routesObj, segments, paramSegments, filteredSegments, route })
+    recursivelyBuildRoutesObj({ routesObj, segments, paramSegments, filteredSegments, route })
   })
 
   const str = recursivelyBuildRoutesStr(routesObj, '', 1)
@@ -73,9 +73,7 @@ function recursivelyBuildRoutesObj({
   paramSegments: string[]
   route: RouteConfig
 }) {
-  let currObj = routesObj
-
-  filteredSegments.forEach((routeSegment, index) => {
+  filteredSegments.reduce((currObj, routeSegment, index) => {
     currObj[routeSegment] ||= {}
     currObj = currObj[routeSegment]
 
@@ -86,9 +84,10 @@ function recursivelyBuildRoutesObj({
         method: route.httpMethod,
       }
     }
-  })
 
-  return routesObj
+    return currObj
+  }, routesObj)
+
 }
 
 function spaces(numIterations: number) {
