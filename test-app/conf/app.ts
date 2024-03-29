@@ -1,38 +1,53 @@
 import PsychicConfig from '../../src/config'
 
-export default async (psyConf: PsychicConfig) => {
+export default async (psy: PsychicConfig) => {
+  // the name of your application (no spaces)
+  psy.appName = 'testapp'
+
+  // set to true to leverage internal websocket bindings to socket.io
+  psy.useWs = false
+
+  // set to true to leverage internal redis bindings.
+  // NOTE: if useWs is also true, then psychic will also create
+  // bindings between redis and socket.io, allowing for a scalable,
+  // distributed ws pattern
+  psy.useRedis = false
+
+  // set to true if you want to also attach a client app to your project.
+  psy.apiOnly = false
+
   // run a callback on server boot (but before routes are processed)
-  psyConf.on('boot', conf => {
+  psy.on('boot', conf => {
     __forTestingOnly('boot')
   })
 
   // run a callback after routes are done processing
-  psyConf.on('after:routes', conf => {
+  psy.on('after:routes', conf => {
     __forTestingOnly('after:routes')
   })
 
   // run a callback after the config is loaded
-  psyConf.on('load', conf => {
+  psy.on('load', conf => {
     __forTestingOnly('load')
   })
 
   // run a callback after the config is loaded, but only if NODE_ENV=development
-  psyConf.on('load:dev', conf => {
+  psy.on('load:dev', conf => {
     __forTestingOnly('load:dev')
   })
 
   // run a callback after the config is loaded, but only if NODE_ENV=test
-  psyConf.on('load:test', conf => {
+  psy.on('load:test', conf => {
     __forTestingOnly('load:test')
   })
 
   // run a callback after the config is loaded, but only if NODE_ENV=prod
-  psyConf.on('load:prod', conf => {
+  psy.on('load:prod', conf => {
     __forTestingOnly('load:prod')
   })
 
   // run a callback after the config is loaded, but only if NODE_ENV=prod
-  psyConf.on('server_error', (err, req, res) => {
+  psy.on('server_error', (err, req, res) => {
     __forTestingOnly('server_error')
   })
 }

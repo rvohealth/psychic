@@ -1,18 +1,16 @@
-import fs from 'fs'
-import YAML from 'yaml'
-import absoluteSrcPath from '../../helpers/absoluteSrcPath'
+import PsychicConfig from '..'
 
 let _appConfig: AppConfig | null = null
-export default function readAppConfig() {
+export default async function readAppConfig() {
   if (_appConfig) return _appConfig
 
-  const appYmlPath = absoluteSrcPath('conf/app.yml')
-  const buffer = fs.readFileSync(appYmlPath, 'utf8')
-  _appConfig = YAML.parse(buffer)?.psychic || {
-    name: 'unknownapp',
-    ws: false,
-    redis: false,
-    api_only: false,
+  const psy = await PsychicConfig.bootForReading()
+
+  _appConfig = {
+    name: psy.appName,
+    ws: psy.useWs,
+    redis: psy.useRedis,
+    api_only: psy.apiOnly,
   }
 
   return _appConfig

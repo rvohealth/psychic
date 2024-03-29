@@ -1,4 +1,4 @@
-import { Application, Request, Response } from 'express'
+import express, { Application, Request, Response } from 'express'
 import PsychicController from '../controller'
 import PsychicDir from '../helpers/psychicdir'
 import readAppConfig from './helpers/readAppConfig'
@@ -8,13 +8,10 @@ import Cable from '../cable'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
 
 export default class PsychicConfig {
-  public static async build(app: Application, { cable }: { cable?: Cable } = {}) {
-    const conf = new PsychicConfig(app, { cable })
-
-    const hooksCB = await importFileWithDefault(absoluteSrcPath('conf/hooks'))
-    if (typeof hooksCB === 'function') {
-      hooksCB(conf)
-    }
+  public static async bootForReading() {
+    const psy = new PsychicConfig(express())
+    await psy.loadAppConfig()
+    return psy
   }
 
   public app: Application
@@ -23,6 +20,7 @@ export default class PsychicConfig {
   public apiOnly: boolean = false
   public useWs: boolean = false
   public useRedis: boolean = false
+  public appName: string = 'untitled app'
   public hooks: Record<PsychicHookLoadEventTypes, ((conf: PsychicConfig) => void | Promise<void>)[]> = {
     boot: [],
     load: [],
@@ -36,13 +34,6 @@ export default class PsychicConfig {
   constructor(app: Application, { cable }: { cable?: Cable } = {}) {
     this.app = app
     this.cable = cable
-
-    const ymlConfig = readAppConfig()
-    if (!ymlConfig) throw new Error(`Failed to read psychic yaml config`)
-
-    if (ymlConfig.ws) this.useWs = true
-    if (ymlConfig.redis) this.useRedis = true
-    if (ymlConfig.api_only) this.apiOnly = true
   }
 
   public get appPath() {
@@ -126,7 +117,7 @@ export default class PsychicConfig {
   }
 
   private async runHooksFor(hookEventType: PsychicHookLoadEventTypes) {
-    await this.loadHooks()
+    await this.loadAppConfig()
 
     for (const hook of this.hooks[hookEventType]) {
       await hook(this)
@@ -134,10 +125,10 @@ export default class PsychicConfig {
   }
 
   private loadedHooks = false
-  private async loadHooks() {
+  private async loadAppConfig() {
     if (this.loadedHooks) return
 
-    const hooksCB = await importFileWithDefault(absoluteSrcPath('conf/hooks'))
+    const hooksCB = await importFileWithDefault(absoluteSrcPath('conf/app'))
     if (typeof hooksCB === 'function') {
       hooksCB(this)
     }
