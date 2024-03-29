@@ -36,10 +36,8 @@ export default class PsychicServer {
 
   public async boot() {
     if (this.booted) return
-    this.booted = true
 
-    const bootCB = await importFileWithDefault(absoluteSrcPath('conf/hooks/boot'))
-    await bootCB(this.config)
+    await this.config['runHooksFor']('boot')
 
     await this.initializeCors()
     await this.initializeJSON()
@@ -48,20 +46,20 @@ export default class PsychicServer {
       await this.config.boot()
     } catch (err) {
       console.error(err)
-      throw `
+      throw new Error(`
         Failed to boot psychic config. the error thrown was:
           ${err}
-      `
+      `)
     }
 
     await this.buildRoutes()
 
-    const afterRoutesCB = await importFileWithDefault(absoluteSrcPath('conf/hooks/after-routes'))
-    await afterRoutesCB(this.config)
+    await this.config['runHooksFor']('after:routes')
 
     if (this.config.useWs) this.cable = new Cable(this.app)
     this.config.cable = this.cable
 
+    this.booted = true
     return true
   }
 
