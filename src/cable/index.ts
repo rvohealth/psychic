@@ -1,14 +1,10 @@
 import * as colors from 'colorette'
 import { Application } from 'express'
-import { createClient, RedisClientOptions, RedisClientType } from 'redis'
+import { createClient, RedisClientOptions } from 'redis'
 import { createAdapter } from '@socket.io/redis-adapter'
 import http from 'http'
 import socketio from 'socket.io'
 import log from '../log'
-import redisOptions from '../config/helpers/redisOptions'
-import readAppConfig from '../config/helpers/readAppConfig'
-import absoluteSrcPath from '../helpers/absoluteSrcPath'
-import importFileWithDefault from '../helpers/importFileWithDefault'
 import { getPsychicHttpInstance } from '../server/helpers/startPsychicServer'
 import PsychicConfig from '../config'
 
@@ -104,16 +100,15 @@ export default class Cable {
   }
 
   public async bindToRedis() {
-    const redisOpts = await redisOptions('ws')
-    const actualOpts = await redisOpts()
+    const userRedisCreds = this.config.redisWsCredentials
     const creds = {
-      username: actualOpts.username,
-      password: actualOpts.password,
+      username: userRedisCreds.username,
+      password: userRedisCreds.password,
       socket: {
-        host: actualOpts.host,
-        port: actualOpts.port ? parseInt(actualOpts.port) : 6379,
-        tls: (!!actualOpts.secure || undefined) as true,
-        rejectUnauthorized: !!actualOpts.secure,
+        host: userRedisCreds.host,
+        port: userRedisCreds.port ? parseInt(userRedisCreds.port) : 6379,
+        tls: (!!userRedisCreds.secure || undefined) as true,
+        rejectUnauthorized: !!userRedisCreds.secure,
       },
     } as RedisClientOptions
 

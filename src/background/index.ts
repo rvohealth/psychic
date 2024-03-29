@@ -1,13 +1,12 @@
-import { ConnectionOptions, Job, Queue, QueueEvents, QueueOptions, Worker, WorkerOptions } from 'bullmq'
+import { ConnectionOptions, Job, Queue, QueueEvents, Worker } from 'bullmq'
 import readAppConfig from '../config/helpers/readAppConfig'
 import { Dream, loadModels, pascalize } from '@rvohealth/dream'
 import getModelKey from '../config/helpers/getModelKey'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
-import redisOptions, { PsychicRedisConnectionOptions } from '../config/helpers/redisOptions'
+import redisOptions from '../config/helpers/redisOptions'
 import developmentOrTestEnv from '../../boot/cli/helpers/developmentOrTestEnv'
 import absoluteFilePath from '../helpers/absoluteFilePath'
-import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import PsychicConfig from '../config'
 
 type JobTypes =
@@ -43,8 +42,7 @@ export class Background {
 
     if (!appConfig?.redis) throw `attempting to use background jobs, but config.useRedis is not set to true.`
 
-    const getConnectionOptions = await redisOptions('background_jobs')
-    const connectionOptions = (await getConnectionOptions()) as PsychicRedisConnectionOptions
+    const connectionOptions = await redisOptions('background_jobs')
     const bullConnectionOpts = {
       host: connectionOptions.host,
       username: connectionOptions.username,

@@ -1,6 +1,4 @@
-import { hyphenize } from '@rvohealth/dream'
-import absoluteSrcPath from '../../helpers/absoluteSrcPath'
-import importFileWithDefault from '../../helpers/importFileWithDefault'
+import PsychicConfig from '..'
 
 export interface PsychicRedisConnectionOptions {
   secure?: boolean
@@ -12,6 +10,16 @@ export interface PsychicRedisConnectionOptions {
 
 export type RedisOptionPurpose = 'ws' | 'background_jobs'
 export default async function redisOptions(purpose: RedisOptionPurpose) {
-  const redisConf = await importFileWithDefault(absoluteSrcPath(`/conf/redis/${hyphenize(purpose)}`))
-  return redisConf as () => Promise<PsychicRedisConnectionOptions>
+  const psyConf = await PsychicConfig.bootForReading()
+
+  switch (purpose) {
+    case 'ws':
+      return psyConf.redisWsCredentials
+
+    case 'background_jobs':
+      return psyConf.redisBackgroundJobCredentials
+
+    default:
+      throw new Error(`unexpected redis purpose encountered: ${purpose}`)
+  }
 }
