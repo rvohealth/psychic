@@ -16,6 +16,20 @@ export default async (psy: PsychicConfig) => {
   // set to true if you want to also attach a client app to your project.
   psy.apiOnly = false
 
+  // set options to pass to express.json when middleware is booted
+  psy.setJsonOptions({
+    limit: '20mb',
+  })
+
+  // set options to pass to coors when middleware is booted
+  psy.setCorsOptions({
+    credentials: true,
+    origin: [
+      process.env.CLIENT_HOST ||
+        (process.env.NODE_ENV === 'test' ? 'http://localhost:7778' : 'http://localhost:3000'),
+    ],
+  })
+
   // run a callback on server boot (but before routes are processed)
   psy.on('boot', conf => {
     __forTestingOnly('boot')
