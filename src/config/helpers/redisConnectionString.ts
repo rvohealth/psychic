@@ -1,8 +1,7 @@
-import redisOptions, { PsychicRedisConnectionOptions, RedisOptionPurpose } from './redisOptions'
+import redisOptions, { RedisOptionPurpose } from './redisOptions'
 
 export default async function redisConnectionString(purpose: RedisOptionPurpose) {
-  const getConnectionOptions = await redisOptions(purpose)
-  const connectionOptions = (await getConnectionOptions()) as PsychicRedisConnectionOptions
+  const connectionOptions = await redisOptions(purpose)
 
   const protocol = connectionOptions.secure ? 'rediss' : 'redis'
   const user = connectionOptions.username || ''

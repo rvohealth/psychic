@@ -1,3 +1,4 @@
+import { developmentOrTestEnv } from '@rvohealth/dream'
 import PsychicConfig from '../../src/config'
 
 export default async (psy: PsychicConfig) => {
@@ -49,6 +50,24 @@ export default async (psy: PsychicConfig) => {
   // configuration options for bullmq worker (used for running background jobs in redis)
   psy.setBackgroundWorkerOptions({})
 
+  // redis background job credentials
+  psy.setRedisBackgroundJobCredentials({
+    username: process.env.REDIS_USER,
+    password: process.env.REDIS_PASSWORD,
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    secure: process.env.REDIS_USE_SSL === '1',
+  })
+
+  // redis websocket credentials
+  psy.setRedisWsCredentials({
+    username: process.env.REDIS_USER,
+    password: process.env.REDIS_PASSWORD,
+    host: process.env.REDIS_HOST,
+    port: process.env.REDIS_PORT,
+    secure: process.env.REDIS_USE_SSL === '1',
+  })
+
   // ******
   // HOOKS:
   // ******
@@ -86,6 +105,9 @@ export default async (psy: PsychicConfig) => {
   // run a callback after the config is loaded, but only if NODE_ENV=prod
   psy.on('server_error', (err, req, res) => {
     __forTestingOnly('server_error')
+
+    if (!res.headersSent) res.sendStatus(500)
+    else if (developmentOrTestEnv()) throw err
   })
 
   psy.on('ws:start', server => {

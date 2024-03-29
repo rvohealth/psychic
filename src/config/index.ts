@@ -9,6 +9,7 @@ import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
 import { CorsOptions } from 'cors'
 import bodyParser from 'body-parser'
 import { QueueOptions } from 'bullmq'
+import { PsychicRedisConnectionOptions } from './helpers/redisOptions'
 
 export default class PsychicConfig {
   public static async bootForReading() {
@@ -28,6 +29,8 @@ export default class PsychicConfig {
   public jsonOptions: bodyParser.Options
   public backgroundQueueOptions: Omit<QueueOptions, 'connection'>
   public backgroundWorkerOptions: WorkerOptions
+  public redisBackgroundJobCredentials: PsychicRedisConnectionOptions
+  public redisWsCredentials: PsychicRedisConnectionOptions
   public bootHooks: Record<PsychicHookLoadEventTypes, ((conf: PsychicConfig) => void | Promise<void>)[]> = {
     boot: [],
     load: [],
@@ -152,6 +155,14 @@ export default class PsychicConfig {
 
   public setBackgroundWorkerOptions(options: WorkerOptions) {
     this.backgroundWorkerOptions = options
+  }
+
+  public setRedisBackgroundJobCredentials(credentials: PsychicRedisConnectionOptions) {
+    this.redisBackgroundJobCredentials = credentials
+  }
+
+  public setRedisWsCredentials(credentials: PsychicRedisConnectionOptions) {
+    this.redisWsCredentials = credentials
   }
 
   private async runHooksFor(hookEventType: PsychicHookLoadEventTypes) {
