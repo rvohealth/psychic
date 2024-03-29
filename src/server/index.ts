@@ -37,10 +37,11 @@ export default class PsychicServer {
   public async boot() {
     if (this.booted) return
 
+    await this.config['loadAppConfig']()
     await this.config['runHooksFor']('boot')
 
-    await this.initializeCors()
-    await this.initializeJSON()
+    this.initializeCors()
+    this.initializeJSON()
 
     try {
       await this.config.boot()
@@ -141,14 +142,12 @@ export default class PsychicServer {
     this.app.use(cookieParser())
   }
 
-  private async initializeCors() {
-    const getCorsOptions = await importFileWithDefault(absoluteSrcPath('conf/cors'))
-    this.app.use(cors(await getCorsOptions()))
+  private initializeCors() {
+    this.app.use(cors(this.config.corsOptions))
   }
 
-  private async initializeJSON() {
-    const getJsonOptions = await importFileWithDefault(absoluteSrcPath('conf/json'))
-    this.app.use(express.json(await getJsonOptions()))
+  private initializeJSON() {
+    this.app.use(express.json(this.config.jsonOptions))
   }
 
   private async buildRoutes() {

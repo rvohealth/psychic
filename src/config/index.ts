@@ -1,11 +1,12 @@
 import express, { Application, Request, Response } from 'express'
 import PsychicController from '../controller'
 import PsychicDir from '../helpers/psychicdir'
-import readAppConfig from './helpers/readAppConfig'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import Cable from '../cable'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
+import { CorsOptions } from 'cors'
+import bodyParser from 'body-parser'
 
 export default class PsychicConfig {
   public static async bootForReading() {
@@ -21,6 +22,8 @@ export default class PsychicConfig {
   public useWs: boolean = false
   public useRedis: boolean = false
   public appName: string = 'untitled app'
+  public corsOptions: CorsOptions = {}
+  public jsonOptions: bodyParser.Options
   public hooks: Record<PsychicHookLoadEventTypes, ((conf: PsychicConfig) => void | Promise<void>)[]> = {
     boot: [],
     load: [],
@@ -114,6 +117,14 @@ export default class PsychicConfig {
           cb as (conf: PsychicConfig) => void | Promise<void>
         )
     }
+  }
+
+  public setCorsOptions(options: CorsOptions) {
+    this.corsOptions = options
+  }
+
+  public setJsonOptions(options: bodyParser.Options) {
+    this.jsonOptions = options
   }
 
   private async runHooksFor(hookEventType: PsychicHookLoadEventTypes) {
