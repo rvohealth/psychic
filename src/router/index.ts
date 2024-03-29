@@ -316,9 +316,9 @@ export default class PsychicRouter {
 
         case 'InternalServerError':
         default:
-          if (this.config.serverErrorHooks.length) {
+          if (this.config.specialHooks.serverError.length) {
             try {
-              for (const hook of this.config.serverErrorHooks) {
+              for (const hook of this.config.specialHooks.serverError) {
                 await hook(err, req, res)
               }
             } catch (error) {

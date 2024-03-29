@@ -35,7 +35,7 @@ export default async function generateResource(
     columnAttributes
   )
 
-  const yamlConf = readAppConfig()
+  const yamlConf = await readAppConfig()
   if (!yamlConf?.api_only) {
     const str = await generateClientAPIModule(route, fullyQualifiedModelName)
     const filepath = (

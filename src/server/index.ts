@@ -57,7 +57,7 @@ export default class PsychicServer {
 
     await this.config['runHooksFor']('after:routes')
 
-    if (this.config.useWs) this.cable = new Cable(this.app)
+    if (this.config.useWs) this.cable = new Cable(this.app, this.config)
     this.config.cable = this.cable
 
     this.booted = true

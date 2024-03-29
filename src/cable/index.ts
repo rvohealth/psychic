@@ -10,14 +10,17 @@ import readAppConfig from '../config/helpers/readAppConfig'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import { getPsychicHttpInstance } from '../server/helpers/startPsychicServer'
+import PsychicConfig from '../config'
 
 export default class Cable {
   public app: Application
   public io: socketio.Server | undefined
   public http: http.Server
   public useRedis: boolean
-  constructor(app: Application) {
+  private config: PsychicConfig
+  constructor(app: Application, config: PsychicConfig) {
     this.app = app
+    this.config = config
   }
 
   public async connect() {
@@ -25,14 +28,8 @@ export default class Cable {
     // for socket.io, we have to circumvent the normal process for starting a
     // psychic server so that we can bind socket.io to the http instance.
     this.http = getPsychicHttpInstance(this.app)
-
-    const getCorsOptions = await importFileWithDefault(absoluteSrcPath('conf/cors'))
-    this.io = new socketio.Server(this.http, { cors: await getCorsOptions() })
-
-    const appConfig = readAppConfig()
-    if (!appConfig) throw `Failed to read app config`
-
-    this.useRedis = appConfig.redis
+    this.io = new socketio.Server(this.http, { cors: this.config.corsOptions })
+    this.useRedis = this.config.useRedis
   }
 
   public async start(
@@ -47,20 +44,15 @@ export default class Cable {
   ) {
     await this.connect()
 
-    let startDef: (socket: socketio.Server) => Promise<void>
-    try {
-      startDef = await importFileWithDefault(absoluteSrcPath('conf/ws/start'))
-      if (startDef) await startDef(this.io!)
-    } catch (error) {}
-
-    let connectDef: (socket: socketio.Socket) => Promise<void>
-    try {
-      connectDef = await importFileWithDefault(absoluteSrcPath('conf/ws/connect'))
-    } catch (error) {}
+    for (const hook of this.config.specialHooks.wsStart) {
+      await hook(this.io!)
+    }
 
     this.io!.on('connect', async socket => {
       try {
-        if (connectDef) await connectDef(socket)
+        for (const hook of this.config.specialHooks.wsConnect) {
+          await hook(socket)
+        }
       } catch (error) {
         if (process.env.PSYCHIC_DANGEROUSLY_PERMIT_WS_EXCEPTIONS === '1') throw error
         else {
