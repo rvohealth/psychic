@@ -1,4 +1,3 @@
-import fs from 'fs'
 import { Application } from 'express'
 import PsychicController from '../controller'
 import PsychicDir from '../helpers/psychicdir'
@@ -14,18 +13,16 @@ export default class PsychicConfig {
   public apiOnly: boolean = false
   public useWs: boolean = false
   public useRedis: boolean = false
-  public useUUIDs: boolean = false
   constructor(app: Application, { cable }: { cable?: Cable } = {}) {
     this.app = app
     this.cable = cable
 
     const ymlConfig = readAppConfig()
-    if (!ymlConfig) throw `Failed to read yaml config`
+    if (!ymlConfig) throw new Error(`Failed to read psychic yaml config`)
 
     if (ymlConfig.ws) this.useWs = true
     if (ymlConfig.redis) this.useRedis = true
     if (ymlConfig.api_only) this.apiOnly = true
-    if (ymlConfig.use_uuids) this.useUUIDs = true
   }
 
   public get appPath() {

@@ -13,7 +13,6 @@ export default function readAppConfig() {
     ws: false,
     redis: false,
     api_only: false,
-    use_uuids: false,
   }
 
   return _appConfig
@@ -24,5 +23,4 @@ export interface AppConfig {
   ws: boolean
   redis: boolean
   api_only: boolean
-  use_uuids: boolean
 }
