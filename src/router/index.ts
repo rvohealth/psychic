@@ -286,13 +286,6 @@ export default class PsychicRouter {
       return
     }
 
-    let serverErrorHandler: any = null
-    try {
-      serverErrorHandler = await importFileWithDefault(absoluteSrcPath('conf/hooks/server-error'))
-    } catch (_) {
-      // ok if this file isn't present
-    }
-
     try {
       await controller.runAction(action)
     } catch (err) {
@@ -323,9 +316,11 @@ export default class PsychicRouter {
 
         case 'InternalServerError':
         default:
-          if (serverErrorHandler) {
+          if (this.config.serverErrorHooks.length) {
             try {
-              await serverErrorHandler(err, req, res)
+              for (const hook of this.config.serverErrorHooks) {
+                await hook(err, req, res)
+              }
             } catch (error) {
               if (developmentOrTestEnv()) {
                 // In development and test, we want to throw so that, for example, double-setting of
@@ -337,7 +332,7 @@ export default class PsychicRouter {
               } else {
                 console.error(
                   `
-                  Something went wrong while attempting to call your custom server-error file.
+                  Something went wrong while attempting to call your custom server_error hooks.
                   Psychic will rescue errors thrown here to prevent the server from crashing.
                   The error thrown is:
                 `

@@ -1,31 +1,35 @@
 import PsychicConfig from '../../../src/config'
+import { PsychicHookEventType } from '../../../src/config/types'
 import PsychicServer from '../../../src/server'
-
-const allSpy = jest.fn()
-const devSpy = jest.fn()
-const prodSpy = jest.fn()
-const testingSpy = jest.fn()
-
-jest.mock('../../../test-app/conf/hooks/all', () => ({ default: allSpy }))
-jest.mock('../../../test-app/conf/hooks/dev', () => ({ default: devSpy }))
-jest.mock('../../../test-app/conf/hooks/prod', () => ({ default: prodSpy }))
-jest.mock('../../../test-app/conf/hooks/testing', () => ({ default: testingSpy }))
+import * as hooksModule from '../../../test-app/conf/hooks'
 
 describe('PsychicConfig', () => {
   let config: PsychicConfig
 
   beforeEach(() => {
+    ;(process.env as any).__PSYCHIC_HOOKS_TEST_CACHE = []
     config = new PsychicConfig(new PsychicServer().app)
+    jest.spyOn(hooksModule, '__forTestingOnly').mockImplementation(() => {})
   })
 
-  it('loads conf/hooks/all.ts', async () => {
-    await config.boot()
-    expect(allSpy).toHaveBeenCalledWith(config)
-  })
+  function expectHookCalled(hookEventType: PsychicHookEventType) {
+    expect((process.env as any).__PSYCHIC_HOOKS_TEST_CACHE.split(',')).toEqual(
+      expect.arrayContaining([hookEventType])
+    )
+  }
 
-  it('loads conf/hooks/testing.ts', async () => {
+  function expectHookNotCalled(hookEventType: PsychicHookEventType) {
+    expect((process.env as any).__PSYCHIC_HOOKS_TEST_CACHE.split(',')).not.toEqual(
+      expect.arrayContaining([hookEventType])
+    )
+  }
+
+  it('loads conf/hooks.ts', async () => {
     await config.boot()
-    expect(testingSpy).toHaveBeenCalledWith(config)
+    expectHookCalled('load')
+    expectHookCalled('load:test')
+    expectHookNotCalled('load:dev')
+    expectHookNotCalled('load:prod')
   })
 
   context('process.env.NODE_ENV === "development"', () => {
@@ -39,7 +43,11 @@ describe('PsychicConfig', () => {
 
     it('loads conf/hooks/testing.ts', async () => {
       await config.boot()
-      expect(devSpy).toHaveBeenCalledWith(config)
+
+      expectHookCalled('load')
+      expectHookCalled('load:dev')
+      expectHookNotCalled('load:test')
+      expectHookNotCalled('load:prod')
     })
   })
 
@@ -54,7 +62,10 @@ describe('PsychicConfig', () => {
 
     it('loads conf/hooks/prod.ts', async () => {
       await config.boot()
-      expect(prodSpy).toHaveBeenCalledWith(config)
+      expectHookCalled('load')
+      expectHookCalled('load:prod')
+      expectHookNotCalled('load:test')
+      expectHookNotCalled('load:dev')
     })
   })
 })
