@@ -8,6 +8,7 @@ import redisOptions, { PsychicRedisConnectionOptions } from '../config/helpers/r
 import developmentOrTestEnv from '../../boot/cli/helpers/developmentOrTestEnv'
 import absoluteFilePath from '../helpers/absoluteFilePath'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
+import PsychicConfig from '../config'
 
 type JobTypes =
   | 'BackgroundJobQueueFunctionJob'
@@ -57,8 +58,8 @@ export class Background {
       connectTimeout: 5000,
     } as ConnectionOptions
 
-    const queueOptsCB = await importFileWithDefault(absoluteSrcPath('conf/background/queue'))
-    const queueOptions: QueueOptions = await queueOptsCB()
+    const psyConf = await PsychicConfig.bootForReading()
+    const queueOptions = psyConf.backgroundQueueOptions
 
     this.queue ||= new Queue(`${pascalize(appConfig.name)}BackgroundJobQueue`, {
       ...queueOptions,
@@ -66,8 +67,7 @@ export class Background {
     })
     this.queueEvents = new QueueEvents(this.queue.name, { connection: bullConnectionOpts })
 
-    const workerOptsCB = await importFileWithDefault(absoluteSrcPath('conf/background/worker'))
-    const workerOptions: WorkerOptions = await workerOptsCB()
+    const workerOptions = psyConf.backgroundWorkerOptions
 
     for (let i = 0; i < workerCount(); i++) {
       this.workers.push(

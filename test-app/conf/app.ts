@@ -1,6 +1,10 @@
 import PsychicConfig from '../../src/config'
 
 export default async (psy: PsychicConfig) => {
+  // ******
+  // CONFIG:
+  // ******
+
   // the name of your application (no spaces)
   psy.appName = 'testapp'
 
@@ -8,9 +12,6 @@ export default async (psy: PsychicConfig) => {
   psy.useWs = true
 
   // set to true to leverage internal redis bindings.
-  // NOTE: if useWs is also true, then psychic will also create
-  // bindings between redis and socket.io, allowing for a scalable,
-  // distributed ws pattern
   psy.useRedis = true
 
   // set to true if you want to also attach a client app to your project.
@@ -29,6 +30,28 @@ export default async (psy: PsychicConfig) => {
         (process.env.NODE_ENV === 'test' ? 'http://localhost:7778' : 'http://localhost:3000'),
     ],
   })
+
+  // configuration options for bullmq queue (used for running background jobs in redis)
+  psy.setBackgroundQueueOptions({
+    defaultJobOptions: {
+      removeOnComplete: 1000,
+      removeOnFail: 20000,
+      // 524,288,000 ms (~6.1 days) using algorithm:
+      // "2 ^ (attempts - 1) * delay"
+      attempts: 20,
+      backoff: {
+        type: 'exponential',
+        delay: 1000,
+      },
+    },
+  })
+
+  // configuration options for bullmq worker (used for running background jobs in redis)
+  psy.setBackgroundWorkerOptions({})
+
+  // ******
+  // HOOKS:
+  // ******
 
   // run a callback on server boot (but before routes are processed)
   psy.on('boot', conf => {

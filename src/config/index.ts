@@ -8,6 +8,7 @@ import Cable from '../cable'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
 import { CorsOptions } from 'cors'
 import bodyParser from 'body-parser'
+import { QueueOptions } from 'bullmq'
 
 export default class PsychicConfig {
   public static async bootForReading() {
@@ -25,6 +26,8 @@ export default class PsychicConfig {
   public appName: string = 'untitled app'
   public corsOptions: CorsOptions = {}
   public jsonOptions: bodyParser.Options
+  public backgroundQueueOptions: Omit<QueueOptions, 'connection'>
+  public backgroundWorkerOptions: WorkerOptions
   public bootHooks: Record<PsychicHookLoadEventTypes, ((conf: PsychicConfig) => void | Promise<void>)[]> = {
     boot: [],
     load: [],
@@ -141,6 +144,14 @@ export default class PsychicConfig {
 
   public setJsonOptions(options: bodyParser.Options) {
     this.jsonOptions = options
+  }
+
+  public setBackgroundQueueOptions(options: Omit<QueueOptions, 'connection'>) {
+    this.backgroundQueueOptions = options
+  }
+
+  public setBackgroundWorkerOptions(options: WorkerOptions) {
+    this.backgroundWorkerOptions = options
   }
 
   private async runHooksFor(hookEventType: PsychicHookLoadEventTypes) {
