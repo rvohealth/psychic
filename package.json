@@ -76,11 +76,11 @@
     "tslib": "^2.6.2"
   },
   "peerDependencies": {
-    "@rvohealth/dream": "0.1.78",
+    "@rvohealth/dream": "^0.2.0-beta1",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "@rvohealth/dream": "0.1.78",
+    "@rvohealth/dream": "^0.2.0-beta1",
     "@types/jest-plugin-context": "^2.9.5",
     "jest-plugin-context": "^2.9.0",
     "typescript": "^5.3.3"
