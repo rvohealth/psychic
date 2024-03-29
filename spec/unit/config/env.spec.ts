@@ -1,7 +1,6 @@
 import PsychicConfig from '../../../src/config'
 import { PsychicHookEventType } from '../../../src/config/types'
 import PsychicServer from '../../../src/server'
-import * as hooksModule from '../../../test-app/conf/hooks'
 
 describe('PsychicConfig', () => {
   let config: PsychicConfig
@@ -9,7 +8,6 @@ describe('PsychicConfig', () => {
   beforeEach(() => {
     ;(process.env as any).__PSYCHIC_HOOKS_TEST_CACHE = []
     config = new PsychicConfig(new PsychicServer().app)
-    jest.spyOn(hooksModule, '__forTestingOnly').mockImplementation(() => {})
   })
 
   function expectHookCalled(hookEventType: PsychicHookEventType) {
@@ -24,7 +22,7 @@ describe('PsychicConfig', () => {
     )
   }
 
-  it('loads conf/hooks.ts', async () => {
+  it('loads conf/app.ts and processes hooks for load:test', async () => {
     await config.boot()
     expectHookCalled('load')
     expectHookCalled('load:test')
@@ -41,7 +39,7 @@ describe('PsychicConfig', () => {
       process.env.NODE_ENV = 'test'
     })
 
-    it('loads conf/hooks/testing.ts', async () => {
+    it('processes callbacks for load:dev', async () => {
       await config.boot()
 
       expectHookCalled('load')
@@ -60,7 +58,7 @@ describe('PsychicConfig', () => {
       process.env.NODE_ENV = 'test'
     })
 
-    it('loads conf/hooks/prod.ts', async () => {
+    it('processes callbacks for load:prod', async () => {
       await config.boot()
       expectHookCalled('load')
       expectHookCalled('load:prod')
