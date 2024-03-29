@@ -1,4 +1,5 @@
 import express, { Application, Request, Response } from 'express'
+import { Server as SocketServer, Socket } from 'socket.io'
 import PsychicController from '../controller'
 import PsychicDir from '../helpers/psychicdir'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
@@ -24,7 +25,7 @@ export default class PsychicConfig {
   public appName: string = 'untitled app'
   public corsOptions: CorsOptions = {}
   public jsonOptions: bodyParser.Options
-  public hooks: Record<PsychicHookLoadEventTypes, ((conf: PsychicConfig) => void | Promise<void>)[]> = {
+  public bootHooks: Record<PsychicHookLoadEventTypes, ((conf: PsychicConfig) => void | Promise<void>)[]> = {
     boot: [],
     load: [],
     'load:dev': [],
@@ -32,7 +33,11 @@ export default class PsychicConfig {
     'load:prod': [],
     'after:routes': [],
   }
-  public serverErrorHooks: ((err: any, req: Request, res: Response) => void | Promise<void>)[] = []
+  public specialHooks: PsychicConfigSpecialHooks = {
+    serverError: [],
+    wsStart: [],
+    wsConnect: [],
+  }
 
   constructor(app: Application, { cable }: { cable?: Cable } = {}) {
     this.app = app
@@ -104,16 +109,27 @@ export default class PsychicConfig {
     hookEventType: T,
     cb: T extends 'server_error'
       ? (err: any, req: Request, res: Response) => void | Promise<void>
+      : T extends 'ws:start'
+      ? (server: SocketServer) => void | Promise<void>
+      : T extends 'ws:connect'
+      ? (socket: Socket) => void | Promise<void>
       : (conf: PsychicConfig) => void | Promise<void>
   ) {
     switch (hookEventType) {
       case 'server_error':
-        this.serverErrorHooks.push(cb as (conf: PsychicConfig) => void | Promise<void>)
+        this.specialHooks.serverError.push(cb as (conf: PsychicConfig) => void | Promise<void>)
+        break
 
+      case 'ws:start':
+        this.specialHooks.wsStart.push(cb as (server: SocketServer) => void | Promise<void>)
+        break
+
+      case 'ws:connect':
+        this.specialHooks.wsConnect.push(cb as (socket: Socket) => void | Promise<void>)
         break
 
       default:
-        this.hooks[hookEventType as PsychicHookLoadEventTypes].push(
+        this.bootHooks[hookEventType as PsychicHookLoadEventTypes].push(
           cb as (conf: PsychicConfig) => void | Promise<void>
         )
     }
@@ -130,7 +146,7 @@ export default class PsychicConfig {
   private async runHooksFor(hookEventType: PsychicHookLoadEventTypes) {
     await this.loadAppConfig()
 
-    for (const hook of this.hooks[hookEventType]) {
+    for (const hook of this.bootHooks[hookEventType]) {
       await hook(this)
     }
   }
@@ -145,4 +161,10 @@ export default class PsychicConfig {
     }
     this.loadedHooks = true
   }
+}
+
+export interface PsychicConfigSpecialHooks {
+  serverError: ((err: any, req: Request, res: Response) => void | Promise<void>)[]
+  wsStart: ((server: SocketServer) => void | Promise<void>)[]
+  wsConnect: ((socket: Socket) => void | Promise<void>)[]
 }

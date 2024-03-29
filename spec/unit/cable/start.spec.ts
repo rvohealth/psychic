@@ -9,7 +9,7 @@ describe('cable#start', () => {
   let httpServer: any
   beforeEach(async () => {
     server = new PsychicServer()
-    cable = new Cable(server.app)
+    cable = new Cable(server.app, server.config)
     httpServer = http.createServer(server.app)
     await cable.connect()
 

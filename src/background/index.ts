@@ -34,7 +34,7 @@ export class Background {
     if (process.env.NODE_ENV === 'test' && process.env.REALLY_TEST_BACKGROUND_QUEUE !== '1') return
     if (this.queue) return
 
-    const appConfig = readAppConfig()
+    const appConfig = await readAppConfig()
 
     // ensure models are loaded, since otherwise we will not properly
     // boot our STI configurations within dream

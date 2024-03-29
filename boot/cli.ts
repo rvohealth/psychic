@@ -217,7 +217,7 @@ program
     await sspawn(dreamjsOrDreamtsCmd('sync:associations', omitCoreArg(args)))
     await maybeSyncRoutes(args)
 
-    const appConf = readAppConfig()!
+    const appConf = await readAppConfig()!
     if (!appConf.api_only) {
       await sspawn(dreamjsOrDreamtsCmd('g:api', args, { cmdArgs: omitCoreArg(args) }))
       await sspawn(

@@ -5,13 +5,13 @@ export default async (psy: PsychicConfig) => {
   psy.appName = 'testapp'
 
   // set to true to leverage internal websocket bindings to socket.io
-  psy.useWs = false
+  psy.useWs = true
 
   // set to true to leverage internal redis bindings.
   // NOTE: if useWs is also true, then psychic will also create
   // bindings between redis and socket.io, allowing for a scalable,
   // distributed ws pattern
-  psy.useRedis = false
+  psy.useRedis = true
 
   // set to true if you want to also attach a client app to your project.
   psy.apiOnly = false
@@ -63,6 +63,14 @@ export default async (psy: PsychicConfig) => {
   // run a callback after the config is loaded, but only if NODE_ENV=prod
   psy.on('server_error', (err, req, res) => {
     __forTestingOnly('server_error')
+  })
+
+  psy.on('ws:start', server => {
+    __forTestingOnly('ws:start')
+  })
+
+  psy.on('ws:connect', socket => {
+    __forTestingOnly('ws:connect')
   })
 }
 
