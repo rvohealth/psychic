@@ -1,6 +1,6 @@
 {
   "name": "@rvohealth/psychic",
-  "version": "0.1.67",
+  "version": "0.2.0",
   "main": "src/index.ts",
   "author": "avocadojesus <jgarbey@gmail.com>",
   "repository": "https://github.com/rvohealth/psychic.git",
@@ -75,11 +75,11 @@
     "tslib": "^2.6.2"
   },
   "peerDependencies": {
-    "@rvohealth/dream": "^0.2.0-beta1",
+    "@rvohealth/dream": "^0.2.0",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "@rvohealth/dream": "^0.2.0-beta1",
+    "@rvohealth/dream": "^0.2.0",
     "@types/jest-plugin-context": "^2.9.5",
     "jest-plugin-context": "^2.9.0",
     "typescript": "^5.3.3"
