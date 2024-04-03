@@ -179,7 +179,7 @@ export default class PsychicConfig {
 
     const hooksCB = await importFileWithDefault(absoluteSrcPath('conf/app'))
     if (typeof hooksCB === 'function') {
-      hooksCB(this)
+      await hooksCB(this)
     }
     this.loadedHooks = true
   }
