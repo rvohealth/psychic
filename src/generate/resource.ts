@@ -11,16 +11,16 @@ import pluralize from 'pluralize'
 export default async function generateResource(
   route: string,
   fullyQualifiedModelName: string,
-  args: string[]
+  args: string[],
 ) {
   const attributesWithTypes = args.filter(attr => !/^--/.test(attr))
-  const columnAttributes = attributesWithTypes.filter(attr => isColumn(attr)).map(attr => attr.split(':')[0]!)
+  const columnAttributes = attributesWithTypes.filter(attr => isColumn(attr)).map(attr => attr.split(':')[0])
 
   await sspawn(
     dreamjsOrDreamtsCmd(
       `g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(' ')}`,
-      omitCoreArg(args)
-    )
+      omitCoreArg(args),
+    ),
   )
 
   if (args.includes('--core')) {
@@ -32,12 +32,12 @@ export default async function generateResource(
     route,
     fullyQualifiedModelName,
     ['create', 'index', 'show', 'update', 'destroy'],
-    columnAttributes
+    columnAttributes,
   )
 
   const yamlConf = await readAppConfig()
   if (!yamlConf?.api_only) {
-    const str = await generateClientAPIModule(route, fullyQualifiedModelName)
+    const str = generateClientAPIModule(route, fullyQualifiedModelName)
     const filepath = (
       (await clientApiPath()) +
       '/' +
@@ -56,6 +56,6 @@ export default async function generateResource(
 }
 
 function isColumn(attribute: string) {
-  const [_, columnType] = attribute.split(':')
+  const [, columnType] = attribute.split(':')
   return !['belongs_to', 'has_one', 'has_many'].includes(columnType)
 }

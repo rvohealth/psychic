@@ -1,11 +1,10 @@
 import sspawn from './sspawn'
 import developmentOrTestEnv from './developmentOrTestEnv'
-import setCoreDevelopmentFlag from './setCoreDevelopmentFlag'
 import nodeOrTsnodeCmd from './nodeOrTsnodeCmd'
 
 export async function maybeSyncRoutes(args: string[]) {
   if (developmentOrTestEnv()) {
-    syncRoutes(args)
+    await syncRoutes(args)
   }
 }
 

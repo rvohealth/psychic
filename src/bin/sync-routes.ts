@@ -4,18 +4,21 @@ import fs from 'fs/promises'
 import PsychicServer from '../server'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import { RouteConfig } from '../router/route-manager'
-;(async function () {
+
+async function syncRoutes() {
   console.log('syncing routes...')
 
   const server = new PsychicServer()
   await server.boot()
 
   const routes = await server.routes()
-  const routeStr = await generateRouteTypes(routes)
+  await generateRouteTypes(routes)
 
   console.log('done syncing routes!')
   process.exit()
-})()
+}
+
+void syncRoutes()
 
 async function generateRouteTypes(routes: RouteConfig[]) {
   const fileStr = `\

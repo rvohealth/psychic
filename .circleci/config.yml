@@ -12,7 +12,7 @@ orbs:
 jobs:
   uspecs:
     docker:
-      - image: cimg/node:18.15.0
+      - image: cimg/node:18.18.0
       - image: cimg/redis:6.2.6
       - image: cimg/postgres:13.9
         environment: # add POSTGRES environment variables.
@@ -33,7 +33,7 @@ jobs:
       - checkout
       - node/install:
           install-yarn: true
-          node-version: '18.15.0'
+          node-version: '18.18.0'
       - run:
           name: Update npmrc with node-beam creds
           command: |
@@ -62,7 +62,7 @@ jobs:
 
   fspecs:
     docker:
-      - image: cimg/node:18.15.0-browsers
+      - image: cimg/node:18.18.0-browsers
       - image: cimg/redis:6.2.6
       - image: cimg/postgres:13.9
         environment: # add POSTGRES environment variables.
@@ -83,7 +83,7 @@ jobs:
       - checkout
       - node/install:
           install-yarn: true
-          node-version: '18.15.0'
+          node-version: '18.18.0'
       - run:
           name: Update npmrc with node-beam creds
           command: |

@@ -4,4 +4,5 @@ import PsychicServer from '../src/server'
 env.load()
 
 const server = new PsychicServer()
-server.start()
+
+void server.start()

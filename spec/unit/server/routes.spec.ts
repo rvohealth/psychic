@@ -12,7 +12,7 @@ describe('PsychicServer', () => {
             path: 'ping',
             controllerActionString: 'Users#ping',
           }),
-        ])
+        ]),
       )
     })
   })

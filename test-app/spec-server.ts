@@ -4,4 +4,5 @@ import PsychicServer from '../src/server'
 env.load()
 
 const server = new PsychicServer()
-server.start(parseInt(process.env.DEV_SERVER_PORT || '7778'))
+
+void server.start(parseInt(process.env.DEV_SERVER_PORT || '7778'))

@@ -109,37 +109,37 @@ describe('PsychicController', () => {
         }
 
         class MyController extends PsychicController {
-          public async index() {
+          public index() {
             this.ok([new Greeting('hello'), new Greeting('howdy')])
           }
 
-          public async show() {
+          public show() {
             this.ok(new Greeting('hello'))
           }
         }
 
-        it('identifies serializer attached to model class and uses it to serialize the object', async () => {
+        it('identifies serializer attached to model class and uses it to serialize the object', () => {
           const controller = new MyController(req, res, { config })
-          await controller.show()
+          controller.show()
           expect(res.json).toHaveBeenCalledWith({ greeting: 'hello world' })
         })
 
-        it('identifies serializer attached to model class and uses it to serialize each object in an array', async () => {
+        it('identifies serializer attached to model class and uses it to serialize each object in an array', () => {
           const controller = new MyController(req, res, { config })
-          await controller.index()
+          controller.index()
           expect(res.json).toHaveBeenCalledWith([{ greeting: 'hello world' }, { greeting: 'howdy world' }])
         })
 
         context('with instances of different classes', () => {
           class MyController2 extends PsychicController {
-            public async index() {
+            public index() {
               this.ok([new Greeting('hello'), new Greeting2('hello')])
             }
           }
 
-          it('allows rendering of different types in the same array', async () => {
+          it('allows rendering of different types in the same array', () => {
             const controller = new MyController2(req, res, { config })
-            await controller.index()
+            controller.index()
             expect(res.json).toHaveBeenCalledWith([
               { greeting: 'hello world' },
               { greeting: 'hello goodbye' },
@@ -152,6 +152,7 @@ describe('PsychicController', () => {
     context('with default passthrough data set on the controller', () => {
       class User2 extends User {
         public get serializer() {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
           return User2Serializer as any
         }
       }
@@ -159,6 +160,7 @@ describe('PsychicController', () => {
       class User2Serializer extends DreamSerializer {
         @Attribute()
         public howyadoin() {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return this.passthroughData.howyadoin
         }
       }

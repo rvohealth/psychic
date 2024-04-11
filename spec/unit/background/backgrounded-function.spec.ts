@@ -1,4 +1,3 @@
-import background, { BackgroundQueuePriority } from '../../../src/background'
 import {
   backgroundedDummyConstFunction,
   backgroundedDummyDefaultFunction,

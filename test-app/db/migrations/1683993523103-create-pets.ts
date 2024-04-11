@@ -1,5 +1,6 @@
 import { Kysely, sql } from 'kysely'
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema.createType('species_types_enum').asEnum(['cat', 'noncat']).execute()
 
@@ -14,6 +15,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .execute()
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function down(db: Kysely<any>): Promise<void> {
   await db.schema.dropTable('pets').execute()
   await db.schema.dropType('species_types_enum').execute()

@@ -33,7 +33,9 @@ describe('Encrypt', () => {
       it('logs to the console to ensure that devs see their mistake', () => {
         try {
           Encrypt.sign('how')
-        } catch (_) {}
+        } catch (_) {
+          // noop
+        }
 
         expect(console.log).toHaveBeenCalledWith(new InvalidAppEncryptionKey().message)
       })

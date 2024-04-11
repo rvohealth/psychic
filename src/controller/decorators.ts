@@ -6,25 +6,15 @@ export function BeforeAction(
     isStatic?: boolean
     only?: string[]
     except?: string[]
-    methodName?: string
-  } = {}
-): any {
-  return function (target: any, methodName: string | symbol): any {
-    if ((target as typeof PsychicController).isPsychicController) {
-      if (!opts.methodName) throw 'Must pass methodName when calling beforeAction'
-      if (!Object.getOwnPropertyDescriptor(target, 'controllerHooks'))
-        target.controllerHooks = [...target.controllerHooks]
+  } = {},
+): (target: PsychicController, methodName: string | symbol) => void {
+  return function (target: PsychicController, methodName: string | symbol): void {
+    const psychicControllerClass: typeof PsychicController = target.constructor as typeof PsychicController
+    if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'controllerHooks'))
+      psychicControllerClass.controllerHooks = [...psychicControllerClass.controllerHooks]
 
-      target.controllerHooks.push(new ControllerHook(target.name, opts.methodName!, opts))
-    } else if ((target as PsychicController).isPsychicControllerInstance) {
-      if (!Object.getOwnPropertyDescriptor(target.constructor, 'controllerHooks'))
-        target.constructor.controllerHooks = [...target.constructor.controllerHooks]
-
-      target.constructor.controllerHooks.push(
-        new ControllerHook(target.constructor.name, methodName.toString(), opts)
-      )
-    } else {
-      throw 'Cannot call BeforeAction on a class that is not extending PsychicController'
-    }
+    psychicControllerClass.controllerHooks.push(
+      new ControllerHook(psychicControllerClass.name, methodName.toString(), opts),
+    )
   }
 }

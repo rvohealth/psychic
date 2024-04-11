@@ -19,7 +19,7 @@ describe('redisConnectionString', () => {
     else delete process.env[key]
   }
 
-  let subject = async () => {
+  const subject = async () => {
     setTempEnv('REDIS_USER', username)
     setTempEnv('REDIS_PASSWORD', password)
     setTempEnv('REDIS_HOST', host)

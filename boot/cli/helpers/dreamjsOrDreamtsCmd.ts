@@ -4,7 +4,7 @@ export type TypescriptFileType = `${string}.ts`
 export default function dreamjsOrDreamtsCmd(
   cmd: string,
   programArgs: string[],
-  { cmdArgs = [] }: { cmdArgs?: string[] } = {}
+  { cmdArgs = [] }: { cmdArgs?: string[] } = {},
 ) {
   const coreDevFlag = setCoreDevelopmentFlag(programArgs)
   const useTsnode = programArgs.includes('--tsnode') || process.env.TS_SAFE === '1'
@@ -14,7 +14,7 @@ export default function dreamjsOrDreamtsCmd(
   if (useTsnode) cmdArgs.push('--tsnode')
 
   const fullcmd = `${coreDevFlag}${omitDistFromPathEnv}yarn --cwd=${basepath}node_modules/@rvohealth/dream ${dreamCmd} ${cmd} ${cmdArgs.join(
-    ' '
+    ' ',
   )} `
 
   return fullcmd

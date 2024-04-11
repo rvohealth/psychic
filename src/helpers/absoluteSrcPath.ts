@@ -16,6 +16,6 @@ export default function absoluteSrcPath(filePath: string) {
       distOrNull,
       srcOrNull,
       filePath,
-    ])
+    ]),
   )
 }

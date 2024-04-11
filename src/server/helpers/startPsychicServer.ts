@@ -16,10 +16,10 @@ export default async function startPsychicServer({
   withFrontEndClient: boolean
   frontEndPort: number
 }): Promise<Server> {
-  return await new Promise(async accept => {
+  return await new Promise(accept => {
     const httpOrHttps = getPsychicHttpInstance(app)
-    const server = httpOrHttps.listen(port, async () => {
-      await welcomeMessage({ port, withFrontEndClient, frontEndPort })
+    const server = httpOrHttps.listen(port, () => {
+      welcomeMessage({ port, withFrontEndClient, frontEndPort })
       accept(server)
     })
   })
@@ -32,14 +32,14 @@ export function getPsychicHttpInstance(app: Application) {
         key: fs.readFileSync(process.env.PSYCHIC_SSL_KEY_PATH),
         cert: fs.readFileSync(process.env.PSYCHIC_SSL_CERT_PATH),
       },
-      app
+      app,
     )
   } else {
     return http.createServer(app)
   }
 }
 
-async function welcomeMessage({
+function welcomeMessage({
   port,
   withFrontEndClient,
   frontEndPort,
@@ -49,8 +49,8 @@ async function welcomeMessage({
   frontEndPort: number
 }) {
   if (process.env.NODE_ENV !== 'test') {
-    log.welcome(port)
-    await log.write(`psychic dev server started at port ${port}`)
-    if (withFrontEndClient) await log.write(`client dev server on port ${frontEndPort}`)
+    log.welcome()
+    log.puts(`psychic dev server started at port ${port}`)
+    if (withFrontEndClient) log.puts(`client dev server on port ${frontEndPort}`)
   }
 }

@@ -21,7 +21,7 @@ describe('PsychicController BeforeAction', () => {
   class MyController extends PsychicController {
     public customValue: string
 
-    public async show() {
+    public show() {
       if (!this.customValue) this.customValue = 'goodbye'
       this.ok(this.customValue)
     }
@@ -44,7 +44,7 @@ describe('PsychicController BeforeAction', () => {
       class MyOtherController extends MyController {
         public customValue2: string
 
-        public async show() {
+        public show() {
           if (!this.customValue) this.customValue = 'goodbye'
           if (!this.customValue2) this.customValue2 = 'goodbye2'
           this.ok({ customValue: this.customValue, customValue2: this.customValue2 })
@@ -67,6 +67,6 @@ describe('PsychicController BeforeAction', () => {
         await controller.runAction('show')
         expect(controller.customValue2).toEqual('hello2')
       })
-    }
+    },
   )
 })

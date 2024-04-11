@@ -16,11 +16,9 @@ export default class PsychicDir {
 
   public static async loadModels() {
     _models = {}
-    const modelPaths = (await getFiles(await absoluteSrcPath('app/models'))).filter(path =>
-      /\.[jt]s$/.test(path)
-    )
+    const modelPaths = (await getFiles(absoluteSrcPath('app/models'))).filter(path => /\.[jt]s$/.test(path))
     for (const modelPath of modelPaths) {
-      const ModelClass = (await importFileWithDefault(modelPath)) as typeof Dream
+      const ModelClass = await importFileWithDefault<typeof Dream>(modelPath)
       const modelKey = modelPath.replace(/^.*app\/models\//, '').replace(/\.[jt]s$/, '')
       _models[modelKey] = ModelClass
     }
@@ -35,10 +33,10 @@ export default class PsychicDir {
   public static async loadControllers() {
     _controllers = {}
     const controllerPaths = (await getFiles(absoluteSrcPath('app/controllers'))).filter(path =>
-      process.env.TS_SAFE === '1' ? /\.ts$/.test(path) : /\.js$/.test(path)
+      process.env.TS_SAFE === '1' ? /\.ts$/.test(path) : /\.js$/.test(path),
     )
     for (const controllerPath of controllerPaths) {
-      const ControllerClass = (await importFileWithDefault(controllerPath)) as typeof PsychicController
+      const ControllerClass = await importFileWithDefault<typeof PsychicController>(controllerPath)
       const controllerKey = controllerPath.replace(/^.*app\/controllers\//, '').replace(/\.[jt]s$/, '')
       _controllers[controllerKey] = ControllerClass
     }
@@ -53,10 +51,10 @@ export default class PsychicDir {
   public static async loadSerializers() {
     _serializers = {}
     const serializerPaths = (await getFiles(absoluteSrcPath('app/serializers'))).filter(path =>
-      /\.[jt]s$/.test(path)
+      /\.[jt]s$/.test(path),
     )
     for (const serializerPath of serializerPaths) {
-      const serializerClass = (await importFileWithDefault(serializerPath)) as typeof DreamSerializer
+      const serializerClass = await importFileWithDefault<typeof DreamSerializer>(serializerPath)
       const serializerKey = serializerPath.replace(/^.*app\/serializers\//, '').replace(/\.[jt]s$/, '')
       _serializers[serializerKey] = serializerClass
     }
@@ -64,13 +62,18 @@ export default class PsychicDir {
   }
 }
 
+interface DirResult {
+  name: string
+  isDirectory: () => boolean
+}
+
 async function getFiles(dir: string): Promise<string[]> {
-  const dirents = await fs.readdir(dir, { withFileTypes: true })
+  const dirents: DirResult[] = await fs.readdir(dir, { withFileTypes: true })
   const files = await Promise.all(
-    (dirents as any[]).map(dirent => {
+    dirents.map(dirent => {
       const res = path.resolve(dir, dirent.name)
       return dirent.isDirectory() ? getFiles(res) : res
-    })
+    }),
   )
-  return Array.prototype.concat(...files)
+  return Array.prototype.concat(...files) as string[]
 }

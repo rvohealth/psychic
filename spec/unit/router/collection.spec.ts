@@ -1,4 +1,3 @@
-import supertest from 'supertest'
 import PsychicServer from '../../../src/server'
 import PsychicRouter from '../../../src/router'
 
@@ -17,7 +16,7 @@ describe('PsychicRouter', () => {
     })
 
     it('does not enforce id param on subsequent routes', () => {
-      router.resources('users', { only: [] }, r => {
+      router.resources('users', { only: [] }, () => {
         router.collection(r => {
           r.get('howyadoin', 'Howyadoin#howyadoin')
         })

@@ -6,14 +6,14 @@ import path from 'path'
 
 export default function absoluteFilePath(
   filePath: string,
-  { purgeTestAppInCoreDevelopment = false }: { purgeTestAppInCoreDevelopment?: boolean } = {}
-) {
+  { purgeTestAppInCoreDevelopment = false }: { purgeTestAppInCoreDevelopment?: boolean } = {},
+): string {
   if (!process.env.APP_ROOT_PATH)
     throw `
       [Psychic]: Must set APP_ROOT_PATH before using psychic
     `
 
-  let appRoot = process.env.APP_ROOT_PATH!
+  let appRoot = process.env.APP_ROOT_PATH
   if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
     filePath = filePath.replace(/^[/]?test-app/, '')
 

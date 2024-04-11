@@ -11,7 +11,8 @@ export default class Session {
 
   public cookie(name: string, data?: string) {
     if (data) return this.setCookie(name, data)
-    return (this.req.cookies as any)[name]
+    const cookies = this.req.cookies as Record<string, string>
+    return cookies[name]
   }
 
   private setCookie(name: string, data: string) {

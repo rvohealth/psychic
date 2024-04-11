@@ -5,10 +5,11 @@ import UrgentDummyScheduledService from '../../../test-app/app/services/UrgentDu
 import NotUrgentDummyScheduledService from '../../../test-app/app/services/NotUrgentDummyScheduledService'
 import LastDummyScheduledService from '../../../test-app/app/services/LastDummyScheduledService'
 import background, { BackgroundQueuePriority } from '../../../src/background'
+import { Job } from 'bullmq'
 
 describe('ScheduledService', () => {
   context('queue priority', () => {
-    let subject = async () => {
+    const subject = async () => {
       await serviceClass.schedule('* * * * *', 'instanceRunInBG', 'bottlearum')
     }
     let serviceClass:
@@ -19,6 +20,7 @@ describe('ScheduledService', () => {
       | typeof LastDummyScheduledService
 
     function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(background.queue!.add).toHaveBeenCalledWith(
         'BackgroundJobQueueStaticJob',
         {
@@ -34,7 +36,7 @@ describe('ScheduledService', () => {
           },
           jobId: `${serviceClass.name}:instanceRunInBG`,
           priority: priorityLevel,
-        }
+        },
       )
     }
 
@@ -42,9 +44,7 @@ describe('ScheduledService', () => {
       process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
       await background.connect()
 
-      jest.spyOn(background.queue!, 'add').mockImplementation(() => {
-        return {} as any
-      })
+      jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
     })
 
     afterEach(() => {

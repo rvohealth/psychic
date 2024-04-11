@@ -10,7 +10,7 @@ export default function nodeOrTsnodeCmd(
     nodeFlags = [],
     tsnodeFlags = [],
     fileArgs = [],
-  }: { nodeFlags?: string[]; tsnodeFlags?: string[]; fileArgs?: string[] } = {}
+  }: { nodeFlags?: string[]; tsnodeFlags?: string[]; fileArgs?: string[] } = {},
 ) {
   const coreDevFlag = setCoreDevelopmentFlag(programArgs)
   const useTsnode = programArgs.includes('--tsnode') || process.env.TS_SAFE === '1'
@@ -19,6 +19,6 @@ export default function nodeOrTsnodeCmd(
   const realFilePath = useTsnode ? filePath : path.join('dist', filePath.replace(/\.ts$/, '.js'))
   if (useTsnode) fileArgs.push('--tsnode')
   return `${coreDevFlag}${omitDistFromPathEnv}${nodeCmd} ${(useTsnode ? tsnodeFlags : nodeFlags).join(
-    ' '
-  )} ${realFilePath} ${fileArgs.join(' ')} ${omitCoreArg(programArgs)}`
+    ' ',
+  )} ${realFilePath} ${fileArgs.join(' ')} ${omitCoreArg(programArgs).join(' ')}`
 }

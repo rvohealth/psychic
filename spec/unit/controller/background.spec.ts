@@ -6,27 +6,27 @@ import BackgroundTestController from '../../../test-app/app/controllers/Backgrou
 describe('PsychicController background methods', () => {
   describe('.background', () => {
     it('adds the model static method to the worker queue', async () => {
-      // @ts-ignore
-      jest.spyOn(background, 'staticMethod').mockResolvedValue({})
+      jest.spyOn(background, 'staticMethod').mockResolvedValue(undefined)
 
       await BackgroundTestController.background('doSomethingInBackground', 1, '2')
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(background.staticMethod).toHaveBeenCalledWith(
         BackgroundTestController,
         'doSomethingInBackground',
         {
           filepath: 'app/controllers/BackgroundTestController',
           args: [1, '2'],
-        }
+        },
       )
     })
   })
 
   describe('.backgroundWithDelay', () => {
     it('adds the model static method to the worker queue', async () => {
-      // @ts-ignore
-      jest.spyOn(background, 'staticMethod').mockResolvedValue({})
+      jest.spyOn(background, 'staticMethod').mockResolvedValue(undefined)
 
       await BackgroundTestController.backgroundWithDelay(3, 'doSomethingInBackground', 1, '2')
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(background.staticMethod).toHaveBeenCalledWith(
         BackgroundTestController,
         'doSomethingInBackground',
@@ -34,7 +34,7 @@ describe('PsychicController background methods', () => {
           delaySeconds: 3,
           filepath: 'app/controllers/BackgroundTestController',
           args: [1, '2'],
-        }
+        },
       )
     })
   })

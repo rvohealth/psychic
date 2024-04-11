@@ -19,7 +19,7 @@ export default class Cable {
     this.config = config
   }
 
-  public async connect() {
+  public connect() {
     if (this.io) return
     // for socket.io, we have to circumvent the normal process for starting a
     // psychic server so that we can bind socket.io to the http instance.
@@ -36,9 +36,9 @@ export default class Cable {
     }: {
       withFrontEndClient?: boolean
       frontEndPort?: number
-    } = {}
+    } = {},
   ) {
-    await this.connect()
+    this.connect()
 
     for (const hook of this.config.specialHooks.wsStart) {
       await hook(this.io!)
@@ -61,7 +61,7 @@ export default class Cable {
 
             the error received is:
 
-            ${error}
+            ${(error as Error).message}
           `)
           console.trace()
         }
@@ -83,16 +83,13 @@ export default class Cable {
     frontEndPort: number
   }) {
     return new Promise(accept => {
-      this.http.listen(port, async () => {
-        log.welcome(port)
-
-        await log.write('\n')
-        await log.write(colors.cyan('socket server started                                      '))
-        await log.write(
-          colors.cyan(`psychic dev server started at port ${colors.bgBlueBright(colors.green(port))}`)
-        )
-        if (withFrontEndClient) await log.write(`client server started at port ${colors.cyan(frontEndPort)}`)
-        await log.write('\n')
+      this.http.listen(port, () => {
+        log.welcome()
+        log.puts('\n')
+        log.puts(colors.cyan('socket server started                                      '))
+        log.puts(colors.cyan(`psychic dev server started at port ${colors.bgBlueBright(colors.green(port))}`))
+        if (withFrontEndClient) log.puts(`client server started at port ${colors.cyan(frontEndPort)}`)
+        log.puts('\n')
 
         accept(true)
       })

@@ -2,7 +2,14 @@ import { IdType } from '@rvohealth/dream'
 import background, { BackgroundQueuePriority } from '.'
 
 type BaseSimpleType = string | number | boolean | null | IdType
-type SimpleType = BaseSimpleType | Record<string, BaseSimpleType | Record<string, any>>
+type SimpleType =
+  | BaseSimpleType
+  | Record<
+      string,
+      | BaseSimpleType
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      | Record<string, any>
+    >
 
 export default function backgroundedFunction<ArgType extends SimpleType, ArgsType extends ArgType[]>(
   callbackFunction: (...args: ArgsType) => Promise<void>,
@@ -16,7 +23,7 @@ export default function backgroundedFunction<ArgType extends SimpleType, ArgsTyp
     delaySeconds?: number
     filepath: string
     priority?: BackgroundQueuePriority
-  }
+  },
 ): (...args: ArgsType) => Promise<void> {
   return async (...args: ArgsType) => {
     await background.func({

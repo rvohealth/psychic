@@ -1,7 +1,7 @@
 import { developmentOrTestEnv } from '@rvohealth/dream'
 import PsychicConfig from '../../src/config'
 
-export default async (psy: PsychicConfig) => {
+export default (psy: PsychicConfig) => {
   // ******
   // CONFIG:
   // ******
@@ -73,32 +73,32 @@ export default async (psy: PsychicConfig) => {
   // ******
 
   // run a callback on server boot (but before routes are processed)
-  psy.on('boot', conf => {
+  psy.on('boot', () => {
     __forTestingOnly('boot')
   })
 
   // run a callback after routes are done processing
-  psy.on('after:routes', conf => {
+  psy.on('after:routes', () => {
     __forTestingOnly('after:routes')
   })
 
   // run a callback after the config is loaded
-  psy.on('load', conf => {
+  psy.on('load', () => {
     __forTestingOnly('load')
   })
 
   // run a callback after the config is loaded, but only if NODE_ENV=development
-  psy.on('load:dev', conf => {
+  psy.on('load:dev', () => {
     __forTestingOnly('load:dev')
   })
 
   // run a callback after the config is loaded, but only if NODE_ENV=test
-  psy.on('load:test', conf => {
+  psy.on('load:test', () => {
     __forTestingOnly('load:test')
   })
 
   // run a callback after the config is loaded, but only if NODE_ENV=prod
-  psy.on('load:prod', conf => {
+  psy.on('load:prod', () => {
     __forTestingOnly('load:prod')
   })
 
@@ -110,16 +110,16 @@ export default async (psy: PsychicConfig) => {
     else if (developmentOrTestEnv()) throw err
   })
 
-  psy.on('ws:start', server => {
+  psy.on('ws:start', () => {
     __forTestingOnly('ws:start')
   })
 
-  psy.on('ws:connect', socket => {
+  psy.on('ws:connect', () => {
     __forTestingOnly('ws:connect')
   })
 }
 
 export function __forTestingOnly(message: string) {
-  ;(process.env as any).__PSYCHIC_HOOKS_TEST_CACHE ||= ''
-  ;(process.env as any).__PSYCHIC_HOOKS_TEST_CACHE += `,${message}`
+  process.env.__PSYCHIC_HOOKS_TEST_CACHE ||= ''
+  process.env.__PSYCHIC_HOOKS_TEST_CACHE += `,${message}`
 }

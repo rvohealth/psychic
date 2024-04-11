@@ -1,12 +1,12 @@
 import pluralize from 'pluralize'
-import { camelize, capitalize } from '@rvohealth/dream'
+import { camelize } from '@rvohealth/dream'
 
-export default async function generateControllerString(
+export default function generateControllerString(
   controllerClassName: string,
   route: string,
   fullyQualifiedModelName: string | null,
   methods: string[] = [],
-  attributes: string[] | null = []
+  attributes: string[] | null = [],
 ) {
   const crudMethods = ['create', 'index', 'show', 'update', 'destroy']
   const psyImports: string[] = ['Params']
@@ -19,12 +19,12 @@ export default async function generateControllerString(
   let extendingClassName = 'AuthedController'
   if (/^\/{0,1}admin\/.*/.test(route)) {
     additionalImports.push(
-      `import AdminAuthedController from '${routeDepthToRelativePath(route, 1)}/Admin/AuthedController'`
+      `import AdminAuthedController from '${routeDepthToRelativePath(route, 1)}/Admin/AuthedController'`,
     )
     extendingClassName = 'AdminAuthedController'
   } else {
     additionalImports.push(
-      `import AuthedController from '${routeDepthToRelativePath(route, 1)}/AuthedController'`
+      `import AuthedController from '${routeDepthToRelativePath(route, 1)}/AuthedController'`,
     )
   }
 
@@ -32,7 +32,7 @@ export default async function generateControllerString(
     modelName = fullyQualifiedModelName.split('/').pop()
     additionalImports.push(
       `\
-import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQualifiedModelName}'`
+import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQualifiedModelName}'`,
     )
   }
 
@@ -117,17 +117,13 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       `\
   private get ${singularName}Params() {
     return Params.restrict(this.params, [${attributes.map(attr => `'${camelize(attr)}'`).join(', ')}])
-  }`
+  }`,
     )
   }
 
-  const pascalizedRoute = route
-    .split('/')
-    .map(n => capitalize(n))
-    .join('')
   return `\
 import { ${psyImports.join(', ')} } from '@rvohealth/psychic'${
-    !!additionalImports.length ? '\n' + additionalImports.join('\n') : ''
+    additionalImports.length ? '\n' + additionalImports.join('\n') : ''
   }
 
 export default class ${controllerClassNameWithoutSlashes} extends ${extendingClassName} {

@@ -90,7 +90,7 @@ describe('PsychicRouter', () => {
 
           expect(server.app.get).toHaveBeenCalledWith(
             '/users/:userId/friends/:id/count',
-            expect.any(Function)
+            expect.any(Function),
           )
         })
       })
@@ -106,7 +106,7 @@ describe('PsychicRouter', () => {
 
           expect(server.app.get).toHaveBeenCalledWith(
             '/user-settings/:userSettingId/friend/count',
-            expect.any(Function)
+            expect.any(Function),
           )
         })
       })

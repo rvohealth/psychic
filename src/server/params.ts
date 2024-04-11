@@ -1,10 +1,12 @@
 import { camelize, snakeify } from '@rvohealth/dream'
+import { PsychicParamsDictionary, PsychicParamsPrimitive } from '../controller'
+import { isObject } from '../helpers/typechecks'
 
 export default class Params {
   public static restrict<T extends typeof Params>(
     this: T,
-    params: { [key: string]: any },
-    allowed: string[]
+    params: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+    allowed: string[],
   ) {
     return new this().restrict(params, allowed)
   }
@@ -21,19 +23,27 @@ export default class Params {
     return this
   }
 
-  public restrict(params: { [key: string]: any }, allowed: string[]) {
-    const permitted: { [key: string]: any } = {}
-    if (!params) return permitted
+  public restrict(
+    param: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+    allowed: string[],
+  ) {
+    const permitted: PsychicParamsDictionary = {}
+    if (param === null || param === undefined) return permitted
+
+    if (!isObject(param))
+      throw new Error(`Params.restrict expects object or null, received: ${JSON.stringify(param)}`)
+
+    const objectParam = param as PsychicParamsDictionary
 
     allowed.forEach(field => {
-      let transformedParams = { ...params }
+      let transformedParams = { ...objectParam }
       switch (this._casing) {
         case 'snake':
-          transformedParams = snakeify(params)
+          transformedParams = snakeify(objectParam)
           break
 
         case 'camel':
-          transformedParams = camelize(params)
+          transformedParams = camelize(objectParam)
           break
       }
 

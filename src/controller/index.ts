@@ -16,6 +16,17 @@ import HttpStatusCodeMap, { HttpStatusSymbol } from '../error/http/status-codes'
 import { ControllerHook } from '../controller/hooks'
 import Conflict from '../error/http/conflict'
 
+type SerializerResult = {
+  [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any
+}
+
+export type PsychicParamsPrimitive = string | number | boolean | null | PsychicParamsPrimitive[]
+
+export interface PsychicParamsDictionary {
+  [key: string]: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[]
+}
+
 export default class PsychicController {
   public static get isPsychicController() {
     return true
@@ -36,17 +47,26 @@ export default class PsychicController {
     return await getControllerKey(this)
   }
 
-  public static async background(methodName: string, ...args: any[]) {
+  public static async background(
+    methodName: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...args: any[]
+  ) {
     return await background.staticMethod(this, methodName, {
-      filepath: `app/controllers/${await (this as typeof PsychicController).controllerPath()}`,
+      filepath: `app/controllers/${await this.controllerPath()}`,
       args,
     })
   }
 
-  public static async backgroundWithDelay(delaySeconds: number, methodName: string, ...args: any[]) {
+  public static async backgroundWithDelay(
+    delaySeconds: number,
+    methodName: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ...args: any[]
+  ) {
     return await background.staticMethod(this, methodName, {
       delaySeconds,
-      filepath: `app/controllers/${await (this as typeof PsychicController).controllerPath()}`,
+      filepath: `app/controllers/${await this.controllerPath()}`,
       args,
     })
   }
@@ -66,7 +86,7 @@ export default class PsychicController {
       config,
     }: {
       config: PsychicConfig
-    }
+    },
   ) {
     this.req = req
     this.res = res
@@ -74,66 +94,94 @@ export default class PsychicController {
     this.session = new Session(req, res)
   }
 
-  public get params() {
-    return {
+  public get params(): PsychicParamsDictionary {
+    const params: PsychicParamsDictionary = {
       ...this.req.params,
       ...this.req.body,
       ...this.req.query,
-    }
+    } as PsychicParamsDictionary
+
+    return params
   }
 
-  public cookie(name: string, data?: any) {
+  public param<ReturnType = string>(key: string): ReturnType {
+    return this.params[key] as ReturnType
+  }
+
+  public cookie(name: string, data?: string) {
     return this.session.cookie(name, data)
   }
 
-  public async startSession(user: any) {
-    return this.cookie(this.config.authSessionKey, {
-      id: user.id,
-      modelKey: await getModelKey(user.constructor as typeof Dream),
-    })
+  public async startSession(user: Dream) {
+    return this.cookie(
+      this.config.authSessionKey,
+      JSON.stringify({
+        id: user.primaryKeyValue,
+        modelKey: await getModelKey(user.constructor as typeof Dream),
+      }),
+    )
   }
 
-  public async endSession() {
+  public endSession() {
     return this.session.clearCookie(this.config.authSessionKey)
   }
 
-  private singleObjectJson(data: any) {
+  private singleObjectJson<T>(data: T): T | SerializerResult {
     if (!data) return data
 
-    const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, data.constructor)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
 
-    const SerializerClass = lookup?.[1] || data.serializer
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    const SerializerClass = lookup?.[1] || (data as any).serializer
     if (SerializerClass) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return new SerializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
     }
 
     return data
   }
 
-  public json(data: any) {
-    if (Array.isArray(data)) return this.res.json(data.map(d => this.singleObjectJson(d)))
+  public json(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
+  ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any {
+    if (Array.isArray(data))
+      return this.res.json(
+        data.map(d =>
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          this.singleObjectJson(d),
+        ),
+      )
     return this.res.json(this.singleObjectJson(data))
   }
 
-  protected defaultSerializerPassthrough: { [key: string]: any } = {}
-  public serializerPassthrough(passthrough: { [key: string]: any }) {
+  protected defaultSerializerPassthrough: SerializerResult = {}
+  public serializerPassthrough(passthrough: SerializerResult) {
     this.defaultSerializerPassthrough = {
       ...this.defaultSerializerPassthrough,
       ...passthrough,
     }
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public ok(data: any = {}) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.json(data)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public created(data: any = {}) {
     this.res.status(201)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.json(data)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public accepted(data: any = {}) {
     this.res.status(202)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return this.json(data)
   }
 
@@ -147,12 +195,12 @@ export default class PsychicController {
     return this.res.status(resolvedStatus)
   }
 
-  public send(message: number | HttpStatusSymbol | string) {
+  public send(message: number | HttpStatusSymbol) {
     if (message.constructor === Number) {
       return this.res.status(message).send()
     } else {
-      const statusLookup = HttpStatusCodeMap[message as any] as string
-      if (statusLookup) {
+      const statusLookup = HttpStatusCodeMap[message as HttpStatusSymbol]
+      if (typeof statusLookup === 'string') {
         return this.res.status(parseInt(statusLookup)).send()
       }
     }
@@ -165,15 +213,15 @@ export default class PsychicController {
   }
 
   // 400
-  public badRequest(data: { [key: string]: any } = {}) {
+  public badRequest(data: SerializerResult = {}) {
     throw new BadRequest(
       'The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).',
-      data
+      data,
     )
   }
 
   // 422
-  public unprocessableEntity(data: { [key: string]: any } = {}) {
+  public unprocessableEntity(data: SerializerResult = {}) {
     throw new UnprocessableEntity('The data passed contained an invalid shape', data)
   }
 
@@ -198,18 +246,18 @@ export default class PsychicController {
   }
 
   // 500
-  public internalServerError(data: { [key: string]: any } = {}) {
+  public internalServerError(data: SerializerResult = {}) {
     throw new InternalServerError(
       'The server has encountered a situation it does not know how to handle.',
-      data
+      data,
     )
   }
 
   // 501
-  public notImplemented(data: { [key: string]: any } = {}) {
+  public notImplemented(data: SerializerResult = {}) {
     throw new InternalServerError(
       'The request method is not supported by the server and cannot be handled. The only methods that servers are required to support (and therefore that must not return this code) are GET and HEAD',
-      data
+      data,
     )
   }
 
@@ -220,17 +268,23 @@ export default class PsychicController {
 
   public async runAction(action: string) {
     await this.runBeforeActionsFor(action)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
     await (this as any)[action]()
   }
 
   public async runBeforeActionsFor(action: string) {
     const beforeActions = (this.constructor as typeof PsychicController).controllerHooks.filter(hook =>
-      hook.shouldFireForAction(action)
+      hook.shouldFireForAction(action),
     )
 
     for (const hook of beforeActions) {
-      if (hook.isStatic) await (this.constructor as any)[hook.methodName]()
-      else await (this as any)[hook.methodName]()
+      if (hook.isStatic) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        await (this.constructor as any)[hook.methodName]()
+      } else {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        await (this as any)[hook.methodName]()
+      }
     }
   }
 }
@@ -241,23 +295,23 @@ export class ControllerSerializerIndex {
   public add(
     ControllerClass: typeof PsychicController,
     SerializerClass: typeof DreamSerializer,
-    ModelClass: typeof Dream
+    ModelClass: typeof Dream,
   ) {
     this.associations.push([ControllerClass, SerializerClass, ModelClass])
   }
 
   public lookupModel(ControllerClass: typeof PsychicController, ModelClass: typeof Dream) {
     return this.associations.find(
-      association => association[0] === ControllerClass && association[2] === ModelClass
+      association => association[0] === ControllerClass && association[2] === ModelClass,
     )
   }
 
   public lookupSerializer(
     ControllerClass: typeof PsychicController,
-    SerializerClass: typeof DreamSerializer
+    SerializerClass: typeof DreamSerializer,
   ) {
     return this.associations.find(
-      association => association[0] === ControllerClass && association[1] === SerializerClass
+      association => association[0] === ControllerClass && association[1] === SerializerClass,
     )
   }
 }

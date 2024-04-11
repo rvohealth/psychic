@@ -13,7 +13,7 @@ import hijackRootForCLI from './cli/helpers/hijackRootForCLI'
 import yarncmdRunByAppConsumer from './cli/helpers/yarncmdRunByAppConsumer'
 import ensureStableAppBuild from './cli/helpers/ensureStableAppBuild'
 import omitCoreArg from './cli/helpers/omitCoreArg'
-import syncRoutes, { maybeSyncRoutes } from './cli/helpers/syncRoutes'
+import { maybeSyncRoutes } from './cli/helpers/syncRoutes'
 import nodeOrTsnodeCmd from './cli/helpers/nodeOrTsnodeCmd'
 import dreamjsOrDreamtsCmd from './cli/helpers/dreamjsOrDreamtsCmd'
 import developmentOrProdEnvString from './cli/helpers/developmentOrProdEnvString'
@@ -43,7 +43,7 @@ program
       NODE_ENV=${developmentOrProdEnvString()} yarn --cwd=../../../node_modules/@rvohealth/dream build
     `
     const psychicCmd = `
-      echo \"building psychic app...\" && \
+      echo "building psychic app..." && \
       npx tsc -p ./tsconfig.build.json
     `
     await sspawn(dreamCmd)
@@ -110,7 +110,7 @@ program
   .command('generate:resource')
   .alias('g:resource')
   .description(
-    'generate:resource <name> [...attributes] create a new dream, migration, controller, and serializer'
+    'generate:resource <name> [...attributes] create a new dream, migration, controller, and serializer',
   )
   .argument('<route>', 'route path')
   .argument('<modelName>', 'model name')
@@ -122,7 +122,7 @@ program
     await sspawn(
       nodeOrTsnodeCmd('src/bin/generate-resource.ts', args, {
         fileArgs: [route, modelName, ...attributes],
-      })
+      }),
     )
   })
 
@@ -130,7 +130,7 @@ program
   .command('generate:controller')
   .alias('g:controller')
   .description(
-    'generate:controller <route> [...methods] create a new controller, autodefining method stubs for passed methods'
+    'generate:controller <route> [...methods] create a new controller, autodefining method stubs for passed methods',
   )
   .argument('<route>', 'route path')
   .option('--core', 'sets core to true')
@@ -141,7 +141,7 @@ program
     await sspawn(
       nodeOrTsnodeCmd('src/bin/generate-controller.ts', args, {
         fileArgs: [route, ...methods],
-      })
+      }),
     )
   })
 
@@ -160,7 +160,7 @@ program
     await sspawn(
       nodeOrTsnodeCmd('src/bin/generate-serializer.ts', omitCoreArg(args), {
         fileArgs: [name, ...attributes],
-      })
+      }),
     )
   })
 
@@ -175,14 +175,14 @@ program
     await sspawn(
       nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
         fileArgs: [],
-      })
+      }),
     )
   })
 
 program
   .command('sync:client:routes')
   .description(
-    'sync:client:routes generates a copy of the routes file that is consumable by your client application.'
+    'sync:client:routes generates a copy of the routes file that is consumable by your client application.',
   )
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
@@ -192,7 +192,7 @@ program
     await sspawn(
       nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
         fileArgs: [],
-      })
+      }),
     )
   })
 
@@ -217,13 +217,13 @@ program
     await sspawn(dreamjsOrDreamtsCmd('sync:associations', omitCoreArg(args)))
     await maybeSyncRoutes(args)
 
-    const appConf = await readAppConfig()!
+    const appConf = await readAppConfig()
     if (!appConf.api_only) {
       await sspawn(dreamjsOrDreamtsCmd('g:api', args, { cmdArgs: omitCoreArg(args) }))
       await sspawn(
         nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
           fileArgs: [],
-        })
+        }),
       )
     }
   })
@@ -232,7 +232,7 @@ program
   .command('sync:schema')
   .alias('introspect')
   .description(
-    'introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration'
+    'introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration',
   )
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
@@ -242,7 +242,7 @@ program
 program
   .command('sync:associations')
   .description(
-    'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.'
+    'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.',
   )
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
@@ -252,7 +252,7 @@ program
 program
   .command('routes')
   .description(
-    'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.'
+    'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.',
   )
   .option('--core', '--core', 'sets core to true')
   .option('--tsnode', '--tsnode', 'runs the command using ts-node instead of node')
@@ -263,14 +263,14 @@ program
 program
   .command('sync:routes')
   .description(
-    'reads the routes generated by your app and generates a cache file, which is then used to give autocomplete support to the route helper, amoongst other things.'
+    'reads the routes generated by your app and generates a cache file, which is then used to give autocomplete support to the route helper, amoongst other things.',
   )
   .option('--core', 'sets core to true')
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
     console.log(
       'DEBUG: about to execute:',
-      nodeOrTsnodeCmd('src/bin/sync-routes.ts', cmdargs(), { tsnodeFlags: ['--transpile-only'] })
+      nodeOrTsnodeCmd('src/bin/sync-routes.ts', cmdargs(), { tsnodeFlags: ['--transpile-only'] }),
     )
     await sspawn(nodeOrTsnodeCmd('src/bin/sync-routes.ts', cmdargs(), { tsnodeFlags: ['--transpile-only'] }))
   })
@@ -302,7 +302,7 @@ program
 program
   .command('db:create')
   .description(
-    'creates a new database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars'
+    'creates a new database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars',
   )
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
@@ -312,7 +312,7 @@ program
 program
   .command('db:drop')
   .description(
-    'drops the database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars'
+    'drops the database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars',
   )
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {

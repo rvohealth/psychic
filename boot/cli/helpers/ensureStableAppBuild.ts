@@ -1,6 +1,7 @@
 import fs from 'fs/promises'
 import developmentOrTestEnv from './developmentOrTestEnv'
 
+// eslint-disable-next-line @typescript-eslint/no-unused-vars
 export default async function ensureStableAppBuild(programArgs: string[]) {
   if (!developmentOrTestEnv()) return
 

@@ -1,7 +1,6 @@
 import { pascalize, compact } from '@rvohealth/dream'
 import PsychicRouter, { PsychicNestedRouter } from '../router'
 import { ResourcesMethodType, ResourcesOptions } from './types'
-import { RouterOptions } from 'express'
 
 export function routePath(routePath: string) {
   return `/${routePath.replace(/^\//, '')}`
@@ -16,12 +15,8 @@ export function sanitizedControllerPath(controllerName: string) {
 }
 
 export function namespacedRoute(namespace: string, route: string) {
-  return (
-    '/' +
-    compact([namespace || null, route])
-      .join('/')
-      .replace(/^\//, '')
-  )
+  const compactedRoutes = compact([namespace || null, route])
+  return '/' + compactedRoutes.join('/').replace(/^\//, '')
 }
 
 export function namespacedControllerActionString(namespace: string, controllerActionString: string) {
@@ -41,7 +36,7 @@ export function applyResourcesAction(
   path: string,
   action: ResourcesMethodType,
   routingMechanism: PsychicRouter | PsychicNestedRouter,
-  options?: ResourcesOptions
+  options?: ResourcesOptions,
 ) {
   const controllerName = options?.controller || pascalize(path)
   switch (action) {
@@ -65,8 +60,6 @@ export function applyResourcesAction(
     case 'delete':
       routingMechanism.delete(`${path}/:id`, `${controllerName}#destroy`)
       break
-    default:
-      throw `unknown action: ${action}`
   }
 }
 
@@ -74,7 +67,7 @@ export function applyResourceAction(
   path: string,
   action: ResourcesMethodType,
   routingMechanism: PsychicRouter | PsychicNestedRouter,
-  options?: ResourcesOptions
+  options?: ResourcesOptions,
 ) {
   const controllerName = options?.controller || pascalize(path)
   switch (action) {

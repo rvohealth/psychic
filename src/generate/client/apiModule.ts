@@ -2,7 +2,7 @@ import { pascalize } from '@rvohealth/dream'
 import pluralize from 'pluralize'
 import updirs from '../helpers/updirs'
 
-export default async function generateClientAPIModule(route: string, modelName: string) {
+export default function generateClientAPIModule(route: string, modelName: string) {
   const pluralizedName = pluralize(modelName)
   const pascalizedName = pascalize(pluralizedName) + 'API'
   const dotRoute = route.replace(/^\//, '').replace(/\//g, '.')

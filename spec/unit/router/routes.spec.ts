@@ -10,7 +10,7 @@ describe('PsychicRouter', () => {
       router = new PsychicRouter(server.app, server.config)
     })
 
-    it('correctly namespaces nested routes as members of the resource', async () => {
+    it('correctly namespaces nested routes as members of the resource', () => {
       router.resources('users', r => {
         r.resources('pets')
       })
@@ -22,11 +22,11 @@ describe('PsychicRouter', () => {
             path: '/users/:userId/pets/:id',
             controllerActionString: 'Users/Pets#update',
           },
-        ])
+        ]),
       )
     })
 
-    it('correctly applies nested crud routes within resources', async () => {
+    it('correctly applies nested crud routes within resources', () => {
       router.resources('users', r => {
         r.get('pets', 'Users#pets')
       })
@@ -38,7 +38,7 @@ describe('PsychicRouter', () => {
             path: '/users/:id/pets',
             controllerActionString: 'Users#pets',
           },
-        ])
+        ]),
       )
     })
   })

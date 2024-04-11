@@ -7,6 +7,6 @@ export default function getCaller(pattern?: RegExp) {
       .stack!.replace('Error\n', '')
       .split('\n')
       .find(line => (pattern ? pattern.test(line) : true))
-      ?.match(/^[^\/]+([^\:]+)\:/)?.[1]
+      ?.match(/^[^/]+([^:]+):/)?.[1]
   }
 }

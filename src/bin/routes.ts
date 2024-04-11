@@ -2,7 +2,8 @@ import '../helpers/loadEnv'
 import * as colors from 'colorette'
 import PsychicServer from '../server'
 import { RouteConfig } from '../router/route-manager'
-;(async function () {
+
+async function printRoutes() {
   const server = new PsychicServer()
   await server.boot()
 
@@ -23,10 +24,12 @@ import { RouteConfig } from '../router/route-manager'
   })
 
   process.exit()
-})()
+}
+
+void printRoutes()
 
 function buildExpressions(routes: RouteConfig[]): [string, string][] {
-  return routes.map((route, i) => {
+  return routes.map(route => {
     const method = route.httpMethod.toUpperCase()
     const numMethodSpaces = 8 - method.length
 

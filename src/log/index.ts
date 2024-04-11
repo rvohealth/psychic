@@ -1,7 +1,5 @@
-import fs from 'fs'
 import * as colors from 'colorette'
 import logo from '../config/logo'
-import logPath from '../config/helpers/logPath'
 import { DateTime } from 'luxon'
 
 export class Logger {
@@ -10,19 +8,8 @@ export class Logger {
   }
 
   public puts(text: string, color = 'magentaBright') {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
     console.log((colors as any)[color](text).split('\n').join('\n  '))
-  }
-
-  public async write(text: string, color?: string) {
-    this.puts(text, color)
-
-    try {
-      const thisFs = fs ? fs : await import('fs')
-      return await thisFs.promises.appendFile(logPath(), this.header + text + '\n')
-    } catch (error) {
-      // don't fret about inability to write to log file, since this is normal if the
-      // file system is readonly.
-    }
   }
 
   public info(text: string) {
@@ -31,14 +18,14 @@ export class Logger {
 
   public error(error: Error | string) {
     if (typeof error === 'string') {
-      this.write(error, 'red')
+      this.puts(error, 'red')
     } else {
-      this.write(error.message, 'red')
-      this.write(error.stack!)
+      this.puts(error.message, 'red')
+      this.puts(error.stack!)
     }
   }
 
-  public welcome(port = process.env.PORT || 7777) {
+  public welcome() {
     this.puts(logo())
   }
 }

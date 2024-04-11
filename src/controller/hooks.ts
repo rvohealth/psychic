@@ -15,7 +15,7 @@ export class ControllerHook {
       isStatic?: boolean
       only?: string[]
       except?: string[]
-    }
+    },
   ) {
     this.controllerClassName = controllerClassName
     this.methodName = methodName

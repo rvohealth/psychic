@@ -10,8 +10,8 @@ Please make sure the following file is present in your app:
   conf/db.ts
 
 the underlying error that triggered this message was:
-  ${error}
-`
+  ${error.message}
+`,
     )
   }
 }

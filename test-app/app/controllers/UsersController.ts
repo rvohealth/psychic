@@ -3,17 +3,9 @@ import Params from '../../../src/server/params'
 import User from '../models/User'
 import ApplicationController from './ApplicationController'
 
-@BeforeAction({
-  only: ['authPing'],
-  methodName: 'authenticate',
-})
 export default class UsersController extends ApplicationController {
   public ping() {
     this.ok('helloworld')
-  }
-
-  public authPing() {
-    this.ok('authed')
   }
 
   public beforeAllTest() {
@@ -21,11 +13,10 @@ export default class UsersController extends ApplicationController {
   }
 
   public async failedToSaveTest() {
-    // @ts-ignore
     await User.create({ email: 'invalidemail', password: 'howyadoin' })
   }
 
-  public async forceThrow() {
+  public forceThrow() {
     throw new Error('this should force a 500')
   }
 
@@ -39,15 +30,15 @@ export default class UsersController extends ApplicationController {
     this.ok(users)
   }
 
-  public async hello() {
-    this.ok(`world ${this.params.id}`)
+  public hello() {
+    this.ok(`world ${this.param('id')}`)
   }
 
   public async login() {
-    const user = await User.findBy({ email: this.params.email })
-    if (!user || !(await user.checkPassword(this.params.password))) this.notFound()
+    const user = await User.findBy({ email: this.param('email') })
+    if (!user || !(await user.checkPassword(this.param('password')))) this.notFound()
 
-    await this.startSession(user)
+    await this.startSession(user!)
     this.ok()
   }
 

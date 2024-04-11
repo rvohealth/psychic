@@ -6,7 +6,7 @@ export default class RouterMissingController extends RouterError {
       `\
 The controller you are attempting to load was not found:
   ${controllerPath}
-      `
+      `,
     )
   }
 }

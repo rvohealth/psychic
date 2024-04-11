@@ -1,3 +1,4 @@
+import { PsychicParamsDictionary } from '../../../src/controller'
 import Params from '../../../src/server/params'
 
 describe('Params', () => {
@@ -24,7 +25,13 @@ describe('Params', () => {
 
     context('one of the desired attributes is undefined', () => {
       it('omits undefined', () => {
-        expect(Object.keys(Params.restrict({ name: undefined, email: 'hello' }, ['name']))).toEqual([])
+        expect(
+          Object.keys(
+            Params.restrict({ name: undefined as unknown as PsychicParamsDictionary, email: 'hello' }, [
+              'name',
+            ]),
+          ),
+        ).toEqual([])
       })
     })
   })

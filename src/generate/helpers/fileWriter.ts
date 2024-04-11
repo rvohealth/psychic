@@ -10,8 +10,10 @@ export default async function fileWriter(
   pluralizeBeforePostfix: boolean,
   directoryPrefix: 'app/controllers' | 'app/serializers' | 'spec/unit/controllers' | 'spec/unit/serializers',
   rootPath: string | null = null,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   contentFunction: (...args: any[]) => Promise<string> | string,
-  contentFunctionAttrs: any[] = []
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  contentFunctionAttrs: any[] = [],
 ) {
   const thisfs = fs ? fs : await import('fs/promises')
   const srcPath =
@@ -26,11 +28,12 @@ export default async function fileWriter(
     .map(str => pascalize(str))
     .join('/')
   const dirPartsRelativeToTypeRoot = filepathRelativeToTypeRoot.split('/').slice(0, -1)
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   const newfileFileContents = await contentFunction(newfileClassName, ...contentFunctionAttrs)
 
   // if they are generating a nested newfile path,
   // we need to make sure the nested directories exist
-  if (!!dirPartsRelativeToTypeRoot.length) {
+  if (dirPartsRelativeToTypeRoot.length) {
     const fullDirectoryPath = [...newfileBasePath.split('/'), ...dirPartsRelativeToTypeRoot].join('/')
     await thisfs.mkdir(fullDirectoryPath, { recursive: true })
   }
@@ -38,13 +41,13 @@ export default async function fileWriter(
   const fullNewfilePath = `${newfileBasePath}/${filepathRelativeToTypeRoot}${fileExtension}`
   const rootRelativeNewfilePath = fullNewfilePath.replace(
     new RegExp(`^.*${directoryPrefix}`),
-    directoryPrefix
+    directoryPrefix,
   )
 
   console.log(
     `generating ${filePostfix.toLowerCase()}${
       fileExtension === '.spec.ts' ? ' spec' : ''
-    }: ${rootRelativeNewfilePath}`
+    }: ${rootRelativeNewfilePath}`,
   )
   await thisfs.writeFile(fullNewfilePath, newfileFileContents)
 }

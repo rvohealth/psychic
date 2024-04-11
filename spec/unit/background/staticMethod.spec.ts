@@ -1,3 +1,4 @@
+import { Job } from 'bullmq'
 import background, { BackgroundQueuePriority } from '../../../src/background'
 import DummyService from '../../../test-app/app/services/DummyService'
 import readTmpFile from '../../helpers/readTmpFile'
@@ -13,7 +14,7 @@ describe('background (app singleton)', () => {
     })
 
     context('priority', () => {
-      let subject = async () => {
+      const subject = async () => {
         await background.staticMethod(DummyService, 'classRunInBG', {
           filepath: 'test-app/app/services/DummyService.ts',
           args: ['bottlearum'],
@@ -23,6 +24,7 @@ describe('background (app singleton)', () => {
       let priority: BackgroundQueuePriority
 
       function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(background.queue!.add).toHaveBeenCalledWith(
           'BackgroundJobQueueStaticJob',
           {
@@ -32,7 +34,7 @@ describe('background (app singleton)', () => {
             importKey: undefined,
             method: 'classRunInBG',
           },
-          { priority: priorityLevel }
+          { priority: priorityLevel },
         )
       }
 
@@ -40,9 +42,7 @@ describe('background (app singleton)', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         await background.connect()
 
-        jest.spyOn(background.queue!, 'add').mockImplementation(() => {
-          return {} as any
-        })
+        jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {
@@ -95,7 +95,7 @@ describe('background (app singleton)', () => {
     })
 
     context('delaySeconds', () => {
-      let subject = async () => {
+      const subject = async () => {
         await background.staticMethod(DummyService, 'classRunInBG', {
           filepath: 'test-app/app/services/DummyService.ts',
           args: ['bottlearum'],
@@ -105,6 +105,7 @@ describe('background (app singleton)', () => {
       let delaySeconds: number
 
       function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, delay: number) {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(background.queue!.add).toHaveBeenCalledWith(
           'BackgroundJobQueueStaticJob',
           {
@@ -114,7 +115,7 @@ describe('background (app singleton)', () => {
             importKey: undefined,
             method: 'classRunInBG',
           },
-          { delay, priority: 2 }
+          { delay, priority: 2 },
         )
       }
 
@@ -122,9 +123,7 @@ describe('background (app singleton)', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         await background.connect()
 
-        jest.spyOn(background.queue!, 'add').mockImplementation(() => {
-          return {} as any
-        })
+        jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {

@@ -4,12 +4,14 @@ import UrgentDummyService from '../../../test-app/app/services/UrgentDummyServic
 import NotUrgentDummyService from '../../../test-app/app/services/NotUrgentDummyService'
 import LastDummyService from '../../../test-app/app/services/LastDummyService'
 import background, { BackgroundQueuePriority } from '../../../src/background'
+import { Job } from 'bullmq'
 
 describe('BackgroundedService', () => {
   describe('.background', () => {
     it('calls the static method, passing args', async () => {
       jest.spyOn(DummyService, 'classRunInBG').mockImplementation(async () => {})
       await DummyService.background('classRunInBG', 'bottlearum')
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(DummyService.classRunInBG).toHaveBeenCalledWith('bottlearum')
     })
 
@@ -19,11 +21,12 @@ describe('BackgroundedService', () => {
         args: ['bottlearum'],
         constructorArgs: ['bottleawhiskey'],
       })
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(DummyService.prototype.instanceMethodToTest).toHaveBeenCalledWith('bottleawhiskey', 'bottlearum')
     })
 
     context('queue priority', () => {
-      let subject = async () => {
+      const subject = async () => {
         await new serviceClass('hello').background('instanceRunInBG', {
           args: ['bottlearum'],
           constructorArgs: ['bottleawhiskey'],
@@ -36,6 +39,7 @@ describe('BackgroundedService', () => {
         | typeof LastDummyService
 
       function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(background.queue!.add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
@@ -46,7 +50,7 @@ describe('BackgroundedService', () => {
             importKey: undefined,
             method: 'instanceRunInBG',
           },
-          { priority: priorityLevel }
+          { priority: priorityLevel },
         )
       }
 
@@ -54,9 +58,7 @@ describe('BackgroundedService', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         await background.connect()
 
-        jest.spyOn(background.queue!, 'add').mockImplementation(() => {
-          return {} as any
-        })
+        jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {
@@ -113,6 +115,7 @@ describe('BackgroundedService', () => {
     it('calls the static method, passing args', async () => {
       jest.spyOn(DummyService, 'classRunInBG').mockImplementation(async () => {})
       await DummyService.backgroundWithDelay(25, 'classRunInBG', 'bottlearum')
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(DummyService.classRunInBG).toHaveBeenCalledWith('bottlearum')
     })
 
@@ -122,11 +125,13 @@ describe('BackgroundedService', () => {
         args: ['bottlearum'],
         constructorArgs: ['bottleawhiskey'],
       })
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(DummyService.prototype.instanceMethodToTest).toHaveBeenCalledWith('bottleawhiskey', 'bottlearum')
     })
 
     context('queue priority', () => {
-      let subject = async () => {
+      const subject = async () => {
         await new serviceClass('hello').backgroundWithDelay(7, 'instanceRunInBG', {
           args: ['bottlearum'],
           constructorArgs: ['bottleawhiskey'],
@@ -139,6 +144,7 @@ describe('BackgroundedService', () => {
         | typeof LastDummyService
 
       function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(background.queue!.add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
@@ -149,7 +155,7 @@ describe('BackgroundedService', () => {
             importKey: undefined,
             method: 'instanceRunInBG',
           },
-          { delay: 7000, priority: priorityLevel }
+          { delay: 7000, priority: priorityLevel },
         )
       }
 
@@ -157,9 +163,7 @@ describe('BackgroundedService', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         await background.connect()
 
-        jest.spyOn(background.queue!, 'add').mockImplementation(() => {
-          return {} as any
-        })
+        jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {

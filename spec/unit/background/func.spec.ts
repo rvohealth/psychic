@@ -1,8 +1,9 @@
+import { Job } from 'bullmq'
 import background, { BackgroundQueuePriority } from '../../../src/background'
 
 describe('backgroundedFunction', () => {
   context('priority', () => {
-    let subject = async () => {
+    const subject = async () => {
       await background.func({
         args: ['bottlearum'],
         filepath: 'test-app/app/services/functions/dummyFunction.ts',
@@ -13,6 +14,7 @@ describe('backgroundedFunction', () => {
     let priority: BackgroundQueuePriority
 
     function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(background.queue!.add).toHaveBeenCalledWith(
         'BackgroundJobQueueFunctionJob',
         {
@@ -21,7 +23,7 @@ describe('backgroundedFunction', () => {
           importKey: 'default',
           priority,
         },
-        { priority: priorityLevel }
+        { priority: priorityLevel },
       )
     }
 
@@ -29,9 +31,7 @@ describe('backgroundedFunction', () => {
       process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
       await background.connect()
 
-      jest.spyOn(background.queue!, 'add').mockImplementation(() => {
-        return {} as any
-      })
+      jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
     })
 
     afterEach(() => {
@@ -84,7 +84,7 @@ describe('backgroundedFunction', () => {
   })
 
   context('delaySeconds', () => {
-    let subject = async () => {
+    const subject = async () => {
       await background.func({
         args: ['bottlearum'],
         filepath: 'test-app/app/services/functions/dummyFunction.ts',
@@ -95,6 +95,7 @@ describe('backgroundedFunction', () => {
     let delaySeconds: number
 
     function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, delay: number) {
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(background.queue!.add).toHaveBeenCalledWith(
         'BackgroundJobQueueFunctionJob',
         {
@@ -103,7 +104,7 @@ describe('backgroundedFunction', () => {
           importKey: 'default',
           priority,
         },
-        { delay, priority: 2 }
+        { delay, priority: 2 },
       )
     }
 
@@ -111,9 +112,7 @@ describe('backgroundedFunction', () => {
       process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
       await background.connect()
 
-      jest.spyOn(background.queue!, 'add').mockImplementation(() => {
-        return {} as any
-      })
+      jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
     })
 
     afterEach(() => {

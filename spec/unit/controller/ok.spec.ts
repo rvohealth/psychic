@@ -1,11 +1,8 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { DreamSerializer, Attribute } from '@rvohealth/dream'
 import PsychicController from '../../../src/controller'
 import PsychicConfig from '../../../src/config'
 import PsychicServer from '../../../src/server'
-import User from '../../../test-app/app/models/User'
 import { Request, Response } from 'express'
-import { BeforeAction } from '../../../src/controller/decorators'
 
 describe('PsychicController', () => {
   describe('#ok', () => {
@@ -15,7 +12,7 @@ describe('PsychicController', () => {
     let config: PsychicConfig
 
     class MyController extends PsychicController {
-      public async howyadoin() {
+      public howyadoin() {
         this.ok({ chalupas: 'dujour' })
       }
     }
@@ -28,22 +25,22 @@ describe('PsychicController', () => {
       jest.spyOn(res, 'json')
     })
 
-    it('renders the data as json', async () => {
+    it('renders the data as json', () => {
       const controller = new MyController(req, res, { config })
-      await controller.howyadoin()
+      controller.howyadoin()
       expect(res.json).toHaveBeenCalledWith({ chalupas: 'dujour' })
     })
 
     context('when passed null', () => {
       class MyController extends PsychicController {
-        public async howyadoin() {
+        public howyadoin() {
           this.ok(null)
         }
       }
 
-      it('passes "null" to json without raising exception', async () => {
+      it('passes "null" to json without raising exception', () => {
         const controller = new MyController(req, res, { config })
-        await controller.howyadoin()
+        controller.howyadoin()
         expect(res.json).toHaveBeenCalledWith(null)
       })
     })

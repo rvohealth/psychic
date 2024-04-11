@@ -1,4 +1,4 @@
-import { Dream, BeforeCreate, BeforeUpdate, Validates, Virtual, BelongsTo, HasMany } from '@rvohealth/dream'
+import { BeforeCreate, BeforeUpdate, Validates, Virtual, HasMany } from '@rvohealth/dream'
 import Hash from '../../../src/encryption/hash'
 import Pet from './Pet'
 import UserSerializer from '../serializers/UserSerializer'
@@ -46,5 +46,6 @@ export default class User extends ApplicationModel {
     return await this._testBackground(this.id, arg)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   public async _testBackground(userId: any, arg: string) {}
 }

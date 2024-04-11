@@ -10,8 +10,8 @@ Failed to connect to the database using the credentials located at:
 
 Please check that your credentials are valid, and then try again.
 The underlying error that triggered this message was:
-  ${error}
-`
+  ${error.message}
+`,
     )
   }
 }

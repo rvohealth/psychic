@@ -7,7 +7,7 @@ export default class RouterMissingControllerMethod extends RouterError {
 The method on the controller you are attempting to load was not found:
   controller: ${controllerPath}
   method: ${method}
-      `
+      `,
     )
   }
 }

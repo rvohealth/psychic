@@ -14,15 +14,15 @@ describe('Hash', () => {
       process.env.APP_ENCRYPTION_KEY = originalEncryptionKey
     })
 
-    it('signs the provided string using jwt', () => {
-      Hash.gen('how')
+    it('signs the provided string using jwt', async () => {
+      await Hash.gen('how')
       expect(bcrypt.hash).toHaveBeenCalledWith('how', 4)
     })
 
     context('in non-test env', () => {
-      it('uses longer salt', () => {
+      it('uses longer salt', async () => {
         process.env.NODE_ENV = 'development'
-        Hash.gen('how')
+        await Hash.gen('how')
         expect(bcrypt.hash).toHaveBeenCalledWith('how', 11)
         process.env.NODE_ENV = 'test'
       })

@@ -1,8 +1,8 @@
 {
   "name": "@rvohealth/psychic",
-  "version": "0.2.1",
+  "version": "0.2.2",
   "main": "src/index.ts",
-  "author": "avocadojesus <jgarbey@gmail.com>",
+  "author": "RVOHealth",
   "repository": "https://github.com/rvohealth/psychic.git",
   "license": "MIT",
   "private": false,
@@ -36,11 +36,13 @@
     "db:create": "yarn dream db:create",
     "db:drop": "yarn dream db:drop",
     "db:migrate": "yarn dream db:migrate",
-    "console": "yarn psyts console --core",
+    "console": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 npx ts-node --transpile-only --project ./tsconfig.json ./test-app/conf/repl.ts",
     "uspec:slow": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts sync:all --core && APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "uspec": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "fspec:slow": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts sync:all --core && APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
-    "fspec": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit"
+    "fspec": "APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 TS_SAFE=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
+    "format": "yarn run prettier . --write",
+    "lint": "yarn run eslint --no-warn-ignored \"src/**/*.ts\" \"spec/**/*.ts\" \"test-app/**/*.ts\" \"boot/**/*.ts\" && yarn run prettier . --check"
   },
   "publishConfig": {
     "registry": "https://npm.pkg.github.com"
@@ -51,8 +53,6 @@
     "@types/bcrypt": "^5.0.2",
     "@types/cookie-parser": "^1.4.6",
     "@types/cors": "^2.8.17",
-    "@types/express": "^4.17.21",
-    "@types/express-requests-logger": "^3.0.4",
     "@types/jest": "^29.5.12",
     "@types/jsonwebtoken": "^9.0.5",
     "@types/node": "^20.11.17",
@@ -63,7 +63,6 @@
     "commander": "^12.0.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
-    "express": "^4.19.2",
     "jest": "^29.7.0",
     "jsonwebtoken": "^9.0.2",
     "pluralize": "^8.0.0",
@@ -75,13 +74,23 @@
     "tslib": "^2.6.2"
   },
   "peerDependencies": {
-    "@rvohealth/dream": "^0.2.0",
+    "@rvohealth/dream": "^0.2.11",
+    "@types/express-requests-logger": "^3.0.4",
+    "@types/express": "^4.17.21",
+    "express": "^4.19.2",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
-    "@rvohealth/dream": "^0.2.0",
+    "@eslint/js": "^9.0.0",
+    "@rvohealth/dream": "^0.2.11",
+    "@types/express-requests-logger": "^3.0.4",
+    "@types/express": "^4.17.21",
     "@types/jest-plugin-context": "^2.9.5",
+    "eslint": "^9.0.0",
+    "express": "^4.19.2",
     "jest-plugin-context": "^2.9.0",
-    "typescript": "^5.3.3"
+    "prettier": "^3.2.5",
+    "typescript-eslint": "^7.6.0",
+    "typescript": "^5.4.5"
   }
 }

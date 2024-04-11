@@ -12,4 +12,4 @@ export default async function adaptPackageJson() {
 
   await fs.writeFile(path.join(__dirname, '..', 'package.json'), JSON.stringify(pack, null, 2))
 }
-adaptPackageJson()
+void adaptPackageJson()

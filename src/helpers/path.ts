@@ -10,10 +10,6 @@ export async function writeFile(filepath: string, contents: string) {
   return await fs.writeFile(filepath, contents)
 }
 
-export async function importFile(filepath: string) {
-  return await import(filepath)
-}
-
 let _yamlCache: DreamYamlFile | null = null
 export async function loadDreamYamlFile() {
   if (_yamlCache) return _yamlCache

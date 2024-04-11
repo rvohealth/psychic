@@ -2,8 +2,8 @@ import generateClientAPIModule from '../../../../src/generate/client/apiModule'
 
 describe('dream generate:model <name> [...attributes]', () => {
   context('when provided with a pascalized table name', () => {
-    it('generates a dream model with multiple string fields', async () => {
-      const res = await generateClientAPIModule('users', 'User')
+    it('generates a dream model with multiple string fields', () => {
+      const res = generateClientAPIModule('users', 'User')
       expect(res).toEqual(
         `\
 import { apiCall } from './common'
@@ -30,13 +30,13 @@ export default class UsersAPI {
     return apiCall('users.id.DELETE', { id }).send()
   }
 }\
-`
+`,
       )
     })
   })
 
-  it('produces valid association paths when the model being generated is namespaced', async () => {
-    const res = await generateClientAPIModule('/api/users', 'System/Main/User')
+  it('produces valid association paths when the model being generated is namespaced', () => {
+    const res = generateClientAPIModule('/api/users', 'System/Main/User')
     expect(res).toEqual(
       `\
 import { apiCall } from '../../common'
@@ -63,7 +63,7 @@ export default class SystemMainUsersAPI {
     return apiCall('api.users.id.DELETE', { id }).send()
   }
 }\
-`
+`,
     )
   })
 })

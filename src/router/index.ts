@@ -11,10 +11,10 @@ import log from '../log'
 import PsychicController from '../controller'
 import { ValidationError, camelize, developmentOrTestEnv } from '@rvohealth/dream'
 import RouteManager from './route-manager'
-import { pascalize, snakeify } from '@rvohealth/dream'
+import { pascalize } from '@rvohealth/dream'
 import pluralize = require('pluralize')
-import absoluteSrcPath from '../helpers/absoluteSrcPath'
-import importFileWithDefault from '../helpers/importFileWithDefault'
+import HttpError from '../error/http'
+import { ValidationType } from '@rvohealth/dream/src/decorators/validations/shared'
 
 export default class PsychicRouter {
   public app: Application
@@ -41,8 +41,8 @@ export default class PsychicRouter {
   // this is called after all routes have been processed.
   public commit() {
     this.routes.forEach(route => {
-      this.app[route.httpMethod](routePath(route.path), async (req, res) => {
-        await this.handle(route.controllerActionString, { req, res })
+      this.app[route.httpMethod](routePath(route.path), (req, res) => {
+        this.handle(route.controllerActionString, { req, res }).catch(() => {})
       })
     })
   }
@@ -74,7 +74,7 @@ export default class PsychicRouter {
   private prefixControllerActionStringWithNamespaces(controllerActionString: string) {
     const [controllerName] = controllerActionString.split('#')
     const filteredNamespaces = this.currentNamespaces.filter(
-      n => !n.isScope && !(n.resourceful && pascalize(n.namespace) === controllerName)
+      n => !n.isScope && !(n.resourceful && pascalize(n.namespace) === controllerName),
     )
     if (!filteredNamespaces.length) return controllerActionString
     return filteredNamespaces.map(str => pascalize(str.namespace)).join('/') + '/' + controllerActionString
@@ -112,7 +112,7 @@ export default class PsychicRouter {
   public resources(
     path: string,
     optionsOrCb?: ResourcesOptions | ((router: PsychicNestedRouter) => void),
-    cb?: (router: PsychicNestedRouter) => void
+    cb?: (router: PsychicNestedRouter) => void,
   ) {
     return this.makeResource(path, optionsOrCb, cb, true)
   }
@@ -120,7 +120,7 @@ export default class PsychicRouter {
   public resource(
     path: string,
     optionsOrCb?: ResourcesOptions | ((router: PsychicNestedRouter) => void),
-    cb?: (router: PsychicNestedRouter) => void
+    cb?: (router: PsychicNestedRouter) => void,
   ) {
     return this.makeResource(path, optionsOrCb, cb, false)
   }
@@ -140,7 +140,7 @@ export default class PsychicRouter {
     path: string,
     optionsOrCb: ResourcesOptions | ((router: PsychicNestedRouter) => void) | undefined,
     cb: ((router: PsychicNestedRouter) => void) | undefined,
-    plural: boolean
+    plural: boolean,
   ) {
     if (cb) {
       if (typeof optionsOrCb === 'function')
@@ -156,7 +156,7 @@ export default class PsychicRouter {
     path: string,
     options: ResourcesOptions | undefined,
     cb: ((router: PsychicNestedRouter) => void) | undefined,
-    plural: boolean
+    plural: boolean,
   ) {
     const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
       namespaces: this.currentNamespaces,
@@ -168,9 +168,7 @@ export default class PsychicRouter {
     if (only) {
       resourceMethods = only
     } else if (except) {
-      resourceMethods = resourceMethods.filter(
-        m => !except.includes(m as ResourcesMethodType)
-      ) as ResourcesMethodType[]
+      resourceMethods = resourceMethods.filter(m => !except.includes(m))
     }
 
     this.makeRoomForNewIdParam(nestedRouter)
@@ -198,7 +196,7 @@ export default class PsychicRouter {
       asMember?: boolean
       resourceful?: boolean
       treatNamespaceAsScope?: boolean
-    } = {}
+    } = {},
   ) {
     this.addNamespace(namespace, resourceful, { nestedRouter, treatNamespaceAsScope })
 
@@ -221,7 +219,7 @@ export default class PsychicRouter {
     }: {
       nestedRouter?: PsychicNestedRouter
       treatNamespaceAsScope?: boolean
-    } = {}
+    } = {},
   ) {
     this.currentNamespaces = [
       ...this.currentNamespaces,
@@ -263,7 +261,7 @@ export default class PsychicRouter {
     }: {
       req: Request
       res: Response
-    }
+    },
   ) {
     const [controllerPath, action] = controllerActionString.split('#')
 
@@ -277,8 +275,10 @@ export default class PsychicRouter {
     }
 
     const controller = this._initializeController(ControllerClass, req, res)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    const controllerAction = (controller as any)[action]
 
-    if (!(controller as any)[action]) {
+    if (!controllerAction) {
       res.status(501).send(`
         The method ${action} is not defined controller:
           ${controllerPath}
@@ -288,10 +288,14 @@ export default class PsychicRouter {
 
     try {
       await controller.runAction(action)
-    } catch (err) {
-      if (process.env.NODE_ENV !== 'test') await log.error(err as string)
+    } catch (error) {
+      const err = error as Error
+      if (process.env.NODE_ENV !== 'test') log.error(err.message)
 
-      switch ((err as any).constructor?.name) {
+      let validationError: ValidationError
+      let validationErrors: Record<string, ValidationType[]>
+
+      switch (err.constructor?.name) {
         case 'Unauthorized':
         case 'Forbidden':
         case 'NotFound':
@@ -299,19 +303,19 @@ export default class PsychicRouter {
         case 'BadRequest':
         case 'NotImplemented':
         case 'ServiceUnavailable':
-          res.sendStatus((err as any).status)
+          res.sendStatus((err as HttpError).status)
           break
 
         case 'ValidationError':
-          const validationError = err as ValidationError
-          const errors = validationError.errors || ([] as ValidationError[])
+          validationError = err as ValidationError
+          validationErrors = validationError.errors || {}
           res.status(422).json({
-            errors,
+            errors: validationErrors,
           })
           break
 
         case 'UnprocessableEntity':
-          res.status(422).json((err as any).data)
+          res.status(422).json((err as HttpError).data)
           break
 
         case 'InternalServerError':
@@ -335,7 +339,7 @@ export default class PsychicRouter {
                   Something went wrong while attempting to call your custom server_error hooks.
                   Psychic will rescue errors thrown here to prevent the server from crashing.
                   The error thrown is:
-                `
+                `,
                 )
                 console.error(error)
               }
@@ -362,7 +366,7 @@ export class PsychicNestedRouter extends PsychicRouter {
       namespaces = [],
     }: {
       namespaces?: NamespaceConfig[]
-    } = {}
+    } = {},
   ) {
     super(app, config)
     this.router = Router()

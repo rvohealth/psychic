@@ -1,10 +1,9 @@
-import { loadModels, closeAllDbConnections, dreamDbConnections } from '@rvohealth/dream'
+import { loadModels, closeAllDbConnections } from '@rvohealth/dream'
 import express from 'express'
 import { Application } from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
 import PsychicConfig from '../config'
-import log from '../log'
 import Cable from '../cable'
 import FrontEndClientServer from './front-end-client'
 import PsychicRouter from '../router'
@@ -12,7 +11,7 @@ import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import { Server } from 'http'
 import startPsychicServer from './helpers/startPsychicServer'
-import background, { stopBackgroundWorkers } from '../background'
+import { stopBackgroundWorkers } from '../background'
 
 export default class PsychicServer {
   public app: Application
@@ -29,7 +28,7 @@ export default class PsychicServer {
   public async routes() {
     const r = new PsychicRouter(this.app, this.config)
     const routesPath = absoluteSrcPath('conf/routes')
-    const routesCB = await importFileWithDefault(routesPath)
+    const routesCB = await importFileWithDefault<(router: PsychicRouter) => Promise<void>>(routesPath)
     await routesCB(r)
     return r.routes
   }
@@ -46,10 +45,11 @@ export default class PsychicServer {
     try {
       await this.config.boot()
     } catch (err) {
-      console.error(err)
+      const error = err as Error
+      console.error(error)
       throw new Error(`
         Failed to boot psychic config. the error thrown was:
-          ${err}
+          ${error.message}
       `)
     }
 
@@ -73,7 +73,7 @@ export default class PsychicServer {
     }: {
       withFrontEndClient?: boolean
       frontEndPort?: number
-    } = {}
+    } = {},
   ) {
     await this.boot()
 
@@ -85,8 +85,8 @@ export default class PsychicServer {
       this.frontEndClient = new FrontEndClientServer()
       this.frontEndClient.start(frontEndPort)
 
-      process.on('SIGTERM', async () => {
-        await this.frontEndClient?.stop()
+      process.on('SIGTERM', () => {
+        this.frontEndClient?.stop()
       })
     }
 
@@ -96,14 +96,18 @@ export default class PsychicServer {
       await this.cable.start(port, { withFrontEndClient, frontEndPort })
       this.server = this.cable.http
     } else {
-      await new Promise(async accept => {
-        this.server = await startPsychicServer({
+      await new Promise(accept => {
+        startPsychicServer({
           app: this.app,
           port,
           withFrontEndClient,
           frontEndPort,
         })
-        accept({})
+          .then(server => {
+            this.server = server
+            accept({})
+          })
+          .catch(() => {})
       })
     }
 
@@ -116,7 +120,7 @@ export default class PsychicServer {
     await closeAllDbConnections()
   }
 
-  public async serveForRequestSpecs(block: () => any) {
+  public async serveForRequestSpecs(block: () => void | Promise<void>) {
     const port = process.env.PORT
     if (!port) throw 'Missing `PORT` environment variable'
 
@@ -124,10 +128,8 @@ export default class PsychicServer {
 
     let server: Server
 
-    await new Promise(async accept => {
-      server = this.app.listen(port, async () => {
-        accept({})
-      })
+    await new Promise(accept => {
+      server = this.app.listen(port, () => accept({}))
     })
 
     await block()
@@ -153,7 +155,7 @@ export default class PsychicServer {
   private async buildRoutes() {
     const r = new PsychicRouter(this.app, this.config)
     const routesPath = absoluteSrcPath('conf/routes')
-    const routesCB = await importFileWithDefault(routesPath)
+    const routesCB = await importFileWithDefault<(router: PsychicRouter) => Promise<void>>(routesPath)
     await routesCB(r)
     r.commit()
   }

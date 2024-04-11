@@ -1,14 +1,17 @@
 import { camelize } from '@rvohealth/dream'
 import { RouteConfig } from '../../router/route-manager'
 
-export default async function generateClientRoutes(routes: RouteConfig[]) {
-  let routesObj: any = {}
+export default function generateClientRoutes(routes: RouteConfig[]) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  const routesObj: any = {}
+
   routes.forEach(route => {
     const segments = route.path.replace(/^\//, '').split('/')
     const paramSegments = segments
       .filter(segment => /^:/.test(segment))
       .map(segment => segment.replace(/^:/, ''))
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     recursivelyBuildRoutesObj({ routesObj, segments, paramSegments, route })
   })
 
@@ -28,6 +31,7 @@ function recursivelyBuildRoutesObj({
   paramSegments,
   route,
 }: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   routesObj: any
   segments: string[]
   paramSegments: string[]
@@ -35,15 +39,19 @@ function recursivelyBuildRoutesObj({
 }) {
   segments.reduce((currObj, routeSegment, index) => {
     const sanitizedSegment = routeSegment.replace(/^:/, '')
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     currObj[sanitizedSegment] ||= {}
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     currObj = currObj[sanitizedSegment]
 
     if (index === segments.length - 1) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       currObj[route.httpMethod.toUpperCase()] = route.path.includes(':')
         ? clientPathFunc(paramSegments, segments)
         : clientPathStr(route.path)
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return currObj
   }, routesObj)
 }
@@ -56,15 +64,20 @@ function spaces(numIterations: number) {
   return spaces
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 function recursivelyBuildRoutesStr(routesObj: any, str: string, numIterations: number): string {
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
   return Object.keys(routesObj).reduce((agg, key) => {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (typeof routesObj[key] === 'string') {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       const pathStr = /^\(/.test(routesObj[key]) ? routesObj[key] : `'${routesObj[key]}'`
 
       agg += `\n${spaces(numIterations)}${key}: ${pathStr},`
     } else {
       agg += `
 ${spaces(numIterations)}${camelize(key)}: {`
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       agg = recursivelyBuildRoutesStr(routesObj[key], agg, numIterations + 1)
       agg += `\n${spaces(numIterations)}},`
     }
@@ -77,7 +90,7 @@ function clientPathFunc(paramSegments: string[], segments: string[]) {
 ({ ${paramSegments.map(segment => segment.replace(/^:/, '')).join(', ')} }: { ${paramSegments
     .map(segment => segment.replace(/^:/, '') + ': UriParam')
     .join(', ')} }) => \`/${segments
-    .map(segment => (/^:/.test(segment) ? `\$\{${segment.replace(/^:/, '')}\}` : segment))
+    .map(segment => (/^:/.test(segment) ? `$\{${segment.replace(/^:/, '')}}` : segment))
     .join('/')
     .replace(/^\//, '')}\``
 }

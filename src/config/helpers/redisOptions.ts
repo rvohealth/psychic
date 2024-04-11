@@ -20,6 +20,6 @@ export default async function redisOptions(purpose: RedisOptionPurpose) {
       return psyConf.redisBackgroundJobCredentials
 
     default:
-      throw new Error(`unexpected redis purpose encountered: ${purpose}`)
+      throw new Error(`unexpected redis purpose encountered: ${purpose as string}`)
   }
 }

@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import InvalidAppEncryptionKey from '../error/encrypt/invalid-app-encryption-key'
 
 export default class Encrypt {
-  public static sign(data: any) {
+  public static sign(data: string) {
     try {
       return jwt.sign(data, process.env.APP_ENCRYPTION_KEY as string)
     } catch (_) {
@@ -15,7 +15,7 @@ export default class Encrypt {
     }
   }
 
-  public static decode(encrypted: string): any {
+  public static decode(encrypted: string): string | jwt.JwtPayload | null {
     try {
       const payload = jwt.verify(encrypted, process.env.APP_ENCRYPTION_KEY as string)
       return payload

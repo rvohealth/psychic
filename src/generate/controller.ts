@@ -5,14 +5,14 @@ import absoluteFilePath from '../helpers/absoluteFilePath'
 
 export default async function generateController(
   route: string,
-  fullyQualifiedModelName: string | null = null,
+  fullyQualifiedModelName: string,
   methods: string[],
   attributes: string[] = [],
   {
     rootPath = absoluteFilePath(''),
   }: {
     rootPath?: string
-  } = {}
+  } = {},
 ) {
   await fileWriter(route, 'Controller', '.ts', true, 'app/controllers', rootPath, generateControllerString, [
     route,
@@ -28,6 +28,6 @@ export default async function generateController(
     true,
     'spec/unit/controllers',
     rootPath,
-    generateBlankSpecContent
+    generateBlankSpecContent,
   )
 }
