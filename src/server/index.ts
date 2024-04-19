@@ -141,7 +141,8 @@ export default class PsychicServer {
 
   public buildApp() {
     this.app = express()
-    this.app.use(cookieParser())
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.app.use(cookieParser() as any)
   }
 
   private initializeCors() {
