@@ -304,6 +304,8 @@ export default class Params {
     }
   ): string | null {
     if (typeof paramValue !== 'string') this.throwUnlessNull(paramValue, ['string'])
+    if (paramValue.length > 1000)
+      throw new Error('We do not accept strings over 1000 chars when matching using Params.demand')
     if (expectedType.test(paramValue)) return paramValue
     this.throwUnlessNull(paramValue, ['string'], opts)
     return null
