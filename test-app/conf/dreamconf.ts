@@ -11,7 +11,7 @@ const dreamconf = new Dreamconf<
   InterpretedDBClass,
   SyncedAssociations,
   SyncedBelongsToAssociations,
-  VirtualColumns,
+  typeof VirtualColumns,
   typeof DBColumns,
   typeof DBTypeCache
 >({
@@ -19,7 +19,7 @@ const dreamconf = new Dreamconf<
   interpretedDB: new InterpretedDBClass(),
   syncedAssociations: SyncedAssociationsVal as SyncedAssociations,
   syncedBelongsToAssociations: {} as SyncedBelongsToAssociations,
-  virtualColumns: {} as VirtualColumns,
+  virtualColumns: VirtualColumns,
   dbColumns: DBColumns,
   dbTypeCache: DBTypeCache,
   env: {

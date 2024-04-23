@@ -10,6 +10,46 @@ orbs:
   aws-ecs: circleci/aws-ecs@2.3.0
 
 jobs:
+  check-build:
+    docker:
+      - image: cimg/node:18.18.0
+    environment:
+      NODE_ENV: development
+    steps:
+      - checkout
+      - run:
+          name: Update npmrc with @rvohealth credentials
+          command: |
+            echo @rvohealth:registry=https://npm.pkg.github.com > ~/.npmrc
+            echo //npm.pkg.github.com/:_authToken=$GITHUB_OAUTH_TOKEN >> ~/.npmrc
+      - node/install-packages:
+          pkg-manager: yarn
+          app-dir: ~/project
+          cache-version: v8
+      - run:
+          name: Test ability to build
+          command: cd ~/project && yarn build:core
+
+  check-lint:
+    docker:
+      - image: cimg/node:18.18.0
+    environment:
+      NODE_ENV: development
+    steps:
+      - checkout
+      - run:
+          name: Update npmrc with @rvohealth credentials
+          command: |
+            echo @rvohealth:registry=https://npm.pkg.github.com > ~/.npmrc
+            echo //npm.pkg.github.com/:_authToken=$GITHUB_OAUTH_TOKEN >> ~/.npmrc
+      - node/install-packages:
+          pkg-manager: yarn
+          app-dir: ~/project
+          cache-version: v8
+      - run:
+          name: Test linting
+          command: cd ~/project && yarn lint
+
   uspecs:
     docker:
       - image: cimg/node:18.18.0
@@ -35,7 +75,7 @@ jobs:
           install-yarn: true
           node-version: '18.18.0'
       - run:
-          name: Update npmrc with node-beam creds
+          name: Update npmrc with @rvohealth credentials
           command: |
             echo @rvohealth:registry=https://npm.pkg.github.com > ~/.npmrc
             echo //npm.pkg.github.com/:_authToken=$GITHUB_OAUTH_TOKEN >> ~/.npmrc
@@ -133,4 +173,8 @@ workflows:
       - uspecs:
           context: github-packages
       - fspecs:
+          context: github-packages
+      - check-build:
+          context: github-packages
+      - check-lint:
           context: github-packages

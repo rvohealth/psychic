@@ -37,10 +37,10 @@ export interface SyncedBelongsToAssociations {
 }
   
 
-export interface VirtualColumns {
+export const VirtualColumns = {
   "health_users": false,
   "pets": false,
   "users": [
     "password"
   ]
-}
+} as const
