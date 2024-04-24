@@ -1,27 +1,9 @@
 import { Dreamconf } from '@rvohealth/dream'
-import SyncedAssociationsVal, {
-  SyncedAssociations,
-  SyncedBelongsToAssociations,
-  VirtualColumns,
-} from '../db/associations'
-import { DBClass, DBColumns, DBTypeCache, InterpretedDBClass } from '../db/schema'
+import { DBClass, schema } from '../db/schema'
 
-const dreamconf = new Dreamconf<
-  DBClass,
-  InterpretedDBClass,
-  SyncedAssociations,
-  SyncedBelongsToAssociations,
-  typeof VirtualColumns,
-  typeof DBColumns,
-  typeof DBTypeCache
->({
+const dreamconf = new Dreamconf<DBClass, typeof schema>({
   DB: new DBClass(),
-  interpretedDB: new InterpretedDBClass(),
-  syncedAssociations: SyncedAssociationsVal as SyncedAssociations,
-  syncedBelongsToAssociations: {} as SyncedBelongsToAssociations,
-  virtualColumns: VirtualColumns,
-  dbColumns: DBColumns,
-  dbTypeCache: DBTypeCache,
+  schema,
   env: {
     db: {
       development: {

@@ -8,3 +8,4 @@ test-app/logs/*
 .DS_Store
 test-app/.psy/*
 spec/tmp.txt
+.vim/*
