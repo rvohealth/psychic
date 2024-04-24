@@ -208,13 +208,14 @@ program
 
 program
   .command('sync')
-  .description('runs yarn dream sync:schema, then yarn dream sync:associations')
+  .alias('sync:schema')
+  .alias('introspect')
+  .description('runs yarn dream sync')
   .option('--core', 'sets core to true')
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
     const args = cmdargs()
-    await sspawn(dreamjsOrDreamtsCmd('sync:schema', omitCoreArg(args)))
-    await sspawn(dreamjsOrDreamtsCmd('sync:associations', omitCoreArg(args)))
+    await sspawn(dreamjsOrDreamtsCmd('sync', omitCoreArg(args)))
     await maybeSyncRoutes(args)
 
     const appConf = await readAppConfig()
@@ -226,27 +227,6 @@ program
         }),
       )
     }
-  })
-
-program
-  .command('sync:schema')
-  .alias('introspect')
-  .description(
-    'introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration',
-  )
-  .option('--tsnode', 'runs the command using ts-node instead of node')
-  .action(async () => {
-    await sspawn(dreamjsOrDreamtsCmd('sync:schema', omitCoreArg(cmdargs())))
-  })
-
-program
-  .command('sync:associations')
-  .description(
-    'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.',
-  )
-  .option('--tsnode', 'runs the command using ts-node instead of node')
-  .action(async () => {
-    await sspawn(dreamjsOrDreamtsCmd('sync:associations', omitCoreArg(cmdargs())))
   })
 
 program

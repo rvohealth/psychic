@@ -50,68 +50,7 @@ export interface DB {
 }
 
 
-export const HealthUserColumns = new Set(['createdAt', 'email', 'id', 'name', 'passwordDigest', 'updatedAt'])
-export const PetColumns = new Set(['createdAt', 'id', 'name', 'species', 'updatedAt', 'userId'])
-export const UserColumns = new Set(['createdAt', 'email', 'id', 'name', 'passwordDigest', 'updatedAt'])
-
 export const AllColumns = ['createdAt', 'email', 'healthUsers', 'id', 'name', 'passwordDigest', 'pets', 'species', 'updatedAt', 'userId', 'users'] as const
-
-export interface HealthUserAttributes {
-  createdAt: DateTime
-  email: string | null
-  id: number
-  name: string | null
-  passwordDigest: string | null
-  updatedAt: DateTime
-}  
-
-export interface PetAttributes {
-  createdAt: DateTime
-  id: IdType
-  name: string | null
-  species: SpeciesTypesEnum | null
-  updatedAt: DateTime
-  userId: number
-}  
-
-export interface UserAttributes {
-  createdAt: DateTime
-  email: string
-  id: number
-  name: string | null
-  passwordDigest: string
-  updatedAt: DateTime
-}  
-
-
-export const HealthUsersDBTypeMap = {
-  createdAt: 'timestamp without time zone',
-  email: 'character varying',
-  id: 'integer',
-  name: 'character varying',
-  passwordDigest: 'character varying',
-  updatedAt: 'timestamp without time zone'
-}
-
-export const PetsDBTypeMap = {
-  createdAt: 'timestamp without time zone',
-  id: 'bigint',
-  name: 'character varying',
-  species: 'species_types_enum',
-  updatedAt: 'timestamp without time zone',
-  userId: 'integer'
-}
-
-export const UsersDBTypeMap = {
-  createdAt: 'timestamp without time zone',
-  email: 'character varying',
-  id: 'integer',
-  name: 'character varying',
-  passwordDigest: 'character varying',
-  updatedAt: 'timestamp without time zone'
-}
-
-
 
 export class DBClass {
   health_users: HealthUsers
@@ -119,26 +58,127 @@ export class DBClass {
   users: Users
 }
 
-export interface InterpretedDB {
-  health_users: HealthUserAttributes,
-  pets: PetAttributes,
-  users: UserAttributes
-}
-
-export class InterpretedDBClass {
-  health_users: HealthUserAttributes
-  pets: PetAttributes
-  users: UserAttributes
-}
-
-export const DBColumns = {
-  health_users: HealthUserColumns,
-  pets: PetColumns,
-  users: UserColumns
-}
-
-export const DBTypeCache = {
-  health_users: HealthUsersDBTypeMap,
-  pets: PetsDBTypeMap,
-  users: UsersDBTypeMap
-} as Partial<Record<keyof DB, any>>
+export const schema = {
+  health_users: {
+    columns: {
+      id: {
+        coercedType: {} as number,
+        dbType: 'integer',
+        allowNull: false,
+      },
+      email: {
+        coercedType: {} as string | null,
+        dbType: 'character varying',
+        allowNull: true,
+      },
+      passwordDigest: {
+        coercedType: {} as string | null,
+        dbType: 'character varying',
+        allowNull: true,
+      },
+      name: {
+        coercedType: {} as string | null,
+        dbType: 'character varying',
+        allowNull: true,
+      },
+      createdAt: {
+        coercedType: {} as DateTime,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+      },
+      updatedAt: {
+        coercedType: {} as DateTime,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+      },
+    },
+    virtualColumns: [],
+    associations: {
+      
+    },
+  },
+  pets: {
+    columns: {
+      id: {
+        coercedType: {} as IdType,
+        dbType: 'bigint',
+        allowNull: false,
+      },
+      userId: {
+        coercedType: {} as number,
+        dbType: 'integer',
+        allowNull: false,
+      },
+      name: {
+        coercedType: {} as string | null,
+        dbType: 'character varying',
+        allowNull: true,
+      },
+      species: {
+        coercedType: {} as SpeciesTypesEnum | null,
+        dbType: 'species_types_enum',
+        allowNull: true,
+      },
+      createdAt: {
+        coercedType: {} as DateTime,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+      },
+      updatedAt: {
+        coercedType: {} as DateTime,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+      },
+    },
+    virtualColumns: [],
+    associations: {
+      user: {
+        type: 'BelongsTo',
+        tables: ['users'],
+        optional: false,
+      },
+    },
+  },
+  users: {
+    columns: {
+      id: {
+        coercedType: {} as number,
+        dbType: 'integer',
+        allowNull: false,
+      },
+      name: {
+        coercedType: {} as string | null,
+        dbType: 'character varying',
+        allowNull: true,
+      },
+      email: {
+        coercedType: {} as string,
+        dbType: 'character varying',
+        allowNull: false,
+      },
+      passwordDigest: {
+        coercedType: {} as string,
+        dbType: 'character varying',
+        allowNull: false,
+      },
+      createdAt: {
+        coercedType: {} as DateTime,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+      },
+      updatedAt: {
+        coercedType: {} as DateTime,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+      },
+    },
+    virtualColumns: ['password'],
+    associations: {
+      pets: {
+        type: 'HasMany',
+        tables: ['pets'],
+        optional: null,
+      },
+    },
+  },
+} as const
