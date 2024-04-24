@@ -174,6 +174,7 @@ program
     await sspawn(dreamjsOrDreamtsCmd('g:api', args, { cmdArgs: omitCoreArg(args) }))
     await sspawn(
       nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
+        tsnodeFlags: ['--transpile-only'],
         fileArgs: [],
       }),
     )
@@ -191,6 +192,7 @@ program
 
     await sspawn(
       nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
+        tsnodeFlags: ['--transpile-only'],
         fileArgs: [],
       }),
     )
@@ -223,6 +225,7 @@ program
       await sspawn(dreamjsOrDreamtsCmd('g:api', args, { cmdArgs: omitCoreArg(args) }))
       await sspawn(
         nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
+          tsnodeFlags: ['--transpile-only'],
           fileArgs: [],
         }),
       )
@@ -248,10 +251,6 @@ program
   .option('--core', 'sets core to true')
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
-    console.log(
-      'DEBUG: about to execute:',
-      nodeOrTsnodeCmd('src/bin/sync-routes.ts', cmdargs(), { tsnodeFlags: ['--transpile-only'] }),
-    )
     await sspawn(nodeOrTsnodeCmd('src/bin/sync-routes.ts', cmdargs(), { tsnodeFlags: ['--transpile-only'] }))
   })
 
