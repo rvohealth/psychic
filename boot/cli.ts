@@ -17,7 +17,7 @@ import { maybeSyncRoutes } from './cli/helpers/syncRoutes'
 import nodeOrTsnodeCmd from './cli/helpers/nodeOrTsnodeCmd'
 import dreamjsOrDreamtsCmd from './cli/helpers/dreamjsOrDreamtsCmd'
 import developmentOrProdEnvString from './cli/helpers/developmentOrProdEnvString'
-import readAppConfig from '../src/config/helpers/readAppConfig'
+import readAppConfig, { AppConfig } from '../src/config/helpers/readAppConfig'
 
 hijackRootForCLI()
 const program = new Command()
@@ -220,8 +220,22 @@ program
     await sspawn(dreamjsOrDreamtsCmd('sync', omitCoreArg(args)))
     await maybeSyncRoutes(args)
 
-    const appConf = await readAppConfig()
-    if (!appConf.api_only) {
+    let appConf: AppConfig | undefined = undefined
+    try {
+      appConf = await readAppConfig()
+    } catch (error) {
+      console.log(
+        `Failed to read app config, so cannot determine whether or not to sync client data.
+         To see the error, make sure to include DEBUG=1.
+         To manually sync client files, run "yarn psy sync:client"
+        `,
+      )
+      if (process.env.DEBUG === '1') {
+        console.error(error)
+      }
+    }
+
+    if (!appConf?.api_only) {
       await sspawn(dreamjsOrDreamtsCmd('g:api', args, { cmdArgs: omitCoreArg(args) }))
       await sspawn(
         nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
