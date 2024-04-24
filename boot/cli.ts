@@ -235,7 +235,7 @@ program
       }
     }
 
-    if (!appConf?.api_only) {
+    if (appConf && !appConf?.api_only) {
       await sspawn(dreamjsOrDreamtsCmd('g:api', args, { cmdArgs: omitCoreArg(args) }))
       await sspawn(
         nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
