@@ -1,6 +1,6 @@
 {
   "name": "@rvohealth/psychic",
-  "version": "0.3.1",
+  "version": "0.3.2",
   "main": "src/index.ts",
   "author": "RVOHealth",
   "repository": "https://github.com/rvohealth/psychic.git",
