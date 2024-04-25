@@ -1,4 +1,4 @@
-import { BeforeCreate, BeforeUpdate, Validates, Virtual, HasMany } from '@rvohealth/dream'
+import { BeforeCreate, BeforeUpdate, Validates, Virtual, HasMany, DreamColumn } from '@rvohealth/dream'
 import Hash from '../../../src/encryption/hash'
 import Pet from './Pet'
 import UserSerializer from '../serializers/UserSerializer'
@@ -12,14 +12,46 @@ export default class User extends ApplicationModel {
     return UserSerializer
   }
 
-  public id: number
-  public name: string
-  public createdAt: Date
-  public updatedAt: Date
+  public id: DreamColumn<User, 'id'>
+  public name: DreamColumn<User, 'name'>
+  public nicknames: DreamColumn<User, 'nicknames'>
+  public requiredNicknames: DreamColumn<User, 'requiredNicknames'>
+  public birthdate: DreamColumn<User, 'birthdate'>
+  public favoriteUuids: DreamColumn<User, 'favoriteUuids'>
+  public requiredFavoriteUuids: DreamColumn<User, 'requiredFavoriteUuids'>
+  public favoriteDates: DreamColumn<User, 'favoriteDates'>
+  public requiredFavoriteDates: DreamColumn<User, 'requiredFavoriteDates'>
+  public favoriteDatetimes: DreamColumn<User, 'favoriteDatetimes'>
+  public requiredFavoriteDatetimes: DreamColumn<User, 'requiredFavoriteDatetimes'>
+  public favoriteJsons: DreamColumn<User, 'favoriteJsons'>
+  public requiredFavoriteJsons: DreamColumn<User, 'requiredFavoriteJsons'>
+  public favoriteJsonbs: DreamColumn<User, 'favoriteJsonbs'>
+  public requiredFavoriteJsonbs: DreamColumn<User, 'requiredFavoriteJsonbs'>
+  public favoriteTexts: DreamColumn<User, 'favoriteTexts'>
+  public requiredFavoriteTexts: DreamColumn<User, 'requiredFavoriteTexts'>
+  public favoriteNumerics: DreamColumn<User, 'favoriteNumerics'>
+  public requiredFavoriteNumerics: DreamColumn<User, 'requiredFavoriteNumerics'>
+  public favoriteBooleans: DreamColumn<User, 'favoriteBooleans'>
+  public requiredFavoriteBooleans: DreamColumn<User, 'requiredFavoriteBooleans'>
+  public favoriteBigints: DreamColumn<User, 'favoriteBigints'>
+  public requiredFavoriteBigints: DreamColumn<User, 'requiredFavoriteBigints'>
+  public favoriteIntegers: DreamColumn<User, 'favoriteIntegers'>
+  public requiredFavoriteIntegers: DreamColumn<User, 'requiredFavoriteIntegers'>
+  public bio: DreamColumn<User, 'bio'>
+  public notes: DreamColumn<User, 'notes'>
+  public jsonData: DreamColumn<User, 'jsonData'>
+  public requiredJsonData: DreamColumn<User, 'requiredJsonData'>
+  public jsonbData: DreamColumn<User, 'jsonbData'>
+  public requiredJsonbData: DreamColumn<User, 'requiredJsonbData'>
+  public uuid: DreamColumn<User, 'uuid'>
+  public optionalUuid: DreamColumn<User, 'optionalUuid'>
+  public createdOn: DreamColumn<User, 'createdOn'>
+  public createdAt: DreamColumn<User, 'createdAt'>
+  public updatedAt: DreamColumn<User, 'updatedAt'>
 
   @Validates('contains', '@')
   @Validates('presence')
-  public email: string
+  public email: DreamColumn<User, 'email'>
 
   @Virtual()
   public password?: string | null

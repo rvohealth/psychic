@@ -24,16 +24,26 @@ type SerializerResult = {
 export type PsychicParamsPrimitive = string | number | boolean | null | PsychicParamsPrimitive[]
 
 export const PsychicParamsPrimitiveLiterals = [
-  'string',
-  'number',
-  'integer',
+  'bigint',
+  'bigint[]',
   'boolean',
-  'null',
-  'string[]',
-  'number[]',
-  'integer[]',
   'boolean[]',
+  'date',
+  'date[]',
+  'datetime',
+  'datetime[]',
+  'integer',
+  'integer[]',
+  'json',
+  'json[]',
+  'null',
   'null[]',
+  'number',
+  'number[]',
+  'string',
+  'string[]',
+  'uuid',
+  'uuid[]',
 ] as const
 
 export interface PsychicParamsDictionary {
@@ -99,7 +109,7 @@ export default class PsychicController {
       config,
     }: {
       config: PsychicConfig
-    }
+    },
   ) {
     this.req = req
     this.res = res
@@ -131,7 +141,7 @@ export default class PsychicController {
       JSON.stringify({
         id: user.primaryKeyValue,
         modelKey: await getModelKey(user.constructor as typeof Dream),
-      })
+      }),
     )
   }
 
@@ -157,15 +167,15 @@ export default class PsychicController {
 
   public json(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any
+    data: any,
   ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any {
     if (Array.isArray(data))
       return this.res.json(
         data.map(d =>
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          this.singleObjectJson(d)
-        )
+          this.singleObjectJson(d),
+        ),
       )
     return this.res.json(this.singleObjectJson(data))
   }
@@ -229,7 +239,7 @@ export default class PsychicController {
   public badRequest(data: SerializerResult = {}) {
     throw new BadRequest(
       'The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).',
-      data
+      data,
     )
   }
 
@@ -262,7 +272,7 @@ export default class PsychicController {
   public internalServerError(data: SerializerResult = {}) {
     throw new InternalServerError(
       'The server has encountered a situation it does not know how to handle.',
-      data
+      data,
     )
   }
 
@@ -270,7 +280,7 @@ export default class PsychicController {
   public notImplemented(data: SerializerResult = {}) {
     throw new InternalServerError(
       'The request method is not supported by the server and cannot be handled. The only methods that servers are required to support (and therefore that must not return this code) are GET and HEAD',
-      data
+      data,
     )
   }
 
@@ -287,7 +297,7 @@ export default class PsychicController {
 
   public async runBeforeActionsFor(action: string) {
     const beforeActions = (this.constructor as typeof PsychicController).controllerHooks.filter(hook =>
-      hook.shouldFireForAction(action)
+      hook.shouldFireForAction(action),
     )
 
     for (const hook of beforeActions) {
@@ -308,23 +318,23 @@ export class ControllerSerializerIndex {
   public add(
     ControllerClass: typeof PsychicController,
     SerializerClass: typeof DreamSerializer,
-    ModelClass: typeof Dream
+    ModelClass: typeof Dream,
   ) {
     this.associations.push([ControllerClass, SerializerClass, ModelClass])
   }
 
   public lookupModel(ControllerClass: typeof PsychicController, ModelClass: typeof Dream) {
     return this.associations.find(
-      association => association[0] === ControllerClass && association[2] === ModelClass
+      association => association[0] === ControllerClass && association[2] === ModelClass,
     )
   }
 
   public lookupSerializer(
     ControllerClass: typeof PsychicController,
-    SerializerClass: typeof DreamSerializer
+    SerializerClass: typeof DreamSerializer,
   ) {
     return this.associations.find(
-      association => association[0] === ControllerClass && association[1] === SerializerClass
+      association => association[0] === ControllerClass && association[1] === SerializerClass,
     )
   }
 }
