@@ -75,22 +75,23 @@
   },
   "peerDependencies": {
     "@rvohealth/dream": "^0.3.7-beta4",
-    "@types/express-requests-logger": "^3.0.4",
     "@types/express": "^4.17.21",
+    "@types/express-requests-logger": "^3.0.4",
     "express": "^4.19.2",
     "typescript": "^5.3.3"
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
-    "@rvohealth/dream": "^0.3.7-beta4",
-    "@types/express-requests-logger": "^3.0.4",
+    "@rvohealth/dream": "^0.3.9-beta1",
     "@types/express": "^4.17.21",
+    "@types/express-requests-logger": "^3.0.4",
     "@types/jest-plugin-context": "^2.9.5",
     "eslint": "^9.0.0",
     "express": "^4.19.2",
     "jest-plugin-context": "^2.9.0",
     "prettier": "^3.2.5",
-    "typescript-eslint": "^7.6.0",
-    "typescript": "^5.4.5"
+    "typedoc": "^0.25.13",
+    "typescript": "^5.4.5",
+    "typescript-eslint": "^7.6.0"
   }
 }
