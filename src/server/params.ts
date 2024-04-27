@@ -1,5 +1,5 @@
 import { DateTime } from 'luxon'
-import { Dream, DreamAttributes, camelize, snakeify } from '@rvohealth/dream'
+import { Dream, DreamAttributes, camelize, snakeify, DreamParamSafeAttributes } from '@rvohealth/dream'
 import {
   PsychicParamsDictionary,
   PsychicParamsPrimitive,
@@ -27,7 +27,7 @@ export default class Params {
   public static for<T extends typeof Dream>(
     params: object,
     dreamClass: T
-  ): Partial<DreamAttributes<InstanceType<T>>> {
+  ): Partial<DreamParamSafeAttributes<InstanceType<T>>> {
     if (!dreamClass?.isDream) throw new Error(`Params.for must receive a dream class as it's first argument`)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

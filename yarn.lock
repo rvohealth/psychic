@@ -838,10 +838,10 @@
   resolved "https://registry.yarnpkg.com/@redis/time-series/-/time-series-1.0.5.tgz#a6d70ef7a0e71e083ea09b967df0a0ed742bc6ad"
   integrity sha512-IFjIgTusQym2B5IZJG3XKr5llka7ey84fw/NOYqESP5WUfQs9zz1ww/9+qoz4ka/S6KcGBodzlCeZ5UImKbscg==
 
-"@rvohealth/dream@^0.3.9-beta1":
-  version "0.3.9-beta1"
-  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.3.9-beta1/415bae2cabeecb85cf93e88da61324b030cc49d0#415bae2cabeecb85cf93e88da61324b030cc49d0"
-  integrity sha512-w8JxAaMc0ny6DauJyzCX1422cLHWz4IOoC3QziXUX/ihl8Q3Wi8JzzTiX2RmwS++MPBg+rgW+b9Maw+jfRcE6Q==
+"@rvohealth/dream@^0.3.9-beta3":
+  version "0.3.9-beta3"
+  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.3.9-beta3/0722b64520f8bfa55241998e17cd570ce4bd5451#0722b64520f8bfa55241998e17cd570ce4bd5451"
+  integrity sha512-DwuQJgD3z9XdgvOOFKN8p9zuK+FS1TEX6DdNWtm3tvxdCaFUtxb2d6thUVl2WRumvADwlyIbmI/FQpNpJdA8SA==
   dependencies:
     "@types/jest" "^29.5.12"
     "@types/lodash.clonedeep" "^4.5.9"
