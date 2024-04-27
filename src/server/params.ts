@@ -26,11 +26,21 @@ export default class Params {
    */
   public static for<
     T extends typeof Dream,
-    ForOpts extends { array?: boolean },
+    const OnlyArray extends readonly (keyof DreamParamSafeAttributes<InstanceType<T>>)[],
+    ForOpts extends {
+      array?: boolean
+      only?: OnlyArray
+    },
+    ReturnPartialType extends {
+      [K in Extract<
+        keyof DreamParamSafeAttributes<InstanceType<T>>,
+        ForOpts['only'][number & keyof ForOpts['only']]
+      >]: DreamParamSafeAttributes<InstanceType<T>>[K]
+    },
     ReturnPayload extends ForOpts['array'] extends true
       ? Partial<DreamParamSafeAttributes<InstanceType<T>>>[]
       : Partial<DreamParamSafeAttributes<InstanceType<T>>>,
-  >(params: object, dreamClass: T, { array = false }: ForOpts = {} as ForOpts): ReturnPayload {
+  >(params: object, dreamClass: T, { array = false, only }: ForOpts = {} as ForOpts): ReturnPayload {
     if (!dreamClass?.isDream) throw new Error(`Params.for must receive a dream class as it's first argument`)
     if (array) {
       if (!Array.isArray(params))
@@ -47,7 +57,13 @@ export default class Params {
 
     const returnObj: Partial<DreamAttributes<InstanceType<T>>> = {}
     const errors: { [key: string]: string[] } = {}
-    for (const columnName of dreamClass.paramSafeColumns()) {
+    const paramSafeColumns: (keyof ReturnPartialType)[] = only
+      ? ([...dreamClass.paramSafeColumns()].filter(column =>
+          only.includes(column)
+        ) as unknown as (keyof ReturnPartialType)[])
+      : ([...dreamClass.paramSafeColumns()] as (keyof ReturnPartialType)[])
+
+    for (const columnName of paramSafeColumns) {
       if (params[columnName as keyof typeof params] === undefined) continue
 
       const columnMetadata = columns[columnName as keyof typeof columns] as {
@@ -149,7 +165,7 @@ export default class Params {
             break
 
           default:
-            if (dreamClass.isVirtualColumn(columnName))
+            if (dreamClass.isVirtualColumn(columnName as string))
               returnObj[columnName as keyof typeof returnObj] = params[columnName as keyof typeof params]
 
             if (columnMetadata?.enumValues) {
@@ -165,7 +181,7 @@ export default class Params {
         }
       } catch (err) {
         if (err instanceof Error) {
-          errors[columnName] = [err.message]
+          errors[columnName as string] = [err.message]
         } else {
           throw err
         }
