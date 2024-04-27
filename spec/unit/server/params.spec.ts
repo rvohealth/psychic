@@ -37,6 +37,17 @@ describe('Params', () => {
       })
     })
 
+    context('array option is true', () => {
+      it('expects top-level array', () => {
+        expect(Params.for([{ id: 123, email: 'how', password: 'yadoin' }], User, { array: true })).toEqual([
+          {
+            email: 'how',
+            password: 'yadoin',
+          },
+        ])
+      })
+    })
+
     context('enum', () => {
       it('permits values inside the enum', () => {
         expect(Params.for({ species: 'cat' }, Pet)).toEqual({ species: 'cat' })

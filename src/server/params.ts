@@ -24,11 +24,20 @@ export default class Params {
    * const params = Params.for(this.params.user, User)
    * ```
    */
-  public static for<T extends typeof Dream>(
-    params: object,
-    dreamClass: T
-  ): Partial<DreamParamSafeAttributes<InstanceType<T>>> {
+  public static for<
+    T extends typeof Dream,
+    ForOpts extends { array?: boolean },
+    ReturnPayload extends ForOpts['array'] extends true
+      ? Partial<DreamParamSafeAttributes<InstanceType<T>>>[]
+      : Partial<DreamParamSafeAttributes<InstanceType<T>>>,
+  >(params: object, dreamClass: T, { array = false }: ForOpts = {} as ForOpts): ReturnPayload {
     if (!dreamClass?.isDream) throw new Error(`Params.for must receive a dream class as it's first argument`)
+    if (array) {
+      if (!Array.isArray(params))
+        throw new Error(`Params.for was expecting a top-level array. got ${typeof params}`)
+
+      return params.map(param => this.for(param as object, dreamClass)) as unknown as ReturnPayload
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const schema = dreamClass.prototype.dreamconf.schema
@@ -167,7 +176,7 @@ export default class Params {
       throw new ParamValidationError(JSON.stringify(errors, null, 2))
     }
 
-    return returnObj
+    return returnObj as ReturnPayload
   }
 
   public static restrict<T extends typeof Params>(
