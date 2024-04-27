@@ -31,12 +31,14 @@ export default class Params {
       array?: boolean
       only?: OnlyArray
     },
-    ReturnPartialType extends {
-      [K in Extract<
-        keyof DreamParamSafeAttributes<InstanceType<T>>,
-        ForOpts['only'][number & keyof ForOpts['only']]
-      >]: DreamParamSafeAttributes<InstanceType<T>>[K]
-    },
+    ReturnPartialType extends ForOpts['only'] extends undefined
+      ? DreamParamSafeAttributes<InstanceType<T>>
+      : {
+          [K in Extract<
+            keyof DreamParamSafeAttributes<InstanceType<T>>,
+            ForOpts['only'][number & keyof ForOpts['only']]
+          >]: DreamParamSafeAttributes<InstanceType<T>>[K]
+        },
     ReturnPayload extends ForOpts['array'] extends true
       ? Partial<DreamParamSafeAttributes<InstanceType<T>>>[]
       : Partial<DreamParamSafeAttributes<InstanceType<T>>>,
