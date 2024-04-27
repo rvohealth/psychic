@@ -19,12 +19,14 @@ describe('PsychicController', () => {
 
   describe('#paramsFor', () => {
     it('returns filtered params', () => {
-      const req = getMockReq({ id: 1, email: 'hi' })
+      const req = getMockReq({
+        body: { id: 1, name: 'howyadoin', createdAt: 'hello', updatedAt: 'birld', deletedAt: 'sometimeago' },
+      })
       const res = getMockRes().res
       const server = new PsychicServer()
       const controller = new PsychicController(req, res, { config: new PsychicConfig(server.app) })
 
-      expect(controller.paramsFor(User)).toEqual({ email: 'hi' })
+      expect(controller.paramsFor(User)).toEqual({ name: 'howyadoin' })
     })
   })
 })
