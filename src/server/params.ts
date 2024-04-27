@@ -288,6 +288,8 @@ export default class Params {
       case 'boolean':
         if (paramValue === 'true') return true as ReturnType
         if (paramValue === 'false') return false as ReturnType
+        if ([1, '1'].includes(paramValue as string)) return true as ReturnType
+        if ([0, '0'].includes(paramValue as string)) return false as ReturnType
         if (typeof paramValue !== 'boolean') this.throwUnlessNull(paramValue, 'expected boolean', realOpts)
         return paramValue as ReturnType
 

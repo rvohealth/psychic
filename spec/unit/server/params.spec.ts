@@ -79,6 +79,18 @@ describe('Params', () => {
         expect(Params.for({ likesWalks: false }, Pet)).toEqual({ likesWalks: false })
       })
 
+      it.only('permits a 0 or 1 value, either as a string or a number', () => {
+        expect(Params.for({ likesWalks: 1 }, Pet)).toEqual({ likesWalks: true })
+        expect(Params.for({ likesWalks: '1' }, Pet)).toEqual({ likesWalks: true })
+        expect(Params.for({ likesWalks: 0 }, Pet)).toEqual({ likesWalks: false })
+        expect(Params.for({ likesWalks: '0' }, Pet)).toEqual({ likesWalks: false })
+      })
+
+      it('permits a string true or string false', () => {
+        expect(Params.for({ likesWalks: 'true' }, Pet)).toEqual({ likesWalks: true })
+        expect(Params.for({ likesWalks: 'false' }, Pet)).toEqual({ likesWalks: false })
+      })
+
       it('rejects a number', () => {
         expect(() => Params.for({ likesWalks: 1 }, Pet)).toThrowError(ParamValidationError)
       })
