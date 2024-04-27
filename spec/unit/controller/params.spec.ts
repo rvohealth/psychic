@@ -2,6 +2,7 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import PsychicController from '../../../src/controller'
 import PsychicConfig from '../../../src/config'
 import PsychicServer from '../../../src/server'
+import User from '../../../test-app/app/models/User'
 
 describe('PsychicController', () => {
   describe('get #params', () => {
@@ -13,6 +14,17 @@ describe('PsychicController', () => {
 
       expect(controller.params.search).toEqual('abc')
       expect(controller.params.cool).toEqual('boyjohnson')
+    })
+  })
+
+  describe('#paramsFor', () => {
+    it('returns filtered params', () => {
+      const req = getMockReq({ id: 1, email: 'hi' })
+      const res = getMockRes().res
+      const server = new PsychicServer()
+      const controller = new PsychicController(req, res, { config: new PsychicConfig(server.app) })
+
+      expect(controller.paramsFor(User)).toEqual({ email: 'hi' })
     })
   })
 })
