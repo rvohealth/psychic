@@ -51,7 +51,7 @@ export default class Params {
         throw new Error(`Params.for was expecting a top-level array. got ${typeof params}`)
 
       return params.map(param =>
-        this.for(param as object, dreamClass, { ...forOpts, array: undefined })
+        this.for(param as object, dreamClass, { ...forOpts, array: undefined }),
       ) as unknown as ReturnPayload
     }
 
@@ -65,7 +65,7 @@ export default class Params {
     const errors: { [key: string]: string[] } = {}
     const paramSafeColumns: (keyof ReturnPartialType)[] = only
       ? ([...dreamClass.paramSafeColumns()].filter(column =>
-          only.includes(column)
+          only.includes(column),
         ) as unknown as (keyof ReturnPartialType)[])
       : ([...dreamClass.paramSafeColumns()] as (keyof ReturnPartialType)[])
 
@@ -94,7 +94,7 @@ export default class Params {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               columnMetadata.dbType,
-              { allowNull: columnMetadata.allowNull }
+              { allowNull: columnMetadata.allowNull },
             )
             break
 
@@ -104,7 +104,7 @@ export default class Params {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'string',
-              { allowNull: columnMetadata.allowNull }
+              { allowNull: columnMetadata.allowNull },
             )
             break
 
@@ -114,7 +114,7 @@ export default class Params {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'string[]',
-              { allowNull: columnMetadata.allowNull }
+              { allowNull: columnMetadata.allowNull },
             )
             break
 
@@ -125,7 +125,7 @@ export default class Params {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'datetime',
-              { allowNull: columnMetadata.allowNull }
+              { allowNull: columnMetadata.allowNull },
             )
             break
 
@@ -136,7 +136,7 @@ export default class Params {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'datetime[]',
-              { allowNull: columnMetadata.allowNull }
+              { allowNull: columnMetadata.allowNull },
             )
             break
 
@@ -144,7 +144,7 @@ export default class Params {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'json',
-              { allowNull: columnMetadata.allowNull }
+              { allowNull: columnMetadata.allowNull },
             )
             break
 
@@ -152,7 +152,7 @@ export default class Params {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'json[]',
-              { allowNull: columnMetadata.allowNull }
+              { allowNull: columnMetadata.allowNull },
             )
             break
 
@@ -160,7 +160,7 @@ export default class Params {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'number',
-              { allowNull: columnMetadata.allowNull }
+              { allowNull: columnMetadata.allowNull },
             )
             break
 
@@ -168,7 +168,7 @@ export default class Params {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'number[]',
-              { allowNull: columnMetadata.allowNull }
+              { allowNull: columnMetadata.allowNull },
             )
             break
 
@@ -183,7 +183,7 @@ export default class Params {
                 // casting to allow enum handling at lower level
                 columnMetadata.dbType as (typeof PsychicParamsPrimitiveLiterals)[number],
 
-                { allowNull: columnMetadata.allowNull, enum: columnMetadata.enumValues }
+                { allowNull: columnMetadata.allowNull, enum: columnMetadata.enumValues },
               )
             }
         }
@@ -206,7 +206,7 @@ export default class Params {
   public static restrict<T extends typeof Params>(
     this: T,
     params: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
-    allowed: string[]
+    allowed: string[],
   ) {
     return new this().restrict(params, allowed)
   }
@@ -255,7 +255,7 @@ export default class Params {
     this: T,
     param: PsychicParamsPrimitive | PsychicParamsPrimitive[],
     expectedType: ExpectedType,
-    opts?: OptsValue
+    opts?: OptsValue,
   ): AllowNullOrUndefined extends true ? ReturnType | null | undefined : ReturnType {
     return new this().cast(param, expectedType, opts) as ReturnType
   }
@@ -290,7 +290,7 @@ export default class Params {
   >(
     paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
     expectedType: ExpectedType,
-    opts?: OptsValue
+    opts?: OptsValue,
   ): AllowNullOrUndefined extends true ? ReturnType | null | undefined : ReturnType {
     const realOpts = this.getOpts(expectedType, opts)
 
@@ -395,7 +395,7 @@ export default class Params {
       case 'uuid[]':
         baseType = (expectedType as string).replace(
           /\[\]$/,
-          ''
+          '',
         ) as (typeof PsychicParamsPrimitiveLiterals)[number]
         errorMessage = `expected ${baseType}[]`
         if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, realOpts)
@@ -420,7 +420,7 @@ export default class Params {
         } else {
           // TODO: serialize/sanitize before printing, handle array types
           throw new Error(
-            `Unexpected point reached in code. need to handle type for ${expectedType as string}`
+            `Unexpected point reached in code. need to handle type for ${expectedType as string}`,
           )
         }
     }
@@ -428,7 +428,7 @@ export default class Params {
 
   public restrict(
     param: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
-    allowed: string[]
+    allowed: string[],
   ) {
     const permitted: PsychicParamsDictionary = {}
     if (param === null || param === undefined) return permitted
@@ -461,7 +461,7 @@ export default class Params {
     opts: {
       allowNull?: boolean
       match?: RegExp
-    }
+    },
   ): string | null {
     const errorMessage = 'did not match expected pattern'
     if (typeof paramValue !== 'string') this.throwUnlessNull(paramValue, errorMessage)
@@ -474,7 +474,7 @@ export default class Params {
   private throwUnlessNull(
     paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
     message: string,
-    { allowNull = false }: { allowNull?: boolean } = {}
+    { allowNull = false }: { allowNull?: boolean } = {},
   ) {
     const isNullOrUndefined = [null, undefined].includes(paramValue as null | undefined)
     if (allowNull && isNullOrUndefined) return
@@ -498,7 +498,7 @@ export default class Params {
       | (typeof PsychicParamsPrimitiveLiterals)[number][]
       | RegExp
       | Opts,
-    opts?: Opts
+    opts?: Opts,
   ): Opts {
     if (typeof expectedType === 'string') return opts ?? ({ allowNull: false } as Opts)
     return expectedType as Opts
