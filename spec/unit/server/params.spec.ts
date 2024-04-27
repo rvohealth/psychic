@@ -340,6 +340,7 @@ describe('Params', () => {
     const stringScenarios = [
       { dbType: 'character varying', allowNull: ['name', User], notNull: ['email', User] },
       { dbType: 'text', allowNull: ['notes', User], notNull: ['bio', User] },
+      { dbType: 'citext', allowNull: ['favoriteCitext', User], notNull: ['requiredFavoriteCitext', User] },
     ] as const
 
     stringScenarios.forEach(
@@ -379,6 +380,11 @@ describe('Params', () => {
     const stringArrayScenarios = [
       { dbType: 'character varying[]', allowNull: ['nicknames', User], notNull: ['requiredNicknames', User] },
       { dbType: 'text[]', allowNull: ['favoriteTexts', User], notNull: ['requiredFavoriteTexts', User] },
+      {
+        dbType: 'citext[]',
+        allowNull: ['favoriteCitexts', User],
+        notNull: ['requiredFavoriteCitexts', User],
+      },
     ] as const
 
     stringArrayScenarios.forEach(
