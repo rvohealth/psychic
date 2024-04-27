@@ -31,17 +31,17 @@ export default class Params {
       array?: boolean
       only?: OnlyArray
     },
-    ReturnPartialType extends ForOpts['only'] extends undefined
-      ? DreamParamSafeAttributes<InstanceType<T>>
-      : {
+    ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
+      InstanceType<T>
+    >)[]
+      ? Partial<{
           [K in Extract<
             keyof DreamParamSafeAttributes<InstanceType<T>>,
             ForOpts['only'][number & keyof ForOpts['only']]
           >]: DreamParamSafeAttributes<InstanceType<T>>[K]
-        },
-    ReturnPayload extends ForOpts['array'] extends true
-      ? Partial<DreamParamSafeAttributes<InstanceType<T>>>[]
+        }>
       : Partial<DreamParamSafeAttributes<InstanceType<T>>>,
+    ReturnPayload extends ForOpts['array'] extends true ? ReturnPartialType[] : ReturnPartialType,
   >(params: object, dreamClass: T, { array = false, only }: ForOpts = {} as ForOpts): ReturnPayload {
     if (!dreamClass?.isDream) throw new Error(`Params.for must receive a dream class as it's first argument`)
     if (array) {
