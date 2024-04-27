@@ -48,6 +48,15 @@ describe('Params', () => {
       })
     })
 
+    context('with only option passed', () => {
+      it('restricts attributes to only those passed in the only array', () => {
+        const params = Params.for({ id: 123, email: 'how', password: 'yadoin' }, User, {
+          only: ['email', 'name'],
+        })
+        expect(params).toEqual({ email: 'how' })
+      })
+    })
+
     context('enum', () => {
       it('permits values inside the enum', () => {
         expect(Params.for({ species: 'cat' }, Pet)).toEqual({ species: 'cat' })
