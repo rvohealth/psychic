@@ -18,13 +18,22 @@ describe('Params', () => {
         expect(error!.message).toEqual(
           JSON.stringify(
             {
-              name: 'expected string',
-              species: 'did not match expected enum values',
+              name: ['expected string'],
+              species: ['did not match expected enum values'],
             },
             null,
             2
           )
         )
+      })
+    })
+
+    context('virtual attributes', () => {
+      it('permits virtual attributes', () => {
+        expect(Params.for({ email: 'how', password: 'yadoin' }, User)).toEqual({
+          email: 'how',
+          password: 'yadoin',
+        })
       })
     })
 

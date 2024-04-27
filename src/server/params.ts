@@ -37,7 +37,7 @@ export default class Params {
     const columns = schema[dreamClass.prototype.table]?.columns as object
 
     const returnObj: Partial<DreamAttributes<InstanceType<T>>> = {}
-    const errors: { [key: string]: string } = {}
+    const errors: { [key: string]: string[] } = {}
     for (const columnName of dreamClass.paramSafeColumns()) {
       if (params[columnName as keyof typeof params] === undefined) continue
 
@@ -140,7 +140,10 @@ export default class Params {
             break
 
           default:
-            if (columnMetadata.enumValues) {
+            if (dreamClass.isVirtualColumn(columnName))
+              returnObj[columnName as keyof typeof returnObj] = params[columnName as keyof typeof params]
+
+            if (columnMetadata?.enumValues) {
               returnObj[columnName as keyof typeof returnObj] = this.cast(
                 params[columnName as keyof typeof params],
 
@@ -153,7 +156,7 @@ export default class Params {
         }
       } catch (err) {
         if (err instanceof Error) {
-          errors[columnName] = err.message
+          errors[columnName] = [err.message]
         } else {
           throw err
         }
