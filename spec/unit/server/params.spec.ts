@@ -6,6 +6,28 @@ import User from '../../../test-app/app/models/User'
 
 describe('Params', () => {
   describe('#for', () => {
+    context('erroring', () => {
+      it('raises an exception containing a payload which tells us of all invalid values', () => {
+        let error: Error | undefined = undefined
+        try {
+          Params.for({ species: 'invalid', name: 123 }, Pet)
+        } catch (err) {
+          error = err as Error
+        }
+
+        expect(error!.message).toEqual(
+          JSON.stringify(
+            {
+              name: 'expected string',
+              species: 'did not match expected enum values',
+            },
+            null,
+            2
+          )
+        )
+      })
+    })
+
     context('enum', () => {
       it('permits values inside the enum', () => {
         expect(Params.for({ species: 'cat' }, Pet)).toEqual({ species: 'cat' })
@@ -79,7 +101,7 @@ describe('Params', () => {
         expect(Params.for({ likesWalks: false }, Pet)).toEqual({ likesWalks: false })
       })
 
-      it.only('permits a 0 or 1 value, either as a string or a number', () => {
+      it('permits a 0 or 1 value, either as a string or a number', () => {
         expect(Params.for({ likesWalks: 1 }, Pet)).toEqual({ likesWalks: true })
         expect(Params.for({ likesWalks: '1' }, Pet)).toEqual({ likesWalks: true })
         expect(Params.for({ likesWalks: 0 }, Pet)).toEqual({ likesWalks: false })
@@ -91,8 +113,8 @@ describe('Params', () => {
         expect(Params.for({ likesWalks: 'false' }, Pet)).toEqual({ likesWalks: false })
       })
 
-      it('rejects a number', () => {
-        expect(() => Params.for({ likesWalks: 1 }, Pet)).toThrowError(ParamValidationError)
+      it('rejects a non-1-or-0-number', () => {
+        expect(() => Params.for({ likesWalks: 3 }, Pet)).toThrowError(ParamValidationError)
       })
 
       it('rejects a string float value', () => {
@@ -129,7 +151,7 @@ describe('Params', () => {
         expect(() => Params.for({ favoriteBooleans: ['1.2'] }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteBooleans: [''] }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteBooleans: ['abc'] }, User)).toThrowError(ParamValidationError)
-        expect(() => Params.for({ favoriteBooleans: [1] }, User)).toThrowError(ParamValidationError)
+        expect(() => Params.for({ favoriteBooleans: [3] }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteBooleans: [{ data: 'hello' }] }, User)).toThrowError(
           ParamValidationError
         )
