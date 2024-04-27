@@ -42,12 +42,17 @@ export interface HealthUsers {
 export interface Pets {
   collarCount: Int8 | null;
   collarCountInt: number | null;
+  collarCountNumeric: Numeric | null;
   createdAt: Timestamp;
   id: Generated<Int8>;
+  lastHeardAt: Generated<Timestamp>;
   lastSeenAt: Timestamp | null;
   likesTreats: Generated<boolean>;
   likesWalks: boolean | null;
   name: string | null;
+  requiredCollarCount: Generated<Int8>;
+  requiredCollarCountInt: Generated<number>;
+  requiredCollarCountNumeric: Generated<number>;
   species: SpeciesTypesEnum | null;
   updatedAt: Timestamp;
   userId: number;
@@ -101,7 +106,7 @@ export interface DB {
 }
 
 
-export const AllColumns = ['bio', 'birthdate', 'collarCount', 'collarCountInt', 'createdAt', 'createdOn', 'email', 'favoriteBigints', 'favoriteBooleans', 'favoriteDates', 'favoriteDatetimes', 'favoriteIntegers', 'favoriteJsonbs', 'favoriteJsons', 'favoriteNumerics', 'favoriteTexts', 'favoriteUuids', 'healthUsers', 'id', 'jsonData', 'jsonbData', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nicknames', 'notes', 'optionalUuid', 'passwordDigest', 'pets', 'requiredFavoriteBigints', 'requiredFavoriteBooleans', 'requiredFavoriteDates', 'requiredFavoriteDatetimes', 'requiredFavoriteIntegers', 'requiredFavoriteJsonbs', 'requiredFavoriteJsons', 'requiredFavoriteNumerics', 'requiredFavoriteTexts', 'requiredFavoriteUuids', 'requiredJsonData', 'requiredJsonbData', 'requiredNicknames', 'species', 'updatedAt', 'userId', 'users', 'uuid'] as const
+export const AllColumns = ['bio', 'birthdate', 'collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'createdOn', 'email', 'favoriteBigints', 'favoriteBooleans', 'favoriteDates', 'favoriteDatetimes', 'favoriteIntegers', 'favoriteJsonbs', 'favoriteJsons', 'favoriteNumerics', 'favoriteTexts', 'favoriteUuids', 'healthUsers', 'id', 'jsonData', 'jsonbData', 'lastHeardAt', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nicknames', 'notes', 'optionalUuid', 'passwordDigest', 'pets', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredCollarCountNumeric', 'requiredFavoriteBigints', 'requiredFavoriteBooleans', 'requiredFavoriteDates', 'requiredFavoriteDatetimes', 'requiredFavoriteIntegers', 'requiredFavoriteJsonbs', 'requiredFavoriteJsons', 'requiredFavoriteNumerics', 'requiredFavoriteTexts', 'requiredFavoriteUuids', 'requiredJsonData', 'requiredJsonbData', 'requiredNicknames', 'species', 'updatedAt', 'userId', 'users', 'uuid'] as const
 
 export class DBClass {
   health_users: HealthUsers
@@ -208,6 +213,38 @@ export const schema = {
         allowNull: true,
         isArray: false,
       },
+      collarCountNumeric: {
+        coercedType: {} as number | null,
+        enumType: null,
+        enumValues: null,
+        dbType: 'numeric',
+        allowNull: true,
+        isArray: false,
+      },
+      requiredCollarCount: {
+        coercedType: {} as IdType,
+        enumType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+      requiredCollarCountInt: {
+        coercedType: {} as number,
+        enumType: null,
+        enumValues: null,
+        dbType: 'integer',
+        allowNull: false,
+        isArray: false,
+      },
+      requiredCollarCountNumeric: {
+        coercedType: {} as number,
+        enumType: null,
+        enumValues: null,
+        dbType: 'integer',
+        allowNull: false,
+        isArray: false,
+      },
       likesWalks: {
         coercedType: {} as boolean | null,
         enumType: null,
@@ -240,6 +277,14 @@ export const schema = {
         allowNull: true,
         isArray: false,
       },
+      lastHeardAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
       createdAt: {
         coercedType: {} as DateTime,
         enumType: null,
@@ -261,6 +306,7 @@ export const schema = {
     associations: {
       user: {
         type: 'BelongsTo',
+        foreignKey: 'userId',
         tables: ['users'],
         optional: false,
       },
@@ -577,6 +623,7 @@ export const schema = {
     associations: {
       pets: {
         type: 'HasMany',
+        foreignKey: null,
         tables: ['pets'],
         optional: null,
       },
