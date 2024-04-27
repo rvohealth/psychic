@@ -66,6 +66,8 @@ export interface Users {
   email: string;
   favoriteBigints: Int8[] | null;
   favoriteBooleans: boolean[] | null;
+  favoriteCitext: string | null;
+  favoriteCitexts: string[] | null;
   favoriteDates: Timestamp[] | null;
   favoriteDatetimes: Timestamp[] | null;
   favoriteIntegers: number[] | null;
@@ -84,6 +86,8 @@ export interface Users {
   passwordDigest: string;
   requiredFavoriteBigints: Generated<Int8[]>;
   requiredFavoriteBooleans: Generated<boolean[]>;
+  requiredFavoriteCitext: Generated<string>;
+  requiredFavoriteCitexts: Generated<string[]>;
   requiredFavoriteDates: Generated<Timestamp[]>;
   requiredFavoriteDatetimes: Generated<Timestamp[]>;
   requiredFavoriteIntegers: Generated<number[]>;
@@ -106,7 +110,7 @@ export interface DB {
 }
 
 
-export const AllColumns = ['bio', 'birthdate', 'collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'createdOn', 'email', 'favoriteBigints', 'favoriteBooleans', 'favoriteDates', 'favoriteDatetimes', 'favoriteIntegers', 'favoriteJsonbs', 'favoriteJsons', 'favoriteNumerics', 'favoriteTexts', 'favoriteUuids', 'healthUsers', 'id', 'jsonData', 'jsonbData', 'lastHeardAt', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nicknames', 'notes', 'optionalUuid', 'passwordDigest', 'pets', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredCollarCountNumeric', 'requiredFavoriteBigints', 'requiredFavoriteBooleans', 'requiredFavoriteDates', 'requiredFavoriteDatetimes', 'requiredFavoriteIntegers', 'requiredFavoriteJsonbs', 'requiredFavoriteJsons', 'requiredFavoriteNumerics', 'requiredFavoriteTexts', 'requiredFavoriteUuids', 'requiredJsonData', 'requiredJsonbData', 'requiredNicknames', 'species', 'updatedAt', 'userId', 'users', 'uuid'] as const
+export const AllColumns = ['bio', 'birthdate', 'collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'createdOn', 'email', 'favoriteBigints', 'favoriteBooleans', 'favoriteCitext', 'favoriteCitexts', 'favoriteDates', 'favoriteDatetimes', 'favoriteIntegers', 'favoriteJsonbs', 'favoriteJsons', 'favoriteNumerics', 'favoriteTexts', 'favoriteUuids', 'healthUsers', 'id', 'jsonData', 'jsonbData', 'lastHeardAt', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nicknames', 'notes', 'optionalUuid', 'passwordDigest', 'pets', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredCollarCountNumeric', 'requiredFavoriteBigints', 'requiredFavoriteBooleans', 'requiredFavoriteCitext', 'requiredFavoriteCitexts', 'requiredFavoriteDates', 'requiredFavoriteDatetimes', 'requiredFavoriteIntegers', 'requiredFavoriteJsonbs', 'requiredFavoriteJsons', 'requiredFavoriteNumerics', 'requiredFavoriteTexts', 'requiredFavoriteUuids', 'requiredJsonData', 'requiredJsonbData', 'requiredNicknames', 'species', 'updatedAt', 'userId', 'users', 'uuid'] as const
 
 export class DBClass {
   health_users: HealthUsers
@@ -370,6 +374,38 @@ export const schema = {
         allowNull: true,
         isArray: false,
       },
+      favoriteCitext: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumValues: null,
+        dbType: 'citext',
+        allowNull: true,
+        isArray: false,
+      },
+      requiredFavoriteCitext: {
+        coercedType: {} as string,
+        enumType: null,
+        enumValues: null,
+        dbType: 'citext',
+        allowNull: false,
+        isArray: false,
+      },
+      favoriteCitexts: {
+        coercedType: {} as string[] | null,
+        enumType: null,
+        enumValues: null,
+        dbType: 'citext[]',
+        allowNull: true,
+        isArray: true,
+      },
+      requiredFavoriteCitexts: {
+        coercedType: {} as string[],
+        enumType: null,
+        enumValues: null,
+        dbType: 'citext[]',
+        allowNull: false,
+        isArray: true,
+      },
       favoriteUuids: {
         coercedType: {} as string[] | null,
         enumType: null,
@@ -623,7 +659,7 @@ export const schema = {
     associations: {
       pets: {
         type: 'HasMany',
-        foreignKey: null,
+        foreignKey: 'userId',
         tables: ['pets'],
         optional: null,
       },

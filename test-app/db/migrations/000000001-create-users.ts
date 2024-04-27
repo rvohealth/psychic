@@ -4,6 +4,7 @@ import { Kysely, sql } from 'kysely'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function up(db: Kysely<any>): Promise<void> {
   await createExtension('uuid-ossp', db)
+  await createExtension('citext', db)
 
   await db.schema
     .createTable('users')
@@ -14,6 +15,10 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('email', 'varchar', col => col.notNull())
     .addColumn('notes', 'text')
     .addColumn('birthdate', 'date')
+    .addColumn('favorite_citext', sql`citext`)
+    .addColumn('required_favorite_citext', sql`citext`, col => col.notNull().defaultTo('chalupas'))
+    .addColumn('favorite_citexts', sql`citext[]`)
+    .addColumn('required_favorite_citexts', sql`citext[]`, col => col.defaultTo('{}').notNull())
     .addColumn('favorite_uuids', sql`uuid[]`)
     .addColumn('required_favorite_uuids', sql`uuid[]`, col => col.defaultTo('{}').notNull())
     .addColumn('favorite_dates', sql`date[]`)
@@ -40,7 +45,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       col
         .notNull()
         .defaultTo(sql`uuid_generate_v4()`)
-        .unique(),
+        .unique()
     )
     .addColumn('bio', 'text', col => col.notNull().defaultTo('my bio'))
     .addColumn('jsonb_data', 'jsonb')

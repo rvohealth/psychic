@@ -99,6 +99,7 @@ export default class Params {
             break
 
           case 'character varying':
+          case 'citext':
           case 'text':
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
@@ -108,6 +109,7 @@ export default class Params {
             break
 
           case 'character varying[]':
+          case 'citext[]':
           case 'text[]':
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],

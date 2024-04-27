@@ -17,6 +17,12 @@ export default class User extends ApplicationModel {
   public nicknames: DreamColumn<User, 'nicknames'>
   public requiredNicknames: DreamColumn<User, 'requiredNicknames'>
   public birthdate: DreamColumn<User, 'birthdate'>
+
+  // begin: favorite records (used for checking type validation in Params.for)
+  public favoriteCitext: DreamColumn<User, 'favoriteCitext'>
+  public requiredFavoriteCitext: DreamColumn<User, 'requiredFavoriteCitext'>
+  public favoriteCitexts: DreamColumn<User, 'favoriteCitexts'>
+  public requiredFavoriteCitexts: DreamColumn<User, 'requiredFavoriteCitexts'>
   public favoriteUuids: DreamColumn<User, 'favoriteUuids'>
   public requiredFavoriteUuids: DreamColumn<User, 'requiredFavoriteUuids'>
   public favoriteDates: DreamColumn<User, 'favoriteDates'>
@@ -37,6 +43,8 @@ export default class User extends ApplicationModel {
   public requiredFavoriteBigints: DreamColumn<User, 'requiredFavoriteBigints'>
   public favoriteIntegers: DreamColumn<User, 'favoriteIntegers'>
   public requiredFavoriteIntegers: DreamColumn<User, 'requiredFavoriteIntegers'>
+  // end: favorite records
+
   public bio: DreamColumn<User, 'bio'>
   public notes: DreamColumn<User, 'notes'>
   public jsonData: DreamColumn<User, 'jsonData'>
