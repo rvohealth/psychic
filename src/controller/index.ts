@@ -132,8 +132,8 @@ export default class PsychicController {
     return this.params[key] as ReturnType
   }
 
-  public paramsFor<DreamClass extends typeof Dream>(dreamClass: DreamClass) {
-    return Params.for(this.params, dreamClass)
+  public paramsFor<DreamClass extends typeof Dream>(dreamClass: DreamClass, key?: string) {
+    return Params.for(key ? (this.params[key] as typeof this.params) : this.params, dreamClass)
   }
 
   public cookie(name: string, data?: string) {

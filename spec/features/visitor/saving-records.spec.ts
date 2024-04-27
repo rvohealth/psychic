@@ -36,4 +36,21 @@ describe('a visitor attempts to save a record', () => {
       expect(await User.count()).toEqual(0)
     })
   })
+
+  context(
+    'with a request that has invalid params, and controller is leveraging Params.for for validation',
+    () => {
+      it('throws 400', async () => {
+        await server.serveForRequestSpecs(async () => {
+          const response = await request
+            .agent(server.app)
+            .post('/users')
+            .send({ user: { email: 123, password: 'howyadoin', name: 456 } })
+            .expect(400)
+          expect(response.body).toEqual({ errors: { email: ['expected string'], name: ['expected string'] } })
+        })
+        expect(await User.count()).toEqual(0)
+      })
+    }
+  )
 })
