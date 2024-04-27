@@ -60,7 +60,7 @@ export default class Params {
           case 'uuid[]':
           case 'json':
           case 'json[]':
-            returnObj[columnName as keyof typeof returnObj] = this.validated(
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               columnMetadata.dbType,
               { allowNull: columnMetadata.allowNull }
@@ -69,7 +69,7 @@ export default class Params {
 
           case 'character varying':
           case 'text':
-            returnObj[columnName as keyof typeof returnObj] = this.validated(
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'string',
               { allowNull: columnMetadata.allowNull }
@@ -78,7 +78,7 @@ export default class Params {
 
           case 'character varying[]':
           case 'text[]':
-            returnObj[columnName as keyof typeof returnObj] = this.validated(
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'string[]',
               { allowNull: columnMetadata.allowNull }
@@ -89,7 +89,7 @@ export default class Params {
           case 'timestamp':
           case 'timestamp with time zone':
           case 'timestamp without time zone':
-            returnObj[columnName as keyof typeof returnObj] = this.validated(
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'datetime',
               { allowNull: columnMetadata.allowNull }
@@ -100,7 +100,7 @@ export default class Params {
           case 'timestamp[]':
           case 'timestamp with time zone[]':
           case 'timestamp without time zone[]':
-            returnObj[columnName as keyof typeof returnObj] = this.validated(
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'datetime[]',
               { allowNull: columnMetadata.allowNull }
@@ -108,7 +108,7 @@ export default class Params {
             break
 
           case 'jsonb':
-            returnObj[columnName as keyof typeof returnObj] = this.validated(
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'json',
               { allowNull: columnMetadata.allowNull }
@@ -116,7 +116,7 @@ export default class Params {
             break
 
           case 'jsonb[]':
-            returnObj[columnName as keyof typeof returnObj] = this.validated(
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'json[]',
               { allowNull: columnMetadata.allowNull }
@@ -124,7 +124,7 @@ export default class Params {
             break
 
           case 'numeric':
-            returnObj[columnName as keyof typeof returnObj] = this.validated(
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'number',
               { allowNull: columnMetadata.allowNull }
@@ -132,7 +132,7 @@ export default class Params {
             break
 
           case 'numeric[]':
-            returnObj[columnName as keyof typeof returnObj] = this.validated(
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'number[]',
               { allowNull: columnMetadata.allowNull }
@@ -141,7 +141,7 @@ export default class Params {
 
           default:
             if (columnMetadata.enumValues) {
-              returnObj[columnName as keyof typeof returnObj] = this.validated(
+              returnObj[columnName as keyof typeof returnObj] = this.cast(
                 params[columnName as keyof typeof params],
 
                 // casting to allow enum handling at lower level
@@ -176,7 +176,7 @@ export default class Params {
   }
 
   /**
-   * ### .validated
+   * ### .cast
    *
    * Returns the param requested if it passes validation
    * for the type specified. If the param is not of the type
@@ -187,19 +187,19 @@ export default class Params {
    * // from within your controller...
    *
    * // raise error if not string
-   * Params.validated(this.params.id, 'string')
+   * Params.cast(this.params.id, 'string')
    *
    * // raise error if not number
-   * Params.validated(this.params.amount, 'number')
+   * Params.cast(this.params.amount, 'number')
    *
    * // raise error if not array of integers
-   * Params.validated(this.params.amounts, 'integer[]')
+   * Params.cast(this.params.amounts, 'integer[]')
    *
    * // raise error if not 'chalupas' or 'other'
-   * Params.validated(this.params.stuff, { enum: ['chalupas', 'other'] })
+   * Params.cast(this.params.stuff, { enum: ['chalupas', 'other'] })
    * ```
    */
-  public static validated<
+  public static cast<
     T extends typeof Params,
     const EnumType extends readonly string[],
     OptsValue extends undefined | { allowNull?: boolean; match?: RegExp },
@@ -221,7 +221,7 @@ export default class Params {
     expectedType: ExpectedType,
     opts?: OptsValue
   ): AllowNullOrUndefined extends true ? ReturnType | null | undefined : ReturnType {
-    return new this().validated(param, expectedType, opts) as ReturnType
+    return new this().cast(param, expectedType, opts) as ReturnType
   }
 
   public static casing<T extends typeof Params>(this: T, casing: 'snake' | 'camel') {
@@ -236,7 +236,7 @@ export default class Params {
     return this
   }
 
-  public validated<
+  public cast<
     EnumType extends readonly string[],
     OptsType extends {
       allowNull?: boolean
@@ -363,7 +363,7 @@ export default class Params {
         if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, realOpts)
         if (paramValue !== null && !Array.isArray(paramValue)) throw new ParamValidationError(errorMessage)
         return (
-          paramValue === null ? null : paramValue.map(val => this.validated(val, baseType, opts))
+          paramValue === null ? null : paramValue.map(val => this.cast(val, baseType, opts))
         ) as ReturnType
 
       case 'null[]':
