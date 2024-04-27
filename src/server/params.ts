@@ -48,7 +48,7 @@ export default class Params {
       if (!Array.isArray(params))
         throw new Error(`Params.for was expecting a top-level array. got ${typeof params}`)
 
-      return params.map(param => this.for(param as object, dreamClass)) as unknown as ReturnPayload
+      return params.map(param => this.for(param as object, dreamClass, { only })) as unknown as ReturnPayload
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

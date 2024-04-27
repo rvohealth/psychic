@@ -46,6 +46,21 @@ describe('Params', () => {
           },
         ])
       })
+
+      context('only is also passed alongside array', () => {
+        it('narrows the types to those passed in only', () => {
+          expect(
+            Params.for([{ id: 123, email: 'how', password: 'yadoin' }], User, {
+              array: true,
+              only: ['email'],
+            })
+          ).toEqual([
+            {
+              email: 'how',
+            },
+          ])
+        })
+      })
     })
 
     context('with only option passed', () => {
