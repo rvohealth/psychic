@@ -42,13 +42,17 @@ export default class Params {
         }>
       : Partial<DreamParamSafeAttributes<InstanceType<T>>>,
     ReturnPayload extends ForOpts['array'] extends true ? ReturnPartialType[] : ReturnPartialType,
-  >(params: object, dreamClass: T, { array = false, only }: ForOpts = {} as ForOpts): ReturnPayload {
+  >(params: object, dreamClass: T, forOpts: ForOpts = {} as ForOpts): ReturnPayload {
+    const { array = false, only } = forOpts
+
     if (!dreamClass?.isDream) throw new Error(`Params.for must receive a dream class as it's first argument`)
     if (array) {
       if (!Array.isArray(params))
         throw new Error(`Params.for was expecting a top-level array. got ${typeof params}`)
 
-      return params.map(param => this.for(param as object, dreamClass, { only })) as unknown as ReturnPayload
+      return params.map(param =>
+        this.for(param as object, dreamClass, { ...forOpts, array: undefined })
+      ) as unknown as ReturnPayload
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
