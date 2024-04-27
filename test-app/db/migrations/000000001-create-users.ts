@@ -45,7 +45,7 @@ export async function up(db: Kysely<any>): Promise<void> {
       col
         .notNull()
         .defaultTo(sql`uuid_generate_v4()`)
-        .unique()
+        .unique(),
     )
     .addColumn('bio', 'text', col => col.notNull().defaultTo('my bio'))
     .addColumn('jsonb_data', 'jsonb')

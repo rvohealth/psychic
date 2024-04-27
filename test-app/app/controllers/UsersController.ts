@@ -1,5 +1,4 @@
 import { BeforeAction } from '../../../src/controller/decorators'
-import Params from '../../../src/server/params'
 import User from '../models/User'
 import ApplicationController from './ApplicationController'
 

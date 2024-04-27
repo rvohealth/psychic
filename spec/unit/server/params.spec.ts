@@ -22,8 +22,8 @@ describe('Params', () => {
               species: ['did not match expected enum values'],
             },
             null,
-            2
-          )
+            2,
+          ),
         )
       })
     })
@@ -53,7 +53,7 @@ describe('Params', () => {
             Params.for([{ id: 123, email: 'how', password: 'yadoin' }], User, {
               array: true,
               only: ['email'],
-            })
+            }),
           ).toEqual([
             {
               email: 'how',
@@ -124,7 +124,7 @@ describe('Params', () => {
         expect(() => Params.for({ favoriteBigints: ['abc'] }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteBigints: [true] }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteBigints: [{ data: 'hello' }] }, User)).toThrowError(
-          ParamValidationError
+          ParamValidationError,
         )
       })
 
@@ -197,7 +197,7 @@ describe('Params', () => {
         expect(() => Params.for({ favoriteBooleans: ['abc'] }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteBooleans: [3] }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteBooleans: [{ data: 'hello' }] }, User)).toThrowError(
-          ParamValidationError
+          ParamValidationError,
         )
       })
 
@@ -282,7 +282,7 @@ describe('Params', () => {
         expect(() => Params.for({ collarCountNumeric: 'abc' }, Pet)).toThrowError(ParamValidationError)
         expect(() => Params.for({ collarCountNumeric: true }, Pet)).toThrowError(ParamValidationError)
         expect(() => Params.for({ collarCountNumeric: { hello: 'world' } }, Pet)).toThrowError(
-          ParamValidationError
+          ParamValidationError,
         )
       })
 
@@ -316,13 +316,13 @@ describe('Params', () => {
         expect(() => Params.for({ favoriteNumerics: ['abc'] }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteNumerics: [true] }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteNumerics: [{ hello: 'world' }] }, User)).toThrowError(
-          ParamValidationError
+          ParamValidationError,
         )
         expect(() => Params.for({ favoriteNumerics: '' }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteNumerics: 'abc' }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteNumerics: true }, User)).toThrowError(ParamValidationError)
         expect(() => Params.for({ favoriteNumerics: { hello: 'world' } }, User)).toThrowError(
-          ParamValidationError
+          ParamValidationError,
         )
       })
 
@@ -362,7 +362,7 @@ describe('Params', () => {
 
           it('rejects null', () => {
             expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
           })
 
@@ -374,7 +374,7 @@ describe('Params', () => {
             })
           })
         })
-      }
+      },
     )
 
     const stringArrayScenarios = [
@@ -404,20 +404,20 @@ describe('Params', () => {
             expect(() => Params.for({ [notNullField]: 1 }, notNullModel)).toThrowError(ParamValidationError)
             expect(() => Params.for({ [notNullField]: 1.2 }, notNullModel)).toThrowError(ParamValidationError)
             expect(() => Params.for({ [notNullField]: true }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
             expect(() => Params.for({ [notNullField]: [1] }, notNullModel)).toThrowError(ParamValidationError)
             expect(() => Params.for({ [notNullField]: [1.2] }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
             expect(() => Params.for({ [notNullField]: [true] }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
           })
 
           it('rejects null', () => {
             expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
           })
 
@@ -429,7 +429,7 @@ describe('Params', () => {
             })
           })
         })
-      }
+      },
     )
 
     const jsonScenarios = [
@@ -448,7 +448,7 @@ describe('Params', () => {
 
           it('rejects a string', () => {
             expect(() => Params.for({ [notNullField]: 'abc123' }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
           })
 
@@ -462,7 +462,7 @@ describe('Params', () => {
 
           it('rejects null', () => {
             expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
           })
 
@@ -474,7 +474,7 @@ describe('Params', () => {
             })
           })
         })
-      }
+      },
     )
 
     const jsonArrayScenarios = [
@@ -497,17 +497,17 @@ describe('Params', () => {
 
           it('rejects a non-object array', () => {
             expect(() => Params.for({ [notNullField]: ['abc123'] }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
             expect(() => Params.for({ [notNullField]: [''] }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
             expect(() => Params.for({ [notNullField]: [1] }, notNullModel)).toThrowError(ParamValidationError)
           })
 
           it('rejects null', () => {
             expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
           })
 
@@ -519,7 +519,7 @@ describe('Params', () => {
             })
           })
         })
-      }
+      },
     )
 
     const datetimeScenarios = [
@@ -549,19 +549,19 @@ describe('Params', () => {
 
           it('rejects a string non-datetime', () => {
             expect(() => Params.for({ [allowNullField]: '1.2' }, allowNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
             expect(() => Params.for({ [allowNullField]: '' }, allowNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
             expect(() => Params.for({ [allowNullField]: 'abc' }, allowNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
           })
 
           it('rejects null', () => {
             expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
           })
 
@@ -573,7 +573,7 @@ describe('Params', () => {
             })
           })
         })
-      }
+      },
     )
 
     const datetimeArrayScenarios = [
@@ -605,19 +605,19 @@ describe('Params', () => {
 
           it('rejects a string non-datetime array', () => {
             expect(() => Params.for({ [allowNullField]: ['1.2'] }, allowNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
             expect(() => Params.for({ [allowNullField]: [''] }, allowNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
             expect(() => Params.for({ [allowNullField]: ['abc'] }, allowNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
           })
 
           it('rejects null', () => {
             expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrowError(
-              ParamValidationError
+              ParamValidationError,
             )
           })
 
@@ -629,7 +629,7 @@ describe('Params', () => {
             })
           })
         })
-      }
+      },
     )
 
     context('uuid', () => {
@@ -641,7 +641,7 @@ describe('Params', () => {
 
       it('rejects non-uuid', () => {
         expect(() => Params.for({ uuid: '883b3fc3-70a8-401c-a04a-a14b196ef83' }, User)).toThrowError(
-          ParamValidationError
+          ParamValidationError,
         )
       })
 
@@ -665,7 +665,7 @@ describe('Params', () => {
 
       it('rejects non-uuid[]', () => {
         expect(() =>
-          Params.for({ favoriteUuids: ['883b3fc3-70a8-401c-a04a-a14b196ef83'] }, User)
+          Params.for({ favoriteUuids: ['883b3fc3-70a8-401c-a04a-a14b196ef83'] }, User),
         ).toThrowError(ParamValidationError)
       })
 
@@ -707,10 +707,10 @@ describe('Params', () => {
             context('with an invalid value', () => {
               it('raises a validation exception', () => {
                 expect(() => Params.cast('howyadoin', 'string', { match: /howya.*zzz/ })).toThrowError(
-                  ParamValidationError
+                  ParamValidationError,
                 )
                 expect(() => Params.cast(7, 'string', { match: /howya.*zzz/ })).toThrowError(
-                  ParamValidationError
+                  ParamValidationError,
                 )
               })
             })
@@ -820,10 +820,10 @@ describe('Params', () => {
             context('with an invalid value', () => {
               it('raises a validation exception', () => {
                 expect(() =>
-                  Params.cast(['howyadoin', 'howyadoinzzz'], 'string[]', { match: /howya.*zzz/ })
+                  Params.cast(['howyadoin', 'howyadoinzzz'], 'string[]', { match: /howya.*zzz/ }),
                 ).toThrowError(ParamValidationError)
                 expect(() =>
-                  Params.cast([1, 'howyadoinzzz'], 'string[]', { match: /howya.*zzz/ })
+                  Params.cast([1, 'howyadoinzzz'], 'string[]', { match: /howya.*zzz/ }),
                 ).toThrowError(ParamValidationError)
               })
             })
@@ -896,7 +896,7 @@ describe('Params', () => {
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
               expect(() => Params.cast('birld', { enum: ['hello', 'world'] })).toThrowError(
-                ParamValidationError
+                ParamValidationError,
               )
             })
           })
@@ -932,8 +932,8 @@ describe('Params', () => {
           Object.keys(
             Params.restrict({ name: undefined as unknown as PsychicParamsDictionary, email: 'hello' }, [
               'name',
-            ])
-          )
+            ]),
+          ),
         ).toEqual([])
       })
     })

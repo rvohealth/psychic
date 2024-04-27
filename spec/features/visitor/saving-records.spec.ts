@@ -51,6 +51,6 @@ describe('a visitor attempts to save a record', () => {
         })
         expect(await User.count()).toEqual(0)
       })
-    }
+    },
   )
 })
