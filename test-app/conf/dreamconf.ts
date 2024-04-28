@@ -1,5 +1,6 @@
 import { Dreamconf } from '@rvohealth/dream'
-import { DBClass, schema } from '../db/schema'
+import { schema } from '../db/schema'
+import { DBClass } from '../db/sync'
 
 const dreamconf = new Dreamconf<DBClass, typeof schema>({
   DB: new DBClass(),
