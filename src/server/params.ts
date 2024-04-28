@@ -401,8 +401,12 @@ export default class Params {
         if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, realOpts)
         if (paramValue !== null && !Array.isArray(paramValue)) throw new ParamValidationError(errorMessage)
         return (
-          paramValue === null ? null : paramValue.map(val => this.cast(val, baseType, opts))
-        ) as ReturnType
+          // casting as string[] here because this will actually cause
+          // build failures once it is brought into other apps
+          (
+            paramValue === null ? null : (paramValue as string[]).map(val => this.cast(val, baseType, opts))
+          ) as ReturnType
+        )
 
       case 'null[]':
         errorMessage = 'expected null array'
