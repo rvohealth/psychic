@@ -1,21 +1,14 @@
 import { DateTime } from 'luxon'
 import {
+  PetTreatsEnumValues,
   SpeciesTypesEnumValues,
-  AllColumns,
   Int8,
   Json,
-  JsonArray,
-  JsonObject,
-  JsonPrimitive,
-  JsonValue,
   Numeric,
+  PetTreatsEnum,
   SpeciesTypesEnum,
   IdType,
-  Timestamp,
-  HealthUsers,
-  Pets,
-  Users,
-  DB
+  Timestamp
 } from './sync'
 
 export const schema = {
@@ -172,6 +165,14 @@ export const schema = {
         dbType: 'species_types_enum',
         allowNull: true,
         isArray: false,
+      },
+      favoriteTreats: {
+        coercedType: {} as PetTreatsEnum[] | null,
+        enumType: {} as PetTreatsEnum,
+        enumValues: PetTreatsEnumValues,
+        dbType: 'pet_treats_enum[]',
+        allowNull: true,
+        isArray: true,
       },
       lastSeenAt: {
         coercedType: {} as DateTime | null,
