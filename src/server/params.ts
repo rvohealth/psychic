@@ -177,14 +177,31 @@ export default class Params {
               returnObj[columnName as keyof typeof returnObj] = params[columnName as keyof typeof params]
 
             if (columnMetadata?.enumValues) {
-              returnObj[columnName as keyof typeof returnObj] = this.cast(
-                params[columnName as keyof typeof params],
+              const paramValue = params[columnName as keyof typeof params]
+              if (columnMetadata.isArray) {
+                if (!Array.isArray(paramValue))
+                  returnObj[columnName as keyof typeof returnObj] = ['expected an array of enum values']
 
-                // casting to allow enum handling at lower level
-                columnMetadata.dbType as (typeof PsychicParamsPrimitiveLiterals)[number],
+                returnObj[columnName as keyof typeof returnObj] = (paramValue as string[]).map(p =>
+                  this.cast(
+                    p,
 
-                { allowNull: columnMetadata.allowNull, enum: columnMetadata.enumValues },
-              )
+                    // casting to allow enum handling at lower level
+                    columnMetadata.dbType as (typeof PsychicParamsPrimitiveLiterals)[number],
+
+                    { allowNull: columnMetadata.allowNull, enum: columnMetadata.enumValues },
+                  ),
+                )
+              } else {
+                returnObj[columnName as keyof typeof returnObj] = this.cast(
+                  paramValue,
+
+                  // casting to allow enum handling at lower level
+                  columnMetadata.dbType as (typeof PsychicParamsPrimitiveLiterals)[number],
+
+                  { allowNull: columnMetadata.allowNull, enum: columnMetadata.enumValues },
+                )
+              }
             }
         }
       } catch (err) {

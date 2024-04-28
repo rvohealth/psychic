@@ -21,6 +21,13 @@ export type JsonValue = JsonArray | JsonObject | JsonPrimitive;
 
 export type Numeric = ColumnType<string, number | string, number | string>;
 
+export type PetTreatsEnum = "efishy feesh" | "snick snowcks";
+export const PetTreatsEnumValues = [
+  "efishy feesh",
+  "snick snowcks"
+] as const
+
+
 export type SpeciesTypesEnum = "cat" | "noncat";
 export const SpeciesTypesEnumValues = [
   "cat",
@@ -44,6 +51,7 @@ export interface Pets {
   collarCountInt: number | null;
   collarCountNumeric: Numeric | null;
   createdAt: Timestamp;
+  favoriteTreats: PetTreatsEnum[] | null;
   id: Generated<Int8>;
   lastHeardAt: Generated<Timestamp>;
   lastSeenAt: Timestamp | null;
@@ -110,7 +118,7 @@ export interface DB {
 }
 
 
-export const AllColumns = ['bio', 'birthdate', 'collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'createdOn', 'email', 'favoriteBigints', 'favoriteBooleans', 'favoriteCitext', 'favoriteCitexts', 'favoriteDates', 'favoriteDatetimes', 'favoriteIntegers', 'favoriteJsonbs', 'favoriteJsons', 'favoriteNumerics', 'favoriteTexts', 'favoriteUuids', 'healthUsers', 'id', 'jsonData', 'jsonbData', 'lastHeardAt', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nicknames', 'notes', 'optionalUuid', 'passwordDigest', 'pets', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredCollarCountNumeric', 'requiredFavoriteBigints', 'requiredFavoriteBooleans', 'requiredFavoriteCitext', 'requiredFavoriteCitexts', 'requiredFavoriteDates', 'requiredFavoriteDatetimes', 'requiredFavoriteIntegers', 'requiredFavoriteJsonbs', 'requiredFavoriteJsons', 'requiredFavoriteNumerics', 'requiredFavoriteTexts', 'requiredFavoriteUuids', 'requiredJsonData', 'requiredJsonbData', 'requiredNicknames', 'species', 'updatedAt', 'userId', 'users', 'uuid'] as const
+export const AllColumns = ['bio', 'birthdate', 'collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'createdOn', 'email', 'favoriteBigints', 'favoriteBooleans', 'favoriteCitext', 'favoriteCitexts', 'favoriteDates', 'favoriteDatetimes', 'favoriteIntegers', 'favoriteJsonbs', 'favoriteJsons', 'favoriteNumerics', 'favoriteTexts', 'favoriteTreats', 'favoriteUuids', 'healthUsers', 'id', 'jsonData', 'jsonbData', 'lastHeardAt', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nicknames', 'notes', 'optionalUuid', 'passwordDigest', 'pets', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredCollarCountNumeric', 'requiredFavoriteBigints', 'requiredFavoriteBooleans', 'requiredFavoriteCitext', 'requiredFavoriteCitexts', 'requiredFavoriteDates', 'requiredFavoriteDatetimes', 'requiredFavoriteIntegers', 'requiredFavoriteJsonbs', 'requiredFavoriteJsons', 'requiredFavoriteNumerics', 'requiredFavoriteTexts', 'requiredFavoriteUuids', 'requiredJsonData', 'requiredJsonbData', 'requiredNicknames', 'species', 'updatedAt', 'userId', 'users', 'uuid'] as const
 
 export class DBClass {
   health_users: HealthUsers

@@ -81,6 +81,14 @@ describe('Params', () => {
       it('rejects values outside the enum', () => {
         expect(() => Params.for({ species: 'invalid' }, Pet)).toThrowError(ParamValidationError)
       })
+
+      context('with an enum[]', () => {
+        it('expects top-level array', () => {
+          expect(Params.for({ favoriteTreats: ['efishy feesh'] }, Pet)).toEqual({
+            favoriteTreats: ['efishy feesh'],
+          })
+        })
+      })
     })
 
     context('bigint', () => {

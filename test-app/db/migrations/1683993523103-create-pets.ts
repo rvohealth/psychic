@@ -3,6 +3,7 @@ import { Kysely, sql } from 'kysely'
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function up(db: Kysely<any>): Promise<void> {
   await db.schema.createType('species_types_enum').asEnum(['cat', 'noncat']).execute()
+  await db.schema.createType('pet_treats_enum').asEnum(['snick snowcks', 'efishy feesh']).execute()
 
   await db.schema
     .createTable('pets')
@@ -18,6 +19,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('likes_walks', 'boolean')
     .addColumn('likes_treats', 'boolean', col => col.notNull().defaultTo(true))
     .addColumn('species', sql`species_types_enum`)
+    .addColumn('favorite_treats', sql`pet_treats_enum[]`)
     .addColumn('last_seen_at', 'timestamp')
     .addColumn('last_heard_at', 'timestamp', col => col.notNull().defaultTo(sql`now()`))
     .addColumn('created_at', 'timestamp', col => col.notNull())
