@@ -36,7 +36,7 @@ export default class Cable {
     }: {
       withFrontEndClient?: boolean
       frontEndPort?: number
-    } = {},
+    } = {}
   ) {
     this.connect()
 

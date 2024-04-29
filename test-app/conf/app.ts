@@ -110,6 +110,10 @@ export default (psy: PsychicConfig) => {
     else if (developmentOrTestEnv()) throw err
   })
 
+  psy.on('ws:init', () => {
+    __forTestingOnly('ws:init')
+  })
+
   psy.on('ws:start', () => {
     __forTestingOnly('ws:start')
   })

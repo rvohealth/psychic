@@ -8,10 +8,11 @@ export type PsychicHookEventType =
   | 'load:prod'
   | 'load:test'
   | 'server_error'
+  | 'ws:init'
   | 'ws:connect'
   | 'ws:start'
 
 export type PsychicHookLoadEventTypes = Exclude<
   PsychicHookEventType,
-  'server_error' | 'ws:connect' | 'ws:start'
+  'server_error' | 'ws:init' | 'ws:connect' | 'ws:start'
 >

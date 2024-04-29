@@ -41,6 +41,7 @@ export default class PsychicConfig {
   }
   public specialHooks: PsychicConfigSpecialHooks = {
     serverError: [],
+    wsInit: [],
     wsStart: [],
     wsConnect: [],
   }
@@ -105,7 +106,7 @@ export default class PsychicConfig {
     }
 
     const inflections = await importFileWithDefault<() => void | Promise<void>>(
-      absoluteSrcPath('conf/inflections'),
+      absoluteSrcPath('conf/inflections')
     )
     await inflections()
 
@@ -117,17 +118,23 @@ export default class PsychicConfig {
     hookEventType: T,
     cb: T extends 'server_error'
       ? (err: Error, req: Request, res: Response) => void | Promise<void>
-      : T extends 'ws:start'
+      : T extends 'ws:init'
         ? (server: SocketServer) => void | Promise<void>
-        : T extends 'ws:connect'
-          ? (socket: Socket) => void | Promise<void>
-          : (conf: PsychicConfig) => void | Promise<void>,
+        : T extends 'ws:start'
+          ? (server: SocketServer) => void | Promise<void>
+          : T extends 'ws:connect'
+            ? (socket: Socket) => void | Promise<void>
+            : (conf: PsychicConfig) => void | Promise<void>
   ) {
     switch (hookEventType) {
       case 'server_error':
         this.specialHooks.serverError.push(
-          cb as (err: Error, req: Request, res: Response) => void | Promise<void>,
+          cb as (err: Error, req: Request, res: Response) => void | Promise<void>
         )
+        break
+
+      case 'ws:init':
+        this.specialHooks.wsInit.push(cb as (server: SocketServer) => void | Promise<void>)
         break
 
       case 'ws:start':
@@ -140,7 +147,7 @@ export default class PsychicConfig {
 
       default:
         this.bootHooks[hookEventType as PsychicHookLoadEventTypes].push(
-          cb as (conf: PsychicConfig) => void | Promise<void>,
+          cb as (conf: PsychicConfig) => void | Promise<void>
         )
     }
   }
@@ -191,6 +198,7 @@ export default class PsychicConfig {
 
 export interface PsychicConfigSpecialHooks {
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
+  wsInit: ((server: SocketServer) => void | Promise<void>)[]
   wsStart: ((server: SocketServer) => void | Promise<void>)[]
   wsConnect: ((socket: Socket) => void | Promise<void>)[]
 }

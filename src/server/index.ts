@@ -57,7 +57,14 @@ export default class PsychicServer {
 
     await this.config['runHooksFor']('after:routes')
 
-    if (this.config.useWs) this.cable = new Cable(this.app, this.config)
+    if (this.config.useWs) {
+      this.cable = new Cable(this.app, this.config)
+
+      for (const hook of this.config.specialHooks.wsInit) {
+        await hook(this.cable.io!)
+      }
+    }
+
     this.config.cable = this.cable
 
     this.booted = true
@@ -73,7 +80,7 @@ export default class PsychicServer {
     }: {
       withFrontEndClient?: boolean
       frontEndPort?: number
-    } = {},
+    } = {}
   ) {
     await this.boot()
 
