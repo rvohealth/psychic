@@ -29,7 +29,7 @@ export default class Ws<AllowedPaths extends readonly string[]> {
         // TODO: make this configurable in non-test environments
         DateTime.now()
           .plus(testEnv() ? { seconds: 15 } : { day: 1 })
-          .toJSDate()
+          .toJSDate(),
       )
       .exec()
 
@@ -51,7 +51,7 @@ export default class Ws<AllowedPaths extends readonly string[]> {
     }: {
       namespace?: string
       redisKeyPrefix?: string
-    } = {}
+    } = {},
   ) {
     this.namespace = namespace
     this.redisKeyPrefix = redisKeyPrefix
@@ -70,13 +70,13 @@ export default class Ws<AllowedPaths extends readonly string[]> {
     id: IdType | Dream,
     path: P,
     // eslint-disable-next-line
-    data: any = {}
+    data: any = {},
   ) {
     if (this.allowedPaths.length && !this.allowedPaths.includes(path)) throw new InvalidWsPathError(path)
 
     await this.boot()
     const socketIds = await this.findSocketIds(
-      (id as Dream)?.isDreamInstance ? (id as Dream).primaryKeyValue : (id as IdType)
+      (id as Dream)?.isDreamInstance ? (id as Dream).primaryKeyValue : (id as IdType),
     )
 
     for (const socketId of socketIds) {

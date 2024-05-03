@@ -1,8 +1,8 @@
 import { describe as context } from '@jest/globals'
 import { DateTime } from 'luxon'
-import Ws, { InvalidWsPathError } from '../../../src/cable/ws'
 import redisWsKey, * as RedisWsKeyModule from '../../../src/cable/redisWsKey'
 import createWsRedisClient from '../../../src/cable/createWsRedisClient'
+import Ws, { InvalidWsPathError } from '../../../src/cable/ws'
 import User from '../../../test-app/app/models/User'
 
 describe('Ws', () => {
@@ -99,6 +99,7 @@ describe('Ws', () => {
 
     it('emits to the passed id to the default socket.io namespace, using "user" (by default) as the redis key prefix', async () => {
       await buildWsInstanceForEmitTests(['456'])
+
       await ws.emit(123, '/ops/howyadoin', { hello: 'world' })
       expect(findSocketIdsSpy).toHaveBeenCalledWith(123)
       expect(toSpy).toHaveBeenCalledWith('456')
@@ -108,6 +109,7 @@ describe('Ws', () => {
     context('findSocketIds does not find any socket ids for the user', () => {
       it('does not emit to the passed id with the "user" namespace', async () => {
         await buildWsInstanceForEmitTests([])
+
         await ws.emit(123, '/ops/howyadoin', { hello: 'world' })
         expect(toSpy).not.toHaveBeenCalled()
         expect(emitSpy).not.toHaveBeenCalled()
@@ -118,6 +120,7 @@ describe('Ws', () => {
       it('emits to the primaryKeyValue of that dream', async () => {
         const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
         await buildWsInstanceForEmitTests(['456'])
+
         await ws.emit(user, '/ops/howyadoin', { hello: 'world' })
         expect(toSpy).toHaveBeenCalledWith('456')
         expect(findSocketIdsSpy).toHaveBeenCalledWith(user.id)
@@ -132,7 +135,7 @@ describe('Ws', () => {
 
         await expect(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ws.emit(user, '/ops/whoopsthisiswrong' as any, { hello: 'world' }),
+          ws.emit(user, '/ops/whoopsthisiswrong' as any, { hello: 'world' })
         ).rejects.toThrowError(InvalidWsPathError)
       })
     })
