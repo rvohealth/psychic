@@ -1,3 +1,4 @@
+import { Encrypt } from '../../../src'
 import { BeforeAction } from '../../../src/controller/decorators'
 import User from '../models/User'
 import ApplicationController from './ApplicationController'
@@ -38,7 +39,12 @@ export default class UsersController extends ApplicationController {
     if (!user || !(await user.checkPassword(this.param('password')))) this.notFound()
 
     await this.startSession(user!)
-    this.ok()
+
+    // this token is used for authenticating via websockets during tests. for more info,
+    // see spec/features/visitor/websockets.spec.ts
+    const token = Encrypt.sign(user!.id.toString())
+
+    this.ok(token)
   }
 
   @BeforeAction()

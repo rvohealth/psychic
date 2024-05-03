@@ -1,5 +1,8 @@
 import { developmentOrTestEnv } from '@rvohealth/dream'
 import PsychicConfig from '../../src/config'
+import { Encrypt } from '../../src'
+import User from '../app/models/User'
+import Ws from '../../src/cable/ws'
 
 export default (psy: PsychicConfig) => {
   // ******
@@ -110,8 +113,19 @@ export default (psy: PsychicConfig) => {
     else if (developmentOrTestEnv()) throw err
   })
 
-  psy.on('ws:start', () => {
+  psy.on('ws:start', io => {
     __forTestingOnly('ws:start')
+
+    io.of('/').on('connection', async socket => {
+      const token = socket.handshake.auth.token as string
+      const userId = Encrypt.decode(token)
+      const user = await User.find(userId)
+
+      if (user) {
+        // this automatically fires the /ops/connection-success message
+        await Ws.register(socket, user.id)
+      }
+    })
   })
 
   psy.on('ws:connect', () => {
