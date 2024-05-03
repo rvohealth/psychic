@@ -3,10 +3,15 @@ import { Application } from 'express'
 import { createClient, RedisClientOptions } from 'redis'
 import { createAdapter } from '@socket.io/redis-adapter'
 import http from 'http'
-import socketio from 'socket.io'
+import socketio, { Socket } from 'socket.io'
 import log from '../log'
 import { getPsychicHttpInstance } from '../server/helpers/startPsychicServer'
 import PsychicConfig from '../config'
+import PsychicRouter, { IoListenerConfig } from '../router'
+import absoluteSrcPath from '../helpers/absoluteSrcPath'
+import importFileWithDefault from '../helpers/importFileWithDefault'
+import { sanitizedIoListenerPath } from '../router/helpers'
+import PsychicIoListener from './io-listener'
 
 export default class Cable {
   public app: Application
@@ -17,6 +22,15 @@ export default class Cable {
   constructor(app: Application, config: PsychicConfig) {
     this.app = app
     this.config = config
+  }
+
+  public async ioRoutes(): Promise<IoListenerConfig[]> {
+    const r = new PsychicRouter(this.app, this.config)
+    const routesPath = absoluteSrcPath('conf/routes')
+    const routesCB = await importFileWithDefault<(router: PsychicRouter) => Promise<void>>(routesPath)
+    await routesCB(r)
+
+    return r.ioListeners
   }
 
   public connect() {
@@ -36,7 +50,7 @@ export default class Cable {
     }: {
       withFrontEndClient?: boolean
       frontEndPort?: number
-    } = {},
+    } = {}
   ) {
     this.connect()
 
@@ -44,7 +58,15 @@ export default class Cable {
       await hook(this.io!)
     }
 
+    const ioRoutes = await this.ioRoutes()
+
     this.io!.on('connect', async socket => {
+      for (const route of ioRoutes) {
+        socket.on(route.path, async () => {
+          await this.runAction(route, socket)
+        })
+      }
+
       try {
         for (const hook of this.config.specialHooks.wsConnect) {
           await hook(socket)
@@ -89,7 +111,7 @@ export default class Cable {
           log.puts('\n')
           log.puts(colors.cyan('socket server started                                      '))
           log.puts(
-            colors.cyan(`psychic dev server started at port ${colors.bgBlueBright(colors.green(port))}`),
+            colors.cyan(`psychic dev server started at port ${colors.bgBlueBright(colors.green(port))}`)
           )
           if (withFrontEndClient) log.puts(`client server started at port ${colors.cyan(frontEndPort)}`)
           log.puts('\n')
@@ -134,5 +156,44 @@ export default class Cable {
     } catch (error) {
       console.log('FAILED TO ADAPT', error)
     }
+  }
+
+  private async runAction(ioListenerConfig: IoListenerConfig, socket: Socket) {
+    const [listenerPath, action] = ioListenerConfig.listenerActionString.split('#')
+
+    const listenerClass = this.config.ioListeners[sanitizedIoListenerPath(listenerPath)]
+    if (!listenerClass) {
+      // TODO: handle err
+      // res.status(501).send(`
+      //   The io listener you are attempting to load was not found:
+      //     ${listenerPath}
+      // `)
+      return
+    }
+
+    const ioListener = this._initializeIoListener(listenerClass, socket)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    const listenerAction = (ioListener as any)[action]
+
+    if (!listenerAction) {
+      // TODO: handle err
+      // res.status(501).send(`
+      //   The method ${action} is not defined controller:
+      //     ${controllerPath}
+      // `)
+      return
+    }
+
+    try {
+      await ioListener.runAction(action)
+    } catch (error) {
+      // noop
+    }
+  }
+
+  private _initializeIoListener(ioListenerClass: typeof PsychicIoListener, socket: Socket) {
+    return new ioListenerClass(socket, {
+      config: this.config,
+    })
   }
 }

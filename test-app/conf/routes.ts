@@ -21,6 +21,7 @@ export default (r: PsychicRouter) => {
     r.namespace('v1', r => {
       r.get('ping', 'Users#ping')
       r.resources('users', { only: ['index'] })
+      r.ws('authed-ping', 'Users#authedPing')
     })
     r.resources('users', r => {
       r.resources('pets')

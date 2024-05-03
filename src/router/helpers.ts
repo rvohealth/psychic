@@ -11,7 +11,11 @@ export function resourcePath(routePath: string) {
 }
 
 export function sanitizedControllerPath(controllerName: string) {
-  return controllerName + 'Controller'
+  return controllerName.replace(/Controller$/, '') + 'Controller'
+}
+
+export function sanitizedIoListenerPath(ioListenerName: string) {
+  return ioListenerName.replace(/IoListener$/, '') + 'IoListener'
 }
 
 export function namespacedRoute(namespace: string, route: string) {
@@ -36,7 +40,7 @@ export function applyResourcesAction(
   path: string,
   action: ResourcesMethodType,
   routingMechanism: PsychicRouter | PsychicNestedRouter,
-  options?: ResourcesOptions,
+  options?: ResourcesOptions
 ) {
   const controllerName = options?.controller || pascalize(path)
   switch (action) {
@@ -67,7 +71,7 @@ export function applyResourceAction(
   path: string,
   action: ResourcesMethodType,
   routingMechanism: PsychicRouter | PsychicNestedRouter,
-  options?: ResourcesOptions,
+  options?: ResourcesOptions
 ) {
   const controllerName = options?.controller || pascalize(path)
   switch (action) {

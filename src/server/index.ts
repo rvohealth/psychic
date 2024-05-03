@@ -6,7 +6,7 @@ import cookieParser from 'cookie-parser'
 import PsychicConfig from '../config'
 import Cable from '../cable'
 import FrontEndClientServer from './front-end-client'
-import PsychicRouter from '../router'
+import PsychicRouter, { IoListenerConfig } from '../router'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import { Server } from 'http'
@@ -73,7 +73,7 @@ export default class PsychicServer {
     }: {
       withFrontEndClient?: boolean
       frontEndPort?: number
-    } = {},
+    } = {}
   ) {
     await this.boot()
 

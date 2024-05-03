@@ -10,6 +10,7 @@ import { CorsOptions } from 'cors'
 import bodyParser from 'body-parser'
 import { QueueOptions } from 'bullmq'
 import { PsychicRedisConnectionOptions } from './helpers/redisOptions'
+import PsychicIoListener from '../cable/io-listener'
 
 export default class PsychicConfig {
   public static async bootForReading() {
@@ -21,6 +22,7 @@ export default class PsychicConfig {
   public app: Application
   public cable?: Cable
   public controllers: { [key: string]: typeof PsychicController } = {}
+  public ioListeners: { [key: string]: typeof PsychicIoListener } = {}
   public apiOnly: boolean = false
   public useWs: boolean = false
   public useRedis: boolean = false
@@ -105,11 +107,12 @@ export default class PsychicConfig {
     }
 
     const inflections = await importFileWithDefault<() => void | Promise<void>>(
-      absoluteSrcPath('conf/inflections'),
+      absoluteSrcPath('conf/inflections')
     )
     await inflections()
 
     this.controllers = await PsychicDir.controllers()
+    this.ioListeners = await PsychicDir.ioListeners()
     this.booted = true
   }
 
@@ -121,12 +124,12 @@ export default class PsychicConfig {
         ? (server: SocketServer) => void | Promise<void>
         : T extends 'ws:connect'
           ? (socket: Socket) => void | Promise<void>
-          : (conf: PsychicConfig) => void | Promise<void>,
+          : (conf: PsychicConfig) => void | Promise<void>
   ) {
     switch (hookEventType) {
       case 'server_error':
         this.specialHooks.serverError.push(
-          cb as (err: Error, req: Request, res: Response) => void | Promise<void>,
+          cb as (err: Error, req: Request, res: Response) => void | Promise<void>
         )
         break
 
@@ -140,7 +143,7 @@ export default class PsychicConfig {
 
       default:
         this.bootHooks[hookEventType as PsychicHookLoadEventTypes].push(
-          cb as (conf: PsychicConfig) => void | Promise<void>,
+          cb as (conf: PsychicConfig) => void | Promise<void>
         )
     }
   }
