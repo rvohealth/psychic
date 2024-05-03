@@ -84,12 +84,16 @@ export default class Cable {
   }) {
     return new Promise(accept => {
       this.http.listen(port, () => {
-        log.welcome()
-        log.puts('\n')
-        log.puts(colors.cyan('socket server started                                      '))
-        log.puts(colors.cyan(`psychic dev server started at port ${colors.bgBlueBright(colors.green(port))}`))
-        if (withFrontEndClient) log.puts(`client server started at port ${colors.cyan(frontEndPort)}`)
-        log.puts('\n')
+        if (process.env.NODE_ENV !== 'test') {
+          log.welcome()
+          log.puts('\n')
+          log.puts(colors.cyan('socket server started                                      '))
+          log.puts(
+            colors.cyan(`psychic dev server started at port ${colors.bgBlueBright(colors.green(port))}`),
+          )
+          if (withFrontEndClient) log.puts(`client server started at port ${colors.cyan(frontEndPort)}`)
+          log.puts('\n')
+        }
 
         accept(true)
       })
