@@ -458,21 +458,24 @@ export default class Params {
       throw new Error(`Params.restrict expects object or null, received: ${JSON.stringify(param)}`)
 
     const objectParam = param as PsychicParamsDictionary
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let transformedParams: any
+
+    switch (this._casing) {
+      case 'snake':
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        transformedParams = snakeify(objectParam)
+        break
+      default:
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        transformedParams = camelize(objectParam)
+    }
 
     allowed.forEach(field => {
-      let transformedParams = { ...objectParam }
-      switch (this._casing) {
-        case 'snake':
-          transformedParams = snakeify(objectParam)
-          break
-
-        case 'camel':
-          transformedParams = camelize(objectParam)
-          break
-      }
-
-      if (transformedParams[field] !== undefined) permitted[field] = transformedParams[field]
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
+      if (transformedParams?.[field] !== undefined) permitted[field] = transformedParams[field]
     })
+
     return permitted
   }
 
