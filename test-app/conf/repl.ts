@@ -14,11 +14,11 @@ export default (async function () {
     const importablePath = dreamPath.replace(/.*\/test-app/, '..')
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const dreamClass = (await import(importablePath)).default as typeof Dream
-    if (dreamClass.isDream)
-      replServer.context[
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        await dreamClass.globalName()
-      ] = dreamClass
+
+    if (dreamClass.isDream) {
+      const globalName = await dreamClass.globalName()
+      if (globalName) replServer.context[globalName] = dreamClass
+    }
   }
 })()
 

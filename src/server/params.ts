@@ -1,12 +1,18 @@
 import { DateTime } from 'luxon'
-import { Dream, DreamAttributes, camelize, snakeify, DreamParamSafeAttributes } from '@rvohealth/dream'
+import {
+  Dream,
+  DreamAttributes,
+  camelize,
+  snakeify,
+  DreamParamSafeAttributes,
+  CalendarDate,
+} from '@rvohealth/dream'
 import {
   PsychicParamsDictionary,
   PsychicParamsPrimitive,
   PsychicParamsPrimitiveLiterals,
 } from '../controller'
 import { isObject } from '../helpers/typechecks'
-import { isArray } from 'node:util'
 import isUuid from '../helpers/isUuid'
 
 export default class Params {
@@ -85,6 +91,8 @@ export default class Params {
           case 'bigint[]':
           case 'boolean':
           case 'boolean[]':
+          case 'date':
+          case 'date[]':
           case 'integer':
           case 'integer[]':
           case 'uuid':
@@ -118,7 +126,6 @@ export default class Params {
             )
             break
 
-          case 'date':
           case 'timestamp':
           case 'timestamp with time zone':
           case 'timestamp without time zone':
@@ -129,7 +136,6 @@ export default class Params {
             )
             break
 
-          case 'date[]':
           case 'timestamp[]':
           case 'timestamp with time zone[]':
           case 'timestamp without time zone[]':
@@ -317,6 +323,8 @@ export default class Params {
 
     let errorMessage: string
     let baseType: (typeof PsychicParamsPrimitiveLiterals)[number]
+    let dateClass: typeof DateTime | typeof CalendarDate
+
     switch (
       expectedType as
         | (typeof PsychicParamsPrimitiveLiterals)[number]
@@ -347,10 +355,25 @@ export default class Params {
         return paramValue as ReturnType
 
       case 'datetime':
+      case 'date':
+        switch (expectedType) {
+          case 'datetime':
+            dateClass = DateTime
+            break
+          case 'date':
+            dateClass = CalendarDate
+            break
+          default:
+            if (typeof expectedType === 'string') throw Error(`${expectedType} must be "datetime" or "date"`)
+            else throw Error(`expectedType is not a string`)
+        }
+
         errorMessage = 'expecting ISO string or millis since epoch'
-        if ((paramValue as unknown as DateTime)?.isValid) return paramValue as ReturnType
+        if ((paramValue instanceof DateTime || paramValue instanceof CalendarDate) && paramValue.isValid)
+          return paramValue as ReturnType
+
         if (typeof paramValue === 'string') {
-          const dateTime = DateTime.fromISO(paramValue)
+          const dateTime = dateClass.fromISO(paramValue)
           if (dateTime.isValid) return dateTime as ReturnType
           throw new ParamValidationError(errorMessage)
         } else if (Number.isInteger(paramValue as number)) {
@@ -405,6 +428,7 @@ export default class Params {
       case 'bigint[]':
       case 'boolean[]':
       case 'datetime[]':
+      case 'date[]':
       case 'integer[]':
       case 'json[]':
       case 'number[]':
@@ -427,7 +451,7 @@ export default class Params {
 
       case 'null[]':
         errorMessage = 'expected null array'
-        if (!isArray(paramValue)) this.throwUnlessNull(paramValue, errorMessage, realOpts)
+        if (!Array.isArray(paramValue)) this.throwUnlessNull(paramValue, errorMessage, realOpts)
         if ((paramValue as number[]).length === 0) return [] as ReturnType
         if ((paramValue as number[]).filter(v => v !== null).length > 0)
           this.throwUnlessNull(paramValue, errorMessage, realOpts)
@@ -539,35 +563,39 @@ type ValidatedReturnType<ExpectedType> = ExpectedType extends RegExp
       ? number
       : ExpectedType extends 'datetime'
         ? DateTime
-        : ExpectedType extends 'bigint'
-          ? string
-          : ExpectedType extends 'integer'
-            ? number
-            : ExpectedType extends 'json'
-              ? object
-              : ExpectedType extends 'boolean'
-                ? boolean
-                : ExpectedType extends 'null'
-                  ? null
-                  : ExpectedType extends 'uuid'
-                    ? string
-                    : ExpectedType extends 'datetime[]'
-                      ? DateTime[]
-                      : ExpectedType extends 'string[]'
-                        ? string[]
-                        : ExpectedType extends 'number[]'
-                          ? number[]
-                          : ExpectedType extends 'integer[]'
-                            ? number[]
-                            : ExpectedType extends 'boolean[]'
-                              ? boolean
-                              : ExpectedType extends 'null[]'
-                                ? null[]
-                                : ExpectedType extends 'uuid[]'
-                                  ? string[]
-                                  : ExpectedType extends { enum: infer EnumValue }
-                                    ? EnumValue
-                                    : never
+        : ExpectedType extends 'date'
+          ? CalendarDate
+          : ExpectedType extends 'bigint'
+            ? string
+            : ExpectedType extends 'integer'
+              ? number
+              : ExpectedType extends 'json'
+                ? object
+                : ExpectedType extends 'boolean'
+                  ? boolean
+                  : ExpectedType extends 'null'
+                    ? null
+                    : ExpectedType extends 'uuid'
+                      ? string
+                      : ExpectedType extends 'datetime[]'
+                        ? DateTime[]
+                        : ExpectedType extends 'date[]'
+                          ? CalendarDate[]
+                          : ExpectedType extends 'string[]'
+                            ? string[]
+                            : ExpectedType extends 'number[]'
+                              ? number[]
+                              : ExpectedType extends 'integer[]'
+                                ? number[]
+                                : ExpectedType extends 'boolean[]'
+                                  ? boolean
+                                  : ExpectedType extends 'null[]'
+                                    ? null[]
+                                    : ExpectedType extends 'uuid[]'
+                                      ? string[]
+                                      : ExpectedType extends { enum: infer EnumValue }
+                                        ? EnumValue
+                                        : never
 
 type ValidatedAllowsNull<ExpectedType, OptsValue> = ExpectedType extends { allowNull: infer R }
   ? R extends true

@@ -1,3 +1,4 @@
+import { CalendarDate } from '@rvohealth/dream'
 import { DateTime } from 'luxon'
 import {
   PetTreatsEnumValues,
@@ -228,7 +229,7 @@ export const schema = {
         isArray: false,
       },
       birthdate: {
-        coercedType: {} as DateTime | null,
+        coercedType: {} as CalendarDate | null,
         enumType: null,
         enumValues: null,
         dbType: 'date',
@@ -244,7 +245,7 @@ export const schema = {
         isArray: false,
       },
       createdOn: {
-        coercedType: {} as DateTime,
+        coercedType: {} as CalendarDate,
         enumType: null,
         enumValues: null,
         dbType: 'date',
