@@ -1,15 +1,19 @@
 import { BeforeCreate, BeforeUpdate, Validates, Virtual, HasMany, DreamColumn } from '@rvohealth/dream'
 import Hash from '../../../src/encryption/hash'
 import Pet from './Pet'
-import UserSerializer from '../serializers/UserSerializer'
+import UserSerializer, { UserExtraSerializer, UserIndexSerializer } from '../serializers/UserSerializer'
 import ApplicationModel from './ApplicationModel'
 export default class User extends ApplicationModel {
   public get table() {
     return 'users' as const
   }
 
-  public get serializer() {
-    return UserSerializer
+  public get serializers() {
+    return {
+      default: UserSerializer,
+      index: UserIndexSerializer,
+      extra: UserExtraSerializer,
+    }
   }
 
   public id: DreamColumn<User, 'id'>

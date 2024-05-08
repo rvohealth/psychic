@@ -6,6 +6,11 @@ import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
 import { Request, Response } from 'express'
 import { BeforeAction } from '../../../src/controller/decorators'
+import Pet from '../../../test-app/app/models/Pet'
+import UserSerializer, {
+  UserExtraSerializer,
+  UserIndexSerializer,
+} from '../../../test-app/app/serializers/UserSerializer'
 
 describe('PsychicController', () => {
   describe('#serialize', () => {
@@ -48,7 +53,7 @@ describe('PsychicController', () => {
       it('identifies serializer attached to model class and uses it to serialize', async () => {
         class MyController extends PsychicController {
           public async index() {
-            this.ok(await User.all())
+            this.ok([...(await User.all()), ...(await Pet.all())], { serializer: 'index' })
           }
 
           public async show() {
@@ -56,17 +61,17 @@ describe('PsychicController', () => {
           }
         }
 
-        await User.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
-        await User.create({ email: 'zed@zed', name: 'zed', passwordDigest: 'hello' })
+        const user1 = await User.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
+        const user2 = await User.create({ email: 'zed@zed', name: 'zed', passwordDigest: 'hello' })
         const controller = new MyController(req, res, { config })
 
         await controller.index()
-        expect(res.json).toHaveBeenCalledWith([
-          { email: 'how@yadoin', name: 'fred' },
-          { email: 'zed@zed', name: 'zed' },
-        ])
+        expect(res.json).toHaveBeenCalledWith([{ id: user1.id }, { id: user2.id }])
+
+        jest.spyOn(res, 'json').mockReset()
 
         await controller.show()
+        expect(res.json).toHaveBeenCalledWith({ id: user1.id, email: 'how@yadoin', name: 'fred' })
       })
 
       context('when the model is not a Dream', () => {
@@ -91,8 +96,8 @@ describe('PsychicController', () => {
             this.word = word
           }
 
-          public get serializer() {
-            return GreetSerializer
+          public get serializers() {
+            return { default: GreetSerializer } as const
           }
         }
 
@@ -103,8 +108,8 @@ describe('PsychicController', () => {
             this.word = word
           }
 
-          public get serializer() {
-            return GreetSerializer2
+          public get serializers() {
+            return { default: GreetSerializer2 } as const
           }
         }
 
@@ -151,13 +156,32 @@ describe('PsychicController', () => {
 
     context('with default passthrough data set on the controller', () => {
       class User2 extends User {
-        public get serializer() {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-explicit-any
-          return User2Serializer as any
+        public get serializers() {
+          return {
+            default: User2Serializer,
+            index: User2IndexSerializer,
+            extra: User2ExtraSerializer,
+          }
         }
       }
 
-      class User2Serializer extends DreamSerializer {
+      class User2Serializer extends UserSerializer {
+        @Attribute()
+        public howyadoin() {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return this.passthroughData.howyadoin
+        }
+      }
+
+      class User2IndexSerializer extends UserIndexSerializer {
+        @Attribute()
+        public howyadoin() {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          return this.passthroughData.howyadoin
+        }
+      }
+
+      class User2ExtraSerializer extends UserExtraSerializer {
         @Attribute()
         public howyadoin() {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
@@ -176,15 +200,22 @@ describe('PsychicController', () => {
         }
       }
 
+      let user2: User2
+
       beforeEach(async () => {
-        await User2.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
+        user2 = await User2.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
       })
 
       it('passes the passthrough data through to the child serializers', async () => {
         const controller = new MyController(req, res, { config })
 
         await controller.runAction('show')
-        expect(res.json).toHaveBeenCalledWith({ howyadoin: 'howyadoin' })
+        expect(res.json).toHaveBeenCalledWith({
+          id: user2.id,
+          email: 'how@yadoin',
+          name: 'fred',
+          howyadoin: 'howyadoin',
+        })
 
         await controller.show()
       })
