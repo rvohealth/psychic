@@ -6,7 +6,7 @@ export default function generateControllerString(
   route: string,
   fullyQualifiedModelName: string | null,
   methods: string[] = [],
-  attributes: string[] | null = [],
+  attributes: string[] | null = []
 ) {
   const crudMethods = ['create', 'index', 'show', 'update', 'destroy']
   const psyImports: string[] = ['Params']
@@ -19,12 +19,12 @@ export default function generateControllerString(
   let extendingClassName = 'AuthedController'
   if (/^\/{0,1}admin\/.*/.test(route)) {
     additionalImports.push(
-      `import AdminAuthedController from '${routeDepthToRelativePath(route, 1)}/Admin/AuthedController'`,
+      `import AdminAuthedController from '${routeDepthToRelativePath(route, 1)}/Admin/AuthedController'`
     )
     extendingClassName = 'AdminAuthedController'
   } else {
     additionalImports.push(
-      `import AuthedController from '${routeDepthToRelativePath(route, 1)}/AuthedController'`,
+      `import AuthedController from '${routeDepthToRelativePath(route, 1)}/AuthedController'`
     )
   }
 
@@ -32,7 +32,7 @@ export default function generateControllerString(
     modelName = fullyQualifiedModelName.split('/').pop()
     additionalImports.push(
       `\
-import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQualifiedModelName}'`,
+import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQualifiedModelName}'`
     )
   }
 
@@ -45,7 +45,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
           return `\
   public async create() {
     //    const ${camelize(modelName)} = await ${modelName}.create(this.${camelize(modelName)}Params)
-    //    this.ok(${camelize(modelName)})
+    //    this.created(${camelize(modelName)})
   }`
         else
           return `\
@@ -82,7 +82,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   public async update() {
     //    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
     //    await ${camelize(modelName)}.update(this.${camelize(modelName)}Params)
-    //    this.ok(${camelize(modelName)})
+    //    this.noContent()
   }`
         else
           return `\
@@ -95,7 +95,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   public async destroy() {
     //    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
     //    await ${camelize(modelName)}.destroy()
-    //    this.ok()
+    //    this.noContent()
   }`
         else
           return `\
@@ -116,8 +116,8 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
     privateDefs.push(
       `\
   private get ${singularName}Params() {
-    return Params.restrict(this.params, [${attributes.map(attr => `'${camelize(attr)}'`).join(', ')}])
-  }`,
+    return this.paramsFor(${modelName})
+  }`
     )
   }
 
