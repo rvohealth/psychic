@@ -6,12 +6,8 @@ export default function generateControllerString(
   route: string,
   fullyQualifiedModelName: string | null,
   methods: string[] = [],
-  attributes: string[] | null = []
 ) {
-  const crudMethods = ['create', 'index', 'show', 'update', 'destroy']
-  const psyImports: string[] = ['Params']
   const additionalImports: string[] = []
-  let hasCrudMethod = false
 
   let modelName: string | undefined
   const controllerClassNameWithoutSlashes = controllerClassName.replace(/\//g, '')
@@ -19,12 +15,12 @@ export default function generateControllerString(
   let extendingClassName = 'AuthedController'
   if (/^\/{0,1}admin\/.*/.test(route)) {
     additionalImports.push(
-      `import AdminAuthedController from '${routeDepthToRelativePath(route, 1)}/Admin/AuthedController'`
+      `import AdminAuthedController from '${routeDepthToRelativePath(route, 1)}/Admin/AuthedController'`,
     )
     extendingClassName = 'AdminAuthedController'
   } else {
     additionalImports.push(
-      `import AuthedController from '${routeDepthToRelativePath(route, 1)}/AuthedController'`
+      `import AuthedController from '${routeDepthToRelativePath(route, 1)}/AuthedController'`,
     )
   }
 
@@ -32,19 +28,17 @@ export default function generateControllerString(
     modelName = fullyQualifiedModelName.split('/').pop()
     additionalImports.push(
       `\
-import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQualifiedModelName}'`
+import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQualifiedModelName}'`,
     )
   }
 
   const methodDefs = methods.map(methodName => {
-    if (crudMethods.includes(methodName)) hasCrudMethod = true
-
     switch (methodName) {
       case 'create':
         if (modelName)
           return `\
   public async create() {
-    //    const ${camelize(modelName)} = await ${modelName}.create(this.${camelize(modelName)}Params)
+    //    const ${camelize(modelName)} = await this.currentUser.createAssociation('${pluralize(camelize(modelName))}', this.paramsFor(${modelName}))
     //    this.created(${camelize(modelName)})
   }`
         else
@@ -56,7 +50,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async index() {
-    //    const ${pluralize(camelize(modelName))} = await ${modelName}.all()
+    //    const ${pluralize(camelize(modelName))} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').all()
     //    this.ok(${pluralize(camelize(modelName))})
   }`
         else
@@ -68,7 +62,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async show() {
-    //    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
+    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.param<string>('id'))
     //    this.ok(${camelize(modelName)})
   }`
         else
@@ -80,8 +74,8 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async update() {
-    //    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
-    //    await ${camelize(modelName)}.update(this.${camelize(modelName)}Params)
+    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.param<string>('id'))
+    //    await ${camelize(modelName)}.update(this.paramsFor(${modelName}))
     //    this.noContent()
   }`
         else
@@ -93,7 +87,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async destroy() {
-    //    const ${camelize(modelName)} = await ${modelName}.find(this.params.id)
+    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.param<string>('id'))
     //    await ${camelize(modelName)}.destroy()
     //    this.noContent()
   }`
@@ -109,25 +103,11 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
     }
   })
 
-  const privateDefs: string[] = []
-  if (modelName && hasCrudMethod) {
-    attributes ||= []
-    const singularName = pluralize.singular(camelize(modelName))
-    privateDefs.push(
-      `\
-  private get ${singularName}Params() {
-    return this.paramsFor(${modelName})
-  }`
-    )
-  }
-
   return `\
-import { ${psyImports.join(', ')} } from '@rvohealth/psychic'${
-    additionalImports.length ? '\n' + additionalImports.join('\n') : ''
-  }
+${additionalImports.length ? additionalImports.join('\n') : ''}
 
 export default class ${controllerClassNameWithoutSlashes} extends ${extendingClassName} {
-${methodDefs.join('\n\n')}${privateDefs.length ? '\n\n' + privateDefs.join('\n\n') : ''}
+${methodDefs.join('\n\n')}
 }\
 `
 }
