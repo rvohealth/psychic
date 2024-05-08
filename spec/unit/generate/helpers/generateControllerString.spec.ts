@@ -30,18 +30,18 @@ export default class ApiV1PostsController extends AuthedController {
   }
 
   public async show() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
     //    this.ok(post)
   }
 
   public async update() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
     //    await post.update(this.paramsFor(Post))
     //    this.noContent()
   }
 
   public async destroy() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
     //    await post.destroy()
     //    this.noContent()
   }
@@ -80,18 +80,18 @@ export default class ApiV1HealthPostsController extends AuthedController {
   }
 
   public async show() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
     //    this.ok(post)
   }
 
   public async update() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
     //    await post.update(this.paramsFor(Post))
     //    this.noContent()
   }
 
   public async destroy() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
     //    await post.destroy()
     //    this.noContent()
   }
