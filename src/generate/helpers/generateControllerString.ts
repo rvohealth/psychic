@@ -62,7 +62,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async show() {
-    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.param<string>('id'))
+    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.castParam('id', 'string'))
     //    this.ok(${camelize(modelName)})
   }`
         else
@@ -74,7 +74,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async update() {
-    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.param<string>('id'))
+    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.castParam('id', 'string'))
     //    await ${camelize(modelName)}.update(this.paramsFor(${modelName}))
     //    this.noContent()
   }`
@@ -87,7 +87,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async destroy() {
-    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.param<string>('id'))
+    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.castParam('id', 'string'))
     //    await ${camelize(modelName)}.destroy()
     //    this.noContent()
   }`

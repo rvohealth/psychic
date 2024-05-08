@@ -132,6 +132,22 @@ export default class PsychicController {
     return this.params[key] as ReturnType
   }
 
+  public castParam<
+    const EnumType extends readonly string[],
+    OptsType extends {
+      allowNull?: boolean
+      match?: RegExp
+      enum?: EnumType
+    },
+    ExpectedType extends
+      | (typeof PsychicParamsPrimitiveLiterals)[number]
+      | (typeof PsychicParamsPrimitiveLiterals)[number][]
+      | RegExp
+      | OptsType,
+  >(key: string, expectedType: ExpectedType) {
+    return Params.cast(this.param<string>(key), expectedType)
+  }
+
   public paramsFor<DreamClass extends typeof Dream>(dreamClass: DreamClass, key?: string) {
     return Params.for(key ? (this.params[key] as typeof this.params) : this.params, dreamClass)
   }
