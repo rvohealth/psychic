@@ -274,13 +274,14 @@ export default class Params {
       | OptsType,
     ReturnType extends ValidatedReturnType<ExpectedType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsValue>,
+    FinalReturnType extends AllowNullOrUndefined extends true ? ReturnType | null | undefined : ReturnType,
   >(
     this: T,
     param: PsychicParamsPrimitive | PsychicParamsPrimitive[],
     expectedType: ExpectedType,
     opts?: OptsValue,
-  ): AllowNullOrUndefined extends true ? ReturnType | null | undefined : ReturnType {
-    return new this().cast(param, expectedType, opts) as ReturnType
+  ): FinalReturnType {
+    return new this().cast(param, expectedType, opts) as FinalReturnType
   }
 
   public static casing<T extends typeof Params>(this: T, casing: 'snake' | 'camel') {
