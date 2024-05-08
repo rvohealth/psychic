@@ -110,7 +110,7 @@ export default class PsychicController {
       config,
     }: {
       config: PsychicConfig
-    },
+    }
   ) {
     this.req = req
     this.res = res
@@ -162,7 +162,7 @@ export default class PsychicController {
       JSON.stringify({
         id: user.primaryKeyValue,
         modelKey: await getModelKey(user.constructor as typeof Dream),
-      }),
+      })
     )
   }
 
@@ -170,14 +170,14 @@ export default class PsychicController {
     return this.session.clearCookie(this.config.authSessionKey)
   }
 
-  private singleObjectJson<T>(data: T): T | SerializerResult {
+  private singleObjectJson<T>(data: T, opts: RenderOptions<T>): T | SerializerResult {
     if (!data) return data
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    const SerializerClass = lookup?.[1] || (data as any).serializer
+    const SerializerClass = lookup?.[1] || (data as any).serializers?.[opts.serializer || 'default']
     if (SerializerClass) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return new SerializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
@@ -186,19 +186,20 @@ export default class PsychicController {
     return data
   }
 
-  public json(
+  public json<T>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any,
+    data: T,
+    opts: RenderOptions<T> = {}
   ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any {
     if (Array.isArray(data))
       return this.res.json(
         data.map(d =>
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          this.singleObjectJson(d),
-        ),
+          this.singleObjectJson(d, opts)
+        )
       )
-    return this.res.json(this.singleObjectJson(data))
+    return this.res.json(this.singleObjectJson(data, opts))
   }
 
   protected defaultSerializerPassthrough: SerializerResult = {}
@@ -209,24 +210,23 @@ export default class PsychicController {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public ok(data: any = {}) {
+  public ok<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return this.json(data)
+    return this.json(data, opts)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public created(data: any = {}) {
+  public created<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
     this.res.status(201)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return this.json(data)
+    return this.json(data, opts)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public accepted(data: any = {}) {
+  public accepted<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
     this.res.status(202)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return this.json(data)
+    return this.json(data, opts)
   }
 
   public noContent() {
@@ -260,7 +260,7 @@ export default class PsychicController {
   public badRequest(data: SerializerResult = {}) {
     throw new BadRequest(
       'The server cannot or will not process the request due to something that is perceived to be a client error (e.g., malformed request syntax, invalid request message framing, or deceptive request routing).',
-      data,
+      data
     )
   }
 
@@ -293,7 +293,7 @@ export default class PsychicController {
   public internalServerError(data: SerializerResult = {}) {
     throw new InternalServerError(
       'The server has encountered a situation it does not know how to handle.',
-      data,
+      data
     )
   }
 
@@ -301,7 +301,7 @@ export default class PsychicController {
   public notImplemented(data: SerializerResult = {}) {
     throw new InternalServerError(
       'The request method is not supported by the server and cannot be handled. The only methods that servers are required to support (and therefore that must not return this code) are GET and HEAD',
-      data,
+      data
     )
   }
 
@@ -318,7 +318,7 @@ export default class PsychicController {
 
   public async runBeforeActionsFor(action: string) {
     const beforeActions = (this.constructor as typeof PsychicController).controllerHooks.filter(hook =>
-      hook.shouldFireForAction(action),
+      hook.shouldFireForAction(action)
     )
 
     for (const hook of beforeActions) {
@@ -339,25 +339,35 @@ export class ControllerSerializerIndex {
   public add(
     ControllerClass: typeof PsychicController,
     SerializerClass: typeof DreamSerializer,
-    ModelClass: typeof Dream,
+    ModelClass: typeof Dream
   ) {
     this.associations.push([ControllerClass, SerializerClass, ModelClass])
   }
 
   public lookupModel(ControllerClass: typeof PsychicController, ModelClass: typeof Dream) {
     return this.associations.find(
-      association => association[0] === ControllerClass && association[2] === ModelClass,
+      association => association[0] === ControllerClass && association[2] === ModelClass
     )
   }
 
   public lookupSerializer(
     ControllerClass: typeof PsychicController,
-    SerializerClass: typeof DreamSerializer,
+    SerializerClass: typeof DreamSerializer
   ) {
     return this.associations.find(
-      association => association[0] === ControllerClass && association[1] === SerializerClass,
+      association => association[0] === ControllerClass && association[1] === SerializerClass
     )
   }
 }
+
+export type RenderOptions<
+  T,
+  U = T extends (infer R)[] ? R : T,
+  SerializerType = U extends null
+    ? never
+    : U['serializers' & keyof U] extends object
+      ? keyof U['serializers' & keyof U]
+      : never,
+> = { serializer?: SerializerType }
 
 export const controllerSerializerIndex = new ControllerSerializerIndex()

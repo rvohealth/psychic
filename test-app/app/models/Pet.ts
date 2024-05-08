@@ -1,10 +1,19 @@
 import { IdType, BelongsTo, DreamColumn } from '@rvohealth/dream'
 import User from './User'
 import ApplicationModel from './ApplicationModel'
+import PetSerializer, { PetAdditionalSerializer, PetIndexSerializer } from '../serializers/PetSerializer'
 
 export default class Pet extends ApplicationModel {
   public get table() {
     return 'pets' as const
+  }
+
+  public get serializers() {
+    return {
+      default: PetSerializer,
+      index: PetIndexSerializer,
+      additional: PetAdditionalSerializer,
+    }
   }
 
   public id: DreamColumn<Pet, 'id'>
