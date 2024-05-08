@@ -9,7 +9,7 @@ describe('psy generate:controller <name> [...methods]', () => {
           'users',
           'User',
           ['create', 'index', 'show', 'update', 'destroy', 'login'],
-          ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at'],
+          ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
         )
 
         expect(res).toEqual(
@@ -21,7 +21,7 @@ import User from '../models/User'
 export default class ApiV1UsersController extends AuthedController {
   public async create() {
     //    const user = await User.create(this.userParams)
-    //    this.ok(user)
+    //    this.created(user)
   }
 
   public async index() {
@@ -37,23 +37,23 @@ export default class ApiV1UsersController extends AuthedController {
   public async update() {
     //    const user = await User.find(this.params.id)
     //    await user.update(this.userParams)
-    //    this.ok(user)
+    //    this.noContent()
   }
 
   public async destroy() {
     //    const user = await User.find(this.params.id)
     //    await user.destroy()
-    //    this.ok()
+    //    this.noContent()
   }
 
   public async login() {
   }
 
   private get userParams() {
-    return Params.restrict(this.params, ['id', 'name', 'email', 'passwordDigest', 'createdAt', 'updatedAt'])
+    return this.paramsFor(User)
   }
 }\
-`,
+`
         )
       })
     })
@@ -65,7 +65,7 @@ export default class ApiV1UsersController extends AuthedController {
           '/api/v1/health/users',
           'Health/User',
           ['create', 'index', 'show', 'update', 'destroy', 'login'],
-          ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at'],
+          ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
         )
 
         expect(res).toEqual(
@@ -77,7 +77,7 @@ import User from '../../../../models/Health/User'
 export default class ApiV1HealthUsersController extends AuthedController {
   public async create() {
     //    const user = await User.create(this.userParams)
-    //    this.ok(user)
+    //    this.created(user)
   }
 
   public async index() {
@@ -93,23 +93,23 @@ export default class ApiV1HealthUsersController extends AuthedController {
   public async update() {
     //    const user = await User.find(this.params.id)
     //    await user.update(this.userParams)
-    //    this.ok(user)
+    //    this.noContent()
   }
 
   public async destroy() {
     //    const user = await User.find(this.params.id)
     //    await user.destroy()
-    //    this.ok()
+    //    this.noContent()
   }
 
   public async login() {
   }
 
   private get userParams() {
-    return Params.restrict(this.params, ['id', 'name', 'email', 'passwordDigest', 'createdAt', 'updatedAt'])
+    return this.paramsFor(User)
   }
 }\
-`,
+`
         )
       })
 
@@ -120,7 +120,7 @@ export default class ApiV1HealthUsersController extends AuthedController {
             'admin/nutrition-log-entries',
             'Nutrition/LogEntry',
             ['create'],
-            ['id', 'calories'],
+            ['id', 'calories']
           )
 
           expect(res).toEqual(
@@ -132,13 +132,13 @@ import LogEntry from '../../models/Nutrition/LogEntry'
 export default class AdminNutritionLogEntriesController extends AdminAuthedController {
   public async create() {
     //    const logEntry = await LogEntry.create(this.logEntryParams)
-    //    this.ok(logEntry)
+    //    this.created(logEntry)
   }
 
   private get logEntryParams() {
-    return Params.restrict(this.params, ['id', 'calories'])
+    return this.paramsFor(LogEntry)
   }
-}`,
+}`
           )
         })
       })
@@ -159,7 +159,7 @@ export default class ApiV1UsersController extends AuthedController {
 
   public async world() {
   }
-}`,
+}`
         )
       })
     })
