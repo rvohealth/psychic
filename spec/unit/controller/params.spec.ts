@@ -3,6 +3,7 @@ import PsychicController from '../../../src/controller'
 import PsychicConfig from '../../../src/config'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
+import { Params } from '../../../src'
 
 describe('PsychicController', () => {
   describe('get #params', () => {
@@ -14,6 +15,24 @@ describe('PsychicController', () => {
 
       expect(controller.params.search).toEqual('abc')
       expect(controller.params.cool).toEqual('boyjohnson')
+    })
+  })
+
+  describe('#castParam', () => {
+    let controller: PsychicController
+
+    beforeEach(() => {
+      const req = getMockReq({
+        body: { id: 1, name: 'howyadoin', createdAt: 'hello', updatedAt: 'birld', deletedAt: 'sometimeago' },
+      })
+      const res = getMockRes().res
+      const server = new PsychicServer()
+      controller = new PsychicController(req, res, { config: new PsychicConfig(server.app) })
+    })
+
+    it('returns the result of Params.cast', () => {
+      jest.spyOn(Params, 'cast').mockReturnValue('chalupas dujour')
+      expect(controller.castParam('name', 'string')).toEqual('chalupas dujour')
     })
   })
 
