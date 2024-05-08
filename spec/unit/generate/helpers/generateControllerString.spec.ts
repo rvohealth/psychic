@@ -4,56 +4,52 @@ describe('psy generate:controller <name> [...methods]', () => {
   context('when provided methods', () => {
     context('passing a model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
-        const res = generateControllerString(
-          'ApiV1UsersController',
-          'users',
-          'User',
-          ['create', 'index', 'show', 'update', 'destroy', 'login'],
-          ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
-        )
+        const res = generateControllerString('ApiV1PostsController', 'posts', 'Post', [
+          'create',
+          'index',
+          'show',
+          'update',
+          'destroy',
+          'preview',
+        ])
 
         expect(res).toEqual(
           `\
-import { Params } from '@rvohealth/psychic'
 import AuthedController from './AuthedController'
-import User from '../models/User'
+import Post from '../models/Post'
 
-export default class ApiV1UsersController extends AuthedController {
+export default class ApiV1PostsController extends AuthedController {
   public async create() {
-    //    const user = await User.create(this.userParams)
-    //    this.created(user)
+    //    const post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
+    //    this.created(post)
   }
 
   public async index() {
-    //    const users = await User.all()
-    //    this.ok(users)
+    //    const posts = await this.currentUser.associationQuery('posts').all()
+    //    this.ok(posts)
   }
 
   public async show() {
-    //    const user = await User.find(this.params.id)
-    //    this.ok(user)
+    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    this.ok(post)
   }
 
   public async update() {
-    //    const user = await User.find(this.params.id)
-    //    await user.update(this.userParams)
+    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    await post.update(this.paramsFor(Post))
     //    this.noContent()
   }
 
   public async destroy() {
-    //    const user = await User.find(this.params.id)
-    //    await user.destroy()
+    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    await post.destroy()
     //    this.noContent()
   }
 
-  public async login() {
-  }
-
-  private get userParams() {
-    return this.paramsFor(User)
+  public async preview() {
   }
 }\
-`
+`,
         )
       })
     })
@@ -61,55 +57,49 @@ export default class ApiV1UsersController extends AuthedController {
     context('passing a namespaced model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
         const res = generateControllerString(
-          'ApiV1HealthUsersController',
-          '/api/v1/health/users',
-          'Health/User',
-          ['create', 'index', 'show', 'update', 'destroy', 'login'],
-          ['id', 'name', 'email', 'password_digest', 'created_at', 'updated_at']
+          'ApiV1HealthPostsController',
+          '/api/v1/health/posts',
+          'Health/Post',
+          ['create', 'index', 'show', 'update', 'destroy', 'preview'],
         )
 
         expect(res).toEqual(
           `\
-import { Params } from '@rvohealth/psychic'
 import AuthedController from '../../../AuthedController'
-import User from '../../../../models/Health/User'
+import Post from '../../../../models/Health/Post'
 
-export default class ApiV1HealthUsersController extends AuthedController {
+export default class ApiV1HealthPostsController extends AuthedController {
   public async create() {
-    //    const user = await User.create(this.userParams)
-    //    this.created(user)
+    //    const post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
+    //    this.created(post)
   }
 
   public async index() {
-    //    const users = await User.all()
-    //    this.ok(users)
+    //    const posts = await this.currentUser.associationQuery('posts').all()
+    //    this.ok(posts)
   }
 
   public async show() {
-    //    const user = await User.find(this.params.id)
-    //    this.ok(user)
+    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    this.ok(post)
   }
 
   public async update() {
-    //    const user = await User.find(this.params.id)
-    //    await user.update(this.userParams)
+    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    await post.update(this.paramsFor(Post))
     //    this.noContent()
   }
 
   public async destroy() {
-    //    const user = await User.find(this.params.id)
-    //    await user.destroy()
+    //    const post = await this.currentUser.associationQuery('posts').find(this.param<string>('id'))
+    //    await post.destroy()
     //    this.noContent()
   }
 
-  public async login() {
-  }
-
-  private get userParams() {
-    return this.paramsFor(User)
+  public async preview() {
   }
 }\
-`
+`,
         )
       })
 
@@ -120,25 +110,19 @@ export default class ApiV1HealthUsersController extends AuthedController {
             'admin/nutrition-log-entries',
             'Nutrition/LogEntry',
             ['create'],
-            ['id', 'calories']
           )
 
           expect(res).toEqual(
             `\
-import { Params } from '@rvohealth/psychic'
 import AdminAuthedController from '../Admin/AuthedController'
 import LogEntry from '../../models/Nutrition/LogEntry'
 
 export default class AdminNutritionLogEntriesController extends AdminAuthedController {
   public async create() {
-    //    const logEntry = await LogEntry.create(this.logEntryParams)
+    //    const logEntry = await this.currentUser.createAssociation('logEntries', this.paramsFor(LogEntry))
     //    this.created(logEntry)
   }
-
-  private get logEntryParams() {
-    return this.paramsFor(LogEntry)
-  }
-}`
+}`,
           )
         })
       })
@@ -150,7 +134,6 @@ export default class AdminNutritionLogEntriesController extends AdminAuthedContr
 
         expect(res).toEqual(
           `\
-import { Params } from '@rvohealth/psychic'
 import AuthedController from '../../AuthedController'
 
 export default class ApiV1UsersController extends AuthedController {
@@ -159,7 +142,7 @@ export default class ApiV1UsersController extends AuthedController {
 
   public async world() {
   }
-}`
+}`,
         )
       })
     })
