@@ -71,6 +71,10 @@ export function applyResourceAction(
 ) {
   const controllerName = options?.controller || pascalize(path)
   switch (action) {
+    case 'create':
+      routingMechanism.post(path, `${controllerName}#create`)
+      break
+
     case 'update':
       routingMechanism.put(path, `${controllerName}#update`)
       routingMechanism.patch(path, `${controllerName}#update`)

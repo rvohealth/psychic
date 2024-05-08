@@ -3,7 +3,7 @@ export type ResourcesMethodType = 'index' | 'create' | 'update' | 'show' | 'dele
 export type HttpMethod = 'get' | 'post' | 'put' | 'patch' | 'delete' | 'options'
 
 export const ResourcesMethods = ['index', 'create', 'update', 'show', 'delete'] as ResourcesMethodType[]
-export const ResourceMethods = ['update', 'show', 'delete'] as ResourcesMethodType[]
+export const ResourceMethods = ['create', 'update', 'show', 'delete'] as ResourcesMethodType[]
 
 export interface ResourcesOptions {
   only?: ResourcesMethodType[]

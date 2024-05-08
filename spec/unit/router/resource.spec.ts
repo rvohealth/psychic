@@ -33,11 +33,11 @@ describe('PsychicRouter', () => {
       it('renders show, update, and destroy routes for a resource', () => {
         router.resource('users')
         router.commit()
+        expect(server.app.post).toHaveBeenCalledWith('/users', expect.any(Function))
         expect(server.app.get).toHaveBeenCalledWith('/users', expect.any(Function))
         expect(server.app.patch).toHaveBeenCalledWith('/users', expect.any(Function))
         expect(server.app.put).toHaveBeenCalledWith('/users', expect.any(Function))
         expect(server.app.delete).toHaveBeenCalledWith('/users', expect.any(Function))
-        expect(server.app.post).not.toHaveBeenCalled()
       })
 
       context('only is passed', () => {
@@ -57,10 +57,10 @@ describe('PsychicRouter', () => {
           router.resource('users', { except: ['show', 'update'] })
           router.commit()
           expect(server.app.get).not.toHaveBeenCalled()
-          expect(server.app.post).not.toHaveBeenCalled()
           expect(server.app.patch).not.toHaveBeenCalled()
           expect(server.app.put).not.toHaveBeenCalled()
           expect(server.app.delete).toHaveBeenCalledWith('/users', expect.any(Function))
+          expect(server.app.post).toHaveBeenCalledWith('/users', expect.any(Function))
         })
       })
 
