@@ -8,7 +8,7 @@ async function _generateController() {
   await generateController(
     route,
     name,
-    methods.filter(method => !['--core'].includes(method))
+    methods.filter(method => !['--core'].includes(method)),
   )
 }
 
