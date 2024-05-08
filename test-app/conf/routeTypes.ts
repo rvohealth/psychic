@@ -16,6 +16,7 @@
   | '/scoped-things/testing-scopes'
   | '/login'
   | '/users/:id/hello'
+  | '/users/:id/'
   | '/users'
   | '/greeter/hello'
   | '/greeter'
