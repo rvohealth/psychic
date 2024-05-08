@@ -76,7 +76,7 @@ function recursivelyBuildRoutesStr(routesObj: any, str: string, numIterations: n
       agg += `\n${spaces(numIterations)}${key}: ${pathStr},`
     } else {
       agg += `
-${spaces(numIterations)}${camelize(key)}: {`
+${spaces(numIterations)}${camelize(key) || "'/'"}: {`
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       agg = recursivelyBuildRoutesStr(routesObj[key], agg, numIterations + 1)
       agg += `\n${spaces(numIterations)}},`
