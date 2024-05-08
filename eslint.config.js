@@ -12,6 +12,7 @@ const config = typescriptEslint.config(
       'test-app/db/schema.ts',
       'test-app/db/sync.ts',
       'test-app/db/associations.ts',
+      'test-app/client/apiRoutes.ts',
       'test-app/client/schema.ts',
     ],
   },

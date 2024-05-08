@@ -34,6 +34,7 @@ export default (r: PsychicRouter) => {
   r.post('login', 'Users#login')
   r.resources('users', { only: ['create', 'index'] }, r => {
     r.get('hello', 'Users#hello')
+    r.post('', 'Users#doathing')
   })
 
   r.resource('greeter', { only: ['show'] }, r => {
