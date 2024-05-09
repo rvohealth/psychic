@@ -27,7 +27,7 @@ describe('PsychicRouter', () => {
 
   async function waitForSocketResponse(socket: Socket) {
     return new Promise(accept => {
-      socket.on('/ops/connection-succeeded', () => {
+      socket.on('/ops/connection-success', () => {
         socket.emit('/api/v1/authed-ping')
       })
 
@@ -38,7 +38,7 @@ describe('PsychicRouter', () => {
   }
 
   describe('#ws', () => {
-    it.only('can direct ws requests to io listeners', async () => {
+    it('can direct ws requests to io listeners', async () => {
       const token = await getUserToken()
 
       const socket = io(`http://localhost:7111`, {

@@ -1,14 +1,10 @@
 import { Encrypt } from '../../../../src'
 import { BeforeIoAction } from '../../../../src/cable/decorators'
-import PsychicIoListener from '../../../../src/cable/io-listener'
+import PsychicWsController from '../../../../src/cable/ws-controller'
 import User from '../../models/User'
 
-export default class ApplicationIoListener extends PsychicIoListener {
+export default class ApplicationWsController extends PsychicWsController {
   protected currentUser: User | null = null
-
-  public get ioListenerPaths() {
-    return ['/api/v1/authed-ping-response'] as const
-  }
 
   @BeforeIoAction()
   public async authenticate() {

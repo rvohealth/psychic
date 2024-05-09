@@ -1,11 +1,11 @@
-export class IoListenerHook {
-  public ioListenerClassName: string
+export class WsControllerHook {
+  public wsControllerClassName: string
   public methodName: string
   public isStatic: boolean
   public only: string[]
   public except: string[]
   constructor(
-    ioListenerClassName: string,
+    wsControllerClassName: string,
     methodName: string,
     {
       isStatic = false,
@@ -15,9 +15,9 @@ export class IoListenerHook {
       isStatic?: boolean
       only?: string[]
       except?: string[]
-    }
+    },
   ) {
-    this.ioListenerClassName = ioListenerClassName
+    this.wsControllerClassName = wsControllerClassName
     this.methodName = methodName
     this.isStatic = isStatic
     this.only = only

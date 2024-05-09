@@ -1,20 +1,21 @@
-import { IoListenerHook } from './hooks'
-import PsychicIoListener from './io-listener'
+import { WsControllerHook } from './hooks'
+import PsychicWsController from './ws-controller'
 
 export function BeforeIoAction(
   opts: {
     isStatic?: boolean
     only?: string[]
     except?: string[]
-  } = {}
-): (target: PsychicIoListener, methodName: string | symbol) => void {
-  return function (target: PsychicIoListener, methodName: string | symbol): void {
-    const psychicIoListenerClass: typeof PsychicIoListener = target.constructor as typeof PsychicIoListener
-    if (!Object.getOwnPropertyDescriptor(psychicIoListenerClass, 'ioListenerHooks'))
-      psychicIoListenerClass.ioListenerHooks = [...psychicIoListenerClass.ioListenerHooks]
+  } = {},
+): (target: PsychicWsController, methodName: string | symbol) => void {
+  return function (target: PsychicWsController, methodName: string | symbol): void {
+    const psychicWsControllerClass: typeof PsychicWsController =
+      target.constructor as typeof PsychicWsController
+    if (!Object.getOwnPropertyDescriptor(psychicWsControllerClass, 'wsControllerHooks'))
+      psychicWsControllerClass.wsControllerHooks = [...psychicWsControllerClass.wsControllerHooks]
 
-    psychicIoListenerClass.ioListenerHooks.push(
-      new IoListenerHook(psychicIoListenerClass.name, methodName.toString(), opts)
+    psychicWsControllerClass.wsControllerHooks.push(
+      new WsControllerHook(psychicWsControllerClass.name, methodName.toString(), opts),
     )
   }
 }

@@ -7,11 +7,11 @@ import socketio, { Socket } from 'socket.io'
 import log from '../log'
 import { getPsychicHttpInstance } from '../server/helpers/startPsychicServer'
 import PsychicConfig from '../config'
-import PsychicRouter, { IoListenerConfig } from '../router'
+import PsychicRouter, { WsControllerConfig } from '../router'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import importFileWithDefault from '../helpers/importFileWithDefault'
-import { sanitizedIoListenerPath } from '../router/helpers'
-import PsychicIoListener from './io-listener'
+import { sanitizedWsControllerPath } from '../router/helpers'
+import PsychicWsController from './ws-controller'
 
 export default class Cable {
   public app: Application
@@ -24,13 +24,13 @@ export default class Cable {
     this.config = config
   }
 
-  public async ioRoutes(): Promise<IoListenerConfig[]> {
+  public async wsRoutes(): Promise<WsControllerConfig[]> {
     const r = new PsychicRouter(this.app, this.config)
     const routesPath = absoluteSrcPath('conf/routes')
     const routesCB = await importFileWithDefault<(router: PsychicRouter) => Promise<void>>(routesPath)
     await routesCB(r)
 
-    return r.ioListeners
+    return r.wsControllers
   }
 
   public connect() {
@@ -50,7 +50,7 @@ export default class Cable {
     }: {
       withFrontEndClient?: boolean
       frontEndPort?: number
-    } = {}
+    } = {},
   ) {
     this.connect()
 
@@ -58,10 +58,10 @@ export default class Cable {
       await hook(this.io!)
     }
 
-    const ioRoutes = await this.ioRoutes()
+    const wsRoutes = await this.wsRoutes()
 
     this.io!.on('connect', async socket => {
-      for (const route of ioRoutes) {
+      for (const route of wsRoutes) {
         socket.on(route.path, async () => {
           await this.runAction(route, socket)
         })
@@ -111,7 +111,7 @@ export default class Cable {
           log.puts('\n')
           log.puts(colors.cyan('socket server started                                      '))
           log.puts(
-            colors.cyan(`psychic dev server started at port ${colors.bgBlueBright(colors.green(port))}`)
+            colors.cyan(`psychic dev server started at port ${colors.bgBlueBright(colors.green(port))}`),
           )
           if (withFrontEndClient) log.puts(`client server started at port ${colors.cyan(frontEndPort)}`)
           log.puts('\n')
@@ -158,10 +158,10 @@ export default class Cable {
     }
   }
 
-  private async runAction(ioListenerConfig: IoListenerConfig, socket: Socket) {
-    const [listenerPath, action] = ioListenerConfig.listenerActionString.split('#')
+  private async runAction(wsControllerConfig: WsControllerConfig, socket: Socket) {
+    const [listenerPath, action] = wsControllerConfig.listenerActionString.split('#')
 
-    const listenerClass = this.config.ioListeners[sanitizedIoListenerPath(listenerPath)]
+    const listenerClass = this.config.wsControllers[sanitizedWsControllerPath(listenerPath)]
     if (!listenerClass) {
       // TODO: handle err
       // res.status(501).send(`
@@ -171,9 +171,9 @@ export default class Cable {
       return
     }
 
-    const ioListener = this._initializeIoListener(listenerClass, socket)
+    const wsController = this._initializeWsController(listenerClass, socket)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    const listenerAction = (ioListener as any)[action]
+    const listenerAction = (wsController as any)[action]
 
     if (!listenerAction) {
       // TODO: handle err
@@ -185,14 +185,14 @@ export default class Cable {
     }
 
     try {
-      await ioListener.runAction(action)
+      await wsController.runAction(action)
     } catch (error) {
       // noop
     }
   }
 
-  private _initializeIoListener(ioListenerClass: typeof PsychicIoListener, socket: Socket) {
-    return new ioListenerClass(socket, {
+  private _initializeWsController(wsControllerClass: typeof PsychicWsController, socket: Socket) {
+    return new wsControllerClass(socket, {
       config: this.config,
     })
   }

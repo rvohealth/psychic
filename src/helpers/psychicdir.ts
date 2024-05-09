@@ -4,12 +4,12 @@ import path from 'path'
 import PsychicController from '../controller'
 import absoluteSrcPath from './absoluteSrcPath'
 import importFileWithDefault from './importFileWithDefault'
-import PsychicIoListener from '../cable/io-listener'
+import PsychicWsController from '../cable/ws-controller'
 
 let _models: { [key: string]: typeof Dream }
 let _controllers: { [key: string]: typeof PsychicController }
 let _serializers: { [key: string]: typeof DreamSerializer }
-let _ioListeners: { [key: string]: typeof PsychicIoListener }
+let _wsControllers: { [key: string]: typeof PsychicWsController }
 export default class PsychicDir {
   public static async models() {
     if (_models) return _models
@@ -35,7 +35,7 @@ export default class PsychicDir {
   public static async loadControllers() {
     _controllers = {}
     const controllerPaths = (await getFiles(absoluteSrcPath('app/controllers'))).filter(path =>
-      process.env.TS_SAFE === '1' ? /\.ts$/.test(path) : /\.js$/.test(path)
+      process.env.TS_SAFE === '1' ? /\.ts$/.test(path) : /\.js$/.test(path),
     )
     for (const controllerPath of controllerPaths) {
       const ControllerClass = await importFileWithDefault<typeof PsychicController>(controllerPath)
@@ -53,7 +53,7 @@ export default class PsychicDir {
   public static async loadSerializers() {
     _serializers = {}
     const serializerPaths = (await getFiles(absoluteSrcPath('app/serializers'))).filter(path =>
-      /\.[jt]s$/.test(path)
+      /\.[jt]s$/.test(path),
     )
     for (const serializerPath of serializerPaths) {
       const serializerClass = await importFileWithDefault<typeof DreamSerializer>(serializerPath)
@@ -63,23 +63,23 @@ export default class PsychicDir {
     return _serializers
   }
 
-  public static async ioListeners() {
-    if (_ioListeners) return _ioListeners
-    return await this.loadIoListeners()
+  public static async wsControllers() {
+    if (_wsControllers) return _wsControllers
+    return await this.loadWsControllers()
   }
 
-  public static async loadIoListeners() {
-    _ioListeners = {}
-    const listenerPaths = (await getFiles(absoluteSrcPath('app/io/listeners'))).filter(path =>
-      process.env.TS_SAFE === '1' ? /\.ts$/.test(path) : /\.js$/.test(path)
+  public static async loadWsControllers() {
+    _wsControllers = {}
+    const listenerPaths = (await getFiles(absoluteSrcPath('app/controllers/ws'))).filter(path =>
+      process.env.TS_SAFE === '1' ? /\.ts$/.test(path) : /\.js$/.test(path),
     )
 
     for (const listenerPath of listenerPaths) {
-      const ioListenerClass = await importFileWithDefault<typeof PsychicIoListener>(listenerPath)
-      const ioListenerKey = listenerPath.replace(/^.*app\/io\/listeners\//, '').replace(/\.[jt]s$/, '')
-      _ioListeners[ioListenerKey] = ioListenerClass
+      const wsControllerClass = await importFileWithDefault<typeof PsychicWsController>(listenerPath)
+      const wsControllerKey = listenerPath.replace(/^.*app\/controllers\/ws\//, '').replace(/\.[jt]s$/, '')
+      _wsControllers[wsControllerKey] = wsControllerClass
     }
-    return _ioListeners
+    return _wsControllers
   }
 }
 
@@ -94,7 +94,7 @@ async function getFiles(dir: string): Promise<string[]> {
     dirents.map(dirent => {
       const res = path.resolve(dir, dirent.name)
       return dirent.isDirectory() ? getFiles(res) : res
-    })
+    }),
   )
   return Array.prototype.concat(...files) as string[]
 }

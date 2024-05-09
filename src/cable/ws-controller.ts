@@ -1,30 +1,19 @@
 import { Socket } from 'socket.io'
 import PsychicConfig from '../config'
-import { IoListenerHook } from './hooks'
-import { Dream, IdType } from '@rvohealth/dream'
-import Ws from './ws'
+import { WsControllerHook } from './hooks'
 
-export default class PsychicIoListener {
-  public static ioListenerHooks: IoListenerHook[] = []
+export default class PsychicWsController {
+  public static wsControllerHooks: WsControllerHook[] = []
 
   private config: PsychicConfig
 
-  public get ioListenerPaths(): readonly string[] {
-    throw new Error('Define ioListenerPaths in child class')
-  }
-
-  public async emit<I extends PsychicIoListener, P extends I['ioListenerPaths'][number]>(
-    this: I,
-    idOrDream: IdType | Dream,
-    path: Record<P, P>[P],
-    data: unknown
-  ) {
-    await new Ws(this.ioListenerPaths).emit(idOrDream, path as (typeof this.ioListenerPaths)[number], data)
+  public get wsControllerPaths(): readonly string[] {
+    throw new Error('Define wsControllerPaths in child class')
   }
 
   constructor(
     protected socket: Socket,
-    { config }: { config: PsychicConfig }
+    { config }: { config: PsychicConfig },
   ) {
     this.config = config
   }
@@ -37,8 +26,8 @@ export default class PsychicIoListener {
   }
 
   private async runBeforeActionsFor(action: string) {
-    const beforeActions = (this.constructor as typeof PsychicIoListener).ioListenerHooks.filter(hook =>
-      hook.shouldFireForAction(action)
+    const beforeActions = (this.constructor as typeof PsychicWsController).wsControllerHooks.filter(hook =>
+      hook.shouldFireForAction(action),
     )
 
     for (const hook of beforeActions) {
