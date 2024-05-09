@@ -9,7 +9,7 @@ import { BeforeAction } from '../../../src/controller/decorators'
 import Pet from '../../../test-app/app/models/Pet'
 import UserSerializer, {
   UserExtraSerializer,
-  UserIndexSerializer,
+  UserSummarySerializer,
 } from '../../../test-app/app/serializers/UserSerializer'
 
 describe('PsychicController', () => {
@@ -53,7 +53,7 @@ describe('PsychicController', () => {
       it('identifies serializer attached to model class and uses it to serialize', async () => {
         class MyController extends PsychicController {
           public async index() {
-            this.ok([...(await User.all()), ...(await Pet.all())], { serializer: 'index' })
+            this.ok([...(await User.all()), ...(await Pet.all())], { serializer: 'summary' })
           }
 
           public async show() {
@@ -159,7 +159,7 @@ describe('PsychicController', () => {
         public get serializers() {
           return {
             default: User2Serializer,
-            index: User2IndexSerializer,
+            summary: User2SummarySerializer,
             extra: User2ExtraSerializer,
           }
         }
@@ -173,7 +173,7 @@ describe('PsychicController', () => {
         }
       }
 
-      class User2IndexSerializer extends UserIndexSerializer {
+      class User2SummarySerializer extends UserSummarySerializer {
         @Attribute()
         public howyadoin() {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return

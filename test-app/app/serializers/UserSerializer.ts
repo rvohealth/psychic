@@ -1,11 +1,11 @@
 import { DreamSerializer, Attribute } from '@rvohealth/dream'
 
-export class UserIndexSerializer extends DreamSerializer {
+export class UserSummarySerializer extends DreamSerializer {
   @Attribute('string')
   public id: string
 }
 
-export default class UserSerializer extends UserIndexSerializer {
+export default class UserSerializer extends UserSummarySerializer {
   @Attribute('string')
   public email: string
 
@@ -13,7 +13,7 @@ export default class UserSerializer extends UserIndexSerializer {
   public name: string
 }
 
-export class UserExtraSerializer extends UserIndexSerializer {
+export class UserExtraSerializer extends UserSummarySerializer {
   @Attribute('string[]')
   public nicknames: string[]
 }

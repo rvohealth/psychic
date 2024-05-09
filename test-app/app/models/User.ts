@@ -1,7 +1,7 @@
 import { BeforeCreate, BeforeUpdate, Validates, Virtual, HasMany, DreamColumn } from '@rvohealth/dream'
 import Hash from '../../../src/encryption/hash'
 import Pet from './Pet'
-import UserSerializer, { UserExtraSerializer, UserIndexSerializer } from '../serializers/UserSerializer'
+import UserSerializer, { UserExtraSerializer, UserSummarySerializer } from '../serializers/UserSerializer'
 import ApplicationModel from './ApplicationModel'
 export default class User extends ApplicationModel {
   public get table() {
@@ -11,7 +11,7 @@ export default class User extends ApplicationModel {
   public get serializers() {
     return {
       default: UserSerializer,
-      index: UserIndexSerializer,
+      summary: UserSummarySerializer,
       extra: UserExtraSerializer,
     }
   }
