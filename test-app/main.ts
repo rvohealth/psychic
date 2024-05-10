@@ -1,8 +1,16 @@
-import env from '../src/env'
+import './conf/global'
 import PsychicServer from '../src/server'
 
-env.load()
+async function start() {
+  const server = new PsychicServer()
+  await server.start()
 
-const server = new PsychicServer()
+  process.on('SIGINT', () => {
+    server
+      .stop()
+      .then(() => {})
+      .catch(() => {})
+  })
+}
 
-void server.start()
+void start()

@@ -1,16 +1,12 @@
-import supertest from 'supertest'
 import PsychicServer from '../../../src/server'
 import PsychicRouter from '../../../src/router'
+import { send } from '../../../spec-helpers'
 
 describe('PsychicRouter', () => {
   describe('resource', () => {
     describe('extra actions', () => {
       it('are directed to the same controller', async () => {
-        const server = new PsychicServer()
-        await server.boot()
-
-        const res = await supertest(server.app).get('/greeter/hello').expect(200)
-
+        const res = await send.get('/greeter/hello', 200)
         expect(res.body).toEqual('goodbye')
       })
     })

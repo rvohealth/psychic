@@ -1,8 +1,7 @@
-import env from '../src/env'
+import './conf/global'
 import PsychicServer from '../src/server'
 
-env.load()
+process.env.NODE_ENV = 'test'
 
 const server = new PsychicServer()
-
-void server.start(parseInt(process.env.DEV_SERVER_PORT || '7778'))
+void server.start(parseInt(process.env.DEV_SERVER_PORT || '7770'))

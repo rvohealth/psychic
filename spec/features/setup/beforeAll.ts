@@ -1,11 +1,10 @@
 import '../../../src/helpers/loadEnv'
-// import devServer from 'jest-dev-server'
+// import { setup as setupDevServer } from 'jest-dev-server'
 
 export default async function () {
-  // await devServer.setup({
+  // ;(globalThis as any).servers = await setupDevServer({
   //   command: 'yarn spec-server',
-  //   launchTimeout: 10000,
-  //   debug: process.env.DEBUG === '1',
-  //   port: 7778,
+  //   launchTimeout: 50000,
+  //   port: 7770,
   // })
 }

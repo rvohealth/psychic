@@ -1,11 +1,12 @@
 import request from 'supertest'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
-const server = new PsychicServer()
+import { createPsychicServer } from '../../../spec-helpers'
 
 describe('a visitor attempts to save a record', () => {
+  let server: PsychicServer
   beforeAll(async () => {
-    await server.boot()
+    server = await createPsychicServer()
   })
 
   it('returns 201', async () => {

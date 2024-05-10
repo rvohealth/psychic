@@ -1,8 +1,8 @@
 import PsychicServer from '../../../src/server'
-import request from 'supertest'
 import { io } from 'socket.io-client'
 import User from '../../../test-app/app/models/User'
 import { Socket } from 'socket.io'
+import { send } from '../../../spec-helpers'
 const server = new PsychicServer()
 
 describe('user attempts to connect to websockets', () => {
@@ -13,14 +13,7 @@ describe('user attempts to connect to websockets', () => {
 
   async function getUserToken() {
     await User.create({ email: 'how@yadoin', password: 'howyadoin' })
-    const res = await request
-      .agent(server.app)
-      .post('/login')
-      .send({
-        email: 'how@yadoin',
-        password: 'howyadoin',
-      })
-      .expect(200)
+    const res = await send.post('/login', 200, { data: { email: 'how@yadoin', password: 'howyadoin' } })
     return res.body as string
   }
 

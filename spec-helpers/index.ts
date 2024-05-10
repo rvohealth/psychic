@@ -1,5 +1,7 @@
 import '@rvohealth/dream/spec-helpers'
 import background from '../src/background'
+import PsychicServer from '../src/server'
+import _send from './send'
 
 // Example usage:
 //   const bgComplete = backgroundJobCompletionPromise()
@@ -17,3 +19,14 @@ export async function backgroundJobCompletionPromise() {
     })
   })
 }
+
+const _server: PsychicServer | undefined = undefined
+export async function createPsychicServer() {
+  if (_server) return _server
+
+  const server = new PsychicServer()
+  await server.boot()
+  return server
+}
+
+export const send = _send
