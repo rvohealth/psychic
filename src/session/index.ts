@@ -12,7 +12,8 @@ export default class Session {
   public cookie(name: string, data?: string) {
     if (data) return this.setCookie(name, data)
     const cookies = this.req.cookies as Record<string, string>
-    return cookies[name]
+    const value = cookies[name]
+    if (value) return Encrypt.decode(value)
   }
 
   private setCookie(name: string, data: string) {

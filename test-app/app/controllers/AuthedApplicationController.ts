@@ -1,12 +1,19 @@
-import { BeforeAction } from '../../../src'
+import { BeforeAction, Encrypt } from '../../../src'
 import PsychicController from '../../../src/controller'
 import User from '../models/User'
 
 export default class AuthedApplicationController extends PsychicController {
-  public user: User
+  protected currentUser: User
 
   @BeforeAction()
-  public authenticate() {
-    if (!this.user) this.unauthorized()
+  public async authenticate() {
+    const cookie = this.cookie('auth_token')
+    if (!cookie) return this.unauthorized()
+
+    const userId = Encrypt.decode(cookie)
+    const user = await User.find(userId)
+    if (!user) return this.unauthorized()
+
+    this.currentUser = user!
   }
 }
