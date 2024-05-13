@@ -262,11 +262,7 @@ export default class Params {
     T extends typeof Params,
     const EnumType extends readonly string[],
     OptsValue extends undefined | { allowNull?: boolean; match?: RegExp },
-    OptsType extends {
-      allowNull?: boolean
-      match?: RegExp
-      enum?: EnumType
-    },
+    OptsType extends ParamsCastOptions<EnumType>,
     ExpectedType extends
       | (typeof PsychicParamsPrimitiveLiterals)[number]
       | (typeof PsychicParamsPrimitiveLiterals)[number][]
@@ -298,11 +294,7 @@ export default class Params {
 
   public cast<
     EnumType extends readonly string[],
-    OptsType extends {
-      allowNull?: boolean
-      match?: RegExp
-      enum?: EnumType
-    },
+    OptsType extends ParamsCastOptions<EnumType>,
     OptsValue extends undefined | { allowNull?: boolean; match?: RegExp },
     ExpectedType extends
       | (typeof PsychicParamsPrimitiveLiterals)[number]
@@ -611,3 +603,9 @@ type ValidatedAllowsNull<ExpectedType, OptsValue> = ExpectedType extends { allow
         ? false
         : never
     : false
+
+export type ParamsCastOptions<EnumType> = {
+  allowNull?: boolean
+  match?: RegExp
+  enum?: EnumType
+}

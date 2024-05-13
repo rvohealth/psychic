@@ -15,7 +15,7 @@ import ServiceUnavailable from '../error/http/service-unavailable'
 import HttpStatusCodeMap, { HttpStatusSymbol } from '../error/http/status-codes'
 import { ControllerHook } from '../controller/hooks'
 import Conflict from '../error/http/conflict'
-import Params from '../server/params'
+import Params, { ParamsCastOptions } from '../server/params'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -134,18 +134,14 @@ export default class PsychicController {
 
   public castParam<
     const EnumType extends readonly string[],
-    OptsType extends {
-      allowNull?: boolean
-      match?: RegExp
-      enum?: EnumType
-    },
+    OptsType extends ParamsCastOptions<EnumType>,
     ExpectedType extends
       | (typeof PsychicParamsPrimitiveLiterals)[number]
       | (typeof PsychicParamsPrimitiveLiterals)[number][]
       | RegExp
       | OptsType,
-  >(key: string, expectedType: ExpectedType) {
-    return Params.cast(this.param<string>(key), expectedType)
+  >(key: string, expectedType: ExpectedType, opts?: OptsType) {
+    return Params.cast(this.param<string>(key), expectedType, opts)
   }
 
   public paramsFor<DreamClass extends typeof Dream>(dreamClass: DreamClass, key?: string) {
