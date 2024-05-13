@@ -122,7 +122,9 @@ export default class Params {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params[columnName as keyof typeof params],
               'string[]',
-              { allowNull: columnMetadata.allowNull },
+              {
+                allowNull: columnMetadata.allowNull,
+              },
             )
             break
 
@@ -193,9 +195,12 @@ export default class Params {
                     p,
 
                     // casting to allow enum handling at lower level
-                    columnMetadata.dbType as (typeof PsychicParamsPrimitiveLiterals)[number],
+                    'string',
 
-                    { allowNull: columnMetadata.allowNull, enum: columnMetadata.enumValues },
+                    {
+                      allowNull: columnMetadata.allowNull,
+                      enum: columnMetadata.enumValues as readonly string[],
+                    },
                   ),
                 )
               } else {
@@ -203,9 +208,13 @@ export default class Params {
                   paramValue,
 
                   // casting to allow enum handling at lower level
-                  columnMetadata.dbType as (typeof PsychicParamsPrimitiveLiterals)[number],
+                  'string',
+                  // columnMetadata.dbType as (typeof PsychicParamsPrimitiveLiterals)[number],
 
-                  { allowNull: columnMetadata.allowNull, enum: columnMetadata.enumValues },
+                  {
+                    allowNull: columnMetadata.allowNull,
+                    enum: columnMetadata.enumValues as readonly string[],
+                  },
                 )
               }
             }
@@ -255,27 +264,27 @@ export default class Params {
    * Params.cast(this.params.amounts, 'integer[]')
    *
    * // raise error if not 'chalupas' or 'other'
-   * Params.cast(this.params.stuff, { enum: ['chalupas', 'other'] })
+   * Params.cast(this.params.stuff, 'string', { enum: ['chalupas', 'other'] })
    * ```
    */
   public static cast<
     T extends typeof Params,
     const EnumType extends readonly string[],
-    OptsValue extends undefined | { allowNull?: boolean; match?: RegExp },
     OptsType extends ParamsCastOptions<EnumType>,
     ExpectedType extends
       | (typeof PsychicParamsPrimitiveLiterals)[number]
       | (typeof PsychicParamsPrimitiveLiterals)[number][]
-      | RegExp
-      | OptsType,
-    ReturnType extends ValidatedReturnType<ExpectedType>,
-    AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsValue>,
-    FinalReturnType extends AllowNullOrUndefined extends true ? ReturnType | null | undefined : ReturnType,
+      | RegExp,
+    ValidatedType extends ValidatedReturnType<ExpectedType>,
+    AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
+    FinalReturnType extends AllowNullOrUndefined extends true
+      ? ValidatedType | null | undefined
+      : ValidatedType,
   >(
     this: T,
     param: PsychicParamsPrimitive | PsychicParamsPrimitive[],
     expectedType: ExpectedType,
-    opts?: OptsValue,
+    opts?: OptsType,
   ): FinalReturnType {
     return new this().cast(param, expectedType, opts) as FinalReturnType
   }
@@ -295,38 +304,35 @@ export default class Params {
   public cast<
     EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
-    OptsValue extends undefined | { allowNull?: boolean; match?: RegExp },
     ExpectedType extends
       | (typeof PsychicParamsPrimitiveLiterals)[number]
       | (typeof PsychicParamsPrimitiveLiterals)[number][]
-      | RegExp
-      | OptsType,
-    ReturnType extends ValidatedReturnType<ExpectedType>,
-    AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsValue>,
+      | RegExp,
+    ValidatedType extends ValidatedReturnType<ExpectedType>,
+    AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
+    ReturnType extends AllowNullOrUndefined extends true ? ValidatedType | null | undefined : ValidatedType,
   >(
     paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
     expectedType: ExpectedType,
-    opts?: OptsValue,
-  ): AllowNullOrUndefined extends true ? ReturnType | null | undefined : ReturnType {
-    const realOpts = this.getOpts(expectedType, opts)
-
+    opts?: OptsType,
+  ): AllowNullOrUndefined extends true ? ValidatedType | null | undefined : ValidatedType {
     if (expectedType instanceof RegExp) {
-      return this.matchRegexOrThrow(paramValue as string, expectedType, realOpts) as ReturnType
+      return this.matchRegexOrThrow(paramValue as string, expectedType, opts) as ReturnType
     }
 
     let errorMessage: string
     let baseType: (typeof PsychicParamsPrimitiveLiterals)[number]
     let dateClass: typeof DateTime | typeof CalendarDate
 
-    switch (
-      expectedType as
-        | (typeof PsychicParamsPrimitiveLiterals)[number]
-        | (typeof PsychicParamsPrimitiveLiterals)[number][]
-    ) {
+    switch (expectedType) {
       case 'string':
-        if (typeof paramValue !== 'string') this.throwUnlessNull(paramValue, 'expected string', realOpts)
-        if (realOpts.match) {
-          return this.matchRegexOrThrow(paramValue as string, realOpts.match, realOpts) as ReturnType
+        if (typeof paramValue !== 'string') this.throwUnlessNull(paramValue, 'expected string', opts)
+
+        if (opts?.enum && !opts.enum.includes(paramValue as string))
+          this.throwUnlessNull(paramValue, 'did not match expected enum values')
+
+        if (opts?.match) {
+          return this.matchRegexOrThrow(paramValue as string, opts.match, opts) as ReturnType
         } else {
           return paramValue as ReturnType
         }
@@ -336,7 +342,7 @@ export default class Params {
           !Number.isInteger(parseInt(paramValue as string)) ||
           `${parseInt(paramValue as string)}` !== `${paramValue as string}`
         )
-          this.throwUnlessNull(paramValue, 'expected bigint', realOpts)
+          this.throwUnlessNull(paramValue, 'expected bigint', opts)
         return (paramValue ? `${paramValue as number}` : null) as ReturnType
 
       case 'boolean':
@@ -344,7 +350,7 @@ export default class Params {
         if (paramValue === 'false') return false as ReturnType
         if ([1, '1'].includes(paramValue as string)) return true as ReturnType
         if ([0, '0'].includes(paramValue as string)) return false as ReturnType
-        if (typeof paramValue !== 'boolean') this.throwUnlessNull(paramValue, 'expected boolean', realOpts)
+        if (typeof paramValue !== 'boolean') this.throwUnlessNull(paramValue, 'expected boolean', opts)
         return paramValue as ReturnType
 
       case 'datetime':
@@ -374,7 +380,7 @@ export default class Params {
           if (dateTime.isValid) return dateTime as ReturnType
           throw new ParamValidationError(errorMessage)
         } else {
-          if (paramValue === null && realOpts.allowNull) {
+          if (paramValue === null && opts?.allowNull) {
             return null as ReturnType
           }
           throw new ParamValidationError(errorMessage)
@@ -384,24 +390,24 @@ export default class Params {
         errorMessage = 'expected integer or string integer'
         if (Number.isInteger(paramValue)) return parseInt(paramValue as string) as ReturnType
         if (Number.isNaN(parseInt(paramValue as string, 10)))
-          this.throwUnlessNull(paramValue, errorMessage, realOpts)
+          this.throwUnlessNull(paramValue, errorMessage, opts)
         if (`${parseInt(paramValue as string, 10)}` !== `${paramValue as string}`)
-          this.throwUnlessNull(paramValue, errorMessage, realOpts)
+          this.throwUnlessNull(paramValue, errorMessage, opts)
         return (paramValue === null ? null : parseInt(paramValue as string, 10)) as ReturnType
 
       case 'json':
         errorMessage = 'expected an object'
         if (typeof paramValue !== 'object') throw new ParamValidationError(errorMessage)
-        if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, realOpts)
+        if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, opts)
         return (paramValue === null ? null : paramValue) as ReturnType
 
       case 'number':
         errorMessage = 'expected number or string number'
         if (typeof paramValue === 'number') return paramValue as ReturnType
         if (`${parseFloat(paramValue as string)}` !== `${paramValue as string}`)
-          this.throwUnlessNull(paramValue, errorMessage, realOpts)
+          this.throwUnlessNull(paramValue, errorMessage, opts)
         if (Number.isNaN(parseFloat(paramValue as string)))
-          this.throwUnlessNull(paramValue, errorMessage, realOpts)
+          this.throwUnlessNull(paramValue, errorMessage, opts)
         if (paramValue === null) return null as ReturnType
         if (['number', 'string'].includes(typeof paramValue)) {
           return parseFloat((paramValue as unknown as number).toString()) as ReturnType
@@ -414,7 +420,7 @@ export default class Params {
 
       case 'uuid':
         errorMessage = 'expected uuid'
-        if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, realOpts)
+        if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, opts)
         if (paramValue !== null && !isUuid(paramValue)) throw new ParamValidationError(errorMessage)
         return paramValue as ReturnType
 
@@ -432,7 +438,7 @@ export default class Params {
           '',
         ) as (typeof PsychicParamsPrimitiveLiterals)[number]
         errorMessage = `expected ${baseType}[]`
-        if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, realOpts)
+        if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, opts)
         if (paramValue !== null && !Array.isArray(paramValue)) throw new ParamValidationError(errorMessage)
         return (
           // casting as string[] here because this will actually cause
@@ -444,23 +450,17 @@ export default class Params {
 
       case 'null[]':
         errorMessage = 'expected null array'
-        if (!Array.isArray(paramValue)) this.throwUnlessNull(paramValue, errorMessage, realOpts)
+        if (!Array.isArray(paramValue)) this.throwUnlessNull(paramValue, errorMessage, opts)
         if ((paramValue as number[]).length === 0) return [] as ReturnType
         if ((paramValue as number[]).filter(v => v !== null).length > 0)
-          this.throwUnlessNull(paramValue, errorMessage, realOpts)
+          this.throwUnlessNull(paramValue, errorMessage, opts)
         return paramValue as ReturnType
 
       default:
-        if (realOpts.enum?.length) {
-          if (realOpts.enum.includes(paramValue as string)) return paramValue as ReturnType
-          this.throwUnlessNull(paramValue, 'did not match expected enum values')
-          return paramValue as ReturnType
-        } else {
-          // TODO: serialize/sanitize before printing, handle array types
-          throw new Error(
-            `Unexpected point reached in code. need to handle type for ${expectedType as string}`,
-          )
-        }
+        // TODO: serialize/sanitize before printing, handle array types
+        throw new Error(
+          `Unexpected point reached in code. need to handle type for ${expectedType as unknown as string}`,
+        )
     }
   }
 
@@ -499,10 +499,7 @@ export default class Params {
   private matchRegexOrThrow(
     paramValue: string,
     expectedType: RegExp,
-    opts: {
-      allowNull?: boolean
-      match?: RegExp
-    },
+    opts?: ParamsCastOptions<readonly string[]>,
   ): string | null {
     const errorMessage = 'did not match expected pattern'
     if (typeof paramValue !== 'string') this.throwUnlessNull(paramValue, errorMessage)
@@ -515,7 +512,7 @@ export default class Params {
   private throwUnlessNull(
     paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
     message: string,
-    { allowNull = false }: { allowNull?: boolean } = {},
+    { allowNull = false }: ParamsCastOptions<readonly string[]> = {},
   ) {
     const isNullOrUndefined = [null, undefined].includes(paramValue as null | undefined)
     if (allowNull && isNullOrUndefined) return
@@ -524,25 +521,6 @@ export default class Params {
 
   private throw(message: string) {
     throw new ParamValidationError(message)
-  }
-
-  private getOpts<
-    EnumType extends readonly string[],
-    Opts extends {
-      allowNull?: boolean
-      match?: RegExp
-      enum?: EnumType
-    },
-  >(
-    expectedType:
-      | (typeof PsychicParamsPrimitiveLiterals)[number]
-      | (typeof PsychicParamsPrimitiveLiterals)[number][]
-      | RegExp
-      | Opts,
-    opts?: Opts,
-  ): Opts {
-    if (typeof expectedType === 'string') return opts ?? ({ allowNull: false } as Opts)
-    return expectedType as Opts
   }
 }
 
