@@ -57,7 +57,7 @@ export function applyResourcesAction(
       routingMechanism.get(`${path}/:id`, `${controllerName}#show`)
       break
 
-    case 'delete':
+    case 'destroy':
       routingMechanism.delete(`${path}/:id`, `${controllerName}#destroy`)
       break
   }
@@ -84,7 +84,7 @@ export function applyResourceAction(
       routingMechanism.get(path, `${controllerName}#show`)
       break
 
-    case 'delete':
+    case 'destroy':
       routingMechanism.delete(path, `${controllerName}#destroy`)
       break
 

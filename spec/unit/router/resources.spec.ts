@@ -41,25 +41,25 @@ describe('PsychicRouter', () => {
 
       context('only is passed', () => {
         it('does not call methods that were omitted with only', () => {
-          router.resources('users', { only: ['create'] })
+          router.resources('users', { only: ['create', 'destroy'] })
           router.commit()
           expect(server.app.post).toHaveBeenCalledWith('/users', expect.any(Function))
+          expect(server.app.delete).toHaveBeenCalledWith('/users/:id', expect.any(Function))
           expect(server.app.get).not.toHaveBeenCalled()
           expect(server.app.patch).not.toHaveBeenCalled()
           expect(server.app.put).not.toHaveBeenCalled()
-          expect(server.app.delete).not.toHaveBeenCalled()
         })
       })
 
       context('except is passed', () => {
         it('does not call methods that were omitted with except', () => {
-          router.resources('users', { except: ['index', 'show', 'create', 'update'] })
+          router.resources('users', { except: ['index', 'show', 'create', 'update', 'destroy'] })
           router.commit()
           expect(server.app.get).not.toHaveBeenCalled()
           expect(server.app.post).not.toHaveBeenCalled()
           expect(server.app.patch).not.toHaveBeenCalled()
           expect(server.app.put).not.toHaveBeenCalled()
-          expect(server.app.delete).toHaveBeenCalledWith('/users/:id', expect.any(Function))
+          expect(server.app.delete).not.toHaveBeenCalled()
         })
       })
 
@@ -73,7 +73,7 @@ describe('PsychicRouter', () => {
 
       context('with nested resources', () => {
         it('successfully applies nested routes', () => {
-          router.resources('users', { except: ['index', 'show', 'create', 'update'] }, r => {
+          router.resources('users', { except: ['index', 'show', 'create', 'update', 'destroy'] }, r => {
             r.get('hello', 'Users#hello')
           })
           router.commit()
@@ -81,7 +81,7 @@ describe('PsychicRouter', () => {
         })
 
         it('successfully applies nested resources', () => {
-          router.resources('users', { except: ['index', 'show', 'create', 'update'] }, r => {
+          router.resources('users', { except: ['index', 'show', 'create', 'update', 'destroy'] }, r => {
             r.resources('friends', {}, r => {
               r.get('count', 'Friends#count')
             })
@@ -97,11 +97,15 @@ describe('PsychicRouter', () => {
 
       context('with nested resource', () => {
         it('successfully applies nested resource', () => {
-          router.resources('user-settings', { except: ['index', 'show', 'create', 'update'] }, r => {
-            r.resource('friend', {}, r => {
-              r.get('count', 'Friend#count')
-            })
-          })
+          router.resources(
+            'user-settings',
+            { except: ['index', 'show', 'create', 'update', 'destroy'] },
+            r => {
+              r.resource('friend', {}, r => {
+                r.get('count', 'Friend#count')
+              })
+            },
+          )
           router.commit()
 
           expect(server.app.get).toHaveBeenCalledWith(
