@@ -889,13 +889,15 @@ describe('Params', () => {
         context('enum', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast('hello', { enum: ['hello', 'world'] })).toEqual('hello')
+              expect(Params.cast('hello', 'string', { enum: ['hello', 'world'] })).toEqual('hello')
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast('birld', { enum: ['hello', 'world'] })).toThrow(ParamValidationError)
+              expect(() => Params.cast('birld', 'string', { enum: ['hello', 'world'] })).toThrow(
+                ParamValidationError,
+              )
             })
           })
         })

@@ -138,8 +138,7 @@ export default class PsychicController {
     ExpectedType extends
       | (typeof PsychicParamsPrimitiveLiterals)[number]
       | (typeof PsychicParamsPrimitiveLiterals)[number][]
-      | RegExp
-      | OptsType,
+      | RegExp,
   >(key: string, expectedType: ExpectedType, opts?: OptsType) {
     return Params.cast(this.param<string>(key), expectedType, opts)
   }
