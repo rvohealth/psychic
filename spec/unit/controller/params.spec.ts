@@ -31,8 +31,9 @@ describe('PsychicController', () => {
     })
 
     it('returns the result of Params.cast', () => {
-      jest.spyOn(Params, 'cast').mockReturnValue('chalupas dujour')
-      expect(controller.castParam('name', 'string')).toEqual('chalupas dujour')
+      const spy = jest.spyOn(Params, 'cast').mockReturnValue('chalupas dujour')
+      expect(controller.castParam('name', 'string', { allowNull: true })).toEqual('chalupas dujour')
+      expect(spy).toHaveBeenCalledWith('howyadoin', 'string', { allowNull: true })
     })
   })
 
