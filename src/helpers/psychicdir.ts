@@ -70,15 +70,22 @@ export default class PsychicDir {
 
   public static async loadWsControllers() {
     _wsControllers = {}
-    const listenerPaths = (await getFiles(absoluteSrcPath('app/controllers/ws'))).filter(path =>
-      process.env.TS_SAFE === '1' ? /\.ts$/.test(path) : /\.js$/.test(path),
-    )
 
-    for (const listenerPath of listenerPaths) {
-      const wsControllerClass = await importFileWithDefault<typeof PsychicWsController>(listenerPath)
-      const wsControllerKey = listenerPath.replace(/^.*app\/controllers\/ws\//, '').replace(/\.[jt]s$/, '')
-      _wsControllers[wsControllerKey] = wsControllerClass
+    try {
+      const listenerPaths = (await getFiles(absoluteSrcPath('app/controllers/ws'))).filter(path =>
+        process.env.TS_SAFE === '1' ? /\.ts$/.test(path) : /\.js$/.test(path),
+      )
+
+      for (const listenerPath of listenerPaths) {
+        const wsControllerClass = await importFileWithDefault<typeof PsychicWsController>(listenerPath)
+        const wsControllerKey = listenerPath.replace(/^.*app\/controllers\/ws\//, '').replace(/\.[jt]s$/, '')
+        _wsControllers[wsControllerKey] = wsControllerClass
+      }
+    } catch (_) {
+      // if this fails, it is likely because the controllers/ws folder does not exist,
+      // in which case we have no wsControllers to import, so we can safely return a blank object
     }
+
     return _wsControllers
   }
 }
