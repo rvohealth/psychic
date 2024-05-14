@@ -1,6 +1,6 @@
 {
   "name": "@rvohealth/psychic",
-  "version": "0.3.15",
+  "version": "0.3.16",
   "main": "src/index.ts",
   "author": "RVOHealth",
   "repository": "https://github.com/rvohealth/psychic.git",
@@ -12,19 +12,23 @@
     "tsconfig.global-cli.json",
     "tsconfig.json",
     "boot/**/*",
+    "boilerplate/**/*",
+    ".global-cli-dist/**/*",
     "spec-helpers/**/*",
     "src/**/*"
   ],
   "bin": {
-    "psy": "./dist/bin/global-cli/main.js"
+    "psy": "./.global-cli-dist/main.js"
   },
   "scripts": {
     "psy": "yarn psyts",
     "psyjs": "node ./dist/boot/cli.js",
     "psyts": "TS_SAFE=1 npx ts-node -r ./boot/cli/helpers/loadAppEnvFromBoot.ts boot/cli.ts",
     "psycore": "PSYCHIC_CORE_DEVELOPMENT=1 APP_ROOT_PATH=$(pwd)/test-app yarn psyts",
+    "gpsycore": "npx ts-node --transpile-only ./global-cli/main.ts",
     "build:package-json": "DREAM_OMIT_DIST_FOLDER=1 TS_SAFE=1 npx ts-node -r ./src/helpers/loadEnv.ts boot/adapt-package-json.ts",
     "build": "yarn build-boot && yarn psyts build && yarn build:package-json",
+    "build:global-cli": "npx tsc -p ./tsconfig.global-cli.json",
     "build-boot": "echo \"bootstrapping psychic...\" && rm -rf dist && npx tsc -p ./tsconfig.boot.json && yarn build:package-json",
     "build:core": "rm -rf dist && APP_ROOT_PATH=$(pwd)/test-app PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=development yarn --cwd=node_modules/@rvohealth/dream build && echo \"building psychic core...\" && npx tsc -p ./tsconfig.build-core.json",
     "sync": "NODE_ENV=development yarn --cwd=node_modules/@rvohealth/dream build-boot && NODE_ENV=development yarn --cwd=node_modules/@rvohealth/dream build",
@@ -63,6 +67,7 @@
     "commander": "^12.0.0",
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
+    "dotenv": "^16.4.5",
     "jest": "^29.7.0",
     "jsonwebtoken": "^9.0.2",
     "pluralize": "^8.0.0",

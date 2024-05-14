@@ -2,6 +2,7 @@ import pluralize from 'pluralize'
 import fs from 'fs/promises'
 import { pascalize, compact } from '@rvohealth/dream'
 import path from 'path'
+import pascalizeFileName from '../../helpers/pascalizeFileName'
 
 export default async function fileWriter(
   filePath: string,
@@ -22,7 +23,7 @@ export default async function fileWriter(
   const fullyQualifiedNewfileClassName = pluralizeBeforePostfix
     ? `${pluralize(filePath)}${filePostfix}`
     : `${filePath}${filePostfix}`
-  const newfileClassName = pascalize(fullyQualifiedNewfileClassName)
+  const newfileClassName = pascalizeFileName(fullyQualifiedNewfileClassName) + filePostfix
   const filepathRelativeToTypeRoot = fullyQualifiedNewfileClassName
     .split('/')
     .map(str => pascalize(str))

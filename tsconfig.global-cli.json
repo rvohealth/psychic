@@ -4,6 +4,8 @@
     "target": "es2021",
     "strict": true,
     "noImplicitAny": true,
+    "declaration": false,
+    "esModuleInterop": true,
     "experimentalDecorators": true,
     "resolveJsonModule": true,
     "skipLibCheck": true,
@@ -15,9 +17,9 @@
     "useDefineForClassFields": false,
 
     /* rootDir and outDir together help maintain dist/src folder */
-    "rootDir": "./",
-    "outDir": "./dist"
+    "rootDir": "./global-cli",
+    "outDir": "./.global-cli-dist"
   },
   "ignore": [],
-  "include": ["boot/global-cli/**/*", "shared/**/*"]
+  "include": ["global-cli/**/*"]
 }

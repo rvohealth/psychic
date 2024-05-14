@@ -7,3 +7,9 @@ test-app/client/apiRoutes.ts
 test-app/client/schema.ts
 src/config/logo.ts
 .github/
+dist/
+
+# global-cli
+boilerplate/
+spec-boilerplate/
+.global-cli-dist/
