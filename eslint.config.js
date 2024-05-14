@@ -14,6 +14,9 @@ const config = typescriptEslint.config(
       'test-app/db/associations.ts',
       'test-app/client/apiRoutes.ts',
       'test-app/client/schema.ts',
+      'boilerplate/*',
+      'spec-boilerplate/*',
+      '.global-cli-dist/*',
     ],
   },
   {

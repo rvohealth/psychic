@@ -14,7 +14,6 @@ export default async function generateResource(
   args: string[],
 ) {
   const attributesWithTypes = args.filter(attr => !/^--/.test(attr))
-  const columnAttributes = attributesWithTypes.filter(attr => isColumn(attr)).map(attr => attr.split(':')[0])
 
   await sspawn(
     dreamjsOrDreamtsCmd(
@@ -28,12 +27,7 @@ export default async function generateResource(
     process.env.PSYCHIC_CORE_DEVELOPMENT = '1'
   }
 
-  await generateController(
-    route,
-    fullyQualifiedModelName,
-    ['create', 'index', 'show', 'update', 'destroy'],
-    columnAttributes,
-  )
+  await generateController(route, fullyQualifiedModelName, ['create', 'index', 'show', 'update', 'destroy'])
 
   const yamlConf = await readAppConfig()
   if (!yamlConf?.api_only) {
@@ -53,9 +47,4 @@ export default async function generateResource(
     console.log(`generating client api module: ${filepath}`)
   }
   // if (process.env.NODE_ENV !== 'test') process.exit()
-}
-
-function isColumn(attribute: string) {
-  const [, columnType] = attribute.split(':')
-  return !['belongs_to', 'has_one', 'has_many'].includes(columnType)
 }

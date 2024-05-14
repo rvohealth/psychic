@@ -7,7 +7,6 @@ export default async function generateController(
   route: string,
   fullyQualifiedModelName: string,
   methods: string[],
-  attributes: string[] = [],
   {
     rootPath = absoluteFilePath(''),
   }: {
@@ -18,7 +17,6 @@ export default async function generateController(
     route,
     fullyQualifiedModelName,
     methods,
-    attributes,
   ])
 
   await fileWriter(
