@@ -13,7 +13,10 @@ export function apiCall<P extends Path<typeof apiRoutes>, Args extends ApiCallAr
   ...pathArgs: Args extends undefined ? [undefined?] : [Args]
 ) {
   const routeParts = route.split('.')
+  let httpMethod: string | undefined = undefined
+  let i = 0
   const routeConf: any = routeParts.reduce((agg, part) => {
+    if (i++ === routeParts.length - 1) httpMethod = part
     return (agg as any)[part]
   }, apiRoutes)
 
@@ -25,7 +28,7 @@ export function apiCall<P extends Path<typeof apiRoutes>, Args extends ApiCallAr
     send({ body, query }: { body?: any; query?: any } = {}) {
       const path: string = typeof routeConf === 'function' ? routeConf(pathArgs) : routeConf
 
-      switch (routeConf.method) {
+      switch (httpMethod?.toLowerCase()) {
         case 'post':
           return api.post(path, body, { params: query })
 
@@ -42,16 +45,13 @@ export function apiCall<P extends Path<typeof apiRoutes>, Args extends ApiCallAr
           return api.delete(path, { params: query })
 
         default:
-          throw new Error(
-            `Unrecognized http method found when attempting to call to api: ${routeConf.method}`
-          )
+          throw new Error(`Unrecognized http method found when attempting to call to api: ${httpMethod}`)
       }
     },
   }
 }
 
-export type ApiCallArgs<T extends Path<typeof apiRoutes>> = PathValue<typeof apiRoutes, T> extends (
-  ...args: any
-) => any
-  ? Parameters<PathValue<typeof apiRoutes, T>>[0]
-  : undefined
+export type ApiCallArgs<T extends Path<typeof apiRoutes>> =
+  PathValue<typeof apiRoutes, T> extends (...args: any) => any
+    ? Parameters<PathValue<typeof apiRoutes, T>>[0]
+    : undefined

@@ -1,4 +1,4 @@
-import { BeforeAction, Encrypt } from '../../../src'
+import { BeforeAction } from '../../../src'
 import PsychicController from '../../../src/controller'
 import User from '../models/User'
 
@@ -7,10 +7,9 @@ export default class AuthedApplicationController extends PsychicController {
 
   @BeforeAction()
   public async authenticate() {
-    const cookie = this.cookie('auth_token')
-    if (!cookie) return this.unauthorized()
+    const userId = this.cookie('auth_token')
+    if (!userId) return this.unauthorized()
 
-    const userId = Encrypt.decode(cookie)
     const user = await User.find(userId)
     if (!user) return this.unauthorized()
 

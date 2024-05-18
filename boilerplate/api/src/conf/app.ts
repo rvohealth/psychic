@@ -30,8 +30,7 @@ export default (psy: PsychicConfig) => {
   psy.setCorsOptions({
     credentials: true,
     origin: [
-      process.env.CLIENT_HOST ||
-        (process.env.NODE_ENV === 'test' ? 'http://localhost:7778' : 'http://localhost:3000'),
+      process.env.CLIENT_HOST || 'http://localhost:3000'
     ],
   })
 
