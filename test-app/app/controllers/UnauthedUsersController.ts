@@ -1,4 +1,3 @@
-// import { Encrypt } from '../../../src'
 import User from '../models/User'
 import ApplicationController from './ApplicationController'
 
@@ -13,7 +12,7 @@ export default class UnauthedUsersController extends ApplicationController {
     const validPassword = await user.checkPassword(password)
     if (!validPassword) return this.unauthorized()
 
-    this.cookie('auth_token', user.id.toString())
+    this.setCookie('auth_token', user.id.toString())
     this.noContent()
   }
 }

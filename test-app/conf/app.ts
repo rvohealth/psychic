@@ -29,10 +29,14 @@ export default (psy: PsychicConfig) => {
   // set options to pass to coors when middleware is booted
   psy.setCorsOptions({
     credentials: true,
-    origin: [
-      process.env.CLIENT_HOST ||
-        (process.env.NODE_ENV === 'test' ? 'http://localhost:3000' : 'http://localhost:3000'),
-    ],
+    origin: [process.env.CLIENT_HOST || 'http://localhost:3000'],
+  })
+
+  // set options for cookie usage
+  psy.setCookieOptions({
+    maxAge: {
+      days: 4,
+    },
   })
 
   // configuration options for bullmq queue (used for running background jobs in redis)

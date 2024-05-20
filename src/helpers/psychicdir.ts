@@ -35,10 +35,18 @@ export default class PsychicDir {
     const controllerPaths = (await getFiles(absoluteSrcPath('app/controllers'))).filter(path =>
       process.env.TS_SAFE === '1' ? /\.ts$/.test(path) : /\.js$/.test(path),
     )
+
     for (const controllerPath of controllerPaths) {
-      const ControllerClass = await importFileWithDefault<typeof PsychicController>(controllerPath)
-      const controllerKey = controllerPath.replace(/^.*app\/controllers\//, '').replace(/\.[jt]s$/, '')
-      _controllers[controllerKey] = ControllerClass
+      try {
+        const ControllerClass = await importFileWithDefault<typeof PsychicController>(controllerPath)
+        const controllerKey = controllerPath.replace(/^.*app\/controllers\//, '').replace(/\.[jt]s$/, '')
+        _controllers[controllerKey] = ControllerClass
+      } catch (err) {
+        // Adding this console error, since controllers with type errors will just cause
+        // this to fail silently otherwise, preventing the developer from understanding the root cause.
+        console.error('An unknown error occurred while trying to import your controllers: ', err)
+        throw err
+      }
     }
     return _controllers
   }
