@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import Forbidden from '../error/http/forbidden'
 import Unauthorized from '../error/http/unauthorized'
 import UnprocessableEntity from '../error/http/unprocessable-entity'
-import Session from '../session'
+import Session, { CustomSessionCookieOptions } from '../session'
 import NotFound from '../error/http/not-found'
 import PsychicConfig from '../config'
 import getControllerKey from '../config/helpers/getControllerKey'
@@ -115,7 +115,7 @@ export default class PsychicController {
     this.req = req
     this.res = res
     this.config = config
-    this.session = new Session(req, res)
+    this.session = new Session(req, res, this.config)
   }
 
   public get params(): PsychicParamsDictionary {
@@ -147,12 +147,16 @@ export default class PsychicController {
     return Params.for(key ? (this.params[key] as typeof this.params) : this.params, dreamClass)
   }
 
-  public cookie(name: string, data?: string) {
-    return this.session.cookie(name, data)
+  public getCookie(name: string) {
+    return this.session.getCookie(name)
+  }
+
+  public setCookie(name: string, data: string, opts: CustomSessionCookieOptions = {}) {
+    return this.session.setCookie(name, data, opts)
   }
 
   public async startSession(user: Dream) {
-    return this.cookie(
+    return this.setCookie(
       this.config.authSessionKey,
       JSON.stringify({
         id: user.primaryKeyValue,

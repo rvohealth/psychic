@@ -10,6 +10,7 @@ import { CorsOptions } from 'cors'
 import bodyParser from 'body-parser'
 import { QueueOptions } from 'bullmq'
 import { PsychicRedisConnectionOptions } from './helpers/redisOptions'
+import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
 
 export default class PsychicConfig {
   public static async bootForReading() {
@@ -27,6 +28,7 @@ export default class PsychicConfig {
   public appName: string = 'untitled app'
   public corsOptions: CorsOptions = {}
   public jsonOptions: bodyParser.Options
+  public cookieOptions: { maxAge: number }
   public backgroundQueueOptions: Omit<QueueOptions, 'connection'>
   public backgroundWorkerOptions: WorkerOptions
   public redisBackgroundJobCredentials: PsychicRedisConnectionOptions
@@ -149,6 +151,10 @@ export default class PsychicConfig {
     this.corsOptions = options
   }
 
+  public setCookieOptions(options: CustomCookieOptions) {
+    this.cookieOptions = { maxAge: cookieMaxAgeFromCookieOpts(options.maxAge) }
+  }
+
   public setJsonOptions(options: bodyParser.Options) {
     this.jsonOptions = options
   }
@@ -181,10 +187,18 @@ export default class PsychicConfig {
   private async loadAppConfig() {
     if (this.loadedHooks) return
 
-    const hooksCB = await importFileWithDefault(absoluteSrcPath('conf/app'))
-    if (typeof hooksCB === 'function') {
-      await hooksCB(this)
+    try {
+      const hooksCB = await importFileWithDefault(absoluteSrcPath('conf/app'))
+      if (typeof hooksCB === 'function') {
+        await hooksCB(this)
+      }
+    } catch (err) {
+      // ts-node will bury this error, preventing us from being able to see it
+      // unless we manually console log the error ourselves.
+      console.error('an error occurred while attempting to import conf/app.ts:', err)
+      throw err
     }
+
     this.loadedHooks = true
   }
 }
@@ -193,4 +207,16 @@ export interface PsychicConfigSpecialHooks {
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
   wsStart: ((server: SocketServer) => void | Promise<void>)[]
   wsConnect: ((socket: Socket) => void | Promise<void>)[]
+}
+
+export interface CustomCookieOptions {
+  maxAge?: CustomCookieMaxAgeOptions
+}
+
+export interface CustomCookieMaxAgeOptions {
+  milliseconds?: number
+  seconds?: number
+  minutes?: number
+  hours?: number
+  days?: number
 }

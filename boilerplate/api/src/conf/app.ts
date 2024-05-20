@@ -34,6 +34,17 @@ export default (psy: PsychicConfig) => {
     ],
   })
 
+  // set options for cookie usage
+  psy.setCookieOptions({
+    maxAge: {
+      days: 14,
+      hours: 0,
+      minutes: 0,
+      seconds: 0,
+      milliseconds: 0,
+    },
+  })
+
   // configuration options for bullmq queue (used for running background jobs in redis)
   psy.setBackgroundQueueOptions({
     defaultJobOptions: {
@@ -123,7 +134,7 @@ export default (psy: PsychicConfig) => {
   // run a callback after the config is loaded, but only if NODE_ENV=test
   psy.on('load:test', () => {})
 
-  // run a callback after the config is loaded, but only if NODE_ENV=prod
+  // run a callback after the config is loaded, but only if NODE_ENV=production
   psy.on('load:prod', () => {})
 
   // this function will be run any time a server error is encountered
