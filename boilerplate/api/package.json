@@ -1,5 +1,5 @@
 {
-  "name": "psychic-app",
+  "name": "psychic",
   "version": "0.2.0",
   "main": "src/index.ts",
   "license": "Apache 2.09",
@@ -23,7 +23,7 @@
   },
   "dependencies": {
     "@rvohealth/dream": "^0.5.16",
-    "@rvohealth/psychic": "^0.3.17",
+    "@rvohealth/psychic": "^0.3.18",
     "express": "^4.19.2",
     "express-winston": "^4.2.0",
     "luxon": "^3.4.4",
