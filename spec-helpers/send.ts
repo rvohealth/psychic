@@ -1,6 +1,6 @@
 import supertest, { Response } from 'supertest'
 import { createPsychicServer } from '.'
-import { HttpMethod } from '../src'
+import { HttpMethod, PsychicServer } from '../src'
 import supersession from './supersession'
 
 export class Send {
@@ -55,7 +55,7 @@ export class Send {
     expectedStatus: number,
     opts: SendOptsAll = {},
   ) {
-    const server = await createPsychicServer()
+    server ||= await createPsychicServer()
 
     const req = supertest(server.app)
     let request = req[method](uri)
@@ -73,6 +73,8 @@ export class Send {
     }
   }
 }
+
+let server: PsychicServer
 
 export interface SendOptsAll extends SendOpts {
   query?: Record<string, unknown>
