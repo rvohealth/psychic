@@ -11,6 +11,10 @@ describe('user attempts to connect to websockets', () => {
     await server.start(7111)
   })
 
+  beforeEach(async () => {
+    await send.init()
+  })
+
   async function getUserToken() {
     await User.create({ email: 'how@yadoin', password: 'howyadoin' })
     const res = await send.post('/login', 200, { data: { email: 'how@yadoin', password: 'howyadoin' } })
