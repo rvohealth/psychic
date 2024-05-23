@@ -4,6 +4,8 @@ import { HttpMethod, PsychicServer } from '../src'
 import supersession from './supersession'
 
 export class Send {
+  private server: PsychicServer | undefined
+
   public async get(uri: string, expectedStatus: number, opts: SendOptsGet = {}): Promise<Response> {
     return await this.makeRequest('get', uri, expectedStatus, opts)
   }
@@ -22,6 +24,10 @@ export class Send {
 
   public async delete(uri: string, expectedStatus: number, opts: SendOptsPost = {}): Promise<Response> {
     return await this.makeRequest('delete', uri, expectedStatus, opts)
+  }
+
+  public async init() {
+    this.server ||= await createPsychicServer()
   }
 
   public async session(
@@ -55,12 +61,23 @@ export class Send {
     expectedStatus: number,
     opts: SendOptsAll = {},
   ) {
-    server ||= await createPsychicServer()
+    // TODO: find out why this is necessary. Currently, without initializing the server
+    // at the beginning of the specs, supertest is unable to use our server to handle requests.
+    // it gives the appearance of being an issue with a runaway promise (i.e. missing await)
+    // but I can't find it anywhere, so I am putting this init method in as a temporary fix.
+    if (!this.server)
+      throw new Error(
+        `
+  ERROR:
+    When making use of the send spec helper, you must first call "await send.init()"
+    from a beforEach hook at the root of your specs.
+`,
+      )
 
-    const req = supertest(server.app)
+    const req = supertest.agent(this.server.app)
     let request = req[method](uri)
-      .set(opts.headers || {})
-      .query(opts.query || {})
+    if (opts.headers) request = request.set(opts.headers)
+    if (opts.query) request = request.query(opts.query)
     if (method !== 'get') request = request.send(opts.data)
 
     try {
@@ -73,8 +90,6 @@ export class Send {
     }
   }
 }
-
-let server: PsychicServer
 
 export interface SendOptsAll extends SendOpts {
   query?: Record<string, unknown>

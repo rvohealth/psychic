@@ -3,6 +3,8 @@ import background from '../src/background'
 import PsychicServer from '../src/server'
 import _send from './send'
 
+export { Send } from './send'
+
 // Example usage:
 //   const bgComplete = backgroundJobCompletionPromise()
 //   await UserEventHandler.handleUserEvent(userEvent)

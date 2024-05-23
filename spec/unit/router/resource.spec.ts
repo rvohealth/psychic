@@ -3,6 +3,10 @@ import PsychicRouter from '../../../src/router'
 import { send } from '../../../spec-helpers'
 
 describe('PsychicRouter', () => {
+  beforeEach(async () => {
+    await send.init()
+  })
+
   describe('resource', () => {
     describe('extra actions', () => {
       it('are directed to the same controller', async () => {

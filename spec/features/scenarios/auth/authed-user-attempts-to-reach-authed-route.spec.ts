@@ -4,6 +4,7 @@ import send from '../../../../spec-helpers/send'
 describe('an authed user attempts to hit an authed route', () => {
   beforeEach(async () => {
     await User.create({ email: 'how@yadoin', password: 'password' })
+    await send.init()
   })
 
   it('returns 200', async () => {
