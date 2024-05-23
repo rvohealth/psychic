@@ -296,7 +296,7 @@ export default class PsychicRouter {
       let validationError: ValidationError
       let paramValidationError: ParamValidationError
       let validationErrors: Record<string, ValidationType[]>
-      let paramValidationErrors: Record<string, string>
+      let errorsJson: object = {}
 
       switch (err.constructor?.name) {
         case 'Unauthorized':
@@ -319,9 +319,14 @@ export default class PsychicRouter {
 
         case 'ParamValidationError':
           paramValidationError = error as ParamValidationError
-          paramValidationErrors = JSON.parse(paramValidationError.message) as Record<string, string>
+          try {
+            errorsJson = JSON.parse(paramValidationError.message) as Record<string, string>
+          } catch (err) {
+            // noop
+          }
+
           res.status(400).json({
-            errors: paramValidationErrors,
+            errors: errorsJson,
           })
           break
 
