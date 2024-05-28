@@ -683,7 +683,7 @@ describe('Params', () => {
     })
   })
 
-  describe('#expect', () => {
+  describe('#cast', () => {
     context('data types', () => {
       context('primitive values', () => {
         context('string', () => {
@@ -807,6 +807,24 @@ describe('Params', () => {
             })
           })
 
+          context('with null', () => {
+            it('compacts null and undefined inner values', () => {
+              expect(Params.cast(['hello', null, undefined], 'string[]')).toEqual(['hello'])
+            })
+
+            it('rejects null or undefined as outer values', () => {
+              expect(() => Params.cast(null, 'string[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast(undefined, 'string[]')).toThrow(ParamValidationError)
+            })
+
+            context('null is explicitly allowed', () => {
+              it('does not reject null or undefined as outer values', () => {
+                expect(Params.cast(null, 'string[]', { allowNull: true })).toEqual(null)
+                expect(Params.cast(undefined, 'string[]', { allowNull: true })).toEqual(undefined)
+              })
+            })
+          })
+
           context('with match passed', () => {
             context('with a valid value', () => {
               it('returns the requsted value', () => {
@@ -839,7 +857,25 @@ describe('Params', () => {
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast(['hello', 1], 'string[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast(['hello', 1], 'number[]')).toThrow(ParamValidationError)
+            })
+          })
+
+          context('with null', () => {
+            it('compacts null and undefined inner values', () => {
+              expect(Params.cast([1, null, undefined], 'number[]')).toEqual([1])
+            })
+
+            it('rejects null or undefined as outer values', () => {
+              expect(() => Params.cast(null, 'number[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast(undefined, 'number[]')).toThrow(ParamValidationError)
+            })
+
+            context('null is explicitly allowed', () => {
+              it('does not reject null or undefined as outer values', () => {
+                expect(Params.cast(null, 'number[]', { allowNull: true })).toEqual(null)
+                expect(Params.cast(undefined, 'number[]', { allowNull: true })).toEqual(undefined)
+              })
             })
           })
         })
@@ -856,6 +892,24 @@ describe('Params', () => {
               expect(() => Params.cast([1.1, 1], 'integer[]')).toThrow(ParamValidationError)
             })
           })
+
+          context('with null', () => {
+            it('compacts null and undefined inner values', () => {
+              expect(Params.cast([1, null, undefined], 'integer[]')).toEqual([1])
+            })
+
+            it('rejects null or undefined as outer values', () => {
+              expect(() => Params.cast(null, 'integer[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast(undefined, 'integer[]')).toThrow(ParamValidationError)
+            })
+
+            context('null is explicitly allowed', () => {
+              it('does not reject null or undefined as outer values', () => {
+                expect(Params.cast(null, 'integer[]', { allowNull: true })).toEqual(null)
+                expect(Params.cast(undefined, 'integer[]', { allowNull: true })).toEqual(undefined)
+              })
+            })
+          })
         })
 
         context('boolean[]', () => {
@@ -868,6 +922,24 @@ describe('Params', () => {
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
               expect(() => Params.cast(['hello', true], 'boolean[]')).toThrow(ParamValidationError)
+            })
+          })
+
+          context('with null', () => {
+            it('compacts null and undefined inner values', () => {
+              expect(Params.cast([true, null, undefined], 'boolean[]')).toEqual([true])
+            })
+
+            it('rejects null or undefined as outer values', () => {
+              expect(() => Params.cast(null, 'boolean[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast(undefined, 'boolean[]')).toThrow(ParamValidationError)
+            })
+
+            context('null is explicitly allowed', () => {
+              it('does not reject null or undefined as outer values', () => {
+                expect(Params.cast(null, 'boolean[]', { allowNull: true })).toEqual(null)
+                expect(Params.cast(undefined, 'boolean[]', { allowNull: true })).toEqual(undefined)
+              })
             })
           })
         })

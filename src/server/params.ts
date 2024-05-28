@@ -6,6 +6,7 @@ import {
   snakeify,
   DreamParamSafeAttributes,
   CalendarDate,
+  compact,
 } from '@rvohealth/dream'
 import {
   PsychicParamsDictionary,
@@ -280,12 +281,7 @@ export default class Params {
     FinalReturnType extends AllowNullOrUndefined extends true
       ? ValidatedType | null | undefined
       : ValidatedType,
-  >(
-    this: T,
-    param: PsychicParamsPrimitive | PsychicParamsPrimitive[],
-    expectedType: ExpectedType,
-    opts?: OptsType,
-  ): FinalReturnType {
+  >(this: T, param: PsychicParamsPrimitive, expectedType: ExpectedType, opts?: OptsType): FinalReturnType {
     return new this().cast(param, expectedType, opts) as FinalReturnType
   }
 
@@ -323,13 +319,14 @@ export default class Params {
     let errorMessage: string
     let baseType: (typeof PsychicParamsPrimitiveLiterals)[number]
     let dateClass: typeof DateTime | typeof CalendarDate
+    let compactedValue: unknown
 
     switch (expectedType) {
       case 'string':
-        if (typeof paramValue !== 'string') this.throwUnlessNull(paramValue, 'expected string', opts)
+        if (typeof paramValue !== 'string') this.throwUnlessAllowNull(paramValue, 'expected string', opts)
 
         if (opts?.enum && !opts.enum.includes(paramValue as string))
-          this.throwUnlessNull(paramValue, 'did not match expected enum values')
+          this.throwUnlessAllowNull(paramValue, 'did not match expected enum values')
 
         if (opts?.match) {
           return this.matchRegexOrThrow(paramValue as string, opts.match, opts) as ReturnType
@@ -342,7 +339,7 @@ export default class Params {
           !Number.isInteger(parseInt(paramValue as string)) ||
           `${parseInt(paramValue as string)}` !== `${paramValue as string}`
         )
-          this.throwUnlessNull(paramValue, 'expected bigint', opts)
+          this.throwUnlessAllowNull(paramValue, 'expected bigint', opts)
         return (paramValue ? `${paramValue as number}` : null) as ReturnType
 
       case 'boolean':
@@ -350,7 +347,7 @@ export default class Params {
         if (paramValue === 'false') return false as ReturnType
         if ([1, '1'].includes(paramValue as string)) return true as ReturnType
         if ([0, '0'].includes(paramValue as string)) return false as ReturnType
-        if (typeof paramValue !== 'boolean') this.throwUnlessNull(paramValue, 'expected boolean', opts)
+        if (typeof paramValue !== 'boolean') this.throwUnlessAllowNull(paramValue, 'expected boolean', opts)
         return paramValue as ReturnType
 
       case 'datetime':
@@ -390,24 +387,24 @@ export default class Params {
         errorMessage = 'expected integer or string integer'
         if (Number.isInteger(paramValue)) return parseInt(paramValue as string) as ReturnType
         if (Number.isNaN(parseInt(paramValue as string, 10)))
-          this.throwUnlessNull(paramValue, errorMessage, opts)
+          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
         if (`${parseInt(paramValue as string, 10)}` !== `${paramValue as string}`)
-          this.throwUnlessNull(paramValue, errorMessage, opts)
+          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
         return (paramValue === null ? null : parseInt(paramValue as string, 10)) as ReturnType
 
       case 'json':
         errorMessage = 'expected an object'
         if (typeof paramValue !== 'object') throw new ParamValidationError(errorMessage)
-        if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, opts)
+        if (paramValue === null) this.throwUnlessAllowNull(paramValue, errorMessage, opts)
         return (paramValue === null ? null : paramValue) as ReturnType
 
       case 'number':
         errorMessage = 'expected number or string number'
         if (typeof paramValue === 'number') return paramValue as ReturnType
         if (`${parseFloat(paramValue as string)}` !== `${paramValue as string}`)
-          this.throwUnlessNull(paramValue, errorMessage, opts)
+          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
         if (Number.isNaN(parseFloat(paramValue as string)))
-          this.throwUnlessNull(paramValue, errorMessage, opts)
+          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
         if (paramValue === null) return null as ReturnType
         if (['number', 'string'].includes(typeof paramValue)) {
           return parseFloat((paramValue as unknown as number).toString()) as ReturnType
@@ -420,7 +417,7 @@ export default class Params {
 
       case 'uuid':
         errorMessage = 'expected uuid'
-        if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, opts)
+        if (paramValue === null) this.throwUnlessAllowNull(paramValue, errorMessage, opts)
         if (paramValue !== null && !isUuid(paramValue)) throw new ParamValidationError(errorMessage)
         return paramValue as ReturnType
 
@@ -438,22 +435,32 @@ export default class Params {
           '',
         ) as (typeof PsychicParamsPrimitiveLiterals)[number]
         errorMessage = `expected ${baseType}[]`
-        if (paramValue === null) this.throwUnlessNull(paramValue, errorMessage, opts)
-        if (paramValue !== null && !Array.isArray(paramValue)) throw new ParamValidationError(errorMessage)
+        if ([undefined, null].includes(paramValue as null))
+          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
+
+        if (![undefined, null].includes(paramValue as null) && !Array.isArray(paramValue))
+          throw new ParamValidationError(errorMessage)
+
+        compactedValue = [undefined, null].includes(paramValue as unknown as null)
+          ? paramValue
+          : compact(paramValue as string[])
+
         return (
           // casting as string[] here because this will actually cause
           // build failures once it is brought into other apps
           (
-            paramValue === null ? null : (paramValue as string[]).map(val => this.cast(val, baseType, opts))
+            [undefined, null].includes(paramValue as null)
+              ? paramValue
+              : (compactedValue as string[]).map(val => this.cast(val, baseType, opts))
           ) as ReturnType
         )
 
       case 'null[]':
         errorMessage = 'expected null array'
-        if (!Array.isArray(paramValue)) this.throwUnlessNull(paramValue, errorMessage, opts)
+        if (!Array.isArray(paramValue)) this.throwUnlessAllowNull(paramValue, errorMessage, opts)
         if ((paramValue as number[]).length === 0) return [] as ReturnType
         if ((paramValue as number[]).filter(v => v !== null).length > 0)
-          this.throwUnlessNull(paramValue, errorMessage, opts)
+          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
         return paramValue as ReturnType
 
       default:
@@ -502,14 +509,14 @@ export default class Params {
     opts?: ParamsCastOptions<readonly string[]>,
   ): string | null {
     const errorMessage = 'did not match expected pattern'
-    if (typeof paramValue !== 'string') this.throwUnlessNull(paramValue, errorMessage)
+    if (typeof paramValue !== 'string') this.throwUnlessAllowNull(paramValue, errorMessage)
     if (paramValue.length > 1000) throw new Error('We do not accept strings over 1000 chars')
     if (expectedType.test(paramValue)) return paramValue
-    this.throwUnlessNull(paramValue, errorMessage, opts)
+    this.throwUnlessAllowNull(paramValue, errorMessage, opts)
     return null
   }
 
-  private throwUnlessNull(
+  private throwUnlessAllowNull(
     paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
     message: string,
     { allowNull = false }: ParamsCastOptions<readonly string[]> = {},

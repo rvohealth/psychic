@@ -22,7 +22,7 @@ type SerializerResult = {
   any
 }
 
-export type PsychicParamsPrimitive = string | number | boolean | null | PsychicParamsPrimitive[]
+export type PsychicParamsPrimitive = string | number | boolean | null | undefined | PsychicParamsPrimitive[]
 
 export const PsychicParamsPrimitiveLiterals = [
   'bigint',
