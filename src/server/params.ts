@@ -34,10 +34,7 @@ export default class Params {
   public static for<
     T extends typeof Dream,
     const OnlyArray extends readonly (keyof DreamParamSafeAttributes<InstanceType<T>>)[],
-    ForOpts extends {
-      array?: boolean
-      only?: OnlyArray
-    },
+    ForOpts extends ParamsForOpts<OnlyArray>,
     ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
       InstanceType<T>
     >)[]
@@ -593,4 +590,9 @@ export type ParamsCastOptions<EnumType> = {
   allowNull?: boolean
   match?: RegExp
   enum?: EnumType
+}
+
+export interface ParamsForOpts<OnlyArray> {
+  array?: boolean
+  only?: OnlyArray
 }

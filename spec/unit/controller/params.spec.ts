@@ -66,7 +66,27 @@ describe('PsychicController', () => {
         const server = new PsychicServer()
         const controller = new PsychicController(req, res, { config: new PsychicConfig(server.app) })
 
-        expect(controller.paramsFor(User, 'user')).toEqual({ name: 'howyadoin' })
+        expect(controller.paramsFor(User, { key: 'user' })).toEqual({ name: 'howyadoin' })
+      })
+    })
+
+    context('with options passed', () => {
+      it('passes options through', () => {
+        const req = getMockReq({
+          body: {
+            id: 1,
+            name: 'howyadoin',
+            email: 'how@yadoin',
+            createdAt: 'hello',
+            updatedAt: 'birld',
+            deletedAt: 'sometimeago',
+          },
+        })
+        const res = getMockRes().res
+        const server = new PsychicServer()
+        const controller = new PsychicController(req, res, { config: new PsychicConfig(server.app) })
+
+        expect(controller.paramsFor(User, { only: ['name'] })).toEqual({ name: 'howyadoin' })
       })
     })
   })

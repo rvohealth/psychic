@@ -1,4 +1,4 @@
-import { Dream, DreamSerializer } from '@rvohealth/dream'
+import { Dream, DreamParamSafeAttributes, DreamSerializer } from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import Forbidden from '../error/http/forbidden'
 import Unauthorized from '../error/http/unauthorized'
@@ -15,7 +15,7 @@ import ServiceUnavailable from '../error/http/service-unavailable'
 import HttpStatusCodeMap, { HttpStatusSymbol } from '../error/http/status-codes'
 import { ControllerHook } from '../controller/hooks'
 import Conflict from '../error/http/conflict'
-import Params, { ParamsCastOptions } from '../server/params'
+import Params, { ParamsCastOptions, ParamsForOpts } from '../server/params'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -143,8 +143,18 @@ export default class PsychicController {
     return Params.cast(this.param<string>(key), expectedType, opts)
   }
 
-  public paramsFor<DreamClass extends typeof Dream>(dreamClass: DreamClass, key?: string) {
-    return Params.for(key ? (this.params[key] as typeof this.params) : this.params, dreamClass)
+  public paramsFor<
+    DreamClass extends typeof Dream,
+    const OnlyArray extends readonly (keyof DreamParamSafeAttributes<InstanceType<DreamClass>>)[],
+    ForOpts extends ParamsForOpts<OnlyArray> & {
+      key?: string
+    },
+  >(this: PsychicController, dreamClass: DreamClass, opts?: ForOpts) {
+    return Params.for(
+      opts?.key ? (this.params[opts.key] as typeof this.params) : this.params,
+      dreamClass,
+      opts,
+    )
   }
 
   public getCookie(name: string) {
