@@ -54,6 +54,6 @@ export default class UsersController extends ApplicationController {
   public beforeAllTestContent = 'before all action was NOT called for all'
 
   private get userParams() {
-    return this.paramsFor(User, 'user')
+    return this.paramsFor(User, { key: 'user' })
   }
 }
