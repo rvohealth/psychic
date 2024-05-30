@@ -1,12 +1,12 @@
-import { send } from '../../../spec-helpers'
+import { specRequest as request } from '../../../spec-helpers'
 
 describe('controller before hooks', () => {
   beforeEach(async () => {
-    await send.init()
+    await request.init()
   })
 
   it('calls before actions before running a method', async () => {
-    const response = await send.get('/users-before-all-test', 200)
+    const response = await request.get('/users-before-all-test', 200)
     expect(response.body).toEqual('before all action was called for all!')
   })
 })

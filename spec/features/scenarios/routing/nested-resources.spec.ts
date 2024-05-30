@@ -1,11 +1,11 @@
-import { send } from '../../../../spec-helpers'
+import { specRequest as request } from '../../../../spec-helpers'
 
 describe('a visitor attempts to hit a route at a nested resource', () => {
   beforeEach(async () => {
-    await send.init()
+    await request.init()
   })
 
   it('accepts the request', async () => {
-    await send.get('/api/v1/users', 200)
+    await request.get('/api/v1/users', 200)
   })
 })

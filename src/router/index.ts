@@ -9,7 +9,7 @@ import {
 import PsychicConfig from '../config'
 import log from '../log'
 import PsychicController from '../controller'
-import { ValidationError, camelize, developmentOrTestEnv } from '@rvohealth/dream'
+import { ValidationError, camelize, developmentOrTestEnv, testEnv } from '@rvohealth/dream'
 import RouteManager from './route-manager'
 import { pascalize } from '@rvohealth/dream'
 import pluralize = require('pluralize')
@@ -336,6 +336,15 @@ export default class PsychicRouter {
 
         case 'InternalServerError':
         default:
+          // by default, ts-node will mask these errors for no good reason, causing us
+          // to have to apply an ugly and annoying try-catch pattern to our controllers
+          // and manually console log the error to determine what the actual error was.
+          // this block enables us to not have to do that anymore.
+          if (testEnv() && process.env.PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR !== '1') {
+            console.log('ATTENTION: a server error was detected:')
+            console.error(err)
+          }
+
           if (this.config.specialHooks.serverError.length) {
             try {
               for (const hook of this.config.specialHooks.serverError) {
