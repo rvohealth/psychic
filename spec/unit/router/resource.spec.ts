@@ -1,16 +1,16 @@
 import PsychicServer from '../../../src/server'
 import PsychicRouter from '../../../src/router'
-import { send } from '../../../spec-helpers'
+import { specRequest as request } from '../../../spec-helpers'
 
 describe('PsychicRouter', () => {
   beforeEach(async () => {
-    await send.init()
+    await request.init()
   })
 
   describe('resource', () => {
     describe('extra actions', () => {
       it('are directed to the same controller', async () => {
-        const res = await send.get('/greeter/hello', 200)
+        const res = await request.get('/greeter/hello', 200)
         expect(res.body).toEqual('goodbye')
       })
     })

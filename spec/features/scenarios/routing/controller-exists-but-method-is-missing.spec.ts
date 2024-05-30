@@ -1,11 +1,11 @@
-import { send } from '../../../../spec-helpers'
+import { specRequest as request } from '../../../../spec-helpers'
 
 describe('a visitor attempts to hit a route where the controller exists, but the method on the controller does not', () => {
   beforeEach(async () => {
-    await send.init()
+    await request.init()
   })
 
   it('returns 501', async () => {
-    await send.get('/controller-exists-but-method-doesnt', 501)
+    await request.get('/controller-exists-but-method-doesnt', 501)
   })
 })

@@ -1,11 +1,11 @@
-import { send } from '../../../../spec-helpers'
+import { specRequest as request } from '../../../../spec-helpers'
 
 describe('a visitor attempts to hit an unauthed route', () => {
   beforeEach(async () => {
-    await send.init()
+    await request.init()
   })
 
   it('accepts the request', async () => {
-    await send.get('/ping', 200)
+    await request.get('/ping', 200)
   })
 })

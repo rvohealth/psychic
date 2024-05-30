@@ -1,11 +1,11 @@
-import { send } from '../../../../spec-helpers'
+import { specRequest as request } from '../../../../spec-helpers'
 
 describe('a visitor attempts to hit an authed route (while being unauthenticated)', () => {
   beforeEach(async () => {
-    await send.init()
+    await request.init()
   })
 
   it('returns 401', async () => {
-    await send.get('/auth-ping', 401)
+    await request.get('/auth-ping', 401)
   })
 })
