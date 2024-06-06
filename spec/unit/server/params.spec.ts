@@ -912,6 +912,39 @@ describe('Params', () => {
           })
         })
 
+        context('bigint[]', () => {
+          context('with a valid value', () => {
+            it('returns the requsted value', () => {
+              expect(Params.cast(['1', '2'], 'bigint[]')).toEqual(['1', '2'])
+              expect(Params.cast([1, 2], 'bigint[]')).toEqual(['1', '2'])
+            })
+          })
+
+          context('with an invalid value', () => {
+            it('raises a validation exception', () => {
+              expect(() => Params.cast(['1.1', '1'], 'bigint[]')).toThrow(ParamValidationError)
+            })
+          })
+
+          context('with null', () => {
+            it('compacts null and undefined inner values', () => {
+              expect(Params.cast(['1', null, undefined], 'bigint[]')).toEqual(['1'])
+            })
+
+            it('rejects null or undefined as outer values', () => {
+              expect(() => Params.cast(null, 'bigint[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast(undefined, 'bigint[]')).toThrow(ParamValidationError)
+            })
+
+            context('null is explicitly allowed', () => {
+              it('does not reject null or undefined as outer values', () => {
+                expect(Params.cast(null, 'bigint[]', { allowNull: true })).toEqual(null)
+                expect(Params.cast(undefined, 'bigint[]', { allowNull: true })).toEqual(undefined)
+              })
+            })
+          })
+        })
+
         context('boolean[]', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {

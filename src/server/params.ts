@@ -558,19 +558,21 @@ type ValidatedReturnType<ExpectedType> = ExpectedType extends RegExp
                           ? CalendarDate[]
                           : ExpectedType extends 'string[]'
                             ? string[]
-                            : ExpectedType extends 'number[]'
-                              ? number[]
-                              : ExpectedType extends 'integer[]'
+                            : ExpectedType extends 'bigint[]'
+                              ? string[]
+                              : ExpectedType extends 'number[]'
                                 ? number[]
-                                : ExpectedType extends 'boolean[]'
-                                  ? boolean
-                                  : ExpectedType extends 'null[]'
-                                    ? null[]
-                                    : ExpectedType extends 'uuid[]'
-                                      ? string[]
-                                      : ExpectedType extends { enum: infer EnumValue }
-                                        ? EnumValue
-                                        : never
+                                : ExpectedType extends 'integer[]'
+                                  ? number[]
+                                  : ExpectedType extends 'boolean[]'
+                                    ? boolean
+                                    : ExpectedType extends 'null[]'
+                                      ? null[]
+                                      : ExpectedType extends 'uuid[]'
+                                        ? string[]
+                                        : ExpectedType extends { enum: infer EnumValue }
+                                          ? EnumValue
+                                          : never
 
 type ValidatedAllowsNull<ExpectedType, OptsValue> = ExpectedType extends { allowNull: infer R }
   ? R extends true
