@@ -1,12 +1,12 @@
+import { CalendarDate } from '@rvohealth/dream'
 import { DateTime } from 'luxon'
 import { PsychicParamsDictionary } from '../../../src/controller'
 import Params, { ParamValidationError } from '../../../src/server/params'
 import Pet from '../../../test-app/app/models/Pet'
 import User from '../../../test-app/app/models/User'
-import { CalendarDate } from '@rvohealth/dream'
 
 describe('Params', () => {
-  describe('#for', () => {
+  describe('.for', () => {
     context('erroring', () => {
       it('raises an exception containing a payload which tells us of all invalid values', () => {
         let error: Error | undefined = undefined
@@ -26,6 +26,36 @@ describe('Params', () => {
             2,
           ),
         )
+      })
+    })
+
+    context('paramSafeColumns is overridden at the model level', () => {
+      class User2 extends User {
+        public get paramSafeColumns() {
+          return ['email'] as const
+        }
+      }
+
+      it('respects override', () => {
+        expect(Params.for({ email: 'how', password: 'yadoin' }, User2)).toEqual({
+          email: 'how',
+        })
+      })
+
+      context('some of the params given are invalid', () => {
+        class User3 extends User {
+          public get paramSafeColumns() {
+            return ['email', 'birthdate', 'id', 'createdAt'] as const
+          }
+        }
+
+        it('omits invalid params', () => {
+          const now = CalendarDate.today()
+          expect(Params.for({ email: 'how', password: 'yadoin', birthdate: now }, User3)).toEqual({
+            email: 'how',
+            birthdate: expect.toEqualCalendarDate(now),
+          })
+        })
       })
     })
 
