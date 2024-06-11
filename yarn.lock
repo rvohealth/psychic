@@ -838,10 +838,10 @@
   resolved "https://registry.yarnpkg.com/@redis/time-series/-/time-series-1.0.5.tgz#a6d70ef7a0e71e083ea09b967df0a0ed742bc6ad"
   integrity sha512-IFjIgTusQym2B5IZJG3XKr5llka7ey84fw/NOYqESP5WUfQs9zz1ww/9+qoz4ka/S6KcGBodzlCeZ5UImKbscg==
 
-"@rvohealth/dream@^0.5.32":
-  version "0.5.32"
-  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.5.32/85b8c098b52e98862b7945323e257bf791fa54a8#85b8c098b52e98862b7945323e257bf791fa54a8"
-  integrity sha512-cnellN4uylFHeGJonCCqdP8kmIJGLaPDM+XEa+47UpU0zGxGuCFKilzDp0lHnBEibBPmW+Y3rN3sqX00xJYHzg==
+"@rvohealth/dream@^0.5.33":
+  version "0.5.33"
+  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.5.33/d1671f0000c403ae4692564e43a8fe5c1268f1fb#d1671f0000c403ae4692564e43a8fe5c1268f1fb"
+  integrity sha512-Yp2umgXbifoOgkVCqfJjwXKmAGBZeyYFZL6RqIInWS6bzhUXF+5VVqMTC4wBheue759ZOW6XqbgYKq8jlSXPdw==
   dependencies:
     "@types/jest" "^29.5.12"
     "@types/lodash.clonedeep" "^4.5.9"
@@ -870,7 +870,7 @@
     luxon "^3.4.4"
     pg "^8.11.3"
     pluralize "^8.0.0"
-    ts-jest "^29.1.2"
+    ts-jest "^29.1.4"
     ts-node "^10.9.2"
     yaml "^2.3.4"
 
@@ -4672,6 +4672,20 @@ ts-jest@^29.1.2:
   version "29.1.2"
   resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-29.1.2.tgz#7613d8c81c43c8cb312c6904027257e814c40e09"
   integrity sha512-br6GJoH/WUX4pu7FbZXuWGKGNDuU7b8Uj77g/Sp7puZV6EXzuByl6JrECvm0MzVzSTkSHWTihsXt+5XYER5b+g==
+  dependencies:
+    bs-logger "0.x"
+    fast-json-stable-stringify "2.x"
+    jest-util "^29.0.0"
+    json5 "^2.2.3"
+    lodash.memoize "4.x"
+    make-error "1.x"
+    semver "^7.5.3"
+    yargs-parser "^21.0.1"
+
+ts-jest@^29.1.4:
+  version "29.1.4"
+  resolved "https://registry.yarnpkg.com/ts-jest/-/ts-jest-29.1.4.tgz#26f8a55ce31e4d2ef7a1fd47dc7fa127e92793ef"
+  integrity sha512-YiHwDhSvCiItoAgsKtoLFCuakDzDsJ1DLDnSouTaTmdOcOwIkSzbLXduaQ6M5DRVhuZC/NYaaZ/mtHbWMv/S6Q==
   dependencies:
     bs-logger "0.x"
     fast-json-stable-stringify "2.x"
