@@ -1,7 +1,9 @@
   export type RouteTypes =
     | '/ping'
+  | '/auth'
   | '/auth-ping'
   | '/api-ping'
+  | '/cast-param-test'
   | '/users-before-all-test'
   | '/failed-to-save-test'
   | '/force-throw'
