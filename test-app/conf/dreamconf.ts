@@ -1,10 +1,11 @@
 import { Dreamconf } from '@rvohealth/dream'
-import { schema } from '../db/schema'
+import { schema, passthroughColumns } from '../db/schema'
 import { DBClass } from '../db/sync'
 
 const dreamconf = new Dreamconf<DBClass, typeof schema>({
   DB: new DBClass(),
   schema,
+  passthroughColumns,
   env: {
     db: {
       development: {

@@ -309,6 +309,10 @@ export default class PsychicRouter {
           res.sendStatus((err as HttpError).status)
           break
 
+        case 'RecordNotFound':
+          res.sendStatus(404)
+          break
+
         case 'ValidationError':
           validationError = err as ValidationError
           validationErrors = validationError.errors || {}

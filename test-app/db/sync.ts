@@ -119,8 +119,6 @@ export interface DB {
 }
 
 
-export const AllColumns = ['bio', 'birthdate', 'collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'createdOn', 'email', 'favoriteBigints', 'favoriteBooleans', 'favoriteCitext', 'favoriteCitexts', 'favoriteDates', 'favoriteDatetimes', 'favoriteIntegers', 'favoriteJsonbs', 'favoriteJsons', 'favoriteNumerics', 'favoriteTexts', 'favoriteTreats', 'favoriteUuids', 'healthUsers', 'id', 'jsonData', 'jsonbData', 'lastHeardAt', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nicknames', 'notes', 'optionalUuid', 'passwordDigest', 'pets', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredCollarCountNumeric', 'requiredFavoriteBigints', 'requiredFavoriteBooleans', 'requiredFavoriteCitext', 'requiredFavoriteCitexts', 'requiredFavoriteDates', 'requiredFavoriteDatetimes', 'requiredFavoriteIntegers', 'requiredFavoriteJsonbs', 'requiredFavoriteJsons', 'requiredFavoriteNumerics', 'requiredFavoriteTexts', 'requiredFavoriteUuids', 'requiredJsonData', 'requiredJsonbData', 'requiredNicknames', 'species', 'updatedAt', 'userId', 'users', 'uuid'] as const
-
 export class DBClass {
   health_users: HealthUsers
   pets: Pets
