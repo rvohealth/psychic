@@ -570,3 +570,5 @@ export const schema = {
     },
   },
 } as const
+
+export const passthroughColumns = [] as const

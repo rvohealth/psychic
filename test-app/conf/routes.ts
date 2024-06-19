@@ -17,6 +17,7 @@ export default (r: PsychicRouter) => {
   r.post('failed-to-save-test', 'Users#failedToSaveTest')
   r.post('force-throw', 'Users#forceThrow')
   r.get('conflict', 'Errors#throwConflict')
+  r.get('not-found', 'Errors#throwNotFound')
 
   r.namespace('api', r => {
     r.get('ping', 'Users#ping')

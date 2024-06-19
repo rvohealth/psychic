@@ -8,6 +8,7 @@
   | '/failed-to-save-test'
   | '/force-throw'
   | '/conflict'
+  | '/not-found'
   | '/api/ping'
   | '/api/v1/ping'
   | '/api/v1/users'
