@@ -194,4 +194,30 @@ export type UriParam = string | number`,
       )
     })
   })
+
+  context('with a wildcard character as one of the segments', () => {
+    it('correctly encases the wildcard in a string', () => {
+      const str = generateClientRoutes([
+        {
+          controllerActionString: 'Api/V1/Users#create',
+          httpMethod: 'get',
+          path: '/wildcards-are-tricky/*',
+        },
+      ])
+
+      expect(str).toEqual(
+        `\
+const apiRoutes = {
+  wildcardsAreTricky: {
+    '*': {
+      GET: '/wildcards-are-tricky/*',
+    },
+  },
+} as const
+export default apiRoutes
+
+export type UriParam = string | number`,
+      )
+    })
+  })
 })

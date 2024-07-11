@@ -64,6 +64,11 @@ function spaces(numIterations: number) {
   return spaces
 }
 
+function safeObjectKey(key: string) {
+  if (/^[A-Za-z0-9]*$/.test(key)) return key
+  return `'${key}'`
+}
+
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function recursivelyBuildRoutesStr(routesObj: any, str: string, numIterations: number): string {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
@@ -73,10 +78,10 @@ function recursivelyBuildRoutesStr(routesObj: any, str: string, numIterations: n
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       const pathStr = /^\(/.test(routesObj[key]) ? routesObj[key] : `'${routesObj[key]}'`
 
-      agg += `\n${spaces(numIterations)}${key}: ${pathStr},`
+      agg += `\n${spaces(numIterations)}${safeObjectKey(key)}: ${pathStr},`
     } else {
       agg += `
-${spaces(numIterations)}${camelize(key) || "'/'"}: {`
+${spaces(numIterations)}${safeObjectKey(camelize(key)) || "'/'"}: {`
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       agg = recursivelyBuildRoutesStr(routesObj[key], agg, numIterations + 1)
       agg += `\n${spaces(numIterations)}},`
