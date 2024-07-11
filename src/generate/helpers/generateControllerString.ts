@@ -1,5 +1,6 @@
 import pluralize from 'pluralize'
 import { camelize } from '@rvohealth/dream'
+import pascalizeFileName from '../../helpers/pascalizeFileName'
 
 export default function generateControllerString(
   controllerClassName: string,
@@ -25,7 +26,7 @@ export default function generateControllerString(
   }
 
   if (fullyQualifiedModelName) {
-    modelName = fullyQualifiedModelName.split('/').pop()
+    modelName = pascalizeFileName(fullyQualifiedModelName)
     additionalImports.push(
       `\
 import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQualifiedModelName}'`,

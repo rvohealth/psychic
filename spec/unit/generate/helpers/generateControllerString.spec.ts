@@ -66,33 +66,33 @@ export default class ApiV1PostsController extends AuthedController {
         expect(res).toEqual(
           `\
 import AuthedController from '../../../AuthedController'
-import Post from '../../../../models/Health/Post'
+import HealthPost from '../../../../models/Health/Post'
 
 export default class ApiV1HealthPostsController extends AuthedController {
   public async create() {
-    //    const post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
-    //    this.created(post)
+    //    const healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
+    //    this.created(healthPost)
   }
 
   public async index() {
-    //    const posts = await this.currentUser.associationQuery('posts').all()
-    //    this.ok(posts)
+    //    const healthPosts = await this.currentUser.associationQuery('healthPosts').all()
+    //    this.ok(healthPosts)
   }
 
   public async show() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
-    //    this.ok(post)
+    //    const healthPost = await this.currentUser.associationQuery('healthPosts').find(this.castParam('id', 'string'))
+    //    this.ok(healthPost)
   }
 
   public async update() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
-    //    await post.update(this.paramsFor(Post))
+    //    const healthPost = await this.currentUser.associationQuery('healthPosts').find(this.castParam('id', 'string'))
+    //    await healthPost.update(this.paramsFor(HealthPost))
     //    this.noContent()
   }
 
   public async destroy() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
-    //    await post.destroy()
+    //    const healthPost = await this.currentUser.associationQuery('healthPosts').find(this.castParam('id', 'string'))
+    //    await healthPost.destroy()
     //    this.noContent()
   }
 
@@ -115,12 +115,12 @@ export default class ApiV1HealthPostsController extends AuthedController {
           expect(res).toEqual(
             `\
 import AdminAuthedController from '../Admin/AuthedController'
-import LogEntry from '../../models/Nutrition/LogEntry'
+import NutritionLogEntry from '../../models/Nutrition/LogEntry'
 
 export default class AdminNutritionLogEntriesController extends AdminAuthedController {
   public async create() {
-    //    const logEntry = await this.currentUser.createAssociation('logEntries', this.paramsFor(LogEntry))
-    //    this.created(logEntry)
+    //    const nutritionLogEntry = await this.currentUser.createAssociation('nutritionLogEntries', this.paramsFor(NutritionLogEntry))
+    //    this.created(nutritionLogEntry)
   }
 }`,
           )
