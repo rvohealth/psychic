@@ -23,7 +23,7 @@ export default async function fileWriter(
   const fullyQualifiedNewfileClassName = pluralizeBeforePostfix
     ? `${pluralize(filePath)}${filePostfix}`
     : `${filePath}${filePostfix}`
-  const newfileClassName = pascalizeFileName(fullyQualifiedNewfileClassName) + filePostfix
+  const newfileClassName = pascalizeFileName(fullyQualifiedNewfileClassName)
   const filepathRelativeToTypeRoot = fullyQualifiedNewfileClassName
     .split('/')
     .map(str => pascalize(str))
