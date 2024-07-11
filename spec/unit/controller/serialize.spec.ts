@@ -168,7 +168,7 @@ describe('PsychicController', () => {
       class User2Serializer extends UserSerializer {
         @Attribute()
         public howyadoin() {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
           return this.passthroughData.howyadoin
         }
       }
@@ -176,7 +176,7 @@ describe('PsychicController', () => {
       class User2SummarySerializer extends UserSummarySerializer {
         @Attribute()
         public howyadoin() {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
           return this.passthroughData.howyadoin
         }
       }
@@ -184,7 +184,7 @@ describe('PsychicController', () => {
       class User2ExtraSerializer extends UserExtraSerializer {
         @Attribute()
         public howyadoin() {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
           return this.passthroughData.howyadoin
         }
       }
