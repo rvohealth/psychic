@@ -1,6 +1,6 @@
 import fileWriter from './helpers/fileWriter'
 import generateControllerString from './helpers/generateControllerString'
-import generateBlankSpecContent from './helpers/generateBlankSpecContent'
+import generateControllerSpecContent from './helpers/generateControllerSpecContent'
 import absoluteFilePath from '../helpers/absoluteFilePath'
 
 export default async function generateController(
@@ -26,6 +26,6 @@ export default async function generateController(
     true,
     'spec/unit/controllers',
     rootPath,
-    generateBlankSpecContent,
+    generateControllerSpecContent,
   )
 }
