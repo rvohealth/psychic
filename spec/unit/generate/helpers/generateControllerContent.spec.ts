@@ -30,23 +30,29 @@ export default class ApiV1PostsController extends AuthedController {
   }
 
   public async show() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
+    //    const post = await this.post()
     //    this.ok(post)
   }
 
   public async update() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
+    //    const post = await this.post()
     //    await post.update(this.paramsFor(Post))
     //    this.noContent()
   }
 
   public async destroy() {
-    //    const post = await this.currentUser.associationQuery('posts').find(this.castParam('id', 'string'))
+    //    const post = await this.post()
     //    await post.destroy()
     //    this.noContent()
   }
 
   public async preview() {
+  }
+
+  private async post() {
+    return await this.currentUser.associationQuery('posts').findOrFail(
+      this.castParam('id', 'string')
+    )
   }
 }\
 `,
@@ -80,23 +86,29 @@ export default class ApiV1HealthPostsController extends AuthedController {
   }
 
   public async show() {
-    //    const healthPost = await this.currentUser.associationQuery('healthPosts').find(this.castParam('id', 'string'))
+    //    const healthPost = await this.healthPost()
     //    this.ok(healthPost)
   }
 
   public async update() {
-    //    const healthPost = await this.currentUser.associationQuery('healthPosts').find(this.castParam('id', 'string'))
+    //    const healthPost = await this.healthPost()
     //    await healthPost.update(this.paramsFor(HealthPost))
     //    this.noContent()
   }
 
   public async destroy() {
-    //    const healthPost = await this.currentUser.associationQuery('healthPosts').find(this.castParam('id', 'string'))
+    //    const healthPost = await this.healthPost()
     //    await healthPost.destroy()
     //    this.noContent()
   }
 
   public async preview() {
+  }
+
+  private async healthPost() {
+    return await this.currentUser.associationQuery('healthPosts').findOrFail(
+      this.castParam('id', 'string')
+    )
   }
 }\
 `,

@@ -1,5 +1,5 @@
-import pluralize from 'pluralize'
 import { camelize } from '@rvohealth/dream'
+import pluralize from 'pluralize'
 import pascalizeFileName from '../../helpers/pascalizeFileName'
 
 export default function generateControllerContent(
@@ -63,7 +63,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async show() {
-    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.castParam('id', 'string'))
+    //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    this.ok(${camelize(modelName)})
   }`
         else
@@ -75,7 +75,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async update() {
-    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.castParam('id', 'string'))
+    //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    await ${camelize(modelName)}.update(this.paramsFor(${modelName}))
     //    this.noContent()
   }`
@@ -88,7 +88,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
         if (modelName)
           return `\
   public async destroy() {
-    //    const ${camelize(modelName)} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').find(this.castParam('id', 'string'))
+    //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    await ${camelize(modelName)}.destroy()
     //    this.noContent()
   }`
@@ -108,9 +108,27 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
 ${additionalImports.length ? additionalImports.join('\n') : ''}
 
 export default class ${controllerClassNameWithoutSlashes} extends ${extendingClassName} {
-${methodDefs.join('\n\n')}
+${methodDefs.join('\n\n')}${modelName ? privateMethods(modelName, methods) : ''}
 }\
 `
+}
+
+function privateMethods(modelName: string, methods: string[]) {
+  const privateMethods: string[] = []
+  if (methods.find(methodName => ['show', 'update', 'destroy'].includes(methodName)))
+    privateMethods.push(loadModelStatement(modelName))
+
+  if (!privateMethods.length) return ''
+  return `\n${privateMethods.join('\n')}`
+}
+
+function loadModelStatement(modelName: string) {
+  return `
+  private async ${camelize(modelName)}() {
+    return await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').findOrFail(
+      this.castParam('id', 'string')
+    )
+  }`
 }
 
 function routeDepthToRelativePath(route: string, subtractFromDepth: number = 0) {
