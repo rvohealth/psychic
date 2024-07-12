@@ -1,10 +1,10 @@
-import generateControllerString from '../../../../src/generate/helpers/generateControllerString'
+import generateControllerContent from '../../../../src/generate/helpers/generateControllerContent'
 
 describe('psy generate:controller <name> [...methods]', () => {
   context('when provided methods', () => {
     context('passing a model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
-        const res = generateControllerString('ApiV1PostsController', 'posts', 'Post', [
+        const res = generateControllerContent('ApiV1PostsController', 'posts', 'Post', [
           'create',
           'index',
           'show',
@@ -56,7 +56,7 @@ export default class ApiV1PostsController extends AuthedController {
 
     context('passing a namespaced model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
-        const res = generateControllerString(
+        const res = generateControllerContent(
           'ApiV1HealthPostsController',
           '/api/v1/health/posts',
           'Health/Post',
@@ -105,7 +105,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
 
       context('the path is within the admin namespace', () => {
         it('generates a controller using', () => {
-          const res = generateControllerString(
+          const res = generateControllerContent(
             'Admin/NutritionLogEntriesController',
             'admin/nutrition-log-entries',
             'Nutrition/LogEntry',
@@ -130,7 +130,10 @@ export default class AdminNutritionLogEntriesController extends AdminAuthedContr
 
     context('when provided with a nested path', () => {
       it('generates a controller with pascal-cased naming', () => {
-        const res = generateControllerString('ApiV1UsersController', 'api/v1/users', null, ['hello', 'world'])
+        const res = generateControllerContent('ApiV1UsersController', 'api/v1/users', null, [
+          'hello',
+          'world',
+        ])
 
         expect(res).toEqual(
           `\

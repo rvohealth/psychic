@@ -2,7 +2,7 @@ import pluralize from 'pluralize'
 import { camelize } from '@rvohealth/dream'
 import pascalizeFileName from '../../helpers/pascalizeFileName'
 
-export default function generateControllerString(
+export default function generateControllerContent(
   controllerClassName: string,
   route: string,
   fullyQualifiedModelName: string | null,

@@ -1,5 +1,5 @@
 import fileWriter from './helpers/fileWriter'
-import generateControllerString from './helpers/generateControllerString'
+import generateControllerContent from './helpers/generateControllerContent'
 import generateControllerSpecContent from './helpers/generateControllerSpecContent'
 import absoluteFilePath from '../helpers/absoluteFilePath'
 
@@ -13,7 +13,7 @@ export default async function generateController(
     rootPath?: string
   } = {},
 ) {
-  await fileWriter(route, 'Controller', '.ts', true, 'app/controllers', rootPath, generateControllerString, [
+  await fileWriter(route, 'Controller', '.ts', true, 'app/controllers', rootPath, generateControllerContent, [
     route,
     fullyQualifiedModelName,
     methods,
