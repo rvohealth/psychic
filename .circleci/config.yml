@@ -130,17 +130,6 @@ jobs:
             echo @rvohealth:registry=https://npm.pkg.github.com > ~/.npmrc
             echo //npm.pkg.github.com/:_authToken=$GITHUB_OAUTH_TOKEN >> ~/.npmrc
       - run: sudo apt-get update
-      - browser-tools/install-chrome:
-          chrome-version: 116.0.5845.96 # TODO: remove until: https://github.com/CircleCI-Public/browser-tools-orb/issues/75
-          replace-existing: true # TODO: remove until: https://github.com/CircleCI-Public/browser-tools-orb/issues/75
-
-      - browser-tools/install-chromedriver
-      - run:
-          name: 'Check install'
-          command: |
-            google-chrome --version
-            chromedriver --version
-
       - node/install-packages:
           pkg-manager: yarn
           app-dir: ~/project
