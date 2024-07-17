@@ -273,11 +273,15 @@ program
   .description('db:migrate runs any outstanding database migrations')
   .option('--core', 'sets core to true')
   .option('--tsnode', 'runs the command using ts-node instead of node')
+  .option('--skip-sync', 'skips syncing local schema after running migrations')
   .action(async () => {
     const args = cmdargs()
     await ensureStableAppBuild(args)
-    await sspawn(dreamjsOrDreamtsCmd('db:migrate', args))
-    await maybeSyncRoutes(args)
+    await sspawn(dreamjsOrDreamtsCmd('db:migrate', args, { cmdArgs: args }))
+
+    if (!args.includes('--skip-sync')) {
+      await maybeSyncRoutes(args)
+    }
   })
 
 program
