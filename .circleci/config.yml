@@ -95,7 +95,7 @@ jobs:
           command: dockerize -wait tcp://localhost:6379 -timeout 1m
       - run:
           name: 'Database migrate'
-          command: cd ~/project && APP_ROOT_PATH=$(pwd) yarn psycore db:migrate
+          command: cd ~/project && APP_ROOT_PATH=$(pwd) yarn psycore db:migrate --skip-sync
       - run:
           name: 'Run unit specs'
           command: cd ~/project && APP_ROOT_PATH=$(pwd) yarn uspec
@@ -147,7 +147,7 @@ jobs:
           command: dockerize -wait tcp://localhost:6379 -timeout 1m
       - run:
           name: 'Database migrate'
-          command: cd ~/project && APP_ROOT_PATH=$(pwd) yarn psycore db:migrate
+          command: cd ~/project && APP_ROOT_PATH=$(pwd) yarn psycore db:migrate --skip-sync
 
       - run: mkdir -p /tmp/screenshots
       - run:
