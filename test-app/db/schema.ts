@@ -1,19 +1,27 @@
 import { CalendarDate } from '@rvohealth/dream'
 import { DateTime } from 'luxon'
 import {
-  PetTreatsEnumValues,
-  SpeciesTypesEnumValues,
+  IdType,
   Int8,
   Json,
   Numeric,
   PetTreatsEnum,
+  PetTreatsEnumValues,
   SpeciesTypesEnum,
-  IdType,
+  SpeciesTypesEnumValues,
   Timestamp
 } from './sync'
 
 export const schema = {
   health_users: {
+    primaryKey: 'id',
+    createdAtField: 'createdAt',
+    updatedAtField: 'updatedAt',
+    deletedAtField: 'deletedAt',
+    scopes: {
+      default: [],
+      named: [],
+    },
     columns: {
       createdAt: {
         coercedType: {} as DateTime,
@@ -70,6 +78,14 @@ export const schema = {
     },
   },
   pets: {
+    primaryKey: 'id',
+    createdAtField: 'createdAt',
+    updatedAtField: 'updatedAt',
+    deletedAtField: 'deletedAt',
+    scopes: {
+      default: [],
+      named: [],
+    },
     columns: {
       collarCount: {
         coercedType: {} as IdType | null,
@@ -220,6 +236,14 @@ export const schema = {
     },
   },
   users: {
+    primaryKey: 'id',
+    createdAtField: 'createdAt',
+    updatedAtField: 'updatedAt',
+    deletedAtField: 'deletedAt',
+    scopes: {
+      default: [],
+      named: [],
+    },
     columns: {
       bio: {
         coercedType: {} as string,
@@ -571,4 +595,7 @@ export const schema = {
   },
 } as const
 
-export const passthroughColumns = [] as const
+export const globalSchema = {
+  passthroughColumns: [],
+  allDefaultScopeNames: [],
+} as const
