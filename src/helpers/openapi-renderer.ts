@@ -1,4 +1,14 @@
-import { Dream, DreamSerializer } from '@rvohealth/dream'
+import {
+  Dream,
+  DreamSerializer,
+  OpenapiAllTypes,
+  OpenapiFormats,
+  OpenapiPrimitiveTypes,
+  OpenapiSchemaBody,
+  OpenapiSchemaBodyShorthand,
+  OpenapiSchemaProperties,
+  openapiPrimitiveTypes,
+} from '@rvohealth/dream'
 import {
   AttributeStatement,
   SerializableObject,
@@ -239,7 +249,7 @@ ${this.getSerializerClass().name}
     }
 
     Object.keys(data).forEach(key => {
-      output.properties![key] = this.parseSerializerAttributeRecursive(data[key], attribute)
+      output.properties![key] = this.parseSerializerAttributeRecursive(data[key] as any, attribute)
     })
 
     return output
@@ -260,7 +270,7 @@ ${this.getSerializerClass().name}
       case 'number[]':
       case 'boolean[]':
       case 'date[]':
-      case 'datetime[]':
+      case 'date-time[]':
       case 'decimal[]':
         return {
           type: 'array',
@@ -281,8 +291,6 @@ ${this.getSerializerClass().name}
 
   private serializerTypeToOpenapiType(type: SerializableTypes): OpenapiPrimitiveTypes {
     switch (type) {
-      case 'datetime':
-        return 'date-time'
       default:
         return (type as string).replace(/\[\]$/, '') as OpenapiPrimitiveTypes
     }
@@ -419,56 +427,56 @@ export type OpenapiContent = {
   }
 }
 
-export interface OpenapiSchemaProperties {
-  [key: string]: OpenapiSchemaBody
-}
-
-export type OpenapiSchemaBody =
-  | {
-      type: 'object'
-      required?: string[]
-      properties?: OpenapiSchemaProperties
-      nullable?: boolean
-    }
-  | {
-      type: 'array'
-      items: OpenapiSchemaBody
-      nullable?: boolean
-    }
-  | {
-      type: OpenapiPrimitiveTypes
-      nullable?: boolean
-    }
-
-export type OpenapiSchemaBodyShorthand =
-  | {
-      type: 'object'
-      required?: string[]
-      properties?: OpenapiSchemaPropertiesShorthand
-      nullable?: boolean
-    }
-  | {
-      type: 'array'
-      items: OpenapiSchemaBodyShorthand
-      nullable?: boolean
-    }
-  | {
-      type: OpenapiPrimitiveTypes
-      nullable?: boolean
-    }
-
-export interface OpenapiSchemaPropertiesShorthand {
-  [key: string]: OpenapiSchemaBodyShorthand | OpenapiPrimitiveTypes
-}
-
-export const openapiPrimitiveTypes = ['string', 'boolean', 'number', 'date', 'date-time'] as const
-export type OpenapiPrimitiveTypes = (typeof openapiPrimitiveTypes)[number]
-export type OpenapiAllTypes = OpenapiPrimitiveTypes | 'object' | 'array'
-
-export type OpenapiTypeField = OpenapiPrimitiveTypes | OpenapiTypeFieldObject
-
-export interface OpenapiTypeFieldObject {
-  [key: string]: OpenapiPrimitiveTypes | OpenapiTypeFieldObject
-}
-
-export type OpenapiFormats = 'application/json'
+// export type OpenapiSchemaBody =
+//   | {
+//       type: 'object'
+//       required?: string[]
+//       properties?: OpenapiSchemaProperties
+//       nullable?: boolean
+//     }
+//   | {
+//       type: 'array'
+//       items: OpenapiSchemaBody
+//       nullable?: boolean
+//     }
+//   | {
+//       type: OpenapiPrimitiveTypes
+//       nullable?: boolean
+//     }
+//
+// export interface OpenapiSchemaProperties {
+//   [key: string]: OpenapiSchemaBody
+// }
+//
+// export type OpenapiSchemaBodyShorthand =
+//   | {
+//       type: 'object'
+//       required?: string[]
+//       properties?: OpenapiSchemaPropertiesShorthand
+//       nullable?: boolean
+//     }
+//   | {
+//       type: 'array'
+//       items: OpenapiSchemaBodyShorthand
+//       nullable?: boolean
+//     }
+//   | {
+//       type: OpenapiPrimitiveTypes
+//       nullable?: boolean
+//     }
+//
+// export interface OpenapiSchemaPropertiesShorthand {
+//   [key: string]: OpenapiSchemaBodyShorthand | OpenapiPrimitiveTypes
+// }
+//
+// export const openapiPrimitiveTypes = ['string', 'boolean', 'number', 'date', 'date-time'] as const
+// export type OpenapiPrimitiveTypes = (typeof openapiPrimitiveTypes)[number]
+// export type OpenapiAllTypes = OpenapiPrimitiveTypes | 'object' | 'array'
+//
+// export type OpenapiTypeField = OpenapiPrimitiveTypes | OpenapiTypeFieldObject
+//
+// export interface OpenapiTypeFieldObject {
+//   [key: string]: OpenapiPrimitiveTypes | OpenapiTypeFieldObject
+// }
+//
+// export type OpenapiFormats = 'application/json'
