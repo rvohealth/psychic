@@ -7,11 +7,17 @@ const apiRoutes = {
     DELETE: '/ping',
     OPTIONS: '/ping',
   },
+  auth: {
+    POST: '/auth',
+  },
   authPing: {
     GET: '/auth-ping',
   },
   apiPing: {
     GET: '/api-ping',
+  },
+  castParamTest: {
+    POST: '/cast-param-test',
   },
   usersBeforeAllTest: {
     GET: '/users-before-all-test',
@@ -24,6 +30,9 @@ const apiRoutes = {
   },
   conflict: {
     GET: '/conflict',
+  },
+  notFound: {
+    GET: '/not-found',
   },
   api: {
     ping: {

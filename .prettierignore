@@ -5,6 +5,7 @@ test-app/db/associations.ts
 test-app/conf/routeTypes.ts
 test-app/client/apiRoutes.ts
 test-app/client/schema.ts
+test-app/openapi.json
 src/config/logo.ts
 .github/
 dist/
