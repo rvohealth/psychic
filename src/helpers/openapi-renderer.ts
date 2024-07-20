@@ -1,5 +1,9 @@
 import { Dream, DreamSerializer } from '@rvohealth/dream'
-import { AttributeStatement, SerializableTypes } from '@rvohealth/dream/src/serializer/decorators/attribute'
+import {
+  AttributeStatement,
+  SerializableObject,
+  SerializableTypes,
+} from '@rvohealth/dream/src/serializer/decorators/attribute'
 import PsychicController from '../controller'
 import { HttpMethod } from '../router/types'
 import PsychicDir from './psychicdir'
@@ -17,7 +21,6 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
 
   public static async buildOpenapiObject() {
     const controllers = await PsychicDir.controllers()
-    const serializers = await PsychicDir.serializers()
 
     const finalOutput: any = {
       openapi: '3.0.2',
@@ -104,7 +107,12 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
     const serializerKey = Object.keys(serializers).find(key => serializers[key] === this.getSerializerClass())
 
     if (!serializerKey) {
-      throw 'RUH ROOOHHHHHH'
+      throw new Error(`
+An unexpected error occurred while serializing your app.
+A serializer was not able to be located:
+
+${this.getSerializerClass().name}
+`)
     }
 
     return {
@@ -218,19 +226,37 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
     attribute: AttributeStatement,
   ) {
     if (typeof data === 'object') {
-      const output: any = {
-        type: 'object',
-        properties: {},
+      if ((data as any).type === 'array') {
+        return this.parseSerializerArrayAttribute(data as any, attribute)
+      } else {
+        return this.parseSerializerObjectAttribute(data, attribute)
       }
-
-      Object.keys(data).forEach(key => {
-        output.properties[key] = this.parseSerializerAttributeRecursive(data[key], attribute)
-      })
-
-      return output
     }
 
     return this.parseAttributeValue(data, attribute)
+  }
+
+  private parseSerializerObjectAttribute(data: SerializableObject, attribute: AttributeStatement) {
+    const output: any = {
+      type: 'object',
+      properties: {},
+    }
+
+    Object.keys(data).forEach(key => {
+      output.properties[key] = this.parseSerializerAttributeRecursive(data[key], attribute)
+    })
+
+    return output
+  }
+
+  private parseSerializerArrayAttribute(data: { items: any }, attribute: AttributeStatement) {
+    console.log('PARSING ARRAY')
+    const output: any = {
+      type: 'array',
+      items: this.parseSerializerAttributeRecursive(data.items, attribute),
+    }
+
+    return output
   }
 
   private parseAttributeValue(data: SerializableTypes | undefined, attribute: AttributeStatement) {
@@ -239,6 +265,14 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
         type: 'object',
         nullable: true,
       }
+
+    if ((data as any).type === 'array') {
+      console.log('GHERE!!!')
+      return {
+        type: 'array',
+        // items: this.seri,
+      }
+    }
 
     switch (data) {
       case 'string[]':
@@ -284,6 +318,12 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
       Object.keys(bodySegment.properties || {}).forEach(key => {
         data.properties[key] = this.recursivelyParseBody(bodySegment.properties![key] as any)
       })
+      return data
+    } else if (bodySegment.type === 'array') {
+      const data: any = {
+        type: 'array',
+        items: this.recursivelyParseBody((bodySegment as any).items),
+      }
       return data
     } else {
       if (openapiPrimitiveTypes.includes(bodySegment as any)) {
@@ -459,6 +499,10 @@ export type OpenapiSchemaBodyShorthand =
       type: 'object'
       required?: string[]
       properties?: OpenapiSchemaPropertiesShorthand
+    }
+  | {
+      type: 'array'
+      items: OpenapiSchemaBodyShorthand
     }
   | {
       type: OpenapiPrimitiveTypes

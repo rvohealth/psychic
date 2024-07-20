@@ -359,6 +359,15 @@ describe('OpenapiRenderer', () => {
                         type: 'string',
                         nullable: true,
                       },
+                      things: {
+                        type: 'array',
+                        items: {
+                          type: 'object',
+                          properties: {
+                            name: 'string',
+                          },
+                        },
+                      },
                     },
                   },
                 },
@@ -391,6 +400,18 @@ describe('OpenapiRenderer', () => {
                             firstName: {
                               type: 'string',
                               nullable: true,
+                            },
+                            things: {
+                              type: 'array',
+                              items: {
+                                type: 'object',
+                                properties: {
+                                  name: {
+                                    type: 'string',
+                                    nullable: false,
+                                  },
+                                },
+                              },
                             },
                           },
                         },
