@@ -22,7 +22,7 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
   public static async buildOpenapiObject() {
     const controllers = await PsychicDir.controllers()
 
-    const finalOutput: any = {
+    const finalOutput: OpenapiSchema = {
       openapi: '3.0.2',
       paths: {},
       components: {
@@ -46,11 +46,10 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
           ['get', 'post', 'delete', 'patch', 'options'].includes(key),
         )!
 
-        finalOutput.paths[path] ||= {
+        ;(finalOutput.paths as any)[path] ||= {
           parameters: [],
         }
-
-        finalOutput.paths[path][method] = (endpointPayload as any)[path][method]
+        ;(finalOutput.paths as any)[path][method] = (endpointPayload as any)[path][method]
       }
     }
 
@@ -149,23 +148,21 @@ ${this.getSerializerClass().name}
     )
   }
 
-  private requestBody() {
+  private requestBody(): OpenapiSchemaBody | undefined {
     if (!this.body) return undefined
     return this.recursivelyParseBody(this.body)
   }
 
-  private async parseResponses() {
-    const responseData: any = {
+  private async parseResponses(): Promise<OpenapiResponses> {
+    const responseData: OpenapiResponses = {
       [this.status || 200]: await this.parseSerializerResponseShape(),
     }
 
     Object.keys(this.responses || {}).forEach(statusCode => {
-      responseData[statusCode] = {
+      responseData[parseInt(statusCode)] = {
         content: {
           'application/json': {
-            schema: {
-              ...this.recursivelyParseBody(this.responses![statusCode as keyof typeof this.responses]),
-            },
+            schema: this.recursivelyParseBody(this.responses![statusCode as keyof typeof this.responses]),
           },
         },
       }
@@ -174,7 +171,7 @@ ${this.getSerializerClass().name}
     return responseData
   }
 
-  private async parseSerializerResponseShape() {
+  private async parseSerializerResponseShape(): Promise<OpenapiContent> {
     const serializers = await PsychicDir.serializers()
     const serializerKey = Object.keys(serializers).find(key => serializers[key] === this.getSerializerClass())
 
@@ -224,7 +221,7 @@ ${this.getSerializerClass().name}
   private parseSerializerAttributeRecursive(
     data: SerializableTypes | undefined,
     attribute: AttributeStatement,
-  ) {
+  ): OpenapiSchemaBody {
     if (typeof data === 'object') {
       return this.parseSerializerObjectAttribute(data, attribute)
     }
@@ -232,20 +229,26 @@ ${this.getSerializerClass().name}
     return this.parseAttributeValue(data, attribute)
   }
 
-  private parseSerializerObjectAttribute(data: SerializableObject, attribute: AttributeStatement) {
-    const output: any = {
+  private parseSerializerObjectAttribute(
+    data: SerializableObject,
+    attribute: AttributeStatement,
+  ): OpenapiSchemaBody {
+    const output: OpenapiSchemaBody = {
       type: 'object',
       properties: {},
     }
 
     Object.keys(data).forEach(key => {
-      output.properties[key] = this.parseSerializerAttributeRecursive(data[key], attribute)
+      output.properties![key] = this.parseSerializerAttributeRecursive(data[key], attribute)
     })
 
     return output
   }
 
-  private parseAttributeValue(data: SerializableTypes | undefined, attribute: AttributeStatement) {
+  private parseAttributeValue(
+    data: SerializableTypes | undefined,
+    attribute: AttributeStatement,
+  ): OpenapiSchemaBody {
     if (!data)
       return {
         type: 'object',
@@ -276,29 +279,29 @@ ${this.getSerializerClass().name}
     }
   }
 
-  private serializerTypeToOpenapiType(type: SerializableTypes) {
+  private serializerTypeToOpenapiType(type: SerializableTypes): OpenapiPrimitiveTypes {
     switch (type) {
       case 'datetime':
         return 'date-time'
       default:
-        return (type as string).replace(/\[\]$/, '')
+        return (type as string).replace(/\[\]$/, '') as OpenapiPrimitiveTypes
     }
   }
 
-  private recursivelyParseBody(bodySegment: OpenapiSchemaBodyShorthand) {
+  private recursivelyParseBody(bodySegment: OpenapiSchemaBodyShorthand): OpenapiSchemaBody {
     if (bodySegment.type === 'object') {
-      const data: any = {
+      const data: OpenapiSchemaBody = {
         type: 'object',
         required: bodySegment.required,
         properties: {},
       }
 
       Object.keys(bodySegment.properties || {}).forEach(key => {
-        data.properties[key] = this.recursivelyParseBody(bodySegment.properties![key] as any)
+        data.properties![key] = this.recursivelyParseBody(bodySegment.properties![key] as any)
       })
       return data
     } else if (bodySegment.type === 'array') {
-      const data: any = {
+      const data: OpenapiSchemaBody = {
         type: 'array',
         items: this.recursivelyParseBody((bodySegment as any).items),
       }
@@ -306,12 +309,12 @@ ${this.getSerializerClass().name}
     } else {
       if (openapiPrimitiveTypes.includes(bodySegment as any)) {
         return {
-          type: bodySegment,
+          type: bodySegment as any,
           nullable: false,
         }
       }
 
-      return bodySegment
+      return bodySegment as OpenapiSchemaBody
     }
   }
 
@@ -357,6 +360,16 @@ export interface OpenapiUriOption {
   description?: string
 }
 
+export interface OpenapiSchema {
+  openapi: `${number}.${number}.${number}`
+  paths: OpenapiEndpointResponse
+  components: {
+    schemas: {
+      [key: string]: OpenapiSchemaBody
+    }
+  }
+}
+
 export type OpenapiEndpointResponse = {
   [path: string]: {
     [method in HttpMethod]: OpenapiMethodBody
@@ -385,9 +398,11 @@ export interface OpenapiMethodBody {
   tags: string[]
   summary: string
   requestBody: OpenapiContent
-  responses: {
-    [statusCode: number]: OpenapiContent
-  }
+  responses: OpenapiResponses
+}
+
+export interface OpenapiResponses {
+  [statusCode: number]: OpenapiContent
 }
 
 export type OpenapiContent = {
@@ -408,34 +423,47 @@ export interface OpenapiSchemaProperties {
   [key: string]: OpenapiSchemaBody
 }
 
-export interface OpenapiSchemaBody {
-  type: OpenapiAllTypes
-  required: string[]
-  properties?: OpenapiSchemaProperties
-}
-
-export interface OpenapiSchemaPropertiesShorthand {
-  [key: string]: OpenapiSchemaBodyShorthand | OpenapiPrimitiveTypes
-}
-
-export type OpenapiSchemaBodyShorthand =
+export type OpenapiSchemaBody =
   | {
       type: 'object'
       required?: string[]
-      properties?: OpenapiSchemaPropertiesShorthand
+      properties?: OpenapiSchemaProperties
+      nullable?: boolean
     }
   | {
       type: 'array'
-      items: OpenapiSchemaBodyShorthand
+      items: OpenapiSchemaBody
+      nullable?: boolean
     }
   | {
       type: OpenapiPrimitiveTypes
       nullable?: boolean
     }
 
-export const openapiPrimitiveTypes = ['string', 'boolean', 'number'] as const
+export type OpenapiSchemaBodyShorthand =
+  | {
+      type: 'object'
+      required?: string[]
+      properties?: OpenapiSchemaPropertiesShorthand
+      nullable?: boolean
+    }
+  | {
+      type: 'array'
+      items: OpenapiSchemaBodyShorthand
+      nullable?: boolean
+    }
+  | {
+      type: OpenapiPrimitiveTypes
+      nullable?: boolean
+    }
+
+export interface OpenapiSchemaPropertiesShorthand {
+  [key: string]: OpenapiSchemaBodyShorthand | OpenapiPrimitiveTypes
+}
+
+export const openapiPrimitiveTypes = ['string', 'boolean', 'number', 'date', 'date-time'] as const
 export type OpenapiPrimitiveTypes = (typeof openapiPrimitiveTypes)[number]
-export type OpenapiAllTypes = OpenapiPrimitiveTypes | 'object'
+export type OpenapiAllTypes = OpenapiPrimitiveTypes | 'object' | 'array'
 
 export type OpenapiTypeField = OpenapiPrimitiveTypes | OpenapiTypeFieldObject
 
