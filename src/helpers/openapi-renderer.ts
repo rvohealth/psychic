@@ -250,7 +250,6 @@ ${this.getSerializerClass().name}
   }
 
   private parseSerializerArrayAttribute(data: { items: any }, attribute: AttributeStatement) {
-    console.log('PARSING ARRAY')
     const output: any = {
       type: 'array',
       items: this.parseSerializerAttributeRecursive(data.items, attribute),
@@ -265,14 +264,6 @@ ${this.getSerializerClass().name}
         type: 'object',
         nullable: true,
       }
-
-    if ((data as any).type === 'array') {
-      console.log('GHERE!!!')
-      return {
-        type: 'array',
-        // items: this.seri,
-      }
-    }
 
     switch (data) {
       case 'string[]':
@@ -334,60 +325,6 @@ ${this.getSerializerClass().name}
       }
 
       return bodySegment
-    }
-  }
-
-  private schemaObject(): OpenapiSchemaProperties {
-    const serializerClass = this.getSerializerClass()
-
-    let obj: any = {}
-    for (const attributeStatement of serializerClass['attributeStatements']) {
-      obj = {
-        ...obj,
-        ...this.renderAsToObject(attributeStatement),
-      }
-    }
-
-    return obj
-  }
-
-  private renderAsToObject(attributeStatement: AttributeStatement) {
-    if (typeof attributeStatement.renderAs === 'object') {
-      return {
-        [attributeStatement.field]: this.recursiveRenderAsToObject(attributeStatement.renderAs),
-      }
-    } else {
-      return {
-        [attributeStatement.field]: {
-          type: attributeStatement.renderAs,
-        },
-      }
-    }
-  }
-
-  private recursiveRenderAsToObject(data: SerializableTypes | undefined): any {
-    if (data === undefined) {
-      return { type: 'any' }
-    }
-
-    if (typeof data === 'object') {
-      const nestedData: any = {
-        type: 'object',
-        properties: {},
-      }
-
-      for (const key of Object.keys(data)) {
-        nestedData.properties[key] = this.recursiveRenderAsToObject(data[key])
-      }
-
-      return nestedData
-    }
-
-    switch (data) {
-      default:
-        return {
-          type: data,
-        }
     }
   }
 
