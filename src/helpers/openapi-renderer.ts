@@ -226,11 +226,7 @@ ${this.getSerializerClass().name}
     attribute: AttributeStatement,
   ) {
     if (typeof data === 'object') {
-      if ((data as any).type === 'array') {
-        return this.parseSerializerArrayAttribute(data as any, attribute)
-      } else {
-        return this.parseSerializerObjectAttribute(data, attribute)
-      }
+      return this.parseSerializerObjectAttribute(data, attribute)
     }
 
     return this.parseAttributeValue(data, attribute)
@@ -245,15 +241,6 @@ ${this.getSerializerClass().name}
     Object.keys(data).forEach(key => {
       output.properties[key] = this.parseSerializerAttributeRecursive(data[key], attribute)
     })
-
-    return output
-  }
-
-  private parseSerializerArrayAttribute(data: { items: any }, attribute: AttributeStatement) {
-    const output: any = {
-      type: 'array',
-      items: this.parseSerializerAttributeRecursive(data.items, attribute),
-    }
 
     return output
   }
