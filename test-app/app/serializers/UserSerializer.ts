@@ -16,4 +16,13 @@ export default class UserSerializer extends UserSummarySerializer {
 export class UserExtraSerializer extends UserSummarySerializer {
   @Attribute('string[]')
   public nicknames: string[]
+
+  @Attribute({
+    label: 'string',
+    value: {
+      label: 'string',
+      value: 'number',
+    },
+  })
+  public howyadoin() {}
 }

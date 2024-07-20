@@ -16,6 +16,7 @@ import HttpStatusCodeMap, { HttpStatusSymbol } from '../error/http/status-codes'
 import { ControllerHook } from '../controller/hooks'
 import Conflict from '../error/http/conflict'
 import Params, { ParamsCastOptions, ParamsForOpts } from '../server/params'
+import OpenapiRenderer from '../helpers/openapi-renderer'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -57,6 +58,7 @@ export default class PsychicController {
   }
 
   public static controllerHooks: ControllerHook[] = []
+  public static openapi: Record<string, OpenapiRenderer<any>>
 
   public static serializes(ModelClass: typeof Dream) {
     return {
