@@ -4,6 +4,7 @@ import path from 'path'
 import PsychicController from '../controller'
 import absoluteSrcPath from './absoluteSrcPath'
 import importFileWithDefault from './importFileWithDefault'
+import importFile from '@rvohealth/dream/src/helpers/path/importFile'
 
 let _models: { [key: string]: typeof Dream }
 let _controllers: { [key: string]: typeof PsychicController }
@@ -62,9 +63,31 @@ export default class PsychicDir {
       /\.[jt]s$/.test(path),
     )
     for (const serializerPath of serializerPaths) {
-      const serializerClass = await importFileWithDefault<typeof DreamSerializer>(serializerPath)
-      const serializerKey = serializerPath.replace(/^.*app\/serializers\//, '').replace(/\.[jt]s$/, '')
-      _serializers[serializerKey] = serializerClass
+      const allSerializers = await importFile(serializerPath)
+      Object.keys(allSerializers).forEach(key => {
+        const potentialSerializer = allSerializers[key]
+        if ((potentialSerializer as typeof DreamSerializer)?.isDreamSerializer) {
+          const trimmedPath = serializerPath
+            .replace(/^.*app\/serializers\//, '')
+            .replace(/\.[jt]s$/, '')
+            .replace(/Serializer$/, '')
+
+          let pathMinusLastSegmentArr = trimmedPath.split('/')
+          const lastSegment = pathMinusLastSegmentArr.pop()
+          const serializerPathMinusLastSegment = pathMinusLastSegmentArr.join('/')
+
+          // default exports should just get the file name as the key,
+          // where named exports should get their named consts
+          const serializerKey =
+            serializerPathMinusLastSegment.replace(/^.*app\/serializers\//, '').replace(/\.[jt]s$/, '') +
+              key ===
+            'default'
+              ? lastSegment
+              : potentialSerializer.name.replace(/Serializer$/, '')
+
+          _serializers[serializerKey] = potentialSerializer
+        }
+      })
     }
     return _serializers
   }

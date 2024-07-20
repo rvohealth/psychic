@@ -1,8 +1,11 @@
 import { Dream, DreamSerializer } from '@rvohealth/dream'
 import { AttributeStatement, SerializableTypes } from '@rvohealth/dream/src/serializer/decorators/attribute'
+import PsychicController from '../controller'
 import { HttpMethod } from '../router/types'
+import PsychicDir from './psychicdir'
 
 export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | typeof DreamSerializer> {
+  private many: OpenapiRendererOpts<DreamOrSerializer>['many']
   private path: OpenapiRendererOpts<DreamOrSerializer>['path']
   private method: OpenapiRendererOpts<DreamOrSerializer>['method']
   private responses: OpenapiRendererOpts<DreamOrSerializer>['responses']
@@ -10,11 +13,62 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
   private uri: OpenapiRendererOpts<DreamOrSerializer>['uri']
   private body: OpenapiRendererOpts<DreamOrSerializer>['body']
   private headers: OpenapiRendererOpts<DreamOrSerializer>['headers']
+  private status: OpenapiRendererOpts<DreamOrSerializer>['status']
+
+  public static async buildOpenapiObject() {
+    const controllers = await PsychicDir.controllers()
+    const serializers = await PsychicDir.serializers()
+
+    const finalOutput: any = {
+      openapi: '3.0.2',
+      paths: {},
+      components: {
+        schemas: {},
+      },
+    }
+
+    for (const controllerName of Object.keys(controllers)) {
+      const controller = controllers[controllerName] as typeof PsychicController
+      for (const key of Object.keys(controller.openapi || {})) {
+        const renderer = controller.openapi[key]
+
+        finalOutput.components.schemas = {
+          ...finalOutput.components.schemas,
+          ...(await renderer.toSchemaObject()),
+        }
+
+        const endpointPayload = await renderer.toObject()
+        const path = Object.keys(endpointPayload)[0]!
+        const method = Object.keys(endpointPayload[path]).find(key =>
+          ['get', 'post', 'delete', 'patch', 'options'].includes(key),
+        )!
+
+        finalOutput.paths[path] ||= {
+          parameters: [],
+        }
+
+        finalOutput.paths[path][method] = (endpointPayload as any)[path][method]
+      }
+    }
+
+    return finalOutput
+  }
 
   constructor(
     private modelOrSerializerCb: () => DreamOrSerializer,
-    { path, method, responses, serializerKey, uri, body, headers }: OpenapiRendererOpts<DreamOrSerializer>,
+    {
+      many,
+      path,
+      method,
+      responses,
+      status,
+      serializerKey,
+      uri,
+      body,
+      headers,
+    }: OpenapiRendererOpts<DreamOrSerializer>,
   ) {
+    this.many = many
     this.path = path
     this.method = method
     this.responses = responses
@@ -22,13 +76,10 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
     this.uri = uri
     this.body = body
     this.headers = headers
+    this.status = status
   }
 
-  public toObject(): OpenapiEndpointResponse {
-    // const serializerClass = this.getSerializerClass()
-    // console.log('schema object', this.schemaObject(), this.path, this.method)
-    //
-
+  public async toObject(): Promise<OpenapiEndpointResponse> {
     return {
       [this.path]: {
         parameters: [...(this.headersArray() as any[]), ...(this.uriArray() as any[])],
@@ -39,18 +90,26 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
             content: {
               'application/json': {
                 schema: this.requestBody(),
-                // schema: {
-                //   type: 'object',
-                //   properties: this.schemaObject(),
-                // },
               },
             },
           },
-          responses: this.parseResponses(),
+          responses: await this.parseResponses(),
         },
       },
-      // }
     } as unknown as OpenapiEndpointResponse
+  }
+
+  public async toSchemaObject(): Promise<Record<string, OpenapiSchemaBody>> {
+    const serializers = await PsychicDir.serializers()
+    const serializerKey = Object.keys(serializers).find(key => serializers[key] === this.getSerializerClass())
+
+    if (!serializerKey) {
+      throw 'RUH ROOOHHHHHH'
+    }
+
+    return {
+      [serializerKey]: this.buildSerializerJson(),
+    }
   }
 
   private headersArray(): OpenapiParameterResponse[] {
@@ -87,8 +146,11 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
     return this.recursivelyParseBody(this.body)
   }
 
-  private parseResponses() {
-    const responseData: any = {}
+  private async parseResponses() {
+    const responseData: any = {
+      [this.status || 200]: await this.parseSerializerResponseShape(),
+    }
+
     Object.keys(this.responses || {}).forEach(statusCode => {
       responseData[statusCode] = {
         content: {
@@ -100,7 +162,115 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
         },
       }
     })
+
     return responseData
+  }
+
+  private async parseSerializerResponseShape() {
+    const serializers = await PsychicDir.serializers()
+    const serializerKey = Object.keys(serializers).find(key => serializers[key] === this.getSerializerClass())
+
+    const serializerObject: OpenapiSchemaBody = {
+      $ref: `#/components/schemas/${serializerKey}`,
+    } as any
+
+    const baseSchema = this.many
+      ? {
+          type: 'array',
+          items: serializerObject,
+        }
+      : serializerObject
+
+    const finalOutput: OpenapiContent = {
+      content: {
+        'application/json': {
+          schema: baseSchema as any,
+        },
+      },
+    }
+
+    return finalOutput
+  }
+
+  private buildSerializerJson(): OpenapiSchemaBody {
+    const serializerClass = this.getSerializerClass()
+    const attributes = serializerClass['attributeStatements']
+
+    const serializerObject: OpenapiSchemaBody = {
+      type: 'object',
+      required: [],
+      properties: {},
+    }
+
+    attributes.forEach(attr => {
+      if (!attr.options?.allowNull) {
+        serializerObject.required!.push(attr.field)
+      }
+
+      serializerObject.properties![attr.field] = this.parseSerializerAttributeRecursive(attr.renderAs, attr)
+    })
+
+    return serializerObject
+  }
+
+  private parseSerializerAttributeRecursive(
+    data: SerializableTypes | undefined,
+    attribute: AttributeStatement,
+  ) {
+    if (typeof data === 'object') {
+      const output: any = {
+        type: 'object',
+        properties: {},
+      }
+
+      Object.keys(data).forEach(key => {
+        output.properties[key] = this.parseSerializerAttributeRecursive(data[key], attribute)
+      })
+
+      return output
+    }
+
+    return this.parseAttributeValue(data, attribute)
+  }
+
+  private parseAttributeValue(data: SerializableTypes | undefined, attribute: AttributeStatement) {
+    if (!data)
+      return {
+        type: 'object',
+        nullable: true,
+      }
+
+    switch (data) {
+      case 'string[]':
+      case 'number[]':
+      case 'boolean[]':
+      case 'date[]':
+      case 'datetime[]':
+      case 'decimal[]':
+        return {
+          type: 'array',
+          items: {
+            type: this.serializerTypeToOpenapiType(data),
+            nullable: false,
+          },
+          nullable: attribute.options?.allowNull ?? false,
+        }
+
+      default:
+        return {
+          type: this.serializerTypeToOpenapiType(data),
+          nullable: attribute.options?.allowNull ?? false,
+        }
+    }
+  }
+
+  private serializerTypeToOpenapiType(type: SerializableTypes) {
+    switch (type) {
+      case 'datetime':
+        return 'date-time'
+      default:
+        return (type as string).replace(/\[\]$/, '')
+    }
   }
 
   private recursivelyParseBody(bodySegment: OpenapiSchemaBodyShorthand) {
@@ -196,6 +366,7 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
 }
 
 export interface OpenapiRendererOpts<T extends typeof Dream | typeof DreamSerializer> {
+  many?: boolean
   path: string
   method: HttpMethod
   uri?: OpenapiUriOption[]
@@ -207,6 +378,7 @@ export interface OpenapiRendererOpts<T extends typeof Dream | typeof DreamSerial
   serializerKey?: T extends typeof Dream
     ? keyof InstanceType<T>['serializers' & keyof InstanceType<T>]
     : undefined
+  status?: number
 }
 
 export interface OpenapiHeaderOption {
@@ -260,6 +432,7 @@ export type OpenapiContent = {
       schema: {
         type: OpenapiAllTypes
         properties?: OpenapiSchemaProperties
+        required?: string[]
       }
     }
   } & {
@@ -273,7 +446,7 @@ export interface OpenapiSchemaProperties {
 
 export interface OpenapiSchemaBody {
   type: OpenapiAllTypes
-  required?: boolean
+  required: string[]
   properties?: OpenapiSchemaProperties
 }
 

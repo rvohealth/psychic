@@ -1,5 +1,5 @@
 import { Encrypt } from '../../../src'
-import { BeforeAction } from '../../../src/controller/decorators'
+import { BeforeAction, Openapi } from '../../../src/controller/decorators'
 import User from '../models/User'
 import ApplicationController from './ApplicationController'
 
@@ -20,11 +20,24 @@ export default class UsersController extends ApplicationController {
     throw new Error('this should force a 500')
   }
 
+  @Openapi(() => User, {
+    path: '/users',
+    method: 'post',
+    status: 201,
+    serializerKey: 'extra',
+  })
   public async create() {
     const user = await User.create(this.userParams)
     this.created(user)
   }
 
+  @Openapi(() => User, {
+    path: '/users',
+    method: 'get',
+    status: 200,
+    many: true,
+    serializerKey: 'extra',
+  })
   public async index() {
     const users = await User.all()
     this.ok(users)
