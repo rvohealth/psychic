@@ -75,7 +75,7 @@ export default class Params {
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const schema = dreamClass.prototype.dreamconf.schema
+    const schema = dreamClass.prototype.schema
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const columns = schema[dreamClass.prototype.table]?.columns as object

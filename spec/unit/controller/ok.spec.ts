@@ -26,7 +26,7 @@ describe('PsychicController', () => {
     })
 
     it('renders the data as json', () => {
-      const controller = new MyController(req, res, { config })
+      const controller = new MyController(req, res, { config, action: 'howyadoin' })
       controller.howyadoin()
       expect(res.json).toHaveBeenCalledWith({ chalupas: 'dujour' })
     })
@@ -39,7 +39,7 @@ describe('PsychicController', () => {
       }
 
       it('passes "null" to json without raising exception', () => {
-        const controller = new MyController(req, res, { config })
+        const controller = new MyController(req, res, { config, action: 'howyadoin' })
         controller.howyadoin()
         expect(res.json).toHaveBeenCalledWith(null)
       })

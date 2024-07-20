@@ -15,7 +15,10 @@ describe('PsychicController', () => {
 
       const res = getMockRes().res
       const server = new PsychicServer()
-      const controller = new PsychicController(req, res, { config: new PsychicConfig(server.app) })
+      const controller = new PsychicController(req, res, {
+        config: new PsychicConfig(server.app),
+        action: 'hello',
+      })
       expect(controller.getCookie('auth_token')).toEqual(user.id.toString())
     })
   })
@@ -25,7 +28,10 @@ describe('PsychicController', () => {
       const req = getMockReq()
       const res = getMockRes().res
       const server = new PsychicServer()
-      const controller = new PsychicController(req, res, { config: new PsychicConfig(server.app) })
+      const controller = new PsychicController(req, res, {
+        config: new PsychicConfig(server.app),
+        action: 'hello',
+      })
 
       const spy = jest.spyOn(controller.session, 'setCookie')
       controller.setCookie('auth_token', 'abc', { secure: true, maxAge: { days: 4 } })

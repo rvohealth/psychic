@@ -24,6 +24,21 @@ export { default as cookieMaxAgeFromCookieOpts } from './helpers/cookieMaxAgeFro
 export { default as loadRepl } from './helpers/loadRepl'
 export { default as pathifyNestedObject } from './helpers/pathifyNestedObject'
 export { default as log } from './log'
+export {
+  MissingControllerActionPairingInRoutes,
+  OpenapiContent,
+  OpenapiEndpointRendererOpts,
+  OpenapiEndpointResponse,
+  OpenapiHeaderOption,
+  OpenapiHeaderType,
+  OpenapiMethodBody,
+  OpenapiMethodResponse,
+  OpenapiParameterResponse,
+  OpenapiQueryOption,
+  OpenapiResponses,
+  OpenapiSchema,
+  OpenapiPathParamOption as OpenapiUriOption,
+} from './openapi-renderer/endpoint'
 export { default as PsychicRouter } from './router'
 export { HttpMethod } from './router/types'
 export { default as scheduledService } from './scheduled/scheduled-service'

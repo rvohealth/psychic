@@ -1,8 +1,22 @@
-import { BeforeCreate, BeforeUpdate, Validates, Virtual, HasMany, DreamColumn } from '@rvohealth/dream'
+import {
+  BeforeCreate,
+  BeforeUpdate,
+  DreamColumn,
+  HasMany,
+  HasOne,
+  Validates,
+  Virtual,
+} from '@rvohealth/dream'
 import Hash from '../../../src/encryption/hash'
-import Pet from './Pet'
-import UserSerializer, { UserExtraSerializer, UserSummarySerializer } from '../serializers/UserSerializer'
+import UserSerializer, {
+  UserExtraSerializer,
+  UserSummarySerializer,
+  UserWithPostsSerializer,
+  UserWithRecentPostSerializer,
+} from '../serializers/UserSerializer'
 import ApplicationModel from './ApplicationModel'
+import Pet from './Pet'
+import Post from './Post'
 export default class User extends ApplicationModel {
   public get table() {
     return 'users' as const
@@ -13,6 +27,8 @@ export default class User extends ApplicationModel {
       default: UserSerializer,
       summary: UserSummarySerializer,
       extra: UserExtraSerializer,
+      withPosts: UserWithPostsSerializer,
+      withRecentPost: UserWithRecentPostSerializer,
     }
   }
 
@@ -71,6 +87,12 @@ export default class User extends ApplicationModel {
 
   @HasMany(() => Pet)
   public pets: Pet[]
+
+  @HasMany(() => Post)
+  public posts: Post[]
+
+  @HasOne(() => Post, { order: { id: 'desc' } })
+  public recentPost: Post | null
 
   public static backgroundTest() {}
 

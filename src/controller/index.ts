@@ -1,21 +1,22 @@
 import { Dream, DreamParamSafeAttributes, DreamSerializer } from '@rvohealth/dream'
 import { Request, Response } from 'express'
-import Forbidden from '../error/http/forbidden'
-import Unauthorized from '../error/http/unauthorized'
-import UnprocessableEntity from '../error/http/unprocessable-entity'
-import Session, { CustomSessionCookieOptions } from '../session'
-import NotFound from '../error/http/not-found'
+import background from '../background'
 import PsychicConfig from '../config'
 import getControllerKey from '../config/helpers/getControllerKey'
-import background from '../background'
 import getModelKey from '../config/helpers/getModelKey'
+import { ControllerHook } from '../controller/hooks'
 import BadRequest from '../error/http/bad-request'
+import Conflict from '../error/http/conflict'
+import Forbidden from '../error/http/forbidden'
 import InternalServerError from '../error/http/internal-server-error'
+import NotFound from '../error/http/not-found'
 import ServiceUnavailable from '../error/http/service-unavailable'
 import HttpStatusCodeMap, { HttpStatusSymbol } from '../error/http/status-codes'
-import { ControllerHook } from '../controller/hooks'
-import Conflict from '../error/http/conflict'
+import Unauthorized from '../error/http/unauthorized'
+import UnprocessableEntity from '../error/http/unprocessable-entity'
+import OpenapiEndpointRenderer from '../openapi-renderer/endpoint'
 import Params, { ParamsCastOptions, ParamsForOpts } from '../server/params'
+import Session, { CustomSessionCookieOptions } from '../session'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -58,6 +59,9 @@ export default class PsychicController {
 
   public static controllerHooks: ControllerHook[] = []
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static openapi: Record<string, OpenapiEndpointRenderer<any>>
+
   public static serializes(ModelClass: typeof Dream) {
     return {
       with: (SerializerClass: typeof DreamSerializer) => {
@@ -69,6 +73,10 @@ export default class PsychicController {
 
   public static async controllerPath() {
     return await getControllerKey(this)
+  }
+
+  public static async controllerActionPath(methodName: string) {
+    return `${(await this.controllerPath()).replace(/Controller$/, '')}#${methodName.toString()}`
   }
 
   public static async background(
@@ -103,19 +111,23 @@ export default class PsychicController {
   public res: Response
   public session: Session
   public config: PsychicConfig
+  public action: string
   constructor(
     req: Request,
     res: Response,
     {
       config,
+      action,
     }: {
       config: PsychicConfig
+      action: string
     },
   ) {
     this.req = req
     this.res = res
     this.config = config
     this.session = new Session(req, res, this.config)
+    this.action = action
   }
 
   public get params(): PsychicParamsDictionary {
@@ -216,6 +228,14 @@ export default class PsychicController {
       ...this.defaultSerializerPassthrough,
       ...passthrough,
     }
+  }
+
+  public respond<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
+    const openapiData = (this.constructor as typeof PsychicController).openapi[this.action]
+    this.res.status(openapiData?.['status'] || 200)
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this.json(data, opts)
   }
 
   public ok<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {

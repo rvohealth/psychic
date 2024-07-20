@@ -275,7 +275,7 @@ export default class PsychicRouter {
       return
     }
 
-    const controller = this._initializeController(ControllerClass, req, res)
+    const controller = this._initializeController(ControllerClass, req, res, action)
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const controllerAction = (controller as any)[action]
 
@@ -378,9 +378,15 @@ export default class PsychicRouter {
     }
   }
 
-  public _initializeController(ControllerClass: typeof PsychicController, req: Request, res: Response) {
+  public _initializeController(
+    ControllerClass: typeof PsychicController,
+    req: Request,
+    res: Response,
+    action: string,
+  ) {
     return new ControllerClass(req, res, {
       config: this.config,
+      action,
     })
   }
 }

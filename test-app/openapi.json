@@ -1,0 +1,193 @@
+{
+  "openapi": "3.0.2",
+  "info": {
+    "version": "0.3.29",
+    "title": "@rvohealth/psychic",
+    "description": "Typescript web framework"
+  },
+  "paths": {
+    "/users": {
+      "parameters": [],
+      "post": {
+        "tags": [],
+        "summary": "",
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserExtra"
+                }
+              }
+            },
+            "description": "create"
+          }
+        }
+      },
+      "get": {
+        "tags": [],
+        "summary": "",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserExtra"
+                  }
+                }
+              }
+            },
+            "description": "index"
+          }
+        }
+      }
+    },
+    "/users/{id}": {
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "description": "id",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "summary": "",
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWithPosts"
+                }
+              }
+            },
+            "description": "show"
+          }
+        }
+      },
+      "delete": {
+        "tags": [],
+        "summary": "",
+        "responses": {
+          "204": {
+            "description": "no content"
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "Comment": {
+        "type": "object",
+        "required": [
+          "id",
+          "body"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          }
+        }
+      },
+      "PostWithComments": {
+        "type": "object",
+        "required": [
+          "id",
+          "body",
+          "comments"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "body": {
+            "type": "string"
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            }
+          }
+        }
+      },
+      "UserExtra": {
+        "type": "object",
+        "required": [
+          "id",
+          "nicknames",
+          "howyadoin"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "nicknames": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "howyadoin": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string"
+              },
+              "stuff": {
+                "type": "array",
+                "items": {
+                  "type": "string"
+                }
+              },
+              "nestedStuff": {
+                "type": "object",
+                "properties": {
+                  "nested1": {
+                    "type": "boolean"
+                  },
+                  "nested2": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "format": "decimal"
+                    }
+                  }
+                }
+              }
+            }
+          }
+        }
+      },
+      "UserWithPosts": {
+        "type": "object",
+        "required": [
+          "id",
+          "posts"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "posts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PostWithComments"
+            }
+          }
+        }
+      }
+    }
+  }
+}
