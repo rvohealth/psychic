@@ -8,7 +8,6 @@ describe('OpenapiRenderer', () => {
       const response = await OpenapiRenderer.buildOpenapiObject()
       expect(response).toEqual({
         openapi: '3.0.2',
-
         paths: expect.objectContaining({
           '/users': {
             parameters: [],

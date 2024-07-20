@@ -19,7 +19,7 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
   private headers: OpenapiRendererOpts<DreamOrSerializer>['headers']
   private status: OpenapiRendererOpts<DreamOrSerializer>['status']
 
-  public static async buildOpenapiObject() {
+  public static async buildOpenapiObject(): Promise<OpenapiSchema> {
     const controllers = await PsychicDir.controllers()
 
     const finalOutput: OpenapiSchema = {
