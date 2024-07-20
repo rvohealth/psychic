@@ -18,10 +18,17 @@ export class UserExtraSerializer extends UserSummarySerializer {
   public nicknames: string[]
 
   @Attribute({
-    label: 'string',
-    value: {
-      label: 'string',
-      value: 'number',
+    type: 'object',
+    properties: {
+      name: 'string',
+      stuff: 'string[]',
+      nestedStuff: {
+        type: 'object',
+        properties: {
+          nested1: 'boolean',
+          nested2: 'decimal[]',
+        },
+      },
     },
   })
   public howyadoin() {}

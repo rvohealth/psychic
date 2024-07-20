@@ -9,11 +9,8 @@ import {
   OpenapiSchemaProperties,
   openapiPrimitiveTypes,
 } from '@rvohealth/dream'
-import {
-  AttributeStatement,
-  SerializableObject,
-  SerializableTypes,
-} from '@rvohealth/dream/src/serializer/decorators/attribute'
+import { OpenapiShorthandPrimitiveTypes } from '@rvohealth/dream/src/openapi/types'
+import { AttributeStatement, SerializableTypes } from '@rvohealth/dream/src/serializer/decorators/attribute'
 import PsychicController from '../controller'
 import { HttpMethod } from '../router/types'
 import PsychicDir from './psychicdir'
@@ -222,42 +219,15 @@ ${this.getSerializerClass().name}
         serializerObject.required!.push(attr.field)
       }
 
-      serializerObject.properties![attr.field] = this.parseSerializerAttributeRecursive(attr.renderAs, attr)
+      serializerObject.properties![attr.field] = this.recursivelyParseBody(attr.renderAs)
     })
 
     return serializerObject
   }
 
-  private parseSerializerAttributeRecursive(
-    data: SerializableTypes | undefined,
-    attribute: AttributeStatement,
-  ): OpenapiSchemaBody {
-    if (typeof data === 'object') {
-      return this.parseSerializerObjectAttribute(data, attribute)
-    }
-
-    return this.parseAttributeValue(data, attribute)
-  }
-
-  private parseSerializerObjectAttribute(
-    data: SerializableObject,
-    attribute: AttributeStatement,
-  ): OpenapiSchemaBody {
-    const output: OpenapiSchemaBody = {
-      type: 'object',
-      properties: {},
-    }
-
-    Object.keys(data).forEach(key => {
-      output.properties![key] = this.parseSerializerAttributeRecursive(data[key] as any, attribute)
-    })
-
-    return output
-  }
-
   private parseAttributeValue(
     data: SerializableTypes | undefined,
-    attribute: AttributeStatement,
+    attribute?: AttributeStatement,
   ): OpenapiSchemaBody {
     if (!data)
       return {
@@ -278,13 +248,13 @@ ${this.getSerializerClass().name}
             type: this.serializerTypeToOpenapiType(data),
             nullable: false,
           },
-          nullable: attribute.options?.allowNull ?? false,
+          nullable: attribute?.options?.allowNull ?? false,
         }
 
       default:
         return {
           type: this.serializerTypeToOpenapiType(data),
-          nullable: attribute.options?.allowNull ?? false,
+          nullable: attribute?.options?.allowNull ?? false,
         }
     }
   }
@@ -296,22 +266,29 @@ ${this.getSerializerClass().name}
     }
   }
 
-  private recursivelyParseBody(bodySegment: OpenapiSchemaBodyShorthand): OpenapiSchemaBody {
-    if (bodySegment.type === 'object') {
+  private recursivelyParseBody(
+    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
+    attributeStatement?: AttributeStatement,
+  ): OpenapiSchemaBody {
+    const nonPrimitiveBodySegment = bodySegment as OpenapiSchemaBodyShorthand
+    if (nonPrimitiveBodySegment.type === 'object') {
       const data: OpenapiSchemaBody = {
         type: 'object',
-        required: bodySegment.required,
+        required: nonPrimitiveBodySegment.required,
         properties: {},
       }
 
-      Object.keys(bodySegment.properties || {}).forEach(key => {
-        data.properties![key] = this.recursivelyParseBody(bodySegment.properties![key] as any)
+      Object.keys(nonPrimitiveBodySegment.properties || {}).forEach(key => {
+        data.properties![key] = this.recursivelyParseBody(
+          nonPrimitiveBodySegment.properties![key] as any,
+          attributeStatement,
+        )
       })
       return data
-    } else if (bodySegment.type === 'array') {
+    } else if (nonPrimitiveBodySegment.type === 'array') {
       const data: OpenapiSchemaBody = {
         type: 'array',
-        items: this.recursivelyParseBody((bodySegment as any).items),
+        items: this.recursivelyParseBody((bodySegment as any).items, attributeStatement),
       }
       return data
     } else {
@@ -322,7 +299,8 @@ ${this.getSerializerClass().name}
         }
       }
 
-      return bodySegment as OpenapiSchemaBody
+      if (typeof bodySegment === 'object') return bodySegment as OpenapiSchemaBody
+      return this.parseAttributeValue(bodySegment, attributeStatement) as OpenapiSchemaBody
     }
   }
 

@@ -82,19 +82,31 @@ describe('OpenapiRenderer', () => {
                 howyadoin: {
                   type: 'object',
                   properties: {
-                    label: {
+                    name: {
                       type: 'string',
                       nullable: false,
                     },
-                    value: {
+                    stuff: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                        nullable: false,
+                      },
+                      nullable: false,
+                    },
+                    nestedStuff: {
                       type: 'object',
                       properties: {
-                        label: {
-                          type: 'string',
+                        nested1: {
+                          type: 'boolean',
                           nullable: false,
                         },
-                        value: {
-                          type: 'number',
+                        nested2: {
+                          type: 'array',
+                          items: {
+                            type: 'decimal',
+                            nullable: false,
+                          },
                           nullable: false,
                         },
                       },
@@ -139,19 +151,31 @@ describe('OpenapiRenderer', () => {
               howyadoin: {
                 type: 'object',
                 properties: {
-                  label: {
+                  name: {
                     type: 'string',
                     nullable: false,
                   },
-                  value: {
+                  stuff: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                      nullable: false,
+                    },
+                    nullable: false,
+                  },
+                  nestedStuff: {
                     type: 'object',
                     properties: {
-                      label: {
-                        type: 'string',
+                      nested1: {
+                        type: 'boolean',
                         nullable: false,
                       },
-                      value: {
-                        type: 'number',
+                      nested2: {
+                        type: 'array',
+                        items: {
+                          type: 'decimal',
+                          nullable: false,
+                        },
                         nullable: false,
                       },
                     },
