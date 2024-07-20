@@ -5,43 +5,48 @@ import { HttpMethod } from '../router/types'
 export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | typeof DreamSerializer> {
   private path: OpenapiRendererOpts<DreamOrSerializer>['path']
   private method: OpenapiRendererOpts<DreamOrSerializer>['method']
-  private status: OpenapiRendererOpts<DreamOrSerializer>['status']
+  private responses: OpenapiRendererOpts<DreamOrSerializer>['responses']
   private serializerKey: OpenapiRendererOpts<DreamOrSerializer>['serializerKey']
-  private params: OpenapiRendererOpts<DreamOrSerializer>['params']
+  private uri: OpenapiRendererOpts<DreamOrSerializer>['uri']
+  private body: OpenapiRendererOpts<DreamOrSerializer>['body']
   private headers: OpenapiRendererOpts<DreamOrSerializer>['headers']
 
   constructor(
     private modelOrSerializerCb: () => DreamOrSerializer,
-    { path, method, status, serializerKey, params, headers }: OpenapiRendererOpts<DreamOrSerializer>,
+    { path, method, responses, serializerKey, uri, body, headers }: OpenapiRendererOpts<DreamOrSerializer>,
   ) {
     this.path = path
     this.method = method
-    this.status = status
+    this.responses = responses
     this.serializerKey = serializerKey
-    this.params = params
+    this.uri = uri
+    this.body = body
     this.headers = headers
   }
 
   public toObject(): OpenapiEndpointResponse {
     // const serializerClass = this.getSerializerClass()
     // console.log('schema object', this.schemaObject(), this.path, this.method)
+    //
 
     return {
       [this.path]: {
-        parameters: [...(this.headersArray() as any[]), ...(this.paramsArray() as any[])],
+        parameters: [...(this.headersArray() as any[]), ...(this.uriArray() as any[])],
         [this.method]: {
           tags: [],
           summary: '',
           requestBody: {
             content: {
               'application/json': {
-                schema: {
-                  type: 'object',
-                  properties: this.schemaObject(),
-                },
+                schema: this.requestBody(),
+                // schema: {
+                //   type: 'object',
+                //   properties: this.schemaObject(),
+                // },
               },
             },
           },
+          responses: this.parseResponses(),
         },
       },
       // }
@@ -61,22 +66,68 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
     )
   }
 
-  private paramsArray(): OpenapiParameterResponse[] {
+  private uriArray(): OpenapiParameterResponse[] {
     return (
-      this.params?.map(param => {
-        const schema = this.recursiveRenderAsToObject(param.type as SerializableTypes)
+      this.uri?.map(param => {
         return {
-          in: param.in,
+          in: 'path',
           name: param.name,
           required: param.required,
           description: param.description || '',
-          schema,
+          schema: {
+            type: 'string',
+          },
         }
       }) || []
     )
   }
 
-  private schemaObject(): OpenapiSchemaBody {
+  private requestBody() {
+    if (!this.body) return undefined
+    return this.recursivelyParseBody(this.body)
+  }
+
+  private parseResponses() {
+    const responseData: any = {}
+    Object.keys(this.responses || {}).forEach(statusCode => {
+      responseData[statusCode] = {
+        content: {
+          'application/json': {
+            schema: {
+              ...this.recursivelyParseBody(this.responses![statusCode as keyof typeof this.responses]),
+            },
+          },
+        },
+      }
+    })
+    return responseData
+  }
+
+  private recursivelyParseBody(bodySegment: OpenapiSchemaBodyShorthand) {
+    if (bodySegment.type === 'object') {
+      const data: any = {
+        type: 'object',
+        required: bodySegment.required,
+        properties: {},
+      }
+
+      Object.keys(bodySegment.properties || {}).forEach(key => {
+        data.properties[key] = this.recursivelyParseBody(bodySegment.properties![key] as any)
+      })
+      return data
+    } else {
+      if (openapiPrimitiveTypes.includes(bodySegment as any)) {
+        return {
+          type: bodySegment,
+          nullable: false,
+        }
+      }
+
+      return bodySegment
+    }
+  }
+
+  private schemaObject(): OpenapiSchemaProperties {
     const serializerClass = this.getSerializerClass()
 
     let obj: any = {}
@@ -147,12 +198,15 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
 export interface OpenapiRendererOpts<T extends typeof Dream | typeof DreamSerializer> {
   path: string
   method: HttpMethod
-  status: number
+  uri?: OpenapiUriOption[]
+  headers?: OpenapiHeaderOption[]
+  body?: OpenapiSchemaBodyShorthand
+  responses?: {
+    [statusCode: number]: OpenapiSchemaBodyShorthand
+  }
   serializerKey?: T extends typeof Dream
     ? keyof InstanceType<T>['serializers' & keyof InstanceType<T>]
     : undefined
-  params?: OpenapiParamOption[]
-  headers?: OpenapiHeaderOption[]
 }
 
 export interface OpenapiHeaderOption {
@@ -161,12 +215,10 @@ export interface OpenapiHeaderOption {
   description?: string
 }
 
-export interface OpenapiParamOption {
-  in: Exclude<OpenapiHeaderType, 'header'>
+export interface OpenapiUriOption {
   name: string
   required: boolean
   description?: string
-  type: OpenapiTypeField
 }
 
 export type OpenapiEndpointResponse = {
@@ -183,7 +235,7 @@ export interface OpenapiParameterResponse {
   required: boolean
   description: string
   schema: {
-    type: 'string' | { type: 'object'; properties: OpenapiSchemaBody }
+    type: 'string' | { type: 'object'; properties: OpenapiSchemaProperties }
   }
 }
 
@@ -196,30 +248,58 @@ export type OpenapiMethodResponse = {
 export interface OpenapiMethodBody {
   tags: string[]
   summary: string
-  requestBody: {
-    content: {
-      [format in OpenapiFormats]: {
-        schema: {
-          type: OpenapiPrimitiveTypes
-          properties?: OpenapiSchemaBody
-        }
+  requestBody: OpenapiContent
+  responses: {
+    [statusCode: number]: OpenapiContent
+  }
+}
+
+export type OpenapiContent = {
+  content: {
+    [format in OpenapiFormats]: {
+      schema: {
+        type: OpenapiAllTypes
+        properties?: OpenapiSchemaProperties
       }
     }
+  } & {
+    description?: string
   }
+}
+
+export interface OpenapiSchemaProperties {
+  [key: string]: OpenapiSchemaBody
 }
 
 export interface OpenapiSchemaBody {
-  [key: string]: {
-    type: OpenapiPrimitiveTypes
-    properties: OpenapiSchemaBody
-  }
+  type: OpenapiAllTypes
+  required?: boolean
+  properties?: OpenapiSchemaProperties
 }
 
-export type OpenapiPrimitiveTypes = 'string' | 'boolean' | 'number' | 'object'
-export type OpenapiTypeField = Exclude<OpenapiPrimitiveTypes, 'object'> | OpenapiTypeFieldObject
+export interface OpenapiSchemaPropertiesShorthand {
+  [key: string]: OpenapiSchemaBodyShorthand | OpenapiPrimitiveTypes
+}
+
+export type OpenapiSchemaBodyShorthand =
+  | {
+      type: 'object'
+      required?: string[]
+      properties?: OpenapiSchemaPropertiesShorthand
+    }
+  | {
+      type: OpenapiPrimitiveTypes
+      nullable?: boolean
+    }
+
+export const openapiPrimitiveTypes = ['string', 'boolean', 'number'] as const
+export type OpenapiPrimitiveTypes = (typeof openapiPrimitiveTypes)[number]
+export type OpenapiAllTypes = OpenapiPrimitiveTypes | 'object'
+
+export type OpenapiTypeField = OpenapiPrimitiveTypes | OpenapiTypeFieldObject
 
 export interface OpenapiTypeFieldObject {
-  [key: string]: Exclude<OpenapiPrimitiveTypes, 'object'> | OpenapiTypeFieldObject
+  [key: string]: OpenapiPrimitiveTypes | OpenapiTypeFieldObject
 }
 
 export type OpenapiFormats = 'application/json'

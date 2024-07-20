@@ -1,14 +1,14 @@
 import OpenapiRenderer from '../../../src/helpers/openapi-renderer'
 import User from '../../../test-app/app/models/User'
+import { UserExtraSerializer } from '../../../test-app/app/serializers/UserSerializer'
 
 describe('OpenapiRenderer', () => {
-  describe('#toJson', () => {
+  describe('#toObject', () => {
     context('headers', () => {
       it('renders headers within the parameters array', () => {
         const renderer = new OpenapiRenderer(() => User, {
           path: '/how/yadoin',
           method: 'get',
-          status: 200,
           headers: [
             {
               name: 'Authorization',
@@ -51,34 +51,20 @@ describe('OpenapiRenderer', () => {
       })
     })
 
-    context('params', () => {
+    context('uri', () => {
       it('renders params within the parameters array', () => {
         const renderer = new OpenapiRenderer(() => User, {
           path: '/how/yadoin',
           method: 'get',
-          status: 200,
-          params: [
+          uri: [
             {
-              in: 'path',
               name: 'search',
               required: true,
               description: 'the search term',
-              type: 'string',
-            },
-            {
-              in: 'body',
-              name: 'user',
-              required: false,
-              type: {
-                email: 'string',
-                password: 'string',
-                settings: {
-                  likesChalupas: 'boolean',
-                },
-              },
             },
           ],
         })
+
         const response = renderer.toObject()
         expect(response).toEqual(
           expect.objectContaining({
@@ -93,35 +79,67 @@ describe('OpenapiRenderer', () => {
                     type: 'string',
                   },
                 },
-                {
-                  in: 'body',
-                  name: 'user',
-                  required: false,
-                  description: '',
-                  schema: {
-                    type: 'object',
-                    properties: {
-                      email: {
-                        type: 'string',
-                      },
-                      password: {
-                        type: 'string',
-                      },
-                      settings: {
-                        type: 'object',
-                        properties: {
-                          likesChalupas: {
-                            type: 'boolean',
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
               ],
             }),
           }),
         )
+      })
+    })
+
+    context('body', () => {
+      it('renders params within the parameters array', () => {
+        const renderer = new OpenapiRenderer(() => User, {
+          path: '/how/yadoin',
+          method: 'get',
+          body: {
+            type: 'object',
+            required: ['email', 'password'],
+            properties: {
+              email: 'string',
+              password: {
+                type: 'string',
+                nullable: true,
+              },
+              settings: {
+                type: 'object',
+                properties: {
+                  likesChalupas: 'boolean',
+                },
+              },
+            },
+          },
+        })
+
+        const response = renderer.toObject()
+        expect(response['/how/yadoin'].get.requestBody).toEqual({
+          content: {
+            'application/json': {
+              schema: {
+                type: 'object',
+                required: ['email', 'password'],
+                properties: {
+                  email: {
+                    type: 'string',
+                    nullable: false,
+                  },
+                  password: {
+                    type: 'string',
+                    nullable: true,
+                  },
+                  settings: {
+                    type: 'object',
+                    properties: {
+                      likesChalupas: {
+                        type: 'boolean',
+                        nullable: false,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        })
       })
     })
 
@@ -131,43 +149,119 @@ describe('OpenapiRenderer', () => {
           const renderer = new OpenapiRenderer(() => User, {
             path: '/how/yadoin',
             method: 'get',
-            status: 200,
             serializerKey: 'extra',
+            responses: {
+              201: {
+                type: 'object',
+                required: ['user'],
+                properties: {
+                  user: {
+                    type: 'object',
+                    required: ['name', 'email'],
+                    properties: {
+                      name: 'string',
+                      email: 'string',
+                      firstName: {
+                        type: 'string',
+                        nullable: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
           })
+
           const response = renderer.toObject()
-          expect(response).toEqual(
+          expect(response['/how/yadoin'].get.responses).toEqual(
             expect.objectContaining({
-              '/how/yadoin': {
-                parameters: [],
-                get: {
-                  tags: [],
-                  summary: '',
-                  requestBody: {
-                    content: {
-                      'application/json': {
-                        schema: {
+              201: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      required: ['user'],
+                      properties: {
+                        user: {
                           type: 'object',
+                          required: ['name', 'email'],
                           properties: {
-                            id: { type: 'string' },
-                            nicknames: { type: 'string[]' },
-                            howyadoin: {
-                              type: 'object',
-                              properties: {
-                                label: {
-                                  type: 'string',
-                                },
-                                value: {
-                                  type: 'object',
-                                  properties: {
-                                    label: {
-                                      type: 'string',
-                                    },
-                                    value: {
-                                      type: 'number',
-                                    },
-                                  },
-                                },
-                              },
+                            name: {
+                              type: 'string',
+                              nullable: false,
+                            },
+                            email: {
+                              type: 'string',
+                              nullable: false,
+                            },
+                            firstName: {
+                              type: 'string',
+                              nullable: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
+      context('with a serializer passed', () => {
+        it("uses the provided serializer, converting it's payload shape to openapi format", () => {
+          const renderer = new OpenapiRenderer(() => UserExtraSerializer, {
+            path: '/how/yadoin',
+            method: 'get',
+            responses: {
+              201: {
+                type: 'object',
+                required: ['user'],
+                properties: {
+                  user: {
+                    type: 'object',
+                    required: ['name', 'email'],
+                    properties: {
+                      name: 'string',
+                      email: 'string',
+                      firstName: {
+                        type: 'string',
+                        nullable: true,
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          })
+
+          const response = renderer.toObject()
+          expect(response['/how/yadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              201: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      required: ['user'],
+                      properties: {
+                        user: {
+                          type: 'object',
+                          required: ['name', 'email'],
+                          properties: {
+                            name: {
+                              type: 'string',
+                              nullable: false,
+                            },
+                            email: {
+                              type: 'string',
+                              nullable: false,
+                            },
+                            firstName: {
+                              type: 'string',
+                              nullable: true,
                             },
                           },
                         },
