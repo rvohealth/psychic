@@ -456,6 +456,51 @@ describe('OpenapiRenderer', () => {
         })
       })
 
+      context('with $ref', () => {
+        it('returns valid openapi', async () => {
+          const renderer = new OpenapiRenderer(() => User, {
+            path: '/how/yadoin',
+            method: 'get',
+            serializerKey: 'extra',
+            responses: {
+              201: {
+                oneOf: [
+                  {
+                    $ref: 'components/schemas/Howyadoin',
+                  },
+                  {
+                    type: 'string',
+                  },
+                ],
+              },
+            },
+          })
+
+          const response = await renderer.toObject()
+          expect(response['/how/yadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              201: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      oneOf: [
+                        {
+                          $ref: '#/components/schemas/Howyadoin',
+                        },
+                        {
+                          type: 'string',
+                          nullable: false,
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
       context('with many=true', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
           const renderer = new OpenapiRenderer(() => User, {

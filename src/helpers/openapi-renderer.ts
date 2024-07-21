@@ -12,6 +12,7 @@ import {
 import {
   OpenapiSchemaArray,
   OpenapiSchemaExpressionAnyOf,
+  OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
   OpenapiSchemaShorthandExpressionAnyOf,
   OpenapiSchemaShorthandExpressionOneOf,
@@ -371,11 +372,11 @@ ${this.getSerializerClass().name}
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
     attributeStatement?: AttributeStatement,
   ): OpenapiSchemaBody {
-    const nonPrimitiveBodySegment = bodySegment as OpenapiSchemaBodyShorthand
     const objectBodySegment = bodySegment as OpenapiSchemaObject
     const arrayBodySegment = bodySegment as OpenapiSchemaArray
     const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
     const anyOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAnyOf
+    const refBodySegment = bodySegment as OpenapiSchemaExpressionRef
 
     if (oneOfBodySegment.oneOf) {
       return {
@@ -389,7 +390,7 @@ ${this.getSerializerClass().name}
       }
     }
 
-    if ((nonPrimitiveBodySegment as OpenapiSchemaObject).type === 'object') {
+    if (objectBodySegment.type === 'object') {
       const data: OpenapiSchemaBody = {
         type: 'object',
         required: objectBodySegment.required,
@@ -403,6 +404,7 @@ ${this.getSerializerClass().name}
           attributeStatement,
         )
       })
+
       return data
     } else if (arrayBodySegment.type === 'array') {
       const data: OpenapiSchemaBody = {
@@ -425,6 +427,12 @@ ${this.getSerializerClass().name}
             nullable: false,
             ...bodySegment,
           } as OpenapiSchemaBody
+        }
+
+        if (refBodySegment.$ref) {
+          return {
+            $ref: `#/${refBodySegment.$ref.replace(/^#\//, '')}`,
+          }
         }
       }
 
@@ -537,6 +545,7 @@ export type OpenapiContent = {
             properties?: OpenapiSchemaProperties
             required?: string[]
           }
+        | OpenapiSchemaExpressionRef
         | OpenapiSchemaExpressionAnyOf
         | OpenapiSchemaShorthandExpressionOneOf
     }
