@@ -1,6 +1,8 @@
 import { DreamColumn, BelongsTo } from '@rvohealth/dream'
 import ApplicationModel from './ApplicationModel'
-import CommentSerializer, { CommentSummarySerializer } from '../../../test-app/app/serializers/CommentSerializer'
+import CommentSerializer, {
+  CommentSummarySerializer,
+} from '../../../test-app/app/serializers/CommentSerializer'
 import Post from './Post'
 
 export default class Comment extends ApplicationModel {

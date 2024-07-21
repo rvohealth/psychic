@@ -41,6 +41,8 @@ describe('PsychicController', () => {
       const controller = new MyController(req, res, { config, action: 'create' })
       controller.create()
       expect(res.json).toHaveBeenCalledWith('created')
+
+      // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(res.status).toHaveBeenCalledWith(201)
     })
 
@@ -49,6 +51,8 @@ describe('PsychicController', () => {
         const controller = new MyController(req, res, { config, action: 'update' })
         controller.update()
         expect(res.json).toHaveBeenCalledWith('updated')
+
+        // eslint-disable-next-line @typescript-eslint/unbound-method
         expect(res.status).toHaveBeenCalledWith(200)
       })
     })

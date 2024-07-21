@@ -157,10 +157,12 @@ describe('PsychicController', () => {
     context('with default passthrough data set on the controller', () => {
       class User2 extends User {
         public get serializers() {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return {
             default: User2Serializer,
             summary: User2SummarySerializer,
             extra: User2ExtraSerializer,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any
         }
       }

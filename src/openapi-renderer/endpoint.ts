@@ -11,8 +11,10 @@ import {
   uniq,
 } from '@rvohealth/dream'
 import {
+  OpenapiSchemaArray,
   OpenapiSchemaExpressionAnyOf,
   OpenapiSchemaExpressionRef,
+  OpenapiSchemaObject,
   OpenapiSchemaShorthandExpressionOneOf,
   OpenapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream/src/openapi/types'
@@ -83,12 +85,7 @@ export default class OpenapiEndpointRenderer<
   public async toObject(): Promise<OpenapiEndpointResponse> {
     return {
       [this.path]: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-        parameters: [
-          ...(this.headersArray() as any[]),
-          ...(this.uriArray() as any[]),
-          ...(this.queryArray() as any[]),
-        ],
+        parameters: [...this.headersArray(), ...this.uriArray(), ...this.queryArray()],
         [this.method]: {
           tags: [],
           summary: '',
@@ -265,7 +262,7 @@ ${this.getSerializerClass().name}
   private buildSerializerJson(
     serializerClass: typeof DreamSerializer,
     serializers: { [key: string]: typeof DreamSerializer },
-  ): Record<string, OpenapiSchemaBody> {
+  ): Record<string, OpenapiSchemaObject> {
     const attributes = serializerClass['attributeStatements']
 
     const serializerKey = Object.keys(serializers).find(key => serializers[key] === serializerClass)
@@ -278,7 +275,7 @@ ${this.getSerializerClass().name}
 `)
     }
 
-    const serializerObject: OpenapiSchemaBody = {
+    const serializerObject: OpenapiSchemaObject = {
       type: 'object',
       required: [],
       properties: {},
@@ -311,7 +308,7 @@ ${this.getSerializerClass().name}
    */
   private attachAssociationsToSerializerPayload(
     serializerClass: typeof DreamSerializer,
-    serializerPayload: any,
+    serializerPayload: Record<string, OpenapiSchemaObject>,
     serializers: { [key: string]: typeof DreamSerializer },
     serializerKey: string,
   ) {
@@ -375,9 +372,10 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
     association,
   }: {
     serializerClass: typeof DreamSerializer
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     associatedSerializers: (typeof DreamSerializer<any, any>)[]
     serializers: { [key: string]: typeof DreamSerializer }
-    finalOutput: any
+    finalOutput: Record<string, OpenapiSchemaObject>
     serializerKey: string
     association: DreamSerializerAssociationStatement
   }) {
@@ -390,11 +388,14 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
         `Failed to identify serializer key for association: ${serializerClass.name}#${association.field}`,
       )
 
-    finalOutput[serializerKey].required = uniq([...finalOutput[serializerKey].required, association.field])
+    finalOutput[serializerKey].required = uniq([
+      ...(finalOutput[serializerKey].required || []),
+      association.field,
+    ])
 
     switch (association.type) {
       case 'RendersMany':
-        finalOutput[serializerKey].properties[association.field] = {
+        finalOutput[serializerKey].properties![association.field] = {
           type: 'array',
           items: {
             $ref: `#/components/schemas/${associatedSerializerKey}`,
@@ -403,7 +404,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
         break
 
       case 'RendersOne':
-        finalOutput[serializerKey].properties[association.field] = {
+        finalOutput[serializerKey].properties![association.field] = {
           $ref: `#/components/schemas/${associatedSerializerKey}`,
         }
         break
@@ -429,13 +430,14 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
     association,
   }: {
     serializerClass: typeof DreamSerializer
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     associatedSerializers: (typeof DreamSerializer<any, any>)[]
     serializers: { [key: string]: typeof DreamSerializer }
-    finalOutput: any
+    finalOutput: Record<string, OpenapiSchemaObject>
     serializerKey: string
     association: DreamSerializerAssociationStatement
   }) {
-    const anyOf: any[] = []
+    const anyOf: (OpenapiSchemaExpressionRef | OpenapiSchemaArray)[] = []
 
     associatedSerializers.forEach(associatedSerializer => {
       const associatedSerializerKey = Object.keys(serializers).find(
@@ -446,7 +448,10 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
           `Failed to identify serializer key for association: ${serializerClass.name}#${association.field}`,
         )
 
-      finalOutput[serializerKey].required = uniq([...finalOutput[serializerKey].required, association.field])
+      finalOutput[serializerKey].required = uniq([
+        ...(finalOutput[serializerKey].required || []),
+        association.field,
+      ])
 
       switch (association.type) {
         case 'RendersMany':
@@ -469,7 +474,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
       finalOutput = { ...finalOutput, ...associatedSchema }
     })
 
-    finalOutput[serializerKey].properties[association.field] = {
+    finalOutput[serializerKey].properties![association.field] = {
       anyOf,
     }
 

@@ -16,4 +16,3 @@ export default class CommentSerializer<
   @Attribute('string')
   public body: DreamColumn<Comment, 'body'>
 }
-

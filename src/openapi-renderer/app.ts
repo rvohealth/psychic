@@ -76,14 +76,24 @@ export default class OpenapiAppRenderer {
     const sortedSchemas = Object.keys(schema.components.schemas).sort()
 
     const sortedSchema: typeof schema = { ...schema }
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     sortedSchema.paths = sortedPaths.reduce((agg, path) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       agg[path] = schema.paths[path]
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return agg
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }, {} as any)
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     sortedSchema.components.schemas = sortedSchemas.reduce((agg, key) => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       agg[key] = schema.components.schemas[key]
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return agg
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     }, {} as any)
 
     return sortedSchema

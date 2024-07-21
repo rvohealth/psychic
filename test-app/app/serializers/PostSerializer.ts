@@ -14,6 +14,7 @@ export default class PostSerializer<
   DataType extends Post,
   Passthrough extends object,
 > extends PostSummarySerializer<DataType, Passthrough> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @RendersMany(() => CommentSerializer<any, any>)
   public comments: Comment[]
 
@@ -25,6 +26,7 @@ export class PostWithRecentCommentSerializer<
   DataType extends Post,
   Passthrough extends object,
 > extends PostSummarySerializer<DataType, Passthrough> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @RendersOne(() => CommentSerializer<any, any>)
   public recentComment: Comment | null
 
@@ -36,6 +38,7 @@ export class PostWithCommentsSerializer<
   DataType extends Post,
   Passthrough extends object,
 > extends PostSummarySerializer<DataType, Passthrough> {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @RendersMany(() => CommentSerializer<any, any>)
   public comments: Comment[]
 

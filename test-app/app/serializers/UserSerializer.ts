@@ -38,11 +38,13 @@ export class UserExtraSerializer extends UserSummarySerializer {
 }
 
 export class UserWithPostsSerializer extends UserSummarySerializer {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @RendersMany(() => PostWithCommentsSerializer<any, any>)
   public posts: Post[]
 }
 
 export class UserWithPostsMultiTypeSerializer extends UserSummarySerializer {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @RendersMany(() => [PostWithCommentsSerializer<any, any>, PostWithRecentCommentSerializer<any, any>])
   public posts: Post[]
 }
@@ -53,6 +55,7 @@ export class UserWithPostsMultiType2Serializer extends UserSummarySerializer {
 }
 
 export class UserWithRecentPostSerializer extends UserSummarySerializer {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   @RendersOne(() => PostWithRecentCommentSerializer<any, any>)
   public recentPost: Post | null
 }
