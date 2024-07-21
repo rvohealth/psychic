@@ -578,7 +578,7 @@ export class MissingControllerActionPairingInRoutes extends Error {
   public get message() {
     return `
 ATTENTION:
-  The @Openapi decorator call in the ${this.controllerClass} did not explicitly
+  The @Openapi decorator call in the ${this.controllerClass.name} did not explicitly
   specify a 'path' option for the ${this.action} action. In this case, Psychic will
   automatically attempt to guess the correct route based on the entries in
   the 'conf/routes.ts' file.

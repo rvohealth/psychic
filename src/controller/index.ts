@@ -17,7 +17,6 @@ import UnprocessableEntity from '../error/http/unprocessable-entity'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint'
 import Params, { ParamsCastOptions, ParamsForOpts } from '../server/params'
 import Session, { CustomSessionCookieOptions } from '../session'
-import { sanitizedControllerPath } from '../router/helpers'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
