@@ -19,8 +19,11 @@ import {
   OpenapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream/src/openapi/types'
 import PsychicDir from '../helpers/psychicdir'
+import { RouteConfig } from '../router/route-manager'
 import { HttpMethod } from '../router/types'
+import PsychicServer from '../server'
 import OpenapiBodySegmentRenderer from './body-segment'
+import PsychicController from '../controller'
 
 export default class OpenapiEndpointRenderer<
   DreamOrSerializer extends typeof Dream | typeof DreamSerializer,
@@ -52,6 +55,8 @@ export default class OpenapiEndpointRenderer<
    */
   constructor(
     private modelOrSerializerCb: () => DreamOrSerializer,
+    private controllerClass: typeof PsychicController,
+    private action: string,
     {
       many,
       path,
@@ -84,7 +89,7 @@ export default class OpenapiEndpointRenderer<
    */
   public async toObject(): Promise<OpenapiEndpointResponse> {
     return {
-      [this.path]: {
+      [await this.computedPath()]: {
         parameters: [...this.headersArray(), ...this.uriArray(), ...this.queryArray()],
         [this.method]: {
           tags: [],
@@ -124,6 +129,49 @@ ${this.getSerializerClass().name}
 
     return this.buildSerializerJson(this.getSerializerClass(), serializers)
   }
+
+  private async computedPath(): Promise<string> {
+    if (this.path) return this.path
+    if (this._path) return this._path
+
+    await this._loadRoutes()
+    const controllerActionString = await this.controllerClass.controllerActionPath(this.action)
+
+    const route = this.routes.find(
+      routeConfig => routeConfig.controllerActionString === controllerActionString,
+    )
+
+    if (!route)
+      throw new Error(
+        `
+No route found in routes file for controllerActionString: ${controllerActionString}`,
+      )
+
+    return `/${route.path.replace(/^\//, '')}`
+  }
+  private _path: string
+
+  private async _loadRoutes() {
+    if (this._routes) return
+
+    const server = new PsychicServer()
+    await server.boot()
+    this._server = server
+
+    this._routes = await server.routes()
+  }
+
+  private get routes() {
+    if (!this._routes) throw new Error('must called _loadRoutes before accessing routes property')
+    return this._routes
+  }
+  private _routes: RouteConfig[]
+
+  private get server() {
+    if (!this._server) throw new Error('must called _loadRoutes before accessing routes property')
+    return this._server
+  }
+  private _server: PsychicServer
 
   /**
    * @internal
@@ -514,9 +562,9 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
 }
 
 export interface OpenapiEndpointRendererOpts<T extends typeof Dream | typeof DreamSerializer> {
-  many?: boolean
-  path: string
   method: HttpMethod
+  path?: string
+  many?: boolean
   uri?: OpenapiUriOption[]
   headers?: OpenapiHeaderOption[]
   query?: OpenapiQueryOption[]

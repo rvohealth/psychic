@@ -11,6 +11,7 @@ export default (r: PsychicRouter) => {
   r.get('auth-ping', 'AuthedUsers#ping')
   r.get('api-ping', 'Api/Users#ping')
   r.post('cast-param-test', 'ParamsTest#testCastParam')
+  r.get('users/howyadoin', 'Users#howyadoin')
 
   // hooks tests
   r.get('users-before-all-test', 'Users#beforeAllTest')

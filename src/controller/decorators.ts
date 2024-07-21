@@ -32,6 +32,8 @@ export function Openapi<I extends typeof Dream | typeof DreamSerializer>(
 
     psychicControllerClass.openapi[methodName.toString()] = new OpenapiEndpointRenderer(
       modelOrSerializerCb,
+      psychicControllerClass,
+      methodName.toString(),
       opts,
     )
   }
