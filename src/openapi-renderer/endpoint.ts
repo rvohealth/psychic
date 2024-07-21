@@ -20,16 +20,18 @@ import PsychicDir from '../helpers/psychicdir'
 import { HttpMethod } from '../router/types'
 import OpenapiBodySegmentRenderer from './body-segment'
 
-export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | typeof DreamSerializer> {
-  private many: OpenapiRendererOpts<DreamOrSerializer>['many']
-  private path: OpenapiRendererOpts<DreamOrSerializer>['path']
-  private method: OpenapiRendererOpts<DreamOrSerializer>['method']
-  private responses: OpenapiRendererOpts<DreamOrSerializer>['responses']
-  private serializerKey: OpenapiRendererOpts<DreamOrSerializer>['serializerKey']
-  private uri: OpenapiRendererOpts<DreamOrSerializer>['uri']
-  private body: OpenapiRendererOpts<DreamOrSerializer>['body']
-  private headers: OpenapiRendererOpts<DreamOrSerializer>['headers']
-  private status: OpenapiRendererOpts<DreamOrSerializer>['status']
+export default class OpenapiEndpointRenderer<
+  DreamOrSerializer extends typeof Dream | typeof DreamSerializer,
+> {
+  private many: OpenapiEndpointRendererOpts<DreamOrSerializer>['many']
+  private path: OpenapiEndpointRendererOpts<DreamOrSerializer>['path']
+  private method: OpenapiEndpointRendererOpts<DreamOrSerializer>['method']
+  private responses: OpenapiEndpointRendererOpts<DreamOrSerializer>['responses']
+  private serializerKey: OpenapiEndpointRendererOpts<DreamOrSerializer>['serializerKey']
+  private uri: OpenapiEndpointRendererOpts<DreamOrSerializer>['uri']
+  private body: OpenapiEndpointRendererOpts<DreamOrSerializer>['body']
+  private headers: OpenapiEndpointRendererOpts<DreamOrSerializer>['headers']
+  private status: OpenapiEndpointRendererOpts<DreamOrSerializer>['status']
 
   /**
    * @internal
@@ -38,7 +40,7 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
    * the contents to the openapi.json file at the project root.
    */
   public static async syncOpenapiJsonFile() {
-    const openapiContents = await OpenapiRenderer.buildOpenapiObject()
+    const openapiContents = await OpenapiEndpointRenderer.buildOpenapiObject()
     const jsonPath = openapiJsonPath()
     await fs.writeFile(jsonPath, JSON.stringify(openapiContents, null, 2), {
       flag: 'w+',
@@ -98,7 +100,7 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
   }
 
   /**
-   * instantiates a new OpenapiRenderer.
+   * instantiates a new OpenapiEndpointRenderer.
    * This class is used by the `@Openapi` decorator
    * to store information related to a controller's action
    * for use in other parts of the app.
@@ -107,7 +109,7 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
    * endpoint information to use when generating an openapi.json
    * file, which is done using the static:
    * ```ts
-   * const openapiJsonContents = await OpenapiRenderer.buildOpenapiObject()
+   * const openapiJsonContents = await OpenapiEndpointRenderer.buildOpenapiObject()
    * const json = JSON.encode(openapiJsonContents, null, 2)
    * ```
    */
@@ -123,7 +125,7 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
       uri,
       body,
       headers,
-    }: OpenapiRendererOpts<DreamOrSerializer>,
+    }: OpenapiEndpointRendererOpts<DreamOrSerializer>,
   ) {
     this.many = many
     this.path = path
@@ -338,7 +340,7 @@ ${this.getSerializerClass().name}
    * @internal
    *
    * Returns the serializer class either attached directly
-   * to this OpenapiRenderer, or else travels through the
+   * to this OpenapiEndpointRenderer, or else travels through the
    * attached dream or view model to identify a serializer
    * match.
    */
@@ -354,7 +356,7 @@ ${this.getSerializerClass().name}
   }
 }
 
-export interface OpenapiRendererOpts<T extends typeof Dream | typeof DreamSerializer> {
+export interface OpenapiEndpointRendererOpts<T extends typeof Dream | typeof DreamSerializer> {
   many?: boolean
   path: string
   method: HttpMethod

@@ -1,11 +1,11 @@
-import OpenapiRenderer from '../../../src/openapi-renderer'
+import OpenapiEndpointRenderer from '../../../src/openapi-renderer/endpoint'
 import User from '../../../test-app/app/models/User'
 import { UserExtraSerializer } from '../../../test-app/app/serializers/UserSerializer'
 
-describe('OpenapiRenderer', () => {
+describe('OpenapiEndpointRenderer', () => {
   describe('.buildOpenapiObject', () => {
     it('reads all controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
-      const response = await OpenapiRenderer.buildOpenapiObject()
+      const response = await OpenapiEndpointRenderer.buildOpenapiObject()
       expect(response).toEqual({
         openapi: '3.0.2',
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -127,7 +127,7 @@ describe('OpenapiRenderer', () => {
 
   describe('#toSchemaObject', () => {
     it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
-      const renderer = new OpenapiRenderer(() => User, {
+      const renderer = new OpenapiEndpointRenderer(() => User, {
         path: '/how/yadoin',
         method: 'get',
         serializerKey: 'extra',
@@ -196,7 +196,7 @@ describe('OpenapiRenderer', () => {
   describe('#toObject', () => {
     context('uri', () => {
       it('renders params within the parameters array', async () => {
-        const renderer = new OpenapiRenderer(() => User, {
+        const renderer = new OpenapiEndpointRenderer(() => User, {
           path: '/how/yadoin',
           method: 'get',
           uri: [
@@ -232,7 +232,7 @@ describe('OpenapiRenderer', () => {
 
     context('body', () => {
       it('renders params within the parameters array', async () => {
-        const renderer = new OpenapiRenderer(() => User, {
+        const renderer = new OpenapiEndpointRenderer(() => User, {
           path: '/how/yadoin',
           method: 'get',
           body: {
@@ -292,7 +292,7 @@ describe('OpenapiRenderer', () => {
     context('response', () => {
       context('with a dream model passed', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
-          const renderer = new OpenapiRenderer(() => User, {
+          const renderer = new OpenapiEndpointRenderer(() => User, {
             path: '/how/yadoin',
             method: 'get',
             serializerKey: 'extra',
@@ -317,7 +317,7 @@ describe('OpenapiRenderer', () => {
 
       context('with a serializer passed', () => {
         it("uses the provided serializer, converting it's payload shape to openapi format", async () => {
-          const renderer = new OpenapiRenderer(() => UserExtraSerializer, {
+          const renderer = new OpenapiEndpointRenderer(() => UserExtraSerializer, {
             path: '/how/yadoin',
             method: 'get',
           })
@@ -341,7 +341,7 @@ describe('OpenapiRenderer', () => {
 
       context('with anyOf', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiRenderer(() => User, {
+          const renderer = new OpenapiEndpointRenderer(() => User, {
             path: '/how/yadoin',
             method: 'get',
             serializerKey: 'extra',
@@ -401,7 +401,7 @@ describe('OpenapiRenderer', () => {
 
       context('with oneOf', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiRenderer(() => User, {
+          const renderer = new OpenapiEndpointRenderer(() => User, {
             path: '/how/yadoin',
             method: 'get',
             serializerKey: 'extra',
@@ -461,7 +461,7 @@ describe('OpenapiRenderer', () => {
 
       context('with $ref', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiRenderer(() => User, {
+          const renderer = new OpenapiEndpointRenderer(() => User, {
             path: '/how/yadoin',
             method: 'get',
             serializerKey: 'extra',
@@ -506,7 +506,7 @@ describe('OpenapiRenderer', () => {
 
       context('with $schema', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiRenderer(() => User, {
+          const renderer = new OpenapiEndpointRenderer(() => User, {
             path: '/how/yadoin',
             method: 'get',
             serializerKey: 'extra',
@@ -536,7 +536,7 @@ describe('OpenapiRenderer', () => {
 
       context('with common fields', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiRenderer(() => User, {
+          const renderer = new OpenapiEndpointRenderer(() => User, {
             path: '/how/yadoin',
             method: 'get',
             serializerKey: 'extra',
@@ -573,7 +573,7 @@ describe('OpenapiRenderer', () => {
 
       context('with enum', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiRenderer(() => User, {
+          const renderer = new OpenapiEndpointRenderer(() => User, {
             path: '/how/yadoin',
             method: 'get',
             serializerKey: 'extra',
@@ -606,7 +606,7 @@ describe('OpenapiRenderer', () => {
 
       context('with many=true', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
-          const renderer = new OpenapiRenderer(() => User, {
+          const renderer = new OpenapiEndpointRenderer(() => User, {
             path: '/how/yadoin',
             method: 'get',
             serializerKey: 'extra',
@@ -635,7 +635,7 @@ describe('OpenapiRenderer', () => {
 
       context('with extra response fields sent', () => {
         it('includes extra response payloads', async () => {
-          const renderer = new OpenapiRenderer(() => User, {
+          const renderer = new OpenapiEndpointRenderer(() => User, {
             path: '/how/yadoin',
             method: 'get',
             serializerKey: 'extra',

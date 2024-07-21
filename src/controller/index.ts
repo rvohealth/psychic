@@ -14,7 +14,7 @@ import ServiceUnavailable from '../error/http/service-unavailable'
 import HttpStatusCodeMap, { HttpStatusSymbol } from '../error/http/status-codes'
 import Unauthorized from '../error/http/unauthorized'
 import UnprocessableEntity from '../error/http/unprocessable-entity'
-import OpenapiRenderer from '../openapi-renderer'
+import OpenapiEndpointRenderer from '../openapi-renderer/endpoint'
 import Params, { ParamsCastOptions, ParamsForOpts } from '../server/params'
 import Session, { CustomSessionCookieOptions } from '../session'
 
@@ -60,7 +60,7 @@ export default class PsychicController {
   public static controllerHooks: ControllerHook[] = []
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static openapi: Record<string, OpenapiRenderer<any>>
+  public static openapi: Record<string, OpenapiEndpointRenderer<any>>
 
   public static serializes(ModelClass: typeof Dream) {
     return {

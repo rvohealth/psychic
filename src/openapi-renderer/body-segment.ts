@@ -350,7 +350,7 @@ export default class OpenapiBodySegmentRenderer {
   }
 }
 
-export interface OpenapiRendererOpts<T extends typeof Dream | typeof DreamSerializer> {
+export interface OpenapiEndpointRendererOpts<T extends typeof Dream | typeof DreamSerializer> {
   many?: boolean
   path: string
   method: HttpMethod
