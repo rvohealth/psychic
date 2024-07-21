@@ -11,6 +11,7 @@ import {
 } from '@rvohealth/dream'
 import {
   OpenapiSchemaArray,
+  OpenapiSchemaExpressionAnyOf,
   OpenapiSchemaObject,
   OpenapiSchemaShorthandExpressionAnyOf,
   OpenapiSchemaShorthandExpressionOneOf,
@@ -519,11 +520,14 @@ export interface OpenapiResponses {
 export type OpenapiContent = {
   content: {
     [format in OpenapiFormats]: {
-      schema: {
-        type: OpenapiAllTypes
-        properties?: OpenapiSchemaProperties
-        required?: string[]
-      }
+      schema:
+        | {
+            type: OpenapiAllTypes
+            properties?: OpenapiSchemaProperties
+            required?: string[]
+          }
+        | OpenapiSchemaExpressionAnyOf
+        | OpenapiSchemaShorthandExpressionOneOf
     }
   } & {
     description?: string
