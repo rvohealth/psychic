@@ -9,7 +9,13 @@ import {
   OpenapiSchemaProperties,
   openapiPrimitiveTypes,
 } from '@rvohealth/dream'
-import { OpenapiShorthandPrimitiveTypes } from '@rvohealth/dream/src/openapi/types'
+import {
+  OpenapiSchemaArray,
+  OpenapiSchemaObject,
+  OpenapiSchemaShorthandExpressionAnyOf,
+  OpenapiSchemaShorthandExpressionOneOf,
+  OpenapiShorthandPrimitiveTypes,
+} from '@rvohealth/dream/src/openapi/types'
 import { AttributeStatement, SerializableTypes } from '@rvohealth/dream/src/serializer/decorators/attribute'
 import fs from 'fs/promises'
 import PsychicController from '../controller'
@@ -365,21 +371,38 @@ ${this.getSerializerClass().name}
     attributeStatement?: AttributeStatement,
   ): OpenapiSchemaBody {
     const nonPrimitiveBodySegment = bodySegment as OpenapiSchemaBodyShorthand
-    if (nonPrimitiveBodySegment.type === 'object') {
+    const objectBodySegment = bodySegment as OpenapiSchemaObject
+    const arrayBodySegment = bodySegment as OpenapiSchemaArray
+    const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
+    const anyOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAnyOf
+
+    if (oneOfBodySegment.oneOf) {
+      return {
+        oneOf: oneOfBodySegment.oneOf.map(segment => this.recursivelyParseBody(segment)),
+      }
+    }
+
+    if (anyOfBodySegment.anyOf) {
+      return {
+        anyOf: anyOfBodySegment.anyOf.map(segment => this.recursivelyParseBody(segment)),
+      }
+    }
+
+    if ((nonPrimitiveBodySegment as OpenapiSchemaObject).type === 'object') {
       const data: OpenapiSchemaBody = {
         type: 'object',
-        required: nonPrimitiveBodySegment.required,
+        required: objectBodySegment.required,
         properties: {},
       }
 
-      Object.keys(nonPrimitiveBodySegment.properties || {}).forEach(key => {
+      Object.keys(objectBodySegment.properties || {}).forEach(key => {
         data.properties![key] = this.recursivelyParseBody(
-          nonPrimitiveBodySegment.properties![key] as any,
+          objectBodySegment.properties![key] as any,
           attributeStatement,
         )
       })
       return data
-    } else if (nonPrimitiveBodySegment.type === 'array') {
+    } else if (arrayBodySegment.type === 'array') {
       const data: OpenapiSchemaBody = {
         type: 'array',
         items: this.recursivelyParseBody((bodySegment as any).items, attributeStatement),
