@@ -319,9 +319,8 @@ ${this.getSerializerClass().name}
    */
   private recursivelyParseBody(
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
-    attributeStatement?: AttributeStatement,
   ): OpenapiSchemaBody {
-    return new OpenapiBodySegmentParser({ bodySegment, attributeStatement }).parse()
+    return new OpenapiBodySegmentParser({ bodySegment }).parse()
   }
 
   /**
