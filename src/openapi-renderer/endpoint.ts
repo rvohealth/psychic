@@ -26,7 +26,10 @@ import OpenapiBodySegmentRenderer from './body-segment'
 import PsychicController from '../controller'
 
 export default class OpenapiEndpointRenderer<
-  DreamOrSerializer extends typeof Dream | typeof DreamSerializer,
+  DreamOrSerializer extends
+    | typeof Dream
+    | typeof DreamSerializer
+    | { serializers: Record<string, typeof DreamSerializer> },
 > {
   private many: OpenapiEndpointRendererOpts<DreamOrSerializer>['many']
   private path: OpenapiEndpointRendererOpts<DreamOrSerializer>['path']
@@ -130,6 +133,15 @@ ${this.getSerializerClass().name}
     return this.buildSerializerJson(this.getSerializerClass(), serializers)
   }
 
+  /**
+   * @internal
+   *
+   * returns the path that was provided in the options if it is available.
+   * Otherwise, it examines the application's routes to determine
+   * a controller action match.
+   *
+   * If no match is found, a MissingControllerActionPairingInRoutes exception.
+   */
   private async computedPath(): Promise<string> {
     if (this.path) return this.path
     if (this._path) return this._path
@@ -140,12 +152,7 @@ ${this.getSerializerClass().name}
     const route = this.routes.find(
       routeConfig => routeConfig.controllerActionString === controllerActionString,
     )
-
-    if (!route)
-      throw new Error(
-        `
-No route found in routes file for controllerActionString: ${controllerActionString}`,
-      )
+    if (!route) throw new MissingControllerActionPairingInRoutes(this.controllerClass, this.action)
 
     return `/${route.path.replace(/^\//, '')}`
   }
@@ -561,7 +568,30 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
   }
 }
 
-export interface OpenapiEndpointRendererOpts<T extends typeof Dream | typeof DreamSerializer> {
+export class MissingControllerActionPairingInRoutes extends Error {
+  constructor(
+    private controllerClass: typeof PsychicController,
+    private action: string,
+  ) {
+    super()
+  }
+  public get message() {
+    return `
+ATTENTION:
+  The @Openapi decorator call in the ${this.controllerClass} did not explicitly
+  specify a 'path' option for the ${this.action} action. In this case, Psychic will
+  automatically attempt to guess the correct route based on the entries in
+  the 'conf/routes.ts' file.
+
+  If it is unable to find a route pointing to this particular controller and action
+  pairing, this exception is raised to gently remind you that you have a documented
+  endpoint which you have not yet included a route entry for.
+`
+  }
+}
+export interface OpenapiEndpointRendererOpts<
+  T extends typeof Dream | typeof DreamSerializer | { serializers: Record<string, typeof DreamSerializer> },
+> {
   method: HttpMethod
   path?: string
   many?: boolean
