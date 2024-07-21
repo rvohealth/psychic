@@ -1,4 +1,4 @@
-import OpenapiRenderer from '../../../src/helpers/openapi-renderer'
+import OpenapiRenderer from '../../../src/openapi-renderer'
 import User from '../../../test-app/app/models/User'
 import { UserExtraSerializer } from '../../../test-app/app/serializers/UserSerializer'
 

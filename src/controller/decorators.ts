@@ -1,7 +1,7 @@
 import { Dream, DreamSerializer } from '@rvohealth/dream'
 import PsychicController from '.'
+import OpenapiRenderer, { OpenapiRendererOpts } from '../openapi-renderer'
 import { ControllerHook } from './hooks'
-import OpenapiRenderer, { OpenapiRendererOpts } from '../helpers/openapi-renderer'
 
 export function BeforeAction(
   opts: {

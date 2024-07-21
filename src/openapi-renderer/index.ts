@@ -21,9 +21,9 @@ import {
 import { AttributeStatement, SerializableTypes } from '@rvohealth/dream/src/serializer/decorators/attribute'
 import fs from 'fs/promises'
 import PsychicController from '../controller'
+import openapiJsonPath from '../helpers/openapiJsonPath'
+import PsychicDir from '../helpers/psychicdir'
 import { HttpMethod } from '../router/types'
-import openapiJsonPath from './openapiJsonPath'
-import PsychicDir from './psychicdir'
 
 export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | typeof DreamSerializer> {
   private many: OpenapiRendererOpts<DreamOrSerializer>['many']
@@ -133,6 +133,11 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
     this.status = status
   }
 
+  /**
+   * @internal
+   *
+   * Generates an openapi object representing a single endpoint.
+   */
   public async toObject(): Promise<OpenapiEndpointResponse> {
     return {
       [this.path]: {

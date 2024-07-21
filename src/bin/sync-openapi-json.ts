@@ -1,5 +1,5 @@
 import '../helpers/loadEnv'
-import OpenapiRenderer from '../helpers/openapi-renderer'
+import OpenapiRenderer from '../openapi-renderer'
 
 async function syncOpenapiJson() {
   console.log('syncing openapi.json...', process.env.APP_ROOT_PATH)
