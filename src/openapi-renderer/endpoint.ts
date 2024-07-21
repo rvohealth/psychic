@@ -29,6 +29,7 @@ export default class OpenapiEndpointRenderer<
   private uri: OpenapiEndpointRendererOpts<DreamOrSerializer>['uri']
   private body: OpenapiEndpointRendererOpts<DreamOrSerializer>['body']
   private headers: OpenapiEndpointRendererOpts<DreamOrSerializer>['headers']
+  private query: OpenapiEndpointRendererOpts<DreamOrSerializer>['query']
   private status: OpenapiEndpointRendererOpts<DreamOrSerializer>['status']
 
   /**
@@ -57,6 +58,7 @@ export default class OpenapiEndpointRenderer<
       uri,
       body,
       headers,
+      query,
     }: OpenapiEndpointRendererOpts<DreamOrSerializer>,
   ) {
     this.many = many
@@ -67,6 +69,7 @@ export default class OpenapiEndpointRenderer<
     this.uri = uri
     this.body = body
     this.headers = headers
+    this.query = query
     this.status = status
   }
 
@@ -79,7 +82,11 @@ export default class OpenapiEndpointRenderer<
     return {
       [this.path]: {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-        parameters: [...(this.headersArray() as any[]), ...(this.uriArray() as any[])],
+        parameters: [
+          ...(this.headersArray() as any[]),
+          ...(this.uriArray() as any[]),
+          ...(this.queryArray() as any[]),
+        ],
         [this.method]: {
           tags: [],
           summary: '',
@@ -134,6 +141,26 @@ ${this.getSerializerClass().name}
         schema: {
           type: 'string',
         },
+      })) || []
+    )
+  }
+
+  /**
+   * @internal
+   *
+   * Generates the header portion of the openapi payload's
+   * "parameters" field for a single endpoint.
+   */
+  private queryArray(): OpenapiParameterResponse[] {
+    return (
+      this.query?.map(param => ({
+        in: 'query',
+        ...param,
+        description: param.description || '',
+        schema: {
+          type: 'string',
+        },
+        allowReserved: param.allowReserved === undefined ? true : param.allowReserved,
       })) || []
     )
   }
@@ -372,6 +399,7 @@ export interface OpenapiEndpointRendererOpts<T extends typeof Dream | typeof Dre
   method: HttpMethod
   uri?: OpenapiUriOption[]
   headers?: OpenapiHeaderOption[]
+  query?: OpenapiQueryOption[]
   body?: OpenapiSchemaBodyShorthand
   responses?: {
     [statusCode: number]: OpenapiSchemaBodyShorthand
@@ -386,6 +414,13 @@ export interface OpenapiHeaderOption {
   name: string
   required: boolean
   description?: string
+}
+
+export interface OpenapiQueryOption {
+  name: string
+  required: boolean
+  description?: string
+  allowReserved?: boolean
 }
 
 export interface OpenapiUriOption {
@@ -422,7 +457,7 @@ export interface OpenapiParameterResponse {
   }
 }
 
-export type OpenapiHeaderType = 'header' | 'body' | 'path'
+export type OpenapiHeaderType = 'header' | 'body' | 'path' | 'query'
 
 export type OpenapiMethodResponse = {
   [method in HttpMethod]: OpenapiMethodBody

@@ -224,8 +224,83 @@ describe('OpenapiEndpointRenderer', () => {
       })
     })
 
-    context('body', () => {
+    context('query', () => {
       it('renders params within the parameters array', async () => {
+        const renderer = new OpenapiEndpointRenderer(() => User, {
+          path: '/how/yadoin',
+          method: 'get',
+          query: [
+            {
+              name: 'search',
+              required: true,
+              description: 'the search term',
+            },
+          ],
+        })
+
+        const response = await renderer.toObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            '/how/yadoin': expect.objectContaining({
+              parameters: [
+                {
+                  in: 'query',
+                  name: 'search',
+                  required: true,
+                  description: 'the search term',
+                  schema: {
+                    type: 'string',
+                  },
+                  allowReserved: true,
+                },
+              ],
+            }),
+          }),
+        )
+      })
+
+      context('allowReserved is overridden', () => {
+        it('applies override', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, {
+            path: '/how/yadoin',
+            method: 'get',
+            query: [
+              {
+                name: 'search',
+                required: true,
+                description: 'the search term',
+                allowReserved: false,
+              },
+            ],
+          })
+
+          const response = await renderer.toObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              '/how/yadoin': expect.objectContaining({
+                parameters: [
+                  {
+                    in: 'query',
+                    name: 'search',
+                    required: true,
+                    description: 'the search term',
+                    schema: {
+                      type: 'string',
+                    },
+                    allowReserved: false,
+                  },
+                ],
+              }),
+            }),
+          )
+        })
+      })
+    })
+
+    context('body', () => {
+      it('renders body in the requestBody payload', async () => {
         const renderer = new OpenapiEndpointRenderer(() => User, {
           path: '/how/yadoin',
           method: 'get',
