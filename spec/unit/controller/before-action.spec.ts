@@ -33,7 +33,7 @@ describe('PsychicController BeforeAction', () => {
   }
 
   it('is called before the action', async () => {
-    const controller = new MyController(req, res, { config })
+    const controller = new MyController(req, res, { config, action: 'show' })
     await controller.runAction('show')
     expect(controller.customValue).toEqual('hello')
   })
@@ -57,13 +57,13 @@ describe('PsychicController BeforeAction', () => {
       }
 
       it('still calls the before action in the ancestor', async () => {
-        const controller = new MyOtherController(req, res, { config })
+        const controller = new MyOtherController(req, res, { config, action: 'show' })
         await controller.runAction('show')
         expect(controller.customValue).toEqual('hello')
       })
 
       it('is called before the action in the child', async () => {
-        const controller = new MyOtherController(req, res, { config })
+        const controller = new MyOtherController(req, res, { config, action: 'show' })
         await controller.runAction('show')
         expect(controller.customValue2).toEqual('hello2')
       })

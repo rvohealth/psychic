@@ -107,19 +107,23 @@ export default class PsychicController {
   public res: Response
   public session: Session
   public config: PsychicConfig
+  public action: string
   constructor(
     req: Request,
     res: Response,
     {
       config,
+      action,
     }: {
       config: PsychicConfig
+      action: string
     },
   ) {
     this.req = req
     this.res = res
     this.config = config
     this.session = new Session(req, res, this.config)
+    this.action = action
   }
 
   public get params(): PsychicParamsDictionary {
@@ -220,6 +224,14 @@ export default class PsychicController {
       ...this.defaultSerializerPassthrough,
       ...passthrough,
     }
+  }
+
+  public respond<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
+    const openapiData = (this.constructor as typeof PsychicController).openapi[this.action]
+    this.res.status(openapiData?.['status'] || 200)
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return this.json(data, opts)
   }
 
   public ok<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {

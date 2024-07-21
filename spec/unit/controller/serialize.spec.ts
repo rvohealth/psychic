@@ -43,7 +43,7 @@ describe('PsychicController', () => {
       }
 
       await User.create({ email: 'how@yadoin', passwordDigest: 'hello' })
-      const controller = new MyController(req, res, { config })
+      const controller = new MyController(req, res, { config, action: 'show' })
 
       await controller.show()
       expect(res.json).toHaveBeenCalledWith({ email: 'how@yadoin' })
@@ -63,7 +63,7 @@ describe('PsychicController', () => {
 
         const user1 = await User.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
         const user2 = await User.create({ email: 'zed@zed', name: 'zed', passwordDigest: 'hello' })
-        const controller = new MyController(req, res, { config })
+        const controller = new MyController(req, res, { config, action: 'show' })
 
         await controller.index()
         expect(res.json).toHaveBeenCalledWith([{ id: user1.id }, { id: user2.id }])
@@ -124,13 +124,13 @@ describe('PsychicController', () => {
         }
 
         it('identifies serializer attached to model class and uses it to serialize the object', () => {
-          const controller = new MyController(req, res, { config })
+          const controller = new MyController(req, res, { config, action: 'show' })
           controller.show()
           expect(res.json).toHaveBeenCalledWith({ greeting: 'hello world' })
         })
 
         it('identifies serializer attached to model class and uses it to serialize each object in an array', () => {
-          const controller = new MyController(req, res, { config })
+          const controller = new MyController(req, res, { config, action: 'show' })
           controller.index()
           expect(res.json).toHaveBeenCalledWith([{ greeting: 'hello world' }, { greeting: 'howdy world' }])
         })
@@ -143,7 +143,7 @@ describe('PsychicController', () => {
           }
 
           it('allows rendering of different types in the same array', () => {
-            const controller = new MyController2(req, res, { config })
+            const controller = new MyController2(req, res, { config, action: 'show' })
             controller.index()
             expect(res.json).toHaveBeenCalledWith([
               { greeting: 'hello world' },
@@ -161,7 +161,7 @@ describe('PsychicController', () => {
             default: User2Serializer,
             summary: User2SummarySerializer,
             extra: User2ExtraSerializer,
-          }
+          } as any
         }
       }
 
@@ -207,7 +207,7 @@ describe('PsychicController', () => {
       })
 
       it('passes the passthrough data through to the child serializers', async () => {
-        const controller = new MyController(req, res, { config })
+        const controller = new MyController(req, res, { config, action: 'show' })
 
         await controller.runAction('show')
         expect(res.json).toHaveBeenCalledWith({
