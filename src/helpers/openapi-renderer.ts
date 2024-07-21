@@ -26,6 +26,11 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
   private headers: OpenapiRendererOpts<DreamOrSerializer>['headers']
   private status: OpenapiRendererOpts<DreamOrSerializer>['status']
 
+  /**
+   * builds a new typescript object which contains the combined
+   * payloads of all `@Openapi` decorator calls used throughout
+   * the controller layer.
+   */
   public static async buildOpenapiObject(): Promise<OpenapiSchema> {
     const controllers = await PsychicDir.controllers()
 
@@ -63,6 +68,20 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
     return finalOutput
   }
 
+  /**
+   * instantiates a new OpenapiRenderer.
+   * This class is used by the `@Openapi` decorator
+   * to store information related to a controller's action
+   * for use in other parts of the app.
+   *
+   * the current sole purpose of this renderer is to store
+   * endpoint information to use when generating an openapi.json
+   * file, which is done using the static:
+   * ```ts
+   * const openapiJsonContents = await OpenapiRenderer.buildOpenapiObject()
+   * const json = JSON.encode(openapiJsonContents, null, 2)
+   * ```
+   */
   constructor(
     private modelOrSerializerCb: () => DreamOrSerializer,
     {
@@ -108,6 +127,13 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
     } as unknown as OpenapiEndpointResponse
   }
 
+  /**
+   * @internal
+   *
+   * Generates the serializer's openapi schema based
+   * on first argument passed to each `@Attribute` decorator
+   * on the given serializer
+   */
   public async toSchemaObject(): Promise<Record<string, OpenapiSchemaBody>> {
     const serializers = await PsychicDir.serializers()
     const serializerKey = Object.keys(serializers).find(key => serializers[key] === this.getSerializerClass())
@@ -126,6 +152,12 @@ ${this.getSerializerClass().name}
     }
   }
 
+  /**
+   * @internal
+   *
+   * Generates the header portion of the openapi payload's
+   * "parameters" field for a single endpoint.
+   */
   private headersArray(): OpenapiParameterResponse[] {
     return (
       this.headers?.map(header => ({
@@ -139,6 +171,12 @@ ${this.getSerializerClass().name}
     )
   }
 
+  /**
+   * @internal
+   *
+   * Generates the path portion of the openapi payload's
+   * "parameters" field for a single endpoint.
+   */
   private uriArray(): OpenapiParameterResponse[] {
     return (
       this.uri?.map(param => {
@@ -155,11 +193,21 @@ ${this.getSerializerClass().name}
     )
   }
 
+  /**
+   * @internal
+   *
+   * Generates the requestBody portion of the endpoint
+   */
   private requestBody(): OpenapiSchemaBody | undefined {
     if (!this.body) return undefined
     return this.recursivelyParseBody(this.body)
   }
 
+  /**
+   * @internal
+   *
+   * Generates the responses portion of the endpoint
+   */
   private async parseResponses(): Promise<OpenapiResponses> {
     const responseData: OpenapiResponses = {
       [this.status || 200]: await this.parseSerializerResponseShape(),
@@ -178,6 +226,11 @@ ${this.getSerializerClass().name}
     return responseData
   }
 
+  /**
+   * @internal
+   *
+   * returns a ref object for a single serializer
+   */
   private async parseSerializerResponseShape(): Promise<OpenapiContent> {
     const serializers = await PsychicDir.serializers()
     const serializerKey = Object.keys(serializers).find(key => serializers[key] === this.getSerializerClass())
@@ -204,6 +257,12 @@ ${this.getSerializerClass().name}
     return finalOutput
   }
 
+  /**
+   * @internal
+   *
+   * builds the definition for the endpoint's serializer
+   * to be placed in the components/schemas path
+   */
   private buildSerializerJson(): OpenapiSchemaBody {
     const serializerClass = this.getSerializerClass()
     const attributes = serializerClass['attributeStatements']
@@ -225,6 +284,11 @@ ${this.getSerializerClass().name}
     return serializerObject
   }
 
+  /**
+   * @internal
+   *
+   * parses a primitive stored type
+   */
   private parseAttributeValue(
     data: SerializableTypes | undefined,
     attribute?: AttributeStatement,
@@ -259,6 +323,12 @@ ${this.getSerializerClass().name}
     }
   }
 
+  /**
+   * @internal
+   *
+   * sanitizes primitive openapi type before putting in
+   * openapi type fields
+   */
   private serializerTypeToOpenapiType(type: SerializableTypes): OpenapiPrimitiveTypes {
     switch (type) {
       default:
@@ -266,6 +336,12 @@ ${this.getSerializerClass().name}
     }
   }
 
+  /**
+   * @internal
+   *
+   * recursive function used to parse nested
+   * openapi shorthand objects
+   */
   private recursivelyParseBody(
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
     attributeStatement?: AttributeStatement,
@@ -304,6 +380,14 @@ ${this.getSerializerClass().name}
     }
   }
 
+  /**
+   * @internal
+   *
+   * Returns the serializer class either attached directly
+   * to this OpenapiRenderer, or else travels through the
+   * attached dream or view model to identify a serializer
+   * match.
+   */
   private getSerializerClass(): typeof DreamSerializer {
     const modelOrSerializer = this.modelOrSerializerCb()
 
