@@ -3,27 +3,23 @@ import {
   DreamSerializer,
   OpenapiAllTypes,
   OpenapiFormats,
-  OpenapiPrimitiveTypes,
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
   OpenapiSchemaProperties,
-  openapiPrimitiveTypes,
 } from '@rvohealth/dream'
 import {
-  OpenapiSchemaArray,
   OpenapiSchemaExpressionAnyOf,
   OpenapiSchemaExpressionRef,
-  OpenapiSchemaObject,
-  OpenapiSchemaShorthandExpressionAnyOf,
   OpenapiSchemaShorthandExpressionOneOf,
   OpenapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream/src/openapi/types'
-import { AttributeStatement, SerializableTypes } from '@rvohealth/dream/src/serializer/decorators/attribute'
+import { AttributeStatement } from '@rvohealth/dream/src/serializer/decorators/attribute'
 import fs from 'fs/promises'
 import PsychicController from '../controller'
 import openapiJsonPath from '../helpers/openapiJsonPath'
 import PsychicDir from '../helpers/psychicdir'
 import { HttpMethod } from '../router/types'
+import OpenapiBodySegmentParser from './openapi-body-segment-parser'
 
 export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | typeof DreamSerializer> {
   private many: OpenapiRendererOpts<DreamOrSerializer>['many']
@@ -318,58 +314,6 @@ ${this.getSerializerClass().name}
   /**
    * @internal
    *
-   * parses a primitive stored type
-   */
-  private parseAttributeValue(
-    data: SerializableTypes | undefined,
-    attribute?: AttributeStatement,
-  ): OpenapiSchemaBody {
-    if (!data)
-      return {
-        type: 'object',
-        nullable: true,
-      }
-
-    switch (data) {
-      case 'string[]':
-      case 'number[]':
-      case 'boolean[]':
-      case 'date[]':
-      case 'date-time[]':
-      case 'decimal[]':
-        return {
-          type: 'array',
-          items: {
-            type: this.serializerTypeToOpenapiType(data),
-            nullable: false,
-          },
-          nullable: attribute?.options?.allowNull ?? false,
-        }
-
-      default:
-        return {
-          type: this.serializerTypeToOpenapiType(data),
-          nullable: attribute?.options?.allowNull ?? false,
-        }
-    }
-  }
-
-  /**
-   * @internal
-   *
-   * sanitizes primitive openapi type before putting in
-   * openapi type fields
-   */
-  private serializerTypeToOpenapiType(type: SerializableTypes): OpenapiPrimitiveTypes {
-    switch (type) {
-      default:
-        return (type as string).replace(/\[\]$/, '') as OpenapiPrimitiveTypes
-    }
-  }
-
-  /**
-   * @internal
-   *
    * recursive function used to parse nested
    * openapi shorthand objects
    */
@@ -377,101 +321,7 @@ ${this.getSerializerClass().name}
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
     attributeStatement?: AttributeStatement,
   ): OpenapiSchemaBody {
-    const objectBodySegment = bodySegment as OpenapiSchemaObject
-    const arrayBodySegment = bodySegment as OpenapiSchemaArray
-    const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
-    const anyOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAnyOf
-    const refBodySegment = bodySegment as OpenapiSchemaExpressionRef
-
-    if (oneOfBodySegment.oneOf) {
-      return {
-        oneOf: oneOfBodySegment.oneOf.map(segment => this.recursivelyParseBody(segment)),
-      }
-    }
-
-    if (anyOfBodySegment.anyOf) {
-      return {
-        anyOf: anyOfBodySegment.anyOf.map(segment => this.recursivelyParseBody(segment)),
-      }
-    }
-
-    if (objectBodySegment.type === 'object') {
-      let data: OpenapiSchemaObject = {
-        type: 'object',
-        properties: {},
-        nullable: objectBodySegment.nullable || false,
-      }
-
-      if (objectBodySegment.description) {
-        data.description = objectBodySegment.description
-      }
-
-      if (objectBodySegment.summary) {
-        data.summary = objectBodySegment.summary
-      }
-
-      data = this.applyCommonFieldsToPayload<OpenapiSchemaObject>(data)
-
-      if (objectBodySegment.required !== undefined) data.required = objectBodySegment.required
-
-      Object.keys(objectBodySegment.properties || {}).forEach(key => {
-        data.properties![key] = this.recursivelyParseBody(
-          objectBodySegment.properties![key] as any,
-          attributeStatement,
-        )
-      })
-
-      return data
-    } else if (arrayBodySegment.type === 'array') {
-      const data = this.applyCommonFieldsToPayload<OpenapiSchemaArray>({
-        type: 'array',
-        items: this.recursivelyParseBody((bodySegment as any).items, attributeStatement),
-      })
-      return data
-    } else {
-      if (openapiPrimitiveTypes.includes(bodySegment as any)) {
-        return this.applyCommonFieldsToPayload({
-          type: bodySegment as any,
-        })
-      }
-
-      if (typeof bodySegment === 'object') {
-        if (openapiPrimitiveTypes.includes((bodySegment as any).type)) {
-          return this.applyCommonFieldsToPayload<OpenapiSchemaBody>(objectBodySegment)
-        }
-
-        if (refBodySegment.$ref) {
-          return {
-            $ref: `#/${refBodySegment.$ref.replace(/^#\//, '')}`,
-          }
-        }
-      }
-
-      if (typeof bodySegment === 'object')
-        return this.applyCommonFieldsToPayload(bodySegment as any) as OpenapiSchemaBody
-
-      return this.parseAttributeValue(bodySegment, attributeStatement) as OpenapiSchemaBody
-    }
-  }
-
-  private applyCommonFieldsToPayload<
-    Obj extends OpenapiSchemaBody | OpenapiSchemaObject | OpenapiSchemaArray,
-  >(obj: Obj): Obj {
-    const objectCast = obj as OpenapiSchemaObject
-    const returnObj: Obj = {
-      nullable: objectCast.nullable || false,
-      ...obj,
-    }
-
-    if (objectCast.description) {
-      ;(returnObj as any).description = objectCast.description
-    }
-
-    if (objectCast.summary) {
-      ;(returnObj as any).summary = objectCast.summary
-    }
-
-    return returnObj
+    return new OpenapiBodySegmentParser().recursivelyParseBody(bodySegment, attributeStatement)
   }
 
   /**

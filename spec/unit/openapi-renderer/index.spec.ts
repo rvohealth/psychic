@@ -501,6 +501,36 @@ describe('OpenapiRenderer', () => {
         })
       })
 
+      context('with $schema', () => {
+        it('returns valid openapi', async () => {
+          const renderer = new OpenapiRenderer(() => User, {
+            path: '/how/yadoin',
+            method: 'get',
+            serializerKey: 'extra',
+            responses: {
+              201: {
+                $schema: 'Howyadoin',
+              },
+            },
+          })
+
+          const response = await renderer.toObject()
+          expect(response['/how/yadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              201: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      $ref: '#/components/schemas/Howyadoin',
+                    },
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
       context('with common fields', () => {
         it('returns valid openapi', async () => {
           const renderer = new OpenapiRenderer(() => User, {
