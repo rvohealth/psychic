@@ -18,7 +18,7 @@ import PsychicController from '../controller'
 import openapiJsonPath from '../helpers/openapiJsonPath'
 import PsychicDir from '../helpers/psychicdir'
 import { HttpMethod } from '../router/types'
-import OpenapiBodySegmentParser from './openapi-body-segment-parser'
+import OpenapiBodySegmentRenderer from './body-segment'
 
 export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | typeof DreamSerializer> {
   private many: OpenapiRendererOpts<DreamOrSerializer>['many']
@@ -331,7 +331,7 @@ ${this.getSerializerClass().name}
   private recursivelyParseBody(
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
   ): OpenapiSchemaBody {
-    return new OpenapiBodySegmentParser({ bodySegment }).parse()
+    return new OpenapiBodySegmentRenderer({ bodySegment }).parse()
   }
 
   /**

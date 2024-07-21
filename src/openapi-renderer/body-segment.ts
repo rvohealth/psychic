@@ -25,7 +25,7 @@ import {
 import { AttributeStatement, SerializableTypes } from '@rvohealth/dream/src/serializer/decorators/attribute'
 import { HttpMethod } from '../router/types'
 
-export default class OpenapiBodySegmentParser {
+export default class OpenapiBodySegmentRenderer {
   private bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined
 
   /**
