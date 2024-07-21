@@ -13,7 +13,6 @@ import {
   OpenapiSchemaShorthandExpressionOneOf,
   OpenapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream/src/openapi/types'
-import { AttributeStatement } from '@rvohealth/dream/src/serializer/decorators/attribute'
 import fs from 'fs/promises'
 import PsychicController from '../controller'
 import openapiJsonPath from '../helpers/openapiJsonPath'
@@ -65,7 +64,9 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
     }
 
     for (const controllerName of Object.keys(controllers)) {
+      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
       const controller = controllers[controllerName] as typeof PsychicController
+
       for (const key of Object.keys(controller.openapi || {})) {
         const renderer = controller.openapi[key]
 
@@ -75,14 +76,20 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
         }
 
         const endpointPayload = await renderer.toObject()
+
+        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const path = Object.keys(endpointPayload)[0]!
+
         const method = Object.keys(endpointPayload[path]).find(key =>
           ['get', 'post', 'delete', 'patch', 'options'].includes(key),
         )!
 
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
         ;(finalOutput.paths as any)[path] ||= {
           parameters: [],
         }
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
         ;(finalOutput.paths as any)[path][method] = (endpointPayload as any)[path][method]
       }
     }
@@ -137,6 +144,7 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
   public async toObject(): Promise<OpenapiEndpointResponse> {
     return {
       [this.path]: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
         parameters: [...(this.headersArray() as any[]), ...(this.uriArray() as any[])],
         [this.method]: {
           tags: [],
@@ -262,8 +270,10 @@ ${this.getSerializerClass().name}
     const serializers = await PsychicDir.serializers()
     const serializerKey = Object.keys(serializers).find(key => serializers[key] === this.getSerializerClass())
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const serializerObject: OpenapiSchemaBody = {
       $ref: `#/components/schemas/${serializerKey}`,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
 
     const baseSchema = this.many
@@ -276,6 +286,7 @@ ${this.getSerializerClass().name}
     const finalOutput: OpenapiContent = {
       content: {
         'application/json': {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
           schema: baseSchema as any,
         },
       },
@@ -336,9 +347,7 @@ ${this.getSerializerClass().name}
 
     if ((modelOrSerializer as typeof Dream).isDream) {
       const modelClass = modelOrSerializer as typeof Dream
-      return modelClass.prototype.serializers[
-        (this.serializerKey || 'default') as keyof typeof modelClass.prototype.serializers
-      ]
+      return modelClass.prototype.serializers[this.serializerKey || 'default'] as typeof DreamSerializer
     } else {
       return modelOrSerializer as typeof DreamSerializer
     }

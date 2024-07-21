@@ -110,10 +110,13 @@ export default class OpenapiBodySegmentParser {
     if (objectBodySegment.type === 'object') return 'object'
     else if (arrayBodySegment.type === 'array') return 'array'
     else {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
       if (openapiShorthandPrimitiveTypes.includes(bodySegment as any)) return 'openapi_primitive_literal'
 
       if (typeof bodySegment === 'object') {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
         if (openapiPrimitiveTypes.includes((bodySegment as any).type)) return 'openapi_primitive_object'
+
         if (refBodySegment.$ref) return '$ref'
         if (schemaRefBodySegment.$schema) return '$schema'
       }
@@ -160,6 +163,8 @@ export default class OpenapiBodySegmentParser {
   ): OpenapiSchemaArray {
     const data = this.applyCommonFieldsToPayload<OpenapiSchemaArray>({
       type: 'array',
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
       items: this.recursivelyParseBody((bodySegment as any).items),
     })
     return data
@@ -193,6 +198,7 @@ export default class OpenapiBodySegmentParser {
     if (objectBodySegment.required !== undefined) data.required = objectBodySegment.required
 
     Object.keys(objectBodySegment.properties || {}).forEach(key => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
       data.properties![key] = this.recursivelyParseBody(objectBodySegment.properties![key] as any)
     })
 
@@ -219,6 +225,8 @@ export default class OpenapiBodySegmentParser {
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
   ): OpenapiSchemaPrimitiveGeneric {
     const objectBodySegment = bodySegment as OpenapiSchemaObject
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
     return this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(objectBodySegment as any)
   }
 
@@ -258,6 +266,7 @@ export default class OpenapiBodySegmentParser {
   private unknownObjectStatement(
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
   ): OpenapiSchemaBody {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.applyCommonFieldsToPayload(bodySegment as any) as OpenapiSchemaBody
   }
 
@@ -328,10 +337,12 @@ export default class OpenapiBodySegmentParser {
     }
 
     if (objectCast.description) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
       ;(returnObj as any).description = objectCast.description
     }
 
     if (objectCast.summary) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
       ;(returnObj as any).summary = objectCast.summary
     }
 

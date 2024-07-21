@@ -58,6 +58,8 @@ export default class PsychicController {
   }
 
   public static controllerHooks: ControllerHook[] = []
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static openapi: Record<string, OpenapiRenderer<any>>
 
   public static serializes(ModelClass: typeof Dream) {

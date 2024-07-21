@@ -63,16 +63,21 @@ export default class PsychicDir {
       /\.[jt]s$/.test(path),
     )
     for (const serializerPath of serializerPaths) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const allSerializers = await importFile(serializerPath)
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       Object.keys(allSerializers).forEach(key => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
         const potentialSerializer = allSerializers[key]
+
         if ((potentialSerializer as typeof DreamSerializer)?.isDreamSerializer) {
           const trimmedPath = serializerPath
             .replace(/^.*app\/serializers\//, '')
             .replace(/\.[jt]s$/, '')
             .replace(/Serializer$/, '')
 
-          let pathMinusLastSegmentArr = trimmedPath.split('/')
+          const pathMinusLastSegmentArr = trimmedPath.split('/')
           const lastSegment = pathMinusLastSegmentArr.pop()
           const serializerPathMinusLastSegment = pathMinusLastSegmentArr.join('/')
 
@@ -83,9 +88,10 @@ export default class PsychicDir {
               key ===
             'default'
               ? lastSegment
-              : potentialSerializer.name.replace(/Serializer$/, '')
+              : (potentialSerializer as typeof DreamSerializer).name.replace(/Serializer$/, '')
 
-          _serializers[serializerKey] = potentialSerializer
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          _serializers[serializerKey as string] = potentialSerializer
         }
       })
     }

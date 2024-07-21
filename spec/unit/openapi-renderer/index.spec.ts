@@ -8,6 +8,7 @@ describe('OpenapiRenderer', () => {
       const response = await OpenapiRenderer.buildOpenapiObject()
       expect(response).toEqual({
         openapi: '3.0.2',
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         paths: expect.objectContaining({
           '/users': {
             parameters: [],
@@ -62,6 +63,7 @@ describe('OpenapiRenderer', () => {
         }),
 
         components: {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           schemas: expect.objectContaining({
             UserExtra: {
               type: 'object',
@@ -209,6 +211,7 @@ describe('OpenapiRenderer', () => {
         const response = await renderer.toObject()
         expect(response).toEqual(
           expect.objectContaining({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/how/yadoin': expect.objectContaining({
               parameters: [
                 {
