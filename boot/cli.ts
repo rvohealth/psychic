@@ -202,39 +202,6 @@ program
   })
 
 program
-  .command('sync:client:routes')
-  .description(
-    'sync:client:routes generates a copy of the routes file that is consumable by your client application.',
-  )
-  .option('--tsnode', 'runs the command using ts-node instead of node')
-  .action(async () => {
-    const args = cmdargs()
-    await ensureStableAppBuild(args)
-
-    await sspawn(
-      nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
-        tsnodeFlags: ['--transpile-only'],
-        fileArgs: [],
-      }),
-    )
-  })
-
-program
-  .command('sync:client:schema')
-  .description('sync:client:schema generates schema from serializers for client application')
-  .option('--tsnode', 'runs the command using ts-node instead of node')
-  .action(async () => {
-    const args = cmdargs()
-    await ensureStableAppBuild(args)
-    await sspawn(
-      nodeOrTsnodeCmd('src/bin/client/sync-openapi-client-schema.ts', omitCoreArg(args), {
-        tsnodeFlags: ['--transpile-only'],
-        fileArgs: [],
-      }),
-    )
-  })
-
-program
   .command('sync')
   .alias('sync:schema')
   .alias('introspect')
@@ -262,9 +229,14 @@ program
     }
 
     if (appConf && !appConf?.api_only) {
-      await sspawn(dreamjsOrDreamtsCmd('g:api', args, { cmdArgs: omitCoreArg(args) }))
       await sspawn(
-        nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
+        nodeOrTsnodeCmd('src/bin/sync-openapi-json.ts', omitCoreArg(args), {
+          tsnodeFlags: ['--transpile-only'],
+          fileArgs: [],
+        }),
+      )
+      await sspawn(
+        nodeOrTsnodeCmd('src/bin/client/sync-openapi-client-schema.ts', omitCoreArg(args), {
           tsnodeFlags: ['--transpile-only'],
           fileArgs: [],
         }),
