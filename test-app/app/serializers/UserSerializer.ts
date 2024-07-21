@@ -1,4 +1,6 @@
-import { DreamSerializer, Attribute } from '@rvohealth/dream'
+import { Attribute, DreamSerializer, RendersMany, RendersOne } from '@rvohealth/dream'
+import Post from '../models/Post'
+import { PostWithCommentsSerializer, PostWithRecentCommentSerializer } from './PostSerializer'
 
 export class UserSummarySerializer extends DreamSerializer {
   @Attribute('string')
@@ -32,4 +34,14 @@ export class UserExtraSerializer extends UserSummarySerializer {
     },
   })
   public howyadoin() {}
+}
+
+export class UserWithPostsSerializer extends UserSummarySerializer {
+  @RendersMany(() => PostWithCommentsSerializer<any, any>)
+  public posts: Post[]
+}
+
+export class UserWithRecentPostSerializer extends UserSummarySerializer {
+  @RendersOne(() => PostWithRecentCommentSerializer<any, any>)
+  public recentPost: Post | null
 }

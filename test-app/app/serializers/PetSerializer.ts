@@ -1,4 +1,6 @@
-import { DreamSerializer, Attribute } from '@rvohealth/dream'
+import { Attribute, DreamSerializer, RendersOne } from '@rvohealth/dream'
+import User from '../models/User'
+import UserSerializer from './UserSerializer'
 
 export class PetSummarySerializer extends DreamSerializer {
   @Attribute('string')
@@ -13,4 +15,9 @@ export default class PetSerializer extends PetSummarySerializer {
 export class PetAdditionalSerializer extends PetSummarySerializer {
   @Attribute('string')
   public nickname: string
+}
+
+export class PetWithAssociationSerializer extends DreamSerializer {
+  @RendersOne(() => UserSerializer)
+  public user: User
 }

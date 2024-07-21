@@ -6,6 +6,7 @@ import {
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
   OpenapiSchemaProperties,
+  testEnv,
 } from '@rvohealth/dream'
 import {
   OpenapiSchemaExpressionAnyOf,
@@ -115,9 +116,7 @@ ${this.getSerializerClass().name}
 `)
     }
 
-    return {
-      [serializerKey]: this.buildSerializerJson(),
-    }
+    return this.buildSerializerJson(this.getSerializerClass(), serializers, {})
   }
 
   /**
@@ -234,9 +233,22 @@ ${this.getSerializerClass().name}
    * builds the definition for the endpoint's serializer
    * to be placed in the components/schemas path
    */
-  private buildSerializerJson(): OpenapiSchemaBody {
-    const serializerClass = this.getSerializerClass()
+  private buildSerializerJson(
+    serializerClass: typeof DreamSerializer,
+    serializers: { [key: string]: typeof DreamSerializer },
+    extraComponentSchemas: any,
+  ): Record<string, OpenapiSchemaBody> {
     const attributes = serializerClass['attributeStatements']
+
+    const serializerKey = Object.keys(serializers).find(key => serializers[key] === serializerClass)
+    if (!serializerKey) {
+      throw new Error(`
+An unexpected error occurred while serializing your app.
+A serializer was not able to be located:
+
+${this.getSerializerClass().name}
+`)
+    }
 
     const serializerObject: OpenapiSchemaBody = {
       type: 'object',
@@ -252,7 +264,64 @@ ${this.getSerializerClass().name}
       serializerObject.properties![attr.field] = this.recursivelyParseBody(attr.renderAs)
     })
 
-    return serializerObject
+    const [serializerPayload, modifiedExtraComponentSchemas] = this.attachAssociationsToSerializerPayload(
+      serializerClass,
+      serializerObject,
+      serializers,
+      extraComponentSchemas,
+    )
+
+    console.log(serializerClass.name, serializerKey, serializerPayload, modifiedExtraComponentSchemas)
+    return {
+      [serializerKey]: serializerPayload,
+      ...modifiedExtraComponentSchemas,
+    }
+  }
+
+  private attachAssociationsToSerializerPayload(
+    serializerClass: typeof DreamSerializer,
+    serializerPayload: any,
+    serializers: { [key: string]: typeof DreamSerializer },
+    extraComponentSchemas: any,
+  ) {
+    const associations = serializerClass['associationStatements']
+
+    const finalOutput = { ...serializerPayload }
+    const finalExtraComponentSchemas = { ...extraComponentSchemas }
+
+    associations.forEach(association => {
+      const associatedSerializer = association.serializerClassCB?.()
+      const associatedSerializerKey = Object.keys(serializers).find(
+        key => serializers[key] === associatedSerializer,
+      )
+      if (associatedSerializer && !associatedSerializerKey)
+        throw new Error(
+          `Failed to identify serializer key for association: ${serializerClass.name}#${association.field}`,
+        )
+
+      if (!associatedSerializer) {
+        if (!testEnv()) {
+          console.warn(
+            `
+Warn: ${serializerClass.name} missing explicit serializer definition for ${association.type} ${association.field}, using type: 'object'
+`,
+          )
+        }
+      } else if (associatedSerializer && associatedSerializerKey) {
+        finalOutput.properties[association.field] = {
+          $ref: `#/components/schemas/${associatedSerializerKey}`,
+        }
+
+        const newFinalOutput = this.buildSerializerJson(
+          associatedSerializer,
+          serializers,
+          finalExtraComponentSchemas,
+        )
+        finalExtraComponentSchemas[associatedSerializerKey] = newFinalOutput[associatedSerializerKey]
+      }
+    })
+
+    return [finalOutput, finalExtraComponentSchemas]
   }
 
   /**

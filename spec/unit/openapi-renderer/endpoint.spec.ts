@@ -1,6 +1,8 @@
+import { DreamSerializer, RendersOne } from '@rvohealth/dream'
 import OpenapiEndpointRenderer from '../../../src/openapi-renderer/endpoint'
 import User from '../../../test-app/app/models/User'
 import { UserExtraSerializer } from '../../../test-app/app/serializers/UserSerializer'
+import Pet from '../../../test-app/app/models/Pet'
 
 describe('OpenapiEndpointRenderer', () => {
   describe('#toSchemaObject', () => {
@@ -67,6 +69,68 @@ describe('OpenapiEndpointRenderer', () => {
             },
           },
         },
+      })
+    })
+
+    context('with a serializer that contains an association', () => {
+      context('RendersOne', () => {
+        it('renders the association as a ref, also providing a schema definition for the associated serializer', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => Pet, {
+            path: '/how/yadoin',
+            method: 'get',
+            serializerKey: 'withAssociation',
+          })
+          const response = await renderer.toSchemaObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              PetWithAssociation: {
+                type: 'object',
+                properties: {
+                  user: { $ref: '#/components/schemas/User' },
+                },
+                required: [],
+              },
+              User: {
+                type: 'object',
+                required: ['id', 'email', 'name'],
+                properties: {
+                  id: { type: 'string', nullable: false },
+                  email: { type: 'string', nullable: false },
+                  name: { type: 'string', nullable: false },
+                },
+              },
+            }),
+          )
+        })
+
+        context('with a nested association', () => {
+          it.only('provides schema for the nested association', async () => {
+            const renderer = new OpenapiEndpointRenderer(() => User, {
+              path: '/how/yadoin',
+              method: 'get',
+              serializerKey: 'withRecentPost',
+            })
+
+            const response = await renderer.toSchemaObject()
+            console.log((response as any).PostWithRecentComment.properties)
+            expect(response).toEqual(
+              expect.objectContaining({
+                User: {
+                  type: 'object',
+                  required: ['id', 'email', 'name'],
+                  properties: {
+                    id: { type: 'string', nullable: false },
+                    email: { type: 'string', nullable: false },
+                    name: { type: 'string', nullable: false },
+                    recentPost: {
+                      $ref: `#/components/schemas/PostWithRecentComment`,
+                    },
+                  },
+                },
+              }),
+            )
+          })
+        })
       })
     })
   })

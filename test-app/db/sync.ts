@@ -38,6 +38,14 @@ export const SpeciesTypesEnumValues = [
 export type IdType = string | number | bigint
 export type Timestamp = ColumnType<DateTime | CalendarDate>
 
+export interface Comments {
+  body: string | null;
+  createdAt: Timestamp;
+  id: Generated<Int8>;
+  postId: Int8;
+  updatedAt: Timestamp;
+}
+
 export interface HealthUsers {
   createdAt: Timestamp;
   email: string | null;
@@ -65,6 +73,14 @@ export interface Pets {
   species: SpeciesTypesEnum | null;
   updatedAt: Timestamp;
   userId: number;
+}
+
+export interface Posts {
+  body: string | null;
+  createdAt: Timestamp;
+  id: Generated<Int8>;
+  updatedAt: Timestamp;
+  userId: Int8;
 }
 
 export interface Users {
@@ -113,14 +129,18 @@ export interface Users {
 }
 
 export interface DB {
+  comments: Comments;
   health_users: HealthUsers;
   pets: Pets;
+  posts: Posts;
   users: Users;
 }
 
 
 export class DBClass {
+  comments: Comments
   health_users: HealthUsers
   pets: Pets
+  posts: Posts
   users: Users
 }
