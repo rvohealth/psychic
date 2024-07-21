@@ -68,6 +68,24 @@ export default class OpenapiAppRenderer {
       }
     }
 
-    return finalOutput
+    return this.sortedSchemaPayload(finalOutput)
+  }
+
+  private static sortedSchemaPayload(schema: OpenapiSchema) {
+    const sortedPaths = Object.keys(schema.paths).sort()
+    const sortedSchemas = Object.keys(schema.components.schemas).sort()
+
+    const sortedSchema: typeof schema = { ...schema }
+    sortedSchema.paths = sortedPaths.reduce((agg, path) => {
+      agg[path] = schema.paths[path]
+      return agg
+    }, {} as any)
+
+    sortedSchema.components.schemas = sortedSchemas.reduce((agg, key) => {
+      agg[key] = schema.components.schemas[key]
+      return agg
+    }, {} as any)
+
+    return sortedSchema
   }
 }
