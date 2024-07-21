@@ -321,7 +321,7 @@ ${this.getSerializerClass().name}
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
     attributeStatement?: AttributeStatement,
   ): OpenapiSchemaBody {
-    return new OpenapiBodySegmentParser().recursivelyParseBody(bodySegment, attributeStatement)
+    return new OpenapiBodySegmentParser({ bodySegment, attributeStatement }).parse()
   }
 
   /**

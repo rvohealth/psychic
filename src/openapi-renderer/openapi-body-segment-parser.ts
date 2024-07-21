@@ -12,12 +12,15 @@ import {
 import {
   OpenapiSchemaArray,
   OpenapiSchemaExpressionAnyOf,
+  OpenapiSchemaExpressionOneOf,
   OpenapiSchemaExpressionRef,
   OpenapiSchemaExpressionRefSchemaShorthand,
   OpenapiSchemaObject,
+  OpenapiSchemaPrimitiveGeneric,
   OpenapiSchemaShorthandExpressionAnyOf,
   OpenapiSchemaShorthandExpressionOneOf,
   OpenapiShorthandPrimitiveTypes,
+  openapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream/src/openapi/types'
 import { AttributeStatement, SerializableTypes } from '@rvohealth/dream/src/serializer/decorators/attribute'
 import { HttpMethod } from '../router/types'
@@ -25,21 +28,25 @@ import { HttpMethod } from '../router/types'
 export default class OpenapiBodySegmentParser<
   DreamOrSerializer extends typeof Dream | typeof DreamSerializer,
 > {
+  private bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined
+  private attributeStatement?: AttributeStatement
+
   /**
-   * instantiates a new OpenapiRenderer.
-   * This class is used by the `@Openapi` decorator
-   * to store information related to a controller's action
-   * for use in other parts of the app.
+   * @internal
    *
-   * the current sole purpose of this renderer is to store
-   * endpoint information to use when generating an openapi.json
-   * file, which is done using the static:
-   * ```ts
-   * const openapiJsonContents = await OpenapiRenderer.buildOpenapiObject()
-   * const json = JSON.encode(openapiJsonContents, null, 2)
-   * ```
+   * Used to recursively parse nested object structures
+   * within nested openapi objects
    */
-  constructor() {}
+  constructor({
+    bodySegment,
+    attributeStatement,
+  }: {
+    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined
+    attributeStatement?: AttributeStatement
+  }) {
+    this.bodySegment = bodySegment
+    this.attributeStatement = attributeStatement
+  }
 
   /**
    * @internal
@@ -47,10 +54,44 @@ export default class OpenapiBodySegmentParser<
    * recursive function used to parse nested
    * openapi shorthand objects
    */
+  public parse(): OpenapiSchemaBody {
+    return this.recursivelyParseBody(this.bodySegment)
+  }
+
   public recursivelyParseBody(
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
-    attributeStatement?: AttributeStatement,
   ): OpenapiSchemaBody {
+    switch (this.segmentType(bodySegment)) {
+      case 'oneOf':
+        return this.oneOfStatement(bodySegment)
+
+      case 'anyOf':
+        return this.anyOfStatement(bodySegment)
+
+      case 'object':
+        return this.objectStatement(bodySegment)
+
+      case 'array':
+        return this.arrayStatement(bodySegment)
+
+      case 'openapi_primitive_literal':
+        return this.primitiveLiteralStatement(bodySegment as OpenapiShorthandPrimitiveTypes)
+
+      case 'openapi_primitive_object':
+        return this.primitiveObjectStatement(bodySegment as OpenapiShorthandPrimitiveTypes)
+
+      case '$ref':
+        return this.refStatement(bodySegment)
+
+      case '$schema':
+        return this.schemaRefStatement(bodySegment)
+
+      case 'unknown_object':
+        return this.unknownObjectStatement(bodySegment)
+    }
+  }
+
+  private segmentType(bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined) {
     const objectBodySegment = bodySegment as OpenapiSchemaObject
     const arrayBodySegment = bodySegment as OpenapiSchemaArray
     const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
@@ -59,80 +100,135 @@ export default class OpenapiBodySegmentParser<
     const schemaRefBodySegment = bodySegment as OpenapiSchemaExpressionRefSchemaShorthand
 
     if (oneOfBodySegment.oneOf) {
-      return {
-        oneOf: oneOfBodySegment.oneOf.map(segment => this.recursivelyParseBody(segment)),
-      }
+      return 'oneOf'
     }
 
     if (anyOfBodySegment.anyOf) {
-      return {
-        anyOf: anyOfBodySegment.anyOf.map(segment => this.recursivelyParseBody(segment)),
-      }
+      return 'anyOf'
     }
 
     if (objectBodySegment.type === 'object') {
-      let data: OpenapiSchemaObject = {
-        type: 'object',
-        properties: {},
-        nullable: objectBodySegment.nullable || false,
-      }
-
-      if (objectBodySegment.description) {
-        data.description = objectBodySegment.description
-      }
-
-      if (objectBodySegment.summary) {
-        data.summary = objectBodySegment.summary
-      }
-
-      data = this.applyCommonFieldsToPayload<OpenapiSchemaObject>(data)
-
-      if (objectBodySegment.required !== undefined) data.required = objectBodySegment.required
-
-      Object.keys(objectBodySegment.properties || {}).forEach(key => {
-        data.properties![key] = this.recursivelyParseBody(
-          objectBodySegment.properties![key] as any,
-          attributeStatement,
-        )
-      })
-
-      return data
+      return 'object'
     } else if (arrayBodySegment.type === 'array') {
-      const data = this.applyCommonFieldsToPayload<OpenapiSchemaArray>({
-        type: 'array',
-        items: this.recursivelyParseBody((bodySegment as any).items, attributeStatement),
-      })
-      return data
+      return 'array'
     } else {
-      if (openapiPrimitiveTypes.includes(bodySegment as any)) {
-        return this.applyCommonFieldsToPayload({
-          type: bodySegment as any,
-        })
+      if (openapiShorthandPrimitiveTypes.includes(bodySegment as any)) {
+        return 'openapi_primitive_literal'
       }
 
       if (typeof bodySegment === 'object') {
         if (openapiPrimitiveTypes.includes((bodySegment as any).type)) {
-          return this.applyCommonFieldsToPayload<OpenapiSchemaBody>(objectBodySegment)
+          return 'openapi_primitive_object'
         }
 
         if (refBodySegment.$ref) {
-          return {
-            $ref: `#/${refBodySegment.$ref.replace(/^#\//, '')}`,
-          }
+          return '$ref'
         }
 
         if (schemaRefBodySegment.$schema) {
-          return {
-            $ref: `#/components/schemas/${schemaRefBodySegment.$schema.replace(/^#\/components\/schemas\//, '')}`,
-          }
+          return '$schema'
         }
       }
 
-      if (typeof bodySegment === 'object')
-        return this.applyCommonFieldsToPayload(bodySegment as any) as OpenapiSchemaBody
+      if (typeof bodySegment === 'object') return 'unknown_object'
 
-      return this.parseAttributeValue(bodySegment, attributeStatement) as OpenapiSchemaBody
+      throw 'holy cow im here'
+      // return this.parseAttributeValue(bodySegment, this.attributeStatement) as OpenapiSchemaBody
     }
+  }
+
+  private oneOfStatement(
+    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
+  ): OpenapiSchemaExpressionOneOf {
+    const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
+    return {
+      oneOf: oneOfBodySegment.oneOf.map(segment => this.recursivelyParseBody(segment)),
+    }
+  }
+
+  private anyOfStatement(
+    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
+  ): OpenapiSchemaExpressionAnyOf {
+    const anyOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAnyOf
+    return {
+      anyOf: anyOfBodySegment.anyOf.map(segment => this.recursivelyParseBody(segment)),
+    }
+  }
+
+  private arrayStatement(
+    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
+  ): OpenapiSchemaArray {
+    const data = this.applyCommonFieldsToPayload<OpenapiSchemaArray>({
+      type: 'array',
+      items: this.recursivelyParseBody((bodySegment as any).items),
+    })
+    return data
+  }
+
+  private objectStatement(
+    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
+  ): OpenapiSchemaObject {
+    const objectBodySegment = bodySegment as OpenapiSchemaObject
+    let data: OpenapiSchemaObject = {
+      type: 'object',
+      properties: {},
+      nullable: objectBodySegment.nullable || false,
+    }
+
+    if (objectBodySegment.description) {
+      data.description = objectBodySegment.description
+    }
+
+    if (objectBodySegment.summary) {
+      data.summary = objectBodySegment.summary
+    }
+
+    data = this.applyCommonFieldsToPayload<OpenapiSchemaObject>(data)
+
+    if (objectBodySegment.required !== undefined) data.required = objectBodySegment.required
+
+    Object.keys(objectBodySegment.properties || {}).forEach(key => {
+      data.properties![key] = this.recursivelyParseBody(objectBodySegment.properties![key] as any)
+    })
+
+    return data
+  }
+
+  private primitiveLiteralStatement(
+    bodySegment: OpenapiShorthandPrimitiveTypes,
+  ): OpenapiSchemaPrimitiveGeneric {
+    return this.parseAttributeValue(bodySegment) as OpenapiSchemaPrimitiveGeneric
+  }
+
+  private primitiveObjectStatement(
+    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
+  ): OpenapiSchemaPrimitiveGeneric {
+    const objectBodySegment = bodySegment as OpenapiSchemaObject
+    return this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(objectBodySegment as any)
+  }
+
+  private refStatement(
+    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
+  ): OpenapiSchemaExpressionRef {
+    const refBodySegment = bodySegment as OpenapiSchemaExpressionRef
+    return {
+      $ref: `#/${refBodySegment.$ref.replace(/^#\//, '')}`,
+    }
+  }
+
+  private schemaRefStatement(
+    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
+  ): OpenapiSchemaExpressionRef {
+    const schemaRefBodySegment = bodySegment as OpenapiSchemaExpressionRefSchemaShorthand
+    return {
+      $ref: `#/components/schemas/${schemaRefBodySegment.$schema.replace(/^#\/components\/schemas\//, '')}`,
+    }
+  }
+
+  private unknownObjectStatement(
+    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
+  ): OpenapiSchemaBody {
+    return this.applyCommonFieldsToPayload(bodySegment as any) as OpenapiSchemaBody
   }
 
   /**
