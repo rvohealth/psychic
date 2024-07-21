@@ -301,6 +301,14 @@ ${this.getSerializerClass().name}
     return serializerPayload
   }
 
+  /**
+   * @internal
+   *
+   * for each association existing on a given serializer,
+   * attach the association's schema to the component schema
+   * output, and also generate a $ref between the base
+   * serializer and the new one.
+   */
   private attachAssociationsToSerializerPayload(
     serializerClass: typeof DreamSerializer,
     serializerPayload: any,
@@ -325,6 +333,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
         }
       } else {
         if (associatedSerializers.length === 1) {
+          // point the association directly to the schema
           finalOutput = this.addSingleSerializerAssociationToOutput({
             serializerClass,
             association,
@@ -334,6 +343,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
             associatedSerializers,
           })
         } else {
+          // leverage anyOf to handle an array of serializers
           finalOutput = this.addMultiSerializerAssociationToOutput({
             serializerClass,
             association,
@@ -349,6 +359,13 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
     return finalOutput
   }
 
+  /**
+   * @internal
+   *
+   * points an association directly to the $ref associated
+   * with the target serializer, and add target serializer
+   * to the schema
+   */
   private addSingleSerializerAssociationToOutput({
     serializerClass,
     associatedSerializers,
@@ -397,6 +414,12 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
     return finalOutput
   }
 
+  /**
+   * @internal
+   *
+   * leverages anyOf to cast multiple possible $ref values,
+   * each pointing to its respective target serializer.
+   */
   private addMultiSerializerAssociationToOutput({
     serializerClass,
     associatedSerializers,
