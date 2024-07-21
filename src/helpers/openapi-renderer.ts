@@ -391,12 +391,23 @@ ${this.getSerializerClass().name}
     }
 
     if (objectBodySegment.type === 'object') {
-      const data: OpenapiSchemaBody = {
+      let data: OpenapiSchemaObject = {
         type: 'object',
-        required: objectBodySegment.required,
-        nullable: objectBodySegment.nullable || false,
         properties: {},
+        nullable: objectBodySegment.nullable || false,
       }
+
+      if (objectBodySegment.description) {
+        data.description = objectBodySegment.description
+      }
+
+      if (objectBodySegment.summary) {
+        data.summary = objectBodySegment.summary
+      }
+
+      data = this.applyCommonFieldsToPayload<OpenapiSchemaObject>(data)
+
+      if (objectBodySegment.required !== undefined) data.required = objectBodySegment.required
 
       Object.keys(objectBodySegment.properties || {}).forEach(key => {
         data.properties![key] = this.recursivelyParseBody(
@@ -407,26 +418,21 @@ ${this.getSerializerClass().name}
 
       return data
     } else if (arrayBodySegment.type === 'array') {
-      const data: OpenapiSchemaBody = {
+      const data = this.applyCommonFieldsToPayload<OpenapiSchemaArray>({
         type: 'array',
-        nullable: arrayBodySegment.nullable || false,
         items: this.recursivelyParseBody((bodySegment as any).items, attributeStatement),
-      }
+      })
       return data
     } else {
       if (openapiPrimitiveTypes.includes(bodySegment as any)) {
-        return {
+        return this.applyCommonFieldsToPayload({
           type: bodySegment as any,
-          nullable: false,
-        }
+        })
       }
 
       if (typeof bodySegment === 'object') {
         if (openapiPrimitiveTypes.includes((bodySegment as any).type)) {
-          return {
-            nullable: false,
-            ...bodySegment,
-          } as OpenapiSchemaBody
+          return this.applyCommonFieldsToPayload<OpenapiSchemaBody>(objectBodySegment)
         }
 
         if (refBodySegment.$ref) {
@@ -436,9 +442,31 @@ ${this.getSerializerClass().name}
         }
       }
 
-      if (typeof bodySegment === 'object') return bodySegment as OpenapiSchemaBody
+      if (typeof bodySegment === 'object')
+        return this.applyCommonFieldsToPayload(bodySegment as any) as OpenapiSchemaBody
+
       return this.parseAttributeValue(bodySegment, attributeStatement) as OpenapiSchemaBody
     }
+  }
+
+  private applyCommonFieldsToPayload<
+    Obj extends OpenapiSchemaBody | OpenapiSchemaObject | OpenapiSchemaArray,
+  >(obj: Obj): Obj {
+    const objectCast = obj as OpenapiSchemaObject
+    const returnObj: Obj = {
+      nullable: objectCast.nullable || false,
+      ...obj,
+    }
+
+    if (objectCast.description) {
+      ;(returnObj as any).description = objectCast.description
+    }
+
+    if (objectCast.summary) {
+      ;(returnObj as any).summary = objectCast.summary
+    }
+
+    return returnObj
   }
 
   /**
