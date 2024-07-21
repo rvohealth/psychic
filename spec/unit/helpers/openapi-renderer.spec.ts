@@ -501,6 +501,39 @@ describe('OpenapiRenderer', () => {
         })
       })
 
+      context('with enum', () => {
+        it('returns valid openapi', async () => {
+          const renderer = new OpenapiRenderer(() => User, {
+            path: '/how/yadoin',
+            method: 'get',
+            serializerKey: 'extra',
+            responses: {
+              201: {
+                type: 'string',
+                enum: ['hello', 'world'],
+              },
+            },
+          })
+
+          const response = await renderer.toObject()
+          expect(response['/how/yadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              201: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'string',
+                      nullable: false,
+                      enum: ['hello', 'world'],
+                    },
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
       context('with many=true', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
           const renderer = new OpenapiRenderer(() => User, {
