@@ -165,15 +165,36 @@ program
   })
 
 program
+  .command('sync:openapi')
+  .description('syncs openapi.json file to current state of all psychic controllers within the app')
+  .option('--tsnode', 'runs the command using ts-node instead of node')
+  .action(async () => {
+    const args = cmdargs()
+    await ensureStableAppBuild(args)
+    // await sspawn(dreamjsOrDreamtsCmd('g:api', args, { cmdArgs: omitCoreArg(args) }))
+    await sspawn(
+      nodeOrTsnodeCmd('src/bin/sync-openapi-json.ts', omitCoreArg(args), {
+        tsnodeFlags: ['--transpile-only'],
+        fileArgs: [],
+      }),
+    )
+  })
+
+program
   .command('sync:client')
   .description('sync api routes and schema to client application')
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
     const args = cmdargs()
     await ensureStableAppBuild(args)
-    await sspawn(dreamjsOrDreamtsCmd('g:api', args, { cmdArgs: omitCoreArg(args) }))
     await sspawn(
-      nodeOrTsnodeCmd('src/bin/client/sync-routes.ts', omitCoreArg(args), {
+      nodeOrTsnodeCmd('src/bin/sync-openapi-json.ts', omitCoreArg(args), {
+        tsnodeFlags: ['--transpile-only'],
+        fileArgs: [],
+      }),
+    )
+    await sspawn(
+      nodeOrTsnodeCmd('src/bin/client/sync-openapi-client-schema.ts', omitCoreArg(args), {
         tsnodeFlags: ['--transpile-only'],
         fileArgs: [],
       }),
@@ -205,7 +226,12 @@ program
   .action(async () => {
     const args = cmdargs()
     await ensureStableAppBuild(args)
-    await sspawn(dreamjsOrDreamtsCmd('g:api', args, { cmdArgs: omitCoreArg(args) }))
+    await sspawn(
+      nodeOrTsnodeCmd('src/bin/client/sync-openapi-client-schema.ts', omitCoreArg(args), {
+        tsnodeFlags: ['--transpile-only'],
+        fileArgs: [],
+      }),
+    )
   })
 
 program

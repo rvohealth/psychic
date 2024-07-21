@@ -70,6 +70,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "jsonwebtoken": "^9.0.2",
+    "openapi-typescript": "^7.1.0",
     "pluralize": "^8.0.0",
     "ts-node": "^10.9.2",
     "tslib": "^2.6.2"

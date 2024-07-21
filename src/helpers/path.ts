@@ -37,6 +37,13 @@ export async function clientApiPath() {
   return absoluteFilePath(schemaParts.join('/'))
 }
 
+export async function clientApiFileName() {
+  const yamlConfig = await loadDreamYamlFile()
+  const schemaPath = yamlConfig.client_api_schema_path
+  const schemaParts = schemaPath.split('/')
+  return schemaParts.pop()
+}
+
 export async function modelsPath() {
   const yamlConfig = await loadDreamYamlFile()
   return absoluteFilePath(yamlConfig.models_path)

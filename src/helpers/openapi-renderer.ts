@@ -11,8 +11,10 @@ import {
 } from '@rvohealth/dream'
 import { OpenapiShorthandPrimitiveTypes } from '@rvohealth/dream/src/openapi/types'
 import { AttributeStatement, SerializableTypes } from '@rvohealth/dream/src/serializer/decorators/attribute'
+import fs from 'fs/promises'
 import PsychicController from '../controller'
 import { HttpMethod } from '../router/types'
+import openapiJsonPath from './openapiJsonPath'
 import PsychicDir from './psychicdir'
 
 export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | typeof DreamSerializer> {
@@ -27,6 +29,22 @@ export default class OpenapiRenderer<DreamOrSerializer extends typeof Dream | ty
   private status: OpenapiRendererOpts<DreamOrSerializer>['status']
 
   /**
+   * @internal
+   *
+   * reads the lates openapi builds using buildOpenapiObject, and syncs
+   * the contents to the openapi.json file at the project root.
+   */
+  public static async syncOpenapiJsonFile() {
+    const openapiContents = await OpenapiRenderer.buildOpenapiObject()
+    const jsonPath = openapiJsonPath()
+    await fs.writeFile(jsonPath, JSON.stringify(openapiContents, null, 2), {
+      flag: 'w+',
+    })
+  }
+
+  /**
+   * @internal
+   *
    * builds a new typescript object which contains the combined
    * payloads of all `@Openapi` decorator calls used throughout
    * the controller layer.

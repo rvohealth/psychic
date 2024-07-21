@@ -1,0 +1,111 @@
+{
+  "openapi": "3.0.2",
+  "paths": {
+    "/users": {
+      "parameters": [],
+      "post": {
+        "tags": [],
+        "summary": "",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {
+          "201": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserExtra"
+                }
+              }
+            }
+          }
+        }
+      },
+      "get": {
+        "tags": [],
+        "summary": "",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserExtra"
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  },
+  "components": {
+    "schemas": {
+      "UserExtra": {
+        "type": "object",
+        "required": [
+          "id",
+          "nicknames",
+          "howyadoin"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false
+          },
+          "nicknames": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "nullable": false
+            },
+            "nullable": false
+          },
+          "howyadoin": {
+            "type": "object",
+            "properties": {
+              "name": {
+                "type": "string",
+                "nullable": false
+              },
+              "stuff": {
+                "type": "array",
+                "items": {
+                  "type": "string",
+                  "nullable": false
+                },
+                "nullable": false
+              },
+              "nestedStuff": {
+                "type": "object",
+                "properties": {
+                  "nested1": {
+                    "type": "boolean",
+                    "nullable": false
+                  },
+                  "nested2": {
+                    "type": "array",
+                    "items": {
+                      "type": "decimal",
+                      "nullable": false
+                    },
+                    "nullable": false
+                  }
+                }
+              }
+            }
+          }
+        }
+      }
+    }
+  }
+}
