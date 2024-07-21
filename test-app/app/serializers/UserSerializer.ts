@@ -1,5 +1,6 @@
 import { Attribute, DreamSerializer, RendersMany, RendersOne } from '@rvohealth/dream'
 import Post from '../models/Post'
+import User from '../models/User'
 import { PostWithCommentsSerializer, PostWithRecentCommentSerializer } from './PostSerializer'
 
 export class UserSummarySerializer extends DreamSerializer {
@@ -38,6 +39,16 @@ export class UserExtraSerializer extends UserSummarySerializer {
 
 export class UserWithPostsSerializer extends UserSummarySerializer {
   @RendersMany(() => PostWithCommentsSerializer<any, any>)
+  public posts: Post[]
+}
+
+export class UserWithPostsMultiTypeSerializer extends UserSummarySerializer {
+  @RendersMany(() => [PostWithCommentsSerializer<any, any>, PostWithRecentCommentSerializer<any, any>])
+  public posts: Post[]
+}
+
+export class UserWithPostsMultiType2Serializer extends UserSummarySerializer {
+  @RendersMany(() => [Post, User], { serializer: 'summary' })
   public posts: Post[]
 }
 

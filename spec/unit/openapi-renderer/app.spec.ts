@@ -4,7 +4,6 @@ describe('OpenapiAppRenderer', () => {
   describe('.buildOpenapiObject', () => {
     it('reads all controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
       const response = await OpenapiAppRenderer.toObject()
-      console.dir(response, { depth: null })
       expect(response).toEqual({
         openapi: '3.0.2',
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

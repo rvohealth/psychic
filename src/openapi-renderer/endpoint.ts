@@ -7,6 +7,7 @@ import {
   OpenapiSchemaBodyShorthand,
   OpenapiSchemaProperties,
   testEnv,
+  uniq,
 } from '@rvohealth/dream'
 import {
   OpenapiSchemaExpressionAnyOf,
@@ -316,16 +317,10 @@ ${this.getSerializerClass().name}
     let finalOutput = { ...serializerPayload }
 
     associations.forEach(association => {
-      const associatedSerializer = association.serializerClassCB?.()
-      const associatedSerializerKey = Object.keys(serializers).find(
-        key => serializers[key] === associatedSerializer,
-      )
-      if (associatedSerializer && !associatedSerializerKey)
-        throw new Error(
-          `Failed to identify serializer key for association: ${serializerClass.name}#${association.field}`,
-        )
+      const associatedSerializers = DreamSerializer.getAssociatedSerializersForOpenapi(association)
+      if (!associatedSerializers) throw new Error('RUH ROGH')
 
-      if (!associatedSerializer) {
+      if (!associatedSerializers) {
         if (!testEnv()) {
           console.warn(
             `
@@ -333,28 +328,83 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
 `,
           )
         }
-      } else if (associatedSerializer && associatedSerializerKey) {
-        finalOutput[serializerKey].required.push(association.field)
+      } else {
+        if (associatedSerializers.length === 1) {
+          const associatedSerializer = associatedSerializers[0]
+          const associatedSerializerKey = Object.keys(serializers).find(
+            key => serializers[key] === associatedSerializer,
+          )
+          if (associatedSerializers && !associatedSerializerKey)
+            throw new Error(
+              `Failed to identify serializer key for association: ${serializerClass.name}#${association.field}`,
+            )
 
-        switch (association.type) {
-          case 'RendersMany':
-            finalOutput[serializerKey].properties[association.field] = {
-              type: 'array',
-              items: {
+          finalOutput[serializerKey].required = uniq([
+            ...finalOutput[serializerKey].required,
+            association.field,
+          ])
+
+          switch (association.type) {
+            case 'RendersMany':
+              finalOutput[serializerKey].properties[association.field] = {
+                type: 'array',
+                items: {
+                  $ref: `#/components/schemas/${associatedSerializerKey}`,
+                },
+              }
+              break
+
+            case 'RendersOne':
+              finalOutput[serializerKey].properties[association.field] = {
                 $ref: `#/components/schemas/${associatedSerializerKey}`,
-              },
-            }
-            break
+              }
+              break
+          }
 
-          case 'RendersOne':
-            finalOutput[serializerKey].properties[association.field] = {
-              $ref: `#/components/schemas/${associatedSerializerKey}`,
+          const associatedSchema = this.buildSerializerJson(associatedSerializer, serializers)
+          finalOutput = { ...finalOutput, ...associatedSchema }
+        } else {
+          const anyOf: any[] = []
+
+          associatedSerializers.forEach(associatedSerializer => {
+            const associatedSerializerKey = Object.keys(serializers).find(
+              key => serializers[key] === associatedSerializer,
+            )
+            if (associatedSerializers && !associatedSerializerKey)
+              throw new Error(
+                `Failed to identify serializer key for association: ${serializerClass.name}#${association.field}`,
+              )
+
+            finalOutput[serializerKey].required = uniq([
+              ...finalOutput[serializerKey].required,
+              association.field,
+            ])
+
+            switch (association.type) {
+              case 'RendersMany':
+                anyOf.push({
+                  type: 'array',
+                  items: {
+                    $ref: `#/components/schemas/${associatedSerializerKey}`,
+                  },
+                })
+                break
+
+              case 'RendersOne':
+                anyOf.push({
+                  $ref: `#/components/schemas/${associatedSerializerKey}`,
+                })
+                break
             }
-            break
+
+            const associatedSchema = this.buildSerializerJson(associatedSerializer, serializers)
+            finalOutput = { ...finalOutput, ...associatedSchema }
+          })
+
+          finalOutput[serializerKey].properties[association.field] = {
+            anyOf,
+          }
         }
-
-        const associatedSchema = this.buildSerializerJson(associatedSerializer, serializers)
-        finalOutput = { ...finalOutput, ...associatedSchema }
       }
     })
 

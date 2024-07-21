@@ -2,7 +2,10 @@ import OpenapiEndpointRenderer from '../../../src/openapi-renderer/endpoint'
 import Pet from '../../../test-app/app/models/Pet'
 import Post from '../../../test-app/app/models/Post'
 import User from '../../../test-app/app/models/User'
-import { UserExtraSerializer } from '../../../test-app/app/serializers/UserSerializer'
+import {
+  UserWithPostsMultiType2Serializer,
+  UserWithPostsMultiTypeSerializer,
+} from '../../../test-app/app/serializers/UserSerializer'
 
 describe('OpenapiEndpointRenderer', () => {
   describe('#toSchemaObject', () => {
@@ -182,6 +185,106 @@ describe('OpenapiEndpointRenderer', () => {
               }),
             )
           })
+        })
+      })
+
+      context('rendering an association which contains an array of serializers', () => {
+        it('encases expression in an anyOf, wrapping all serializers present', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => UserWithPostsMultiTypeSerializer, {
+            path: '/how/yadoin',
+            method: 'get',
+          })
+
+          const response = await renderer.toSchemaObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              Comment: {
+                type: 'object',
+                required: ['id', 'body'],
+                properties: {
+                  id: { type: 'string', nullable: false },
+                  body: { type: 'string', nullable: false },
+                },
+              },
+
+              UserWithPostsMultiType: {
+                type: 'object',
+                required: ['id', 'posts'],
+                properties: {
+                  id: { type: 'string', nullable: false },
+                  posts: {
+                    anyOf: [
+                      {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/PostWithComments' },
+                      },
+                      {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/PostWithRecentComment' },
+                      },
+                    ],
+                  },
+                },
+              },
+
+              PostWithComments: {
+                type: 'object',
+                required: ['id', 'body', 'comments'],
+                properties: {
+                  id: { type: 'string', nullable: false },
+                  body: { type: 'string', nullable: false },
+                  comments: {
+                    type: 'array',
+                    items: { $ref: '#/components/schemas/Comment' },
+                  },
+                },
+              },
+
+              PostWithRecentComment: {
+                type: 'object',
+                required: ['id', 'body', 'recentComment'],
+                properties: {
+                  id: { type: 'string', nullable: false },
+                  body: { type: 'string', nullable: false },
+                  recentComment: { $ref: '#/components/schemas/Comment' },
+                },
+              },
+            }),
+          )
+        })
+      })
+
+      context('rendering an association which contains an array of dreams', () => {
+        it('extracts serializers from each dream, then encases expression in an anyOf, wrapping all identified serializers', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => UserWithPostsMultiType2Serializer, {
+            path: '/how/yadoin',
+            method: 'get',
+          })
+
+          const response = await renderer.toSchemaObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              UserWithPostsMultiType2: {
+                type: 'object',
+                required: ['id', 'posts'],
+                properties: {
+                  id: { type: 'string', nullable: false },
+                  posts: {
+                    anyOf: [
+                      {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/PostSummary' },
+                      },
+                      {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/UserSummary' },
+                      },
+                    ],
+                  },
+                },
+              },
+            }),
+          )
         })
       })
     })
@@ -386,7 +489,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with a serializer passed', () => {
         it("uses the provided serializer, converting it's payload shape to openapi format", async () => {
-          const renderer = new OpenapiEndpointRenderer(() => UserExtraSerializer, {
+          const renderer = new OpenapiEndpointRenderer(() => UserWithPostsMultiTypeSerializer, {
             path: '/how/yadoin',
             method: 'get',
           })
@@ -398,7 +501,7 @@ describe('OpenapiEndpointRenderer', () => {
                 content: {
                   'application/json': {
                     schema: {
-                      $ref: '#/components/schemas/UserExtra',
+                      $ref: '#/components/schemas/UserWithPostsMultiType',
                     },
                   },
                 },
