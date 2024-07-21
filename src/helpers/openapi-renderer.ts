@@ -393,6 +393,7 @@ ${this.getSerializerClass().name}
       const data: OpenapiSchemaBody = {
         type: 'object',
         required: objectBodySegment.required,
+        nullable: objectBodySegment.nullable || false,
         properties: {},
       }
 
@@ -406,6 +407,7 @@ ${this.getSerializerClass().name}
     } else if (arrayBodySegment.type === 'array') {
       const data: OpenapiSchemaBody = {
         type: 'array',
+        nullable: arrayBodySegment.nullable || false,
         items: this.recursivelyParseBody((bodySegment as any).items, attributeStatement),
       }
       return data
@@ -414,6 +416,15 @@ ${this.getSerializerClass().name}
         return {
           type: bodySegment as any,
           nullable: false,
+        }
+      }
+
+      if (typeof bodySegment === 'object') {
+        if (openapiPrimitiveTypes.includes((bodySegment as any).type)) {
+          return {
+            nullable: false,
+            ...bodySegment,
+          } as OpenapiSchemaBody
         }
       }
 

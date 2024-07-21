@@ -73,14 +73,15 @@ describe('OpenapiRenderer', () => {
                 },
                 nicknames: {
                   type: 'array',
+                  nullable: false,
                   items: {
                     type: 'string',
                     nullable: false,
                   },
-                  nullable: false,
                 },
                 howyadoin: {
                   type: 'object',
+                  nullable: false,
                   properties: {
                     name: {
                       type: 'string',
@@ -96,6 +97,7 @@ describe('OpenapiRenderer', () => {
                     },
                     nestedStuff: {
                       type: 'object',
+                      nullable: false,
                       properties: {
                         nested1: {
                           type: 'boolean',
@@ -122,60 +124,60 @@ describe('OpenapiRenderer', () => {
   })
 
   describe('#toSchemaObject', () => {
-    context('with a dream model passed', () => {
-      it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
-        const renderer = new OpenapiRenderer(() => User, {
-          path: '/how/yadoin',
-          method: 'get',
-          serializerKey: 'extra',
-        })
+    it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
+      const renderer = new OpenapiRenderer(() => User, {
+        path: '/how/yadoin',
+        method: 'get',
+        serializerKey: 'extra',
+      })
 
-        const response = await renderer.toSchemaObject()
-        expect(response).toEqual({
-          UserExtra: {
-            type: 'object',
-            required: ['id', 'nicknames', 'howyadoin'],
-            properties: {
-              id: {
+      const response = await renderer.toSchemaObject()
+      expect(response).toEqual({
+        UserExtra: {
+          type: 'object',
+          required: ['id', 'nicknames', 'howyadoin'],
+          properties: {
+            id: {
+              type: 'string',
+              nullable: false,
+            },
+            nicknames: {
+              type: 'array',
+              nullable: false,
+              items: {
                 type: 'string',
                 nullable: false,
               },
-              nicknames: {
-                type: 'array',
-                items: {
+            },
+            howyadoin: {
+              type: 'object',
+              nullable: false,
+              properties: {
+                name: {
                   type: 'string',
                   nullable: false,
                 },
-                nullable: false,
-              },
-              howyadoin: {
-                type: 'object',
-                properties: {
-                  name: {
+                stuff: {
+                  type: 'array',
+                  nullable: false,
+                  items: {
                     type: 'string',
                     nullable: false,
                   },
-                  stuff: {
-                    type: 'array',
-                    items: {
-                      type: 'string',
+                },
+                nestedStuff: {
+                  type: 'object',
+                  nullable: false,
+                  properties: {
+                    nested1: {
+                      type: 'boolean',
                       nullable: false,
                     },
-                    nullable: false,
-                  },
-                  nestedStuff: {
-                    type: 'object',
-                    properties: {
-                      nested1: {
-                        type: 'boolean',
-                        nullable: false,
-                      },
-                      nested2: {
-                        type: 'array',
-                        items: {
-                          type: 'decimal',
-                          nullable: false,
-                        },
+                    nested2: {
+                      type: 'array',
+                      nullable: false,
+                      items: {
+                        type: 'decimal',
                         nullable: false,
                       },
                     },
@@ -184,7 +186,7 @@ describe('OpenapiRenderer', () => {
               },
             },
           },
-        })
+        },
       })
     })
   })
@@ -255,6 +257,7 @@ describe('OpenapiRenderer', () => {
             'application/json': {
               schema: {
                 type: 'object',
+                nullable: false,
                 required: ['email', 'password'],
                 properties: {
                   email: {
@@ -267,6 +270,7 @@ describe('OpenapiRenderer', () => {
                   },
                   settings: {
                     type: 'object',
+                    nullable: false,
                     properties: {
                       likesChalupas: {
                         type: 'boolean',
@@ -306,35 +310,6 @@ describe('OpenapiRenderer', () => {
             }),
           )
         })
-
-        context('with many=true', () => {
-          it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
-            const renderer = new OpenapiRenderer(() => User, {
-              path: '/how/yadoin',
-              method: 'get',
-              serializerKey: 'extra',
-              many: true,
-            })
-
-            const response = await renderer.toObject()
-            expect(response['/how/yadoin'].get.responses).toEqual(
-              expect.objectContaining({
-                200: {
-                  content: {
-                    'application/json': {
-                      schema: {
-                        type: 'array',
-                        items: {
-                          $ref: '#/components/schemas/UserExtra',
-                        },
-                      },
-                    },
-                  },
-                },
-              }),
-            )
-          })
-        })
       })
 
       context('with a serializer passed', () => {
@@ -352,6 +327,95 @@ describe('OpenapiRenderer', () => {
                   'application/json': {
                     schema: {
                       $ref: '#/components/schemas/UserExtra',
+                    },
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
+      context('with anyOf', () => {
+        it('returns valid openapi', async () => {
+          const renderer = new OpenapiRenderer(() => User, {
+            path: '/how/yadoin',
+            method: 'get',
+            serializerKey: 'extra',
+            responses: {
+              201: {
+                anyOf: [
+                  {
+                    type: 'object',
+                    properties: {
+                      name: 'string',
+                      email: 'string',
+                    },
+                  },
+                  {
+                    type: 'string',
+                  },
+                ],
+              },
+            },
+          })
+
+          const response = await renderer.toObject()
+          expect(response['/how/yadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              201: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      anyOf: [
+                        {
+                          type: 'object',
+                          nullable: false,
+                          properties: {
+                            name: {
+                              type: 'string',
+                              nullable: false,
+                            },
+                            email: {
+                              type: 'string',
+                              nullable: false,
+                            },
+                          },
+                        },
+                        {
+                          type: 'string',
+                          nullable: false,
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
+      context('with many=true', () => {
+        it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
+          const renderer = new OpenapiRenderer(() => User, {
+            path: '/how/yadoin',
+            method: 'get',
+            serializerKey: 'extra',
+            many: true,
+          })
+
+          const response = await renderer.toObject()
+          expect(response['/how/yadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              200: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'array',
+                      items: {
+                        $ref: '#/components/schemas/UserExtra',
+                      },
                     },
                   },
                 },
@@ -406,10 +470,12 @@ describe('OpenapiRenderer', () => {
                   'application/json': {
                     schema: {
                       type: 'object',
+                      nullable: false,
                       required: ['user'],
                       properties: {
                         user: {
                           type: 'object',
+                          nullable: false,
                           required: ['name', 'email'],
                           properties: {
                             name: {
@@ -426,8 +492,10 @@ describe('OpenapiRenderer', () => {
                             },
                             things: {
                               type: 'array',
+                              nullable: false,
                               items: {
                                 type: 'object',
+                                nullable: false,
                                 properties: {
                                   name: {
                                     type: 'string',
