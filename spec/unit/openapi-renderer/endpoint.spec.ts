@@ -1,8 +1,8 @@
-import { DreamSerializer, RendersOne } from '@rvohealth/dream'
 import OpenapiEndpointRenderer from '../../../src/openapi-renderer/endpoint'
+import Pet from '../../../test-app/app/models/Pet'
+import Post from '../../../test-app/app/models/Post'
 import User from '../../../test-app/app/models/User'
 import { UserExtraSerializer } from '../../../test-app/app/serializers/UserSerializer'
-import Pet from '../../../test-app/app/models/Pet'
 
 describe('OpenapiEndpointRenderer', () => {
   describe('#toSchemaObject', () => {
@@ -85,10 +85,10 @@ describe('OpenapiEndpointRenderer', () => {
             expect.objectContaining({
               PetWithAssociation: {
                 type: 'object',
+                required: ['user'],
                 properties: {
                   user: { $ref: '#/components/schemas/User' },
                 },
-                required: [],
               },
               User: {
                 type: 'object',
@@ -104,7 +104,7 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('with a nested association', () => {
-          it.only('provides schema for the nested association', async () => {
+          it('provides schema for the nested association', async () => {
             const renderer = new OpenapiEndpointRenderer(() => User, {
               path: '/how/yadoin',
               method: 'get',
@@ -112,19 +112,71 @@ describe('OpenapiEndpointRenderer', () => {
             })
 
             const response = await renderer.toSchemaObject()
-            console.log((response as any).PostWithRecentComment.properties)
             expect(response).toEqual(
               expect.objectContaining({
-                User: {
+                Comment: {
                   type: 'object',
-                  required: ['id', 'email', 'name'],
+                  required: ['id', 'body'],
                   properties: {
                     id: { type: 'string', nullable: false },
-                    email: { type: 'string', nullable: false },
-                    name: { type: 'string', nullable: false },
-                    recentPost: {
-                      $ref: `#/components/schemas/PostWithRecentComment`,
-                    },
+                    body: { type: 'string', nullable: false },
+                  },
+                },
+              }),
+            )
+          })
+        })
+      })
+
+      context('RendersMany', () => {
+        it('renders the association as an array of $refs, also providing a schema definition for the associated serializer', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => Post, {
+            path: '/how/yadoin',
+            method: 'get',
+            serializerKey: 'withComments',
+          })
+
+          const response = await renderer.toSchemaObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              PostWithComments: {
+                type: 'object',
+                required: ['id', 'body', 'comments'],
+                properties: {
+                  id: { type: 'string', nullable: false },
+                  body: { type: 'string', nullable: false },
+                  comments: { type: 'array', items: { $ref: '#/components/schemas/Comment' } },
+                },
+              },
+              Comment: {
+                type: 'object',
+                required: ['id', 'body'],
+                properties: {
+                  id: { type: 'string', nullable: false },
+                  body: { type: 'string', nullable: false },
+                },
+              },
+            }),
+          )
+        })
+
+        context('with a nested association', () => {
+          it('provides schema for the nested association', async () => {
+            const renderer = new OpenapiEndpointRenderer(() => User, {
+              path: '/how/yadoin',
+              method: 'get',
+              serializerKey: 'withPosts',
+            })
+
+            const response = await renderer.toSchemaObject()
+            expect(response).toEqual(
+              expect.objectContaining({
+                Comment: {
+                  type: 'object',
+                  required: ['id', 'body'],
+                  properties: {
+                    id: { type: 'string', nullable: false },
+                    body: { type: 'string', nullable: false },
                   },
                 },
               }),

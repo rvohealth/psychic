@@ -4,6 +4,7 @@ describe('OpenapiAppRenderer', () => {
   describe('.buildOpenapiObject', () => {
     it('reads all controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
       const response = await OpenapiAppRenderer.toObject()
+      console.dir(response.components, { depth: null })
       expect(response).toEqual({
         openapi: '3.0.2',
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -53,6 +54,22 @@ describe('OpenapiAppRenderer', () => {
                         },
                       },
                     },
+                  },
+                },
+              },
+            },
+          },
+
+          '/users/{id}': {
+            parameters: [],
+            get: {
+              tags: [],
+              summary: '',
+              requestBody: { content: { 'application/json': { schema: undefined } } },
+              responses: {
+                '200': {
+                  content: {
+                    'application/json': { schema: { $ref: '#/components/schemas/UserWithPosts' } },
                   },
                 },
               },
@@ -115,6 +132,40 @@ describe('OpenapiAppRenderer', () => {
                     },
                   },
                 },
+              },
+            },
+
+            UserWithPosts: {
+              type: 'object',
+              required: ['id', 'posts'],
+              properties: {
+                id: { type: 'string', nullable: false },
+                posts: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/PostWithComments' },
+                },
+              },
+            },
+
+            PostWithComments: {
+              type: 'object',
+              required: ['id', 'body', 'comments'],
+              properties: {
+                id: { type: 'string', nullable: false },
+                body: { type: 'string', nullable: false },
+                comments: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/Comment' },
+                },
+              },
+            },
+
+            Comment: {
+              type: 'object',
+              required: ['id', 'body'],
+              properties: {
+                id: { type: 'string', nullable: false },
+                body: { type: 'string', nullable: false },
               },
             },
           }),

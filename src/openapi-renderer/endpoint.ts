@@ -116,7 +116,7 @@ ${this.getSerializerClass().name}
 `)
     }
 
-    return this.buildSerializerJson(this.getSerializerClass(), serializers, {})
+    return this.buildSerializerJson(this.getSerializerClass(), serializers)
   }
 
   /**
@@ -236,7 +236,6 @@ ${this.getSerializerClass().name}
   private buildSerializerJson(
     serializerClass: typeof DreamSerializer,
     serializers: { [key: string]: typeof DreamSerializer },
-    extraComponentSchemas: any,
   ): Record<string, OpenapiSchemaBody> {
     const attributes = serializerClass['attributeStatements']
 
@@ -264,30 +263,30 @@ ${this.getSerializerClass().name}
       serializerObject.properties![attr.field] = this.recursivelyParseBody(attr.renderAs)
     })
 
-    const [serializerPayload, modifiedExtraComponentSchemas] = this.attachAssociationsToSerializerPayload(
+    const serializerPayload = this.attachAssociationsToSerializerPayload(
       serializerClass,
-      serializerObject,
+      { [serializerKey]: serializerObject },
       serializers,
-      extraComponentSchemas,
+      serializerKey,
     )
-
-    console.log(serializerClass.name, serializerKey, serializerPayload, modifiedExtraComponentSchemas)
-    return {
-      [serializerKey]: serializerPayload,
-      ...modifiedExtraComponentSchemas,
-    }
+    return serializerPayload
+    //
+    // console.log(serializerClass.name, serializerKey, serializerPayload, modifiedExtraComponentSchemas)
+    // return {
+    //   [serializerKey]: serializerPayload,
+    //   ...modifiedExtraComponentSchemas,
+    // }
   }
 
   private attachAssociationsToSerializerPayload(
     serializerClass: typeof DreamSerializer,
     serializerPayload: any,
     serializers: { [key: string]: typeof DreamSerializer },
-    extraComponentSchemas: any,
+    serializerKey: string,
   ) {
     const associations = serializerClass['associationStatements']
 
-    const finalOutput = { ...serializerPayload }
-    const finalExtraComponentSchemas = { ...extraComponentSchemas }
+    let finalOutput = { ...serializerPayload }
 
     associations.forEach(association => {
       const associatedSerializer = association.serializerClassCB?.()
@@ -308,20 +307,31 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
           )
         }
       } else if (associatedSerializer && associatedSerializerKey) {
-        finalOutput.properties[association.field] = {
-          $ref: `#/components/schemas/${associatedSerializerKey}`,
+        finalOutput[serializerKey].required.push(association.field)
+
+        switch (association.type) {
+          case 'RendersMany':
+            finalOutput[serializerKey].properties[association.field] = {
+              type: 'array',
+              items: {
+                $ref: `#/components/schemas/${associatedSerializerKey}`,
+              },
+            }
+            break
+
+          case 'RendersOne':
+            finalOutput[serializerKey].properties[association.field] = {
+              $ref: `#/components/schemas/${associatedSerializerKey}`,
+            }
+            break
         }
 
-        const newFinalOutput = this.buildSerializerJson(
-          associatedSerializer,
-          serializers,
-          finalExtraComponentSchemas,
-        )
-        finalExtraComponentSchemas[associatedSerializerKey] = newFinalOutput[associatedSerializerKey]
+        const associatedSchema = this.buildSerializerJson(associatedSerializer, serializers)
+        finalOutput = { ...finalOutput, ...associatedSchema }
       }
     })
 
-    return [finalOutput, finalExtraComponentSchemas]
+    return finalOutput
   }
 
   /**

@@ -43,6 +43,17 @@ export default class UsersController extends ApplicationController {
     this.ok(users)
   }
 
+  @Openapi(() => User, {
+    path: '/users/{id}',
+    method: 'get',
+    status: 200,
+    serializerKey: 'withPosts',
+  })
+  public async show() {
+    const user = await User.findOrFail(this.castParam('id', 'bigint'))
+    this.ok(user)
+  }
+
   public hello() {
     this.ok(`world ${this.param('id')}`)
   }
