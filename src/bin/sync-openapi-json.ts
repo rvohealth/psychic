@@ -1,10 +1,10 @@
 import '../helpers/loadEnv'
-import OpenapiEndpointRenderer from '../openapi-renderer/endpoint'
+import OpenapiAppRenderer from '../openapi-renderer/app'
 
 async function syncOpenapiJson() {
   console.log('syncing openapi.json...', process.env.APP_ROOT_PATH)
 
-  await OpenapiEndpointRenderer.syncOpenapiJsonFile()
+  await OpenapiAppRenderer.sync()
 
   console.log('done syncing openapi.json!')
   process.exit()
