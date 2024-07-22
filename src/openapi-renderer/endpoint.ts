@@ -58,7 +58,7 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
    * ```
    */
   constructor(
-    private dreamsOrSerializersCb: () => DreamsOrSerializersCB,
+    private dreamsOrSerializersCb: (() => DreamsOrSerializersCB) | null,
     private controllerClass: typeof PsychicController,
     private action: string,
     {
@@ -121,10 +121,13 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
    * on the given serializer
    */
   public async toSchemaObject(): Promise<Record<string, OpenapiSchemaBody>> {
+    const serializerClasses = this.getSerializerClasses()
+    if (!serializerClasses) return {}
+
     const serializers = await PsychicDir.serializers()
 
     let output: Record<string, OpenapiSchemaBody> = {}
-    this.getSerializerClasses().forEach(serializerClass => {
+    serializerClasses.forEach(serializerClass => {
       output = { ...output, ...this.buildSerializerJson(serializerClass, serializers) }
     })
 
@@ -183,7 +186,6 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
 
     const route = await this.getCurrentRouteConfig()
     this._path = openapiRoute(route.path)
-    console.log('PATH', this._path)
     return this._path
   }
   private _path: string
@@ -299,7 +301,7 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
    */
   private async parseResponses(): Promise<OpenapiResponses> {
     const responseData: OpenapiResponses = {
-      [this.status || 200]: await this.parseSerializerResponseShape(),
+      [this.status || this.defaultStatus]: await this.parseSerializerResponseShape(),
     }
 
     Object.keys(this.responses || {}).forEach(statusCode => {
@@ -315,16 +317,25 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
     return responseData
   }
 
+  private get defaultStatus() {
+    if (!this.getSerializerClasses()) return 204
+    return 200
+  }
+
   /**
    * @internal
    *
    * returns a ref object for the callback passed to the
    * Openapi decorator.
    */
-  private async parseSerializerResponseShape(): Promise<OpenapiContent> {
-    if (this.getSerializerClasses().length > 1) {
+  private async parseSerializerResponseShape(): Promise<OpenapiContent | { description: string }> {
+    const serializerClasses = this.getSerializerClasses()
+    if (!serializerClasses) return { description: 'no content' }
+
+    if (serializerClasses.length > 1) {
       return this.parseMultiEntitySerializerResponseShape()
     }
+
     return this.parseSingleEntitySerializerResponseShape()
   }
 
@@ -341,7 +352,7 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
    */
   private async parseSingleEntitySerializerResponseShape(): Promise<OpenapiContent> {
     const serializers = await PsychicDir.serializers()
-    const serializerClass = this.getSerializerClasses()[0]!
+    const serializerClass = this.getSerializerClasses()![0]!
     const serializerKey = Object.keys(serializers).find(key => serializers[key] === serializerClass)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -385,7 +396,7 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
 
     const anyOf: OpenapiSchemaExpressionAnyOf = { anyOf: [] }
 
-    this.getSerializerClasses().forEach(serializerClass => {
+    this.getSerializerClasses()!.forEach(serializerClass => {
       const serializerKey = Object.keys(serializers).find(key => serializers[key] === serializerClass)
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -663,7 +674,9 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
    * attached dream or view model to identify a serializer
    * match.
    */
-  private getSerializerClasses(): (typeof DreamSerializer<any, any>)[] {
+  private getSerializerClasses(): (typeof DreamSerializer<any, any>)[] | null {
+    if (!this.dreamsOrSerializersCb) return null
+
     const dreamsOrSerializers = this.dreamsOrSerializersCb()
 
     if (Array.isArray(dreamsOrSerializers)) {
@@ -798,7 +811,7 @@ export interface OpenapiMethodBody {
 }
 
 export interface OpenapiResponses {
-  [statusCode: number]: OpenapiContent
+  [statusCode: number]: OpenapiContent | { description: string }
 }
 
 export type OpenapiContent = {

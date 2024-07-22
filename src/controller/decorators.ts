@@ -1,6 +1,8 @@
-import { Dream, DreamSerializer } from '@rvohealth/dream'
 import PsychicController from '.'
-import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint'
+import OpenapiEndpointRenderer, {
+  DreamsOrSerializersOrViewModels,
+  OpenapiEndpointRendererOpts,
+} from '../openapi-renderer/endpoint'
 import { ControllerHook } from './hooks'
 
 export function BeforeAction(
@@ -41,22 +43,38 @@ export function BeforeAction(
  * @param tags - Optional. string array
  * @param uri - Optional. A list of uri segments that this endpoint uses
  */
-export function Openapi<
-  I extends typeof Dream | typeof DreamSerializer | { serializers: Record<string, typeof DreamSerializer> },
->(
-  modelOrSerializerCb: () => I,
-  opts: OpenapiEndpointRendererOpts<I>,
+export function Openapi<I extends DreamsOrSerializersOrViewModels>(
+  modelOrSerializerCb: () => I | OpenapiEndpointRendererOpts<I>,
+  opts?: OpenapiEndpointRendererOpts<I>,
 ): (target: PsychicController, methodName: string | symbol) => void {
   return function (target: PsychicController, methodName: string | symbol): void {
     const psychicControllerClass: typeof PsychicController = target.constructor as typeof PsychicController
     if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'openapi'))
       psychicControllerClass.openapi = {}
 
-    psychicControllerClass.openapi[methodName.toString()] = new OpenapiEndpointRenderer(
-      modelOrSerializerCb,
-      psychicControllerClass,
-      methodName.toString(),
-      opts,
-    )
+    if (opts) {
+      psychicControllerClass.openapi[methodName.toString()] = new OpenapiEndpointRenderer(
+        modelOrSerializerCb as () => I,
+        psychicControllerClass,
+        methodName.toString(),
+        opts,
+      )
+    } else {
+      if (typeof modelOrSerializerCb === 'function') {
+        psychicControllerClass.openapi[methodName.toString()] = new OpenapiEndpointRenderer(
+          modelOrSerializerCb as () => I,
+          psychicControllerClass,
+          methodName.toString(),
+          undefined,
+        )
+      } else {
+        psychicControllerClass.openapi[methodName.toString()] = new OpenapiEndpointRenderer(
+          null,
+          psychicControllerClass,
+          methodName.toString(),
+          modelOrSerializerCb,
+        )
+      }
+    }
   }
 }
