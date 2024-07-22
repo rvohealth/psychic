@@ -336,7 +336,7 @@ describe('OpenapiEndpointRenderer', () => {
 
   describe('#toObject', () => {
     context('tags', () => {
-      it('renders tags', async () => {
+      it('renders provided tags', async () => {
         const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
           path: '/hello/world',
           method: 'get',
@@ -354,6 +354,52 @@ describe('OpenapiEndpointRenderer', () => {
             }),
           }),
         )
+      })
+    })
+
+    context('method', () => {
+      it('renders provided method', async () => {
+        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          path: '/hello/world',
+          method: 'get',
+          tags: ['hello', 'world'],
+        })
+
+        const response = await renderer.toObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            '/hello/world': expect.objectContaining({
+              get: expect.objectContaining({
+                tags: ['hello', 'world'],
+              }),
+            }),
+          }),
+        )
+      })
+
+      context('with no method provided', () => {
+        it('infers the method by examining routes', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'show')
+
+          const response = await renderer.toObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              '/users/{id}': expect.objectContaining({
+                get: expect.objectContaining({
+                  responses: {
+                    '200': {
+                      content: {
+                        'application/json': { schema: { $ref: '#/components/schemas/User' } },
+                      },
+                    },
+                  },
+                }),
+              }),
+            }),
+          )
+        })
       })
     })
 

@@ -28,6 +28,7 @@ import { RouteConfig } from '../router/route-manager'
 import { HttpMethod } from '../router/types'
 import PsychicServer from '../server'
 import OpenapiBodySegmentRenderer from './body-segment'
+import openapiRoute from './helpers/openapiRoute'
 
 export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends DreamsOrSerializersOrViewModels> {
   private many: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['many']
@@ -72,7 +73,7 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
       status,
       tags,
       uri,
-    }: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>,
+    }: OpenapiEndpointRendererOpts<DreamsOrSerializersCB> = {},
   ) {
     this.body = body
     this.headers = headers
@@ -96,7 +97,7 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
     return {
       [await this.computedPath()]: {
         parameters: [...this.headersArray(), ...this.uriArray(), ...this.queryArray()],
-        [this.method]: {
+        [await this.computedMethod()]: {
           tags: this.tags || [],
           summary: '',
           requestBody: {
@@ -139,10 +140,55 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
    *
    * If no match is found, a MissingControllerActionPairingInRoutes exception.
    */
+  private async computedMethod(): Promise<HttpMethod> {
+    if (this.method) return this.method
+    if (this._method) return this._method
+
+    try {
+      const route = await this.getCurrentRouteConfig()
+      this._method = route.httpMethod
+    } catch {
+      this._method = this.guessHttpMethod()
+    }
+
+    return this._method
+  }
+  private _method: HttpMethod
+
+  private guessHttpMethod() {
+    switch (this.action) {
+      case 'create':
+        return 'post'
+      case 'destroy':
+        return 'delete'
+      case 'update':
+        return 'patch'
+      default:
+        return 'get'
+    }
+  }
+
+  /**
+   * @internal
+   *
+   * returns the path that was provided in the options if it is available.
+   * Otherwise, it examines the application's routes to determine
+   * a controller action match.
+   *
+   * If no match is found, a MissingControllerActionPairingInRoutes exception.
+   */
   private async computedPath(): Promise<string> {
     if (this.path) return this.path
     if (this._path) return this._path
 
+    const route = await this.getCurrentRouteConfig()
+    this._path = openapiRoute(route.path)
+    console.log('PATH', this._path)
+    return this._path
+  }
+  private _path: string
+
+  private async getCurrentRouteConfig() {
     await this._loadRoutes()
     const controllerActionString = await this.controllerClass.controllerActionPath(this.action)
 
@@ -150,10 +196,8 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
       routeConfig => routeConfig.controllerActionString === controllerActionString,
     )
     if (!route) throw new MissingControllerActionPairingInRoutes(this.controllerClass, this.action)
-
-    return `/${route.path.replace(/^\//, '')}`
+    return route
   }
-  private _path: string
 
   private async _loadRoutes() {
     if (this._routes) return
@@ -664,6 +708,7 @@ ATTENTION:
 `
   }
 }
+
 export interface OpenapiEndpointRendererOpts<
   T extends DreamsOrSerializersOrViewModels,
   NonArrayT extends DreamsOrSerializersOrViewModels extends (infer R extends abstract new (
@@ -675,7 +720,7 @@ export interface OpenapiEndpointRendererOpts<
     ? R & (abstract new (...args: any) => any)
     : T & (abstract new (...args: any) => any),
 > {
-  method: HttpMethod
+  method?: HttpMethod
   path?: string
   many?: boolean
   uri?: OpenapiUriOption[]
