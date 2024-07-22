@@ -11,12 +11,14 @@ import {
 } from '@rvohealth/dream'
 import {
   OpenapiSchemaArray,
+  OpenapiSchemaExpressionAllOf,
   OpenapiSchemaExpressionAnyOf,
   OpenapiSchemaExpressionOneOf,
   OpenapiSchemaExpressionRef,
   OpenapiSchemaExpressionRefSchemaShorthand,
   OpenapiSchemaObject,
   OpenapiSchemaPrimitiveGeneric,
+  OpenapiSchemaShorthandExpressionAllOf,
   OpenapiSchemaShorthandExpressionAnyOf,
   OpenapiSchemaShorthandExpressionOneOf,
   OpenapiShorthandPrimitiveTypes,
@@ -66,6 +68,9 @@ export default class OpenapiBodySegmentRenderer {
       case 'anyOf':
         return this.anyOfStatement(bodySegment)
 
+      case 'allOf':
+        return this.allOfStatement(bodySegment)
+
       case 'object':
         return this.objectStatement(bodySegment)
 
@@ -102,11 +107,13 @@ export default class OpenapiBodySegmentRenderer {
     const arrayBodySegment = bodySegment as OpenapiSchemaArray
     const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
     const anyOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAnyOf
+    const allOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAllOf
     const refBodySegment = bodySegment as OpenapiSchemaExpressionRef
     const schemaRefBodySegment = bodySegment as OpenapiSchemaExpressionRefSchemaShorthand
 
     if (oneOfBodySegment.oneOf) return 'oneOf'
     if (anyOfBodySegment.anyOf) return 'anyOf'
+    if (allOfBodySegment.allOf) return 'allOf'
     if (objectBodySegment.type === 'object') return 'object'
     else if (arrayBodySegment.type === 'array') return 'array'
     else {
@@ -150,6 +157,20 @@ export default class OpenapiBodySegmentRenderer {
     const anyOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAnyOf
     return {
       anyOf: anyOfBodySegment.anyOf.map(segment => this.recursivelyParseBody(segment)),
+    }
+  }
+
+  /**
+   * @internal
+   *
+   * recursively parses an anyOf statement
+   */
+  private allOfStatement(
+    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
+  ): OpenapiSchemaExpressionAllOf {
+    const allOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAllOf
+    return {
+      allOf: allOfBodySegment.allOf.map(segment => this.recursivelyParseBody(segment)),
     }
   }
 

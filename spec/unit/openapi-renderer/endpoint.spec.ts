@@ -547,6 +547,66 @@ describe('OpenapiEndpointRenderer', () => {
         })
       })
 
+      context('with allOf', () => {
+        it('returns valid openapi', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            path: '/how/yadoin',
+            method: 'get',
+            serializerKey: 'extra',
+            responses: {
+              201: {
+                allOf: [
+                  {
+                    type: 'object',
+                    properties: {
+                      name: 'string',
+                      email: 'string',
+                    },
+                  },
+                  {
+                    type: 'string',
+                  },
+                ],
+              },
+            },
+          })
+
+          const response = await renderer.toObject()
+          expect(response['/how/yadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              201: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      allOf: [
+                        {
+                          type: 'object',
+                          nullable: false,
+                          properties: {
+                            name: {
+                              type: 'string',
+                              nullable: false,
+                            },
+                            email: {
+                              type: 'string',
+                              nullable: false,
+                            },
+                          },
+                        },
+                        {
+                          type: 'string',
+                          nullable: false,
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
       context('with anyOf', () => {
         it('returns valid openapi', async () => {
           const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {

@@ -12,18 +12,22 @@ import {
 } from '@rvohealth/dream'
 import {
   OpenapiSchemaArray,
+  OpenapiSchemaExpressionAllOf,
   OpenapiSchemaExpressionAnyOf,
+  OpenapiSchemaExpressionOneOf,
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
+  OpenapiSchemaShorthandExpressionAllOf,
+  OpenapiSchemaShorthandExpressionAnyOf,
   OpenapiSchemaShorthandExpressionOneOf,
   OpenapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream/src/openapi/types'
+import PsychicController from '../controller'
 import PsychicDir from '../helpers/psychicdir'
 import { RouteConfig } from '../router/route-manager'
 import { HttpMethod } from '../router/types'
 import PsychicServer from '../server'
 import OpenapiBodySegmentRenderer from './body-segment'
-import PsychicController from '../controller'
 
 export default class OpenapiEndpointRenderer<
   DreamOrSerializer extends
@@ -683,7 +687,11 @@ export type OpenapiContent = {
           }
         | OpenapiSchemaExpressionRef
         | OpenapiSchemaExpressionAnyOf
+        | OpenapiSchemaExpressionAllOf
+        | OpenapiSchemaExpressionOneOf
         | OpenapiSchemaShorthandExpressionOneOf
+        | OpenapiSchemaShorthandExpressionAllOf
+        | OpenapiSchemaShorthandExpressionAnyOf
     }
   } & {
     description?: string
