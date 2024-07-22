@@ -656,6 +656,38 @@ describe('OpenapiEndpointRenderer', () => {
         })
       })
 
+      context('with a view model passed', () => {
+        class MyViewModel {
+          public get serializers() {
+            return {
+              default: UserWithPostsMultiTypeSerializer,
+            }
+          }
+        }
+
+        it("uses the provided serializer, converting it's payload shape to openapi format", async () => {
+          const renderer = new OpenapiEndpointRenderer(() => MyViewModel, UsersController, 'howyadoin', {
+            path: '/how/yadoin',
+            method: 'get',
+          })
+
+          const response = await renderer.toObject()
+          expect(response['/how/yadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              200: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      $ref: '#/components/schemas/UserWithPostsMultiType',
+                    },
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
       context('with an array of dream models passed', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
           const renderer = new OpenapiEndpointRenderer(() => [User, Post], UsersController, 'howyadoin', {

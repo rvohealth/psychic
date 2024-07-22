@@ -692,13 +692,13 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
   private getSerializerClass(
     dreamOrSerializerOrViewModel: DreamOrSerializerOrViewModel,
   ): typeof DreamSerializer {
-    if ((dreamOrSerializerOrViewModel as typeof Dream).isDream) {
+    if ((dreamOrSerializerOrViewModel as typeof DreamSerializer).isDreamSerializer) {
+      return dreamOrSerializerOrViewModel as typeof DreamSerializer
+    } else {
       const modelClass = dreamOrSerializerOrViewModel as typeof Dream
       return modelClass.prototype.serializers[
         (this.serializerKey || 'default') as keyof typeof modelClass.prototype.serializers
       ] as typeof DreamSerializer
-    } else {
-      return dreamOrSerializerOrViewModel as typeof DreamSerializer
     }
   }
 }
@@ -852,4 +852,4 @@ export type DreamOrSerializerOrViewModel =
   | typeof Dream
   | (typeof Dream)[]
   | typeof DreamSerializer
-  | { serializers: Record<string, typeof DreamSerializer> }
+  | (abstract new (...args: any) => { serializers: Record<string, typeof DreamSerializer> })
