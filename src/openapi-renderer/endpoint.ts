@@ -208,8 +208,6 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
 
     const server = new PsychicServer()
     await server.boot()
-    this._server = server
-
     this._routes = await server.routes()
   }
 
@@ -218,12 +216,6 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
     return this._routes
   }
   private _routes: RouteConfig[]
-
-  private get server() {
-    if (!this._server) throw new Error('must called _loadRoutes before accessing routes property')
-    return this._server
-  }
-  private _server: PsychicServer
 
   /**
    * @internal
@@ -310,7 +302,9 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
       responseData[parseInt(statusCode)] = {
         content: {
           'application/json': {
-            schema: this.recursivelyParseBody(this.responses![statusCode as keyof typeof this.responses]),
+            schema: this.recursivelyParseBody(
+              this.responses![statusCode as keyof typeof this.responses],
+            ) as any,
           },
         },
       }
@@ -461,7 +455,7 @@ ${serializerClass.name}
         serializerObject.required!.push(attr.field)
       }
 
-      serializerObject.properties![attr.field] = this.recursivelyParseBody(attr.renderAs)
+      ;(serializerObject as any).properties![attr.field] = this.recursivelyParseBody(attr.renderAs)
     })
 
     const serializerPayload = this.attachAssociationsToSerializerPayload(
@@ -570,7 +564,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
 
     switch (association.type) {
       case 'RendersMany':
-        finalOutput[serializerKey].properties![association.field] = {
+        ;(finalOutput as any)[serializerKey].properties![association.field] = {
           type: 'array',
           items: {
             $ref: `#/components/schemas/${associatedSerializerKey}`,
@@ -579,7 +573,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
         break
 
       case 'RendersOne':
-        finalOutput[serializerKey].properties![association.field] = {
+        ;(finalOutput as any)[serializerKey].properties![association.field] = {
           $ref: `#/components/schemas/${associatedSerializerKey}`,
         }
         break
@@ -648,8 +642,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
       const associatedSchema = this.buildSerializerJson(associatedSerializer, serializers)
       finalOutput = { ...finalOutput, ...associatedSchema }
     })
-
-    finalOutput[serializerKey].properties![association.field] = {
+    ;(finalOutput as any)[serializerKey].properties![association.field] = {
       anyOf,
     }
 
@@ -837,9 +830,6 @@ export type OpenapiContent = {
         | OpenapiSchemaExpressionAnyOf
         | OpenapiSchemaExpressionAllOf
         | OpenapiSchemaExpressionOneOf
-        | OpenapiSchemaShorthandExpressionOneOf
-        | OpenapiSchemaShorthandExpressionAllOf
-        | OpenapiSchemaShorthandExpressionAnyOf
     }
   } & {
     description?: string

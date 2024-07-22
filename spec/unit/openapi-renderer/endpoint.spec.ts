@@ -3,6 +3,19 @@ import UsersController from '../../../test-app/app/controllers/UsersController'
 import Pet from '../../../test-app/app/models/Pet'
 import Post from '../../../test-app/app/models/Post'
 import User from '../../../test-app/app/models/User'
+import {
+  CommentTestingDateSerializer,
+  CommentTestingDateTimeSerializer,
+  CommentTestingDefaultObjectFieldsSerializer,
+  CommentTestingIntegerSerializer,
+  CommentTestingStringSerializer,
+  CommentWithAllOfArraySerializer,
+  CommentWithAllOfObjectSerializer,
+  CommentWithAnyOfArraySerializer,
+  CommentWithAnyOfObjectSerializer,
+  CommentWithOneOfArraySerializer,
+  CommentWithOneOfObjectSerializer,
+} from '../../../test-app/app/serializers/CommentSerializer'
 import PostSerializer from '../../../test-app/app/serializers/PostSerializer'
 import UserSerializer, {
   UserWithPostsMultiType2Serializer,
@@ -74,6 +87,380 @@ describe('OpenapiEndpointRenderer', () => {
             },
           },
         },
+      })
+    })
+
+    context('with an integer type passed', () => {
+      it('supports integer type fields, including minimum and maximum', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentTestingIntegerSerializer,
+          UsersController,
+          'howyadoin',
+          {
+            method: 'get',
+          },
+        )
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingInteger: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  type: 'integer',
+                  minimum: 10,
+                  maximum: 20,
+                  nullable: false,
+                },
+              },
+            },
+          }),
+        )
+      })
+    })
+
+    context('with a date type passed', () => {
+      it('supports integer type fields, including minimum and maximum', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentTestingDateSerializer,
+          UsersController,
+          'howyadoin',
+          {
+            method: 'get',
+          },
+        )
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingDate: {
+              type: 'object',
+              required: ['howyadoin', 'howyadoins'],
+              properties: {
+                howyadoin: {
+                  type: 'string',
+                  nullable: false,
+                  format: 'date',
+                },
+                howyadoins: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    nullable: false,
+                    format: 'date',
+                  },
+                  nullable: false,
+                },
+              },
+            },
+          }),
+        )
+      })
+    })
+
+    context('with a date-time type passed', () => {
+      it('supports integer type fields, including minimum and maximum', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentTestingDateTimeSerializer,
+          UsersController,
+          'howyadoin',
+          {
+            method: 'get',
+          },
+        )
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingDateTime: {
+              type: 'object',
+              required: ['howyadoin', 'howyadoins'],
+              properties: {
+                howyadoin: {
+                  type: 'string',
+                  nullable: false,
+                  format: 'date-time',
+                },
+                howyadoins: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    nullable: false,
+                    format: 'date-time',
+                  },
+                  nullable: false,
+                },
+              },
+            },
+          }),
+        )
+      })
+    })
+
+    context('with a string type passed', () => {
+      it('supports format and enum fields', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentTestingStringSerializer,
+          UsersController,
+          'howyadoin',
+          {
+            method: 'get',
+          },
+        )
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingString: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  type: 'string',
+                  nullable: false,
+                  format: 'date',
+                  enum: ['hello', 'world'],
+                },
+              },
+            },
+          }),
+        )
+      })
+    })
+
+    context('with an object type passed', () => {
+      it('supports maxProperties and additionalProperties fields', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentTestingDefaultObjectFieldsSerializer,
+          UsersController,
+          'howyadoin',
+          {
+            method: 'get',
+            serializerKey: 'default',
+          },
+        )
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingDefaultObjectFields: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  type: 'object',
+                  nullable: false,
+                  maxProperties: 10,
+                  properties: {},
+                  additionalProperties: {
+                    oneOf: [
+                      { type: 'string', nullable: false },
+                      { type: 'boolean', nullable: false },
+                    ],
+                  },
+                },
+              },
+            },
+          }),
+        )
+      })
+
+      it('supports anyOf expression', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentWithAnyOfObjectSerializer,
+          UsersController,
+          'howyadoin',
+          {
+            method: 'get',
+            serializerKey: 'default',
+          },
+        )
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentWithAnyOfObject: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  anyOf: [
+                    { type: 'string', nullable: false },
+                    { type: 'boolean', nullable: false },
+                  ],
+                },
+              },
+            },
+          }),
+        )
+      })
+
+      it('supports allOf expression', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentWithAllOfObjectSerializer,
+          UsersController,
+          'howyadoin',
+          {
+            method: 'get',
+            serializerKey: 'default',
+          },
+        )
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentWithAllOfObject: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  allOf: [
+                    { type: 'string', nullable: false },
+                    { type: 'boolean', nullable: false },
+                  ],
+                },
+              },
+            },
+          }),
+        )
+      })
+
+      it('supports oneOf expression', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentWithOneOfObjectSerializer,
+          UsersController,
+          'howyadoin',
+          {
+            method: 'get',
+            serializerKey: 'default',
+          },
+        )
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentWithOneOfObject: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  oneOf: [
+                    { type: 'string', nullable: false },
+                    { type: 'boolean', nullable: false },
+                  ],
+                },
+              },
+            },
+          }),
+        )
+      })
+    })
+
+    context('with an array type passed', () => {
+      context('items on the array or leveraging an expression', () => {
+        context('anyOf', () => {
+          it('renders anyOf expression', async () => {
+            const renderer = new OpenapiEndpointRenderer(
+              () => CommentWithAnyOfArraySerializer,
+              UsersController,
+              'howyadoin',
+              {
+                method: 'get',
+                serializerKey: 'default',
+              },
+            )
+            const response = await renderer.toSchemaObject()
+            expect(response).toEqual(
+              expect.objectContaining({
+                CommentWithAnyOfArray: {
+                  type: 'object',
+                  required: ['howyadoin'],
+                  properties: {
+                    howyadoin: {
+                      type: 'array',
+                      items: {
+                        anyOf: [
+                          { type: 'string', nullable: false },
+                          { type: 'boolean', nullable: false },
+                        ],
+                      },
+                      nullable: false,
+                    },
+                  },
+                },
+              }),
+            )
+          })
+        })
+
+        context('allOf', () => {
+          it('renders allOf expression', async () => {
+            const renderer = new OpenapiEndpointRenderer(
+              () => CommentWithAllOfArraySerializer,
+              UsersController,
+              'howyadoin',
+              {
+                method: 'get',
+                serializerKey: 'default',
+              },
+            )
+            const response = await renderer.toSchemaObject()
+            expect(response).toEqual(
+              expect.objectContaining({
+                CommentWithAllOfArray: {
+                  type: 'object',
+                  required: ['howyadoin'],
+                  properties: {
+                    howyadoin: {
+                      type: 'array',
+                      items: {
+                        allOf: [
+                          { type: 'string', nullable: false },
+                          { type: 'boolean', nullable: false },
+                        ],
+                      },
+                      nullable: false,
+                    },
+                  },
+                },
+              }),
+            )
+          })
+        })
+
+        context('oneOf', () => {
+          it('renders anyOf expression', async () => {
+            const renderer = new OpenapiEndpointRenderer(
+              () => CommentWithOneOfArraySerializer,
+              UsersController,
+              'howyadoin',
+              {
+                method: 'get',
+                serializerKey: 'default',
+              },
+            )
+            const response = await renderer.toSchemaObject()
+            expect(response).toEqual(
+              expect.objectContaining({
+                CommentWithOneOfArray: {
+                  type: 'object',
+                  required: ['howyadoin'],
+                  properties: {
+                    howyadoin: {
+                      type: 'array',
+                      items: {
+                        oneOf: [
+                          { type: 'string', nullable: false },
+                          { type: 'boolean', nullable: false },
+                        ],
+                      },
+                      nullable: false,
+                    },
+                  },
+                },
+              }),
+            )
+          })
+        })
       })
     })
 

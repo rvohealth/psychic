@@ -216,16 +216,50 @@ export default class OpenapiBodySegmentRenderer {
       data.summary = objectBodySegment.summary
     }
 
-    data = this.applyCommonFieldsToPayload<OpenapiSchemaObject>(data)
+    if ((objectBodySegment as any).maxProperties) {
+      data.maxProperties = (objectBodySegment as any).maxProperties
+    }
+
+    if ((objectBodySegment as any).additionalProperties) {
+      ;(data as any).additionalProperties = this.parseObjectPropertyStatement(
+        (objectBodySegment as any).additionalProperties,
+      )
+    }
 
     if (objectBodySegment.required !== undefined) data.required = objectBodySegment.required
 
-    Object.keys(objectBodySegment.properties || {}).forEach(key => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-      data.properties![key] = this.recursivelyParseBody(objectBodySegment.properties![key] as any)
-    })
+    if ((objectBodySegment as any).properties) {
+      ;(data as any).properties! = this.parseObjectPropertyStatement((objectBodySegment as any).properties)
+    }
 
     return data
+  }
+
+  private parseObjectPropertyStatement(
+    propertySegment:
+      | Record<string, OpenapiSchemaBody | OpenapiSchemaBodyShorthand>
+      | OpenapiSchemaExpressionAllOf
+      | OpenapiSchemaExpressionAnyOf
+      | OpenapiSchemaExpressionOneOf
+      | OpenapiSchemaShorthandExpressionAllOf
+      | OpenapiSchemaShorthandExpressionAnyOf
+      | OpenapiSchemaShorthandExpressionOneOf,
+  ) {
+    if (
+      (propertySegment as OpenapiSchemaExpressionOneOf).oneOf ||
+      (propertySegment as OpenapiSchemaExpressionAllOf).allOf ||
+      (propertySegment as OpenapiSchemaExpressionAnyOf).anyOf
+    ) {
+      return this.recursivelyParseBody(propertySegment as any as any)
+    }
+
+    const objectBodySegment = propertySegment as OpenapiSchemaObject
+    Object.keys((objectBodySegment as any) || {}).forEach(key => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+      ;(propertySegment as any)[key] = this.recursivelyParseBody((objectBodySegment as any)[key] as any)
+    })
+
+    return propertySegment
   }
 
   /**
@@ -312,8 +346,6 @@ export default class OpenapiBodySegmentRenderer {
       case 'string[]':
       case 'number[]':
       case 'boolean[]':
-      case 'date[]':
-      case 'date-time[]':
       case 'decimal[]':
         return {
           type: 'array',
@@ -321,6 +353,26 @@ export default class OpenapiBodySegmentRenderer {
             type: this.serializerTypeToOpenapiType(data),
             nullable: false,
           },
+          nullable: attribute?.options?.allowNull ?? false,
+        }
+
+      case 'date[]':
+      case 'date-time[]':
+        return {
+          type: 'array',
+          items: {
+            type: 'string',
+            format: data.replace(/\[\]$/, ''),
+            nullable: false,
+          },
+          nullable: attribute?.options?.allowNull ?? false,
+        }
+
+      case 'date':
+      case 'date-time':
+        return {
+          type: 'string',
+          format: data,
           nullable: attribute?.options?.allowNull ?? false,
         }
 
@@ -340,6 +392,12 @@ export default class OpenapiBodySegmentRenderer {
    */
   private serializerTypeToOpenapiType(type: SerializableTypes): OpenapiPrimitiveTypes {
     switch (type) {
+      case 'date':
+      case 'date-time':
+      case 'date[]':
+      case 'date-time[]':
+        return 'string'
+
       default:
         return (type as string).replace(/\[\]$/, '') as OpenapiPrimitiveTypes
     }
