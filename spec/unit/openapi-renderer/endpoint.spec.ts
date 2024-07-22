@@ -302,6 +302,28 @@ describe('OpenapiEndpointRenderer', () => {
   })
 
   describe('#toObject', () => {
+    context('tags', () => {
+      it('renders tags', async () => {
+        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          path: '/hello/world',
+          method: 'get',
+          tags: ['hello', 'world'],
+        })
+
+        const response = await renderer.toObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            '/hello/world': expect.objectContaining({
+              get: expect.objectContaining({
+                tags: ['hello', 'world'],
+              }),
+            }),
+          }),
+        )
+      })
+    })
+
     context('uri', () => {
       it('renders params within the parameters array', async () => {
         const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {

@@ -163,7 +163,7 @@ export default class OpenapiBodySegmentRenderer {
   /**
    * @internal
    *
-   * recursively parses an anyOf statement
+   * recursively parses an allOf statement
    */
   private allOfStatement(
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,

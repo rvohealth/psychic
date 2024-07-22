@@ -45,6 +45,7 @@ export default class OpenapiEndpointRenderer<
   private headers: OpenapiEndpointRendererOpts<DreamOrSerializer>['headers']
   private query: OpenapiEndpointRendererOpts<DreamOrSerializer>['query']
   private status: OpenapiEndpointRendererOpts<DreamOrSerializer>['status']
+  private tags: OpenapiEndpointRendererOpts<DreamOrSerializer>['tags']
 
   /**
    * instantiates a new OpenapiEndpointRenderer.
@@ -65,28 +66,30 @@ export default class OpenapiEndpointRenderer<
     private controllerClass: typeof PsychicController,
     private action: string,
     {
-      many,
-      path,
-      method,
-      responses,
-      status,
-      serializerKey,
-      uri,
       body,
       headers,
+      many,
+      method,
+      path,
       query,
+      responses,
+      serializerKey,
+      status,
+      tags,
+      uri,
     }: OpenapiEndpointRendererOpts<DreamOrSerializer>,
   ) {
-    this.many = many
-    this.path = path
-    this.method = method
-    this.responses = responses
-    this.serializerKey = serializerKey
-    this.uri = uri
     this.body = body
     this.headers = headers
+    this.many = many
+    this.method = method
+    this.path = path
     this.query = query
+    this.responses = responses
+    this.serializerKey = serializerKey
     this.status = status
+    this.tags = tags
+    this.uri = uri
   }
 
   /**
@@ -99,7 +102,7 @@ export default class OpenapiEndpointRenderer<
       [await this.computedPath()]: {
         parameters: [...this.headersArray(), ...this.uriArray(), ...this.queryArray()],
         [this.method]: {
-          tags: [],
+          tags: this.tags,
           summary: '',
           requestBody: {
             content: {
@@ -603,6 +606,7 @@ export interface OpenapiEndpointRendererOpts<
   headers?: OpenapiHeaderOption[]
   query?: OpenapiQueryOption[]
   body?: OpenapiSchemaBodyShorthand
+  tags?: string[]
   responses?: {
     [statusCode: number]: OpenapiSchemaBodyShorthand
   }
