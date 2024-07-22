@@ -54,6 +54,15 @@ export default class UsersController extends ApplicationController {
     this.ok(user)
   }
 
+  @Openapi({
+    path: '/users/{id}',
+  })
+  public async destroy() {
+    const user = await User.findOrFail(this.castParam('id', 'bigint'))
+    await user.destroy()
+    this.noContent()
+  }
+
   public hello() {
     this.ok(`world ${this.param('id')}`)
   }

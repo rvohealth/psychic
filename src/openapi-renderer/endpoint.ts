@@ -33,6 +33,7 @@ import openapiRoute from './helpers/openapiRoute'
 export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends DreamsOrSerializersOrViewModels> {
   private many: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['many']
   private path: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['path']
+  private pathz: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['path']
   private method: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['method']
   private responses: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['responses']
   private serializerKey: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['serializerKey']
@@ -80,6 +81,7 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
     this.many = many
     this.method = method
     this.path = path
+    this.pathz = path
     this.query = query
     this.responses = responses
     this.serializerKey = serializerKey

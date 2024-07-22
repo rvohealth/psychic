@@ -401,6 +401,30 @@ describe('OpenapiEndpointRenderer', () => {
           )
         })
       })
+
+      context('when the method cannot be inferred by routes', () => {
+        it('infers the method by examining routes', async () => {
+          const renderer = new OpenapiEndpointRenderer(null, UsersController, 'destroy', {
+            path: '/users/{id}',
+          })
+
+          const response = await renderer.toObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              '/users/{id}': expect.objectContaining({
+                delete: expect.objectContaining({
+                  responses: {
+                    '204': {
+                      description: 'no content',
+                    },
+                  },
+                }),
+              }),
+            }),
+          )
+        })
+      })
     })
 
     context('uri', () => {
