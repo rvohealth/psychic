@@ -354,7 +354,7 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
    */
   private async parseSingleEntitySerializerResponseShape(): Promise<OpenapiContent> {
     const serializers = await PsychicDir.serializers()
-    const serializerClass = this.getSerializerClasses()![0]!
+    const serializerClass = this.getSerializerClasses()![0]
     const serializerKey = Object.keys(serializers).find(key => serializers[key] === serializerClass)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -676,6 +676,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
    * attached dream or view model to identify a serializer
    * match.
    */
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getSerializerClasses(): (typeof DreamSerializer<any, any>)[] | null {
     if (!this.dreamsOrSerializersCb) return null
 
@@ -727,13 +728,20 @@ ATTENTION:
 export interface OpenapiEndpointRendererOpts<
   T extends DreamsOrSerializersOrViewModels,
   NonArrayT extends DreamsOrSerializersOrViewModels extends (infer R extends abstract new (
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
   ) => any)[]
-    ? R & (abstract new (...args: any) => any)
-    : T & (abstract new (...args: any) => any) = DreamsOrSerializersOrViewModels extends (infer R extends
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      R & (abstract new (...args: any) => any)
+    : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      T & (abstract new (...args: any) => any) = DreamsOrSerializersOrViewModels extends (infer R extends
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     abstract new (...args: any) => any)[]
-    ? R & (abstract new (...args: any) => any)
-    : T & (abstract new (...args: any) => any),
+    ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      R & (abstract new (...args: any) => any)
+    : // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      T & (abstract new (...args: any) => any),
 > {
   method?: HttpMethod
   path?: string

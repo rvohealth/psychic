@@ -348,6 +348,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/hello/world': expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               get: expect.objectContaining({
                 tags: ['hello', 'world'],
               }),
@@ -370,6 +371,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/hello/world': expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               get: expect.objectContaining({
                 tags: ['hello', 'world'],
               }),
@@ -387,6 +389,7 @@ describe('OpenapiEndpointRenderer', () => {
             expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               '/users/{id}': expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 get: expect.objectContaining({
                   responses: {
                     '200': {
@@ -413,6 +416,7 @@ describe('OpenapiEndpointRenderer', () => {
             expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               '/users/{id}': expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 delete: expect.objectContaining({
                   responses: {
                     '204': {
@@ -686,6 +690,7 @@ describe('OpenapiEndpointRenderer', () => {
       context('with an array of dream serializers passed', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
           const renderer = new OpenapiEndpointRenderer(
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
             () => [UserSerializer, PostSerializer<any, any>],
             UsersController,
             'howyadoin',
