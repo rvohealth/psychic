@@ -623,7 +623,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
     const dreamsOrSerializers = this.dreamsOrSerializersCb()
 
     if (Array.isArray(dreamsOrSerializers)) {
-      return dreamsOrSerializers.map(this.getSerializerClass)
+      return dreamsOrSerializers.map(s => this.getSerializerClass(s))
     } else {
       return [this.getSerializerClass(dreamsOrSerializers)]
     }

@@ -3,7 +3,8 @@ import UsersController from '../../../test-app/app/controllers/UsersController'
 import Pet from '../../../test-app/app/models/Pet'
 import Post from '../../../test-app/app/models/Post'
 import User from '../../../test-app/app/models/User'
-import {
+import PostSerializer from '../../../test-app/app/serializers/PostSerializer'
+import UserSerializer, {
   UserWithPostsMultiType2Serializer,
   UserWithPostsMultiTypeSerializer,
 } from '../../../test-app/app/serializers/UserSerializer'
@@ -73,6 +74,38 @@ describe('OpenapiEndpointRenderer', () => {
             },
           },
         },
+      })
+    })
+
+    context('with multiple dream models passed to callback', () => {
+      it('renders the association as a ref, also providing a schema definition for the associated serializer', async () => {
+        const renderer = new OpenapiEndpointRenderer(() => [Pet, User], UsersController, 'howyadoin', {
+          method: 'get',
+          serializerKey: 'default',
+        })
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            Pet: {
+              type: 'object',
+              required: ['id', 'name'],
+              properties: {
+                id: { type: 'string', nullable: false },
+                name: { type: 'object' },
+              },
+            },
+            User: {
+              type: 'object',
+              required: ['id', 'email', 'name'],
+              properties: {
+                id: { type: 'string', nullable: false },
+                email: { type: 'string', nullable: false },
+                name: { type: 'string', nullable: false },
+              },
+            },
+          }),
+        )
       })
     })
 
@@ -540,6 +573,73 @@ describe('OpenapiEndpointRenderer', () => {
                   'application/json': {
                     schema: {
                       $ref: '#/components/schemas/UserWithPostsMultiType',
+                    },
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
+      context('with an array of dream models passed', () => {
+        it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
+          const renderer = new OpenapiEndpointRenderer(() => [User, Post], UsersController, 'howyadoin', {
+            path: '/how/yadoin',
+            method: 'get',
+          })
+
+          const response = await renderer.toObject()
+          expect(response['/how/yadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              200: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      anyOf: [
+                        {
+                          $ref: '#/components/schemas/User',
+                        },
+                        {
+                          $ref: '#/components/schemas/Post',
+                        },
+                      ],
+                    },
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
+      context('with an array of dream serializers passed', () => {
+        it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
+          const renderer = new OpenapiEndpointRenderer(
+            () => [UserSerializer, PostSerializer<any, any>],
+            UsersController,
+            'howyadoin',
+            {
+              path: '/how/yadoin',
+              method: 'get',
+            },
+          )
+
+          const response = await renderer.toObject()
+          expect(response['/how/yadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              200: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      anyOf: [
+                        {
+                          $ref: '#/components/schemas/User',
+                        },
+                        {
+                          $ref: '#/components/schemas/Post',
+                        },
+                      ],
                     },
                   },
                 },

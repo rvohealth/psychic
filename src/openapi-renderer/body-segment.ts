@@ -103,6 +103,8 @@ export default class OpenapiBodySegmentRenderer {
    * Returns a type based on analysis of the bodySegment
    */
   private segmentType(bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined) {
+    if (bodySegment === undefined) return undefined
+
     const objectBodySegment = bodySegment as OpenapiSchemaObject
     const arrayBodySegment = bodySegment as OpenapiSchemaArray
     const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
