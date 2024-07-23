@@ -59,7 +59,7 @@ describe('OpenapiAppRenderer', () => {
             },
           },
 
-          '/users/{id}': {
+          '/users/{id}': expect.objectContaining({
             parameters: [],
             get: {
               tags: [],
@@ -73,7 +73,24 @@ describe('OpenapiAppRenderer', () => {
                 },
               },
             },
-          },
+
+            delete: {
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: undefined,
+                  },
+                },
+              },
+              responses: {
+                '204': {
+                  description: 'no content',
+                },
+              },
+              summary: '',
+              tags: [],
+            },
+          }),
         }),
 
         components: {
