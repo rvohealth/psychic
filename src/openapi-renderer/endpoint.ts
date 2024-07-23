@@ -17,9 +17,6 @@ import {
   OpenapiSchemaExpressionOneOf,
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
-  OpenapiSchemaShorthandExpressionAllOf,
-  OpenapiSchemaShorthandExpressionAnyOf,
-  OpenapiSchemaShorthandExpressionOneOf,
   OpenapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream/src/openapi/types'
 import PsychicController from '../controller'
@@ -139,11 +136,13 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
   /**
    * @internal
    *
-   * returns the path that was provided in the options if it is available.
+   * returns the method that was provided in the options if it is available.
    * Otherwise, it examines the application's routes to determine
-   * a controller action match.
+   * a controller method match.
    *
-   * If no match is found, a MissingControllerActionPairingInRoutes exception.
+   * If no match is found, a guess is taken as to the correct method
+   * based on the name of the controller action. If the action is not
+   * a standardized crud action, then `get` will be returned.
    */
   private async computedMethod(): Promise<HttpMethod> {
     if (this.method) return this.method
@@ -160,6 +159,13 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
   }
   private _method: HttpMethod
 
+  /**
+   * @internal
+   *
+   * Takes a guess as to the correct method
+   * based on the name of the controller action. If the action is not
+   * a standardized crud action, then `get` will be returned.
+   */
   private guessHttpMethod() {
     switch (this.action) {
       case 'create':
@@ -192,6 +198,12 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
   }
   private _path: string
 
+  /**
+   * @internal
+   *
+   * find and memoize the route corresponding to this controller.
+   * If no match is found, a MissingControllerActionPairingInRoutes exception.
+   */
   private async getCurrentRouteConfig() {
     await this._loadRoutes()
     const controllerActionString = await this.controllerClass.controllerActionPath(this.action)
@@ -203,6 +215,11 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
     return route
   }
 
+  /**
+   * @internal
+   *
+   * loads all routes for this psychic app and memoizes them
+   */
   private async _loadRoutes() {
     if (this._routes) return
 
@@ -211,6 +228,11 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
     this._routes = await server.routes()
   }
 
+  /**
+   * @internal
+   *
+   * Returns the loaded routes (loaded by the #_loadRoutes method)
+   */
   private get routes() {
     if (!this._routes) throw new Error('must called _loadRoutes before accessing routes property')
     return this._routes
@@ -302,8 +324,10 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
       responseData[parseInt(statusCode)] = {
         content: {
           'application/json': {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             schema: this.recursivelyParseBody(
               this.responses![statusCode as keyof typeof this.responses],
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ) as any,
           },
         },
@@ -313,6 +337,12 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
     return responseData
   }
 
+  /**
+   * @internal
+   *
+   * Returns the default status code that should be used
+   * if it was not passed.
+   */
   private get defaultStatus() {
     if (!this.getSerializerClasses()) return 204
     return 200
@@ -455,6 +485,7 @@ ${serializerClass.name}
         serializerObject.required!.push(attr.field)
       }
 
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
       ;(serializerObject as any).properties![attr.field] = this.recursivelyParseBody(attr.renderAs)
     })
 
@@ -564,6 +595,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
 
     switch (association.type) {
       case 'RendersMany':
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
         ;(finalOutput as any)[serializerKey].properties![association.field] = {
           type: 'array',
           items: {
@@ -573,6 +605,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
         break
 
       case 'RendersOne':
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
         ;(finalOutput as any)[serializerKey].properties![association.field] = {
           $ref: `#/components/schemas/${associatedSerializerKey}`,
         }
@@ -642,6 +675,8 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
       const associatedSchema = this.buildSerializerJson(associatedSerializer, serializers)
       finalOutput = { ...finalOutput, ...associatedSchema }
     })
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
     ;(finalOutput as any)[serializerKey].properties![association.field] = {
       anyOf,
     }
@@ -682,6 +717,11 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
     }
   }
 
+  /**
+   * @internal
+   *
+   * Uses the provided entity to resolve to a serializer class.
+   */
   private getSerializerClass(
     dreamOrSerializerOrViewModel: DreamOrSerializerOrViewModel,
   ): typeof DreamSerializer {
@@ -842,4 +882,5 @@ export type DreamOrSerializerOrViewModel =
   | typeof Dream
   | (typeof Dream)[]
   | typeof DreamSerializer
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   | (abstract new (...args: any) => { serializers: Record<string, typeof DreamSerializer> })

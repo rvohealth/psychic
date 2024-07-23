@@ -17,6 +17,7 @@ import {
   OpenapiSchemaExpressionRef,
   OpenapiSchemaExpressionRefSchemaShorthand,
   OpenapiSchemaObject,
+  OpenapiSchemaObjectBase,
   OpenapiSchemaPrimitiveGeneric,
   OpenapiSchemaShorthandExpressionAllOf,
   OpenapiSchemaShorthandExpressionAnyOf,
@@ -202,7 +203,7 @@ export default class OpenapiBodySegmentRenderer {
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
   ): OpenapiSchemaObject {
     const objectBodySegment = bodySegment as OpenapiSchemaObject
-    let data: OpenapiSchemaObject = {
+    const data: OpenapiSchemaObjectBase = {
       type: 'object',
       properties: {},
       nullable: objectBodySegment.nullable || false,
@@ -216,25 +217,33 @@ export default class OpenapiBodySegmentRenderer {
       data.summary = objectBodySegment.summary
     }
 
-    if ((objectBodySegment as any).maxProperties) {
-      data.maxProperties = (objectBodySegment as any).maxProperties
+    if ((objectBodySegment as OpenapiSchemaObjectBase).maxProperties) {
+      data.maxProperties = (objectBodySegment as OpenapiSchemaObjectBase).maxProperties
     }
 
-    if ((objectBodySegment as any).additionalProperties) {
-      ;(data as any).additionalProperties = this.parseObjectPropertyStatement(
-        (objectBodySegment as any).additionalProperties,
+    if ((objectBodySegment as OpenapiSchemaObjectBase).additionalProperties) {
+      data.additionalProperties = this.parseObjectPropertyStatement(
+        (objectBodySegment as OpenapiSchemaObjectBase).additionalProperties!,
       )
     }
 
     if (objectBodySegment.required !== undefined) data.required = objectBodySegment.required
 
-    if ((objectBodySegment as any).properties) {
-      ;(data as any).properties! = this.parseObjectPropertyStatement((objectBodySegment as any).properties)
+    if ((objectBodySegment as OpenapiSchemaObjectBase).properties) {
+      data.properties = this.parseObjectPropertyStatement(
+        (objectBodySegment as OpenapiSchemaObjectBase).properties!,
+      )
     }
 
     return data
   }
 
+  /**
+   * @internal
+   *
+   * parses either the `properties` or `additionalProperties` values
+   * on an object
+   */
   private parseObjectPropertyStatement(
     propertySegment:
       | Record<string, OpenapiSchemaBody | OpenapiSchemaBodyShorthand>
@@ -244,22 +253,24 @@ export default class OpenapiBodySegmentRenderer {
       | OpenapiSchemaShorthandExpressionAllOf
       | OpenapiSchemaShorthandExpressionAnyOf
       | OpenapiSchemaShorthandExpressionOneOf,
-  ) {
+  ): OpenapiSchemaProperties {
     if (
       (propertySegment as OpenapiSchemaExpressionOneOf).oneOf ||
       (propertySegment as OpenapiSchemaExpressionAllOf).allOf ||
       (propertySegment as OpenapiSchemaExpressionAnyOf).anyOf
     ) {
-      return this.recursivelyParseBody(propertySegment as any as any)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+      return this.recursivelyParseBody(propertySegment as any) as unknown as OpenapiSchemaProperties
     }
 
-    const objectBodySegment = propertySegment as OpenapiSchemaObject
-    Object.keys((objectBodySegment as any) || {}).forEach(key => {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-      ;(propertySegment as any)[key] = this.recursivelyParseBody((objectBodySegment as any)[key] as any)
+    const objectBodySegment = propertySegment as unknown as OpenapiSchemaObjectBase
+    Object.keys(objectBodySegment || {}).forEach(key => {
+      ;(propertySegment as Record<string, OpenapiSchemaBody | OpenapiSchemaBodyShorthand>)[key] =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+        this.recursivelyParseBody((objectBodySegment as any)[key])
     })
 
-    return propertySegment
+    return propertySegment as OpenapiSchemaProperties
   }
 
   /**
