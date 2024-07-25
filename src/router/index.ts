@@ -1,28 +1,28 @@
+import { ValidationError, camelize, developmentOrTestEnv, pascalize, testEnv } from '@rvohealth/dream'
+import { ValidationType } from '@rvohealth/dream/src/decorators/validations/shared'
 import { Application, Request, Response, Router } from 'express'
-import { HttpMethod, ResourceMethods, ResourcesMethods, ResourcesMethodType, ResourcesOptions } from './types'
+import PsychicController from '../controller'
+import HttpError from '../error/http'
+import { devEnvBool } from '../helpers/envValue'
+import log from '../log'
+import Psyconf from '../psyconf'
 import {
   applyResourceAction,
   applyResourcesAction,
   routePath,
   sanitizedControllerPath,
 } from '../router/helpers'
-import PsychicConfig from '../config'
-import log from '../log'
-import PsychicController from '../controller'
-import { ValidationError, camelize, developmentOrTestEnv, testEnv } from '@rvohealth/dream'
-import RouteManager from './route-manager'
-import { pascalize } from '@rvohealth/dream'
-import pluralize = require('pluralize')
-import HttpError from '../error/http'
-import { ValidationType } from '@rvohealth/dream/src/decorators/validations/shared'
 import { ParamValidationError } from '../server/params'
+import RouteManager from './route-manager'
+import { HttpMethod, ResourceMethods, ResourcesMethodType, ResourcesMethods, ResourcesOptions } from './types'
+import pluralize = require('pluralize')
 
 export default class PsychicRouter {
   public app: Application
-  public config: PsychicConfig
+  public config: Psyconf
   public currentNamespaces: NamespaceConfig[] = []
   public routeManager: RouteManager = new RouteManager()
-  constructor(app: Application, config: PsychicConfig) {
+  constructor(app: Application, config: Psyconf) {
     this.app = app
     this.config = config
   }
@@ -291,7 +291,7 @@ export default class PsychicRouter {
       await controller.runAction(action)
     } catch (error) {
       const err = error as Error
-      if (process.env.NODE_ENV !== 'test') log.error(err.message)
+      if (!testEnv()) log.error(err.message)
 
       let validationError: ValidationError
       let paramValidationError: ParamValidationError
@@ -344,7 +344,7 @@ export default class PsychicRouter {
           // to have to apply an ugly and annoying try-catch pattern to our controllers
           // and manually console log the error to determine what the actual error was.
           // this block enables us to not have to do that anymore.
-          if (testEnv() && process.env.PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR !== '1') {
+          if (testEnv() && !devEnvBool('PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR')) {
             console.log('ATTENTION: a server error was detected:')
             console.error(err)
           }
@@ -365,7 +365,7 @@ export default class PsychicRouter {
               } else {
                 console.error(
                   `
-                  Something went wrong while attempting to call your custom server_error hooks.
+                  Something went wrong while attempting to call your custom server:error hooks.
                   Psychic will rescue errors thrown here to prevent the server from crashing.
                   The error thrown is:
                 `,
@@ -395,7 +395,7 @@ export class PsychicNestedRouter extends PsychicRouter {
   public router: Router
   constructor(
     app: Application,
-    config: PsychicConfig,
+    config: Psyconf,
     routeManager: RouteManager,
     {
       namespaces = [],

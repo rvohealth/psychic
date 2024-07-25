@@ -1,5 +1,6 @@
-import redisConnectionString from '../../../../src/config/helpers/redisConnectionString'
-import { RedisOptionPurpose } from '../../../../src/config/helpers/redisOptions'
+import { Psyconf } from '../../../../src'
+import redisConnectionString from '../../../../src/psyconf/helpers/redisConnectionString'
+import { RedisOptionPurpose } from '../../../../src/psyconf/helpers/redisOptions'
 
 describe('redisConnectionString', () => {
   let purpose: RedisOptionPurpose
@@ -25,6 +26,7 @@ describe('redisConnectionString', () => {
     setTempEnv('REDIS_HOST', host)
     setTempEnv('REDIS_PORT', port)
     setTempEnv('REDIS_USE_SSL', secure)
+    await Psyconf.reconfigure()
     return redisConnectionString(purpose)
   }
 
@@ -41,12 +43,13 @@ describe('redisConnectionString', () => {
     originalSecure = process.env.REDIS_USE_SSL
   })
 
-  afterEach(() => {
+  afterEach(async () => {
     setTempEnv('REDIS_USER', originalUsername)
     setTempEnv('REDIS_PASSWORD', originalPassword)
     setTempEnv('REDIS_HOST', originalHost)
     setTempEnv('REDIS_PORT', originalPort)
     setTempEnv('REDIS_USE_SSL', originalSecure)
+    await Psyconf.reconfigure()
   })
 
   beforeEach(() => {

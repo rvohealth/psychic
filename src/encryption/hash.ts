@@ -1,8 +1,11 @@
+import { testEnv } from '@rvohealth/dream'
 import bcrypt from 'bcrypt'
+import { getCachedPsyconfOrFail } from '../psyconf/cache'
 
 export default class Hash {
   public static get saltRounds() {
-    return process.env.SALT_ROUNDS || (process.env.NODE_ENV === 'test' ? 4 : 11)
+    const psyconf = getCachedPsyconfOrFail()
+    return psyconf.saltRounds || (testEnv() ? 4 : 11)
   }
 
   static async gen(plaintext: string) {

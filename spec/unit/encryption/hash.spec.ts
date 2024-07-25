@@ -1,8 +1,9 @@
 import bcrypt from 'bcrypt'
 import Hash from '../../../src/encryption/hash'
+import envValue from '../../../src/helpers/envValue'
 
 // TODO: finish spec, ensuring that encryption key is passed
-const originalEncryptionKey = process.env.APP_ENCRYPTION_KEY
+const originalEncryptionKey = envValue('APP_ENCRYPTION_KEY')
 
 describe('Hash', () => {
   describe('#gen', () => {

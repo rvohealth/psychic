@@ -1,7 +1,8 @@
-import pluralize from 'pluralize'
+import { compact, pascalize } from '@rvohealth/dream'
 import fs from 'fs/promises'
-import { pascalize, compact } from '@rvohealth/dream'
 import path from 'path'
+import pluralize from 'pluralize'
+import { envBool } from '../../helpers/envValue'
 import pascalizeFileName from '../../helpers/pascalizeFileName'
 
 export default async function fileWriter(
@@ -17,8 +18,7 @@ export default async function fileWriter(
   contentFunctionAttrs: any[] = [],
 ) {
   const thisfs = fs ? fs : await import('fs/promises')
-  const srcPath =
-    fileExtension === '.spec.ts' ? '' : process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? null : 'src'
+  const srcPath = fileExtension === '.spec.ts' ? '' : envBool('PSYCHIC_CORE_DEVELOPMENT') ? null : 'src'
   const newfileBasePath = path.join(...compact([rootPath, srcPath, directoryPrefix]))
   const fullyQualifiedNewfileClassName = pluralizeBeforePostfix
     ? `${pluralize(filePath)}${filePostfix}`

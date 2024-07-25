@@ -1,13 +1,14 @@
 import { CookieOptions, Request, Response } from 'express'
 import Encrypt from '../encryption/encrypt'
-import PsychicConfig, { CustomCookieOptions } from '../config'
+import Psyconf, { CustomCookieOptions } from '../psyconf'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
+import envValue from '../helpers/envValue'
 
 export default class Session {
   constructor(
     private req: Request,
     private res: Response,
-    private config: PsychicConfig,
+    private config: Psyconf,
   ) {}
 
   public getCookie(name: string) {
@@ -19,7 +20,7 @@ export default class Session {
 
   public setCookie(name: string, data: string, opts: CustomSessionCookieOptions = {}) {
     this.res.cookie(name, Encrypt.sign(data), {
-      secure: process.env.NODE_ENV === 'production',
+      secure: envValue('NODE_ENV') === 'production',
       httpOnly: true,
       ...opts,
       maxAge: opts.maxAge ? cookieMaxAgeFromCookieOpts(opts.maxAge) : this.config.cookieOptions.maxAge,

@@ -6,7 +6,7 @@ test-app/conf/routeTypes.ts
 test-app/client/apiRoutes.ts
 test-app/client/schema.ts
 test-app/openapi.json
-src/config/logo.ts
+src/psyconf/logo.ts
 .github/
 dist/
 

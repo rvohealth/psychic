@@ -4,15 +4,16 @@
 // build to dist, since directory structures morph in those contexts.
 import { compact } from '@rvohealth/dream'
 import path from 'path'
+import envValue, { envBool } from './envValue'
 
 export default function absoluteSrcPath(filePath: string) {
-  const distOrNull =
-    process.env.PSYCHIC_OMIT_DIST_FOLDER === '1' || process.env.TS_SAFE === '1' ? null : 'dist'
-  const srcOrNull = process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? 'test-app' : 'src'
+  const distOrNull = envBool('PSYCHIC_OMIT_DIST_FOLDER') || envBool('TS_SAFE') ? null : 'dist'
+  const srcOrNull = envBool('PSYCHIC_CORE_DEVELOPMENT') ? 'test-app' : 'src'
+
   return path.join(
     ...compact([
-      process.env.APP_ROOT_PATH!,
-      process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? '..' : null,
+      envValue('APP_ROOT_PATH'),
+      envBool('PSYCHIC_CORE_DEVELOPMENT') ? '..' : null,
       distOrNull,
       srcOrNull,
       filePath,
