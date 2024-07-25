@@ -1,18 +1,20 @@
 import * as fs from 'fs/promises'
-import generateController from './controller'
-import sspawn from '../helpers/sspawn'
+import pluralize from 'pluralize'
 import dreamjsOrDreamtsCmd from '../../boot/cli/helpers/dreamjsOrDreamtsCmd'
 import omitCoreArg from '../../boot/cli/helpers/omitCoreArg'
 import { clientApiPath } from '../helpers/path'
-import readAppConfig from '../config/helpers/readAppConfig'
+import sspawn from '../helpers/sspawn'
+import Psyconf from '../psyconf'
 import generateClientAPIModule from './client/apiModule'
-import pluralize from 'pluralize'
+import generateController from './controller'
 
 export default async function generateResource(
   route: string,
   fullyQualifiedModelName: string,
   args: string[],
 ) {
+  const psyconf = await Psyconf.configure()
+
   const attributesWithTypes = args.filter(attr => !/^--/.test(attr))
 
   await sspawn(
@@ -29,8 +31,7 @@ export default async function generateResource(
 
   await generateController(route, fullyQualifiedModelName, ['create', 'index', 'show', 'update', 'destroy'])
 
-  const yamlConf = await readAppConfig()
-  if (!yamlConf?.api_only) {
+  if (!psyconf?.apiOnly) {
     const str = generateClientAPIModule(route, fullyQualifiedModelName)
     const filepath = (
       (await clientApiPath()) +

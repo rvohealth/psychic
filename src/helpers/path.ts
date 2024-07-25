@@ -37,7 +37,7 @@ export async function clientApiPath() {
   return absoluteFilePath(schemaParts.join('/'))
 }
 
-export async function clientApiFileName() {
+export async function clientApiFileName(): Promise<string> {
   return await new Promise(accept => accept('schema.ts'))
 }
 

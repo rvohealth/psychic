@@ -1,13 +1,13 @@
+import { Dream, IdType, loadModels, pascalize, testEnv } from '@rvohealth/dream'
 import { ConnectionOptions, Job, Queue, QueueEvents, Worker } from 'bullmq'
-import readAppConfig from '../config/helpers/readAppConfig'
-import { Dream, IdType, loadModels, pascalize } from '@rvohealth/dream'
-import getModelKey from '../config/helpers/getModelKey'
-import importFileWithDefault from '../helpers/importFileWithDefault'
-import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
-import redisOptions from '../config/helpers/redisOptions'
 import developmentOrTestEnv from '../../boot/cli/helpers/developmentOrTestEnv'
 import absoluteFilePath from '../helpers/absoluteFilePath'
-import PsychicConfig from '../config'
+import envValue, { devEnvBool, envBool } from '../helpers/envValue'
+import importFileWithDefault from '../helpers/importFileWithDefault'
+import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
+import Psyconf from '../psyconf'
+import getModelKey from '../psyconf/helpers/getModelKey'
+import redisOptions from '../psyconf/helpers/redisOptions'
 
 type JobTypes =
   | 'BackgroundJobQueueFunctionJob'
@@ -33,16 +33,17 @@ export class Background {
   public workers: Worker[] = []
 
   public async connect() {
-    if (process.env.NODE_ENV === 'test' && process.env.REALLY_TEST_BACKGROUND_QUEUE !== '1') return
+    if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) return
     if (this.queue) return
 
-    const appConfig = await readAppConfig()
+    const psyConf = await Psyconf.configure()
 
     // ensure models are loaded, since otherwise we will not properly
     // boot our STI configurations within dream
     await loadModels()
 
-    if (!appConfig?.redis) throw `attempting to use background jobs, but config.useRedis is not set to true.`
+    if (!psyConf?.useRedis)
+      throw new Error(`attempting to use background jobs, but config.useRedis is not set to true.`)
 
     const connectionOptions = await redisOptions('background_jobs')
     const bullConnectionOpts = {
@@ -58,10 +59,9 @@ export class Background {
       connectTimeout: 5000,
     } as ConnectionOptions
 
-    const psyConf = await PsychicConfig.bootForReading()
     const queueOptions = psyConf.backgroundQueueOptions
 
-    this.queue ||= new Queue(`${pascalize(appConfig.name)}BackgroundJobQueue`, {
+    this.queue ||= new Queue(`${pascalize(psyConf.appName)}BackgroundJobQueue`, {
       ...queueOptions,
       connection: bullConnectionOpts,
     })
@@ -71,7 +71,7 @@ export class Background {
 
     for (let i = 0; i < workerCount(); i++) {
       this.workers.push(
-        new Worker(`${pascalize(appConfig.name)}BackgroundJobQueue`, data => this.handler(data), {
+        new Worker(`${pascalize(psyConf.appName)}BackgroundJobQueue`, data => this.handler(data), {
           ...workerOptions,
           connection: bullConnectionOpts,
         }),
@@ -262,7 +262,7 @@ export class Background {
       delaySeconds?: number
     },
   ) {
-    if (process.env.NODE_ENV === 'test' && process.env.REALLY_TEST_BACKGROUND_QUEUE !== '1') {
+    if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) {
       await this.doWork(jobType, jobData)
     } else {
       await this.queue!.add(jobType, jobData, {
@@ -368,23 +368,23 @@ export class Background {
 }
 
 function workerCount() {
-  if (process.env.WORKER_COUNT) return parseInt(process.env.WORKER_COUNT)
+  if (envValue('WORKER_COUNT')) return parseInt(envValue('WORKER_COUNT'))
   return developmentOrTestEnv() ? 1 : 0
 }
 
 function trimFilepath(filepath: string) {
-  if (!process.env.APP_ROOT_PATH)
+  if (!envValue('APP_ROOT_PATH'))
     throw `
       [Psychic:] Must set APP_ROOT_PATH before calling trimFilepath
     `
 
   const trimmed = filepath
     .replace(/^\//, '')
-    .replace(process.env.APP_ROOT_PATH.replace(/^\//, ''), '')
+    .replace(envValue('APP_ROOT_PATH').replace(/^\//, ''), '')
     .replace(/^\/?dist/, '')
     .replace(/\.[jt]s$/, '')
 
-  return process.env.PSYCHIC_CORE_DEVELOPMENT === '1' ? trimmed.replace(/^test-app/, '') : trimmed
+  return envBool('PSYCHIC_CORE_DEVELOPMENT') ? trimmed.replace(/^test-app/, '') : trimmed
 }
 
 const background = new Background()

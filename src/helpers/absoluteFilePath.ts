@@ -3,18 +3,19 @@
 // would be the most stable moving forward, especially if we ever decide to
 // build to dist, since directory structures morph in those contexts.
 import path from 'path'
+import envValue, { envBool } from './envValue'
 
 export default function absoluteFilePath(
   filePath: string,
   { purgeTestAppInCoreDevelopment = false }: { purgeTestAppInCoreDevelopment?: boolean } = {},
 ): string {
-  if (!process.env.APP_ROOT_PATH)
+  if (!envValue('APP_ROOT_PATH'))
     throw `
       [Psychic]: Must set APP_ROOT_PATH before using psychic
     `
 
-  let appRoot = process.env.APP_ROOT_PATH
-  if (process.env.PSYCHIC_CORE_DEVELOPMENT === '1') {
+  let appRoot = envValue('APP_ROOT_PATH')
+  if (envBool('PSYCHIC_CORE_DEVELOPMENT')) {
     filePath = filePath.replace(/^[/]?test-app/, '')
 
     if (purgeTestAppInCoreDevelopment) {
@@ -22,7 +23,7 @@ export default function absoluteFilePath(
     }
   }
 
-  if (process.env.TS_SAFE !== '1') {
+  if (!envBool('TS_SAFE')) {
     filePath = path.join('dist', filePath)
   }
 

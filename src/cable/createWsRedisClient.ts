@@ -1,5 +1,5 @@
 import { createClient, RedisClientOptions } from 'redis'
-import redisOptions from '../config/helpers/redisOptions'
+import redisOptions from '../psyconf/helpers/redisOptions'
 
 let redisWsClientCache: ReturnType<typeof createClient> | null = null
 

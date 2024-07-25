@@ -1,20 +1,22 @@
+import { testEnv } from '@rvohealth/dream'
+import { createAdapter } from '@socket.io/redis-adapter'
 import * as colors from 'colorette'
 import { Application } from 'express'
-import { createClient, RedisClientOptions } from 'redis'
-import { createAdapter } from '@socket.io/redis-adapter'
 import http from 'http'
+import { createClient, RedisClientOptions } from 'redis'
 import socketio from 'socket.io'
 import log from '../log'
+import Psyconf from '../psyconf'
 import { getPsychicHttpInstance } from '../server/helpers/startPsychicServer'
-import PsychicConfig from '../config'
+import { envBool } from '../helpers/envValue'
 
 export default class Cable {
   public app: Application
   public io: socketio.Server | undefined
   public http: http.Server
   public useRedis: boolean
-  private config: PsychicConfig
-  constructor(app: Application, config: PsychicConfig) {
+  private config: Psyconf
+  constructor(app: Application, config: Psyconf) {
     this.app = app
     this.config = config
   }
@@ -23,7 +25,7 @@ export default class Cable {
     if (this.io) return
     // for socket.io, we have to circumvent the normal process for starting a
     // psychic server so that we can bind socket.io to the http instance.
-    this.http = getPsychicHttpInstance(this.app)
+    this.http = getPsychicHttpInstance(this.app, this.config.sslCredentials)
     this.io = new socketio.Server(this.http, { cors: this.config.corsOptions })
     this.useRedis = this.config.useRedis
   }
@@ -50,7 +52,7 @@ export default class Cable {
           await hook(socket)
         }
       } catch (error) {
-        if (process.env.PSYCHIC_DANGEROUSLY_PERMIT_WS_EXCEPTIONS === '1') throw error
+        if (envBool('PSYCHIC_DANGEROUSLY_PERMIT_WS_EXCEPTIONS')) throw error
         else {
           console.error(`
             An exception was caught in your websocket thread.
@@ -84,7 +86,7 @@ export default class Cable {
   }) {
     return new Promise(accept => {
       this.http.listen(port, () => {
-        if (process.env.NODE_ENV !== 'test') {
+        if (!testEnv()) {
           log.welcome()
           log.puts('\n')
           log.puts(colors.cyan('socket server started                                      '))

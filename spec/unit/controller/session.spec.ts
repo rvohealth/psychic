@@ -1,21 +1,21 @@
-import { describe as context } from '@jest/globals'
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import User from '../../../test-app/app/models/User'
-import { Encrypt, PsychicConfig, PsychicServer } from '../../../src'
-import Session, { CustomSessionCookieOptions } from '../../../src/session'
+import { describe as context } from '@jest/globals'
 import { Request, Response } from 'express'
+import { Encrypt, Psyconf } from '../../../src'
+import Session, { CustomSessionCookieOptions } from '../../../src/session'
+import User from '../../../test-app/app/models/User'
 
 describe('Session', () => {
   let user: User
   let req: Request
   let res: Response
-  let config: PsychicConfig
+  let config: Psyconf
 
   beforeEach(async () => {
     user = await User.create({ email: 'how@yadoin', password: 'password' })
     req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
     res = getMockRes().res
-    config = new PsychicConfig(new PsychicServer().app)
+    config = new Psyconf()
     await config.boot()
   })
 

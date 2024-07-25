@@ -1,11 +1,10 @@
-import PsychicConfig from '../../../src/config'
-import PsychicServer from '../../../src/server'
+import Psyconf from '../../../src/psyconf'
 import UsersController from '../../../test-app/app/controllers/UsersController'
 
-describe('PsychicConfig', () => {
+describe('Psyconf', () => {
   describe('get #controllers', () => {
     it('returns controllers from controllers folder', async () => {
-      const config = new PsychicConfig(new PsychicServer().app)
+      const config = new Psyconf()
       await config.boot()
       expect(config.controllers.UsersController.toString()).toEqual(UsersController.toString())
     })

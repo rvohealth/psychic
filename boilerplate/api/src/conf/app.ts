@@ -1,10 +1,10 @@
-import { PsychicConfig, background } from '@rvohealth/psychic'
+import { Psyconf, background } from '@rvohealth/psychic'
 import { developmentOrTestEnv, testEnv } from '@rvohealth/dream'
 import expressWinston from 'express-winston'
 import winston from 'winston'
 
 
-export default (psy: PsychicConfig) => {
+export default (psy: Psyconf) => {
   // ******
   // CONFIG:
   // ******
@@ -27,7 +27,7 @@ export default (psy: PsychicConfig) => {
   })
 
   // set options to pass to coors when middleware is booted
-  psy.setCorsOptions({
+  psy.set('cors', {
     credentials: true,
     origin: [
       process.env.CLIENT_HOST || 'http://localhost:3000'
@@ -118,6 +118,9 @@ export default (psy: PsychicConfig) => {
     }
   })
 
+  // run a callback when the express server starts. the express app will be passed to each callback as the first argument
+  psy.on('server:init', () => {})
+
   // run a callback after routes are done processing
   psy.on('after:routes', () => {})
 
@@ -139,7 +142,7 @@ export default (psy: PsychicConfig) => {
 
   // this function will be run any time a server error is encountered
   // that psychic isn't sure how to respond to (i.e. 500 internal server errors)
-  psy.on('server_error', (err, _, res) => {
+  psy.on('server:error', (err, _, res) => {
     if (!res.headersSent) res.sendStatus(500)
     else if (developmentOrTestEnv()) throw err
   })

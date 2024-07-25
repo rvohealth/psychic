@@ -1,5 +1,5 @@
 import * as colors from 'colorette'
-import logo from '../config/logo'
+import logo from '../psyconf/logo'
 import { DateTime } from 'luxon'
 
 export class Logger {

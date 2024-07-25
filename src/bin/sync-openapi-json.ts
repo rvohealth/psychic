@@ -1,8 +1,9 @@
+import envValue from '../helpers/envValue'
 import '../helpers/loadEnv'
 import OpenapiAppRenderer from '../openapi-renderer/app'
 
 async function syncOpenapiJson() {
-  console.log('syncing openapi.json...', process.env.APP_ROOT_PATH)
+  console.log('syncing openapi.json...', envValue('APP_ROOT_PATH'))
 
   await OpenapiAppRenderer.sync()
 

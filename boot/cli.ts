@@ -5,19 +5,19 @@
 // commanderjs docs:
 // https://github.com/tj/commander.js#quick-start
 
-import './cli/loadEnv'
 import { Command } from 'commander'
-import sspawn from './cli/helpers/sspawn'
-import setCoreDevelopmentFlag from './cli/helpers/setCoreDevelopmentFlag'
-import hijackRootForCLI from './cli/helpers/hijackRootForCLI'
-import yarncmdRunByAppConsumer from './cli/helpers/yarncmdRunByAppConsumer'
-import ensureStableAppBuild from './cli/helpers/ensureStableAppBuild'
-import omitCoreArg from './cli/helpers/omitCoreArg'
-import { maybeSyncRoutes } from './cli/helpers/syncRoutes'
-import nodeOrTsnodeCmd from './cli/helpers/nodeOrTsnodeCmd'
-import dreamjsOrDreamtsCmd from './cli/helpers/dreamjsOrDreamtsCmd'
+import { Psyconf } from '../src'
 import developmentOrProdEnvString from './cli/helpers/developmentOrProdEnvString'
-import readAppConfig, { AppConfig } from '../src/config/helpers/readAppConfig'
+import dreamjsOrDreamtsCmd from './cli/helpers/dreamjsOrDreamtsCmd'
+import ensureStableAppBuild from './cli/helpers/ensureStableAppBuild'
+import hijackRootForCLI from './cli/helpers/hijackRootForCLI'
+import nodeOrTsnodeCmd from './cli/helpers/nodeOrTsnodeCmd'
+import omitCoreArg from './cli/helpers/omitCoreArg'
+import setCoreDevelopmentFlag from './cli/helpers/setCoreDevelopmentFlag'
+import sspawn from './cli/helpers/sspawn'
+import { maybeSyncRoutes } from './cli/helpers/syncRoutes'
+import yarncmdRunByAppConsumer from './cli/helpers/yarncmdRunByAppConsumer'
+import './cli/loadEnv'
 
 hijackRootForCLI()
 const program = new Command()
@@ -213,9 +213,9 @@ program
     await sspawn(dreamjsOrDreamtsCmd('sync', omitCoreArg(args)))
     await maybeSyncRoutes(args)
 
-    let appConf: AppConfig | undefined = undefined
+    let psyconf: Psyconf | undefined = undefined
     try {
-      appConf = await readAppConfig()
+      psyconf = await Psyconf.configure()
     } catch (error) {
       console.log(
         `Failed to read app config, so cannot determine whether or not to sync client data.
@@ -223,12 +223,13 @@ program
          To manually sync client files, run "yarn psy sync:client"
         `,
       )
+
       if (process.env.DEBUG === '1') {
         console.error(error)
       }
     }
 
-    if (appConf && !appConf?.api_only) {
+    if (psyconf && !psyconf?.apiOnly) {
       await sspawn(
         nodeOrTsnodeCmd('src/bin/sync-openapi-json.ts', omitCoreArg(args), {
           tsnodeFlags: ['--transpile-only'],

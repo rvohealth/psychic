@@ -1,18 +1,16 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import PsychicController from '../../../src/controller'
-import PsychicConfig from '../../../src/config'
-import PsychicServer from '../../../src/server'
-import User from '../../../test-app/app/models/User'
 import { Params } from '../../../src'
+import PsychicController from '../../../src/controller'
+import Psyconf from '../../../src/psyconf'
+import User from '../../../test-app/app/models/User'
 
 describe('PsychicController', () => {
   describe('get #params', () => {
     it('returns both body and query params', () => {
       const req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
       const res = getMockRes().res
-      const server = new PsychicServer()
       const controller = new PsychicController(req, res, {
-        config: new PsychicConfig(server.app),
+        config: new Psyconf(),
         action: 'hello',
       })
 
@@ -29,8 +27,7 @@ describe('PsychicController', () => {
         body: { id: 1, name: 'howyadoin', createdAt: 'hello', updatedAt: 'birld', deletedAt: 'sometimeago' },
       })
       const res = getMockRes().res
-      const server = new PsychicServer()
-      controller = new PsychicController(req, res, { config: new PsychicConfig(server.app), action: 'hello' })
+      controller = new PsychicController(req, res, { config: new Psyconf(), action: 'hello' })
     })
 
     it('returns the result of Params.cast', () => {
@@ -46,9 +43,8 @@ describe('PsychicController', () => {
         body: { id: 1, name: 'howyadoin', createdAt: 'hello', updatedAt: 'birld', deletedAt: 'sometimeago' },
       })
       const res = getMockRes().res
-      const server = new PsychicServer()
       const controller = new PsychicController(req, res, {
-        config: new PsychicConfig(server.app),
+        config: new Psyconf(),
         action: 'hello',
       })
 
@@ -69,9 +65,8 @@ describe('PsychicController', () => {
           },
         })
         const res = getMockRes().res
-        const server = new PsychicServer()
         const controller = new PsychicController(req, res, {
-          config: new PsychicConfig(server.app),
+          config: new Psyconf(),
           action: 'hello',
         })
 
@@ -92,9 +87,8 @@ describe('PsychicController', () => {
           },
         })
         const res = getMockRes().res
-        const server = new PsychicServer()
         const controller = new PsychicController(req, res, {
-          config: new PsychicConfig(server.app),
+          config: new Psyconf(),
           action: 'hello',
         })
 

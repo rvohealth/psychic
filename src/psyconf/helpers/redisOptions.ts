@@ -1,4 +1,4 @@
-import PsychicConfig from '..'
+import Psyconf from '..'
 
 export interface PsychicRedisConnectionOptions {
   secure?: boolean
@@ -10,7 +10,7 @@ export interface PsychicRedisConnectionOptions {
 
 export type RedisOptionPurpose = 'ws' | 'background_jobs'
 export default async function redisOptions(purpose: RedisOptionPurpose) {
-  const psyConf = await PsychicConfig.bootForReading()
+  const psyConf = await Psyconf.configure()
 
   switch (purpose) {
     case 'ws':

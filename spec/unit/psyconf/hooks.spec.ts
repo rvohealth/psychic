@@ -1,13 +1,12 @@
-import PsychicConfig from '../../../src/config'
-import { PsychicHookEventType } from '../../../src/config/types'
-import PsychicServer from '../../../src/server'
+import Psyconf from '../../../src/psyconf'
+import { PsychicHookEventType } from '../../../src/psyconf/types'
 
-describe('PsychicConfig', () => {
-  let config: PsychicConfig
+describe('Psyconf hooks', () => {
+  let config: Psyconf
 
   beforeEach(() => {
     process.env.__PSYCHIC_HOOKS_TEST_CACHE = ''
-    config = new PsychicConfig(new PsychicServer().app)
+    config = new Psyconf()
   })
 
   function expectHookCalled(hookEventType: PsychicHookEventType) {

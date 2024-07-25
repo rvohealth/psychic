@@ -1,5 +1,6 @@
 import path from 'path'
+import envValue from './envValue'
 
 export default function openapiJsonPath() {
-  return path.join(process.env.APP_ROOT_PATH!, 'openapi.json')
+  return path.join(envValue('APP_ROOT_PATH'), 'openapi.json')
 }
