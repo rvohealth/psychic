@@ -1,12 +1,11 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { DreamSerializer, Attribute } from '@rvohealth/dream'
-import PsychicController from '../../../src/controller'
-import PsychicConfig from '../../../src/config'
-import PsychicServer from '../../../src/server'
-import User from '../../../test-app/app/models/User'
+import { Attribute, DreamSerializer } from '@rvohealth/dream'
 import { Request, Response } from 'express'
+import PsychicController from '../../../src/controller'
 import { BeforeAction } from '../../../src/controller/decorators'
+import Psyconf from '../../../src/psyconf'
 import Pet from '../../../test-app/app/models/Pet'
+import User from '../../../test-app/app/models/User'
 import UserSerializer, {
   UserExtraSerializer,
   UserSummarySerializer,
@@ -16,14 +15,12 @@ describe('PsychicController', () => {
   describe('#serialize', () => {
     let req: Request
     let res: Response
-    let server: PsychicServer
-    let config: PsychicConfig
+    let config: Psyconf
 
     beforeEach(() => {
       req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
       res = getMockRes().res
-      server = new PsychicServer()
-      config = new PsychicConfig(server.app)
+      config = new Psyconf()
       jest.spyOn(res, 'json')
     })
 

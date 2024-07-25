@@ -1,9 +1,9 @@
 import { Dream, DreamParamSafeAttributes, DreamSerializer } from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import background from '../background'
-import PsychicConfig from '../config'
-import getControllerKey from '../config/helpers/getControllerKey'
-import getModelKey from '../config/helpers/getModelKey'
+import Psyconf from '../psyconf'
+import getControllerKey from '../psyconf/helpers/getControllerKey'
+import getModelKey from '../psyconf/helpers/getModelKey'
 import { ControllerHook } from '../controller/hooks'
 import BadRequest from '../error/http/bad-request'
 import Conflict from '../error/http/conflict'
@@ -110,7 +110,7 @@ export default class PsychicController {
   public req: Request
   public res: Response
   public session: Session
-  public config: PsychicConfig
+  public config: Psyconf
   public action: string
   constructor(
     req: Request,
@@ -119,7 +119,7 @@ export default class PsychicController {
       config,
       action,
     }: {
-      config: PsychicConfig
+      config: Psyconf
       action: string
     },
   ) {

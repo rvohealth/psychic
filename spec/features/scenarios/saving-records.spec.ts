@@ -30,6 +30,14 @@ describe('a visitor attempts to save a record', () => {
   })
 
   context('with a response that throws', () => {
+    beforeEach(() => {
+      process.env.PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR = '1'
+    })
+
+    afterEach(() => {
+      process.env.PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR = undefined
+    })
+
     it('throws 500', async () => {
       await server.serveForRequestSpecs(async () => {
         await request.agent(server.app).post('/force-throw').expect(500)

@@ -1,8 +1,8 @@
-import { DreamColumn, BelongsTo } from '@rvohealth/dream'
-import ApplicationModel from './ApplicationModel'
+import { BelongsTo, DreamColumn } from '@rvohealth/dream'
 import CommentSerializer, {
   CommentSummarySerializer,
 } from '../../../test-app/app/serializers/CommentSerializer'
+import ApplicationModel from './ApplicationModel'
 import Post from './Post'
 
 export default class Comment extends ApplicationModel {
@@ -12,10 +12,7 @@ export default class Comment extends ApplicationModel {
 
   public get serializers() {
     return {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       default: CommentSerializer,
-
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
       summary: CommentSummarySerializer,
     } as const
   }

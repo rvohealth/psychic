@@ -1,4 +1,4 @@
-import { CustomCookieMaxAgeOptions } from '../config'
+import { CustomCookieMaxAgeOptions } from '../psyconf'
 
 const DEFAULT_COOKIE_MAX_AGE_DAYS = 31
 

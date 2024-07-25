@@ -1,10 +1,10 @@
 import { developmentOrTestEnv } from '@rvohealth/dream'
-import PsychicConfig from '../../src/config'
+import Psyconf from '../../src/psyconf'
 import { Encrypt } from '../../src'
 import User from '../app/models/User'
 import Ws from '../../src/cable/ws'
 
-export default (psy: PsychicConfig) => {
+export default (psy: Psyconf) => {
   // ******
   // CONFIG:
   // ******
@@ -22,25 +22,25 @@ export default (psy: PsychicConfig) => {
   psy.apiOnly = false
 
   // set options to pass to express.json when middleware is booted
-  psy.setJsonOptions({
+  psy.set('json', {
     limit: '20mb',
   })
 
   // set options to pass to coors when middleware is booted
-  psy.setCorsOptions({
+  psy.set('cors', {
     credentials: true,
     origin: [process.env.CLIENT_HOST || 'http://localhost:3000'],
   })
 
   // set options for cookie usage
-  psy.setCookieOptions({
+  psy.set('cookie', {
     maxAge: {
       days: 4,
     },
   })
 
   // configuration options for bullmq queue (used for running background jobs in redis)
-  psy.setBackgroundQueueOptions({
+  psy.set('background:queue', {
     defaultJobOptions: {
       removeOnComplete: 1000,
       removeOnFail: 20000,
@@ -55,10 +55,10 @@ export default (psy: PsychicConfig) => {
   })
 
   // configuration options for bullmq worker (used for running background jobs in redis)
-  psy.setBackgroundWorkerOptions({})
+  psy.set('background:worker', {})
 
   // redis background job credentials
-  psy.setRedisBackgroundJobCredentials({
+  psy.set('redis:background', {
     username: process.env.REDIS_USER,
     password: process.env.REDIS_PASSWORD,
     host: process.env.REDIS_HOST,
@@ -67,7 +67,7 @@ export default (psy: PsychicConfig) => {
   })
 
   // redis websocket credentials
-  psy.setRedisWsCredentials({
+  psy.set('redis:ws', {
     username: process.env.REDIS_USER,
     password: process.env.REDIS_PASSWORD,
     host: process.env.REDIS_HOST,
@@ -82,6 +82,10 @@ export default (psy: PsychicConfig) => {
   // run a callback on server boot (but before routes are processed)
   psy.on('boot', () => {
     __forTestingOnly('boot')
+  })
+
+  psy.on('server:init', () => {
+    __forTestingOnly('server:init')
   })
 
   // run a callback after routes are done processing
@@ -110,8 +114,8 @@ export default (psy: PsychicConfig) => {
   })
 
   // run a callback after the config is loaded, but only if NODE_ENV=prod
-  psy.on('server_error', (err, req, res) => {
-    __forTestingOnly('server_error')
+  psy.on('server:error', (err, req, res) => {
+    __forTestingOnly('server:error')
 
     if (!res.headersSent) res.sendStatus(500)
     else if (developmentOrTestEnv()) throw err

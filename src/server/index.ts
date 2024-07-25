@@ -3,7 +3,7 @@ import express from 'express'
 import { Application } from 'express'
 import cors from 'cors'
 import cookieParser from 'cookie-parser'
-import PsychicConfig from '../config'
+import Psyconf from '../psyconf'
 import Cable from '../cable'
 import FrontEndClientServer from './front-end-client'
 import PsychicRouter from '../router'
@@ -12,17 +12,19 @@ import importFileWithDefault from '../helpers/importFileWithDefault'
 import { Server } from 'http'
 import startPsychicServer from './helpers/startPsychicServer'
 import { stopBackgroundWorkers } from '../background'
+import portValue from '../helpers/portValue'
+import { envBool } from '../helpers/envValue'
 
 export default class PsychicServer {
   public app: Application
   public cable: Cable
-  public config: PsychicConfig
+  public config: Psyconf
   public frontEndClient: FrontEndClientServer
   public server: Server
   private booted = false
   constructor() {
     this.buildApp()
-    this.config = new PsychicConfig(this.app)
+    this.config = new Psyconf()
   }
 
   public async routes() {
@@ -53,12 +55,15 @@ export default class PsychicServer {
       `)
     }
 
+    for (const expressInitHook of this.config.specialHooks.expressInit) {
+      await expressInitHook(this.app)
+    }
+
     await this.buildRoutes()
 
     await this.config['runHooksFor']('after:routes')
 
     if (this.config.useWs) this.cable = new Cable(this.app, this.config)
-    this.config.cable = this.cable
 
     this.booted = true
     return true
@@ -66,9 +71,9 @@ export default class PsychicServer {
 
   // TODO: use config helper for fetching default port
   public async start(
-    port = process.env.PORT ? parseInt(process.env.PORT) : 7777,
+    port = portValue(),
     {
-      withFrontEndClient = process.env.CLIENT === '1',
+      withFrontEndClient = envBool('CLIENT'),
       frontEndPort = 3000,
     }: {
       withFrontEndClient?: boolean
@@ -102,6 +107,7 @@ export default class PsychicServer {
           port,
           withFrontEndClient,
           frontEndPort,
+          sslCredentials: this.config.sslCredentials,
         })
           .then(server => {
             this.server = server

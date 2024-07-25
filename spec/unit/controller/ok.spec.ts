@@ -1,15 +1,13 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import PsychicController from '../../../src/controller'
-import PsychicConfig from '../../../src/config'
-import PsychicServer from '../../../src/server'
 import { Request, Response } from 'express'
+import PsychicController from '../../../src/controller'
+import Psyconf from '../../../src/psyconf'
 
 describe('PsychicController', () => {
   describe('#ok', () => {
     let req: Request
     let res: Response
-    let server: PsychicServer
-    let config: PsychicConfig
+    let config: Psyconf
 
     class MyController extends PsychicController {
       public howyadoin() {
@@ -20,8 +18,7 @@ describe('PsychicController', () => {
     beforeEach(() => {
       req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
       res = getMockRes().res
-      server = new PsychicServer()
-      config = new PsychicConfig(server.app)
+      config = new Psyconf()
       jest.spyOn(res, 'json')
     })
 

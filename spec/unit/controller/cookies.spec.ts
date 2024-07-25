@@ -1,9 +1,8 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import PsychicController from '../../../src/controller'
-import PsychicConfig from '../../../src/config'
-import PsychicServer from '../../../src/server'
-import User from '../../../test-app/app/models/User'
 import { Encrypt } from '../../../src'
+import PsychicController from '../../../src/controller'
+import Psyconf from '../../../src/psyconf'
+import User from '../../../test-app/app/models/User'
 
 describe('PsychicController', () => {
   describe('#getCookie', () => {
@@ -14,9 +13,8 @@ describe('PsychicController', () => {
       req.cookies = { auth_token: Encrypt.sign(user.id.toString()) }
 
       const res = getMockRes().res
-      const server = new PsychicServer()
       const controller = new PsychicController(req, res, {
-        config: new PsychicConfig(server.app),
+        config: new Psyconf(),
         action: 'hello',
       })
       expect(controller.getCookie('auth_token')).toEqual(user.id.toString())
@@ -27,9 +25,8 @@ describe('PsychicController', () => {
     it('calls to underlying session instance, passing options along', () => {
       const req = getMockReq()
       const res = getMockRes().res
-      const server = new PsychicServer()
       const controller = new PsychicController(req, res, {
-        config: new PsychicConfig(server.app),
+        config: new Psyconf(),
         action: 'hello',
       })
 

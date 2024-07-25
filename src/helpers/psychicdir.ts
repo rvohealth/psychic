@@ -5,6 +5,7 @@ import PsychicController from '../controller'
 import absoluteSrcPath from './absoluteSrcPath'
 import importFileWithDefault from './importFileWithDefault'
 import importFile from '@rvohealth/dream/src/helpers/path/importFile'
+import { envBool } from './envValue'
 
 let _models: { [key: string]: typeof Dream }
 let _controllers: { [key: string]: typeof PsychicController }
@@ -34,7 +35,7 @@ export default class PsychicDir {
   public static async loadControllers() {
     _controllers = {}
     const controllerPaths = (await getFiles(absoluteSrcPath('app/controllers'))).filter(path =>
-      process.env.TS_SAFE === '1' ? /\.ts$/.test(path) : /\.js$/.test(path),
+      envBool('TS_SAFE') ? /\.ts$/.test(path) : /\.js$/.test(path),
     )
 
     for (const controllerPath of controllerPaths) {
