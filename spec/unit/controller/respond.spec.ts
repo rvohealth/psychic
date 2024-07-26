@@ -15,8 +15,6 @@ describe('PsychicController', () => {
 
     class MyController extends PsychicController {
       @Openapi(() => User, {
-        path: '/users',
-        method: 'post',
         status: 201,
       })
       public create() {

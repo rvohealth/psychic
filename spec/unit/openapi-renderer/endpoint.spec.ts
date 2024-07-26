@@ -6,8 +6,14 @@ import User from '../../../test-app/app/models/User'
 import {
   CommentTestingDateSerializer,
   CommentTestingDateTimeSerializer,
+  CommentTestingDecimalSerializer,
+  CommentTestingDecimalShorthandSerializer,
   CommentTestingDefaultObjectFieldsSerializer,
+  CommentTestingDoubleArrayShorthandSerializer,
+  CommentTestingDoubleSerializer,
+  CommentTestingDoubleShorthandSerializer,
   CommentTestingIntegerSerializer,
+  CommentTestingIntegerShorthandSerializer,
   CommentTestingStringSerializer,
   CommentWithAllOfArraySerializer,
   CommentWithAllOfObjectSerializer,
@@ -75,7 +81,8 @@ describe('OpenapiEndpointRenderer', () => {
                       type: 'array',
                       nullable: false,
                       items: {
-                        type: 'decimal',
+                        type: 'number',
+                        format: 'decimal',
                         nullable: false,
                       },
                     },
@@ -114,6 +121,181 @@ describe('OpenapiEndpointRenderer', () => {
             },
           }),
         )
+      })
+
+      context('using shorthand', () => {
+        it('expands to integer type with nullable: false', async () => {
+          const renderer = new OpenapiEndpointRenderer(
+            () => CommentTestingIntegerShorthandSerializer,
+            UsersController,
+            'howyadoin',
+            {},
+          )
+
+          const response = await renderer.toSchemaObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              CommentTestingIntegerShorthand: {
+                type: 'object',
+                required: ['howyadoin'],
+                properties: {
+                  howyadoin: {
+                    type: 'integer',
+                    nullable: false,
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+    })
+
+    context('with a decimal type passed', () => {
+      it('expands to number tpye with decimal format', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentTestingDecimalSerializer,
+          UsersController,
+          'howyadoin',
+          {},
+        )
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingDecimal: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  type: 'number',
+                  format: 'decimal',
+                  minimum: 10,
+                  maximum: 20,
+                  nullable: false,
+                },
+              },
+            },
+          }),
+        )
+      })
+
+      context('using deicmal shorthand', () => {
+        it('expands to number format', async () => {
+          const renderer = new OpenapiEndpointRenderer(
+            () => CommentTestingDecimalShorthandSerializer,
+            UsersController,
+            'howyadoin',
+            {},
+          )
+
+          const response = await renderer.toSchemaObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              CommentTestingDecimalShorthand: {
+                type: 'object',
+                required: ['howyadoin'],
+                properties: {
+                  howyadoin: {
+                    type: 'number',
+                    format: 'decimal',
+                    nullable: false,
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+    })
+
+    context('with a double type passed', () => {
+      it('expands to number type with double format', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentTestingDoubleSerializer,
+          UsersController,
+          'howyadoin',
+          {},
+        )
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingDouble: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  type: 'number',
+                  format: 'double',
+                  minimum: 10,
+                  maximum: 20,
+                  nullable: false,
+                },
+              },
+            },
+          }),
+        )
+      })
+
+      context('using double shorthand', () => {
+        it('expands to number type with double format', async () => {
+          const renderer = new OpenapiEndpointRenderer(
+            () => CommentTestingDoubleShorthandSerializer,
+            UsersController,
+            'howyadoin',
+            {},
+          )
+
+          const response = await renderer.toSchemaObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              CommentTestingDoubleShorthand: {
+                type: 'object',
+                required: ['howyadoin'],
+                properties: {
+                  howyadoin: {
+                    type: 'number',
+                    format: 'double',
+                    nullable: false,
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
+      context('using double[] shorthand', () => {
+        it('expands to array with items of number type with double format', async () => {
+          const renderer = new OpenapiEndpointRenderer(
+            () => CommentTestingDoubleArrayShorthandSerializer,
+            UsersController,
+            'howyadoin',
+            {},
+          )
+
+          const response = await renderer.toSchemaObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              CommentTestingDoubleArrayShorthand: {
+                type: 'object',
+                required: ['howyadoin'],
+                properties: {
+                  howyadoin: {
+                    type: 'array',
+                    items: {
+                      type: 'number',
+                      format: 'double',
+                      nullable: false,
+                    },
+                    nullable: false,
+                  },
+                },
+              },
+            }),
+          )
+        })
       })
     })
 

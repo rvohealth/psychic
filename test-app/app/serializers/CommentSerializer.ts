@@ -88,6 +88,46 @@ export class CommentTestingIntegerSerializer extends DreamSerializer {
   public howyadoin: number
 }
 
+export class CommentTestingIntegerShorthandSerializer extends DreamSerializer {
+  @Attribute('integer')
+  public howyadoin: number
+}
+
+export class CommentTestingDecimalSerializer extends DreamSerializer {
+  @Attribute({
+    type: 'number',
+    format: 'decimal',
+    minimum: 10,
+    maximum: 20,
+  })
+  public howyadoin: number
+}
+
+export class CommentTestingDecimalShorthandSerializer extends DreamSerializer {
+  @Attribute('decimal')
+  public howyadoin: number
+}
+
+export class CommentTestingDoubleSerializer extends DreamSerializer {
+  @Attribute({
+    type: 'number',
+    format: 'double',
+    minimum: 10,
+    maximum: 20,
+  })
+  public howyadoin: number
+}
+
+export class CommentTestingDoubleShorthandSerializer extends DreamSerializer {
+  @Attribute('double')
+  public howyadoin: number
+}
+
+export class CommentTestingDoubleArrayShorthandSerializer extends DreamSerializer {
+  @Attribute('double[]')
+  public howyadoin: number[]
+}
+
 export class CommentTestingDateSerializer extends DreamSerializer {
   @Attribute('date')
   public howyadoin: string

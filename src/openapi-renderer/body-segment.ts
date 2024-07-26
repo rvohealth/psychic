@@ -357,11 +357,23 @@ export default class OpenapiBodySegmentRenderer {
       case 'string[]':
       case 'number[]':
       case 'boolean[]':
-      case 'decimal[]':
+      case 'integer[]':
         return {
           type: 'array',
           items: {
             type: this.serializerTypeToOpenapiType(data),
+            nullable: false,
+          },
+          nullable: attribute?.options?.allowNull ?? false,
+        }
+
+      case 'decimal[]':
+      case 'double[]':
+        return {
+          type: 'array',
+          items: {
+            type: 'number',
+            format: data.replace(/\[\]$/, '') as 'double' | 'decimal',
             nullable: false,
           },
           nullable: attribute?.options?.allowNull ?? false,
@@ -376,6 +388,14 @@ export default class OpenapiBodySegmentRenderer {
             format: data.replace(/\[\]$/, ''),
             nullable: false,
           },
+          nullable: attribute?.options?.allowNull ?? false,
+        }
+
+      case 'decimal':
+      case 'double':
+        return {
+          type: 'number',
+          format: data,
           nullable: attribute?.options?.allowNull ?? false,
         }
 
