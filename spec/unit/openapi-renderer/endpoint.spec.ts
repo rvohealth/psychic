@@ -43,47 +43,36 @@ describe('OpenapiEndpointRenderer', () => {
           properties: {
             id: {
               type: 'string',
-              nullable: false,
             },
             nicknames: {
               type: 'array',
-              nullable: false,
               items: {
                 type: 'string',
-                nullable: false,
               },
             },
             howyadoin: {
               type: 'object',
-              nullable: false,
               properties: {
                 name: {
                   type: 'string',
-                  nullable: false,
                 },
                 stuff: {
                   type: 'array',
-                  nullable: false,
                   items: {
                     type: 'string',
-                    nullable: false,
                   },
                 },
                 nestedStuff: {
                   type: 'object',
-                  nullable: false,
                   properties: {
                     nested1: {
                       type: 'boolean',
-                      nullable: false,
                     },
                     nested2: {
                       type: 'array',
-                      nullable: false,
                       items: {
                         type: 'number',
                         format: 'decimal',
-                        nullable: false,
                       },
                     },
                   },
@@ -113,7 +102,6 @@ describe('OpenapiEndpointRenderer', () => {
               properties: {
                 howyadoin: {
                   type: 'string',
-                  nullable: false,
                   format: 'date',
                   enum: ['hello', 'world'],
                   pattern: '/^helloworld$/',
@@ -147,7 +135,6 @@ describe('OpenapiEndpointRenderer', () => {
                   type: 'integer',
                   minimum: 10,
                   maximum: 20,
-                  nullable: false,
                 },
               },
             },
@@ -156,7 +143,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('using shorthand', () => {
-        it('expands to integer type with nullable: false', async () => {
+        it('expands to integer type', async () => {
           const renderer = new OpenapiEndpointRenderer(
             () => CommentTestingIntegerShorthandSerializer,
             UsersController,
@@ -173,7 +160,6 @@ describe('OpenapiEndpointRenderer', () => {
                 properties: {
                   howyadoin: {
                     type: 'integer',
-                    nullable: false,
                   },
                 },
               },
@@ -204,7 +190,6 @@ describe('OpenapiEndpointRenderer', () => {
                   format: 'decimal',
                   minimum: 10,
                   maximum: 20,
-                  nullable: false,
                 },
               },
             },
@@ -231,7 +216,6 @@ describe('OpenapiEndpointRenderer', () => {
                   howyadoin: {
                     type: 'number',
                     format: 'decimal',
-                    nullable: false,
                   },
                 },
               },
@@ -263,7 +247,6 @@ describe('OpenapiEndpointRenderer', () => {
                   minimum: 10,
                   maximum: 20,
                   multipleOf: 2.5,
-                  nullable: false,
                 },
               },
             },
@@ -290,7 +273,6 @@ describe('OpenapiEndpointRenderer', () => {
                   howyadoin: {
                     type: 'number',
                     format: 'double',
-                    nullable: false,
                   },
                 },
               },
@@ -320,9 +302,7 @@ describe('OpenapiEndpointRenderer', () => {
                     items: {
                       type: 'number',
                       format: 'double',
-                      nullable: false,
                     },
-                    nullable: false,
                   },
                 },
               },
@@ -350,17 +330,14 @@ describe('OpenapiEndpointRenderer', () => {
               properties: {
                 howyadoin: {
                   type: 'string',
-                  nullable: false,
                   format: 'date',
                 },
                 howyadoins: {
                   type: 'array',
                   items: {
                     type: 'string',
-                    nullable: false,
                     format: 'date',
                   },
-                  nullable: false,
                 },
               },
             },
@@ -387,17 +364,14 @@ describe('OpenapiEndpointRenderer', () => {
               properties: {
                 howyadoin: {
                   type: 'string',
-                  nullable: false,
                   format: 'date-time',
                 },
                 howyadoins: {
                   type: 'array',
                   items: {
                     type: 'string',
-                    nullable: false,
                     format: 'date-time',
                   },
-                  nullable: false,
                 },
               },
             },
@@ -426,15 +400,11 @@ describe('OpenapiEndpointRenderer', () => {
               properties: {
                 howyadoin: {
                   type: 'object',
-                  nullable: false,
                   minProperties: 8,
                   maxProperties: 10,
                   properties: {},
                   additionalProperties: {
-                    oneOf: [
-                      { type: 'string', nullable: false },
-                      { type: 'boolean', nullable: false },
-                    ],
+                    oneOf: [{ type: 'string' }, { type: 'boolean' }],
                   },
                 },
               },
@@ -460,10 +430,7 @@ describe('OpenapiEndpointRenderer', () => {
               required: ['howyadoin'],
               properties: {
                 howyadoin: {
-                  anyOf: [
-                    { type: 'string', nullable: false },
-                    { type: 'boolean', nullable: false },
-                  ],
+                  anyOf: [{ type: 'string' }, { type: 'boolean' }],
                 },
               },
             },
@@ -488,10 +455,7 @@ describe('OpenapiEndpointRenderer', () => {
               required: ['howyadoin'],
               properties: {
                 howyadoin: {
-                  allOf: [
-                    { type: 'string', nullable: false },
-                    { type: 'boolean', nullable: false },
-                  ],
+                  allOf: [{ type: 'string' }, { type: 'boolean' }],
                 },
               },
             },
@@ -516,10 +480,7 @@ describe('OpenapiEndpointRenderer', () => {
               required: ['howyadoin'],
               properties: {
                 howyadoin: {
-                  oneOf: [
-                    { type: 'string', nullable: false },
-                    { type: 'boolean', nullable: false },
-                  ],
+                  oneOf: [{ type: 'string' }, { type: 'boolean' }],
                 },
               },
             },
@@ -550,12 +511,8 @@ describe('OpenapiEndpointRenderer', () => {
                     howyadoin: {
                       type: 'array',
                       items: {
-                        anyOf: [
-                          { type: 'string', nullable: false },
-                          { type: 'boolean', nullable: false },
-                        ],
+                        anyOf: [{ type: 'string' }, { type: 'boolean' }],
                       },
-                      nullable: false,
                     },
                   },
                 },
@@ -584,12 +541,8 @@ describe('OpenapiEndpointRenderer', () => {
                     howyadoin: {
                       type: 'array',
                       items: {
-                        allOf: [
-                          { type: 'string', nullable: false },
-                          { type: 'boolean', nullable: false },
-                        ],
+                        allOf: [{ type: 'string' }, { type: 'boolean' }],
                       },
-                      nullable: false,
                     },
                   },
                 },
@@ -618,12 +571,8 @@ describe('OpenapiEndpointRenderer', () => {
                     howyadoin: {
                       type: 'array',
                       items: {
-                        oneOf: [
-                          { type: 'string', nullable: false },
-                          { type: 'boolean', nullable: false },
-                        ],
+                        oneOf: [{ type: 'string' }, { type: 'boolean' }],
                       },
-                      nullable: false,
                     },
                   },
                 },
@@ -647,7 +596,7 @@ describe('OpenapiEndpointRenderer', () => {
               type: 'object',
               required: ['id', 'name'],
               properties: {
-                id: { type: 'string', nullable: false },
+                id: { type: 'string' },
                 name: { type: 'object' },
               },
             },
@@ -655,9 +604,9 @@ describe('OpenapiEndpointRenderer', () => {
               type: 'object',
               required: ['id', 'email', 'name'],
               properties: {
-                id: { type: 'string', nullable: false },
-                email: { type: 'string', nullable: false },
-                name: { type: 'string', nullable: false },
+                id: { type: 'string' },
+                email: { type: 'string' },
+                name: { type: 'string' },
               },
             },
           }),
@@ -685,9 +634,9 @@ describe('OpenapiEndpointRenderer', () => {
                 type: 'object',
                 required: ['id', 'email', 'name'],
                 properties: {
-                  id: { type: 'string', nullable: false },
-                  email: { type: 'string', nullable: false },
-                  name: { type: 'string', nullable: false },
+                  id: { type: 'string' },
+                  email: { type: 'string' },
+                  name: { type: 'string' },
                 },
               },
             }),
@@ -707,8 +656,8 @@ describe('OpenapiEndpointRenderer', () => {
                   type: 'object',
                   required: ['id', 'body'],
                   properties: {
-                    id: { type: 'string', nullable: false },
-                    body: { type: 'string', nullable: false },
+                    id: { type: 'string' },
+                    body: { type: 'string' },
                   },
                 },
               }),
@@ -730,8 +679,8 @@ describe('OpenapiEndpointRenderer', () => {
                 type: 'object',
                 required: ['id', 'body', 'comments'],
                 properties: {
-                  id: { type: 'string', nullable: false },
-                  body: { type: 'string', nullable: false },
+                  id: { type: 'string' },
+                  body: { type: 'string' },
                   comments: { type: 'array', items: { $ref: '#/components/schemas/Comment' } },
                 },
               },
@@ -739,8 +688,8 @@ describe('OpenapiEndpointRenderer', () => {
                 type: 'object',
                 required: ['id', 'body'],
                 properties: {
-                  id: { type: 'string', nullable: false },
-                  body: { type: 'string', nullable: false },
+                  id: { type: 'string' },
+                  body: { type: 'string' },
                 },
               },
             }),
@@ -760,8 +709,8 @@ describe('OpenapiEndpointRenderer', () => {
                   type: 'object',
                   required: ['id', 'body'],
                   properties: {
-                    id: { type: 'string', nullable: false },
-                    body: { type: 'string', nullable: false },
+                    id: { type: 'string' },
+                    body: { type: 'string' },
                   },
                 },
               }),
@@ -786,7 +735,7 @@ describe('OpenapiEndpointRenderer', () => {
                 type: 'object',
                 required: ['id', 'posts'],
                 properties: {
-                  id: { type: 'string', nullable: false },
+                  id: { type: 'string' },
                   posts: {
                     anyOf: [
                       {
@@ -1032,12 +981,10 @@ describe('OpenapiEndpointRenderer', () => {
             'application/json': {
               schema: {
                 type: 'object',
-                nullable: false,
                 required: ['email', 'password'],
                 properties: {
                   email: {
                     type: 'string',
-                    nullable: false,
                   },
                   password: {
                     type: 'string',
@@ -1045,11 +992,9 @@ describe('OpenapiEndpointRenderer', () => {
                   },
                   settings: {
                     type: 'object',
-                    nullable: false,
                     properties: {
                       likesChalupas: {
                         type: 'boolean',
-                        nullable: false,
                       },
                     },
                   },
@@ -1248,21 +1193,17 @@ describe('OpenapiEndpointRenderer', () => {
                       allOf: [
                         {
                           type: 'object',
-                          nullable: false,
                           properties: {
                             name: {
                               type: 'string',
-                              nullable: false,
                             },
                             email: {
                               type: 'string',
-                              nullable: false,
                             },
                           },
                         },
                         {
                           type: 'string',
-                          nullable: false,
                         },
                       ],
                     },
@@ -1308,21 +1249,17 @@ describe('OpenapiEndpointRenderer', () => {
                       anyOf: [
                         {
                           type: 'object',
-                          nullable: false,
                           properties: {
                             name: {
                               type: 'string',
-                              nullable: false,
                             },
                             email: {
                               type: 'string',
-                              nullable: false,
                             },
                           },
                         },
                         {
                           type: 'string',
-                          nullable: false,
                         },
                       ],
                     },
@@ -1368,21 +1305,17 @@ describe('OpenapiEndpointRenderer', () => {
                       oneOf: [
                         {
                           type: 'object',
-                          nullable: false,
                           properties: {
                             name: {
                               type: 'string',
-                              nullable: false,
                             },
                             email: {
                               type: 'string',
-                              nullable: false,
                             },
                           },
                         },
                         {
                           type: 'string',
-                          nullable: false,
                         },
                       ],
                     },
@@ -1427,7 +1360,6 @@ describe('OpenapiEndpointRenderer', () => {
                         },
                         {
                           type: 'string',
-                          nullable: false,
                         },
                       ],
                     },
@@ -1525,7 +1457,6 @@ describe('OpenapiEndpointRenderer', () => {
                   'application/json': {
                     schema: {
                       type: 'string',
-                      nullable: false,
                       enum: ['hello', 'world'],
                     },
                   },
@@ -1608,21 +1539,17 @@ describe('OpenapiEndpointRenderer', () => {
                   'application/json': {
                     schema: {
                       type: 'object',
-                      nullable: false,
                       required: ['user'],
                       properties: {
                         user: {
                           type: 'object',
-                          nullable: false,
                           required: ['name', 'email'],
                           properties: {
                             name: {
                               type: 'string',
-                              nullable: false,
                             },
                             email: {
                               type: 'string',
-                              nullable: false,
                             },
                             firstName: {
                               type: 'string',
@@ -1630,14 +1557,11 @@ describe('OpenapiEndpointRenderer', () => {
                             },
                             things: {
                               type: 'array',
-                              nullable: false,
                               items: {
                                 type: 'object',
-                                nullable: false,
                                 properties: {
                                   name: {
                                     type: 'string',
-                                    nullable: false,
                                   },
                                 },
                               },

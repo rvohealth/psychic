@@ -7,6 +7,7 @@ import {
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
   OpenapiSchemaProperties,
+  compact,
   openapiPrimitiveTypes,
 } from '@rvohealth/dream'
 import {
@@ -206,11 +207,14 @@ export default class OpenapiBodySegmentRenderer {
     const data: OpenapiSchemaObjectBase = {
       type: 'object',
       properties: {},
-      nullable: objectBodySegment.nullable || false,
     }
 
     if (objectBodySegment.description) {
       data.description = objectBodySegment.description
+    }
+
+    if (objectBodySegment.nullable) {
+      data.nullable = true
     }
 
     if (objectBodySegment.summary) {
@@ -362,60 +366,57 @@ export default class OpenapiBodySegmentRenderer {
       case 'number[]':
       case 'boolean[]':
       case 'integer[]':
-        return {
+        return compact({
           type: 'array',
           items: {
             type: this.serializerTypeToOpenapiType(data),
-            nullable: false,
           },
-          nullable: attribute?.options?.allowNull ?? false,
-        }
+          nullable: attribute?.options?.allowNull ?? undefined,
+        }) as OpenapiSchemaBody
 
       case 'decimal[]':
       case 'double[]':
-        return {
+        return compact({
           type: 'array',
           items: {
             type: 'number',
             format: data.replace(/\[\]$/, '') as 'double' | 'decimal',
-            nullable: false,
           },
-          nullable: attribute?.options?.allowNull ?? false,
-        }
+          nullable: attribute?.options?.allowNull ?? undefined,
+        }) as OpenapiSchemaBody
 
       case 'date[]':
       case 'date-time[]':
-        return {
+        return compact({
           type: 'array',
           items: {
             type: 'string',
             format: data.replace(/\[\]$/, ''),
-            nullable: false,
           },
-          nullable: attribute?.options?.allowNull ?? false,
-        }
+          nullable: attribute?.options?.allowNull ? true : undefined,
+        }) as OpenapiSchemaBody
 
       case 'decimal':
       case 'double':
-        return {
+        return compact({
           type: 'number',
           format: data,
-          nullable: attribute?.options?.allowNull ?? false,
-        }
+          nullable: attribute?.options?.allowNull ? true : undefined,
+        }) as OpenapiSchemaBody
 
       case 'date':
       case 'date-time':
-        return {
+        return compact({
           type: 'string',
           format: data,
-          nullable: attribute?.options?.allowNull ?? false,
-        }
+          nullable: attribute?.options?.allowNull ? true : undefined,
+        }) as OpenapiSchemaBody
 
       default:
-        return {
+        return compact({
           type: this.serializerTypeToOpenapiType(data),
-          nullable: attribute?.options?.allowNull ?? false,
-        }
+          nullable: attribute?.options?.allowNull ? true : undefined,
+        }) as OpenapiSchemaBody
     }
   }
 
@@ -448,8 +449,11 @@ export default class OpenapiBodySegmentRenderer {
   >(obj: Obj): Obj {
     const objectCast = obj as OpenapiSchemaObject
     const returnObj: Obj = {
-      nullable: objectCast.nullable || false,
       ...obj,
+    }
+
+    if (objectCast.nullable) {
+      ;(returnObj as any).nullable = true
     }
 
     if (objectCast.description) {

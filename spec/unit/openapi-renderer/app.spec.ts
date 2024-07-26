@@ -100,48 +100,37 @@ describe('OpenapiAppRenderer', () => {
               properties: {
                 id: {
                   type: 'string',
-                  nullable: false,
                 },
                 nicknames: {
                   type: 'array',
-                  nullable: false,
                   items: {
                     type: 'string',
-                    nullable: false,
                   },
                 },
                 howyadoin: {
                   type: 'object',
-                  nullable: false,
                   properties: {
                     name: {
                       type: 'string',
-                      nullable: false,
                     },
                     stuff: {
                       type: 'array',
                       items: {
                         type: 'string',
-                        nullable: false,
                       },
-                      nullable: false,
                     },
                     nestedStuff: {
                       type: 'object',
-                      nullable: false,
                       properties: {
                         nested1: {
                           type: 'boolean',
-                          nullable: false,
                         },
                         nested2: {
                           type: 'array',
                           items: {
                             type: 'number',
                             format: 'decimal',
-                            nullable: false,
                           },
-                          nullable: false,
                         },
                       },
                     },
@@ -154,7 +143,7 @@ describe('OpenapiAppRenderer', () => {
               type: 'object',
               required: ['id', 'posts'],
               properties: {
-                id: { type: 'string', nullable: false },
+                id: { type: 'string' },
                 posts: {
                   type: 'array',
                   items: { $ref: '#/components/schemas/PostWithComments' },
@@ -166,8 +155,8 @@ describe('OpenapiAppRenderer', () => {
               type: 'object',
               required: ['id', 'body', 'comments'],
               properties: {
-                id: { type: 'string', nullable: false },
-                body: { type: 'string', nullable: false },
+                id: { type: 'string' },
+                body: { type: 'string' },
                 comments: {
                   type: 'array',
                   items: { $ref: '#/components/schemas/Comment' },
@@ -179,8 +168,8 @@ describe('OpenapiAppRenderer', () => {
               type: 'object',
               required: ['id', 'body'],
               properties: {
-                id: { type: 'string', nullable: false },
-                body: { type: 'string', nullable: false },
+                id: { type: 'string' },
+                body: { type: 'string' },
               },
             },
           }),
