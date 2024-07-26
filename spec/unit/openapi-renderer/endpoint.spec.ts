@@ -831,30 +831,28 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('method', () => {
-      context('with no method provided', () => {
-        it('infers the method by examining routes', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'show')
+      it('infers the method by examining routes', async () => {
+        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'show')
 
-          const response = await renderer.toObject()
-          expect(response).toEqual(
-            expect.objectContaining({
+        const response = await renderer.toObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            '/users/{id}': expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              '/users/{id}': expect.objectContaining({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                get: expect.objectContaining({
-                  responses: {
-                    '200': {
-                      description: 'show',
-                      content: {
-                        'application/json': { schema: { $ref: '#/components/schemas/User' } },
-                      },
+              get: expect.objectContaining({
+                responses: {
+                  '200': {
+                    description: 'show',
+                    content: {
+                      'application/json': { schema: { $ref: '#/components/schemas/User' } },
                     },
                   },
-                }),
+                },
               }),
             }),
-          )
-        })
+          }),
+        )
       })
     })
 
@@ -889,6 +887,49 @@ describe('OpenapiEndpointRenderer', () => {
             }),
           }),
         )
+      })
+
+      context('when the path contains uri params', () => {
+        it('includes the uri params in the parameters block', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'show', {
+            uri: [
+              {
+                name: 'search',
+                required: true,
+                description: 'the search term',
+              },
+            ],
+          })
+
+          const response = await renderer.toObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              '/users/{id}': expect.objectContaining({
+                parameters: [
+                  {
+                    in: 'path',
+                    name: 'id',
+                    required: true,
+                    description: 'id',
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                  {
+                    in: 'path',
+                    name: 'search',
+                    required: true,
+                    description: 'the search term',
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                ],
+              }),
+            }),
+          )
+        })
       })
     })
 

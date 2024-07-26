@@ -55,7 +55,17 @@ describe('OpenapiAppRenderer', () => {
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           '/users/{id}': expect.objectContaining({
-            parameters: [],
+            parameters: [
+              {
+                in: 'path',
+                name: 'id',
+                required: true,
+                description: 'id',
+                schema: {
+                  type: 'string',
+                },
+              },
+            ],
             get: {
               tags: [],
               summary: '',

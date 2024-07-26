@@ -5,6 +5,7 @@ import PsychicDir from '../helpers/psychicdir'
 import { OpenapiSchema } from './body-segment'
 import path from 'path'
 import { projectRootPath } from '@rvohealth/dream/src/helpers/path'
+import { uniq } from '@rvohealth/dream'
 
 export default class OpenapiAppRenderer {
   /**
@@ -74,9 +75,16 @@ export default class OpenapiAppRenderer {
         ;(finalOutput.paths as any)[path] ||= {
           parameters: [],
         }
+        ;(finalOutput.paths as any)[path][method] = (endpointPayload as any)[path][method]
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-        ;(finalOutput.paths as any)[path][method] = (endpointPayload as any)[path][method]
+        ;(finalOutput.paths as any)[path]['parameters'] = uniq(
+          [
+            ...((finalOutput.paths as any)[path]?.['parameters'] || []),
+            ...((endpointPayload as any)[path]?.['parameters'] || []),
+          ],
+          (a, b) => a.name === b.name,
+        )
       }
     }
 

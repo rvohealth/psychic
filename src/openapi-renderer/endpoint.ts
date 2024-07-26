@@ -102,7 +102,7 @@ export default class OpenapiEndpointRenderer<
 
     const output = {
       [path]: {
-        parameters: [...this.headersArray(), ...this.uriArray(), ...this.queryArray()],
+        parameters: [...this.headersArray(), ...(await this.uriArray()), ...this.queryArray()],
         [method]: {
           tags: this.tags || [],
           summary: '',
@@ -163,6 +163,50 @@ export default class OpenapiEndpointRenderer<
     return this._method
   }
   private _method: HttpMethod
+
+  /**
+   * @internal
+   *
+   * Generates the path portion of the openapi payload's
+   * "parameters" field for a single endpoint.
+   */
+  private async uriArray(): Promise<OpenapiParameterResponse[]> {
+    if (this._uri) return this._uri
+
+    const userProvidedUriParams = (this.uri?.map(param => {
+      return {
+        in: 'path',
+        name: param.name,
+        required: param.required,
+        description: param.description || '',
+        schema: {
+          type: 'string',
+        },
+      }
+    }) || []) as OpenapiParameterResponse[]
+
+    const route = await this.getCurrentRouteConfig()
+    const uriSegments = route.path
+      .split('/')
+      .filter(uriSegment => /^:/.test(uriSegment))
+      .map(field => {
+        const sanitizedField = field.replace(/^:/, '')
+        return {
+          in: 'path',
+          name: sanitizedField,
+          required: true,
+          description: sanitizedField,
+          schema: {
+            type: 'string',
+          },
+        }
+      })
+
+    this._uri = [...uriSegments, ...userProvidedUriParams] as OpenapiParameterResponse[]
+
+    return this._uri
+  }
+  private _uri: OpenapiParameterResponse[]
 
   /**
    * @internal
@@ -279,28 +323,6 @@ export default class OpenapiEndpointRenderer<
         },
         allowReserved: param.allowReserved === undefined ? true : param.allowReserved,
       })) || []
-    )
-  }
-
-  /**
-   * @internal
-   *
-   * Generates the path portion of the openapi payload's
-   * "parameters" field for a single endpoint.
-   */
-  private uriArray(): OpenapiParameterResponse[] {
-    return (
-      this.uri?.map(param => {
-        return {
-          in: 'path',
-          name: param.name,
-          required: param.required,
-          description: param.description || '',
-          schema: {
-            type: 'string',
-          },
-        }
-      }) || []
     )
   }
 

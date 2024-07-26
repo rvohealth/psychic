@@ -18,11 +18,7 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: {
-                content: {
-                    "application/json": unknown;
-                };
-            };
+            requestBody?: never;
             responses: {
                 /** @description index */
                 200: {
@@ -43,11 +39,7 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: {
-                content: {
-                    "application/json": unknown;
-                };
-            };
+            requestBody?: never;
             responses: {
                 /** @description create */
                 201: {
@@ -80,11 +72,7 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: {
-                content: {
-                    "application/json": unknown;
-                };
-            };
+            requestBody?: never;
             responses: {
                 /** @description show */
                 200: {
@@ -106,11 +94,7 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: {
-                content: {
-                    "application/json": unknown;
-                };
-            };
+            requestBody?: never;
             responses: {
                 /** @description no content */
                 204: {

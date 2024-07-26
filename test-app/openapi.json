@@ -11,11 +11,6 @@
       "post": {
         "tags": [],
         "summary": "",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
         "responses": {
           "201": {
             "content": {
@@ -32,11 +27,6 @@
       "get": {
         "tags": [],
         "summary": "",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
         "responses": {
           "200": {
             "content": {
@@ -59,11 +49,6 @@
       "get": {
         "tags": [],
         "summary": "",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
         "responses": {
           "200": {
             "content": {
@@ -80,11 +65,6 @@
       "delete": {
         "tags": [],
         "summary": "",
-        "requestBody": {
-          "content": {
-            "application/json": {}
-          }
-        },
         "responses": {
           "204": {
             "description": "no content"
