@@ -1018,6 +1018,15 @@ describe('OpenapiEndpointRenderer', () => {
           },
         })
       })
+
+      context('requestBody is not specified', () => {
+        it('does not provide request body', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'show')
+
+          const response = await renderer.toObject()
+          expect(response['/users/{id}'].get.requestBody).toBeUndefined()
+        })
+      })
     })
 
     context('response', () => {

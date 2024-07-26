@@ -19,13 +19,6 @@ describe('OpenapiAppRenderer', () => {
             post: {
               tags: [],
               summary: '',
-              requestBody: {
-                content: {
-                  'application/json': {
-                    schema: undefined,
-                  },
-                },
-              },
               responses: {
                 201: {
                   description: 'create',
@@ -42,13 +35,6 @@ describe('OpenapiAppRenderer', () => {
             get: {
               tags: [],
               summary: '',
-              requestBody: {
-                content: {
-                  'application/json': {
-                    schema: undefined,
-                  },
-                },
-              },
               responses: {
                 200: {
                   description: 'index',
@@ -73,7 +59,6 @@ describe('OpenapiAppRenderer', () => {
             get: {
               tags: [],
               summary: '',
-              requestBody: { content: { 'application/json': { schema: undefined } } },
               responses: {
                 '200': {
                   description: 'show',
@@ -85,13 +70,6 @@ describe('OpenapiAppRenderer', () => {
             },
 
             delete: {
-              requestBody: {
-                content: {
-                  'application/json': {
-                    schema: undefined,
-                  },
-                },
-              },
               responses: {
                 '204': {
                   description: 'no content',
