@@ -29,9 +29,6 @@ import openapiRoute from './helpers/openapiRoute'
 
 export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends DreamsOrSerializersOrViewModels> {
   private many: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['many']
-  private path: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['path']
-  private pathz: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['path']
-  private method: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['method']
   private responses: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['responses']
   private serializerKey: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['serializerKey']
   private uri: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['uri']
@@ -63,8 +60,6 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
       body,
       headers,
       many,
-      method,
-      path,
       query,
       responses,
       serializerKey,
@@ -76,9 +71,6 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
     this.body = body
     this.headers = headers
     this.many = many
-    this.method = method
-    this.path = path
-    this.pathz = path
     this.query = query
     this.responses = responses
     this.serializerKey = serializerKey
@@ -145,7 +137,6 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
    * a standardized crud action, then `get` will be returned.
    */
   private async computedMethod(): Promise<HttpMethod> {
-    if (this.method) return this.method
     if (this._method) return this._method
 
     try {
@@ -189,7 +180,6 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
    * If no match is found, a MissingControllerActionPairingInRoutes exception.
    */
   private async computedPath(): Promise<string> {
-    if (this.path) return this.path
     if (this._path) return this._path
 
     const route = await this.getCurrentRouteConfig()
@@ -776,8 +766,6 @@ export interface OpenapiEndpointRendererOpts<
     : // eslint-disable-next-line @typescript-eslint/no-explicit-any
       T & (abstract new (...args: any) => any),
 > {
-  method?: HttpMethod
-  path?: string
   many?: boolean
   uri?: OpenapiUriOption[]
   headers?: OpenapiHeaderOption[]
