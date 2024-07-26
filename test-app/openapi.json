@@ -24,7 +24,8 @@
                   "$ref": "#/components/schemas/UserExtra"
                 }
               }
-            }
+            },
+            "description": "create"
           }
         }
       },
@@ -47,7 +48,8 @@
                   }
                 }
               }
-            }
+            },
+            "description": "index"
           }
         }
       }
@@ -70,7 +72,8 @@
                   "$ref": "#/components/schemas/UserWithPosts"
                 }
               }
-            }
+            },
+            "description": "show"
           }
         }
       },

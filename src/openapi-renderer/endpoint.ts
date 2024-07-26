@@ -93,20 +93,27 @@ export default class OpenapiEndpointRenderer<
    * Generates an openapi object representing a single endpoint.
    */
   public async toObject(): Promise<OpenapiEndpointResponse> {
+    const [path, method, body, responses] = await Promise.all([
+      this.computedPath(),
+      this.computedMethod(),
+      this.requestBody(),
+      this.parseResponses(),
+    ])
+
     return {
-      [await this.computedPath()]: {
+      [path]: {
         parameters: [...this.headersArray(), ...this.uriArray(), ...this.queryArray()],
-        [await this.computedMethod()]: {
+        [method]: {
           tags: this.tags || [],
           summary: '',
           requestBody: {
             content: {
               'application/json': {
-                schema: this.requestBody(),
+                schema: body,
               },
             },
           },
-          responses: await this.parseResponses(),
+          responses,
         },
       },
     } as unknown as OpenapiEndpointResponse
@@ -303,7 +310,8 @@ export default class OpenapiEndpointRenderer<
    *
    * Generates the requestBody portion of the endpoint
    */
-  private requestBody(): OpenapiSchemaBody | undefined {
+  private async requestBody(): Promise<OpenapiSchemaBody | undefined> {
+    if ((await this.computedMethod()) === 'get') return undefined
     if (!this.body) return undefined
     return this.recursivelyParseBody(this.body)
   }

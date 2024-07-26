@@ -24,6 +24,7 @@ export interface paths {
                 };
             };
             responses: {
+                /** @description index */
                 200: {
                     headers: {
                         [name: string]: unknown;
@@ -48,6 +49,7 @@ export interface paths {
                 };
             };
             responses: {
+                /** @description create */
                 201: {
                     headers: {
                         [name: string]: unknown;
@@ -84,6 +86,7 @@ export interface paths {
                 };
             };
             responses: {
+                /** @description show */
                 200: {
                     headers: {
                         [name: string]: unknown;

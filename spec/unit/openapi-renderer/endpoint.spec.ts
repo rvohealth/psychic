@@ -965,7 +965,7 @@ describe('OpenapiEndpointRenderer', () => {
 
     context('body', () => {
       it('renders body in the requestBody payload', async () => {
-        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create', {
           body: {
             type: 'object',
             required: ['email', 'password'],
@@ -986,7 +986,7 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         const response = await renderer.toObject()
-        expect(response['/users/howyadoin'].get.requestBody).toEqual({
+        expect(response['/users'].post.requestBody).toEqual({
           content: {
             'application/json': {
               schema: {

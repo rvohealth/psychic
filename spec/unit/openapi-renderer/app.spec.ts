@@ -28,6 +28,7 @@ describe('OpenapiAppRenderer', () => {
               },
               responses: {
                 201: {
+                  description: 'create',
                   content: {
                     'application/json': {
                       schema: {
@@ -50,6 +51,7 @@ describe('OpenapiAppRenderer', () => {
               },
               responses: {
                 200: {
+                  description: 'index',
                   content: {
                     'application/json': {
                       schema: {
@@ -74,6 +76,7 @@ describe('OpenapiAppRenderer', () => {
               requestBody: { content: { 'application/json': { schema: undefined } } },
               responses: {
                 '200': {
+                  description: 'show',
                   content: {
                     'application/json': { schema: { $ref: '#/components/schemas/UserWithPosts' } },
                   },
