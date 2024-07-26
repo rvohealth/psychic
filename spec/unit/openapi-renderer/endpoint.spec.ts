@@ -427,6 +427,7 @@ describe('OpenapiEndpointRenderer', () => {
                 howyadoin: {
                   type: 'object',
                   nullable: false,
+                  minProperties: 8,
                   maxProperties: 10,
                   properties: {},
                   additionalProperties: {

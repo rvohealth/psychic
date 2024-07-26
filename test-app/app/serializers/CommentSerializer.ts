@@ -71,6 +71,7 @@ export class CommentWithOneOfObjectSerializer extends DreamSerializer {
 export class CommentTestingDefaultObjectFieldsSerializer extends DreamSerializer {
   @Attribute({
     type: 'object',
+    minProperties: 8,
     maxProperties: 10,
     additionalProperties: {
       oneOf: [{ type: 'string' }, { type: 'boolean' }],

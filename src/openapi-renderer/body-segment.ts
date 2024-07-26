@@ -221,6 +221,10 @@ export default class OpenapiBodySegmentRenderer {
       data.maxProperties = (objectBodySegment as OpenapiSchemaObjectBase).maxProperties
     }
 
+    if ((objectBodySegment as OpenapiSchemaObjectBase).minProperties) {
+      data.minProperties = (objectBodySegment as OpenapiSchemaObjectBase).minProperties
+    }
+
     if ((objectBodySegment as OpenapiSchemaObjectBase).additionalProperties) {
       data.additionalProperties = this.parseObjectPropertyStatement(
         (objectBodySegment as OpenapiSchemaObjectBase).additionalProperties!,
