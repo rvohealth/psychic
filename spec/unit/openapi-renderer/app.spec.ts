@@ -2,7 +2,7 @@ import OpenapiAppRenderer from '../../../src/openapi-renderer/app'
 
 describe('OpenapiAppRenderer', () => {
   describe('.buildOpenapiObject', () => {
-    it.only('reads all controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
+    it('reads all controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
       const response = await OpenapiAppRenderer.toObject()
       expect(response).toEqual({
         openapi: '3.0.2',
@@ -59,6 +59,7 @@ describe('OpenapiAppRenderer', () => {
             },
           },
 
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           '/users/{id}': expect.objectContaining({
             parameters: [],
             get: {
