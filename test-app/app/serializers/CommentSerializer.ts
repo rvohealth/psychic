@@ -112,6 +112,7 @@ export class CommentTestingDoubleSerializer extends DreamSerializer {
   @Attribute({
     type: 'number',
     format: 'double',
+    multipleOf: 2.5,
     minimum: 10,
     maximum: 20,
   })
@@ -149,6 +150,9 @@ export class CommentTestingStringSerializer extends DreamSerializer {
     type: 'string',
     enum: ['hello', 'world'],
     format: 'date',
+    pattern: '/^helloworld$/',
+    minLength: 2,
+    maxLength: 4,
   })
   public howyadoin: string
 }

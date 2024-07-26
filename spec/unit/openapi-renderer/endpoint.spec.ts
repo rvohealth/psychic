@@ -95,6 +95,38 @@ describe('OpenapiEndpointRenderer', () => {
       })
     })
 
+    context('with a string type passed', () => {
+      it('supports format and enum fields', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentTestingStringSerializer,
+          UsersController,
+          'howyadoin',
+          {},
+        )
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingString: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  type: 'string',
+                  nullable: false,
+                  format: 'date',
+                  enum: ['hello', 'world'],
+                  pattern: '/^helloworld$/',
+                  minLength: 2,
+                  maxLength: 4,
+                },
+              },
+            },
+          }),
+        )
+      })
+    })
+
     context('with an integer type passed', () => {
       it('supports integer type fields, including minimum and maximum', async () => {
         const renderer = new OpenapiEndpointRenderer(
@@ -180,7 +212,7 @@ describe('OpenapiEndpointRenderer', () => {
         )
       })
 
-      context('using deicmal shorthand', () => {
+      context('using decimal shorthand', () => {
         it('expands to number format', async () => {
           const renderer = new OpenapiEndpointRenderer(
             () => CommentTestingDecimalShorthandSerializer,
@@ -230,6 +262,7 @@ describe('OpenapiEndpointRenderer', () => {
                   format: 'double',
                   minimum: 10,
                   maximum: 20,
+                  multipleOf: 2.5,
                   nullable: false,
                 },
               },
@@ -365,35 +398,6 @@ describe('OpenapiEndpointRenderer', () => {
                     format: 'date-time',
                   },
                   nullable: false,
-                },
-              },
-            },
-          }),
-        )
-      })
-    })
-
-    context('with a string type passed', () => {
-      it('supports format and enum fields', async () => {
-        const renderer = new OpenapiEndpointRenderer(
-          () => CommentTestingStringSerializer,
-          UsersController,
-          'howyadoin',
-          {},
-        )
-
-        const response = await renderer.toSchemaObject()
-        expect(response).toEqual(
-          expect.objectContaining({
-            CommentTestingString: {
-              type: 'object',
-              required: ['howyadoin'],
-              properties: {
-                howyadoin: {
-                  type: 'string',
-                  nullable: false,
-                  format: 'date',
-                  enum: ['hello', 'world'],
                 },
               },
             },
