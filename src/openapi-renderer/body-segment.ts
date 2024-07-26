@@ -453,6 +453,7 @@ export default class OpenapiBodySegmentRenderer {
     }
 
     if (objectCast.nullable) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
       ;(returnObj as any).nullable = true
     }
 

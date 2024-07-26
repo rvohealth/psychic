@@ -335,12 +335,14 @@ export default class OpenapiEndpointRenderer<
     if ((await this.computedMethod()) === 'get') return undefined
     if (!this.body) return undefined
 
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
     const schema = this.recursivelyParseBody(this.body) as any
     if (!schema) return undefined
 
     return {
       content: {
         'application/json': {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           schema,
         },
       },

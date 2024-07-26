@@ -31,6 +31,8 @@ export default class OpenapiAppRenderer {
    */
   public static async toObject(): Promise<OpenapiSchema> {
     const controllers = await PsychicDir.controllers()
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const packageJson = (await import(path.join(projectRootPath(), 'package.json'))).default as {
       version: string
       name: string
@@ -75,14 +77,21 @@ export default class OpenapiAppRenderer {
         ;(finalOutput.paths as any)[path] ||= {
           parameters: [],
         }
-        ;(finalOutput.paths as any)[path][method] = (endpointPayload as any)[path][method]
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+        ;(finalOutput.paths as any)[path][method] = (endpointPayload as any)[path][method]
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
         ;(finalOutput.paths as any)[path]['parameters'] = uniq(
           [
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
             ...((finalOutput.paths as any)[path]?.['parameters'] || []),
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
             ...((endpointPayload as any)[path]?.['parameters'] || []),
           ],
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
           (a, b) => a.name === b.name,
         )
       }
