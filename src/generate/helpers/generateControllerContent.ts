@@ -38,6 +38,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       case 'create':
         if (modelName)
           return `\
+  @Openapi(() => ${modelName}, { status: 201 })
   public async create() {
     //    const ${camelize(modelName)} = await this.currentUser.createAssociation('${pluralize(camelize(modelName))}', this.paramsFor(${modelName}))
     //    this.created(${camelize(modelName)})
@@ -50,30 +51,51 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       case 'index':
         if (modelName)
           return `\
+  @Openapi(() => ${modelName}, {
+    status: 200,
+    many: true,
+    serializerKey: 'summary',
+  })
   public async index() {
     //    const ${pluralize(camelize(modelName))} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').all()
     //    this.ok(${pluralize(camelize(modelName))})
   }`
         else
           return `\
+  @Openapi({
+    response: {
+      200: {
+        // add openapi definition for your custom endpoint
+      }
+    }
+  })
   public async index() {
   }`
 
       case 'show':
         if (modelName)
           return `\
+  @Openapi(() => ${modelName}, { status: 200 })
   public async show() {
     //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    this.ok(${camelize(modelName)})
   }`
         else
           return `\
+  @Openapi({
+    response: {
+      200: {
+        // add openapi definition for your custom endpoint
+      }
+    }
+  })
   public async show() {
   }`
 
       case 'update':
         if (modelName)
           return `\
+  @Openapi({ status: 204 })
   public async update() {
     //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    await ${camelize(modelName)}.update(this.paramsFor(${modelName}))
@@ -81,12 +103,14 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   }`
         else
           return `\
+  @Openapi({ status: 204 })
   public async update() {
   }`
 
       case 'destroy':
         if (modelName)
           return `\
+  @Openapi({ status: 204 })
   public async destroy() {
     //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    await ${camelize(modelName)}.destroy()
@@ -94,17 +118,26 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   }`
         else
           return `\
+  @Openapi({ status: 204 })
   public async destroy() {
   }`
 
       default:
         return `\
+  @Openapi({
+    response: {
+      200: {
+        // add openapi definition for your custom endpoint
+      }
+    }
+  })
   public async ${methodName}() {
   }`
     }
   })
 
   return `\
+import { Openapi } from '@rvohealth/psychic'
 ${additionalImports.length ? additionalImports.join('\n') : ''}
 
 export default class ${controllerClassNameWithoutSlashes} extends ${extendingClassName} {

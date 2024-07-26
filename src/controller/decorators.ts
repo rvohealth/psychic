@@ -44,8 +44,8 @@ export function BeforeAction(
  * @param uri - Optional. A list of uri segments that this endpoint uses
  */
 export function Openapi<I extends DreamsOrSerializersOrViewModels>(
-  modelOrSerializerCb: (() => I) | OpenapiEndpointRendererOpts<I>,
-  opts?: OpenapiEndpointRendererOpts<I>,
+  modelOrSerializerCb?: (() => I) | OpenapiEndpointRendererOpts<I>,
+  opts: OpenapiEndpointRendererOpts<I> = {},
 ): (target: PsychicController, methodName: string | symbol) => void {
   return function (target: PsychicController, methodName: string | symbol): void {
     const psychicControllerClass: typeof PsychicController = target.constructor as typeof PsychicController

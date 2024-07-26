@@ -12,7 +12,7 @@ export default (r: PsychicRouter) => {
   r.get('api-ping', 'Api/Users#ping')
   r.post('cast-param-test', 'ParamsTest#testCastParam')
   r.get('users/howyadoin', 'Users#howyadoin')
-  r.resources('users', { only: ['show', 'create', 'index'] })
+  r.resources('users', { only: ['show', 'create', 'index', 'destroy'] })
 
   // hooks tests
   r.get('users-before-all-test', 'Users#beforeAllTest')

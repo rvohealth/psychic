@@ -21,8 +21,6 @@ export default class UsersController extends ApplicationController {
   }
 
   @Openapi(() => User, {
-    path: '/users',
-    method: 'post',
     status: 201,
     serializerKey: 'extra',
   })
@@ -32,8 +30,6 @@ export default class UsersController extends ApplicationController {
   }
 
   @Openapi(() => User, {
-    path: '/users',
-    method: 'get',
     status: 200,
     many: true,
     serializerKey: 'extra',
@@ -44,8 +40,6 @@ export default class UsersController extends ApplicationController {
   }
 
   @Openapi(() => User, {
-    path: '/users/{id}',
-    method: 'get',
     status: 200,
     serializerKey: 'withPosts',
   })
@@ -54,9 +48,7 @@ export default class UsersController extends ApplicationController {
     this.ok(user)
   }
 
-  @Openapi({
-    path: '/users/{id}',
-  })
+  @Openapi()
   public async destroy() {
     const user = await User.findOrFail(this.castParam('id', 'bigint'))
     await user.destroy()
