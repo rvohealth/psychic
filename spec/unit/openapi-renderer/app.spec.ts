@@ -140,7 +140,8 @@ describe('OpenapiAppRenderer', () => {
                         nested2: {
                           type: 'array',
                           items: {
-                            type: 'decimal',
+                            type: 'number',
+                            format: 'decimal',
                             nullable: false,
                           },
                           nullable: false,

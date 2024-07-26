@@ -1,8 +1,6 @@
+import { DreamClassOrViewModelClassOrSerializerClass } from '@rvohealth/dream'
 import PsychicController from '.'
-import OpenapiEndpointRenderer, {
-  DreamsOrSerializersOrViewModels,
-  OpenapiEndpointRendererOpts,
-} from '../openapi-renderer/endpoint'
+import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint'
 import { ControllerHook } from './hooks'
 
 export function BeforeAction(
@@ -43,7 +41,9 @@ export function BeforeAction(
  * @param tags - Optional. string array
  * @param uri - Optional. A list of uri segments that this endpoint uses
  */
-export function Openapi<I extends DreamsOrSerializersOrViewModels>(
+export function Openapi<
+  I extends DreamClassOrViewModelClassOrSerializerClass | DreamClassOrViewModelClassOrSerializerClass[],
+>(
   modelOrSerializerCb?: (() => I) | OpenapiEndpointRendererOpts<I>,
   opts: OpenapiEndpointRendererOpts<I> = {},
 ): (target: PsychicController, methodName: string | symbol) => void {

@@ -1,5 +1,6 @@
 import {
   Dream,
+  DreamClassOrViewModelClassOrSerializerClass,
   DreamSerializer,
   DreamSerializerAssociationStatement,
   OpenapiAllTypes,
@@ -27,16 +28,20 @@ import PsychicServer from '../server'
 import OpenapiBodySegmentRenderer from './body-segment'
 import openapiRoute from './helpers/openapiRoute'
 
-export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends DreamsOrSerializersOrViewModels> {
-  private many: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['many']
-  private responses: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['responses']
-  private serializerKey: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['serializerKey']
-  private uri: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['uri']
-  private body: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['body']
-  private headers: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['headers']
-  private query: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['query']
-  private status: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['status']
-  private tags: OpenapiEndpointRendererOpts<DreamsOrSerializersCB>['tags']
+export default class OpenapiEndpointRenderer<
+  DreamsOrSerializersCBReturnVal extends
+    | DreamClassOrViewModelClassOrSerializerClass
+    | DreamClassOrViewModelClassOrSerializerClass[],
+> {
+  private many: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['many']
+  private responses: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['responses']
+  private serializerKey: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['serializerKey']
+  private uri: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['uri']
+  private body: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['body']
+  private headers: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['headers']
+  private query: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['query']
+  private status: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['status']
+  private tags: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['tags']
 
   /**
    * instantiates a new OpenapiEndpointRenderer.
@@ -53,7 +58,7 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
    * ```
    */
   constructor(
-    private dreamsOrSerializersCb: (() => DreamsOrSerializersCB) | null,
+    private dreamsOrSerializersCb: (() => DreamsOrSerializersCBReturnVal) | null,
     private controllerClass: typeof PsychicController,
     private action: string,
     {
@@ -66,7 +71,7 @@ export default class OpenapiEndpointRenderer<DreamsOrSerializersCB extends Dream
       status,
       tags,
       uri,
-    }: OpenapiEndpointRendererOpts<DreamsOrSerializersCB> = {},
+    }: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal> = {},
   ) {
     this.body = body
     this.headers = headers
@@ -713,7 +718,7 @@ Warn: ${serializerClass.name} missing explicit serializer definition for ${assoc
    * Uses the provided entity to resolve to a serializer class.
    */
   private getSerializerClass(
-    dreamOrSerializerOrViewModel: DreamOrSerializerOrViewModel,
+    dreamOrSerializerOrViewModel: DreamClassOrViewModelClassOrSerializerClass,
   ): typeof DreamSerializer {
     if ((dreamOrSerializerOrViewModel as typeof DreamSerializer).isDreamSerializer) {
       return dreamOrSerializerOrViewModel as typeof DreamSerializer
@@ -749,8 +754,8 @@ ATTENTION:
 }
 
 export interface OpenapiEndpointRendererOpts<
-  T extends DreamsOrSerializersOrViewModels,
-  NonArrayT extends DreamsOrSerializersOrViewModels extends (infer R extends abstract new (
+  T extends DreamClassOrViewModelClassOrSerializerClass | DreamClassOrViewModelClassOrSerializerClass[],
+  NonArrayT extends T extends (infer R extends abstract new (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -758,7 +763,7 @@ export interface OpenapiEndpointRendererOpts<
     ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
       R & (abstract new (...args: any) => any)
     : // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      T & (abstract new (...args: any) => any) = DreamsOrSerializersOrViewModels extends (infer R extends
+      T & (abstract new (...args: any) => any) = T extends (infer R extends
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     abstract new (...args: any) => any)[]
     ? // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -863,12 +868,3 @@ export type OpenapiContent = {
     description?: string
   }
 }
-
-export type DreamsOrSerializersOrViewModels = DreamOrSerializerOrViewModel | DreamOrSerializerOrViewModel[]
-
-export type DreamOrSerializerOrViewModel =
-  | typeof Dream
-  | (typeof Dream)[]
-  | typeof DreamSerializer
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  | (abstract new (...args: any) => { serializers: Record<string, typeof DreamSerializer> })
