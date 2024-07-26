@@ -496,6 +496,11 @@ export interface OpenapiUriOption {
 
 export interface OpenapiSchema {
   openapi: `${number}.${number}.${number}`
+  info: {
+    version: string
+    title: string
+    description: string
+  }
   paths: OpenapiEndpointResponse
   components: {
     schemas: {

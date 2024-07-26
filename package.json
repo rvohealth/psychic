@@ -1,5 +1,6 @@
 {
   "name": "@rvohealth/psychic",
+  "description": "Typescript web framework",
   "version": "0.3.29",
   "main": "src/index.ts",
   "author": "RVOHealth",
@@ -76,7 +77,7 @@
     "tslib": "^2.6.2"
   },
   "peerDependencies": {
-    "@rvohealth/dream": "^0.7.1-fgbeta-34",
+    "@rvohealth/dream": "^0.7.1-fgbeta-35",
     "@types/express": "^4.17.21",
     "@types/express-requests-logger": "^3.0.4",
     "@types/supertest": "^6.0.2",
@@ -90,7 +91,7 @@
   },
   "devDependencies": {
     "@eslint/js": "^9.0.0",
-    "@rvohealth/dream": "^0.7.1-fgbeta-34",
+    "@rvohealth/dream": "^0.7.1-fgbeta-35",
     "@types/express": "^4.17.21",
     "@types/express-requests-logger": "^3.0.4",
     "@types/jest-plugin-context": "^2.9.7",

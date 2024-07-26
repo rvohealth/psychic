@@ -68,7 +68,7 @@ export const schema = {
     associations: {
       post: {
         type: 'BelongsTo',
-        foreignKey: null,
+        foreignKey: 'postId',
         tables: ['posts'],
         optional: false,
         requiredWhereClauses: null,
@@ -352,21 +352,21 @@ export const schema = {
     associations: {
       comments: {
         type: 'HasMany',
-        foreignKey: null,
+        foreignKey: 'postId',
         tables: ['comments'],
         optional: null,
         requiredWhereClauses: null,
       },
       recentComment: {
         type: 'HasOne',
-        foreignKey: null,
+        foreignKey: 'postId',
         tables: ['comments'],
         optional: null,
         requiredWhereClauses: null,
       },
       user: {
         type: 'BelongsTo',
-        foreignKey: null,
+        foreignKey: 'userId',
         tables: ['users'],
         optional: false,
         requiredWhereClauses: null,
@@ -731,14 +731,14 @@ export const schema = {
       },
       posts: {
         type: 'HasMany',
-        foreignKey: null,
+        foreignKey: 'userId',
         tables: ['posts'],
         optional: null,
         requiredWhereClauses: null,
       },
       recentPost: {
         type: 'HasOne',
-        foreignKey: null,
+        foreignKey: 'userId',
         tables: ['posts'],
         optional: null,
         requiredWhereClauses: null,

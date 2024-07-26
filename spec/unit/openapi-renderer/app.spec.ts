@@ -1,4 +1,5 @@
 import OpenapiAppRenderer from '../../../src/openapi-renderer/app'
+import packageJson from '../../../package.json'
 
 describe('OpenapiAppRenderer', () => {
   describe('.buildOpenapiObject', () => {
@@ -6,6 +7,11 @@ describe('OpenapiAppRenderer', () => {
       const response = await OpenapiAppRenderer.toObject()
       expect(response).toEqual({
         openapi: '3.0.2',
+        info: {
+          version: packageJson.version,
+          title: packageJson.name,
+          description: packageJson.description,
+        },
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         paths: expect.objectContaining({
           '/users': {

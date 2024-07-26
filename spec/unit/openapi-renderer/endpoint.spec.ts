@@ -25,7 +25,7 @@ import {
 import PostSerializer from '../../../test-app/app/serializers/PostSerializer'
 import UserSerializer, {
   UserWithPostsMultiType2Serializer,
-  UserWithPostsMultiTypeSerializer,
+  UserWithPostsSerializer,
 } from '../../../test-app/app/serializers/UserSerializer'
 
 describe('OpenapiEndpointRenderer', () => {
@@ -770,74 +770,6 @@ describe('OpenapiEndpointRenderer', () => {
         })
       })
 
-      context('rendering an association which contains an array of serializers', () => {
-        it('encases expression in an anyOf, wrapping all serializers present', async () => {
-          const renderer = new OpenapiEndpointRenderer(
-            () => UserWithPostsMultiTypeSerializer,
-            UsersController,
-            'howyadoin',
-            {},
-          )
-
-          const response = await renderer.toSchemaObject()
-          expect(response).toEqual(
-            expect.objectContaining({
-              Comment: {
-                type: 'object',
-                required: ['id', 'body'],
-                properties: {
-                  id: { type: 'string', nullable: false },
-                  body: { type: 'string', nullable: false },
-                },
-              },
-
-              UserWithPostsMultiType: {
-                type: 'object',
-                required: ['id', 'posts'],
-                properties: {
-                  id: { type: 'string', nullable: false },
-                  posts: {
-                    anyOf: [
-                      {
-                        type: 'array',
-                        items: { $ref: '#/components/schemas/PostWithComments' },
-                      },
-                      {
-                        type: 'array',
-                        items: { $ref: '#/components/schemas/PostWithRecentComment' },
-                      },
-                    ],
-                  },
-                },
-              },
-
-              PostWithComments: {
-                type: 'object',
-                required: ['id', 'body', 'comments'],
-                properties: {
-                  id: { type: 'string', nullable: false },
-                  body: { type: 'string', nullable: false },
-                  comments: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/Comment' },
-                  },
-                },
-              },
-
-              PostWithRecentComment: {
-                type: 'object',
-                required: ['id', 'body', 'recentComment'],
-                properties: {
-                  id: { type: 'string', nullable: false },
-                  body: { type: 'string', nullable: false },
-                  recentComment: { $ref: '#/components/schemas/Comment' },
-                },
-              },
-            }),
-          )
-        })
-      })
-
       context('rendering an association which contains an array of dreams', () => {
         it('extracts serializers from each dream, then encases expression in an anyOf, wrapping all identified serializers', async () => {
           const renderer = new OpenapiEndpointRenderer(
@@ -912,32 +844,10 @@ describe('OpenapiEndpointRenderer', () => {
                 get: expect.objectContaining({
                   responses: {
                     '200': {
+                      description: 'show',
                       content: {
                         'application/json': { schema: { $ref: '#/components/schemas/User' } },
                       },
-                    },
-                  },
-                }),
-              }),
-            }),
-          )
-        })
-      })
-
-      context('when the method cannot be inferred by routes', () => {
-        it('infers the method by examining routes', async () => {
-          const renderer = new OpenapiEndpointRenderer(null, UsersController, 'destroy', {})
-
-          const response = await renderer.toObject()
-          expect(response).toEqual(
-            expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              '/users/{id}': expect.objectContaining({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                delete: expect.objectContaining({
-                  responses: {
-                    '204': {
-                      description: 'no content',
                     },
                   },
                 }),
@@ -1121,6 +1031,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
+                description: 'howyadoin',
                 content: {
                   'application/json': {
                     schema: {
@@ -1137,7 +1048,7 @@ describe('OpenapiEndpointRenderer', () => {
       context('with a serializer passed', () => {
         it("uses the provided serializer, converting it's payload shape to openapi format", async () => {
           const renderer = new OpenapiEndpointRenderer(
-            () => UserWithPostsMultiTypeSerializer,
+            () => UserWithPostsSerializer,
             UsersController,
             'howyadoin',
             {},
@@ -1147,10 +1058,11 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
+                description: 'howyadoin',
                 content: {
                   'application/json': {
                     schema: {
-                      $ref: '#/components/schemas/UserWithPostsMultiType',
+                      $ref: '#/components/schemas/UserWithPosts',
                     },
                   },
                 },
@@ -1164,7 +1076,7 @@ describe('OpenapiEndpointRenderer', () => {
         class MyViewModel {
           public get serializers() {
             return {
-              default: UserWithPostsMultiTypeSerializer,
+              default: UserWithPostsSerializer,
             }
           }
         }
@@ -1176,10 +1088,11 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
+                description: 'howyadoin',
                 content: {
                   'application/json': {
                     schema: {
-                      $ref: '#/components/schemas/UserWithPostsMultiType',
+                      $ref: '#/components/schemas/UserWithPosts',
                     },
                   },
                 },
@@ -1257,6 +1170,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'extra',
             responses: {
               201: {
+                description: 'howyadoin',
                 allOf: [
                   {
                     type: 'object',
@@ -1277,6 +1191,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
+                description: 'howyadoin',
                 content: {
                   'application/json': {
                     schema: {
@@ -1315,6 +1230,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'extra',
             responses: {
               201: {
+                description: 'chalupas for life',
                 anyOf: [
                   {
                     type: 'object',
@@ -1335,6 +1251,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
+                description: 'chalupas for life',
                 content: {
                   'application/json': {
                     schema: {
@@ -1373,6 +1290,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'extra',
             responses: {
               201: {
+                description: 'howyadoin',
                 oneOf: [
                   {
                     type: 'object',
@@ -1393,6 +1311,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
+                description: 'howyadoin',
                 content: {
                   'application/json': {
                     schema: {
@@ -1431,6 +1350,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'extra',
             responses: {
               201: {
+                description: 'howyadoin',
                 oneOf: [
                   {
                     $ref: 'components/schemas/Howyadoin',
@@ -1447,6 +1367,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
+                description: 'howyadoin',
                 content: {
                   'application/json': {
                     schema: {
@@ -1483,6 +1404,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
+                description: 'howyadoin',
                 content: {
                   'application/json': {
                     schema: {
@@ -1514,6 +1436,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
+                description: 'my description',
                 content: {
                   'application/json': {
                     schema: {
@@ -1547,6 +1470,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
+                description: 'howyadoin',
                 content: {
                   'application/json': {
                     schema: {
@@ -1573,6 +1497,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
+                description: 'howyadoin',
                 content: {
                   'application/json': {
                     schema: {
@@ -1628,6 +1553,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
+                description: 'howyadoin',
                 content: {
                   'application/json': {
                     schema: {

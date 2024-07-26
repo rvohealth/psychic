@@ -1,5 +1,10 @@
 {
   "openapi": "3.0.2",
+  "info": {
+    "version": "0.3.29",
+    "title": "@rvohealth/psychic",
+    "description": "Typescript web framework"
+  },
   "paths": {
     "/users": {
       "parameters": [],
@@ -46,10 +51,88 @@
           }
         }
       }
+    },
+    "/users/{id}": {
+      "parameters": [],
+      "get": {
+        "tags": [],
+        "summary": "",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWithPosts"
+                }
+              }
+            }
+          }
+        }
+      },
+      "delete": {
+        "tags": [],
+        "summary": "",
+        "requestBody": {
+          "content": {
+            "application/json": {}
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "no content"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "Comment": {
+        "type": "object",
+        "required": [
+          "id",
+          "body"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false
+          },
+          "body": {
+            "type": "string",
+            "nullable": false
+          }
+        }
+      },
+      "PostWithComments": {
+        "type": "object",
+        "required": [
+          "id",
+          "body",
+          "comments"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false
+          },
+          "body": {
+            "type": "string",
+            "nullable": false
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            }
+          }
+        }
+      },
       "UserExtra": {
         "type": "object",
         "required": [
@@ -74,34 +157,56 @@
             "type": "object",
             "properties": {
               "name": {
-                "type": "string",
-                "nullable": false
+                "nullable": false,
+                "type": "string"
               },
               "stuff": {
+                "nullable": false,
                 "type": "array",
                 "items": {
-                  "type": "string",
-                  "nullable": false
-                },
-                "nullable": false
+                  "nullable": false,
+                  "type": "string"
+                }
               },
               "nestedStuff": {
                 "type": "object",
                 "properties": {
                   "nested1": {
-                    "type": "boolean",
-                    "nullable": false
+                    "nullable": false,
+                    "type": "boolean"
                   },
                   "nested2": {
+                    "nullable": false,
                     "type": "array",
                     "items": {
-                      "type": "decimal",
-                      "nullable": false
-                    },
-                    "nullable": false
+                      "nullable": false,
+                      "type": "number",
+                      "format": "decimal"
+                    }
                   }
-                }
+                },
+                "nullable": false
               }
+            },
+            "nullable": false
+          }
+        }
+      },
+      "UserWithPosts": {
+        "type": "object",
+        "required": [
+          "id",
+          "posts"
+        ],
+        "properties": {
+          "id": {
+            "type": "string",
+            "nullable": false
+          },
+          "posts": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/PostWithComments"
             }
           }
         }

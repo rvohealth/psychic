@@ -42,6 +42,7 @@ export default class OpenapiEndpointRenderer<
   private query: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['query']
   private status: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['status']
   private tags: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['tags']
+  private description: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['description']
 
   /**
    * instantiates a new OpenapiEndpointRenderer.
@@ -71,6 +72,7 @@ export default class OpenapiEndpointRenderer<
       status,
       tags,
       uri,
+      description,
     }: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal> = {},
   ) {
     this.body = body
@@ -82,6 +84,7 @@ export default class OpenapiEndpointRenderer<
     this.status = status
     this.tags = tags
     this.uri = uri
+    this.description = description
   }
 
   /**
@@ -317,6 +320,7 @@ export default class OpenapiEndpointRenderer<
 
     Object.keys(this.responses || {}).forEach(statusCode => {
       responseData[parseInt(statusCode)] = {
+        description: this.responses![statusCode as keyof typeof this.responses].description || this.action,
         content: {
           'application/json': {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -396,6 +400,7 @@ export default class OpenapiEndpointRenderer<
           schema: baseSchema as any,
         },
       },
+      description: this.description || this.action,
     }
 
     return finalOutput
@@ -777,8 +782,9 @@ export interface OpenapiEndpointRendererOpts<
   query?: OpenapiQueryOption[]
   body?: OpenapiSchemaBodyShorthand
   tags?: string[]
+  description?: string
   responses?: {
-    [statusCode: number]: OpenapiSchemaBodyShorthand
+    [statusCode: number]: OpenapiSchemaBodyShorthand & { description?: string }
   }
   serializerKey?: InstanceType<NonArrayT> extends { serializers: { [key: string]: typeof DreamSerializer } }
     ? keyof InstanceType<NonArrayT>['serializers' & keyof InstanceType<NonArrayT>]
@@ -864,7 +870,6 @@ export type OpenapiContent = {
         | OpenapiSchemaExpressionAllOf
         | OpenapiSchemaExpressionOneOf
     }
-  } & {
-    description?: string
   }
+  description?: string
 }
