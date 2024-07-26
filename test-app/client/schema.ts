@@ -62,14 +62,20 @@ export interface paths {
         parameters: {
             query?: never;
             header?: never;
-            path?: never;
+            path: {
+                /** @description id */
+                id: string;
+            };
             cookie?: never;
         };
         get: {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    /** @description id */
+                    id: string;
+                };
                 cookie?: never;
             };
             requestBody?: never;
@@ -91,7 +97,10 @@ export interface paths {
             parameters: {
                 query?: never;
                 header?: never;
-                path?: never;
+                path: {
+                    /** @description id */
+                    id: string;
+                };
                 cookie?: never;
             };
             requestBody?: never;

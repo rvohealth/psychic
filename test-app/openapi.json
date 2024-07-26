@@ -45,7 +45,17 @@
       }
     },
     "/users/{id}": {
-      "parameters": [],
+      "parameters": [
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "description": "id",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
       "get": {
         "tags": [],
         "summary": "",
