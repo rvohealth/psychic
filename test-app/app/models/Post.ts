@@ -16,16 +16,16 @@ export default class Post extends ApplicationModel {
   public get serializers() {
     return {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      default: PostSerializer<any, any>,
+      default: PostSerializer,
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      summary: PostSummarySerializer<any, any>,
+      summary: PostSummarySerializer,
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      withRecentComment: PostWithRecentCommentSerializer<any, any>,
+      withRecentComment: PostWithRecentCommentSerializer,
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      withComments: PostWithCommentsSerializer<any, any>,
+      withComments: PostWithCommentsSerializer,
     } as const
   }
 

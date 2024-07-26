@@ -13,10 +13,10 @@ export default class Comment extends ApplicationModel {
   public get serializers() {
     return {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      default: CommentSerializer<any, any>,
+      default: CommentSerializer,
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      summary: CommentSummarySerializer<any, any>,
+      summary: CommentSummarySerializer,
     } as const
   }
 
