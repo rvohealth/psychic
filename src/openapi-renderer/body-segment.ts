@@ -235,7 +235,7 @@ export default class OpenapiBodySegmentRenderer {
       )
     }
 
-    if (objectBodySegment.required !== undefined) data.required = objectBodySegment.required
+    if (Array.isArray(objectBodySegment.required)) data.required = objectBodySegment.required
 
     if ((objectBodySegment as OpenapiSchemaObjectBase).properties) {
       data.properties = this.parseObjectPropertyStatement(
