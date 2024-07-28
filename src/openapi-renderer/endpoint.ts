@@ -102,7 +102,7 @@ export default class OpenapiEndpointRenderer<
 
     const output = {
       [path]: {
-        parameters: [...this.headersArray(), ...(await this.uriArray()), ...this.queryArray()],
+        parameters: [...this.headersArray(), ...(await this.pathParamsArray()), ...this.queryArray()],
         [method]: {
           tags: this.tags || [],
           summary: '',
@@ -170,7 +170,7 @@ export default class OpenapiEndpointRenderer<
    * Generates the path portion of the openapi payload's
    * "parameters" field for a single endpoint.
    */
-  private async uriArray(): Promise<OpenapiParameterResponse[]> {
+  private async pathParamsArray(): Promise<OpenapiParameterResponse[]> {
     if (this._uri) return this._uri
 
     const userProvidedUriParams = (this.pathParams?.map(param => {
