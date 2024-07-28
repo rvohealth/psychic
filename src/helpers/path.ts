@@ -38,10 +38,7 @@ export async function clientApiPath() {
 }
 
 export async function clientApiFileName() {
-  const yamlConfig = await loadDreamYamlFile()
-  const schemaPath = yamlConfig.client_api_schema_path
-  const schemaParts = schemaPath.split('/')
-  return schemaParts.pop()
+  return await new Promise(accept => accept('schema.ts'))
 }
 
 export async function modelsPath() {
