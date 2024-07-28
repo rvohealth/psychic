@@ -1,11 +1,12 @@
+import { uniq } from '@rvohealth/dream'
+import { projectRootPath } from '@rvohealth/dream/src/helpers/path'
 import fs from 'fs/promises'
+import path from 'path'
 import PsychicController from '../controller'
 import openapiJsonPath from '../helpers/openapiJsonPath'
 import PsychicDir from '../helpers/psychicdir'
+import { HttpMethod, HttpMethods } from '../router/types'
 import { OpenapiSchema } from './body-segment'
-import path from 'path'
-import { projectRootPath } from '@rvohealth/dream/src/helpers/path'
-import { uniq } from '@rvohealth/dream'
 
 export default class OpenapiAppRenderer {
   /**
@@ -70,7 +71,7 @@ export default class OpenapiAppRenderer {
         const path = Object.keys(endpointPayload)[0]!
 
         const method = Object.keys(endpointPayload[path]).find(key =>
-          ['get', 'post', 'delete', 'patch', 'options'].includes(key),
+          HttpMethods.includes(key as HttpMethod),
         )!
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
