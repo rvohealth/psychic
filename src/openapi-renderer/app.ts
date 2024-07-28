@@ -89,7 +89,7 @@ export default class OpenapiAppRenderer {
         methodObj['parameters'] = uniq(
           [
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            ...(methodObj?.['parameters'] || []),
+            ...(methodObj.parameters || []),
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
             ...((endpointPayload as any)[path]?.['parameters'] || []),
