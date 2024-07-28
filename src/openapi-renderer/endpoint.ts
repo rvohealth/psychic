@@ -779,10 +779,10 @@ export class MissingControllerActionPairingInRoutes extends Error {
   }
   public get message() {
     return `
-Openapi decorator has been applied to method '${this.action}' in '${this.controllerClass.name}',
+OpenAPI decorator has been applied to method '${this.action}' in '${this.controllerClass.name}',
 but no route maps to this method in your conf/routes.ts file.
 
-Either remove the @Openapi decorator for '${this.action}', or add a route to the
+Either remove the @OpenAPI decorator for '${this.action}', or add a route to the
 routes file which will direct to this controller class and method.`
   }
 }
