@@ -80,16 +80,16 @@ export default class OpenapiAppRenderer {
         }
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        const methodObj = (finalOutput.paths as any)[path]
+        const pathObj = (finalOutput.paths as any)[path]
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-        methodObj[method] = (endpointPayload as any)[path][method]
+        pathObj[method] = (endpointPayload as any)[path][method]
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        methodObj.parameters = uniq(
+        pathObj.parameters = uniq(
           [
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            ...(methodObj.parameters || []),
+            ...(pathObj.parameters || []),
 
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
             ...((endpointPayload as any)[path]?.['parameters'] || []),
