@@ -171,9 +171,9 @@ export default class OpenapiEndpointRenderer<
    * "parameters" field for a single endpoint.
    */
   private async pathParamsArray(): Promise<OpenapiParameterResponse[]> {
-    if (this._uri) return this._uri
+    if (this._pathParams) return this._pathParams
 
-    const userProvidedUriParams = (this.pathParams?.map(param => {
+    const userProvidedPathParams = (this.pathParams?.map(param => {
       return {
         in: 'path',
         name: param.name,
@@ -186,9 +186,9 @@ export default class OpenapiEndpointRenderer<
     }) || []) as OpenapiParameterResponse[]
 
     const route = await this.getCurrentRouteConfig()
-    const uriSegments = route.path
+    const pathSegments = route.path
       .split('/')
-      .filter(uriSegment => /^:/.test(uriSegment))
+      .filter(pathSegment => /^:/.test(pathSegment))
       .map(field => {
         const sanitizedField = field.replace(/^:/, '')
         return {
@@ -202,11 +202,11 @@ export default class OpenapiEndpointRenderer<
         }
       })
 
-    this._uri = [...uriSegments, ...userProvidedUriParams] as OpenapiParameterResponse[]
+    this._pathParams = [...pathSegments, ...userProvidedPathParams] as OpenapiParameterResponse[]
 
-    return this._uri
+    return this._pathParams
   }
-  private _uri: OpenapiParameterResponse[]
+  private _pathParams: OpenapiParameterResponse[]
 
   /**
    * @internal
