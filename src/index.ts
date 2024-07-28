@@ -37,7 +37,7 @@ export {
   OpenapiQueryOption,
   OpenapiResponses,
   OpenapiSchema,
-  OpenapiUriOption,
+  OpenapiPathParamOption as OpenapiUriOption,
 } from './openapi-renderer/endpoint'
 export { default as PsychicRouter } from './router'
 export { HttpMethod } from './router/types'

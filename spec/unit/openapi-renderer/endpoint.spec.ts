@@ -805,10 +805,10 @@ describe('OpenapiEndpointRenderer', () => {
       })
     })
 
-    context('uri', () => {
+    context('pathParams', () => {
       it('renders params within the parameters array', async () => {
         const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
-          uri: [
+          pathParams: [
             {
               name: 'search',
               required: true,
@@ -841,7 +841,7 @@ describe('OpenapiEndpointRenderer', () => {
       context('when the path contains uri params', () => {
         it('includes the uri params in the parameters block', async () => {
           const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'show', {
-            uri: [
+            pathParams: [
               {
                 name: 'search',
                 required: true,

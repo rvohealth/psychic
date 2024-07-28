@@ -36,7 +36,7 @@ export default class OpenapiEndpointRenderer<
   private many: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['many']
   private responses: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['responses']
   private serializerKey: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['serializerKey']
-  private uri: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['uri']
+  private pathParams: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['pathParams']
   private body: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['body']
   private headers: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['headers']
   private query: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['query']
@@ -71,7 +71,7 @@ export default class OpenapiEndpointRenderer<
       serializerKey,
       status,
       tags,
-      uri,
+      pathParams,
       description,
     }: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal> = {},
   ) {
@@ -83,7 +83,7 @@ export default class OpenapiEndpointRenderer<
     this.serializerKey = serializerKey
     this.status = status
     this.tags = tags
-    this.uri = uri
+    this.pathParams = pathParams
     this.description = description
   }
 
@@ -173,7 +173,7 @@ export default class OpenapiEndpointRenderer<
   private async uriArray(): Promise<OpenapiParameterResponse[]> {
     if (this._uri) return this._uri
 
-    const userProvidedUriParams = (this.uri?.map(param => {
+    const userProvidedUriParams = (this.pathParams?.map(param => {
       return {
         in: 'path',
         name: param.name,
@@ -818,7 +818,7 @@ export interface OpenapiEndpointRendererOpts<
       T & (abstract new (...args: any) => any),
 > {
   many?: boolean
-  uri?: OpenapiUriOption[]
+  pathParams?: OpenapiPathParamOption[]
   headers?: OpenapiHeaderOption[]
   query?: OpenapiQueryOption[]
   body?: OpenapiSchemaBodyShorthand
@@ -846,7 +846,7 @@ export interface OpenapiQueryOption {
   allowReserved?: boolean
 }
 
-export interface OpenapiUriOption {
+export interface OpenapiPathParamOption {
   name: string
   required: boolean
   description?: string
