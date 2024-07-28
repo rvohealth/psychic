@@ -1,7 +1,4 @@
 export default function openapiRoute(route: string) {
-  const sanitizedRoute = route
-    .replace(/^\//, '')
-    .replace(/:([^/]*)\//g, '{$1}')
-    .replace(/:([^/]*)$/g, '{$1}')
+  const sanitizedRoute = route.replace(/^\//, '').replace(/:([^/]*)(\/|$)/g, '{$1}')
   return `/${sanitizedRoute}`
 }
