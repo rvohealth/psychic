@@ -93,12 +93,10 @@
         ],
         "properties": {
           "id": {
-            "type": "string",
-            "nullable": false
+            "type": "string"
           },
           "body": {
-            "type": "string",
-            "nullable": false
+            "type": "string"
           }
         }
       },
@@ -111,12 +109,10 @@
         ],
         "properties": {
           "id": {
-            "type": "string",
-            "nullable": false
+            "type": "string"
           },
           "body": {
-            "type": "string",
-            "nullable": false
+            "type": "string"
           },
           "comments": {
             "type": "array",
@@ -135,29 +131,23 @@
         ],
         "properties": {
           "id": {
-            "type": "string",
-            "nullable": false
+            "type": "string"
           },
           "nicknames": {
             "type": "array",
             "items": {
-              "type": "string",
-              "nullable": false
-            },
-            "nullable": false
+              "type": "string"
+            }
           },
           "howyadoin": {
             "type": "object",
             "properties": {
               "name": {
-                "nullable": false,
                 "type": "string"
               },
               "stuff": {
-                "nullable": false,
                 "type": "array",
                 "items": {
-                  "nullable": false,
                   "type": "string"
                 }
               },
@@ -165,23 +155,18 @@
                 "type": "object",
                 "properties": {
                   "nested1": {
-                    "nullable": false,
                     "type": "boolean"
                   },
                   "nested2": {
-                    "nullable": false,
                     "type": "array",
                     "items": {
-                      "nullable": false,
                       "type": "number",
                       "format": "decimal"
                     }
                   }
-                },
-                "nullable": false
+                }
               }
-            },
-            "nullable": false
+            }
           }
         }
       },
@@ -193,8 +178,7 @@
         ],
         "properties": {
           "id": {
-            "type": "string",
-            "nullable": false
+            "type": "string"
           },
           "posts": {
             "type": "array",
