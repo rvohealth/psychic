@@ -559,38 +559,31 @@ ${serializerClass.name}
 
     associations.forEach(association => {
       const associatedSerializers = DreamSerializer.getAssociatedSerializersForOpenapi(association)
-      if (!associatedSerializers) throw new Error('RUH ROGH')
+      if (!associatedSerializers)
+        throw new Error(`
+Error: ${serializerClass.name} missing explicit serializer definition for ${association.type} ${association.field}, using type: 'object'
+`)
 
-      if (!associatedSerializers) {
-        if (!testEnv()) {
-          console.warn(
-            `
-Warn: ${serializerClass.name} missing explicit serializer definition for ${association.type} ${association.field}, using type: 'object'
-`,
-          )
-        }
+      if (associatedSerializers.length === 1) {
+        // point the association directly to the schema
+        finalOutput = this.addSingleSerializerAssociationToOutput({
+          serializerClass,
+          association,
+          serializerKey,
+          finalOutput,
+          serializers,
+          associatedSerializers,
+        })
       } else {
-        if (associatedSerializers.length === 1) {
-          // point the association directly to the schema
-          finalOutput = this.addSingleSerializerAssociationToOutput({
-            serializerClass,
-            association,
-            serializerKey,
-            finalOutput,
-            serializers,
-            associatedSerializers,
-          })
-        } else {
-          // leverage anyOf to handle an array of serializers
-          finalOutput = this.addMultiSerializerAssociationToOutput({
-            serializerClass,
-            association,
-            serializerKey,
-            finalOutput,
-            serializers,
-            associatedSerializers,
-          })
-        }
+        // leverage anyOf to handle an array of serializers
+        finalOutput = this.addMultiSerializerAssociationToOutput({
+          serializerClass,
+          association,
+          serializerKey,
+          finalOutput,
+          serializers,
+          associatedSerializers,
+        })
       }
     })
 
