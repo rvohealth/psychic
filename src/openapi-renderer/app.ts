@@ -86,7 +86,7 @@ export default class OpenapiAppRenderer {
         methodObj[method] = (endpointPayload as any)[path][method]
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        methodObj['parameters'] = uniq(
+        methodObj.parameters = uniq(
           [
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
             ...(methodObj.parameters || []),
