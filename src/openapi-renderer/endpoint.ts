@@ -779,16 +779,11 @@ export class MissingControllerActionPairingInRoutes extends Error {
   }
   public get message() {
     return `
-ATTENTION:
-  The @Openapi decorator call in the ${this.controllerClass.name} did not explicitly
-  specify a 'path' option for the ${this.action} action. In this case, Psychic will
-  automatically attempt to guess the correct route based on the entries in
-  the 'conf/routes.ts' file.
+Openapi decorator has been applied to method '${this.action}' in '${this.controllerClass.name}',
+but no route maps to this method in your conf/routes.ts file.
 
-  If it is unable to find a route pointing to this particular controller and action
-  pairing, this exception is raised to gently remind you that you have a documented
-  endpoint which you have not yet included a route entry for.
-`
+Either remove the @Openapi decorator for '${this.action}', or add a route to the
+routes file which will direct to this controller class and method.`
   }
 }
 
