@@ -41,7 +41,7 @@ export function BeforeAction(
  * @param tags - Optional. string array
  * @param uri - Optional. A list of uri segments that this endpoint uses
  */
-export function Openapi<
+export function OpenAPI<
   I extends DreamClassOrViewModelClassOrSerializerClass | DreamClassOrViewModelClassOrSerializerClass[],
 >(
   modelOrSerializerCb?: (() => I) | OpenapiEndpointRendererOpts<I>,

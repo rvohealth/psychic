@@ -2,7 +2,7 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import PsychicConfig from '../../../src/config'
 import PsychicController from '../../../src/controller'
-import { Openapi } from '../../../src/controller/decorators'
+import { OpenAPI } from '../../../src/controller/decorators'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
 
@@ -14,7 +14,7 @@ describe('PsychicController', () => {
     let config: PsychicConfig
 
     class MyController extends PsychicController {
-      @Openapi(() => User, {
+      @OpenAPI(() => User, {
         status: 201,
       })
       public create() {

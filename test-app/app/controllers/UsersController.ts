@@ -1,5 +1,5 @@
 import { Encrypt } from '../../../src'
-import { BeforeAction, Openapi } from '../../../src/controller/decorators'
+import { BeforeAction, OpenAPI } from '../../../src/controller/decorators'
 import User from '../models/User'
 import ApplicationController from './ApplicationController'
 
@@ -20,7 +20,7 @@ export default class UsersController extends ApplicationController {
     throw new Error('this should force a 500')
   }
 
-  @Openapi(() => User, {
+  @OpenAPI(() => User, {
     status: 201,
     serializerKey: 'extra',
   })
@@ -29,7 +29,7 @@ export default class UsersController extends ApplicationController {
     this.created(user)
   }
 
-  @Openapi(() => User, {
+  @OpenAPI(() => User, {
     status: 200,
     many: true,
     serializerKey: 'extra',
@@ -39,7 +39,7 @@ export default class UsersController extends ApplicationController {
     this.ok(users)
   }
 
-  @Openapi(() => User, {
+  @OpenAPI(() => User, {
     status: 200,
     serializerKey: 'withPosts',
   })
@@ -48,7 +48,7 @@ export default class UsersController extends ApplicationController {
     this.ok(user)
   }
 
-  @Openapi()
+  @OpenAPI()
   public async destroy() {
     const user = await User.findOrFail(this.castParam('id', 'bigint'))
     await user.destroy()
