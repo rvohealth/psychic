@@ -643,6 +643,30 @@ describe('OpenapiEndpointRenderer', () => {
           )
         })
 
+        context('with a nullable RendersOne', () => {
+          it('treats association as nullable', async () => {
+            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+              serializerKey: 'withRecentPost',
+            })
+
+            const response = await renderer.toSchemaObject()
+            expect(response).toEqual(
+              expect.objectContaining({
+                UserWithRecentPost: {
+                  type: 'object',
+                  required: ['id', 'recentPost'],
+                  properties: {
+                    id: { type: 'string' },
+                    recentPost: {
+                      allOf: [{ $ref: '#/components/schemas/PostWithRecentComment' }, { nullable: true }],
+                    },
+                  },
+                },
+              }),
+            )
+          })
+        })
+
         context('with a nested association', () => {
           it('provides schema for the nested association', async () => {
             const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
@@ -1031,6 +1055,31 @@ describe('OpenapiEndpointRenderer', () => {
                   'application/json': {
                     schema: {
                       $ref: '#/components/schemas/UserExtra',
+                    },
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
+      context('when nullable is set to true in the Openapi decorator call', () => {
+        it('makes the top level serializer nullable', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            serializerKey: 'withRecentPost',
+            nullable: true,
+          })
+
+          const response = await renderer.toObject()
+          expect(response['/users/howyadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              200: {
+                description: 'howyadoin',
+                content: {
+                  'application/json': {
+                    schema: {
+                      allOf: [{ $ref: '#/components/schemas/UserWithRecentPost' }, { nullable: true }],
                     },
                   },
                 },

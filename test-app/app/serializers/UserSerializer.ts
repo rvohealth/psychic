@@ -50,6 +50,6 @@ export class UserWithPostsMultiType2Serializer extends UserSummarySerializer {
 
 export class UserWithRecentPostSerializer extends UserSummarySerializer {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @RendersOne(() => PostWithRecentCommentSerializer<any, any>)
+  @RendersOne(() => PostWithRecentCommentSerializer<any, any>, { nullable: true })
   public recentPost: Post | null
 }
