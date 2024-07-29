@@ -26,6 +26,7 @@ import { HttpMethod } from '../router/types'
 import PsychicServer from '../server'
 import OpenapiBodySegmentRenderer from './body-segment'
 import openapiRoute from './helpers/openapiRoute'
+import { getCachedPsyconfOrFail } from '../psyconf/cache'
 
 export default class OpenapiEndpointRenderer<
   DreamsOrSerializersCBReturnVal extends
@@ -431,15 +432,15 @@ export default class OpenapiEndpointRenderer<
   private async parseSingleEntitySerializerResponseShape(): Promise<OpenapiContent> {
     const serializers = await PsychicDir.serializers()
     const serializerClass = this.getSerializerClasses()![0]
-    const serializerKey = Object.keys(serializers).find(key => serializers[key] === serializerClass)
+    const serializerKey = this.computedSerializerKeyOrFail(serializerClass, serializers)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const serializerObject: OpenapiSchemaBody = this.accountForNullableOption(
       {
         $ref: `#/components/schemas/${serializerKey}`,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
       },
       this.nullable || false,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any
 
     const baseSchema = this.many
@@ -479,7 +480,7 @@ export default class OpenapiEndpointRenderer<
     const anyOf: OpenapiSchemaExpressionAnyOf = { anyOf: [] }
 
     this.getSerializerClasses()!.forEach(serializerClass => {
-      const serializerKey = Object.keys(serializers).find(key => serializers[key] === serializerClass)
+      const serializerKey = this.computedSerializerKeyOrFail(serializerClass, serializers)
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const serializerObject: OpenapiSchemaBody = {
@@ -519,16 +520,7 @@ export default class OpenapiEndpointRenderer<
     serializers: { [key: string]: typeof DreamSerializer },
   ): Record<string, OpenapiSchemaObject> {
     const attributes = serializerClass['attributeStatements']
-
-    const serializerKey = Object.keys(serializers).find(key => serializers[key] === serializerClass)
-    if (!serializerKey) {
-      throw new Error(`
-An unexpected error occurred while serializing your app.
-A serializer was not able to be located:
-
-${serializerClass.name}
-`)
-    }
+    const serializerKey = this.computedSerializerKeyOrFail(serializerClass, serializers)
 
     const serializerObject: OpenapiSchemaObject = {
       type: 'object',
@@ -582,7 +574,6 @@ Error: ${serializerClass.name} missing explicit serializer definition for ${asso
       if (associatedSerializers.length === 1) {
         // point the association directly to the schema
         finalOutput = this.addSingleSerializerAssociationToOutput({
-          serializerClass,
           association,
           serializerKey,
           finalOutput,
@@ -592,7 +583,6 @@ Error: ${serializerClass.name} missing explicit serializer definition for ${asso
       } else {
         // leverage anyOf to handle an array of serializers
         finalOutput = this.addMultiSerializerAssociationToOutput({
-          serializerClass,
           association,
           serializerKey,
           finalOutput,
@@ -613,14 +603,12 @@ Error: ${serializerClass.name} missing explicit serializer definition for ${asso
    * to the schema
    */
   private addSingleSerializerAssociationToOutput({
-    serializerClass,
     associatedSerializers,
     serializers,
     finalOutput,
     serializerKey,
     association,
   }: {
-    serializerClass: typeof DreamSerializer
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     associatedSerializers: (typeof DreamSerializer<any, any>)[]
     serializers: { [key: string]: typeof DreamSerializer }
@@ -629,13 +617,7 @@ Error: ${serializerClass.name} missing explicit serializer definition for ${asso
     association: DreamSerializerAssociationStatement
   }) {
     const associatedSerializer = associatedSerializers[0]
-    const associatedSerializerKey = Object.keys(serializers).find(
-      key => serializers[key] === associatedSerializer,
-    )
-    if (associatedSerializers && !associatedSerializerKey)
-      throw new Error(
-        `Failed to identify serializer key for association: ${serializerClass.name}#${association.field}`,
-      )
+    const associatedSerializerKey = this.computedSerializerKeyOrFail(associatedSerializer, serializers)
 
     finalOutput[serializerKey].required = uniq([
       ...(finalOutput[serializerKey].required || []),
@@ -676,14 +658,12 @@ Error: ${serializerClass.name} missing explicit serializer definition for ${asso
    * each pointing to its respective target serializer.
    */
   private addMultiSerializerAssociationToOutput({
-    serializerClass,
     associatedSerializers,
     serializers,
     finalOutput,
     serializerKey,
     association,
   }: {
-    serializerClass: typeof DreamSerializer
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     associatedSerializers: (typeof DreamSerializer<any, any>)[]
     serializers: { [key: string]: typeof DreamSerializer }
@@ -694,13 +674,7 @@ Error: ${serializerClass.name} missing explicit serializer definition for ${asso
     const anyOf: (OpenapiSchemaExpressionRef | OpenapiSchemaArray)[] = []
 
     associatedSerializers.forEach(associatedSerializer => {
-      const associatedSerializerKey = Object.keys(serializers).find(
-        key => serializers[key] === associatedSerializer,
-      )
-      if (associatedSerializers && !associatedSerializerKey)
-        throw new Error(
-          `Failed to identify serializer key for association: ${serializerClass.name}#${association.field}`,
-        )
+      const associatedSerializerKey = this.computedSerializerKeyOrFail(associatedSerializer, serializers)
 
       finalOutput[serializerKey].required = uniq([
         ...(finalOutput[serializerKey].required || []),
@@ -734,6 +708,54 @@ Error: ${serializerClass.name} missing explicit serializer definition for ${asso
     }
 
     return finalOutput
+  }
+
+  /**
+   * @internal
+   *
+   * identifies the serializer key belonging to a given serializer, and
+   * modifies the key to respect the `schemaDelimeter` config option,
+   * separating all path-related nodes with the provided delimeter.
+   *
+   * If the serializer cannot be located, an exception is raised.
+   */
+  private computedSerializerKeyOrFail(
+    serializerClass: typeof DreamSerializer,
+    serializers: { [key: string]: typeof DreamSerializer },
+  ) {
+    const serializerKey = Object.keys(serializers).find(key => serializers[key] === serializerClass)
+    if (!serializerKey) {
+      throw new Error(`
+An unexpected error occurred while serializing your app.
+A serializer was not able to be located:
+
+${serializerClass.name}
+`)
+    }
+
+    return this.addSchemaDelimeterToSerializerKey(serializerKey, serializerClass)
+  }
+
+  /**
+   * @internal
+   *
+   * Applies the provided `schemaDelimeter` to the passed serializerKey
+   */
+  private addSchemaDelimeterToSerializerKey(serializerKey: string, serializerClass: typeof DreamSerializer) {
+    const serializerKeyRoot = serializerKey.replace(
+      new RegExp(serializerClass.name.replace(/Serializer$/, '') + '$'),
+      '',
+    )
+
+    return (
+      serializerKeyRoot.replace(/([a-z])([A-Z]|$)/g, '$1' + this.schemaDelimeter || '' + '$2') +
+      serializerClass.name.replace(/Serializer$/, '')
+    )
+  }
+
+  public get schemaDelimeter() {
+    const psyconf = getCachedPsyconfOrFail()
+    return psyconf.openapi?.schemaDelimeter || ''
   }
 
   /**

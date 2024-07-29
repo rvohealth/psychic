@@ -58,6 +58,7 @@ export default class Psyconf {
   public redisWsCredentials: PsychicRedisConnectionOptions
   public sslCredentials?: PsychicSslCredentials
   public saltRounds?: number
+  public openapi?: PsychicOpenapiOptions
   public bootHooks: Record<PsychicHookLoadEventTypes, ((conf: Psyconf) => void | Promise<void>)[]> = {
     boot: [],
     load: [],
@@ -194,9 +195,11 @@ export default class Psyconf {
                   ? PsychicRedisConnectionOptions
                   : Opt extends 'ssl'
                     ? PsychicSslCredentials
-                    : Opt extends 'saltRounds'
-                      ? number
-                      : never,
+                    : Opt extends 'openapi'
+                      ? PsychicOpenapiOptions
+                      : Opt extends 'saltRounds'
+                        ? number
+                        : never,
   ) {
     switch (option) {
       case 'cors':
@@ -233,6 +236,10 @@ export default class Psyconf {
 
       case 'saltRounds':
         this.saltRounds = value as number
+        break
+
+      case 'openapi':
+        this.openapi = value as PsychicOpenapiOptions
         break
 
       default:
@@ -279,6 +286,7 @@ export type PsyconfOption =
   | 'redis:ws'
   | 'ssl'
   | 'saltRounds'
+  | 'openapi'
 
 export interface PsyconfSpecialHooks {
   expressInit: ((app: Application) => void | Promise<void>)[]
@@ -302,4 +310,9 @@ export interface CustomCookieMaxAgeOptions {
 export interface PsychicSslCredentials {
   key: string
   cert: string
+}
+
+export interface PsychicOpenapiOptions {
+  schemaDelimeter?: string
+  outputFilename?: `${string}.json`
 }

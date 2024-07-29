@@ -3,6 +3,8 @@ import UsersController from '../../../test-app/app/controllers/UsersController'
 import Pet from '../../../test-app/app/models/Pet'
 import Post from '../../../test-app/app/models/Post'
 import User from '../../../test-app/app/models/User'
+import { AdminPetSummarySerializer } from '../../../test-app/app/serializers/Admin/PetSerializer'
+import AdminUserSerializer from '../../../test-app/app/serializers/Admin/UserSerializer'
 import {
   CommentTestingDateSerializer,
   CommentTestingDateTimeSerializer,
@@ -81,6 +83,29 @@ describe('OpenapiEndpointRenderer', () => {
             },
           },
         },
+      })
+    })
+
+    context('with a schemaDelimeter set', () => {
+      it('leverages the schemaDelimeter when computing schema names', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => AdminPetSummarySerializer,
+          UsersController,
+          'howyadoin',
+        )
+
+        jest.spyOn(OpenapiEndpointRenderer.prototype, 'schemaDelimeter', 'get').mockReturnValue('__')
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            Admin__AdminPetSummary: {
+              type: 'object',
+              required: ['id'],
+              properties: { id: { type: 'string' } },
+            },
+          }),
+        )
       })
     })
 
@@ -641,6 +666,43 @@ describe('OpenapiEndpointRenderer', () => {
               },
             }),
           )
+        })
+
+        context('with a schemaDelimeter set', () => {
+          it('uses delimeter to specify schema name', async () => {
+            const renderer = new OpenapiEndpointRenderer(
+              () => AdminUserSerializer,
+              UsersController,
+              'howyadoin',
+            )
+
+            jest.spyOn(OpenapiEndpointRenderer.prototype, 'schemaDelimeter', 'get').mockReturnValue('__')
+
+            const response = await renderer.toSchemaObject()
+            expect(response).toEqual(
+              expect.objectContaining({
+                Admin__AdminUser: {
+                  type: 'object',
+                  required: ['id', 'name', 'pets'],
+                  properties: {
+                    id: { type: 'string' },
+                    name: { type: 'string' },
+                    pets: {
+                      type: 'array',
+                      items: {
+                        $ref: '#/components/schemas/Admin__AdminPetSummary',
+                      },
+                    },
+                  },
+                },
+                Admin__AdminPetSummary: {
+                  type: 'object',
+                  required: ['id'],
+                  properties: { id: { type: 'string' } },
+                },
+              }),
+            )
+          })
         })
 
         context('with a nullable RendersOne', () => {
