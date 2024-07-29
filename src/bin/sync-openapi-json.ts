@@ -1,13 +1,16 @@
-import envValue from '../helpers/envValue'
 import '../helpers/loadEnv'
+import openapiJsonPath from '../helpers/openapiJsonPath'
 import OpenapiAppRenderer from '../openapi-renderer/app'
+import Psyconf from '../psyconf'
 
 async function syncOpenapiJson() {
-  console.log('syncing openapi.json...', envValue('APP_ROOT_PATH'))
+  await Psyconf.configure()
+
+  console.log(`syncing ${openapiJsonPath()}...`)
 
   await OpenapiAppRenderer.sync()
 
-  console.log('done syncing openapi.json!')
+  console.log(`done syncing ${openapiJsonPath()}!`)
   process.exit()
 }
 

@@ -1,12 +1,15 @@
 import { uniq } from '@rvohealth/dream'
-import '../helpers/loadEnv'
 import fs from 'fs/promises'
-import PsychicServer from '../server'
 import absoluteSrcPath from '../helpers/absoluteSrcPath'
+import '../helpers/loadEnv'
+import Psyconf from '../psyconf'
 import { RouteConfig } from '../router/route-manager'
+import PsychicServer from '../server'
 
 async function syncRoutes() {
   console.log('syncing routes...')
+
+  await Psyconf.configure()
 
   const server = new PsychicServer()
   await server.boot()

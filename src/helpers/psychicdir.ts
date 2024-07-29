@@ -79,20 +79,17 @@ export default class PsychicDir {
             .replace(/Serializer$/, '')
 
           const pathMinusLastSegmentArr = trimmedPath.split('/')
-          const lastSegment = pathMinusLastSegmentArr.pop()
+          pathMinusLastSegmentArr.pop()
           const serializerPathMinusLastSegment = pathMinusLastSegmentArr.join('/')
 
           // default exports should just get the file name as the key,
           // where named exports should get their named consts
           const serializerKey =
             serializerPathMinusLastSegment.replace(/^.*app\/serializers\//, '').replace(/\.[jt]s$/, '') +
-              key ===
-            'default'
-              ? lastSegment
-              : (potentialSerializer as typeof DreamSerializer).name.replace(/Serializer$/, '')
+            (potentialSerializer as typeof DreamSerializer).name.replace(/Serializer$/, '')
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          _serializers[serializerKey as string] = potentialSerializer
+          _serializers[serializerKey] = potentialSerializer
         }
       })
     }
