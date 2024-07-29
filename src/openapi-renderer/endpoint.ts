@@ -42,6 +42,7 @@ export default class OpenapiEndpointRenderer<
   private status: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['status']
   private tags: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['tags']
   private description: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['description']
+  private nullable: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['nullable']
 
   /**
    * instantiates a new OpenapiEndpointRenderer.
@@ -72,6 +73,7 @@ export default class OpenapiEndpointRenderer<
       tags,
       pathParams,
       description,
+      nullable,
     }: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal> = {},
   ) {
     this.body = body
@@ -84,6 +86,7 @@ export default class OpenapiEndpointRenderer<
     this.tags = tags
     this.pathParams = pathParams
     this.description = description
+    this.nullable = nullable
   }
 
   /**
@@ -404,6 +407,16 @@ export default class OpenapiEndpointRenderer<
     return this.parseSingleEntitySerializerResponseShape()
   }
 
+  private accountForNullableOption<T>(bodySegment: T, nullable: boolean): T | OpenapiSchemaExpressionAllOf {
+    if (nullable) {
+      return {
+        allOf: [bodySegment, { nullable: true }],
+      } as OpenapiSchemaExpressionAllOf
+    } else {
+      return bodySegment
+    }
+  }
+
   /**
    * @internal
    *
@@ -421,10 +434,13 @@ export default class OpenapiEndpointRenderer<
     const serializerKey = Object.keys(serializers).find(key => serializers[key] === serializerClass)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const serializerObject: OpenapiSchemaBody = {
-      $ref: `#/components/schemas/${serializerKey}`,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
+    const serializerObject: OpenapiSchemaBody = this.accountForNullableOption(
+      {
+        $ref: `#/components/schemas/${serializerKey}`,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      },
+      this.nullable || false,
+    ) as any
 
     const baseSchema = this.many
       ? {
@@ -639,9 +655,12 @@ Error: ${serializerClass.name} missing explicit serializer definition for ${asso
 
       case 'RendersOne':
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        ;(finalOutput as any)[serializerKey].properties![association.field] = {
-          $ref: `#/components/schemas/${associatedSerializerKey}`,
-        }
+        ;(finalOutput as any)[serializerKey].properties![association.field] = this.accountForNullableOption(
+          {
+            $ref: `#/components/schemas/${associatedSerializerKey}`,
+          },
+          association.nullable,
+        )
         break
     }
 
@@ -818,6 +837,7 @@ export interface OpenapiEndpointRendererOpts<
     ? keyof InstanceType<NonArrayT>['serializers' & keyof InstanceType<NonArrayT>]
     : undefined
   status?: number
+  nullable?: boolean
 }
 
 export interface OpenapiHeaderOption {
