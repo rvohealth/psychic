@@ -8,6 +8,7 @@ import {
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
   OpenapiSchemaProperties,
+  pascalize,
   uniq,
 } from '@rvohealth/dream'
 import {
@@ -748,11 +749,19 @@ ${serializerClass.name}
     )
 
     return (
-      serializerKeyRoot.replace(/([a-z])([A-Z]|$)/g, '$1' + this.schemaDelimeter || '' + '$2') +
-      serializerClass.name.replace(/Serializer$/, '')
+      serializerKeyRoot
+        .split('/')
+        .map(segment => pascalize(segment))
+        .join(this.schemaDelimeter) + serializerClass.name.replace(/Serializer$/, '')
     )
   }
 
+  /**
+   * @internal
+   *
+   * returns either the delimiter set in the app config, or else a blank string
+   * NOTE: this is only public for testing purposes.
+   */
   public get schemaDelimeter() {
     const psyconf = getCachedPsyconfOrFail()
     return psyconf.openapi?.schemaDelimeter || ''

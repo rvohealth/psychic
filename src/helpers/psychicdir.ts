@@ -73,20 +73,10 @@ export default class PsychicDir {
         const potentialSerializer = allSerializers[key]
 
         if ((potentialSerializer as typeof DreamSerializer)?.isDreamSerializer) {
-          const trimmedPath = serializerPath
-            .replace(/^.*app\/serializers\//, '')
-            .replace(/\.[jt]s$/, '')
-            .replace(/Serializer$/, '')
-
-          const pathMinusLastSegmentArr = trimmedPath.split('/')
-          pathMinusLastSegmentArr.pop()
-          const serializerPathMinusLastSegment = pathMinusLastSegmentArr.join('/')
-
-          // default exports should just get the file name as the key,
-          // where named exports should get their named consts
-          const serializerKey =
-            serializerPathMinusLastSegment.replace(/^.*app\/serializers\//, '').replace(/\.[jt]s$/, '') +
-            (potentialSerializer as typeof DreamSerializer).name.replace(/Serializer$/, '')
+          const serializerKey = makeSerializerKey(
+            serializerPath,
+            potentialSerializer as typeof DreamSerializer,
+          )
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           _serializers[serializerKey] = potentialSerializer
@@ -100,6 +90,27 @@ export default class PsychicDir {
 interface DirResult {
   name: string
   isDirectory: () => boolean
+}
+
+function makeSerializerKey(serializerPath: string, serializerClass: typeof DreamSerializer): string {
+  const trimmedPath = serializerPath
+    .replace(/^.*app\/serializers\//, '')
+    .replace(/\.[jt]s$/, '')
+    .replace(/Serializer$/, '')
+
+  const pathMinusLastSegmentArr = trimmedPath.split('/')
+  pathMinusLastSegmentArr.pop()
+  const serializerPathMinusLastSegment = pathMinusLastSegmentArr.join('/')
+
+  // default exports should just get the file name as the key,
+  // where named exports should get their named consts
+  const serializerKey = (
+    serializerPathMinusLastSegment.replace(/^.*app\/serializers\//, '').replace(/\.[jt]s$/, '') +
+    '/' +
+    serializerClass.name.replace(/Serializer$/, '')
+  ).replace(/^\//, '')
+
+  return serializerKey
 }
 
 async function getFiles(dir: string): Promise<string[]> {
