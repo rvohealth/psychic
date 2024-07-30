@@ -38,7 +38,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       case 'create':
         if (modelName)
           return `\
-  @Openapi(() => ${modelName}, { status: 201 })
+  @OpenAPI(() => ${modelName}, { status: 201 })
   public async create() {
     //    const ${camelize(modelName)} = await this.currentUser.createAssociation('${pluralize(camelize(modelName))}', this.paramsFor(${modelName}))
     //    this.created(${camelize(modelName)})
@@ -51,7 +51,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       case 'index':
         if (modelName)
           return `\
-  @Openapi(() => ${modelName}, {
+  @OpenAPI(() => ${modelName}, {
     status: 200,
     many: true,
     serializerKey: 'summary',
@@ -62,7 +62,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   }`
         else
           return `\
-  @Openapi({
+  @OpenAPI({
     response: {
       200: {
         // add openapi definition for your custom endpoint
@@ -75,14 +75,14 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       case 'show':
         if (modelName)
           return `\
-  @Openapi(() => ${modelName}, { status: 200 })
+  @OpenAPI(() => ${modelName}, { status: 200 })
   public async show() {
     //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    this.ok(${camelize(modelName)})
   }`
         else
           return `\
-  @Openapi({
+  @OpenAPI({
     response: {
       200: {
         // add openapi definition for your custom endpoint
@@ -95,7 +95,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       case 'update':
         if (modelName)
           return `\
-  @Openapi({ status: 204 })
+  @OpenAPI({ status: 204 })
   public async update() {
     //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    await ${camelize(modelName)}.update(this.paramsFor(${modelName}))
@@ -103,14 +103,14 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   }`
         else
           return `\
-  @Openapi({ status: 204 })
+  @OpenAPI({ status: 204 })
   public async update() {
   }`
 
       case 'destroy':
         if (modelName)
           return `\
-  @Openapi({ status: 204 })
+  @OpenAPI({ status: 204 })
   public async destroy() {
     //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    await ${camelize(modelName)}.destroy()
@@ -118,13 +118,13 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   }`
         else
           return `\
-  @Openapi({ status: 204 })
+  @OpenAPI({ status: 204 })
   public async destroy() {
   }`
 
       default:
         return `\
-  @Openapi({
+  @OpenAPI({
     response: {
       200: {
         // add openapi definition for your custom endpoint
@@ -137,7 +137,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   })
 
   return `\
-import { Openapi } from '@rvohealth/psychic'
+import { OpenAPI } from '@rvohealth/psychic'
 ${additionalImports.length ? additionalImports.join('\n') : ''}
 
 export default class ${controllerClassNameWithoutSlashes} extends ${extendingClassName} {

@@ -15,18 +15,18 @@ describe('psy generate:controller <name> [...methods]', () => {
 
         expect(res).toEqual(
           `\
-import { Openapi } from '@rvohealth/psychic'
+import { OpenAPI } from '@rvohealth/psychic'
 import AuthedController from './AuthedController'
 import Post from '../models/Post'
 
 export default class ApiV1PostsController extends AuthedController {
-  @Openapi(() => Post, { status: 201 })
+  @OpenAPI(() => Post, { status: 201 })
   public async create() {
     //    const post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
     //    this.created(post)
   }
 
-  @Openapi(() => Post, {
+  @OpenAPI(() => Post, {
     status: 200,
     many: true,
     serializerKey: 'summary',
@@ -36,27 +36,27 @@ export default class ApiV1PostsController extends AuthedController {
     //    this.ok(posts)
   }
 
-  @Openapi(() => Post, { status: 200 })
+  @OpenAPI(() => Post, { status: 200 })
   public async show() {
     //    const post = await this.post()
     //    this.ok(post)
   }
 
-  @Openapi({ status: 204 })
+  @OpenAPI({ status: 204 })
   public async update() {
     //    const post = await this.post()
     //    await post.update(this.paramsFor(Post))
     //    this.noContent()
   }
 
-  @Openapi({ status: 204 })
+  @OpenAPI({ status: 204 })
   public async destroy() {
     //    const post = await this.post()
     //    await post.destroy()
     //    this.noContent()
   }
 
-  @Openapi({
+  @OpenAPI({
     response: {
       200: {
         // add openapi definition for your custom endpoint
@@ -88,18 +88,18 @@ export default class ApiV1PostsController extends AuthedController {
 
         expect(res).toEqual(
           `\
-import { Openapi } from '@rvohealth/psychic'
+import { OpenAPI } from '@rvohealth/psychic'
 import AuthedController from '../../../AuthedController'
 import HealthPost from '../../../../models/Health/Post'
 
 export default class ApiV1HealthPostsController extends AuthedController {
-  @Openapi(() => HealthPost, { status: 201 })
+  @OpenAPI(() => HealthPost, { status: 201 })
   public async create() {
     //    const healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
     //    this.created(healthPost)
   }
 
-  @Openapi(() => HealthPost, {
+  @OpenAPI(() => HealthPost, {
     status: 200,
     many: true,
     serializerKey: 'summary',
@@ -109,27 +109,27 @@ export default class ApiV1HealthPostsController extends AuthedController {
     //    this.ok(healthPosts)
   }
 
-  @Openapi(() => HealthPost, { status: 200 })
+  @OpenAPI(() => HealthPost, { status: 200 })
   public async show() {
     //    const healthPost = await this.healthPost()
     //    this.ok(healthPost)
   }
 
-  @Openapi({ status: 204 })
+  @OpenAPI({ status: 204 })
   public async update() {
     //    const healthPost = await this.healthPost()
     //    await healthPost.update(this.paramsFor(HealthPost))
     //    this.noContent()
   }
 
-  @Openapi({ status: 204 })
+  @OpenAPI({ status: 204 })
   public async destroy() {
     //    const healthPost = await this.healthPost()
     //    await healthPost.destroy()
     //    this.noContent()
   }
 
-  @Openapi({
+  @OpenAPI({
     response: {
       200: {
         // add openapi definition for your custom endpoint
@@ -160,12 +160,12 @@ export default class ApiV1HealthPostsController extends AuthedController {
 
           expect(res).toEqual(
             `\
-import { Openapi } from '@rvohealth/psychic'
+import { OpenAPI } from '@rvohealth/psychic'
 import AdminAuthedController from '../Admin/AuthedController'
 import NutritionLogEntry from '../../models/Nutrition/LogEntry'
 
 export default class AdminNutritionLogEntriesController extends AdminAuthedController {
-  @Openapi(() => NutritionLogEntry, { status: 201 })
+  @OpenAPI(() => NutritionLogEntry, { status: 201 })
   public async create() {
     //    const nutritionLogEntry = await this.currentUser.createAssociation('nutritionLogEntries', this.paramsFor(NutritionLogEntry))
     //    this.created(nutritionLogEntry)
@@ -185,11 +185,11 @@ export default class AdminNutritionLogEntriesController extends AdminAuthedContr
 
         expect(res).toEqual(
           `\
-import { Openapi } from '@rvohealth/psychic'
+import { OpenAPI } from '@rvohealth/psychic'
 import AuthedController from '../../AuthedController'
 
 export default class ApiV1UsersController extends AuthedController {
-  @Openapi({
+  @OpenAPI({
     response: {
       200: {
         // add openapi definition for your custom endpoint
@@ -199,7 +199,7 @@ export default class ApiV1UsersController extends AuthedController {
   public async hello() {
   }
 
-  @Openapi({
+  @OpenAPI({
     response: {
       200: {
         // add openapi definition for your custom endpoint
