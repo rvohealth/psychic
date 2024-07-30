@@ -149,7 +149,9 @@ export default class Psyconf {
           ? (socket: Socket) => void | Promise<void>
           : T extends 'server:init'
             ? (app: Application) => void | Promise<void>
-            : (conf: Psyconf) => void | Promise<void>,
+            : T extends 'after:routes'
+              ? (app: Application) => void | Promise<void>
+              : (conf: Psyconf) => void | Promise<void>,
   ) {
     switch (hookEventType) {
       case 'server:error':
