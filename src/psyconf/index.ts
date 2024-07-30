@@ -172,6 +172,10 @@ export default class Psyconf {
         this.specialHooks.wsConnect.push(cb as (socket: Socket) => void | Promise<void>)
         break
 
+      case 'after:routes':
+        this.specialHooks['after:routes'].push(cb as (app: Application) => void | Promise<void>)
+        break
+
       default:
         this.bootHooks[hookEventType as PsychicHookLoadEventTypes].push(
           cb as (conf: Psyconf) => void | Promise<void>,
