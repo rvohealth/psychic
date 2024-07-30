@@ -8,10 +8,6 @@ import {
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
   OpenapiSchemaProperties,
-  pascalize,
-  uniq,
-} from '@rvohealth/dream'
-import {
   OpenapiSchemaArray,
   OpenapiSchemaExpressionAllOf,
   OpenapiSchemaExpressionAnyOf,
@@ -19,7 +15,9 @@ import {
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
   OpenapiShorthandPrimitiveTypes,
-} from '@rvohealth/dream/src/openapi/types'
+  pascalize,
+  uniq,
+} from '@rvohealth/dream'
 import PsychicController from '../controller'
 import PsychicDir from '../helpers/psychicdir'
 import { RouteConfig } from '../router/route-manager'

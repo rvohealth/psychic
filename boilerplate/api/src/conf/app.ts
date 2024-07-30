@@ -12,6 +12,9 @@ export default (psy: Psyconf) => {
   // the name of your application (no spaces)
   psy.appName = '<APP_NAME>'
 
+  // the encryption key to use when encrypting
+  psy.encryptionKey = process.env.APP_ENCRYPTION_KEY!
+
   // set to true to leverage internal websocket bindings to socket.io
   psy.useWs = <USE_WS>
 
@@ -26,7 +29,7 @@ export default (psy: Psyconf) => {
     limit: '20kb',
   })
 
-  // set options to pass to coors when middleware is booted
+  // set options to pass to cors when middleware is booted
   psy.set('cors', {
     credentials: true,
     origin: [

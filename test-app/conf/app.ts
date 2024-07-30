@@ -12,6 +12,9 @@ export default (psy: Psyconf) => {
   // the name of your application (no spaces)
   psy.appName = 'testapp'
 
+  // the encryption key to use when encrypting
+  psy.encryptionKey = process.env.APP_ENCRYPTION_KEY!
+
   // set to true to leverage internal websocket bindings to socket.io
   psy.useWs = true
 

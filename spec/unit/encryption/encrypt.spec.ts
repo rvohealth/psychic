@@ -1,18 +1,22 @@
 import jwt from 'jsonwebtoken'
 import Encrypt from '../../../src/encryption/encrypt'
 import InvalidAppEncryptionKey from '../../../src/error/encrypt/invalid-app-encryption-key'
+import { Psyconf } from '../../../src'
 
 const originalEncryptionKey = process.env.APP_ENCRYPTION_KEY
 
 describe('Encrypt', () => {
   describe('#sign', () => {
-    beforeEach(() => {
+    beforeEach(async () => {
       process.env.APP_ENCRYPTION_KEY = 'abc'
+      await Psyconf.reconfigure()
+
       jest.spyOn(jwt, 'sign')
     })
 
-    afterEach(() => {
+    afterEach(async () => {
       process.env.APP_ENCRYPTION_KEY = originalEncryptionKey
+      await Psyconf.reconfigure()
     })
 
     it('signs the provided string using jwt', () => {
@@ -21,8 +25,10 @@ describe('Encrypt', () => {
     })
 
     context('with no APP_ENCRYPTION_KEY set', () => {
-      beforeEach(() => {
+      beforeEach(async () => {
         process.env.APP_ENCRYPTION_KEY = ''
+        await Psyconf.reconfigure()
+
         jest.spyOn(console, 'log').mockImplementation(() => {})
       })
 

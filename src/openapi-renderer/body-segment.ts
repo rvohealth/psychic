@@ -1,17 +1,13 @@
 import {
+  AttributeStatement,
   Dream,
   DreamSerializer,
   OpenapiAllTypes,
   OpenapiFormats,
   OpenapiPrimitiveTypes,
+  OpenapiSchemaArray,
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
-  OpenapiSchemaProperties,
-  compact,
-  openapiPrimitiveTypes,
-} from '@rvohealth/dream'
-import {
-  OpenapiSchemaArray,
   OpenapiSchemaExpressionAllOf,
   OpenapiSchemaExpressionAnyOf,
   OpenapiSchemaExpressionOneOf,
@@ -20,13 +16,16 @@ import {
   OpenapiSchemaObject,
   OpenapiSchemaObjectBase,
   OpenapiSchemaPrimitiveGeneric,
+  OpenapiSchemaProperties,
   OpenapiSchemaShorthandExpressionAllOf,
   OpenapiSchemaShorthandExpressionAnyOf,
   OpenapiSchemaShorthandExpressionOneOf,
   OpenapiShorthandPrimitiveTypes,
+  SerializableTypes,
+  compact,
+  openapiPrimitiveTypes,
   openapiShorthandPrimitiveTypes,
-} from '@rvohealth/dream/src/openapi/types'
-import { AttributeStatement, SerializableTypes } from '@rvohealth/dream/src/serializer/decorators/attribute'
+} from '@rvohealth/dream'
 import { HttpMethod } from '../router/types'
 
 export default class OpenapiBodySegmentRenderer {
