@@ -38,6 +38,8 @@ export default class PsychicServer {
   public async boot() {
     if (this.booted) return
 
+    await Psyconf.configure()
+
     await this.config['loadAppConfig']()
     await this.config['runHooksFor']('boot')
 
