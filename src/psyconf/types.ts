@@ -14,5 +14,5 @@ export type PsychicHookEventType =
 
 export type PsychicHookLoadEventTypes = Exclude<
   PsychicHookEventType,
-  'server:error' | 'ws:connect' | 'ws:start' | 'server:init'
+  'server:error' | 'ws:connect' | 'ws:start' | 'server:init' | 'after:routes'
 >
