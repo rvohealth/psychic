@@ -364,13 +364,14 @@ export default class OpenapiEndpointRenderer<
     }
 
     Object.keys(this.responses || {}).forEach(statusCode => {
-      responseData[parseInt(statusCode)] = {
-        description: this.responses![statusCode as keyof typeof this.responses].description || this.action,
+      const statusCodeInt = parseInt(statusCode)
+      responseData[statusCodeInt] = {
+        description: this.responses![statusCodeInt].description || this.action,
         content: {
           'application/json': {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             schema: this.recursivelyParseBody(
-              this.responses![statusCode as keyof typeof this.responses],
+              this.responses![statusCodeInt],
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ) as any,
           },
