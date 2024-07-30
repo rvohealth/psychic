@@ -1,5 +1,12 @@
-import { ValidationError, camelize, developmentOrTestEnv, pascalize, testEnv } from '@rvohealth/dream'
-import { ValidationType } from '@rvohealth/dream/src/decorators/validations/shared'
+import pluralize = require('pluralize')
+import {
+  ValidationError,
+  ValidationType,
+  camelize,
+  developmentOrTestEnv,
+  pascalize,
+  testEnv,
+} from '@rvohealth/dream'
 import { Application, Request, Response, Router } from 'express'
 import PsychicController from '../controller'
 import HttpError from '../error/http'
@@ -15,7 +22,6 @@ import {
 import { ParamValidationError } from '../server/params'
 import RouteManager from './route-manager'
 import { HttpMethod, ResourceMethods, ResourcesMethodType, ResourcesMethods, ResourcesOptions } from './types'
-import pluralize = require('pluralize')
 
 export default class PsychicRouter {
   public app: Application

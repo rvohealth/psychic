@@ -4,8 +4,8 @@ import path from 'path'
 import PsychicController from '../controller'
 import absoluteSrcPath from './absoluteSrcPath'
 import importFileWithDefault from './importFileWithDefault'
-import importFile from '@rvohealth/dream/src/helpers/path/importFile'
 import { envBool } from './envValue'
+import importFile from './importFile'
 
 let _models: { [key: string]: typeof Dream }
 let _controllers: { [key: string]: typeof PsychicController }

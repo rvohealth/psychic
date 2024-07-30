@@ -1,5 +1,4 @@
-import { uniq } from '@rvohealth/dream'
-import { projectRootPath } from '@rvohealth/dream/src/helpers/path'
+import { uniq, projectRootPath } from '@rvohealth/dream'
 import fs from 'fs/promises'
 import path from 'path'
 import PsychicController from '../controller'

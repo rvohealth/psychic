@@ -1,4 +1,4 @@
-import { primaryKeyTypes } from '@rvohealth/dream/src/dream/types'
+import { primaryKeyTypes } from '@rvohealth/dream'
 import fs from 'fs/promises'
 
 export async function readHowyadoinFile(filePath: string) {

@@ -1,5 +1,6 @@
 import { testEnv } from '@rvohealth/dream'
 import { Application } from 'express'
+import fs from 'fs'
 import http, { Server } from 'http'
 import https from 'https'
 import log from '../../log'
@@ -29,7 +30,13 @@ export default async function startPsychicServer({
 
 export function getPsychicHttpInstance(app: Application, sslCredentials: PsychicSslCredentials | undefined) {
   if (sslCredentials?.key && sslCredentials?.cert) {
-    return https.createServer(sslCredentials, app)
+    return https.createServer(
+      {
+        key: fs.readFileSync(sslCredentials.key),
+        cert: fs.readFileSync(sslCredentials.cert),
+      },
+      app,
+    )
   } else {
     return http.createServer(app)
   }
