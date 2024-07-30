@@ -65,13 +65,13 @@ export default class Psyconf {
     'load:dev': [],
     'load:test': [],
     'load:prod': [],
-    'after:routes': [],
   }
   public specialHooks: PsyconfSpecialHooks = {
     expressInit: [],
     serverError: [],
     wsStart: [],
     wsConnect: [],
+    'after:routes': [],
   }
 
   public get appPath() {
@@ -293,6 +293,7 @@ export interface PsyconfSpecialHooks {
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
   wsStart: ((server: SocketServer) => void | Promise<void>)[]
   wsConnect: ((socket: Socket) => void | Promise<void>)[]
+  ['after:routes']: ((app: Application) => void | Promise<void>)[]
 }
 
 export interface CustomCookieOptions {
