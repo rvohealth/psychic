@@ -1,0 +1,193 @@
+name: PR Checks
+on:
+  - pull_request
+
+jobs:
+  uspec:
+    name: Unit tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: psychic
+          POSTGRES_DB: psychic_core_test
+          POSTGRES_PASSWORD: 'postgres'
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:6.2
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    env:
+      NODE_ENV: test
+      PORT: 7777
+      DB_USER: psychic
+      DB_NAME: psychic_core_test
+      DB_HOST: localhost
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+      TZ: UTC
+      GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      APP_ENCRYPTION_KEY: doesntmatter
+      PSYCHIC_CORE_DEVELOPMENT: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: echo "@rvohealth:registry=https://npm.pkg.github.com" > ./.npmrc
+      - run: echo -e "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ./.npmrc
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.yarn-cache
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - if: ${{ steps.cache-node-modules.outputs.cache-hit != 'true' }}
+        name: List the state of node modules
+        continue-on-error: true
+        run: yarn list
+      - run: yarn install --frozen-lockfile
+      - run: APP_ROOT_PATH=$(pwd) yarn psycore db:migrate --skip-sync
+      - run: APP_ROOT_PATH=$(pwd) yarn uspec
+
+  fspec:
+    name: Feature tests
+    runs-on: ubuntu-latest
+    services:
+      postgres:
+        image: postgres:13
+        env:
+          POSTGRES_USER: psychic
+          POSTGRES_DB: psychic_core_test
+          POSTGRES_PASSWORD: 'postgres'
+        options: >-
+          --health-cmd pg_isready
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 5432:5432
+      redis:
+        image: redis:6.2
+        options: >-
+          --health-cmd "redis-cli ping"
+          --health-interval 10s
+          --health-timeout 5s
+          --health-retries 5
+        ports:
+          - 6379:6379
+    env:
+      NODE_ENV: test
+      PORT: 7777
+      DB_USER: psychic
+      DB_NAME: psychic_core_test
+      DB_HOST: localhost
+      DB_PASSWORD: postgres
+      DB_PORT: 5432
+      TZ: UTC
+      GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+      APP_ENCRYPTION_KEY: doesntmatter
+      PSYCHIC_CORE_DEVELOPMENT: 1
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+      - run: echo "@rvohealth:registry=https://npm.pkg.github.com" > ./.npmrc
+      - run: echo -e "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ./.npmrc
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.yarn-cache
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/yarn.lock') }}
+      - if: ${{ steps.cache-node-modules.outputs.cache-hit != 'true' }}
+        name: List the state of node modules
+        continue-on-error: true
+        run: yarn list
+      - run: yarn install --frozen-lockfile
+      - run: APP_ROOT_PATH=$(pwd) yarn psycore db:migrate --skip-sync
+      - run: mkdir -p /tmp/screenshots
+      - run: APP_ROOT_PATH=$(pwd) yarn fspec
+      - name: Archive screenshots
+        uses: actions/upload-artifact@v4
+        if: ${{ failure() }}
+        with:
+          name: Feature spec screenshots
+          path: /tmp/screenshots
+
+  lint:
+    name: Linting
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: development
+      YARN_CACHE_FOLDER: ~/.yarn-cache
+      GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - run: echo "@rvohealth:registry=https://npm.pkg.github.com" > ./.npmrc
+      - run: echo -e "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ./.npmrc
+
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.yarn-cache
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - if: ${{ steps.cache-node-modules.outputs.cache-hit != 'true' }}
+        name: List the state of node modules
+        continue-on-error: true
+        run: yarn list
+
+      - run: yarn install --frozen-lockfile
+      - run: yarn lint
+
+  check-build:
+    name: Check build
+    runs-on: ubuntu-latest
+    env:
+      NODE_ENV: development
+      YARN_CACHE_FOLDER: ~/.yarn-cache
+      GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: '18'
+
+      - run: echo "@rvohealth:registry=https://npm.pkg.github.com" > ./.npmrc
+      - run: echo -e "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ./.npmrc
+
+      - name: Cache node_modules
+        id: cache-node-modules
+        uses: actions/cache@v4
+        with:
+          path: ~/.yarn-cache
+          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/yarn.lock') }}
+
+      - if: ${{ steps.cache-node-modules.outputs.cache-hit != 'true' }}
+        name: List the state of node modules
+        continue-on-error: true
+        run: yarn list
+
+      - run: yarn install --frozen-lockfile
+      - run: yarn build:core
