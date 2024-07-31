@@ -1247,6 +1247,92 @@ describe('OpenapiEndpointRenderer', () => {
       })
     })
 
+    context('headers', () => {
+      it('renders headers within the parameters array', async () => {
+        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          headers: [
+            {
+              name: 'Authorization',
+              required: true,
+              description: 'Auth header',
+            },
+            {
+              name: 'today',
+              required: true,
+              description: "today's date",
+              format: 'date',
+            },
+          ],
+        })
+
+        const response = await renderer.toObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            '/users/howyadoin': expect.objectContaining({
+              parameters: [
+                {
+                  in: 'header',
+                  name: 'Authorization',
+                  required: true,
+                  description: 'Auth header',
+                  schema: {
+                    type: 'string',
+                  },
+                },
+                {
+                  in: 'header',
+                  name: 'today',
+                  required: true,
+                  description: "today's date",
+                  schema: {
+                    type: 'string',
+                    format: 'date',
+                  },
+                },
+              ],
+            }),
+          }),
+        )
+      })
+
+      context('allowReserved is overridden', () => {
+        it('applies override', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            query: [
+              {
+                name: 'search',
+                required: true,
+                description: 'the search term',
+                allowReserved: false,
+              },
+            ],
+          })
+
+          const response = await renderer.toObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              '/users/howyadoin': expect.objectContaining({
+                parameters: [
+                  {
+                    in: 'query',
+                    name: 'search',
+                    required: true,
+                    description: 'the search term',
+                    schema: {
+                      type: 'string',
+                    },
+                    allowReserved: false,
+                  },
+                ],
+              }),
+            }),
+          )
+        })
+      })
+    })
+
     context('body', () => {
       it('renders body in the requestBody payload', async () => {
         const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create', {
