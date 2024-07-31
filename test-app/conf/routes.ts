@@ -44,6 +44,7 @@ export default (r: PsychicRouter) => {
 
   r.resource('greeter', { only: ['show'] }, r => {
     r.get('hello', 'Greeter#hello')
+    r.get('justforspecs', 'Greeter#justforspecs')
   })
 
   r.get('route-exists-but-controller-doesnt', 'Nonexistent#someMethod')

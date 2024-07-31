@@ -131,12 +131,11 @@ export default class OpenapiEndpointRenderer<
    */
   public async toSchemaObject(): Promise<Record<string, OpenapiSchemaBody>> {
     this.serializers = await PsychicDir.serializers()
-
     const serializerClasses = this.getSerializerClasses()
-    if (!serializerClasses) return {}
 
     let output: Record<string, OpenapiSchemaBody> = {}
-    serializerClasses.forEach(serializerClass => {
+
+    ;(serializerClasses || ([] as (typeof DreamSerializer)[])).forEach(serializerClass => {
       output = {
         ...output,
         ...serializerToOpenapiSchema({
@@ -670,6 +669,11 @@ export interface OpenapiPathParamOption {
 
 export interface OpenapiSchema {
   openapi: `${number}.${number}.${number}`
+  info: {
+    version: string
+    title: string
+    description: string
+  }
   paths: OpenapiEndpointResponse
   components: {
     schemas: {
