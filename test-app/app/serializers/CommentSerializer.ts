@@ -146,6 +146,100 @@ export class CommentTestingDateTimeSerializer extends DreamSerializer {
   public howyadoins: string
 }
 
+export class CommentTestingBasicSerializerRefSerializer extends DreamSerializer {
+  @Attribute({
+    $serializer: CommentTestingDoubleShorthandSerializer,
+  })
+  public howyadoin: string
+}
+
+export class CommentTestingBasicArraySerializerRefSerializer extends DreamSerializer {
+  @Attribute({
+    $serializer: CommentTestingDoubleShorthandSerializer,
+    many: true,
+  })
+  public howyadoin: string
+}
+
+export class CommentTestingRootSerializerRefSerializer extends DreamSerializer {
+  @Attribute({
+    $serializer: CommentTestingDoubleShorthandSerializer,
+  })
+  public nonNullableHowyadoin: string
+
+  @Attribute({
+    $serializer: CommentTestingDoubleShorthandSerializer,
+    many: true,
+  })
+  public nonNullableHowyadoins: string
+
+  @Attribute({
+    $serializer: CommentTestingDoubleShorthandSerializer,
+    nullable: true,
+  })
+  public singleHowyadoin: string
+
+  @Attribute({
+    $serializer: CommentTestingDoubleShorthandSerializer,
+    many: true,
+    nullable: true,
+  })
+  public manyHowyadoins: string
+}
+
+export class CommentTestingObjectWithSerializerRefSerializer extends DreamSerializer {
+  @Attribute({
+    type: 'object',
+    properties: {
+      myProperty: {
+        $serializer: CommentTestingDoubleShorthandSerializer,
+      },
+      myProperties: {
+        $serializer: CommentTestingDoubleShorthandSerializer,
+        many: true,
+      },
+      myNullableProperty: {
+        $serializer: CommentTestingDoubleShorthandSerializer,
+        nullable: true,
+      },
+      myNullableProperties: {
+        $serializer: CommentTestingDoubleShorthandSerializer,
+        many: true,
+        nullable: true,
+      },
+    },
+  })
+  public howyadoin: string
+}
+
+export class CommentTestingArrayWithSerializerRefSerializer extends DreamSerializer {
+  @Attribute({
+    type: 'array',
+    items: {
+      $serializer: CommentTestingDoubleShorthandSerializer,
+    },
+  })
+  public howyadoins: string
+
+  @Attribute({
+    type: 'array',
+    items: {
+      $serializer: CommentTestingDoubleShorthandSerializer,
+      nullable: true,
+    },
+  })
+  public nullableHowyadoins: string
+
+  @Attribute({
+    type: 'array',
+    items: {
+      $serializer: CommentTestingDoubleShorthandSerializer,
+      many: true,
+    },
+  })
+  public howyadoinsNestedArray: string
+}
+
 export class CommentTestingStringSerializer extends DreamSerializer {
   @Attribute({
     type: 'string',

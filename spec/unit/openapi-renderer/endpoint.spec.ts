@@ -6,6 +6,9 @@ import User from '../../../test-app/app/models/User'
 import { AdminPetSummarySerializer } from '../../../test-app/app/serializers/Admin/PetSerializer'
 import AdminUserSerializer from '../../../test-app/app/serializers/Admin/UserSerializer'
 import {
+  CommentTestingArrayWithSerializerRefSerializer,
+  CommentTestingBasicArraySerializerRefSerializer,
+  CommentTestingBasicSerializerRefSerializer,
   CommentTestingDateSerializer,
   CommentTestingDateTimeSerializer,
   CommentTestingDecimalSerializer,
@@ -16,6 +19,8 @@ import {
   CommentTestingDoubleShorthandSerializer,
   CommentTestingIntegerSerializer,
   CommentTestingIntegerShorthandSerializer,
+  CommentTestingObjectWithSerializerRefSerializer,
+  CommentTestingRootSerializerRefSerializer,
   CommentTestingStringSerializer,
   CommentWithAllOfArraySerializer,
   CommentWithAllOfObjectSerializer,
@@ -405,6 +410,58 @@ describe('OpenapiEndpointRenderer', () => {
       })
     })
 
+    context('with a $serializer expression passed', () => {
+      it('supports an attribute with the $serializer expression', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentTestingRootSerializerRefSerializer,
+          UsersController,
+          'howyadoin',
+          {},
+        )
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingRootSerializerRef: {
+              type: 'object',
+              required: [
+                'nonNullableHowyadoin',
+                'nonNullableHowyadoins',
+                'singleHowyadoin',
+                'manyHowyadoins',
+              ],
+              properties: {
+                nonNullableHowyadoin: {
+                  $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                },
+                nonNullableHowyadoins: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                  },
+                },
+                singleHowyadoin: {
+                  allOf: [
+                    {
+                      $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                    },
+                    { nullable: true },
+                  ],
+                },
+                manyHowyadoins: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                  },
+                  nullable: true,
+                },
+              },
+            },
+          }),
+        )
+      })
+    })
+
     context('with an object type passed', () => {
       it('supports maxProperties and additionalProperties fields', async () => {
         const renderer = new OpenapiEndpointRenderer(
@@ -512,6 +569,57 @@ describe('OpenapiEndpointRenderer', () => {
           }),
         )
       })
+
+      it('supports $serializer expression', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentTestingObjectWithSerializerRefSerializer,
+          UsersController,
+          'howyadoin',
+          {
+            serializerKey: 'default',
+          },
+        )
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingObjectWithSerializerRef: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  type: 'object',
+                  properties: {
+                    myProperty: {
+                      $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                    },
+                    myProperties: {
+                      type: 'array',
+                      items: {
+                        $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                      },
+                    },
+                    myNullableProperty: {
+                      allOf: [
+                        {
+                          $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                        },
+                        { nullable: true },
+                      ],
+                    },
+                    myNullableProperties: {
+                      type: 'array',
+                      items: {
+                        $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                      },
+                      nullable: true,
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        )
+      })
     })
 
     context('with an array type passed', () => {
@@ -604,6 +712,59 @@ describe('OpenapiEndpointRenderer', () => {
               }),
             )
           })
+        })
+
+        it('supports $serializer expression', async () => {
+          const renderer = new OpenapiEndpointRenderer(
+            () => CommentTestingArrayWithSerializerRefSerializer,
+            UsersController,
+            'howyadoin',
+            {
+              serializerKey: 'default',
+            },
+          )
+          const response = await renderer.toSchemaObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              CommentTestingArrayWithSerializerRef: {
+                type: 'object',
+                required: ['howyadoins', 'nullableHowyadoins', 'howyadoinsNestedArray'],
+                properties: {
+                  howyadoins: {
+                    type: 'array',
+                    items: {
+                      $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                    },
+                  },
+                  nullableHowyadoins: {
+                    type: 'array',
+                    items: {
+                      allOf: [
+                        {
+                          $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                        },
+                        { nullable: true },
+                      ],
+                    },
+                  },
+                  howyadoinsNestedArray: {
+                    type: 'array',
+                    items: {
+                      type: 'array',
+                      items: {
+                        $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                      },
+                    },
+                  },
+                },
+              },
+              CommentTestingDoubleShorthand: {
+                type: 'object',
+                required: ['howyadoin'],
+                properties: { howyadoin: { type: 'number', format: 'double' } },
+              },
+            }),
+          )
         })
       })
     })
@@ -839,6 +1000,53 @@ describe('OpenapiEndpointRenderer', () => {
             }),
           )
         })
+      })
+    })
+
+    context('when responses includes $serializer refs', () => {
+      it('extracts serializers and renders them in components.schemas', async () => {
+        const renderer = new OpenapiEndpointRenderer(
+          () => CommentTestingBasicSerializerRefSerializer,
+          UsersController,
+          'howyadoin',
+          {
+            responses: {
+              204: {
+                $serializer: CommentTestingBasicArraySerializerRefSerializer,
+              },
+            },
+          },
+        )
+
+        const response = await renderer.toSchemaObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingBasicSerializerRef: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: { $ref: '#/components/schemas/CommentTestingDoubleShorthand' },
+              },
+            },
+            CommentTestingDoubleShorthand: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: { howyadoin: { type: 'number', format: 'double' } },
+            },
+            CommentTestingBasicArraySerializerRef: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  type: 'array',
+                  items: {
+                    $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                  },
+                },
+              },
+            },
+          }),
+        )
       })
     })
   })
@@ -1323,6 +1531,56 @@ describe('OpenapiEndpointRenderer', () => {
               },
             }),
           )
+        })
+
+        context('allOf includes a $serializer ref', () => {
+          it('returns valid openapi', async () => {
+            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+              serializerKey: 'extra',
+              responses: {
+                201: {
+                  description: 'howyadoin',
+                  allOf: [
+                    {
+                      type: 'string',
+                    },
+                    {
+                      $serializer: CommentTestingDoubleShorthandSerializer,
+                      nullable: true,
+                    },
+                  ],
+                },
+              },
+            })
+
+            const response = await renderer.toObject()
+            expect(response['/users/howyadoin'].get.responses).toEqual(
+              expect.objectContaining({
+                201: {
+                  description: 'howyadoin',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        allOf: [
+                          {
+                            type: 'string',
+                          },
+                          {
+                            allOf: [
+                              {
+                                $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                              },
+                              { nullable: true },
+                            ],
+                          },
+                        ],
+                      },
+                    },
+                  },
+                },
+              }),
+            )
+          })
         })
       })
 
