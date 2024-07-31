@@ -1,10 +1,14 @@
-import envValue from '../../helpers/envValue'
 import '../../helpers/loadEnv'
+
+import envValue from '../../helpers/envValue'
 import { clientApiFileName, clientApiPath } from '../../helpers/path'
 import sspawn from '../../helpers/sspawn'
+import Psyconf from '../../psyconf'
 
 async function syncOpenapiClientSchema() {
   console.log('syncing client api schema...')
+
+  await Psyconf.configure()
 
   const apiPath = await clientApiPath()
 

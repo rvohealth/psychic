@@ -1,11 +1,15 @@
 import '../../helpers/loadEnv'
+
 import fs from 'fs/promises'
-import PsychicServer from '../../server'
 import generateClientRoutes from '../../generate/client/routes'
 import { clientApiPath } from '../../helpers/path'
+import Psyconf from '../../psyconf'
+import PsychicServer from '../../server'
 
 async function syncRoutes() {
   console.log('syncing client routes...')
+
+  await Psyconf.configure()
 
   const server = new PsychicServer()
   await server.boot()
