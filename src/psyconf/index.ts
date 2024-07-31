@@ -48,6 +48,7 @@ export default class Psyconf {
   public useWs: boolean = false
   public useRedis: boolean = false
   public appName: string = 'untitled app'
+  public clientSchemaFilename: `${string}.ts` = 'schema.ts'
   public encryptionKey: string
   public port?: number
   public corsOptions: CorsOptions = {}

@@ -1,6 +1,7 @@
 import YAML from 'yaml'
 import { promises as fs } from 'fs'
 import absoluteFilePath from './absoluteFilePath'
+import { getCachedPsyconfOrFail } from '../psyconf/cache'
 
 export async function loadFile(filepath: string) {
   return await fs.readFile(filepath)
@@ -38,7 +39,8 @@ export async function clientApiPath() {
 }
 
 export async function clientApiFileName(): Promise<string> {
-  return await new Promise(accept => accept('schema.ts'))
+  const psyconf = getCachedPsyconfOrFail()
+  return await new Promise(accept => accept(psyconf.clientSchemaFilename))
 }
 
 export async function modelsPath() {
