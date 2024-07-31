@@ -893,10 +893,10 @@
     pluralize "^8.0.0"
     yaml-ast-parser "0.0.43"
 
-"@rvohealth/dream@^0.7.5-fgbeta-3":
-  version "0.7.5-fgbeta-3"
-  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.7.5-fgbeta-3/5417994bac55f7e5baa969b0325043b79b25c636#5417994bac55f7e5baa969b0325043b79b25c636"
-  integrity sha512-Ai9E6cdqIbgd0cD4qNnujUnE+c+3hseHOuFUkEvnb7a8TKXcFNQgFV0x5jPw+bOhBcfDugZND2kFS5HAkbCywg==
+"@rvohealth/dream@^0.7.5-fgbeta-5":
+  version "0.7.5-fgbeta-5"
+  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.7.5-fgbeta-5/b00c91b4bd526bc6251bfdec51c29e7116553186#b00c91b4bd526bc6251bfdec51c29e7116553186"
+  integrity sha512-eOcWj7wmnx/qB1c4MFvq2xHOfBfTcVNBcD4oYMboBR6ChlU10FXhHRN4C5ZBQk8KMNe6NzRg85XBKgd9ny/l/A==
   dependencies:
     "@types/jest" "^29.5.12"
     "@types/lodash.clonedeep" "^4.5.9"
