@@ -39,6 +39,7 @@ export default class OpenapiEndpointRenderer<
   private query: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['query']
   private status: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['status']
   private tags: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['tags']
+  private summary: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['summary']
   private description: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['description']
   private nullable: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['nullable']
   private serializers: { [key: string]: typeof DreamSerializer }
@@ -74,6 +75,7 @@ export default class OpenapiEndpointRenderer<
       pathParams,
       description,
       nullable,
+      summary,
     }: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal> = {},
   ) {
     this.body = body
@@ -85,6 +87,7 @@ export default class OpenapiEndpointRenderer<
     this.status = status
     this.tags = tags
     this.pathParams = pathParams
+    this.summary = summary
     this.description = description
     this.nullable = nullable
   }
@@ -109,7 +112,8 @@ export default class OpenapiEndpointRenderer<
         parameters: [...this.headersArray(), ...(await this.pathParamsArray()), ...this.queryArray()],
         [method]: {
           tags: this.tags || [],
-          summary: '',
+          summary: this.summary,
+          description: this.description,
           responses,
         },
       },

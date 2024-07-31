@@ -8,6 +8,29 @@ import UserSerializer, { UserWithPostsSerializer } from '../../../../test-app/ap
 
 describe('OpenapiEndpointRenderer', () => {
   describe('#toObject', () => {
+    context('description and summary', () => {
+      it('renders provided tags', async () => {
+        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          description: 'hello',
+          summary: 'world',
+        })
+
+        const response = await renderer.toObject()
+        expect(response).toEqual(
+          expect.objectContaining({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            '/users/howyadoin': expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              get: expect.objectContaining({
+                description: 'hello',
+                summary: 'world',
+              }),
+            }),
+          }),
+        )
+      })
+    })
+
     context('tags', () => {
       it('renders provided tags', async () => {
         const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
