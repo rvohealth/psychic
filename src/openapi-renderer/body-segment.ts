@@ -1,9 +1,6 @@
 import {
   AttributeStatement,
-  Dream,
   DreamSerializer,
-  OpenapiAllTypes,
-  OpenapiFormats,
   OpenapiPrimitiveTypes,
   OpenapiSchemaArray,
   OpenapiSchemaBody,
@@ -28,7 +25,6 @@ import {
   openapiPrimitiveTypes,
   openapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream'
-import { HttpMethod } from '../router/types'
 import computedSerializerKeyOrFail from './helpers/computedSerializerKeyOrFail'
 import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
 
@@ -586,102 +582,6 @@ export default class OpenapiBodySegmentRenderer {
     }
 
     return returnObj
-  }
-}
-
-export interface OpenapiEndpointRendererOpts<T extends typeof Dream | typeof DreamSerializer> {
-  many?: boolean
-  path: string
-  method: HttpMethod
-  uri?: OpenapiUriOption[]
-  headers?: OpenapiHeaderOption[]
-  body?: OpenapiSchemaBodyShorthand
-  responses?: {
-    [statusCode: number]: OpenapiSchemaBodyShorthand
-  }
-  serializerKey?: T extends typeof Dream
-    ? keyof InstanceType<T>['serializers' & keyof InstanceType<T>]
-    : undefined
-  status?: number
-}
-
-export interface OpenapiHeaderOption {
-  name: string
-  required: boolean
-  description?: string
-}
-
-export interface OpenapiUriOption {
-  name: string
-  required: boolean
-  description?: string
-}
-
-export interface OpenapiSchema {
-  openapi: `${number}.${number}.${number}`
-  info: {
-    version: string
-    title: string
-    description: string
-  }
-  paths: OpenapiEndpointResponse
-  components: {
-    schemas: {
-      [key: string]: OpenapiSchemaBody
-    }
-  }
-}
-
-export type OpenapiEndpointResponse = {
-  [path: string]: {
-    [method in HttpMethod]: OpenapiMethodBody
-  } & {
-    parameters: OpenapiParameterResponse[]
-  }
-}
-
-export interface OpenapiParameterResponse {
-  in: OpenapiHeaderType
-  name: string
-  required: boolean
-  description: string
-  schema: {
-    type: 'string' | { type: 'object'; properties: OpenapiSchemaProperties }
-  }
-}
-
-export type OpenapiHeaderType = 'header' | 'body' | 'path'
-
-export type OpenapiMethodResponse = {
-  [method in HttpMethod]: OpenapiMethodBody
-}
-
-export interface OpenapiMethodBody {
-  tags: string[]
-  summary: string
-  requestBody: OpenapiContent
-  responses: OpenapiResponses
-}
-
-export interface OpenapiResponses {
-  [statusCode: number]: OpenapiContent
-}
-
-export type OpenapiContent = {
-  content: {
-    [format in OpenapiFormats]: {
-      schema:
-        | {
-            type: OpenapiAllTypes
-            properties?: OpenapiSchemaProperties
-            required?: string[]
-          }
-        | OpenapiSchemaExpressionRef
-        | OpenapiSchemaExpressionAnyOf
-        | OpenapiSchemaShorthandExpressionOneOf
-    }
-  } & {
-    description?: string
   }
 }
 
