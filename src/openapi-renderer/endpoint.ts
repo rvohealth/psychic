@@ -2,30 +2,28 @@ import {
   Dream,
   DreamClassOrViewModelClassOrSerializerClass,
   DreamSerializer,
-  DreamSerializerAssociationStatement,
   OpenapiAllTypes,
   OpenapiFormats,
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
-  OpenapiSchemaProperties,
-  OpenapiSchemaArray,
   OpenapiSchemaExpressionAllOf,
   OpenapiSchemaExpressionAnyOf,
   OpenapiSchemaExpressionOneOf,
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
+  OpenapiSchemaProperties,
   OpenapiShorthandPrimitiveTypes,
-  pascalize,
-  uniq,
 } from '@rvohealth/dream'
 import PsychicController from '../controller'
 import PsychicDir from '../helpers/psychicdir'
+import { getCachedPsyconfOrFail } from '../psyconf/cache'
 import { RouteConfig } from '../router/route-manager'
 import { HttpMethod } from '../router/types'
 import PsychicServer from '../server'
 import OpenapiBodySegmentRenderer from './body-segment'
+import computedSerializerKeyOrFail from './helpers/computedSerializerKeyOrFail'
 import openapiRoute from './helpers/openapiRoute'
-import { getCachedPsyconfOrFail } from '../psyconf/cache'
+import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
 
 export default class OpenapiEndpointRenderer<
   DreamsOrSerializersCBReturnVal extends
@@ -43,6 +41,8 @@ export default class OpenapiEndpointRenderer<
   private tags: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['tags']
   private description: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['description']
   private nullable: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['nullable']
+  private serializers: { [key: string]: typeof DreamSerializer }
+  private computedExtraComponents: { [key: string]: OpenapiSchemaObject } = {}
 
   /**
    * instantiates a new OpenapiEndpointRenderer.
@@ -95,6 +95,8 @@ export default class OpenapiEndpointRenderer<
    * Generates an openapi object representing a single endpoint.
    */
   public async toObject(): Promise<OpenapiEndpointResponse> {
+    this.serializers = await PsychicDir.serializers()
+
     const [path, method, requestBody, responses] = await Promise.all([
       this.computedPath(),
       this.computedMethod(),
@@ -128,17 +130,28 @@ export default class OpenapiEndpointRenderer<
    * on the given serializer
    */
   public async toSchemaObject(): Promise<Record<string, OpenapiSchemaBody>> {
+    this.serializers = await PsychicDir.serializers()
+
     const serializerClasses = this.getSerializerClasses()
     if (!serializerClasses) return {}
 
-    const serializers = await PsychicDir.serializers()
-
     let output: Record<string, OpenapiSchemaBody> = {}
     serializerClasses.forEach(serializerClass => {
-      output = { ...output, ...this.buildSerializerJson(serializerClass, serializers) }
+      output = {
+        ...output,
+        ...serializerToOpenapiSchema({
+          serializerClass,
+          schemaDelimeter: this.schemaDelimeter,
+          serializers: this.serializers,
+        }),
+      }
     })
 
-    return output
+    // run this to extract all $serializer refs from responses object
+    // and put them into the computedExtraComponents field
+    this.parseResponses()
+
+    return { ...output, ...this.computedExtraComponents }
   }
 
   /**
@@ -356,9 +369,9 @@ export default class OpenapiEndpointRenderer<
    *
    * Generates the responses portion of the endpoint
    */
-  private async parseResponses(): Promise<OpenapiResponses> {
+  private parseResponses(): OpenapiResponses {
     const responseData: OpenapiResponses = {
-      [this.status || this.defaultStatus]: await this.parseSerializerResponseShape(),
+      [this.status || this.defaultStatus]: this.parseSerializerResponseShape(),
     }
 
     Object.keys(this.responses || {}).forEach(statusCode => {
@@ -397,7 +410,7 @@ export default class OpenapiEndpointRenderer<
    * returns a ref object for the callback passed to the
    * Openapi decorator.
    */
-  private async parseSerializerResponseShape(): Promise<OpenapiContent | { description: string }> {
+  private parseSerializerResponseShape(): OpenapiContent | { description: string } {
     const serializerClasses = this.getSerializerClasses()
     if (!serializerClasses) return { description: 'no content' }
 
@@ -429,10 +442,9 @@ export default class OpenapiEndpointRenderer<
    * public show() {...}
    * ```
    */
-  private async parseSingleEntitySerializerResponseShape(): Promise<OpenapiContent> {
-    const serializers = await PsychicDir.serializers()
+  private parseSingleEntitySerializerResponseShape(): OpenapiContent {
     const serializerClass = this.getSerializerClasses()![0]
-    const serializerKey = this.computedSerializerKeyOrFail(serializerClass, serializers)
+    const serializerKey = computedSerializerKeyOrFail(serializerClass, this.serializers, this.schemaDelimeter)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const serializerObject: OpenapiSchemaBody = this.accountForNullableOption(
@@ -474,13 +486,15 @@ export default class OpenapiEndpointRenderer<
    * public responses() {...}
    * ```
    */
-  private async parseMultiEntitySerializerResponseShape(): Promise<OpenapiContent> {
-    const serializers = await PsychicDir.serializers()
-
+  private parseMultiEntitySerializerResponseShape(): OpenapiContent {
     const anyOf: OpenapiSchemaExpressionAnyOf = { anyOf: [] }
 
     this.getSerializerClasses()!.forEach(serializerClass => {
-      const serializerKey = this.computedSerializerKeyOrFail(serializerClass, serializers)
+      const serializerKey = computedSerializerKeyOrFail(
+        serializerClass,
+        this.serializers,
+        this.schemaDelimeter,
+      )
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const serializerObject: OpenapiSchemaBody = {
@@ -512,252 +526,6 @@ export default class OpenapiEndpointRenderer<
   /**
    * @internal
    *
-   * builds the definition for the endpoint's serializer
-   * to be placed in the components/schemas path
-   */
-  private buildSerializerJson(
-    serializerClass: typeof DreamSerializer,
-    serializers: { [key: string]: typeof DreamSerializer },
-  ): Record<string, OpenapiSchemaObject> {
-    const attributes = serializerClass['attributeStatements']
-    const serializerKey = this.computedSerializerKeyOrFail(serializerClass, serializers)
-
-    const serializerObject: OpenapiSchemaObject = {
-      type: 'object',
-      required: [],
-      properties: {},
-    }
-
-    attributes.forEach(attr => {
-      if (!attr.options?.allowNull) {
-        serializerObject.required!.push(attr.field)
-      }
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-      ;(serializerObject as any).properties![attr.field] = this.recursivelyParseBody(attr.renderAs)
-    })
-
-    const serializerPayload = this.attachAssociationsToSerializerPayload(
-      serializerClass,
-      { [serializerKey]: serializerObject },
-      serializers,
-      serializerKey,
-    )
-    return serializerPayload
-  }
-
-  /**
-   * @internal
-   *
-   * for each association existing on a given serializer,
-   * attach the association's schema to the component schema
-   * output, and also generate a $ref between the base
-   * serializer and the new one.
-   */
-  private attachAssociationsToSerializerPayload(
-    serializerClass: typeof DreamSerializer,
-    serializerPayload: Record<string, OpenapiSchemaObject>,
-    serializers: { [key: string]: typeof DreamSerializer },
-    serializerKey: string,
-  ) {
-    const associations = serializerClass['associationStatements']
-
-    let finalOutput = { ...serializerPayload }
-
-    associations.forEach(association => {
-      const associatedSerializers = DreamSerializer.getAssociatedSerializersForOpenapi(association)
-      if (!associatedSerializers)
-        throw new Error(`
-Error: ${serializerClass.name} missing explicit serializer definition for ${association.type} ${association.field}, using type: 'object'
-`)
-
-      if (associatedSerializers.length === 1) {
-        // point the association directly to the schema
-        finalOutput = this.addSingleSerializerAssociationToOutput({
-          association,
-          serializerKey,
-          finalOutput,
-          serializers,
-          associatedSerializers,
-        })
-      } else {
-        // leverage anyOf to handle an array of serializers
-        finalOutput = this.addMultiSerializerAssociationToOutput({
-          association,
-          serializerKey,
-          finalOutput,
-          serializers,
-          associatedSerializers,
-        })
-      }
-    })
-
-    return finalOutput
-  }
-
-  /**
-   * @internal
-   *
-   * points an association directly to the $ref associated
-   * with the target serializer, and add target serializer
-   * to the schema
-   */
-  private addSingleSerializerAssociationToOutput({
-    associatedSerializers,
-    serializers,
-    finalOutput,
-    serializerKey,
-    association,
-  }: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    associatedSerializers: (typeof DreamSerializer<any, any>)[]
-    serializers: { [key: string]: typeof DreamSerializer }
-    finalOutput: Record<string, OpenapiSchemaObject>
-    serializerKey: string
-    association: DreamSerializerAssociationStatement
-  }) {
-    const associatedSerializer = associatedSerializers[0]
-    const associatedSerializerKey = this.computedSerializerKeyOrFail(associatedSerializer, serializers)
-
-    finalOutput[serializerKey].required = uniq([
-      ...(finalOutput[serializerKey].required || []),
-      association.field,
-    ])
-
-    switch (association.type) {
-      case 'RendersMany':
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        ;(finalOutput as any)[serializerKey].properties![association.field] = {
-          type: 'array',
-          items: {
-            $ref: `#/components/schemas/${associatedSerializerKey}`,
-          },
-        }
-        break
-
-      case 'RendersOne':
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        ;(finalOutput as any)[serializerKey].properties![association.field] = this.accountForNullableOption(
-          {
-            $ref: `#/components/schemas/${associatedSerializerKey}`,
-          },
-          association.nullable,
-        )
-        break
-    }
-
-    const associatedSchema = this.buildSerializerJson(associatedSerializer, serializers)
-    finalOutput = { ...finalOutput, ...associatedSchema }
-    return finalOutput
-  }
-
-  /**
-   * @internal
-   *
-   * leverages anyOf to cast multiple possible $ref values,
-   * each pointing to its respective target serializer.
-   */
-  private addMultiSerializerAssociationToOutput({
-    associatedSerializers,
-    serializers,
-    finalOutput,
-    serializerKey,
-    association,
-  }: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    associatedSerializers: (typeof DreamSerializer<any, any>)[]
-    serializers: { [key: string]: typeof DreamSerializer }
-    finalOutput: Record<string, OpenapiSchemaObject>
-    serializerKey: string
-    association: DreamSerializerAssociationStatement
-  }) {
-    const anyOf: (OpenapiSchemaExpressionRef | OpenapiSchemaArray)[] = []
-
-    associatedSerializers.forEach(associatedSerializer => {
-      const associatedSerializerKey = this.computedSerializerKeyOrFail(associatedSerializer, serializers)
-
-      finalOutput[serializerKey].required = uniq([
-        ...(finalOutput[serializerKey].required || []),
-        association.field,
-      ])
-
-      switch (association.type) {
-        case 'RendersMany':
-          anyOf.push({
-            type: 'array',
-            items: {
-              $ref: `#/components/schemas/${associatedSerializerKey}`,
-            },
-          })
-          break
-
-        case 'RendersOne':
-          anyOf.push({
-            $ref: `#/components/schemas/${associatedSerializerKey}`,
-          })
-          break
-      }
-
-      const associatedSchema = this.buildSerializerJson(associatedSerializer, serializers)
-      finalOutput = { ...finalOutput, ...associatedSchema }
-    })
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-    ;(finalOutput as any)[serializerKey].properties![association.field] = {
-      anyOf,
-    }
-
-    return finalOutput
-  }
-
-  /**
-   * @internal
-   *
-   * identifies the serializer key belonging to a given serializer, and
-   * modifies the key to respect the `schemaDelimeter` config option,
-   * separating all path-related nodes with the provided delimeter.
-   *
-   * If the serializer cannot be located, an exception is raised.
-   */
-  private computedSerializerKeyOrFail(
-    serializerClass: typeof DreamSerializer,
-    serializers: { [key: string]: typeof DreamSerializer },
-  ) {
-    const serializerKey = Object.keys(serializers).find(key => serializers[key] === serializerClass)
-    if (!serializerKey) {
-      throw new Error(`
-An unexpected error occurred while serializing your app.
-A serializer was not able to be located:
-
-${serializerClass.name}
-`)
-    }
-
-    return this.addSchemaDelimeterToSerializerKey(serializerKey, serializerClass)
-  }
-
-  /**
-   * @internal
-   *
-   * Applies the provided `schemaDelimeter` to the passed serializerKey
-   */
-  private addSchemaDelimeterToSerializerKey(serializerKey: string, serializerClass: typeof DreamSerializer) {
-    const serializerKeyRoot = serializerKey.replace(
-      new RegExp(serializerClass.name.replace(/Serializer$/, '') + '$'),
-      '',
-    )
-
-    return (
-      serializerKeyRoot
-        .split('/')
-        .map(segment => pascalize(segment))
-        .join(this.schemaDelimeter) + serializerClass.name.replace(/Serializer$/, '')
-    )
-  }
-
-  /**
-   * @internal
-   *
    * returns either the delimiter set in the app config, or else a blank string
    * NOTE: this is only public for testing purposes.
    */
@@ -775,7 +543,18 @@ ${serializerClass.name}
   private recursivelyParseBody(
     bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
   ): OpenapiSchemaBody {
-    return new OpenapiBodySegmentRenderer({ bodySegment }).parse()
+    const { results, extraComponents } = new OpenapiBodySegmentRenderer({
+      bodySegment,
+      serializers: this.serializers,
+      schemaDelimeter: this.schemaDelimeter,
+    }).parse()
+
+    this.computedExtraComponents = {
+      ...this.computedExtraComponents,
+      ...extraComponents,
+    }
+
+    return results
   }
 
   /**
