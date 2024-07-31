@@ -45,7 +45,7 @@ export function OpenAPI<
   I extends DreamClassOrViewModelClassOrSerializerClass | DreamClassOrViewModelClassOrSerializerClass[],
 >(
   modelOrSerializerCb?: (() => I) | OpenapiEndpointRendererOpts<I>,
-  opts: OpenapiEndpointRendererOpts<I> = {},
+  opts?: OpenapiEndpointRendererOpts<I>,
 ): (target: PsychicController, methodName: string | symbol) => void {
   return function (target: PsychicController, methodName: string | symbol): void {
     const psychicControllerClass: typeof PsychicController = target.constructor as typeof PsychicController
