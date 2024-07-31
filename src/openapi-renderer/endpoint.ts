@@ -647,6 +647,7 @@ export interface OpenapiEndpointRendererOpts<
   body?: OpenapiSchemaBodyShorthand
   tags?: string[]
   description?: string
+  summary?: string
   responses?: {
     [statusCode: number]: OpenapiSchemaBodyShorthand & { description?: string }
   }
