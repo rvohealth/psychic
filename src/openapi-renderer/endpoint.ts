@@ -309,14 +309,23 @@ export default class OpenapiEndpointRenderer<
    */
   private headersArray(): OpenapiParameterResponse[] {
     return (
-      this.headers?.map(header => ({
-        in: 'header',
-        ...header,
-        description: header.description || '',
-        schema: {
-          type: 'string',
-        },
-      })) || []
+      this.headers?.map(header => {
+        const data = {
+          in: 'header',
+          name: header.name,
+          required: header.required,
+          description: header.description || '',
+          schema: {
+            type: 'string',
+          },
+        } as OpenapiParameterResponse
+
+        if (header.format) {
+          data.schema.format = header.format
+        }
+
+        return data
+      }) || []
     )
   }
 
@@ -652,6 +661,7 @@ export interface OpenapiHeaderOption {
   name: string
   required: boolean
   description?: string
+  format?: 'date' | 'date-time'
 }
 
 export interface OpenapiQueryOption {
@@ -697,6 +707,7 @@ export interface OpenapiParameterResponse {
   description: string
   schema: {
     type: 'string' | { type: 'object'; properties: OpenapiSchemaProperties }
+    format?: 'date' | 'date-time'
   }
 }
 
