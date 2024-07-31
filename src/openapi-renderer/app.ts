@@ -1,11 +1,11 @@
-import { uniq, projectRootPath } from '@rvohealth/dream'
+import { projectRootPath, uniq } from '@rvohealth/dream'
 import fs from 'fs/promises'
 import path from 'path'
 import PsychicController from '../controller'
 import openapiJsonPath from '../helpers/openapiJsonPath'
 import PsychicDir from '../helpers/psychicdir'
 import { HttpMethod, HttpMethods } from '../router/types'
-import { OpenapiSchema } from './body-segment'
+import { OpenapiSchema } from './endpoint'
 
 export default class OpenapiAppRenderer {
   /**

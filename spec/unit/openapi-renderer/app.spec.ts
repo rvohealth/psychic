@@ -5,6 +5,7 @@ describe('OpenapiAppRenderer', () => {
   describe('.buildOpenapiObject', () => {
     it('reads all controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
       const response = await OpenapiAppRenderer.toObject()
+
       expect(response).toEqual({
         openapi: '3.0.2',
         info: {
@@ -14,6 +15,27 @@ describe('OpenapiAppRenderer', () => {
         },
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         paths: expect.objectContaining({
+          '/greeter/justforspecs': {
+            parameters: [],
+            get: {
+              tags: [],
+              summary: '',
+              responses: {
+                '200': {
+                  description: 'justforspecs',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        $ref: '#/components/schemas/CommentTestingBasicSerializerRef',
+                      },
+                    },
+                  },
+                },
+                '204': { description: 'no content' },
+              },
+            },
+          },
+
           '/users': {
             parameters: [],
             post: {
@@ -171,6 +193,22 @@ describe('OpenapiAppRenderer', () => {
                 id: { type: 'string' },
                 body: { type: 'string' },
               },
+            },
+
+            CommentTestingBasicSerializerRef: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                },
+              },
+            },
+
+            CommentTestingDoubleShorthand: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: { howyadoin: { type: 'number', format: 'double' } },
             },
           }),
         },
