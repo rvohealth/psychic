@@ -32,7 +32,6 @@ export {
   OpenapiHeaderOption,
   OpenapiHeaderType,
   OpenapiMethodBody,
-  OpenapiMethodResponse,
   OpenapiParameterResponse,
   OpenapiQueryOption,
   OpenapiResponses,
