@@ -59,6 +59,8 @@ export default class User extends ApplicationModel {
   public requiredFavoriteNumerics: DreamColumn<User, 'requiredFavoriteNumerics'>
   public favoriteBooleans: DreamColumn<User, 'favoriteBooleans'>
   public requiredFavoriteBooleans: DreamColumn<User, 'requiredFavoriteBooleans'>
+  public favoriteBigint: DreamColumn<User, 'favoriteBigint'>
+  public requiredFavoriteBigint: DreamColumn<User, 'requiredFavoriteBigint'>
   public favoriteBigints: DreamColumn<User, 'favoriteBigints'>
   public requiredFavoriteBigints: DreamColumn<User, 'requiredFavoriteBigints'>
   public favoriteIntegers: DreamColumn<User, 'favoriteIntegers'>
@@ -84,6 +86,12 @@ export default class User extends ApplicationModel {
   @Virtual()
   public password?: string | null
   public passwordDigest: string
+
+  @Virtual({ type: 'string', nullable: true })
+  public openapiVirtualSpecTest?: string | null
+
+  @Virtual('string[]')
+  public openapiVirtualSpecTest2?: string | null
 
   @HasMany(() => Pet)
   public pets: Pet[]

@@ -12,7 +12,6 @@ import {
   OpenapiSchemaExpressionRefSchemaShorthand,
   OpenapiSchemaObject,
   OpenapiSchemaObjectBase,
-  OpenapiSchemaPartialSegment,
   OpenapiSchemaPrimitiveGeneric,
   OpenapiSchemaProperties,
   OpenapiSchemaShorthandExpressionAllOf,
@@ -27,9 +26,10 @@ import {
 } from '@rvohealth/dream'
 import computedSerializerKeyOrFail from './helpers/computedSerializerKeyOrFail'
 import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
+import isBlankDescription from './helpers/isBlankDescription'
 
 export default class OpenapiBodySegmentRenderer {
-  private bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined
+  private bodySegment: OpenapiBodySegment
   private serializers: { [key: string]: typeof DreamSerializer }
   private schemaDelimeter: string
   private computedExtraComponents: { [key: string]: OpenapiSchemaObject } = {}
@@ -45,7 +45,7 @@ export default class OpenapiBodySegmentRenderer {
     serializers,
     schemaDelimeter,
   }: {
-    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined
+    bodySegment: OpenapiBodySegment
     serializers: { [key: string]: typeof DreamSerializer }
     schemaDelimeter: string
   }) {
@@ -72,14 +72,11 @@ export default class OpenapiBodySegmentRenderer {
    * Recursively parses nested objects and arrays,
    * as well as primitive types
    */
-  public recursivelyParseBody(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
-  ): OpenapiSchemaBody {
+  public recursivelyParseBody(bodySegment: OpenapiBodySegment): OpenapiSchemaBody {
     switch (this.segmentType(bodySegment)) {
+      case 'blank_description':
+        return bodySegment as OpenapiSchemaBody
+
       case 'oneOf':
         return this.oneOfStatement(bodySegment)
 
@@ -123,13 +120,7 @@ export default class OpenapiBodySegmentRenderer {
    *
    * Returns a type based on analysis of the bodySegment
    */
-  private segmentType(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
-  ) {
+  private segmentType(bodySegment: OpenapiBodySegment) {
     if (bodySegment === undefined) return undefined
 
     const objectBodySegment = bodySegment as OpenapiSchemaObject
@@ -141,6 +132,7 @@ export default class OpenapiBodySegmentRenderer {
     const schemaRefBodySegment = bodySegment as OpenapiSchemaExpressionRefSchemaShorthand
     const serializerRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializerRef
 
+    if (isBlankDescription(bodySegment)) return 'blank_description'
     if (serializerRefBodySegment.$serializer) return '$serializer'
     if (refBodySegment.$ref) return '$ref'
     if (schemaRefBodySegment.$schema) return '$schema'
@@ -167,16 +159,10 @@ export default class OpenapiBodySegmentRenderer {
    *
    * recursively parses a oneOf statement
    */
-  private oneOfStatement(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
-  ): OpenapiSchemaExpressionOneOf {
+  private oneOfStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaExpressionOneOf {
     const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
     return {
-      oneOf: oneOfBodySegment.oneOf.map(segment => this.recursivelyParseBody(segment)),
+      oneOf: oneOfBodySegment.oneOf.map(segment => this.recursivelyParseBody(segment as OpenapiBodySegment)),
     }
   }
 
@@ -185,16 +171,10 @@ export default class OpenapiBodySegmentRenderer {
    *
    * recursively parses an anyOf statement
    */
-  private anyOfStatement(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
-  ): OpenapiSchemaExpressionAnyOf {
+  private anyOfStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaExpressionAnyOf {
     const anyOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAnyOf
     return {
-      anyOf: anyOfBodySegment.anyOf.map(segment => this.recursivelyParseBody(segment)),
+      anyOf: anyOfBodySegment.anyOf.map(segment => this.recursivelyParseBody(segment as OpenapiBodySegment)),
     }
   }
 
@@ -203,16 +183,10 @@ export default class OpenapiBodySegmentRenderer {
    *
    * recursively parses an allOf statement
    */
-  private allOfStatement(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
-  ): OpenapiSchemaExpressionAllOf {
+  private allOfStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaExpressionAllOf {
     const allOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAllOf
     return {
-      allOf: allOfBodySegment.allOf.map(segment => this.recursivelyParseBody(segment)),
+      allOf: allOfBodySegment.allOf.map(segment => this.recursivelyParseBody(segment as OpenapiBodySegment)),
     }
   }
 
@@ -221,19 +195,18 @@ export default class OpenapiBodySegmentRenderer {
    *
    * recursively parses an array statement
    */
-  private arrayStatement(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
-  ): OpenapiSchemaArray {
+  private arrayStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaArray {
     const data = this.applyCommonFieldsToPayload<OpenapiSchemaArray>({
       type: 'array',
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
       items: this.recursivelyParseBody((bodySegment as any).items),
     })
+
+    if ((bodySegment as OpenapiSchemaArray).nullable) {
+      data.nullable = true
+    }
+
     return data
   }
 
@@ -242,17 +215,10 @@ export default class OpenapiBodySegmentRenderer {
    *
    * recursively parses an object statement
    */
-  private objectStatement(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
-  ): OpenapiSchemaObject {
-    const objectBodySegment = bodySegment as OpenapiSchemaObject
+  private objectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaObject {
+    const objectBodySegment = bodySegment as OpenapiSchemaObjectBase
     const data: OpenapiSchemaObjectBase = {
       type: 'object',
-      properties: {},
     }
 
     if (objectBodySegment.description) {
@@ -267,26 +233,22 @@ export default class OpenapiBodySegmentRenderer {
       data.summary = objectBodySegment.summary
     }
 
-    if ((objectBodySegment as OpenapiSchemaObjectBase).maxProperties) {
-      data.maxProperties = (objectBodySegment as OpenapiSchemaObjectBase).maxProperties
+    if (objectBodySegment.maxProperties) {
+      data.maxProperties = objectBodySegment.maxProperties
     }
 
-    if ((objectBodySegment as OpenapiSchemaObjectBase).minProperties) {
-      data.minProperties = (objectBodySegment as OpenapiSchemaObjectBase).minProperties
+    if (objectBodySegment.minProperties) {
+      data.minProperties = objectBodySegment.minProperties
     }
 
-    if ((objectBodySegment as OpenapiSchemaObjectBase).additionalProperties) {
-      data.additionalProperties = this.parseObjectPropertyStatement(
-        (objectBodySegment as OpenapiSchemaObjectBase).additionalProperties!,
-      )
+    if (objectBodySegment.additionalProperties) {
+      data.additionalProperties = this.parseObjectPropertyStatement(objectBodySegment.additionalProperties)
     }
 
     if (Array.isArray(objectBodySegment.required)) data.required = objectBodySegment.required
 
-    if ((objectBodySegment as OpenapiSchemaObjectBase).properties) {
-      data.properties = this.parseObjectPropertyStatement(
-        (objectBodySegment as OpenapiSchemaObjectBase).properties!,
-      )
+    if (objectBodySegment.properties) {
+      data.properties = this.parseObjectPropertyStatement(objectBodySegment.properties)
     }
 
     return data
@@ -343,13 +305,7 @@ export default class OpenapiBodySegmentRenderer {
    *
    * recursively parses a primitive object type (i.e. { type: 'string[]' })
    */
-  private primitiveObjectStatement(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
-  ): OpenapiSchemaPrimitiveGeneric {
+  private primitiveObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaPrimitiveGeneric {
     const objectBodySegment = bodySegment as OpenapiSchemaObject
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
@@ -361,13 +317,7 @@ export default class OpenapiBodySegmentRenderer {
    *
    * recursively a $ref statement
    */
-  private refStatement(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
-  ): OpenapiSchemaExpressionRef {
+  private refStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaExpressionRef {
     const refBodySegment = bodySegment as OpenapiSchemaExpressionRef
     return {
       $ref: `#/${refBodySegment.$ref.replace(/^#\//, '')}`,
@@ -380,11 +330,7 @@ export default class OpenapiBodySegmentRenderer {
    * recursively a $ref statement
    */
   private serializerStatement(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
+    bodySegment: OpenapiBodySegment,
   ): OpenapiSchemaExpressionRef | OpenapiSchemaArray | OpenapiSchemaExpressionAllOf {
     const serializerRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializerRef
     const serializerKey = computedSerializerKeyOrFail(
@@ -431,13 +377,7 @@ export default class OpenapiBodySegmentRenderer {
    *
    * recursively a $schema statement
    */
-  private schemaRefStatement(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
-  ): OpenapiSchemaExpressionRef {
+  private schemaRefStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaExpressionRef {
     const schemaRefBodySegment = bodySegment as OpenapiSchemaExpressionRefSchemaShorthand
     return {
       $ref: `#/components/schemas/${schemaRefBodySegment.$schema.replace(/^#\/components\/schemas\//, '')}`,
@@ -449,13 +389,7 @@ export default class OpenapiBodySegmentRenderer {
    *
    * recursively an unknown_object statement
    */
-  private unknownObjectStatement(
-    bodySegment:
-      | OpenapiSchemaBodyShorthand
-      | OpenapiShorthandPrimitiveTypes
-      | OpenapiSchemaPartialSegment
-      | undefined,
-  ): OpenapiSchemaBody {
+  private unknownObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaBody {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.applyCommonFieldsToPayload(bodySegment as any) as OpenapiSchemaBody
   }
@@ -589,3 +523,9 @@ export type OpenapiEndpointParseResults = {
   results: OpenapiSchemaBody
   extraComponents: { [key: string]: OpenapiSchemaObject }
 }
+
+export type OpenapiBodySegment =
+  | OpenapiSchemaBodyShorthand
+  | OpenapiShorthandPrimitiveTypes
+  | { description: string }
+  | undefined

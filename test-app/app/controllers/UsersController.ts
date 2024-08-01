@@ -48,6 +48,13 @@ export default class UsersController extends ApplicationController {
     this.ok(user)
   }
 
+  @OpenAPI(() => User)
+  public async update() {
+    const user = await User.findOrFail(this.castParam('id', 'bigint'))
+    await user.update(this.paramsFor(User))
+    this.ok(user)
+  }
+
   @OpenAPI()
   public async destroy() {
     const user = await User.findOrFail(this.castParam('id', 'bigint'))

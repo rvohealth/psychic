@@ -89,6 +89,7 @@ export interface Users {
   createdAt: Generated<Timestamp>;
   createdOn: Generated<Timestamp>;
   email: string;
+  favoriteBigint: Int8 | null;
   favoriteBigints: Int8[] | null;
   favoriteBooleans: boolean[] | null;
   favoriteCitext: string | null;
@@ -109,6 +110,7 @@ export interface Users {
   notes: string | null;
   optionalUuid: Generated<string | null>;
   passwordDigest: string;
+  requiredFavoriteBigint: Generated<Int8>;
   requiredFavoriteBigints: Generated<Int8[]>;
   requiredFavoriteBooleans: Generated<boolean[]>;
   requiredFavoriteCitext: Generated<string>;

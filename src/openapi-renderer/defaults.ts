@@ -44,6 +44,11 @@ export const DEFAULT_OPENAPI_COMPONENT_SCHEMAS = {
 } as Record<string, OpenapiSchemaBody>
 
 export const DEFAULT_OPENAPI_COMPONENT_RESPONSES = {
+  // 204
+  NoContent: {
+    description: 'The request has succeeded, but there is no content to render',
+  },
+
   // 400
   BadRequest: {
     description:

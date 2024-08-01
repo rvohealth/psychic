@@ -6,77 +6,142 @@ describe('OpenapiAppRenderer', () => {
     it('reads all controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
       const response = await OpenapiAppRenderer.toObject()
 
-      expect(response).toEqual({
-        openapi: '3.0.2',
-        info: {
-          version: packageJson.version,
-          title: packageJson.name,
-          description: packageJson.description,
-        },
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        paths: expect.objectContaining({
-          '/greeter/justforspecs': {
-            parameters: [],
-            get: {
-              tags: [],
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              responses: expect.objectContaining({
-                '200': {
-                  description: 'justforspecs',
-                  content: {
-                    'application/json': {
-                      schema: {
-                        $ref: '#/components/schemas/CommentTestingBasicSerializerRef',
-                      },
+      expect(response).toEqual(
+        expect.objectContaining({
+          openapi: '3.0.2',
+          info: {
+            version: packageJson.version,
+            title: packageJson.name,
+            description: packageJson.description,
+          },
+        }),
+      )
+
+      expect(response.paths['/greeter/justforspecs']).toEqual(
+        expect.objectContaining({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          parameters: expect.arrayContaining([
+            {
+              description: 'custom header',
+              in: 'header',
+              name: 'custom-header',
+              required: true,
+              schema: {
+                type: 'string',
+              },
+            },
+          ]),
+
+          get: {
+            tags: [],
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            responses: expect.objectContaining({
+              '200': {
+                description: 'justforspecs',
+                content: {
+                  'application/json': {
+                    schema: {
+                      $ref: '#/components/schemas/CommentTestingBasicSerializerRef',
                     },
                   },
                 },
-              }),
-            },
+              },
+            }),
           },
+        }),
+      )
 
-          '/users': {
-            parameters: [],
-            post: {
-              tags: [],
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              responses: expect.objectContaining({
-                201: {
-                  description: 'create',
-                  content: {
-                    'application/json': {
-                      schema: {
+      expect(response.paths['/users']).toEqual(
+        expect.objectContaining({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          parameters: expect.arrayContaining([
+            expect.objectContaining({
+              description: 'custom header',
+              in: 'header',
+              name: 'custom-header',
+              required: true,
+              schema: {
+                type: 'string',
+              },
+            }),
+          ]),
+        }),
+      )
+
+      expect(response.paths['/users']).toEqual(
+        expect.objectContaining({
+          post: {
+            tags: [],
+            requestBody: {
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                    properties: expect.objectContaining({
+                      bio: { type: 'string' },
+                      birthdate: { type: 'date', nullable: true },
+                      createdOn: { type: 'date' },
+                      email: { type: 'string' },
+                      favoriteBigint: { type: 'string', nullable: true },
+                      favoriteBigints: {
+                        type: 'array',
+                        items: { type: 'string' },
+                        nullable: true,
+                      },
+                    }),
+                  },
+                },
+              },
+            },
+
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            responses: expect.objectContaining({
+              201: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      $ref: '#/components/schemas/UserExtra',
+                    },
+                  },
+                },
+                description: 'create',
+              },
+            }),
+          },
+        }),
+      )
+
+      expect(response.paths['/users']).toEqual(
+        expect.objectContaining({
+          get: {
+            tags: [],
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            responses: expect.objectContaining({
+              200: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'array',
+                      items: {
                         $ref: '#/components/schemas/UserExtra',
                       },
                     },
                   },
                 },
-              }),
-            },
-            get: {
-              tags: [],
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              responses: expect.objectContaining({
-                200: {
-                  description: 'index',
-                  content: {
-                    'application/json': {
-                      schema: {
-                        type: 'array',
-                        items: {
-                          $ref: '#/components/schemas/UserExtra',
-                        },
-                      },
-                    },
-                  },
-                },
-              }),
-            },
+                description: 'index',
+              },
+            }),
           },
+        }),
+      )
 
+      expect(response.paths).toEqual(
+        expect.objectContaining({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           '/users/{id}': expect.objectContaining({
-            parameters: [
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            parameters: expect.arrayContaining([
               {
                 in: 'path',
                 name: 'id',
@@ -86,7 +151,7 @@ describe('OpenapiAppRenderer', () => {
                   type: 'string',
                 },
               },
-            ],
+            ]),
             get: {
               tags: [],
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -111,8 +176,10 @@ describe('OpenapiAppRenderer', () => {
             },
           }),
         }),
+      )
 
-        components: {
+      expect(response.components).toEqual(
+        expect.objectContaining({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           schemas: expect.objectContaining({
             UserExtra: {
@@ -288,8 +355,8 @@ describe('OpenapiAppRenderer', () => {
                 'the server encountered an unexpected condition that prevented it from fulfilling the request',
             },
           }),
-        },
-      })
+        }),
+      )
     })
   })
 })

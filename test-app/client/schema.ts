@@ -4,17 +4,368 @@
  */
 
 export interface paths {
-    "/users": {
+    "/api/pets": {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description create */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Pet"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/pets/{id}": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
+            path: {
+                /** @description id */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path: {
+                    /** @description id */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                204: components["responses"]["NoContent"];
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        trace?: never;
+    };
+    "/api/users": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            responses: {
+                204: components["responses"]["NoContent"];
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/api/users/{id}": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
+            path: {
+                /** @description id */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path: {
+                    /** @description id */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            responses: {
+                204: components["responses"]["NoContent"];
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        trace?: never;
+    };
+    "/greeter/justforspecs": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
             path?: never;
             cookie?: never;
         };
         get: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description justforspecs */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CommentTestingBasicSerializerRef"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pets": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            responses: {
+                /** @description create */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["Pet"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/pets/{id}": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
+            path: {
+                /** @description id */
+                id: string;
+            };
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path: {
+                    /** @description id */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            responses: {
+                204: components["responses"]["NoContent"];
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        trace?: never;
+    };
+    "/users": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
                 path?: never;
                 cookie?: never;
             };
@@ -29,17 +380,32 @@ export interface paths {
                         "application/json": components["schemas"]["UserExtra"][];
                     };
                 };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
             };
         };
         put?: never;
         post: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: never;
+            requestBody?: {
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
             responses: {
                 /** @description create */
                 201: {
@@ -50,6 +416,14 @@ export interface paths {
                         "application/json": components["schemas"]["UserExtra"];
                     };
                 };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
             };
         };
         delete?: never;
@@ -61,7 +435,10 @@ export interface paths {
     "/users/{id}": {
         parameters: {
             query?: never;
-            header?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
             path: {
                 /** @description id */
                 id: string;
@@ -71,7 +448,10 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
                 path: {
                     /** @description id */
                     id: string;
@@ -89,6 +469,14 @@ export interface paths {
                         "application/json": components["schemas"]["UserWithPosts"];
                     };
                 };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
             };
         };
         put?: never;
@@ -96,7 +484,10 @@ export interface paths {
         delete: {
             parameters: {
                 query?: never;
-                header?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
                 path: {
                     /** @description id */
                     id: string;
@@ -112,11 +503,56 @@ export interface paths {
                     };
                     content?: never;
                 };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
             };
         };
         options?: never;
         head?: never;
-        patch?: never;
+        patch: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path: {
+                    /** @description id */
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": Record<string, never>;
+                };
+            };
+            responses: {
+                /** @description update */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["User"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
         trace?: never;
     };
 }
@@ -127,10 +563,27 @@ export interface components {
             id: string;
             body: string;
         };
+        CommentTestingBasicSerializerRef: {
+            howyadoin: components["schemas"]["CommentTestingDoubleShorthand"];
+        };
+        CommentTestingDoubleShorthand: {
+            /** Format: double */
+            howyadoin: number;
+        };
+        CustomSchema: string;
+        Pet: {
+            id: string;
+            name: Record<string, never>;
+        };
         PostWithComments: {
             id: string;
             body: string;
             comments: components["schemas"]["Comment"][];
+        };
+        User: {
+            id: string;
+            email: string;
+            name: string;
         };
         UserExtra: {
             id: string;
@@ -148,8 +601,81 @@ export interface components {
             id: string;
             posts: components["schemas"]["PostWithComments"][];
         };
+        ValidationErrors: {
+            errors?: {
+                [key: string]: string[] | undefined;
+            };
+        };
     };
-    responses: never;
+    responses: {
+        /** @description The request has succeeded, but there is no content to render */
+        NoContent: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content?: never;
+        };
+        /** @description The server would not process the request due to something the server considered to be a client error */
+        BadRequest: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content?: never;
+        };
+        /** @description The request was not successful because it lacks valid authentication credentials for the requested resource */
+        Unauthorized: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content?: never;
+        };
+        /** @description Understood the request, but refused to process it */
+        Forbidden: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content?: never;
+        };
+        /** @description The specified resource was not found */
+        NotFound: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content?: never;
+        };
+        /** @description The request failed because a conflict was detected with the given request params */
+        Conflict: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content?: never;
+        };
+        /** @description The request failed to process due to validation errors with the provided values */
+        ValidationErrors: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": components["schemas"]["ValidationErrors"];
+            };
+        };
+        /** @description the server encountered an unexpected condition that prevented it from fulfilling the request */
+        InternalServerError: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content?: never;
+        };
+        /** @description my custom response */
+        CustomResponse: {
+            headers: {
+                [name: string]: unknown;
+            };
+            content: {
+                "application/json": string;
+            };
+        };
+    };
     parameters: never;
     requestBodies: never;
     headers: never;

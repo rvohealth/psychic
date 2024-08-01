@@ -3,8 +3,11 @@ import * as fs from 'fs/promises'
 import * as path from 'path'
 import { DateTime } from 'luxon'
 import { Dream } from '@rvohealth/dream'
+import Psyconf from '../psyconf'
 
 export default async function loadRepl(context: Record<string, unknown>) {
+  await Psyconf.configure()
+
   const inflectionsPath = './src/conf/inflections'
   try {
     await import(inflectionsPath)

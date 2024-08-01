@@ -76,7 +76,7 @@ export default class OpenapiAppRenderer {
           ...(await renderer.toSchemaObject()),
         }
 
-        const endpointPayload = await renderer.toObject()
+        const endpointPayload = await renderer.toPathObject()
 
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const path = Object.keys(endpointPayload)[0]!

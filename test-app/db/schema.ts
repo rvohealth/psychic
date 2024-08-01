@@ -423,6 +423,14 @@ export const schema = {
         allowNull: false,
         isArray: false,
       },
+      favoriteBigint: {
+        coercedType: {} as IdType | null,
+        enumType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: true,
+        isArray: false,
+      },
       favoriteBigints: {
         coercedType: {} as Int8[] | null,
         enumType: null,
@@ -583,6 +591,14 @@ export const schema = {
         allowNull: false,
         isArray: false,
       },
+      requiredFavoriteBigint: {
+        coercedType: {} as IdType,
+        enumType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
       requiredFavoriteBigints: {
         coercedType: {} as Int8[],
         enumType: null,
@@ -720,7 +736,7 @@ export const schema = {
         isArray: false,
       },
     },
-    virtualColumns: ['password'],
+    virtualColumns: ['openapiVirtualSpecTest', 'openapiVirtualSpecTest2', 'password'],
     associations: {
       pets: {
         type: 'HasMany',
