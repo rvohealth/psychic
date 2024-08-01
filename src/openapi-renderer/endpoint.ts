@@ -391,10 +391,16 @@ export default class OpenapiEndpointRenderer<
   private parseResponses(): OpenapiResponses {
     const psyconf = getCachedPsyconfOrFail()
 
-    const responseData: OpenapiResponses = {
+    let responseData: OpenapiResponses = {
       ...DEFAULT_OPENAPI_RESPONSES,
       ...(psyconf.openapi?.defaults?.responses || {}),
-      [this.status || this.defaultStatus]: this.parseSerializerResponseShape(),
+    }
+
+    if (!this.responses?.['200'] && !this.responses?.['201'] && !this.responses?.['204']) {
+      responseData = {
+        ...responseData,
+        [this.status || this.defaultStatus]: this.parseSerializerResponseShape(),
+      }
     }
 
     Object.keys(this.responses || {}).forEach(statusCode => {
