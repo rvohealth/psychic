@@ -480,7 +480,6 @@ describe('OpenapiEndpointRenderer', () => {
                   type: 'object',
                   minProperties: 8,
                   maxProperties: 10,
-                  properties: {},
                   additionalProperties: {
                     oneOf: [{ type: 'string' }, { type: 'boolean' }],
                   },

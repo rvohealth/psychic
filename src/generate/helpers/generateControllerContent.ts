@@ -95,7 +95,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       case 'update':
         if (modelName)
           return `\
-  @OpenAPI({ status: 204 })
+  @OpenAPI(() => ${modelName}, { status: 204 })
   public async update() {
     //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    await ${camelize(modelName)}.update(this.paramsFor(${modelName}))

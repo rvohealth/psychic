@@ -1,5 +1,8 @@
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
+import ApiPetsController from '../../../../test-app/app/controllers/Api/PetsController'
+import PetsController from '../../../../test-app/app/controllers/PetsController'
 import UsersController from '../../../../test-app/app/controllers/UsersController'
+import Pet from '../../../../test-app/app/models/Pet'
 import Post from '../../../../test-app/app/models/Post'
 import User from '../../../../test-app/app/models/User'
 import { CommentTestingDoubleShorthandSerializer } from '../../../../test-app/app/serializers/CommentSerializer'
@@ -7,7 +10,7 @@ import PostSerializer from '../../../../test-app/app/serializers/PostSerializer'
 import UserSerializer, { UserWithPostsSerializer } from '../../../../test-app/app/serializers/UserSerializer'
 
 describe('OpenapiEndpointRenderer', () => {
-  describe('#toObject', () => {
+  describe('#toPathObject', () => {
     context('description and summary', () => {
       it('renders provided tags', async () => {
         const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
@@ -15,7 +18,7 @@ describe('OpenapiEndpointRenderer', () => {
           summary: 'world',
         })
 
-        const response = await renderer.toObject()
+        const response = await renderer.toPathObject()
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -37,7 +40,7 @@ describe('OpenapiEndpointRenderer', () => {
           tags: ['hello', 'world'],
         })
 
-        const response = await renderer.toObject()
+        const response = await renderer.toPathObject()
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -56,7 +59,7 @@ describe('OpenapiEndpointRenderer', () => {
       it('infers the method by examining routes', async () => {
         const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'show')
 
-        const response = await renderer.toObject()
+        const response = await renderer.toPathObject()
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -91,12 +94,13 @@ describe('OpenapiEndpointRenderer', () => {
           ],
         })
 
-        const response = await renderer.toObject()
+        const response = await renderer.toPathObject()
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/users/howyadoin': expect.objectContaining({
-              parameters: [
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              parameters: expect.arrayContaining([
                 {
                   in: 'path',
                   name: 'search',
@@ -106,7 +110,7 @@ describe('OpenapiEndpointRenderer', () => {
                     type: 'string',
                   },
                 },
-              ],
+              ]),
             }),
           }),
         )
@@ -124,12 +128,13 @@ describe('OpenapiEndpointRenderer', () => {
             ],
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response).toEqual(
             expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               '/users/{id}': expect.objectContaining({
-                parameters: [
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                parameters: expect.arrayContaining([
                   {
                     in: 'path',
                     name: 'id',
@@ -148,7 +153,7 @@ describe('OpenapiEndpointRenderer', () => {
                       type: 'string',
                     },
                   },
-                ],
+                ]),
               }),
             }),
           )
@@ -168,12 +173,13 @@ describe('OpenapiEndpointRenderer', () => {
           ],
         })
 
-        const response = await renderer.toObject()
+        const response = await renderer.toPathObject()
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/users/howyadoin': expect.objectContaining({
-              parameters: [
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              parameters: expect.arrayContaining([
                 {
                   in: 'query',
                   name: 'search',
@@ -182,9 +188,8 @@ describe('OpenapiEndpointRenderer', () => {
                   schema: {
                     type: 'string',
                   },
-                  allowReserved: true,
                 },
-              ],
+              ]),
             }),
           }),
         )
@@ -203,12 +208,13 @@ describe('OpenapiEndpointRenderer', () => {
             ],
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response).toEqual(
             expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               '/users/howyadoin': expect.objectContaining({
-                parameters: [
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                parameters: expect.arrayContaining([
                   {
                     in: 'query',
                     name: 'search',
@@ -219,7 +225,44 @@ describe('OpenapiEndpointRenderer', () => {
                     },
                     allowReserved: false,
                   },
-                ],
+                ]),
+              }),
+            }),
+          )
+        })
+      })
+
+      context('allowEmptyValue is overridden', () => {
+        it('applies override', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            query: [
+              {
+                name: 'search',
+                required: true,
+                description: 'the search term',
+                allowEmptyValue: true,
+              },
+            ],
+          })
+
+          const response = await renderer.toPathObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              '/users/howyadoin': expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                parameters: expect.arrayContaining([
+                  {
+                    in: 'query',
+                    name: 'search',
+                    required: true,
+                    description: 'the search term',
+                    schema: {
+                      type: 'string',
+                    },
+                    allowEmptyValue: true,
+                  },
+                ]),
               }),
             }),
           )
@@ -245,12 +288,13 @@ describe('OpenapiEndpointRenderer', () => {
           ],
         })
 
-        const response = await renderer.toObject()
+        const response = await renderer.toPathObject()
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/users/howyadoin': expect.objectContaining({
-              parameters: [
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              parameters: expect.arrayContaining([
                 {
                   in: 'header',
                   name: 'Authorization',
@@ -270,53 +314,100 @@ describe('OpenapiEndpointRenderer', () => {
                     format: 'date',
                   },
                 },
-              ],
+              ]),
             }),
           }),
         )
       })
 
-      context('allowReserved is overridden', () => {
-        it('applies override', async () => {
+      context('config-level header defaults', () => {
+        it('renders default headers', async () => {
           const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
-            query: [
+            headers: [
               {
-                name: 'search',
+                name: 'today',
                 required: true,
-                description: 'the search term',
-                allowReserved: false,
+                description: "today's date",
+                format: 'date',
               },
             ],
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response).toEqual(
             expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               '/users/howyadoin': expect.objectContaining({
-                parameters: [
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                parameters: expect.arrayContaining([
                   {
-                    in: 'query',
-                    name: 'search',
+                    in: 'header',
+                    name: 'custom-header',
                     required: true,
-                    description: 'the search term',
+                    description: 'custom header',
                     schema: {
                       type: 'string',
                     },
-                    allowReserved: false,
                   },
-                ],
+                  {
+                    in: 'header',
+                    name: 'today',
+                    required: true,
+                    description: "today's date",
+                    schema: {
+                      type: 'string',
+                      format: 'date',
+                    },
+                  },
+                ]),
               }),
             }),
           )
         })
+
+        context('when default headers are bypassed', () => {
+          it('does not render default headers', async () => {
+            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+              headers: [
+                {
+                  name: 'today',
+                  required: true,
+                  description: "today's date",
+                  format: 'date',
+                },
+              ],
+              omitDefaultHeaders: true,
+            })
+
+            const response = await renderer.toPathObject()
+            expect(response).toEqual(
+              expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                '/users/howyadoin': expect.objectContaining({
+                  parameters: [
+                    {
+                      in: 'header',
+                      name: 'today',
+                      required: true,
+                      description: "today's date",
+                      schema: {
+                        type: 'string',
+                        format: 'date',
+                      },
+                    },
+                  ],
+                }),
+              }),
+            )
+          })
+        })
       })
     })
 
-    context('body', () => {
-      it('renders body in the requestBody payload', async () => {
+    context('requestBody', () => {
+      it('renders requestBody in the requestBody payload', async () => {
         const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create', {
-          body: {
+          requestBody: {
             type: 'object',
             required: ['email', 'password'],
             properties: {
@@ -335,7 +426,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         })
 
-        const response = await renderer.toObject()
+        const response = await renderer.toPathObject()
         expect(response['/users'].post.requestBody).toEqual({
           content: {
             'application/json': {
@@ -369,8 +460,488 @@ describe('OpenapiEndpointRenderer', () => {
         it('does not provide request body', async () => {
           const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'show')
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/{id}'].get.requestBody).toBeUndefined()
+        })
+
+        context('for a POST http method', () => {
+          it('prvoides request body matching the model', async () => {
+            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+
+            const response = await renderer.toPathObject()
+            expect(response['/users'].post.requestBody).toEqual(
+              expect.objectContaining({
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                      properties: expect.objectContaining({
+                        bio: { type: 'string' },
+                        birthdate: { type: 'date', nullable: true },
+                        createdOn: { type: 'date' },
+                        email: { type: 'string' },
+                        favoriteBooleans: { type: 'boolean[]', nullable: true },
+                        favoriteCitext: { type: 'string', nullable: true },
+                        favoriteCitexts: {
+                          type: 'array',
+                          items: { type: 'string' },
+                          nullable: true,
+                        },
+                        favoriteDates: { type: 'date[]', nullable: true },
+                        favoriteDatetimes: {
+                          type: 'array',
+                          items: { type: 'date-time' },
+                          nullable: true,
+                        },
+                        favoriteIntegers: { type: 'integer[]', nullable: true },
+                        favoriteNumerics: {
+                          type: 'array',
+                          items: { type: 'number' },
+                          nullable: true,
+                        },
+                        favoriteTexts: {
+                          type: 'array',
+                          items: { type: 'string' },
+                          nullable: true,
+                        },
+                        name: { type: 'string', nullable: true },
+                        nicknames: {
+                          type: 'array',
+                          items: { type: 'string' },
+                          nullable: true,
+                        },
+                        notes: { type: 'string', nullable: true },
+                        passwordDigest: { type: 'string' },
+                        requiredFavoriteBooleans: { type: 'boolean[]' },
+                        requiredFavoriteCitext: { type: 'string' },
+                        requiredFavoriteCitexts: { type: 'array', items: { type: 'string' } },
+                        requiredFavoriteDates: { type: 'date[]' },
+                        requiredFavoriteDatetimes: { type: 'array', items: { type: 'date-time' } },
+                        requiredFavoriteIntegers: { type: 'integer[]' },
+                        requiredFavoriteNumerics: { type: 'array', items: { type: 'number' } },
+                        requiredFavoriteTexts: { type: 'array', items: { type: 'string' } },
+                        requiredNicknames: { type: 'array', items: { type: 'string' } },
+                      }),
+                    },
+                  },
+                },
+              }),
+            )
+          })
+
+          context('non-standard data types', () => {
+            context('bigint', () => {
+              it('returns string', async () => {
+                const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+
+                const response = await renderer.toPathObject()
+                expect(response['/users'].post.requestBody).toEqual(
+                  expect.objectContaining({
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                          properties: expect.objectContaining({
+                            requiredFavoriteBigint: { type: 'string' },
+                          }),
+                        },
+                      },
+                    },
+                  }),
+                )
+              })
+
+              context('bigint[]', () => {
+                it('returns string within an array', async () => {
+                  const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+
+                  const response = await renderer.toPathObject()
+                  expect(response['/users'].post.requestBody).toEqual(
+                    expect.objectContaining({
+                      content: {
+                        'application/json': {
+                          schema: {
+                            type: 'object',
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                            properties: expect.objectContaining({
+                              requiredFavoriteBigints: { type: 'array', items: { type: 'string' } },
+                            }),
+                          },
+                        },
+                      },
+                    }),
+                  )
+                })
+              })
+            })
+
+            context('uuid', () => {
+              it('returns string', async () => {
+                const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+
+                const response = await renderer.toPathObject()
+                expect(response['/users'].post.requestBody).toEqual(
+                  expect.objectContaining({
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                          properties: expect.objectContaining({
+                            uuid: { type: 'string' },
+                          }),
+                        },
+                      },
+                    },
+                  }),
+                )
+              })
+
+              context('uuid[]', () => {
+                it('returns string within an array', async () => {
+                  const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+
+                  const response = await renderer.toPathObject()
+                  expect(response['/users'].post.requestBody).toEqual(
+                    expect.objectContaining({
+                      content: {
+                        'application/json': {
+                          schema: {
+                            type: 'object',
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                            properties: expect.objectContaining({
+                              favoriteUuids: { type: 'array', items: { type: 'string' }, nullable: true },
+                            }),
+                          },
+                        },
+                      },
+                    }),
+                  )
+                })
+              })
+            })
+
+            context('json', () => {
+              it('returns object schema', async () => {
+                const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+
+                const response = await renderer.toPathObject()
+                expect(response['/users'].post.requestBody).toEqual(
+                  expect.objectContaining({
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                          properties: expect.objectContaining({
+                            jsonData: { type: 'object', nullable: true },
+                          }),
+                        },
+                      },
+                    },
+                  }),
+                )
+              })
+
+              context('json[]', () => {
+                it('returns object schema within an array', async () => {
+                  const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+
+                  const response = await renderer.toPathObject()
+                  expect(response['/users'].post.requestBody).toEqual(
+                    expect.objectContaining({
+                      content: {
+                        'application/json': {
+                          schema: {
+                            type: 'object',
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                            properties: expect.objectContaining({
+                              favoriteJsons: { type: 'array', items: { type: 'object' }, nullable: true },
+                            }),
+                          },
+                        },
+                      },
+                    }),
+                  )
+                })
+              })
+            })
+
+            context('jsonb', () => {
+              it('returns object schema', async () => {
+                const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+
+                const response = await renderer.toPathObject()
+                expect(response['/users'].post.requestBody).toEqual(
+                  expect.objectContaining({
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                          properties: expect.objectContaining({
+                            jsonbData: { type: 'object', nullable: true },
+                          }),
+                        },
+                      },
+                    },
+                  }),
+                )
+              })
+
+              context('jsonb[]', () => {
+                it('returns object schema within an array', async () => {
+                  const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+
+                  const response = await renderer.toPathObject()
+                  expect(response['/users'].post.requestBody).toEqual(
+                    expect.objectContaining({
+                      content: {
+                        'application/json': {
+                          schema: {
+                            type: 'object',
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                            properties: expect.objectContaining({
+                              favoriteJsonbs: { type: 'array', items: { type: 'object' }, nullable: true },
+                            }),
+                          },
+                        },
+                      },
+                    }),
+                  )
+                })
+              })
+            })
+
+            context('virtual columns', () => {
+              it('returns an anyOf statement, allowing all types', async () => {
+                const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+
+                const response = await renderer.toPathObject()
+                expect(response['/users'].post.requestBody).toEqual(
+                  expect.objectContaining({
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                          properties: expect.objectContaining({
+                            password: {
+                              anyOf: [
+                                { type: 'string', nullable: true },
+                                { type: 'number', nullable: true },
+                                { type: 'object', nullable: true },
+                              ],
+                            },
+                          }),
+                        },
+                      },
+                    },
+                  }),
+                )
+              })
+
+              context('for virtual attributes with explicit types specified', () => {
+                it('uses the provided type', async () => {
+                  const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+
+                  const response = await renderer.toPathObject()
+                  expect(response['/users'].post.requestBody).toEqual(
+                    expect.objectContaining({
+                      content: {
+                        'application/json': {
+                          schema: {
+                            type: 'object',
+                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                            properties: expect.objectContaining({
+                              openapiVirtualSpecTest: {
+                                type: 'string',
+                                nullable: true,
+                              },
+                              openapiVirtualSpecTest2: {
+                                type: 'array',
+                                items: {
+                                  type: 'string',
+                                },
+                              },
+                            }),
+                          },
+                        },
+                      },
+                    }),
+                  )
+                })
+              })
+            })
+
+            context('enums', () => {
+              it('renders enums as string with enum option', async () => {
+                const renderer = new OpenapiEndpointRenderer(() => Pet, PetsController, 'create')
+
+                const response = await renderer.toPathObject()
+                expect(response['/pets'].post.requestBody).toEqual(
+                  expect.objectContaining({
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                          properties: expect.objectContaining({
+                            species: { type: 'string', enum: ['cat', 'noncat'], nullable: true },
+                          }),
+                        },
+                      },
+                    },
+                  }),
+                )
+              })
+
+              it('renders enum[] as array with string with enum option', async () => {
+                const renderer = new OpenapiEndpointRenderer(() => Pet, PetsController, 'create')
+
+                const response = await renderer.toPathObject()
+                expect(response['/pets'].post.requestBody).toEqual(
+                  expect.objectContaining({
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                          properties: expect.objectContaining({
+                            favoriteTreats: {
+                              type: 'array',
+                              items: {
+                                type: 'string',
+                                enum: ['efishy feesh', 'snick snowcks'],
+                              },
+                              nullable: true,
+                            },
+                          }),
+                        },
+                      },
+                    },
+                  }),
+                )
+              })
+            })
+
+            context('requestBody is explicitly set to null', () => {
+              it('does not provide requestBody', async () => {
+                const renderer = new OpenapiEndpointRenderer(() => Pet, ApiPetsController, 'create', {
+                  requestBody: null,
+                })
+
+                const response = await renderer.toPathObject()
+                expect(response['/api/pets'].post.requestBody).toBeUndefined()
+              })
+            })
+
+            context('requestBody leverages only opt', () => {
+              it('only renders attributes specified in only array', async () => {
+                const renderer = new OpenapiEndpointRenderer(() => Pet, ApiPetsController, 'create', {
+                  requestBody: { only: ['species', 'name'] },
+                })
+
+                const response = await renderer.toPathObject()
+                expect(response['/api/pets'].post.requestBody).toEqual({
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          name: { type: 'string', nullable: true },
+                          species: {
+                            type: 'string',
+                            enum: ['cat', 'noncat'],
+                            nullable: true,
+                          },
+                        },
+                      },
+                    },
+                  },
+                })
+              })
+
+              context('requestBody leverages required opt', () => {
+                it('renders the required options in the required field', async () => {
+                  const renderer = new OpenapiEndpointRenderer(() => Pet, ApiPetsController, 'create', {
+                    requestBody: { only: ['species', 'name'], required: ['species'] },
+                  })
+
+                  const response = await renderer.toPathObject()
+                  expect(response['/api/pets'].post.requestBody).toEqual({
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          required: ['species'],
+                          properties: {
+                            name: { type: 'string', nullable: true },
+                            species: {
+                              type: 'string',
+                              enum: ['cat', 'noncat'],
+                              nullable: true,
+                            },
+                          },
+                        },
+                      },
+                    },
+                  })
+                })
+              })
+
+              context('requestBody leverages for opt', () => {
+                it('uses the model provided in the for option to determine request body shape', async () => {
+                  const renderer = new OpenapiEndpointRenderer(() => Pet, ApiPetsController, 'create', {
+                    requestBody: { for: User, only: ['email'], required: ['email'] },
+                  })
+
+                  const response = await renderer.toPathObject()
+                  expect(response['/api/pets'].post.requestBody).toEqual({
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          required: ['email'],
+                          properties: {
+                            email: { type: 'string' },
+                          },
+                        },
+                      },
+                    },
+                  })
+                })
+              })
+            })
+          })
+        })
+
+        context('for a PUT http method', () => {
+          it('prvoides request body matching the model', async () => {
+            const renderer = new OpenapiEndpointRenderer(() => Pet, PetsController, 'update')
+
+            const response = await renderer.toPathObject()
+            expect(response['/pets/{id}'].patch.requestBody).toEqual(
+              expect.objectContaining({
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                      properties: expect.objectContaining({
+                        collarCount: {
+                          nullable: true,
+                          type: 'string',
+                        },
+                      }),
+                    },
+                  },
+                },
+              }),
+            )
+          })
         })
       })
     })
@@ -380,7 +951,7 @@ describe('OpenapiEndpointRenderer', () => {
         it('system-level default responses are automatically provided', async () => {
           const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {})
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               400: {
@@ -398,11 +969,76 @@ describe('OpenapiEndpointRenderer', () => {
         it('config-level default responses are automatically provided', async () => {
           const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {})
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               490: {
                 $ref: '#/components/responses/CustomResponse',
+              },
+            }),
+          )
+        })
+
+        context('default responses are explicitly bypassed', () => {
+          it('config-level default responses are omitted', async () => {
+            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+              omitDefaultResponses: true,
+            })
+
+            const response = await renderer.toPathObject()
+            expect(response['/users/howyadoin'].get.responses).toEqual(
+              expect.not.objectContaining({
+                490: {
+                  $ref: '#/components/responses/CustomResponse',
+                },
+              }),
+            )
+          })
+        })
+      })
+
+      context('with a 204 response specified', () => {
+        it('does not render a response payload', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            status: 204,
+          })
+
+          const response = await renderer.toPathObject()
+          expect(response['/users/howyadoin'].get.responses['200']).toBeUndefined()
+          expect(response['/users/howyadoin'].get.responses['204']).toEqual({
+            $ref: '#/components/responses/NoContent',
+          })
+        })
+      })
+
+      context('with a default description specified', () => {
+        it('renders the default description in the response payload', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            status: 204,
+            defaultResponse: {
+              description: 'World',
+            },
+            responses: {
+              205: {
+                type: 'string',
+              },
+            },
+          })
+
+          const response = await renderer.toPathObject()
+          expect(response['/users/howyadoin'].get.responses['200']).toBeUndefined()
+          expect(response['/users/howyadoin'].get.responses['204']).toEqual({
+            description: 'World',
+            $ref: '#/components/responses/NoContent',
+          })
+          expect(response['/users/howyadoin'].get.responses['205']).toEqual(
+            expect.objectContaining({
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'string',
+                  },
+                },
               },
             }),
           )
@@ -415,7 +1051,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'extra',
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -439,7 +1075,7 @@ describe('OpenapiEndpointRenderer', () => {
               nullable: true,
             })
 
-            const response = await renderer.toObject()
+            const response = await renderer.toPathObject()
             expect(response['/users/howyadoin'].get.responses).toEqual(
               expect.objectContaining({
                 200: {
@@ -467,7 +1103,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -497,7 +1133,7 @@ describe('OpenapiEndpointRenderer', () => {
         it("uses the provided serializer, converting it's payload shape to openapi format", async () => {
           const renderer = new OpenapiEndpointRenderer(() => MyViewModel, UsersController, 'howyadoin', {})
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -519,7 +1155,7 @@ describe('OpenapiEndpointRenderer', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
           const renderer = new OpenapiEndpointRenderer(() => [User, Post], UsersController, 'howyadoin', {})
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -553,7 +1189,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -600,7 +1236,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -652,7 +1288,7 @@ describe('OpenapiEndpointRenderer', () => {
               },
             })
 
-            const response = await renderer.toObject()
+            const response = await renderer.toPathObject()
             expect(response['/users/howyadoin'].get.responses).toEqual(
               expect.objectContaining({
                 201: {
@@ -706,7 +1342,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -762,7 +1398,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -814,7 +1450,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -843,6 +1479,7 @@ describe('OpenapiEndpointRenderer', () => {
         it('returns valid openapi', async () => {
           const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
+            status: 201,
             responses: {
               201: {
                 $schema: 'Howyadoin',
@@ -850,7 +1487,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -863,6 +1500,24 @@ describe('OpenapiEndpointRenderer', () => {
                   },
                 },
               },
+            }),
+          )
+        })
+      })
+
+      context('with top-level arguments that should apply to the success response', () => {
+        it('applies top-level arguments to the correct response code', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            serializerKey: 'extra',
+            summary: 'hello',
+            description: 'world',
+          })
+
+          const response = await renderer.toPathObject()
+          expect(response['/users/howyadoin'].get).toEqual(
+            expect.objectContaining({
+              summary: 'hello',
+              description: 'world',
             }),
           )
         })
@@ -882,7 +1537,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -894,7 +1549,6 @@ describe('OpenapiEndpointRenderer', () => {
                       description: 'my description',
                       summary: 'my summary',
                       nullable: true,
-                      properties: {},
                     },
                   },
                 },
@@ -908,6 +1562,7 @@ describe('OpenapiEndpointRenderer', () => {
         it('returns valid openapi', async () => {
           const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
+            status: 201,
             responses: {
               201: {
                 type: 'string',
@@ -916,7 +1571,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -942,7 +1597,7 @@ describe('OpenapiEndpointRenderer', () => {
             many: true,
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -967,6 +1622,7 @@ describe('OpenapiEndpointRenderer', () => {
         it('includes extra response payloads', async () => {
           const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
+            status: 201,
             responses: {
               201: {
                 type: 'object',
@@ -998,7 +1654,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toObject()
+          const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {

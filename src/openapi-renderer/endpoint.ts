@@ -4,6 +4,7 @@ import {
   DreamSerializer,
   OpenapiAllTypes,
   OpenapiFormats,
+  OpenapiSchemaArray,
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
   OpenapiSchemaExpressionAllOf,
@@ -12,7 +13,7 @@ import {
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
   OpenapiSchemaProperties,
-  OpenapiShorthandPrimitiveTypes,
+  compact,
 } from '@rvohealth/dream'
 import PsychicController from '../controller'
 import PsychicDir from '../helpers/psychicdir'
@@ -20,9 +21,10 @@ import { getCachedPsyconfOrFail } from '../psyconf/cache'
 import { RouteConfig } from '../router/route-manager'
 import { HttpMethod } from '../router/types'
 import PsychicServer from '../server'
-import OpenapiBodySegmentRenderer from './body-segment'
+import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment'
 import { DEFAULT_OPENAPI_RESPONSES } from './defaults'
 import computedSerializerKeyOrFail from './helpers/computedSerializerKeyOrFail'
+import isBlankDescription from './helpers/isBlankDescription'
 import openapiRoute from './helpers/openapiRoute'
 import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
 
@@ -35,7 +37,7 @@ export default class OpenapiEndpointRenderer<
   private responses: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['responses']
   private serializerKey: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['serializerKey']
   private pathParams: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['pathParams']
-  private body: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['body']
+  private requestBody: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['requestBody']
   private headers: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['headers']
   private query: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['query']
   private status: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['status']
@@ -43,6 +45,9 @@ export default class OpenapiEndpointRenderer<
   private summary: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['summary']
   private description: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['description']
   private nullable: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['nullable']
+  private omitDefaultHeaders: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['omitDefaultHeaders']
+  private omitDefaultResponses: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['omitDefaultResponses']
+  private defaultResponse: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['defaultResponse']
   private serializers: { [key: string]: typeof DreamSerializer }
   private computedExtraComponents: { [key: string]: OpenapiSchemaObject } = {}
 
@@ -65,7 +70,7 @@ export default class OpenapiEndpointRenderer<
     private controllerClass: typeof PsychicController,
     private action: string,
     {
-      body,
+      requestBody,
       headers,
       many,
       query,
@@ -77,9 +82,12 @@ export default class OpenapiEndpointRenderer<
       description,
       nullable,
       summary,
+      omitDefaultHeaders,
+      omitDefaultResponses,
+      defaultResponse,
     }: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal> = {},
   ) {
-    this.body = body
+    this.requestBody = requestBody
     this.headers = headers
     this.many = many
     this.query = query
@@ -91,20 +99,32 @@ export default class OpenapiEndpointRenderer<
     this.summary = summary
     this.description = description
     this.nullable = nullable
+    this.omitDefaultHeaders = omitDefaultHeaders
+    this.omitDefaultResponses = omitDefaultResponses
+    this.defaultResponse = defaultResponse
   }
 
   /**
    * @internal
    *
-   * Generates an openapi object representing a single endpoint.
+   * Each Endpoint renderer contains both path and schema data
+   * for the respective endpoint. The OpenapiAppRenderer#toObject method
+   * examines each controller, scanning for @OpenAPI decorator calls,
+   * each of which instantiates a new OpenapiEndpointRenderer. The
+   * OpenapiAppRenderer#toObject will call both `#toPathObject` AND
+   * `#toSchemaObject`, combining them both into part of the final
+   * Openapi output.
+   *
+   * `#toPathObject` specifically builds the `paths` portion of the
+   * final openapi.json output
    */
-  public async toObject(): Promise<OpenapiEndpointResponse> {
+  public async toPathObject(): Promise<OpenapiEndpointResponse> {
     this.serializers = await PsychicDir.serializers()
 
     const [path, method, requestBody, responses] = await Promise.all([
       this.computedPath(),
       this.computedMethod(),
-      this.requestBody(),
+      this.computedRequestBody(),
       this.parseResponses(),
     ])
 
@@ -113,14 +133,9 @@ export default class OpenapiEndpointRenderer<
         parameters: [...this.headersArray(), ...(await this.pathParamsArray()), ...this.queryArray()],
         [method]: {
           tags: this.tags || [],
-          responses,
         },
       },
     } as unknown as OpenapiEndpointResponse
-
-    if (requestBody) {
-      output[path][method]['requestBody'] = requestBody
-    }
 
     if (this.summary) {
       output[path][method].summary = this.summary
@@ -130,17 +145,33 @@ export default class OpenapiEndpointRenderer<
       output[path][method].description = this.description
     }
 
+    if (requestBody) {
+      output[path][method]['requestBody'] = requestBody
+    }
+
+    output[path][method].responses = responses
+
     return output
   }
 
   /**
    * @internal
    *
-   * Generates the serializer's openapi schema based
-   * on first argument passed to each `@Attribute` decorator
-   * on the given serializer
+   * Each Endpoint renderer contains both path and schema data
+   * for the respective endpoint. The OpenapiAppRenderer#toObject method
+   * examines each controller, scanning for @OpenAPI decorator calls,
+   * each of which instantiates a new OpenapiEndpointRenderer. The
+   * OpenapiAppRenderer#toObject will call both `#toPathObject` AND
+   * `#toSchemaObject`, combining them both into part of the final
+   * Openapi output.
+   *
+   * `#toSchemaObject` specifically builds the `components.schema` portion of the
+   * final openapi.json output, adding any relevant entries that were uncovered
+   * while parsing the responses and provided callback function.
    */
   public async toSchemaObject(): Promise<Record<string, OpenapiSchemaBody>> {
+    this.computedExtraComponents = {}
+
     this.serializers = await PsychicDir.serializers()
     const serializerClasses = this.getSerializerClasses()
 
@@ -281,9 +312,20 @@ export default class OpenapiEndpointRenderer<
     await this._loadRoutes()
     const controllerActionString = await this.controllerClass.controllerActionPath(this.action)
 
-    const route = this.routes.find(
-      routeConfig => routeConfig.controllerActionString === controllerActionString,
-    )
+    // if the action is update, we want to specifically find the 'patch' route,
+    // otherwise we find any route that matches
+    let route =
+      this.action === 'update'
+        ? this.routes.find(
+            routeConfig =>
+              routeConfig.controllerActionString === controllerActionString &&
+              routeConfig.httpMethod === 'patch',
+          )
+        : this.routes.find(routeConfig => routeConfig.controllerActionString === controllerActionString)
+
+    if (!route)
+      route = this.routes.find(routeConfig => routeConfig.controllerActionString === controllerActionString)
+
     if (!route) throw new MissingControllerActionPairingInRoutes(this.controllerClass, this.action)
     return route
   }
@@ -319,8 +361,13 @@ export default class OpenapiEndpointRenderer<
    * "parameters" field for a single endpoint.
    */
   private headersArray(): OpenapiParameterResponse[] {
+    const psyconf = getCachedPsyconfOrFail()
+
+    const defaultHeaders = this.omitDefaultHeaders ? [] : psyconf.openapi?.defaults?.headers || []
+    const headers = [...defaultHeaders, ...(this.headers || [])] as OpenapiHeaderOption[]
+
     return (
-      this.headers?.map(header => {
+      headers.map(header => {
         const data = {
           in: 'header',
           name: header.name,
@@ -348,15 +395,26 @@ export default class OpenapiEndpointRenderer<
    */
   private queryArray(): OpenapiParameterResponse[] {
     return (
-      this.query?.map(param => ({
-        in: 'query',
-        ...param,
-        description: param.description || '',
-        schema: {
-          type: 'string',
-        },
-        allowReserved: param.allowReserved === undefined ? true : param.allowReserved,
-      })) || []
+      this.query?.map(param => {
+        const output = {
+          in: 'query',
+          ...param,
+          description: param.description || '',
+          schema: {
+            type: 'string',
+          },
+        } as OpenapiParameterResponse
+
+        if (typeof param.allowEmptyValue === 'boolean') {
+          output.allowEmptyValue = param.allowEmptyValue
+        }
+
+        if (typeof param.allowReserved === 'boolean') {
+          output.allowReserved = param.allowReserved
+        }
+
+        return output
+      }) || []
     )
   }
 
@@ -365,12 +423,19 @@ export default class OpenapiEndpointRenderer<
    *
    * Generates the requestBody portion of the endpoint
    */
-  private async requestBody(): Promise<OpenapiContent | undefined> {
-    if ((await this.computedMethod()) === 'get') return undefined
-    if (!this.body) return undefined
+  private async computedRequestBody(): Promise<OpenapiContent | undefined> {
+    const method = await this.computedMethod()
+    if (this.requestBody === null) return undefined
+
+    const httpMethodsThatAllowBody: HttpMethod[] = ['post', 'patch', 'put']
+    if (!httpMethodsThatAllowBody.includes(method)) return undefined
+
+    if (this.shouldAutogenerateBody()) {
+      return this.generateRequestBodyForModel()
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    const schema = this.recursivelyParseBody(this.body) as any
+    const schema = this.recursivelyParseBody(this.requestBody as OpenapiSchemaBodyShorthand) as any
     if (!schema) return undefined
 
     return {
@@ -386,28 +451,293 @@ export default class OpenapiEndpointRenderer<
   /**
    * @internal
    *
+   * determine if the requestBody is meant to identify a special shape
+   * used when requestBody is proxying off of the model CB. In these cases,
+   * an object with "only" and "required" fields can be passed.
+   *
+   * This method returns true if it detects that this is the case.
+   */
+  private shouldAutogenerateBody() {
+    const body = this.requestBody as OpenapiSchemaRequestBodyOnlyOption
+    if (!body) return true
+    if (body.only) return true
+    if (body.for) return true
+    if (body.required && (body as OpenapiSchemaObject).type !== 'object') return true
+    return false
+  }
+
+  /**
+   * @internal
+   *
+   * Generates a request body by examining the provided model callback.
+   * If the callback returns a single model, then all of the params for
+   * that model that are safe to ingest will be automatically added to
+   * the request body.
+   */
+  private generateRequestBodyForModel(): OpenapiContent | undefined {
+    const forDreamClass = (this.requestBody as OpenapiSchemaRequestBodyOnlyOption)?.for
+    const dreamClass = forDreamClass || this.getSingleDreamModelClassFromCb()
+    if (!dreamClass) return undefined
+
+    let paramSafeColumns = dreamClass.paramSafeColumnsOrFallback()
+    const only = (this.requestBody as OpenapiSchemaRequestBodyOnlyOption)?.only
+    if (only) {
+      paramSafeColumns = paramSafeColumns.filter(column => only.includes(column))
+    }
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const schema = dreamClass.prototype.schema
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+    const columns = schema[dreamClass.prototype.table]?.columns as object
+
+    const paramsShape: OpenapiSchemaObject = {
+      type: 'object',
+      properties: {},
+    }
+
+    const required = (this.requestBody as OpenapiSchemaRequestBodyOnlyOption)?.required
+    if (required) {
+      paramsShape.required = required
+    }
+
+    for (const columnName of paramSafeColumns) {
+      const columnMetadata = columns[columnName] as {
+        dbType: string
+        allowNull: boolean
+        isArray: boolean
+        enumValues: unknown[] | null
+      }
+
+      switch (columnMetadata?.dbType) {
+        case 'boolean':
+        case 'boolean[]':
+        case 'date':
+        case 'date[]':
+        case 'integer':
+        case 'integer[]':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: columnMetadata.dbType,
+            },
+          }
+          break
+
+        case 'character varying':
+        case 'citext':
+        case 'text':
+        case 'uuid':
+        case 'bigint':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: 'string',
+            },
+          }
+          break
+
+        case 'character varying[]':
+        case 'citext[]':
+        case 'text[]':
+        case 'uuid[]':
+        case 'bigint[]':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: 'array',
+              items: {
+                type: 'string',
+              },
+            },
+          }
+          break
+
+        case 'timestamp':
+        case 'timestamp with time zone':
+        case 'timestamp without time zone':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: 'date-time',
+            },
+          }
+          break
+
+        case 'timestamp[]':
+        case 'timestamp with time zone[]':
+        case 'timestamp without time zone[]':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: 'array',
+              items: {
+                type: 'date-time',
+              },
+            },
+          }
+          break
+
+        case 'json':
+        case 'jsonb':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: 'object',
+            },
+          }
+          break
+
+        case 'json[]':
+        case 'jsonb[]':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: 'array',
+              items: {
+                type: 'object',
+              },
+            },
+          }
+          break
+
+        case 'numeric':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: 'number',
+            },
+          }
+          break
+
+        case 'numeric[]':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: 'array',
+              items: {
+                type: 'number',
+              },
+            },
+          }
+          break
+
+        default:
+          if (dreamClass.isVirtualColumn(columnName as string)) {
+            const metadata = dreamClass['virtualAttributes'].find(
+              statement => statement.property === columnName,
+            )
+            if (metadata?.type) {
+              paramsShape.properties = {
+                ...paramsShape.properties,
+                [columnName]: this.recursivelyParseBody(metadata.type),
+              }
+            } else {
+              paramsShape.properties = {
+                ...paramsShape.properties,
+                [columnName]: {
+                  anyOf: [
+                    { type: 'string', nullable: true },
+                    { type: 'number', nullable: true },
+                    { type: 'object', nullable: true },
+                  ],
+                },
+              }
+            }
+          } else if (columnMetadata?.enumValues) {
+            if (columnMetadata.isArray) {
+              paramsShape.properties = {
+                ...paramsShape.properties,
+                [columnName]: {
+                  type: 'array',
+                  items: {
+                    type: 'string',
+                    enum: columnMetadata.enumValues,
+                  },
+                },
+              }
+            } else {
+              paramsShape.properties = {
+                ...paramsShape.properties,
+                [columnName]: {
+                  type: 'string',
+                  enum: columnMetadata.enumValues,
+                },
+              }
+            }
+          }
+      }
+
+      if (columnMetadata?.allowNull && paramsShape.properties![columnName]) {
+        ;(paramsShape.properties![columnName] as OpenapiSchemaObject).nullable = true
+      }
+    }
+
+    return {
+      content: {
+        'application/json': {
+          schema: this.recursivelyParseBody(paramsShape),
+        },
+      },
+    }
+  }
+
+  /**
+   * @internal
+   *
    * Generates the responses portion of the endpoint
    */
   private parseResponses(): OpenapiResponses {
     const psyconf = getCachedPsyconfOrFail()
 
+    const defaultResponses = this.omitDefaultResponses ? {} : psyconf.openapi?.defaults?.responses || {}
     let responseData: OpenapiResponses = {
       ...DEFAULT_OPENAPI_RESPONSES,
-      ...(psyconf.openapi?.defaults?.responses || {}),
+      ...defaultResponses,
     }
 
-    if (!this.responses?.['200'] && !this.responses?.['201'] && !this.responses?.['204']) {
+    const computedStatus = this.status || this.defaultStatus
+
+    if (this.status === 204) {
       responseData = {
         ...responseData,
-        [this.status || this.defaultStatus]: this.parseSerializerResponseShape(),
+        204: {
+          $ref: '#/components/responses/NoContent',
+        },
       }
+      responseData = this.applyDefaultResponseOptions(responseData, computedStatus)
+    } else if (!this.responses?.['200'] && !this.responses?.['201'] && !this.responses?.['204']) {
+      responseData = {
+        ...responseData,
+        [computedStatus]: this.parseSerializerResponseShape(),
+      }
+      responseData = this.applyDefaultResponseOptions(responseData, computedStatus)
     }
 
     Object.keys(this.responses || {}).forEach(statusCode => {
       const statusCodeInt = parseInt(statusCode)
-      responseData[statusCodeInt] = {
-        description: this.responses![statusCodeInt].description || this.action,
-        content: {
+      const response = this.responses![statusCodeInt] as OpenapiSchemaBodyShorthand & { description?: string }
+      responseData[statusCodeInt] = {}
+
+      if (statusCodeInt === computedStatus) {
+        responseData = this.applyDefaultResponseOptions(responseData, statusCodeInt)
+      }
+
+      if (!(responseData[statusCodeInt] as { description: string }).description && response.description) {
+        ;(responseData[statusCodeInt] as { description: string }).description = response.description!
+      } else {
+        // this is not necessarily the best, but if there is no description provided,
+        // the openapi document is invalid. This is here to stop that from happening,
+        // though it is a stop gap for a better solution.
+        ;(responseData[statusCodeInt] as { description: string }).description = this.action
+      }
+
+      if (isBlankDescription(this.responses![statusCodeInt])) {
+        ;(responseData[statusCodeInt] as OpenapiContent) = {
+          ...this.responses![statusCodeInt],
+        }
+      } else {
+        ;(responseData[statusCodeInt] as OpenapiContent).content = {
           'application/json': {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             schema: this.recursivelyParseBody(
@@ -415,9 +745,22 @@ export default class OpenapiEndpointRenderer<
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ) as any,
           },
-        },
+        }
       }
     })
+
+    return responseData
+  }
+
+  private applyDefaultResponseOptions<T extends OpenapiResponses>(responseData: T, statusCodeInt: number): T {
+    // if (this.summary) {
+    //   // responseData[statusCodeInt].summary = this.summary
+    // }
+
+    if (this.defaultResponse?.description) {
+      ;(responseData[statusCodeInt] as { description: string }).description =
+        this.defaultResponse?.description
+    }
 
     return responseData
   }
@@ -569,9 +912,7 @@ export default class OpenapiEndpointRenderer<
    * recursive function used to parse nested
    * openapi shorthand objects
    */
-  private recursivelyParseBody(
-    bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
-  ): OpenapiSchemaBody {
+  private recursivelyParseBody(bodySegment: OpenapiBodySegment): OpenapiSchemaBody {
     const { results, extraComponents } = new OpenapiBodySegmentRenderer({
       bodySegment,
       serializers: this.serializers,
@@ -601,10 +942,29 @@ export default class OpenapiEndpointRenderer<
     const dreamsOrSerializers = this.dreamsOrSerializersCb()
 
     if (Array.isArray(dreamsOrSerializers)) {
-      return dreamsOrSerializers.map(s => this.getSerializerClass(s))
+      return compact(dreamsOrSerializers.map(s => this.getSerializerClass(s)))
     } else {
-      return [this.getSerializerClass(dreamsOrSerializers)]
+      return compact([this.getSerializerClass(dreamsOrSerializers)])
     }
+  }
+
+  /**
+   * @internal
+   *
+   * Returns the dream model provided to the callback function.
+   * If the callback function does not return a single dream model,
+   * then this method will return null.
+   */
+  private getSingleDreamModelClassFromCb(): typeof Dream | null {
+    if (!this.dreamsOrSerializersCb) return null
+    const dreamsOrSerializers = this.dreamsOrSerializersCb()
+
+    if (Array.isArray(dreamsOrSerializers)) {
+      return null
+    }
+
+    if ((dreamsOrSerializers as typeof Dream).isDream) return dreamsOrSerializers as typeof Dream
+    return null
   }
 
   /**
@@ -665,18 +1025,31 @@ export interface OpenapiEndpointRendererOpts<
   pathParams?: OpenapiPathParamOption[]
   headers?: OpenapiHeaderOption[]
   query?: OpenapiQueryOption[]
-  body?: OpenapiSchemaBodyShorthand
+  requestBody?: OpenapiSchemaBodyShorthand | OpenapiSchemaRequestBodyOnlyOption | null
   tags?: string[]
   description?: string
   summary?: string
   responses?: {
-    [statusCode: number]: OpenapiSchemaBodyShorthand & { description?: string }
+    [statusCode: number]: (OpenapiSchemaBodyShorthand & { description?: string }) | { description: string }
   }
+  defaultResponse?: OpenapiEndpointRendererDefaultResponseOption
   serializerKey?: InstanceType<NonArrayT> extends { serializers: { [key: string]: typeof DreamSerializer } }
     ? keyof InstanceType<NonArrayT>['serializers' & keyof InstanceType<NonArrayT>]
     : undefined
   status?: number
   nullable?: boolean
+  omitDefaultHeaders?: boolean
+  omitDefaultResponses?: boolean
+}
+
+export interface OpenapiEndpointRendererDefaultResponseOption {
+  description?: string
+}
+
+export interface OpenapiSchemaRequestBodyOnlyOption {
+  for?: typeof Dream
+  only?: string[]
+  required?: string[]
 }
 
 export interface OpenapiHeaderOption {
@@ -691,6 +1064,7 @@ export interface OpenapiQueryOption {
   required: boolean
   description?: string
   allowReserved?: boolean
+  allowEmptyValue?: boolean
 }
 
 export interface OpenapiPathParamOption {
@@ -731,6 +1105,8 @@ export interface OpenapiParameterResponse {
     type: 'string' | { type: 'object'; properties: OpenapiSchemaProperties }
     format?: 'date' | 'date-time'
   }
+  allowReserved?: boolean
+  allowEmptyValue?: boolean
 }
 
 export type OpenapiHeaderType = 'header' | 'body' | 'path' | 'query'
@@ -748,6 +1124,8 @@ export interface OpenapiMethodBody {
 }
 
 export interface OpenapiResponses {
+  summary?: string
+  description?: string
   [statusCode: number]: OpenapiContent | OpenapiSchemaExpressionRef | { description: string }
 }
 
@@ -760,6 +1138,8 @@ export type OpenapiContent = {
             properties?: OpenapiSchemaProperties
             required?: string[]
           }
+        | OpenapiSchemaObject
+        | OpenapiSchemaArray
         | OpenapiSchemaExpressionRef
         | OpenapiSchemaExpressionAnyOf
         | OpenapiSchemaExpressionAllOf

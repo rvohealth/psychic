@@ -27,11 +27,20 @@ export default (psy: Psyconf) => {
   // set options to configure openapi integration
   psy.set('openapi', {
     defaults: {
+      headers: [
+        {
+          name: 'custom-header',
+          required: true,
+          description: 'custom header',
+        },
+      ],
+
       responses: {
         490: {
           $ref: '#/components/responses/CustomResponse',
         },
       },
+
       components: {
         responses: {
           CustomResponse: {

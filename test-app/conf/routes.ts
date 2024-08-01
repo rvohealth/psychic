@@ -12,7 +12,10 @@ export default (r: PsychicRouter) => {
   r.get('api-ping', 'Api/Users#ping')
   r.post('cast-param-test', 'ParamsTest#testCastParam')
   r.get('users/howyadoin', 'Users#howyadoin')
-  r.resources('users', { only: ['show', 'create', 'index', 'destroy'] })
+  r.resources('users')
+  r.resources('pets', { only: ['create', 'update'] }, r => {
+    r.put('update2', 'Pets#update2')
+  })
 
   // hooks tests
   r.get('users-before-all-test', 'Users#beforeAllTest')
@@ -27,9 +30,10 @@ export default (r: PsychicRouter) => {
       r.get('ping', 'Users#ping')
       r.resources('users', { only: ['index'] })
     })
-    r.resources('users', r => {
+    r.resources('users', { only: ['create', 'update'] }, r => {
       r.resources('pets')
     })
+    r.resources('pets', { only: ['create', 'update'] })
   })
 
   r.scope('scoped-things', r => {

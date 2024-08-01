@@ -42,7 +42,7 @@ export default class ApiV1PostsController extends AuthedController {
     //    this.ok(post)
   }
 
-  @OpenAPI({ status: 204 })
+  @OpenAPI(() => Post, { status: 204 })
   public async update() {
     //    const post = await this.post()
     //    await post.update(this.paramsFor(Post))
@@ -115,7 +115,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
     //    this.ok(healthPost)
   }
 
-  @OpenAPI({ status: 204 })
+  @OpenAPI(() => HealthPost, { status: 204 })
   public async update() {
     //    const healthPost = await this.healthPost()
     //    await healthPost.update(this.paramsFor(HealthPost))

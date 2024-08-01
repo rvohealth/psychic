@@ -13,7 +13,7 @@ import { cachePsyconf, getCachedPsyconf } from './cache'
 import { PsychicRedisConnectionOptions } from './helpers/redisOptions'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
 import { Dreamconf, OpenapiSchemaBody } from '@rvohealth/dream'
-import { OpenapiContent, OpenapiResponses } from '../openapi-renderer/endpoint'
+import { OpenapiContent, OpenapiHeaderOption, OpenapiResponses } from '../openapi-renderer/endpoint'
 
 export default class Psyconf {
   /**
@@ -326,6 +326,7 @@ export interface PsychicOpenapiOptions {
   outputFilename?: `${string}.json`
   clientOutputFilename?: `${string}.ts`
   defaults?: {
+    headers?: OpenapiHeaderOption[]
     responses?: OpenapiResponses
     components?: {
       [key: string]: {

@@ -35,7 +35,7 @@ export {
   OpenapiSchema,
   OpenapiPathParamOption as OpenapiUriOption,
 } from './openapi-renderer/endpoint'
-export { default as Psyconf } from './psyconf'
+export { PsychicOpenapiOptions, default as Psyconf } from './psyconf'
 export { PsychicRedisConnectionOptions } from './psyconf/helpers/redisOptions'
 export { UUID } from './psyconf/types'
 export { default as PsychicRouter } from './router'

@@ -35,6 +35,8 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('required_favorite_numerics', sql`numeric[]`, col => col.defaultTo('{}').notNull())
     .addColumn('favorite_booleans', sql`boolean[]`)
     .addColumn('required_favorite_booleans', sql`boolean[]`, col => col.defaultTo('{}').notNull())
+    .addColumn('favorite_bigint', sql`bigint`)
+    .addColumn('required_favorite_bigint', sql`bigint`, col => col.defaultTo(0).notNull())
     .addColumn('favorite_bigints', sql`bigint[]`)
     .addColumn('required_favorite_bigints', sql`bigint[]`, col => col.defaultTo('{}').notNull())
     .addColumn('favorite_integers', sql`integer[]`)
