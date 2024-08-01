@@ -21,6 +21,7 @@ import { RouteConfig } from '../router/route-manager'
 import { HttpMethod } from '../router/types'
 import PsychicServer from '../server'
 import OpenapiBodySegmentRenderer from './body-segment'
+import { DEFAULT_OPENAPI_RESPONSES } from './defaults'
 import computedSerializerKeyOrFail from './helpers/computedSerializerKeyOrFail'
 import openapiRoute from './helpers/openapiRoute'
 import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
@@ -619,15 +620,6 @@ export default class OpenapiEndpointRenderer<
   }
 }
 
-export const DEFAULT_OPENAPI_RESPONSES = {
-  400: {
-    $ref: '#/components/responses/BadRequest',
-  },
-  422: {
-    $ref: '#/components/responses/UnprocessableEntity',
-  },
-} as OpenapiResponses
-
 export class MissingControllerActionPairingInRoutes extends Error {
   constructor(
     private controllerClass: typeof PsychicController,
@@ -710,8 +702,8 @@ export interface OpenapiSchema {
   }
   paths: OpenapiEndpointResponse
   components: {
-    schemas: {
-      [key: string]: OpenapiSchemaBody
+    [key: string]: {
+      [key: string]: OpenapiSchemaBody | OpenapiContent
     }
   }
 }
@@ -754,7 +746,7 @@ export interface OpenapiResponses {
 }
 
 export type OpenapiContent = {
-  content: {
+  content?: {
     [format in OpenapiFormats]: {
       schema:
         | {

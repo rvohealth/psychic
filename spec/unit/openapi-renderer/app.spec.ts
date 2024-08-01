@@ -210,6 +210,25 @@ describe('OpenapiAppRenderer', () => {
               required: ['howyadoin'],
               properties: { howyadoin: { type: 'number', format: 'double' } },
             },
+
+            ValidationErrors: {
+              type: 'object',
+              properties: {
+                errors: {
+                  type: 'object',
+                  additionalProperties: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+
+            CustomSchema: {
+              type: 'string',
+            },
           }),
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -223,6 +242,51 @@ describe('OpenapiAppRenderer', () => {
                   },
                 },
               },
+            },
+
+            // 400
+            BadRequest: {
+              description:
+                'The server would not process the request due to something the server considered to be a client error',
+            },
+
+            // 401
+            Unauthorized: {
+              description:
+                'The request was not successful because it lacks valid authentication credentials for the requested resource',
+            },
+
+            // 403
+            Forbidden: {
+              description: 'Understood the request, but refused to process it',
+            },
+
+            // 404
+            NotFound: {
+              description: 'The specified resource was not found',
+            },
+
+            // 409
+            Conflict: {
+              description: 'The request failed because a conflict was detected with the given request params',
+            },
+
+            // 422
+            ValidationErrors: {
+              description: 'The request failed to process due to validation errors with the provided values',
+              content: {
+                'application/json': {
+                  schema: {
+                    $ref: '#/components/schemas/ValidationErrors',
+                  },
+                },
+              },
+            },
+
+            // 500
+            InternalServerError: {
+              description:
+                'the server encountered an unexpected condition that prevented it from fulfilling the request',
             },
           }),
         },

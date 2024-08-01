@@ -7,6 +7,7 @@ import PsychicDir from '../helpers/psychicdir'
 import { HttpMethod, HttpMethods } from '../router/types'
 import { OpenapiSchema } from './endpoint'
 import { getCachedPsyconfOrFail } from '../psyconf/cache'
+import { DEFAULT_OPENAPI_COMPONENT_SCHEMAS, DEFAULT_OPENAPI_COMPONENT_RESPONSES } from './defaults'
 
 export default class OpenapiAppRenderer {
   /**
@@ -50,11 +51,18 @@ export default class OpenapiAppRenderer {
       },
       paths: {},
       components: {
-        schemas: {},
         ...(psyconf.openapi?.defaults?.components || {}),
+        schemas: {
+          ...DEFAULT_OPENAPI_COMPONENT_SCHEMAS,
+          ...((psyconf.openapi?.defaults?.components?.schemas ||
+            {}) as typeof DEFAULT_OPENAPI_COMPONENT_SCHEMAS),
+        },
+        responses: {
+          ...DEFAULT_OPENAPI_COMPONENT_RESPONSES,
+          ...(psyconf.openapi?.defaults?.components?.responses || {}),
+        },
       },
     }
-    console.log(finalOutput)
 
     for (const controllerName of Object.keys(controllers)) {
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
