@@ -63,14 +63,15 @@ describe('OpenapiEndpointRenderer', () => {
             '/users/{id}': expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               get: expect.objectContaining({
-                responses: {
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                responses: expect.objectContaining({
                   '200': {
                     description: 'show',
                     content: {
                       'application/json': { schema: { $ref: '#/components/schemas/User' } },
                     },
                   },
-                },
+                }),
               }),
             }),
           }),
@@ -374,7 +375,40 @@ describe('OpenapiEndpointRenderer', () => {
       })
     })
 
-    context('response', () => {
+    context('responses', () => {
+      context('system-level default responses', () => {
+        it('system-level default responses are automatically provided', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {})
+
+          const response = await renderer.toObject()
+          expect(response['/users/howyadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              400: {
+                $ref: '#/components/responses/BadRequest',
+              },
+              422: {
+                $ref: '#/components/responses/UnprocessableEntity',
+              },
+            }),
+          )
+        })
+      })
+
+      context('config-level default responses', () => {
+        it('config-level default responses are automatically provided', async () => {
+          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {})
+
+          const response = await renderer.toObject()
+          expect(response['/users/howyadoin'].get.responses).toEqual(
+            expect.objectContaining({
+              490: {
+                $ref: '#/components/responses/CustomResponse',
+              },
+            }),
+          )
+        })
+      })
+
       context('with a dream model passed', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
           const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
@@ -397,30 +431,30 @@ describe('OpenapiEndpointRenderer', () => {
             }),
           )
         })
-      })
 
-      context('when nullable is set to true in the Openapi decorator call', () => {
-        it('makes the top level serializer nullable', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
-            serializerKey: 'withRecentPost',
-            nullable: true,
-          })
+        context('when nullable is set to true in the Openapi decorator call', () => {
+          it('makes the top level serializer nullable', async () => {
+            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+              serializerKey: 'withRecentPost',
+              nullable: true,
+            })
 
-          const response = await renderer.toObject()
-          expect(response['/users/howyadoin'].get.responses).toEqual(
-            expect.objectContaining({
-              200: {
-                description: 'howyadoin',
-                content: {
-                  'application/json': {
-                    schema: {
-                      allOf: [{ $ref: '#/components/schemas/UserWithRecentPost' }, { nullable: true }],
+            const response = await renderer.toObject()
+            expect(response['/users/howyadoin'].get.responses).toEqual(
+              expect.objectContaining({
+                200: {
+                  description: 'howyadoin',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        allOf: [{ $ref: '#/components/schemas/UserWithRecentPost' }, { nullable: true }],
+                      },
                     },
                   },
                 },
-              },
-            }),
-          )
+              }),
+            )
+          })
         })
       })
 

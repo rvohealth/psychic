@@ -12,7 +12,8 @@ import PsychicDir from '../helpers/psychicdir'
 import { cachePsyconf, getCachedPsyconf } from './cache'
 import { PsychicRedisConnectionOptions } from './helpers/redisOptions'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
-import { Dreamconf } from '@rvohealth/dream'
+import { Dreamconf, OpenapiSchemaBody } from '@rvohealth/dream'
+import { OpenapiContent, OpenapiResponses } from '../openapi-renderer/endpoint'
 
 export default class Psyconf {
   /**
@@ -48,7 +49,6 @@ export default class Psyconf {
   public useWs: boolean = false
   public useRedis: boolean = false
   public appName: string = 'untitled app'
-  public clientSchemaFilename: `${string}.ts` = 'schema.ts'
   public encryptionKey: string
   public port?: number
   public corsOptions: CorsOptions = {}
@@ -324,4 +324,13 @@ export interface PsychicSslCredentials {
 export interface PsychicOpenapiOptions {
   schemaDelimeter?: string
   outputFilename?: `${string}.json`
+  clientOutputFilename?: `${string}.ts`
+  defaults?: {
+    responses: OpenapiResponses
+    components?: {
+      [key: string]: {
+        [key: string]: OpenapiSchemaBody | OpenapiContent
+      }
+    }
+  }
 }

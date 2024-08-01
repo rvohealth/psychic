@@ -19,8 +19,8 @@ describe('OpenapiAppRenderer', () => {
             parameters: [],
             get: {
               tags: [],
-              summary: '',
-              responses: {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
                 '200': {
                   description: 'justforspecs',
                   content: {
@@ -32,7 +32,7 @@ describe('OpenapiAppRenderer', () => {
                   },
                 },
                 '204': { description: 'no content' },
-              },
+              }),
             },
           },
 
@@ -40,8 +40,8 @@ describe('OpenapiAppRenderer', () => {
             parameters: [],
             post: {
               tags: [],
-              summary: '',
-              responses: {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
                 201: {
                   description: 'create',
                   content: {
@@ -52,12 +52,12 @@ describe('OpenapiAppRenderer', () => {
                     },
                   },
                 },
-              },
+              }),
             },
             get: {
               tags: [],
-              summary: '',
-              responses: {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
                 200: {
                   description: 'index',
                   content: {
@@ -71,7 +71,7 @@ describe('OpenapiAppRenderer', () => {
                     },
                   },
                 },
-              },
+              }),
             },
           },
 
@@ -90,24 +90,24 @@ describe('OpenapiAppRenderer', () => {
             ],
             get: {
               tags: [],
-              summary: '',
-              responses: {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
                 '200': {
                   description: 'show',
                   content: {
                     'application/json': { schema: { $ref: '#/components/schemas/UserWithPosts' } },
                   },
                 },
-              },
+              }),
             },
 
             delete: {
-              responses: {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
                 '204': {
                   description: 'no content',
                 },
-              },
-              summary: '',
+              }),
               tags: [],
             },
           }),
@@ -209,6 +209,20 @@ describe('OpenapiAppRenderer', () => {
               type: 'object',
               required: ['howyadoin'],
               properties: { howyadoin: { type: 'number', format: 'double' } },
+            },
+          }),
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          responses: expect.objectContaining({
+            CustomResponse: {
+              description: 'my custom response',
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'string',
+                  },
+                },
+              },
             },
           }),
         },
