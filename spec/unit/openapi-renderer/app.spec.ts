@@ -31,7 +31,6 @@ describe('OpenapiAppRenderer', () => {
                     },
                   },
                 },
-                '204': { description: 'no content' },
               }),
             },
           },

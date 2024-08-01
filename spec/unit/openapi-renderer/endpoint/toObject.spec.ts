@@ -387,7 +387,7 @@ describe('OpenapiEndpointRenderer', () => {
                 $ref: '#/components/responses/BadRequest',
               },
               422: {
-                $ref: '#/components/responses/UnprocessableEntity',
+                $ref: '#/components/responses/ValidationErrors',
               },
             }),
           )
