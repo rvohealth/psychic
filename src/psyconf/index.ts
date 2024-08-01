@@ -326,7 +326,7 @@ export interface PsychicOpenapiOptions {
   outputFilename?: `${string}.json`
   clientOutputFilename?: `${string}.ts`
   defaults?: {
-    responses: OpenapiResponses
+    responses?: OpenapiResponses
     components?: {
       [key: string]: {
         [key: string]: OpenapiSchemaBody | OpenapiContent
