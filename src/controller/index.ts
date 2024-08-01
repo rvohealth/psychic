@@ -1,9 +1,6 @@
 import { Dream, DreamParamSafeAttributes, DreamSerializer } from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import background from '../background'
-import Psyconf from '../psyconf'
-import getControllerKey from '../psyconf/helpers/getControllerKey'
-import getModelKey from '../psyconf/helpers/getModelKey'
 import { ControllerHook } from '../controller/hooks'
 import BadRequest from '../error/http/bad-request'
 import Conflict from '../error/http/conflict'
@@ -15,6 +12,9 @@ import HttpStatusCodeMap, { HttpStatusSymbol } from '../error/http/status-codes'
 import Unauthorized from '../error/http/unauthorized'
 import UnprocessableEntity from '../error/http/unprocessable-entity'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint'
+import Psyconf from '../psyconf'
+import getControllerKey from '../psyconf/helpers/getControllerKey'
+import getModelKey from '../psyconf/helpers/getModelKey'
 import Params, { ParamsCastOptions, ParamsForOpts } from '../server/params'
 import Session, { CustomSessionCookieOptions } from '../session'
 
@@ -234,52 +234,48 @@ export default class PsychicController {
     const openapiData = (this.constructor as typeof PsychicController).openapi[this.action]
     this.res.status(openapiData?.['status'] || 200)
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return this.json(data, opts)
+    this.json(data, opts)
   }
 
   public ok<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return this.json(data, opts)
+    this.json(data, opts)
   }
 
   public created<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
     this.res.status(201)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return this.json(data, opts)
+    this.json(data, opts)
   }
 
   public accepted<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
     this.res.status(202)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-    return this.json(data, opts)
+    this.json(data, opts)
   }
 
   public noContent() {
-    return this.res.sendStatus(204)
+    this.res.sendStatus(204)
   }
 
   public setStatus(status: number | HttpStatusSymbol) {
     const resolvedStatus =
       status.constructor === Number ? status : parseInt(HttpStatusCodeMap[status] as string)
-    return this.res.status(resolvedStatus)
+    this.res.status(resolvedStatus)
   }
 
   public send(message: number | HttpStatusSymbol) {
-    if (message.constructor === Number) {
-      return this.res.status(message).send()
+    if (typeof message === 'number') {
+      this.res.status(message).send()
     } else {
-      const statusLookup = HttpStatusCodeMap[message as HttpStatusSymbol]
+      const statusLookup = HttpStatusCodeMap[message]
       if (typeof statusLookup === 'string') {
-        return this.res.status(parseInt(statusLookup)).send()
+        this.res.status(parseInt(statusLookup)).send()
+      } else {
+        this.res.send(message)
       }
     }
-
-    return this.res.send(message)
   }
 
   public redirect(path: string) {
-    return this.res.redirect(path)
+    this.res.redirect(path)
   }
 
   // 400

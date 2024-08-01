@@ -7,27 +7,23 @@ export class SpecRequest {
   private server: PsychicServer | undefined
 
   public async get(uri: string, expectedStatus: number, opts: SpecRequestOptsGet = {}): Promise<Response> {
-    return await this.makeRequest('get', uri, expectedStatus, opts)
+    return await this.makeRequest('get', uri, expectedStatus, opts as SpecRequestOptsAll)
   }
 
   public async post(uri: string, expectedStatus: number, opts: SpecRequestOptsPost = {}): Promise<Response> {
-    return await this.makeRequest('post', uri, expectedStatus, opts)
+    return await this.makeRequest('post', uri, expectedStatus, opts as SpecRequestOptsAll)
   }
 
   public async put(uri: string, expectedStatus: number, opts: SpecRequestOptsPost = {}): Promise<Response> {
-    return await this.makeRequest('put', uri, expectedStatus, opts)
+    return await this.makeRequest('put', uri, expectedStatus, opts as SpecRequestOptsAll)
   }
 
   public async patch(uri: string, expectedStatus: number, opts: SpecRequestOptsPost = {}): Promise<Response> {
-    return await this.makeRequest('patch', uri, expectedStatus, opts)
+    return await this.makeRequest('patch', uri, expectedStatus, opts as SpecRequestOptsAll)
   }
 
-  public async delete(
-    uri: string,
-    expectedStatus: number,
-    opts: SpecRequestOptsPost = {},
-  ): Promise<Response> {
-    return await this.makeRequest('delete', uri, expectedStatus, opts)
+  public async delete(uri: string, expectedStatus: number, opts: SpecRequestOptsGet = {}): Promise<Response> {
+    return await this.makeRequest('delete', uri, expectedStatus, opts as SpecRequestOptsAll)
   }
 
   public async init() {
@@ -40,22 +36,31 @@ export class SpecRequest {
     expectedStatus: number,
     opts: SpecRequestSessionOpts = {},
   ): Promise<ReturnType<typeof supertest>> {
-    return await new Promise(async (accept, reject) => {
-      const server = await createPsychicServer()
-      const session = supersession(server)
+    return await new Promise((accept, reject) => {
+      createPsychicServer()
+        .then(server => {
+          const session = supersession(server)
 
-      // supersession is borrowed from a non-typescript repo, which
-      // does not have strong types around http methods, so we need to any cast
-      ;(session[(opts.httpMethod || 'post') as keyof typeof session] as any)(uri)
-        .send(credentials)
-        .expect(expectedStatus)
-        .query(opts.query || {})
-        .set(opts.headers || {})
-        .end((err: Error) => {
-          if (err) return reject(err)
+          // supersession is borrowed from a non-typescript repo, which
+          // does not have strong types around http methods, so we need to any cast
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any
+          ;(session[(opts.httpMethod || 'post') as keyof typeof session] as any)(uri)
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            .send(credentials)
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            .expect(expectedStatus)
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            .query(opts.query || {})
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            .set(opts.headers || {})
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+            .end((err: Error) => {
+              if (err) return reject(err)
 
-          return accept(session)
+              return accept(session)
+            })
         })
+        .catch(() => null)
     })
   }
 
@@ -110,11 +115,13 @@ export interface SpecRequestOptsAll extends SpecRequestOpts {
 }
 
 export interface SpecRequestOptsGet extends SpecRequestOpts {
-  query?: Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query?: any
 }
 
 export interface SpecRequestOptsPost extends SpecRequestOpts {
-  data?: Record<string, unknown>
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  data?: any
 }
 
 export interface SpecRequestOpts {
