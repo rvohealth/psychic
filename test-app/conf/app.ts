@@ -45,6 +45,11 @@ export default (psy: Psyconf) => {
             },
           },
         },
+        schemas: {
+          CustomSchema: {
+            type: 'string',
+          },
+        },
       },
     },
   })

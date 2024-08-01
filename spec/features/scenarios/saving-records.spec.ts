@@ -25,7 +25,8 @@ describe('a visitor attempts to save a record', () => {
 
   context('with a record that is invalid at DB level', () => {
     it('does not save, throws 422', async () => {
-      await request.agent(server.app).post('/failed-to-save-test').expect(422)
+      const res = await request.agent(server.app).post('/failed-to-save-test').expect(422)
+      expect(res.body).toEqual({ errors: { email: ['contains'] } })
     })
   })
 
