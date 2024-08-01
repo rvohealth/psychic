@@ -40,7 +40,7 @@ export async function clientApiPath() {
 
 export async function clientApiFileName(): Promise<string> {
   const psyconf = getCachedPsyconfOrFail()
-  return await new Promise(accept => accept(psyconf.clientSchemaFilename))
+  return await new Promise(accept => accept(psyconf.openapi?.clientOutputFilename || 'schema.ts'))
 }
 
 export async function modelsPath() {

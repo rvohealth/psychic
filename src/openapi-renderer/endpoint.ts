@@ -112,8 +112,6 @@ export default class OpenapiEndpointRenderer<
         parameters: [...this.headersArray(), ...(await this.pathParamsArray()), ...this.queryArray()],
         [method]: {
           tags: this.tags || [],
-          summary: this.summary,
-          description: this.description,
           responses,
         },
       },
@@ -121,6 +119,14 @@ export default class OpenapiEndpointRenderer<
 
     if (requestBody) {
       output[path][method]['requestBody'] = requestBody
+    }
+
+    if (this.summary) {
+      output[path][method].summary = this.summary
+    }
+
+    if (this.description) {
+      output[path][method].description = this.description
     }
 
     return output
@@ -382,7 +388,11 @@ export default class OpenapiEndpointRenderer<
    * Generates the responses portion of the endpoint
    */
   private parseResponses(): OpenapiResponses {
+    const psyconf = getCachedPsyconfOrFail()
+
     const responseData: OpenapiResponses = {
+      ...DEFAULT_OPENAPI_RESPONSES,
+      ...(psyconf.openapi?.defaults?.responses || {}),
       [this.status || this.defaultStatus]: this.parseSerializerResponseShape(),
     }
 
@@ -609,6 +619,15 @@ export default class OpenapiEndpointRenderer<
   }
 }
 
+export const DEFAULT_OPENAPI_RESPONSES = {
+  400: {
+    $ref: '#/components/responses/BadRequest',
+  },
+  422: {
+    $ref: '#/components/responses/UnprocessableEntity',
+  },
+} as OpenapiResponses
+
 export class MissingControllerActionPairingInRoutes extends Error {
   constructor(
     private controllerClass: typeof PsychicController,
@@ -725,12 +744,13 @@ export type OpenapiMethodResponse = {
 export interface OpenapiMethodBody {
   tags: string[]
   summary: string
+  description: string
   requestBody: OpenapiContent
   responses: OpenapiResponses
 }
 
 export interface OpenapiResponses {
-  [statusCode: number]: OpenapiContent | { description: string }
+  [statusCode: number]: OpenapiContent | OpenapiSchemaExpressionRef | { description: string }
 }
 
 export type OpenapiContent = {

@@ -24,6 +24,31 @@ export default (psy: Psyconf) => {
   // set to true if you want to also attach a client app to your project.
   psy.apiOnly = false
 
+  // set options to configure openapi integration
+  psy.set('openapi', {
+    defaults: {
+      responses: {
+        490: {
+          $ref: '#/components/responses/CustomResponse',
+        },
+      },
+      components: {
+        responses: {
+          CustomResponse: {
+            description: 'my custom response',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+      },
+    },
+  })
+
   // set options to pass to express.json when middleware is booted
   psy.set('json', {
     limit: '20mb',

@@ -6,6 +6,7 @@ import openapiJsonPath from '../helpers/openapiJsonPath'
 import PsychicDir from '../helpers/psychicdir'
 import { HttpMethod, HttpMethods } from '../router/types'
 import { OpenapiSchema } from './endpoint'
+import { getCachedPsyconfOrFail } from '../psyconf/cache'
 
 export default class OpenapiAppRenderer {
   /**
@@ -31,6 +32,7 @@ export default class OpenapiAppRenderer {
    */
   public static async toObject(): Promise<OpenapiSchema> {
     const controllers = await PsychicDir.controllers()
+    const psyconf = getCachedPsyconfOrFail()
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const packageJson = (await import(path.join(projectRootPath(), 'package.json'))).default as {
@@ -49,8 +51,10 @@ export default class OpenapiAppRenderer {
       paths: {},
       components: {
         schemas: {},
+        ...(psyconf.openapi?.defaults?.components || {}),
       },
     }
+    console.log(finalOutput)
 
     for (const controllerName of Object.keys(controllers)) {
       // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
