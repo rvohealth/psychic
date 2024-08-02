@@ -44,7 +44,7 @@ export class UserWithPostsSerializer extends UserSummarySerializer {
 }
 
 export class UserWithPostsMultiType2Serializer extends UserSummarySerializer {
-  @RendersMany(() => [Post, User], { serializer: 'summary' })
+  @RendersMany(() => [Post, User], { serializerKey: 'summary' })
   public posts: Post[]
 }
 
