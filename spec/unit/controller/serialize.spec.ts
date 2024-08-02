@@ -50,7 +50,7 @@ describe('PsychicController', () => {
       it('identifies serializer attached to model class and uses it to serialize', async () => {
         class MyController extends PsychicController {
           public async index() {
-            this.ok([...(await User.all()), ...(await Pet.all())], { serializer: 'summary' })
+            this.ok([...(await User.all()), ...(await Pet.all())], { serializerKey: 'summary' })
           }
 
           public async show() {

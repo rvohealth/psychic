@@ -198,7 +198,7 @@ export default class PsychicController {
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    const SerializerClass = lookup?.[1] || (data as any).serializers?.[opts.serializer || 'default']
+    const SerializerClass = lookup?.[1] || (data as any).serializers?.[opts.serializerKey || 'default']
     if (SerializerClass) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return new SerializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
@@ -390,6 +390,6 @@ export type RenderOptions<
     : U['serializers' & keyof U] extends object
       ? keyof U['serializers' & keyof U]
       : never,
-> = { serializer?: SerializerType }
+> = { serializerKey?: SerializerType }
 
 export const controllerSerializerIndex = new ControllerSerializerIndex()
