@@ -15,7 +15,13 @@ import OpenapiEndpointRenderer from '../openapi-renderer/endpoint'
 import Psyconf from '../psyconf'
 import getControllerKey from '../psyconf/helpers/getControllerKey'
 import getModelKey from '../psyconf/helpers/getModelKey'
-import Params, { ParamsCastOptions, ParamsForOpts } from '../server/params'
+import Params, {
+  ParamsCastOptions,
+  ParamsForOpts,
+  ParamValidationError,
+  ValidatedAllowsNull,
+  ValidatedReturnType,
+} from '../server/params'
 import Session, { CustomSessionCookieOptions } from '../session'
 
 type SerializerResult = {
@@ -51,6 +57,8 @@ export const PsychicParamsPrimitiveLiterals = [
 export interface PsychicParamsDictionary {
   [key: string]: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[]
 }
+
+class InvalidDotNotationPath extends Error {}
 
 export default class PsychicController {
   public static get isPsychicController() {
@@ -152,7 +160,48 @@ export default class PsychicController {
       | (typeof PsychicParamsPrimitiveLiterals)[number][]
       | RegExp,
   >(key: string, expectedType: ExpectedType, opts?: OptsType) {
-    return Params.cast(this.param<string>(key), expectedType, opts)
+    try {
+      return this._castParam(key.split('.'), this.params, expectedType, opts)
+    } catch (error) {
+      if (error instanceof InvalidDotNotationPath)
+        throw new ParamValidationError(`Invalid dot notation in castParam: ${key}`)
+      throw error
+    }
+  }
+
+  private _castParam<
+    const EnumType extends readonly string[],
+    OptsType extends ParamsCastOptions<EnumType>,
+    ExpectedType extends
+      | (typeof PsychicParamsPrimitiveLiterals)[number]
+      | (typeof PsychicParamsPrimitiveLiterals)[number][]
+      | RegExp,
+    ValidatedType extends ValidatedReturnType<ExpectedType>,
+    AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
+    FinalReturnType extends AllowNullOrUndefined extends true
+      ? ValidatedType | null | undefined
+      : ValidatedType,
+  >(
+    keys: string[],
+    params: PsychicParamsDictionary,
+    expectedType: ExpectedType,
+    opts?: OptsType,
+  ): FinalReturnType {
+    const key = keys.shift() as string
+    if (!keys.length) return Params.cast(params[key] as PsychicParamsPrimitive, expectedType, opts)
+
+    const nestedParams = params[key]
+
+    if (nestedParams === undefined) {
+      if (opts?.allowNull) return null as FinalReturnType
+      throw new InvalidDotNotationPath()
+    } else if (Array.isArray(nestedParams)) {
+      throw new InvalidDotNotationPath()
+    } else if (typeof nestedParams !== 'object') {
+      throw new InvalidDotNotationPath()
+    }
+
+    return this._castParam(keys, nestedParams as PsychicParamsDictionary, expectedType, opts)
   }
 
   public paramsFor<

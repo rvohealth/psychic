@@ -1,21 +1,21 @@
-import { DateTime } from 'luxon'
 import {
+  CalendarDate,
+  camelize,
+  compact,
   Dream,
   DreamAttributes,
-  camelize,
-  snakeify,
   DreamParamSafeAttributes,
-  CalendarDate,
-  compact,
   DreamParamSafeColumnNames,
+  snakeify,
 } from '@rvohealth/dream'
+import { DateTime } from 'luxon'
 import {
   PsychicParamsDictionary,
   PsychicParamsPrimitive,
   PsychicParamsPrimitiveLiterals,
 } from '../controller'
-import { isObject } from '../helpers/typechecks'
 import isUuid from '../helpers/isUuid'
+import { isObject } from '../helpers/typechecks'
 
 export default class Params {
   /**
@@ -281,7 +281,6 @@ export default class Params {
    * ```
    */
   public static cast<
-    T extends typeof Params,
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
     ExpectedType extends
@@ -293,7 +292,7 @@ export default class Params {
     FinalReturnType extends AllowNullOrUndefined extends true
       ? ValidatedType | null | undefined
       : ValidatedType,
-  >(this: T, param: PsychicParamsPrimitive, expectedType: ExpectedType, opts?: OptsType): FinalReturnType {
+  >(param: PsychicParamsPrimitive, expectedType: ExpectedType, opts?: OptsType): FinalReturnType {
     return new this().cast(param, expectedType, opts) as FinalReturnType
   }
 
@@ -545,7 +544,7 @@ export default class Params {
 
 export class ParamValidationError extends Error {}
 
-type ValidatedReturnType<ExpectedType> = ExpectedType extends RegExp
+export type ValidatedReturnType<ExpectedType> = ExpectedType extends RegExp
   ? string
   : ExpectedType extends 'string'
     ? string
@@ -589,7 +588,7 @@ type ValidatedReturnType<ExpectedType> = ExpectedType extends RegExp
                                           ? EnumValue
                                           : never
 
-type ValidatedAllowsNull<ExpectedType, OptsValue> = ExpectedType extends { allowNull: infer R }
+export type ValidatedAllowsNull<ExpectedType, OptsValue> = ExpectedType extends { allowNull: infer R }
   ? R extends true
     ? true
     : R extends false
