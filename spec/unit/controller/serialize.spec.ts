@@ -47,7 +47,7 @@ describe('PsychicController', () => {
     })
 
     context('without a serializer explicitly bound to the controller', () => {
-      it('identifies serializer attached to model class and uses it to serialize', async () => {
+      it.only('identifies serializer attached to model class and uses it to serialize', async () => {
         class MyController extends PsychicController {
           public async index() {
             this.ok([...(await User.all()), ...(await Pet.all())], { serializerKey: 'summary' })
@@ -156,9 +156,6 @@ describe('PsychicController', () => {
         public get serializers() {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return {
-            default: User2Serializer,
-            summary: User2SummarySerializer,
-            extra: User2ExtraSerializer,
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any
         }
@@ -187,6 +184,12 @@ describe('PsychicController', () => {
           return this.passthroughData.howyadoin
         }
       }
+
+      User2.register('serializers', {
+        default: User2Serializer,
+        summary: User2SummarySerializer,
+        extra: User2ExtraSerializer,
+      })
 
       class MyController extends PsychicController {
         public async show() {

@@ -979,9 +979,9 @@ export default class OpenapiEndpointRenderer<
       return dreamOrSerializerOrViewModel as typeof DreamSerializer
     } else {
       const modelClass = dreamOrSerializerOrViewModel as typeof Dream
-      return modelClass.prototype.serializers[
-        (this.serializerKey || 'default') as keyof typeof modelClass.prototype.serializers
-      ] as typeof DreamSerializer
+      return modelClass['serializers'][
+        (this.serializerKey || 'default') as keyof (typeof modelClass)['serializers']
+      ]
     }
   }
 }

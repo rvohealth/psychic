@@ -10,13 +10,6 @@ export default class Comment extends ApplicationModel {
     return 'comments' as const
   }
 
-  public get serializers() {
-    return {
-      default: CommentSerializer,
-      summary: CommentSummarySerializer,
-    } as const
-  }
-
   public id: DreamColumn<Comment, 'id'>
   public body: DreamColumn<Comment, 'body'>
   public createdAt: DreamColumn<Comment, 'createdAt'>
@@ -26,3 +19,11 @@ export default class Comment extends ApplicationModel {
   public post: Post
   public postId: DreamColumn<Comment, 'postId'>
 }
+
+Comment.register('serializers', {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  default: CommentSerializer<any, any>,
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  summary: CommentSummarySerializer<any, any>,
+})

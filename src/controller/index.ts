@@ -1,4 +1,9 @@
-import { Dream, DreamParamSafeAttributes, DreamSerializer } from '@rvohealth/dream'
+import {
+  Dream,
+  DreamParamSafeAttributes,
+  DreamSerializer,
+  inferSerializerFromDreamOrViewModel,
+} from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import background from '../background'
 import { ControllerHook } from '../controller/hooks'
@@ -197,10 +202,14 @@ export default class PsychicController {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    const SerializerClass = lookup?.[1] || (data as any).serializers?.[opts.serializerKey || 'default']
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+    const serializerClass = inferSerializerFromDreamOrViewModel(data as any)
+    console.log({ serializerClass, lookup }, (data as any).constructor['serializers'])
+
+    const SerializerClass =
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      lookup?.[1] || serializerClass || (data as any).serializers?.[opts.serializerKey || 'default']
     if (SerializerClass) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       return new SerializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
     }
 

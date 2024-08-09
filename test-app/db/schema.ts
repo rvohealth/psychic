@@ -18,6 +18,7 @@ export const schema = {
     createdAtField: 'createdAt',
     updatedAtField: 'updatedAt',
     deletedAtField: 'deletedAt',
+    serializerKeys: ['default', 'summary'],
     scopes: {
       default: [],
       named: [],
@@ -80,6 +81,7 @@ export const schema = {
     createdAtField: 'createdAt',
     updatedAtField: 'updatedAt',
     deletedAtField: 'deletedAt',
+    serializerKeys: [],
     scopes: {
       default: [],
       named: [],
@@ -144,6 +146,7 @@ export const schema = {
     createdAtField: 'createdAt',
     updatedAtField: 'updatedAt',
     deletedAtField: 'deletedAt',
+    serializerKeys: ['additional', 'default', 'summary', 'withAssociation'],
     scopes: {
       default: [],
       named: [],
@@ -302,6 +305,7 @@ export const schema = {
     createdAtField: 'createdAt',
     updatedAtField: 'updatedAt',
     deletedAtField: 'deletedAt',
+    serializerKeys: ['default', 'summary', 'withComments', 'withRecentComment'],
     scopes: {
       default: [],
       named: [],
@@ -378,6 +382,7 @@ export const schema = {
     createdAtField: 'createdAt',
     updatedAtField: 'updatedAt',
     deletedAtField: 'deletedAt',
+    serializerKeys: ['default', 'extra', 'summary', 'withPosts', 'withRecentPost'],
     scopes: {
       default: [],
       named: [],

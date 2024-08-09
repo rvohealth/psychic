@@ -13,15 +13,6 @@ export default class Post extends ApplicationModel {
     return 'posts' as const
   }
 
-  public get serializers() {
-    return {
-      default: PostSerializer,
-      summary: PostSummarySerializer,
-      withRecentComment: PostWithRecentCommentSerializer,
-      withComments: PostWithCommentsSerializer,
-    } as const
-  }
-
   public id: DreamColumn<Post, 'id'>
   public body: DreamColumn<Post, 'body'>
   public createdAt: DreamColumn<Post, 'createdAt'>
@@ -37,3 +28,17 @@ export default class Post extends ApplicationModel {
   @HasOne(() => Comment, { order: { id: 'desc' } })
   public recentComment: Comment | null
 }
+
+Post.register('serializers', {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  default: PostSerializer<any, any>,
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  summary: PostSummarySerializer<any, any>,
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  withRecentComment: PostWithRecentCommentSerializer<any, any>,
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  withComments: PostWithCommentsSerializer<any, any>,
+})

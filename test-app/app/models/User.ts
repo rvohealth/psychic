@@ -22,16 +22,6 @@ export default class User extends ApplicationModel {
     return 'users' as const
   }
 
-  public get serializers() {
-    return {
-      default: UserSerializer,
-      summary: UserSummarySerializer,
-      extra: UserExtraSerializer,
-      withPosts: UserWithPostsSerializer,
-      withRecentPost: UserWithRecentPostSerializer,
-    }
-  }
-
   public id: DreamColumn<User, 'id'>
   public name: DreamColumn<User, 'name'>
   public nicknames: DreamColumn<User, 'nicknames'>
@@ -123,3 +113,11 @@ export default class User extends ApplicationModel {
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
   public async _testBackground(userId: any, arg: string) {}
 }
+
+User.register('serializers', {
+  default: UserSerializer,
+  summary: UserSummarySerializer,
+  extra: UserExtraSerializer,
+  withPosts: UserWithPostsSerializer,
+  withRecentPost: UserWithRecentPostSerializer,
+})
