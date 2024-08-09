@@ -2,6 +2,7 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Params } from '../../../src'
 import PsychicController from '../../../src/controller'
 import Psyconf from '../../../src/psyconf'
+import { ParamValidationError } from '../../../src/server/params'
 import User from '../../../test-app/app/models/User'
 
 describe('PsychicController', () => {
@@ -24,7 +25,16 @@ describe('PsychicController', () => {
 
     beforeEach(() => {
       const req = getMockReq({
-        body: { id: 1, name: 'howyadoin', createdAt: 'hello', updatedAt: 'birld', deletedAt: 'sometimeago' },
+        body: {
+          id: 1,
+          name: 'howyadoin',
+          createdAt: 'hello',
+          updatedAt: 'birld',
+          deletedAt: 'sometimeago',
+          subBody: { hello: 'world' },
+          dotNotationToArray: ['a'],
+          dotNotationToString: 'a',
+        },
       })
       const res = getMockRes().res
       controller = new PsychicController(req, res, { config: new Psyconf(), action: 'hello' })
@@ -34,6 +44,52 @@ describe('PsychicController', () => {
       const spy = jest.spyOn(Params, 'cast').mockReturnValue('chalupas dujour')
       expect(controller.castParam('name', 'string', { allowNull: true })).toEqual('chalupas dujour')
       expect(spy).toHaveBeenCalledWith('howyadoin', 'string', { allowNull: true })
+    })
+
+    it('can traverse dot notation', () => {
+      const spy = jest.spyOn(Params, 'cast')
+      expect(controller.castParam('subBody.hello', 'string')).toEqual('world')
+      expect(spy).toHaveBeenCalledWith('world', 'string', undefined)
+    })
+
+    context('when specifying an invalid type for the nested attribute', () => {
+      it('throws ParamValidationError', () => {
+        expect(() => controller.castParam('subBody.hello', 'number')).toThrow(ParamValidationError)
+      })
+    })
+
+    context('when the specified sub-object doesn’t exist', () => {
+      it('throws ParamValidationError', () => {
+        expect(() => controller.castParam('invalidSubBody.hello', 'string')).toThrow(ParamValidationError)
+      })
+    })
+
+    context('when dot notation specifies a non-object', () => {
+      it('throws ParamValidationError', () => {
+        expect(() => controller.castParam('dotNotationToString.hello', 'string')).toThrow(
+          ParamValidationError,
+        )
+      })
+    })
+
+    context('when dot notation specifies a an array', () => {
+      it('throws ParamValidationError', () => {
+        expect(() => controller.castParam('dotNotationToArray.hello', 'string')).toThrow(ParamValidationError)
+      })
+    })
+
+    context('with allowNull', () => {
+      it('can traverse dot notation', () => {
+        const spy = jest.spyOn(Params, 'cast')
+        expect(controller.castParam('subBody.hello', 'string', { allowNull: true })).toEqual('world')
+        expect(spy).toHaveBeenCalledWith('world', 'string', { allowNull: true })
+      })
+
+      context('when the specified sub-object doesn’t exist', () => {
+        it('returns null', () => {
+          expect(controller.castParam('invalidSubBody.hello', 'string', { allowNull: true })).toBeNull()
+        })
+      })
     })
   })
 
