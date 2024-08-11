@@ -29,16 +29,20 @@ export default class Post extends ApplicationModel {
   public recentComment: Comment | null
 }
 
-Post.register('serializers', {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  default: PostSerializer<any, any>,
+void new Promise<void>(accept => accept())
+  .then(() =>
+    Post.register('serializers', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      default: PostSerializer<any, any>,
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  summary: PostSummarySerializer<any, any>,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      summary: PostSummarySerializer<any, any>,
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  withRecentComment: PostWithRecentCommentSerializer<any, any>,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      withRecentComment: PostWithRecentCommentSerializer<any, any>,
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  withComments: PostWithCommentsSerializer<any, any>,
-})
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      withComments: PostWithCommentsSerializer<any, any>,
+    }),
+  )
+  .catch()

@@ -34,9 +34,13 @@ export default class Pet extends ApplicationModel {
   public userId: IdType
 }
 
-Pet.register('serializers', {
-  default: PetSerializer,
-  summary: PetSummarySerializer,
-  additional: PetAdditionalSerializer,
-  withAssociation: PetWithAssociationSerializer,
-})
+void new Promise<void>(accept => accept())
+  .then(() =>
+    Pet.register('serializers', {
+      default: PetSerializer,
+      summary: PetSummarySerializer,
+      additional: PetAdditionalSerializer,
+      withAssociation: PetWithAssociationSerializer,
+    }),
+  )
+  .catch()

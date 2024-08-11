@@ -114,10 +114,14 @@ export default class User extends ApplicationModel {
   public async _testBackground(userId: any, arg: string) {}
 }
 
-User.register('serializers', {
-  default: UserSerializer,
-  summary: UserSummarySerializer,
-  extra: UserExtraSerializer,
-  withPosts: UserWithPostsSerializer,
-  withRecentPost: UserWithRecentPostSerializer,
-})
+void new Promise<void>(accept => accept())
+  .then(() =>
+    User.register('serializers', {
+      default: UserSerializer,
+      summary: UserSummarySerializer,
+      extra: UserExtraSerializer,
+      withPosts: UserWithPostsSerializer,
+      withRecentPost: UserWithRecentPostSerializer,
+    }),
+  )
+  .catch()

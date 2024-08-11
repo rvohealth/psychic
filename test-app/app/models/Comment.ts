@@ -20,10 +20,14 @@ export default class Comment extends ApplicationModel {
   public postId: DreamColumn<Comment, 'postId'>
 }
 
-Comment.register('serializers', {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  default: CommentSerializer<any, any>,
+void new Promise<void>(accept => accept())
+  .then(() =>
+    Comment.register('serializers', {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      default: CommentSerializer<any, any>,
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  summary: CommentSummarySerializer<any, any>,
-})
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      summary: CommentSummarySerializer<any, any>,
+    }),
+  )
+  .catch()

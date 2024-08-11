@@ -93,7 +93,7 @@ describe('PsychicController', () => {
             this.word = word
           }
 
-          public get serializers() {
+          public static get serializers() {
             return { default: GreetSerializer } as const
           }
         }
@@ -105,7 +105,7 @@ describe('PsychicController', () => {
             this.word = word
           }
 
-          public get serializers() {
+          public static get serializers() {
             return { default: GreetSerializer2 } as const
           }
         }
@@ -153,7 +153,7 @@ describe('PsychicController', () => {
 
     context('with default passthrough data set on the controller', () => {
       class User2 extends User {
-        public get serializers() {
+        public static get serializers() {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
