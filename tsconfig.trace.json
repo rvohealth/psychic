@@ -1,0 +1,26 @@
+{
+  "compilerOptions": {
+    "module": "commonjs",
+    "moduleResolution": "node",
+    "target": "es2021",
+    "strict": true,
+    "noImplicitAny": true,
+    "experimentalDecorators": true,
+    "emitDecoratorMetadata": true,
+    "resolveJsonModule": true,
+    "esModuleInterop": true,
+    "declaration": true,
+    "skipLibCheck": true,
+
+    /* do not require all properties to be initialized in constructor */
+    "strictPropertyInitialization": false,
+
+    /* with esnext as target, need to specify this so that Object.defineProperty works */
+    "useDefineForClassFields": false,
+
+    /* rootDir and outDir together help maintain dist/src folder */
+    "rootDir": "./",
+    "outDir": "./dist"
+  },
+  "include": ["test-app/**/*"]
+}
