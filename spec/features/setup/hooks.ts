@@ -1,7 +1,13 @@
 import { truncate } from '@rvohealth/dream/spec-helpers'
-import { Psyconf } from '../../../src'
+import initializePsychicApplication from '../../../test-app/cli/helpers/initializePsychicApplication'
 
 beforeEach(async () => {
-  await Psyconf.configure()
+  try {
+    await initializePsychicApplication()
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
+
   await truncate()
 })

@@ -18,7 +18,6 @@ export function devEnvBool(env: AllowedDevBoolEnv) {
 
 export type AllowedEnv =
   | 'NODE_ENV'
-  | 'APP_ROOT_PATH'
   | 'APP_ENCRYPTION_KEY'
   | 'WORKER_COUNT'
   | 'PSYCHIC_CORE_DEVELOPMENT'

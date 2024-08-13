@@ -1,7 +1,7 @@
 import { DateTime } from 'luxon'
 import ApplicationModel from '../ApplicationModel'
 
-export default class User extends ApplicationModel {
+export default class HealthUser extends ApplicationModel {
   public get table() {
     return 'health_users' as const
   }

@@ -1,6 +1,8 @@
 import fs from 'fs/promises'
-import absoluteFilePath from '../../src/helpers/absoluteFilePath'
+import { getCachedPsychicApplicationOrFail } from '../../src/psychic-application/cache'
+import path from 'path'
 
 export default async function readTmpFile() {
-  return (await fs.readFile(absoluteFilePath('spec/tmp.txt'))).toString()
+  const psychicApp = getCachedPsychicApplicationOrFail()
+  return (await fs.readFile(path.join(psychicApp.appRoot, '../spec/tmp.txt'))).toString()
 }

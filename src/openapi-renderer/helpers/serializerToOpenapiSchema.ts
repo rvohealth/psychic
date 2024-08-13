@@ -10,7 +10,6 @@ import {
   uniq,
 } from '@rvohealth/dream'
 import OpenapiBodySegmentRenderer, { OpenapiEndpointParseResults } from '../body-segment'
-import computedSerializerKeyOrFail from './computedSerializerKeyOrFail'
 
 /**
  * @internal
@@ -28,7 +27,7 @@ export default function serializerToOpenapiSchema({
   schemaDelimeter: string
 }): Record<string, OpenapiSchemaObject> {
   const attributes = serializerClass['attributeStatements']
-  const serializerKey = computedSerializerKeyOrFail(serializerClass, serializers, schemaDelimeter)
+  const serializerKey = serializerClass.openapiName
 
   const serializerObject: OpenapiSchemaObject = {
     type: 'object',
@@ -148,11 +147,7 @@ function addSingleSerializerAssociationToOutput({
   schemaDelimeter: string
 }) {
   const associatedSerializer = associatedSerializers[0]
-  const associatedSerializerKey = computedSerializerKeyOrFail(
-    associatedSerializer,
-    serializers,
-    schemaDelimeter,
-  )
+  const associatedSerializerKey = associatedSerializer.openapiName
 
   finalOutput[serializerKey].required = uniq([
     ...(finalOutput[serializerKey].required || []),
@@ -217,11 +212,7 @@ function addMultiSerializerAssociationToOutput({
   const anyOf: (OpenapiSchemaExpressionRef | OpenapiSchemaArray)[] = []
 
   associatedSerializers.forEach(associatedSerializer => {
-    const associatedSerializerKey = computedSerializerKeyOrFail(
-      associatedSerializer,
-      serializers,
-      schemaDelimeter,
-    )
+    const associatedSerializerKey = associatedSerializer.openapiName
 
     finalOutput[serializerKey].required = uniq([
       ...(finalOutput[serializerKey].required || []),

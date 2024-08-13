@@ -1,13 +1,13 @@
-import { projectRootPath, uniq } from '@rvohealth/dream'
+import { uniq } from '@rvohealth/dream'
 import fs from 'fs/promises'
 import path from 'path'
 import PsychicController from '../controller'
+import { envBool } from '../helpers/envValue'
 import openapiJsonPath from '../helpers/openapiJsonPath'
-import PsychicDir from '../helpers/psychicdir'
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import { HttpMethod, HttpMethods } from '../router/types'
+import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults'
 import { OpenapiSchema } from './endpoint'
-import { getCachedPsyconfOrFail } from '../psyconf/cache'
-import { DEFAULT_OPENAPI_COMPONENT_SCHEMAS, DEFAULT_OPENAPI_COMPONENT_RESPONSES } from './defaults'
 
 export default class OpenapiAppRenderer {
   /**
@@ -32,11 +32,15 @@ export default class OpenapiAppRenderer {
    * the controller layer.
    */
   public static async toObject(): Promise<OpenapiSchema> {
-    const controllers = await PsychicDir.controllers()
-    const psyconf = getCachedPsyconfOrFail()
+    const psychicApp = getCachedPsychicApplicationOrFail()
+    const controllers = psychicApp.controllers
+
+    const packageJsonPath = envBool('PSYCHIC_CORE_DEVELOPMENT')
+      ? path.join(psychicApp.appRoot, '..', 'package.json')
+      : path.join(psychicApp.appRoot, 'package.json')
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const packageJson = (await import(path.join(projectRootPath(), 'package.json'))).default as {
+    const packageJson = (await import(packageJsonPath)).default as {
       version: string
       name: string
       description?: string
@@ -51,15 +55,15 @@ export default class OpenapiAppRenderer {
       },
       paths: {},
       components: {
-        ...(psyconf.openapi?.defaults?.components || {}),
+        ...(psychicApp.openapi?.defaults?.components || {}),
         schemas: {
           ...DEFAULT_OPENAPI_COMPONENT_SCHEMAS,
-          ...((psyconf.openapi?.defaults?.components?.schemas ||
+          ...((psychicApp.openapi?.defaults?.components?.schemas ||
             {}) as typeof DEFAULT_OPENAPI_COMPONENT_SCHEMAS),
         },
         responses: {
           ...DEFAULT_OPENAPI_COMPONENT_RESPONSES,
-          ...(psyconf.openapi?.defaults?.components?.responses || {}),
+          ...(psychicApp.openapi?.defaults?.components?.responses || {}),
         },
       },
     }
@@ -73,7 +77,7 @@ export default class OpenapiAppRenderer {
 
         finalOutput.components.schemas = {
           ...finalOutput.components.schemas,
-          ...(await renderer.toSchemaObject()),
+          ...renderer.toSchemaObject(),
         }
 
         const endpointPayload = await renderer.toPathObject()

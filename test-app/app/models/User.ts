@@ -2,18 +2,11 @@ import {
   BeforeCreate,
   BeforeUpdate,
   DreamColumn,
-  HasMany,
-  HasOne,
+  DreamSerializers,
   Validates,
   Virtual,
 } from '@rvohealth/dream'
 import Hash from '../../../src/encryption/hash'
-import UserSerializer, {
-  UserExtraSerializer,
-  UserSummarySerializer,
-  UserWithPostsSerializer,
-  UserWithRecentPostSerializer,
-} from '../serializers/UserSerializer'
 import ApplicationModel from './ApplicationModel'
 import Pet from './Pet'
 import Post from './Post'
@@ -22,13 +15,13 @@ export default class User extends ApplicationModel {
     return 'users' as const
   }
 
-  public get serializers() {
+  public get serializers(): DreamSerializers<User> {
     return {
-      default: UserSerializer,
-      summary: UserSummarySerializer,
-      extra: UserExtraSerializer,
-      withPosts: UserWithPostsSerializer,
-      withRecentPost: UserWithRecentPostSerializer,
+      default: 'UserSerializer',
+      summary: 'UserSummarySerializer',
+      extra: 'UserExtraSerializer',
+      withPosts: 'UserWithPostsSerializer',
+      withRecentPost: 'UserWithRecentPostSerializer',
     }
   }
 
@@ -93,13 +86,13 @@ export default class User extends ApplicationModel {
   @Virtual('string[]')
   public openapiVirtualSpecTest2?: string | null
 
-  @HasMany(() => Pet)
+  @User.HasMany('Pet')
   public pets: Pet[]
 
-  @HasMany(() => Post)
+  @User.HasMany('Post')
   public posts: Post[]
 
-  @HasOne(() => Post, { order: { id: 'desc' } })
+  @User.HasOne('Post', { order: { id: 'desc' } })
   public recentPost: Post | null
 
   public static backgroundTest() {}

@@ -6,7 +6,7 @@ export default class InvalidAppEncryptionKey extends Error {
       encryption key set in 'conf/app.ts', like so:
 
       
-      export default (psy: Psyconf) => {
+      export default (psy: PsychicApplication) => {
         psy.encryptionKey = process.env.APP_ENCRYPTION_KEY
       }
     `

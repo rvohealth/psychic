@@ -2,14 +2,14 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller'
 import { OpenAPI } from '../../../src/controller/decorators'
-import Psyconf from '../../../src/psyconf'
+import PsychicApplication from '../../../src/psychic-application'
 import User from '../../../test-app/app/models/User'
 
 describe('PsychicController', () => {
   describe('#respond', () => {
     let req: Request
     let res: Response
-    let config: Psyconf
+    let config: PsychicApplication
 
     class MyController extends PsychicController {
       @OpenAPI(() => User, {
@@ -27,7 +27,7 @@ describe('PsychicController', () => {
     beforeEach(() => {
       req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
       res = getMockRes().res
-      config = new Psyconf()
+      config = new PsychicApplication()
       jest.spyOn(res, 'json')
       jest.spyOn(res, 'status')
     })

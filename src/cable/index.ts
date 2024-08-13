@@ -6,7 +6,7 @@ import http from 'http'
 import { createClient, RedisClientOptions } from 'redis'
 import socketio from 'socket.io'
 import log from '../log'
-import Psyconf from '../psyconf'
+import PsychicApplication from '../psychic-application'
 import { getPsychicHttpInstance } from '../server/helpers/startPsychicServer'
 import { envBool } from '../helpers/envValue'
 
@@ -15,8 +15,8 @@ export default class Cable {
   public io: socketio.Server | undefined
   public http: http.Server
   public useRedis: boolean
-  private config: Psyconf
-  constructor(app: Application, config: Psyconf) {
+  private config: PsychicApplication
+  constructor(app: Application, config: PsychicApplication) {
     this.app = app
     this.config = config
   }

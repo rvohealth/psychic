@@ -14,16 +14,15 @@ import {
   OpenapiSchemaObject,
   OpenapiSchemaProperties,
   compact,
+  getCachedDreamApplicationOrFail,
 } from '@rvohealth/dream'
 import PsychicController from '../controller'
-import PsychicDir from '../helpers/psychicdir'
-import { getCachedPsyconfOrFail } from '../psyconf/cache'
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import { RouteConfig } from '../router/route-manager'
 import { HttpMethod } from '../router/types'
 import PsychicServer from '../server'
 import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment'
 import { DEFAULT_OPENAPI_RESPONSES } from './defaults'
-import computedSerializerKeyOrFail from './helpers/computedSerializerKeyOrFail'
 import isBlankDescription from './helpers/isBlankDescription'
 import openapiRoute from './helpers/openapiRoute'
 import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
@@ -119,7 +118,7 @@ export default class OpenapiEndpointRenderer<
    * final openapi.json output
    */
   public async toPathObject(): Promise<OpenapiEndpointResponse> {
-    this.serializers = await PsychicDir.serializers()
+    this.serializers = getCachedDreamApplicationOrFail().serializers
 
     const [path, method, requestBody, responses] = await Promise.all([
       this.computedPath(),
@@ -169,10 +168,10 @@ export default class OpenapiEndpointRenderer<
    * final openapi.json output, adding any relevant entries that were uncovered
    * while parsing the responses and provided callback function.
    */
-  public async toSchemaObject(): Promise<Record<string, OpenapiSchemaBody>> {
+  public toSchemaObject(): Record<string, OpenapiSchemaBody> {
     this.computedExtraComponents = {}
 
-    this.serializers = await PsychicDir.serializers()
+    this.serializers = getCachedDreamApplicationOrFail().serializers
     const serializerClasses = this.getSerializerClasses()
 
     let output: Record<string, OpenapiSchemaBody> = {}
@@ -310,7 +309,7 @@ export default class OpenapiEndpointRenderer<
    */
   private async getCurrentRouteConfig() {
     await this._loadRoutes()
-    const controllerActionString = await this.controllerClass.controllerActionPath(this.action)
+    const controllerActionString = this.controllerClass.controllerActionPath(this.action)
 
     // if the action is update, we want to specifically find the 'patch' route,
     // otherwise we find any route that matches
@@ -361,9 +360,9 @@ export default class OpenapiEndpointRenderer<
    * "parameters" field for a single endpoint.
    */
   private headersArray(): OpenapiParameterResponse[] {
-    const psyconf = getCachedPsyconfOrFail()
+    const psychicApp = getCachedPsychicApplicationOrFail()
 
-    const defaultHeaders = this.omitDefaultHeaders ? [] : psyconf.openapi?.defaults?.headers || []
+    const defaultHeaders = this.omitDefaultHeaders ? [] : psychicApp.openapi?.defaults?.headers || []
     const headers = [...defaultHeaders, ...(this.headers || [])] as OpenapiHeaderOption[]
 
     return (
@@ -688,9 +687,9 @@ export default class OpenapiEndpointRenderer<
    * Generates the responses portion of the endpoint
    */
   private parseResponses(): OpenapiResponses {
-    const psyconf = getCachedPsyconfOrFail()
+    const psychicApp = getCachedPsychicApplicationOrFail()
 
-    const defaultResponses = this.omitDefaultResponses ? {} : psyconf.openapi?.defaults?.responses || {}
+    const defaultResponses = this.omitDefaultResponses ? {} : psychicApp.openapi?.defaults?.responses || {}
     let responseData: OpenapiResponses = {
       ...DEFAULT_OPENAPI_RESPONSES,
       ...defaultResponses,
@@ -816,7 +815,7 @@ export default class OpenapiEndpointRenderer<
    */
   private parseSingleEntitySerializerResponseShape(): OpenapiContent {
     const serializerClass = this.getSerializerClasses()![0]
-    const serializerKey = computedSerializerKeyOrFail(serializerClass, this.serializers, this.schemaDelimeter)
+    const serializerKey = serializerClass.openapiName
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const serializerObject: OpenapiSchemaBody = this.accountForNullableOption(
@@ -862,11 +861,7 @@ export default class OpenapiEndpointRenderer<
     const anyOf: OpenapiSchemaExpressionAnyOf = { anyOf: [] }
 
     this.getSerializerClasses()!.forEach(serializerClass => {
-      const serializerKey = computedSerializerKeyOrFail(
-        serializerClass,
-        this.serializers,
-        this.schemaDelimeter,
-      )
+      const serializerKey = serializerClass.openapiName
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const serializerObject: OpenapiSchemaBody = {
@@ -902,8 +897,8 @@ export default class OpenapiEndpointRenderer<
    * NOTE: this is only public for testing purposes.
    */
   public get schemaDelimeter() {
-    const psyconf = getCachedPsyconfOrFail()
-    return psyconf.openapi?.schemaDelimeter || ''
+    const psychicApp = getCachedPsychicApplicationOrFail()
+    return psychicApp.openapi?.schemaDelimeter || ''
   }
 
   /**
@@ -975,13 +970,15 @@ export default class OpenapiEndpointRenderer<
   private getSerializerClass(
     dreamOrSerializerOrViewModel: DreamClassOrViewModelClassOrSerializerClass,
   ): typeof DreamSerializer {
+    const dreamApp = getCachedDreamApplicationOrFail()
     if ((dreamOrSerializerOrViewModel as typeof DreamSerializer).isDreamSerializer) {
       return dreamOrSerializerOrViewModel as typeof DreamSerializer
     } else {
       const modelClass = dreamOrSerializerOrViewModel as typeof Dream
-      return modelClass.prototype.serializers[
+      const serializerKey = modelClass.prototype.serializers[
         (this.serializerKey || 'default') as keyof typeof modelClass.prototype.serializers
-      ] as typeof DreamSerializer
+      ] as string
+      return dreamApp.serializers[serializerKey] || null
     }
   }
 }

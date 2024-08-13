@@ -4,7 +4,7 @@ import { createPsychicServer } from '../../../spec-helpers'
 
 describe('hitting an endpoint that calls castParam', () => {
   let server: PsychicServer
-  beforeAll(async () => {
+  beforeEach(async () => {
     server = await createPsychicServer()
   })
 

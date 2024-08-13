@@ -37,20 +37,19 @@ describe('background (app singleton)', () => {
       expect(background.queue!.add).toHaveBeenCalledWith(
         'BackgroundJobQueueModelInstanceJob',
         {
-          filepath: 'app/models/User',
+          globalName: 'User',
           id: user.id,
           args: ['howyadoin'],
           priority,
-          importKey: undefined,
           method: 'testBackground',
         },
         { priority: priorityLevel },
       )
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
-      await background.connect()
+      background.connect()
 
       jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
     })
@@ -123,20 +122,19 @@ describe('background (app singleton)', () => {
       expect(background.queue!.add).toHaveBeenCalledWith(
         'BackgroundJobQueueModelInstanceJob',
         {
-          filepath: 'app/models/User',
+          globalName: 'User',
           id: user.id,
           args: ['howyadoin'],
           priority,
-          importKey: undefined,
           method: 'testBackground',
         },
         { delay, priority: 2 },
       )
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
-      await background.connect()
+      background.connect()
 
       jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
     })

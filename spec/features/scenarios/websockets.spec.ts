@@ -1,12 +1,15 @@
-import PsychicServer from '../../../src/server'
-import { io } from 'socket.io-client'
-import User from '../../../test-app/app/models/User'
 import { Socket } from 'socket.io'
+import { io } from 'socket.io-client'
 import { specRequest as request } from '../../../spec-helpers'
-const server = new PsychicServer()
+import PsychicServer from '../../../src/server'
+import User from '../../../test-app/app/models/User'
+import initializePsychicApplication from '../../../test-app/cli/helpers/initializePsychicApplication'
 
 describe('user attempts to connect to websockets', () => {
+  let server: PsychicServer
   beforeAll(async () => {
+    await initializePsychicApplication()
+    server = new PsychicServer()
     await server.boot()
     await server.start(7111)
   })

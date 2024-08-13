@@ -1,12 +1,8 @@
 import * as colors from 'colorette'
-import '../helpers/loadEnv'
-import Psyconf from '../psyconf'
-import { RouteConfig } from '../router/route-manager'
-import PsychicServer from '../server'
+import { RouteConfig } from '../../router/route-manager'
+import PsychicServer from '../../server'
 
-async function printRoutes() {
-  await Psyconf.configure()
-
+export default async function printRoutes() {
   const server = new PsychicServer()
   await server.boot()
 
@@ -25,11 +21,7 @@ async function printRoutes() {
     const colorizedExpression = i % 2 ? colors.bgWhite(colors.black(expression)) : expression
     console.log(colorizedExpression)
   })
-
-  process.exit()
 }
-
-void printRoutes()
 
 function buildExpressions(routes: RouteConfig[]): [string, string][] {
   return routes.map(route => {

@@ -43,7 +43,7 @@ describe('BackgroundedService', () => {
         expect(background.queue!.add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
-            filepath: `/app/services/${serviceClass.name}`,
+            globalName: `services/${serviceClass.name}`,
             args: ['bottlearum'],
             constructorArgs: ['bottleawhiskey'],
             priority: priority,
@@ -54,9 +54,9 @@ describe('BackgroundedService', () => {
         )
       }
 
-      beforeEach(async () => {
+      beforeEach(() => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
-        await background.connect()
+        background.connect()
 
         jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
       })
@@ -148,7 +148,7 @@ describe('BackgroundedService', () => {
         expect(background.queue!.add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
-            filepath: `/app/services/${serviceClass.name}`,
+            globalName: `services/${serviceClass.name}`,
             args: ['bottlearum'],
             constructorArgs: ['bottleawhiskey'],
             priority: priority,
@@ -159,9 +159,9 @@ describe('BackgroundedService', () => {
         )
       }
 
-      beforeEach(async () => {
+      beforeEach(() => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
-        await background.connect()
+        background.connect()
 
         jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
       })

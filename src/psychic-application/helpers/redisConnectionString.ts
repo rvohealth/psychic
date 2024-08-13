@@ -1,7 +1,7 @@
 import redisOptions, { RedisOptionPurpose } from './redisOptions'
 
-export default async function redisConnectionString(purpose: RedisOptionPurpose) {
-  const connectionOptions = await redisOptions(purpose)
+export default function redisConnectionString(purpose: RedisOptionPurpose) {
+  const connectionOptions = redisOptions(purpose)
 
   const protocol = connectionOptions.secure ? 'rediss' : 'redis'
   const user = connectionOptions.username || ''

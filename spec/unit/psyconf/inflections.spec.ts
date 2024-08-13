@@ -1,11 +1,11 @@
 import pluralize from 'pluralize'
-import Psyconf from '../../../src/psyconf'
+import PsychicApplication from '../../../src/psychic-application'
 
-describe('Psyconf', () => {
-  let config: Psyconf
+describe('PsychicApplication', () => {
+  let config: PsychicApplication
 
   beforeEach(() => {
-    config = new Psyconf()
+    config = new PsychicApplication()
   })
 
   it('loads inflections.ts', async () => {

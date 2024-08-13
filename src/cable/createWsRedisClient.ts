@@ -1,12 +1,12 @@
 import { createClient, RedisClientOptions } from 'redis'
-import redisOptions from '../psyconf/helpers/redisOptions'
+import redisOptions from '../psychic-application/helpers/redisOptions'
 
 let redisWsClientCache: ReturnType<typeof createClient> | null = null
 
 export default async function createWsRedisClient(): Promise<ReturnType<typeof createClient>> {
   if (redisWsClientCache) return redisWsClientCache
 
-  const redisOpts = await redisOptions('ws')
+  const redisOpts = redisOptions('ws')
 
   const creds = {
     username: redisOpts.username,

@@ -1,28 +1,28 @@
 import { developmentOrTestEnv } from '@rvohealth/dream'
-import Psyconf from '../../src/psyconf'
+import PsychicApplication from '../../src/psychic-application'
 import { Encrypt } from '../../src'
 import User from '../app/models/User'
 import Ws from '../../src/cable/ws'
+import path from 'path'
+import inflections from './inflections'
+import routesCb from './routes'
 
-export default (psy: Psyconf) => {
+export default async (psy: PsychicApplication) => {
   // ******
   // CONFIG:
   // ******
 
-  // the name of your application (no spaces)
   psy.appName = 'testapp'
-
-  // the encryption key to use when encrypting
   psy.encryptionKey = process.env.APP_ENCRYPTION_KEY!
-
-  // set to true to leverage internal websocket bindings to socket.io
   psy.useWs = true
-
-  // set to true to leverage internal redis bindings.
   psy.useRedis = true
-
-  // set to true if you want to also attach a client app to your project.
   psy.apiOnly = false
+
+  await psy.load('controllers', path.join(__dirname, '..', 'app', 'controllers'))
+
+  psy.set('appRoot', path.join(__dirname, '..'))
+  psy.set('inflections', inflections)
+  psy.set('routes', routesCb)
 
   // set options to configure openapi integration
   psy.set('openapi', {

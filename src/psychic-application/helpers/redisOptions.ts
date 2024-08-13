@@ -1,4 +1,4 @@
-import Psyconf from '..'
+import { getCachedPsychicApplicationOrFail } from '../cache'
 
 export interface PsychicRedisConnectionOptions {
   secure?: boolean
@@ -9,15 +9,15 @@ export interface PsychicRedisConnectionOptions {
 }
 
 export type RedisOptionPurpose = 'ws' | 'background_jobs'
-export default async function redisOptions(purpose: RedisOptionPurpose) {
-  const psyConf = await Psyconf.configure()
+export default function redisOptions(purpose: RedisOptionPurpose) {
+  const psychicApp = getCachedPsychicApplicationOrFail()
 
   switch (purpose) {
     case 'ws':
-      return psyConf.redisWsCredentials
+      return psychicApp.redisWsCredentials
 
     case 'background_jobs':
-      return psyConf.redisBackgroundJobCredentials
+      return psychicApp.redisBackgroundJobCredentials
 
     default:
       throw new Error(`unexpected redis purpose encountered: ${purpose as string}`)

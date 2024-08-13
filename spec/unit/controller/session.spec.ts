@@ -1,7 +1,7 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { describe as context } from '@jest/globals'
 import { Request, Response } from 'express'
-import { Encrypt, Psyconf } from '../../../src'
+import { Encrypt } from '../../../src'
 import Session, { CustomSessionCookieOptions } from '../../../src/session'
 import User from '../../../test-app/app/models/User'
 
@@ -9,18 +9,15 @@ describe('Session', () => {
   let user: User
   let req: Request
   let res: Response
-  let config: Psyconf
 
   beforeEach(async () => {
     user = await User.create({ email: 'how@yadoin', password: 'password' })
     req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
     res = getMockRes().res
-    config = new Psyconf()
-    await config.boot()
   })
 
   describe('#getCookie', () => {
-    const subject = () => new Session(req, res, config).getCookie('auth_token')
+    const subject = () => new Session(req, res).getCookie('auth_token')
 
     it('returns the value of an existing cookie, automatically decrypted', () => {
       req.cookies = { auth_token: Encrypt.sign(user.id.toString()) }
@@ -36,7 +33,7 @@ describe('Session', () => {
 
   describe('#setCookie', () => {
     const subject = (value: string, opts: CustomSessionCookieOptions = {}) =>
-      new Session(req, res, config).setCookie('auth_token', value, opts)
+      new Session(req, res).setCookie('auth_token', value, opts)
     let cookieSpy: jest.SpyInstance
     let encryptSpy: jest.SpyInstance
 

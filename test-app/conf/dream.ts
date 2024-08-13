@@ -1,9 +1,27 @@
-import { Dreamconf } from '@rvohealth/dream'
+import { DreamApplication } from '@rvohealth/dream'
+import path from 'node:path'
+import inflections from './inflections'
 
-export default function configureDream(dreamconf: Dreamconf) {
-  dreamconf.set('primaryKeyType', 'bigserial')
+export default async function configureDream(app: DreamApplication) {
+  app.set('appRoot', path.join(__dirname, '..'))
+  app.set('primaryKeyType', 'bigserial')
+  app.set('inflections', inflections)
 
-  dreamconf.set('dbCredentials', {
+  await app.load('models', path.join(__dirname, '..', 'app', 'models'))
+  await app.load('serializers', path.join(__dirname, '..', 'app', 'serializers'))
+  await app.load('services', path.join(__dirname, '..', 'app', 'services'))
+
+  // provides a list of path overrides for your app. This is optional, and will default
+  // to the paths expected for a typical psychic application.
+  app.set('paths', {
+    // models: 'test-app/app/models',
+    // serializers: 'test-app/app/serializers',
+    // conf: 'test-app/conf',
+    // db: 'test-app/db',
+    // uspecs: 'test-app/spec/unit',
+  })
+
+  app.set('db', {
     primary: {
       user: process.env.DB_USER!,
       password: process.env.DB_PASSWORD!,

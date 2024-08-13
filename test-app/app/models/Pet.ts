@@ -1,9 +1,4 @@
-import { BelongsTo, DreamColumn, IdType } from '@rvohealth/dream'
-import PetSerializer, {
-  PetAdditionalSerializer,
-  PetSummarySerializer,
-  PetWithAssociationSerializer,
-} from '../serializers/PetSerializer'
+import { DreamColumn, DreamSerializers, IdType } from '@rvohealth/dream'
 import ApplicationModel from './ApplicationModel'
 import User from './User'
 
@@ -12,12 +7,12 @@ export default class Pet extends ApplicationModel {
     return 'pets' as const
   }
 
-  public get serializers() {
+  public get serializers(): DreamSerializers<Pet> {
     return {
-      default: PetSerializer,
-      summary: PetSummarySerializer,
-      additional: PetAdditionalSerializer,
-      withAssociation: PetWithAssociationSerializer,
+      default: 'PetSerializer',
+      summary: 'PetSummarySerializer',
+      additional: 'PetAdditionalSerializer',
+      withAssociation: 'PetWithAssociationSerializer',
     }
   }
 
@@ -38,7 +33,7 @@ export default class Pet extends ApplicationModel {
   public createdAt: DreamColumn<Pet, 'createdAt'>
   public updatedAt: DreamColumn<Pet, 'updatedAt'>
 
-  @BelongsTo(() => User)
+  @Pet.BelongsTo('User')
   public user: User
   public userId: IdType
 }

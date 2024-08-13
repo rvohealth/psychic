@@ -1,12 +1,13 @@
-import Psyconf from '../../../src/psyconf'
-import { PsychicHookEventType } from '../../../src/psyconf/types'
+import PsychicApplication from '../../../src/psychic-application'
+import { getCachedPsychicApplicationOrFail } from '../../../src/psychic-application/cache'
+import { PsychicHookEventType } from '../../../src/psychic-application/types'
 
-describe('Psyconf hooks', () => {
-  let config: Psyconf
+describe('PsychicApplication hooks', () => {
+  let config: PsychicApplication
 
   beforeEach(() => {
     process.env.__PSYCHIC_HOOKS_TEST_CACHE = ''
-    config = new Psyconf()
+    config = getCachedPsychicApplicationOrFail()
   })
 
   function expectHookCalled(hookEventType: PsychicHookEventType) {
@@ -24,7 +25,7 @@ describe('Psyconf hooks', () => {
   }
 
   it('loads conf/app.ts and processes hooks for load:test', async () => {
-    await config.boot()
+    await config.boot(true)
     expectHookCalled('load')
     expectHookCalled('load:test')
     expectHookNotCalled('load:dev')
@@ -41,7 +42,7 @@ describe('Psyconf hooks', () => {
     })
 
     it('processes callbacks for load:dev', async () => {
-      await config.boot()
+      await config.boot(true)
 
       expectHookCalled('load')
       expectHookCalled('load:dev')
@@ -60,7 +61,7 @@ describe('Psyconf hooks', () => {
     })
 
     it('processes callbacks for load:prod', async () => {
-      await config.boot()
+      await config.boot(true)
       expectHookCalled('load')
       expectHookCalled('load:prod')
       expectHookNotCalled('load:test')

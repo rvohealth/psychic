@@ -24,9 +24,8 @@ import {
   openapiPrimitiveTypes,
   openapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream'
-import computedSerializerKeyOrFail from './helpers/computedSerializerKeyOrFail'
-import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
 import isBlankDescription from './helpers/isBlankDescription'
+import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
 
 export default class OpenapiBodySegmentRenderer {
   private bodySegment: OpenapiBodySegment
@@ -333,11 +332,7 @@ export default class OpenapiBodySegmentRenderer {
     bodySegment: OpenapiBodySegment,
   ): OpenapiSchemaExpressionRef | OpenapiSchemaArray | OpenapiSchemaExpressionAllOf {
     const serializerRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializerRef
-    const serializerKey = computedSerializerKeyOrFail(
-      serializerRefBodySegment.$serializer,
-      this.serializers,
-      this.schemaDelimeter,
-    )
+    const serializerKey = serializerRefBodySegment.$serializer.openapiName
 
     this.computedExtraComponents = {
       ...this.computedExtraComponents,

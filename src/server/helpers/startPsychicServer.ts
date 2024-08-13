@@ -4,7 +4,7 @@ import fs from 'fs'
 import http, { Server } from 'http'
 import https from 'https'
 import log from '../../log'
-import { PsychicSslCredentials } from '../../psyconf'
+import { PsychicSslCredentials } from '../../psychic-application'
 
 export default async function startPsychicServer({
   app,

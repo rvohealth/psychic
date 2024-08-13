@@ -24,7 +24,7 @@ module.exports = {
     },
     {
       command:
-        'APP_ROOT_PATH=$(pwd) TS_SAFE=1 FEATURE_SPEC_RUN=1 DEV_SERVER_PORT=7779 npx ts-node --transpile-only ./src/spec-server.ts',
+        'TS_SAFE=1 FEATURE_SPEC_RUN=1 DEV_SERVER_PORT=7779 npx ts-node --transpile-only ./src/spec-server.ts',
       host: '127.0.0.1',
       launchTimeout:
         (process.env.LAUNCH_TIMEOUT_SECONDS && parseInt(process.env.LAUNCH_TIMEOUT_SECONDS) * 1000) || 60000,

@@ -5,7 +5,7 @@ import { createPsychicServer } from '../../../spec-helpers'
 
 describe('a visitor attempts to save a record', () => {
   let server: PsychicServer
-  beforeAll(async () => {
+  beforeEach(async () => {
     server = await createPsychicServer()
   })
 

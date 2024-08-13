@@ -70,7 +70,7 @@ export default class UsersController extends ApplicationController {
     const user = await User.findBy({ email: this.param('email') })
     if (!user || !(await user.checkPassword(this.param('password')))) this.notFound()
 
-    await this.startSession(user!)
+    this.startSession(user!)
 
     // this token is used for authenticating via websockets during tests. for more info,
     // see spec/features/visitor/websockets.spec.ts

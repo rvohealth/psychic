@@ -24,7 +24,7 @@ describe('ScheduledService', () => {
       expect(background.queue!.add).toHaveBeenCalledWith(
         'BackgroundJobQueueStaticJob',
         {
-          filepath: `/app/services/${serviceClass.name}`,
+          globalName: `services/${serviceClass.name}`,
           args: ['bottlearum'],
           importKey: undefined,
           method: 'instanceRunInBG',
@@ -40,9 +40,9 @@ describe('ScheduledService', () => {
       )
     }
 
-    beforeEach(async () => {
+    beforeEach(() => {
       process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
-      await background.connect()
+      background.connect()
 
       jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
     })

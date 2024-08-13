@@ -1,13 +1,13 @@
-import { Dream, IdType, loadModels, pascalize, testEnv } from '@rvohealth/dream'
+import { Dream, IdType, pascalize, testEnv } from '@rvohealth/dream'
 import { ConnectionOptions, Job, Queue, QueueEvents, Worker } from 'bullmq'
 import developmentOrTestEnv from '../../boot/cli/helpers/developmentOrTestEnv'
 import absoluteFilePath from '../helpers/absoluteFilePath'
-import envValue, { devEnvBool, envBool } from '../helpers/envValue'
+import envValue, { devEnvBool } from '../helpers/envValue'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
-import Psyconf from '../psyconf'
-import getModelKey from '../psyconf/helpers/getModelKey'
-import redisOptions from '../psyconf/helpers/redisOptions'
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import lookupClassByGlobalName from '../psychic-application/helpers/lookupClassByGlobalName'
+import redisOptions from '../psychic-application/helpers/redisOptions'
 
 type JobTypes =
   | 'BackgroundJobQueueFunctionJob'
@@ -22,8 +22,9 @@ export interface BackgroundJobData {
   args: any
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   constructorArgs?: any
-  filepath: string
+  filepath?: string
   importKey?: string
+  globalName?: string
   priority: BackgroundQueuePriority
 }
 
@@ -32,20 +33,16 @@ export class Background {
   public queueEvents: QueueEvents
   public workers: Worker[] = []
 
-  public async connect() {
+  public connect() {
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) return
     if (this.queue) return
 
-    const psyConf = await Psyconf.configure()
+    const psychicApp = getCachedPsychicApplicationOrFail()
 
-    // ensure models are loaded, since otherwise we will not properly
-    // boot our STI configurations within dream
-    await loadModels()
-
-    if (!psyConf?.useRedis)
+    if (!psychicApp?.useRedis)
       throw new Error(`attempting to use background jobs, but config.useRedis is not set to true.`)
 
-    const connectionOptions = await redisOptions('background_jobs')
+    const connectionOptions = redisOptions('background_jobs')
     const bullConnectionOpts = {
       host: connectionOptions.host,
       username: connectionOptions.username,
@@ -59,19 +56,19 @@ export class Background {
       connectTimeout: 5000,
     } as ConnectionOptions
 
-    const queueOptions = psyConf.backgroundQueueOptions
+    const queueOptions = psychicApp.backgroundQueueOptions
 
-    this.queue ||= new Queue(`${pascalize(psyConf.appName)}BackgroundJobQueue`, {
+    this.queue ||= new Queue(`${pascalize(psychicApp.appName)}BackgroundJobQueue`, {
       ...queueOptions,
       connection: bullConnectionOpts,
     })
     this.queueEvents = new QueueEvents(this.queue.name, { connection: bullConnectionOpts })
 
-    const workerOptions = psyConf.backgroundWorkerOptions
+    const workerOptions = psychicApp.backgroundWorkerOptions
 
     for (let i = 0; i < workerCount(); i++) {
       this.workers.push(
-        new Worker(`${pascalize(psyConf.appName)}BackgroundJobQueue`, data => this.handler(data), {
+        new Worker(`${pascalize(psychicApp.appName)}BackgroundJobQueue`, data => this.handler(data), {
           ...workerOptions,
           connection: bullConnectionOpts,
         }),
@@ -79,57 +76,29 @@ export class Background {
     }
   }
 
-  public async func({
-    delaySeconds,
-    filepath, // filepath means a file within the app that is consuming psychic
-    importKey,
-    args = [],
-    priority = 'default',
-  }: {
-    delaySeconds?: number
-    filepath: string
-    importKey: string
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    args?: any[]
-    priority?: BackgroundQueuePriority
-  }) {
-    await this.connect()
-    await this._addToQueue(
-      'BackgroundJobQueueFunctionJob',
-      {
-        filepath: trimFilepath(filepath),
-        importKey,
-        args,
-        priority,
-      },
-      { delaySeconds },
-    )
-  }
-
   public async staticMethod(
     ObjectClass: Record<'name', string>,
     method: string,
     {
       delaySeconds,
-      filepath, // filepath means a file within the app that is consuming psychic
-      importKey,
+      globalName,
       args = [],
       priority = 'default',
     }: {
+      globalName: string
+      filepath?: string
       delaySeconds?: number
-      filepath: string
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
       priority?: BackgroundQueuePriority
     },
   ) {
-    await this.connect()
+    this.connect()
     await this._addToQueue(
       `BackgroundJobQueueStaticJob`,
       {
-        filepath: trimFilepath(filepath),
-        importKey,
+        globalName,
         method,
         args,
         priority,
@@ -143,19 +112,19 @@ export class Background {
     pattern: string,
     method: string,
     {
-      filepath, // filepath means a file within the app that is consuming psychic
-      importKey,
+      globalName,
       args = [],
       priority = 'default',
     }: {
-      filepath: string
+      globalName: string
+      filepath?: string
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
       priority?: BackgroundQueuePriority
     },
   ) {
-    await this.connect()
+    this.connect()
 
     // `jobId` is used to determine uniqueness along with name and repeat pattern.
     // Since the name is really a job type and never changes, the `jobId` is the only
@@ -168,8 +137,7 @@ export class Background {
     await this.queue!.add(
       'BackgroundJobQueueStaticJob',
       {
-        filepath: trimFilepath(filepath),
-        importKey,
+        globalName,
         method,
         args,
         priority,
@@ -189,14 +157,14 @@ export class Background {
     method: string,
     {
       delaySeconds,
-      filepath, // filepath means a file within the app that is consuming psychic
-      importKey,
+      globalName,
       args = [],
       constructorArgs = [],
       priority = 'default',
     }: {
+      globalName: string
       delaySeconds?: number
-      filepath: string
+      filepath?: string
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
@@ -205,12 +173,11 @@ export class Background {
       priority?: BackgroundQueuePriority
     },
   ) {
-    await this.connect()
+    this.connect()
     await this._addToQueue(
       'BackgroundJobQueueInstanceJob',
       {
-        filepath: trimFilepath(filepath),
-        importKey,
+        globalName,
         method,
         args,
         constructorArgs,
@@ -225,7 +192,6 @@ export class Background {
     method: string,
     {
       delaySeconds,
-      importKey,
       args = [],
       priority = 'default',
     }: {
@@ -236,14 +202,12 @@ export class Background {
       priority?: BackgroundQueuePriority
     },
   ) {
-    await this.connect()
-    const modelPath = await getModelKey(modelInstance.constructor as typeof Dream)
+    this.connect()
     await this._addToQueue(
       'BackgroundJobQueueModelInstanceJob',
       {
         id: modelInstance.primaryKeyValue,
-        filepath: `app/models/${modelPath}`,
-        importKey,
+        globalName: (modelInstance.constructor as typeof Dream).globalName,
         method,
         args,
         priority,
@@ -289,9 +253,14 @@ export class Background {
 
   public async doWork(
     jobType: JobTypes,
-    { id, method, args, constructorArgs, filepath, importKey }: BackgroundJobData,
+    { id, method, args, constructorArgs, filepath, importKey, globalName }: BackgroundJobData,
   ) {
-    const absFilePath = absoluteFilePath(filepath)
+    // TODO: chat with daniel about background job scenario
+    const absFilePath = absoluteFilePath(filepath || '')
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let objectClass: any
+    let dreamClass: typeof Dream | undefined
 
     switch (jobType) {
       case 'BackgroundJobQueueFunctionJob':
@@ -307,38 +276,52 @@ export class Background {
 
           // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
           await func(...args)
+        } else if (globalName) {
+          // TODO: determine how to handle global lookup for func background jobs
+          // const classDef = lookupGlobalName(globalName)
         }
         break
 
       case 'BackgroundJobQueueStaticJob':
         if (filepath) {
-          const ObjectClass = await importFileWithNamedExport(absFilePath, importKey || 'default')
-
-          if (!ObjectClass) return
-
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-          await (ObjectClass as any)[method!](...args)
+          objectClass = await importFileWithNamedExport(absFilePath, importKey || 'default')
+        } else if (globalName) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          objectClass = lookupClassByGlobalName(globalName)
         }
+
+        if (!objectClass) return
+
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
+        await objectClass[method!](...args)
         break
 
       case 'BackgroundJobQueueInstanceJob':
         if (filepath) {
-          const ObjectClass = await importFileWithNamedExport(absFilePath, importKey || 'default')
-          if (!ObjectClass) return
+          objectClass = await importFileWithNamedExport(absFilePath, importKey || 'default')
+        } else if (globalName) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          objectClass = lookupClassByGlobalName(globalName)
+        }
 
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
-          const instance = new (ObjectClass as any)(...constructorArgs)
+        if (objectClass) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
+          const instance = new objectClass(...constructorArgs)
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
           await instance[method!](...args)
         }
+
         break
 
       case 'BackgroundJobQueueModelInstanceJob':
         if (filepath) {
-          const DreamModelClass = await importFileWithDefault<typeof Dream | undefined>(absFilePath)
-          if (!DreamModelClass) return
+          dreamClass = await importFileWithDefault<typeof Dream | undefined>(absFilePath)
+        } else if (globalName) {
+          dreamClass = lookupClassByGlobalName(globalName) as typeof Dream | undefined
+        }
 
-          const modelInstance = await DreamModelClass.find(id)
+        if (dreamClass) {
+          const modelInstance = await dreamClass.find(id)
           if (!modelInstance) return
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
@@ -370,21 +353,6 @@ export class Background {
 function workerCount() {
   if (envValue('WORKER_COUNT')) return parseInt(envValue('WORKER_COUNT'))
   return developmentOrTestEnv() ? 1 : 0
-}
-
-function trimFilepath(filepath: string) {
-  if (!envValue('APP_ROOT_PATH'))
-    throw `
-      [Psychic:] Must set APP_ROOT_PATH before calling trimFilepath
-    `
-
-  const trimmed = filepath
-    .replace(/^\//, '')
-    .replace(envValue('APP_ROOT_PATH').replace(/^\//, ''), '')
-    .replace(/^\/?dist/, '')
-    .replace(/\.[jt]s$/, '')
-
-  return envBool('PSYCHIC_CORE_DEVELOPMENT') ? trimmed.replace(/^test-app/, '') : trimmed
 }
 
 const background = new Background()
