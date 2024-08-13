@@ -1,6 +1,8 @@
 import fs from 'fs/promises'
-import absoluteFilePath from '../../src/helpers/absoluteFilePath'
+import { getCachedPsychicApplicationOrFail } from '../../src/psychic-application/cache'
+import path from 'path'
 
 export default async function writeTmpFile(content: string) {
-  return await fs.writeFile(absoluteFilePath('spec/tmp.txt'), content)
+  const psychicApp = getCachedPsychicApplicationOrFail()
+  return await fs.writeFile(path.join(psychicApp.appRoot, '../spec/tmp.txt'), content)
 }

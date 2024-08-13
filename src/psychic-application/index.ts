@@ -1,51 +1,33 @@
+import { OpenapiSchemaBody } from '@rvohealth/dream'
 import bodyParser from 'body-parser'
 import { QueueOptions } from 'bullmq'
 import { CorsOptions } from 'cors'
 import { Application, Request, Response } from 'express'
 import { Socket, Server as SocketServer } from 'socket.io'
-import PsychicController from '../controller'
-import absoluteSrcPath from '../helpers/absoluteSrcPath'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
 import envValue from '../helpers/envValue'
-import importFileWithDefault from '../helpers/importFileWithDefault'
-import PsychicDir from '../helpers/psychicdir'
-import { cachePsyconf, getCachedPsyconf } from './cache'
+import { OpenapiContent, OpenapiHeaderOption, OpenapiResponses } from '../openapi-renderer/endpoint'
+import PsychicRouter from '../router'
+import { cachePsychicApplication } from './cache'
+import loadControllers, { getControllersOrFail } from './helpers/loadControllers'
 import { PsychicRedisConnectionOptions } from './helpers/redisOptions'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
-import { Dreamconf, OpenapiSchemaBody } from '@rvohealth/dream'
-import { OpenapiContent, OpenapiHeaderOption, OpenapiResponses } from '../openapi-renderer/endpoint'
 
-export default class Psyconf {
-  /**
-   * If a psychic config has already been cached, it will
-   * be returned. Otherwise, a new psychic config is cached,
-   * with all relevant hooks applied.
-   */
-  public static async configure(): Promise<Psyconf> {
-    await Dreamconf.configure()
-
-    const cachedPsyconf = getCachedPsyconf()
-    if (cachedPsyconf) return cachedPsyconf
-    return await this.reconfigure()
+export default class PsychicApplication {
+  public static async init(cb: (app: PsychicApplication) => void | Promise<void>) {
+    const psychicApp = new PsychicApplication()
+    await cb(psychicApp)
+    await psychicApp.inflections?.()
+    cachePsychicApplication(psychicApp)
+    return psychicApp
   }
 
-  /**
-   * @internal
-   *
-   * Blows away the cached psychic config, providing
-   * a new one, with all hooks re-run. This is usually
-   * only necessary in tests, where env vars may be
-   * changing around between test runs, and you need
-   * the configuration to rebuild
-   */
-  public static async reconfigure(): Promise<Psyconf> {
-    const psyconf = new Psyconf()
-    await psyconf.loadAppConfig()
-    return psyconf
+  public static async loadControllers(controllersPath: string) {
+    return await loadControllers(controllersPath)
   }
 
-  public controllers: { [key: string]: typeof PsychicController } = {}
   public apiOnly: boolean = false
+  public appRoot: string
   public useWs: boolean = false
   public useRedis: boolean = false
   public appName: string = 'untitled app'
@@ -60,15 +42,21 @@ export default class Psyconf {
   public redisWsCredentials: PsychicRedisConnectionOptions
   public sslCredentials?: PsychicSslCredentials
   public saltRounds?: number
+  public routesCb: (r: PsychicRouter) => void | Promise<void>
   public openapi?: PsychicOpenapiOptions
-  public bootHooks: Record<PsychicHookLoadEventTypes, ((conf: Psyconf) => void | Promise<void>)[]> = {
+  public client?: PsychicClientOptions
+  public inflections?: () => void | Promise<void>
+  public bootHooks: Record<
+    PsychicHookLoadEventTypes,
+    ((conf: PsychicApplication) => void | Promise<void>)[]
+  > = {
     boot: [],
     load: [],
     'load:dev': [],
     'load:test': [],
     'load:prod': [],
   }
-  public specialHooks: PsyconfSpecialHooks = {
+  public specialHooks: PsychicApplicationSpecialHooks = {
     expressInit: [],
     serverError: [],
     wsStart: [],
@@ -76,43 +64,24 @@ export default class Psyconf {
     'after:routes': [],
   }
 
-  public get appPath() {
-    return absoluteSrcPath('app')
-  }
-
-  public get confPath() {
-    return absoluteSrcPath('conf')
-  }
-
-  public get dbPath() {
-    return absoluteSrcPath('db')
-  }
-
-  public get migrationsPath() {
-    return absoluteSrcPath('db/migrations')
-  }
-
-  public get controllersPath() {
-    return absoluteSrcPath('app/controllers')
-  }
-
-  public get modelsPath() {
-    return absoluteSrcPath('app/models')
-  }
-
-  public get servicesPath() {
-    return absoluteSrcPath('app/services')
-  }
-
   public get authSessionKey() {
     return envValue('AUTH_SESSION_KEY') || 'auth_session'
   }
 
-  private booted = false
-  public async boot() {
-    if (this.booted) return
+  public get controllers() {
+    return getControllersOrFail()
+  }
 
-    await this.loadAppConfig()
+  public async load(resourceType: 'controllers', resourcePath: string) {
+    switch (resourceType) {
+      case 'controllers':
+        return await loadControllers(resourcePath)
+    }
+  }
+
+  private booted = false
+  public async boot(force: boolean = false) {
+    if (this.booted && !force) return
 
     // await new IntegrityChecker().check()
 
@@ -132,12 +101,8 @@ export default class Psyconf {
         break
     }
 
-    const inflections = await importFileWithDefault<() => void | Promise<void>>(
-      absoluteSrcPath('conf/inflections'),
-    )
-    await inflections()
+    await this.inflections?.()
 
-    this.controllers = await PsychicDir.controllers()
     this.booted = true
   }
 
@@ -153,7 +118,7 @@ export default class Psyconf {
             ? (app: Application) => void | Promise<void>
             : T extends 'after:routes'
               ? (app: Application) => void | Promise<void>
-              : (conf: Psyconf) => void | Promise<void>,
+              : (conf: PsychicApplication) => void | Promise<void>,
   ) {
     switch (hookEventType) {
       case 'server:error':
@@ -180,42 +145,62 @@ export default class Psyconf {
 
       default:
         this.bootHooks[hookEventType as PsychicHookLoadEventTypes].push(
-          cb as (conf: Psyconf) => void | Promise<void>,
+          cb as (conf: PsychicApplication) => void | Promise<void>,
         )
     }
   }
 
-  public set<Opt extends PsyconfOption>(
+  public set<Opt extends PsychicApplicationOption>(
     option: Opt,
     value: Opt extends 'cors'
       ? CorsOptions
       : Opt extends 'cookie'
         ? CustomCookieOptions
-        : Opt extends 'json'
-          ? bodyParser.Options
-          : Opt extends 'background:queue'
-            ? Omit<QueueOptions, 'connection'>
-            : Opt extends 'background:worker'
-              ? WorkerOptions
-              : Opt extends 'redis:background'
-                ? PsychicRedisConnectionOptions
-                : Opt extends 'redis:ws'
-                  ? PsychicRedisConnectionOptions
-                  : Opt extends 'ssl'
-                    ? PsychicSslCredentials
-                    : Opt extends 'openapi'
-                      ? PsychicOpenapiOptions
-                      : Opt extends 'saltRounds'
-                        ? number
-                        : never,
+        : Opt extends 'appRoot'
+          ? string
+          : Opt extends 'json'
+            ? bodyParser.Options
+            : Opt extends 'client'
+              ? PsychicClientOptions
+              : Opt extends 'background:queue'
+                ? Omit<QueueOptions, 'connection'>
+                : Opt extends 'background:worker'
+                  ? WorkerOptions
+                  : Opt extends 'redis:background'
+                    ? PsychicRedisConnectionOptions
+                    : Opt extends 'redis:ws'
+                      ? PsychicRedisConnectionOptions
+                      : Opt extends 'ssl'
+                        ? PsychicSslCredentials
+                        : Opt extends 'openapi'
+                          ? PsychicOpenapiOptions
+                          : Opt extends 'saltRounds'
+                            ? number
+                            : Opt extends 'inflections'
+                              ? () => void | Promise<void>
+                              : Opt extends 'routes'
+                                ? (r: PsychicRouter) => void | Promise<void>
+                                : never,
   ) {
     switch (option) {
+      case 'appRoot':
+        this.appRoot = value as string
+        break
+
       case 'cors':
         this.corsOptions = value as CorsOptions
         break
 
       case 'cookie':
         this.cookieOptions = { maxAge: cookieMaxAgeFromCookieOpts((value as CustomCookieOptions).maxAge) }
+        break
+
+      case 'client':
+        this.client = value as PsychicClientOptions
+        break
+
+      case 'routes':
+        this.routesCb = value as (r: PsychicRouter) => void | Promise<void>
         break
 
       case 'json':
@@ -250,44 +235,28 @@ export default class Psyconf {
         this.openapi = value as PsychicOpenapiOptions
         break
 
+      case 'inflections':
+        this.inflections = value as () => void | Promise<void>
+        break
+
       default:
-        throw new Error(`Unhandled option type passed to Psyconf#set: ${option}`)
+        throw new Error(`Unhandled option type passed to PsychicApplication#set: ${option}`)
     }
   }
 
   private async runHooksFor(hookEventType: PsychicHookLoadEventTypes) {
-    await this.loadAppConfig()
-
     for (const hook of this.bootHooks[hookEventType]) {
       await hook(this)
     }
   }
-
-  private loadedHooks = false
-  private async loadAppConfig() {
-    if (this.loadedHooks) return
-
-    try {
-      const hooksCB = await importFileWithDefault(absoluteSrcPath('conf/app'))
-      if (typeof hooksCB === 'function') {
-        await hooksCB(this)
-      }
-    } catch (err) {
-      // ts-node will bury this error, preventing us from being able to see it
-      // unless we manually console log the error ourselves.
-      console.error('an error occurred while attempting to import conf/app.ts:', err)
-      throw err
-    }
-
-    cachePsyconf(this)
-    this.loadedHooks = true
-  }
 }
 
-export type PsyconfOption =
+export type PsychicApplicationOption =
+  | 'appRoot'
   | 'cors'
   | 'cookie'
   | 'json'
+  | 'client'
   | 'background:queue'
   | 'background:worker'
   | 'redis:background'
@@ -295,8 +264,11 @@ export type PsyconfOption =
   | 'ssl'
   | 'saltRounds'
   | 'openapi'
+  | 'controllers'
+  | 'inflections'
+  | 'routes'
 
-export interface PsyconfSpecialHooks {
+export interface PsychicApplicationSpecialHooks {
   expressInit: ((app: Application) => void | Promise<void>)[]
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
   wsStart: ((server: SocketServer) => void | Promise<void>)[]
@@ -334,4 +306,8 @@ export interface PsychicOpenapiOptions {
       }
     }
   }
+}
+
+export interface PsychicClientOptions {
+  apiPath?: string
 }

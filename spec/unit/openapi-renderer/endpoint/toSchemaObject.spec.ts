@@ -3,8 +3,6 @@ import UsersController from '../../../../test-app/app/controllers/UsersControlle
 import Pet from '../../../../test-app/app/models/Pet'
 import Post from '../../../../test-app/app/models/Post'
 import User from '../../../../test-app/app/models/User'
-import { AdminPetSummarySerializer } from '../../../../test-app/app/serializers/Admin/PetSerializer'
-import AdminUserSerializer from '../../../../test-app/app/serializers/Admin/UserSerializer'
 import {
   CommentTestingArrayWithSerializerRefSerializer,
   CommentTestingBasicArraySerializerRefSerializer,
@@ -33,12 +31,12 @@ import { UserWithPostsMultiType2Serializer } from '../../../../test-app/app/seri
 
 describe('OpenapiEndpointRenderer', () => {
   describe('#toSchemaObject', () => {
-    it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
+    it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", () => {
       const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
         serializerKey: 'extra',
       })
 
-      const response = await renderer.toSchemaObject()
+      const response = renderer.toSchemaObject()
       expect(response).toEqual({
         UserExtra: {
           type: 'object',
@@ -87,31 +85,8 @@ describe('OpenapiEndpointRenderer', () => {
       })
     })
 
-    context('with a schemaDelimeter set', () => {
-      it('leverages the schemaDelimeter when computing schema names', async () => {
-        const renderer = new OpenapiEndpointRenderer(
-          () => AdminPetSummarySerializer,
-          UsersController,
-          'howyadoin',
-        )
-
-        jest.spyOn(OpenapiEndpointRenderer.prototype, 'schemaDelimeter', 'get').mockReturnValue('__')
-
-        const response = await renderer.toSchemaObject()
-        expect(response).toEqual(
-          expect.objectContaining({
-            Admin__AdminPetSummary: {
-              type: 'object',
-              required: ['id'],
-              properties: { id: { type: 'string' } },
-            },
-          }),
-        )
-      })
-    })
-
     context('with a string type passed', () => {
-      it('supports format and enum fields', async () => {
+      it('supports format and enum fields', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentTestingStringSerializer,
           UsersController,
@@ -119,7 +94,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingString: {
@@ -142,7 +117,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('with an integer type passed', () => {
-      it('supports integer type fields, including minimum and maximum', async () => {
+      it('supports integer type fields, including minimum and maximum', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentTestingIntegerSerializer,
           UsersController,
@@ -150,7 +125,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingInteger: {
@@ -169,7 +144,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('using shorthand', () => {
-        it('expands to integer type', async () => {
+        it('expands to integer type', () => {
           const renderer = new OpenapiEndpointRenderer(
             () => CommentTestingIntegerShorthandSerializer,
             UsersController,
@@ -177,7 +152,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = await renderer.toSchemaObject()
+          const response = renderer.toSchemaObject()
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingIntegerShorthand: {
@@ -196,7 +171,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('with a decimal type passed', () => {
-      it('expands to number tpye with decimal format', async () => {
+      it('expands to number tpye with decimal format', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentTestingDecimalSerializer,
           UsersController,
@@ -204,7 +179,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDecimal: {
@@ -224,7 +199,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('using decimal shorthand', () => {
-        it('expands to number format', async () => {
+        it('expands to number format', () => {
           const renderer = new OpenapiEndpointRenderer(
             () => CommentTestingDecimalShorthandSerializer,
             UsersController,
@@ -232,7 +207,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = await renderer.toSchemaObject()
+          const response = renderer.toSchemaObject()
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingDecimalShorthand: {
@@ -252,7 +227,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('with a double type passed', () => {
-      it('expands to number type with double format', async () => {
+      it('expands to number type with double format', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentTestingDoubleSerializer,
           UsersController,
@@ -260,7 +235,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDouble: {
@@ -281,7 +256,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('using double shorthand', () => {
-        it('expands to number type with double format', async () => {
+        it('expands to number type with double format', () => {
           const renderer = new OpenapiEndpointRenderer(
             () => CommentTestingDoubleShorthandSerializer,
             UsersController,
@@ -289,7 +264,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = await renderer.toSchemaObject()
+          const response = renderer.toSchemaObject()
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingDoubleShorthand: {
@@ -308,7 +283,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('using double[] shorthand', () => {
-        it('expands to array with items of number type with double format', async () => {
+        it('expands to array with items of number type with double format', () => {
           const renderer = new OpenapiEndpointRenderer(
             () => CommentTestingDoubleArrayShorthandSerializer,
             UsersController,
@@ -316,7 +291,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = await renderer.toSchemaObject()
+          const response = renderer.toSchemaObject()
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingDoubleArrayShorthand: {
@@ -339,7 +314,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('with a date type passed', () => {
-      it('supports integer type fields, including minimum and maximum', async () => {
+      it('supports integer type fields, including minimum and maximum', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentTestingDateSerializer,
           UsersController,
@@ -347,7 +322,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDate: {
@@ -373,7 +348,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('with a date-time type passed', () => {
-      it('supports integer type fields, including minimum and maximum', async () => {
+      it('supports integer type fields, including minimum and maximum', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentTestingDateTimeSerializer,
           UsersController,
@@ -381,7 +356,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDateTime: {
@@ -407,7 +382,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('with a $serializer expression passed', () => {
-      it('supports an attribute with the $serializer expression', async () => {
+      it('supports an attribute with the $serializer expression', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentTestingRootSerializerRefSerializer,
           UsersController,
@@ -415,7 +390,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingRootSerializerRef: {
@@ -459,7 +434,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('with an object type passed', () => {
-      it('supports maxProperties and additionalProperties fields', async () => {
+      it('supports maxProperties and additionalProperties fields', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentTestingDefaultObjectFieldsSerializer,
           UsersController,
@@ -469,7 +444,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         )
 
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDefaultObjectFields: {
@@ -490,7 +465,7 @@ describe('OpenapiEndpointRenderer', () => {
         )
       })
 
-      it('supports anyOf expression', async () => {
+      it('supports anyOf expression', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentWithAnyOfObjectSerializer,
           UsersController,
@@ -499,7 +474,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'default',
           },
         )
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentWithAnyOfObject: {
@@ -515,7 +490,7 @@ describe('OpenapiEndpointRenderer', () => {
         )
       })
 
-      it('supports allOf expression', async () => {
+      it('supports allOf expression', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentWithAllOfObjectSerializer,
           UsersController,
@@ -524,7 +499,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'default',
           },
         )
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentWithAllOfObject: {
@@ -540,7 +515,7 @@ describe('OpenapiEndpointRenderer', () => {
         )
       })
 
-      it('supports oneOf expression', async () => {
+      it('supports oneOf expression', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentWithOneOfObjectSerializer,
           UsersController,
@@ -549,7 +524,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'default',
           },
         )
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentWithOneOfObject: {
@@ -565,7 +540,7 @@ describe('OpenapiEndpointRenderer', () => {
         )
       })
 
-      it('supports $serializer expression', async () => {
+      it('supports $serializer expression', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentTestingObjectWithSerializerRefSerializer,
           UsersController,
@@ -574,7 +549,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'default',
           },
         )
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingObjectWithSerializerRef: {
@@ -620,7 +595,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('with an array type passed', () => {
       context('items on the array or leveraging an expression', () => {
         context('anyOf', () => {
-          it('renders anyOf expression', async () => {
+          it('renders anyOf expression', () => {
             const renderer = new OpenapiEndpointRenderer(
               () => CommentWithAnyOfArraySerializer,
               UsersController,
@@ -629,7 +604,7 @@ describe('OpenapiEndpointRenderer', () => {
                 serializerKey: 'default',
               },
             )
-            const response = await renderer.toSchemaObject()
+            const response = renderer.toSchemaObject()
             expect(response).toEqual(
               expect.objectContaining({
                 CommentWithAnyOfArray: {
@@ -650,7 +625,7 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('allOf', () => {
-          it('renders allOf expression', async () => {
+          it('renders allOf expression', () => {
             const renderer = new OpenapiEndpointRenderer(
               () => CommentWithAllOfArraySerializer,
               UsersController,
@@ -659,7 +634,7 @@ describe('OpenapiEndpointRenderer', () => {
                 serializerKey: 'default',
               },
             )
-            const response = await renderer.toSchemaObject()
+            const response = renderer.toSchemaObject()
             expect(response).toEqual(
               expect.objectContaining({
                 CommentWithAllOfArray: {
@@ -680,7 +655,7 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('oneOf', () => {
-          it('renders anyOf expression', async () => {
+          it('renders anyOf expression', () => {
             const renderer = new OpenapiEndpointRenderer(
               () => CommentWithOneOfArraySerializer,
               UsersController,
@@ -689,7 +664,7 @@ describe('OpenapiEndpointRenderer', () => {
                 serializerKey: 'default',
               },
             )
-            const response = await renderer.toSchemaObject()
+            const response = renderer.toSchemaObject()
             expect(response).toEqual(
               expect.objectContaining({
                 CommentWithOneOfArray: {
@@ -709,7 +684,7 @@ describe('OpenapiEndpointRenderer', () => {
           })
         })
 
-        it('supports $serializer expression', async () => {
+        it('supports $serializer expression', () => {
           const renderer = new OpenapiEndpointRenderer(
             () => CommentTestingArrayWithSerializerRefSerializer,
             UsersController,
@@ -718,7 +693,7 @@ describe('OpenapiEndpointRenderer', () => {
               serializerKey: 'default',
             },
           )
-          const response = await renderer.toSchemaObject()
+          const response = renderer.toSchemaObject()
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingArrayWithSerializerRef: {
@@ -765,12 +740,12 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('with multiple dream models passed to callback', () => {
-      it('renders the association as a ref, also providing a schema definition for the associated serializer', async () => {
+      it('renders the association as a ref, also providing a schema definition for the associated serializer', () => {
         const renderer = new OpenapiEndpointRenderer(() => [Pet, User], UsersController, 'howyadoin', {
           serializerKey: 'default',
         })
 
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             Pet: {
@@ -797,11 +772,11 @@ describe('OpenapiEndpointRenderer', () => {
 
     context('with a serializer that contains an association', () => {
       context('RendersOne', () => {
-        it('renders the association as a ref, also providing a schema definition for the associated serializer', async () => {
+        it('renders the association as a ref, also providing a schema definition for the associated serializer', () => {
           const renderer = new OpenapiEndpointRenderer(() => Pet, UsersController, 'howyadoin', {
             serializerKey: 'withAssociation',
           })
-          const response = await renderer.toSchemaObject()
+          const response = renderer.toSchemaObject()
           expect(response).toEqual(
             expect.objectContaining({
               PetWithAssociation: {
@@ -824,50 +799,13 @@ describe('OpenapiEndpointRenderer', () => {
           )
         })
 
-        context('with a schemaDelimeter set', () => {
-          it('uses delimeter to specify schema name', async () => {
-            const renderer = new OpenapiEndpointRenderer(
-              () => AdminUserSerializer,
-              UsersController,
-              'howyadoin',
-            )
-
-            jest.spyOn(OpenapiEndpointRenderer.prototype, 'schemaDelimeter', 'get').mockReturnValue('__')
-
-            const response = await renderer.toSchemaObject()
-            expect(response).toEqual(
-              expect.objectContaining({
-                Admin__AdminUser: {
-                  type: 'object',
-                  required: ['id', 'name', 'pets'],
-                  properties: {
-                    id: { type: 'string' },
-                    name: { type: 'string' },
-                    pets: {
-                      type: 'array',
-                      items: {
-                        $ref: '#/components/schemas/Admin__AdminPetSummary',
-                      },
-                    },
-                  },
-                },
-                Admin__AdminPetSummary: {
-                  type: 'object',
-                  required: ['id'],
-                  properties: { id: { type: 'string' } },
-                },
-              }),
-            )
-          })
-        })
-
         context('with a nullable RendersOne', () => {
-          it('treats association as nullable', async () => {
+          it('treats association as nullable', () => {
             const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
               serializerKey: 'withRecentPost',
             })
 
-            const response = await renderer.toSchemaObject()
+            const response = renderer.toSchemaObject()
             expect(response).toEqual(
               expect.objectContaining({
                 UserWithRecentPost: {
@@ -886,12 +824,12 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('with a nested association', () => {
-          it('provides schema for the nested association', async () => {
+          it('provides schema for the nested association', () => {
             const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
               serializerKey: 'withRecentPost',
             })
 
-            const response = await renderer.toSchemaObject()
+            const response = renderer.toSchemaObject()
             expect(response).toEqual(
               expect.objectContaining({
                 Comment: {
@@ -909,12 +847,12 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('RendersMany', () => {
-        it('renders the association as an array of $refs, also providing a schema definition for the associated serializer', async () => {
+        it('renders the association as an array of $refs, also providing a schema definition for the associated serializer', () => {
           const renderer = new OpenapiEndpointRenderer(() => Post, UsersController, 'howyadoin', {
             serializerKey: 'withComments',
           })
 
-          const response = await renderer.toSchemaObject()
+          const response = renderer.toSchemaObject()
           expect(response).toEqual(
             expect.objectContaining({
               PostWithComments: {
@@ -939,12 +877,12 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('with a nested association', () => {
-          it('provides schema for the nested association', async () => {
+          it('provides schema for the nested association', () => {
             const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
               serializerKey: 'withPosts',
             })
 
-            const response = await renderer.toSchemaObject()
+            const response = renderer.toSchemaObject()
             expect(response).toEqual(
               expect.objectContaining({
                 Comment: {
@@ -962,7 +900,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('rendering an association which contains an array of dreams', () => {
-        it('extracts serializers from each dream, then encases expression in an anyOf, wrapping all identified serializers', async () => {
+        it('extracts serializers from each dream, then encases expression in an anyOf, wrapping all identified serializers', () => {
           const renderer = new OpenapiEndpointRenderer(
             () => UserWithPostsMultiType2Serializer,
             UsersController,
@@ -970,7 +908,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = await renderer.toSchemaObject()
+          const response = renderer.toSchemaObject()
           expect(response).toEqual(
             expect.objectContaining({
               UserWithPostsMultiType2: {
@@ -999,7 +937,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('when responses includes $serializer refs', () => {
-      it('extracts serializers and renders them in components.schemas', async () => {
+      it('extracts serializers and renders them in components.schemas', () => {
         const renderer = new OpenapiEndpointRenderer(
           () => CommentTestingBasicSerializerRefSerializer,
           UsersController,
@@ -1013,7 +951,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         )
 
-        const response = await renderer.toSchemaObject()
+        const response = renderer.toSchemaObject()
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingBasicSerializerRef: {

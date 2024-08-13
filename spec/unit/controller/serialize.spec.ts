@@ -3,24 +3,25 @@ import { Attribute, DreamSerializer } from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller'
 import { BeforeAction } from '../../../src/controller/decorators'
-import Psyconf from '../../../src/psyconf'
+import PsychicApplication from '../../../src/psychic-application'
 import Pet from '../../../test-app/app/models/Pet'
 import User from '../../../test-app/app/models/User'
 import UserSerializer, {
   UserExtraSerializer,
   UserSummarySerializer,
 } from '../../../test-app/app/serializers/UserSerializer'
+import * as DreamModule from '@rvohealth/dream'
 
 describe('PsychicController', () => {
   describe('#serialize', () => {
     let req: Request
     let res: Response
-    let config: Psyconf
+    let config: PsychicApplication
 
     beforeEach(() => {
       req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
       res = getMockRes().res
-      config = new Psyconf()
+      config = new PsychicApplication()
       jest.spyOn(res, 'json')
     })
 
@@ -29,6 +30,15 @@ describe('PsychicController', () => {
         @Attribute()
         public email: string
       }
+
+      const dreamApp = DreamModule.getCachedDreamApplicationOrFail()
+      jest.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
+        ...dreamApp.serializers,
+        MySerializer,
+      })
+
+      jest.spyOn(DreamModule, 'getCachedDreamApplicationOrFail').mockReturnValue(dreamApp)
+
       class MyController extends PsychicController {
         static {
           this.serializes(User).with(MySerializer)
@@ -94,7 +104,7 @@ describe('PsychicController', () => {
           }
 
           public get serializers() {
-            return { default: GreetSerializer } as const
+            return { default: 'GreetSerializer' } as const
           }
         }
 
@@ -106,7 +116,7 @@ describe('PsychicController', () => {
           }
 
           public get serializers() {
-            return { default: GreetSerializer2 } as const
+            return { default: 'GreetSerializer2' } as const
           }
         }
 
@@ -119,6 +129,17 @@ describe('PsychicController', () => {
             this.ok(new Greeting('hello'))
           }
         }
+
+        beforeEach(() => {
+          const dreamApp = DreamModule.getCachedDreamApplicationOrFail()
+          jest.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
+            ...dreamApp.serializers,
+            GreetSerializer,
+            GreetSerializer2,
+          })
+
+          jest.spyOn(DreamModule, 'getCachedDreamApplicationOrFail').mockReturnValue(dreamApp)
+        })
 
         it('identifies serializer attached to model class and uses it to serialize the object', () => {
           const controller = new MyController(req, res, { config, action: 'show' })
@@ -156,9 +177,9 @@ describe('PsychicController', () => {
         public get serializers() {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return {
-            default: User2Serializer,
-            summary: User2SummarySerializer,
-            extra: User2ExtraSerializer,
+            default: 'User2Serializer',
+            summary: 'User2SummarySerializer',
+            extra: 'User2ExtraSerializer',
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
           } as any
         }
@@ -203,6 +224,15 @@ describe('PsychicController', () => {
 
       beforeEach(async () => {
         user2 = await User2.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
+        const dreamApp = DreamModule.getCachedDreamApplicationOrFail()
+        jest.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
+          ...dreamApp.serializers,
+          User2Serializer,
+          User2SummarySerializer,
+          User2ExtraSerializer,
+        })
+
+        jest.spyOn(DreamModule, 'getCachedDreamApplicationOrFail').mockReturnValue(dreamApp)
       })
 
       it('passes the passthrough data through to the child serializers', async () => {

@@ -1,7 +1,4 @@
-import { BelongsTo, DreamColumn } from '@rvohealth/dream'
-import CommentSerializer, {
-  CommentSummarySerializer,
-} from '../../../test-app/app/serializers/CommentSerializer'
+import { DreamColumn, DreamSerializers } from '@rvohealth/dream'
 import ApplicationModel from './ApplicationModel'
 import Post from './Post'
 
@@ -10,10 +7,10 @@ export default class Comment extends ApplicationModel {
     return 'comments' as const
   }
 
-  public get serializers() {
+  public get serializers(): DreamSerializers<Comment> {
     return {
-      default: CommentSerializer,
-      summary: CommentSummarySerializer,
+      default: 'CommentSerializer',
+      summary: 'CommentSummarySerializer',
     } as const
   }
 
@@ -22,7 +19,7 @@ export default class Comment extends ApplicationModel {
   public createdAt: DreamColumn<Comment, 'createdAt'>
   public updatedAt: DreamColumn<Comment, 'updatedAt'>
 
-  @BelongsTo(() => Post)
+  @Comment.BelongsTo('Post')
   public post: Post
   public postId: DreamColumn<Comment, 'postId'>
 }

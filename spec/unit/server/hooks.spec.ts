@@ -1,5 +1,5 @@
 import { PsychicServer } from '../../../src'
-import { PsychicHookEventType } from '../../../src/psyconf/types'
+import { PsychicHookEventType } from '../../../src/psychic-application/types'
 
 describe('PsychicServer hooks', () => {
   let server: PsychicServer

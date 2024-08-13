@@ -1,9 +1,4 @@
-import { BelongsTo, DreamColumn, HasMany, HasOne } from '@rvohealth/dream'
-import PostSerializer, {
-  PostSummarySerializer,
-  PostWithCommentsSerializer,
-  PostWithRecentCommentSerializer,
-} from '../../../test-app/app/serializers/PostSerializer'
+import { DreamColumn, DreamSerializers } from '@rvohealth/dream'
 import ApplicationModel from './ApplicationModel'
 import Comment from './Comment'
 import User from './User'
@@ -13,12 +8,12 @@ export default class Post extends ApplicationModel {
     return 'posts' as const
   }
 
-  public get serializers() {
+  public get serializers(): DreamSerializers<Post> {
     return {
-      default: PostSerializer,
-      summary: PostSummarySerializer,
-      withRecentComment: PostWithRecentCommentSerializer,
-      withComments: PostWithCommentsSerializer,
+      default: 'PostSerializer',
+      summary: 'PostSummarySerializer',
+      withRecentComment: 'PostWithRecentCommentSerializer',
+      withComments: 'PostWithCommentsSerializer',
     } as const
   }
 
@@ -27,13 +22,13 @@ export default class Post extends ApplicationModel {
   public createdAt: DreamColumn<Post, 'createdAt'>
   public updatedAt: DreamColumn<Post, 'updatedAt'>
 
-  @BelongsTo(() => User)
+  @Post.BelongsTo('User')
   public user: User
   public userId: DreamColumn<Post, 'userId'>
 
-  @HasMany(() => Comment)
+  @Post.HasMany('Comment')
   public comments: Comment[]
 
-  @HasOne(() => Comment, { order: { id: 'desc' } })
+  @Post.HasOne('Comment', { order: { id: 'desc' } })
   public recentComment: Comment | null
 }

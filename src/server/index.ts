@@ -1,46 +1,40 @@
-import { loadModels, closeAllDbConnections } from '@rvohealth/dream'
-import express from 'express'
-import { Application } from 'express'
-import cors from 'cors'
+import { closeAllDbConnections } from '@rvohealth/dream'
 import cookieParser from 'cookie-parser'
-import Psyconf from '../psyconf'
-import Cable from '../cable'
-import FrontEndClientServer from './front-end-client'
-import PsychicRouter from '../router'
-import absoluteSrcPath from '../helpers/absoluteSrcPath'
-import importFileWithDefault from '../helpers/importFileWithDefault'
+import cors from 'cors'
+import express, { Application } from 'express'
 import { Server } from 'http'
-import startPsychicServer from './helpers/startPsychicServer'
 import { stopBackgroundWorkers } from '../background'
-import portValue from '../helpers/portValue'
+import Cable from '../cable'
 import { envBool } from '../helpers/envValue'
+import portValue from '../helpers/portValue'
+import PsychicApplication from '../psychic-application'
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import PsychicRouter from '../router'
+import FrontEndClientServer from './front-end-client'
+import startPsychicServer from './helpers/startPsychicServer'
 
 export default class PsychicServer {
   public app: Application
   public cable: Cable
-  public config: Psyconf
+  public config: PsychicApplication
   public frontEndClient: FrontEndClientServer
   public server: Server
   private booted = false
   constructor() {
     this.buildApp()
-    this.config = new Psyconf()
+    this.config = getCachedPsychicApplicationOrFail()
   }
 
   public async routes() {
     const r = new PsychicRouter(this.app, this.config)
-    const routesPath = absoluteSrcPath('conf/routes')
-    const routesCB = await importFileWithDefault<(router: PsychicRouter) => Promise<void>>(routesPath)
-    await routesCB(r)
+    const psychicApp = getCachedPsychicApplicationOrFail()
+    await psychicApp.routesCb(r)
     return r.routes
   }
 
   public async boot() {
     if (this.booted) return
 
-    await Psyconf.configure()
-
-    await this.config['loadAppConfig']()
     await this.config['runHooksFor']('boot')
 
     this.initializeCors()
@@ -85,10 +79,6 @@ export default class PsychicServer {
     } = {},
   ) {
     await this.boot()
-
-    // ensure models are loaded, since otherwise we will not properly
-    // boot our STI configurations within dream
-    await loadModels()
 
     if (withFrontEndClient) {
       this.frontEndClient = new FrontEndClientServer()
@@ -165,9 +155,8 @@ export default class PsychicServer {
 
   private async buildRoutes() {
     const r = new PsychicRouter(this.app, this.config)
-    const routesPath = absoluteSrcPath('conf/routes')
-    const routesCB = await importFileWithDefault<(router: PsychicRouter) => Promise<void>>(routesPath)
-    await routesCB(r)
+    const psychicApp = getCachedPsychicApplicationOrFail()
+    await psychicApp.routesCb(r)
     r.commit()
   }
 }

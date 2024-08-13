@@ -1,6 +1,6 @@
-import { Psyconf } from '../../../../src'
-import redisConnectionString from '../../../../src/psyconf/helpers/redisConnectionString'
-import { RedisOptionPurpose } from '../../../../src/psyconf/helpers/redisOptions'
+import redisConnectionString from '../../../../src/psychic-application/helpers/redisConnectionString'
+import { RedisOptionPurpose } from '../../../../src/psychic-application/helpers/redisOptions'
+import initializePsychicApplication from '../../../../test-app/cli/helpers/initializePsychicApplication'
 
 describe('redisConnectionString', () => {
   let purpose: RedisOptionPurpose
@@ -26,7 +26,7 @@ describe('redisConnectionString', () => {
     setTempEnv('REDIS_HOST', host)
     setTempEnv('REDIS_PORT', port)
     setTempEnv('REDIS_USE_SSL', secure)
-    await Psyconf.reconfigure()
+    await initializePsychicApplication()
     return redisConnectionString(purpose)
   }
 
@@ -49,7 +49,7 @@ describe('redisConnectionString', () => {
     setTempEnv('REDIS_HOST', originalHost)
     setTempEnv('REDIS_PORT', originalPort)
     setTempEnv('REDIS_USE_SSL', originalSecure)
-    await Psyconf.reconfigure()
+    await initializePsychicApplication()
   })
 
   beforeEach(() => {

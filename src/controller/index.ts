@@ -1,4 +1,10 @@
-import { Dream, DreamParamSafeAttributes, DreamSerializer } from '@rvohealth/dream'
+import {
+  Dream,
+  DreamParamSafeAttributes,
+  DreamSerializer,
+  GlobalNameNotSet,
+  getCachedDreamApplicationOrFail,
+} from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import background from '../background'
 import { ControllerHook } from '../controller/hooks'
@@ -12,13 +18,11 @@ import HttpStatusCodeMap, { HttpStatusSymbol } from '../error/http/status-codes'
 import Unauthorized from '../error/http/unauthorized'
 import UnprocessableEntity from '../error/http/unprocessable-entity'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint'
-import Psyconf from '../psyconf'
-import getControllerKey from '../psyconf/helpers/getControllerKey'
-import getModelKey from '../psyconf/helpers/getModelKey'
+import PsychicApplication from '../psychic-application'
 import Params, {
+  ParamValidationError,
   ParamsCastOptions,
   ParamsForOpts,
-  ParamValidationError,
   ValidatedAllowsNull,
   ValidatedReturnType,
 } from '../server/params'
@@ -61,15 +65,45 @@ export interface PsychicParamsDictionary {
 class InvalidDotNotationPath extends Error {}
 
 export default class PsychicController {
+  /**
+   * @internal
+   *
+   * Used internally as a helpful distinguisher between controllers
+   * and non-controllers
+   */
   public static get isPsychicController() {
     return true
   }
 
+  /**
+   * @internal
+   *
+   * Used to store controller hooks, which are registered
+   * by using the `@BeforeAction` decorator on your controllers
+   */
   public static controllerHooks: ControllerHook[] = []
 
+  /**
+   * @internal
+   *
+   * Used to store openapi data, which is registered
+   * by using the `@Openapi` decorator on your controller methods
+   */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static openapi: Record<string, OpenapiEndpointRenderer<any>>
 
+  /**
+   * Enables you to specify specific serializers to use
+   * when encountering specific models, i.e.
+   *
+   * ```ts
+   * class MyController extends AuthedController {
+   *   static {
+   *     this.serializes(User).with(UserCustomSerializer)
+   *   }
+   * }
+   * ````
+   */
   public static serializes(ModelClass: typeof Dream) {
     return {
       with: (SerializerClass: typeof DreamSerializer) => {
@@ -79,25 +113,65 @@ export default class PsychicController {
     }
   }
 
-  public static async controllerPath() {
-    return await getControllerKey(this)
+  /**
+   * @internal
+   *
+   * Returns the global identifier for this particular controller.
+   * When you first initialize your application, the controllers
+   * you provide are organized into a map of key-value pairs,
+   * where the keys are global identifiers for each controller, and
+   * the values are the matching controllers. The key returned here
+   * enables a lookup of the controller from the PsychicApplication
+   * class.
+   */
+  public static get globalName(): string {
+    if (!this._globalName) throw new GlobalNameNotSet(this)
+    return this._globalName
   }
 
-  public static async controllerActionPath(methodName: string) {
-    return `${(await this.controllerPath()).replace(/Controller$/, '')}#${methodName.toString()}`
+  private static setGlobalName(globalName: string) {
+    this._globalName = globalName
+  }
+  private static _globalName: string | undefined
+
+  /**
+   * @internal
+   *
+   * Returns a controller-action string which is used to signify both
+   * the controller and the method to be called for a particular route.
+   * For the controller "Api/V1/UsersController" and the method "show",
+   * the controllerActionPath would return:
+   *
+   *   "Api/V1/Users#show"
+   */
+  public static controllerActionPath(methodName: string) {
+    return `${this.globalName.replace(/^controllers\//, '').replace(/Controller$/, '')}#${methodName.toString()}`
   }
 
+  /**
+   * given a static method on this controller, it will call this method
+   * in a background worker.
+   *
+   * @param args - a list of arguments to send into the method you are calling in the background.
+   */
   public static async background(
     methodName: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any[]
   ) {
     return await background.staticMethod(this, methodName, {
-      filepath: `app/controllers/${await this.controllerPath()}`,
+      globalName: this.globalName,
       args,
     })
   }
 
+  /**
+   * given a static method on this controller, it will call this method
+   * in a background worker, waiting the specified number of delaySeconds
+   * before doing so.
+   *
+   * @param args - a list of arguments to send into the method you are calling in the background.
+   */
   public static async backgroundWithDelay(
     delaySeconds: number,
     methodName: string,
@@ -106,11 +180,17 @@ export default class PsychicController {
   ) {
     return await background.staticMethod(this, methodName, {
       delaySeconds,
-      filepath: `app/controllers/${await this.controllerPath()}`,
+      globalName: this.globalName,
       args,
     })
   }
 
+  /**
+   * @internal
+   *
+   * Used internally as a helpful distinguisher between controllers
+   * and non-controllers
+   */
   public get isPsychicControllerInstance() {
     return true
   }
@@ -118,7 +198,7 @@ export default class PsychicController {
   public req: Request
   public res: Response
   public session: Session
-  public config: Psyconf
+  public config: PsychicApplication
   public action: string
   constructor(
     req: Request,
@@ -127,14 +207,14 @@ export default class PsychicController {
       config,
       action,
     }: {
-      config: Psyconf
+      config: PsychicApplication
       action: string
     },
   ) {
     this.req = req
     this.res = res
     this.config = config
-    this.session = new Session(req, res, this.config)
+    this.session = new Session(req, res)
     this.action = action
   }
 
@@ -226,12 +306,12 @@ export default class PsychicController {
     return this.session.setCookie(name, data, opts)
   }
 
-  public async startSession(user: Dream) {
+  public startSession(user: Dream) {
     return this.setCookie(
       this.config.authSessionKey,
       JSON.stringify({
         id: user.primaryKeyValue,
-        modelKey: await getModelKey(user.constructor as typeof Dream),
+        modelKey: (user.constructor as typeof Dream).globalName,
       }),
     )
   }
@@ -242,15 +322,32 @@ export default class PsychicController {
 
   private singleObjectJson<T>(data: T, opts: RenderOptions<T>): T | SerializerResult {
     if (!data) return data
+    const dreamApp = getCachedDreamApplicationOrFail()
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
+    if (lookup?.length) {
+      const serializerClass = lookup?.[1]
+      if (typeof serializerClass === 'function' && serializerClass.isDreamSerializer) {
+        return new serializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
+      }
+    } else {
+      const serializerKey =
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        (data as any).serializers?.[opts.serializerKey || 'default'] as string | undefined
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    const SerializerClass = lookup?.[1] || (data as any).serializers?.[opts.serializerKey || 'default']
-    if (SerializerClass) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-      return new SerializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
+      if (serializerKey && Object.prototype.hasOwnProperty.call(dreamApp.serializers, serializerKey)) {
+        const serializerClass = dreamApp.serializers[serializerKey]
+        if (typeof serializerClass === 'function' && serializerClass.isDreamSerializer) {
+          return new serializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
+        } else {
+          throw new Error(
+            `
+A serializer key was detected, but the server was unable to identify an associated serializer class matching the key.
+The key in question is: "${serializerKey}"`,
+          )
+        }
+      }
     }
 
     return data

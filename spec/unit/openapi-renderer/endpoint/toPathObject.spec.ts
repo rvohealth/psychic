@@ -1125,7 +1125,7 @@ describe('OpenapiEndpointRenderer', () => {
         class MyViewModel {
           public get serializers() {
             return {
-              default: UserWithPostsSerializer,
+              default: 'UserWithPostsSerializer',
             }
           }
         }

@@ -1,14 +1,14 @@
 import { CookieOptions, Request, Response } from 'express'
 import Encrypt from '../encryption/encrypt'
-import Psyconf, { CustomCookieOptions } from '../psyconf'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
 import envValue from '../helpers/envValue'
+import { CustomCookieOptions } from '../psychic-application'
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 
 export default class Session {
   constructor(
     private req: Request,
     private res: Response,
-    private config: Psyconf,
   ) {}
 
   public getCookie(name: string) {
@@ -23,7 +23,9 @@ export default class Session {
       secure: envValue('NODE_ENV') === 'production',
       httpOnly: true,
       ...opts,
-      maxAge: opts.maxAge ? cookieMaxAgeFromCookieOpts(opts.maxAge) : this.config.cookieOptions.maxAge,
+      maxAge: opts.maxAge
+        ? cookieMaxAgeFromCookieOpts(opts.maxAge)
+        : getCachedPsychicApplicationOrFail().cookieOptions?.maxAge,
     })
   }
 

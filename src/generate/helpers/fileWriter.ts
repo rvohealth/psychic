@@ -17,7 +17,6 @@ export default async function fileWriter(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   contentFunctionAttrs: any[] = [],
 ) {
-  const thisfs = fs ? fs : await import('fs/promises')
   const srcPath = fileExtension === '.spec.ts' ? '' : envBool('PSYCHIC_CORE_DEVELOPMENT') ? null : 'src'
   const newfileBasePath = path.join(...compact([rootPath, srcPath, directoryPrefix]))
   const fullyQualifiedNewfileClassName = pluralizeBeforePostfix
@@ -36,7 +35,7 @@ export default async function fileWriter(
   // we need to make sure the nested directories exist
   if (dirPartsRelativeToTypeRoot.length) {
     const fullDirectoryPath = [...newfileBasePath.split('/'), ...dirPartsRelativeToTypeRoot].join('/')
-    await thisfs.mkdir(fullDirectoryPath, { recursive: true })
+    await fs.mkdir(fullDirectoryPath, { recursive: true })
   }
 
   const fullNewfilePath = `${newfileBasePath}/${filepathRelativeToTypeRoot}${fileExtension}`
@@ -50,5 +49,5 @@ export default async function fileWriter(
       fileExtension === '.spec.ts' ? ' spec' : ''
     }: ${rootRelativeNewfilePath}`,
   )
-  await thisfs.writeFile(fullNewfilePath, newfileFileContents)
+  await fs.writeFile(fullNewfilePath, newfileFileContents)
 }

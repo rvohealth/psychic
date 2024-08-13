@@ -10,7 +10,7 @@ describe('background (app singleton)', () => {
       await background.instanceMethod(DummyService, 'instanceRunInBG', {
         args: ['bottlearum'],
         constructorArgs: ['bottleawhiskey'],
-        filepath: 'test-app/app/services/DummyService.ts',
+        globalName: 'services/DummyService',
       })
       expect(await readTmpFile()).toEqual('bottleawhiskey,bottlearum')
     })
@@ -20,7 +20,7 @@ describe('background (app singleton)', () => {
         await background.instanceMethod(DummyService, 'instanceRunInBG', {
           args: ['bottlearum'],
           constructorArgs: ['bottleawhiskey'],
-          filepath: 'test-app/app/services/DummyService.ts',
+          globalName: 'services/DummyService',
           priority,
         })
       }
@@ -31,7 +31,7 @@ describe('background (app singleton)', () => {
         expect(background.queue!.add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
-            filepath: '/app/services/DummyService',
+            globalName: 'services/DummyService',
             args: ['bottlearum'],
             constructorArgs: ['bottleawhiskey'],
             priority,
@@ -42,9 +42,9 @@ describe('background (app singleton)', () => {
         )
       }
 
-      beforeEach(async () => {
+      beforeEach(() => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
-        await background.connect()
+        background.connect()
 
         jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
       })
@@ -103,7 +103,7 @@ describe('background (app singleton)', () => {
         await background.instanceMethod(DummyService, 'instanceRunInBG', {
           args: ['bottlearum'],
           constructorArgs: ['bottleawhiskey'],
-          filepath: 'test-app/app/services/DummyService.ts',
+          globalName: 'services/DummyService',
           delaySeconds,
         })
       }
@@ -114,7 +114,7 @@ describe('background (app singleton)', () => {
         expect(background.queue!.add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
-            filepath: '/app/services/DummyService',
+            globalName: 'services/DummyService',
             args: ['bottlearum'],
             constructorArgs: ['bottleawhiskey'],
             priority,
@@ -125,9 +125,9 @@ describe('background (app singleton)', () => {
         )
       }
 
-      beforeEach(async () => {
+      beforeEach(() => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
-        await background.connect()
+        background.connect()
 
         jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
       })

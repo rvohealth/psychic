@@ -1,7 +1,7 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Encrypt } from '../../../src'
 import PsychicController from '../../../src/controller'
-import Psyconf from '../../../src/psyconf'
+import PsychicApplication from '../../../src/psychic-application'
 import User from '../../../test-app/app/models/User'
 
 describe('PsychicController', () => {
@@ -14,7 +14,7 @@ describe('PsychicController', () => {
 
       const res = getMockRes().res
       const controller = new PsychicController(req, res, {
-        config: new Psyconf(),
+        config: new PsychicApplication(),
         action: 'hello',
       })
       expect(controller.getCookie('auth_token')).toEqual(user.id.toString())
@@ -26,7 +26,7 @@ describe('PsychicController', () => {
       const req = getMockReq()
       const res = getMockRes().res
       const controller = new PsychicController(req, res, {
-        config: new Psyconf(),
+        config: new PsychicApplication(),
         action: 'hello',
       })
 

@@ -1,8 +1,8 @@
 import '../../../src/conf/global'
-import { Psyconf } from '@rvohealth/psychic'
-import { truncate } from '@rvohealth/dream/spec-helpers'
 
-process.env.APP_ROOT_PATH = process.cwd()
+import { truncate } from '@rvohealth/dream/spec-helpers'
+import initializePsychicApplication from 'cli/helpers/initializePsychicApplication'
+
 process.env.TS_SAFE = '1'
 
 jest.setTimeout(
@@ -11,6 +11,12 @@ jest.setTimeout(
 )
 
 beforeEach(async () => {
-  await Psyconf.configure()
+  try {
+    await initializePsychicApplication()
+  } catch (err) {
+    console.error(err)
+    throw err
+  }
+
   await truncate()
 }, 15000)

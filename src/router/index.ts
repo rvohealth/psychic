@@ -12,12 +12,12 @@ import PsychicController from '../controller'
 import HttpError from '../error/http'
 import { devEnvBool } from '../helpers/envValue'
 import log from '../log'
-import Psyconf from '../psyconf'
+import PsychicApplication from '../psychic-application'
 import {
   applyResourceAction,
   applyResourcesAction,
+  controllerGlobalNameFromControllerPath,
   routePath,
-  sanitizedControllerPath,
 } from '../router/helpers'
 import { ParamValidationError } from '../server/params'
 import RouteManager from './route-manager'
@@ -25,10 +25,10 @@ import { HttpMethod, ResourceMethods, ResourcesMethodType, ResourcesMethods, Res
 
 export default class PsychicRouter {
   public app: Application
-  public config: Psyconf
+  public config: PsychicApplication
   public currentNamespaces: NamespaceConfig[] = []
   public routeManager: RouteManager = new RouteManager()
-  constructor(app: Application, config: Psyconf) {
+  constructor(app: Application, config: PsychicApplication) {
     this.app = app
     this.config = config
   }
@@ -272,7 +272,7 @@ export default class PsychicRouter {
   ) {
     const [controllerPath, action] = controllerActionString.split('#')
 
-    const ControllerClass = this.config.controllers[sanitizedControllerPath(controllerPath)]
+    const ControllerClass = this.config.controllers[controllerGlobalNameFromControllerPath(controllerPath)]
     if (!ControllerClass) {
       res.status(501).send(`
         The controller you are attempting to load was not found:
@@ -401,7 +401,7 @@ export class PsychicNestedRouter extends PsychicRouter {
   public router: Router
   constructor(
     app: Application,
-    config: Psyconf,
+    config: PsychicApplication,
     routeManager: RouteManager,
     {
       namespaces = [],

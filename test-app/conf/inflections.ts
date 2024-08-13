@@ -1,5 +1,5 @@
 import pluralize from 'pluralize'
 
-export default () => {
+export default function inflections() {
   pluralize.addUncountableRule('paper')
 }

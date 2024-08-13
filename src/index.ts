@@ -3,8 +3,8 @@ export const pluralize = _pluralize
 
 export { default as developmentOrTestEnv } from '../boot/cli/helpers/developmentOrTestEnv'
 export { default as background, stopBackgroundWorkers } from './background'
-export { default as backgroundedFunction } from './background/backgrounded-function'
 export { default as backgroundedService } from './background/backgrounded-service'
+export { default as PsychicBin } from './bin'
 export { default as Ws } from './cable/ws'
 export { default as PsychicController, PsychicParamsDictionary, PsychicParamsPrimitive } from './controller'
 export { BeforeAction, OpenAPI } from './controller/decorators'
@@ -18,7 +18,6 @@ export { default as UnprocessableEntity } from './error/http/unprocessable-entit
 export { default as generateController } from './generate/controller'
 export { default as generateResource } from './generate/resource'
 export { default as cookieMaxAgeFromCookieOpts } from './helpers/cookieMaxAgeFromCookieOpts'
-export { default as loadRepl } from './helpers/loadRepl'
 export { default as pathifyNestedObject } from './helpers/pathifyNestedObject'
 export { default as log } from './log'
 export {
@@ -35,9 +34,10 @@ export {
   OpenapiSchema,
   OpenapiPathParamOption as OpenapiUriOption,
 } from './openapi-renderer/endpoint'
-export { PsychicOpenapiOptions, default as Psyconf } from './psyconf'
-export { PsychicRedisConnectionOptions } from './psyconf/helpers/redisOptions'
-export { UUID } from './psyconf/types'
+export { default as PsychicApplication, PsychicOpenapiOptions } from './psychic-application'
+export { getCachedPsychicApplicationOrFail } from './psychic-application/cache'
+export { PsychicRedisConnectionOptions } from './psychic-application/helpers/redisOptions'
+export { UUID } from './psychic-application/types'
 export { default as PsychicRouter } from './router'
 export { HttpMethod } from './router/types'
 export { default as scheduledService } from './scheduled/scheduled-service'

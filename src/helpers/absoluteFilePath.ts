@@ -3,18 +3,17 @@
 // would be the most stable moving forward, especially if we ever decide to
 // build to dist, since directory structures morph in those contexts.
 import path from 'path'
-import envValue, { envBool } from './envValue'
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import { envBool } from './envValue'
 
 export default function absoluteFilePath(
   filePath: string,
   { purgeTestAppInCoreDevelopment = false }: { purgeTestAppInCoreDevelopment?: boolean } = {},
 ): string {
-  if (!envValue('APP_ROOT_PATH'))
-    throw `
-      [Psychic]: Must set APP_ROOT_PATH before using psychic
-    `
+  const psychicApp = getCachedPsychicApplicationOrFail()
 
-  let appRoot = envValue('APP_ROOT_PATH')
+  let appRoot = psychicApp.appRoot
+
   if (envBool('PSYCHIC_CORE_DEVELOPMENT')) {
     filePath = filePath.replace(/^[/]?test-app/, '')
 

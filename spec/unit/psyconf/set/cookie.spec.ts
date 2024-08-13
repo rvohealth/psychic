@@ -1,11 +1,11 @@
 import { describe as context } from '@jest/globals'
-import Psyconf from '../../../../src/psyconf'
+import PsychicApplication from '../../../../src/psychic-application'
 
-describe('Psyconf set("cookie", ...opts)', () => {
-  let config: Psyconf
+describe('PsychicApplication set("cookie", ...opts)', () => {
+  let config: PsychicApplication
 
   beforeEach(() => {
-    config = new Psyconf()
+    config = new PsychicApplication()
   })
 
   context('milliseconds unit is passed for maxAge', () => {

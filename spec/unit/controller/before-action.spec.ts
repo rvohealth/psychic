@@ -2,17 +2,17 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller'
 import { BeforeAction } from '../../../src/controller/decorators'
-import Psyconf from '../../../src/psyconf'
+import PsychicApplication from '../../../src/psychic-application'
 
 describe('PsychicController BeforeAction', () => {
   let req: Request
   let res: Response
-  let config: Psyconf
+  let config: PsychicApplication
 
   beforeEach(() => {
     req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
     res = getMockRes().res
-    config = new Psyconf()
+    config = new PsychicApplication()
   })
 
   class MyController extends PsychicController {

@@ -14,6 +14,10 @@ export function sanitizedControllerPath(controllerName: string) {
   return controllerName.replace(/Controller$/, '') + 'Controller'
 }
 
+export function controllerGlobalNameFromControllerPath(controllerName: string) {
+  return `controllers/${sanitizedControllerPath(controllerName)}`
+}
+
 export function namespacedRoute(namespace: string, route: string) {
   const compactedRoutes = compact([namespace || null, route])
   return '/' + compactedRoutes.join('/').replace(/^\//, '')

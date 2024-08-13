@@ -1,12 +1,14 @@
 import fs from 'fs/promises'
+import path from 'path'
 import backgroundedService from '../../../src/background/backgrounded-service'
-import absoluteFilePath from '../../../src/helpers/absoluteFilePath'
+import { getCachedPsychicApplicationOrFail } from '../../../src/psychic-application/cache'
 
-export default class LastDummyService extends backgroundedService(__filename, 'last') {
+export default class LastDummyService extends backgroundedService('last') {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static async classRunInBG(arg: any) {
+    const psychicApp = getCachedPsychicApplicationOrFail()
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    await fs.writeFile(absoluteFilePath('spec/tmp.txt'), arg)
+    await fs.writeFile(path.join(psychicApp.appRoot, '../spec/tmp.txt'), arg)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -25,6 +27,7 @@ export default class LastDummyService extends backgroundedService(__filename, 'l
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async instanceMethodToTest(a: any, b: any) {
-    await fs.writeFile(absoluteFilePath('spec/tmp.txt'), `${a},${b}`)
+    const psychicApp = getCachedPsychicApplicationOrFail()
+    await fs.writeFile(path.join(psychicApp.appRoot, '../spec/tmp.txt'), `${a},${b}`)
   }
 }

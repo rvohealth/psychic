@@ -14,7 +14,7 @@ describe('PsychicController background methods', () => {
         BackgroundTestController,
         'doSomethingInBackground',
         {
-          filepath: 'app/controllers/BackgroundTestController',
+          globalName: 'controllers/BackgroundTestController',
           args: [1, '2'],
         },
       )
@@ -32,7 +32,7 @@ describe('PsychicController background methods', () => {
         'doSomethingInBackground',
         {
           delaySeconds: 3,
-          filepath: 'app/controllers/BackgroundTestController',
+          globalName: 'controllers/BackgroundTestController',
           args: [1, '2'],
         },
       )

@@ -1,7 +1,7 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Params } from '../../../src'
 import PsychicController from '../../../src/controller'
-import Psyconf from '../../../src/psyconf'
+import PsychicApplication from '../../../src/psychic-application'
 import { ParamValidationError } from '../../../src/server/params'
 import User from '../../../test-app/app/models/User'
 
@@ -11,7 +11,7 @@ describe('PsychicController', () => {
       const req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
       const res = getMockRes().res
       const controller = new PsychicController(req, res, {
-        config: new Psyconf(),
+        config: new PsychicApplication(),
         action: 'hello',
       })
 
@@ -37,7 +37,7 @@ describe('PsychicController', () => {
         },
       })
       const res = getMockRes().res
-      controller = new PsychicController(req, res, { config: new Psyconf(), action: 'hello' })
+      controller = new PsychicController(req, res, { config: new PsychicApplication(), action: 'hello' })
     })
 
     it('returns the result of Params.cast', () => {
@@ -100,7 +100,7 @@ describe('PsychicController', () => {
       })
       const res = getMockRes().res
       const controller = new PsychicController(req, res, {
-        config: new Psyconf(),
+        config: new PsychicApplication(),
         action: 'hello',
       })
 
@@ -122,7 +122,7 @@ describe('PsychicController', () => {
         })
         const res = getMockRes().res
         const controller = new PsychicController(req, res, {
-          config: new Psyconf(),
+          config: new PsychicApplication(),
           action: 'hello',
         })
 
@@ -144,7 +144,7 @@ describe('PsychicController', () => {
         })
         const res = getMockRes().res
         const controller = new PsychicController(req, res, {
-          config: new Psyconf(),
+          config: new PsychicApplication(),
           action: 'hello',
         })
 

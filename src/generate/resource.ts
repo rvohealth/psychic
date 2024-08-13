@@ -4,7 +4,7 @@ import dreamjsOrDreamtsCmd from '../../boot/cli/helpers/dreamjsOrDreamtsCmd'
 import omitCoreArg from '../../boot/cli/helpers/omitCoreArg'
 import { clientApiPath } from '../helpers/path'
 import sspawn from '../helpers/sspawn'
-import Psyconf from '../psyconf'
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import generateClientAPIModule from './client/apiModule'
 import generateController from './controller'
 
@@ -13,7 +13,7 @@ export default async function generateResource(
   fullyQualifiedModelName: string,
   args: string[],
 ) {
-  const psyconf = await Psyconf.configure()
+  const psychicApp = getCachedPsychicApplicationOrFail()
 
   const attributesWithTypes = args.filter(attr => !/^--/.test(attr))
 
@@ -31,7 +31,7 @@ export default async function generateResource(
 
   await generateController(route, fullyQualifiedModelName, ['create', 'index', 'show', 'update', 'destroy'])
 
-  if (!psyconf?.apiOnly) {
+  if (!psychicApp?.apiOnly) {
     const str = generateClientAPIModule(route, fullyQualifiedModelName)
     const filepath = (
       (await clientApiPath()) +

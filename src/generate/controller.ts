@@ -1,14 +1,14 @@
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import fileWriter from './helpers/fileWriter'
 import generateControllerContent from './helpers/generateControllerContent'
 import generateControllerSpecContent from './helpers/generateControllerSpecContent'
-import absoluteFilePath from '../helpers/absoluteFilePath'
 
 export default async function generateController(
   route: string,
   fullyQualifiedModelName: string,
   methods: string[],
   {
-    rootPath = absoluteFilePath(''),
+    rootPath,
   }: {
     rootPath?: string
   } = {},
@@ -25,7 +25,7 @@ export default async function generateController(
     '.spec.ts',
     true,
     'spec/unit/controllers',
-    rootPath,
+    rootPath || getCachedPsychicApplicationOrFail().appRoot,
     generateControllerSpecContent,
   )
 }

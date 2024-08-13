@@ -1,10 +1,10 @@
-import { Psyconf, background } from '@rvohealth/psychic'
+import { PsychicApplication, background } from '@rvohealth/psychic'
 import { developmentOrTestEnv, testEnv } from '@rvohealth/dream'
 import expressWinston from 'express-winston'
 import winston from 'winston'
 
 
-export default (psy: Psyconf) => {
+export default (psy: PsychicApplication) => {
   // ******
   // CONFIG:
   // ******
