@@ -1,10 +1,7 @@
 import { Dream, IdType, pascalize, testEnv } from '@rvohealth/dream'
 import { ConnectionOptions, Job, Queue, QueueEvents, Worker } from 'bullmq'
 import developmentOrTestEnv from '../../boot/cli/helpers/developmentOrTestEnv'
-import absoluteFilePath from '../helpers/absoluteFilePath'
 import envValue, { devEnvBool } from '../helpers/envValue'
-import importFileWithDefault from '../helpers/importFileWithDefault'
-import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
 import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import lookupClassByGlobalName from '../psychic-application/helpers/lookupClassByGlobalName'
 import redisOptions from '../psychic-application/helpers/redisOptions'
@@ -253,39 +250,18 @@ export class Background {
 
   public async doWork(
     jobType: JobTypes,
-    { id, method, args, constructorArgs, filepath, importKey, globalName }: BackgroundJobData,
+    { id, method, args, constructorArgs, globalName }: BackgroundJobData,
   ) {
-    // TODO: chat with daniel about background job scenario
-    const absFilePath = absoluteFilePath(filepath || '')
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let objectClass: any
     let dreamClass: typeof Dream | undefined
 
     switch (jobType) {
       case 'BackgroundJobQueueFunctionJob':
-        if (filepath) {
-          const func = await importFileWithNamedExport<
-            (
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              ...args: any[]
-            ) => Promise<void>
-          >(absFilePath, importKey)
-
-          if (!func) return
-
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-          await func(...args)
-        } else if (globalName) {
-          // TODO: determine how to handle global lookup for func background jobs
-          // const classDef = lookupGlobalName(globalName)
-        }
-        break
+        throw new Error('Background functions no longer supported, please use backgroundableService')
 
       case 'BackgroundJobQueueStaticJob':
-        if (filepath) {
-          objectClass = await importFileWithNamedExport(absFilePath, importKey || 'default')
-        } else if (globalName) {
+        if (globalName) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           objectClass = lookupClassByGlobalName(globalName)
         }
@@ -297,9 +273,7 @@ export class Background {
         break
 
       case 'BackgroundJobQueueInstanceJob':
-        if (filepath) {
-          objectClass = await importFileWithNamedExport(absFilePath, importKey || 'default')
-        } else if (globalName) {
+        if (globalName) {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           objectClass = lookupClassByGlobalName(globalName)
         }
@@ -314,9 +288,7 @@ export class Background {
         break
 
       case 'BackgroundJobQueueModelInstanceJob':
-        if (filepath) {
-          dreamClass = await importFileWithDefault<typeof Dream | undefined>(absFilePath)
-        } else if (globalName) {
+        if (globalName) {
           dreamClass = lookupClassByGlobalName(globalName) as typeof Dream | undefined
         }
 
