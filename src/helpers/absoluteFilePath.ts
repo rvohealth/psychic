@@ -22,9 +22,5 @@ export default function absoluteFilePath(
     }
   }
 
-  if (!envBool('TS_SAFE')) {
-    filePath = path.join('dist', filePath)
-  }
-
-  return path.join(appRoot, filePath)
+  return path.join(appRoot, filePath.replace(/^\/src/, ''))
 }
