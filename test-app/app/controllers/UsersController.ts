@@ -20,7 +20,7 @@ export default class UsersController extends ApplicationController {
     throw new Error('this should force a 500')
   }
 
-  @OpenAPI(() => User, {
+  @OpenAPI(User, {
     status: 201,
     serializerKey: 'extra',
   })
@@ -29,7 +29,7 @@ export default class UsersController extends ApplicationController {
     this.created(user)
   }
 
-  @OpenAPI(() => User, {
+  @OpenAPI(User, {
     status: 200,
     many: true,
     serializerKey: 'extra',
@@ -39,7 +39,7 @@ export default class UsersController extends ApplicationController {
     this.ok(users)
   }
 
-  @OpenAPI(() => User, {
+  @OpenAPI(User, {
     status: 200,
     serializerKey: 'withPosts',
   })
@@ -48,7 +48,7 @@ export default class UsersController extends ApplicationController {
     this.ok(user)
   }
 
-  @OpenAPI(() => User)
+  @OpenAPI(User)
   public async update() {
     const user = await User.findOrFail(this.castParam('id', 'bigint'))
     await user.update(this.paramsFor(User))

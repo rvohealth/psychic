@@ -38,7 +38,7 @@ export default function serializerToOpenapiSchema({
   let componentsSchema = {} as { [key: string]: OpenapiSchemaObject }
 
   attributes.forEach(attr => {
-    if (!attr.options?.allowNull) {
+    if (!attr.renderOptions?.allowNull) {
       serializerObject.required!.push(attr.field)
     }
 

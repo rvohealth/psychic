@@ -260,7 +260,7 @@ export const schema = {
         coercedType: {} as number,
         enumType: null,
         enumValues: null,
-        dbType: 'integer',
+        dbType: 'numeric',
         allowNull: false,
         isArray: false,
       },

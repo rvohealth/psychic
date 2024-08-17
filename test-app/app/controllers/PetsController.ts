@@ -3,7 +3,7 @@ import Pet from '../models/Pet'
 import ApplicationController from './ApplicationController'
 
 export default class PetsController extends ApplicationController {
-  @OpenAPI(() => Pet, {
+  @OpenAPI(Pet, {
     status: 201,
   })
   public async create() {
@@ -11,7 +11,7 @@ export default class PetsController extends ApplicationController {
     this.created(pet)
   }
 
-  @OpenAPI(() => Pet, {
+  @OpenAPI(Pet, {
     status: 204,
   })
   public async update() {

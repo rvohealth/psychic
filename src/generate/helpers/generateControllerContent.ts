@@ -38,7 +38,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       case 'create':
         if (modelName)
           return `\
-  @OpenAPI(() => ${modelName}, { status: 201 })
+  @OpenAPI(${modelName}, { status: 201 })
   public async create() {
     //    const ${camelize(modelName)} = await this.currentUser.createAssociation('${pluralize(camelize(modelName))}', this.paramsFor(${modelName}))
     //    this.created(${camelize(modelName)})
@@ -51,7 +51,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       case 'index':
         if (modelName)
           return `\
-  @OpenAPI(() => ${modelName}, {
+  @OpenAPI(${modelName}, {
     status: 200,
     many: true,
     serializerKey: 'summary',
@@ -75,7 +75,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       case 'show':
         if (modelName)
           return `\
-  @OpenAPI(() => ${modelName}, { status: 200 })
+  @OpenAPI(${modelName}, { status: 200 })
   public async show() {
     //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    this.ok(${camelize(modelName)})
@@ -95,7 +95,7 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
       case 'update':
         if (modelName)
           return `\
-  @OpenAPI(() => ${modelName}, { status: 204 })
+  @OpenAPI(${modelName}, { status: 204 })
   public async update() {
     //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
     //    await ${camelize(modelName)}.update(this.paramsFor(${modelName}))

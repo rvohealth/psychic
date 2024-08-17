@@ -13,7 +13,7 @@ describe('OpenapiEndpointRenderer', () => {
   describe('#toPathObject', () => {
     context('description and summary', () => {
       it('renders provided tags', async () => {
-        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
           description: 'hello',
           summary: 'world',
         })
@@ -36,7 +36,7 @@ describe('OpenapiEndpointRenderer', () => {
 
     context('tags', () => {
       it('renders provided tags', async () => {
-        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
           tags: ['hello', 'world'],
         })
 
@@ -57,7 +57,7 @@ describe('OpenapiEndpointRenderer', () => {
 
     context('method', () => {
       it('infers the method by examining routes', async () => {
-        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'show')
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show')
 
         const response = await renderer.toPathObject()
         expect(response).toEqual(
@@ -84,7 +84,7 @@ describe('OpenapiEndpointRenderer', () => {
 
     context('pathParams', () => {
       it('renders params within the parameters array', async () => {
-        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
           pathParams: [
             {
               name: 'search',
@@ -118,7 +118,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('when the path contains uri params', () => {
         it('includes the uri params in the parameters block', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'show', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show', {
             pathParams: [
               {
                 name: 'search',
@@ -163,7 +163,7 @@ describe('OpenapiEndpointRenderer', () => {
 
     context('query', () => {
       it('renders params within the parameters array', async () => {
-        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
           query: [
             {
               name: 'search',
@@ -197,7 +197,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('allowReserved is overridden', () => {
         it('applies override', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             query: [
               {
                 name: 'search',
@@ -234,7 +234,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('allowEmptyValue is overridden', () => {
         it('applies override', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             query: [
               {
                 name: 'search',
@@ -272,7 +272,7 @@ describe('OpenapiEndpointRenderer', () => {
 
     context('headers', () => {
       it('renders headers within the parameters array', async () => {
-        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
           headers: [
             {
               name: 'Authorization',
@@ -322,7 +322,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('config-level header defaults', () => {
         it('renders default headers', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             headers: [
               {
                 name: 'today',
@@ -367,7 +367,7 @@ describe('OpenapiEndpointRenderer', () => {
 
         context('when default headers are bypassed', () => {
           it('does not render default headers', async () => {
-            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               headers: [
                 {
                   name: 'today',
@@ -406,7 +406,7 @@ describe('OpenapiEndpointRenderer', () => {
 
     context('requestBody', () => {
       it('renders requestBody in the requestBody payload', async () => {
-        const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create', {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
           requestBody: {
             type: 'object',
             required: ['email', 'password'],
@@ -458,7 +458,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('requestBody is not specified', () => {
         it('does not provide request body', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'show')
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show')
 
           const response = await renderer.toPathObject()
           expect(response['/users/{id}'].get.requestBody).toBeUndefined()
@@ -466,7 +466,7 @@ describe('OpenapiEndpointRenderer', () => {
 
         context('for a POST http method', () => {
           it('prvoides request body matching the model', async () => {
-            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
             const response = await renderer.toPathObject()
             expect(response['/users'].post.requestBody).toEqual(
@@ -533,7 +533,7 @@ describe('OpenapiEndpointRenderer', () => {
           context('non-standard data types', () => {
             context('bigint', () => {
               it('returns string', async () => {
-                const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+                const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
                 const response = await renderer.toPathObject()
                 expect(response['/users'].post.requestBody).toEqual(
@@ -555,7 +555,7 @@ describe('OpenapiEndpointRenderer', () => {
 
               context('bigint[]', () => {
                 it('returns string within an array', async () => {
-                  const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+                  const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
                   const response = await renderer.toPathObject()
                   expect(response['/users'].post.requestBody).toEqual(
@@ -579,7 +579,7 @@ describe('OpenapiEndpointRenderer', () => {
 
             context('uuid', () => {
               it('returns string', async () => {
-                const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+                const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
                 const response = await renderer.toPathObject()
                 expect(response['/users'].post.requestBody).toEqual(
@@ -601,7 +601,7 @@ describe('OpenapiEndpointRenderer', () => {
 
               context('uuid[]', () => {
                 it('returns string within an array', async () => {
-                  const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+                  const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
                   const response = await renderer.toPathObject()
                   expect(response['/users'].post.requestBody).toEqual(
@@ -625,7 +625,7 @@ describe('OpenapiEndpointRenderer', () => {
 
             context('json', () => {
               it('returns object schema', async () => {
-                const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+                const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
                 const response = await renderer.toPathObject()
                 expect(response['/users'].post.requestBody).toEqual(
@@ -647,7 +647,7 @@ describe('OpenapiEndpointRenderer', () => {
 
               context('json[]', () => {
                 it('returns object schema within an array', async () => {
-                  const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+                  const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
                   const response = await renderer.toPathObject()
                   expect(response['/users'].post.requestBody).toEqual(
@@ -671,7 +671,7 @@ describe('OpenapiEndpointRenderer', () => {
 
             context('jsonb', () => {
               it('returns object schema', async () => {
-                const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+                const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
                 const response = await renderer.toPathObject()
                 expect(response['/users'].post.requestBody).toEqual(
@@ -693,7 +693,7 @@ describe('OpenapiEndpointRenderer', () => {
 
               context('jsonb[]', () => {
                 it('returns object schema within an array', async () => {
-                  const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+                  const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
                   const response = await renderer.toPathObject()
                   expect(response['/users'].post.requestBody).toEqual(
@@ -717,7 +717,7 @@ describe('OpenapiEndpointRenderer', () => {
 
             context('virtual columns', () => {
               it('returns an anyOf statement, allowing all types', async () => {
-                const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+                const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
                 const response = await renderer.toPathObject()
                 expect(response['/users'].post.requestBody).toEqual(
@@ -745,7 +745,7 @@ describe('OpenapiEndpointRenderer', () => {
 
               context('for virtual attributes with explicit types specified', () => {
                 it('uses the provided type', async () => {
-                  const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'create')
+                  const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
                   const response = await renderer.toPathObject()
                   expect(response['/users'].post.requestBody).toEqual(
@@ -778,7 +778,7 @@ describe('OpenapiEndpointRenderer', () => {
 
             context('enums', () => {
               it('renders enums as string with enum option', async () => {
-                const renderer = new OpenapiEndpointRenderer(() => Pet, PetsController, 'create')
+                const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
                 const response = await renderer.toPathObject()
                 expect(response['/pets'].post.requestBody).toEqual(
@@ -799,7 +799,7 @@ describe('OpenapiEndpointRenderer', () => {
               })
 
               it('renders enum[] as array with string with enum option', async () => {
-                const renderer = new OpenapiEndpointRenderer(() => Pet, PetsController, 'create')
+                const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
                 const response = await renderer.toPathObject()
                 expect(response['/pets'].post.requestBody).toEqual(
@@ -829,7 +829,7 @@ describe('OpenapiEndpointRenderer', () => {
 
             context('requestBody is explicitly set to null', () => {
               it('does not provide requestBody', async () => {
-                const renderer = new OpenapiEndpointRenderer(() => Pet, ApiPetsController, 'create', {
+                const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
                   requestBody: null,
                 })
 
@@ -840,7 +840,7 @@ describe('OpenapiEndpointRenderer', () => {
 
             context('requestBody leverages only opt', () => {
               it('only renders attributes specified in only array', async () => {
-                const renderer = new OpenapiEndpointRenderer(() => Pet, ApiPetsController, 'create', {
+                const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
                   requestBody: { only: ['species', 'name'] },
                 })
 
@@ -866,7 +866,7 @@ describe('OpenapiEndpointRenderer', () => {
 
               context('requestBody leverages required opt', () => {
                 it('renders the required options in the required field', async () => {
-                  const renderer = new OpenapiEndpointRenderer(() => Pet, ApiPetsController, 'create', {
+                  const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
                     requestBody: { only: ['species', 'name'], required: ['species'] },
                   })
 
@@ -894,7 +894,7 @@ describe('OpenapiEndpointRenderer', () => {
 
               context('requestBody leverages for opt', () => {
                 it('uses the model provided in the for option to determine request body shape', async () => {
-                  const renderer = new OpenapiEndpointRenderer(() => Pet, ApiPetsController, 'create', {
+                  const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
                     requestBody: { for: User, only: ['email'], required: ['email'] },
                   })
 
@@ -920,7 +920,7 @@ describe('OpenapiEndpointRenderer', () => {
 
         context('for a PUT http method', () => {
           it('prvoides request body matching the model', async () => {
-            const renderer = new OpenapiEndpointRenderer(() => Pet, PetsController, 'update')
+            const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'update')
 
             const response = await renderer.toPathObject()
             expect(response['/pets/{id}'].patch.requestBody).toEqual(
@@ -949,7 +949,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('responses', () => {
       context('system-level default responses', () => {
         it('system-level default responses are automatically provided', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {})
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {})
 
           const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
@@ -967,7 +967,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('config-level default responses', () => {
         it('config-level default responses are automatically provided', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {})
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {})
 
           const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
@@ -981,7 +981,7 @@ describe('OpenapiEndpointRenderer', () => {
 
         context('default responses are explicitly bypassed', () => {
           it('config-level default responses are omitted', async () => {
-            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               omitDefaultResponses: true,
             })
 
@@ -999,7 +999,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with a 204 response specified', () => {
         it('does not render a response payload', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             status: 204,
           })
 
@@ -1013,7 +1013,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with a default description specified', () => {
         it('renders the default description in the response payload', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             status: 204,
             defaultResponse: {
               description: 'World',
@@ -1047,7 +1047,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with a dream model passed', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
           })
 
@@ -1070,7 +1070,7 @@ describe('OpenapiEndpointRenderer', () => {
 
         context('when nullable is set to true in the Openapi decorator call', () => {
           it('makes the top level serializer nullable', async () => {
-            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               serializerKey: 'withRecentPost',
               nullable: true,
             })
@@ -1097,7 +1097,7 @@ describe('OpenapiEndpointRenderer', () => {
       context('with a serializer passed', () => {
         it("uses the provided serializer, converting it's payload shape to openapi format", async () => {
           const renderer = new OpenapiEndpointRenderer(
-            () => UserWithPostsSerializer,
+            UserWithPostsSerializer,
             UsersController,
             'howyadoin',
             {},
@@ -1131,7 +1131,7 @@ describe('OpenapiEndpointRenderer', () => {
         }
 
         it("uses the provided serializer, converting it's payload shape to openapi format", async () => {
-          const renderer = new OpenapiEndpointRenderer(() => MyViewModel, UsersController, 'howyadoin', {})
+          const renderer = new OpenapiEndpointRenderer(MyViewModel, UsersController, 'howyadoin', {})
 
           const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
@@ -1153,7 +1153,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with an array of dream models passed', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
-          const renderer = new OpenapiEndpointRenderer(() => [User, Post], UsersController, 'howyadoin', {})
+          const renderer = new OpenapiEndpointRenderer([User, Post], UsersController, 'howyadoin', {})
 
           const response = await renderer.toPathObject()
           expect(response['/users/howyadoin'].get.responses).toEqual(
@@ -1183,7 +1183,7 @@ describe('OpenapiEndpointRenderer', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
           const renderer = new OpenapiEndpointRenderer(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            () => [UserSerializer, PostSerializer<any, any>],
+            [UserSerializer, PostSerializer<any, any>],
             UsersController,
             'howyadoin',
             {},
@@ -1215,7 +1215,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with allOf', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             responses: {
               201: {
@@ -1270,7 +1270,7 @@ describe('OpenapiEndpointRenderer', () => {
 
         context('allOf includes a $serializer ref', () => {
           it('returns valid openapi', async () => {
-            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               serializerKey: 'extra',
               responses: {
                 201: {
@@ -1321,7 +1321,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with anyOf', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             responses: {
               201: {
@@ -1377,7 +1377,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with oneOf', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             responses: {
               201: {
@@ -1433,7 +1433,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with $ref', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             responses: {
               201: {
@@ -1477,7 +1477,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with $schema', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             status: 201,
             responses: {
@@ -1507,7 +1507,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with top-level arguments that should apply to the success response', () => {
         it('applies top-level arguments to the correct response code', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             summary: 'hello',
             description: 'world',
@@ -1525,7 +1525,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with common fields', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             responses: {
               201: {
@@ -1560,7 +1560,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with enum', () => {
         it('returns valid openapi', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             status: 201,
             responses: {
@@ -1592,7 +1592,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with many=true', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             many: true,
           })
@@ -1620,7 +1620,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('with extra response fields sent', () => {
         it('includes extra response payloads', async () => {
-          const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             status: 201,
             responses: {

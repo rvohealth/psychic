@@ -1,5 +1,4 @@
 import {
-  AttributeStatement,
   DreamSerializer,
   OpenapiPrimitiveTypes,
   OpenapiSchemaArray,
@@ -394,10 +393,7 @@ export default class OpenapiBodySegmentRenderer {
    *
    * parses a primitive stored type
    */
-  private parseAttributeValue(
-    data: SerializableTypes | undefined,
-    attribute?: AttributeStatement,
-  ): OpenapiSchemaBody {
+  private parseAttributeValue(data: SerializableTypes | undefined): OpenapiSchemaBody {
     if (!data)
       return {
         type: 'object',
@@ -414,7 +410,6 @@ export default class OpenapiBodySegmentRenderer {
           items: {
             type: this.serializerTypeToOpenapiType(data),
           },
-          nullable: attribute?.options?.allowNull ?? undefined,
         }) as OpenapiSchemaBody
 
       case 'decimal[]':
@@ -425,7 +420,6 @@ export default class OpenapiBodySegmentRenderer {
             type: 'number',
             format: data.replace(/\[\]$/, '') as 'double' | 'decimal',
           },
-          nullable: attribute?.options?.allowNull ?? undefined,
         }) as OpenapiSchemaBody
 
       case 'date[]':
@@ -436,7 +430,6 @@ export default class OpenapiBodySegmentRenderer {
             type: 'string',
             format: data.replace(/\[\]$/, ''),
           },
-          nullable: attribute?.options?.allowNull ? true : undefined,
         }) as OpenapiSchemaBody
 
       case 'decimal':
@@ -444,7 +437,6 @@ export default class OpenapiBodySegmentRenderer {
         return compact({
           type: 'number',
           format: data,
-          nullable: attribute?.options?.allowNull ? true : undefined,
         }) as OpenapiSchemaBody
 
       case 'date':
@@ -452,13 +444,11 @@ export default class OpenapiBodySegmentRenderer {
         return compact({
           type: 'string',
           format: data,
-          nullable: attribute?.options?.allowNull ? true : undefined,
         }) as OpenapiSchemaBody
 
       default:
         return compact({
           type: this.serializerTypeToOpenapiType(data),
-          nullable: attribute?.options?.allowNull ? true : undefined,
         }) as OpenapiSchemaBody
     }
   }

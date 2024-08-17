@@ -32,7 +32,7 @@ import { UserWithPostsMultiType2Serializer } from '../../../../test-app/app/seri
 describe('OpenapiEndpointRenderer', () => {
   describe('#toSchemaObject', () => {
     it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", () => {
-      const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+      const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
         serializerKey: 'extra',
       })
 
@@ -88,7 +88,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('with a string type passed', () => {
       it('supports format and enum fields', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentTestingStringSerializer,
+          CommentTestingStringSerializer,
           UsersController,
           'howyadoin',
           {},
@@ -119,7 +119,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('with an integer type passed', () => {
       it('supports integer type fields, including minimum and maximum', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentTestingIntegerSerializer,
+          CommentTestingIntegerSerializer,
           UsersController,
           'howyadoin',
           {},
@@ -146,7 +146,7 @@ describe('OpenapiEndpointRenderer', () => {
       context('using shorthand', () => {
         it('expands to integer type', () => {
           const renderer = new OpenapiEndpointRenderer(
-            () => CommentTestingIntegerShorthandSerializer,
+            CommentTestingIntegerShorthandSerializer,
             UsersController,
             'howyadoin',
             {},
@@ -173,7 +173,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('with a decimal type passed', () => {
       it('expands to number tpye with decimal format', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentTestingDecimalSerializer,
+          CommentTestingDecimalSerializer,
           UsersController,
           'howyadoin',
           {},
@@ -201,7 +201,7 @@ describe('OpenapiEndpointRenderer', () => {
       context('using decimal shorthand', () => {
         it('expands to number format', () => {
           const renderer = new OpenapiEndpointRenderer(
-            () => CommentTestingDecimalShorthandSerializer,
+            CommentTestingDecimalShorthandSerializer,
             UsersController,
             'howyadoin',
             {},
@@ -229,7 +229,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('with a double type passed', () => {
       it('expands to number type with double format', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentTestingDoubleSerializer,
+          CommentTestingDoubleSerializer,
           UsersController,
           'howyadoin',
           {},
@@ -258,7 +258,7 @@ describe('OpenapiEndpointRenderer', () => {
       context('using double shorthand', () => {
         it('expands to number type with double format', () => {
           const renderer = new OpenapiEndpointRenderer(
-            () => CommentTestingDoubleShorthandSerializer,
+            CommentTestingDoubleShorthandSerializer,
             UsersController,
             'howyadoin',
             {},
@@ -285,7 +285,7 @@ describe('OpenapiEndpointRenderer', () => {
       context('using double[] shorthand', () => {
         it('expands to array with items of number type with double format', () => {
           const renderer = new OpenapiEndpointRenderer(
-            () => CommentTestingDoubleArrayShorthandSerializer,
+            CommentTestingDoubleArrayShorthandSerializer,
             UsersController,
             'howyadoin',
             {},
@@ -316,7 +316,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('with a date type passed', () => {
       it('supports integer type fields, including minimum and maximum', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentTestingDateSerializer,
+          CommentTestingDateSerializer,
           UsersController,
           'howyadoin',
           {},
@@ -350,7 +350,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('with a date-time type passed', () => {
       it('supports integer type fields, including minimum and maximum', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentTestingDateTimeSerializer,
+          CommentTestingDateTimeSerializer,
           UsersController,
           'howyadoin',
           {},
@@ -384,7 +384,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('with a $serializer expression passed', () => {
       it('supports an attribute with the $serializer expression', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentTestingRootSerializerRefSerializer,
+          CommentTestingRootSerializerRefSerializer,
           UsersController,
           'howyadoin',
           {},
@@ -436,7 +436,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('with an object type passed', () => {
       it('supports maxProperties and additionalProperties fields', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentTestingDefaultObjectFieldsSerializer,
+          CommentTestingDefaultObjectFieldsSerializer,
           UsersController,
           'howyadoin',
           {
@@ -467,7 +467,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       it('supports anyOf expression', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentWithAnyOfObjectSerializer,
+          CommentWithAnyOfObjectSerializer,
           UsersController,
           'howyadoin',
           {
@@ -492,7 +492,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       it('supports allOf expression', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentWithAllOfObjectSerializer,
+          CommentWithAllOfObjectSerializer,
           UsersController,
           'howyadoin',
           {
@@ -517,7 +517,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       it('supports oneOf expression', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentWithOneOfObjectSerializer,
+          CommentWithOneOfObjectSerializer,
           UsersController,
           'howyadoin',
           {
@@ -542,7 +542,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       it('supports $serializer expression', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentTestingObjectWithSerializerRefSerializer,
+          CommentTestingObjectWithSerializerRefSerializer,
           UsersController,
           'howyadoin',
           {
@@ -597,7 +597,7 @@ describe('OpenapiEndpointRenderer', () => {
         context('anyOf', () => {
           it('renders anyOf expression', () => {
             const renderer = new OpenapiEndpointRenderer(
-              () => CommentWithAnyOfArraySerializer,
+              CommentWithAnyOfArraySerializer,
               UsersController,
               'howyadoin',
               {
@@ -627,7 +627,7 @@ describe('OpenapiEndpointRenderer', () => {
         context('allOf', () => {
           it('renders allOf expression', () => {
             const renderer = new OpenapiEndpointRenderer(
-              () => CommentWithAllOfArraySerializer,
+              CommentWithAllOfArraySerializer,
               UsersController,
               'howyadoin',
               {
@@ -657,7 +657,7 @@ describe('OpenapiEndpointRenderer', () => {
         context('oneOf', () => {
           it('renders anyOf expression', () => {
             const renderer = new OpenapiEndpointRenderer(
-              () => CommentWithOneOfArraySerializer,
+              CommentWithOneOfArraySerializer,
               UsersController,
               'howyadoin',
               {
@@ -686,7 +686,7 @@ describe('OpenapiEndpointRenderer', () => {
 
         it('supports $serializer expression', () => {
           const renderer = new OpenapiEndpointRenderer(
-            () => CommentTestingArrayWithSerializerRefSerializer,
+            CommentTestingArrayWithSerializerRefSerializer,
             UsersController,
             'howyadoin',
             {
@@ -741,7 +741,7 @@ describe('OpenapiEndpointRenderer', () => {
 
     context('with multiple dream models passed to callback', () => {
       it('renders the association as a ref, also providing a schema definition for the associated serializer', () => {
-        const renderer = new OpenapiEndpointRenderer(() => [Pet, User], UsersController, 'howyadoin', {
+        const renderer = new OpenapiEndpointRenderer([Pet, User], UsersController, 'howyadoin', {
           serializerKey: 'default',
         })
 
@@ -773,7 +773,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('with a serializer that contains an association', () => {
       context('RendersOne', () => {
         it('renders the association as a ref, also providing a schema definition for the associated serializer', () => {
-          const renderer = new OpenapiEndpointRenderer(() => Pet, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'howyadoin', {
             serializerKey: 'withAssociation',
           })
           const response = renderer.toSchemaObject()
@@ -801,7 +801,7 @@ describe('OpenapiEndpointRenderer', () => {
 
         context('with a nullable RendersOne', () => {
           it('treats association as nullable', () => {
-            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               serializerKey: 'withRecentPost',
             })
 
@@ -825,7 +825,7 @@ describe('OpenapiEndpointRenderer', () => {
 
         context('with a nested association', () => {
           it('provides schema for the nested association', () => {
-            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               serializerKey: 'withRecentPost',
             })
 
@@ -848,7 +848,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('RendersMany', () => {
         it('renders the association as an array of $refs, also providing a schema definition for the associated serializer', () => {
-          const renderer = new OpenapiEndpointRenderer(() => Post, UsersController, 'howyadoin', {
+          const renderer = new OpenapiEndpointRenderer(Post, UsersController, 'howyadoin', {
             serializerKey: 'withComments',
           })
 
@@ -878,7 +878,7 @@ describe('OpenapiEndpointRenderer', () => {
 
         context('with a nested association', () => {
           it('provides schema for the nested association', () => {
-            const renderer = new OpenapiEndpointRenderer(() => User, UsersController, 'howyadoin', {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               serializerKey: 'withPosts',
             })
 
@@ -902,7 +902,7 @@ describe('OpenapiEndpointRenderer', () => {
       context('rendering an association which contains an array of dreams', () => {
         it('extracts serializers from each dream, then encases expression in an anyOf, wrapping all identified serializers', () => {
           const renderer = new OpenapiEndpointRenderer(
-            () => UserWithPostsMultiType2Serializer,
+            UserWithPostsMultiType2Serializer,
             UsersController,
             'howyadoin',
             {},
@@ -939,7 +939,7 @@ describe('OpenapiEndpointRenderer', () => {
     context('when responses includes $serializer refs', () => {
       it('extracts serializers and renders them in components.schemas', () => {
         const renderer = new OpenapiEndpointRenderer(
-          () => CommentTestingBasicSerializerRefSerializer,
+          CommentTestingBasicSerializerRefSerializer,
           UsersController,
           'howyadoin',
           {

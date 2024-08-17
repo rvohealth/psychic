@@ -69,7 +69,7 @@ export interface Pets {
   name: string | null;
   requiredCollarCount: Generated<Int8>;
   requiredCollarCountInt: Generated<number>;
-  requiredCollarCountNumeric: Generated<number>;
+  requiredCollarCountNumeric: Generated<Numeric>;
   species: SpeciesTypesEnum | null;
   updatedAt: Timestamp;
   userId: number;
