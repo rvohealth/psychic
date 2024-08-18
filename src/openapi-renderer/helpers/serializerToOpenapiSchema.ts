@@ -38,9 +38,7 @@ export default function serializerToOpenapiSchema({
   let componentsSchema = {} as { [key: string]: OpenapiSchemaObject }
 
   attributes.forEach(attr => {
-    if (!attr.renderOptions?.allowNull) {
-      serializerObject.required!.push(attr.field)
-    }
+    serializerObject.required!.push(attr.field)
 
     const { results, extraComponents } = recursivelyParseBody({
       bodySegment: attr.renderAs,
