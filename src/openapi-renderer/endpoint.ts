@@ -475,7 +475,7 @@ export default class OpenapiEndpointRenderer<
    */
   private generateRequestBodyForModel(): OpenapiContent | undefined {
     const forDreamClass = (this.requestBody as OpenapiSchemaRequestBodyOnlyOption)?.for
-    const dreamClass = forDreamClass || this.getSingleDreamModelClassFromCb()
+    const dreamClass = forDreamClass || this.getSingleDreamModelClass()
     if (!dreamClass) return undefined
 
     let paramSafeColumns = dreamClass.paramSafeColumnsOrFallback()
@@ -948,17 +948,11 @@ export default class OpenapiEndpointRenderer<
    * If the callback function does not return a single dream model,
    * then this method will return null.
    */
-  private getSingleDreamModelClassFromCb(): typeof Dream | null {
+  private getSingleDreamModelClass(): typeof Dream | null {
     if (!this.dreamsOrSerializers) return null
     if (Array.isArray(this.dreamsOrSerializers)) return null
 
-    if (
-      (
-        (this.dreamsOrSerializers as SerializableDreamClassOrViewModelClass)
-          ?.prototype as SerializableDreamOrViewModel
-      )?.serializers &&
-      (this.dreamsOrSerializers as unknown as typeof Dream)?.isDream
-    ) {
+    if ((this.dreamsOrSerializers as unknown as typeof Dream)?.isDream) {
       return this.dreamsOrSerializers as unknown as typeof Dream
     }
 
