@@ -1,6 +1,5 @@
 import {
   Dream,
-  DreamClassOrViewModelClassOrSerializerClass,
   DreamSerializer,
   OpenapiAllTypes,
   OpenapiFormats,
@@ -13,6 +12,9 @@ import {
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
   OpenapiSchemaProperties,
+  SerializableClass,
+  SerializableDreamClassOrViewModelClass,
+  SerializableDreamOrViewModel,
   compact,
   getCachedDreamApplicationOrFail,
 } from '@rvohealth/dream'
@@ -28,25 +30,23 @@ import openapiRoute from './helpers/openapiRoute'
 import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
 
 export default class OpenapiEndpointRenderer<
-  DreamsOrSerializersCBReturnVal extends
-    | DreamClassOrViewModelClassOrSerializerClass
-    | DreamClassOrViewModelClassOrSerializerClass[],
+  DreamsOrSerializersOrViewModels extends SerializableClass | SerializableClass[],
 > {
-  private many: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['many']
-  private responses: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['responses']
-  private serializerKey: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['serializerKey']
-  private pathParams: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['pathParams']
-  private requestBody: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['requestBody']
-  private headers: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['headers']
-  private query: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['query']
-  private status: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['status']
-  private tags: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['tags']
-  private summary: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['summary']
-  private description: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['description']
-  private nullable: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['nullable']
-  private omitDefaultHeaders: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['omitDefaultHeaders']
-  private omitDefaultResponses: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['omitDefaultResponses']
-  private defaultResponse: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal>['defaultResponse']
+  private many: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['many']
+  private responses: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['responses']
+  private serializerKey: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['serializerKey']
+  private pathParams: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['pathParams']
+  private requestBody: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['requestBody']
+  private headers: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['headers']
+  private query: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['query']
+  private status: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['status']
+  private tags: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['tags']
+  private summary: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['summary']
+  private description: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['description']
+  private nullable: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['nullable']
+  private omitDefaultHeaders: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['omitDefaultHeaders']
+  private omitDefaultResponses: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['omitDefaultResponses']
+  private defaultResponse: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['defaultResponse']
   private serializers: { [key: string]: typeof DreamSerializer }
   private computedExtraComponents: { [key: string]: OpenapiSchemaObject } = {}
 
@@ -65,7 +65,7 @@ export default class OpenapiEndpointRenderer<
    * ```
    */
   constructor(
-    private dreamsOrSerializersCb: (() => DreamsOrSerializersCBReturnVal) | null,
+    private dreamsOrSerializers: DreamsOrSerializersOrViewModels | null,
     private controllerClass: typeof PsychicController,
     private action: string,
     {
@@ -84,7 +84,7 @@ export default class OpenapiEndpointRenderer<
       omitDefaultHeaders,
       omitDefaultResponses,
       defaultResponse,
-    }: OpenapiEndpointRendererOpts<DreamsOrSerializersCBReturnVal> = {},
+    }: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels> = {},
   ) {
     this.requestBody = requestBody
     this.headers = headers
@@ -475,7 +475,7 @@ export default class OpenapiEndpointRenderer<
    */
   private generateRequestBodyForModel(): OpenapiContent | undefined {
     const forDreamClass = (this.requestBody as OpenapiSchemaRequestBodyOnlyOption)?.for
-    const dreamClass = forDreamClass || this.getSingleDreamModelClassFromCb()
+    const dreamClass = forDreamClass || this.getSingleDreamModelClass()
     if (!dreamClass) return undefined
 
     let paramSafeColumns = dreamClass.paramSafeColumnsOrFallback()
@@ -932,14 +932,12 @@ export default class OpenapiEndpointRenderer<
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   private getSerializerClasses(): (typeof DreamSerializer<any, any>)[] | null {
-    if (!this.dreamsOrSerializersCb) return null
+    if (!this.dreamsOrSerializers) return null
 
-    const dreamsOrSerializers = this.dreamsOrSerializersCb()
-
-    if (Array.isArray(dreamsOrSerializers)) {
-      return compact(dreamsOrSerializers.map(s => this.getSerializerClass(s)))
+    if (Array.isArray(this.dreamsOrSerializers)) {
+      return compact(this.dreamsOrSerializers.map(s => this.getSerializerClass(s)))
     } else {
-      return compact([this.getSerializerClass(dreamsOrSerializers)])
+      return compact([this.getSerializerClass(this.dreamsOrSerializers)])
     }
   }
 
@@ -950,15 +948,14 @@ export default class OpenapiEndpointRenderer<
    * If the callback function does not return a single dream model,
    * then this method will return null.
    */
-  private getSingleDreamModelClassFromCb(): typeof Dream | null {
-    if (!this.dreamsOrSerializersCb) return null
-    const dreamsOrSerializers = this.dreamsOrSerializersCb()
+  private getSingleDreamModelClass(): typeof Dream | null {
+    if (!this.dreamsOrSerializers) return null
+    if (Array.isArray(this.dreamsOrSerializers)) return null
 
-    if (Array.isArray(dreamsOrSerializers)) {
-      return null
+    if ((this.dreamsOrSerializers as unknown as typeof Dream)?.isDream) {
+      return this.dreamsOrSerializers as unknown as typeof Dream
     }
 
-    if ((dreamsOrSerializers as typeof Dream).isDream) return dreamsOrSerializers as typeof Dream
     return null
   }
 
@@ -967,17 +964,17 @@ export default class OpenapiEndpointRenderer<
    *
    * Uses the provided entity to resolve to a serializer class.
    */
-  private getSerializerClass(
-    dreamOrSerializerOrViewModel: DreamClassOrViewModelClassOrSerializerClass,
-  ): typeof DreamSerializer {
+  private getSerializerClass(dreamOrSerializerOrViewModel: SerializableClass): typeof DreamSerializer {
     const dreamApp = getCachedDreamApplicationOrFail()
     if ((dreamOrSerializerOrViewModel as typeof DreamSerializer).isDreamSerializer) {
       return dreamOrSerializerOrViewModel as typeof DreamSerializer
     } else {
-      const modelClass = dreamOrSerializerOrViewModel as typeof Dream
-      const serializerKey = modelClass.prototype.serializers[
-        (this.serializerKey || 'default') as keyof typeof modelClass.prototype.serializers
-      ] as string
+      const modelClass = dreamOrSerializerOrViewModel as SerializableDreamClassOrViewModelClass
+      const modelPrototype = modelClass.prototype as SerializableDreamOrViewModel
+      const serializerKey =
+        modelPrototype.serializers[
+          (this.serializerKey || 'default') as keyof typeof modelPrototype.serializers
+        ]
       return dreamApp.serializers[serializerKey] || null
     }
   }
@@ -1001,7 +998,7 @@ routes file which will direct to this controller class and method.`
 }
 
 export interface OpenapiEndpointRendererOpts<
-  T extends DreamClassOrViewModelClassOrSerializerClass | DreamClassOrViewModelClassOrSerializerClass[],
+  T extends SerializableClass | SerializableClass[],
   NonArrayT extends T extends (infer R extends abstract new (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any

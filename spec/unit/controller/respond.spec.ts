@@ -12,7 +12,7 @@ describe('PsychicController', () => {
     let config: PsychicApplication
 
     class MyController extends PsychicController {
-      @OpenAPI(() => User, {
+      @OpenAPI(User, {
         status: 201,
       })
       public create() {

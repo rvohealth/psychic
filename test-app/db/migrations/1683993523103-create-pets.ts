@@ -15,7 +15,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('collar_count_numeric', 'numeric')
     .addColumn('required_collar_count', 'bigint', col => col.notNull().defaultTo(0))
     .addColumn('required_collar_count_int', 'integer', col => col.notNull().defaultTo(0))
-    .addColumn('required_collar_count_numeric', 'integer', col => col.notNull().defaultTo(0))
+    .addColumn('required_collar_count_numeric', 'numeric', col => col.notNull().defaultTo(0))
     .addColumn('likes_walks', 'boolean')
     .addColumn('likes_treats', 'boolean', col => col.notNull().defaultTo(true))
     .addColumn('species', sql`species_types_enum`)

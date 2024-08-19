@@ -20,13 +20,13 @@ import AuthedController from './AuthedController'
 import Post from '../models/Post'
 
 export default class ApiV1PostsController extends AuthedController {
-  @OpenAPI(() => Post, { status: 201 })
+  @OpenAPI(Post, { status: 201 })
   public async create() {
     //    const post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
     //    this.created(post)
   }
 
-  @OpenAPI(() => Post, {
+  @OpenAPI(Post, {
     status: 200,
     many: true,
     serializerKey: 'summary',
@@ -36,13 +36,13 @@ export default class ApiV1PostsController extends AuthedController {
     //    this.ok(posts)
   }
 
-  @OpenAPI(() => Post, { status: 200 })
+  @OpenAPI(Post, { status: 200 })
   public async show() {
     //    const post = await this.post()
     //    this.ok(post)
   }
 
-  @OpenAPI(() => Post, { status: 204 })
+  @OpenAPI(Post, { status: 204 })
   public async update() {
     //    const post = await this.post()
     //    await post.update(this.paramsFor(Post))
@@ -93,13 +93,13 @@ import AuthedController from '../../../AuthedController'
 import HealthPost from '../../../../models/Health/Post'
 
 export default class ApiV1HealthPostsController extends AuthedController {
-  @OpenAPI(() => HealthPost, { status: 201 })
+  @OpenAPI(HealthPost, { status: 201 })
   public async create() {
     //    const healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
     //    this.created(healthPost)
   }
 
-  @OpenAPI(() => HealthPost, {
+  @OpenAPI(HealthPost, {
     status: 200,
     many: true,
     serializerKey: 'summary',
@@ -109,13 +109,13 @@ export default class ApiV1HealthPostsController extends AuthedController {
     //    this.ok(healthPosts)
   }
 
-  @OpenAPI(() => HealthPost, { status: 200 })
+  @OpenAPI(HealthPost, { status: 200 })
   public async show() {
     //    const healthPost = await this.healthPost()
     //    this.ok(healthPost)
   }
 
-  @OpenAPI(() => HealthPost, { status: 204 })
+  @OpenAPI(HealthPost, { status: 204 })
   public async update() {
     //    const healthPost = await this.healthPost()
     //    await healthPost.update(this.paramsFor(HealthPost))
@@ -165,7 +165,7 @@ import AdminAuthedController from '../Admin/AuthedController'
 import NutritionLogEntry from '../../models/Nutrition/LogEntry'
 
 export default class AdminNutritionLogEntriesController extends AdminAuthedController {
-  @OpenAPI(() => NutritionLogEntry, { status: 201 })
+  @OpenAPI(NutritionLogEntry, { status: 201 })
   public async create() {
     //    const nutritionLogEntry = await this.currentUser.createAssociation('nutritionLogEntries', this.paramsFor(NutritionLogEntry))
     //    this.created(nutritionLogEntry)
