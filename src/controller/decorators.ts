@@ -1,4 +1,9 @@
-import { Dream, DreamClassOrViewModelClassOrSerializerClass, DreamSerializer } from '@rvohealth/dream'
+import {
+  DreamSerializer,
+  SerializableClass,
+  SerializableDreamClassOrViewModelClass,
+  SerializableDreamOrViewModel,
+} from '@rvohealth/dream'
 import PsychicController from '.'
 import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint'
 import { ControllerHook } from './hooks'
@@ -41,9 +46,7 @@ export function BeforeAction(
  * @param tags - Optional. string array
  * @param uri - Optional. A list of uri segments that this endpoint uses
  */
-export function OpenAPI<
-  I extends DreamClassOrViewModelClassOrSerializerClass | DreamClassOrViewModelClassOrSerializerClass[],
->(
+export function OpenAPI<I extends SerializableClass | SerializableClass[]>(
   modelOrSerializer?: I | OpenapiEndpointRendererOpts<I>,
   opts?: OpenapiEndpointRendererOpts<I>,
 ): (target: PsychicController, methodName: string | symbol) => void {
@@ -62,10 +65,11 @@ export function OpenAPI<
     } else {
       if (
         Array.isArray(modelOrSerializer) ||
-        (modelOrSerializer as typeof Dream)?.isDream ||
-        (modelOrSerializer as typeof DreamSerializer)?.isDreamSerializer ||
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        (modelOrSerializer as any)?.serializers
+        (
+          (modelOrSerializer as SerializableDreamClassOrViewModelClass)
+            ?.prototype as SerializableDreamOrViewModel
+        )?.serializers ||
+        (modelOrSerializer as typeof DreamSerializer)?.isDreamSerializer
       ) {
         psychicControllerClass.openapi[methodName.toString()] = new OpenapiEndpointRenderer(
           modelOrSerializer as I,

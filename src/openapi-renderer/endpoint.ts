@@ -1,6 +1,5 @@
 import {
   Dream,
-  DreamClassOrViewModelClassOrSerializerClass,
   DreamSerializer,
   OpenapiAllTypes,
   OpenapiFormats,
@@ -13,6 +12,9 @@ import {
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
   OpenapiSchemaProperties,
+  SerializableClass,
+  SerializableDreamClassOrViewModelClass,
+  SerializableDreamOrViewModel,
   compact,
   getCachedDreamApplicationOrFail,
 } from '@rvohealth/dream'
@@ -28,9 +30,7 @@ import openapiRoute from './helpers/openapiRoute'
 import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
 
 export default class OpenapiEndpointRenderer<
-  DreamsOrSerializersOrViewModels extends
-    | DreamClassOrViewModelClassOrSerializerClass
-    | DreamClassOrViewModelClassOrSerializerClass[],
+  DreamsOrSerializersOrViewModels extends SerializableClass | SerializableClass[],
 > {
   private many: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['many']
   private responses: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['responses']
@@ -950,12 +950,18 @@ export default class OpenapiEndpointRenderer<
    */
   private getSingleDreamModelClassFromCb(): typeof Dream | null {
     if (!this.dreamsOrSerializers) return null
+    if (Array.isArray(this.dreamsOrSerializers)) return null
 
-    if (Array.isArray(this.dreamsOrSerializers)) {
-      return null
+    if (
+      (
+        (this.dreamsOrSerializers as SerializableDreamClassOrViewModelClass)
+          ?.prototype as SerializableDreamOrViewModel
+      )?.serializers &&
+      (this.dreamsOrSerializers as unknown as typeof Dream)?.isDream
+    ) {
+      return this.dreamsOrSerializers as unknown as typeof Dream
     }
 
-    if ((this.dreamsOrSerializers as typeof Dream).isDream) return this.dreamsOrSerializers as typeof Dream
     return null
   }
 
@@ -964,17 +970,17 @@ export default class OpenapiEndpointRenderer<
    *
    * Uses the provided entity to resolve to a serializer class.
    */
-  private getSerializerClass(
-    dreamOrSerializerOrViewModel: DreamClassOrViewModelClassOrSerializerClass,
-  ): typeof DreamSerializer {
+  private getSerializerClass(dreamOrSerializerOrViewModel: SerializableClass): typeof DreamSerializer {
     const dreamApp = getCachedDreamApplicationOrFail()
     if ((dreamOrSerializerOrViewModel as typeof DreamSerializer).isDreamSerializer) {
       return dreamOrSerializerOrViewModel as typeof DreamSerializer
     } else {
-      const modelClass = dreamOrSerializerOrViewModel as typeof Dream
-      const serializerKey = modelClass.prototype.serializers[
-        (this.serializerKey || 'default') as keyof typeof modelClass.prototype.serializers
-      ] as string
+      const modelClass = dreamOrSerializerOrViewModel as SerializableDreamClassOrViewModelClass
+      const modelPrototype = modelClass.prototype as SerializableDreamOrViewModel
+      const serializerKey =
+        modelPrototype.serializers[
+          (this.serializerKey || 'default') as keyof typeof modelPrototype.serializers
+        ]
       return dreamApp.serializers[serializerKey] || null
     }
   }
@@ -998,7 +1004,7 @@ routes file which will direct to this controller class and method.`
 }
 
 export interface OpenapiEndpointRendererOpts<
-  T extends DreamClassOrViewModelClassOrSerializerClass | DreamClassOrViewModelClassOrSerializerClass[],
+  T extends SerializableClass | SerializableClass[],
   NonArrayT extends T extends (infer R extends abstract new (
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ...args: any
