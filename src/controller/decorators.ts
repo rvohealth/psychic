@@ -1,9 +1,4 @@
-import {
-  DreamSerializer,
-  SerializableClass,
-  SerializableDreamClassOrViewModelClass,
-  SerializableDreamOrViewModel,
-} from '@rvohealth/dream'
+import { DreamSerializer, SerializableClass, SerializableDreamOrViewModel } from '@rvohealth/dream'
 import PsychicController from '.'
 import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint'
 import { ControllerHook } from './hooks'
@@ -63,14 +58,7 @@ export function OpenAPI<I extends SerializableClass | SerializableClass[]>(
         opts,
       )
     } else {
-      if (
-        Array.isArray(modelOrSerializer) ||
-        (
-          (modelOrSerializer as SerializableDreamClassOrViewModelClass)
-            ?.prototype as SerializableDreamOrViewModel
-        )?.serializers ||
-        (modelOrSerializer as typeof DreamSerializer)?.isDreamSerializer
-      ) {
+      if (isSerializable(modelOrSerializer)) {
         psychicControllerClass.openapi[methodName.toString()] = new OpenapiEndpointRenderer(
           modelOrSerializer as I,
           psychicControllerClass,
@@ -86,5 +74,22 @@ export function OpenAPI<I extends SerializableClass | SerializableClass[]>(
         )
       }
     }
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function isSerializable(dreamOrSerializerClass: any) {
+  return (
+    Array.isArray(dreamOrSerializerClass) ||
+    hasSerializersGetter(dreamOrSerializerClass as SerializableClass) ||
+    !!(dreamOrSerializerClass as typeof DreamSerializer)?.isDreamSerializer
+  )
+}
+
+function hasSerializersGetter(dreamOrSerializerClass: SerializableClass): boolean {
+  try {
+    return !!(dreamOrSerializerClass?.prototype as SerializableDreamOrViewModel)?.serializers
+  } catch {
+    return false
   }
 }
