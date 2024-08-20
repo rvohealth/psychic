@@ -11,6 +11,6 @@ export default class AdminUserSerializer extends AdminUserSummarySerializer {
   @Attribute('string')
   public name: string
 
-  @RendersMany(AdminPetSummarySerializer)
+  @RendersMany(() => AdminPetSummarySerializer)
   public pets: Pet[]
 }

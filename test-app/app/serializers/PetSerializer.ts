@@ -18,6 +18,6 @@ export class PetAdditionalSerializer extends PetSummarySerializer {
 }
 
 export class PetWithAssociationSerializer extends DreamSerializer {
-  @RendersOne(UserSerializer)
+  @RendersOne(() => UserSerializer)
   public user: User
 }
