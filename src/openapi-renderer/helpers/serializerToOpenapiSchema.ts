@@ -2,14 +2,10 @@ import {
   DreamSerializer,
   DreamSerializerAssociationStatement,
   OpenapiSchemaArray,
-  OpenapiSchemaBodyShorthand,
-  OpenapiSchemaExpressionAllOf,
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
-  OpenapiShorthandPrimitiveTypes,
   uniq,
 } from '@rvohealth/dream'
-import OpenapiBodySegmentRenderer, { OpenapiEndpointParseResults } from '../body-segment'
 
 /**
  * @internal
@@ -211,6 +207,8 @@ function addMultiSerializerAssociationToOutput({
 
   associatedSerializers.forEach(associatedSerializer => {
     const associatedSerializerKey = associatedSerializer.openapiName
+
+    if (process.env.DEBUG === '1') console.log(`Processing serializer ${associatedSerializerKey}`)
 
     finalOutput[serializerKey].required = uniq([
       ...(finalOutput[serializerKey].required || []),
