@@ -61,6 +61,10 @@ export default class PsychicBin {
     const apiPath = path.join(psychicApp.clientRoot, psychicApp.client.apiPath)
     const clientApiSchemaFilename = psychicApp.openapi?.clientOutputFilename
 
+    console.log(
+      `npx openapi-typescript ${psychicApp.apiRoot}/openapi.json -o ${apiPath}/${clientApiSchemaFilename}`,
+    )
+
     await sspawn(
       `npx openapi-typescript ${psychicApp.apiRoot}/openapi.json -o ${apiPath}/${clientApiSchemaFilename}`,
     )

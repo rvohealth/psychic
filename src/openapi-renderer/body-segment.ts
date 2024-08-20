@@ -17,15 +17,15 @@ import {
   OpenapiSchemaShorthandExpressionAnyOf,
   OpenapiSchemaShorthandExpressionOneOf,
   OpenapiSchemaShorthandExpressionSerializerRef,
+  OpenapiSchemaShorthandPrimitiveGeneric,
   OpenapiShorthandPrimitiveTypes,
   SerializableTypes,
   compact,
-  openapiPrimitiveTypes,
   openapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream'
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import isBlankDescription from './helpers/isBlankDescription'
 import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 
 export default class OpenapiBodySegmentRenderer {
   private bodySegment: OpenapiBodySegment
@@ -154,7 +154,8 @@ export default class OpenapiBodySegmentRenderer {
 
       if (typeof bodySegment === 'object') {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-        if (openapiPrimitiveTypes.includes((bodySegment as any).type)) return 'openapi_primitive_object'
+        if (openapiShorthandPrimitiveTypes.includes((bodySegment as any).type))
+          return 'openapi_primitive_object'
       }
 
       if (typeof bodySegment === 'object') return 'unknown_object'
@@ -313,12 +314,64 @@ export default class OpenapiBodySegmentRenderer {
    * recursively parses a primitive object type (i.e. { type: 'string[]' })
    */
   private primitiveObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaPrimitiveGeneric {
-    const objectBodySegment = bodySegment as OpenapiSchemaObject
+    // const objectBodySegment = bodySegment as OpenapiSchemaObject
 
-    return this.applyConfigurationOptions(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-      this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(objectBodySegment as any),
-    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
+    if (/\[\]$/.test((bodySegment as any).type)) {
+      return this.applyConfigurationOptions(
+        this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+          this.expandShorthandArray(bodySegment as OpenapiSchemaShorthandPrimitiveGeneric) as any,
+        ),
+      )
+    } else {
+      return this.applyConfigurationOptions(
+        this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+          this.expandType(bodySegment as OpenapiSchemaShorthandPrimitiveGeneric) as any,
+        ),
+      )
+    }
+  }
+
+  private expandShorthandArray(bodySegment: OpenapiSchemaShorthandPrimitiveGeneric) {
+    const retObj: OpenapiSchemaArray = {
+      ...bodySegment,
+      type: 'array',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      items: this.expandType({
+        // ...bodySegment,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+        type: bodySegment.type.replace(/\[\]$/, '') as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any,
+    }
+
+    if (bodySegment.nullable) {
+      retObj.nullable = true
+    }
+
+    return retObj
+  }
+
+  private expandType(bodySegment: OpenapiSchemaShorthandPrimitiveGeneric) {
+    switch (bodySegment.type) {
+      case 'decimal':
+      case 'double':
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        ;(bodySegment as any).format = bodySegment.type
+        bodySegment.type = 'number'
+        break
+
+      case 'date':
+      case 'date-time':
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        ;(bodySegment as any).format = bodySegment.type
+        bodySegment.type = 'string'
+        break
+    }
+
+    return bodySegment
   }
 
   private applyConfigurationOptions<T>(obj: T): T {

@@ -12,6 +12,7 @@ export default (r: PsychicRouter) => {
   r.get('auth-ping', 'AuthedUsers#ping')
   r.get('api-ping', 'Api/Users#ping')
   r.post('cast-param-test', 'ParamsTest#testCastParam')
+  r.post('openapi-validation-test', 'ParamsTest#testOpenapiValidation')
   r.get('users/howyadoin', 'Users#howyadoin')
   r.resources('users')
   r.resources('pets', { only: ['create', 'update'] }, r => {

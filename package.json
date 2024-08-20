@@ -61,6 +61,8 @@
     "cookie-parser": "^1.4.6",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
+    "express-openapi-validator": "^5.3.1",
+    "iso-datestring-validator": "^2.2.2",
     "jsonwebtoken": "^9.0.2",
     "openapi-typescript": "^7.1.0",
     "pluralize": "^8.0.0",
