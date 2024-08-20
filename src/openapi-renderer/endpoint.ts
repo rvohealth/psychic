@@ -187,6 +187,7 @@ export default class OpenapiEndpointRenderer<
           schemaDelimeter: this.schemaDelimeter,
           serializers: this.serializers,
           processedSchemas,
+          target: 'response',
         }),
       }
     })
@@ -443,8 +444,12 @@ export default class OpenapiEndpointRenderer<
     const schema = this.recursivelyParseBody(
       this.requestBody as OpenapiSchemaBodyShorthand,
       processedSchemas,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      {
+        target: 'request',
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      },
     ) as any
+
     if (!schema) return undefined
 
     return {
@@ -639,7 +644,9 @@ export default class OpenapiEndpointRenderer<
             if (metadata?.type) {
               paramsShape.properties = {
                 ...paramsShape.properties,
-                [columnName]: this.recursivelyParseBody(metadata.type, processedSchemas),
+                [columnName]: this.recursivelyParseBody(metadata.type, processedSchemas, {
+                  target: 'request',
+                }),
               }
             } else {
               paramsShape.properties = {
@@ -685,7 +692,7 @@ export default class OpenapiEndpointRenderer<
     return {
       content: {
         'application/json': {
-          schema: this.recursivelyParseBody(paramsShape, processedSchemas),
+          schema: this.recursivelyParseBody(paramsShape, processedSchemas, { target: 'request' }),
         },
       },
     }
@@ -752,6 +759,7 @@ export default class OpenapiEndpointRenderer<
             schema: this.recursivelyParseBody(
               this.responses![statusCodeInt],
               processedSchemas,
+              { target: 'response' },
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ) as any,
           },
@@ -921,12 +929,14 @@ export default class OpenapiEndpointRenderer<
   private recursivelyParseBody(
     bodySegment: OpenapiBodySegment,
     processedSchemas: Record<string, boolean>,
+    { target }: { target: 'request' | 'response' },
   ): OpenapiSchemaBody {
     const { results, extraComponents } = new OpenapiBodySegmentRenderer({
       bodySegment,
       serializers: this.serializers,
       schemaDelimeter: this.schemaDelimeter,
       processedSchemas,
+      target,
     }).parse()
 
     this.computedExtraComponents = {

@@ -1,4 +1,5 @@
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
+import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
 import UsersController from '../../../../test-app/app/controllers/UsersController'
 import Pet from '../../../../test-app/app/models/Pet'
 import Post from '../../../../test-app/app/models/Post'
@@ -113,6 +114,49 @@ describe('OpenapiEndpointRenderer', () => {
             },
           }),
         )
+      })
+
+      context('suppressResponseEnums=true', () => {
+        beforeEach(() => {
+          const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
+          psychicApp.openapi!.suppressResponseEnums = true
+
+          jest
+            .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
+            .mockReturnValue(psychicApp)
+        })
+
+        it('suppresses enums, instead using description to clarify enum options', () => {
+          const renderer = new OpenapiEndpointRenderer(
+            CommentTestingStringSerializer,
+            UsersController,
+            'howyadoin',
+            {},
+          )
+
+          const response = renderer.toSchemaObject()
+          expect(response).toEqual(
+            expect.objectContaining({
+              CommentTestingString: {
+                type: 'object',
+                required: ['howyadoin'],
+                properties: {
+                  howyadoin: {
+                    type: 'string',
+                    format: 'date',
+                    description: `
+The following values will be allowed:
+  hello,
+  world`,
+                    pattern: '/^helloworld$/',
+                    minLength: 2,
+                    maxLength: 4,
+                  },
+                },
+              },
+            }),
+          )
+        })
       })
     })
 
