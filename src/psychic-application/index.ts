@@ -4,6 +4,9 @@ import { QueueOptions } from 'bullmq'
 import { CorsOptions } from 'cors'
 import { Application, Request, Response } from 'express'
 import { Socket, Server as SocketServer } from 'socket.io'
+import PsychicApplicationInitMissingAppRoot from '../error/psychic-application/init-missing-app-root'
+import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
+import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
 import envValue from '../helpers/envValue'
 import { OpenapiContent, OpenapiHeaderOption, OpenapiResponses } from '../openapi-renderer/endpoint'
@@ -17,6 +20,11 @@ export default class PsychicApplication {
   public static async init(cb: (app: PsychicApplication) => void | Promise<void>) {
     const psychicApp = new PsychicApplication()
     await cb(psychicApp)
+
+    if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
+    if (!psychicApp.appRoot) throw new PsychicApplicationInitMissingAppRoot()
+    if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
+
     await psychicApp.inflections?.()
     cachePsychicApplication(psychicApp)
     return psychicApp
@@ -64,6 +72,8 @@ export default class PsychicApplication {
     'after:routes': [],
   }
 
+  protected loadedControllers: boolean = false
+
   public get authSessionKey() {
     return envValue('AUTH_SESSION_KEY') || 'auth_session'
   }
@@ -75,7 +85,9 @@ export default class PsychicApplication {
   public async load(resourceType: 'controllers', resourcePath: string) {
     switch (resourceType) {
       case 'controllers':
-        return await loadControllers(resourcePath)
+        await loadControllers(resourcePath)
+        this.loadedControllers = true
+        break
     }
   }
 
