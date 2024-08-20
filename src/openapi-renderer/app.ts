@@ -32,6 +32,7 @@ export default class OpenapiAppRenderer {
    * the controller layer.
    */
   public static async toObject(): Promise<OpenapiSchema> {
+    const processedSchemas: Record<string, boolean> = {}
     const psychicApp = getCachedPsychicApplicationOrFail()
     const controllers = psychicApp.controllers
     const packageJsonPath = path.join(psychicApp.appRoot, '..', 'package.json')
@@ -76,10 +77,10 @@ export default class OpenapiAppRenderer {
 
         finalOutput.components.schemas = {
           ...finalOutput.components.schemas,
-          ...renderer.toSchemaObject(),
+          ...renderer.toSchemaObject(processedSchemas),
         }
 
-        const endpointPayload = await renderer.toPathObject()
+        const endpointPayload = await renderer.toPathObject(processedSchemas)
 
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const path = Object.keys(endpointPayload)[0]!

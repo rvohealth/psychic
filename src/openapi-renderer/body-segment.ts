@@ -31,6 +31,7 @@ export default class OpenapiBodySegmentRenderer {
   private serializers: { [key: string]: typeof DreamSerializer }
   private schemaDelimeter: string
   private computedExtraComponents: { [key: string]: OpenapiSchemaObject } = {}
+  private processedSchemas: Record<string, boolean>
 
   /**
    * @internal
@@ -42,14 +43,17 @@ export default class OpenapiBodySegmentRenderer {
     bodySegment,
     serializers,
     schemaDelimeter,
+    processedSchemas,
   }: {
     bodySegment: OpenapiBodySegment
     serializers: { [key: string]: typeof DreamSerializer }
     schemaDelimeter: string
+    processedSchemas: Record<string, boolean>
   }) {
     this.bodySegment = bodySegment
     this.serializers = serializers
     this.schemaDelimeter = schemaDelimeter
+    this.processedSchemas = processedSchemas
   }
 
   /**
@@ -339,6 +343,7 @@ export default class OpenapiBodySegmentRenderer {
         serializerClass: serializerRefBodySegment.$serializer,
         serializers: this.serializers,
         schemaDelimeter: this.schemaDelimeter,
+        processedSchemas: this.processedSchemas,
       }),
     }
 

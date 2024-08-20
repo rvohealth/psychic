@@ -120,14 +120,14 @@ export default class OpenapiEndpointRenderer<
    * `#toPathObject` specifically builds the `paths` portion of the
    * final openapi.json output
    */
-  public async toPathObject(): Promise<OpenapiEndpointResponse> {
+  public async toPathObject(processedSchemas: Record<string, boolean>): Promise<OpenapiEndpointResponse> {
     this.serializers = getCachedDreamApplicationOrFail().serializers
 
     const [path, method, requestBody, responses] = await Promise.all([
       this.computedPath(),
       this.computedMethod(),
-      this.computedRequestBody(),
-      this.parseResponses(),
+      this.computedRequestBody(processedSchemas),
+      this.parseResponses(processedSchemas),
     ])
 
     const output = {
@@ -171,7 +171,7 @@ export default class OpenapiEndpointRenderer<
    * final openapi.json output, adding any relevant entries that were uncovered
    * while parsing the responses and provided callback function.
    */
-  public toSchemaObject(): Record<string, OpenapiSchemaBody> {
+  public toSchemaObject(processedSchemas: Record<string, boolean>): Record<string, OpenapiSchemaBody> {
     this.computedExtraComponents = {}
 
     this.serializers = getCachedDreamApplicationOrFail().serializers
@@ -186,13 +186,14 @@ export default class OpenapiEndpointRenderer<
           serializerClass,
           schemaDelimeter: this.schemaDelimeter,
           serializers: this.serializers,
+          processedSchemas,
         }),
       }
     })
 
     // run this to extract all $serializer refs from responses object
     // and put them into the computedExtraComponents field
-    this.parseResponses()
+    this.parseResponses(processedSchemas)
 
     return { ...output, ...this.computedExtraComponents }
   }
@@ -425,7 +426,9 @@ export default class OpenapiEndpointRenderer<
    *
    * Generates the requestBody portion of the endpoint
    */
-  private async computedRequestBody(): Promise<OpenapiContent | undefined> {
+  private async computedRequestBody(
+    processedSchemas: Record<string, boolean>,
+  ): Promise<OpenapiContent | undefined> {
     const method = await this.computedMethod()
     if (this.requestBody === null) return undefined
 
@@ -433,11 +436,15 @@ export default class OpenapiEndpointRenderer<
     if (!httpMethodsThatAllowBody.includes(method)) return undefined
 
     if (this.shouldAutogenerateBody()) {
-      return this.generateRequestBodyForModel()
+      return this.generateRequestBodyForModel(processedSchemas)
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-    const schema = this.recursivelyParseBody(this.requestBody as OpenapiSchemaBodyShorthand) as any
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const schema = this.recursivelyParseBody(
+      this.requestBody as OpenapiSchemaBodyShorthand,
+      processedSchemas,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ) as any
     if (!schema) return undefined
 
     return {
@@ -476,7 +483,7 @@ export default class OpenapiEndpointRenderer<
    * that model that are safe to ingest will be automatically added to
    * the request body.
    */
-  private generateRequestBodyForModel(): OpenapiContent | undefined {
+  private generateRequestBodyForModel(processedSchemas: Record<string, boolean>): OpenapiContent | undefined {
     const forDreamClass = (this.requestBody as OpenapiSchemaRequestBodyOnlyOption)?.for
     const dreamClass = forDreamClass || this.getSingleDreamModelClass()
     if (!dreamClass) return undefined
@@ -632,7 +639,7 @@ export default class OpenapiEndpointRenderer<
             if (metadata?.type) {
               paramsShape.properties = {
                 ...paramsShape.properties,
-                [columnName]: this.recursivelyParseBody(metadata.type),
+                [columnName]: this.recursivelyParseBody(metadata.type, processedSchemas),
               }
             } else {
               paramsShape.properties = {
@@ -678,7 +685,7 @@ export default class OpenapiEndpointRenderer<
     return {
       content: {
         'application/json': {
-          schema: this.recursivelyParseBody(paramsShape),
+          schema: this.recursivelyParseBody(paramsShape, processedSchemas),
         },
       },
     }
@@ -689,7 +696,7 @@ export default class OpenapiEndpointRenderer<
    *
    * Generates the responses portion of the endpoint
    */
-  private parseResponses(): OpenapiResponses {
+  private parseResponses(processedSchemas: Record<string, boolean>): OpenapiResponses {
     const psychicApp = getCachedPsychicApplicationOrFail()
 
     const defaultResponses = this.omitDefaultResponses ? {} : psychicApp.openapi?.defaults?.responses || {}
@@ -744,6 +751,7 @@ export default class OpenapiEndpointRenderer<
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             schema: this.recursivelyParseBody(
               this.responses![statusCodeInt],
+              processedSchemas,
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ) as any,
           },
@@ -910,11 +918,15 @@ export default class OpenapiEndpointRenderer<
    * recursive function used to parse nested
    * openapi shorthand objects
    */
-  private recursivelyParseBody(bodySegment: OpenapiBodySegment): OpenapiSchemaBody {
+  private recursivelyParseBody(
+    bodySegment: OpenapiBodySegment,
+    processedSchemas: Record<string, boolean>,
+  ): OpenapiSchemaBody {
     const { results, extraComponents } = new OpenapiBodySegmentRenderer({
       bodySegment,
       serializers: this.serializers,
       schemaDelimeter: this.schemaDelimeter,
+      processedSchemas,
     }).parse()
 
     this.computedExtraComponents = {

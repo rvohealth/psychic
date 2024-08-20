@@ -22,11 +22,16 @@ export default function serializerToOpenapiSchema({
   serializerClass,
   schemaDelimeter,
   serializers,
+  processedSchemas,
 }: {
   serializerClass: typeof DreamSerializer
   serializers: { [key: string]: typeof DreamSerializer }
   schemaDelimeter: string
+  processedSchemas: Record<string, boolean>
 }): Record<string, OpenapiSchemaObject> {
+  if (processedSchemas[serializerClass.globalName]) return {}
+  processedSchemas[serializerClass.globalName] = true
+
   const attributes = serializerClass['attributeStatements']
   const serializerKey = serializerClass.openapiName
 
@@ -45,6 +50,7 @@ export default function serializerToOpenapiSchema({
       bodySegment: attr.renderAs,
       serializers,
       schemaDelimeter,
+      processedSchemas,
     })
 
     componentsSchema = { ...componentsSchema, ...extraComponents }
@@ -59,6 +65,7 @@ export default function serializerToOpenapiSchema({
     serializerKey,
     serializers,
     schemaDelimeter,
+    processedSchemas,
   })
 
   return { ...serializerPayload, ...componentsSchema }
@@ -78,12 +85,14 @@ function attachAssociationsToSerializerPayload({
   serializerKey,
   serializers,
   schemaDelimeter,
+  processedSchemas,
 }: {
   serializerClass: typeof DreamSerializer
   serializerPayload: Record<string, OpenapiSchemaObject>
   serializerKey: string
   serializers: { [key: string]: typeof DreamSerializer }
   schemaDelimeter: string
+  processedSchemas: Record<string, boolean>
 }) {
   const associations = serializerClass['associationStatements']
 
@@ -105,6 +114,7 @@ Error: ${serializerClass.name} missing explicit serializer definition for ${asso
         associatedSerializers,
         serializers,
         schemaDelimeter,
+        processedSchemas,
       })
     } else {
       // leverage anyOf to handle an array of serializers
@@ -115,6 +125,7 @@ Error: ${serializerClass.name} missing explicit serializer definition for ${asso
         associatedSerializers,
         serializers,
         schemaDelimeter,
+        processedSchemas,
       })
     }
   })
@@ -136,6 +147,7 @@ function addSingleSerializerAssociationToOutput({
   association,
   serializers,
   schemaDelimeter,
+  processedSchemas,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   associatedSerializers: (typeof DreamSerializer<any, any>)[]
@@ -144,6 +156,7 @@ function addSingleSerializerAssociationToOutput({
   association: DreamSerializerAssociationStatement
   serializers: { [key: string]: typeof DreamSerializer }
   schemaDelimeter: string
+  processedSchemas: Record<string, boolean>
 }) {
   const associatedSerializer = associatedSerializers[0]
   const associatedSerializerKey = associatedSerializer.openapiName
@@ -181,6 +194,7 @@ function addSingleSerializerAssociationToOutput({
     serializerClass: associatedSerializer,
     serializers,
     schemaDelimeter,
+    processedSchemas,
   })
 
   finalOutput = { ...finalOutput, ...associatedSchema }
@@ -201,6 +215,7 @@ function addMultiSerializerAssociationToOutput({
   association,
   serializers,
   schemaDelimeter,
+  processedSchemas,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   associatedSerializers: (typeof DreamSerializer<any, any>)[]
@@ -209,6 +224,7 @@ function addMultiSerializerAssociationToOutput({
   association: DreamSerializerAssociationStatement
   serializers: { [key: string]: typeof DreamSerializer }
   schemaDelimeter: string
+  processedSchemas: Record<string, boolean>
 }) {
   const anyOf: (OpenapiSchemaExpressionRef | OpenapiSchemaArray)[] = []
 
@@ -243,6 +259,7 @@ function addMultiSerializerAssociationToOutput({
       serializerClass: associatedSerializer,
       serializers,
       schemaDelimeter,
+      processedSchemas,
     })
 
     finalOutput = { ...finalOutput, ...associatedSchema }
@@ -260,15 +277,18 @@ function recursivelyParseBody({
   bodySegment,
   serializers,
   schemaDelimeter,
+  processedSchemas,
 }: {
   bodySegment: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined
   serializers: { [key: string]: typeof DreamSerializer }
   schemaDelimeter: string
+  processedSchemas: Record<string, boolean>
 }): OpenapiEndpointParseResults {
   return new OpenapiBodySegmentRenderer({
     bodySegment,
     serializers: serializers,
     schemaDelimeter: schemaDelimeter,
+    processedSchemas,
   }).parse()
 }
 

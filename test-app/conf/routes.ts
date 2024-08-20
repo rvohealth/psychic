@@ -1,6 +1,7 @@
 import PsychicRouter from '../../src/router'
 
 export default (r: PsychicRouter) => {
+  r.get('circular', 'Circular#hello')
   r.get('ping', 'Users#ping')
   r.post('ping', 'Users#ping')
   r.put('ping', 'Users#ping')
