@@ -148,6 +148,8 @@ function addSingleSerializerAssociationToOutput({
   const associatedSerializer = associatedSerializers[0]
   const associatedSerializerKey = associatedSerializer.openapiName
 
+  if (envBool('DEBUG')) console.log(`Processing serializer ${associatedSerializerKey}`)
+
   finalOutput[serializerKey].required = uniq([
     ...(finalOutput[serializerKey].required || []),
     association.field,
