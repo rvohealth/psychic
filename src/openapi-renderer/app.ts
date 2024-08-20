@@ -2,7 +2,6 @@ import { uniq } from '@rvohealth/dream'
 import fs from 'fs/promises'
 import path from 'path'
 import PsychicController from '../controller'
-import { envBool } from '../helpers/envValue'
 import openapiJsonPath from '../helpers/openapiJsonPath'
 import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import { HttpMethod, HttpMethods } from '../router/types'
@@ -34,10 +33,7 @@ export default class OpenapiAppRenderer {
   public static async toObject(): Promise<OpenapiSchema> {
     const psychicApp = getCachedPsychicApplicationOrFail()
     const controllers = psychicApp.controllers
-
-    const packageJsonPath = envBool('PSYCHIC_CORE_DEVELOPMENT')
-      ? path.join(psychicApp.appRoot, '..', 'package.json')
-      : path.join(psychicApp.appRoot, 'package.json')
+    const packageJsonPath = path.join(psychicApp.appRoot, '..', 'package.json')
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const packageJson = (await import(packageJsonPath)).default as {
