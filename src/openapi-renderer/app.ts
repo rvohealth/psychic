@@ -2,6 +2,7 @@ import { uniq } from '@rvohealth/dream'
 import fs from 'fs/promises'
 import path from 'path'
 import PsychicController from '../controller'
+import { envBool } from '../helpers/envValue'
 import openapiJsonPath from '../helpers/openapiJsonPath'
 import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import { HttpMethod, HttpMethods } from '../router/types'
@@ -69,6 +70,8 @@ export default class OpenapiAppRenderer {
       const controller = controllers[controllerName] as typeof PsychicController
 
       for (const key of Object.keys(controller.openapi || {})) {
+        if (envBool('DEBUG')) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
+
         const renderer = controller.openapi[key]
 
         finalOutput.components.schemas = {
