@@ -1,7 +1,7 @@
 {
   "name": "@rvohealth/psychic",
   "description": "Typescript web framework",
-  "version": "0.7.0-fgnewbeta-1",
+  "version": "0.7.0-fgnewbeta-2",
   "main": "dist/src/index.js",
   "author": "RVOHealth",
   "repository": "https://github.com/rvohealth/psychic.git",
