@@ -1,3 +1,3 @@
-import scheduledService from '../../../src/scheduled/scheduled-service'
+import { UrgentScheduledService } from '../../../src'
 
-export default class UrgentDummyScheduledService extends scheduledService('urgent') {}
+export default class UrgentDummyScheduledService extends UrgentScheduledService {}
