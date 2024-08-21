@@ -9,6 +9,7 @@ test-app/openapi.json
 src/psychic-application/logo.ts
 .github/
 dist/
+openapi.json
 
 # global-cli
 boilerplate/
