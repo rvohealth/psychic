@@ -31,7 +31,7 @@ export default class Cable {
   }
 
   public async start(
-    port = process.env.PORT || 7777,
+    port?: number,
     {
       withFrontEndClient = false,
       frontEndPort = 3000,
@@ -72,7 +72,12 @@ export default class Cable {
 
     if (this.useRedis) await this.bindToRedis()
 
-    await this.listen({ port: parseInt(port.toString()), withFrontEndClient, frontEndPort })
+    const psychicApp = PsychicApplication.getOrFail()
+    await this.listen({
+      port: parseInt((port || psychicApp.port).toString()),
+      withFrontEndClient,
+      frontEndPort,
+    })
   }
 
   public async listen({

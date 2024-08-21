@@ -1,12 +1,12 @@
 import * as fs from 'fs/promises'
 import path from 'path'
 import pluralize from 'pluralize'
-import dreamjsOrDreamtsCmd from '../../boot/cli/helpers/dreamjsOrDreamtsCmd'
-import omitCoreArg from '../../boot/cli/helpers/omitCoreArg'
+import dreamjsOrDreamtsCmd from '../helpers/cli/dreamjsOrDreamtsCmd'
 import sspawn from '../helpers/sspawn'
 import PsychicApplication from '../psychic-application'
 import generateClientAPIModule from './client/apiModule'
 import generateController from './controller'
+import omitCoreArg from '../helpers/cli/omitCoreArg'
 
 export default async function generateResource(
   route: string,

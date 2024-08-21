@@ -1,6 +1,6 @@
 import { Dream, IdType, pascalize, testEnv } from '@rvohealth/dream'
 import { ConnectionOptions, Job, Queue, QueueEvents, Worker } from 'bullmq'
-import developmentOrTestEnv from '../../boot/cli/helpers/developmentOrTestEnv'
+import developmentOrTestEnv from '../helpers/cli/developmentOrTestEnv'
 import absoluteFilePath from '../helpers/absoluteFilePath'
 import envValue, { devEnvBool } from '../helpers/envValue'
 import importFileWithDefault from '../helpers/importFileWithDefault'
