@@ -12,15 +12,15 @@ export default function absoluteFilePath(
 ): string {
   const psychicApp = getCachedPsychicApplicationOrFail()
 
-  let appRoot = psychicApp.appRoot
+  let apiRoot = psychicApp.apiRoot
 
   if (envBool('PSYCHIC_CORE_DEVELOPMENT')) {
     filePath = filePath.replace(/^[/]?test-app/, '')
 
     if (purgeTestAppInCoreDevelopment) {
-      appRoot = appRoot.replace(/\/test-app/, '')
+      apiRoot = apiRoot.replace(/\/test-app/, '')
     }
   }
 
-  return path.join(appRoot, filePath.replace(/^\/src/, ''))
+  return path.join(apiRoot, filePath.replace(/^\/src/, ''))
 }

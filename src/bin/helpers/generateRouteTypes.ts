@@ -11,6 +11,6 @@ export default async function generateRouteTypes(routes: RouteConfig[]) {
   `
 
   const psychicApp = getCachedPsychicApplicationOrFail()
-  const routeTypesPath = path.join(psychicApp.appRoot, 'src/conf/routeTypes.ts')
+  const routeTypesPath = path.join(psychicApp.apiRoot, 'src/conf/routeTypes.ts')
   await fs.writeFile(routeTypesPath, fileStr)
 }

@@ -1,5 +1,8 @@
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
-import fileWriter from './helpers/fileWriter'
+import { standardizeFullyQualifiedModelName } from '@rvohealth/dream/psychic-support-helpers'
+import fs from 'fs/promises'
+import pluralize from 'pluralize'
+import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths'
+import psychicPath from '../helpers/path/psychicPath'
 import generateControllerContent from './helpers/generateControllerContent'
 import generateControllerSpecContent from './helpers/generateControllerSpecContent'
 
@@ -7,25 +10,60 @@ export default async function generateController(
   route: string,
   fullyQualifiedModelName: string,
   methods: string[],
-  {
-    rootPath,
-  }: {
-    rootPath?: string
-  } = {},
 ) {
-  await fileWriter(route, 'Controller', '.ts', true, 'app/controllers', rootPath, generateControllerContent, [
-    route,
-    fullyQualifiedModelName,
-    methods,
-  ])
+  fullyQualifiedModelName = standardizeFullyQualifiedModelName(fullyQualifiedModelName)
+  const fullyQualifiedControllerName = `${pluralize(fullyQualifiedModelName)}Controller`
 
-  await fileWriter(
-    route,
-    'Controller',
-    '.spec.ts',
-    true,
-    'spec/unit/controllers',
-    rootPath || getCachedPsychicApplicationOrFail().appRoot,
-    generateControllerSpecContent,
+  const { relFilePath, absDirPath, absFilePath } = psychicFileAndDirPaths(
+    psychicPath('controllers'),
+    fullyQualifiedControllerName + `.ts`,
   )
+
+  try {
+    console.log(`generating controller: ${relFilePath}`)
+    await fs.mkdir(absDirPath, { recursive: true })
+    await fs.writeFile(
+      absFilePath,
+      generateControllerContent(fullyQualifiedControllerName, route, fullyQualifiedModelName, methods),
+    )
+  } catch (error) {
+    throw new Error(`
+      Something happened while trying to create the controller file:
+        ${relFilePath}
+
+      Does this file already exist? Here is the error that was raised:
+        ${(error as Error).message}
+    `)
+  }
+
+  await generateControllerSpec(fullyQualifiedControllerName) //, route, fullyQualifiedModelName, methods)
+}
+
+async function generateControllerSpec(
+  fullyQualifiedControllerName: string,
+  // route: string,
+  // fullyQualifiedModelName: string,
+  // methods: string[],
+) {
+  const { relFilePath, absDirPath, absFilePath } = psychicFileAndDirPaths(
+    psychicPath('controllerSpecs'),
+    fullyQualifiedControllerName + `.spec.ts`,
+  )
+
+  try {
+    console.log(`generating controller: ${relFilePath}`)
+    await fs.mkdir(absDirPath, { recursive: true })
+    await fs.writeFile(
+      absFilePath,
+      generateControllerSpecContent(fullyQualifiedControllerName), //, route, fullyQualifiedModelName, methods),
+    )
+  } catch (error) {
+    throw new Error(`
+      Something happened while trying to create the controller spec file:
+        ${relFilePath}
+
+      Does this file already exist? Here is the error that was raised:
+        ${(error as Error).message}
+    `)
+  }
 }

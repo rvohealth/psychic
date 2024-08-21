@@ -32,12 +32,10 @@ export default class OpenapiAppRenderer {
    * the controller layer.
    */
   public static async toObject(): Promise<OpenapiSchema> {
+    const processedSchemas: Record<string, boolean> = {}
     const psychicApp = getCachedPsychicApplicationOrFail()
     const controllers = psychicApp.controllers
-
-    const packageJsonPath = envBool('PSYCHIC_CORE_DEVELOPMENT')
-      ? path.join(psychicApp.appRoot, '..', 'package.json')
-      : path.join(psychicApp.appRoot, 'package.json')
+    const packageJsonPath = path.join(psychicApp.apiRoot, 'package.json')
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const packageJson = (await import(packageJsonPath)).default as {
@@ -73,14 +71,16 @@ export default class OpenapiAppRenderer {
       const controller = controllers[controllerName] as typeof PsychicController
 
       for (const key of Object.keys(controller.openapi || {})) {
+        if (envBool('DEBUG')) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
+
         const renderer = controller.openapi[key]
 
         finalOutput.components.schemas = {
           ...finalOutput.components.schemas,
-          ...renderer.toSchemaObject(),
+          ...renderer.toSchemaObject(processedSchemas),
         }
 
-        const endpointPayload = await renderer.toPathObject()
+        const endpointPayload = await renderer.toPathObject(processedSchemas)
 
         // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
         const path = Object.keys(endpointPayload)[0]!

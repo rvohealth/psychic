@@ -4,7 +4,7 @@ describe('psy generate:controller <name> [...methods]', () => {
   context('when provided methods', () => {
     context('passing a model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
-        const res = generateControllerContent('ApiV1PostsController', 'posts', 'Post', [
+        const res = generateControllerContent('PostsController', 'posts', 'Post', [
           'create',
           'index',
           'show',
@@ -19,7 +19,7 @@ import { OpenAPI } from '@rvohealth/psychic'
 import AuthedController from './AuthedController'
 import Post from '../models/Post'
 
-export default class ApiV1PostsController extends AuthedController {
+export default class PostsController extends AuthedController {
   @OpenAPI(Post, { status: 201 })
   public async create() {
     //    const post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
@@ -80,7 +80,7 @@ export default class ApiV1PostsController extends AuthedController {
     context('passing a namespaced model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
         const res = generateControllerContent(
-          'ApiV1HealthPostsController',
+          'Api/V1/Health/PostsController',
           '/api/v1/health/posts',
           'Health/Post',
           ['create', 'index', 'show', 'update', 'destroy', 'preview'],
@@ -178,7 +178,7 @@ export default class AdminNutritionLogEntriesController extends AdminAuthedContr
 
     context('when provided with a nested path', () => {
       it('generates a controller with pascal-cased naming', () => {
-        const res = generateControllerContent('ApiV1UsersController', 'api/v1/users', null, [
+        const res = generateControllerContent('Api/V1/UsersController', 'api/v1/users', null, [
           'hello',
           'world',
         ])

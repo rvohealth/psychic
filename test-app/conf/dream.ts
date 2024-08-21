@@ -3,7 +3,7 @@ import path from 'node:path'
 import inflections from './inflections'
 
 export default async function configureDream(app: DreamApplication) {
-  app.set('appRoot', path.join(__dirname, '..'))
+  app.set('projectRoot', path.join(__dirname, '..', '..'))
   app.set('primaryKeyType', 'bigserial')
   app.set('inflections', inflections)
 
@@ -14,11 +14,11 @@ export default async function configureDream(app: DreamApplication) {
   // provides a list of path overrides for your app. This is optional, and will default
   // to the paths expected for a typical psychic application.
   app.set('paths', {
-    // models: 'test-app/app/models',
-    // serializers: 'test-app/app/serializers',
-    // conf: 'test-app/conf',
-    // db: 'test-app/db',
-    // uspecs: 'test-app/spec/unit',
+    conf: 'test-app/conf',
+    db: 'test-app/db',
+    models: 'test-app/app/models',
+    modelSpecs: 'test-app/spec/unit/models',
+    serializers: 'test-app/app/serializers',
   })
 
   app.set('db', {

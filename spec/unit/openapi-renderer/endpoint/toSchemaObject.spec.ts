@@ -36,7 +36,7 @@ describe('OpenapiEndpointRenderer', () => {
         serializerKey: 'extra',
       })
 
-      const response = renderer.toSchemaObject()
+      const response = renderer.toSchemaObject({})
       expect(response).toEqual({
         UserExtra: {
           type: 'object',
@@ -94,7 +94,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingString: {
@@ -125,7 +125,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingInteger: {
@@ -152,7 +152,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = renderer.toSchemaObject()
+          const response = renderer.toSchemaObject({})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingIntegerShorthand: {
@@ -179,7 +179,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDecimal: {
@@ -207,7 +207,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = renderer.toSchemaObject()
+          const response = renderer.toSchemaObject({})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingDecimalShorthand: {
@@ -235,7 +235,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDouble: {
@@ -264,7 +264,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = renderer.toSchemaObject()
+          const response = renderer.toSchemaObject({})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingDoubleShorthand: {
@@ -291,7 +291,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = renderer.toSchemaObject()
+          const response = renderer.toSchemaObject({})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingDoubleArrayShorthand: {
@@ -322,7 +322,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDate: {
@@ -356,7 +356,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDateTime: {
@@ -390,7 +390,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingRootSerializerRef: {
@@ -444,7 +444,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         )
 
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDefaultObjectFields: {
@@ -474,7 +474,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'default',
           },
         )
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentWithAnyOfObject: {
@@ -499,7 +499,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'default',
           },
         )
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentWithAllOfObject: {
@@ -524,7 +524,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'default',
           },
         )
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentWithOneOfObject: {
@@ -549,7 +549,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'default',
           },
         )
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingObjectWithSerializerRef: {
@@ -604,7 +604,7 @@ describe('OpenapiEndpointRenderer', () => {
                 serializerKey: 'default',
               },
             )
-            const response = renderer.toSchemaObject()
+            const response = renderer.toSchemaObject({})
             expect(response).toEqual(
               expect.objectContaining({
                 CommentWithAnyOfArray: {
@@ -634,7 +634,7 @@ describe('OpenapiEndpointRenderer', () => {
                 serializerKey: 'default',
               },
             )
-            const response = renderer.toSchemaObject()
+            const response = renderer.toSchemaObject({})
             expect(response).toEqual(
               expect.objectContaining({
                 CommentWithAllOfArray: {
@@ -664,7 +664,7 @@ describe('OpenapiEndpointRenderer', () => {
                 serializerKey: 'default',
               },
             )
-            const response = renderer.toSchemaObject()
+            const response = renderer.toSchemaObject({})
             expect(response).toEqual(
               expect.objectContaining({
                 CommentWithOneOfArray: {
@@ -693,7 +693,7 @@ describe('OpenapiEndpointRenderer', () => {
               serializerKey: 'default',
             },
           )
-          const response = renderer.toSchemaObject()
+          const response = renderer.toSchemaObject({})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingArrayWithSerializerRef: {
@@ -745,7 +745,7 @@ describe('OpenapiEndpointRenderer', () => {
           serializerKey: 'default',
         })
 
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             Pet: {
@@ -776,7 +776,7 @@ describe('OpenapiEndpointRenderer', () => {
           const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'howyadoin', {
             serializerKey: 'withAssociation',
           })
-          const response = renderer.toSchemaObject()
+          const response = renderer.toSchemaObject({})
           expect(response).toEqual(
             expect.objectContaining({
               PetWithAssociation: {
@@ -805,7 +805,7 @@ describe('OpenapiEndpointRenderer', () => {
               serializerKey: 'withRecentPost',
             })
 
-            const response = renderer.toSchemaObject()
+            const response = renderer.toSchemaObject({})
             expect(response).toEqual(
               expect.objectContaining({
                 UserWithRecentPost: {
@@ -829,7 +829,7 @@ describe('OpenapiEndpointRenderer', () => {
               serializerKey: 'withRecentPost',
             })
 
-            const response = renderer.toSchemaObject()
+            const response = renderer.toSchemaObject({})
             expect(response).toEqual(
               expect.objectContaining({
                 Comment: {
@@ -852,7 +852,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'withComments',
           })
 
-          const response = renderer.toSchemaObject()
+          const response = renderer.toSchemaObject({})
           expect(response).toEqual(
             expect.objectContaining({
               PostWithComments: {
@@ -882,7 +882,7 @@ describe('OpenapiEndpointRenderer', () => {
               serializerKey: 'withPosts',
             })
 
-            const response = renderer.toSchemaObject()
+            const response = renderer.toSchemaObject({})
             expect(response).toEqual(
               expect.objectContaining({
                 Comment: {
@@ -908,7 +908,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = renderer.toSchemaObject()
+          const response = renderer.toSchemaObject({})
           expect(response).toEqual(
             expect.objectContaining({
               UserWithPostsMultiType2: {
@@ -951,7 +951,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         )
 
-        const response = renderer.toSchemaObject()
+        const response = renderer.toSchemaObject({})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingBasicSerializerRef: {

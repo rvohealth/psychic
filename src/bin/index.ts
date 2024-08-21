@@ -58,11 +58,11 @@ export default class PsychicBin {
     console.log('syncing client api schema...')
     const psychicApp = getCachedPsychicApplicationOrFail()
 
-    const apiPath = path.join(psychicApp.appRoot, psychicApp.client?.apiPath || '../client/src/api')
+    const apiPath = path.join(psychicApp.clientRoot, psychicApp.client.apiPath)
     const clientApiSchemaFilename = psychicApp.openapi?.clientOutputFilename
 
     await sspawn(
-      `npx openapi-typescript ${psychicApp.appRoot}/openapi.json -o ${apiPath}/${clientApiSchemaFilename}`,
+      `npx openapi-typescript ${psychicApp.apiRoot}/openapi.json -o ${apiPath}/${clientApiSchemaFilename}`,
     )
 
     console.log('done syncing client api schema!')

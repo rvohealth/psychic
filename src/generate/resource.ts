@@ -1,8 +1,8 @@
 import * as fs from 'fs/promises'
+import path from 'path'
 import pluralize from 'pluralize'
 import dreamjsOrDreamtsCmd from '../../boot/cli/helpers/dreamjsOrDreamtsCmd'
 import omitCoreArg from '../../boot/cli/helpers/omitCoreArg'
-import { clientApiPath } from '../helpers/path'
 import sspawn from '../helpers/sspawn'
 import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import generateClientAPIModule from './client/apiModule'
@@ -32,13 +32,14 @@ export default async function generateResource(
   await generateController(route, fullyQualifiedModelName, ['create', 'index', 'show', 'update', 'destroy'])
 
   if (!psychicApp?.apiOnly) {
+    const psychicApp = getCachedPsychicApplicationOrFail()
     const str = generateClientAPIModule(route, fullyQualifiedModelName)
-    const filepath = (
-      (await clientApiPath()) +
-      '/' +
-      pluralize(fullyQualifiedModelName) +
-      '.ts'
-    ).toLowerCase()
+    const filepath = path.join(
+      psychicApp.clientRoot,
+      psychicApp.client.apiPath,
+      psychicApp.openapi.clientOutputFilename,
+      pluralize(fullyQualifiedModelName.toLowerCase()) + '.ts',
+    )
 
     const pathParts = filepath.split('/')
     pathParts.pop()

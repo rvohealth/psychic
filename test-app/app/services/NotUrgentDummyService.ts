@@ -8,7 +8,7 @@ export default class NotUrgentDummyService extends backgroundedService('not_urge
   public static async classRunInBG(arg: any) {
     const psychicApp = getCachedPsychicApplicationOrFail()
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    await fs.writeFile(path.join(psychicApp.appRoot, '../spec/tmp.txt'), arg)
+    await fs.writeFile(path.join(psychicApp.apiRoot, 'spec/tmp.txt'), arg)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -28,6 +28,6 @@ export default class NotUrgentDummyService extends backgroundedService('not_urge
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async instanceMethodToTest(a: any, b: any) {
     const psychicApp = getCachedPsychicApplicationOrFail()
-    await fs.writeFile(path.join(psychicApp.appRoot, '../spec/tmp.txt'), `${a},${b}`)
+    await fs.writeFile(path.join(psychicApp.apiRoot, 'spec/tmp.txt'), `${a},${b}`)
   }
 }
