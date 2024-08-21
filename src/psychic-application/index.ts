@@ -1,4 +1,4 @@
-import { OpenapiSchemaBody } from '@rvohealth/dream'
+import { DreamApplication, OpenapiSchemaBody } from '@rvohealth/dream'
 import bodyParser from 'body-parser'
 import { QueueOptions } from 'bullmq'
 import { CorsOptions } from 'cors'
@@ -17,19 +17,28 @@ import { PsychicRedisConnectionOptions } from './helpers/redisOptions'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
 
 export default class PsychicApplication {
-  public static async init(cb: (app: PsychicApplication) => void | Promise<void>) {
-    const psychicApp = new PsychicApplication()
-    await cb(psychicApp)
+  public static async init(
+    cb: (app: PsychicApplication) => void | Promise<void>,
+    dreamCb: (app: DreamApplication) => void | Promise<void>,
+  ) {
+    let psychicApp: PsychicApplication
 
-    if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
-    if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
-    if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
+    await DreamApplication.init(dreamCb, {}, async dreamApp => {
+      psychicApp = new PsychicApplication()
+      await cb(psychicApp)
 
-    await psychicApp.inflections?.()
+      if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
+      if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
+      if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
 
-    cachePsychicApplication(psychicApp)
+      await psychicApp.inflections?.()
 
-    return psychicApp
+      dreamApp.set('projectRoot', psychicApp.apiRoot)
+
+      cachePsychicApplication(psychicApp)
+    })
+
+    return psychicApp!
   }
 
   /**
