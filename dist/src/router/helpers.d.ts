@@ -1,0 +1,10 @@
+import PsychicRouter, { PsychicNestedRouter } from '../router';
+import { ResourcesMethodType, ResourcesOptions } from './types';
+export declare function routePath(routePath: string): string;
+export declare function resourcePath(routePath: string): string;
+export declare function sanitizedControllerPath(controllerName: string): string;
+export declare function controllerGlobalNameFromControllerPath(controllerName: string): string;
+export declare function namespacedRoute(namespace: string, route: string): string;
+export declare function namespacedControllerActionString(namespace: string, controllerActionString: string): string;
+export declare function applyResourcesAction(path: string, action: ResourcesMethodType, routingMechanism: PsychicRouter | PsychicNestedRouter, options?: ResourcesOptions): void;
+export declare function applyResourceAction(path: string, action: ResourcesMethodType, routingMechanism: PsychicRouter | PsychicNestedRouter, options?: ResourcesOptions): void;
