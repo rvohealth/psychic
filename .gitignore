@@ -8,3 +8,4 @@ test-app/logs/*
 test-app/.psy/*
 spec/tmp.txt
 .vim/*
+dist
