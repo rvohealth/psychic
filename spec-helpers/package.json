@@ -2,7 +2,7 @@
   "name": "psychic-spec-helpers",
   "version": "0.0.0",
   "description": "psychic web framework spec helpers",
-  "main": "spec-helpers/index.ts",
+  "main": "../dist/spec-helpers/index.js",
   "dependencies": {
     "@types/jest": "^29.5.0",
     "@types/node": "^18.15.11",
