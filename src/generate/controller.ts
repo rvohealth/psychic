@@ -59,7 +59,7 @@ async function generateControllerSpec(
     )
   } catch (error) {
     throw new Error(`
-      Something happened while trying to create the controller file:
+      Something happened while trying to create the controller spec file:
         ${relFilePath}
 
       Does this file already exist? Here is the error that was raised:

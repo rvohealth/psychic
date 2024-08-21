@@ -3,12 +3,6 @@ import globalClassNameFromFullyQualifiedModelName from '@rvohealth/dream/src/hel
 import standardizeFullyQualifiedModelName from '@rvohealth/dream/src/helpers/standardizeFullyQualifiedModelName'
 import pluralize from 'pluralize'
 import relativePsychicPath from '../../helpers/path/relativePsychicPath'
-// import globalClassNameFromFullyQualifiedModelName from '../globalClassNameFromFullyQualifiedModelName'
-// import relativeDreamPath from '../path/relativeDreamPath'
-// import serializerNameFromFullyQualifiedModelName from '../serializerNameFromFullyQualifiedModelName'
-// import snakeify from '../snakeify'
-// import standardizeFullyQualifiedModelName from '../standardizeFullyQualifiedModelName'
-// import uniq from '../uniq'
 
 export default function generateControllerContent(
   fullyQualifiedControllerName: string,
