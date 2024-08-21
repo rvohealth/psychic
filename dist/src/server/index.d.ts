@@ -7,11 +7,11 @@ import FrontEndClientServer from './front-end-client';
 export default class PsychicServer {
     app: Application;
     cable: Cable;
-    config: PsychicApplication;
     frontEndClient: FrontEndClientServer;
     server: Server;
     private booted;
     constructor();
+    get config(): PsychicApplication;
     routes(): Promise<import("../router/route-manager").RouteConfig[]>;
     boot(): Promise<true | undefined>;
     start(port?: number, { withFrontEndClient, frontEndPort, }?: {

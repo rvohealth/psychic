@@ -16,7 +16,7 @@ Object.defineProperty(exports, "SpecRequest", { enumerable: true, get: function 
 //   await bgComplete
 // At this point, the background job will have run
 async function backgroundJobCompletionPromise() {
-    await background_1.default.connect();
+    background_1.default.connect();
     return new Promise(accept => {
         background_1.default.workers.forEach(worker => {
             worker.addListener('completed', () => {

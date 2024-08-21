@@ -19,7 +19,9 @@ class PsychicServer {
     constructor() {
         this.booted = false;
         this.buildApp();
-        this.config = psychic_application_1.default.getOrFail();
+    }
+    get config() {
+        return psychic_application_1.default.getOrFail();
     }
     async routes() {
         const r = new router_1.default(this.app, this.config);

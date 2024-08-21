@@ -12,7 +12,7 @@ export { SpecRequest } from './spec-request'
 // At this point, the background job will have run
 
 export async function backgroundJobCompletionPromise() {
-  await background.connect()
+  background.connect()
   return new Promise(accept => {
     background.workers.forEach(worker => {
       worker.addListener('completed', () => {

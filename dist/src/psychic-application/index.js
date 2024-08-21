@@ -83,6 +83,8 @@ class PsychicApplication {
                 throw new init_missing_routes_callback_1.default();
             await psychicApp.inflections?.();
             dreamApp.set('projectRoot', psychicApp.apiRoot);
+            console.log('CACHING APP');
+            console.trace();
             (0, cache_1.cachePsychicApplication)(psychicApp);
         });
         return psychicApp;

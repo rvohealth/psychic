@@ -15,13 +15,15 @@ import startPsychicServer from './helpers/startPsychicServer'
 export default class PsychicServer {
   public app: Application
   public cable: Cable
-  public config: PsychicApplication
   public frontEndClient: FrontEndClientServer
   public server: Server
   private booted = false
   constructor() {
     this.buildApp()
-    this.config = PsychicApplication.getOrFail()
+  }
+
+  public get config() {
+    return PsychicApplication.getOrFail()
   }
 
   public async routes() {
