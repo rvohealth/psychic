@@ -4,7 +4,6 @@ import { QueueOptions } from 'bullmq'
 import { CorsOptions } from 'cors'
 import { Application, Request, Response } from 'express'
 import { Socket, Server as SocketServer } from 'socket.io'
-import IncludedClientConfigWithoutClientRoot from '../error/psychic-application/included-client-config-without-client-root'
 import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
@@ -24,7 +23,6 @@ export default class PsychicApplication {
 
     if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
     if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
-    if (!psychicApp.clientRoot && psychicApp.client.apiPath) throw new IncludedClientConfigWithoutClientRoot()
     if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
 
     await psychicApp.inflections?.()
