@@ -1,11 +1,14 @@
 import { closeAllDbConnections } from '@rvohealth/dream'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import express, { Application } from 'express'
+import express, { Application, Request, Response } from 'express'
+import * as OpenApiValidator from 'express-openapi-validator'
 import { Server } from 'http'
+import path from 'path'
 import { stopBackgroundWorkers } from '../background'
 import Cable from '../cable'
 import { envBool } from '../helpers/envValue'
+import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError'
 import PsychicApplication from '../psychic-application'
 import PsychicRouter from '../router'
 import FrontEndClientServer from './front-end-client'
@@ -54,6 +57,8 @@ export default class PsychicServer {
     for (const expressInitHook of this.config.specialHooks.expressInit) {
       await expressInitHook(this.app)
     }
+
+    this.initializeOpenapiValidation()
 
     await this.buildRoutes()
 
@@ -153,6 +158,34 @@ export default class PsychicServer {
 
   private initializeJSON() {
     this.app.use(express.json(this.config.jsonOptions))
+  }
+
+  private initializeOpenapiValidation() {
+    const psychicApp = PsychicApplication.getOrFail()
+    if (psychicApp.openapi?.validation) {
+      const opts = psychicApp.openapi?.validation
+      opts.apiSpec ||= path.join(psychicApp.apiRoot, 'openapi.json')
+      this.app.use(OpenApiValidator.middleware(opts as Required<typeof opts>))
+
+      this.app.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
+        if (isOpenapiError(err)) {
+          if (envBool('DEBUG')) {
+            console.log(JSON.stringify(err))
+            console.trace()
+          }
+
+          res.status(err.status).json({
+            message: err.message,
+            errors: err.errors,
+          })
+        } else {
+          if (envBool('DEBUG')) {
+            console.error(err)
+          }
+          next()
+        }
+      })
+    }
   }
 
   private async buildRoutes() {

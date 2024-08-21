@@ -1,6 +1,6 @@
 import request from 'supertest'
-import PsychicServer from '../../../src/server'
-import { createPsychicServer } from '../../../spec-helpers'
+import PsychicServer from '../../../../src/server'
+import { createPsychicServer } from '../../../../spec-helpers'
 
 describe('hitting an endpoint that calls castParam', () => {
   let server: PsychicServer

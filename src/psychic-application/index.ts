@@ -15,6 +15,7 @@ import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './ca
 import loadControllers, { getControllersOrFail } from './helpers/loadControllers'
 import { PsychicRedisConnectionOptions } from './helpers/redisOptions'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
+import * as OpenApiValidator from 'express-openapi-validator'
 
 export default class PsychicApplication {
   public static async init(
@@ -376,6 +377,7 @@ export interface PsychicOpenapiOptions {
   outputFilename?: `${string}.json`
   clientOutputFilename?: `${string}.ts`
   suppressResponseEnums?: boolean
+  validation?: Partial<Parameters<(typeof OpenApiValidator)['middleware']>[0]>
   defaults?: {
     headers?: OpenapiHeaderOption[]
     responses?: OpenapiResponses
