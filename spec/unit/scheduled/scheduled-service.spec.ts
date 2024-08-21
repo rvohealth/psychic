@@ -51,17 +51,6 @@ describe('ScheduledService', () => {
       process.env.REALLY_TEST_BACKGROUND_QUEUE = undefined
     })
 
-    context('with no priority specified', () => {
-      beforeEach(() => {
-        serviceClass = DummyScheduledService
-      })
-
-      it('uses priority 3', async () => {
-        await subject()
-        expectAddedToQueueWithPriority('not_urgent', 3)
-      })
-    })
-
     context('with a default priority', () => {
       beforeEach(() => {
         serviceClass = DefaultDummyScheduledService
