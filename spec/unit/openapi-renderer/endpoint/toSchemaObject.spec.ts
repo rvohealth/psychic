@@ -119,7 +119,7 @@ describe('OpenapiEndpointRenderer', () => {
       context('suppressResponseEnums=true', () => {
         beforeEach(() => {
           const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
-          psychicApp.openapi!.suppressResponseEnums = true
+          psychicApp.openapi.suppressResponseEnums = true
 
           jest
             .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
@@ -134,7 +134,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = renderer.toSchemaObject()
+          const response = renderer.toSchemaObject({})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingString: {
