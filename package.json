@@ -15,7 +15,8 @@
     "boilerplate/**/*",
     ".global-cli-dist/**/*",
     "spec-helpers/**/*",
-    "src/**/*"
+    "src/**/*",
+    "dist/**/*"
   ],
   "bin": {
     "psy": "./.global-cli-dist/main.js"
