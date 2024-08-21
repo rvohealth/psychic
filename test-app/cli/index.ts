@@ -9,10 +9,10 @@ import '../conf/loadEnv'
 
 import { DreamBin, developmentOrTestEnv } from '@rvohealth/dream'
 import { Command } from 'commander'
+import PsychicBin from '../../src/bin'
 import seedDb from '../db/seed'
 import initializePsychicApplication from './helpers/initializePsychicApplication'
-import PsychicBin from '../../src/bin'
-import PsychicApplication from '../../src/psychic-application'
+import sync from './helpers/sync'
 
 const program = new Command()
 
@@ -118,16 +118,7 @@ program
   )
   .option('--tsnode', 'runs the command using ts-node instead of node')
   .action(async () => {
-    await initializePsychicApplication()
-    await DreamBin.sync()
-
-    const psychicApp = PsychicApplication.getOrFail()
-
-    if (psychicApp && !psychicApp?.apiOnly) {
-      await PsychicBin.syncOpenapiJson()
-      await PsychicBin.syncOpenapiClientSchema()
-    }
-
+    await sync()
     process.exit()
   })
 
@@ -193,7 +184,7 @@ program
     await DreamBin.dbMigrate()
 
     if (developmentOrTestEnv() && !cmdargs().includes('--skip-sync')) {
-      await DreamBin.sync()
+      await sync()
     }
 
     process.exit()
@@ -212,7 +203,7 @@ program
   .action(async () => {
     await initializePsychicApplication()
     await DreamBin.dbRollback()
-    await DreamBin.sync()
+    await sync()
     process.exit()
   })
 
@@ -243,7 +234,7 @@ program
     await DreamBin.dbDrop()
     await DreamBin.dbCreate()
     await DreamBin.dbMigrate()
-    await DreamBin.sync()
+    await sync()
     await seedDb()
     process.exit()
   })
