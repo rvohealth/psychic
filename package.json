@@ -29,7 +29,7 @@
     "gpsycore": "npx ts-node --transpile-only ./global-cli/main.ts",
     "build": "rm -rf dist && echo \"building psychic app...\" && npx tsc -p ./tsconfig.build.json",
     "build:global-cli": "npx tsc -p ./tsconfig.global-cli.json",
-    "build:core": "rm -rf dist && PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=development yarn --cwd=node_modules/@rvohealth/dream build && echo \"building psychic core...\" && npx tsc -p ./tsconfig.build-core.json",
+    "build:core": "rm -rf dist && echo \"building psychic core...\" && npx tsc -p ./tsconfig.build-core.json",
     "sync": "NODE_ENV=development yarn --cwd=node_modules/@rvohealth/dream build-boot && NODE_ENV=development yarn --cwd=node_modules/@rvohealth/dream build",
     "syncb": "NODE_ENV=development yarn --cwd=node_modules/@rvohealth/dream build-boot && NODE_ENV=development yarn dream sync:config-cache && yarn --cwd=node_modules/@rvohealth/dream build && yarn build",
     "dev": "TS_SAFE=1 PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=development ts-node ./test-app/main.ts",
