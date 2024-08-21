@@ -35,7 +35,7 @@ export default class OpenapiAppRenderer {
     const processedSchemas: Record<string, boolean> = {}
     const psychicApp = getCachedPsychicApplicationOrFail()
     const controllers = psychicApp.controllers
-    const packageJsonPath = path.join(psychicApp.appRoot, '..', 'package.json')
+    const packageJsonPath = path.join(psychicApp.apiRoot, 'package.json')
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const packageJson = (await import(packageJsonPath)).default as {

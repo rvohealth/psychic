@@ -1,9 +1,9 @@
 import { developmentOrTestEnv } from '@rvohealth/dream'
-import PsychicApplication from '../../src/psychic-application'
-import { Encrypt } from '../../src'
-import User from '../app/models/User'
-import Ws from '../../src/cable/ws'
 import path from 'path'
+import { Encrypt } from '../../src'
+import Ws from '../../src/cable/ws'
+import PsychicApplication from '../../src/psychic-application'
+import User from '../app/models/User'
 import inflections from './inflections'
 import routesCb from './routes'
 
@@ -20,7 +20,7 @@ export default async (psy: PsychicApplication) => {
 
   await psy.load('controllers', path.join(__dirname, '..', 'app', 'controllers'))
 
-  psy.set('appRoot', path.join(__dirname, '..'))
+  psy.set('apiRoot', path.join(__dirname, '..', '..'))
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
 

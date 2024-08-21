@@ -5,7 +5,7 @@ import { getCachedPsychicApplicationOrFail } from '../../src/psychic-application
 export default async function readTmpFile() {
   try {
     const psychicApp = getCachedPsychicApplicationOrFail()
-    return await fs.rm(path.join(psychicApp.appRoot, '../spec/tmp.txt'))
+    return await fs.rm(path.join(psychicApp.apiRoot, 'spec/tmp.txt'))
   } catch (err) {
     //
   }

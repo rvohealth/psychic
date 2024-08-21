@@ -1,17 +1,25 @@
 import { camelize } from '@rvohealth/dream'
+import globalClassNameFromFullyQualifiedModelName from '@rvohealth/dream/src/helpers/globalClassNameFromFullyQualifiedModelName'
+import standardizeFullyQualifiedModelName from '@rvohealth/dream/src/helpers/standardizeFullyQualifiedModelName'
 import pluralize from 'pluralize'
-import pascalizeFileName from '../../helpers/pascalizeFileName'
+import relativePsychicPath from '../../helpers/path/relativePsychicPath'
+// import globalClassNameFromFullyQualifiedModelName from '../globalClassNameFromFullyQualifiedModelName'
+// import relativeDreamPath from '../path/relativeDreamPath'
+// import serializerNameFromFullyQualifiedModelName from '../serializerNameFromFullyQualifiedModelName'
+// import snakeify from '../snakeify'
+// import standardizeFullyQualifiedModelName from '../standardizeFullyQualifiedModelName'
+// import uniq from '../uniq'
 
 export default function generateControllerContent(
-  controllerClassName: string,
+  fullyQualifiedControllerName: string,
   route: string,
   fullyQualifiedModelName: string | null,
   methods: string[] = [],
 ) {
-  const additionalImports: string[] = []
+  fullyQualifiedControllerName = standardizeFullyQualifiedModelName(fullyQualifiedControllerName)
 
-  let modelName: string | undefined
-  const controllerClassNameWithoutSlashes = controllerClassName.replace(/\//g, '')
+  const additionalImports: string[] = []
+  const controllerClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedControllerName)
 
   let extendingClassName = 'AuthedController'
   if (/^\/{0,1}admin\/.*/.test(route)) {
@@ -25,23 +33,24 @@ export default function generateControllerContent(
     )
   }
 
+  let modelClassName: string | undefined
+  let modelAttributeName: string | undefined
   if (fullyQualifiedModelName) {
-    modelName = pascalizeFileName(fullyQualifiedModelName)
-    additionalImports.push(
-      `\
-import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQualifiedModelName}'`,
-    )
+    fullyQualifiedModelName = standardizeFullyQualifiedModelName(fullyQualifiedModelName)
+    modelClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
+    modelAttributeName = camelize(modelClassName)
+    additionalImports.push(importStatementForModel(fullyQualifiedControllerName, fullyQualifiedModelName))
   }
 
   const methodDefs = methods.map(methodName => {
     switch (methodName) {
       case 'create':
-        if (modelName)
+        if (modelAttributeName)
           return `\
-  @OpenAPI(${modelName}, { status: 201 })
+  @OpenAPI(${modelClassName}, { status: 201 })
   public async create() {
-    //    const ${camelize(modelName)} = await this.currentUser.createAssociation('${pluralize(camelize(modelName))}', this.paramsFor(${modelName}))
-    //    this.created(${camelize(modelName)})
+    //    const ${modelAttributeName} = await this.currentUser.createAssociation('${pluralize(modelAttributeName)}', this.paramsFor(${modelClassName}))
+    //    this.created(${modelAttributeName})
   }`
         else
           return `\
@@ -49,16 +58,16 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   }`
 
       case 'index':
-        if (modelName)
+        if (modelAttributeName)
           return `\
-  @OpenAPI(${modelName}, {
+  @OpenAPI(${modelClassName}, {
     status: 200,
     many: true,
     serializerKey: 'summary',
   })
   public async index() {
-    //    const ${pluralize(camelize(modelName))} = await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').all()
-    //    this.ok(${pluralize(camelize(modelName))})
+    //    const ${pluralize(modelAttributeName)} = await this.currentUser.associationQuery('${pluralize(modelAttributeName)}').all()
+    //    this.ok(${pluralize(modelAttributeName)})
   }`
         else
           return `\
@@ -73,12 +82,12 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   }`
 
       case 'show':
-        if (modelName)
+        if (modelAttributeName)
           return `\
-  @OpenAPI(${modelName}, { status: 200 })
+  @OpenAPI(${modelClassName}, { status: 200 })
   public async show() {
-    //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
-    //    this.ok(${camelize(modelName)})
+    //    const ${modelAttributeName} = await this.${modelAttributeName}()
+    //    this.ok(${modelAttributeName})
   }`
         else
           return `\
@@ -93,12 +102,12 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   }`
 
       case 'update':
-        if (modelName)
+        if (modelAttributeName)
           return `\
-  @OpenAPI(${modelName}, { status: 204 })
+  @OpenAPI(${modelClassName}, { status: 204 })
   public async update() {
-    //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
-    //    await ${camelize(modelName)}.update(this.paramsFor(${modelName}))
+    //    const ${modelAttributeName} = await this.${modelAttributeName}()
+    //    await ${modelAttributeName}.update(this.paramsFor(${modelClassName}))
     //    this.noContent()
   }`
         else
@@ -108,12 +117,12 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
   }`
 
       case 'destroy':
-        if (modelName)
+        if (modelAttributeName)
           return `\
   @OpenAPI({ status: 204 })
   public async destroy() {
-    //    const ${camelize(modelName)} = await this.${camelize(modelName)}()
-    //    await ${camelize(modelName)}.destroy()
+    //    const ${modelAttributeName} = await this.${modelAttributeName}()
+    //    await ${modelAttributeName}.destroy()
     //    this.noContent()
   }`
         else
@@ -140,25 +149,25 @@ import ${modelName} from '${routeDepthToRelativePath(route)}/models/${fullyQuali
 import { OpenAPI } from '@rvohealth/psychic'
 ${additionalImports.length ? additionalImports.join('\n') : ''}
 
-export default class ${controllerClassNameWithoutSlashes} extends ${extendingClassName} {
-${methodDefs.join('\n\n')}${modelName ? privateMethods(modelName, methods) : ''}
+export default class ${controllerClassName} extends ${extendingClassName} {
+${methodDefs.join('\n\n')}${modelClassName ? privateMethods(modelClassName, methods) : ''}
 }\
 `
 }
 
-function privateMethods(modelName: string, methods: string[]) {
+function privateMethods(modelClassName: string, methods: string[]) {
   const privateMethods: string[] = []
   if (methods.find(methodName => ['show', 'update', 'destroy'].includes(methodName)))
-    privateMethods.push(loadModelStatement(modelName))
+    privateMethods.push(loadModelStatement(modelClassName))
 
   if (!privateMethods.length) return ''
   return `\n${privateMethods.join('\n')}`
 }
 
-function loadModelStatement(modelName: string) {
+function loadModelStatement(modelClassName: string) {
   return `
-  private async ${camelize(modelName)}() {
-    return await this.currentUser.associationQuery('${pluralize(camelize(modelName))}').findOrFail(
+  private async ${camelize(modelClassName)}() {
+    return await this.currentUser.associationQuery('${pluralize(camelize(modelClassName))}').findOrFail(
       this.castParam('id', 'string')
     )
   }`
@@ -171,4 +180,9 @@ function routeDepthToRelativePath(route: string, subtractFromDepth: number = 0) 
       .fill('..')
       .join('/') || '.'
   )
+}
+
+function importStatementForModel(originControllerName: string, destinationModelName: string) {
+  console.debug({ originControllerName, destinationModelName })
+  return `import ${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${relativePsychicPath('controllers', 'models', originControllerName, destinationModelName)}'`
 }

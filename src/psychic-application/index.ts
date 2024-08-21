@@ -4,7 +4,8 @@ import { QueueOptions } from 'bullmq'
 import { CorsOptions } from 'cors'
 import { Application, Request, Response } from 'express'
 import { Socket, Server as SocketServer } from 'socket.io'
-import PsychicApplicationInitMissingAppRoot from '../error/psychic-application/init-missing-app-root'
+import IncludedClientConfigWithoutClientRoot from '../error/psychic-application/included-client-config-without-client-root'
+import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
@@ -22,7 +23,8 @@ export default class PsychicApplication {
     await cb(psychicApp)
 
     if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
-    if (!psychicApp.appRoot) throw new PsychicApplicationInitMissingAppRoot()
+    if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
+    if (!psychicApp.clientRoot && psychicApp.client.apiPath) throw new IncludedClientConfigWithoutClientRoot()
     if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
 
     await psychicApp.inflections?.()
@@ -35,7 +37,8 @@ export default class PsychicApplication {
   }
 
   public apiOnly: boolean = false
-  public appRoot: string
+  public apiRoot: string
+  public clientRoot: string
   public useWs: boolean = false
   public useRedis: boolean = false
   public appName: string = 'untitled app'
@@ -51,8 +54,19 @@ export default class PsychicApplication {
   public sslCredentials?: PsychicSslCredentials
   public saltRounds?: number
   public routesCb: (r: PsychicRouter) => void | Promise<void>
-  public openapi?: PsychicOpenapiOptions
-  public client?: PsychicClientOptions
+  public openapi: PsychicOpenapiOptions &
+    Required<Pick<PsychicOpenapiOptions, 'clientOutputFilename' | 'outputFilename' | 'schemaDelimeter'>> = {
+    clientOutputFilename: 'openapi.ts',
+    outputFilename: 'openapi.json',
+    schemaDelimeter: '',
+  }
+  public client: Required<PsychicClientOptions> = {
+    apiPath: 'src/api',
+  }
+  public paths: Required<PsychicPathOptions> = {
+    controllers: 'src/app/controllers',
+    controllerSpecs: 'spec/unit/controllers',
+  }
   public inflections?: () => void | Promise<void>
   public bootHooks: Record<
     PsychicHookLoadEventTypes,
@@ -168,47 +182,58 @@ export default class PsychicApplication {
       ? CorsOptions
       : Opt extends 'cookie'
         ? CustomCookieOptions
-        : Opt extends 'appRoot'
+        : Opt extends 'apiRoot'
           ? string
-          : Opt extends 'json'
-            ? bodyParser.Options
-            : Opt extends 'client'
-              ? PsychicClientOptions
-              : Opt extends 'background:queue'
-                ? Omit<QueueOptions, 'connection'>
-                : Opt extends 'background:worker'
-                  ? WorkerOptions
-                  : Opt extends 'redis:background'
-                    ? PsychicRedisConnectionOptions
-                    : Opt extends 'redis:ws'
+          : Opt extends 'clientRoot'
+            ? string
+            : Opt extends 'json'
+              ? bodyParser.Options
+              : Opt extends 'client'
+                ? PsychicClientOptions
+                : Opt extends 'background:queue'
+                  ? Omit<QueueOptions, 'connection'>
+                  : Opt extends 'background:worker'
+                    ? WorkerOptions
+                    : Opt extends 'redis:background'
                       ? PsychicRedisConnectionOptions
-                      : Opt extends 'ssl'
-                        ? PsychicSslCredentials
-                        : Opt extends 'openapi'
-                          ? PsychicOpenapiOptions
-                          : Opt extends 'saltRounds'
-                            ? number
-                            : Opt extends 'inflections'
-                              ? () => void | Promise<void>
-                              : Opt extends 'routes'
-                                ? (r: PsychicRouter) => void | Promise<void>
-                                : never,
+                      : Opt extends 'redis:ws'
+                        ? PsychicRedisConnectionOptions
+                        : Opt extends 'ssl'
+                          ? PsychicSslCredentials
+                          : Opt extends 'openapi'
+                            ? PsychicOpenapiOptions
+                            : Opt extends 'paths'
+                              ? PsychicPathOptions
+                              : Opt extends 'saltRounds'
+                                ? number
+                                : Opt extends 'inflections'
+                                  ? () => void | Promise<void>
+                                  : Opt extends 'routes'
+                                    ? (r: PsychicRouter) => void | Promise<void>
+                                    : never,
   ) {
     switch (option) {
-      case 'appRoot':
-        this.appRoot = value as string
+      case 'apiRoot':
+        this.apiRoot = value as string
+        break
+
+      case 'clientRoot':
+        this.clientRoot = value as string
         break
 
       case 'cors':
-        this.corsOptions = value as CorsOptions
+        this.corsOptions = { ...this.corsOptions, ...(value as CorsOptions) }
         break
 
       case 'cookie':
-        this.cookieOptions = { maxAge: cookieMaxAgeFromCookieOpts((value as CustomCookieOptions).maxAge) }
+        this.cookieOptions = {
+          ...this.cookieOptions,
+          maxAge: cookieMaxAgeFromCookieOpts((value as CustomCookieOptions).maxAge),
+        }
         break
 
       case 'client':
-        this.client = value as PsychicClientOptions
+        this.client = { ...this.client, ...(value as PsychicClientOptions) }
         break
 
       case 'routes':
@@ -216,27 +241,33 @@ export default class PsychicApplication {
         break
 
       case 'json':
-        this.jsonOptions = value as bodyParser.Options
+        this.jsonOptions = { ...this.jsonOptions, ...(value as bodyParser.Options) }
         break
 
       case 'background:queue':
-        this.backgroundQueueOptions = value as Omit<QueueOptions, 'connection'>
+        this.backgroundQueueOptions = {
+          ...this.backgroundQueueOptions,
+          ...(value as Omit<QueueOptions, 'connection'>),
+        }
         break
 
       case 'background:worker':
-        this.backgroundWorkerOptions = value as WorkerOptions
+        this.backgroundWorkerOptions = { ...this.backgroundWorkerOptions, ...(value as WorkerOptions) }
         break
 
       case 'redis:background':
-        this.redisBackgroundJobCredentials = value as PsychicRedisConnectionOptions
+        this.redisBackgroundJobCredentials = {
+          ...this.redisBackgroundJobCredentials,
+          ...(value as PsychicRedisConnectionOptions),
+        }
         break
 
       case 'redis:ws':
-        this.redisWsCredentials = value as PsychicRedisConnectionOptions
+        this.redisWsCredentials = { ...this.redisWsCredentials, ...(value as PsychicRedisConnectionOptions) }
         break
 
       case 'ssl':
-        this.sslCredentials = value as PsychicSslCredentials
+        this.sslCredentials = { ...this.sslCredentials, ...(value as PsychicSslCredentials) }
         break
 
       case 'saltRounds':
@@ -244,7 +275,14 @@ export default class PsychicApplication {
         break
 
       case 'openapi':
-        this.openapi = value as PsychicOpenapiOptions
+        this.openapi = { ...this.openapi, ...(value as PsychicOpenapiOptions) }
+        break
+
+      case 'paths':
+        this.paths = {
+          ...this.paths,
+          ...(value as PsychicPathOptions),
+        }
         break
 
       case 'inflections':
@@ -264,7 +302,8 @@ export default class PsychicApplication {
 }
 
 export type PsychicApplicationOption =
-  | 'appRoot'
+  | 'apiRoot'
+  | 'clientRoot'
   | 'cors'
   | 'cookie'
   | 'json'
@@ -276,6 +315,7 @@ export type PsychicApplicationOption =
   | 'ssl'
   | 'saltRounds'
   | 'openapi'
+  | 'paths'
   | 'controllers'
   | 'inflections'
   | 'routes'
@@ -318,6 +358,11 @@ export interface PsychicOpenapiOptions {
       }
     }
   }
+}
+
+interface PsychicPathOptions {
+  controllers?: string
+  controllerSpecs?: string
 }
 
 export interface PsychicClientOptions {

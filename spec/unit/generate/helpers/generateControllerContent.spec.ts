@@ -78,7 +78,7 @@ export default class ApiV1PostsController extends AuthedController {
     })
 
     context('passing a namespaced model and a path', () => {
-      it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
+      it.only('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
         const res = generateControllerContent(
           'ApiV1HealthPostsController',
           '/api/v1/health/posts',

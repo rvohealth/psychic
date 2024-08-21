@@ -1,6 +1,6 @@
 import { describe as context } from '@jest/globals'
 import { PsychicApplication } from '../../../src'
-import PsychicApplicationInitMissingAppRoot from '../../../src/error/psychic-application/init-missing-app-root'
+import PsychicApplicationInitMissingApiRoot from '../../../src/error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../../../src/error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../../../src/error/psychic-application/init-missing-routes-callback'
 import * as LoadControllersModule from '../../../src/psychic-application/helpers/loadControllers'
@@ -14,7 +14,7 @@ describe('DreamApplication#init', () => {
   context('with a valid config', () => {
     it('does not raise an exception', async () => {
       const cb = async (app: PsychicApplication) => {
-        app.set('appRoot', 'how/yadoin')
+        app.set('apiRoot', 'how/yadoin')
         app.set('routes', () => {})
         await app.load('controllers', 'how/yadoin')
       }
@@ -27,7 +27,7 @@ describe('DreamApplication#init', () => {
     context('load("controllers") never called', () => {
       it('throws targeted exception', async () => {
         const cb = (app: PsychicApplication) => {
-          app.set('appRoot', 'how/yadoin')
+          app.set('apiRoot', 'how/yadoin')
           app.set('routes', () => {})
         }
 
@@ -37,21 +37,21 @@ describe('DreamApplication#init', () => {
       })
     })
 
-    context('appRoot not set', () => {
+    context('apiRoot not set', () => {
       it('throws targeted exception', async () => {
         const cb = async (app: PsychicApplication) => {
           await app.load('controllers', 'how/yadoin')
           app.set('routes', () => {})
         }
 
-        await expect(PsychicApplication.init(cb)).rejects.toThrow(PsychicApplicationInitMissingAppRoot)
+        await expect(PsychicApplication.init(cb)).rejects.toThrow(PsychicApplicationInitMissingApiRoot)
       })
     })
 
     context('routes not set', () => {
       it('throws targeted exception', async () => {
         const cb = async (app: PsychicApplication) => {
-          app.set('appRoot', 'how/yadoin')
+          app.set('apiRoot', 'how/yadoin')
           await app.load('controllers', 'how/yadoin')
         }
 
