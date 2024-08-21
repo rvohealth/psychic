@@ -3,14 +3,14 @@
 // would be the most stable moving forward, especially if we ever decide to
 // build to dist, since directory structures morph in those contexts.
 import path from 'path'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import PsychicApplication from '../psychic-application'
 import { envBool } from './envValue'
 
 export default function absoluteFilePath(
   filePath: string,
   { purgeTestAppInCoreDevelopment = false }: { purgeTestAppInCoreDevelopment?: boolean } = {},
 ): string {
-  const psychicApp = getCachedPsychicApplicationOrFail()
+  const psychicApp = PsychicApplication.getOrFail()
 
   let apiRoot = psychicApp.apiRoot
 

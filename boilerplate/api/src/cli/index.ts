@@ -8,7 +8,7 @@
 import '../conf/loadEnv'
 
 import { DreamBin, developmentOrTestEnv } from '@rvohealth/dream'
-import { PsychicBin, getCachedPsychicApplicationOrFail } from '@rvohealth/psychic'
+import { PsychicBin, PsychicApplication } from '@rvohealth/psychic'
 import { Command } from 'commander'
 import seedDb from '../db/seed'
 import initializePsychicApplication from './helpers/initializePsychicApplication'
@@ -120,7 +120,7 @@ program
     await initializePsychicApplication()
     await DreamBin.sync()
 
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
 
     if (psychicApp && !psychicApp?.apiOnly) {
       await PsychicBin.syncOpenapiJson()

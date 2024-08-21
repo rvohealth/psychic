@@ -1,7 +1,7 @@
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import PsychicApplication from '../psychic-application'
 import { envInt } from './envValue'
 
 export default function portValue() {
-  const psychicApp = getCachedPsychicApplicationOrFail()
+  const psychicApp = PsychicApplication.getOrFail()
   return psychicApp.port || envInt('PORT') || 7777
 }

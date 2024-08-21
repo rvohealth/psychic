@@ -1,4 +1,4 @@
-import { getCachedPsychicApplicationOrFail } from '../cache'
+import PsychicApplication from '..'
 
 export interface PsychicRedisConnectionOptions {
   secure?: boolean
@@ -10,7 +10,7 @@ export interface PsychicRedisConnectionOptions {
 
 export type RedisOptionPurpose = 'ws' | 'background_jobs'
 export default function redisOptions(purpose: RedisOptionPurpose) {
-  const psychicApp = getCachedPsychicApplicationOrFail()
+  const psychicApp = PsychicApplication.getOrFail()
 
   switch (purpose) {
     case 'ws':

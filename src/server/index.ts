@@ -8,7 +8,6 @@ import Cable from '../cable'
 import { envBool } from '../helpers/envValue'
 import portValue from '../helpers/portValue'
 import PsychicApplication from '../psychic-application'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import PsychicRouter from '../router'
 import FrontEndClientServer from './front-end-client'
 import startPsychicServer from './helpers/startPsychicServer'
@@ -22,12 +21,12 @@ export default class PsychicServer {
   private booted = false
   constructor() {
     this.buildApp()
-    this.config = getCachedPsychicApplicationOrFail()
+    this.config = PsychicApplication.getOrFail()
   }
 
   public async routes() {
     const r = new PsychicRouter(this.app, this.config)
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
     await psychicApp.routesCb(r)
     return r.routes
   }
@@ -155,7 +154,7 @@ export default class PsychicServer {
 
   private async buildRoutes() {
     const r = new PsychicRouter(this.app, this.config)
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
     await psychicApp.routesCb(r)
     r.commit()
   }

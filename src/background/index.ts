@@ -5,7 +5,7 @@ import absoluteFilePath from '../helpers/absoluteFilePath'
 import envValue, { devEnvBool } from '../helpers/envValue'
 import importFileWithDefault from '../helpers/importFileWithDefault'
 import importFileWithNamedExport from '../helpers/importFileWithNamedExport'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import PsychicApplication from '../psychic-application'
 import lookupClassByGlobalName from '../psychic-application/helpers/lookupClassByGlobalName'
 import redisOptions from '../psychic-application/helpers/redisOptions'
 
@@ -37,7 +37,7 @@ export class Background {
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) return
     if (this.queue) return
 
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
 
     if (!psychicApp?.useRedis)
       throw new Error(`attempting to use background jobs, but config.useRedis is not set to true.`)

@@ -1,5 +1,6 @@
 import {
   Dream,
+  DreamApplication,
   DreamSerializer,
   OpenapiAllTypes,
   OpenapiFormats,
@@ -15,10 +16,9 @@ import {
   SerializableDreamClassOrViewModelClass,
   SerializableDreamOrViewModel,
   compact,
-  getCachedDreamApplicationOrFail,
 } from '@rvohealth/dream'
 import PsychicController from '../controller'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import PsychicApplication from '../psychic-application'
 import { RouteConfig } from '../router/route-manager'
 import { HttpMethod } from '../router/types'
 import PsychicServer from '../server'
@@ -121,7 +121,7 @@ export default class OpenapiEndpointRenderer<
    * final openapi.json output
    */
   public async toPathObject(processedSchemas: Record<string, boolean>): Promise<OpenapiEndpointResponse> {
-    this.serializers = getCachedDreamApplicationOrFail().serializers
+    this.serializers = DreamApplication.getOrFail().serializers
 
     const [path, method, requestBody, responses] = await Promise.all([
       this.computedPath(),
@@ -174,7 +174,7 @@ export default class OpenapiEndpointRenderer<
   public toSchemaObject(processedSchemas: Record<string, boolean>): Record<string, OpenapiSchemaBody> {
     this.computedExtraComponents = {}
 
-    this.serializers = getCachedDreamApplicationOrFail().serializers
+    this.serializers = DreamApplication.getOrFail().serializers
     const serializerClasses = this.getSerializerClasses()
 
     let output: Record<string, OpenapiSchemaBody> = {}
@@ -364,7 +364,7 @@ export default class OpenapiEndpointRenderer<
    * "parameters" field for a single endpoint.
    */
   private headersArray(): OpenapiParameterResponse[] {
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
 
     const defaultHeaders = this.omitDefaultHeaders ? [] : psychicApp.openapi?.defaults?.headers || []
     const headers = [...defaultHeaders, ...(this.headers || [])] as OpenapiHeaderOption[]
@@ -697,7 +697,7 @@ export default class OpenapiEndpointRenderer<
    * Generates the responses portion of the endpoint
    */
   private parseResponses(processedSchemas: Record<string, boolean>): OpenapiResponses {
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
 
     const defaultResponses = this.omitDefaultResponses ? {} : psychicApp.openapi?.defaults?.responses || {}
     let responseData: OpenapiResponses = {
@@ -908,7 +908,7 @@ export default class OpenapiEndpointRenderer<
    * NOTE: this is only public for testing purposes.
    */
   public get schemaDelimeter() {
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
     return psychicApp.openapi?.schemaDelimeter || ''
   }
 
@@ -982,7 +982,7 @@ export default class OpenapiEndpointRenderer<
   private getSerializerClass(
     dreamOrSerializerOrViewModel: SerializableDreamClassOrViewModelClass | typeof DreamSerializer,
   ): typeof DreamSerializer {
-    const dreamApp = getCachedDreamApplicationOrFail()
+    const dreamApp = DreamApplication.getOrFail()
     if ((dreamOrSerializerOrViewModel as typeof DreamSerializer).isDreamSerializer) {
       return dreamOrSerializerOrViewModel as typeof DreamSerializer
     } else {

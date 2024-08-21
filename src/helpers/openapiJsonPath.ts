@@ -1,7 +1,7 @@
 import path from 'path'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import PsychicApplication from '../psychic-application'
 
 export default function openapiJsonPath() {
-  const psychicApp = getCachedPsychicApplicationOrFail()
+  const psychicApp = PsychicApplication.getOrFail()
   return path.join(psychicApp.apiRoot, psychicApp.openapi.outputFilename)
 }

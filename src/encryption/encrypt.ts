@@ -1,11 +1,11 @@
 import jwt from 'jsonwebtoken'
 import InvalidAppEncryptionKey from '../error/encrypt/invalid-app-encryption-key'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import PsychicApplication from '../psychic-application'
 
 export default class Encrypt {
   public static sign(data: string) {
     try {
-      const psychicApp = getCachedPsychicApplicationOrFail()
+      const psychicApp = PsychicApplication.getOrFail()
       return jwt.sign(data, psychicApp.encryptionKey)
     } catch (_) {
       const err = new InvalidAppEncryptionKey()
@@ -19,7 +19,7 @@ export default class Encrypt {
 
   public static decode(encrypted: string): string | jwt.JwtPayload | null {
     try {
-      const psychicApp = getCachedPsychicApplicationOrFail()
+      const psychicApp = PsychicApplication.getOrFail()
       const payload = jwt.verify(encrypted, psychicApp.encryptionKey)
       return payload
     } catch (err) {

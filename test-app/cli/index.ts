@@ -12,7 +12,7 @@ import { Command } from 'commander'
 import seedDb from '../db/seed'
 import initializePsychicApplication from './helpers/initializePsychicApplication'
 import PsychicBin from '../../src/bin'
-import { getCachedPsychicApplicationOrFail } from '../../src/psychic-application/cache'
+import PsychicApplication from '../../src/psychic-application'
 
 const program = new Command()
 
@@ -121,7 +121,7 @@ program
     await initializePsychicApplication()
     await DreamBin.sync()
 
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
 
     if (psychicApp && !psychicApp?.apiOnly) {
       await PsychicBin.syncOpenapiJson()

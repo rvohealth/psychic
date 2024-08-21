@@ -4,7 +4,7 @@ import generateResource from '../generate/resource'
 import openapiJsonPath from '../helpers/openapiJsonPath'
 import sspawn from '../helpers/sspawn'
 import OpenapiAppRenderer from '../openapi-renderer/app'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import PsychicApplication from '../psychic-application'
 import PsychicServer from '../server'
 import generateRouteTypes from './helpers/generateRouteTypes'
 import printRoutes from './helpers/printRoutes'
@@ -56,7 +56,7 @@ export default class PsychicBin {
 
   public static async syncOpenapiClientSchema() {
     console.log('syncing client api schema...')
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
 
     const apiPath = path.join(psychicApp.clientRoot, psychicApp.client.apiPath)
     const clientApiSchemaFilename = psychicApp.openapi?.clientOutputFilename

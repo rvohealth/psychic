@@ -2,8 +2,7 @@ import { CookieOptions, Request, Response } from 'express'
 import Encrypt from '../encryption/encrypt'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
 import envValue from '../helpers/envValue'
-import { CustomCookieOptions } from '../psychic-application'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import PsychicApplication, { CustomCookieOptions } from '../psychic-application'
 
 export default class Session {
   constructor(
@@ -25,7 +24,7 @@ export default class Session {
       ...opts,
       maxAge: opts.maxAge
         ? cookieMaxAgeFromCookieOpts(opts.maxAge)
-        : getCachedPsychicApplicationOrFail().cookieOptions?.maxAge,
+        : PsychicApplication.getOrFail().cookieOptions?.maxAge,
     })
   }
 

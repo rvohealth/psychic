@@ -35,7 +35,6 @@ export {
   OpenapiPathParamOption as OpenapiUriOption,
 } from './openapi-renderer/endpoint'
 export { default as PsychicApplication, PsychicOpenapiOptions } from './psychic-application'
-export { getCachedPsychicApplicationOrFail } from './psychic-application/cache'
 export { PsychicRedisConnectionOptions } from './psychic-application/helpers/redisOptions'
 export { UUID } from './psychic-application/types'
 export { default as PsychicRouter } from './router'

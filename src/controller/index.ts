@@ -1,9 +1,9 @@
 import {
   Dream,
+  DreamApplication,
   DreamParamSafeAttributes,
   DreamSerializer,
   GlobalNameNotSet,
-  getCachedDreamApplicationOrFail,
 } from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import background from '../background'
@@ -322,7 +322,7 @@ export default class PsychicController {
 
   private singleObjectJson<T>(data: T, opts: RenderOptions<T>): T | SerializerResult {
     if (!data) return data
-    const dreamApp = getCachedDreamApplicationOrFail()
+    const dreamApp = DreamApplication.getOrFail()
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
