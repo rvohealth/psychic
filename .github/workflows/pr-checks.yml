@@ -176,6 +176,7 @@ jobs:
 
       - run: echo "@rvohealth:registry=https://npm.pkg.github.com" > ./.npmrc
       - run: echo -e "//npm.pkg.github.com/:_authToken=${{ secrets.GITHUB_TOKEN }}" >> ./.npmrc
+      - run: git add ./.npmrc; git commit -m "add .npmrc"
 
       - name: Cache node_modules
         id: cache-node-modules
