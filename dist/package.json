@@ -8,7 +8,6 @@
     "license": "MIT",
     "private": false,
     "files": [
-        "tsconfig.boot.json",
         "tsconfig.build.json",
         "tsconfig.global-cli.json",
         "tsconfig.json",
