@@ -1,6 +1,6 @@
-import PsychicServer from '../../../src/server'
-import PsychicRouter from '../../../src/router'
 import { specRequest as request } from '../../../spec-helpers'
+import PsychicRouter from '../../../src/router'
+import PsychicServer from '../../../src/server'
 
 describe('PsychicRouter', () => {
   beforeEach(async () => {
