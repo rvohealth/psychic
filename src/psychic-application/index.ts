@@ -223,13 +223,15 @@ export default class PsychicApplication {
                             ? PsychicOpenapiOptions
                             : Opt extends 'paths'
                               ? PsychicPathOptions
-                              : Opt extends 'saltRounds'
+                              : Opt extends 'port'
                                 ? number
-                                : Opt extends 'inflections'
-                                  ? () => void | Promise<void>
-                                  : Opt extends 'routes'
-                                    ? (r: PsychicRouter) => void | Promise<void>
-                                    : never,
+                                : Opt extends 'saltRounds'
+                                  ? number
+                                  : Opt extends 'inflections'
+                                    ? () => void | Promise<void>
+                                    : Opt extends 'routes'
+                                      ? (r: PsychicRouter) => void | Promise<void>
+                                      : never,
   ) {
     switch (option) {
       case 'apiRoot':
@@ -289,6 +291,10 @@ export default class PsychicApplication {
         this.sslCredentials = { ...this.sslCredentials, ...(value as PsychicSslCredentials) }
         break
 
+      case 'port':
+        this.port = value as number
+        break
+
       case 'saltRounds':
         this.saltRounds = value as number
         break
@@ -322,22 +328,23 @@ export default class PsychicApplication {
 
 export type PsychicApplicationOption =
   | 'apiRoot'
-  | 'clientRoot'
-  | 'cors'
-  | 'cookie'
-  | 'json'
-  | 'client'
   | 'background:queue'
   | 'background:worker'
-  | 'redis:background'
-  | 'redis:ws'
-  | 'ssl'
-  | 'saltRounds'
+  | 'client'
+  | 'clientRoot'
+  | 'controllers'
+  | 'cookie'
+  | 'cors'
+  | 'inflections'
+  | 'json'
   | 'openapi'
   | 'paths'
-  | 'controllers'
-  | 'inflections'
+  | 'port'
+  | 'redis:background'
+  | 'redis:ws'
   | 'routes'
+  | 'saltRounds'
+  | 'ssl'
 
 export interface PsychicApplicationSpecialHooks {
   expressInit: ((app: Application) => void | Promise<void>)[]

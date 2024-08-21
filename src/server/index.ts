@@ -122,7 +122,8 @@ export default class PsychicServer {
   }
 
   public async serveForRequestSpecs(block: () => void | Promise<void>) {
-    const port = process.env.PORT
+    const psychicApp = PsychicApplication.getOrFail()
+    const port = psychicApp.port
     if (!port) throw 'Missing `PORT` environment variable'
 
     await this.boot()

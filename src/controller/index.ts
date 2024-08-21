@@ -6,7 +6,6 @@ import {
   GlobalNameNotSet,
 } from '@rvohealth/dream'
 import { Request, Response } from 'express'
-import background from '../background'
 import { ControllerHook } from '../controller/hooks'
 import BadRequest from '../error/http/bad-request'
 import Conflict from '../error/http/conflict'

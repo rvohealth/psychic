@@ -1,7 +1,7 @@
 import _pluralize from 'pluralize'
 export const pluralize = _pluralize
 
-export { default as developmentOrTestEnv } from '../boot/cli/helpers/developmentOrTestEnv'
+export { default as developmentOrTestEnv } from './helpers/cli/developmentOrTestEnv'
 export { default as background, stopBackgroundWorkers } from './background'
 export { default as BackgroundedService } from './background/backgrounded-service'
 export { default as LastBackgroundedService } from './background/backgrounded-service/last'
