@@ -831,7 +831,7 @@ describe('OpenapiEndpointRenderer', () => {
             context('suppressResponseEnums=true', () => {
               beforeEach(() => {
                 const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
-                psychicApp.openapi!.suppressResponseEnums = true
+                psychicApp.openapi.suppressResponseEnums = true
 
                 jest
                   .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
@@ -841,7 +841,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('does not suppress enums for request bodies', async () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
-                const response = await renderer.toPathObject()
+                const response = await renderer.toPathObject({})
                 expect(response['/pets'].post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -1632,7 +1632,7 @@ describe('OpenapiEndpointRenderer', () => {
         context('suppressResponseEnums=true', () => {
           beforeEach(() => {
             const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
-            psychicApp.openapi!.suppressResponseEnums = true
+            psychicApp.openapi.suppressResponseEnums = true
 
             jest
               .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
@@ -1651,7 +1651,7 @@ describe('OpenapiEndpointRenderer', () => {
               },
             })
 
-            const response = await renderer.toPathObject()
+            const response = await renderer.toPathObject({})
             expect(response['/users/howyadoin'].get.responses).toEqual(
               expect.objectContaining({
                 201: {
