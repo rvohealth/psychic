@@ -1,7 +1,0 @@
-models_path: 'test-app/app/models'
-serializers_path: 'test-app/app/serializers'
-client_api_schema_path: 'test-app/client/schema.ts'
-conf_path: 'test-app/conf'
-db_path: 'test-app/db'
-unit_spec_path: 'test-app/spec/unit'
-primary_key_type: 'bigserial'

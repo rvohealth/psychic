@@ -24,6 +24,11 @@ export default async (psy: PsychicApplication) => {
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
 
+  psy.set('paths', {
+    controllers: 'test-app/app/controllers',
+    controllerSpecs: 'test-app/spec/controllers',
+  })
+
   // set options to configure openapi integration
   psy.set('openapi', {
     defaults: {

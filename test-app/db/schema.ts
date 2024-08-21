@@ -786,6 +786,8 @@ export const globalSchema = {
       'Admin/UserSummarySerializer',
       'Admin/V2/AdminV2PetSummarySerializer',
       'Admin/V2/PetSerializer',
+      'Circular/HelloSerializer',
+      'Circular/WorldSerializer',
       'CommentSerializer',
       'CommentSummarySerializer',
       'CommentTestingArrayWithSerializerRefSerializer',

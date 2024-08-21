@@ -183,6 +183,5 @@ function routeDepthToRelativePath(route: string, subtractFromDepth: number = 0) 
 }
 
 function importStatementForModel(originControllerName: string, destinationModelName: string) {
-  console.debug({ originControllerName, destinationModelName })
   return `import ${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${relativePsychicPath('controllers', 'models', originControllerName, destinationModelName)}'`
 }
