@@ -6,7 +6,6 @@ import { Server } from 'http'
 import { stopBackgroundWorkers } from '../background'
 import Cable from '../cable'
 import { envBool } from '../helpers/envValue'
-import portValue from '../helpers/portValue'
 import PsychicApplication from '../psychic-application'
 import PsychicRouter from '../router'
 import FrontEndClientServer from './front-end-client'
@@ -70,7 +69,7 @@ export default class PsychicServer {
 
   // TODO: use config helper for fetching default port
   public async start(
-    port = portValue(),
+    port?: number,
     {
       withFrontEndClient = envBool('CLIENT'),
       frontEndPort = 3000,
@@ -97,9 +96,11 @@ export default class PsychicServer {
       this.server = this.cable.http
     } else {
       await new Promise(accept => {
+        const psychicApp = PsychicApplication.getOrFail()
+
         startPsychicServer({
           app: this.app,
-          port,
+          port: port || psychicApp.port,
           withFrontEndClient,
           frontEndPort,
           sslCredentials: this.config.sslCredentials,
@@ -124,7 +125,20 @@ export default class PsychicServer {
   public async serveForRequestSpecs(block: () => void | Promise<void>) {
     const psychicApp = PsychicApplication.getOrFail()
     const port = psychicApp.port
-    if (!port) throw 'Missing `PORT` environment variable'
+    if (!port)
+      throw new Error(
+        `
+Missing port in your psychic app configuration.
+
+Please provide a value for "port" within your conf/app.ts file, like so:
+
+
+  // conf/app.ts
+  export default async (app: PsychicApplication) => {
+    app.set('port', parseInt(process.env.PORT!))
+  }
+`,
+      )
 
     await this.boot()
 

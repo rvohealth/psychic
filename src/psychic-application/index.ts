@@ -8,7 +8,7 @@ import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/i
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
-import envValue from '../helpers/envValue'
+import envValue, { envInt } from '../helpers/envValue'
 import { OpenapiContent, OpenapiHeaderOption, OpenapiResponses } from '../openapi-renderer/endpoint'
 import PsychicRouter from '../router'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache'
@@ -62,7 +62,7 @@ export default class PsychicApplication {
   public useRedis: boolean = false
   public appName: string = 'untitled app'
   public encryptionKey: string
-  public port?: number
+  public port: number = envInt('PORT') || 7777
   public corsOptions: CorsOptions = {}
   public jsonOptions: bodyParser.Options
   public cookieOptions: { maxAge: number }
