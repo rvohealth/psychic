@@ -137,8 +137,8 @@
                   },
                   "birthdate": {
                     "type": "string",
-                    "nullable": true,
-                    "format": "date"
+                    "format": "date",
+                    "nullable": true
                   },
                   "createdOn": {
                     "type": "string",
@@ -160,10 +160,10 @@
                   },
                   "favoriteBooleans": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "boolean"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteCitext": {
                     "type": "string",
@@ -178,11 +178,11 @@
                   },
                   "favoriteDates": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "string",
                       "format": "date"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteDatetimes": {
                     "type": "array",
@@ -194,10 +194,10 @@
                   },
                   "favoriteIntegers": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "integer"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteJsonbs": {
                     "type": "array",
@@ -449,8 +449,8 @@
                   },
                   "birthdate": {
                     "type": "string",
-                    "nullable": true,
-                    "format": "date"
+                    "format": "date",
+                    "nullable": true
                   },
                   "createdOn": {
                     "type": "string",
@@ -472,10 +472,10 @@
                   },
                   "favoriteBooleans": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "boolean"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteCitext": {
                     "type": "string",
@@ -490,11 +490,11 @@
                   },
                   "favoriteDates": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "string",
                       "format": "date"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteDatetimes": {
                     "type": "array",
@@ -506,10 +506,10 @@
                   },
                   "favoriteIntegers": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "integer"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteJsonbs": {
                     "type": "array",
@@ -940,8 +940,8 @@
                   },
                   "lastSeenAt": {
                     "type": "string",
-                    "nullable": true,
-                    "format": "date-time"
+                    "format": "date-time",
+                    "nullable": true
                   },
                   "likesTreats": {
                     "type": "boolean"
@@ -1072,8 +1072,8 @@
                   },
                   "lastSeenAt": {
                     "type": "string",
-                    "nullable": true,
-                    "format": "date-time"
+                    "format": "date-time",
+                    "nullable": true
                   },
                   "likesTreats": {
                     "type": "boolean"
@@ -1164,8 +1164,8 @@
                   },
                   "birthdate": {
                     "type": "string",
-                    "nullable": true,
-                    "format": "date"
+                    "format": "date",
+                    "nullable": true
                   },
                   "createdOn": {
                     "type": "string",
@@ -1187,10 +1187,10 @@
                   },
                   "favoriteBooleans": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "boolean"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteCitext": {
                     "type": "string",
@@ -1205,11 +1205,11 @@
                   },
                   "favoriteDates": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "string",
                       "format": "date"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteDatetimes": {
                     "type": "array",
@@ -1221,10 +1221,10 @@
                   },
                   "favoriteIntegers": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "integer"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteJsonbs": {
                     "type": "array",
@@ -1564,8 +1564,8 @@
                   },
                   "birthdate": {
                     "type": "string",
-                    "nullable": true,
-                    "format": "date"
+                    "format": "date",
+                    "nullable": true
                   },
                   "createdOn": {
                     "type": "string",
@@ -1587,10 +1587,10 @@
                   },
                   "favoriteBooleans": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "boolean"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteCitext": {
                     "type": "string",
@@ -1605,11 +1605,11 @@
                   },
                   "favoriteDates": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "string",
                       "format": "date"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteDatetimes": {
                     "type": "array",
@@ -1621,10 +1621,10 @@
                   },
                   "favoriteIntegers": {
                     "type": "array",
-                    "nullable": true,
                     "items": {
                       "type": "integer"
-                    }
+                    },
+                    "nullable": true
                   },
                   "favoriteJsonbs": {
                     "type": "array",

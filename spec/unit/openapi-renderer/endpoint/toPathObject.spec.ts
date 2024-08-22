@@ -499,7 +499,11 @@ describe('OpenapiEndpointRenderer', () => {
                           items: { type: 'string', format: 'date-time' },
                           nullable: true,
                         },
-                        favoriteIntegers: { type: 'array', items: { type: 'integer' }, nullable: true },
+                        favoriteIntegers: {
+                          type: 'array',
+                          items: { type: 'integer' },
+                          nullable: true,
+                        },
                         favoriteNumerics: {
                           type: 'array',
                           items: { type: 'number' },
@@ -518,15 +522,24 @@ describe('OpenapiEndpointRenderer', () => {
                         },
                         notes: { type: 'string', nullable: true },
                         passwordDigest: { type: 'string' },
-                        requiredFavoriteBooleans: { type: 'array', items: { type: 'boolean' } },
+                        requiredFavoriteBooleans: {
+                          items: { type: 'boolean' },
+                          type: 'array',
+                        },
                         requiredFavoriteCitext: { type: 'string' },
                         requiredFavoriteCitexts: { type: 'array', items: { type: 'string' } },
-                        requiredFavoriteDates: { type: 'array', items: { type: 'string', format: 'date' } },
+                        requiredFavoriteDates: {
+                          items: { type: 'string', format: 'date' },
+                          type: 'array',
+                        },
                         requiredFavoriteDatetimes: {
                           type: 'array',
                           items: { type: 'string', format: 'date-time' },
                         },
-                        requiredFavoriteIntegers: { type: 'array', items: { type: 'integer' } },
+                        requiredFavoriteIntegers: {
+                          items: { type: 'integer' },
+                          type: 'array',
+                        },
                         requiredFavoriteNumerics: { type: 'array', items: { type: 'number' } },
                         requiredFavoriteTexts: { type: 'array', items: { type: 'string' } },
                         requiredNicknames: { type: 'array', items: { type: 'string' } },

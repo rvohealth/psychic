@@ -525,15 +525,24 @@ export default class OpenapiEndpointRenderer<
 
       switch (columnMetadata?.dbType) {
         case 'boolean':
-        case 'boolean[]':
-        case 'date':
-        case 'date[]':
         case 'integer':
-        case 'integer[]':
           paramsShape.properties = {
             ...paramsShape.properties,
             [columnName]: {
               type: columnMetadata.dbType,
+            },
+          }
+          break
+
+        case 'boolean[]':
+        case 'integer[]':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: 'array',
+              items: {
+                type: columnMetadata.dbType.replace(/\[\]$/, ''),
+              },
             },
           }
           break
@@ -567,13 +576,37 @@ export default class OpenapiEndpointRenderer<
           }
           break
 
+        case 'date':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: 'string',
+              format: 'date',
+            },
+          }
+          break
+
+        case 'date[]':
+          paramsShape.properties = {
+            ...paramsShape.properties,
+            [columnName]: {
+              type: 'array',
+              items: {
+                type: 'string',
+                format: 'date',
+              },
+            },
+          }
+          break
+
         case 'timestamp':
         case 'timestamp with time zone':
         case 'timestamp without time zone':
           paramsShape.properties = {
             ...paramsShape.properties,
             [columnName]: {
-              type: 'date-time',
+              type: 'string',
+              format: 'date-time',
             },
           }
           break
@@ -586,7 +619,8 @@ export default class OpenapiEndpointRenderer<
             [columnName]: {
               type: 'array',
               items: {
-                type: 'date-time',
+                type: 'string',
+                format: 'date-time',
               },
             },
           }
