@@ -125,20 +125,6 @@ export default class PsychicServer {
   public async serveForRequestSpecs(block: () => void | Promise<void>) {
     const psychicApp = PsychicApplication.getOrFail()
     const port = psychicApp.port
-    if (!port)
-      throw new Error(
-        `
-Missing port in your psychic app configuration.
-
-Please provide a value for "port" within your conf/app.ts file, like so:
-
-
-  // conf/app.ts
-  export default async (app: PsychicApplication) => {
-    app.set('port', parseInt(process.env.PORT!))
-  }
-`,
-      )
 
     await this.boot()
 
