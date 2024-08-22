@@ -1,7 +1,11 @@
 import { GlobalNameNotSet } from '@rvohealth/dream'
-import background, { BackgroundQueuePriority } from '..'
+import background, { BackgroundQueuePriority } from './'
 
-export default class BaseBackgroundedService {
+export default class BackgroundedService {
+  public static get priority(): BackgroundQueuePriority {
+    return 'default' as const
+  }
+
   public static get globalName(): string {
     if (!this._globalName) throw new GlobalNameNotSet(this)
     return this._globalName
@@ -11,12 +15,6 @@ export default class BaseBackgroundedService {
     this._globalName = globalName
   }
   public static _globalName: string | undefined
-
-  public static get priority(): BackgroundQueuePriority {
-    throw new Error(
-      'Do not use BaseBackgroundedService directly. Instead, Use an inheriting class, like BackgroundedService, UrgentBackgroundedService, etc...',
-    )
-  }
 
   public static async background(
     methodName: string,
@@ -43,10 +41,10 @@ export default class BaseBackgroundedService {
     } = {},
   ) {
     return await background.instanceMethod(this.constructor, methodName, {
-      globalName: (this.constructor as typeof BaseBackgroundedService).globalName,
+      globalName: (this.constructor as typeof BackgroundedService).globalName,
       args,
       constructorArgs,
-      priority: (this.constructor as typeof BaseBackgroundedService).priority,
+      priority: (this.constructor as typeof BackgroundedService).priority,
     })
   }
 
@@ -78,11 +76,11 @@ export default class BaseBackgroundedService {
     } = {},
   ) {
     return await background.instanceMethod(this.constructor, methodName, {
-      globalName: (this.constructor as typeof BaseBackgroundedService).globalName,
+      globalName: (this.constructor as typeof BackgroundedService).globalName,
       delaySeconds,
       args,
       constructorArgs,
-      priority: (this.constructor as typeof BaseBackgroundedService).priority,
+      priority: (this.constructor as typeof BackgroundedService).priority,
     })
   }
 }

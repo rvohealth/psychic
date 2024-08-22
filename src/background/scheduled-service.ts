@@ -1,7 +1,11 @@
 import { GlobalNameNotSet } from '@rvohealth/dream'
-import background, { BackgroundQueuePriority } from '..'
+import background, { BackgroundQueuePriority } from '.'
 
-export default class BaseScheduledService {
+export default class ScheduledService {
+  public static get priority(): BackgroundQueuePriority {
+    return 'default' as const
+  }
+
   public static get globalName(): string {
     if (!this._globalName) throw new GlobalNameNotSet(this)
     return this._globalName
@@ -23,11 +27,5 @@ export default class BaseScheduledService {
       args,
       priority: this.priority,
     })
-  }
-
-  public static get priority(): BackgroundQueuePriority {
-    throw new Error(
-      'Do not use BaseScheduledService directly. Instead, Use an inheriting class, like ScheduledService, UrgentScheduledService, etc...',
-    )
   }
 }

@@ -1,9 +1,13 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { LastBackgroundedService } from '../../../src'
 import PsychicApplication from '../../../src/psychic-application'
+import { BackgroundedService } from '../../../src'
 
-export default class LastDummyService extends LastBackgroundedService {
+export default class LastDummyService extends BackgroundedService {
+  public static get priority() {
+    return 'last' as const
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static async classRunInBG(arg: any) {
     const psychicApp = PsychicApplication.getOrFail()
