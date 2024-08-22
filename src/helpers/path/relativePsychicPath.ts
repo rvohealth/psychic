@@ -1,8 +1,5 @@
 import { pascalize } from '@rvohealth/dream'
-import {
-  sharedPathPrefix,
-  standardizeFullyQualifiedModelName,
-} from '@rvohealth/dream/psychic-support-helpers'
+import { sharedPathPrefix, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
 import psychicPath, { PsychicPaths } from './psychicPath'
 
 export default function (

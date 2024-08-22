@@ -1,4 +1,4 @@
-import { standardizeFullyQualifiedModelName } from '@rvohealth/dream/psychic-support-helpers'
+import { standardizeFullyQualifiedModelName } from '@rvohealth/dream'
 import fs from 'fs/promises'
 import pluralize from 'pluralize'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths'
