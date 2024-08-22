@@ -375,6 +375,7 @@ export interface PsychicOpenapiOptions {
   schemaDelimeter?: string
   outputFilename?: `${string}.json`
   clientOutputFilename?: `${string}.ts`
+  suppressResponseEnums?: boolean
   defaults?: {
     headers?: OpenapiHeaderOption[]
     responses?: OpenapiResponses

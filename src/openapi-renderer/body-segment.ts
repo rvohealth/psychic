@@ -25,6 +25,7 @@ import {
 } from '@rvohealth/dream'
 import isBlankDescription from './helpers/isBlankDescription'
 import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 
 export default class OpenapiBodySegmentRenderer {
   private bodySegment: OpenapiBodySegment
@@ -32,6 +33,7 @@ export default class OpenapiBodySegmentRenderer {
   private schemaDelimeter: string
   private computedExtraComponents: { [key: string]: OpenapiSchemaObject } = {}
   private processedSchemas: Record<string, boolean>
+  private target: OpenapiBodyTarget
 
   /**
    * @internal
@@ -44,16 +46,19 @@ export default class OpenapiBodySegmentRenderer {
     serializers,
     schemaDelimeter,
     processedSchemas,
+    target,
   }: {
     bodySegment: OpenapiBodySegment
     serializers: { [key: string]: typeof DreamSerializer }
     schemaDelimeter: string
     processedSchemas: Record<string, boolean>
+    target: OpenapiBodyTarget
   }) {
     this.bodySegment = bodySegment
     this.serializers = serializers
     this.schemaDelimeter = schemaDelimeter
     this.processedSchemas = processedSchemas
+    this.target = target
   }
 
   /**
@@ -310,8 +315,40 @@ export default class OpenapiBodySegmentRenderer {
   private primitiveObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaPrimitiveGeneric {
     const objectBodySegment = bodySegment as OpenapiSchemaObject
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-    return this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(objectBodySegment as any)
+    return this.applyConfigurationOptions(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+      this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(objectBodySegment as any),
+    )
+  }
+
+  private applyConfigurationOptions<T>(obj: T): T {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+    const anyObj = obj as any
+    const psychicApp = getCachedPsychicApplicationOrFail()
+
+    if (typeof anyObj === 'object') {
+      if (
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        anyObj?.type === 'string' &&
+        this.target === 'response' &&
+        psychicApp.openapi?.suppressResponseEnums
+      ) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const enums = anyObj.enum as string[] | null
+
+        if (enums?.length) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          delete anyObj.enum
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          anyObj.description ||= `
+The following values will be allowed:
+  ${enums.join(',\n  ')}`
+        }
+      }
+    }
+
+    return anyObj as T
   }
 
   /**
@@ -344,6 +381,7 @@ export default class OpenapiBodySegmentRenderer {
         serializers: this.serializers,
         schemaDelimeter: this.schemaDelimeter,
         processedSchemas: this.processedSchemas,
+        target: this.target,
       }),
     }
 
@@ -519,3 +557,5 @@ export type OpenapiBodySegment =
   | OpenapiShorthandPrimitiveTypes
   | { description: string }
   | undefined
+
+export type OpenapiBodyTarget = 'request' | 'response'
