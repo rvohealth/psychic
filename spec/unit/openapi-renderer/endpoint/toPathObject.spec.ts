@@ -1,4 +1,5 @@
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
+import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
 import ApiPetsController from '../../../../test-app/app/controllers/Api/PetsController'
 import PetsController from '../../../../test-app/app/controllers/PetsController'
 import UsersController from '../../../../test-app/app/controllers/UsersController'
@@ -827,6 +828,45 @@ describe('OpenapiEndpointRenderer', () => {
               })
             })
 
+            context('suppressResponseEnums=true', () => {
+              beforeEach(() => {
+                const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
+                psychicApp.openapi.suppressResponseEnums = true
+
+                jest
+                  .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
+                  .mockReturnValue(psychicApp)
+              })
+
+              it('does not suppress enums for request bodies', async () => {
+                const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
+
+                const response = await renderer.toPathObject({})
+                expect(response['/pets'].post.requestBody).toEqual(
+                  expect.objectContaining({
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                          properties: expect.objectContaining({
+                            favoriteTreats: {
+                              type: 'array',
+                              items: {
+                                type: 'string',
+                                enum: ['efishy feesh', 'snick snowcks'],
+                              },
+                              nullable: true,
+                            },
+                          }),
+                        },
+                      },
+                    },
+                  }),
+                )
+              })
+            })
+
             context('requestBody is explicitly set to null', () => {
               it('does not provide requestBody', async () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
@@ -1587,6 +1627,50 @@ describe('OpenapiEndpointRenderer', () => {
               },
             }),
           )
+        })
+
+        context('suppressResponseEnums=true', () => {
+          beforeEach(() => {
+            const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
+            psychicApp.openapi.suppressResponseEnums = true
+
+            jest
+              .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
+              .mockReturnValue(psychicApp)
+          })
+
+          it('suppresses enums, instead using description to clarify enum options', async () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+              serializerKey: 'extra',
+              status: 201,
+              responses: {
+                201: {
+                  type: 'string',
+                  enum: ['hello', 'world'],
+                },
+              },
+            })
+
+            const response = await renderer.toPathObject({})
+            expect(response['/users/howyadoin'].get.responses).toEqual(
+              expect.objectContaining({
+                201: {
+                  description: 'howyadoin',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'string',
+                        description: `
+The following values will be allowed:
+  hello,
+  world`,
+                      },
+                    },
+                  },
+                },
+              }),
+            )
+          })
         })
       })
 
