@@ -1,12 +1,16 @@
 import fs from 'fs/promises'
 import path from 'path'
-import backgroundedService from '../../../src/background/backgrounded-service'
-import { getCachedPsychicApplicationOrFail } from '../../../src/psychic-application/cache'
+import { BackgroundedService } from '../../../src'
+import PsychicApplication from '../../../src/psychic-application'
 
-export default class NotUrgentDummyService extends backgroundedService('not_urgent') {
+export default class NotUrgentDummyService extends BackgroundedService {
+  public static get priority() {
+    return 'not_urgent' as const
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static async classRunInBG(arg: any) {
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     await fs.writeFile(path.join(psychicApp.apiRoot, 'spec/tmp.txt'), arg)
   }
@@ -27,7 +31,7 @@ export default class NotUrgentDummyService extends backgroundedService('not_urge
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public async instanceMethodToTest(a: any, b: any) {
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
     await fs.writeFile(path.join(psychicApp.apiRoot, 'spec/tmp.txt'), `${a},${b}`)
   }
 }

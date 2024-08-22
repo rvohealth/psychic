@@ -1,6 +1,5 @@
 node_modules
 .env*
-dist
 .dream
 logs/!.gitignore
 test-app/logs/*
@@ -9,3 +8,4 @@ test-app/logs/*
 test-app/.psy/*
 spec/tmp.txt
 .vim/*
+dist

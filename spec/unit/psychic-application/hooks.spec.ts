@@ -1,5 +1,4 @@
 import PsychicApplication from '../../../src/psychic-application'
-import { getCachedPsychicApplicationOrFail } from '../../../src/psychic-application/cache'
 import { PsychicHookEventType } from '../../../src/psychic-application/types'
 
 describe('PsychicApplication hooks', () => {
@@ -7,7 +6,7 @@ describe('PsychicApplication hooks', () => {
 
   beforeEach(() => {
     process.env.__PSYCHIC_HOOKS_TEST_CACHE = ''
-    config = getCachedPsychicApplicationOrFail()
+    config = PsychicApplication.getOrFail()
   })
 
   function expectHookCalled(hookEventType: PsychicHookEventType) {

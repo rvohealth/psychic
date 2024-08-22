@@ -1,3 +1,7 @@
-import scheduledService from '../../../src/scheduled/scheduled-service'
+import { ScheduledService } from '../../../src'
 
-export default class LastDummyScheduledService extends scheduledService('last') {}
+export default class LastDummyScheduledService extends ScheduledService {
+  public static get priority() {
+    return 'last' as const
+  }
+}

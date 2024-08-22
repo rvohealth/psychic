@@ -190,4 +190,5 @@ jobs:
         run: yarn list
 
       - run: yarn install --frozen-lockfile
+      - run: yarn build
       - run: yarn build:core

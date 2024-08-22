@@ -1,4 +1,4 @@
-import { OpenapiSchemaBody } from '@rvohealth/dream'
+import { DreamApplication, OpenapiSchemaBody } from '@rvohealth/dream'
 import bodyParser from 'body-parser'
 import { QueueOptions } from 'bullmq'
 import { CorsOptions } from 'cors'
@@ -8,26 +8,48 @@ import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/i
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
-import envValue from '../helpers/envValue'
+import envValue, { envInt } from '../helpers/envValue'
 import { OpenapiContent, OpenapiHeaderOption, OpenapiResponses } from '../openapi-renderer/endpoint'
 import PsychicRouter from '../router'
-import { cachePsychicApplication } from './cache'
+import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache'
 import loadControllers, { getControllersOrFail } from './helpers/loadControllers'
 import { PsychicRedisConnectionOptions } from './helpers/redisOptions'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
+import * as OpenApiValidator from 'express-openapi-validator'
 
 export default class PsychicApplication {
-  public static async init(cb: (app: PsychicApplication) => void | Promise<void>) {
-    const psychicApp = new PsychicApplication()
-    await cb(psychicApp)
+  public static async init(
+    cb: (app: PsychicApplication) => void | Promise<void>,
+    dreamCb: (app: DreamApplication) => void | Promise<void>,
+  ) {
+    let psychicApp: PsychicApplication
 
-    if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
-    if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
-    if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
+    await DreamApplication.init(dreamCb, {}, async dreamApp => {
+      psychicApp = new PsychicApplication()
+      await cb(psychicApp)
 
-    await psychicApp.inflections?.()
-    cachePsychicApplication(psychicApp)
-    return psychicApp
+      if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
+      if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
+      if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
+
+      await psychicApp.inflections?.()
+
+      dreamApp.set('projectRoot', psychicApp.apiRoot)
+
+      cachePsychicApplication(psychicApp)
+    })
+
+    return psychicApp!
+  }
+
+  /**
+   * Returns the cached psychic application if it has been set.
+   * If it has not been set, an exception is raised.
+   *
+   * The psychic application can be set by calling PsychicApplication#init
+   */
+  public static getOrFail() {
+    return getCachedPsychicApplicationOrFail()
   }
 
   public static async loadControllers(controllersPath: string) {
@@ -41,7 +63,7 @@ export default class PsychicApplication {
   public useRedis: boolean = false
   public appName: string = 'untitled app'
   public encryptionKey: string
-  public port?: number
+  public port: number = envInt('PORT') || 7777
   public corsOptions: CorsOptions = {}
   public jsonOptions: bodyParser.Options
   public cookieOptions: { maxAge: number }
@@ -202,13 +224,15 @@ export default class PsychicApplication {
                             ? PsychicOpenapiOptions
                             : Opt extends 'paths'
                               ? PsychicPathOptions
-                              : Opt extends 'saltRounds'
+                              : Opt extends 'port'
                                 ? number
-                                : Opt extends 'inflections'
-                                  ? () => void | Promise<void>
-                                  : Opt extends 'routes'
-                                    ? (r: PsychicRouter) => void | Promise<void>
-                                    : never,
+                                : Opt extends 'saltRounds'
+                                  ? number
+                                  : Opt extends 'inflections'
+                                    ? () => void | Promise<void>
+                                    : Opt extends 'routes'
+                                      ? (r: PsychicRouter) => void | Promise<void>
+                                      : never,
   ) {
     switch (option) {
       case 'apiRoot':
@@ -268,6 +292,10 @@ export default class PsychicApplication {
         this.sslCredentials = { ...this.sslCredentials, ...(value as PsychicSslCredentials) }
         break
 
+      case 'port':
+        this.port = value as number
+        break
+
       case 'saltRounds':
         this.saltRounds = value as number
         break
@@ -301,22 +329,23 @@ export default class PsychicApplication {
 
 export type PsychicApplicationOption =
   | 'apiRoot'
-  | 'clientRoot'
-  | 'cors'
-  | 'cookie'
-  | 'json'
-  | 'client'
   | 'background:queue'
   | 'background:worker'
-  | 'redis:background'
-  | 'redis:ws'
-  | 'ssl'
-  | 'saltRounds'
+  | 'client'
+  | 'clientRoot'
+  | 'controllers'
+  | 'cookie'
+  | 'cors'
+  | 'inflections'
+  | 'json'
   | 'openapi'
   | 'paths'
-  | 'controllers'
-  | 'inflections'
+  | 'port'
+  | 'redis:background'
+  | 'redis:ws'
   | 'routes'
+  | 'saltRounds'
+  | 'ssl'
 
 export interface PsychicApplicationSpecialHooks {
   expressInit: ((app: Application) => void | Promise<void>)[]
@@ -347,6 +376,8 @@ export interface PsychicOpenapiOptions {
   schemaDelimeter?: string
   outputFilename?: `${string}.json`
   clientOutputFilename?: `${string}.ts`
+  suppressResponseEnums?: boolean
+  validation?: Partial<Parameters<(typeof OpenApiValidator)['middleware']>[0]>
   defaults?: {
     headers?: OpenapiHeaderOption[]
     responses?: OpenapiResponses

@@ -1,4 +1,5 @@
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
+import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
 import ApiPetsController from '../../../../test-app/app/controllers/Api/PetsController'
 import PetsController from '../../../../test-app/app/controllers/PetsController'
 import UsersController from '../../../../test-app/app/controllers/UsersController'
@@ -478,23 +479,27 @@ describe('OpenapiEndpointRenderer', () => {
                       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                       properties: expect.objectContaining({
                         bio: { type: 'string' },
-                        birthdate: { type: 'date', nullable: true },
-                        createdOn: { type: 'date' },
+                        birthdate: { type: 'string', format: 'date', nullable: true },
+                        createdOn: { type: 'string', format: 'date' },
                         email: { type: 'string' },
-                        favoriteBooleans: { type: 'boolean[]', nullable: true },
+                        favoriteBooleans: { type: 'array', items: { type: 'boolean' }, nullable: true },
                         favoriteCitext: { type: 'string', nullable: true },
                         favoriteCitexts: {
                           type: 'array',
                           items: { type: 'string' },
                           nullable: true,
                         },
-                        favoriteDates: { type: 'date[]', nullable: true },
-                        favoriteDatetimes: {
+                        favoriteDates: {
                           type: 'array',
-                          items: { type: 'date-time' },
+                          items: { type: 'string', format: 'date' },
                           nullable: true,
                         },
-                        favoriteIntegers: { type: 'integer[]', nullable: true },
+                        favoriteDatetimes: {
+                          type: 'array',
+                          items: { type: 'string', format: 'date-time' },
+                          nullable: true,
+                        },
+                        favoriteIntegers: { type: 'array', items: { type: 'integer' }, nullable: true },
                         favoriteNumerics: {
                           type: 'array',
                           items: { type: 'number' },
@@ -513,12 +518,15 @@ describe('OpenapiEndpointRenderer', () => {
                         },
                         notes: { type: 'string', nullable: true },
                         passwordDigest: { type: 'string' },
-                        requiredFavoriteBooleans: { type: 'boolean[]' },
+                        requiredFavoriteBooleans: { type: 'array', items: { type: 'boolean' } },
                         requiredFavoriteCitext: { type: 'string' },
                         requiredFavoriteCitexts: { type: 'array', items: { type: 'string' } },
-                        requiredFavoriteDates: { type: 'date[]' },
-                        requiredFavoriteDatetimes: { type: 'array', items: { type: 'date-time' } },
-                        requiredFavoriteIntegers: { type: 'integer[]' },
+                        requiredFavoriteDates: { type: 'array', items: { type: 'string', format: 'date' } },
+                        requiredFavoriteDatetimes: {
+                          type: 'array',
+                          items: { type: 'string', format: 'date-time' },
+                        },
+                        requiredFavoriteIntegers: { type: 'array', items: { type: 'integer' } },
                         requiredFavoriteNumerics: { type: 'array', items: { type: 'number' } },
                         requiredFavoriteTexts: { type: 'array', items: { type: 'string' } },
                         requiredNicknames: { type: 'array', items: { type: 'string' } },
@@ -799,6 +807,45 @@ describe('OpenapiEndpointRenderer', () => {
               })
 
               it('renders enum[] as array with string with enum option', async () => {
+                const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
+
+                const response = await renderer.toPathObject({})
+                expect(response['/pets'].post.requestBody).toEqual(
+                  expect.objectContaining({
+                    content: {
+                      'application/json': {
+                        schema: {
+                          type: 'object',
+                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                          properties: expect.objectContaining({
+                            favoriteTreats: {
+                              type: 'array',
+                              items: {
+                                type: 'string',
+                                enum: ['efishy feesh', 'snick snowcks'],
+                              },
+                              nullable: true,
+                            },
+                          }),
+                        },
+                      },
+                    },
+                  }),
+                )
+              })
+            })
+
+            context('suppressResponseEnums=true', () => {
+              beforeEach(() => {
+                const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
+                psychicApp.openapi.suppressResponseEnums = true
+
+                jest
+                  .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
+                  .mockReturnValue(psychicApp)
+              })
+
+              it('does not suppress enums for request bodies', async () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
                 const response = await renderer.toPathObject({})
@@ -1587,6 +1634,50 @@ describe('OpenapiEndpointRenderer', () => {
               },
             }),
           )
+        })
+
+        context('suppressResponseEnums=true', () => {
+          beforeEach(() => {
+            const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
+            psychicApp.openapi.suppressResponseEnums = true
+
+            jest
+              .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
+              .mockReturnValue(psychicApp)
+          })
+
+          it('suppresses enums, instead using description to clarify enum options', async () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+              serializerKey: 'extra',
+              status: 201,
+              responses: {
+                201: {
+                  type: 'string',
+                  enum: ['hello', 'world'],
+                },
+              },
+            })
+
+            const response = await renderer.toPathObject({})
+            expect(response['/users/howyadoin'].get.responses).toEqual(
+              expect.objectContaining({
+                201: {
+                  description: 'howyadoin',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'string',
+                        description: `
+The following values will be allowed:
+  hello,
+  world`,
+                      },
+                    },
+                  },
+                },
+              }),
+            )
+          })
         })
       })
 

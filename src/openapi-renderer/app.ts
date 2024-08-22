@@ -4,7 +4,7 @@ import path from 'path'
 import PsychicController from '../controller'
 import { envBool } from '../helpers/envValue'
 import openapiJsonPath from '../helpers/openapiJsonPath'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import PsychicApplication from '../psychic-application'
 import { HttpMethod, HttpMethods } from '../router/types'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults'
 import { OpenapiSchema } from './endpoint'
@@ -33,7 +33,7 @@ export default class OpenapiAppRenderer {
    */
   public static async toObject(): Promise<OpenapiSchema> {
     const processedSchemas: Record<string, boolean> = {}
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
     const controllers = psychicApp.controllers
     const packageJsonPath = path.join(psychicApp.apiRoot, 'package.json')
 

@@ -4,6 +4,7 @@ import PsychicApplicationInitMissingApiRoot from '../../../src/error/psychic-app
 import PsychicApplicationInitMissingCallToLoadControllers from '../../../src/error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../../../src/error/psychic-application/init-missing-routes-callback'
 import * as LoadControllersModule from '../../../src/psychic-application/helpers/loadControllers'
+import dreamCb from '../../../test-app/conf/dream'
 
 describe('DreamApplication#init', () => {
   beforeEach(() => {
@@ -19,7 +20,7 @@ describe('DreamApplication#init', () => {
         await app.load('controllers', 'how/yadoin')
       }
 
-      await expect(PsychicApplication.init(cb)).resolves.not.toThrow()
+      await expect(PsychicApplication.init(cb, dreamCb)).resolves.not.toThrow()
     })
   })
 
@@ -31,7 +32,7 @@ describe('DreamApplication#init', () => {
           app.set('routes', () => {})
         }
 
-        await expect(PsychicApplication.init(cb)).rejects.toThrow(
+        await expect(PsychicApplication.init(cb, dreamCb)).rejects.toThrow(
           PsychicApplicationInitMissingCallToLoadControllers,
         )
       })
@@ -44,7 +45,9 @@ describe('DreamApplication#init', () => {
           app.set('routes', () => {})
         }
 
-        await expect(PsychicApplication.init(cb)).rejects.toThrow(PsychicApplicationInitMissingApiRoot)
+        await expect(PsychicApplication.init(cb, dreamCb)).rejects.toThrow(
+          PsychicApplicationInitMissingApiRoot,
+        )
       })
     })
 
@@ -55,7 +58,9 @@ describe('DreamApplication#init', () => {
           await app.load('controllers', 'how/yadoin')
         }
 
-        await expect(PsychicApplication.init(cb)).rejects.toThrow(PsychicApplicationInitMissingRoutesCallback)
+        await expect(PsychicApplication.init(cb, dreamCb)).rejects.toThrow(
+          PsychicApplicationInitMissingRoutesCallback,
+        )
       })
     })
   })

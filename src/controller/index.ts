@@ -1,12 +1,11 @@
 import {
   Dream,
+  DreamApplication,
   DreamParamSafeAttributes,
   DreamSerializer,
   GlobalNameNotSet,
-  getCachedDreamApplicationOrFail,
 } from '@rvohealth/dream'
 import { Request, Response } from 'express'
-import background from '../background'
 import { ControllerHook } from '../controller/hooks'
 import BadRequest from '../error/http/bad-request'
 import Conflict from '../error/http/conflict'
@@ -149,43 +148,6 @@ export default class PsychicController {
   }
 
   /**
-   * given a static method on this controller, it will call this method
-   * in a background worker.
-   *
-   * @param args - a list of arguments to send into the method you are calling in the background.
-   */
-  public static async background(
-    methodName: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...args: any[]
-  ) {
-    return await background.staticMethod(this, methodName, {
-      globalName: this.globalName,
-      args,
-    })
-  }
-
-  /**
-   * given a static method on this controller, it will call this method
-   * in a background worker, waiting the specified number of delaySeconds
-   * before doing so.
-   *
-   * @param args - a list of arguments to send into the method you are calling in the background.
-   */
-  public static async backgroundWithDelay(
-    delaySeconds: number,
-    methodName: string,
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...args: any[]
-  ) {
-    return await background.staticMethod(this, methodName, {
-      delaySeconds,
-      globalName: this.globalName,
-      args,
-    })
-  }
-
-  /**
    * @internal
    *
    * Used internally as a helpful distinguisher between controllers
@@ -322,7 +284,7 @@ export default class PsychicController {
 
   private singleObjectJson<T>(data: T, opts: RenderOptions<T>): T | SerializerResult {
     if (!data) return data
-    const dreamApp = getCachedDreamApplicationOrFail()
+    const dreamApp = DreamApplication.getOrFail()
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)

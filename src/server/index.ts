@@ -1,14 +1,15 @@
 import { closeAllDbConnections } from '@rvohealth/dream'
 import cookieParser from 'cookie-parser'
 import cors from 'cors'
-import express, { Application } from 'express'
+import express, { Application, Request, Response } from 'express'
+import * as OpenApiValidator from 'express-openapi-validator'
 import { Server } from 'http'
+import path from 'path'
 import { stopBackgroundWorkers } from '../background'
 import Cable from '../cable'
 import { envBool } from '../helpers/envValue'
-import portValue from '../helpers/portValue'
+import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError'
 import PsychicApplication from '../psychic-application'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import PsychicRouter from '../router'
 import FrontEndClientServer from './front-end-client'
 import startPsychicServer from './helpers/startPsychicServer'
@@ -16,18 +17,20 @@ import startPsychicServer from './helpers/startPsychicServer'
 export default class PsychicServer {
   public app: Application
   public cable: Cable
-  public config: PsychicApplication
   public frontEndClient: FrontEndClientServer
   public server: Server
   private booted = false
   constructor() {
     this.buildApp()
-    this.config = getCachedPsychicApplicationOrFail()
+  }
+
+  public get config() {
+    return PsychicApplication.getOrFail()
   }
 
   public async routes() {
     const r = new PsychicRouter(this.app, this.config)
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
     await psychicApp.routesCb(r)
     return r.routes
   }
@@ -55,6 +58,8 @@ export default class PsychicServer {
       await expressInitHook(this.app)
     }
 
+    this.initializeOpenapiValidation()
+
     await this.buildRoutes()
 
     for (const afterRoutesHook of this.config.specialHooks['after:routes']) {
@@ -69,7 +74,7 @@ export default class PsychicServer {
 
   // TODO: use config helper for fetching default port
   public async start(
-    port = portValue(),
+    port?: number,
     {
       withFrontEndClient = envBool('CLIENT'),
       frontEndPort = 3000,
@@ -96,9 +101,11 @@ export default class PsychicServer {
       this.server = this.cable.http
     } else {
       await new Promise(accept => {
+        const psychicApp = PsychicApplication.getOrFail()
+
         startPsychicServer({
           app: this.app,
-          port,
+          port: port || psychicApp.port,
           withFrontEndClient,
           frontEndPort,
           sslCredentials: this.config.sslCredentials,
@@ -121,8 +128,8 @@ export default class PsychicServer {
   }
 
   public async serveForRequestSpecs(block: () => void | Promise<void>) {
-    const port = process.env.PORT
-    if (!port) throw 'Missing `PORT` environment variable'
+    const psychicApp = PsychicApplication.getOrFail()
+    const port = psychicApp.port
 
     await this.boot()
 
@@ -153,9 +160,37 @@ export default class PsychicServer {
     this.app.use(express.json(this.config.jsonOptions))
   }
 
+  private initializeOpenapiValidation() {
+    const psychicApp = PsychicApplication.getOrFail()
+    if (psychicApp.openapi?.validation) {
+      const opts = psychicApp.openapi?.validation
+      opts.apiSpec ||= path.join(psychicApp.apiRoot, 'openapi.json')
+      this.app.use(OpenApiValidator.middleware(opts as Required<typeof opts>))
+
+      this.app.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
+        if (isOpenapiError(err)) {
+          if (envBool('DEBUG')) {
+            console.log(JSON.stringify(err))
+            console.trace()
+          }
+
+          res.status(err.status).json({
+            message: err.message,
+            errors: err.errors,
+          })
+        } else {
+          if (envBool('DEBUG')) {
+            console.error(err)
+          }
+          next()
+        }
+      })
+    }
+  }
+
   private async buildRoutes() {
     const r = new PsychicRouter(this.app, this.config)
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
     await psychicApp.routesCb(r)
     r.commit()
   }

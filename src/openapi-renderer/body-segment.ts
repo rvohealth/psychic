@@ -17,12 +17,13 @@ import {
   OpenapiSchemaShorthandExpressionAnyOf,
   OpenapiSchemaShorthandExpressionOneOf,
   OpenapiSchemaShorthandExpressionSerializerRef,
+  OpenapiSchemaShorthandPrimitiveGeneric,
   OpenapiShorthandPrimitiveTypes,
   SerializableTypes,
   compact,
-  openapiPrimitiveTypes,
   openapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream'
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import isBlankDescription from './helpers/isBlankDescription'
 import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
 
@@ -32,6 +33,7 @@ export default class OpenapiBodySegmentRenderer {
   private schemaDelimeter: string
   private computedExtraComponents: { [key: string]: OpenapiSchemaObject } = {}
   private processedSchemas: Record<string, boolean>
+  private target: OpenapiBodyTarget
 
   /**
    * @internal
@@ -44,16 +46,19 @@ export default class OpenapiBodySegmentRenderer {
     serializers,
     schemaDelimeter,
     processedSchemas,
+    target,
   }: {
     bodySegment: OpenapiBodySegment
     serializers: { [key: string]: typeof DreamSerializer }
     schemaDelimeter: string
     processedSchemas: Record<string, boolean>
+    target: OpenapiBodyTarget
   }) {
     this.bodySegment = bodySegment
     this.serializers = serializers
     this.schemaDelimeter = schemaDelimeter
     this.processedSchemas = processedSchemas
+    this.target = target
   }
 
   /**
@@ -149,7 +154,8 @@ export default class OpenapiBodySegmentRenderer {
 
       if (typeof bodySegment === 'object') {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-        if (openapiPrimitiveTypes.includes((bodySegment as any).type)) return 'openapi_primitive_object'
+        if (openapiShorthandPrimitiveTypes.includes((bodySegment as any).type))
+          return 'openapi_primitive_object'
       }
 
       if (typeof bodySegment === 'object') return 'unknown_object'
@@ -308,10 +314,92 @@ export default class OpenapiBodySegmentRenderer {
    * recursively parses a primitive object type (i.e. { type: 'string[]' })
    */
   private primitiveObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaPrimitiveGeneric {
-    const objectBodySegment = bodySegment as OpenapiSchemaObject
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
+    if (/\[\]$/.test((bodySegment as any).type)) {
+      return this.applyConfigurationOptions(
+        this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+          this.expandShorthandArray(bodySegment as OpenapiSchemaShorthandPrimitiveGeneric) as any,
+        ),
+      )
+    } else {
+      return this.applyConfigurationOptions(
+        this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+          this.expandType(bodySegment as OpenapiSchemaShorthandPrimitiveGeneric) as any,
+        ),
+      )
+    }
+  }
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-    return this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(objectBodySegment as any)
+  private expandShorthandArray(bodySegment: OpenapiSchemaShorthandPrimitiveGeneric) {
+    const retObj: OpenapiSchemaArray = {
+      ...bodySegment,
+      type: 'array',
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      items: this.expandType({
+        // ...bodySegment,
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+        type: bodySegment.type.replace(/\[\]$/, '') as any,
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      }) as any,
+    }
+
+    if (bodySegment.nullable) {
+      retObj.nullable = true
+    }
+
+    return retObj
+  }
+
+  private expandType(bodySegment: OpenapiSchemaShorthandPrimitiveGeneric) {
+    switch (bodySegment.type) {
+      case 'decimal':
+      case 'double':
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        ;(bodySegment as any).format = bodySegment.type
+        bodySegment.type = 'number'
+        break
+
+      case 'date':
+      case 'date-time':
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        ;(bodySegment as any).format = bodySegment.type
+        bodySegment.type = 'string'
+        break
+    }
+
+    return bodySegment
+  }
+
+  private applyConfigurationOptions<T>(obj: T): T {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+    const anyObj = obj as any
+    const psychicApp = getCachedPsychicApplicationOrFail()
+
+    if (typeof anyObj === 'object') {
+      if (
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        anyObj?.type === 'string' &&
+        this.target === 'response' &&
+        psychicApp.openapi?.suppressResponseEnums
+      ) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+        const enums = anyObj.enum as string[] | null
+
+        if (enums?.length) {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          delete anyObj.enum
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
+          anyObj.description ||= `
+The following values will be allowed:
+  ${enums.join(',\n  ')}`
+        }
+      }
+    }
+
+    return anyObj as T
   }
 
   /**
@@ -344,6 +432,7 @@ export default class OpenapiBodySegmentRenderer {
         serializers: this.serializers,
         schemaDelimeter: this.schemaDelimeter,
         processedSchemas: this.processedSchemas,
+        target: this.target,
       }),
     }
 
@@ -519,3 +608,5 @@ export type OpenapiBodySegment =
   | OpenapiShorthandPrimitiveTypes
   | { description: string }
   | undefined
+
+export type OpenapiBodyTarget = 'request' | 'response'

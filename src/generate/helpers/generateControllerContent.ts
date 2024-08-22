@@ -1,6 +1,8 @@
 import { camelize } from '@rvohealth/dream'
-import globalClassNameFromFullyQualifiedModelName from '@rvohealth/dream/src/helpers/globalClassNameFromFullyQualifiedModelName'
-import standardizeFullyQualifiedModelName from '@rvohealth/dream/src/helpers/standardizeFullyQualifiedModelName'
+import {
+  globalClassNameFromFullyQualifiedModelName,
+  standardizeFullyQualifiedModelName,
+} from '@rvohealth/dream'
 import pluralize from 'pluralize'
 import relativePsychicPath from '../../helpers/path/relativePsychicPath'
 

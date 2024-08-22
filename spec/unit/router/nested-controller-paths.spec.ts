@@ -1,4 +1,4 @@
-import { specRequest as request } from '../../../spec-helpers'
+import request from '../../../spec-helpers/spec-request'
 
 describe('PsychicRouter', () => {
   beforeEach(async () => {

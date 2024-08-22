@@ -1,8 +1,7 @@
-import { PsychicApplication } from '../../../src'
-import psychicConfCb from '../../conf/app'
-import initializeDreamApplication from './initializeDreamApplication'
+import { PsychicApplication } from '@rvohealth/psychic'
+import psychicCb from '../../conf/app'
+import dreamCb from '../../conf/app'
 
 export default async function initializePsychicApplication() {
-  await initializeDreamApplication()
-  return await PsychicApplication.init(psychicConfCb)
+  return await PsychicApplication.init(psychicCb, dreamCb)
 }

@@ -3,7 +3,6 @@ import path from 'node:path'
 import inflections from './inflections'
 
 export default async function configureDream(app: DreamApplication) {
-  app.set('projectRoot', path.join(__dirname, '..', '..'))
   app.set('primaryKeyType', 'bigserial')
   app.set('inflections', inflections)
 

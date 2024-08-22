@@ -1,5 +1,5 @@
-import OpenapiAppRenderer from '../../../src/openapi-renderer/app'
 import packageJson from '../../../package.json'
+import OpenapiAppRenderer from '../../../src/openapi-renderer/app'
 
 describe('OpenapiAppRenderer', () => {
   describe('.buildOpenapiObject', () => {
@@ -80,8 +80,8 @@ describe('OpenapiAppRenderer', () => {
                     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                     properties: expect.objectContaining({
                       bio: { type: 'string' },
-                      birthdate: { type: 'date', nullable: true },
-                      createdOn: { type: 'date' },
+                      birthdate: { type: 'string', format: 'date', nullable: true },
+                      createdOn: { type: 'string', format: 'date' },
                       email: { type: 'string' },
                       favoriteBigint: { type: 'string', nullable: true },
                       favoriteBigints: {

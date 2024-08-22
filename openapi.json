@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "version": "0.6.3",
+    "version": "0.7.0-fgnewbeta-2",
     "title": "@rvohealth/psychic",
     "description": "Typescript web framework"
   },
@@ -136,11 +136,13 @@
                     "type": "string"
                   },
                   "birthdate": {
-                    "type": "date",
-                    "nullable": true
+                    "type": "string",
+                    "nullable": true,
+                    "format": "date"
                   },
                   "createdOn": {
-                    "type": "date"
+                    "type": "string",
+                    "format": "date"
                   },
                   "email": {
                     "type": "string"
@@ -157,8 +159,11 @@
                     "nullable": true
                   },
                   "favoriteBooleans": {
-                    "type": "boolean[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "boolean"
+                    }
                   },
                   "favoriteCitext": {
                     "type": "string",
@@ -172,19 +177,27 @@
                     "nullable": true
                   },
                   "favoriteDates": {
-                    "type": "date[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
                   },
                   "favoriteDatetimes": {
                     "type": "array",
                     "items": {
-                      "type": "date-time"
+                      "type": "string",
+                      "format": "date-time"
                     },
                     "nullable": true
                   },
                   "favoriteIntegers": {
-                    "type": "integer[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "integer"
+                    }
                   },
                   "favoriteJsonbs": {
                     "type": "array",
@@ -261,7 +274,10 @@
                     }
                   },
                   "requiredFavoriteBooleans": {
-                    "type": "boolean[]"
+                    "type": "array",
+                    "items": {
+                      "type": "boolean"
+                    }
                   },
                   "requiredFavoriteCitext": {
                     "type": "string"
@@ -273,16 +289,24 @@
                     }
                   },
                   "requiredFavoriteDates": {
-                    "type": "date[]"
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
                   },
                   "requiredFavoriteDatetimes": {
                     "type": "array",
                     "items": {
-                      "type": "date-time"
+                      "type": "string",
+                      "format": "date-time"
                     }
                   },
                   "requiredFavoriteIntegers": {
-                    "type": "integer[]"
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
                   },
                   "requiredFavoriteJsonbs": {
                     "type": "array",
@@ -424,11 +448,13 @@
                     "type": "string"
                   },
                   "birthdate": {
-                    "type": "date",
-                    "nullable": true
+                    "type": "string",
+                    "nullable": true,
+                    "format": "date"
                   },
                   "createdOn": {
-                    "type": "date"
+                    "type": "string",
+                    "format": "date"
                   },
                   "email": {
                     "type": "string"
@@ -445,8 +471,11 @@
                     "nullable": true
                   },
                   "favoriteBooleans": {
-                    "type": "boolean[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "boolean"
+                    }
                   },
                   "favoriteCitext": {
                     "type": "string",
@@ -460,19 +489,27 @@
                     "nullable": true
                   },
                   "favoriteDates": {
-                    "type": "date[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
                   },
                   "favoriteDatetimes": {
                     "type": "array",
                     "items": {
-                      "type": "date-time"
+                      "type": "string",
+                      "format": "date-time"
                     },
                     "nullable": true
                   },
                   "favoriteIntegers": {
-                    "type": "integer[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "integer"
+                    }
                   },
                   "favoriteJsonbs": {
                     "type": "array",
@@ -549,7 +586,10 @@
                     }
                   },
                   "requiredFavoriteBooleans": {
-                    "type": "boolean[]"
+                    "type": "array",
+                    "items": {
+                      "type": "boolean"
+                    }
                   },
                   "requiredFavoriteCitext": {
                     "type": "string"
@@ -561,16 +601,24 @@
                     }
                   },
                   "requiredFavoriteDates": {
-                    "type": "date[]"
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
                   },
                   "requiredFavoriteDatetimes": {
                     "type": "array",
                     "items": {
-                      "type": "date-time"
+                      "type": "string",
+                      "format": "date-time"
                     }
                   },
                   "requiredFavoriteIntegers": {
-                    "type": "integer[]"
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
                   },
                   "requiredFavoriteJsonbs": {
                     "type": "array",
@@ -783,6 +831,66 @@
         }
       }
     },
+    "/openapi-validation-test": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": true,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "howyadoin": {
+                    "type": "string",
+                    "nullable": true
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "no content"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/pets": {
       "parameters": [
         {
@@ -827,11 +935,13 @@
                     "nullable": true
                   },
                   "lastHeardAt": {
-                    "type": "date-time"
+                    "type": "string",
+                    "format": "date-time"
                   },
                   "lastSeenAt": {
-                    "type": "date-time",
-                    "nullable": true
+                    "type": "string",
+                    "nullable": true,
+                    "format": "date-time"
                   },
                   "likesTreats": {
                     "type": "boolean"
@@ -957,11 +1067,13 @@
                     "nullable": true
                   },
                   "lastHeardAt": {
-                    "type": "date-time"
+                    "type": "string",
+                    "format": "date-time"
                   },
                   "lastSeenAt": {
-                    "type": "date-time",
-                    "nullable": true
+                    "type": "string",
+                    "nullable": true,
+                    "format": "date-time"
                   },
                   "likesTreats": {
                     "type": "boolean"
@@ -1051,11 +1163,13 @@
                     "type": "string"
                   },
                   "birthdate": {
-                    "type": "date",
-                    "nullable": true
+                    "type": "string",
+                    "nullable": true,
+                    "format": "date"
                   },
                   "createdOn": {
-                    "type": "date"
+                    "type": "string",
+                    "format": "date"
                   },
                   "email": {
                     "type": "string"
@@ -1072,8 +1186,11 @@
                     "nullable": true
                   },
                   "favoriteBooleans": {
-                    "type": "boolean[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "boolean"
+                    }
                   },
                   "favoriteCitext": {
                     "type": "string",
@@ -1087,19 +1204,27 @@
                     "nullable": true
                   },
                   "favoriteDates": {
-                    "type": "date[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
                   },
                   "favoriteDatetimes": {
                     "type": "array",
                     "items": {
-                      "type": "date-time"
+                      "type": "string",
+                      "format": "date-time"
                     },
                     "nullable": true
                   },
                   "favoriteIntegers": {
-                    "type": "integer[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "integer"
+                    }
                   },
                   "favoriteJsonbs": {
                     "type": "array",
@@ -1176,7 +1301,10 @@
                     }
                   },
                   "requiredFavoriteBooleans": {
-                    "type": "boolean[]"
+                    "type": "array",
+                    "items": {
+                      "type": "boolean"
+                    }
                   },
                   "requiredFavoriteCitext": {
                     "type": "string"
@@ -1188,16 +1316,24 @@
                     }
                   },
                   "requiredFavoriteDates": {
-                    "type": "date[]"
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
                   },
                   "requiredFavoriteDatetimes": {
                     "type": "array",
                     "items": {
-                      "type": "date-time"
+                      "type": "string",
+                      "format": "date-time"
                     }
                   },
                   "requiredFavoriteIntegers": {
-                    "type": "integer[]"
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
                   },
                   "requiredFavoriteJsonbs": {
                     "type": "array",
@@ -1427,11 +1563,13 @@
                     "type": "string"
                   },
                   "birthdate": {
-                    "type": "date",
-                    "nullable": true
+                    "type": "string",
+                    "nullable": true,
+                    "format": "date"
                   },
                   "createdOn": {
-                    "type": "date"
+                    "type": "string",
+                    "format": "date"
                   },
                   "email": {
                     "type": "string"
@@ -1448,8 +1586,11 @@
                     "nullable": true
                   },
                   "favoriteBooleans": {
-                    "type": "boolean[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "boolean"
+                    }
                   },
                   "favoriteCitext": {
                     "type": "string",
@@ -1463,19 +1604,27 @@
                     "nullable": true
                   },
                   "favoriteDates": {
-                    "type": "date[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
                   },
                   "favoriteDatetimes": {
                     "type": "array",
                     "items": {
-                      "type": "date-time"
+                      "type": "string",
+                      "format": "date-time"
                     },
                     "nullable": true
                   },
                   "favoriteIntegers": {
-                    "type": "integer[]",
-                    "nullable": true
+                    "type": "array",
+                    "nullable": true,
+                    "items": {
+                      "type": "integer"
+                    }
                   },
                   "favoriteJsonbs": {
                     "type": "array",
@@ -1552,7 +1701,10 @@
                     }
                   },
                   "requiredFavoriteBooleans": {
-                    "type": "boolean[]"
+                    "type": "array",
+                    "items": {
+                      "type": "boolean"
+                    }
                   },
                   "requiredFavoriteCitext": {
                     "type": "string"
@@ -1564,16 +1716,24 @@
                     }
                   },
                   "requiredFavoriteDates": {
-                    "type": "date[]"
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
                   },
                   "requiredFavoriteDatetimes": {
                     "type": "array",
                     "items": {
-                      "type": "date-time"
+                      "type": "string",
+                      "format": "date-time"
                     }
                   },
                   "requiredFavoriteIntegers": {
-                    "type": "integer[]"
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
                   },
                   "requiredFavoriteJsonbs": {
                     "type": "array",

@@ -1,3 +1,3 @@
-import scheduledService from '../../../src/scheduled/scheduled-service'
+import ScheduledService from '../../../src/background/scheduled-service'
 
-export default class DefaultDummyScheduledService extends scheduledService('default') {}
+export default class DefaultDummyScheduledService extends ScheduledService {}

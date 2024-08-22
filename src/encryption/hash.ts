@@ -1,10 +1,10 @@
 import { testEnv } from '@rvohealth/dream'
 import bcrypt from 'bcrypt'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
+import PsychicApplication from '../psychic-application'
 
 export default class Hash {
   public static get saltRounds() {
-    const psychicApp = getCachedPsychicApplicationOrFail()
+    const psychicApp = PsychicApplication.getOrFail()
     return psychicApp.saltRounds || (testEnv() ? 4 : 11)
   }
 

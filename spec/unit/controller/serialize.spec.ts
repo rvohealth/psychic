@@ -1,5 +1,5 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { Attribute, DreamSerializer } from '@rvohealth/dream'
+import { Attribute, DreamApplication, DreamSerializer } from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller'
 import { BeforeAction } from '../../../src/controller/decorators'
@@ -10,7 +10,6 @@ import UserSerializer, {
   UserExtraSerializer,
   UserSummarySerializer,
 } from '../../../test-app/app/serializers/UserSerializer'
-import * as DreamModule from '@rvohealth/dream'
 
 describe('PsychicController', () => {
   describe('#serialize', () => {
@@ -31,13 +30,13 @@ describe('PsychicController', () => {
         public email: string
       }
 
-      const dreamApp = DreamModule.getCachedDreamApplicationOrFail()
+      const dreamApp = DreamApplication.getOrFail()
       jest.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
         ...dreamApp.serializers,
         MySerializer,
       })
 
-      jest.spyOn(DreamModule, 'getCachedDreamApplicationOrFail').mockReturnValue(dreamApp)
+      jest.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
 
       class MyController extends PsychicController {
         static {
@@ -131,14 +130,14 @@ describe('PsychicController', () => {
         }
 
         beforeEach(() => {
-          const dreamApp = DreamModule.getCachedDreamApplicationOrFail()
+          const dreamApp = DreamApplication.getOrFail()
           jest.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
             ...dreamApp.serializers,
             GreetSerializer,
             GreetSerializer2,
           })
 
-          jest.spyOn(DreamModule, 'getCachedDreamApplicationOrFail').mockReturnValue(dreamApp)
+          jest.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
         })
 
         it('identifies serializer attached to model class and uses it to serialize the object', () => {
@@ -224,7 +223,7 @@ describe('PsychicController', () => {
 
       beforeEach(async () => {
         user2 = await User2.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
-        const dreamApp = DreamModule.getCachedDreamApplicationOrFail()
+        const dreamApp = DreamApplication.getOrFail()
         jest.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
           ...dreamApp.serializers,
           User2Serializer,
@@ -232,7 +231,7 @@ describe('PsychicController', () => {
           User2ExtraSerializer,
         })
 
-        jest.spyOn(DreamModule, 'getCachedDreamApplicationOrFail').mockReturnValue(dreamApp)
+        jest.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
       })
 
       it('passes the passthrough data through to the child serializers', async () => {

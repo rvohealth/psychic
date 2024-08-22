@@ -1,9 +1,10 @@
 import _pluralize from 'pluralize'
 export const pluralize = _pluralize
 
-export { default as developmentOrTestEnv } from '../boot/cli/helpers/developmentOrTestEnv'
+export { default as developmentOrTestEnv } from './helpers/cli/developmentOrTestEnv'
 export { default as background, stopBackgroundWorkers } from './background'
-export { default as backgroundedService } from './background/backgrounded-service'
+export { default as BackgroundedService } from './background/backgrounded-service'
+export { default as ScheduledService } from './background/scheduled-service'
 export { default as PsychicBin } from './bin'
 export { default as Ws } from './cable/ws'
 export { default as PsychicController, PsychicParamsDictionary, PsychicParamsPrimitive } from './controller'
@@ -35,12 +36,10 @@ export {
   OpenapiPathParamOption as OpenapiUriOption,
 } from './openapi-renderer/endpoint'
 export { default as PsychicApplication, PsychicOpenapiOptions } from './psychic-application'
-export { getCachedPsychicApplicationOrFail } from './psychic-application/cache'
 export { PsychicRedisConnectionOptions } from './psychic-application/helpers/redisOptions'
 export { UUID } from './psychic-application/types'
 export { default as PsychicRouter } from './router'
 export { HttpMethod } from './router/types'
-export { default as scheduledService } from './scheduled/scheduled-service'
 export { default as PsychicServer } from './server'
 export { getPsychicHttpInstance } from './server/helpers/startPsychicServer'
 export { default as Params } from './server/params'

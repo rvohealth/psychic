@@ -1,8 +1,7 @@
 import { PsychicApplication } from '../../../src'
 import psychicConfCb from '../../conf/app'
-import initializeDreamApplication from './initializeDreamApplication'
+import dreamCb from '../../conf/dream'
 
 export default async function initializePsychicApplication() {
-  await initializeDreamApplication()
-  return await PsychicApplication.init(psychicConfCb)
+  return await PsychicApplication.init(psychicConfCb, dreamCb)
 }

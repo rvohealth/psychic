@@ -21,6 +21,7 @@ export default async (psy: PsychicApplication) => {
   await psy.load('controllers', path.join(__dirname, '..', 'app', 'controllers'))
 
   psy.set('apiRoot', path.join(__dirname, '..', '..'))
+  psy.set('clientRoot', path.join(__dirname, '..', '..', '..', 'client'))
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
 
