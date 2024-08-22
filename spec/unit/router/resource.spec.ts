@@ -1,4 +1,4 @@
-import { specRequest as request } from '../../../spec-helpers'
+import request from '../../../spec-helpers/spec-request'
 import PsychicRouter from '../../../src/router'
 import PsychicServer from '../../../src/server'
 

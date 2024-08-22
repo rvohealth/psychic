@@ -1,7 +1,8 @@
 import '@rvohealth/dream/spec-helpers'
+
 import background from '../src/background'
 import PsychicServer from '../src/server'
-import _specRequest from './spec-request'
+import _specRequest from '../spec-helpers/spec-request'
 
 export { SpecRequest } from './spec-request'
 

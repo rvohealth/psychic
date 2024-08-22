@@ -1,6 +1,6 @@
 import { Socket } from 'socket.io'
 import { io } from 'socket.io-client'
-import { specRequest as request } from '../../../spec-helpers'
+import request from '../../../spec-helpers/spec-request'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
 import initializePsychicApplication from '../../../test-app/cli/helpers/initializePsychicApplication'

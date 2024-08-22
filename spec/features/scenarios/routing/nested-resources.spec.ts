@@ -1,4 +1,4 @@
-import { specRequest as request } from '../../../../spec-helpers'
+import request from '../../../../spec-helpers/spec-request'
 
 describe('a visitor attempts to hit a route at a nested resource', () => {
   beforeEach(async () => {
