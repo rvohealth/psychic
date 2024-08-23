@@ -37,7 +37,7 @@ describe('OpenapiAppRenderer', () => {
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             responses: expect.objectContaining({
               '200': {
-                description: 'justforspecs',
+                description: 'Success',
                 content: {
                   'application/json': {
                     schema: {
@@ -105,7 +105,7 @@ describe('OpenapiAppRenderer', () => {
                     },
                   },
                 },
-                description: 'create',
+                description: 'Created',
               },
             }),
           },
@@ -129,7 +129,7 @@ describe('OpenapiAppRenderer', () => {
                     },
                   },
                 },
-                description: 'index',
+                description: 'Success',
               },
             }),
           },
@@ -157,7 +157,7 @@ describe('OpenapiAppRenderer', () => {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               responses: expect.objectContaining({
                 '200': {
-                  description: 'show',
+                  description: 'Success',
                   content: {
                     'application/json': { schema: { $ref: '#/components/schemas/UserWithPosts' } },
                   },
@@ -169,7 +169,7 @@ describe('OpenapiAppRenderer', () => {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               responses: expect.objectContaining({
                 '204': {
-                  description: 'no content',
+                  description: 'Success, no content',
                 },
               }),
               tags: [],

@@ -18,13 +18,13 @@ import {
   compact,
 } from '@rvohealth/dream'
 import PsychicController from '../controller'
+import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes'
 import PsychicApplication from '../psychic-application'
 import { RouteConfig } from '../router/route-manager'
 import { HttpMethod } from '../router/types'
 import PsychicServer from '../server'
 import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment'
 import { DEFAULT_OPENAPI_RESPONSES } from './defaults'
-import isBlankDescription from './helpers/isBlankDescription'
 import openapiRoute from './helpers/openapiRoute'
 import OpenapiSerializerRenderer from './serializer'
 
@@ -704,75 +704,50 @@ export default class OpenapiEndpointRenderer<
       ...defaultResponses,
     }
 
-    const computedStatus = this.status || this.defaultStatus
+    const computedStatus: HttpStatusCodeNumber = this.status || this.defaultStatus
 
     if (this.status === 204) {
       responseData = {
         ...responseData,
         204: {
+          description: this.defaultResponseDescription(computedStatus),
           $ref: '#/components/responses/NoContent',
         },
       }
-      responseData = this.applyDefaultResponseOptions(responseData, computedStatus)
     } else if (!this.responses?.['200'] && !this.responses?.['201'] && !this.responses?.['204']) {
       responseData = {
         ...responseData,
-        [computedStatus]: this.parseSerializerResponseShape(),
+        [computedStatus]: {
+          ...this.parseSerializerResponseShape(),
+          description: this.defaultResponseDescription(computedStatus),
+        },
       }
-      responseData = this.applyDefaultResponseOptions(responseData, computedStatus)
     }
 
     Object.keys(this.responses || {}).forEach(statusCode => {
-      const statusCodeInt = parseInt(statusCode)
+      const statusCodeInt: HttpStatusCodeNumber = parseInt(statusCode) as HttpStatusCodeNumber
       const response = this.responses![statusCodeInt] as OpenapiSchemaBodyShorthand & { description?: string }
-      responseData[statusCodeInt] = {}
+      responseData[statusCodeInt] ||= { description: statusDescription(statusCodeInt) } as OpenapiContent
+      const statusResponse: OpenapiContent = responseData[statusCodeInt] as OpenapiContent
 
-      if (statusCodeInt === computedStatus) {
-        responseData = this.applyDefaultResponseOptions(responseData, statusCodeInt)
-      }
-
-      if (!(responseData[statusCodeInt] as { description: string }).description && response.description) {
-        ;(responseData[statusCodeInt] as { description: string }).description = response.description!
-      } else {
-        // this is not necessarily the best, but if there is no description provided,
-        // the openapi document is invalid. This is here to stop that from happening,
-        // though it is a stop gap for a better solution.
-        ;(responseData[statusCodeInt] as { description: string }).description = this.action
-      }
-
-      if (isBlankDescription(this.responses![statusCodeInt])) {
-        ;(responseData[statusCodeInt] as OpenapiContent) = {
-          ...this.responses![statusCodeInt],
-        }
-      } else {
-        ;(responseData[statusCodeInt] as OpenapiContent).content = {
-          'application/json': {
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            schema: this.recursivelyParseBody(
-              this.responses![statusCodeInt],
-              processedSchemas,
-              { target: 'response' },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            ) as any,
-          },
-        }
+      statusResponse.content = {
+        'application/json': {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          schema: this.recursivelyParseBody(
+            response,
+            processedSchemas,
+            { target: 'response' },
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          ) as any,
+        },
       }
     })
 
     return responseData
   }
 
-  private applyDefaultResponseOptions<T extends OpenapiResponses>(responseData: T, statusCodeInt: number): T {
-    // if (this.summary) {
-    //   // responseData[statusCodeInt].summary = this.summary
-    // }
-
-    if (this.defaultResponse?.description) {
-      ;(responseData[statusCodeInt] as { description: string }).description =
-        this.defaultResponse?.description
-    }
-
-    return responseData
+  private defaultResponseDescription(statusCodeInt: HttpStatusCodeNumber) {
+    return this.defaultResponse?.description || statusDescription(statusCodeInt)
   }
 
   /**
@@ -1046,14 +1021,14 @@ export interface OpenapiEndpointRendererOpts<
   tags?: string[]
   description?: string
   summary?: string
-  responses?: {
-    [statusCode: number]: (OpenapiSchemaBodyShorthand & { description?: string }) | { description: string }
-  }
+  responses?: Partial<
+    Record<HttpStatusCode, (OpenapiSchemaBodyShorthand & { description?: string }) | { description: string }>
+  >
   defaultResponse?: OpenapiEndpointRendererDefaultResponseOption
   serializerKey?: InstanceType<NonArrayT> extends { serializers: { [key: string]: typeof DreamSerializer } }
     ? keyof InstanceType<NonArrayT>['serializers' & keyof InstanceType<NonArrayT>]
     : undefined
-  status?: number
+  status?: HttpStatusCodeNumber
   nullable?: boolean
   omitDefaultHeaders?: boolean
   omitDefaultResponses?: boolean
@@ -1164,4 +1139,119 @@ export type OpenapiContent = {
     }
   }
   description?: string
+}
+
+function statusDescription(status: HttpStatusCodeNumber | HttpStatusCode) {
+  switch (status) {
+    case 200:
+    case '200':
+      return 'Success'
+
+    case 201:
+    case '201':
+      return 'Created'
+
+    case 202:
+    case '202':
+      return 'Accepted'
+
+    case 203:
+    case '203':
+      return 'Non authoritative information'
+
+    case 204:
+    case '204':
+      return 'Success, no content'
+
+    case 205:
+    case '205':
+      return 'Reset content'
+
+    case 206:
+    case '206':
+      return 'Partial content'
+
+    case 301:
+    case '301':
+      return 'Moved permanently'
+
+    case 302:
+    case '302':
+      return 'Found'
+
+    case 304:
+    case '304':
+      return 'Not modified'
+
+    case 400:
+    case '400':
+      return 'Bad request'
+
+    case 401:
+    case '401':
+      return 'Unauthorized'
+
+    case 402:
+    case '402':
+      return 'Payment required'
+
+    case 403:
+    case '403':
+      return 'Forbidden'
+
+    case 404:
+    case '404':
+      return 'Not found'
+
+    case 408:
+    case '408':
+      return 'Request timeout'
+
+    case 409:
+    case '409':
+      return 'Conflict'
+
+    case 412:
+    case '412':
+      return 'Precondition failed'
+
+    case 413:
+    case '413':
+      return 'Payload too large'
+
+    case 415:
+    case '415':
+      return 'Unsupported media type'
+
+    case 422:
+    case '422':
+      return 'Unprocessable entity'
+
+    case 423:
+    case '423':
+      return 'Locked'
+
+    case 424:
+    case '424':
+      return 'Failed dependency'
+
+    case 426:
+    case '426':
+      return 'Upgrade required'
+
+    case 428:
+    case '428':
+      return 'Precondition required'
+
+    case 429:
+    case '429':
+      return 'Too many requests'
+
+    case 451:
+    case '451':
+      return 'Unavailable for legal reasons'
+
+    default:
+      return `Status ${status}`
+  }
 }

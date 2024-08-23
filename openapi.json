@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "version": "0.7.0-fgnewbeta-2",
+    "version": "0.7.1",
     "title": "@rvohealth/psychic",
     "description": "Typescript web framework"
   },
@@ -29,7 +29,7 @@
                 }
               }
             },
-            "description": "create"
+            "description": "Created"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -83,6 +83,7 @@
         "tags": [],
         "responses": {
           "204": {
+            "description": "Success, no content",
             "$ref": "#/components/responses/NoContent"
           },
           "400": {
@@ -386,6 +387,7 @@
         },
         "responses": {
           "204": {
+            "description": "Success, no content",
             "$ref": "#/components/responses/NoContent"
           },
           "400": {
@@ -698,6 +700,7 @@
         },
         "responses": {
           "204": {
+            "description": "Success, no content",
             "$ref": "#/components/responses/NoContent"
           },
           "400": {
@@ -750,7 +753,7 @@
                 }
               }
             },
-            "description": "hello"
+            "description": "Success"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -795,7 +798,7 @@
         "tags": [],
         "responses": {
           "200": {
-            "description": "justforspecs",
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
@@ -862,7 +865,7 @@
         },
         "responses": {
           "204": {
-            "description": "no content"
+            "description": "Success, no content"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -985,7 +988,7 @@
                 }
               }
             },
-            "description": "create"
+            "description": "Created"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -1110,6 +1113,7 @@
         },
         "responses": {
           "204": {
+            "description": "Success, no content",
             "$ref": "#/components/responses/NoContent"
           },
           "400": {
@@ -1420,7 +1424,7 @@
                 }
               }
             },
-            "description": "create"
+            "description": "Created"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -1462,7 +1466,7 @@
                 }
               }
             },
-            "description": "index"
+            "description": "Success"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -1523,7 +1527,7 @@
                 }
               }
             },
-            "description": "show"
+            "description": "Success"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -1820,7 +1824,7 @@
                 }
               }
             },
-            "description": "update"
+            "description": "Success"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -1852,7 +1856,7 @@
         "tags": [],
         "responses": {
           "204": {
-            "description": "no content"
+            "description": "Success, no content"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"

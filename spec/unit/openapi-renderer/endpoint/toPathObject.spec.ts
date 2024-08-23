@@ -70,7 +70,7 @@ describe('OpenapiEndpointRenderer', () => {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 responses: expect.objectContaining({
                   '200': {
-                    description: 'show',
+                    description: 'Success',
                     content: {
                       'application/json': { schema: { $ref: '#/components/schemas/User' } },
                     },
@@ -1007,6 +1007,7 @@ describe('OpenapiEndpointRenderer', () => {
           const response = await renderer.toPathObject({})
           expect(response['/users/howyadoin'].get.responses['200']).toBeUndefined()
           expect(response['/users/howyadoin'].get.responses['204']).toEqual({
+            description: 'Success, no content',
             $ref: '#/components/responses/NoContent',
           })
         })
@@ -1056,7 +1057,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
-                description: 'howyadoin',
+                description: 'Success',
                 content: {
                   'application/json': {
                     schema: {
@@ -1080,7 +1081,7 @@ describe('OpenapiEndpointRenderer', () => {
             expect(response['/users/howyadoin'].get.responses).toEqual(
               expect.objectContaining({
                 200: {
-                  description: 'howyadoin',
+                  description: 'Success',
                   content: {
                     'application/json': {
                       schema: {
@@ -1108,7 +1109,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
-                description: 'howyadoin',
+                description: 'Success',
                 content: {
                   'application/json': {
                     schema: {
@@ -1138,7 +1139,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
-                description: 'howyadoin',
+                description: 'Success',
                 content: {
                   'application/json': {
                     schema: {
@@ -1160,6 +1161,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
+                description: 'Success',
                 content: {
                   'application/json': {
                     schema: {
@@ -1194,6 +1196,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
+                description: 'Success',
                 content: {
                   'application/json': {
                     schema: {
@@ -1220,7 +1223,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'extra',
             responses: {
               201: {
-                description: 'howyadoin',
+                description: 'Created',
                 allOf: [
                   {
                     type: 'object',
@@ -1241,7 +1244,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
-                description: 'howyadoin',
+                description: 'Created',
                 content: {
                   'application/json': {
                     schema: {
@@ -1275,7 +1278,7 @@ describe('OpenapiEndpointRenderer', () => {
               serializerKey: 'extra',
               responses: {
                 201: {
-                  description: 'howyadoin',
+                  description: 'Created',
                   allOf: [
                     {
                       type: 'string',
@@ -1293,7 +1296,7 @@ describe('OpenapiEndpointRenderer', () => {
             expect(response['/users/howyadoin'].get.responses).toEqual(
               expect.objectContaining({
                 201: {
-                  description: 'howyadoin',
+                  description: 'Created',
                   content: {
                     'application/json': {
                       schema: {
@@ -1326,7 +1329,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'extra',
             responses: {
               201: {
-                description: 'chalupas for life',
+                description: 'Created',
                 anyOf: [
                   {
                     type: 'object',
@@ -1347,7 +1350,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
-                description: 'chalupas for life',
+                description: 'Created',
                 content: {
                   'application/json': {
                     schema: {
@@ -1382,7 +1385,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'extra',
             responses: {
               201: {
-                description: 'howyadoin',
+                description: 'Created',
                 oneOf: [
                   {
                     type: 'object',
@@ -1403,7 +1406,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
-                description: 'howyadoin',
+                description: 'Created',
                 content: {
                   'application/json': {
                     schema: {
@@ -1438,7 +1441,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'extra',
             responses: {
               201: {
-                description: 'howyadoin',
+                description: 'Created',
                 oneOf: [
                   {
                     $ref: 'components/schemas/Howyadoin',
@@ -1455,7 +1458,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
-                description: 'howyadoin',
+                description: 'Created',
                 content: {
                   'application/json': {
                     schema: {
@@ -1492,7 +1495,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
-                description: 'howyadoin',
+                description: 'Created',
                 content: {
                   'application/json': {
                     schema: {
@@ -1542,7 +1545,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
-                description: 'my description',
+                description: 'Created',
                 content: {
                   'application/json': {
                     schema: {
@@ -1576,7 +1579,7 @@ describe('OpenapiEndpointRenderer', () => {
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
-                description: 'howyadoin',
+                description: 'Created',
                 content: {
                   'application/json': {
                     schema: {
@@ -1616,7 +1619,7 @@ describe('OpenapiEndpointRenderer', () => {
             expect(response['/users/howyadoin'].get.responses).toEqual(
               expect.objectContaining({
                 201: {
-                  description: 'howyadoin',
+                  description: 'Created',
                   content: {
                     'application/json': {
                       schema: {
@@ -1646,7 +1649,7 @@ The following values will be allowed:
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
-                description: 'howyadoin',
+                description: 'Success',
                 content: {
                   'application/json': {
                     schema: {
@@ -1703,7 +1706,7 @@ The following values will be allowed:
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
-                description: 'howyadoin',
+                description: 'Created',
                 content: {
                   'application/json': {
                     schema: {
