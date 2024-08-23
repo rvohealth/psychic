@@ -69,7 +69,7 @@ export default class OpenapiSerializerRenderer {
     attributes.forEach(attr => {
       serializerObject.required!.push(attr.field)
 
-      const { results, extraComponents } = this.recursivelyParseBody({ renderAs: attr.renderAs })
+      const { results, extraComponents } = this.recursivelyParseBody({ openApiShape: attr.openApiShape })
 
       componentsSchema = { ...componentsSchema, ...extraComponents }
 
@@ -87,9 +87,13 @@ export default class OpenapiSerializerRenderer {
     return { ...serializerPayload, ...componentsSchema }
   }
 
-  private recursivelyParseBody({ renderAs }: { renderAs?: SerializableTypes }): OpenapiEndpointParseResults {
+  private recursivelyParseBody({
+    openApiShape,
+  }: {
+    openApiShape?: SerializableTypes
+  }): OpenapiEndpointParseResults {
     return new OpenapiBodySegmentRenderer({
-      bodySegment: renderAs,
+      bodySegment: openApiShape,
       serializers: this.serializers,
       schemaDelimeter: this.schemaDelimeter,
       processedSchemas: this.processedSchemas,

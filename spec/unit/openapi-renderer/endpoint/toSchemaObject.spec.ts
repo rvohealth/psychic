@@ -44,10 +44,11 @@ describe('OpenapiEndpointRenderer', () => {
           required: ['id', 'nicknames', 'howyadoin'],
           properties: {
             id: {
-              type: 'string',
+              type: 'integer',
             },
             nicknames: {
               type: 'array',
+              nullable: true,
               items: {
                 type: 'string',
               },
@@ -797,16 +798,16 @@ The following values will be allowed:
               required: ['id', 'name'],
               properties: {
                 id: { type: 'string' },
-                name: { type: 'object' },
+                name: { type: 'string', nullable: true },
               },
             },
             User: {
               type: 'object',
               required: ['id', 'email', 'name'],
               properties: {
-                id: { type: 'string' },
+                id: { type: 'integer' },
                 email: { type: 'string' },
-                name: { type: 'string' },
+                name: { type: 'string', nullable: true },
               },
             },
           }),
@@ -834,9 +835,9 @@ The following values will be allowed:
                 type: 'object',
                 required: ['id', 'email', 'name'],
                 properties: {
-                  id: { type: 'string' },
+                  id: { type: 'integer' },
                   email: { type: 'string' },
-                  name: { type: 'string' },
+                  name: { type: 'string', nullable: true },
                 },
               },
             }),
@@ -856,7 +857,7 @@ The following values will be allowed:
                   type: 'object',
                   required: ['id', 'recentPost'],
                   properties: {
-                    id: { type: 'string' },
+                    id: { type: 'integer' },
                     recentPost: {
                       allOf: [{ $ref: '#/components/schemas/PostWithRecentComment' }, { nullable: true }],
                     },
@@ -881,7 +882,7 @@ The following values will be allowed:
                   required: ['id', 'body'],
                   properties: {
                     id: { type: 'string' },
-                    body: { type: 'string' },
+                    body: { type: 'string', nullable: true },
                   },
                 },
               }),
@@ -904,7 +905,7 @@ The following values will be allowed:
                 required: ['id', 'body', 'comments'],
                 properties: {
                   id: { type: 'string' },
-                  body: { type: 'string' },
+                  body: { type: 'string', nullable: true },
                   comments: { type: 'array', items: { $ref: '#/components/schemas/Comment' } },
                 },
               },
@@ -913,7 +914,7 @@ The following values will be allowed:
                 required: ['id', 'body'],
                 properties: {
                   id: { type: 'string' },
-                  body: { type: 'string' },
+                  body: { type: 'string', nullable: true },
                 },
               },
             }),
@@ -934,7 +935,7 @@ The following values will be allowed:
                   required: ['id', 'body'],
                   properties: {
                     id: { type: 'string' },
-                    body: { type: 'string' },
+                    body: { type: 'string', nullable: true },
                   },
                 },
               }),
@@ -959,7 +960,7 @@ The following values will be allowed:
                 type: 'object',
                 required: ['id', 'posts'],
                 properties: {
-                  id: { type: 'string' },
+                  id: { type: 'integer' },
                   posts: {
                     anyOf: [
                       {

@@ -187,10 +187,11 @@ describe('OpenapiAppRenderer', () => {
               required: ['id', 'nicknames', 'howyadoin'],
               properties: {
                 id: {
-                  type: 'string',
+                  type: 'integer',
                 },
                 nicknames: {
                   type: 'array',
+                  nullable: true,
                   items: {
                     type: 'string',
                   },
@@ -231,7 +232,7 @@ describe('OpenapiAppRenderer', () => {
               type: 'object',
               required: ['id', 'posts'],
               properties: {
-                id: { type: 'string' },
+                id: { type: 'integer' },
                 posts: {
                   type: 'array',
                   items: { $ref: '#/components/schemas/PostWithComments' },
@@ -244,7 +245,7 @@ describe('OpenapiAppRenderer', () => {
               required: ['id', 'body', 'comments'],
               properties: {
                 id: { type: 'string' },
-                body: { type: 'string' },
+                body: { type: 'string', nullable: true },
                 comments: {
                   type: 'array',
                   items: { $ref: '#/components/schemas/Comment' },
@@ -257,7 +258,7 @@ describe('OpenapiAppRenderer', () => {
               required: ['id', 'body'],
               properties: {
                 id: { type: 'string' },
-                body: { type: 'string' },
+                body: { type: 'string', nullable: true },
               },
             },
 

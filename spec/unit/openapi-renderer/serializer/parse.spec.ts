@@ -261,7 +261,7 @@ describe('OpenapiSerializerRenderer', () => {
               required: ['id', 'body', 'comments'],
               properties: {
                 id: { type: 'string' },
-                body: { type: 'string' },
+                body: { type: 'string', nullable: true },
                 comments: {
                   type: 'array',
                   items: { $ref: '#/components/schemas/Comment' },
@@ -271,7 +271,7 @@ describe('OpenapiSerializerRenderer', () => {
             Comment: {
               type: 'object',
               required: ['id', 'body'],
-              properties: { id: { type: 'string' }, body: { type: 'string' } },
+              properties: { id: { type: 'string' }, body: { type: 'string', nullable: true } },
             },
           })
         })
@@ -284,10 +284,10 @@ describe('OpenapiSerializerRenderer', () => {
               type: 'object',
               required: ['body', 'id', 'email', 'name'],
               properties: {
-                body: { type: 'string' },
-                id: { type: 'string' },
+                body: { type: 'string', nullable: true },
+                id: { type: 'integer' },
                 email: { type: 'string' },
-                name: { type: 'string' },
+                name: { type: 'string', nullable: true },
               },
             },
           })
