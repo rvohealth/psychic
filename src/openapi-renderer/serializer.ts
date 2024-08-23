@@ -222,15 +222,17 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
         break
     }
 
-    const associatedSchema = new OpenapiSerializerRenderer({
-      serializerClass: associatedSerializer,
-      serializers: this.serializers,
-      schemaDelimeter: this.schemaDelimeter,
-      processedSchemas: this.processedSchemas,
-      target: this.target,
-    }).parse()
+    if (!association.flatten) {
+      const associatedSchema = new OpenapiSerializerRenderer({
+        serializerClass: associatedSerializer,
+        serializers: this.serializers,
+        schemaDelimeter: this.schemaDelimeter,
+        processedSchemas: this.processedSchemas,
+        target: this.target,
+      }).parse()
 
-    finalOutput = { ...finalOutput, ...associatedSchema }
+      finalOutput = { ...finalOutput, ...associatedSchema }
+    }
 
     return finalOutput
   }
@@ -256,7 +258,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
       serializerClass: associatedSerializer,
       serializers: this.serializers,
       schemaDelimeter: this.schemaDelimeter,
-      processedSchemas: this.processedSchemas,
+      processedSchemas: {},
       target: this.target,
     }).parse()
 

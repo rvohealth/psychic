@@ -1976,11 +1976,24 @@
       "Hello": {
         "type": "object",
         "required": [
-          "world"
+          "world",
+          "id",
+          "email",
+          "name"
         ],
         "properties": {
           "world": {
             "$ref": "#/components/schemas/World"
+          },
+          "id": {
+            "type": "integer"
+          },
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string",
+            "nullable": true
           }
         }
       },
