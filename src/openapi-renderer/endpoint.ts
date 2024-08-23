@@ -26,7 +26,7 @@ import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment'
 import { DEFAULT_OPENAPI_RESPONSES } from './defaults'
 import isBlankDescription from './helpers/isBlankDescription'
 import openapiRoute from './helpers/openapiRoute'
-import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
+import OpenapiSerializerRenderer from './serializer'
 
 export default class OpenapiEndpointRenderer<
   DreamsOrSerializersOrViewModels extends
@@ -182,13 +182,13 @@ export default class OpenapiEndpointRenderer<
     ;(serializerClasses || ([] as (typeof DreamSerializer)[])).forEach(serializerClass => {
       output = {
         ...output,
-        ...serializerToOpenapiSchema({
+        ...new OpenapiSerializerRenderer({
           serializerClass,
           schemaDelimeter: this.schemaDelimeter,
           serializers: this.serializers,
           processedSchemas,
           target: 'response',
-        }),
+        }).parse(),
       }
     })
 

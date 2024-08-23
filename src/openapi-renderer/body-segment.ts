@@ -25,7 +25,7 @@ import {
 } from '@rvohealth/dream'
 import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import isBlankDescription from './helpers/isBlankDescription'
-import serializerToOpenapiSchema from './helpers/serializerToOpenapiSchema'
+import OpenapiSerializerRenderer from './serializer'
 
 export default class OpenapiBodySegmentRenderer {
   private bodySegment: OpenapiBodySegment
@@ -427,13 +427,13 @@ The following values will be allowed:
 
     this.computedExtraComponents = {
       ...this.computedExtraComponents,
-      ...serializerToOpenapiSchema({
+      ...new OpenapiSerializerRenderer({
         serializerClass: serializerRefBodySegment.$serializer,
         serializers: this.serializers,
         schemaDelimeter: this.schemaDelimeter,
         processedSchemas: this.processedSchemas,
         target: this.target,
-      }),
+      }).parse(),
     }
 
     if (serializerRefBodySegment.many) {
