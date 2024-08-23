@@ -215,6 +215,10 @@ export default class OpenapiBodySegmentRenderer {
       data.nullable = true
     }
 
+    if ((bodySegment as OpenapiSchemaArray).description) {
+      data.description = (bodySegment as OpenapiSchemaArray).description
+    }
+
     return data
   }
 

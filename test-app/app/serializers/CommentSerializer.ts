@@ -1,5 +1,6 @@
-import { Attribute, DreamColumn, DreamSerializer } from '@rvohealth/dream'
+import { Attribute, DreamColumn, DreamSerializer, RendersOne } from '@rvohealth/dream'
 import Comment from '../models/Comment'
+import User from '../models/User'
 
 export class CommentSummarySerializer<
   DataType extends Comment,
@@ -15,6 +16,14 @@ export default class CommentSerializer<
 > extends CommentSummarySerializer<DataType, Passthrough> {
   @Attribute('string')
   public body: DreamColumn<Comment, 'body'>
+}
+
+export class CommentWithFlattenedUserSerializer extends DreamSerializer {
+  @Attribute('string')
+  public body: DreamColumn<Comment, 'body'>
+
+  @RendersOne(User, { flatten: true })
+  public user: DreamColumn<Comment, 'body'>
 }
 
 export class CommentWithAnyOfArraySerializer extends DreamSerializer {
@@ -248,6 +257,29 @@ export class CommentTestingStringSerializer extends DreamSerializer {
     pattern: '/^helloworld$/',
     minLength: 2,
     maxLength: 4,
+  })
+  public howyadoin: string
+}
+
+export class CommentTestingStringShorthandSerializer extends DreamSerializer {
+  @Attribute('string')
+  public howyadoin: string
+}
+
+export class CommentTestingStringArrayShorthandSerializer extends DreamSerializer {
+  @Attribute('string[]')
+  public howyadoin: string
+}
+
+export class CommentTestingStringArraySerializer extends DreamSerializer {
+  @Attribute({
+    type: 'array',
+    description: 'my array',
+    items: {
+      type: 'string',
+      nullable: true,
+      description: 'my array item',
+    },
   })
   public howyadoin: string
 }

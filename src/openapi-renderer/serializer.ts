@@ -7,6 +7,7 @@ import {
   OpenapiSchemaExpressionAllOf,
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
+  OpenapiSchemaObjectBase,
   OpenapiShorthandPrimitiveTypes,
   SerializableTypes,
   uniq,
@@ -75,6 +76,8 @@ export default class OpenapiSerializerRenderer {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
       ;(serializerObject as any).properties![attr.field] = results
     })
+
+    serializerObject.required = uniq(serializerObject.required!)
 
     const serializerPayload = this.attachAssociationsToSerializerPayload({
       serializerPayload: { [serializerKey]: serializerObject, ...componentsSchema },
@@ -166,10 +169,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
 
     if (envBool('DEBUG')) console.log(`Processing serializer ${associatedSerializerKey}`)
 
-    finalOutput[serializerKey].required = uniq([
-      ...(finalOutput[serializerKey].required || []),
-      association.field,
-    ])
+    let flattenedData: Record<string, OpenapiSchemaObject>
 
     switch (association.type) {
       case 'RendersMany':
@@ -180,16 +180,41 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
             $ref: `#/components/schemas/${associatedSerializerKey}`,
           },
         }
+
+        finalOutput[serializerKey].required = uniq([
+          ...(finalOutput[serializerKey].required || []),
+          association.field,
+        ])
         break
 
       case 'RendersOne':
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        ;(finalOutput as any)[serializerKey].properties![association.field] = this.accountForNullableOption(
-          {
-            $ref: `#/components/schemas/${associatedSerializerKey}`,
-          },
-          association.nullable,
-        )
+        if (association.flatten) {
+          flattenedData = this.flattenRendersOneAssociation(associatedSerializer, {
+            finalOutput,
+            serializerKey,
+          })
+
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+          ;(finalOutput as any)[serializerKey].properties = flattenedData
+
+          finalOutput[serializerKey].required = uniq([
+            ...(finalOutput[serializerKey].required || []),
+            ...Object.keys(flattenedData),
+          ])
+        } else {
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+          ;(finalOutput as any)[serializerKey].properties![association.field] = this.accountForNullableOption(
+            {
+              $ref: `#/components/schemas/${associatedSerializerKey}`,
+            },
+            association.nullable,
+          )
+
+          finalOutput[serializerKey].required = uniq([
+            ...(finalOutput[serializerKey].required || []),
+            association.field,
+          ])
+        }
         break
     }
 
@@ -204,6 +229,41 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     finalOutput = { ...finalOutput, ...associatedSchema }
 
     return finalOutput
+  }
+
+  /**
+   * @internal
+   *
+   * Takes an association and flattens each of it's child
+   * attributes into a new object. This is done whenever
+   * a serializer's @RendersOne options include `flatten: true`
+   */
+  private flattenRendersOneAssociation(
+    associatedSerializer: typeof DreamSerializer,
+    {
+      finalOutput,
+      serializerKey,
+    }: {
+      finalOutput: Record<string, OpenapiSchemaObject>
+      serializerKey: string
+    },
+  ): Record<string, OpenapiSchemaObject> {
+    const serialized = new OpenapiSerializerRenderer({
+      serializerClass: associatedSerializer,
+      serializers: this.serializers,
+      schemaDelimeter: this.schemaDelimeter,
+      processedSchemas: this.processedSchemas,
+      target: this.target,
+    }).parse()
+
+    const associatedProperties = (serialized[associatedSerializer.openapiName] as OpenapiSchemaObjectBase)
+      .properties
+
+    return {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+      ...(finalOutput as any)[serializerKey].properties!,
+      ...associatedProperties,
+    } as Record<string, OpenapiSchemaObject>
   }
 
   /**
