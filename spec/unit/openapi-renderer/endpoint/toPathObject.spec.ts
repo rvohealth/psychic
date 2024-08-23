@@ -119,13 +119,12 @@ describe('OpenapiEndpointRenderer', () => {
     context('query', () => {
       it('renders params within the parameters array', async () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
-          query: [
-            {
-              name: 'search',
+          query: {
+            search: {
               required: true,
               description: 'the search term',
             },
-          ],
+          },
         })
 
         const response = await renderer.toPathObject({})
@@ -153,14 +152,13 @@ describe('OpenapiEndpointRenderer', () => {
       context('allowReserved is overridden', () => {
         it('applies override', async () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
-            query: [
-              {
-                name: 'search',
+            query: {
+              search: {
                 required: true,
                 description: 'the search term',
                 allowReserved: false,
               },
-            ],
+            },
           })
 
           const response = await renderer.toPathObject({})
@@ -190,14 +188,13 @@ describe('OpenapiEndpointRenderer', () => {
       context('allowEmptyValue is overridden', () => {
         it('applies override', async () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
-            query: [
-              {
-                name: 'search',
+            query: {
+              search: {
                 required: true,
                 description: 'the search term',
                 allowEmptyValue: true,
               },
-            ],
+            },
           })
 
           const response = await renderer.toPathObject({})
@@ -228,19 +225,17 @@ describe('OpenapiEndpointRenderer', () => {
     context('headers', () => {
       it('renders headers within the parameters array', async () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
-          headers: [
-            {
-              name: 'Authorization',
+          headers: {
+            Authorization: {
               required: true,
               description: 'Auth header',
             },
-            {
-              name: 'today',
+            today: {
               required: true,
               description: "today's date",
               format: 'date',
             },
-          ],
+          },
         })
 
         const response = await renderer.toPathObject({})
@@ -278,14 +273,13 @@ describe('OpenapiEndpointRenderer', () => {
       context('config-level header defaults', () => {
         it('renders default headers', async () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
-            headers: [
-              {
-                name: 'today',
+            headers: {
+              today: {
                 required: true,
                 description: "today's date",
                 format: 'date',
               },
-            ],
+            },
           })
 
           const response = await renderer.toPathObject({})
@@ -323,14 +317,13 @@ describe('OpenapiEndpointRenderer', () => {
         context('when default headers are bypassed', () => {
           it('does not render default headers', async () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
-              headers: [
-                {
-                  name: 'today',
+              headers: {
+                today: {
                   required: true,
                   description: "today's date",
                   format: 'date',
                 },
-              ],
+              },
               omitDefaultHeaders: true,
             })
 

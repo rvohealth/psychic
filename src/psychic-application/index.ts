@@ -3,19 +3,19 @@ import bodyParser from 'body-parser'
 import { QueueOptions } from 'bullmq'
 import { CorsOptions } from 'cors'
 import { Application, Request, Response } from 'express'
+import * as OpenApiValidator from 'express-openapi-validator'
 import { Socket, Server as SocketServer } from 'socket.io'
 import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
 import envValue, { envInt } from '../helpers/envValue'
-import { OpenapiContent, OpenapiHeaderOption, OpenapiResponses } from '../openapi-renderer/endpoint'
+import { OpenapiContent, OpenapiHeaders, OpenapiResponses } from '../openapi-renderer/endpoint'
 import PsychicRouter from '../router'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache'
 import loadControllers, { getControllersOrFail } from './helpers/loadControllers'
 import { PsychicRedisConnectionOptions } from './helpers/redisOptions'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
-import * as OpenApiValidator from 'express-openapi-validator'
 
 export default class PsychicApplication {
   public static async init(
@@ -379,7 +379,7 @@ export interface PsychicOpenapiOptions {
   suppressResponseEnums?: boolean
   validation?: Partial<Parameters<(typeof OpenApiValidator)['middleware']>[0]>
   defaults?: {
-    headers?: OpenapiHeaderOption[]
+    headers?: OpenapiHeaders
     responses?: OpenapiResponses
     components?: {
       [key: string]: {

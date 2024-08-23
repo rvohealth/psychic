@@ -33,13 +33,12 @@ export default async (psy: PsychicApplication) => {
   // set options to configure openapi integration
   psy.set('openapi', {
     defaults: {
-      headers: [
-        {
-          name: 'custom-header',
+      headers: {
+        ['custom-header']: {
           required: true,
           description: 'custom header',
         },
-      ],
+      },
 
       responses: {
         490: {

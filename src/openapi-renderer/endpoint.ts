@@ -359,16 +359,17 @@ export default class OpenapiEndpointRenderer<
   private headersArray(): OpenapiParameterResponse[] {
     const psychicApp = PsychicApplication.getOrFail()
 
-    const defaultHeaders = this.omitDefaultHeaders ? [] : psychicApp.openapi?.defaults?.headers || []
-    const headers = [...defaultHeaders, ...(this.headers || [])] as OpenapiHeaderOption[]
+    const defaultHeaders = this.omitDefaultHeaders ? {} : psychicApp.openapi?.defaults?.headers || {}
+    const headers = { ...defaultHeaders, ...(this.headers || []) } as OpenapiHeaders
 
     return (
-      headers.map(header => {
+      Object.keys(headers).map((headerName: string) => {
+        const header = headers[headerName]
         const data = {
           in: 'header',
-          name: header.name,
+          name: headerName,
           required: header.required,
-          description: header.description || '',
+          description: header.description || headerName,
           schema: {
             type: 'string',
           },
@@ -391,22 +392,24 @@ export default class OpenapiEndpointRenderer<
    */
   private queryArray(): OpenapiParameterResponse[] {
     return (
-      this.query?.map(param => {
+      Object.keys(this.query || ({} as OpenapiQueries)).map((queryName: string) => {
+        const queryParam = this.query![queryName]
         const output = {
           in: 'query',
-          ...param,
-          description: param.description || '',
+          name: queryName,
+          description: queryParam.description || queryName,
+          ...queryParam,
           schema: {
             type: 'string',
           },
         } as OpenapiParameterResponse
 
-        if (typeof param.allowEmptyValue === 'boolean') {
-          output.allowEmptyValue = param.allowEmptyValue
+        if (typeof queryParam.allowEmptyValue === 'boolean') {
+          output.allowEmptyValue = queryParam.allowEmptyValue
         }
 
-        if (typeof param.allowReserved === 'boolean') {
-          output.allowReserved = param.allowReserved
+        if (typeof queryParam.allowReserved === 'boolean') {
+          output.allowReserved = queryParam.allowReserved
         }
 
         return output
@@ -1015,8 +1018,8 @@ export interface OpenapiEndpointRendererOpts<
 > {
   many?: boolean
   pathParams?: OpenapiPathParams
-  headers?: OpenapiHeaderOption[]
-  query?: OpenapiQueryOption[]
+  headers?: OpenapiHeaders
+  query?: OpenapiQueries
   requestBody?: OpenapiSchemaBodyShorthand | OpenapiSchemaRequestBodyOnlyOption | null
   tags?: string[]
   description?: string
@@ -1045,19 +1048,21 @@ export interface OpenapiSchemaRequestBodyOnlyOption {
 }
 
 export interface OpenapiHeaderOption {
-  name: string
   required: boolean
   description?: string
   format?: 'date' | 'date-time'
 }
 
+export type OpenapiHeaders = Record<string, OpenapiHeaderOption>
+
 export interface OpenapiQueryOption {
-  name: string
   required: boolean
   description?: string
   allowReserved?: boolean
   allowEmptyValue?: boolean
 }
+
+export type OpenapiQueries = Record<string, OpenapiQueryOption>
 
 export interface OpenapiPathParamOption {
   description?: string
