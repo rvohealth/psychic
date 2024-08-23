@@ -1,13 +1,12 @@
-import { uniq } from '@rvohealth/dream'
 import fs from 'fs/promises'
+import groupBy from 'lodash.groupby'
 import path from 'path'
-import PsychicController from '../controller'
 import { envBool } from '../helpers/envValue'
 import openapiJsonPath from '../helpers/openapiJsonPath'
 import PsychicApplication from '../psychic-application'
 import { HttpMethod, HttpMethods } from '../router/types'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults'
-import { OpenapiSchema } from './endpoint'
+import { OpenapiEndpointResponsePath, OpenapiParameterResponse, OpenapiSchema } from './endpoint'
 
 export default class OpenapiAppRenderer {
   /**
@@ -67,8 +66,7 @@ export default class OpenapiAppRenderer {
     }
 
     for (const controllerName of Object.keys(controllers)) {
-      // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-      const controller = controllers[controllerName] as typeof PsychicController
+      const controller = controllers[controllerName]
 
       for (const key of Object.keys(controller.openapi || {})) {
         if (envBool('DEBUG')) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
@@ -81,42 +79,51 @@ export default class OpenapiAppRenderer {
         }
 
         const endpointPayload = await renderer.toPathObject(processedSchemas)
+        const path = Object.keys(endpointPayload)[0]
 
-        // eslint-disable-next-line @typescript-eslint/no-unnecessary-type-assertion
-        const path = Object.keys(endpointPayload)[0]!
-
-        const method = Object.keys(endpointPayload[path]).find(key =>
-          HttpMethods.includes(key as HttpMethod),
+        const method = (Object.keys(endpointPayload[path]) as HttpMethod[]).find(key =>
+          HttpMethods.includes(key),
         )!
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        ;(finalOutput.paths as any)[path] ||= {
-          parameters: [],
+        if (!finalOutput.paths[path]) {
+          finalOutput.paths[path] = { parameters: [] } as unknown as OpenapiEndpointResponsePath
         }
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-        const pathObj = (finalOutput.paths as any)[path]
+        const pathObj = finalOutput.paths[path]
+        const otherPathObj = endpointPayload[path]
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-        pathObj[method] = (endpointPayload as any)[path][method]
+        pathObj[method] = otherPathObj[method]
 
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        pathObj.parameters = uniq(
-          [
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
-            ...(pathObj.parameters || []),
-
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            ...((endpointPayload as any)[path]?.['parameters'] || []),
-          ],
-
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          (a, b) => a.name === b.name,
-        )
+        pathObj.parameters = this.combineParameters([
+          ...pathObj.parameters,
+          ...endpointPayload[path].parameters,
+        ])
       }
     }
 
     return this.sortedSchemaPayload(finalOutput)
+  }
+
+  private static combineParameters(parameters: OpenapiParameterResponse[]) {
+    const groupedParams = groupBy(parameters, 'name')
+
+    const result = Object.keys(groupedParams).map(paramName => {
+      const identicalParams = groupedParams[paramName]
+      return identicalParams.reduce((compositeParam, param) => {
+        compositeParam.description ||= param.description
+
+        if (compositeParam.allowEmptyValue !== undefined)
+          compositeParam.allowEmptyValue = param.allowEmptyValue
+
+        if (compositeParam.allowReserved !== undefined) compositeParam.allowReserved = param.allowReserved
+
+        if (compositeParam.required !== undefined) compositeParam.required = param.required
+
+        return compositeParam
+      }, identicalParams[0])
+    })
+
+    return result
   }
 
   private static sortedSchemaPayload(schema: OpenapiSchema) {

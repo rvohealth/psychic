@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "version": "0.7.1",
+    "version": "0.7.3",
     "title": "@rvohealth/psychic",
     "description": "Typescript web framework"
   },
@@ -73,7 +73,6 @@
           "in": "path",
           "name": "id",
           "required": true,
-          "description": "id",
           "schema": {
             "type": "string"
           }
@@ -432,7 +431,6 @@
           "in": "path",
           "name": "id",
           "required": true,
-          "description": "id",
           "schema": {
             "type": "string"
           }
@@ -1032,7 +1030,6 @@
           "in": "path",
           "name": "id",
           "required": true,
-          "description": "id",
           "schema": {
             "type": "string"
           }
@@ -1510,7 +1507,7 @@
           "in": "path",
           "name": "id",
           "required": true,
-          "description": "id",
+          "description": "The ID of the User",
           "schema": {
             "type": "string"
           }
@@ -1816,15 +1813,9 @@
           }
         },
         "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/User"
-                }
-              }
-            },
-            "description": "Success"
+          "204": {
+            "description": "Success, no content",
+            "$ref": "#/components/responses/NoContent"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"

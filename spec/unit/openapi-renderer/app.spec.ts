@@ -145,8 +145,8 @@ describe('OpenapiAppRenderer', () => {
               {
                 in: 'path',
                 name: 'id',
+                description: 'The ID of the User',
                 required: true,
-                description: 'id',
                 schema: {
                   type: 'string',
                 },

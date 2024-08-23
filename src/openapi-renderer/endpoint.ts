@@ -247,7 +247,7 @@ export default class OpenapiEndpointRenderer<
           in: 'path',
           name: sanitizedField,
           required: true,
-          description: extraPathParamDetailsForThisParam || sanitizedField,
+          description: extraPathParamDetailsForThisParam,
           schema: {
             type: 'string',
           },
@@ -1085,12 +1085,14 @@ export interface OpenapiSchema {
   }
 }
 
+export type OpenapiEndpointResponsePath = {
+  [method in HttpMethod]: OpenapiMethodBody
+} & {
+  parameters: OpenapiParameterResponse[]
+}
+
 export type OpenapiEndpointResponse = {
-  [path: string]: {
-    [method in HttpMethod]: OpenapiMethodBody
-  } & {
-    parameters: OpenapiParameterResponse[]
-  }
+  [path: string]: OpenapiEndpointResponsePath
 }
 
 export interface OpenapiParameterResponse {
@@ -1113,8 +1115,8 @@ export type OpenapiMethodResponse = {
 }
 
 export interface OpenapiMethodBody {
-  tags: string[]
-  summary: string
+  tags?: string[]
+  summary?: string
   description: string
   requestBody: OpenapiContent
   responses: OpenapiResponses

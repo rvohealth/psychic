@@ -48,7 +48,10 @@ export default class UsersController extends ApplicationController {
     this.ok(user)
   }
 
-  @OpenAPI(User)
+  @OpenAPI(User, {
+    status: 204,
+    pathParams: { id: { description: 'The ID of the User' } },
+  })
   public async update() {
     const user = await User.findOrFail(this.castParam('id', 'bigint'))
     await user.update(this.paramsFor(User))
