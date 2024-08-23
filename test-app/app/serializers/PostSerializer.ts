@@ -6,7 +6,7 @@ export class PostSummarySerializer<DataType extends Post, Passthrough extends ob
   DataType,
   Passthrough
 > {
-  @Attribute('string')
+  @Attribute(Post)
   public id: DreamColumn<Post, 'id'>
 }
 
@@ -18,7 +18,7 @@ export default class PostSerializer<
   @RendersMany(() => CommentSerializer<any, any>)
   public comments: Comment[]
 
-  @Attribute('string')
+  @Attribute(Post)
   public body: DreamColumn<Post, 'body'>
 }
 
@@ -30,7 +30,7 @@ export class PostWithRecentCommentSerializer<
   @RendersOne(() => CommentSerializer<any, any>)
   public recentComment: Comment | null
 
-  @Attribute('string')
+  @Attribute(Post)
   public body: DreamColumn<Post, 'body'>
 }
 
@@ -42,6 +42,6 @@ export class PostWithCommentsSerializer<
   @RendersMany(() => CommentSerializer<any, any>)
   public comments: Comment[]
 
-  @Attribute('string')
+  @Attribute(Post)
   public body: DreamColumn<Post, 'body'>
 }

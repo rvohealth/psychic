@@ -1,24 +1,24 @@
-import { Attribute, DreamSerializer, RendersMany, RendersOne } from '@rvohealth/dream'
+import { Attribute, DreamColumn, DreamSerializer, RendersMany, RendersOne } from '@rvohealth/dream'
 import Post from '../models/Post'
 import User from '../models/User'
 import { PostWithCommentsSerializer, PostWithRecentCommentSerializer } from './PostSerializer'
 
 export class UserSummarySerializer extends DreamSerializer {
-  @Attribute('string')
-  public id: string
+  @Attribute(User)
+  public id: DreamColumn<User, 'id'>
 }
 
 export default class UserSerializer extends UserSummarySerializer {
-  @Attribute('string')
-  public email: string
+  @Attribute(User)
+  public email: DreamColumn<User, 'email'>
 
-  @Attribute('string')
-  public name: string
+  @Attribute(User)
+  public name: DreamColumn<User, 'name'>
 }
 
 export class UserExtraSerializer extends UserSummarySerializer {
-  @Attribute('string[]')
-  public nicknames: string[]
+  @Attribute(User)
+  public nicknames: DreamColumn<User, 'nicknames'>
 
   @Attribute({
     type: 'object',

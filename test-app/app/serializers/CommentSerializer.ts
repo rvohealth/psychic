@@ -6,20 +6,27 @@ export class CommentSummarySerializer<
   DataType extends Comment,
   Passthrough extends object,
 > extends DreamSerializer<DataType, Passthrough> {
-  @Attribute('string')
+  @Attribute(Comment)
   public id: DreamColumn<Comment, 'id'>
+
+  // `body` in CommentSummarySerializer, which is inherited by CommentSerializer,
+  // which also includes a `body` Attribute reproduced an error in a Psychic project
+  // wherein the same attribute appeared multiple times as a `required` attribute,
+  // which is invalid OpenAPI
+  @Attribute(Comment)
+  public body: DreamColumn<Comment, 'body'>
 }
 
 export default class CommentSerializer<
   DataType extends Comment,
   Passthrough extends object,
 > extends CommentSummarySerializer<DataType, Passthrough> {
-  @Attribute('string')
+  @Attribute(Comment)
   public body: DreamColumn<Comment, 'body'>
 }
 
 export class CommentWithFlattenedUserSerializer extends DreamSerializer {
-  @Attribute('string')
+  @Attribute(Comment)
   public body: DreamColumn<Comment, 'body'>
 
   @RendersOne(User, { flatten: true })

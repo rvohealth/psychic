@@ -1939,10 +1939,10 @@
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "object"
           },
           "body": {
-            "type": "string"
+            "type": "object"
           }
         }
       },
@@ -1991,7 +1991,7 @@
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "object"
           },
           "name": {
             "type": "object"
@@ -2007,10 +2007,10 @@
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "object"
           },
           "body": {
-            "type": "string"
+            "type": "object"
           },
           "comments": {
             "type": "array",
@@ -2029,13 +2029,13 @@
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "object"
           },
           "email": {
-            "type": "string"
+            "type": "object"
           },
           "name": {
-            "type": "string"
+            "type": "object"
           }
         }
       },
@@ -2048,13 +2048,10 @@
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "object"
           },
           "nicknames": {
-            "type": "array",
-            "items": {
-              "type": "string"
-            }
+            "type": "object"
           },
           "howyadoin": {
             "type": "object",
@@ -2095,7 +2092,7 @@
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "object"
           },
           "posts": {
             "type": "array",
