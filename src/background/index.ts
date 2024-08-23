@@ -1,7 +1,6 @@
 import { Dream, IdType, pascalize, testEnv } from '@rvohealth/dream'
 import { ConnectionOptions, Job, Queue, QueueEvents, Worker } from 'bullmq'
-import developmentOrTestEnv from '../helpers/cli/developmentOrTestEnv'
-import envValue, { devEnvBool } from '../helpers/envValue'
+import { devEnvBool } from '../helpers/envValue'
 import PsychicApplication from '../psychic-application'
 import lookupClassByGlobalName from '../psychic-application/helpers/lookupClassByGlobalName'
 import redisOptions from '../psychic-application/helpers/redisOptions'
@@ -320,8 +319,8 @@ export class Background {
 }
 
 function workerCount() {
-  if (envValue('WORKER_COUNT')) return parseInt(envValue('WORKER_COUNT'))
-  return developmentOrTestEnv() ? 1 : 0
+  const psychicApp = PsychicApplication.getOrFail()
+  return psychicApp.backgroundOptions.workerCount
 }
 
 const background = new Background()

@@ -1,4 +1,4 @@
-import { DreamApplication, OpenapiSchemaBody } from '@rvohealth/dream'
+import { DreamApplication, OpenapiSchemaBody, developmentOrTestEnv } from '@rvohealth/dream'
 import bodyParser from 'body-parser'
 import { QueueOptions } from 'bullmq'
 import { CorsOptions } from 'cors'
@@ -58,6 +58,11 @@ export default class PsychicApplication {
 
   public apiOnly: boolean = false
   public apiRoot: string
+  public authSessionKey: string = 'auth_session'
+  public appEncryptionKey: string
+  public backgroundOptions: PsychicBackgroundOptions = {
+    workerCount: developmentOrTestEnv() ? 1 : 0,
+  }
   public clientRoot: string
   public useWs: boolean = false
   public useRedis: boolean = false
@@ -107,10 +112,6 @@ export default class PsychicApplication {
   }
 
   protected loadedControllers: boolean = false
-
-  public get authSessionKey() {
-    return envValue('AUTH_SESSION_KEY') || 'auth_session'
-  }
 
   public get controllers() {
     return getControllersOrFail()
@@ -204,35 +205,41 @@ export default class PsychicApplication {
         ? CustomCookieOptions
         : Opt extends 'apiRoot'
           ? string
-          : Opt extends 'clientRoot'
+          : Opt extends 'authSessionKey'
             ? string
-            : Opt extends 'json'
-              ? bodyParser.Options
-              : Opt extends 'client'
-                ? PsychicClientOptions
-                : Opt extends 'background:queue'
-                  ? Omit<QueueOptions, 'connection'>
-                  : Opt extends 'background:worker'
-                    ? WorkerOptions
-                    : Opt extends 'redis:background'
-                      ? PsychicRedisConnectionOptions
-                      : Opt extends 'redis:ws'
-                        ? PsychicRedisConnectionOptions
-                        : Opt extends 'ssl'
-                          ? PsychicSslCredentials
-                          : Opt extends 'openapi'
-                            ? PsychicOpenapiOptions
-                            : Opt extends 'paths'
-                              ? PsychicPathOptions
-                              : Opt extends 'port'
-                                ? number
-                                : Opt extends 'saltRounds'
-                                  ? number
-                                  : Opt extends 'inflections'
-                                    ? () => void | Promise<void>
-                                    : Opt extends 'routes'
-                                      ? (r: PsychicRouter) => void | Promise<void>
-                                      : never,
+            : Opt extends 'appEncryptionKey'
+              ? string
+              : Opt extends 'background'
+                ? PsychicBackgroundOptions
+                : Opt extends 'clientRoot'
+                  ? string
+                  : Opt extends 'json'
+                    ? bodyParser.Options
+                    : Opt extends 'client'
+                      ? PsychicClientOptions
+                      : Opt extends 'background:queue'
+                        ? Omit<QueueOptions, 'connection'>
+                        : Opt extends 'background:worker'
+                          ? WorkerOptions
+                          : Opt extends 'redis:background'
+                            ? PsychicRedisConnectionOptions
+                            : Opt extends 'redis:ws'
+                              ? PsychicRedisConnectionOptions
+                              : Opt extends 'ssl'
+                                ? PsychicSslCredentials
+                                : Opt extends 'openapi'
+                                  ? PsychicOpenapiOptions
+                                  : Opt extends 'paths'
+                                    ? PsychicPathOptions
+                                    : Opt extends 'port'
+                                      ? number
+                                      : Opt extends 'saltRounds'
+                                        ? number
+                                        : Opt extends 'inflections'
+                                          ? () => void | Promise<void>
+                                          : Opt extends 'routes'
+                                            ? (r: PsychicRouter) => void | Promise<void>
+                                            : never,
   ) {
     switch (option) {
       case 'apiRoot':
@@ -241,6 +248,14 @@ export default class PsychicApplication {
 
       case 'clientRoot':
         this.clientRoot = value as string
+        break
+
+      case 'authSessionKey':
+        this.authSessionKey = value as string
+        break
+
+      case 'appEncryptionKey':
+        this.appEncryptionKey = value as string
         break
 
       case 'cors':
@@ -264,6 +279,10 @@ export default class PsychicApplication {
 
       case 'json':
         this.jsonOptions = { ...this.jsonOptions, ...(value as bodyParser.Options) }
+        break
+
+      case 'background':
+        this.backgroundOptions = { ...this.backgroundOptions, ...(value as PsychicBackgroundOptions) }
         break
 
       case 'background:queue':
@@ -329,6 +348,9 @@ export default class PsychicApplication {
 
 export type PsychicApplicationOption =
   | 'apiRoot'
+  | 'appEncryptionKey'
+  | 'authSessionKey'
+  | 'background'
   | 'background:queue'
   | 'background:worker'
   | 'client'
@@ -392,6 +414,10 @@ export interface PsychicOpenapiOptions {
 interface PsychicPathOptions {
   controllers?: string
   controllerSpecs?: string
+}
+
+interface PsychicBackgroundOptions {
+  workerCount: number
 }
 
 export interface PsychicClientOptions {

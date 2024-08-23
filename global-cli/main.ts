@@ -30,14 +30,9 @@ program
     '--client',
     "the type of client to use. valid options are: 'react', 'vue', 'nuxt', 'none' (i.e. --client none)",
   )
-  .option(
-    '--tsnode',
-    'runs the command using ts-node instead of node (this should not be passed, is here to support legacy building processes)',
-  )
   .action(async () => {
     const name = program.args[1]
-    const indexOfTsNode = program.args.findIndex(str => str === '--tsnode')
-    const args = indexOfTsNode > -1 ? program.args.slice(2, indexOfTsNode) : program.args.slice(2)
+    const args = program.args.slice(2)
     await newPsychicApp(name, args)
   })
 
