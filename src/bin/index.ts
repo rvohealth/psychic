@@ -13,8 +13,7 @@ export default class PsychicBin {
   public static async generateController() {
     const route = process.argv[3]
     const name = process.argv[4]
-    const indexOfTsNode = process.argv.findIndex(str => str === '--tsnode')
-    const methods = indexOfTsNode ? process.argv.slice(5, indexOfTsNode) : process.argv.slice(5)
+    const methods = process.argv.slice(5)
     await generateController(
       route,
       name,
@@ -25,8 +24,7 @@ export default class PsychicBin {
   public static async generateResource() {
     const route = process.argv[3]
     const name = process.argv[4]
-    const indexOfTsNode = process.argv.findIndex(str => str === '--tsnode')
-    const args = indexOfTsNode ? process.argv.slice(5, indexOfTsNode) : process.argv.slice(5)
+    const args = process.argv.slice(5)
     await generateResource(route, name, args)
   }
 

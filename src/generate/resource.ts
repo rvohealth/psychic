@@ -1,12 +1,10 @@
 import * as fs from 'fs/promises'
 import path from 'path'
 import pluralize from 'pluralize'
-import dreamjsOrDreamtsCmd from '../helpers/cli/dreamjsOrDreamtsCmd'
 import sspawn from '../helpers/sspawn'
 import PsychicApplication from '../psychic-application'
 import generateClientAPIModule from './client/apiModule'
 import generateController from './controller'
-import omitCoreArg from '../helpers/cli/omitCoreArg'
 
 export default async function generateResource(
   route: string,
@@ -17,12 +15,7 @@ export default async function generateResource(
 
   const attributesWithTypes = args.filter(attr => !/^--/.test(attr))
 
-  await sspawn(
-    dreamjsOrDreamtsCmd(
-      `g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(' ')}`,
-      omitCoreArg(args),
-    ),
-  )
+  await sspawn(`yarn psy g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(' ')}`)
 
   if (args.includes('--core')) {
     console.log('--core argument provided, setting now')
