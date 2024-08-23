@@ -19,8 +19,14 @@ import { OpenAPI } from '@rvohealth/psychic'
 import AuthedController from './AuthedController'
 import Post from '../models/Post'
 
+const openApiTags = ['posts']
+
 export default class PostsController extends AuthedController {
-  @OpenAPI(Post, { status: 201 })
+  @OpenAPI(Post, {
+    status: 201,
+    tags: openApiTags,
+    description: 'Create a Post',
+  })
   public async create() {
     //    const post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
     //    this.created(post)
@@ -28,6 +34,8 @@ export default class PostsController extends AuthedController {
 
   @OpenAPI(Post, {
     status: 200,
+    tags: openApiTags,
+    description: 'Fetch multiple Posts',
     many: true,
     serializerKey: 'summary',
   })
@@ -36,20 +44,32 @@ export default class PostsController extends AuthedController {
     //    this.ok(posts)
   }
 
-  @OpenAPI(Post, { status: 200 })
+  @OpenAPI(Post, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a Post',
+  })
   public async show() {
     //    const post = await this.post()
     //    this.ok(post)
   }
 
-  @OpenAPI(Post, { status: 204 })
+  @OpenAPI(Post, {
+    status: 204,
+    tags: openApiTags,
+    description: 'Update a Post',
+  })
   public async update() {
     //    const post = await this.post()
     //    await post.update(this.paramsFor(Post))
     //    this.noContent()
   }
 
-  @OpenAPI({ status: 204 })
+  @OpenAPI({
+    status: 204,
+    tags: openApiTags,
+    description: 'Destroy a Post',
+  })
   public async destroy() {
     //    const post = await this.post()
     //    await post.destroy()
@@ -59,6 +79,8 @@ export default class PostsController extends AuthedController {
   @OpenAPI({
     response: {
       200: {
+        tags: openApiTags,
+        description: '<tbd>',
         // add openapi definition for your custom endpoint
       }
     }
@@ -92,8 +114,14 @@ import { OpenAPI } from '@rvohealth/psychic'
 import AuthedController from '../../../AuthedController'
 import HealthPost from '../../../../models/Health/Post'
 
+const openApiTags = ['health-posts']
+
 export default class ApiV1HealthPostsController extends AuthedController {
-  @OpenAPI(HealthPost, { status: 201 })
+  @OpenAPI(HealthPost, {
+    status: 201,
+    tags: openApiTags,
+    description: 'Create a HealthPost',
+  })
   public async create() {
     //    const healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
     //    this.created(healthPost)
@@ -101,6 +129,8 @@ export default class ApiV1HealthPostsController extends AuthedController {
 
   @OpenAPI(HealthPost, {
     status: 200,
+    tags: openApiTags,
+    description: 'Fetch multiple HealthPosts',
     many: true,
     serializerKey: 'summary',
   })
@@ -109,20 +139,32 @@ export default class ApiV1HealthPostsController extends AuthedController {
     //    this.ok(healthPosts)
   }
 
-  @OpenAPI(HealthPost, { status: 200 })
+  @OpenAPI(HealthPost, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a HealthPost',
+  })
   public async show() {
     //    const healthPost = await this.healthPost()
     //    this.ok(healthPost)
   }
 
-  @OpenAPI(HealthPost, { status: 204 })
+  @OpenAPI(HealthPost, {
+    status: 204,
+    tags: openApiTags,
+    description: 'Update a HealthPost',
+  })
   public async update() {
     //    const healthPost = await this.healthPost()
     //    await healthPost.update(this.paramsFor(HealthPost))
     //    this.noContent()
   }
 
-  @OpenAPI({ status: 204 })
+  @OpenAPI({
+    status: 204,
+    tags: openApiTags,
+    description: 'Destroy a HealthPost',
+  })
   public async destroy() {
     //    const healthPost = await this.healthPost()
     //    await healthPost.destroy()
@@ -132,6 +174,8 @@ export default class ApiV1HealthPostsController extends AuthedController {
   @OpenAPI({
     response: {
       200: {
+        tags: openApiTags,
+        description: '<tbd>',
         // add openapi definition for your custom endpoint
       }
     }
@@ -164,8 +208,14 @@ import { OpenAPI } from '@rvohealth/psychic'
 import AdminAuthedController from '../Admin/AuthedController'
 import NutritionLogEntry from '../../models/Nutrition/LogEntry'
 
+const openApiTags = ['nutrition-log-entries']
+
 export default class AdminNutritionLogEntriesController extends AdminAuthedController {
-  @OpenAPI(NutritionLogEntry, { status: 201 })
+  @OpenAPI(NutritionLogEntry, {
+    status: 201,
+    tags: openApiTags,
+    description: 'Create a NutritionLogEntry',
+  })
   public async create() {
     //    const nutritionLogEntry = await this.currentUser.createAssociation('nutritionLogEntries', this.paramsFor(NutritionLogEntry))
     //    this.created(nutritionLogEntry)
@@ -188,10 +238,14 @@ export default class AdminNutritionLogEntriesController extends AdminAuthedContr
 import { OpenAPI } from '@rvohealth/psychic'
 import AuthedController from '../../AuthedController'
 
+const openApiTags = ['api-v1-users']
+
 export default class ApiV1UsersController extends AuthedController {
   @OpenAPI({
     response: {
       200: {
+        tags: openApiTags,
+        description: '<tbd>',
         // add openapi definition for your custom endpoint
       }
     }
@@ -202,6 +256,8 @@ export default class ApiV1UsersController extends AuthedController {
   @OpenAPI({
     response: {
       200: {
+        tags: openApiTags,
+        description: '<tbd>',
         // add openapi definition for your custom endpoint
       }
     }

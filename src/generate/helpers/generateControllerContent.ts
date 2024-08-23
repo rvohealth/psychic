@@ -1,6 +1,7 @@
-import { camelize } from '@rvohealth/dream'
 import {
+  camelize,
   globalClassNameFromFullyQualifiedModelName,
+  hyphenize,
   standardizeFullyQualifiedModelName,
 } from '@rvohealth/dream'
 import pluralize from 'pluralize'
@@ -31,10 +32,13 @@ export default function generateControllerContent(
 
   let modelClassName: string | undefined
   let modelAttributeName: string | undefined
+  let pluralizedModelAttributeName: string | undefined
+
   if (fullyQualifiedModelName) {
     fullyQualifiedModelName = standardizeFullyQualifiedModelName(fullyQualifiedModelName)
     modelClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
     modelAttributeName = camelize(modelClassName)
+    pluralizedModelAttributeName = pluralize(modelAttributeName)
     additionalImports.push(importStatementForModel(fullyQualifiedControllerName, fullyQualifiedModelName))
   }
 
@@ -43,13 +47,26 @@ export default function generateControllerContent(
       case 'create':
         if (modelAttributeName)
           return `\
-  @OpenAPI(${modelClassName}, { status: 201 })
+  @OpenAPI(${modelClassName}, {
+    status: 201,
+    tags: openApiTags,
+    description: 'Create ${aOrAnDreamModelName(modelClassName!)}',
+  })
   public async create() {
-    //    const ${modelAttributeName} = await this.currentUser.createAssociation('${pluralize(modelAttributeName)}', this.paramsFor(${modelClassName}))
+    //    const ${modelAttributeName} = await this.currentUser.createAssociation('${pluralizedModelAttributeName}', this.paramsFor(${modelClassName}))
     //    this.created(${modelAttributeName})
   }`
         else
           return `\
+  @OpenAPI({
+    response: {
+      200: {
+        tags: openApiTags,
+        description: '<tbd>',
+        // add openapi definition for your custom endpoint
+      }
+    }
+  })
   public async create() {
   }`
 
@@ -58,18 +75,22 @@ export default function generateControllerContent(
           return `\
   @OpenAPI(${modelClassName}, {
     status: 200,
+    tags: openApiTags,
+    description: 'Fetch multiple ${pluralize(modelClassName!)}',
     many: true,
     serializerKey: 'summary',
   })
   public async index() {
-    //    const ${pluralize(modelAttributeName)} = await this.currentUser.associationQuery('${pluralize(modelAttributeName)}').all()
-    //    this.ok(${pluralize(modelAttributeName)})
+    //    const ${pluralizedModelAttributeName} = await this.currentUser.associationQuery('${pluralizedModelAttributeName}').all()
+    //    this.ok(${pluralizedModelAttributeName})
   }`
         else
           return `\
   @OpenAPI({
     response: {
       200: {
+        tags: openApiTags,
+        description: '<tbd>',
         // add openapi definition for your custom endpoint
       }
     }
@@ -80,7 +101,11 @@ export default function generateControllerContent(
       case 'show':
         if (modelAttributeName)
           return `\
-  @OpenAPI(${modelClassName}, { status: 200 })
+  @OpenAPI(${modelClassName}, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch ${aOrAnDreamModelName(modelClassName!)}',
+  })
   public async show() {
     //    const ${modelAttributeName} = await this.${modelAttributeName}()
     //    this.ok(${modelAttributeName})
@@ -90,6 +115,8 @@ export default function generateControllerContent(
   @OpenAPI({
     response: {
       200: {
+        tags: openApiTags,
+        description: '<tbd>',
         // add openapi definition for your custom endpoint
       }
     }
@@ -100,7 +127,11 @@ export default function generateControllerContent(
       case 'update':
         if (modelAttributeName)
           return `\
-  @OpenAPI(${modelClassName}, { status: 204 })
+  @OpenAPI(${modelClassName}, {
+    status: 204,
+    tags: openApiTags,
+    description: 'Update ${aOrAnDreamModelName(modelClassName!)}',
+  })
   public async update() {
     //    const ${modelAttributeName} = await this.${modelAttributeName}()
     //    await ${modelAttributeName}.update(this.paramsFor(${modelClassName}))
@@ -108,14 +139,22 @@ export default function generateControllerContent(
   }`
         else
           return `\
-  @OpenAPI({ status: 204 })
+  @OpenAPI({
+    status: 204,
+    tags: openApiTags,
+    description: '<tbd>',
+  })
   public async update() {
   }`
 
       case 'destroy':
         if (modelAttributeName)
           return `\
-  @OpenAPI({ status: 204 })
+  @OpenAPI({
+    status: 204,
+    tags: openApiTags,
+    description: 'Destroy ${aOrAnDreamModelName(modelClassName!)}',
+  })
   public async destroy() {
     //    const ${modelAttributeName} = await this.${modelAttributeName}()
     //    await ${modelAttributeName}.destroy()
@@ -123,7 +162,11 @@ export default function generateControllerContent(
   }`
         else
           return `\
-  @OpenAPI({ status: 204 })
+  @OpenAPI({
+    status: 204,
+    tags: openApiTags,
+    description: '<tbd>',
+  })
   public async destroy() {
   }`
 
@@ -132,6 +175,8 @@ export default function generateControllerContent(
   @OpenAPI({
     response: {
       200: {
+        tags: openApiTags,
+        description: '<tbd>',
         // add openapi definition for your custom endpoint
       }
     }
@@ -144,6 +189,8 @@ export default function generateControllerContent(
   return `\
 import { OpenAPI } from '@rvohealth/psychic'
 ${additionalImports.length ? additionalImports.join('\n') : ''}
+
+const openApiTags = ['${hyphenize(pluralizedModelAttributeName || controllerClassName.replace(/Controller$/, ''))}']
 
 export default class ${controllerClassName} extends ${extendingClassName} {
 ${methodDefs.join('\n\n')}${modelClassName ? privateMethods(modelClassName, methods) : ''}
@@ -180,4 +227,9 @@ function routeDepthToRelativePath(route: string, subtractFromDepth: number = 0) 
 
 function importStatementForModel(originControllerName: string, destinationModelName: string) {
   return `import ${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${relativePsychicPath('controllers', 'models', originControllerName, destinationModelName)}'`
+}
+
+function aOrAnDreamModelName(dreamName: string) {
+  if (/^[aeiou]/.test(dreamName)) return `an ${dreamName}`
+  return `a ${dreamName}`
 }
