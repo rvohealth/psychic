@@ -233,17 +233,7 @@ export default class OpenapiEndpointRenderer<
   private async pathParamsArray(): Promise<OpenapiParameterResponse[]> {
     if (this._pathParams) return this._pathParams
 
-    const userProvidedPathParams = (this.pathParams?.map(param => {
-      return {
-        in: 'path',
-        name: param.name,
-        required: param.required,
-        description: param.description || '',
-        schema: {
-          type: 'string',
-        },
-      }
-    }) || []) as OpenapiParameterResponse[]
+    const extraPathParamDetails: OpenapiPathParams = this.pathParams || {}
 
     const route = await this.getCurrentRouteConfig()
     const pathSegments = route.path
@@ -251,18 +241,20 @@ export default class OpenapiEndpointRenderer<
       .filter(pathSegment => /^:/.test(pathSegment))
       .map(field => {
         const sanitizedField = field.replace(/^:/, '')
+        const extraPathParamDetailsForThisParam = extraPathParamDetails[sanitizedField]?.description
+
         return {
           in: 'path',
           name: sanitizedField,
           required: true,
-          description: sanitizedField,
+          description: extraPathParamDetailsForThisParam || sanitizedField,
           schema: {
             type: 'string',
           },
         }
       })
 
-    this._pathParams = [...pathSegments, ...userProvidedPathParams] as OpenapiParameterResponse[]
+    this._pathParams = pathSegments as OpenapiParameterResponse[]
 
     return this._pathParams
   }
@@ -1047,7 +1039,7 @@ export interface OpenapiEndpointRendererOpts<
       T & (abstract new (...args: any) => any),
 > {
   many?: boolean
-  pathParams?: OpenapiPathParamOption[]
+  pathParams?: OpenapiPathParams
   headers?: OpenapiHeaderOption[]
   query?: OpenapiQueryOption[]
   requestBody?: OpenapiSchemaBodyShorthand | OpenapiSchemaRequestBodyOnlyOption | null
@@ -1093,10 +1085,10 @@ export interface OpenapiQueryOption {
 }
 
 export interface OpenapiPathParamOption {
-  name: string
-  required: boolean
   description?: string
 }
+
+export type OpenapiPathParams = Record<string, OpenapiPathParamOption>
 
 export interface OpenapiSchema {
   openapi: `${number}.${number}.${number}`

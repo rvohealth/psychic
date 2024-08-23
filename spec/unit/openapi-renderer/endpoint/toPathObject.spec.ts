@@ -84,29 +84,27 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('pathParams', () => {
-      it('renders params within the parameters array', async () => {
-        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
-          pathParams: [
-            {
-              name: 'search',
-              required: true,
-              description: 'the search term',
+      it('enhances the automatically derived attribute data', async () => {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show', {
+          pathParams: {
+            id: {
+              description: 'The ID of the User',
             },
-          ],
+          },
         })
 
         const response = await renderer.toPathObject({})
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            '/users/howyadoin': expect.objectContaining({
+            '/users/{id}': expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               parameters: expect.arrayContaining([
                 {
                   in: 'path',
-                  name: 'search',
+                  name: 'id',
                   required: true,
-                  description: 'the search term',
+                  description: 'The ID of the User',
                   schema: {
                     type: 'string',
                   },
@@ -115,50 +113,6 @@ describe('OpenapiEndpointRenderer', () => {
             }),
           }),
         )
-      })
-
-      context('when the path contains uri params', () => {
-        it('includes the uri params in the parameters block', async () => {
-          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show', {
-            pathParams: [
-              {
-                name: 'search',
-                required: true,
-                description: 'the search term',
-              },
-            ],
-          })
-
-          const response = await renderer.toPathObject({})
-          expect(response).toEqual(
-            expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              '/users/{id}': expect.objectContaining({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-                parameters: expect.arrayContaining([
-                  {
-                    in: 'path',
-                    name: 'id',
-                    required: true,
-                    description: 'id',
-                    schema: {
-                      type: 'string',
-                    },
-                  },
-                  {
-                    in: 'path',
-                    name: 'search',
-                    required: true,
-                    description: 'the search term',
-                    schema: {
-                      type: 'string',
-                    },
-                  },
-                ]),
-              }),
-            }),
-          )
-        })
       })
     })
 
