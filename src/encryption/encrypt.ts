@@ -9,9 +9,9 @@ export default class Encrypt {
       return jwt.sign(data, psychicApp.encryptionKey)
     } catch (_) {
       const err = new InvalidAppEncryptionKey()
-      // intentionally doing a manual console.log here to ensure that
+      // intentionally doing a manual PsychicApplication.log here to ensure that
       // this shows up in circleci, since this error is otherwise fairly hard to track down
-      console.log(err.message)
+      PsychicApplication.log(err.message)
 
       throw err
     }

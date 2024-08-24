@@ -8,7 +8,7 @@
 import '../conf/loadEnv'
 
 import { DreamBin, developmentOrTestEnv } from '@rvohealth/dream'
-import { PsychicBin } from '@rvohealth/psychic'
+import { PsychicBin, PsychicApplication } from '@rvohealth/psychic'
 import { Command } from 'commander'
 import seedDb from '../db/seed'
 import initializePsychicApplication from './helpers/initializePsychicApplication'
@@ -232,7 +232,9 @@ program
   )
   .action(async () => {
     if (process.env.NODE_ENV === 'test' && process.env.DREAM_SEED_DB_IN_TEST !== '1') {
-      console.log('skipping db seed for test env. To really seed for test, add DREAM_SEED_DB_IN_TEST=1')
+      PsychicApplication.log(
+        'skipping db seed for test env. To really seed for test, add DREAM_SEED_DB_IN_TEST=1',
+      )
       return
     }
 

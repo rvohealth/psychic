@@ -5,6 +5,7 @@ import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths'
 import psychicPath from '../helpers/path/psychicPath'
 import generateControllerContent from './helpers/generateControllerContent'
 import generateControllerSpecContent from './helpers/generateControllerSpecContent'
+import PsychicApplication from '../psychic-application'
 
 export default async function generateController(
   route: string,
@@ -20,7 +21,7 @@ export default async function generateController(
   )
 
   try {
-    console.log(`generating controller: ${relFilePath}`)
+    PsychicApplication.log(`generating controller: ${relFilePath}`)
     await fs.mkdir(absDirPath, { recursive: true })
     await fs.writeFile(
       absFilePath,
@@ -51,7 +52,7 @@ async function generateControllerSpec(
   )
 
   try {
-    console.log(`generating controller: ${relFilePath}`)
+    PsychicApplication.log(`generating controller: ${relFilePath}`)
     await fs.mkdir(absDirPath, { recursive: true })
     await fs.writeFile(
       absFilePath,

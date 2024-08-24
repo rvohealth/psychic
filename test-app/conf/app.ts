@@ -1,5 +1,6 @@
 import { developmentOrTestEnv } from '@rvohealth/dream'
 import path from 'path'
+import winston from 'winston'
 import { Encrypt } from '../../src'
 import Ws from '../../src/cable/ws'
 import PsychicApplication from '../../src/psychic-application'
@@ -8,12 +9,7 @@ import inflections from './inflections'
 import routesCb from './routes'
 
 export default async (psy: PsychicApplication) => {
-  // ******
-  // CONFIG:
-  // ******
-
   psy.appName = 'testapp'
-  psy.encryptionKey = process.env.APP_ENCRYPTION_KEY!
   psy.useWs = true
   psy.useRedis = true
   psy.apiOnly = false
@@ -24,6 +20,24 @@ export default async (psy: PsychicApplication) => {
   psy.set('clientRoot', path.join(__dirname, '..', '..', '..', 'client'))
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
+  psy.set('appEncryptionKey', process.env.APP_ENCRYPTION_KEY!)
+
+  psy.set(
+    'logger',
+    winston.createLogger({
+      level: 'info',
+      format: winston.format.json(),
+      defaultMeta: { service: 'user-service' },
+      transports: [
+        //
+        // - Write all logs with importance level of `error` or less to `error.log`
+        // - Write all logs with importance level of `info` or less to `combined.log`
+        //
+        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({ filename: 'combined.log' }),
+      ],
+    }),
+  )
 
   psy.set('paths', {
     controllers: 'test-app/app/controllers',

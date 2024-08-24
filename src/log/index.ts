@@ -1,6 +1,7 @@
 import * as colors from 'colorette'
 import logo from '../psychic-application/logo'
 import { DateTime } from 'luxon'
+import PsychicApplication from '../psychic-application'
 
 export class Logger {
   public get header() {
@@ -9,7 +10,7 @@ export class Logger {
 
   public puts(text: string, color = 'magentaBright') {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-    console.log((colors as any)[color](text).split('\n').join('\n  '))
+    PsychicApplication.log((colors as any)[color](text).split('\n').join('\n  '))
   }
 
   public info(text: string) {

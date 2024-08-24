@@ -33,15 +33,15 @@ export default class PsychicBin {
   }
 
   public static async syncOpenapiJson() {
-    console.log(`syncing ${openapiJsonPath()}...`)
+    PsychicApplication.log(`syncing ${openapiJsonPath()}...`)
 
     await OpenapiAppRenderer.sync()
 
-    console.log(`done syncing ${openapiJsonPath()}!`)
+    PsychicApplication.log(`done syncing ${openapiJsonPath()}!`)
   }
 
   public static async syncRoutes() {
-    console.log('syncing routes...')
+    PsychicApplication.log('syncing routes...')
 
     const server = new PsychicServer()
     await server.boot()
@@ -49,11 +49,11 @@ export default class PsychicBin {
     const routes = await server.routes()
     await generateRouteTypes(routes)
 
-    console.log('done syncing routes!')
+    PsychicApplication.log('done syncing routes!')
   }
 
   public static async syncOpenapiClientSchema() {
-    console.log('syncing client api schema...')
+    PsychicApplication.log('syncing client api schema...')
     const psychicApp = PsychicApplication.getOrFail()
 
     const apiPath = path.join(psychicApp.clientRoot, psychicApp.client.apiPath)
@@ -63,6 +63,6 @@ export default class PsychicBin {
       `npx openapi-typescript ${psychicApp.apiRoot}/openapi.json -o ${apiPath}/${clientApiSchemaFilename}`,
     )
 
-    console.log('done syncing client api schema!')
+    PsychicApplication.log('done syncing client api schema!')
   }
 }

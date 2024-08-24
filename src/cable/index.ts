@@ -54,7 +54,9 @@ export default class Cable {
       } catch (error) {
         if (envBool('PSYCHIC_DANGEROUSLY_PERMIT_WS_EXCEPTIONS')) throw error
         else {
-          console.error(`
+          PsychicApplication.logWithLevel(
+            'error',
+            `
             An exception was caught in your websocket thread.
             To prevent your server from crashing, we are rescuing this error here for you.
             If you would like us to raise this exception, make sure to set
@@ -64,7 +66,8 @@ export default class Cable {
             the error received is:
 
             ${(error as Error).message}
-          `)
+          `,
+          )
           console.trace()
         }
       }
@@ -124,22 +127,22 @@ export default class Cable {
     const subClient = pubClient.duplicate()
 
     pubClient.on('error', error => {
-      console.log('PUB CLIENT ERROR', error)
+      PsychicApplication.log('PUB CLIENT ERROR', error)
     })
     subClient.on('error', error => {
-      console.log('sub CLIENT ERROR', error)
+      PsychicApplication.log('sub CLIENT ERROR', error)
     })
 
     try {
       await Promise.all([pubClient.connect(), subClient.connect()])
     } catch (error) {
-      console.log('REDIS CONNECT ERROR: ', error)
+      PsychicApplication.log('REDIS CONNECT ERROR: ', error)
     }
 
     try {
       this.io!.adapter(createAdapter(pubClient, subClient))
     } catch (error) {
-      console.log('FAILED TO ADAPT', error)
+      PsychicApplication.log('FAILED TO ADAPT', error)
     }
   }
 }

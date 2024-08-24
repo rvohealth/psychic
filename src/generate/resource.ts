@@ -18,7 +18,7 @@ export default async function generateResource(
   await sspawn(`yarn psy g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(' ')}`)
 
   if (args.includes('--core')) {
-    console.log('--core argument provided, setting now')
+    PsychicApplication.log('--core argument provided, setting now')
     process.env.PSYCHIC_CORE_DEVELOPMENT = '1'
   }
 
@@ -39,7 +39,7 @@ export default async function generateResource(
 
     await fs.mkdir(pathParts.join('/'), { recursive: true })
     await fs.writeFile(filepath, str)
-    console.log(`generating client api module: ${filepath}`)
+    PsychicApplication.log(`generating client api module: ${filepath}`)
   }
   // if (process.env.NODE_ENV !== 'test') process.exit()
 }

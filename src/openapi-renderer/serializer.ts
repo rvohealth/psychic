@@ -14,6 +14,7 @@ import {
 } from '@rvohealth/dream'
 import { envBool } from '../helpers/envValue'
 import OpenapiBodySegmentRenderer from './body-segment'
+import PsychicApplication from '../psychic-application'
 
 export default class OpenapiSerializerRenderer {
   private serializerClass: typeof DreamSerializer
@@ -171,7 +172,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     const associatedSerializer = associatedSerializers[0]
     const associatedSerializerKey = associatedSerializer.openapiName
 
-    if (envBool('DEBUG')) console.log(`Processing serializer ${associatedSerializerKey}`)
+    if (envBool('DEBUG')) PsychicApplication.log(`Processing serializer ${associatedSerializerKey}`)
 
     let flattenedData: Record<string, OpenapiSchemaObject>
 
@@ -295,7 +296,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     associatedSerializers.forEach(associatedSerializer => {
       const associatedSerializerKey = associatedSerializer.openapiName
 
-      if (envBool('DEBUG')) console.log(`Processing serializer ${associatedSerializerKey}`)
+      if (envBool('DEBUG')) PsychicApplication.log(`Processing serializer ${associatedSerializerKey}`)
 
       finalOutput[serializerKey].required = uniq([
         ...(finalOutput[serializerKey].required || []),
