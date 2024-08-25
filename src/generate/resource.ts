@@ -1,7 +1,7 @@
+import { generateDream } from '@rvohealth/dream'
 import * as fs from 'fs/promises'
 import path from 'path'
 import pluralize from 'pluralize'
-import sspawn from '../helpers/sspawn'
 import PsychicApplication from '../psychic-application'
 import generateClientAPIModule from './client/apiModule'
 import generateController from './controller'
@@ -13,9 +13,7 @@ export default async function generateResource(
 ) {
   const psychicApp = PsychicApplication.getOrFail()
 
-  const attributesWithTypes = args.filter(attr => !/^--/.test(attr))
-
-  await sspawn(`yarn psy g:model ${fullyQualifiedModelName} ${attributesWithTypes.join(' ')}`)
+  await generateDream(fullyQualifiedModelName, args)
 
   if (args.includes('--core')) {
     PsychicApplication.log('--core argument provided, setting now')
