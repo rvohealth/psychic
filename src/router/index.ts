@@ -351,8 +351,8 @@ export default class PsychicRouter {
           // and manually console log the error to determine what the actual error was.
           // this block enables us to not have to do that anymore.
           if (testEnv() && !devEnvBool('PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR')) {
-            console.log('ATTENTION: a server error was detected:')
-            console.error(err)
+            PsychicApplication.log('ATTENTION: a server error was detected:')
+            PsychicApplication.logWithLevel('error', err)
           }
 
           if (this.config.specialHooks.serverError.length) {
@@ -369,14 +369,15 @@ export default class PsychicRouter {
                 // happened when Jest ended the spec.
                 throw error
               } else {
-                console.error(
+                PsychicApplication.logWithLevel(
+                  'error',
                   `
                   Something went wrong while attempting to call your custom server:error hooks.
                   Psychic will rescue errors thrown here to prevent the server from crashing.
                   The error thrown is:
                 `,
                 )
-                console.error(error)
+                PsychicApplication.logWithLevel('error', error)
               }
             }
           } else throw err

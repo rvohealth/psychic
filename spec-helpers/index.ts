@@ -25,7 +25,7 @@ export async function backgroundJobCompletionPromise() {
 
 const _server: PsychicServer | undefined = undefined
 export async function createPsychicServer() {
-  if (_server) return _server
+  if (_server) return _server!
 
   const server = new PsychicServer()
   await server.boot()

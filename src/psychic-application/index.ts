@@ -1,4 +1,10 @@
-import { DreamApplication, OpenapiSchemaBody } from '@rvohealth/dream'
+import {
+  DreamApplication,
+  DreamLogLevel,
+  DreamLogger,
+  OpenapiSchemaBody,
+  developmentOrTestEnv,
+} from '@rvohealth/dream'
 import bodyParser from 'body-parser'
 import { QueueOptions } from 'bullmq'
 import { CorsOptions } from 'cors'
@@ -35,6 +41,7 @@ export default class PsychicApplication {
       await psychicApp.inflections?.()
 
       dreamApp.set('projectRoot', psychicApp.apiRoot)
+      dreamApp.set('logger', psychicApp.logger)
 
       cachePsychicApplication(psychicApp)
     })
@@ -56,8 +63,24 @@ export default class PsychicApplication {
     return await loadControllers(controllersPath)
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static log(...args: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    this.getOrFail().logger.info(...args)
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static logWithLevel(level: DreamLogLevel, ...args: any[]) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    this.getOrFail().logger[level](...args)
+  }
+
   public apiOnly: boolean = false
   public apiRoot: string
+  public sessionCookieName: string = 'session'
+  public backgroundOptions: PsychicBackgroundOptions = {
+    workerCount: developmentOrTestEnv() ? 1 : 0,
+  }
   public clientRoot: string
   public useWs: boolean = false
   public useRedis: boolean = false
@@ -67,6 +90,7 @@ export default class PsychicApplication {
   public corsOptions: CorsOptions = {}
   public jsonOptions: bodyParser.Options
   public cookieOptions: { maxAge: number }
+  public logger: PsychicLogger = console
   public backgroundQueueOptions: Omit<QueueOptions, 'connection'>
   public backgroundWorkerOptions: WorkerOptions
   public redisBackgroundJobCredentials: PsychicRedisConnectionOptions
@@ -107,10 +131,6 @@ export default class PsychicApplication {
   }
 
   protected loadedControllers: boolean = false
-
-  public get authSessionKey() {
-    return envValue('AUTH_SESSION_KEY') || 'auth_session'
-  }
 
   public get controllers() {
     return getControllersOrFail()
@@ -204,35 +224,43 @@ export default class PsychicApplication {
         ? CustomCookieOptions
         : Opt extends 'apiRoot'
           ? string
-          : Opt extends 'clientRoot'
+          : Opt extends 'sessionCookieName'
             ? string
-            : Opt extends 'json'
-              ? bodyParser.Options
-              : Opt extends 'client'
-                ? PsychicClientOptions
-                : Opt extends 'background:queue'
-                  ? Omit<QueueOptions, 'connection'>
-                  : Opt extends 'background:worker'
-                    ? WorkerOptions
-                    : Opt extends 'redis:background'
-                      ? PsychicRedisConnectionOptions
-                      : Opt extends 'redis:ws'
-                        ? PsychicRedisConnectionOptions
-                        : Opt extends 'ssl'
-                          ? PsychicSslCredentials
-                          : Opt extends 'openapi'
-                            ? PsychicOpenapiOptions
-                            : Opt extends 'paths'
-                              ? PsychicPathOptions
-                              : Opt extends 'port'
-                                ? number
-                                : Opt extends 'saltRounds'
-                                  ? number
-                                  : Opt extends 'inflections'
-                                    ? () => void | Promise<void>
-                                    : Opt extends 'routes'
-                                      ? (r: PsychicRouter) => void | Promise<void>
-                                      : never,
+            : Opt extends 'appEncryptionKey'
+              ? string
+              : Opt extends 'background'
+                ? PsychicBackgroundOptions
+                : Opt extends 'clientRoot'
+                  ? string
+                  : Opt extends 'json'
+                    ? bodyParser.Options
+                    : Opt extends 'logger'
+                      ? PsychicLogger
+                      : Opt extends 'client'
+                        ? PsychicClientOptions
+                        : Opt extends 'background:queue'
+                          ? Omit<QueueOptions, 'connection'>
+                          : Opt extends 'background:worker'
+                            ? WorkerOptions
+                            : Opt extends 'redis:background'
+                              ? PsychicRedisConnectionOptions
+                              : Opt extends 'redis:ws'
+                                ? PsychicRedisConnectionOptions
+                                : Opt extends 'ssl'
+                                  ? PsychicSslCredentials
+                                  : Opt extends 'openapi'
+                                    ? PsychicOpenapiOptions
+                                    : Opt extends 'paths'
+                                      ? PsychicPathOptions
+                                      : Opt extends 'port'
+                                        ? number
+                                        : Opt extends 'saltRounds'
+                                          ? number
+                                          : Opt extends 'inflections'
+                                            ? () => void | Promise<void>
+                                            : Opt extends 'routes'
+                                              ? (r: PsychicRouter) => void | Promise<void>
+                                              : never,
   ) {
     switch (option) {
       case 'apiRoot':
@@ -241,6 +269,14 @@ export default class PsychicApplication {
 
       case 'clientRoot':
         this.clientRoot = value as string
+        break
+
+      case 'sessionCookieName':
+        this.sessionCookieName = value as string
+        break
+
+      case 'appEncryptionKey':
+        this.encryptionKey = value as string
         break
 
       case 'cors':
@@ -264,6 +300,14 @@ export default class PsychicApplication {
 
       case 'json':
         this.jsonOptions = { ...this.jsonOptions, ...(value as bodyParser.Options) }
+        break
+
+      case 'logger':
+        this.logger = value as PsychicLogger
+        break
+
+      case 'background':
+        this.backgroundOptions = { ...this.backgroundOptions, ...(value as PsychicBackgroundOptions) }
         break
 
       case 'background:queue':
@@ -329,6 +373,9 @@ export default class PsychicApplication {
 
 export type PsychicApplicationOption =
   | 'apiRoot'
+  | 'appEncryptionKey'
+  | 'sessionCookieName'
+  | 'background'
   | 'background:queue'
   | 'background:worker'
   | 'client'
@@ -338,6 +385,7 @@ export type PsychicApplicationOption =
   | 'cors'
   | 'inflections'
   | 'json'
+  | 'logger'
   | 'openapi'
   | 'paths'
   | 'port'
@@ -394,6 +442,13 @@ interface PsychicPathOptions {
   controllerSpecs?: string
 }
 
+interface PsychicBackgroundOptions {
+  workerCount: number
+}
+
 export interface PsychicClientOptions {
   apiPath?: string
 }
+
+export type PsychicLogger = DreamLogger
+export type PsychicLogLevel = DreamLogLevel

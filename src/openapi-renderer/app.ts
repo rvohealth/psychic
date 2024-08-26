@@ -69,7 +69,8 @@ export default class OpenapiAppRenderer {
       const controller = controllers[controllerName]
 
       for (const key of Object.keys(controller.openapi || {})) {
-        if (envBool('DEBUG')) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
+        if (envBool('DEBUG'))
+          PsychicApplication.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
 
         const renderer = controller.openapi[key]
 

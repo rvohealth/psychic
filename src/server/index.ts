@@ -47,7 +47,7 @@ export default class PsychicServer {
       await this.config.boot()
     } catch (err) {
       const error = err as Error
-      console.error(error)
+      PsychicApplication.logWithLevel('error', error)
       throw new Error(`
         Failed to boot psychic config. the error thrown was:
           ${error.message}
@@ -170,7 +170,7 @@ export default class PsychicServer {
       this.app.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
         if (isOpenapiError(err)) {
           if (envBool('DEBUG')) {
-            console.log(JSON.stringify(err))
+            PsychicApplication.log(JSON.stringify(err))
             console.trace()
           }
 
@@ -180,7 +180,7 @@ export default class PsychicServer {
           })
         } else {
           if (envBool('DEBUG')) {
-            console.error(err)
+            PsychicApplication.logWithLevel('error', err)
           }
           next()
         }

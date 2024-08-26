@@ -1,6 +1,7 @@
 import * as colors from 'colorette'
 import { RouteConfig } from '../../router/route-manager'
 import PsychicServer from '../../server'
+import PsychicApplication from '../../psychic-application'
 
 export default async function printRoutes() {
   const server = new PsychicServer()
@@ -19,7 +20,7 @@ export default async function printRoutes() {
     const closingSpaces = makeSpaces(partialExpression, desiredLastGapSpaceCount)
     const expression = `${partialExpression}${closingSpaces}`
     const colorizedExpression = i % 2 ? colors.bgWhite(colors.black(expression)) : expression
-    console.log(colorizedExpression)
+    PsychicApplication.log(colorizedExpression)
   })
 }
 
