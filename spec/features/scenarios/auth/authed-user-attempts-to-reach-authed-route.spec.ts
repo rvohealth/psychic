@@ -1,10 +1,11 @@
+import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { PsychicServer } from '../../../../src'
 import User from '../../../../test-app/app/models/User'
-import request from '../../../../spec-helpers/spec-request'
 
 describe('an authed user attempts to hit an authed route', () => {
   beforeEach(async () => {
     await User.create({ email: 'how@yadoin', password: 'password' })
-    await request.init()
+    await request.init(PsychicServer)
   })
 
   it('returns 200', async () => {

@@ -1,8 +1,9 @@
+import '@rvohealth/psychic-spec-helpers'
 import '../../../src/conf/loadEnv'
-import '@rvohealth/psychic/spec-helpers'
 
+import { DreamApplication } from '@rvohealth/dream'
+import { truncate } from '@rvohealth/dream-spec-helpers'
 import initializePsychicApplication from '../../../src/cli/helpers/initializePsychicApplication'
-import { truncate } from '@rvohealth/dream/spec-helpers'
 
 beforeEach(async () => {
   try {
@@ -12,5 +13,5 @@ beforeEach(async () => {
     throw err
   }
 
-  await truncate()
+  await truncate(DreamApplication)
 })

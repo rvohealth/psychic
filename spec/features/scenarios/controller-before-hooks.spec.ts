@@ -1,8 +1,9 @@
-import request from '../../../spec-helpers/spec-request'
+import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { PsychicServer } from '../../../src'
 
 describe('controller before hooks', () => {
   beforeEach(async () => {
-    await request.init()
+    await request.init(PsychicServer)
   })
 
   it('calls before actions before running a method', async () => {

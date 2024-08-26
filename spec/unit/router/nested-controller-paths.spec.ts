@@ -1,8 +1,9 @@
-import request from '../../../spec-helpers/spec-request'
+import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { PsychicServer } from '../../../src'
 
 describe('PsychicRouter', () => {
   beforeEach(async () => {
-    await request.init()
+    await request.init(PsychicServer)
   })
 
   describe('namespaced routes', () => {

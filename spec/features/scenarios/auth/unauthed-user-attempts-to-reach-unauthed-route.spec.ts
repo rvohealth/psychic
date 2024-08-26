@@ -1,8 +1,9 @@
-import request from '../../../../spec-helpers/spec-request'
+import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { PsychicServer } from '../../../../src'
 
 describe('a visitor attempts to hit an unauthed route', () => {
   beforeEach(async () => {
-    await request.init()
+    await request.init(PsychicServer)
   })
 
   it('accepts the request', async () => {

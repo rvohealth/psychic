@@ -1,31 +1,27 @@
-import request from 'supertest'
+import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
-import { createPsychicServer } from '../../../spec-helpers'
 
 describe('a visitor attempts to save a record', () => {
-  let server: PsychicServer
   beforeEach(async () => {
-    server = await createPsychicServer()
+    await request.init(PsychicServer)
   })
 
   it('returns 201', async () => {
-    await request
-      .agent(server.app)
-      .post('/users')
-      .send({
+    await request.post('/users', 201, {
+      data: {
         user: {
           email: 'how@yadoin',
           password: 'howyadoin',
         },
-      })
-      .expect(201)
+      },
+    })
     expect(await User.where({ email: 'how@yadoin' }).count()).toEqual(1)
   })
 
   context('with a record that is invalid at DB level', () => {
     it('does not save, throws 422', async () => {
-      const res = await request.agent(server.app).post('/failed-to-save-test').expect(422)
+      const res = await request.post('/failed-to-save-test', 422)
       expect(res.body).toEqual({ errors: { email: ['contains'] } })
     })
   })
@@ -40,9 +36,7 @@ describe('a visitor attempts to save a record', () => {
     })
 
     it('throws 500', async () => {
-      await server.serveForRequestSpecs(async () => {
-        await request.agent(server.app).post('/force-throw').expect(500)
-      })
+      await request.post('/force-throw', 500)
       expect(await User.count()).toEqual(0)
     })
   })
@@ -51,14 +45,10 @@ describe('a visitor attempts to save a record', () => {
     'with a request that has invalid params, and controller is leveraging Params.for for validation',
     () => {
       it('throws 400', async () => {
-        await server.serveForRequestSpecs(async () => {
-          const response = await request
-            .agent(server.app)
-            .post('/users')
-            .send({ user: { email: 123, password: 'howyadoin', name: 456 } })
-            .expect(400)
-          expect(response.body).toEqual({ errors: { email: ['expected string'], name: ['expected string'] } })
+        const response = await request.post('/users', 400, {
+          data: { user: { email: 123, password: 'howyadoin', name: 456 } },
         })
+        expect(response.body).toEqual({ errors: { email: ['expected string'], name: ['expected string'] } })
         expect(await User.count()).toEqual(0)
       })
     },

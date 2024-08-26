@@ -190,5 +190,7 @@ jobs:
         run: yarn list
 
       - run: yarn install --frozen-lockfile
+      # Add peer dependencies
+      - run: yarn add @rvohealth/dream @socket.io/redis-adapter @socket.io/redis-emitter @types/express bullmq express @types/jsonwebtoken jsonwebtoken redis socket.io typescript
       - run: yarn build
       - run: yarn build:core

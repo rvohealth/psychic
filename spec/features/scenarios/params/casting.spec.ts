@@ -1,26 +1,22 @@
-import request from 'supertest'
+import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
 import PsychicServer from '../../../../src/server'
-import { createPsychicServer } from '../../../../spec-helpers'
 
 describe('hitting an endpoint that calls castParam', () => {
-  let server: PsychicServer
   beforeEach(async () => {
-    server = await createPsychicServer()
+    await request.init(PsychicServer)
   })
 
   it('returns 204 with the param present', async () => {
-    await request
-      .agent(server.app)
-      .post('/cast-param-test')
-      .send({
+    await request.post('/cast-param-test', 204, {
+      data: {
         testString: 'hi',
-      })
-      .expect(204)
+      },
+    })
   })
 
   context('with the test field not present in params', () => {
     it('throws a 400', async () => {
-      await request.agent(server.app).post('/cast-param-test').expect(400)
+      await request.post('/cast-param-test', 400)
     })
   })
 })

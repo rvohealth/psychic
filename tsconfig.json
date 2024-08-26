@@ -26,5 +26,5 @@
     "outDir": "./dist"
   },
   "ignore": [],
-  "include": ["src/**/*", "spec/**/*", "spec-helpers/**/*", "test-app/**/*", "shared/**/*"]
+  "include": ["src/**/*", "spec/**/*", "test-app/**/*", "shared/**/*"]
 }

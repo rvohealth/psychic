@@ -1,6 +1,7 @@
+import { DreamApplication } from '@rvohealth/dream'
 import '../../../src/conf/global'
 
-import { truncate } from '@rvohealth/dream/spec-helpers'
+import { truncate } from '@rvohealth/dream-spec-helpers'
 import initializePsychicApplication from 'cli/helpers/initializePsychicApplication'
 
 jest.setTimeout(
@@ -16,5 +17,5 @@ beforeEach(async () => {
     throw err
   }
 
-  await truncate()
+  await truncate(DreamApplication)
 }, 15000)

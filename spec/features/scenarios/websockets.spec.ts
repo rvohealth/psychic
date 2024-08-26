@@ -1,6 +1,6 @@
+import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
 import { Socket } from 'socket.io'
 import { io } from 'socket.io-client'
-import request from '../../../spec-helpers/spec-request'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/app/models/User'
 import initializePsychicApplication from '../../../test-app/cli/helpers/initializePsychicApplication'
@@ -15,7 +15,7 @@ describe('user attempts to connect to websockets', () => {
   })
 
   beforeEach(async () => {
-    await request.init()
+    await request.init(PsychicServer)
   })
 
   async function getUserToken() {

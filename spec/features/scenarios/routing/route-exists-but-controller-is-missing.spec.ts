@@ -1,8 +1,9 @@
-import request from '../../../../spec-helpers/spec-request'
+import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { PsychicServer } from '../../../../src'
 
 describe('a visitor attempts to hit a route that exists, but is missing a matching controller', () => {
   beforeEach(async () => {
-    await request.init()
+    await request.init(PsychicServer)
   })
 
   it('returns 501', async () => {

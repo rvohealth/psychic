@@ -2,6 +2,7 @@ node_modules
 .env*
 .dream
 logs/!.gitignore
+*.log
 test-app/logs/*
 .node-version
 .DS_Store
