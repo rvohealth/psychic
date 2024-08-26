@@ -77,7 +77,7 @@ export default class PsychicApplication {
 
   public apiOnly: boolean = false
   public apiRoot: string
-  public authSessionKey: string = 'auth_session'
+  public sessionCookieName: string = 'session'
   public backgroundOptions: PsychicBackgroundOptions = {
     workerCount: developmentOrTestEnv() ? 1 : 0,
   }
@@ -224,7 +224,7 @@ export default class PsychicApplication {
         ? CustomCookieOptions
         : Opt extends 'apiRoot'
           ? string
-          : Opt extends 'authSessionKey'
+          : Opt extends 'sessionCookieName'
             ? string
             : Opt extends 'appEncryptionKey'
               ? string
@@ -271,8 +271,8 @@ export default class PsychicApplication {
         this.clientRoot = value as string
         break
 
-      case 'authSessionKey':
-        this.authSessionKey = value as string
+      case 'sessionCookieName':
+        this.sessionCookieName = value as string
         break
 
       case 'appEncryptionKey':
@@ -374,7 +374,7 @@ export default class PsychicApplication {
 export type PsychicApplicationOption =
   | 'apiRoot'
   | 'appEncryptionKey'
-  | 'authSessionKey'
+  | 'sessionCookieName'
   | 'background'
   | 'background:queue'
   | 'background:worker'

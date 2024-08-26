@@ -270,7 +270,7 @@ export default class PsychicController {
 
   public startSession(user: Dream) {
     return this.setCookie(
-      this.config.authSessionKey,
+      this.config.sessionCookieName,
       JSON.stringify({
         id: user.primaryKeyValue,
         modelKey: (user.constructor as typeof Dream).globalName,
@@ -279,7 +279,7 @@ export default class PsychicController {
   }
 
   public endSession() {
-    return this.session.clearCookie(this.config.authSessionKey)
+    return this.session.clearCookie(this.config.sessionCookieName)
   }
 
   private singleObjectJson<T>(data: T, opts: RenderOptions<T>): T | SerializerResult {
