@@ -1,5 +1,5 @@
 import { describe as context } from '@jest/globals'
-import newPsychicApp from '../../../../global-cli/newPsychicApp'
+import newPsychicApp from '../../../../global-cli/helpers/newPsychicApp'
 import { expectPrimaryKey, readHowyadoinFile, removeHowyadoinDir } from './helpers/assertion'
 
 describe('newPsychicApp (primaryKey options)', () => {
@@ -15,7 +15,7 @@ describe('newPsychicApp (primaryKey options)', () => {
     it('sets primary_key_type to "bigserial" in .dream.yml', async () => {
       await newPsychicApp('howyadoin', ['--redis', '--ws', '--client', 'react', '--primaryKey', 'bigserial'])
 
-      const dreamtsContent = await readHowyadoinFile('api/.dream.yml')
+      const dreamtsContent = await readHowyadoinFile('api/src/conf/dream.ts')
       expectPrimaryKey('bigserial', dreamtsContent)
     })
   })
@@ -34,7 +34,7 @@ describe('newPsychicApp (primaryKey options)', () => {
         'uuid',
       ])
 
-      const dreamtsContent = await readHowyadoinFile('api/.dream.yml')
+      const dreamtsContent = await readHowyadoinFile('api/src/conf/dream.ts')
       expectPrimaryKey('uuid', dreamtsContent)
     })
   })
@@ -53,7 +53,7 @@ describe('newPsychicApp (primaryKey options)', () => {
         'bigint',
       ])
 
-      const dreamtsContent = await readHowyadoinFile('api/.dream.yml')
+      const dreamtsContent = await readHowyadoinFile('api/src/conf/dream.ts')
       expectPrimaryKey('bigint', dreamtsContent)
     })
   })
@@ -72,7 +72,7 @@ describe('newPsychicApp (primaryKey options)', () => {
         'integer',
       ])
 
-      const dreamtsContent = await readHowyadoinFile('api/.dream.yml')
+      const dreamtsContent = await readHowyadoinFile('api/src/conf/dream.ts')
       expectPrimaryKey('integer', dreamtsContent)
     })
   })

@@ -9,7 +9,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 const commander_1 = require("commander");
-const newPsychicApp_1 = __importDefault(require("./newPsychicApp"));
+const newPsychicApp_1 = __importDefault(require("./helpers/newPsychicApp"));
 const program = new commander_1.Command();
 program
     .command('new')
@@ -19,11 +19,9 @@ program
     .option('--ws', "allow websockets (i.e. --ws, or --ws false) If you don't set this, you will be prompted on whether or not to enable this. Only enable this if redis is also enabled")
     .option('--primaryKey', "the type of primary key to use. valid options are: 'bigserial', 'bigint', 'integer', 'uuid' (i.e. --primaryKey uuid)")
     .option('--client', "the type of client to use. valid options are: 'react', 'vue', 'nuxt', 'none' (i.e. --client none)")
-    .option('--tsnode', 'runs the command using ts-node instead of node (this should not be passed, is here to support legacy building processes)')
     .action(async () => {
     const name = program.args[1];
-    const indexOfTsNode = program.args.findIndex(str => str === '--tsnode');
-    const args = indexOfTsNode > -1 ? program.args.slice(2, indexOfTsNode) : program.args.slice(2);
+    const args = program.args.slice(2);
     await (0, newPsychicApp_1.default)(name, args);
 });
 program.parse();

@@ -25,7 +25,6 @@ export function expectRedis(redisEnabled: boolean, appTsContent: string) {
   expect(appTsContent).toMatch(
     `
   psy.useRedis = ${redisEnabled}
-
 `,
   )
 }
@@ -34,7 +33,6 @@ export function expectWs(wsEnabled: boolean, appTsContent: string) {
   expect(appTsContent).toMatch(
     `
   psy.useWs = ${wsEnabled}
-
 `,
   )
 }
@@ -43,7 +41,6 @@ export function expectApiOnly(apiOnlyEnabled: boolean, appTsContent: string) {
   expect(appTsContent).toMatch(
     `
   psy.apiOnly = ${apiOnlyEnabled}
-
 `,
   )
 }
@@ -51,7 +48,7 @@ export function expectApiOnly(apiOnlyEnabled: boolean, appTsContent: string) {
 export function expectPrimaryKey(primaryKey: (typeof primaryKeyTypes)[number], dreamYmlContent: string) {
   expect(dreamYmlContent).toMatch(
     `\
-primary_key_type: '${primaryKey}'
+  app.set('primaryKeyType', '${primaryKey}')
 `,
   )
 }

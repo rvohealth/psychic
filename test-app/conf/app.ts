@@ -100,6 +100,10 @@ export default async (psy: PsychicApplication) => {
     },
   })
 
+  psy.set('background', {
+    workerCount: parseInt(process.env.WORKER_COUNT || '0'),
+  })
+
   // configuration options for bullmq queue (used for running background jobs in redis)
   psy.set('background:queue', {
     defaultJobOptions: {

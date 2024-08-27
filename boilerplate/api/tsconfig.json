@@ -1,27 +1,10 @@
 {
+  "extends": "./tsconfig.build.json",
   "ts-node": {
     "ignore": [],
-    "include": ["src/**/*", "node_modules/psychic/src/**/*"]
+    "include": ["src/**/*"]
   },
   "compilerOptions": {
-    "module": "commonjs",
-    "moduleResolution": "node",
-    "removeComments": true,
-    "resolveJsonModule": true,
-    "emitDecoratorMetadata": true,
-    "esModuleInterop": true,
-    "experimentalDecorators": true,
-    "allowSyntheticDefaultImports": true,
-    "target": "es2021",
-    "sourceMap": true,
-    "incremental": true,
-    "skipLibCheck": true,
-    "strictNullChecks": true,
-    "noImplicitAny": true,
-    "strictBindCallApply": false,
-    "forceConsistentCasingInFileNames": false,
-    "noFallthroughCasesInSwitch": false,
-    "outDir": "./dist",
     "baseUrl": "src",
     "types": ["jest", "@types/jest", "jest-playwright-preset", "expect-playwright", "luxon-jest-matchers"]
   },
