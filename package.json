@@ -35,8 +35,8 @@
     "uspec:slow": "PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts sync:all --core && PSYCHIC_CORE_DEVELOPMENT=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "uspec": "PSYCHIC_CORE_DEVELOPMENT=1 jest --config=./spec/unit/jest.config.js --runInBand --forceExit",
     "fspec:slow": "PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts sync:all --core && PSYCHIC_CORE_DEVELOPMENT=1 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
-    "fspec": "PSYCHIC_CORE_DEVELOPMENT=1 DEV_SERVER_PORT=7770 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
-    "spec-server": "FEATURE_SPEC_RUN=1 DEV_SERVER_PORT=7770 PORT=7770 npx ts-node --transpile-only ./test-app/spec-server.ts",
+    "fspec": "PSYCHIC_CORE_DEVELOPMENT=1 SPEC_SERVER_PORT=7770 jest --config=./spec/features/jest.config.js --runInBand --forceExit",
+    "spec-server": "FEATURE_SPEC_RUN=1 SPEC_SERVER_PORT=7770 PORT=7770 npx ts-node --transpile-only ./test-app/spec-server.ts",
     "format": "yarn run prettier . --write",
     "lint": "yarn run eslint --no-warn-ignored \"src/**/*.ts\" \"spec/**/*.ts\" \"test-app/**/*.ts\" && yarn run prettier . --check",
     "prepack": "yarn build"

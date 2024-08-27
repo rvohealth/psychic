@@ -1,35 +1,36 @@
+import os from 'os'
+import path from 'path'
 import { PsychicApplication, background } from '@rvohealth/psychic'
 import { developmentOrTestEnv, testEnv } from '@rvohealth/dream'
 import expressWinston from 'express-winston'
+import inflections from './inflections'
+import routesCb from './routes'
 import winston from 'winston'
 
 
-export default (psy: PsychicApplication) => {
-  // ******
-  // CONFIG:
-  // ******
-
-  // the name of your application (no spaces)
+export default async (psy: PsychicApplication) => {
   psy.appName = '<APP_NAME>'
-
-  // the encryption key to use when encrypting
-  psy.encryptionKey = process.env.APP_ENCRYPTION_KEY!
-
-  // set to true to leverage internal websocket bindings to socket.io
   psy.useWs = <USE_WS>
-
-  // set to true to leverage internal redis bindings.
   psy.useRedis = <USE_REDIS>
-
-  // set to true if you want to also attach a client app to your project.
   psy.apiOnly = <API_ONLY>
 
-  // set options to pass to express.json when middleware is booted
+  await psy.load('controllers', path.join(__dirname, '..', 'app', 'controllers'))
+
+  psy.set('appEncryptionKey', process.env.APP_ENCRYPTION_KEY!)
+  psy.set('apiRoot', path.join(__dirname, '..', '..'))
+  psy.set('clientRoot', path.join(__dirname, '..', '..', '..', 'client'))
+  psy.set('inflections', inflections)
+  psy.set('routes', routesCb)
+
   psy.setJsonOptions({
     limit: '20kb',
   })
 
-  // set options to pass to cors when middleware is booted
+  psy.set('ssl', {
+    key: process.env.PSYCHIC_SSL_KEY_PATH!,
+    cert: process.env.PSYCHIC_SSL_CERT_PATH!,
+  })
+
   psy.set('cors', {
     credentials: true,
     origin: [
@@ -37,8 +38,7 @@ export default (psy: PsychicApplication) => {
     ],
   })
 
-  // set options for cookie usage
-  psy.setCookieOptions({
+  psy.set('cookie', {
     maxAge: {
       days: 14,
       hours: 0,
@@ -48,8 +48,12 @@ export default (psy: PsychicApplication) => {
     },
   })
 
+  psy.set('background', {
+    workerCount: parseInt(process.env.WORKER_COUNT || '1'),
+  })
+
   // configuration options for bullmq queue (used for running background jobs in redis)
-  psy.setBackgroundQueueOptions({
+  psy.set('background:queue', {
     defaultJobOptions: {
       removeOnComplete: 1000,
       removeOnFail: 20000,
@@ -64,10 +68,10 @@ export default (psy: PsychicApplication) => {
   })
 
   // configuration options for bullmq worker (used for running background jobs in redis)
-  psy.setBackgroundWorkerOptions({})
+  psy.set('background:worker', {})
 
   // redis background job credentials
-  psy.setRedisBackgroundJobCredentials({
+  psy.set('redis:background', {
     username: process.env.BACKGROUND_JOBS_REDIS_USER,
     password: process.env.BACKGROUND_JOBS_REDIS_PASSWORD,
     host: process.env.BACKGROUND_JOBS_REDIS_HOST,
@@ -76,7 +80,7 @@ export default (psy: PsychicApplication) => {
   })
 
   // redis websocket credentials
-  psy.setRedisWsCredentials({
+  psy.set('redis:ws', {
     username: process.env.WS_REDIS_USER,
     password: process.env.WS_REDIS_PASSWORD,
     host: process.env.WS_REDIS_HOST,
@@ -84,9 +88,7 @@ export default (psy: PsychicApplication) => {
     secure: process.env.WS_REDIS_USE_SSL === '1',
   })
 
-  // ******
-  // HOOKS:
-  // ******
+  psy.set('openapi', {})
 
   // run a callback on server boot (but before routes are processed)
   psy.on('boot', () => {

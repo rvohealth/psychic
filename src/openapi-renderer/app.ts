@@ -5,9 +5,9 @@ import { envBool } from '../helpers/envValue'
 import openapiJsonPath from '../helpers/openapiJsonPath'
 import PsychicApplication from '../psychic-application'
 import { HttpMethod, HttpMethods } from '../router/types'
+import PsychicServer from '../server'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults'
 import { OpenapiEndpointResponsePath, OpenapiParameterResponse, OpenapiSchema } from './endpoint'
-import PsychicServer from '../server'
 
 export default class OpenapiAppRenderer {
   /**
@@ -74,8 +74,7 @@ export default class OpenapiAppRenderer {
       const controller = controllers[controllerName]
 
       for (const key of Object.keys(controller.openapi || {})) {
-        if (envBool('DEBUG'))
-          PsychicApplication.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
+        if (envBool('DEBUG')) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
 
         const renderer = controller.openapi[key]
 

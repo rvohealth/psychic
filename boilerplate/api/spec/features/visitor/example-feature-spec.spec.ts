@@ -1,6 +1,8 @@
+import visit from '../helpers/visit'
+
 describe('playwright sample test', () => {
   it('my first playwright test', async () => {
-    await page.goto('http://localhost:3000')
+    await visit('/')
     // TODO add specs here for your client app
   })
 })

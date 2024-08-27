@@ -1,4 +1,4 @@
-import newPsychicApp from '../../../../../global-cli/newPsychicApp'
+import newPsychicApp from '../../../../../global-cli/helpers/newPsychicApp'
 import { expectApiOnly, expectVueClient, readHowyadoinFile, removeHowyadoinDir } from '../helpers/assertion'
 
 describe('newPsychicApp (client options)', () => {

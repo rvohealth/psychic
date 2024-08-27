@@ -16,7 +16,7 @@ export function devEnvBool(env: AllowedDevBoolEnv) {
   return process.env[env] === '1'
 }
 
-export type AllowedEnv = 'DEV_SERVER_PORT' | 'NODE_ENV' | 'PORT' | 'PSYCHIC_CORE_DEVELOPMENT'
+export type AllowedEnv = 'SPEC_SERVER_PORT' | 'NODE_ENV' | 'PORT' | 'PSYCHIC_CORE_DEVELOPMENT'
 
 export type AllowedBoolEnv =
   | 'CLIENT'

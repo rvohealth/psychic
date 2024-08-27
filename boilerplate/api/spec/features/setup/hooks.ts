@@ -1,8 +1,9 @@
-import { DreamApplication } from '@rvohealth/dream'
+import '@rvohealth/psychic-spec-helpers'
 import '../../../src/conf/global'
 
+import { DreamApplication } from '@rvohealth/dream'
 import { truncate } from '@rvohealth/dream-spec-helpers'
-import initializePsychicApplication from 'cli/helpers/initializePsychicApplication'
+import initializePsychicApplication from '../../../src/cli/helpers/initializePsychicApplication'
 
 jest.setTimeout(
   (process.env.JEST_FEATURE_TIMEOUT_SECONDS && parseInt(process.env.JEST_FEATURE_TIMEOUT_SECONDS) * 1000) ||
@@ -18,4 +19,4 @@ beforeEach(async () => {
   }
 
   await truncate(DreamApplication)
-}, 15000)
+}, 50000)

@@ -6,9 +6,8 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   transform: { '^.+\\.tsx?$': 'ts-jest' },
-  transformIgnorePatterns: ['<rootDir>/node_modules/dream/src'],
-  // setupFiles: ['jest-plugin-context/setup'],
-  setupFilesAfterEnv: ['<rootDir>setup/hooks.ts'],
+  setupFilesAfterEnv: ['<rootDir>setup/hooks.ts', 'luxon-jest-matchers'],
   globalSetup: '<rootDir>setup/beforeAll.ts',
   globalTeardown: '<rootDir>setup/afterAll.ts',
+  workerIdleMemoryLimit: '1024MB',
 }

@@ -1,19 +1,19 @@
-import * as fs from 'fs'
 import * as c from 'colorette'
+import * as fs from 'fs'
 
-import copyRecursive from './helpers/copyRecursive'
-import EnvBuilder from './file-builders/EnvBuilder'
-import sspawn from './helpers/sspawn'
-import logo from './helpers/logo'
-import log from './helpers/log'
-import sleep from './helpers/sleep'
-import welcomeMessage from './helpers/welcomeMessage'
-import gatherUserInput from './helpers/gatherUserInput'
-import PackagejsonBuilder from './file-builders/PackagejsonBuilder'
-import ViteConfBuilder from './file-builders/ViteConfBuilder'
-import AppConfigBuilder from './file-builders/AppConfigBuilder'
-import DreamYamlBuilder from './file-builders/DreamYamlBuilder'
-import ESLintConfBuilder from './file-builders/EslintConfBuilder'
+import AppConfigBuilder from '../file-builders/AppConfigBuilder'
+import DreamConfigBuilder from '../file-builders/DreamConfigBuilder'
+import EnvBuilder from '../file-builders/EnvBuilder'
+import ESLintConfBuilder from '../file-builders/EslintConfBuilder'
+import PackagejsonBuilder from '../file-builders/PackagejsonBuilder'
+import ViteConfBuilder from '../file-builders/ViteConfBuilder'
+import copyRecursive from './copyRecursive'
+import gatherUserInput from './gatherUserInput'
+import log from './log'
+import logo from './logo'
+import sleep from './sleep'
+import sspawn from './sspawn'
+import welcomeMessage from './welcomeMessage'
 
 function testEnv() {
   return process.env.NODE_ENV === 'test'
@@ -34,11 +34,11 @@ export default async function newPsychicApp(appName: string, args: string[]) {
 
   if (userOptions.apiOnly) {
     projectPath = `./${appName}`
-    copyRecursive(__dirname + '/../boilerplate/api', `./${appName}`)
+    copyRecursive(__dirname + '/../../boilerplate/api', `./${appName}`)
   } else {
     projectPath = `./${appName}/api`
     fs.mkdirSync(`./${appName}`)
-    copyRecursive(__dirname + '/../boilerplate/api', projectPath)
+    copyRecursive(__dirname + '/../../boilerplate/api', projectPath)
   }
 
   if (!testEnv()) {
@@ -51,7 +51,10 @@ export default async function newPsychicApp(appName: string, args: string[]) {
   fs.writeFileSync(`${projectPath}/.env.test`, EnvBuilder.build({ appName, env: 'test' }))
   fs.writeFileSync(projectPath + '/package.json', await PackagejsonBuilder.buildAPI(userOptions))
   fs.writeFileSync(`${projectPath}/src/conf/app.ts`, await AppConfigBuilder.build({ appName, userOptions }))
-  fs.writeFileSync(projectPath + '/.dream.yml', await DreamYamlBuilder.build(userOptions))
+  fs.writeFileSync(
+    `${projectPath}/src/conf/dream.ts`,
+    await DreamConfigBuilder.build({ appName, userOptions }),
+  )
 
   if (!testEnv()) {
     log.restoreCache()
@@ -93,13 +96,13 @@ export default async function newPsychicApp(appName: string, args: string[]) {
 
           fs.mkdirSync(`./${appName}/client/src/config`)
 
-          copyRecursive(__dirname + '/../boilerplate/client/api', `${projectPath}/../client/src/api`)
+          copyRecursive(__dirname + '/../../boilerplate/client/api', `${projectPath}/../client/src/api`)
           copyRecursive(
-            __dirname + '/../boilerplate/client/config/routes.ts',
+            __dirname + '/../../boilerplate/client/config/routes.ts',
             `${projectPath}/../client/src/config/routes.ts`,
           )
           copyRecursive(
-            __dirname + '/../boilerplate/client/node-version',
+            __dirname + '/../../boilerplate/client/node-version',
             `${projectPath}/../client/.node-version`,
           )
 
@@ -112,13 +115,13 @@ export default async function newPsychicApp(appName: string, args: string[]) {
           await sspawn(`cd ${rootPath} && yarn create vite client --template vue-ts`)
           fs.mkdirSync(`./${appName}/client/src/config`)
 
-          copyRecursive(__dirname + '/../boilerplate/client/api', `${projectPath}/../client/src/api`)
+          copyRecursive(__dirname + '/../../boilerplate/client/api', `${projectPath}/../client/src/api`)
           copyRecursive(
-            __dirname + '/../boilerplate/client/config/routes.ts',
+            __dirname + '/../../boilerplate/client/config/routes.ts',
             `${projectPath}/../client/src/config/routes.ts`,
           )
           copyRecursive(
-            __dirname + '/../boilerplate/client/node-version',
+            __dirname + '/../../boilerplate/client/node-version',
             `${projectPath}/../client/.node-version`,
           )
 
@@ -130,13 +133,13 @@ export default async function newPsychicApp(appName: string, args: string[]) {
 
           fs.mkdirSync(`./${appName}/client/config`)
 
-          copyRecursive(__dirname + '/../boilerplate/client/api', `${projectPath}/../client/src/api`)
+          copyRecursive(__dirname + '/../../boilerplate/client/api', `${projectPath}/../client/src/api`)
           copyRecursive(
-            __dirname + '/../boilerplate/client/config/routes.ts',
+            __dirname + '/../../boilerplate/client/config/routes.ts',
             `${projectPath}/../client/config/routes.ts`,
           )
           copyRecursive(
-            __dirname + '/../boilerplate/client/node-version',
+            __dirname + '/../../boilerplate/client/node-version',
             `${projectPath}/../client/.node-version`,
           )
 

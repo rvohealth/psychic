@@ -6,7 +6,7 @@
 // https://github.com/tj/commander.js#quick-start
 
 import { Command } from 'commander'
-import newPsychicApp from './newPsychicApp'
+import newPsychicApp from './helpers/newPsychicApp'
 
 const program = new Command()
 

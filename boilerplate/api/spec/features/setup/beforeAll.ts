@@ -1,4 +1,7 @@
-import * as dotenv from 'dotenv'
-dotenv.config({ path: '.env.test' })
+import '../../../src/conf/global'
 
-export default async function () {}
+import initializePsychicApplication from '../../../src/cli/helpers/initializePsychicApplication'
+
+export default async () => {
+  await initializePsychicApplication()
+}

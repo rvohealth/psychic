@@ -1,5 +1,5 @@
 import { describe as context } from '@jest/globals'
-import newPsychicApp from '../../../../global-cli/newPsychicApp'
+import newPsychicApp from '../../../../global-cli/helpers/newPsychicApp'
 import { expectRedis, readHowyadoinFile, removeHowyadoinDir } from './helpers/assertion'
 
 describe('newPsychicApp (ws options)', () => {

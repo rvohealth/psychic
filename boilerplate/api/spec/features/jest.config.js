@@ -6,6 +6,5 @@ module.exports = {
   resetMocks: true,
   preset: 'jest-playwright-preset',
   transform: { '^.+\\.tsx?$': 'ts-jest' },
-  transformIgnorePatterns: ['<rootDir>/node_modules/dream/src'],
   setupFilesAfterEnv: ['expect-playwright', '<rootDir>/setup/hooks.ts'],
 }

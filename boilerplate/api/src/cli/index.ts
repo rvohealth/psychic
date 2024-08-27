@@ -8,10 +8,11 @@
 import '../conf/loadEnv'
 
 import { DreamBin, developmentOrTestEnv } from '@rvohealth/dream'
-import { PsychicBin, PsychicApplication } from '@rvohealth/psychic'
+import { PsychicApplication, PsychicBin } from '@rvohealth/psychic'
 import { Command } from 'commander'
 import seedDb from '../db/seed'
 import initializePsychicApplication from './helpers/initializePsychicApplication'
+import sync from './helpers/sync'
 
 const program = new Command()
 
@@ -40,6 +41,18 @@ program
   .action(async () => {
     await initializePsychicApplication()
     await DreamBin.generateDream()
+    process.exit()
+  })
+
+program
+  .command('generate:sti-child')
+  .alias('g:sti-child')
+  .description('generate:dream <name> extends <base-name> [...attributes] create a new dream')
+  .argument('<name>', 'name of the dream')
+  .argument('<base-name>', 'name of the parent dream')
+  .action(async () => {
+    await initializePsychicApplication()
+    await DreamBin.generateStiChild()
     process.exit()
   })
 
@@ -110,7 +123,6 @@ program
   )
   .action(async () => {
     await sync()
-    process.exit()
   })
 
 program
@@ -217,7 +229,11 @@ program
     await DreamBin.dbDrop()
     await DreamBin.dbCreate()
     await DreamBin.dbMigrate()
-    await sync()
+
+    if (developmentOrTestEnv()) {
+      await sync()
+    }
+
     await seedDb()
     process.exit()
   })
@@ -232,9 +248,7 @@ program
   )
   .action(async () => {
     if (process.env.NODE_ENV === 'test' && process.env.DREAM_SEED_DB_IN_TEST !== '1') {
-      PsychicApplication.log(
-        'skipping db seed for test env. To really seed for test, add DREAM_SEED_DB_IN_TEST=1',
-      )
+      console.log('skipping db seed for test env. To really seed for test, add DREAM_SEED_DB_IN_TEST=1')
       return
     }
 
