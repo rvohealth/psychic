@@ -290,3 +290,19 @@ export class CommentTestingStringArraySerializer extends DreamSerializer {
   })
   public howyadoin: string
 }
+
+export class CommentTestingAdditionalPropertiesShorthandSerializer extends DreamSerializer {
+  @Attribute({ type: 'object', additionalProperties: 'number' })
+  public howyadoin: Record<string, number>
+}
+
+export class CommentTestingAdditionalPropertiesSerializer extends DreamSerializer {
+  @Attribute({
+    type: 'object',
+    additionalProperties: {
+      type: 'object',
+      properties: { code: { type: 'integer' }, text: { type: 'string' } },
+    },
+  })
+  public howyadoin: Record<string, { code: string; text: string }>
+}

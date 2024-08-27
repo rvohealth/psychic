@@ -1,6 +1,8 @@
 import { DreamSerializer } from '@rvohealth/dream'
 import OpenapiSerializerRenderer from '../../../../src/openapi-renderer/serializer'
 import {
+  CommentTestingAdditionalPropertiesSerializer,
+  CommentTestingAdditionalPropertiesShorthandSerializer,
   CommentTestingDateSerializer,
   CommentTestingDateTimeSerializer,
   CommentTestingDecimalSerializer,
@@ -244,6 +246,43 @@ describe('OpenapiSerializerRenderer', () => {
                 },
               },
               required: ['howyadoin', 'howyadoins'],
+              type: 'object',
+            },
+          })
+        })
+      })
+
+      context('additionalProperties', () => {
+        it('shorthand', () => {
+          expect(subject(CommentTestingAdditionalPropertiesShorthandSerializer)).toEqual({
+            CommentTestingAdditionalPropertiesShorthand: {
+              properties: {
+                howyadoin: {
+                  type: 'object',
+                  additionalProperties: {
+                    type: 'number',
+                  },
+                },
+              },
+              required: ['howyadoin'],
+              type: 'object',
+            },
+          })
+        })
+
+        it('full', () => {
+          expect(subject(CommentTestingAdditionalPropertiesSerializer)).toEqual({
+            CommentTestingAdditionalProperties: {
+              properties: {
+                howyadoin: {
+                  type: 'object',
+                  additionalProperties: {
+                    type: 'object',
+                    properties: { code: { type: 'integer' }, text: { type: 'string' } },
+                  },
+                },
+              },
+              required: ['howyadoin'],
               type: 'object',
             },
           })

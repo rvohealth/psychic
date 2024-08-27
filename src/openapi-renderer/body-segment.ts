@@ -254,7 +254,9 @@ export default class OpenapiBodySegmentRenderer {
     }
 
     if (objectBodySegment.additionalProperties) {
-      data.additionalProperties = this.parseObjectPropertyStatement(objectBodySegment.additionalProperties)
+      data.additionalProperties = this.recursivelyParseBody(
+        objectBodySegment.additionalProperties,
+      ) as OpenapiSchemaObject
     }
 
     if (Array.isArray(objectBodySegment.required)) data.required = objectBodySegment.required
