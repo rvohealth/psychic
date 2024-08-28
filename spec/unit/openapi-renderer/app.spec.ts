@@ -51,6 +51,40 @@ describe('OpenapiAppRenderer', () => {
         }),
       )
 
+      expect(response.paths['/users/{id}/justforspecs']).toEqual(
+        expect.objectContaining({
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+          parameters: expect.arrayContaining([
+            {
+              description: 'custom header',
+              in: 'header',
+              name: 'custom-header',
+              required: true,
+              schema: {
+                type: 'string',
+              },
+            },
+          ]),
+
+          get: {
+            tags: [],
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            responses: expect.objectContaining({
+              '200': {
+                description: 'Success',
+                content: {
+                  'application/json': {
+                    schema: {
+                      $ref: '#/components/schemas/CommentTestingBasicSerializerRef',
+                    },
+                  },
+                },
+              },
+            }),
+          },
+        }),
+      )
+
       expect(response.paths['/users']).toEqual(
         expect.objectContaining({
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

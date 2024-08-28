@@ -1,6 +1,7 @@
 import { Encrypt } from '../../../src'
 import { BeforeAction, OpenAPI } from '../../../src/controller/decorators'
 import User from '../models/User'
+import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer'
 import ApplicationController from './ApplicationController'
 
 export default class UsersController extends ApplicationController {
@@ -81,6 +82,16 @@ export default class UsersController extends ApplicationController {
 
     this.ok(token)
   }
+
+  @OpenAPI({
+    status: 200,
+    responses: {
+      200: {
+        $serializer: CommentTestingBasicSerializerRefSerializer,
+      },
+    },
+  })
+  public justforspecs() {}
 
   @BeforeAction()
   public setBeforeAllTestContent() {
