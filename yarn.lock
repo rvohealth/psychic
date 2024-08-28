@@ -937,10 +937,10 @@
     ts-node "^10.9.2"
     typescript "^5.5.4"
 
-"@rvohealth/dream@^0.10.7":
-  version "0.10.7"
-  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.10.7/f257ec78c8fdb3c19cab376ffcf53116b7857f92#f257ec78c8fdb3c19cab376ffcf53116b7857f92"
-  integrity sha512-TVqR2NLVQ8qLkU35bDbVYntEbOVMGr2vLvfBFgGr3sWUJm4MjKN+JNDJIypPxW5UnrPoyPAL8AEDOvfdQA/rRA==
+"@rvohealth/dream@^0.10.8":
+  version "0.10.8"
+  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.10.8/b0f3245426761e6c00c687b952de2e73d0c76d59#b0f3245426761e6c00c687b952de2e73d0c76d59"
+  integrity sha512-b4MTYOBMIFIczPEj8GlHhrxu0hEEQU/6o/Ak8EPrT3+btrdukhudUW3w0FKfu8cl6F+kKqBIcoZAzy9CsxPyhw==
   dependencies:
     "@types/lodash.clonedeep" "^4.5.9"
     "@types/lodash.clonedeepwith" "^4.5.9"
