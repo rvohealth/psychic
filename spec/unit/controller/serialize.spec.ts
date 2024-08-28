@@ -84,14 +84,14 @@ describe('PsychicController', () => {
         class GreetSerializer extends DreamSerializer {
           @Attribute()
           public greeting(): string {
-            return `${(this.data as Greeting).word} world`
+            return `${(this.$data as Greeting).word} world`
           }
         }
 
         class GreetSerializer2 extends DreamSerializer {
           @Attribute()
           public greeting(): string {
-            return `${(this.data as Greeting).word} goodbye`
+            return `${(this.$data as Greeting).word} goodbye`
           }
         }
 
