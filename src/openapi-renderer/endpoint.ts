@@ -22,7 +22,6 @@ import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes
 import PsychicApplication from '../psychic-application'
 import { RouteConfig } from '../router/route-manager'
 import { HttpMethod } from '../router/types'
-import PsychicServer from '../server'
 import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment'
 import { DEFAULT_OPENAPI_RESPONSES } from './defaults'
 import openapiRoute from './helpers/openapiRoute'
@@ -120,19 +119,20 @@ export default class OpenapiEndpointRenderer<
    * `#toPathObject` specifically builds the `paths` portion of the
    * final openapi.json output
    */
-  public async toPathObject(processedSchemas: Record<string, boolean>): Promise<OpenapiEndpointResponse> {
+  public toPathObject(
+    processedSchemas: Record<string, boolean>,
+    routes: RouteConfig[],
+  ): OpenapiEndpointResponse {
     this.serializers = DreamApplication.getOrFail().serializers
 
-    const [path, method, requestBody, responses] = await Promise.all([
-      this.computedPath(),
-      this.computedMethod(),
-      this.computedRequestBody(processedSchemas),
-      this.parseResponses(processedSchemas),
-    ])
+    const path = this.computedPath(routes)
+    const method = this.computedMethod(routes)
+    const requestBody = this.computedRequestBody(processedSchemas, routes)
+    const responses = this.parseResponses(processedSchemas)
 
     const output = {
       [path]: {
-        parameters: [...this.headersArray(), ...(await this.pathParamsArray()), ...this.queryArray()],
+        parameters: [...this.headersArray(), ...this.pathParamsArray(routes), ...this.queryArray()],
         [method]: {
           tags: this.tags || [],
         },
@@ -210,19 +210,10 @@ export default class OpenapiEndpointRenderer<
    * based on the name of the controller action. If the action is not
    * a standardized crud action, then `get` will be returned.
    */
-  private async computedMethod(): Promise<HttpMethod> {
-    if (this._method) return this._method
-
-    try {
-      const route = await this.getCurrentRouteConfig()
-      this._method = route.httpMethod
-    } catch {
-      this._method = this.guessHttpMethod()
-    }
-
-    return this._method
+  private computedMethod(routes: RouteConfig[]): HttpMethod {
+    const route = this.getCurrentRouteConfig(routes)
+    return route.httpMethod
   }
-  private _method: HttpMethod
 
   /**
    * @internal
@@ -230,12 +221,12 @@ export default class OpenapiEndpointRenderer<
    * Generates the path portion of the openapi payload's
    * "parameters" field for a single endpoint.
    */
-  private async pathParamsArray(): Promise<OpenapiParameterResponse[]> {
+  private pathParamsArray(routes: RouteConfig[]): OpenapiParameterResponse[] {
     if (this._pathParams) return this._pathParams
 
     const extraPathParamDetails: OpenapiPathParams = this.pathParams || {}
 
-    const route = await this.getCurrentRouteConfig()
+    const route = this.getCurrentRouteConfig(routes)
     const pathSegments = route.path
       .split('/')
       .filter(pathSegment => /^:/.test(pathSegment))
@@ -289,14 +280,10 @@ export default class OpenapiEndpointRenderer<
    *
    * If no match is found, a MissingControllerActionPairingInRoutes exception.
    */
-  private async computedPath(): Promise<string> {
-    if (this._path) return this._path
-
-    const route = await this.getCurrentRouteConfig()
-    this._path = openapiRoute(route.path)
-    return this._path
+  private computedPath(routes: RouteConfig[]) {
+    const route = this.getCurrentRouteConfig(routes)
+    return openapiRoute(route.path)
   }
-  private _path: string
 
   /**
    * @internal
@@ -304,51 +291,26 @@ export default class OpenapiEndpointRenderer<
    * find and memoize the route corresponding to this controller.
    * If no match is found, a MissingControllerActionPairingInRoutes exception.
    */
-  private async getCurrentRouteConfig() {
-    await this._loadRoutes()
+  private getCurrentRouteConfig(routes: RouteConfig[]) {
     const controllerActionString = this.controllerClass.controllerActionPath(this.action)
 
     // if the action is update, we want to specifically find the 'patch' route,
     // otherwise we find any route that matches
     let route =
       this.action === 'update'
-        ? this.routes.find(
+        ? routes.find(
             routeConfig =>
               routeConfig.controllerActionString === controllerActionString &&
               routeConfig.httpMethod === 'patch',
           )
-        : this.routes.find(routeConfig => routeConfig.controllerActionString === controllerActionString)
+        : routes.find(routeConfig => routeConfig.controllerActionString === controllerActionString)
 
     if (!route)
-      route = this.routes.find(routeConfig => routeConfig.controllerActionString === controllerActionString)
+      route = routes.find(routeConfig => routeConfig.controllerActionString === controllerActionString)
 
     if (!route) throw new MissingControllerActionPairingInRoutes(this.controllerClass, this.action)
     return route
   }
-
-  /**
-   * @internal
-   *
-   * loads all routes for this psychic app and memoizes them
-   */
-  private async _loadRoutes() {
-    if (this._routes) return
-
-    const server = new PsychicServer()
-    await server.boot()
-    this._routes = await server.routes()
-  }
-
-  /**
-   * @internal
-   *
-   * Returns the loaded routes (loaded by the #_loadRoutes method)
-   */
-  private get routes() {
-    if (!this._routes) throw new Error('must called _loadRoutes before accessing routes property')
-    return this._routes
-  }
-  private _routes: RouteConfig[]
 
   /**
    * @internal
@@ -422,10 +384,11 @@ export default class OpenapiEndpointRenderer<
    *
    * Generates the requestBody portion of the endpoint
    */
-  private async computedRequestBody(
+  private computedRequestBody(
     processedSchemas: Record<string, boolean>,
-  ): Promise<OpenapiContent | undefined> {
-    const method = await this.computedMethod()
+    routes: RouteConfig[],
+  ): OpenapiContent | undefined {
+    const method = this.computedMethod(routes)
     if (this.requestBody === null) return undefined
 
     const httpMethodsThatAllowBody: HttpMethod[] = ['post', 'patch', 'put']

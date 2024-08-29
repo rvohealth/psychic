@@ -7,6 +7,7 @@ import PsychicApplication from '../psychic-application'
 import { HttpMethod, HttpMethods } from '../router/types'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults'
 import { OpenapiEndpointResponsePath, OpenapiParameterResponse, OpenapiSchema } from './endpoint'
+import PsychicServer from '../server'
 
 export default class OpenapiAppRenderer {
   /**
@@ -35,6 +36,10 @@ export default class OpenapiAppRenderer {
     const psychicApp = PsychicApplication.getOrFail()
     const controllers = psychicApp.controllers
     const packageJsonPath = path.join(psychicApp.apiRoot, 'package.json')
+
+    const server = new PsychicServer()
+    await server.boot()
+    const routes = await server.routes()
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     const packageJson = (await import(packageJsonPath)).default as {
@@ -79,7 +84,7 @@ export default class OpenapiAppRenderer {
           ...renderer.toSchemaObject(processedSchemas),
         }
 
-        const endpointPayload = await renderer.toPathObject(processedSchemas)
+        const endpointPayload = renderer.toPathObject(processedSchemas, routes)
         const path = Object.keys(endpointPayload)[0]
 
         const method = (Object.keys(endpointPayload[path]) as HttpMethod[]).find(key =>
