@@ -197,10 +197,7 @@ export default class PsychicController {
   public castParam<
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
-    ExpectedType extends
-      | (typeof PsychicParamsPrimitiveLiterals)[number]
-      | (typeof PsychicParamsPrimitiveLiterals)[number][]
-      | RegExp,
+    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
   >(key: string, expectedType: ExpectedType, opts?: OptsType) {
     try {
       return this._castParam(key.split('.'), this.params, expectedType, opts)
@@ -214,10 +211,7 @@ export default class PsychicController {
   private _castParam<
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
-    ExpectedType extends
-      | (typeof PsychicParamsPrimitiveLiterals)[number]
-      | (typeof PsychicParamsPrimitiveLiterals)[number][]
-      | RegExp,
+    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
     ValidatedType extends ValidatedReturnType<ExpectedType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
     FinalReturnType extends AllowNullOrUndefined extends true

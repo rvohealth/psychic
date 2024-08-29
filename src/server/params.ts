@@ -283,10 +283,7 @@ export default class Params {
   public static cast<
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
-    ExpectedType extends
-      | (typeof PsychicParamsPrimitiveLiterals)[number]
-      | (typeof PsychicParamsPrimitiveLiterals)[number][]
-      | RegExp,
+    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
     ValidatedType extends ValidatedReturnType<ExpectedType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
     FinalReturnType extends AllowNullOrUndefined extends true
@@ -311,10 +308,7 @@ export default class Params {
   public cast<
     EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
-    ExpectedType extends
-      | (typeof PsychicParamsPrimitiveLiterals)[number]
-      | (typeof PsychicParamsPrimitiveLiterals)[number][]
-      | RegExp,
+    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
     ValidatedType extends ValidatedReturnType<ExpectedType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
     ReturnType extends AllowNullOrUndefined extends true ? ValidatedType | null | undefined : ValidatedType,
@@ -324,42 +318,36 @@ export default class Params {
     opts?: OptsType,
   ): AllowNullOrUndefined extends true ? ValidatedType | null | undefined : ValidatedType {
     if (expectedType instanceof RegExp) {
-      return this.matchRegexOrThrow(paramValue as string, expectedType, opts) as ReturnType
+      return this.matchRegexOrThrow(paramValue as string, expectedType) as ReturnType
     }
 
-    let errorMessage: string
-    let baseType: (typeof PsychicParamsPrimitiveLiterals)[number]
-    let dateClass: typeof DateTime | typeof CalendarDate
-    let compactedValue: unknown
+    if (paramValue === null || paramValue === undefined) {
+      if (expectedType === 'null') return null as ReturnType
+      this.throwUnlessAllowNull(paramValue, typeToError(expectedType), opts)
+      return paramValue as ReturnType
+    }
 
+    let dateClass: typeof DateTime | typeof CalendarDate
+    const integerRegexp = /^-?\d+$/
     switch (expectedType) {
       case 'string':
-        if (typeof paramValue !== 'string') this.throwUnlessAllowNull(paramValue, 'expected string', opts)
-
-        if (opts?.enum && !opts.enum.includes(paramValue as string))
-          this.throwUnlessAllowNull(paramValue, 'did not match expected enum values')
-
-        if (opts?.match) {
-          return this.matchRegexOrThrow(paramValue as string, opts.match, opts) as ReturnType
-        } else {
-          return paramValue as ReturnType
-        }
+        if (typeof paramValue !== 'string') throw new ParamValidationError(typeToError(expectedType))
+        if (opts?.enum && !opts.enum.includes(paramValue))
+          throw new ParamValidationError('did not match expected enum values')
+        if (opts?.match) return this.matchRegexOrThrow(paramValue, opts.match) as ReturnType
+        return paramValue as ReturnType
 
       case 'bigint':
-        if (
-          !Number.isInteger(parseInt(paramValue as string)) ||
-          `${parseInt(paramValue as string)}` !== `${paramValue as string}`
-        )
-          this.throwUnlessAllowNull(paramValue, 'expected bigint', opts)
-        return (paramValue ? `${paramValue as number}` : null) as ReturnType
+        if (typeof paramValue !== 'string' && typeof paramValue !== 'number')
+          throw new ParamValidationError(typeToError(expectedType))
+        if (!integerRegexp.test(paramValue?.toString()))
+          throw new ParamValidationError(typeToError(expectedType))
+        return paramValue.toString() as ReturnType
 
       case 'boolean':
-        if (paramValue === 'true') return true as ReturnType
-        if (paramValue === 'false') return false as ReturnType
-        if ([1, '1'].includes(paramValue as string)) return true as ReturnType
-        if ([0, '0'].includes(paramValue as string)) return false as ReturnType
-        if (typeof paramValue !== 'boolean') this.throwUnlessAllowNull(paramValue, 'expected boolean', opts)
-        return paramValue as ReturnType
+        if ([true, 'true', 1, '1'].includes(paramValue as string)) return true as ReturnType
+        if ([false, 'false', 0, '0'].includes(paramValue as string)) return false as ReturnType
+        throw new ParamValidationError(typeToError(expectedType))
 
       case 'datetime':
       case 'date':
@@ -375,62 +363,43 @@ export default class Params {
             else throw Error(`expectedType is not a string`)
         }
 
-        errorMessage = 'expecting ISO string or millis since epoch'
         if ((paramValue instanceof DateTime || paramValue instanceof CalendarDate) && paramValue.isValid)
           return paramValue as ReturnType
 
         if (typeof paramValue === 'string') {
           const dateTime = dateClass.fromISO(paramValue)
           if (dateTime.isValid) return dateTime as ReturnType
-          throw new ParamValidationError(errorMessage)
-        } else if (Number.isInteger(paramValue as number)) {
-          const dateTime = DateTime.fromMillis(paramValue as number)
-          if (dateTime.isValid) return dateTime as ReturnType
-          throw new ParamValidationError(errorMessage)
-        } else {
-          if (paramValue === null && opts?.allowNull) {
-            return null as ReturnType
-          }
-          throw new ParamValidationError(errorMessage)
         }
+
+        throw new ParamValidationError(typeToError(expectedType))
 
       case 'integer':
-        errorMessage = 'expected integer or string integer'
-        if (Number.isInteger(paramValue)) return parseInt(paramValue as string) as ReturnType
-        if (Number.isNaN(parseInt(paramValue as string, 10)))
-          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
-        if (`${parseInt(paramValue as string, 10)}` !== `${paramValue as string}`)
-          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
-        return (paramValue === null ? null : parseInt(paramValue as string, 10)) as ReturnType
+        if (typeof paramValue !== 'string' && typeof paramValue !== 'number')
+          throw new ParamValidationError(typeToError(expectedType))
+        if (!integerRegexp.test(paramValue?.toString()))
+          throw new ParamValidationError(typeToError(expectedType))
+        return parseInt(paramValue as string, 10) as ReturnType
 
       case 'json':
-        errorMessage = 'expected an object'
-        if (typeof paramValue !== 'object') throw new ParamValidationError(errorMessage)
-        if (paramValue === null) this.throwUnlessAllowNull(paramValue, errorMessage, opts)
-        return (paramValue === null ? null : paramValue) as ReturnType
+        if (typeof paramValue !== 'object') throw new ParamValidationError(typeToError(expectedType))
+        return paramValue as ReturnType
 
       case 'number':
-        errorMessage = 'expected number or string number'
         if (typeof paramValue === 'number') return paramValue as ReturnType
-        if (`${parseFloat(paramValue as string)}` !== `${paramValue as string}`)
-          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
-        if (Number.isNaN(parseFloat(paramValue as string)))
-          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
-        if (paramValue === null) return null as ReturnType
-        if (['number', 'string'].includes(typeof paramValue)) {
-          return parseFloat((paramValue as unknown as number).toString()) as ReturnType
+        if (typeof paramValue === 'string') {
+          if (paramValue.length === 0 || Number.isNaN(Number(paramValue)))
+            throw new ParamValidationError(typeToError(expectedType))
+          return Number(paramValue) as ReturnType
         }
-        return null as ReturnType
+        throw new ParamValidationError(typeToError(expectedType))
 
       case 'null':
-        if (paramValue !== null) this.throw('expecting null')
+        if (paramValue !== null) throw new ParamValidationError(typeToError(expectedType))
         return null as ReturnType
 
       case 'uuid':
-        errorMessage = 'expected uuid'
-        if (paramValue === null) this.throwUnlessAllowNull(paramValue, errorMessage, opts)
-        if (paramValue !== null && !isUuid(paramValue)) throw new ParamValidationError(errorMessage)
-        return paramValue as ReturnType
+        if (isUuid(paramValue)) return paramValue as ReturnType
+        throw new ParamValidationError(typeToError(expectedType))
 
       case 'bigint[]':
       case 'boolean[]':
@@ -441,38 +410,18 @@ export default class Params {
       case 'number[]':
       case 'string[]':
       case 'uuid[]':
-        baseType = (expectedType as string).replace(
-          /\[\]$/,
-          '',
-        ) as (typeof PsychicParamsPrimitiveLiterals)[number]
-        errorMessage = `expected ${baseType}[]`
-        if ([undefined, null].includes(paramValue as null))
-          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
-
-        if (![undefined, null].includes(paramValue as null) && !Array.isArray(paramValue))
-          throw new ParamValidationError(errorMessage)
-
-        compactedValue = [undefined, null].includes(paramValue as unknown as null)
-          ? paramValue
-          : compact(paramValue as string[])
-
-        return (
-          // casting as string[] here because this will actually cause
-          // build failures once it is brought into other apps
-          (
-            [undefined, null].includes(paramValue as null)
-              ? paramValue
-              : (compactedValue as string[]).map(val => this.cast(val, baseType, opts))
-          ) as ReturnType
-        )
+        if (!Array.isArray(paramValue)) throw new ParamValidationError(typeToError(expectedType))
+        return compact(
+          paramValue.map(param =>
+            this.cast(param, arrayTypeToNonArrayType(expectedType), { ...opts, allowNull: true }),
+          ),
+        ) as ReturnType
 
       case 'null[]':
-        errorMessage = 'expected null array'
-        if (!Array.isArray(paramValue)) this.throwUnlessAllowNull(paramValue, errorMessage, opts)
-        if ((paramValue as number[]).length === 0) return [] as ReturnType
-        if ((paramValue as number[]).filter(v => v !== null).length > 0)
-          this.throwUnlessAllowNull(paramValue, errorMessage, opts)
-        return paramValue as ReturnType
+        if (!Array.isArray(paramValue)) throw new ParamValidationError(typeToError(expectedType))
+        return paramValue.map(param =>
+          this.cast(param, arrayTypeToNonArrayType(expectedType), { ...opts, allowNull: true }),
+        ) as ReturnType
 
       default:
         // TODO: serialize/sanitize before printing, handle array types
@@ -514,17 +463,11 @@ export default class Params {
     return permitted
   }
 
-  private matchRegexOrThrow(
-    paramValue: string,
-    expectedType: RegExp,
-    opts?: ParamsCastOptions<readonly string[]>,
-  ): string | null {
-    const errorMessage = 'did not match expected pattern'
-    if (typeof paramValue !== 'string') this.throwUnlessAllowNull(paramValue, errorMessage)
+  private matchRegexOrThrow(paramValue: string, expectedType: RegExp): string {
+    if (typeof paramValue !== 'string') throw new ParamValidationError(typeToError(expectedType))
     if (paramValue.length > 1000) throw new Error('We do not accept strings over 1000 chars')
     if (expectedType.test(paramValue)) return paramValue
-    this.throwUnlessAllowNull(paramValue, errorMessage, opts)
-    return null
+    throw new ParamValidationError(typeToError(expectedType))
   }
 
   private throwUnlessAllowNull(
@@ -611,4 +554,53 @@ export type ParamsCastOptions<EnumType> = {
 export interface ParamsForOpts<OnlyArray> {
   array?: boolean
   only?: OnlyArray
+}
+
+const typeToErrorMap: Record<(typeof PsychicParamsPrimitiveLiterals)[number], string> = {
+  bigint: 'expected bigint',
+  boolean: 'expected boolean',
+  date: 'expecting ISO date string',
+  datetime: 'expecting ISO datetime string',
+  integer: 'expected integer or string integer',
+  json: 'expected an object',
+  null: 'expecting null',
+  number: 'expected number or string number',
+  string: 'expected string',
+  uuid: 'expected uuid',
+
+  'bigint[]': 'expected bigint array',
+  'boolean[]': 'expected boolean array',
+  'date[]': 'expecting ISO date string array',
+  'datetime[]': 'expecting ISO datetime string array',
+  'integer[]': 'expected integer or string integer array',
+  'json[]': 'expected an object array',
+  'null[]': 'expecting null array',
+  'number[]': 'expected number or string number array',
+  'string[]': 'expected string array',
+  'uuid[]': 'expected uuid array',
+} as const
+
+function typeToError(param: (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp) {
+  if (param instanceof RegExp) return 'did not match expected pattern'
+  const message = typeToErrorMap[param]
+  return message ?? `expected ${param}`
+}
+
+const arrayTypeToNonArrayTypeMap = {
+  'bigint[]': 'bigint',
+  'boolean[]': 'boolean',
+  'date[]': 'date',
+  'datetime[]': 'datetime',
+  'integer[]': 'integer',
+  'json[]': 'json',
+  'null[]': 'null',
+  'number[]': 'number',
+  'string[]': 'string',
+  'uuid[]': 'uuid',
+} as const
+
+function arrayTypeToNonArrayType(
+  param: keyof typeof arrayTypeToNonArrayTypeMap,
+): (typeof PsychicParamsPrimitiveLiterals)[number] {
+  return arrayTypeToNonArrayTypeMap[param]
 }

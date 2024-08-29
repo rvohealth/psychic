@@ -124,7 +124,9 @@ describe('Params', () => {
 
     context('bigint', () => {
       it('permits a string integer', () => {
-        expect(Params.for({ collarCount: '1' }, Pet)).toEqual({ collarCount: '1' })
+        expect(Params.for({ collarCount: '9999999999999999999999999' }, Pet)).toEqual({
+          collarCount: '9999999999999999999999999',
+        })
       })
 
       it('permits a number', () => {
@@ -552,13 +554,6 @@ describe('Params', () => {
         })
       })
 
-      it('permits a number, but treats it as number of milliseconds since epoch and casts to datetime', () => {
-        const millis = 1714027129950
-        expect(Params.for({ lastSeenAt: millis }, Pet)).toEqual({
-          lastSeenAt: DateTime.fromMillis(millis),
-        })
-      })
-
       it('rejects a string non-datetime', () => {
         expect(() => Params.for({ lastSeenAt: '1.2' }, Pet)).toThrow(ParamValidationError)
         expect(() => Params.for({ lastSeenAt: '' }, Pet)).toThrow(ParamValidationError)
@@ -629,13 +624,6 @@ describe('Params', () => {
           it('permits a datetime array', () => {
             expect(Params.for({ [allowNullField]: [now] }, allowNullModel)).toEqual({
               [allowNullField]: [now],
-            })
-          })
-
-          it('permits a number array, but treats it as number of milliseconds since epoch and casts to datetime', () => {
-            const millis = 1714027129950
-            expect(Params.for({ [allowNullField]: [millis] }, allowNullModel)).toEqual({
-              [allowNullField]: [DateTime.fromMillis(millis)],
             })
           })
 
@@ -768,6 +756,11 @@ describe('Params', () => {
               expect(Params.cast(7, 'number')).toEqual(7)
               expect(Params.cast('7', 'number')).toEqual(7)
               expect(Params.cast('7.1', 'number')).toEqual(7.1)
+              expect(Params.cast(-7, 'number')).toEqual(-7)
+              expect(Params.cast('-7', 'number')).toEqual(-7)
+              expect(Params.cast('-7.1', 'number')).toEqual(-7.1)
+              expect(Params.cast(7.1234567898765e30, 'number')).toEqual(7.1234567898765e30)
+              expect(Params.cast('7.1234567898765e30', 'number')).toEqual(7.1234567898765e30)
             })
           })
 
@@ -783,7 +776,9 @@ describe('Params', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
               expect(Params.cast(7, 'integer')).toEqual(7)
-              expect(Params.cast('7', 'number')).toEqual(7)
+              expect(Params.cast('7', 'integer')).toEqual(7)
+              expect(Params.cast(-7, 'integer')).toEqual(-7)
+              expect(Params.cast('-7', 'integer')).toEqual(-7)
             })
           })
 
@@ -791,6 +786,26 @@ describe('Params', () => {
             it('raises a validation exception', () => {
               expect(() => Params.cast(7.1, 'integer')).toThrow(ParamValidationError)
               expect(() => Params.cast('0x777', 'integer')).toThrow(ParamValidationError)
+            })
+          })
+        })
+
+        context('bigint', () => {
+          context('with a valid value', () => {
+            it('returns the requsted value', () => {
+              expect(Params.cast('9999999999999999999999999', 'bigint')).toEqual('9999999999999999999999999')
+              expect(Params.cast(7, 'bigint')).toEqual('7')
+              expect(Params.cast('-9999999999999999999999999', 'bigint')).toEqual(
+                '-9999999999999999999999999',
+              )
+              expect(Params.cast(-7, 'bigint')).toEqual('-7')
+            })
+          })
+
+          context('with an invalid value', () => {
+            it('raises a validation exception', () => {
+              expect(() => Params.cast('9i', 'bigint')).toThrow(ParamValidationError)
+              expect(() => Params.cast(7.1, 'bigint')).toThrow(ParamValidationError)
             })
           })
         })
