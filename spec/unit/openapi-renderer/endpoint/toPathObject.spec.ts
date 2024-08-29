@@ -1,5 +1,7 @@
+import { PsychicServer } from '../../../../src'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
 import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
+import { RouteConfig } from '../../../../src/router/route-manager'
 import ApiPetsController from '../../../../test-app/app/controllers/Api/PetsController'
 import PetsController from '../../../../test-app/app/controllers/PetsController'
 import UsersController from '../../../../test-app/app/controllers/UsersController'
@@ -9,17 +11,26 @@ import User from '../../../../test-app/app/models/User'
 import { CommentTestingDoubleShorthandSerializer } from '../../../../test-app/app/serializers/CommentSerializer'
 import PostSerializer from '../../../../test-app/app/serializers/PostSerializer'
 import UserSerializer, { UserWithPostsSerializer } from '../../../../test-app/app/serializers/UserSerializer'
+import initializePsychicApplication from '../../../../test-app/cli/helpers/initializePsychicApplication'
 
 describe('OpenapiEndpointRenderer', () => {
+  let routes: RouteConfig[]
+  beforeAll(async () => {
+    await initializePsychicApplication()
+    const server = new PsychicServer()
+    await server.boot()
+    routes = await server.routes()
+  })
+
   describe('#toPathObject', () => {
     context('description and summary', () => {
-      it('renders provided tags', async () => {
+      it('renders provided tags', () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
           description: 'hello',
           summary: 'world',
         })
 
-        const response = await renderer.toPathObject({})
+        const response = renderer.toPathObject({}, routes)
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -36,12 +47,12 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('tags', () => {
-      it('renders provided tags', async () => {
+      it('renders provided tags', () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
           tags: ['hello', 'world'],
         })
 
-        const response = await renderer.toPathObject({})
+        const response = renderer.toPathObject({}, routes)
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -57,10 +68,10 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('method', () => {
-      it('infers the method by examining routes', async () => {
+      it('infers the method by examining routes', () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show')
 
-        const response = await renderer.toPathObject({})
+        const response = renderer.toPathObject({}, routes)
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -84,7 +95,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('pathParams', () => {
-      it('enhances the automatically derived attribute data', async () => {
+      it('enhances the automatically derived attribute data', () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show', {
           pathParams: {
             id: {
@@ -93,7 +104,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         })
 
-        const response = await renderer.toPathObject({})
+        const response = renderer.toPathObject({}, routes)
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -117,7 +128,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('query', () => {
-      it('renders params within the parameters array', async () => {
+      it('renders params within the parameters array', () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
           query: {
             search: {
@@ -127,7 +138,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         })
 
-        const response = await renderer.toPathObject({})
+        const response = renderer.toPathObject({}, routes)
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -150,7 +161,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('allowReserved is overridden', () => {
-        it('applies override', async () => {
+        it('applies override', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             query: {
               search: {
@@ -161,7 +172,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response).toEqual(
             expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -186,7 +197,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('allowEmptyValue is overridden', () => {
-        it('applies override', async () => {
+        it('applies override', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             query: {
               search: {
@@ -197,7 +208,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response).toEqual(
             expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -223,7 +234,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('headers', () => {
-      it('renders headers within the parameters array', async () => {
+      it('renders headers within the parameters array', () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
           headers: {
             Authorization: {
@@ -238,7 +249,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         })
 
-        const response = await renderer.toPathObject({})
+        const response = renderer.toPathObject({}, routes)
         expect(response).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -271,7 +282,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('config-level header defaults', () => {
-        it('renders default headers', async () => {
+        it('renders default headers', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             headers: {
               today: {
@@ -282,7 +293,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response).toEqual(
             expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -315,7 +326,7 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('when default headers are bypassed', () => {
-          it('does not render default headers', async () => {
+          it('does not render default headers', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               headers: {
                 today: {
@@ -327,7 +338,7 @@ describe('OpenapiEndpointRenderer', () => {
               omitDefaultHeaders: true,
             })
 
-            const response = await renderer.toPathObject({})
+            const response = renderer.toPathObject({}, routes)
             expect(response).toEqual(
               expect.objectContaining({
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -353,7 +364,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('requestBody', () => {
-      it('renders requestBody in the requestBody payload', async () => {
+      it('renders requestBody in the requestBody payload', () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
           requestBody: {
             type: 'object',
@@ -374,7 +385,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         })
 
-        const response = await renderer.toPathObject({})
+        const response = renderer.toPathObject({}, routes)
         expect(response['/users'].post.requestBody).toEqual({
           content: {
             'application/json': {
@@ -405,18 +416,18 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('requestBody is not specified', () => {
-        it('does not provide request body', async () => {
+        it('does not provide request body', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show')
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/{id}'].get.requestBody).toBeUndefined()
         })
 
         context('for a POST http method', () => {
-          it('prvoides request body matching the model', async () => {
+          it('prvoides request body matching the model', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-            const response = await renderer.toPathObject({})
+            const response = renderer.toPathObject({}, routes)
             expect(response['/users'].post.requestBody).toEqual(
               expect.objectContaining({
                 content: {
@@ -487,10 +498,10 @@ describe('OpenapiEndpointRenderer', () => {
 
           context('non-standard data types', () => {
             context('bigint', () => {
-              it('returns string', async () => {
+              it('returns string', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = await renderer.toPathObject({})
+                const response = renderer.toPathObject({}, routes)
                 expect(response['/users'].post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -509,10 +520,10 @@ describe('OpenapiEndpointRenderer', () => {
               })
 
               context('bigint[]', () => {
-                it('returns string within an array', async () => {
+                it('returns string within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = await renderer.toPathObject({})
+                  const response = renderer.toPathObject({}, routes)
                   expect(response['/users'].post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -533,10 +544,10 @@ describe('OpenapiEndpointRenderer', () => {
             })
 
             context('uuid', () => {
-              it('returns string', async () => {
+              it('returns string', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = await renderer.toPathObject({})
+                const response = renderer.toPathObject({}, routes)
                 expect(response['/users'].post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -555,10 +566,10 @@ describe('OpenapiEndpointRenderer', () => {
               })
 
               context('uuid[]', () => {
-                it('returns string within an array', async () => {
+                it('returns string within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = await renderer.toPathObject({})
+                  const response = renderer.toPathObject({}, routes)
                   expect(response['/users'].post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -579,10 +590,10 @@ describe('OpenapiEndpointRenderer', () => {
             })
 
             context('json', () => {
-              it('returns object schema', async () => {
+              it('returns object schema', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = await renderer.toPathObject({})
+                const response = renderer.toPathObject({}, routes)
                 expect(response['/users'].post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -601,10 +612,10 @@ describe('OpenapiEndpointRenderer', () => {
               })
 
               context('json[]', () => {
-                it('returns object schema within an array', async () => {
+                it('returns object schema within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = await renderer.toPathObject({})
+                  const response = renderer.toPathObject({}, routes)
                   expect(response['/users'].post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -625,10 +636,10 @@ describe('OpenapiEndpointRenderer', () => {
             })
 
             context('jsonb', () => {
-              it('returns object schema', async () => {
+              it('returns object schema', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = await renderer.toPathObject({})
+                const response = renderer.toPathObject({}, routes)
                 expect(response['/users'].post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -647,10 +658,10 @@ describe('OpenapiEndpointRenderer', () => {
               })
 
               context('jsonb[]', () => {
-                it('returns object schema within an array', async () => {
+                it('returns object schema within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = await renderer.toPathObject({})
+                  const response = renderer.toPathObject({}, routes)
                   expect(response['/users'].post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -671,10 +682,10 @@ describe('OpenapiEndpointRenderer', () => {
             })
 
             context('virtual columns', () => {
-              it('returns an anyOf statement, allowing all types', async () => {
+              it('returns an anyOf statement, allowing all types', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = await renderer.toPathObject({})
+                const response = renderer.toPathObject({}, routes)
                 expect(response['/users'].post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -699,10 +710,10 @@ describe('OpenapiEndpointRenderer', () => {
               })
 
               context('for virtual attributes with explicit types specified', () => {
-                it('uses the provided type', async () => {
+                it('uses the provided type', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = await renderer.toPathObject({})
+                  const response = renderer.toPathObject({}, routes)
                   expect(response['/users'].post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -732,10 +743,10 @@ describe('OpenapiEndpointRenderer', () => {
             })
 
             context('enums', () => {
-              it('renders enums as string with enum option', async () => {
+              it('renders enums as string with enum option', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
-                const response = await renderer.toPathObject({})
+                const response = renderer.toPathObject({}, routes)
                 expect(response['/pets'].post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -753,10 +764,10 @@ describe('OpenapiEndpointRenderer', () => {
                 )
               })
 
-              it('renders enum[] as array with string with enum option', async () => {
+              it('renders enum[] as array with string with enum option', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
-                const response = await renderer.toPathObject({})
+                const response = renderer.toPathObject({}, routes)
                 expect(response['/pets'].post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -792,10 +803,10 @@ describe('OpenapiEndpointRenderer', () => {
                   .mockReturnValue(psychicApp)
               })
 
-              it('does not suppress enums for request bodies', async () => {
+              it('does not suppress enums for request bodies', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
-                const response = await renderer.toPathObject({})
+                const response = renderer.toPathObject({}, routes)
                 expect(response['/pets'].post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -822,23 +833,23 @@ describe('OpenapiEndpointRenderer', () => {
             })
 
             context('requestBody is explicitly set to null', () => {
-              it('does not provide requestBody', async () => {
+              it('does not provide requestBody', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
                   requestBody: null,
                 })
 
-                const response = await renderer.toPathObject({})
+                const response = renderer.toPathObject({}, routes)
                 expect(response['/api/pets'].post.requestBody).toBeUndefined()
               })
             })
 
             context('requestBody leverages only opt', () => {
-              it('only renders attributes specified in only array', async () => {
+              it('only renders attributes specified in only array', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
                   requestBody: { only: ['species', 'name'] },
                 })
 
-                const response = await renderer.toPathObject({})
+                const response = renderer.toPathObject({}, routes)
                 expect(response['/api/pets'].post.requestBody).toEqual({
                   content: {
                     'application/json': {
@@ -859,12 +870,12 @@ describe('OpenapiEndpointRenderer', () => {
               })
 
               context('requestBody leverages required opt', () => {
-                it('renders the required options in the required field', async () => {
+                it('renders the required options in the required field', () => {
                   const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
                     requestBody: { only: ['species', 'name'], required: ['species'] },
                   })
 
-                  const response = await renderer.toPathObject({})
+                  const response = renderer.toPathObject({}, routes)
                   expect(response['/api/pets'].post.requestBody).toEqual({
                     content: {
                       'application/json': {
@@ -887,12 +898,12 @@ describe('OpenapiEndpointRenderer', () => {
               })
 
               context('requestBody leverages for opt', () => {
-                it('uses the model provided in the for option to determine request body shape', async () => {
+                it('uses the model provided in the for option to determine request body shape', () => {
                   const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
                     requestBody: { for: User, only: ['email'], required: ['email'] },
                   })
 
-                  const response = await renderer.toPathObject({})
+                  const response = renderer.toPathObject({}, routes)
                   expect(response['/api/pets'].post.requestBody).toEqual({
                     content: {
                       'application/json': {
@@ -913,10 +924,10 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('for a PUT http method', () => {
-          it('prvoides request body matching the model', async () => {
+          it('prvoides request body matching the model', () => {
             const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'update')
 
-            const response = await renderer.toPathObject({})
+            const response = renderer.toPathObject({}, routes)
             expect(response['/pets/{id}'].patch.requestBody).toEqual(
               expect.objectContaining({
                 content: {
@@ -942,10 +953,10 @@ describe('OpenapiEndpointRenderer', () => {
 
     context('responses', () => {
       context('system-level default responses', () => {
-        it('system-level default responses are automatically provided', async () => {
+        it('system-level default responses are automatically provided', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {})
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               400: {
@@ -960,10 +971,10 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('config-level default responses', () => {
-        it('config-level default responses are automatically provided', async () => {
+        it('config-level default responses are automatically provided', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {})
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               490: {
@@ -974,12 +985,12 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('default responses are explicitly bypassed', () => {
-          it('config-level default responses are omitted', async () => {
+          it('config-level default responses are omitted', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               omitDefaultResponses: true,
             })
 
-            const response = await renderer.toPathObject({})
+            const response = renderer.toPathObject({}, routes)
             expect(response['/users/howyadoin'].get.responses).toEqual(
               expect.not.objectContaining({
                 490: {
@@ -992,12 +1003,12 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with a 204 response specified', () => {
-        it('does not render a response payload', async () => {
+        it('does not render a response payload', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             status: 204,
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses['200']).toBeUndefined()
           expect(response['/users/howyadoin'].get.responses['204']).toEqual({
             description: 'Success, no content',
@@ -1007,7 +1018,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with a default description specified', () => {
-        it('renders the default description in the response payload', async () => {
+        it('renders the default description in the response payload', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             status: 204,
             defaultResponse: {
@@ -1020,7 +1031,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses['200']).toBeUndefined()
           expect(response['/users/howyadoin'].get.responses['204']).toEqual({
             description: 'World',
@@ -1041,12 +1052,12 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with a dream model passed', () => {
-        it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
+        it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -1064,13 +1075,13 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('when nullable is set to true in the Openapi decorator call', () => {
-          it('makes the top level serializer nullable', async () => {
+          it('makes the top level serializer nullable', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               serializerKey: 'withRecentPost',
               nullable: true,
             })
 
-            const response = await renderer.toPathObject({})
+            const response = renderer.toPathObject({}, routes)
             expect(response['/users/howyadoin'].get.responses).toEqual(
               expect.objectContaining({
                 200: {
@@ -1090,7 +1101,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with a serializer passed', () => {
-        it("uses the provided serializer, converting it's payload shape to openapi format", async () => {
+        it("uses the provided serializer, converting it's payload shape to openapi format", () => {
           const renderer = new OpenapiEndpointRenderer(
             UserWithPostsSerializer,
             UsersController,
@@ -1098,7 +1109,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -1125,10 +1136,10 @@ describe('OpenapiEndpointRenderer', () => {
           }
         }
 
-        it("uses the provided serializer, converting it's payload shape to openapi format", async () => {
+        it("uses the provided serializer, converting it's payload shape to openapi format", () => {
           const renderer = new OpenapiEndpointRenderer(MyViewModel, UsersController, 'howyadoin', {})
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -1147,10 +1158,10 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with an array of dream models passed', () => {
-        it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
+        it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", () => {
           const renderer = new OpenapiEndpointRenderer([User, Post], UsersController, 'howyadoin', {})
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -1176,7 +1187,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with an array of dream serializers passed', () => {
-        it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
+        it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", () => {
           const renderer = new OpenapiEndpointRenderer(
             // eslint-disable-next-line @typescript-eslint/no-explicit-any
             [UserSerializer, PostSerializer<any, any>],
@@ -1185,7 +1196,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -1211,7 +1222,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with allOf', () => {
-        it('returns valid openapi', async () => {
+        it('returns valid openapi', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             responses: {
@@ -1233,7 +1244,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1266,7 +1277,7 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('allOf includes a $serializer ref', () => {
-          it('returns valid openapi', async () => {
+          it('returns valid openapi', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               serializerKey: 'extra',
               responses: {
@@ -1285,7 +1296,7 @@ describe('OpenapiEndpointRenderer', () => {
               },
             })
 
-            const response = await renderer.toPathObject({})
+            const response = renderer.toPathObject({}, routes)
             expect(response['/users/howyadoin'].get.responses).toEqual(
               expect.objectContaining({
                 201: {
@@ -1317,7 +1328,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with anyOf', () => {
-        it('returns valid openapi', async () => {
+        it('returns valid openapi', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             responses: {
@@ -1339,7 +1350,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1373,7 +1384,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with oneOf', () => {
-        it('returns valid openapi', async () => {
+        it('returns valid openapi', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             responses: {
@@ -1395,7 +1406,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1429,7 +1440,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with $ref', () => {
-        it('returns valid openapi', async () => {
+        it('returns valid openapi', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             responses: {
@@ -1447,7 +1458,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1473,7 +1484,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with $schema', () => {
-        it('returns valid openapi', async () => {
+        it('returns valid openapi', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             status: 201,
@@ -1484,7 +1495,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1503,14 +1514,14 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with top-level arguments that should apply to the success response', () => {
-        it('applies top-level arguments to the correct response code', async () => {
+        it('applies top-level arguments to the correct response code', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             summary: 'hello',
             description: 'world',
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get).toEqual(
             expect.objectContaining({
               summary: 'hello',
@@ -1521,7 +1532,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with common fields', () => {
-        it('returns valid openapi', async () => {
+        it('returns valid openapi', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             responses: {
@@ -1534,7 +1545,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1556,7 +1567,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('with enum', () => {
-        it('returns valid openapi', async () => {
+        it('returns valid openapi', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             status: 201,
@@ -1568,7 +1579,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1596,7 +1607,7 @@ describe('OpenapiEndpointRenderer', () => {
               .mockReturnValue(psychicApp)
           })
 
-          it('suppresses enums, instead using description to clarify enum options', async () => {
+          it('suppresses enums, instead using description to clarify enum options', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               serializerKey: 'extra',
               status: 201,
@@ -1608,7 +1619,7 @@ describe('OpenapiEndpointRenderer', () => {
               },
             })
 
-            const response = await renderer.toPathObject({})
+            const response = renderer.toPathObject({}, routes)
             expect(response['/users/howyadoin'].get.responses).toEqual(
               expect.objectContaining({
                 201: {
@@ -1632,13 +1643,13 @@ The following values will be allowed:
       })
 
       context('with many=true', () => {
-        it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", async () => {
+        it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             many: true,
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -1660,7 +1671,7 @@ The following values will be allowed:
       })
 
       context('with extra response fields sent', () => {
-        it('includes extra response payloads', async () => {
+        it('includes extra response payloads', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
             serializerKey: 'extra',
             status: 201,
@@ -1695,7 +1706,7 @@ The following values will be allowed:
             },
           })
 
-          const response = await renderer.toPathObject({})
+          const response = renderer.toPathObject({}, routes)
           expect(response['/users/howyadoin'].get.responses).toEqual(
             expect.objectContaining({
               201: {
