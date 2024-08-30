@@ -16,6 +16,7 @@ async function redisQuestion(args, options) {
     }
     const answer = await new select_1.default('redis?', ['yes', 'no']).run();
     options.redis = answer === 'yes';
+    console.log('');
 }
 async function wsQuestion(args, options) {
     const [wsArg, value] = (0, argAndValue_1.default)('--ws', args);

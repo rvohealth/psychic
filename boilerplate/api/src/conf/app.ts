@@ -22,7 +22,7 @@ export default async (psy: PsychicApplication) => {
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
 
-  psy.setJsonOptions({
+  psy.set('json', {
     limit: '20kb',
   })
 
@@ -91,11 +91,14 @@ export default async (psy: PsychicApplication) => {
   psy.set('openapi', {})
 
   // run a callback on server boot (but before routes are processed)
-  psy.on('boot', () => {
+  psy.on('boot', () => {})
+
+  // run a callback when the express server starts. the express app will be passed to each callback as the first argument
+  psy.on('server:init', app => {
     if (!testEnv() || process.env.REQUEST_LOGGING === '1') {
       const SENSITIVE_FIELDS = ['password', 'token', 'authentication', 'authorization', 'secret']
 
-      psy.app.use(
+      app.use(
         expressWinston.logger({
           transports: [new winston.transports.Console()],
           format: winston.format.combine(winston.format.colorize(), winston.format.json()),
@@ -118,13 +121,11 @@ export default async (psy: PsychicApplication) => {
           ],
           ignoredRoutes: ['/health_check'],
           bodyBlacklist: SENSITIVE_FIELDS,
-        })
+        }),
       )
     }
   })
 
-  // run a callback when the express server starts. the express app will be passed to each callback as the first argument
-  psy.on('server:init', () => {})
 
   // run a callback after routes are done processing
   psy.on('after:routes', () => {})

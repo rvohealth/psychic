@@ -937,10 +937,10 @@
     ts-node "^10.9.2"
     typescript "^5.5.4"
 
-"@rvohealth/dream@^0.10.8":
-  version "0.10.8"
-  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.10.8/b0f3245426761e6c00c687b952de2e73d0c76d59#b0f3245426761e6c00c687b952de2e73d0c76d59"
-  integrity sha512-b4MTYOBMIFIczPEj8GlHhrxu0hEEQU/6o/Ak8EPrT3+btrdukhudUW3w0FKfu8cl6F+kKqBIcoZAzy9CsxPyhw==
+"@rvohealth/dream@^0.10.12":
+  version "0.10.12"
+  resolved "https://npm.pkg.github.com/download/@rvohealth/dream/0.10.12/726fb96f0e6d94a30c2bedbada10a2dce3024c76#726fb96f0e6d94a30c2bedbada10a2dce3024c76"
+  integrity sha512-kpsAwc0Cz5PUI6sbmqx2C2Nn1J1zqc1sRIvy4gVeg9BBgKnFqe28Occ4MOOvimq6Uau+xY3phnq+d2kmBnHbsg==
   dependencies:
     "@types/lodash.clonedeep" "^4.5.9"
     "@types/lodash.clonedeepwith" "^4.5.9"
@@ -954,6 +954,7 @@
     lodash.clonedeep "^4.5.0"
     lodash.clonedeepwith "^4.5.0"
     lodash.isempty "^4.4.0"
+    lodash.pick "^4.4.0"
     lodash.sortby "^4.7.0"
     lodash.uniq "^4.5.0"
     lodash.uniqwith "^4.5.0"
@@ -3825,6 +3826,11 @@ lodash.once@^4.0.0:
   version "4.1.1"
   resolved "https://registry.yarnpkg.com/lodash.once/-/lodash.once-4.1.1.tgz#0dd3971213c7c56df880977d504c88fb471a97ac"
   integrity sha512-Sb487aTOCr9drQVL8pIxOzVhafOjZN9UU54hiN8PU3uAiSV7lx1yYNpbNmex2PK6dSJoNTSJUUswT651yww3Mg==
+
+lodash.pick@^4.4.0:
+  version "4.4.0"
+  resolved "https://registry.yarnpkg.com/lodash.pick/-/lodash.pick-4.4.0.tgz#52f05610fff9ded422611441ed1fc123a03001b3"
+  integrity sha512-hXt6Ul/5yWjfklSGvLQl8vM//l3FtyHZeuelpzK6mm99pNvN9yTDruNZPEJZD1oWrqo+izBmB7oUfWgcCX7s4Q==
 
 lodash.sortby@^4.7.0:
   version "4.7.0"

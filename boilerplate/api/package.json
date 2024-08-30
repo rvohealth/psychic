@@ -22,8 +22,8 @@
   },
   "dependencies": {
     "@bull-board/express": "^5.16.0",
-    "@rvohealth/dream": "^0.10.5",
-    "@rvohealth/psychic": "^0.7.5",
+    "@rvohealth/dream": "^0.10.12",
+    "@rvohealth/psychic": "^0.7.10",
     "bullmq": "^5.1.11",
     "express-winston": "^4.2.0",
     "express": "^4.19.2",
