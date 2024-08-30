@@ -23,6 +23,7 @@ async function redisQuestion(args: string[], options: NewAppCLIOptions) {
 
   const answer = await new Select('redis?', ['yes', 'no'] as const).run()
   options.redis = answer === 'yes'
+  console.log('')
 }
 
 async function wsQuestion(args: string[], options: NewAppCLIOptions) {
