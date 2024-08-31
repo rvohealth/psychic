@@ -7,7 +7,7 @@ export default class Encrypt {
     try {
       const psychicApp = PsychicApplication.getOrFail()
       return jwt.sign(data, psychicApp.encryptionKey)
-    } catch (_) {
+    } catch {
       const err = new InvalidAppEncryptionKey()
       // intentionally doing a manual PsychicApplication.log here to ensure that
       // this shows up in circleci, since this error is otherwise fairly hard to track down
@@ -22,7 +22,7 @@ export default class Encrypt {
       const psychicApp = PsychicApplication.getOrFail()
       const payload = jwt.verify(encrypted, psychicApp.encryptionKey)
       return payload
-    } catch (err) {
+    } catch {
       return null
     }
   }

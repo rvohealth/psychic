@@ -1,6 +1,7 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
-exports.ssspawn = void 0;
+exports.default = sspawn;
+exports.ssspawn = ssspawn;
 const child_process_1 = require("child_process");
 function sspawn(command, opts = {}) {
     return new Promise((accept, reject) => {
@@ -11,7 +12,6 @@ function sspawn(command, opts = {}) {
         });
     });
 }
-exports.default = sspawn;
 function ssspawn(command, opts = {}) {
     return (0, child_process_1.spawn)(command, {
         stdio: 'inherit',
@@ -19,4 +19,3 @@ function ssspawn(command, opts = {}) {
         ...opts,
     });
 }
-exports.ssspawn = ssspawn;

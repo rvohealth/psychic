@@ -4,6 +4,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
 };
 Object.defineProperty(exports, "__esModule", { value: true });
 exports.clientTypes = exports.primaryKeyTypes = void 0;
+exports.default = gatherUserInput;
 const argAndValue_1 = __importDefault(require("./argAndValue"));
 const select_1 = __importDefault(require("./select"));
 exports.primaryKeyTypes = ['bigserial', 'bigint', 'integer', 'uuid'];
@@ -69,4 +70,3 @@ async function gatherUserInput(args) {
     await primaryKeyTypeQuestion(args, options);
     return options;
 }
-exports.default = gatherUserInput;

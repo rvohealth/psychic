@@ -26,6 +26,7 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = newPsychicApp;
 const c = __importStar(require("colorette"));
 const fs = __importStar(require("fs"));
 const AppConfigBuilder_1 = __importDefault(require("../file-builders/AppConfigBuilder"));
@@ -63,6 +64,8 @@ async function newPsychicApp(appName, args) {
         fs.mkdirSync(`./${appName}`);
         (0, copyRecursive_1.default)(__dirname + '/../../boilerplate/api', projectPath);
     }
+    fs.renameSync(`${projectPath}/yarnrc.yml`, `${projectPath}/.yarnrc.yml`);
+    fs.renameSync(`${projectPath}/gitignore`, `${projectPath}/.gitignore`);
     if (!testEnv()) {
         log_1.default.restoreCache();
         log_1.default.write(c.green(`Step 1. write boilerplate to ${appName}: Done!`), { cache: true });
@@ -78,7 +81,7 @@ async function newPsychicApp(appName, args) {
         log_1.default.write(c.green(`Step 2. build default config files: Done!`), { cache: true });
         log_1.default.write(c.green(`Step 3. Installing psychic dependencies...`));
         // only run yarn install if not in test env to save time
-        await (0, sspawn_1.default)(`cd ${projectPath} && yarn install`);
+        await (0, sspawn_1.default)(`cd ${projectPath} && mkdir node_modules && touch yarn.lock && corepack enable && yarn set version berry && yarn install`);
     }
     // sleeping here because yarn has a delayed print that we need to clean up
     if (!testEnv())
@@ -128,9 +131,9 @@ async function newPsychicApp(appName, args) {
             }
             if (!testEnv()) {
                 // only bother installing packages if not in test env to save time
-                await (0, sspawn_1.default)(`cd ${projectPath}/../client && yarn install --ignore-engines`);
+                await (0, sspawn_1.default)(`cd ${projectPath}/../client && mkdir node_modules && touch yarn.lock && corepack enable && yarn set version berry && yarn install`);
                 try {
-                    await (0, sspawn_1.default)(`cd ${projectPath}/../client && yarn add axios --ignore-engines`);
+                    await (0, sspawn_1.default)(`cd ${projectPath}/../client && yarn add axios`);
                 }
                 catch (err) {
                     errors.push(`
@@ -154,4 +157,3 @@ async function newPsychicApp(appName, args) {
         });
     }
 }
-exports.default = newPsychicApp;

@@ -23,6 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = welcomeMessage;
 const c = __importStar(require("colorette"));
 function welcomeMessage(appName) {
     return `
@@ -70,4 +71,3 @@ function welcomeMessage(appName) {
   # you can see conf/dream.ts to see how those credentials are used.
     `;
 }
-exports.default = welcomeMessage;

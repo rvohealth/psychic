@@ -23,6 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = logo;
 const colors = __importStar(require("colorette"));
 function logo() {
     return (colors.bgMagentaBright(colors.black(`
@@ -66,4 +67,3 @@ function logo() {
                                                          
                                                          `)));
 }
-exports.default = logo;

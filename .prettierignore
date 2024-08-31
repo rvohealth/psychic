@@ -10,6 +10,8 @@ src/psychic-application/logo.ts
 .github/
 dist/
 openapi.json
+.yarn/
+.yarnrc.yml
 
 # global-cli
 boilerplate/

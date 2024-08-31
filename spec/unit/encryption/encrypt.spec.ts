@@ -1,8 +1,8 @@
 import jwt from 'jsonwebtoken'
+import { PsychicApplication } from '../../../src'
 import Encrypt from '../../../src/encryption/encrypt'
 import InvalidAppEncryptionKey from '../../../src/error/encrypt/invalid-app-encryption-key'
 import initializePsychicApplication from '../../../test-app/cli/helpers/initializePsychicApplication'
-import { PsychicApplication } from '../../../src'
 
 const originalEncryptionKey = process.env.APP_ENCRYPTION_KEY
 
@@ -42,7 +42,7 @@ describe('Encrypt', () => {
       it('logs to the console to ensure that devs see their mistake', () => {
         try {
           Encrypt.sign('how')
-        } catch (_) {
+        } catch {
           // noop
         }
 

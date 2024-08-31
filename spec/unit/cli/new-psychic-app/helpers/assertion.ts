@@ -8,7 +8,7 @@ export async function readHowyadoinFile(filePath: string) {
 export async function removeHowyadoinDir() {
   try {
     await fs.rmdir('./howyadoin', { recursive: true })
-  } catch (_) {
+  } catch {
     // noop
   }
 }
@@ -61,7 +61,7 @@ export async function expectApiNodeModulesInstalled() {
 export async function removeProjectDir(projectName: string) {
   try {
     await fs.rmdir(`./${projectName}`, { recursive: true })
-  } catch (_) {
+  } catch {
     // noop
   }
 }

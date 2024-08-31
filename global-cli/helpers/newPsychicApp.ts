@@ -41,6 +41,9 @@ export default async function newPsychicApp(appName: string, args: string[]) {
     copyRecursive(__dirname + '/../../boilerplate/api', projectPath)
   }
 
+  fs.renameSync(`${projectPath}/yarnrc.yml`, `${projectPath}/.yarnrc.yml`)
+  fs.renameSync(`${projectPath}/gitignore`, `${projectPath}/.gitignore`)
+
   if (!testEnv()) {
     log.restoreCache()
     log.write(c.green(`Step 1. write boilerplate to ${appName}: Done!`), { cache: true })
@@ -62,7 +65,9 @@ export default async function newPsychicApp(appName: string, args: string[]) {
     log.write(c.green(`Step 3. Installing psychic dependencies...`))
 
     // only run yarn install if not in test env to save time
-    await sspawn(`cd ${projectPath} && yarn install`)
+    await sspawn(
+      `cd ${projectPath} && mkdir node_modules && touch yarn.lock && corepack enable && yarn set version berry && yarn install`,
+    )
   }
 
   // sleeping here because yarn has a delayed print that we need to clean up
@@ -148,10 +153,12 @@ export default async function newPsychicApp(appName: string, args: string[]) {
 
       if (!testEnv()) {
         // only bother installing packages if not in test env to save time
-        await sspawn(`cd ${projectPath}/../client && yarn install --ignore-engines`)
+        await sspawn(
+          `cd ${projectPath}/../client && mkdir node_modules && touch yarn.lock && corepack enable && yarn set version berry && yarn install`,
+        )
 
         try {
-          await sspawn(`cd ${projectPath}/../client && yarn add axios --ignore-engines`)
+          await sspawn(`cd ${projectPath}/../client && yarn add axios`)
         } catch (err) {
           errors.push(
             `

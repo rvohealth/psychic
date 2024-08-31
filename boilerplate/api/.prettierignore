@@ -1,0 +1,11 @@
+# Ignore generated files
+openapi/openapi.json
+openapi.json
+src/db/schema.ts
+src/db/sync.ts
+src/conf/routeTypes.ts
+
+.github/
+dist/
+.yarn/
+.yarnrc.yml

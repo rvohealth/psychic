@@ -5,10 +5,10 @@ import { Application } from 'express'
 import http from 'http'
 import { createClient, RedisClientOptions } from 'redis'
 import socketio from 'socket.io'
+import { envBool } from '../helpers/envValue'
 import log from '../log'
 import PsychicApplication from '../psychic-application'
 import { getPsychicHttpInstance } from '../server/helpers/startPsychicServer'
-import { envBool } from '../helpers/envValue'
 
 export default class Cable {
   public app: Application

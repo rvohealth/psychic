@@ -23,6 +23,7 @@ var __importStar = (this && this.__importStar) || function (mod) {
     return result;
 };
 Object.defineProperty(exports, "__esModule", { value: true });
+exports.default = copyRecursive;
 const fs = __importStar(require("fs"));
 const path = __importStar(require("path"));
 function copyRecursive(src, dest) {
@@ -40,4 +41,3 @@ function copyRecursive(src, dest) {
         fs.copyFileSync(src, dest);
     }
 }
-exports.default = copyRecursive;

@@ -75,7 +75,7 @@ function recursivelyBuildRoutesStr(routesObj: any, str: string, numIterations: n
   return Object.keys(routesObj).reduce((agg, key) => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
     if (typeof routesObj[key] === 'string') {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const pathStr = /^\(/.test(routesObj[key]) ? routesObj[key] : `'${routesObj[key]}'`
 
       agg += `\n${spaces(numIterations)}${safeObjectKey(key)}: ${pathStr},`

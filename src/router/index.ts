@@ -1,4 +1,3 @@
-import pluralize = require('pluralize')
 import {
   ValidationError,
   ValidationType,
@@ -8,6 +7,7 @@ import {
   testEnv,
 } from '@rvohealth/dream'
 import { Application, Request, Response, Router } from 'express'
+import pluralize from 'pluralize'
 import PsychicController from '../controller'
 import HttpError from '../error/http'
 import { devEnvBool } from '../helpers/envValue'
@@ -138,7 +138,7 @@ export default class PsychicRouter {
       namespaces: replacedNamespaces,
     })
     const currentNamespace = replacedNamespaces[replacedNamespaces.length - 1]
-    if (!currentNamespace) throw 'Must be within a resource to call the collection method'
+    if (!currentNamespace) throw new Error('Must be within a resource to call the collection method')
 
     cb(nestedRouter)
   }
@@ -151,7 +151,7 @@ export default class PsychicRouter {
   ) {
     if (cb) {
       if (typeof optionsOrCb === 'function')
-        throw 'cannot pass a function as a second arg when passing 3 args'
+        throw new Error('cannot pass a function as a second arg when passing 3 args')
       this._makeResource(path, optionsOrCb as ResourcesOptions, cb, plural)
     } else {
       if (typeof optionsOrCb === 'function') this._makeResource(path, undefined, optionsOrCb, plural)
@@ -331,7 +331,7 @@ export default class PsychicRouter {
           paramValidationError = error as ParamValidationError
           try {
             errorsJson = JSON.parse(paramValidationError.message) as Record<string, string>
-          } catch (err) {
+          } catch {
             // noop
           }
 

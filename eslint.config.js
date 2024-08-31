@@ -7,6 +7,7 @@ const typescriptParser = require('@typescript-eslint/parser')
 const config = typescriptEslint.config(
   eslint.configs.recommended,
   ...typescriptEslint.configs.recommendedTypeChecked,
+
   {
     ignores: [
       'test-app/db/schema.ts',
@@ -14,11 +15,14 @@ const config = typescriptEslint.config(
       'test-app/db/associations.ts',
       'test-app/client/apiRoutes.ts',
       'test-app/client/schema.ts',
-      'boilerplate/*',
-      'spec-boilerplate/*',
+      'boilerplate/**/*',
+      'spec-boilerplate/**/*',
+      '.yarn/**/*',
+      '.yarnrc.yml',
       '.global-cli-dist/*',
     ],
   },
+
   {
     files: ['**/*.ts'],
     languageOptions: {

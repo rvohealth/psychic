@@ -10,3 +10,11 @@ test-app/.psy/*
 spec/tmp.txt
 .vim/*
 dist
+
+.pnp.*
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions

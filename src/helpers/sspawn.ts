@@ -7,7 +7,7 @@ export default function sspawn(
 ) {
   return new Promise((accept, reject) => {
     ssspawn(command, opts).on('close', code => {
-      if (code !== 0) reject(code)
+      if (code !== 0) reject(new Error(code?.toString()))
       accept({})
     })
   })

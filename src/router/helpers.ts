@@ -1,4 +1,4 @@
-import { pascalize, compact } from '@rvohealth/dream'
+import { compact, pascalize } from '@rvohealth/dream'
 import PsychicRouter, { PsychicNestedRouter } from '../router'
 import { ResourcesMethodType, ResourcesOptions } from './types'
 
@@ -93,6 +93,6 @@ export function applyResourceAction(
       break
 
     default:
-      throw `unsupported resource method type: ${action}`
+      throw new Error(`unsupported resource method type: ${action}`)
   }
 }
