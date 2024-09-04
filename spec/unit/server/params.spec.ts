@@ -2,8 +2,8 @@ import { CalendarDate } from '@rvohealth/dream'
 import { DateTime } from 'luxon'
 import { PsychicParamsDictionary } from '../../../src/controller'
 import Params, { ParamValidationError } from '../../../src/server/params'
-import Pet from '../../../test-app/app/models/Pet'
-import User from '../../../test-app/app/models/User'
+import Pet from '../../../test-app/src/app/models/Pet'
+import User from '../../../test-app/src/app/models/User'
 
 describe('Params', () => {
   describe('.for', () => {

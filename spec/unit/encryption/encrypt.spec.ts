@@ -2,7 +2,7 @@ import jwt from 'jsonwebtoken'
 import { PsychicApplication } from '../../../src'
 import Encrypt from '../../../src/encryption/encrypt'
 import InvalidAppEncryptionKey from '../../../src/error/encrypt/invalid-app-encryption-key'
-import initializePsychicApplication from '../../../test-app/cli/helpers/initializePsychicApplication'
+import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication'
 
 const originalEncryptionKey = process.env.APP_ENCRYPTION_KEY
 

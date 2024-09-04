@@ -1,10 +1,10 @@
 import { describe as context } from '@jest/globals'
-import DummyService from '../../../test-app/app/services/DummyService'
-import UrgentDummyService from '../../../test-app/app/services/UrgentDummyService'
-import NotUrgentDummyService from '../../../test-app/app/services/NotUrgentDummyService'
-import LastDummyService from '../../../test-app/app/services/LastDummyService'
-import background, { BackgroundQueuePriority } from '../../../src/background'
 import { Job } from 'bullmq'
+import background, { BackgroundQueuePriority } from '../../../src/background'
+import DummyService from '../../../test-app/src/app/services/DummyService'
+import LastDummyService from '../../../test-app/src/app/services/LastDummyService'
+import NotUrgentDummyService from '../../../test-app/src/app/services/NotUrgentDummyService'
+import UrgentDummyService from '../../../test-app/src/app/services/UrgentDummyService'
 
 describe('BackgroundedService', () => {
   describe('.background', () => {

@@ -1,6 +1,6 @@
-import { pascalize } from '@rvohealth/dream'
-import { sharedPathPrefix, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
+import { pascalize, sharedPathPrefix, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
 import psychicPath, { PsychicPaths } from './psychicPath'
+import updirsFromPath from './updirsFromPath'
 
 export default function (
   originDreamPathType: PsychicPaths,
@@ -58,13 +58,5 @@ export function psychicPathTypeRelativePath(
   const sharedPrefixLength = sharedPathPrefix(originPath, destinationPath).length
   const originPathToRemove = originPath.slice(sharedPrefixLength)
 
-  const updirs =
-    originPathToRemove.length === 0
-      ? ''
-      : originPathToRemove
-          .split('/')
-          .map(() => '../')
-          .join('')
-
-  return updirs + destinationPath.slice(sharedPrefixLength)
+  return updirsFromPath(originPathToRemove) + destinationPath.slice(sharedPrefixLength)
 }

@@ -1,9 +1,9 @@
 import { describe as context } from '@jest/globals'
 import { DateTime } from 'luxon'
-import Ws, { InvalidWsPathError } from '../../../src/cable/ws'
-import redisWsKey, * as RedisWsKeyModule from '../../../src/cable/redisWsKey'
 import createWsRedisClient from '../../../src/cable/createWsRedisClient'
-import User from '../../../test-app/app/models/User'
+import redisWsKey, * as RedisWsKeyModule from '../../../src/cable/redisWsKey'
+import Ws, { InvalidWsPathError } from '../../../src/cable/ws'
+import User from '../../../test-app/src/app/models/User'
 
 describe('Ws', () => {
   describe('.register', () => {

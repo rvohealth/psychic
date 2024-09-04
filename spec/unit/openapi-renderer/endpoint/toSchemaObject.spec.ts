@@ -1,9 +1,9 @@
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
 import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
-import UsersController from '../../../../test-app/app/controllers/UsersController'
-import Pet from '../../../../test-app/app/models/Pet'
-import Post from '../../../../test-app/app/models/Post'
-import User from '../../../../test-app/app/models/User'
+import UsersController from '../../../../test-app/src/app/controllers/UsersController'
+import Pet from '../../../../test-app/src/app/models/Pet'
+import Post from '../../../../test-app/src/app/models/Post'
+import User from '../../../../test-app/src/app/models/User'
 import {
   CommentTestingArrayWithSerializerRefSerializer,
   CommentTestingBasicArraySerializerRefSerializer,
@@ -27,8 +27,8 @@ import {
   CommentWithAnyOfObjectSerializer,
   CommentWithOneOfArraySerializer,
   CommentWithOneOfObjectSerializer,
-} from '../../../../test-app/app/serializers/CommentSerializer'
-import { UserWithPostsMultiType2Serializer } from '../../../../test-app/app/serializers/UserSerializer'
+} from '../../../../test-app/src/app/serializers/CommentSerializer'
+import { UserWithPostsMultiType2Serializer } from '../../../../test-app/src/app/serializers/UserSerializer'
 
 describe('OpenapiEndpointRenderer', () => {
   describe('#toSchemaObject', () => {

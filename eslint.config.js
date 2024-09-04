@@ -10,9 +10,8 @@ const config = typescriptEslint.config(
 
   {
     ignores: [
-      'test-app/db/schema.ts',
-      'test-app/db/sync.ts',
-      'test-app/db/associations.ts',
+      'test-app/src/db/schema.ts',
+      'test-app/src/db/sync.ts',
       'test-app/client/apiRoutes.ts',
       'test-app/client/schema.ts',
       'boilerplate/**/*',

@@ -3,7 +3,7 @@ import { Params } from '../../../src'
 import PsychicController from '../../../src/controller'
 import PsychicApplication from '../../../src/psychic-application'
 import { ParamValidationError } from '../../../src/server/params'
-import User from '../../../test-app/app/models/User'
+import User from '../../../test-app/src/app/models/User'
 
 describe('PsychicController', () => {
   describe('get #params', () => {

@@ -1,8 +1,7 @@
 # Ignore generated files
-test-app/db/schema.ts
-test-app/db/sync.ts
-test-app/db/associations.ts
-test-app/conf/routeTypes.ts
+test-app/src/db/schema.ts
+test-app/src/db/sync.ts
+test-app/src/conf/routeTypes.ts
 test-app/client/apiRoutes.ts
 test-app/client/schema.ts
 test-app/openapi.json

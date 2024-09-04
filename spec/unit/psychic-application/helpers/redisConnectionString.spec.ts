@@ -1,6 +1,6 @@
 import redisConnectionString from '../../../../src/psychic-application/helpers/redisConnectionString'
 import { RedisOptionPurpose } from '../../../../src/psychic-application/helpers/redisOptions'
-import initializePsychicApplication from '../../../../test-app/cli/helpers/initializePsychicApplication'
+import initializePsychicApplication from '../../../../test-app/src/cli/helpers/initializePsychicApplication'
 
 describe('redisConnectionString', () => {
   let purpose: RedisOptionPurpose

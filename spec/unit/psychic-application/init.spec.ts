@@ -4,7 +4,7 @@ import PsychicApplicationInitMissingApiRoot from '../../../src/error/psychic-app
 import PsychicApplicationInitMissingCallToLoadControllers from '../../../src/error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../../../src/error/psychic-application/init-missing-routes-callback'
 import * as LoadControllersModule from '../../../src/psychic-application/helpers/loadControllers'
-import dreamCb from '../../../test-app/conf/dream'
+import dreamCb from '../../../test-app/src/conf/dream'
 
 describe('DreamApplication#init', () => {
   beforeEach(() => {

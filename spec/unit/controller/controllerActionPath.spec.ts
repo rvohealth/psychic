@@ -1,4 +1,4 @@
-import UsersController from '../../../test-app/app/controllers/UsersController'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('PsychicController', () => {
   describe('.controllerActionPath', () => {

@@ -2,7 +2,7 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Encrypt } from '../../../src'
 import PsychicController from '../../../src/controller'
 import PsychicApplication from '../../../src/psychic-application'
-import User from '../../../test-app/app/models/User'
+import User from '../../../test-app/src/app/models/User'
 
 describe('PsychicController', () => {
   describe('#getCookie', () => {

@@ -3,7 +3,7 @@ import { describe as context } from '@jest/globals'
 import { Request, Response } from 'express'
 import { Encrypt } from '../../../src'
 import Session, { CustomSessionCookieOptions } from '../../../src/session'
-import User from '../../../test-app/app/models/User'
+import User from '../../../test-app/src/app/models/User'
 
 describe('Session', () => {
   let user: User

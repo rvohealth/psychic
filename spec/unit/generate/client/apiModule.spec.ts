@@ -6,8 +6,8 @@ describe('dream generate:model <name> [...attributes]', () => {
       const res = generateClientAPIModule('users', 'User')
       expect(res).toEqual(
         `\
-import { apiCall } from './common'
-import { User } from './schema'
+import { apiCall } from '../common'
+import { User } from '../schema'
 
 export default class UsersAPI {
   public static index() {
@@ -39,8 +39,8 @@ export default class UsersAPI {
     const res = generateClientAPIModule('/api/users', 'System/Main/User')
     expect(res).toEqual(
       `\
-import { apiCall } from '../../common'
-import { User } from '../../schema'
+import { apiCall } from '../../../common'
+import { User } from '../../../schema'
 
 export default class SystemMainUsersAPI {
   public static index() {

@@ -2,16 +2,18 @@ import { PsychicServer } from '../../../../src'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
 import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
 import { RouteConfig } from '../../../../src/router/route-manager'
-import ApiPetsController from '../../../../test-app/app/controllers/Api/PetsController'
-import PetsController from '../../../../test-app/app/controllers/PetsController'
-import UsersController from '../../../../test-app/app/controllers/UsersController'
-import Pet from '../../../../test-app/app/models/Pet'
-import Post from '../../../../test-app/app/models/Post'
-import User from '../../../../test-app/app/models/User'
-import { CommentTestingDoubleShorthandSerializer } from '../../../../test-app/app/serializers/CommentSerializer'
-import PostSerializer from '../../../../test-app/app/serializers/PostSerializer'
-import UserSerializer, { UserWithPostsSerializer } from '../../../../test-app/app/serializers/UserSerializer'
-import initializePsychicApplication from '../../../../test-app/cli/helpers/initializePsychicApplication'
+import ApiPetsController from '../../../../test-app/src/app/controllers/Api/PetsController'
+import PetsController from '../../../../test-app/src/app/controllers/PetsController'
+import UsersController from '../../../../test-app/src/app/controllers/UsersController'
+import Pet from '../../../../test-app/src/app/models/Pet'
+import Post from '../../../../test-app/src/app/models/Post'
+import User from '../../../../test-app/src/app/models/User'
+import { CommentTestingDoubleShorthandSerializer } from '../../../../test-app/src/app/serializers/CommentSerializer'
+import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer'
+import UserSerializer, {
+  UserWithPostsSerializer,
+} from '../../../../test-app/src/app/serializers/UserSerializer'
+import initializePsychicApplication from '../../../../test-app/src/cli/helpers/initializePsychicApplication'
 
 describe('OpenapiEndpointRenderer', () => {
   let routes: RouteConfig[]

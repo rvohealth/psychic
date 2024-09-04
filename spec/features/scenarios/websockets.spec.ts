@@ -2,8 +2,8 @@ import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
 import { Socket } from 'socket.io'
 import { io } from 'socket.io-client'
 import PsychicServer from '../../../src/server'
-import User from '../../../test-app/app/models/User'
-import initializePsychicApplication from '../../../test-app/cli/helpers/initializePsychicApplication'
+import User from '../../../test-app/src/app/models/User'
+import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication'
 
 describe('user attempts to connect to websockets', () => {
   let server: PsychicServer

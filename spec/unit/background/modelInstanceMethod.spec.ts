@@ -1,7 +1,7 @@
 import { describe as context } from '@jest/globals'
-import background, { BackgroundQueuePriority } from '../../../src/background'
-import User from '../../../test-app/app/models/User'
 import { Job } from 'bullmq'
+import background, { BackgroundQueuePriority } from '../../../src/background'
+import User from '../../../test-app/src/app/models/User'
 
 describe('background (app singleton)', () => {
   describe('.modelInstanceMethod', () => {

@@ -1,8 +1,8 @@
 import { describe as context } from '@jest/globals'
-import background, { BackgroundQueuePriority } from '../../../src/background'
-import DummyService from '../../../test-app/app/services/DummyService'
-import readTmpFile from '../../helpers/readTmpFile'
 import { Job } from 'bullmq'
+import background, { BackgroundQueuePriority } from '../../../src/background'
+import DummyService from '../../../test-app/src/app/services/DummyService'
+import readTmpFile from '../../helpers/readTmpFile'
 
 describe('background (app singleton)', () => {
   describe('#instanceMethod', () => {

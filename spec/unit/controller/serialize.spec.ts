@@ -4,12 +4,12 @@ import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller'
 import { BeforeAction } from '../../../src/controller/decorators'
 import PsychicApplication from '../../../src/psychic-application'
-import Pet from '../../../test-app/app/models/Pet'
-import User from '../../../test-app/app/models/User'
+import Pet from '../../../test-app/src/app/models/Pet'
+import User from '../../../test-app/src/app/models/User'
 import UserSerializer, {
   UserExtraSerializer,
   UserSummarySerializer,
-} from '../../../test-app/app/serializers/UserSerializer'
+} from '../../../test-app/src/app/serializers/UserSerializer'
 
 describe('PsychicController', () => {
   describe('#serialize', () => {

@@ -1,5 +1,5 @@
 import PsychicApplication from '../../../src/psychic-application'
-import UsersController from '../../../test-app/app/controllers/UsersController'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('PsychicApplication', () => {
   describe('get #controllers', () => {

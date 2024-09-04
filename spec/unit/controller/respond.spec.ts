@@ -3,7 +3,7 @@ import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller'
 import { OpenAPI } from '../../../src/controller/decorators'
 import PsychicApplication from '../../../src/psychic-application'
-import User from '../../../test-app/app/models/User'
+import User from '../../../test-app/src/app/models/User'
 
 describe('PsychicController', () => {
   describe('#respond', () => {

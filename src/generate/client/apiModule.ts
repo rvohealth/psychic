@@ -1,6 +1,6 @@
 import { pascalize } from '@rvohealth/dream'
 import pluralize from 'pluralize'
-import updirs from '../helpers/updirs'
+import updirsFromPath from '../../helpers/path/updirsFromPath'
 
 export default function generateClientAPIModule(route: string, modelName: string) {
   const pluralizedName = pluralize(modelName)
@@ -8,8 +8,8 @@ export default function generateClientAPIModule(route: string, modelName: string
   const dotRoute = route.replace(/^\//, '').replace(/\//g, '.')
 
   return `\
-import { apiCall } from '${updirs(modelName.split('/').length - 1)}common'
-import { User } from '${updirs(modelName.split('/').length - 1)}schema'
+import { apiCall } from '${updirsFromPath(modelName)}common'
+import { User } from '${updirsFromPath(modelName)}schema'
 
 export default class ${pascalizedName} {
   public static index() {

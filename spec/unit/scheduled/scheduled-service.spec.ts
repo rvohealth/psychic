@@ -1,11 +1,11 @@
 import { describe as context } from '@jest/globals'
-import DummyScheduledService from '../../../test-app/app/services/DummyScheduledService'
-import DefaultDummyScheduledService from '../../../test-app/app/services/DefaultDummyScheduledService'
-import UrgentDummyScheduledService from '../../../test-app/app/services/UrgentDummyScheduledService'
-import NotUrgentDummyScheduledService from '../../../test-app/app/services/NotUrgentDummyScheduledService'
-import LastDummyScheduledService from '../../../test-app/app/services/LastDummyScheduledService'
-import background, { BackgroundQueuePriority } from '../../../src/background'
 import { Job } from 'bullmq'
+import background, { BackgroundQueuePriority } from '../../../src/background'
+import DefaultDummyScheduledService from '../../../test-app/src/app/services/DefaultDummyScheduledService'
+import DummyScheduledService from '../../../test-app/src/app/services/DummyScheduledService'
+import LastDummyScheduledService from '../../../test-app/src/app/services/LastDummyScheduledService'
+import NotUrgentDummyScheduledService from '../../../test-app/src/app/services/NotUrgentDummyScheduledService'
+import UrgentDummyScheduledService from '../../../test-app/src/app/services/UrgentDummyScheduledService'
 
 describe('ScheduledService', () => {
   context('queue priority', () => {
