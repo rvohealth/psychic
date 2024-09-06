@@ -55,7 +55,8 @@ export default (r: PsychicRouter) => {
   })
 
   r.post('login', UsersController, 'login')
-  r.resources('users', { only: ['create', 'index'] }, r => {
+  // TODO this one uses new syntax
+  r.resources('users', { controller: UsersController, only: ['create', 'index'] }, r => {
     r.get('hello', UsersController, 'hello')
     r.post('', UsersController, 'doathing')
     r.get('justforspecs', UsersController, 'justforspecs')

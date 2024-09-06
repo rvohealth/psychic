@@ -1,6 +1,8 @@
 import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
 import PsychicRouter from '../../../src/router'
 import PsychicServer from '../../../src/server'
+import PetsController from '../../../test-app/app/controllers/PetsController'
+import UsersController from '../../../test-app/app/controllers/UsersController'
 
 describe('PsychicRouter', () => {
   beforeEach(async () => {
@@ -34,18 +36,18 @@ describe('PsychicRouter', () => {
         router.resource('users')
         router.commit()
         expect(server.app.post).toHaveBeenCalledWith('/users', expect.any(Function))
-        expect(server.app.get).toHaveBeenCalledWith('/users', expect.any(Function))
-        expect(server.app.patch).toHaveBeenCalledWith('/users', expect.any(Function))
-        expect(server.app.put).toHaveBeenCalledWith('/users', expect.any(Function))
-        expect(server.app.delete).toHaveBeenCalledWith('/users', expect.any(Function))
+        expect(server.app.get).toHaveBeenCalledWith('/users/:id', expect.any(Function))
+        expect(server.app.patch).toHaveBeenCalledWith('/users/:id', expect.any(Function))
+        expect(server.app.put).toHaveBeenCalledWith('/users/:id', expect.any(Function))
+        expect(server.app.delete).toHaveBeenCalledWith('/users/:id', expect.any(Function))
       })
 
       context('only is passed', () => {
         it('does not call methods that were omitted with only', () => {
           router.resource('users', { only: ['show', 'destroy'] })
           router.commit()
-          expect(server.app.get).toHaveBeenCalledWith('/users', expect.any(Function))
-          expect(server.app.delete).toHaveBeenCalledWith('/users', expect.any(Function))
+          expect(server.app.get).toHaveBeenCalledWith('/users/:id', expect.any(Function))
+          expect(server.app.delete).toHaveBeenCalledWith('/users/:id', expect.any(Function))
           expect(server.app.post).not.toHaveBeenCalled()
           expect(server.app.patch).not.toHaveBeenCalled()
           expect(server.app.put).not.toHaveBeenCalled()
@@ -66,9 +68,9 @@ describe('PsychicRouter', () => {
 
       context('controller is passed', () => {
         it('uses the passed controller instead of assuming', () => {
-          router.resource('user', { only: ['update'], controller: 'Howyadoin' })
+          router.resource('user', { only: ['update'], controller: PetsController })
           router.commit()
-          expect(router.routes[0].controllerActionString).toEqual('Howyadoin#update')
+          expect(router.routes[0].controller).toEqual(PetsController)
         })
       })
 
@@ -77,7 +79,7 @@ describe('PsychicRouter', () => {
           router.namespace('api', r => {
             r.namespace('v1', r => {
               r.resource('users', { except: ['show', 'update', 'destroy', 'create'] }, r => {
-                r.get('hello', 'Users#hello')
+                r.get('hello', UsersController, 'hello')
               })
             })
           })
@@ -87,7 +89,7 @@ describe('PsychicRouter', () => {
 
         it('successfully applies nested resource routes', () => {
           router.resource('users', { except: ['show', 'update', 'destroy', 'create'] }, r => {
-            r.get('hello', 'Users#hello')
+            r.get('hello', UsersController, 'hello')
           })
           router.commit()
           expect(server.app.get).toHaveBeenCalledWith('/users/hello', expect.any(Function))
@@ -95,8 +97,8 @@ describe('PsychicRouter', () => {
 
         it('successfully applies double-nested resource resources', () => {
           router.resource('users', { except: ['show', 'update', 'destroy', 'create'] }, r => {
-            r.resource('friends', {}, r => {
-              r.get('count', 'Friends#count')
+            r.resource('pets', {}, r => {
+              r.get('update', PetsController, 'update')
             })
           })
           router.commit()

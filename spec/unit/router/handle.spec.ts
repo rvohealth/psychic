@@ -16,8 +16,8 @@ describe('PsychicRouter#handle', () => {
 
   it('calls the matching method on a corresponding controller', async () => {
     jest.spyOn(UsersController.prototype, 'ping')
-    router.get('users', 'Users#ping')
-    await router.handle('Users#ping', { req, res })
+    router.get('users', UsersController, 'ping')
+    await router.handle(UsersController, 'ping', { req, res })
 
     // eslint-disable-next-line @typescript-eslint/unbound-method
     expect(UsersController.prototype.ping).toHaveBeenCalled()
