@@ -3,6 +3,7 @@ import PsychicRouter, { PsychicNestedRouter } from '../router'
 import { ResourcesMethodType, ResourcesOptions } from './types'
 import PsychicController from '../controller'
 import PsychicApplication from '../psychic-application'
+import CannotInferControllerFromTopLevelRouteError from '../error/router/cannot-infer-controller-from-top-level-route'
 
 export function routePath(routePath: string) {
   return `/${routePath.replace(/^\//, '')}`
@@ -40,24 +41,31 @@ export function namespacedControllerActionString(namespace: string, controllerAc
 
 type RoutingMechanism = PsychicRouter | PsychicNestedRouter
 
+type LookupOpts = {
+  resourceName?: string
+  httpMethod: string
+  path: string
+}
+
 export function lookupControllerOrFail(
   routingMechanism: RoutingMechanism,
-  resourceName?: string,
+  opts: LookupOpts,
 ): typeof PsychicController {
-  const namespaces = resourceName
+  const namespaces = opts.resourceName
     ? routingMechanism.currentNamespaces.concat({
-        namespace: resourceName,
+        namespace: opts.resourceName,
         resourceful: false,
         isScope: false,
       })
     : routingMechanism.currentNamespaces
 
   const filteredNamespaces = namespaces.filter(n => !n.isScope)
-  if (!filteredNamespaces.length) throw new Error('no valid namespaces')
+  if (!filteredNamespaces.length)
+    throw new CannotInferControllerFromTopLevelRouteError(opts.httpMethod, opts.path)
   const filename = filteredNamespaces.map(str => pascalize(str.namespace)).join('/') + 'Controller'
   const psychicApp = PsychicApplication.getOrFail()
   const controller = psychicApp.controllers[`controllers/${filename}`]
-  if (!controller) throw new Error('Psychic controller not found')
+  if (!controller) throw new Error('inferred controller not found in list of known controllers')
   return controller
 }
 
@@ -83,7 +91,7 @@ export function applyResourcesAction(
   routingMechanism: RoutingMechanism,
   options?: ResourcesOptions,
 ) {
-  const controller = options?.controller || lookupControllerOrFail(routingMechanism, path)
+  const controller = options?.controller || lookupControllerOrFail(routingMechanism, { path: path })
   switch (action) {
     case 'index':
       routingMechanism.get(path, controller, 'index' as PsychicControllerActions<typeof controller>)
