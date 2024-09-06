@@ -71,6 +71,7 @@ describe('PsychicRouter', () => {
           router.resource('user', { only: ['update'], controller: PetsController })
           router.commit()
           expect(router.routes[0].controller).toEqual(PetsController)
+          expect(router.routes[0].action).toEqual('update')
         })
       })
 
