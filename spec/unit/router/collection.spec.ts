@@ -1,5 +1,6 @@
 import PsychicServer from '../../../src/server'
 import PsychicRouter from '../../../src/router'
+import UsersController from '../../../test-app/app/controllers/UsersController'
 
 describe('PsychicRouter', () => {
   describe('#collection', () => {
@@ -18,7 +19,7 @@ describe('PsychicRouter', () => {
     it('does not enforce id param on subsequent routes', () => {
       router.resources('users', { only: [] }, () => {
         router.collection(r => {
-          r.get('howyadoin', 'Howyadoin#howyadoin')
+          r.get('howyadoin', UsersController, 'howyadoin')
         })
       })
 
