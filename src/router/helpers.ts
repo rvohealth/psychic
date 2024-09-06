@@ -1,6 +1,8 @@
 import { compact, pascalize } from '@rvohealth/dream'
 import PsychicRouter, { PsychicNestedRouter } from '../router'
 import { ResourcesMethodType, ResourcesOptions } from './types'
+import PsychicController from '../controller'
+import PsychicApplication from '../psychic-application'
 
 export function routePath(routePath: string) {
   return `/${routePath.replace(/^\//, '')}`
@@ -36,33 +38,70 @@ export function namespacedControllerActionString(namespace: string, controllerAc
     .replace(/^\//, '')
 }
 
+export function lookupControllerOrFail(namespaces: NamespaceConfig[]): typeof PsychicController {
+  const filteredNamespaces = namespaces.filter(n => !n.isScope)
+  console.log({ filteredNamespaces, namespaces })
+  if (!filteredNamespaces.length) throw new Error('no valid namespaces')
+  const filename = filteredNamespaces.map(str => pascalize(str.namespace)).join('/') + 'Controller'
+  console.log({ filename })
+  const psychicApp = PsychicApplication.getOrFail()
+  const controller = psychicApp.controllers[`controllers/${filename}`]
+  console.log({ controller })
+  if (!controller) throw new Error('Psychic controller not found')
+  return controller
+}
+
+export type FunctionProperties<T> = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  [K in keyof T as T[K] extends (...args: any[]) => any ? K : never]: T[K]
+}
+export type FunctionPropertyNames<T> = keyof FunctionProperties<T>
+export type PsychicControllerActions<T extends typeof PsychicController> = Exclude<
+  FunctionPropertyNames<Required<InstanceType<T>>>,
+  FunctionPropertyNames<PsychicController>
+>
+
+export interface NamespaceConfig {
+  namespace: string
+  resourceful: boolean
+  isScope: boolean
+}
+
 export function applyResourcesAction(
   path: string,
   action: ResourcesMethodType,
   routingMechanism: PsychicRouter | PsychicNestedRouter,
   options?: ResourcesOptions,
 ) {
-  const controllerName = options?.controller || pascalize(path)
+  const controller = options?.controller || lookupControllerOrFail(routingMechanism.currentNamespaces)
   switch (action) {
     case 'index':
-      routingMechanism.get(path, `${controllerName}#index`)
+      routingMechanism.get(path, controller, 'index' as PsychicControllerActions<typeof controller>)
       break
 
     case 'create':
-      routingMechanism.post(path, `${controllerName}#create`)
+      routingMechanism.post(path, controller, 'create' as PsychicControllerActions<typeof controller>)
       break
 
     case 'update':
-      routingMechanism.put(`${path}/:id`, `${controllerName}#update`)
-      routingMechanism.patch(`${path}/:id`, `${controllerName}#update`)
+      routingMechanism.put(`${path}/:id`, controller, 'update' as PsychicControllerActions<typeof controller>)
+      routingMechanism.patch(
+        `${path}/:id`,
+        controller,
+        'update' as PsychicControllerActions<typeof controller>,
+      )
       break
 
     case 'show':
-      routingMechanism.get(`${path}/:id`, `${controllerName}#show`)
+      routingMechanism.get(`${path}/:id`, controller, 'show' as PsychicControllerActions<typeof controller>)
       break
 
     case 'destroy':
-      routingMechanism.delete(`${path}/:id`, `${controllerName}#destroy`)
+      routingMechanism.delete(
+        `${path}/:id`,
+        controller,
+        'destroy' as PsychicControllerActions<typeof controller>,
+      )
       break
   }
 }
@@ -73,23 +112,31 @@ export function applyResourceAction(
   routingMechanism: PsychicRouter | PsychicNestedRouter,
   options?: ResourcesOptions,
 ) {
-  const controllerName = options?.controller || pascalize(path)
+  const controller = options?.controller || lookupControllerOrFail(routingMechanism.currentNamespaces)
   switch (action) {
     case 'create':
-      routingMechanism.post(path, `${controllerName}#create`)
+      routingMechanism.post(path, controller, 'create' as PsychicControllerActions<typeof controller>)
       break
 
     case 'update':
-      routingMechanism.put(path, `${controllerName}#update`)
-      routingMechanism.patch(path, `${controllerName}#update`)
+      routingMechanism.put(`${path}/:id`, controller, 'update' as PsychicControllerActions<typeof controller>)
+      routingMechanism.patch(
+        `${path}/:id`,
+        controller,
+        'update' as PsychicControllerActions<typeof controller>,
+      )
       break
 
     case 'show':
-      routingMechanism.get(path, `${controllerName}#show`)
+      routingMechanism.get(`${path}/:id`, controller, 'show' as PsychicControllerActions<typeof controller>)
       break
 
     case 'destroy':
-      routingMechanism.delete(path, `${controllerName}#destroy`)
+      routingMechanism.delete(
+        `${path}/:id`,
+        controller,
+        'destroy' as PsychicControllerActions<typeof controller>,
+      )
       break
 
     default:

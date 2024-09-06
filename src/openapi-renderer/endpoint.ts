@@ -292,21 +292,17 @@ export default class OpenapiEndpointRenderer<
    * If no match is found, a MissingControllerActionPairingInRoutes exception.
    */
   private getCurrentRouteConfig(routes: RouteConfig[]) {
-    const controllerActionString = this.controllerClass.controllerActionPath(this.action)
-
     // if the action is update, we want to specifically find the 'patch' route,
     // otherwise we find any route that matches
     let route =
       this.action === 'update'
         ? routes.find(
             routeConfig =>
-              routeConfig.controllerActionString === controllerActionString &&
-              routeConfig.httpMethod === 'patch',
+              routeConfig.controller === this.controllerClass && routeConfig.httpMethod === 'patch',
           )
-        : routes.find(routeConfig => routeConfig.controllerActionString === controllerActionString)
+        : routes.find(routeConfig => routeConfig.controller === this.controllerClass)
 
-    if (!route)
-      route = routes.find(routeConfig => routeConfig.controllerActionString === controllerActionString)
+    if (!route) route = routes.find(routeConfig => routeConfig.controller === this.controllerClass)
 
     if (!route) throw new MissingControllerActionPairingInRoutes(this.controllerClass, this.action)
     return route
