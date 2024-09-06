@@ -1,15 +1,42 @@
 import supertest from 'supertest'
 import PsychicServer from '../../../src/server'
+import PsychicRouter from '../../../src/router'
+import UsersController from '../../../test-app/app/controllers/UsersController'
 
 describe('PsychicRouter', () => {
   describe('#get', () => {
-    it('can direct get requests to controller', async () => {
-      const server = new PsychicServer()
-      await server.boot()
+    let server: PsychicServer
+    let router: PsychicRouter
 
-      const res = await supertest(server.app).get('/ping').expect(200)
+    beforeEach(() => {
+      server = new PsychicServer()
+      router = new PsychicRouter(server.app, server.config)
+    })
 
-      expect(res.body).toEqual('helloworld')
+    describe('end-to-end specs', () => {
+      it('can direct get requests to controller', async () => {
+        await server.boot()
+
+        const res = await supertest(server.app).get('/ping').expect(200)
+
+        expect(res.body).toEqual('helloworld')
+      })
+    })
+
+    it('correctly applies nested crud routes within resources', () => {
+      router.get('/ping', UsersController, 'ping')
+      router.commit()
+
+      expect(router.routes).toEqual(
+        expect.arrayContaining([
+          {
+            httpMethod: 'get',
+            path: '/ping',
+            controller: UsersController,
+            action: 'ping',
+          },
+        ]),
+      )
     })
   })
 })
