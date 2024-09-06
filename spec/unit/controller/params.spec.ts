@@ -128,6 +128,22 @@ describe('PsychicController', () => {
 
         expect(controller.paramsFor(User, { key: 'user' })).toEqual({ name: 'howyadoin' })
       })
+
+      context('the key is not present', () => {
+        it('does not raise an exception', () => {
+          const req = getMockReq({
+            body: {},
+          })
+
+          const res = getMockRes().res
+          const controller = new PsychicController(req, res, {
+            config: new PsychicApplication(),
+            action: 'hello',
+          })
+
+          expect(controller.paramsFor(User, { key: 'user' })).toEqual({})
+        })
+      })
     })
 
     context('with options passed', () => {
