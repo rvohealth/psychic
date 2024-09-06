@@ -44,7 +44,8 @@ export default (r: PsychicRouter) => {
       r.resources('users', { only: ['index'] })
     })
     r.resources('users', { only: ['create', 'update'] }, r => {
-      r.resources('pets')
+      // TODO this controller is missing....do we delete this line or add the controller?
+      // r.resources('pets')
     })
     r.resources('pets', { only: ['create', 'update'] })
   })
@@ -65,6 +66,7 @@ export default (r: PsychicRouter) => {
     r.get('justforspecs', GreeterController, 'justforspecs')
   })
 
+  // TODO do we still need these?
   // r.get('route-exists-but-controller-doesnt')
   // r.get('controller-exists-but-method-doesnt')
 }

@@ -40,13 +40,10 @@ export function namespacedControllerActionString(namespace: string, controllerAc
 
 export function lookupControllerOrFail(namespaces: NamespaceConfig[]): typeof PsychicController {
   const filteredNamespaces = namespaces.filter(n => !n.isScope)
-  console.log({ filteredNamespaces, namespaces })
   if (!filteredNamespaces.length) throw new Error('no valid namespaces')
   const filename = filteredNamespaces.map(str => pascalize(str.namespace)).join('/') + 'Controller'
-  console.log({ filename })
   const psychicApp = PsychicApplication.getOrFail()
   const controller = psychicApp.controllers[`controllers/${filename}`]
-  console.log({ controller })
   if (!controller) throw new Error('Psychic controller not found')
   return controller
 }
@@ -73,7 +70,12 @@ export function applyResourcesAction(
   routingMechanism: PsychicRouter | PsychicNestedRouter,
   options?: ResourcesOptions,
 ) {
-  const controller = options?.controller || lookupControllerOrFail(routingMechanism.currentNamespaces)
+  const namespaces = routingMechanism.currentNamespaces.concat({
+    namespace: path,
+    resourceful: false,
+    isScope: false,
+  })
+  const controller = options?.controller || lookupControllerOrFail(namespaces)
   switch (action) {
     case 'index':
       routingMechanism.get(path, controller, 'index' as PsychicControllerActions<typeof controller>)
@@ -112,7 +114,12 @@ export function applyResourceAction(
   routingMechanism: PsychicRouter | PsychicNestedRouter,
   options?: ResourcesOptions,
 ) {
-  const controller = options?.controller || lookupControllerOrFail(routingMechanism.currentNamespaces)
+  const namespaces = routingMechanism.currentNamespaces.concat({
+    namespace: path,
+    resourceful: false,
+    isScope: false,
+  })
+  const controller = options?.controller || lookupControllerOrFail(namespaces)
   switch (action) {
     case 'create':
       routingMechanism.post(path, controller, 'create' as PsychicControllerActions<typeof controller>)

@@ -146,13 +146,9 @@ export default class PsychicRouter {
     action: string,
   ): void
   public crud(httpMethod: HttpMethod, path: string, controller?: typeof PsychicController, action?: string) {
-    // console.log({ controller, action, httpMethod })
     controller ||= lookupControllerOrFail(this.currentNamespaces)
     action ||= path.replace(/^\//, '')
-    if (action.match(/\//)) {
-      console.log({ path })
-      throw new Error('path is not a valid controller action')
-    }
+    if (action.match(/\//)) throw new Error('path is not a valid controller action')
 
     this.routeManager.addRoute({
       httpMethod,
