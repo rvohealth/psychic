@@ -6,6 +6,7 @@ export { default as BackgroundedService } from './background/backgrounded-servic
 export { default as ScheduledService } from './background/scheduled-service'
 export { default as PsychicBin } from './bin'
 export { default as Ws } from './cable/ws'
+export { default as PsychicCLI } from './cli'
 export { default as PsychicController, PsychicParamsDictionary, PsychicParamsPrimitive } from './controller'
 export { BeforeAction, OpenAPI } from './controller/decorators'
 export { default as Encrypt } from './encryption/encrypt'
