@@ -96,14 +96,16 @@ describe('PsychicRouter', () => {
         })
 
         it('successfully applies double-nested resource resources', () => {
-          router.resource('users', { except: ['show', 'update', 'destroy', 'create'] }, r => {
-            r.resource('pets', {}, r => {
-              r.get('update', PetsController, 'update')
+          router.namespace('api', r => {
+            r.resource('users', { except: ['show', 'update', 'destroy', 'create'] }, r => {
+              r.resource('pets', { only: [] }, r => {
+                r.get('count')
+              })
             })
           })
           router.commit()
 
-          expect(server.app.get).toHaveBeenCalledWith('/users/friends/count', expect.any(Function))
+          expect(server.app.get).toHaveBeenCalledWith('/api/users/pets/count', expect.any(Function))
         })
       })
     })

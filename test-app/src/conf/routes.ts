@@ -43,10 +43,7 @@ export default (r: PsychicRouter) => {
       r.get('ping', ApiV1UsersController, 'ping')
       r.resources('users', { only: ['index'] })
     })
-    r.resources('users', { only: ['create', 'update'] }, r => {
-      // TODO this controller is missing....do we delete this line or add the controller?
-      // r.resources('pets')
-    })
+    r.resources('users', { only: ['create', 'update'] })
     r.resources('pets', { only: ['create', 'update'] })
   })
 
