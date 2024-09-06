@@ -1,4 +1,3 @@
-import os from 'os'
 import path from 'path'
 import { PsychicApplication, background } from '@rvohealth/psychic'
 import { developmentOrTestEnv, testEnv } from '@rvohealth/dream'
@@ -9,13 +8,12 @@ import winston from 'winston'
 
 
 export default async (psy: PsychicApplication) => {
-  psy.appName = '<APP_NAME>'
-  psy.useWs = <USE_WS>
-  psy.useRedis = <USE_REDIS>
-  psy.apiOnly = <API_ONLY>
-
   await psy.load('controllers', path.join(__dirname, '..', 'app', 'controllers'))
 
+  psy.set('appName', '<APP_NAME>')
+  psy.set('useWs', <USE_WS>)
+  psy.set('useRedis', <USE_REDIS>)
+  psy.set('apiOnly', <API_ONLY>)
   psy.set('appEncryptionKey', process.env.APP_ENCRYPTION_KEY!)
   psy.set('apiRoot', path.join(__dirname, '..', '..'))
   psy.set('clientRoot', path.join(__dirname, '..', '..', '..', 'client'))

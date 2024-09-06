@@ -75,44 +75,144 @@ export default class PsychicApplication {
     this.getOrFail().logger[level](...args)
   }
 
-  public apiOnly: boolean = false
-  public apiRoot: string
-  public sessionCookieName: string = 'session'
-  public backgroundOptions: PsychicBackgroundOptions = {
+  private _apiOnly: boolean = false
+  public get apiOnly() {
+    return this._apiOnly
+  }
+
+  private _apiRoot: string
+  public get apiRoot() {
+    return this._apiRoot
+  }
+
+  private _sessionCookieName: string = 'session'
+  public get sessionCookieName() {
+    return this._sessionCookieName
+  }
+
+  private _backgroundOptions: PsychicBackgroundOptions = {
     workerCount: developmentOrTestEnv() ? 1 : 0,
   }
-  public clientRoot: string
-  public useWs: boolean = false
-  public useRedis: boolean = false
-  public appName: string = 'untitled app'
-  public encryptionKey: string
-  public port: number = envInt('PORT') || 7777
-  public corsOptions: CorsOptions = {}
-  public jsonOptions: bodyParser.Options
-  public cookieOptions: { maxAge: number }
-  public logger: PsychicLogger = console
-  public backgroundQueueOptions: Omit<QueueOptions, 'connection'>
-  public backgroundWorkerOptions: WorkerOptions
-  public redisBackgroundJobCredentials: PsychicRedisConnectionOptions
-  public redisWsCredentials: PsychicRedisConnectionOptions
-  public sslCredentials?: PsychicSslCredentials
-  public saltRounds?: number
-  public routesCb: (r: PsychicRouter) => void | Promise<void>
-  public openapi: PsychicOpenapiOptions &
+  public get backgroundOptions() {
+    return this._backgroundOptions
+  }
+
+  private _clientRoot: string
+  public get clientRoot() {
+    return this._clientRoot
+  }
+
+  private _useWs: boolean = false
+  public get useWs() {
+    return this._useWs
+  }
+
+  private _useRedis: boolean = false
+  public get useRedis() {
+    return this._useRedis
+  }
+
+  private _appName: string = 'untitled app'
+  public get appName() {
+    return this._appName
+  }
+
+  private _encryptionKey: string
+  public get encryptionKey() {
+    return this._encryptionKey
+  }
+
+  private _port: number = envInt('PORT') || 7777
+  public get port() {
+    return this._port
+  }
+
+  private _corsOptions: CorsOptions = {}
+  public get corsOptions() {
+    return this._corsOptions
+  }
+
+  private _jsonOptions: bodyParser.Options
+  public get jsonOptions() {
+    return this._jsonOptions
+  }
+
+  private _cookieOptions: { maxAge: number }
+  public get cookieOptions() {
+    return this._cookieOptions
+  }
+
+  private _logger: PsychicLogger = console
+  public get logger() {
+    return this._logger
+  }
+
+  private _backgroundQueueOptions: Omit<QueueOptions, 'connection'>
+  public get backgroundQueueOptions() {
+    return this._backgroundQueueOptions
+  }
+
+  private _backgroundWorkerOptions: WorkerOptions
+  public get backgroundWorkerOptions() {
+    return this._backgroundWorkerOptions
+  }
+
+  private _redisBackgroundJobCredentials: PsychicRedisConnectionOptions
+  public get redisBackgroundJobCredentials() {
+    return this._redisBackgroundJobCredentials
+  }
+
+  private _redisWsCredentials: PsychicRedisConnectionOptions
+  public get redisWsCredentials() {
+    return this._redisWsCredentials
+  }
+
+  private _sslCredentials?: PsychicSslCredentials
+  public get sslCredentials() {
+    return this._sslCredentials
+  }
+
+  private _saltRounds?: number
+  public get saltRounds() {
+    return this._saltRounds
+  }
+
+  private _routesCb: (r: PsychicRouter) => void | Promise<void>
+  public get routesCb() {
+    return this._routesCb
+  }
+
+  private _openapi: PsychicOpenapiOptions &
     Required<Pick<PsychicOpenapiOptions, 'clientOutputFilename' | 'outputFilename' | 'schemaDelimeter'>> = {
     clientOutputFilename: 'openapi.ts',
     outputFilename: 'openapi.json',
     schemaDelimeter: '',
   }
-  public client: Required<PsychicClientOptions> = {
+  public get openapi() {
+    return this._openapi
+  }
+
+  private _client: Required<PsychicClientOptions> = {
     apiPath: 'src/api',
   }
-  public paths: Required<PsychicPathOptions> = {
+  public get client() {
+    return this._client
+  }
+
+  private _paths: Required<PsychicPathOptions> = {
     controllers: 'src/app/controllers',
     controllerSpecs: 'spec/unit/controllers',
   }
-  public inflections?: () => void | Promise<void>
-  public bootHooks: Record<
+  public get paths() {
+    return this._paths
+  }
+
+  private _inflections?: () => void | Promise<void>
+  public get inflections() {
+    return this._inflections
+  }
+
+  private _bootHooks: Record<
     PsychicHookLoadEventTypes,
     ((conf: PsychicApplication) => void | Promise<void>)[]
   > = {
@@ -122,15 +222,25 @@ export default class PsychicApplication {
     'load:test': [],
     'load:prod': [],
   }
-  public specialHooks: PsychicApplicationSpecialHooks = {
+  public get bootHooks() {
+    return this._bootHooks
+  }
+
+  private _specialHooks: PsychicApplicationSpecialHooks = {
     expressInit: [],
     serverError: [],
     wsStart: [],
     wsConnect: [],
     'after:routes': [],
   }
+  public get specialHooks() {
+    return this._specialHooks
+  }
 
-  protected loadedControllers: boolean = false
+  private _loadedControllers: boolean = false
+  public get loadedControllers() {
+    return this._loadedControllers
+  }
 
   public get controllers() {
     return getControllersOrFail()
@@ -140,7 +250,7 @@ export default class PsychicApplication {
     switch (resourceType) {
       case 'controllers':
         await loadControllers(resourcePath)
-        this.loadedControllers = true
+        this._loadedControllers = true
         break
     }
   }
@@ -188,25 +298,25 @@ export default class PsychicApplication {
   ) {
     switch (hookEventType) {
       case 'server:error':
-        this.specialHooks.serverError.push(
+        this._specialHooks.serverError.push(
           cb as (err: Error, req: Request, res: Response) => void | Promise<void>,
         )
         break
 
       case 'server:init':
-        this.specialHooks.expressInit.push(cb as (app: Application) => void | Promise<void>)
+        this._specialHooks.expressInit.push(cb as (app: Application) => void | Promise<void>)
         break
 
       case 'ws:start':
-        this.specialHooks.wsStart.push(cb as (server: SocketServer) => void | Promise<void>)
+        this._specialHooks.wsStart.push(cb as (server: SocketServer) => void | Promise<void>)
         break
 
       case 'ws:connect':
-        this.specialHooks.wsConnect.push(cb as (socket: Socket) => void | Promise<void>)
+        this._specialHooks.wsConnect.push(cb as (socket: Socket) => void | Promise<void>)
         break
 
       case 'after:routes':
-        this.specialHooks['after:routes'].push(cb as (app: Application) => void | Promise<void>)
+        this._specialHooks['after:routes'].push(cb as (app: Application) => void | Promise<void>)
         break
 
       default:
@@ -218,145 +328,169 @@ export default class PsychicApplication {
 
   public set<Opt extends PsychicApplicationOption>(
     option: Opt,
-    value: Opt extends 'cors'
-      ? CorsOptions
-      : Opt extends 'cookie'
-        ? CustomCookieOptions
-        : Opt extends 'apiRoot'
-          ? string
-          : Opt extends 'sessionCookieName'
-            ? string
-            : Opt extends 'appEncryptionKey'
-              ? string
-              : Opt extends 'background'
-                ? PsychicBackgroundOptions
-                : Opt extends 'clientRoot'
+    value: Opt extends 'appName'
+      ? string
+      : Opt extends 'useWs'
+        ? boolean
+        : Opt extends 'useRedis'
+          ? boolean
+          : Opt extends 'apiOnly'
+            ? boolean
+            : Opt extends 'cors'
+              ? CorsOptions
+              : Opt extends 'cookie'
+                ? CustomCookieOptions
+                : Opt extends 'apiRoot'
                   ? string
-                  : Opt extends 'json'
-                    ? bodyParser.Options
-                    : Opt extends 'logger'
-                      ? PsychicLogger
-                      : Opt extends 'client'
-                        ? PsychicClientOptions
-                        : Opt extends 'background:queue'
-                          ? Omit<QueueOptions, 'connection'>
-                          : Opt extends 'background:worker'
-                            ? WorkerOptions
-                            : Opt extends 'redis:background'
-                              ? PsychicRedisConnectionOptions
-                              : Opt extends 'redis:ws'
-                                ? PsychicRedisConnectionOptions
-                                : Opt extends 'ssl'
-                                  ? PsychicSslCredentials
-                                  : Opt extends 'openapi'
-                                    ? PsychicOpenapiOptions
-                                    : Opt extends 'paths'
-                                      ? PsychicPathOptions
-                                      : Opt extends 'port'
-                                        ? number
-                                        : Opt extends 'saltRounds'
-                                          ? number
-                                          : Opt extends 'inflections'
-                                            ? () => void | Promise<void>
-                                            : Opt extends 'routes'
-                                              ? (r: PsychicRouter) => void | Promise<void>
-                                              : never,
+                  : Opt extends 'sessionCookieName'
+                    ? string
+                    : Opt extends 'appEncryptionKey'
+                      ? string
+                      : Opt extends 'background'
+                        ? PsychicBackgroundOptions
+                        : Opt extends 'clientRoot'
+                          ? string
+                          : Opt extends 'json'
+                            ? bodyParser.Options
+                            : Opt extends 'logger'
+                              ? PsychicLogger
+                              : Opt extends 'client'
+                                ? PsychicClientOptions
+                                : Opt extends 'background:queue'
+                                  ? Omit<QueueOptions, 'connection'>
+                                  : Opt extends 'background:worker'
+                                    ? WorkerOptions
+                                    : Opt extends 'redis:background'
+                                      ? PsychicRedisConnectionOptions
+                                      : Opt extends 'redis:ws'
+                                        ? PsychicRedisConnectionOptions
+                                        : Opt extends 'ssl'
+                                          ? PsychicSslCredentials
+                                          : Opt extends 'openapi'
+                                            ? PsychicOpenapiOptions
+                                            : Opt extends 'paths'
+                                              ? PsychicPathOptions
+                                              : Opt extends 'port'
+                                                ? number
+                                                : Opt extends 'saltRounds'
+                                                  ? number
+                                                  : Opt extends 'inflections'
+                                                    ? () => void | Promise<void>
+                                                    : Opt extends 'routes'
+                                                      ? (r: PsychicRouter) => void | Promise<void>
+                                                      : never,
   ) {
     switch (option) {
+      case 'appName':
+        this._appName = value as string
+        break
+
+      case 'useWs':
+        this._useWs = value as boolean
+        break
+
+      case 'useRedis':
+        this._useRedis = value as boolean
+        break
+
+      case 'apiOnly':
+        this._apiOnly = value as boolean
+        break
+
       case 'apiRoot':
-        this.apiRoot = value as string
+        this._apiRoot = value as string
         break
 
       case 'clientRoot':
-        this.clientRoot = value as string
+        this._clientRoot = value as string
         break
 
       case 'sessionCookieName':
-        this.sessionCookieName = value as string
+        this._sessionCookieName = value as string
         break
 
       case 'appEncryptionKey':
-        this.encryptionKey = value as string
+        this._encryptionKey = value as string
         break
 
       case 'cors':
-        this.corsOptions = { ...this.corsOptions, ...(value as CorsOptions) }
+        this._corsOptions = { ...this.corsOptions, ...(value as CorsOptions) }
         break
 
       case 'cookie':
-        this.cookieOptions = {
+        this._cookieOptions = {
           ...this.cookieOptions,
           maxAge: cookieMaxAgeFromCookieOpts((value as CustomCookieOptions).maxAge),
         }
         break
 
       case 'client':
-        this.client = { ...this.client, ...(value as PsychicClientOptions) }
+        this._client = { ...this.client, ...(value as PsychicClientOptions) }
         break
 
       case 'routes':
-        this.routesCb = value as (r: PsychicRouter) => void | Promise<void>
+        this._routesCb = value as (r: PsychicRouter) => void | Promise<void>
         break
 
       case 'json':
-        this.jsonOptions = { ...this.jsonOptions, ...(value as bodyParser.Options) }
+        this._jsonOptions = { ...this.jsonOptions, ...(value as bodyParser.Options) }
         break
 
       case 'logger':
-        this.logger = value as PsychicLogger
+        this._logger = value as PsychicLogger
         break
 
       case 'background':
-        this.backgroundOptions = { ...this.backgroundOptions, ...(value as PsychicBackgroundOptions) }
+        this._backgroundOptions = { ...this._backgroundOptions, ...(value as PsychicBackgroundOptions) }
         break
 
       case 'background:queue':
-        this.backgroundQueueOptions = {
+        this._backgroundQueueOptions = {
           ...this.backgroundQueueOptions,
           ...(value as Omit<QueueOptions, 'connection'>),
         }
         break
 
       case 'background:worker':
-        this.backgroundWorkerOptions = { ...this.backgroundWorkerOptions, ...(value as WorkerOptions) }
+        this._backgroundWorkerOptions = { ...this.backgroundWorkerOptions, ...(value as WorkerOptions) }
         break
 
       case 'redis:background':
-        this.redisBackgroundJobCredentials = {
+        this._redisBackgroundJobCredentials = {
           ...this.redisBackgroundJobCredentials,
           ...(value as PsychicRedisConnectionOptions),
         }
         break
 
       case 'redis:ws':
-        this.redisWsCredentials = { ...this.redisWsCredentials, ...(value as PsychicRedisConnectionOptions) }
+        this._redisWsCredentials = { ...this.redisWsCredentials, ...(value as PsychicRedisConnectionOptions) }
         break
 
       case 'ssl':
-        this.sslCredentials = { ...this.sslCredentials, ...(value as PsychicSslCredentials) }
+        this._sslCredentials = { ...this.sslCredentials, ...(value as PsychicSslCredentials) }
         break
 
       case 'port':
-        this.port = value as number
+        this._port = value as number
         break
 
       case 'saltRounds':
-        this.saltRounds = value as number
+        this._saltRounds = value as number
         break
 
       case 'openapi':
-        this.openapi = { ...this.openapi, ...(value as PsychicOpenapiOptions) }
+        this._openapi = { ...this.openapi, ...(value as PsychicOpenapiOptions) }
         break
 
       case 'paths':
-        this.paths = {
+        this._paths = {
           ...this.paths,
           ...(value as PsychicPathOptions),
         }
         break
 
       case 'inflections':
-        this.inflections = value as () => void | Promise<void>
+        this._inflections = value as () => void | Promise<void>
         break
 
       default:
@@ -372,6 +506,10 @@ export default class PsychicApplication {
 }
 
 export type PsychicApplicationOption =
+  | 'appName'
+  | 'useWs'
+  | 'useRedis'
+  | 'apiOnly'
   | 'apiRoot'
   | 'appEncryptionKey'
   | 'sessionCookieName'
