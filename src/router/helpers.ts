@@ -38,7 +38,20 @@ export function namespacedControllerActionString(namespace: string, controllerAc
     .replace(/^\//, '')
 }
 
-export function lookupControllerOrFail(namespaces: NamespaceConfig[]): typeof PsychicController {
+type RoutingMechanism = PsychicRouter | PsychicNestedRouter
+
+export function lookupControllerOrFail(
+  routingMechanism: RoutingMechanism,
+  resourceName?: string,
+): typeof PsychicController {
+  const namespaces = resourceName
+    ? routingMechanism.currentNamespaces.concat({
+        namespace: resourceName,
+        resourceful: false,
+        isScope: false,
+      })
+    : routingMechanism.currentNamespaces
+
   const filteredNamespaces = namespaces.filter(n => !n.isScope)
   if (!filteredNamespaces.length) throw new Error('no valid namespaces')
   const filename = filteredNamespaces.map(str => pascalize(str.namespace)).join('/') + 'Controller'
@@ -67,15 +80,10 @@ export interface NamespaceConfig {
 export function applyResourcesAction(
   path: string,
   action: ResourcesMethodType,
-  routingMechanism: PsychicRouter | PsychicNestedRouter,
+  routingMechanism: RoutingMechanism,
   options?: ResourcesOptions,
 ) {
-  const namespaces = routingMechanism.currentNamespaces.concat({
-    namespace: path,
-    resourceful: false,
-    isScope: false,
-  })
-  const controller = options?.controller || lookupControllerOrFail(namespaces)
+  const controller = options?.controller || lookupControllerOrFail(routingMechanism, path)
   switch (action) {
     case 'index':
       routingMechanism.get(path, controller, 'index' as PsychicControllerActions<typeof controller>)
@@ -114,12 +122,7 @@ export function applyResourceAction(
   routingMechanism: PsychicRouter | PsychicNestedRouter,
   options?: ResourcesOptions,
 ) {
-  const namespaces = routingMechanism.currentNamespaces.concat({
-    namespace: path,
-    resourceful: false,
-    isScope: false,
-  })
-  const controller = options?.controller || lookupControllerOrFail(namespaces)
+  const controller = options?.controller || lookupControllerOrFail(routingMechanism, path)
   switch (action) {
     case 'create':
       routingMechanism.post(path, controller, 'create' as PsychicControllerActions<typeof controller>)

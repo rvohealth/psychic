@@ -146,7 +146,7 @@ export default class PsychicRouter {
     action: string,
   ): void
   public crud(httpMethod: HttpMethod, path: string, controller?: typeof PsychicController, action?: string) {
-    controller ||= lookupControllerOrFail(this.currentNamespaces)
+    controller ||= lookupControllerOrFail(this)
     action ||= path.replace(/^\//, '')
     if (action.match(/\//)) throw new Error('path is not a valid controller action')
 
