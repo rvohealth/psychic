@@ -248,7 +248,7 @@ export default class PsychicController {
     },
   >(this: PsychicController, dreamClass: DreamClass, opts?: ForOpts) {
     return Params.for(
-      opts?.key ? (this.params[opts.key] as typeof this.params) : this.params,
+      opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params,
       dreamClass,
       opts,
     )
