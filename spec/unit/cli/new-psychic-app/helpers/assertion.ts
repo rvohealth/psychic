@@ -16,7 +16,7 @@ export async function removeHowyadoinDir() {
 export function expectAppName(appName: string, appTsContent: string) {
   expect(appTsContent).toMatch(
     `
-  psy.appName = '${appName}'
+  psy.set('appName', '${appName}')
 `,
   )
 }
@@ -24,7 +24,7 @@ export function expectAppName(appName: string, appTsContent: string) {
 export function expectRedis(redisEnabled: boolean, appTsContent: string) {
   expect(appTsContent).toMatch(
     `
-  psy.useRedis = ${redisEnabled}
+  psy.set('useRedis', ${redisEnabled})
 `,
   )
 }
@@ -32,7 +32,7 @@ export function expectRedis(redisEnabled: boolean, appTsContent: string) {
 export function expectWs(wsEnabled: boolean, appTsContent: string) {
   expect(appTsContent).toMatch(
     `
-  psy.useWs = ${wsEnabled}
+  psy.set('useWs', ${wsEnabled})
 `,
   )
 }
@@ -40,7 +40,7 @@ export function expectWs(wsEnabled: boolean, appTsContent: string) {
 export function expectApiOnly(apiOnlyEnabled: boolean, appTsContent: string) {
   expect(appTsContent).toMatch(
     `
-  psy.apiOnly = ${apiOnlyEnabled}
+  psy.set('apiOnly', ${apiOnlyEnabled})
 `,
   )
 }

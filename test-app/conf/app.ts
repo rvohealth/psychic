@@ -9,13 +9,12 @@ import inflections from './inflections'
 import routesCb from './routes'
 
 export default async (psy: PsychicApplication) => {
-  psy.appName = 'testapp'
-  psy.useWs = true
-  psy.useRedis = true
-  psy.apiOnly = false
-
   await psy.load('controllers', path.join(__dirname, '..', 'app', 'controllers'))
 
+  psy.set('appName', 'testapp')
+  psy.set('useWs', true)
+  psy.set('useRedis', true)
+  psy.set('apiOnly', false)
   psy.set('apiRoot', path.join(__dirname, '..', '..'))
   psy.set('clientRoot', path.join(__dirname, '..', '..', '..', 'client'))
   psy.set('inflections', inflections)
