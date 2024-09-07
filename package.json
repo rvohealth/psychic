@@ -21,8 +21,8 @@
   "scripts": {
     "publish": "yarn npm publish",
     "psy": "yarn psyts",
-    "psyjs": "node ./dist/test-app/cli/index.js",
-    "psyts": "npx ts-node --transpile-only -r ./src/helpers/loadEnv.ts test-app/cli/index.ts",
+    "psyjs": "node ./dist/test-app/src/cli/index.js",
+    "psyts": "npx ts-node --transpile-only -r ./src/helpers/loadEnv.ts test-app/src/cli/index.ts",
     "psycore": "PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts",
     "gpsycore": "PSYCHIC_CORE_DEVELOPMENT=1 npx ts-node --transpile-only ./global-cli/main.ts",
     "build": "rm -rf dist && echo \"building psychic app...\" && npx tsc -p ./tsconfig.build.json",
@@ -76,7 +76,7 @@
   "devDependencies": {
     "@eslint/js": "=9.0.0",
     "@jest-mock/express": "^2.1.0",
-    "@rvohealth/dream": "^0.10.19",
+    "@rvohealth/dream": "^0.10.20-beta-2",
     "@rvohealth/dream-spec-helpers": "^0.0.8",
     "@rvohealth/psychic-spec-helpers": "^0.0.3",
     "@socket.io/redis-adapter": "^8.3.0",

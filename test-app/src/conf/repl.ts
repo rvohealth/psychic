@@ -7,5 +7,5 @@ import initializePsychicApplication from '../cli/helpers/initializePsychicApplic
 const replServer = repl.start('> ')
 export default (async function () {
   await initializePsychicApplication()
-  loadRepl(replServer.context)
+  await loadRepl(replServer.context)
 })()
