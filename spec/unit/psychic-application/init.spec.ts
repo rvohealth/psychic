@@ -1,5 +1,5 @@
 import { describe as context } from '@jest/globals'
-import { PsychicApplication } from '../../../src'
+import { Encrypt, PsychicApplication } from '../../../src'
 import PsychicApplicationInitMissingApiRoot from '../../../src/error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../../../src/error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../../../src/error/psychic-application/init-missing-routes-callback'
@@ -61,6 +61,20 @@ describe('DreamApplication#init', () => {
         await expect(PsychicApplication.init(cb, dreamCb)).rejects.toThrow(
           PsychicApplicationInitMissingRoutesCallback,
         )
+      })
+    })
+
+    context('encryptionKey is invalid length', () => {
+      it('throws targeted exception', async () => {
+        const cb = async (app: PsychicApplication) => {
+          app.set('apiRoot', 'how/yadoin')
+          app.set('routes', () => {})
+          await app.load('controllers', 'how/yadoin')
+
+          app.set('appEncryptionKey', Encrypt.generateKey(31))
+        }
+
+        await expect(PsychicApplication.init(cb, dreamCb)).rejects.toThrow()
       })
     })
   })

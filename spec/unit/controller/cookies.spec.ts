@@ -10,7 +10,7 @@ describe('PsychicController', () => {
       const user = await User.create({ email: 'how@yadoin', password: 'password' })
 
       const req = getMockReq()
-      req.cookies = { auth_token: Encrypt.sign(user.id.toString()) }
+      req.cookies = { auth_token: Encrypt.encrypt(user.id.toString()) }
 
       const res = getMockRes().res
       const controller = new PsychicController(req, res, {

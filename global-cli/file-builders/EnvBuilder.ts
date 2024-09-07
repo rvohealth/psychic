@@ -1,13 +1,17 @@
-import generateEncryptionKey from '../helpers/generateEncryptionKey'
+import crypto from 'crypto'
 
 export default class EnvBuilder {
   public static build({ env, appName }: { env: 'test' | 'development' | 'production'; appName: string }) {
+    // TODO: replace with Encrypt.generateKey() after moving global
+    // cli to be part of main project.
+    const encryptionKey = crypto.randomBytes(32).toString('base64')
+
     return `\
 DB_USER=
 DB_NAME=${snakeify(appName)}_${env}
 DB_PORT=5432
 DB_HOST=localhost
-APP_ENCRYPTION_KEY='${generateEncryptionKey()}'
+APP_ENCRYPTION_KEY="${encryptionKey}"
 TZ=UTC
 `
   }
