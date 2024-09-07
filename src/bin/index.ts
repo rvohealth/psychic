@@ -10,22 +10,16 @@ import generateRouteTypes from './helpers/generateRouteTypes'
 import printRoutes from './helpers/printRoutes'
 
 export default class PsychicBin {
-  public static async generateController() {
-    const route = process.argv[3]
-    const name = process.argv[4]
-    const methods = process.argv.slice(5)
-    await generateController(
-      route,
-      name,
-      methods.filter(method => !['--core'].includes(method)),
-    )
+  public static async generateController(route: string, controllerName: string, actions: string[]) {
+    await generateController({ route, fullyQualifiedModelName: controllerName, actions })
   }
 
-  public static async generateResource() {
-    const route = process.argv[3]
-    const name = process.argv[4]
-    const args = process.argv.slice(5)
-    await generateResource(route, name, args)
+  public static async generateResource(
+    route: string,
+    fullyQualifiedModelName: string,
+    columnsWithTypes: string[],
+  ) {
+    await generateResource({ route, fullyQualifiedModelName, columnsWithTypes })
   }
 
   public static async routes() {

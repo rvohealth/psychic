@@ -4,14 +4,12 @@ describe('psy generate:controller <name> [...methods]', () => {
   context('when provided methods', () => {
     context('passing a model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
-        const res = generateControllerContent('PostsController', 'posts', 'Post', [
-          'create',
-          'index',
-          'show',
-          'update',
-          'destroy',
-          'preview',
-        ])
+        const res = generateControllerContent({
+          fullyQualifiedControllerName: 'PostsController',
+          route: 'posts',
+          fullyQualifiedModelName: 'Post',
+          actions: ['create', 'index', 'show', 'update', 'destroy', 'preview'],
+        })
 
         expect(res).toEqual(
           `\
@@ -101,12 +99,12 @@ export default class PostsController extends AuthedController {
 
     context('passing a namespaced model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
-        const res = generateControllerContent(
-          'Api/V1/Health/PostsController',
-          '/api/v1/health/posts',
-          'Health/Post',
-          ['create', 'index', 'show', 'update', 'destroy', 'preview'],
-        )
+        const res = generateControllerContent({
+          fullyQualifiedControllerName: 'Api/V1/Health/PostsController',
+          route: '/api/v1/health/posts',
+          fullyQualifiedModelName: 'Health/Post',
+          actions: ['create', 'index', 'show', 'update', 'destroy', 'preview'],
+        })
 
         expect(res).toEqual(
           `\
@@ -195,12 +193,12 @@ export default class ApiV1HealthPostsController extends AuthedController {
 
       context('the path is within the admin namespace', () => {
         it('generates a controller using', () => {
-          const res = generateControllerContent(
-            'Admin/NutritionLogEntriesController',
-            'admin/nutrition-log-entries',
-            'Nutrition/LogEntry',
-            ['create'],
-          )
+          const res = generateControllerContent({
+            fullyQualifiedControllerName: 'Admin/NutritionLogEntriesController',
+            route: 'admin/nutrition-log-entries',
+            fullyQualifiedModelName: 'Nutrition/LogEntry',
+            actions: ['create'],
+          })
 
           expect(res).toEqual(
             `\
@@ -228,10 +226,11 @@ export default class AdminNutritionLogEntriesController extends AdminAuthedContr
 
     context('when provided with a nested path', () => {
       it('generates a controller with pascal-cased naming', () => {
-        const res = generateControllerContent('Api/V1/UsersController', 'api/v1/users', null, [
-          'hello',
-          'world',
-        ])
+        const res = generateControllerContent({
+          fullyQualifiedControllerName: 'Api/V1/UsersController',
+          route: 'api/v1/users',
+          actions: ['hello', 'world'],
+        })
 
         expect(res).toEqual(
           `\

@@ -1,16 +1,12 @@
 import { CalendarDate } from '@rvohealth/dream'
 import { DateTime } from 'luxon'
 import {
-  ArrayType,
   IdType,
-  Int8,
   Json,
-  Numeric,
   PetTreatsEnum,
   PetTreatsEnumValues,
   SpeciesTypesEnum,
-  SpeciesTypesEnumValues,
-  Timestamp
+  SpeciesTypesEnumValues
 } from './sync'
 
 export const schema = {
@@ -186,7 +182,7 @@ export const schema = {
         isArray: false,
       },
       favoriteTreats: {
-        coercedType: {} as ArrayType<PetTreatsEnum> | null,
+        coercedType: {} as PetTreatsEnum[] | null,
         enumType: {} as PetTreatsEnum,
         enumValues: PetTreatsEnumValues,
         dbType: 'pet_treats_enum[]',
@@ -438,7 +434,7 @@ export const schema = {
         isArray: false,
       },
       favoriteBigints: {
-        coercedType: {} as ArrayType<Int8> | null,
+        coercedType: {} as IdType[] | null,
         enumType: null,
         enumValues: null,
         dbType: 'bigint[]',
@@ -470,7 +466,7 @@ export const schema = {
         isArray: true,
       },
       favoriteDates: {
-        coercedType: {} as ArrayType<Timestamp> | null,
+        coercedType: {} as CalendarDate[] | null,
         enumType: null,
         enumValues: null,
         dbType: 'date[]',
@@ -478,7 +474,7 @@ export const schema = {
         isArray: true,
       },
       favoriteDatetimes: {
-        coercedType: {} as ArrayType<Timestamp> | null,
+        coercedType: {} as DateTime[] | null,
         enumType: null,
         enumValues: null,
         dbType: 'timestamp without time zone[]',
@@ -494,7 +490,7 @@ export const schema = {
         isArray: true,
       },
       favoriteJsonbs: {
-        coercedType: {} as ArrayType<Json> | null,
+        coercedType: {} as Json[] | null,
         enumType: null,
         enumValues: null,
         dbType: 'jsonb[]',
@@ -502,7 +498,7 @@ export const schema = {
         isArray: true,
       },
       favoriteJsons: {
-        coercedType: {} as ArrayType<Json> | null,
+        coercedType: {} as Json[] | null,
         enumType: null,
         enumValues: null,
         dbType: 'json[]',
@@ -510,7 +506,7 @@ export const schema = {
         isArray: true,
       },
       favoriteNumerics: {
-        coercedType: {} as ArrayType<Numeric> | null,
+        coercedType: {} as number[] | null,
         enumType: null,
         enumValues: null,
         dbType: 'numeric[]',
@@ -606,7 +602,7 @@ export const schema = {
         isArray: false,
       },
       requiredFavoriteBigints: {
-        coercedType: {} as ArrayType<Int8>,
+        coercedType: {} as IdType[],
         enumType: null,
         enumValues: null,
         dbType: 'bigint[]',
@@ -638,7 +634,7 @@ export const schema = {
         isArray: true,
       },
       requiredFavoriteDates: {
-        coercedType: {} as ArrayType<Timestamp>,
+        coercedType: {} as CalendarDate[],
         enumType: null,
         enumValues: null,
         dbType: 'date[]',
@@ -646,7 +642,7 @@ export const schema = {
         isArray: true,
       },
       requiredFavoriteDatetimes: {
-        coercedType: {} as ArrayType<Timestamp>,
+        coercedType: {} as DateTime[],
         enumType: null,
         enumValues: null,
         dbType: 'timestamp without time zone[]',
@@ -662,7 +658,7 @@ export const schema = {
         isArray: true,
       },
       requiredFavoriteJsonbs: {
-        coercedType: {} as ArrayType<Json>,
+        coercedType: {} as Json[],
         enumType: null,
         enumValues: null,
         dbType: 'jsonb[]',
@@ -670,7 +666,7 @@ export const schema = {
         isArray: true,
       },
       requiredFavoriteJsons: {
-        coercedType: {} as ArrayType<Json>,
+        coercedType: {} as Json[],
         enumType: null,
         enumValues: null,
         dbType: 'json[]',
@@ -678,7 +674,7 @@ export const schema = {
         isArray: true,
       },
       requiredFavoriteNumerics: {
-        coercedType: {} as ArrayType<Numeric>,
+        coercedType: {} as number[],
         enumType: null,
         enumValues: null,
         dbType: 'numeric[]',

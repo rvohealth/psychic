@@ -2,11 +2,12 @@ import generateResourceControllerSpecContent from '../../../../src/generate/help
 
 describe('generateResourceControllerSpecContent', () => {
   it('generates a useful resource controller spec', () => {
-    const res = generateResourceControllerSpecContent('PostsController', 'posts', 'Post', [
-      'body:text',
-      'rating:decimal:3,2',
-      'User:belongs_to',
-    ])
+    const res = generateResourceControllerSpecContent({
+      fullyQualifiedControllerName: 'PostsController',
+      route: 'posts',
+      fullyQualifiedModelName: 'Post',
+      columnsWithTypes: ['body:text', 'rating:decimal:3,2', 'User:belongs_to'],
+    })
     expect(res).toEqual(`\
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { describe as context } from '@jest/globals'
