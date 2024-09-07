@@ -6,21 +6,24 @@ import PsychicApplication from '../psychic-application'
 import generateClientAPIModule from './client/apiModule'
 import generateController from './controller'
 
-export default async function generateResource(
-  route: string,
-  fullyQualifiedModelName: string,
-  args: string[],
-) {
+export default async function generateResource({
+  route,
+  fullyQualifiedModelName,
+  columnsWithTypes,
+}: {
+  route: string
+  fullyQualifiedModelName: string
+  columnsWithTypes: string[]
+}) {
   const psychicApp = PsychicApplication.getOrFail()
 
-  await generateDream(fullyQualifiedModelName, args)
+  await generateDream({ fullyQualifiedModelName, columnsWithTypes, options: { serializer: true } })
 
-  if (args.includes('--core')) {
-    console.log('--core argument provided, setting now')
-    process.env.PSYCHIC_CORE_DEVELOPMENT = '1'
-  }
-
-  await generateController(route, fullyQualifiedModelName, ['create', 'index', 'show', 'update', 'destroy'])
+  await generateController({
+    route,
+    fullyQualifiedModelName,
+    actions: ['create', 'index', 'show', 'update', 'destroy'],
+  })
 
   if (!psychicApp?.apiOnly) {
     const psychicApp = PsychicApplication.getOrFail()

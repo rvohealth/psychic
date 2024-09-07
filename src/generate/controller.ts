@@ -6,11 +6,15 @@ import psychicPath from '../helpers/path/psychicPath'
 import generateControllerContent from './helpers/generateControllerContent'
 import generateControllerSpecContent from './helpers/generateControllerSpecContent'
 
-export default async function generateController(
-  route: string,
-  fullyQualifiedModelName: string,
-  methods: string[],
-) {
+export default async function generateController({
+  route,
+  fullyQualifiedModelName,
+  actions,
+}: {
+  route: string
+  fullyQualifiedModelName: string
+  actions: string[]
+}) {
   fullyQualifiedModelName = standardizeFullyQualifiedModelName(fullyQualifiedModelName)
   const fullyQualifiedControllerName = `${pluralize(fullyQualifiedModelName)}Controller`
 
@@ -24,7 +28,7 @@ export default async function generateController(
     await fs.mkdir(absDirPath, { recursive: true })
     await fs.writeFile(
       absFilePath,
-      generateControllerContent(fullyQualifiedControllerName, route, fullyQualifiedModelName, methods),
+      generateControllerContent({ fullyQualifiedControllerName, route, fullyQualifiedModelName, actions }),
     )
   } catch (error) {
     throw new Error(`
