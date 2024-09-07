@@ -1,10 +1,10 @@
-import { createExtension } from '@rvohealth/dream'
+import { DreamMigrationHelpers } from '@rvohealth/dream'
 import { Kysely, sql } from 'kysely'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function up(db: Kysely<any>): Promise<void> {
-  await createExtension('uuid-ossp', db)
-  await createExtension('citext', db)
+  await DreamMigrationHelpers.createExtension(db, 'uuid-ossp')
+  await DreamMigrationHelpers.createExtension(db, 'citext')
 
   await db.schema
     .createTable('users')
