@@ -13,12 +13,12 @@ export default class Session {
   public getCookie(name: string) {
     const cookies = this.req.cookies as Record<string, string>
     const value = cookies[name]
-    if (value) return Encrypt.decode(value)
+    if (value) return Encrypt.decrypt(value)
     return null
   }
 
   public setCookie(name: string, data: string, opts: CustomSessionCookieOptions = {}) {
-    this.res.cookie(name, Encrypt.sign(data), {
+    this.res.cookie(name, Encrypt.encrypt(data), {
       secure: envValue('NODE_ENV') === 'production',
       httpOnly: true,
       ...opts,

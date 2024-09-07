@@ -39,7 +39,7 @@ jobs:
       DB_PORT: 5432
       TZ: UTC
       GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      APP_ENCRYPTION_KEY: doesntmatter
+      APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
       PSYCHIC_CORE_DEVELOPMENT: 1
     steps:
       - uses: actions/checkout@v4
@@ -107,7 +107,7 @@ jobs:
       DB_PORT: 5432
       TZ: UTC
       GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
-      APP_ENCRYPTION_KEY: doesntmatter
+      APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
       PSYCHIC_CORE_DEVELOPMENT: 1
     steps:
       - uses: actions/checkout@v4
