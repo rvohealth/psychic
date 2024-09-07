@@ -11,9 +11,11 @@ import { CorsOptions } from 'cors'
 import { Application, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { Socket, Server as SocketServer } from 'socket.io'
+import Encrypt from '../encryption/encrypt'
 import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
+import PsychicApplicationInvalidEncryptionKey from '../error/psychic-application/invalid-encryption-key'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
 import envValue, { envInt } from '../helpers/envValue'
 import { OpenapiContent, OpenapiHeaders, OpenapiResponses } from '../openapi-renderer/endpoint'
@@ -37,6 +39,9 @@ export default class PsychicApplication {
       if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
       if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
       if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
+
+      if (psychicApp.encryptionKey && !Encrypt.validateKey(psychicApp.encryptionKey))
+        throw new PsychicApplicationInvalidEncryptionKey()
 
       await psychicApp.inflections?.()
 

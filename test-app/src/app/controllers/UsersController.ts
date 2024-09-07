@@ -77,7 +77,7 @@ export default class UsersController extends ApplicationController {
 
     // this token is used for authenticating via websockets during tests. for more info,
     // see spec/features/visitor/websockets.spec.ts
-    const token = Encrypt.sign(user!.id.toString())
+    const token = Encrypt.encrypt(user!.id.toString())
 
     this.ok(token)
   }

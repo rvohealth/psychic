@@ -191,7 +191,7 @@ export default async (psy: PsychicApplication) => {
 
     io.of('/').on('connection', async socket => {
       const token = socket.handshake.auth.token as string
-      const userId = Encrypt.decode(token)
+      const userId = Encrypt.decrypt(token)
       const user = await User.find(userId)
 
       if (user) {

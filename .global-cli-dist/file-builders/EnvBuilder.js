@@ -3,15 +3,18 @@ var __importDefault = (this && this.__importDefault) || function (mod) {
     return (mod && mod.__esModule) ? mod : { "default": mod };
 };
 Object.defineProperty(exports, "__esModule", { value: true });
-const generateEncryptionKey_1 = __importDefault(require("../helpers/generateEncryptionKey"));
+const crypto_1 = __importDefault(require("crypto"));
 class EnvBuilder {
     static build({ env, appName }) {
+        // TODO: replace with Encrypt.generateKey() after moving global
+        // cli to be part of main project.
+        const encryptionKey = crypto_1.default.randomBytes(32).toString('base64');
         return `\
 DB_USER=
 DB_NAME=${snakeify(appName)}_${env}
 DB_PORT=5432
 DB_HOST=localhost
-APP_ENCRYPTION_KEY='${(0, generateEncryptionKey_1.default)()}'
+APP_ENCRYPTION_KEY="${encryptionKey}"
 TZ=UTC
 `;
     }

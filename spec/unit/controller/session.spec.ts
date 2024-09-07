@@ -17,16 +17,16 @@ describe('Session', () => {
   })
 
   describe('#getCookie', () => {
-    const subject = () => new Session(req, res).getCookie('auth_token')
+    const subject = async () => await new Session(req, res).getCookie('auth_token')
 
-    it('returns the value of an existing cookie, automatically decrypted', () => {
-      req.cookies = { auth_token: Encrypt.sign(user.id.toString()) }
-      expect(subject()).toEqual(user.id.toString())
+    it('returns the value of an existing cookie, automatically decrypted', async () => {
+      req.cookies = { auth_token: Encrypt.encrypt(user.id.toString()) }
+      expect(await subject()).toEqual(user.id.toString())
     })
 
     context('the cookie is not present in the request', () => {
-      it('returns null', () => {
-        expect(subject()).toBeNull()
+      it('returns null', async () => {
+        expect(await subject()).toBeNull()
       })
     })
   })
@@ -39,7 +39,7 @@ describe('Session', () => {
 
     beforeEach(() => {
       cookieSpy = jest.spyOn(res, 'cookie')
-      encryptSpy = jest.spyOn(Encrypt, 'sign').mockReturnValue('abc123')
+      encryptSpy = jest.spyOn(Encrypt, 'encrypt').mockReturnValue('abc123')
     })
 
     it('encrypts and stores the value as an httpOnly cookie, leveraging ttl from conf/app.ts cookie options', () => {
