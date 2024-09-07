@@ -21,12 +21,15 @@ export default class PsychicCLI {
     program
       .command('generate:migration')
       .alias('g:migration')
-      .description('g:migration <name> create a new dream migration')
-      .argument('<name>', 'name of the migration')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
-      .action(async () => {
+      .description('create a new migration')
+      .argument('<migrationName>', 'end with -to-table-name to prepopulate with an alterTable command')
+      .argument(
+        '<args...>',
+        'properties of the model property1:text/string/enum/etc. property2:text/string/enum/etc. ... propertyN:text/string/enum/etc.',
+      )
+      .action(async (migrationName: string, args: string[]) => {
         await initializePsychicApplication()
-        await DreamBin.generateMigration()
+        await DreamBin.generateMigration(migrationName, args)
         process.exit()
       })
 
@@ -35,78 +38,88 @@ export default class PsychicCLI {
       .alias('generate:model')
       .alias('g:dream')
       .alias('g:model')
-      .description('generate:dream <name> [...attributes] create a new dream')
-      .argument('<name>', 'name of the dream')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
-      .action(async () => {
+      .option('--no-serializer')
+      .description('create a new Dream model')
+      .argument(
+        '<modelName>',
+        'the name of the model to create, e.g. Post or Settings/CommunicationPreferences',
+      )
+      .argument(
+        '<args...>',
+        'properties of the model property1:text/string/enum/etc. property2:text/string/enum/etc. ... propertyN:text/string/enum/etc.',
+      )
+      .action(async (modelName: string, args: string[], options: { serializer: boolean }) => {
         await initializePsychicApplication()
-        await DreamBin.generateDream()
+        await DreamBin.generateDream(modelName, args, options)
         process.exit()
       })
 
     program
       .command('generate:sti-child')
       .alias('g:sti-child')
-      .description('generate:dream <name> extends <base-name> [...attributes] create a new dream')
-      .argument('<name>', 'name of the dream')
-      .argument('<base-name>', 'name of the parent dream')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
-      .action(async () => {
-        await initializePsychicApplication()
-        await DreamBin.generateStiChild()
-        process.exit()
-      })
-
-    program
-      .command('generate:factory')
-      .alias('g:factory')
-      .description('generate:factory [...attributes] create a new factory for a dream')
-      .argument('<name>', 'name of the dream')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
-      .action(async () => {
-        await initializePsychicApplication()
-        await DreamBin.generateFactory()
-        process.exit()
-      })
-
-    program
-      .command('generate:serializer')
-      .alias('g:serializer')
-      .description('generate:serializer <name> [...attributes] create a new serializer')
-      .argument('<name>', 'name of the serializer')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
-      .action(async () => {
-        await initializePsychicApplication()
-        await DreamBin.generateSerializer()
-        process.exit()
-      })
+      .description(
+        'create a new Dream model that extends another Dream model, leveraging STI (single table inheritance)',
+      )
+      .option('--no-serializer')
+      .argument(
+        '<childModelName>',
+        'the name of the model to create, e.g. Post or Settings/CommunicationPreferences',
+      )
+      .argument('<extends>', 'just the word extends')
+      .argument('<parentModelName>', 'name of the parent model')
+      .argument(
+        '<args...>',
+        'properties of the model property1:text/string/enum/etc. property2:text/string/enum/etc. ... propertyN:text/string/enum/etc.',
+      )
+      .action(
+        async (
+          childModelName: string,
+          extendsWord: string,
+          parentModelName: string,
+          args: string[],
+          options: { serializer: boolean },
+        ) => {
+          await initializePsychicApplication()
+          if (extendsWord !== 'extends')
+            throw new Error('Expecting: `<child-name> extends <parent-name> <args>')
+          await DreamBin.generateStiChild(childModelName, parentModelName, args, options)
+          process.exit()
+        },
+      )
 
     program
       .command('generate:resource')
       .alias('g:resource')
-      .description(
-        'generate:resource <name> [...attributes] create a new dream, migration, controller, and serializer',
+      .description('create a Dream model, migration, controller, serializer, and spec placeholders')
+      .argument('<path>', 'URL path from root domain')
+      .argument(
+        '<modelName>',
+        'the name of the model to create, e.g. Post or Settings/CommunicationPreferences',
       )
-      .argument('<route>', 'route path')
-      .argument('<modelName>', 'model name')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
-      .action(async () => {
+      .argument(
+        '<args...>',
+        'properties of the model property1:text/string/enum/etc. property2:text/string/enum/etc. ... propertyN:text/string/enum/etc.',
+      )
+      .action(async (route: string, modelName: string, args: string[]) => {
         await initializePsychicApplication()
-        await PsychicBin.generateResource()
+        await PsychicBin.generateResource(route, modelName, args)
         process.exit()
       })
 
     program
       .command('generate:controller')
       .alias('g:controller')
-      .description(
-        'generate:controller <route> [...methods] create a new controller, autodefining method stubs for passed methods',
+      .description('create a controller')
+      .argument('<path>', 'URL path from root domain')
+      .argument(
+        '<controllerName>',
+        'the name of the controller to create, e.g. Post or Settings/CommunicationPreferences',
       )
-      .argument('<route>', 'route path')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
-      .action(async () => {
+      .argument('<actions...>', 'the names of controller actions to create')
+
+      .action(async (route: string, controllerName: string, actions: string[]) => {
         await initializePsychicApplication()
-        await PsychicBin.generateController()
+        await PsychicBin.generateController(route, controllerName, actions)
         process.exit()
       })
 
@@ -127,7 +140,6 @@ export default class PsychicCLI {
       .description(
         'sync introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration',
       )
-      .option('--tsnode', 'runs the command using ts-node instead of node')
       .action(async () => {
         await initializePsychicApplication()
         await DreamBin.sync()
@@ -148,7 +160,6 @@ export default class PsychicCLI {
         'reads the routes generated by your app and generates a cache file, which is then used to give autocomplete support to the route helper, amoongst other things.',
       )
       .option('--core', 'sets core to true')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
       .action(async () => {
         await PsychicBin.syncRoutes()
       })
@@ -156,7 +167,6 @@ export default class PsychicCLI {
     program
       .command('sync:openapi')
       .description('syncs openapi.json file to current state of all psychic controllers within the app')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
       .action(async () => {
         await initializePsychicApplication()
         await PsychicBin.syncOpenapiJson()
@@ -166,7 +176,6 @@ export default class PsychicCLI {
     program
       .command('sync:client')
       .description('sync api routes and schema to client application')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
       .action(async () => {
         await initializePsychicApplication()
         await PsychicBin.syncOpenapiJson()
@@ -179,7 +188,6 @@ export default class PsychicCLI {
       .description(
         'creates a new database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars',
       )
-      .option('--tsnode', 'runs the command using ts-node instead of node')
       .option(
         '--bypass-config-cache',
         'bypasses running type cache build (this is typically used internally only)',
@@ -193,7 +201,6 @@ export default class PsychicCLI {
     program
       .command('db:migrate')
       .description('db:migrate runs any outstanding database migrations')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
       .option('--skip-sync', 'skips syncing local schema after running migrations')
       .option(
         '--bypass-config-cache',
@@ -215,7 +222,6 @@ export default class PsychicCLI {
       .description('db:rollback rolls back the migration')
       .option('--step <integer>', '--step <integer> number of steps back to travel')
       .option('--core', 'sets core to true')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
       .option(
         '--bypass-config-cache',
         'bypasses running type cache build (this is typically used internally only)',
@@ -233,7 +239,6 @@ export default class PsychicCLI {
         'drops the database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars',
       )
       .option('--core', 'sets core to true')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
       .option(
         '--bypass-config-cache',
         'bypasses running type cache build (this is typically used internally only)',
@@ -248,7 +253,6 @@ export default class PsychicCLI {
       .command('db:reset')
       .description('db:reset runs db:drop (safely), then db:create, then db:migrate')
       .option('--core', 'sets core to true')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
       .action(async () => {
         await initializePsychicApplication()
         await DreamBin.dbDrop()
@@ -263,7 +267,6 @@ export default class PsychicCLI {
       .command('db:seed')
       .description('seeds the database using the file located in db/seed.ts')
       .option('--core', 'sets core to true')
-      .option('--tsnode', 'runs the command using ts-node instead of node')
       .option(
         '--bypass-config-cache',
         'bypasses running type cache build (this is typically used internally only)',
