@@ -9,13 +9,13 @@ import generateController from './controller'
 export default async function generateResource(
   route: string,
   fullyQualifiedModelName: string,
-  args: string[],
+  columnsWithTypes: string[],
 ) {
   const psychicApp = PsychicApplication.getOrFail()
 
-  await generateDream(fullyQualifiedModelName, args)
+  await generateDream(fullyQualifiedModelName, columnsWithTypes, { serializer: true })
 
-  if (args.includes('--core')) {
+  if (columnsWithTypes.includes('--core')) {
     console.log('--core argument provided, setting now')
     process.env.PSYCHIC_CORE_DEVELOPMENT = '1'
   }
