@@ -7,12 +7,17 @@ import {
 import relativePsychicPath from '../../helpers/path/relativePsychicPath'
 import updirsFromPath from '../../helpers/path/updirsFromPath'
 
-export default function generateResourceControllerSpecContent(
-  controllerName: string,
-  path: string,
-  fullyQualifiedModelName: string,
-  attributes: string[],
-) {
+export default function generateResourceControllerSpecContent({
+  fullyQualifiedControllerName,
+  route,
+  fullyQualifiedModelName,
+  columnsWithTypes,
+}: {
+  fullyQualifiedControllerName: string
+  route: string
+  fullyQualifiedModelName: string
+  columnsWithTypes: string[]
+}) {
   fullyQualifiedModelName = standardizeFullyQualifiedModelName(fullyQualifiedModelName)
   const modelClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
   const modelVariableName = camelize(modelClassName)
@@ -30,7 +35,7 @@ export default function generateResourceControllerSpecContent(
   const originalStringAttributeChecks: string[] = []
   const updatedStringAttributeChecks: string[] = []
 
-  for (const attribute of attributes) {
+  for (const attribute of columnsWithTypes) {
     const [attributeName, attributeType] = attribute.split(':')
     const originalName = `The ${fullyQualifiedModelName} ${attributeName}`
     const updatedName = `Updated ${fullyQualifiedModelName} ${attributeName}`
@@ -61,7 +66,7 @@ import { PsychicServer } from '@rvohealth/psychic'
 import { specRequest as request } from '@rvohealth/psychic-spec-helpers'${uniq(importStatements).join('')}
 import { addEndUserAuthHeader } from '${specUnitUpdirs}helpers/authentication'
 
-describe('${controllerName}', () => {
+describe('${fullyQualifiedControllerName}', () => {
   let user: User
 
   beforeEach(async () => {
@@ -71,7 +76,7 @@ describe('${controllerName}', () => {
 
   describe('GET index', () => {
     function subject(expectedStatus: number = 200) {
-      return request.get('/${path}', expectedStatus, {
+      return request.get('/${route}', expectedStatus, {
         headers: addEndUserAuthHeader(request, user, {}),
       })
     }
@@ -101,7 +106,7 @@ describe('${controllerName}', () => {
 
   describe('GET show', () => {
     function subject(${modelVariableName}: ${modelClassName}, expectedStatus: number = 200) {
-      return request.get(\`/${path}/\${${modelVariableName}.id}\`, expectedStatus, {
+      return request.get(\`/${route}/\${${modelVariableName}.id}\`, expectedStatus, {
         headers: addEndUserAuthHeader(request, user, {}),
       })
     }
@@ -129,7 +134,7 @@ describe('${controllerName}', () => {
 
   describe('POST create', () => {
     function subject(data: UpdateableProperties<${modelClassName}>, expectedStatus: number = 201) {
-      return request.${modelVariableName}('/${path}', expectedStatus, {
+      return request.${modelVariableName}('/${route}', expectedStatus, {
         data,
         headers: addEndUserAuthHeader(request, user, {}),
       })
@@ -151,7 +156,7 @@ describe('${controllerName}', () => {
 
   describe('PATCH update', () => {
     function subject(${modelVariableName}: ${modelClassName}, data: UpdateableProperties<${modelClassName}>, expectedStatus: number = 204) {
-      return request.patch(\`/${path}/\${${modelVariableName}.id}\`, expectedStatus, {
+      return request.patch(\`/${route}/\${${modelVariableName}.id}\`, expectedStatus, {
         data,
         headers: addEndUserAuthHeader(request, user, {}),
       })
@@ -186,7 +191,7 @@ describe('${controllerName}', () => {
 
   describe('DELETE destroy', () => {
     function subject(${modelVariableName}: ${modelClassName}, expectedStatus: number = 204) {
-      return request.delete(\`/${path}/\${${modelVariableName}.id}\`, expectedStatus, {
+      return request.delete(\`/${route}/\${${modelVariableName}.id}\`, expectedStatus, {
         headers: addEndUserAuthHeader(request, user, {}),
       })
     }

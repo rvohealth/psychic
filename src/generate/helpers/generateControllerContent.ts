@@ -7,12 +7,17 @@ import {
 import pluralize from 'pluralize'
 import relativePsychicPath from '../../helpers/path/relativePsychicPath'
 
-export default function generateControllerContent(
-  fullyQualifiedControllerName: string,
-  route: string,
-  fullyQualifiedModelName: string | null,
-  methods: string[] = [],
-) {
+export default function generateControllerContent({
+  fullyQualifiedControllerName,
+  route,
+  fullyQualifiedModelName,
+  actions = [],
+}: {
+  fullyQualifiedControllerName: string
+  route: string
+  fullyQualifiedModelName?: string
+  actions?: string[]
+}) {
   fullyQualifiedControllerName = standardizeFullyQualifiedModelName(fullyQualifiedControllerName)
 
   const additionalImports: string[] = []
@@ -42,7 +47,7 @@ export default function generateControllerContent(
     additionalImports.push(importStatementForModel(fullyQualifiedControllerName, fullyQualifiedModelName))
   }
 
-  const methodDefs = methods.map(methodName => {
+  const methodDefs = actions.map(methodName => {
     switch (methodName) {
       case 'create':
         if (modelAttributeName)
@@ -193,7 +198,7 @@ ${additionalImports.length ? additionalImports.join('\n') : ''}
 const openApiTags = ['${hyphenize(pluralizedModelAttributeName || controllerClassName.replace(/Controller$/, ''))}']
 
 export default class ${controllerClassName} extends ${extendingClassName} {
-${methodDefs.join('\n\n')}${modelClassName ? privateMethods(modelClassName, methods) : ''}
+${methodDefs.join('\n\n')}${modelClassName ? privateMethods(modelClassName, actions) : ''}
 }\
 `
 }
