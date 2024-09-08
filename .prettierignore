@@ -6,6 +6,7 @@ test-app/client/apiRoutes.ts
 test-app/client/schema.ts
 test-app/openapi.json
 src/psychic-application/logo.ts
+spec/support/routes/*
 .github/
 dist/
 openapi.json

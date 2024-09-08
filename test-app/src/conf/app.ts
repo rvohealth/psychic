@@ -39,6 +39,7 @@ export default async (psy: PsychicApplication) => {
   )
 
   psy.set('paths', {
+    apiRoutes: 'test-app/src/conf/routes.ts',
     controllers: 'test-app/src/app/controllers',
     controllerSpecs: 'test-app/spec/unit/controllers',
   })
