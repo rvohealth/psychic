@@ -14,8 +14,8 @@ export default class PsychicBin {
     await generateController(route, controllerName, actions)
   }
 
-  public static async generateResource(route: string, modelName: string, args: string[]) {
-    await generateResource(route, modelName, args)
+  public static async generateResource(route: string, modelName: string, columnsWithTypes: string[]) {
+    await generateResource(route, modelName, columnsWithTypes)
   }
 
   public static async routes() {
