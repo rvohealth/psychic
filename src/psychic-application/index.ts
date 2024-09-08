@@ -200,6 +200,7 @@ export default class PsychicApplication {
   }
 
   private _paths: Required<PsychicPathOptions> = {
+    apiRoutes: 'src/conf/routes.ts',
     controllers: 'src/app/controllers',
     controllerSpecs: 'spec/unit/controllers',
   }
@@ -518,7 +519,6 @@ export type PsychicApplicationOption =
   | 'background:worker'
   | 'client'
   | 'clientRoot'
-  | 'controllers'
   | 'cookie'
   | 'cors'
   | 'inflections'
@@ -576,6 +576,7 @@ export interface PsychicOpenapiOptions {
 }
 
 interface PsychicPathOptions {
+  apiRoutes?: string
   controllers?: string
   controllerSpecs?: string
 }
