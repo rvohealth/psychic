@@ -15,7 +15,7 @@ export default async function generateResource({
   await generateDream({ fullyQualifiedModelName, columnsWithTypes, options: { serializer: true } })
 
   await generateController({
-    route,
+    fullyQualifiedControllerName: pluralize(fullyQualifiedModelName),
     fullyQualifiedModelName,
     actions: ['create', 'index', 'show', 'update', 'destroy'],
   })

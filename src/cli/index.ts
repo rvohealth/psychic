@@ -106,16 +106,15 @@ export default class PsychicCLI {
       .command('generate:controller')
       .alias('g:controller')
       .description('create a controller')
-      .argument('<path>', 'URL path from root domain')
       .argument(
         '<controllerName>',
-        'the name of the controller to create, e.g. Post or Settings/CommunicationPreferences',
+        'the name of the controller to create, including namespaces, e.g. Posts or Api/V1/Posts',
       )
       .argument('<actions...>', 'the names of controller actions to create')
 
       .action(async (route: string, controllerName: string, actions: string[]) => {
         await initializePsychicApplication()
-        await PsychicBin.generateController(route, controllerName, actions)
+        await PsychicBin.generateController(controllerName, actions)
         process.exit()
       })
 

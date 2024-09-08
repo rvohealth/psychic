@@ -1,0 +1,14 @@
+{
+  "editor.formatOnSave": false,
+
+  "files.associations": {
+    "**/*.ts": "plaintext"
+  },
+
+  "[typescript]": {
+    "editor.codeActionsOnSave": {
+      "editor.formatOnSave": "never",
+      "source.organizeImports": "never"
+    }
+  }
+}

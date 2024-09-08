@@ -10,8 +10,8 @@ import generateRouteTypes from './helpers/generateRouteTypes'
 import printRoutes from './helpers/printRoutes'
 
 export default class PsychicBin {
-  public static async generateController(route: string, controllerName: string, actions: string[]) {
-    await generateController({ route, fullyQualifiedModelName: controllerName, actions })
+  public static async generateController(controllerName: string, actions: string[]) {
+    await generateController({ fullyQualifiedControllerName: controllerName, actions })
   }
 
   public static async generateResource(

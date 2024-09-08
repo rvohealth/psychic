@@ -5,8 +5,9 @@ describe('psy generate:controller <name> [...methods]', () => {
     context('passing a model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
         const res = generateControllerContent({
+          ancestorImportStatement: "import AuthedController from './AuthedController'",
+          ancestorName: 'AuthedController',
           fullyQualifiedControllerName: 'PostsController',
-          route: 'posts',
           fullyQualifiedModelName: 'Post',
           actions: ['create', 'index', 'show', 'update', 'destroy', 'preview'],
         })
@@ -91,7 +92,7 @@ export default class PostsController extends AuthedController {
       this.castParam('id', 'string')
     )
   }
-}\
+}
 `,
         )
       })
@@ -100,8 +101,9 @@ export default class PostsController extends AuthedController {
     context('passing a namespaced model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
         const res = generateControllerContent({
+          ancestorImportStatement: "import AuthedController from '../../../AuthedController'",
+          ancestorName: 'AuthedController',
           fullyQualifiedControllerName: 'Api/V1/Health/PostsController',
-          route: '/api/v1/health/posts',
           fullyQualifiedModelName: 'Health/Post',
           actions: ['create', 'index', 'show', 'update', 'destroy', 'preview'],
         })
@@ -186,49 +188,18 @@ export default class ApiV1HealthPostsController extends AuthedController {
       this.castParam('id', 'string')
     )
   }
-}\
+}
 `,
         )
-      })
-
-      context('the path is within the admin namespace', () => {
-        it('generates a controller using', () => {
-          const res = generateControllerContent({
-            fullyQualifiedControllerName: 'Admin/NutritionLogEntriesController',
-            route: 'admin/nutrition-log-entries',
-            fullyQualifiedModelName: 'Nutrition/LogEntry',
-            actions: ['create'],
-          })
-
-          expect(res).toEqual(
-            `\
-import { OpenAPI } from '@rvohealth/psychic'
-import AdminAuthedController from '../Admin/AuthedController'
-import NutritionLogEntry from '../../models/Nutrition/LogEntry'
-
-const openApiTags = ['nutrition-log-entries']
-
-export default class AdminNutritionLogEntriesController extends AdminAuthedController {
-  @OpenAPI(NutritionLogEntry, {
-    status: 201,
-    tags: openApiTags,
-    description: 'Create a NutritionLogEntry',
-  })
-  public async create() {
-    //    const nutritionLogEntry = await this.currentUser.createAssociation('nutritionLogEntries', this.paramsFor(NutritionLogEntry))
-    //    this.created(nutritionLogEntry)
-  }
-}`,
-          )
-        })
       })
     })
 
     context('when provided with a nested path', () => {
       it('generates a controller with pascal-cased naming', () => {
         const res = generateControllerContent({
+          ancestorImportStatement: "import AuthedController from '../../AuthedController'",
+          ancestorName: 'AuthedController',
           fullyQualifiedControllerName: 'Api/V1/UsersController',
-          route: 'api/v1/users',
           actions: ['hello', 'world'],
         })
 
@@ -263,7 +234,8 @@ export default class ApiV1UsersController extends AuthedController {
   })
   public async world() {
   }
-}`,
+}
+`,
         )
       })
     })
