@@ -39,7 +39,6 @@ export default async function generateResource({
     const filepath = path.join(
       psychicApp.clientRoot,
       psychicApp.client.apiPath,
-      psychicApp.openapi.clientOutputFilename,
       pluralize(fullyQualifiedModelName.toLowerCase()) + '.ts',
     )
 
