@@ -188,10 +188,6 @@ export default class PsychicCLI {
       .description(
         'creates a new database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars',
       )
-      .option(
-        '--bypass-config-cache',
-        'bypasses running type cache build (this is typically used internally only)',
-      )
       .action(async () => {
         await initializePsychicApplication()
         await DreamBin.dbCreate()
@@ -202,15 +198,11 @@ export default class PsychicCLI {
       .command('db:migrate')
       .description('db:migrate runs any outstanding database migrations')
       .option('--skip-sync', 'skips syncing local schema after running migrations')
-      .option(
-        '--bypass-config-cache',
-        'bypasses running type cache build (this is typically used internally only)',
-      )
-      .action(async () => {
+      .action(async ({ skipSync }: { skipSync: boolean }) => {
         await initializePsychicApplication()
         await DreamBin.dbMigrate()
 
-        if (developmentOrTestEnv() && !cmdargs().includes('--skip-sync')) {
+        if (developmentOrTestEnv() && !skipSync) {
           await DreamBin.sync()
         }
 
@@ -220,16 +212,16 @@ export default class PsychicCLI {
     program
       .command('db:rollback')
       .description('db:rollback rolls back the migration')
-      .option('--step <integer>', '--step <integer> number of steps back to travel')
-      .option('--core', 'sets core to true')
-      .option(
-        '--bypass-config-cache',
-        'bypasses running type cache build (this is typically used internally only)',
-      )
-      .action(async () => {
+      .option('--step <integer>', 'number of steps back to travel', '1')
+      .option('--skip-sync', 'skips syncing local schema after running migrations')
+      .action(async ({ steps, skipSync }: { steps: number; skipSync: boolean }) => {
         await initializePsychicApplication()
-        await DreamBin.dbRollback()
-        await DreamBin.sync()
+        await DreamBin.dbRollback({ steps })
+
+        if (developmentOrTestEnv() && !skipSync) {
+          await DreamBin.sync()
+        }
+
         process.exit()
       })
 
@@ -237,11 +229,6 @@ export default class PsychicCLI {
       .command('db:drop')
       .description(
         'drops the database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars',
-      )
-      .option('--core', 'sets core to true')
-      .option(
-        '--bypass-config-cache',
-        'bypasses running type cache build (this is typically used internally only)',
       )
       .action(async () => {
         await initializePsychicApplication()
@@ -251,8 +238,7 @@ export default class PsychicCLI {
 
     program
       .command('db:reset')
-      .description('db:reset runs db:drop (safely), then db:create, then db:migrate')
-      .option('--core', 'sets core to true')
+      .description('runs db:drop (safely), then db:create, db:migrate, and db:seed')
       .action(async () => {
         await initializePsychicApplication()
         await DreamBin.dbDrop()
@@ -266,11 +252,6 @@ export default class PsychicCLI {
     program
       .command('db:seed')
       .description('seeds the database using the file located in db/seed.ts')
-      .option('--core', 'sets core to true')
-      .option(
-        '--bypass-config-cache',
-        'bypasses running type cache build (this is typically used internally only)',
-      )
       .action(async () => {
         if (process.env.NODE_ENV === 'test' && process.env.DREAM_SEED_DB_IN_TEST !== '1') {
           console.log('skipping db seed for test env. To really seed for test, add DREAM_SEED_DB_IN_TEST=1')
