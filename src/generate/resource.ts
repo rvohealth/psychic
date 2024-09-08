@@ -26,7 +26,7 @@ export default async function generateResource({
   }
 
   await generateController({
-    route,
+    fullyQualifiedControllerName: pluralize(fullyQualifiedModelName),
     fullyQualifiedModelName,
     actions: ['create', 'index', 'show', 'update', 'destroy'],
   })
