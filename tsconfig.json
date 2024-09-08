@@ -25,6 +25,6 @@
     "rootDir": "./",
     "outDir": "./dist"
   },
-  "ignore": [],
+  "ignore": ["spec/support/routes/*"],
   "include": ["src/**/*", "spec/**/*", "test-app/**/*", "shared/**/*"]
 }

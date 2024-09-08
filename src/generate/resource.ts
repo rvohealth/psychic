@@ -5,6 +5,7 @@ import pluralize from 'pluralize'
 import PsychicApplication from '../psychic-application'
 import generateClientAPIModule from './client/apiModule'
 import generateController from './controller'
+import addResourceToRoutes from './helpers/addResourceToRoutes'
 
 export default async function generateResource({
   route,
@@ -29,6 +30,8 @@ export default async function generateResource({
     fullyQualifiedModelName,
     actions: ['create', 'index', 'show', 'update', 'destroy'],
   })
+
+  await addResourceToRoutes(route)
 
   if (!psychicApp?.apiOnly) {
     const psychicApp = PsychicApplication.getOrFail()
