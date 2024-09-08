@@ -5,6 +5,7 @@ import pluralize from 'pluralize'
 import PsychicApplication from '../psychic-application'
 import generateClientAPIModule from './client/apiModule'
 import generateController from './controller'
+import addResourceToRoutes from './helpers/addResourceToRoutes'
 
 export default async function generateResource({
   route,
@@ -25,13 +26,14 @@ export default async function generateResource({
     actions: ['create', 'index', 'show', 'update', 'destroy'],
   })
 
+  await addResourceToRoutes(pluralize(route))
+
   if (!psychicApp?.apiOnly) {
     const psychicApp = PsychicApplication.getOrFail()
     const str = generateClientAPIModule(route, fullyQualifiedModelName)
     const filepath = path.join(
       psychicApp.clientRoot,
       psychicApp.client.apiPath,
-      psychicApp.openapi.clientOutputFilename,
       pluralize(fullyQualifiedModelName.toLowerCase()) + '.ts',
     )
 

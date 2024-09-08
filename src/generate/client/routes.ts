@@ -56,7 +56,7 @@ function recursivelyBuildRoutesObj({
   }, routesObj)
 }
 
-function spaces(numIterations: number) {
+function indent(numIterations: number) {
   let spaces = ''
   for (let i = 0; i < numIterations; i++) {
     spaces += '  '
@@ -78,13 +78,13 @@ function recursivelyBuildRoutesStr(routesObj: any, str: string, numIterations: n
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       const pathStr = /^\(/.test(routesObj[key]) ? routesObj[key] : `'${routesObj[key]}'`
 
-      agg += `\n${spaces(numIterations)}${safeObjectKey(key)}: ${pathStr},`
+      agg += `\n${indent(numIterations)}${safeObjectKey(key)}: ${pathStr},`
     } else {
       agg += `
-${spaces(numIterations)}${safeObjectKey(camelize(key)) || "'/'"}: {`
+${indent(numIterations)}${safeObjectKey(camelize(key)) || "'/'"}: {`
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       agg = recursivelyBuildRoutesStr(routesObj[key], agg, numIterations + 1)
-      agg += `\n${spaces(numIterations)}},`
+      agg += `\n${indent(numIterations)}},`
     }
     return agg
   }, str)

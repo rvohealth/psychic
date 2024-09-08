@@ -5,6 +5,9 @@ export default function (dreamPathType: PsychicPaths) {
   const psychicApp = PsychicApplication.getOrFail()
 
   switch (dreamPathType) {
+    case 'apiRoutes':
+      return psychicApp.paths.apiRoutes
+
     case 'controllers':
       return psychicApp.paths.controllers
 
@@ -17,4 +20,4 @@ export default function (dreamPathType: PsychicPaths) {
 }
 
 type DreamPaths = 'models' | 'modelSpecs' | 'serializers' | 'db' | 'conf' | 'factories'
-export type PsychicPaths = DreamPaths | 'controllers' | 'controllerSpecs'
+export type PsychicPaths = DreamPaths | 'apiRoutes' | 'controllers' | 'controllerSpecs'

@@ -8,6 +8,8 @@ test-app/logs/*
 .DS_Store
 test-app/.psy/*
 spec/tmp.txt
+spec/tmp/*
+!spec/tmp/.keep
 .vim/*
 dist
 
