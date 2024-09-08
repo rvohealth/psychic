@@ -10,6 +10,8 @@ const config = typescriptEslint.config(
 
   {
     ignores: [
+      'spec/support/routes',
+      'spec/tmp/**/*',
       'test-app/src/db/schema.ts',
       'test-app/src/db/sync.ts',
       'test-app/client/apiRoutes.ts',
