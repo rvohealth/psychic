@@ -10,6 +10,9 @@ test-app/.psy/*
 spec/tmp.txt
 spec/tmp/*
 !spec/tmp/.keep
+!spec/tmp/controllers/
+spec/tmp/controllers/*
+!spec/tmp/controllers/.keep
 .vim/*
 dist
 

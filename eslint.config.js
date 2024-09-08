@@ -10,7 +10,7 @@ const config = typescriptEslint.config(
 
   {
     ignores: [
-      'spec/support/routes',
+      'spec/support/generators/**/*',
       'spec/tmp/**/*',
       'test-app/src/db/schema.ts',
       'test-app/src/db/sync.ts',
