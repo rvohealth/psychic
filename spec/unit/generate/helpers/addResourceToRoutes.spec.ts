@@ -16,7 +16,7 @@ describe('addResourceToRoutes', () => {
     psychicApp = PsychicApplication.getOrFail()
     tmpRoutesFileRelativePath = path.join('spec', 'tmp', 'routes.ts')
     tmpRoutesFilepath = path.join(psychicApp.apiRoot, tmpRoutesFileRelativePath)
-    supportDir = path.join(psychicApp.apiRoot, 'spec', 'support', 'routes')
+    supportDir = path.join(psychicApp.apiRoot, 'spec', 'support', 'generators', 'routes')
     jest.spyOn(psychicPathModule, 'default').mockReturnValue(tmpRoutesFileRelativePath)
   })
 

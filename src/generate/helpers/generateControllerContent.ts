@@ -8,32 +8,24 @@ import pluralize from 'pluralize'
 import relativePsychicPath from '../../helpers/path/relativePsychicPath'
 
 export default function generateControllerContent({
+  ancestorName,
+  ancestorImportStatement,
   fullyQualifiedControllerName,
-  route,
   fullyQualifiedModelName,
   actions = [],
+  omitOpenApi = false,
 }: {
+  ancestorName: string
+  ancestorImportStatement: string
   fullyQualifiedControllerName: string
-  route: string
   fullyQualifiedModelName?: string
   actions?: string[]
+  omitOpenApi?: boolean
 }) {
   fullyQualifiedControllerName = standardizeFullyQualifiedModelName(fullyQualifiedControllerName)
 
   const additionalImports: string[] = []
   const controllerClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedControllerName)
-
-  let extendingClassName = 'AuthedController'
-  if (/^\/{0,1}admin\/.*/.test(route)) {
-    additionalImports.push(
-      `import AdminAuthedController from '${routeDepthToRelativePath(route, 1)}/Admin/AuthedController'`,
-    )
-    extendingClassName = 'AdminAuthedController'
-  } else {
-    additionalImports.push(
-      `import AuthedController from '${routeDepthToRelativePath(route, 1)}/AuthedController'`,
-    )
-  }
 
   let modelClassName: string | undefined
   let modelAttributeName: string | undefined
@@ -191,15 +183,16 @@ export default function generateControllerContent({
     }
   })
 
+  const openApiImport = `import { OpenAPI } from '@rvohealth/psychic'`
+
+  const openApiTags = `const openApiTags = ['${hyphenize(pluralizedModelAttributeName || controllerClassName.replace(/Controller$/, ''))}']`
+
   return `\
-import { OpenAPI } from '@rvohealth/psychic'
-${additionalImports.length ? additionalImports.join('\n') : ''}
+${omitOpenApi ? '' : openApiImport + '\n'}${ancestorImportStatement}${additionalImports.length ? '\n' + additionalImports.join('\n') : ''}${omitOpenApi ? '' : '\n\n' + openApiTags}
 
-const openApiTags = ['${hyphenize(pluralizedModelAttributeName || controllerClassName.replace(/Controller$/, ''))}']
-
-export default class ${controllerClassName} extends ${extendingClassName} {
+export default class ${controllerClassName} extends ${ancestorName} {
 ${methodDefs.join('\n\n')}${modelClassName ? privateMethods(modelClassName, actions) : ''}
-}\
+}
 `
 }
 
@@ -219,15 +212,6 @@ function loadModelStatement(modelClassName: string) {
       this.castParam('id', 'string')
     )
   }`
-}
-
-function routeDepthToRelativePath(route: string, subtractFromDepth: number = 0) {
-  const depth = route.replace(/^\//, '').split('/').length
-  return (
-    Array(depth - subtractFromDepth)
-      .fill('..')
-      .join('/') || '.'
-  )
 }
 
 function importStatementForModel(originControllerName: string, destinationModelName: string) {
