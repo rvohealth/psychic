@@ -1,6 +1,4 @@
 import crypto from 'crypto'
-import InvalidValuePassedToEncryptionDecode from '../error/encrypt/invalid-value-passed-to-encryption-decode'
-import InvalidValuePassedToEncryptionSign from '../error/encrypt/invalid-value-passed-to-encryption-sign'
 import MissingEncryptionKey from '../error/encrypt/missing-encryption-key'
 import PsychicApplication from '../psychic-application'
 //
@@ -9,8 +7,6 @@ export default class Encrypt {
   public static encrypt(data: any): string {
     const psychicApp = PsychicApplication.getOrFail()
     if (!psychicApp.encryptionKey) throw new MissingEncryptionKey()
-
-    if ([null, undefined].includes(data as null)) throw new InvalidValuePassedToEncryptionSign()
 
     const key = psychicApp.encryptionKey
     const iv = this.generateKey(12)
@@ -25,12 +21,11 @@ export default class Encrypt {
     return Buffer.from(JSON.stringify({ ciphertext, iv, tag })).toString('base64')
   }
 
-  public static decrypt<RetType>(encrypted: string) {
+  public static decrypt<RetType>(encrypted: string): RetType | null {
     const psychicApp = PsychicApplication.getOrFail()
     if (!psychicApp.encryptionKey) throw new MissingEncryptionKey()
 
-    if ([null, undefined].includes(encrypted as unknown as null))
-      throw new InvalidValuePassedToEncryptionDecode()
+    if ([null, undefined].includes(encrypted as unknown as null)) return null
 
     const key = psychicApp.encryptionKey
     const { ciphertext, tag, iv } = this.unpackPayloadOrFail(encrypted)

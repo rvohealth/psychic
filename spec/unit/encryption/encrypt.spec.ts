@@ -1,11 +1,9 @@
 import Encrypt from '../../../src/encryption/encrypt'
-import InvalidValuePassedToEncryptionDecode from '../../../src/error/encrypt/invalid-value-passed-to-encryption-decode'
-import InvalidValuePassedToEncryptionSign from '../../../src/error/encrypt/invalid-value-passed-to-encryption-sign'
 import MissingEncryptionKey from '../../../src/error/encrypt/missing-encryption-key'
 import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication'
 
 describe('Encrypt', () => {
-  describe('#encrypt', () => {
+  describe('#encrypt, #decrypt', () => {
     let originalEncryptionKey: string
 
     beforeEach(async () => {
@@ -45,20 +43,12 @@ describe('Encrypt', () => {
       expectCanEncryptAndDecryptValue(1.1111)
     })
 
+    it('can encrypt null', () => {
+      expectCanEncryptAndDecryptValue(null)
+    })
+
     it('can encrypt and decrypt an array of values', () => {
       expectCanEncryptAndDecryptValue([1, 'hi', true])
-    })
-
-    context('with null passed', () => {
-      it('raises a targeted exception', () => {
-        expect(() => Encrypt.encrypt(null)).toThrow(InvalidValuePassedToEncryptionSign)
-      })
-    })
-
-    context('with undefined passed', () => {
-      it('raises a targeted exception', () => {
-        expect(() => Encrypt.encrypt(undefined)).toThrow(InvalidValuePassedToEncryptionSign)
-      })
     })
 
     context('with no encryption key set', () => {
@@ -69,22 +59,6 @@ describe('Encrypt', () => {
 
       it('raises a targeted exception', () => {
         expect(() => Encrypt.encrypt('how')).toThrow(MissingEncryptionKey)
-      })
-    })
-  })
-
-  describe('#decrypt', () => {
-    context('with null passed', () => {
-      it('raises a targeted exception', () => {
-        expect(() => Encrypt.decrypt(null as unknown as string)).toThrow(InvalidValuePassedToEncryptionDecode)
-      })
-    })
-
-    context('with undefined passed', () => {
-      it('raises a targeted exception', () => {
-        expect(() => Encrypt.decrypt(undefined as unknown as string)).toThrow(
-          InvalidValuePassedToEncryptionDecode,
-        )
       })
     })
   })
