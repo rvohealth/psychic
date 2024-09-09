@@ -1192,7 +1192,7 @@ __metadata:
     socket.io: "*"
     socket.io-adapter: "*"
   bin:
-    psy: ./.global-cli-dist/main.js
+    psy: ./dist/src/global-cli/psy.js
   languageName: unknown
   linkType: soft
 

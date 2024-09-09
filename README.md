@@ -22,7 +22,7 @@ NODE_ENV=test yarn fspec
 The global CLI is used to build a new psychic app. You can access the global cli on your machine by doing the following:
 
 ```bash
-yarn global add @rvohealth/psychic
+yarn dlx @rvohealth/psychic
 ```
 
 Once installed globally, you can access the global cli like so:
@@ -31,19 +31,7 @@ Once installed globally, you can access the global cli like so:
 psy new myapp --redis --ws --primaryKey bigserial --client react
 ```
 
-All files for maintaining this can be found in the `global-cli` folder at the project root. If any of these files are edited, those edits will not persist until you run `yarn build:global-cli`, since the `bin` field in package.json only supports javascript files.
-
-Once that is done and the code is published using `yarn publish`, you can test the global cli on your local machine like so:
-
-```bash
-# if you already have it installed, remove it first
-yarn global remove @rvohealth/psychic
-
-# replace "1.1.1" with the version you have published
-yarn global add @rvohealth/psychic@1.1.1
-```
-
-To test generating a new app without publishing, you can run the following from within the psychic directory:
+To test the global cli without publishing, you can run the following from within the psychic directory:
 
 ```bash
 yarn gpsycore new myapp --redis --ws --primaryKey bigserial --client react

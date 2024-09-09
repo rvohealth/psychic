@@ -5,7 +5,7 @@ import { NewAppCLIOptions } from '../helpers/gatherUserInput'
 export default class AppConfigBuilder {
   public static async build(opts: { appName: string; userOptions: NewAppCLIOptions }) {
     const contents = (
-      await fs.readFile(path.join(__dirname, '..', '..', 'boilerplate', 'api', 'src', 'conf', 'app.ts'))
+      await fs.readFile(path.join(__dirname, '..', '..', '..', 'boilerplate', 'api', 'src', 'conf', 'app.ts'))
     ).toString()
 
     return contents
