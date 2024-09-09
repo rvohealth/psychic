@@ -112,7 +112,7 @@ export default class PsychicCLI {
       )
       .argument('[actions...]', 'the names of controller actions to create')
 
-      .action(async (route: string, controllerName: string, actions: string[]) => {
+      .action(async (controllerName: string, actions: string[]) => {
         await initializePsychicApplication()
         await PsychicBin.generateController(controllerName, actions)
         process.exit()
