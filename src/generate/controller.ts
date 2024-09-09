@@ -1,19 +1,24 @@
-import { standardizeFullyQualifiedModelName } from '@rvohealth/dream'
+import { hyphenize, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
 import { existsSync } from 'fs'
 import fs from 'fs/promises'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths'
 import psychicPath from '../helpers/path/psychicPath'
 import generateControllerContent from './helpers/generateControllerContent'
 import generateControllerSpecContent from './helpers/generateControllerSpecContent'
+import generateResourceControllerSpecContent from './helpers/generateResourceControllerSpecContent'
 
 export default async function generateController({
   fullyQualifiedControllerName,
   fullyQualifiedModelName,
   actions,
+  columnsWithTypes = [],
+  resourceSpecs = false,
 }: {
   fullyQualifiedControllerName: string
   fullyQualifiedModelName?: string
   actions: string[]
+  columnsWithTypes?: string[]
+  resourceSpecs?: boolean
 }) {
   fullyQualifiedModelName = fullyQualifiedModelName
     ? standardizeFullyQualifiedModelName(fullyQualifiedModelName)
@@ -93,7 +98,13 @@ export default async function generateController({
     `)
   }
 
-  await generateControllerSpec(fullyQualifiedControllerName) //, route, fullyQualifiedModelName, methods)
+  await generateControllerSpec({
+    fullyQualifiedControllerName,
+    route: hyphenize(fullyQualifiedControllerName),
+    fullyQualifiedModelName,
+    columnsWithTypes,
+    resourceSpecs,
+  })
 }
 
 function baseAncestorNameAndImport(
@@ -110,12 +121,19 @@ function baseAncestorNameAndImport(
     : [maybeAncestorNameForBase, `import ${maybeAncestorNameForBase} from '${dotFiles}/BaseController'`]
 }
 
-async function generateControllerSpec(
-  fullyQualifiedControllerName: string,
-  // route: string,
-  // fullyQualifiedModelName: string,
-  // methods: string[],
-) {
+async function generateControllerSpec({
+  fullyQualifiedControllerName,
+  route,
+  fullyQualifiedModelName,
+  columnsWithTypes,
+  resourceSpecs,
+}: {
+  fullyQualifiedControllerName: string
+  route: string
+  fullyQualifiedModelName: string | undefined
+  columnsWithTypes: string[]
+  resourceSpecs: boolean
+}) {
   const { relFilePath, absDirPath, absFilePath } = psychicFileAndDirPaths(
     psychicPath('controllerSpecs'),
     fullyQualifiedControllerName + `.spec.ts`,
@@ -126,7 +144,14 @@ async function generateControllerSpec(
     await fs.mkdir(absDirPath, { recursive: true })
     await fs.writeFile(
       absFilePath,
-      generateControllerSpecContent(fullyQualifiedControllerName), //, route, fullyQualifiedModelName, methods),
+      resourceSpecs && fullyQualifiedModelName
+        ? generateResourceControllerSpecContent({
+            fullyQualifiedControllerName,
+            route,
+            fullyQualifiedModelName,
+            columnsWithTypes,
+          })
+        : generateControllerSpecContent(fullyQualifiedControllerName), //, route, fullyQualifiedModelName, actions),
     )
   } catch (error) {
     throw new Error(`

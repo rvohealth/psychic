@@ -18,6 +18,8 @@ export default async function generateResource({
     fullyQualifiedControllerName: pluralize(fullyQualifiedModelName),
     fullyQualifiedModelName,
     actions: ['create', 'index', 'show', 'update', 'destroy'],
+    columnsWithTypes,
+    resourceSpecs: true,
   })
 
   await addResourceToRoutes(pluralize(route))
