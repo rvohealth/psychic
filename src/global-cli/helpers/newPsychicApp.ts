@@ -34,11 +34,11 @@ export default async function newPsychicApp(appName: string, args: string[]) {
 
   if (userOptions.apiOnly) {
     projectPath = `./${appName}`
-    copyRecursive(__dirname + '/../../boilerplate/api', `./${appName}`)
+    copyRecursive(__dirname + '/../../../boilerplate/api', `./${appName}`)
   } else {
     projectPath = `./${appName}/api`
     fs.mkdirSync(`./${appName}`)
-    copyRecursive(__dirname + '/../../boilerplate/api', projectPath)
+    copyRecursive(__dirname + '/../../../boilerplate/api', projectPath)
   }
 
   fs.renameSync(`${projectPath}/yarnrc.yml`, `${projectPath}/.yarnrc.yml`)
@@ -101,13 +101,13 @@ export default async function newPsychicApp(appName: string, args: string[]) {
 
           fs.mkdirSync(`./${appName}/client/src/config`)
 
-          copyRecursive(__dirname + '/../../boilerplate/client/api', `${projectPath}/../client/src/api`)
+          copyRecursive(__dirname + '/../../../boilerplate/client/api', `${projectPath}/../client/src/api`)
           copyRecursive(
-            __dirname + '/../../boilerplate/client/config/routes.ts',
+            __dirname + '/../../../boilerplate/client/config/routes.ts',
             `${projectPath}/../client/src/config/routes.ts`,
           )
           copyRecursive(
-            __dirname + '/../../boilerplate/client/node-version',
+            __dirname + '/../../../boilerplate/client/node-version',
             `${projectPath}/../client/.node-version`,
           )
 
@@ -120,13 +120,13 @@ export default async function newPsychicApp(appName: string, args: string[]) {
           await sspawn(`cd ${rootPath} && yarn create vite client --template vue-ts`)
           fs.mkdirSync(`./${appName}/client/src/config`)
 
-          copyRecursive(__dirname + '/../../boilerplate/client/api', `${projectPath}/../client/src/api`)
+          copyRecursive(__dirname + '/../../../boilerplate/client/api', `${projectPath}/../client/src/api`)
           copyRecursive(
-            __dirname + '/../../boilerplate/client/config/routes.ts',
+            __dirname + '/../../../boilerplate/client/config/routes.ts',
             `${projectPath}/../client/src/config/routes.ts`,
           )
           copyRecursive(
-            __dirname + '/../../boilerplate/client/node-version',
+            __dirname + '/../../../boilerplate/client/node-version',
             `${projectPath}/../client/.node-version`,
           )
 
@@ -138,13 +138,13 @@ export default async function newPsychicApp(appName: string, args: string[]) {
 
           fs.mkdirSync(`./${appName}/client/config`)
 
-          copyRecursive(__dirname + '/../../boilerplate/client/api', `${projectPath}/../client/src/api`)
+          copyRecursive(__dirname + '/../../../boilerplate/client/api', `${projectPath}/../client/src/api`)
           copyRecursive(
-            __dirname + '/../../boilerplate/client/config/routes.ts',
+            __dirname + '/../../../boilerplate/client/config/routes.ts',
             `${projectPath}/../client/config/routes.ts`,
           )
           copyRecursive(
-            __dirname + '/../../boilerplate/client/node-version',
+            __dirname + '/../../../boilerplate/client/node-version',
             `${projectPath}/../client/.node-version`,
           )
 
