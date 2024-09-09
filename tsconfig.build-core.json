@@ -1,25 +1,5 @@
 {
-  "compilerOptions": {
-    "module": "CommonJS",
-    "target": "es2021",
-    "strict": true,
-    "noImplicitAny": true,
-    "experimentalDecorators": true,
-    "esModuleInterop": true,
-    "declaration": true,
-    "resolveJsonModule": true,
-    "skipLibCheck": true,
-
-    /* do not require all properties to be initialized in constructor */
-    "strictPropertyInitialization": false,
-
-    /* with esnext as target, need to specify this so that Object.defineProperty works */
-    "useDefineForClassFields": false,
-
-    /* rootDir and outDir together help maintain dist/src folder */
-    "rootDir": "./",
-    "outDir": "./dist"
-  },
+  "extends": "./tsconfig.build.json",
   "ignore": [],
   "include": ["src/**/*", "shared/**/*", "test-app/**/*"]
 }
