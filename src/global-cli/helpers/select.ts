@@ -4,6 +4,7 @@ const input = process.stdin
 const output = process.stdout
 
 let firstCallComplete = false
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default class Select<T extends readonly any[]> {
   private question: string
   private selectIndex: number = 0
@@ -18,13 +19,15 @@ export default class Select<T extends readonly any[]> {
   }
 
   public async run(): Promise<T[number]> {
-    await this.init()
+    this.init()
+
     return new Promise(accept => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
       this.cb = accept as any
     })
   }
 
-  private keyPressedHandler(_: any, key: any) {
+  private keyPressedHandler(_: unknown, key: { name: string; ctrl: boolean }) {
     if (key) {
       const optionLength = this.options.length - 1
       if (key.name === 'down' && this.selectIndex < optionLength) {
@@ -71,7 +74,7 @@ export default class Select<T extends readonly any[]> {
     return clear
   }
 
-  private async init() {
+  private init() {
     console.log(this.question)
 
     readline.emitKeypressEvents(input)
@@ -82,7 +85,7 @@ export default class Select<T extends readonly any[]> {
     //setup the input for reading
     input.setRawMode(true)
     input.resume()
-    input.on('keypress', (event, key) => this.keyPressedHandler(event, key))
+    input.on('keypress', (event, key: { name: string; ctrl: boolean }) => this.keyPressedHandler(event, key))
 
     if (this.selectIndex >= 0) {
       this.createOptionMenu()

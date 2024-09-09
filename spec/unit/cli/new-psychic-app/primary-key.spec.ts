@@ -1,5 +1,5 @@
 import { describe as context } from '@jest/globals'
-import newPsychicApp from '../../../../global-cli/helpers/newPsychicApp'
+import newPsychicApp from '../../../../src/global-cli/helpers/newPsychicApp'
 import { expectPrimaryKey, readHowyadoinFile, removeHowyadoinDir } from './helpers/assertion'
 
 describe('newPsychicApp (primaryKey options)', () => {
