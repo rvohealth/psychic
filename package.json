@@ -7,12 +7,8 @@
   "repository": "https://github.com/rvohealth/psychic.git",
   "license": "MIT",
   "files": [
-    "tsconfig.build.json",
-    "tsconfig.global-cli.json",
-    "tsconfig.json",
     "boilerplate/**/*",
     ".global-cli-dist/**/*",
-    "src/**/*",
     "dist/**/*"
   ],
   "bin": {
@@ -76,7 +72,7 @@
   "devDependencies": {
     "@eslint/js": "=9.0.0",
     "@jest-mock/express": "^2.1.0",
-    "@rvohealth/dream": "^0.10.20-beta-6",
+    "@rvohealth/dream": "=0.10.20",
     "@rvohealth/dream-spec-helpers": "^0.0.8",
     "@rvohealth/psychic-spec-helpers": "^0.0.3",
     "@socket.io/redis-adapter": "^8.3.0",
