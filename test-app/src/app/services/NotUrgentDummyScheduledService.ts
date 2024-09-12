@@ -1,6 +1,6 @@
-import { ScheduledService } from '../../../../src'
+import BaseDummyScheduledService from './BaseDummyScheduledService'
 
-export default class NotUrgentDummyScheduledService extends ScheduledService {
+export default class NotUrgentDummyScheduledService extends BaseDummyScheduledService {
   public static get priority() {
     return 'not_urgent' as const
   }

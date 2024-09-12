@@ -14,7 +14,9 @@ describe('BackgroundedService', () => {
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(DummyService.classRunInBG).toHaveBeenCalledWith('bottlearum')
     })
+  })
 
+  describe('#background', () => {
     it('calls the instance method, passing constructor args to the constructor and args to the instance method', async () => {
       jest.spyOn(DummyService.prototype, 'instanceMethodToTest').mockImplementation(async () => {})
       await new DummyService('hello').background('instanceRunInBG', {
@@ -118,7 +120,9 @@ describe('BackgroundedService', () => {
       // eslint-disable-next-line @typescript-eslint/unbound-method
       expect(DummyService.classRunInBG).toHaveBeenCalledWith('bottlearum')
     })
+  })
 
+  describe('#backgroundWithDelay', () => {
     it('calls the instance method, passing constructor args to the constructor and args to the instance method', async () => {
       jest.spyOn(DummyService.prototype, 'instanceMethodToTest').mockImplementation(async () => {})
       await new DummyService('hello').backgroundWithDelay(15, 'instanceRunInBG', {
