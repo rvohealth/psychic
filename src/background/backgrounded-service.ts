@@ -1,5 +1,6 @@
 import { GlobalNameNotSet } from '@rvohealth/dream'
 import background, { BackgroundQueuePriority } from './'
+import { FunctionPropertyNames } from '../helpers/typeHelpers'
 
 export default class BackgroundedService {
   public static get priority(): BackgroundQueuePriority {
@@ -16,71 +17,106 @@ export default class BackgroundedService {
   }
   public static _globalName: string | undefined
 
-  public static async background(
-    methodName: string,
+  public static async background<
+    T,
+    MethodName extends PsychicBackgroundedServiceStaticMethods<T & typeof BackgroundedService>,
+    MethodFunc extends T[MethodName & keyof T],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...args: any[]
-  ) {
-    return await background.staticMethod(this, methodName, {
-      globalName: this.globalName,
+    MethodArgs extends MethodFunc extends (...args: any) => any ? Parameters<MethodFunc> : never,
+  >(this: T, methodName: MethodName, ...args: MethodArgs) {
+    const safeThis: typeof BackgroundedService = this as typeof BackgroundedService
+
+    return await background.staticMethod(safeThis, methodName, {
+      globalName: safeThis.globalName,
       args,
-      priority: this.priority,
+      priority: safeThis.priority,
     })
   }
 
-  public async background(
-    methodName: string,
+  public static async backgroundWithDelay<
+    T,
+    MethodName extends PsychicBackgroundedServiceStaticMethods<T & typeof BackgroundedService>,
+    MethodFunc extends T[MethodName & keyof T],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MethodArgs extends MethodFunc extends (...args: any) => any ? Parameters<MethodFunc> : never,
+  >(this: T, delaySeconds: number, methodName: MethodName, ...args: MethodArgs) {
+    const safeThis: typeof BackgroundedService = this as typeof BackgroundedService
+
+    return await background.staticMethod(safeThis, methodName, {
+      globalName: safeThis.globalName,
+      delaySeconds,
+      args,
+      priority: safeThis.priority,
+    })
+  }
+
+  public async background<
+    T,
+    MethodName extends PsychicBackgroundedServiceInstanceMethods<T & BackgroundedService>,
+    MethodFunc extends T[MethodName & keyof T],
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    MethodArgs extends MethodFunc extends (...args: any) => any ? Parameters<MethodFunc> : never,
+  >(
+    this: T,
+    methodName: MethodName,
     {
       args,
       constructorArgs,
     }: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      args?: any[]
+      args?: MethodArgs
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       constructorArgs?: any[]
     } = {},
   ) {
-    return await background.instanceMethod(this.constructor, methodName, {
-      globalName: (this.constructor as typeof BackgroundedService).globalName,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    const constructor = (this as any).constructor as typeof BackgroundedService
+
+    return await background.instanceMethod(constructor, methodName, {
+      globalName: constructor.globalName,
       args,
       constructorArgs,
-      priority: (this.constructor as typeof BackgroundedService).priority,
+      priority: constructor.priority,
     })
   }
 
-  public static async backgroundWithDelay(
-    delaySeconds: number,
-    methodName: string,
+  public async backgroundWithDelay<
+    T,
+    MethodName extends PsychicBackgroundedServiceInstanceMethods<T & BackgroundedService>,
+    MethodFunc extends T[MethodName & keyof T],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ...args: any[]
-  ) {
-    return await background.staticMethod(this, methodName, {
-      globalName: this.globalName,
-      delaySeconds,
-      args,
-      priority: this.priority,
-    })
-  }
-
-  public async backgroundWithDelay(
+    MethodArgs extends MethodFunc extends (...args: any) => any ? Parameters<MethodFunc> : never,
+  >(
+    this: T,
     delaySeconds: number,
-    methodName: string,
+    methodName: MethodName,
     {
       args,
       constructorArgs,
     }: {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      args?: any[]
+      args?: MethodArgs
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       constructorArgs?: any[]
     } = {},
   ) {
-    return await background.instanceMethod(this.constructor, methodName, {
-      globalName: (this.constructor as typeof BackgroundedService).globalName,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+    const constructor = (this as any).constructor as typeof BackgroundedService
+
+    return await background.instanceMethod(constructor, methodName, {
+      globalName: constructor.globalName,
       delaySeconds,
       args,
       constructorArgs,
-      priority: (this.constructor as typeof BackgroundedService).priority,
+      priority: constructor.priority,
     })
   }
 }
+
+export type PsychicBackgroundedServiceStaticMethods<T extends typeof BackgroundedService> = Exclude<
+  FunctionPropertyNames<Required<T>>,
+  FunctionPropertyNames<typeof BackgroundedService>
+>
+
+export type PsychicBackgroundedServiceInstanceMethods<T extends BackgroundedService> = Exclude<
+  FunctionPropertyNames<Required<T>>,
+  FunctionPropertyNames<BackgroundedService>
+>

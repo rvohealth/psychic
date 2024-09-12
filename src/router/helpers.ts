@@ -1,11 +1,12 @@
 import { camelize, compact, pascalize } from '@rvohealth/dream'
 import PsychicController from '../controller'
+import CannotFindInferredControllerFromProvidedNamespace from '../error/router/cannot-find-inferred-controller-from-provided-namespace'
 import CannotInferControllerFromTopLevelRouteError from '../error/router/cannot-infer-controller-from-top-level-route'
+import pascalizeFileName from '../helpers/pascalizeFileName'
+import { FunctionPropertyNames } from '../helpers/typeHelpers'
 import PsychicApplication from '../psychic-application'
 import PsychicRouter, { PsychicNestedRouter } from '../router'
 import { ResourcesMethodType, ResourcesOptions } from './types'
-import CannotFindInferredControllerFromProvidedNamespace from '../error/router/cannot-find-inferred-controller-from-provided-namespace'
-import pascalizeFileName from '../helpers/pascalizeFileName'
 
 export function routePath(routePath: string) {
   return `/${routePath.replace(/^\//, '')}`
@@ -93,11 +94,6 @@ function inferControllerOrFail(
   return controller
 }
 
-export type FunctionProperties<T> = {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  [K in keyof T as T[K] extends (...args: any[]) => any ? K : never]: T[K]
-}
-export type FunctionPropertyNames<T> = keyof FunctionProperties<T>
 export type PsychicControllerActions<T extends typeof PsychicController> = Exclude<
   FunctionPropertyNames<Required<InstanceType<T>>>,
   FunctionPropertyNames<PsychicController>

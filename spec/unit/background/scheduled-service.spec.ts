@@ -10,7 +10,7 @@ import UrgentDummyScheduledService from '../../../test-app/src/app/services/Urge
 describe('ScheduledService', () => {
   context('queue priority', () => {
     const subject = async () => {
-      await serviceClass.schedule('* * * * *', 'instanceRunInBG', 'bottlearum')
+      await serviceClass.schedule('* * * * *', 'classRunInBg', 'bottlearum')
     }
     let serviceClass:
       | typeof DummyScheduledService
@@ -27,14 +27,14 @@ describe('ScheduledService', () => {
           globalName: `services/${serviceClass.name}`,
           args: ['bottlearum'],
           importKey: undefined,
-          method: 'instanceRunInBG',
+          method: 'classRunInBg',
           priority,
         },
         {
           repeat: {
             pattern: '* * * * *',
           },
-          jobId: `${serviceClass.name}:instanceRunInBG`,
+          jobId: `${serviceClass.name}:classRunInBg`,
           priority: priorityLevel,
         },
       )
