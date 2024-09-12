@@ -1,8 +1,7 @@
 import '../../../src/helpers/loadEnv'
 
-import { loadRepl } from '@rvohealth/dream'
+import { Encrypt, loadRepl } from '@rvohealth/dream'
 import * as repl from 'node:repl'
-import { Encrypt } from '../../../src'
 import initializePsychicApplication from '../cli/helpers/initializePsychicApplication'
 
 const replServer = repl.start('> ')

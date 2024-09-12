@@ -1,7 +1,6 @@
-import { developmentOrTestEnv } from '@rvohealth/dream'
+import { developmentOrTestEnv, Encrypt } from '@rvohealth/dream'
 import path from 'path'
 import winston from 'winston'
-import { Encrypt } from '../../../src'
 import Ws from '../../../src/cable/ws'
 import PsychicApplication from '../../../src/psychic-application'
 import User from '../app/models/User'
@@ -19,7 +18,18 @@ export default async (psy: PsychicApplication) => {
   psy.set('clientRoot', path.join(__dirname, '..', '..', '..', '..', 'client'))
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
-  psy.set('appEncryptionKey', process.env.APP_ENCRYPTION_KEY!)
+  psy.set('encryption', {
+    cookies: {
+      current: {
+        algorithm: 'aes-256-gcm',
+        key: process.env.APP_ENCRYPTION_KEY!,
+      },
+      legacy: {
+        algorithm: 'aes-256-gcm',
+        key: process.env.LEGACY_APP_ENCRYPTION_KEY!,
+      },
+    },
+  })
 
   psy.set(
     'logger',
@@ -191,7 +201,10 @@ export default async (psy: PsychicApplication) => {
 
     io.of('/').on('connection', async socket => {
       const token = socket.handshake.auth.token as string
-      const userId = Encrypt.decrypt(token)
+      const userId = Encrypt.decrypt(token, {
+        algorithm: 'aes-256-gcm',
+        key: process.env.APP_ENCRYPTION_KEY!,
+      })
       const user = await User.find(userId)
 
       if (user) {

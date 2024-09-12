@@ -14,7 +14,15 @@ export default async (psy: PsychicApplication) => {
   psy.set('useWs', <USE_WS>)
   psy.set('useRedis', <USE_REDIS>)
   psy.set('apiOnly', <API_ONLY>)
-  psy.set('appEncryptionKey', process.env.APP_ENCRYPTION_KEY!)
+  psy.set('encryption', {
+    cookies: {
+      current: {
+        algorithm: 'aes-256-gcm',
+        key: process.env.APP_ENCRYPTION_KEY!,
+      },
+    },
+  })
+
   psy.set('apiRoot', path.join(__dirname, '..', '..'))
   psy.set('clientRoot', path.join(__dirname, '..', '..', '..', 'client'))
   psy.set('inflections', inflections)
