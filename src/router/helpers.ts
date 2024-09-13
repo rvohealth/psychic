@@ -66,8 +66,8 @@ export function lookupControllerOrFail(
     throw new CannotInferControllerFromTopLevelRouteError(
       opts.httpMethod,
       opts.path,
-      pascalize(opts.path.replace(/^\//, '') + 'Controller'),
-      camelize(opts.path.replace(/^\//, '')),
+      pascalizeFileName(opts.path) + 'Controller',
+      camelize(pascalizeFileName(opts.path)),
     )
 
   return inferControllerOrFail(filteredNamespaces, opts)
