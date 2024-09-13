@@ -168,24 +168,16 @@ export function applyResourceAction(
       break
 
     case 'update':
-      routingMechanism.put(`${path}/:id`, controller, 'update' as PsychicControllerActions<typeof controller>)
-      routingMechanism.patch(
-        `${path}/:id`,
-        controller,
-        'update' as PsychicControllerActions<typeof controller>,
-      )
+      routingMechanism.put(path, controller, 'update' as PsychicControllerActions<typeof controller>)
+      routingMechanism.patch(path, controller, 'update' as PsychicControllerActions<typeof controller>)
       break
 
     case 'show':
-      routingMechanism.get(`${path}/:id`, controller, 'show' as PsychicControllerActions<typeof controller>)
+      routingMechanism.get(path, controller, 'show' as PsychicControllerActions<typeof controller>)
       break
 
     case 'destroy':
-      routingMechanism.delete(
-        `${path}/:id`,
-        controller,
-        'destroy' as PsychicControllerActions<typeof controller>,
-      )
+      routingMechanism.delete(path, controller, 'destroy' as PsychicControllerActions<typeof controller>)
       break
 
     default:
