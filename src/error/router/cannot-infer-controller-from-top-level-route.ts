@@ -24,7 +24,7 @@ file within your application. The error is:
 
   try this:
     r.resources('users', r => {
-      r.get('${this.path}')
+      r.${this.httpMethod}('${this.path}')
     })
 
   or else, manually pass a controller and method to match up with your route, like so:
