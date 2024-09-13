@@ -31,7 +31,7 @@ function buildExpressions(routes: RouteConfig[]): [string, string][] {
     const beginningOfExpression = `${route.httpMethod.toUpperCase()}${' '.repeat(numMethodSpaces)}${
       route.path
     }`
-    const endOfExpression = route.controllerActionString
+    const endOfExpression = route.controller.globalName + '#' + route.action
 
     return [beginningOfExpression, endOfExpression]
   })

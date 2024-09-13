@@ -1,6 +1,8 @@
 import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
 import PsychicRouter from '../../../src/router'
 import PsychicServer from '../../../src/server'
+import PetsController from '../../../test-app/src/app/controllers/PetsController'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('PsychicRouter', () => {
   beforeEach(async () => {
@@ -66,9 +68,10 @@ describe('PsychicRouter', () => {
 
       context('controller is passed', () => {
         it('uses the passed controller instead of assuming', () => {
-          router.resource('user', { only: ['update'], controller: 'Howyadoin' })
+          router.resource('user', { only: ['update'], controller: PetsController })
           router.commit()
-          expect(router.routes[0].controllerActionString).toEqual('Howyadoin#update')
+          expect(router.routes[0].controller).toEqual(PetsController)
+          expect(router.routes[0].action).toEqual('update')
         })
       })
 
@@ -77,7 +80,7 @@ describe('PsychicRouter', () => {
           router.namespace('api', r => {
             r.namespace('v1', r => {
               r.resource('users', { except: ['show', 'update', 'destroy', 'create'] }, r => {
-                r.get('hello', 'Users#hello')
+                r.get('hello', UsersController, 'hello')
               })
             })
           })
@@ -87,7 +90,7 @@ describe('PsychicRouter', () => {
 
         it('successfully applies nested resource routes', () => {
           router.resource('users', { except: ['show', 'update', 'destroy', 'create'] }, r => {
-            r.get('hello', 'Users#hello')
+            r.get('hello', UsersController, 'hello')
           })
           router.commit()
           expect(server.app.get).toHaveBeenCalledWith('/users/hello', expect.any(Function))
@@ -95,13 +98,13 @@ describe('PsychicRouter', () => {
 
         it('successfully applies double-nested resource resources', () => {
           router.resource('users', { except: ['show', 'update', 'destroy', 'create'] }, r => {
-            r.resource('friends', {}, r => {
-              r.get('count', 'Friends#count')
+            r.resource('pets', { only: [] }, r => {
+              r.get('count')
             })
           })
           router.commit()
 
-          expect(server.app.get).toHaveBeenCalledWith('/users/friends/count', expect.any(Function))
+          expect(server.app.get).toHaveBeenCalledWith('/users/pets/count', expect.any(Function))
         })
       })
     })

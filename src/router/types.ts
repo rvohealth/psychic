@@ -1,3 +1,5 @@
+import PsychicController from '../controller'
+
 export type ResourcesMethodType = 'index' | 'create' | 'update' | 'show' | 'destroy'
 export const ResourcesMethods = ['index', 'create', 'update', 'show', 'destroy'] as ResourcesMethodType[]
 export const ResourceMethods = ['create', 'update', 'show', 'destroy'] as ResourcesMethodType[]
@@ -7,5 +9,5 @@ export type HttpMethod = (typeof HttpMethods)[number]
 export interface ResourcesOptions {
   only?: ResourcesMethodType[]
   except?: ResourcesMethodType[]
-  controller?: string
+  controller?: typeof PsychicController
 }

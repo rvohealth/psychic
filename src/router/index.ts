@@ -1,11 +1,4 @@
-import {
-  ValidationError,
-  ValidationType,
-  camelize,
-  developmentOrTestEnv,
-  pascalize,
-  testEnv,
-} from '@rvohealth/dream'
+import { ValidationError, ValidationType, camelize, developmentOrTestEnv, testEnv } from '@rvohealth/dream'
 import { Application, Request, Response, Router } from 'express'
 import pluralize from 'pluralize'
 import PsychicController from '../controller'
@@ -14,9 +7,11 @@ import { devEnvBool } from '../helpers/envValue'
 import log from '../log'
 import PsychicApplication from '../psychic-application'
 import {
+  NamespaceConfig,
+  PsychicControllerActions,
   applyResourceAction,
   applyResourcesAction,
-  controllerGlobalNameFromControllerPath,
+  lookupControllerOrFail,
   routePath,
 } from '../router/helpers'
 import { ParamValidationError } from '../server/params'
@@ -49,42 +44,93 @@ export default class PsychicRouter {
   public commit() {
     this.routes.forEach(route => {
       this.app[route.httpMethod](routePath(route.path), (req, res) => {
-        this.handle(route.controllerActionString, { req, res }).catch(() => {})
+        this.handle(route.controller, route.action, { req, res }).catch(() => {})
       })
     })
   }
 
-  get(path: string, controllerActionString: string) {
-    this.crud('get', path, controllerActionString)
+  get(path: string): void
+  get<T extends typeof PsychicController>(
+    path: string,
+    controller: T,
+    action: PsychicControllerActions<T>,
+  ): void
+  get<T extends typeof PsychicController>(
+    path: string,
+    controller?: T,
+    action?: PsychicControllerActions<T>,
+  ) {
+    this.crud('get', path, controller as typeof PsychicController, action as string)
   }
 
-  post(path: string, controllerActionString: string) {
-    this.crud('post', path, controllerActionString)
+  post(path: string): void
+  post<T extends typeof PsychicController>(
+    path: string,
+    controller: T,
+    action: PsychicControllerActions<T>,
+  ): void
+  post<T extends typeof PsychicController>(
+    path: string,
+    controller?: T,
+    action?: PsychicControllerActions<T>,
+  ) {
+    this.crud('post', path, controller as typeof PsychicController, action as string)
   }
 
-  put(path: string, controllerActionString: string) {
-    this.crud('put', path, controllerActionString)
+  put(path: string): void
+  put<T extends typeof PsychicController>(
+    path: string,
+    controller: T,
+    action: PsychicControllerActions<T>,
+  ): void
+  put<T extends typeof PsychicController>(
+    path: string,
+    controller?: T,
+    action?: PsychicControllerActions<T>,
+  ) {
+    this.crud('put', path, controller as typeof PsychicController, action as string)
   }
 
-  patch(path: string, controllerActionString: string) {
-    this.crud('patch', path, controllerActionString)
+  patch(path: string): void
+  patch<T extends typeof PsychicController>(
+    path: string,
+    controller: T,
+    action: PsychicControllerActions<T>,
+  ): void
+  patch<T extends typeof PsychicController>(
+    path: string,
+    controller?: T,
+    action?: PsychicControllerActions<T>,
+  ) {
+    this.crud('patch', path, controller as typeof PsychicController, action as string)
   }
 
-  delete(path: string, controllerActionString: string) {
-    this.crud('delete', path, controllerActionString)
+  delete(path: string): void
+  delete<T extends typeof PsychicController>(
+    path: string,
+    controller: T,
+    action: PsychicControllerActions<T>,
+  ): void
+  delete<T extends typeof PsychicController>(
+    path: string,
+    controller?: T,
+    action?: PsychicControllerActions<T>,
+  ) {
+    this.crud('delete', path, controller as typeof PsychicController, action as string)
   }
 
-  options(path: string, controllerActionString: string) {
-    this.crud('options', path, controllerActionString)
-  }
-
-  private prefixControllerActionStringWithNamespaces(controllerActionString: string) {
-    const [controllerName] = controllerActionString.split('#')
-    const filteredNamespaces = this.currentNamespaces.filter(
-      n => !n.isScope && !(n.resourceful && pascalize(n.namespace) === controllerName),
-    )
-    if (!filteredNamespaces.length) return controllerActionString
-    return filteredNamespaces.map(str => pascalize(str.namespace)).join('/') + '/' + controllerActionString
+  options(path: string): void
+  options<T extends typeof PsychicController>(
+    path: string,
+    controller: T,
+    action: PsychicControllerActions<T>,
+  ): void
+  options<T extends typeof PsychicController>(
+    path: string,
+    controller?: T,
+    action?: PsychicControllerActions<T>,
+  ) {
+    this.crud('options', path, controller as typeof PsychicController, action as string)
   }
 
   private prefixPathWithNamespaces(str: string) {
@@ -92,11 +138,23 @@ export default class PsychicRouter {
     return '/' + this.currentNamespacePaths.join('/') + '/' + str
   }
 
-  public crud(httpMethod: HttpMethod, path: string, controllerActionString: string) {
+  public crud(httpMethod: HttpMethod, path: string): void
+  public crud(
+    httpMethod: HttpMethod,
+    path: string,
+    controller: typeof PsychicController,
+    action: string,
+  ): void
+  public crud(httpMethod: HttpMethod, path: string, controller?: typeof PsychicController, action?: string) {
+    controller ||= lookupControllerOrFail(this, { path, httpMethod })
+    action ||= path.replace(/^\//, '')
+    if (action.match(/\//)) throw new Error('action cant have a slash in it - action was inferred from path')
+
     this.routeManager.addRoute({
       httpMethod,
       path: this.prefixPathWithNamespaces(path),
-      controllerActionString: this.prefixControllerActionStringWithNamespaces(controllerActionString),
+      controller,
+      action,
     })
   }
 
@@ -261,7 +319,8 @@ export default class PsychicRouter {
   }
 
   public async handle(
-    controllerActionString: string,
+    controller: typeof PsychicController,
+    action: string,
     {
       req,
       res,
@@ -270,31 +329,10 @@ export default class PsychicRouter {
       res: Response
     },
   ) {
-    const [controllerPath, action] = controllerActionString.split('#')
-
-    const ControllerClass = this.config.controllers[controllerGlobalNameFromControllerPath(controllerPath)]
-    if (!ControllerClass) {
-      res.status(501).send(`
-        The controller you are attempting to load was not found:
-          ${controllerPath}
-      `)
-      return
-    }
-
-    const controller = this._initializeController(ControllerClass, req, res, action)
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    const controllerAction = (controller as any)[action]
-
-    if (!controllerAction) {
-      res.status(501).send(`
-        The method ${action} is not defined controller:
-          ${controllerPath}
-      `)
-      return
-    }
+    const controllerInstance = this._initializeController(controller, req, res, action)
 
     try {
-      await controller.runAction(action)
+      await controllerInstance.runAction(action)
     } catch (error) {
       const err = error as Error
       if (!testEnv()) log.error(err.message)
@@ -419,10 +457,4 @@ export class PsychicNestedRouter extends PsychicRouter {
   public get routingMechanism() {
     return this.router
   }
-}
-
-export interface NamespaceConfig {
-  namespace: string
-  resourceful: boolean
-  isScope: boolean
 }

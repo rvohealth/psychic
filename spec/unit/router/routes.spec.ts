@@ -1,5 +1,7 @@
-import PsychicServer from '../../../src/server'
 import PsychicRouter from '../../../src/router'
+import PsychicServer from '../../../src/server'
+import UsersPetsController from '../../../test-app/src/app/controllers/Users/PetsController'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('PsychicRouter', () => {
   describe('#routes', () => {
@@ -20,7 +22,8 @@ describe('PsychicRouter', () => {
           {
             httpMethod: 'put',
             path: '/users/:userId/pets/:id',
-            controllerActionString: 'Users/Pets#update',
+            controller: UsersPetsController,
+            action: 'update',
           },
         ]),
       )
@@ -28,7 +31,7 @@ describe('PsychicRouter', () => {
 
     it('correctly applies nested crud routes within resources', () => {
       router.resources('users', r => {
-        r.get('pets', 'Users#pets')
+        r.get('pets', UsersController, 'ping')
       })
       router.commit()
       expect(router.routes).toEqual(
@@ -36,7 +39,8 @@ describe('PsychicRouter', () => {
           {
             httpMethod: 'get',
             path: '/users/:id/pets',
-            controllerActionString: 'Users#pets',
+            controller: UsersController,
+            action: 'ping',
           },
         ]),
       )

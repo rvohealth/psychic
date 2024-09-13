@@ -20,6 +20,10 @@ export default class PetsController extends ApplicationController {
     this.noContent()
   }
 
+  public update2() {
+    this.noContent()
+  }
+
   private get petParams() {
     return this.paramsFor(Pet)
   }

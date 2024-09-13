@@ -92,6 +92,14 @@ export default class UsersController extends ApplicationController {
   })
   public justforspecs() {}
 
+  public howyadoin() {
+    this.noContent()
+  }
+
+  public doathing() {
+    this.noContent()
+  }
+
   @BeforeAction()
   public setBeforeAllTestContent() {
     this.beforeAllTestContent = 'before all action was called for all!'

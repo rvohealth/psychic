@@ -1,6 +1,8 @@
 import supertest from 'supertest'
 import PsychicServer from '../../../src/server'
 import PsychicRouter from '../../../src/router'
+import PetsController from '../../../test-app/src/app/controllers/PetsController'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('PsychicRouter', () => {
   describe('resources', () => {
@@ -65,16 +67,17 @@ describe('PsychicRouter', () => {
 
       context('controller is passed', () => {
         it('uses the passed controller instead of assuming', () => {
-          router.resources('users', { only: ['create'], controller: 'Howyadoin' })
+          router.resources('users', { only: ['create'], controller: PetsController })
           router.commit()
-          expect(router.routes[0].controllerActionString).toEqual('Howyadoin#create')
+          expect(router.routes[0].controller).toEqual(PetsController)
+          expect(router.routes[0].action).toEqual('create')
         })
       })
 
       context('with nested resources', () => {
         it('successfully applies nested routes', () => {
           router.resources('users', { except: ['index', 'show', 'create', 'update', 'destroy'] }, r => {
-            r.get('hello', 'Users#hello')
+            r.get('hello', UsersController, 'hello')
           })
           router.commit()
           expect(server.app.get).toHaveBeenCalledWith('/users/:id/hello', expect.any(Function))
@@ -82,14 +85,14 @@ describe('PsychicRouter', () => {
 
         it('successfully applies nested resources', () => {
           router.resources('users', { except: ['index', 'show', 'create', 'update', 'destroy'] }, r => {
-            r.resources('friends', {}, r => {
-              r.get('count', 'Friends#count')
+            r.resources('friends', { only: [] }, r => {
+              r.get('hello', UsersController, 'hello')
             })
           })
           router.commit()
 
           expect(server.app.get).toHaveBeenCalledWith(
-            '/users/:userId/friends/:id/count',
+            '/users/:userId/friends/:id/hello',
             expect.any(Function),
           )
         })
@@ -97,15 +100,11 @@ describe('PsychicRouter', () => {
 
       context('with nested resource', () => {
         it('successfully applies nested resource', () => {
-          router.resources(
-            'user-settings',
-            { except: ['index', 'show', 'create', 'update', 'destroy'] },
-            r => {
-              r.resource('friend', {}, r => {
-                r.get('count', 'Friend#count')
-              })
-            },
-          )
+          router.resources('user-settings', { only: [] }, r => {
+            r.resource('friend', { only: [] }, r => {
+              r.get('count', UsersController, 'hello')
+            })
+          })
           router.commit()
 
           expect(server.app.get).toHaveBeenCalledWith(

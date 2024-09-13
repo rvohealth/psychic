@@ -1,3 +1,4 @@
+import PsychicController from '../controller'
 import { HttpMethod } from './types'
 
 export default class RouteManager {
@@ -6,22 +7,26 @@ export default class RouteManager {
   public addRoute({
     httpMethod,
     path,
-    controllerActionString,
+    controller,
+    action,
   }: {
     httpMethod: HttpMethod
     path: string
-    controllerActionString: string
+    controller: typeof PsychicController
+    action: string
   }) {
     this.routes.push({
       httpMethod,
       path,
-      controllerActionString,
+      controller,
+      action,
     })
   }
 }
 
 export interface RouteConfig {
-  controllerActionString: string
+  controller: typeof PsychicController
+  action: string
   path: string
   httpMethod: HttpMethod
 }

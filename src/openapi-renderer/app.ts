@@ -70,9 +70,7 @@ export default class OpenapiAppRenderer {
       },
     }
 
-    for (const controllerName of Object.keys(controllers)) {
-      const controller = controllers[controllerName]
-
+    for (const [controllerName, controller] of Object.entries(controllers)) {
       for (const key of Object.keys(controller.openapi || {})) {
         if (envBool('DEBUG')) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
 

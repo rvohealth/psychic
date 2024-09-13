@@ -1,4 +1,5 @@
 import PsychicServer from '../../../src/server'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('PsychicServer', () => {
   describe('#routes', () => {
@@ -10,7 +11,8 @@ describe('PsychicServer', () => {
           expect.objectContaining({
             httpMethod: 'get',
             path: 'ping',
-            controllerActionString: 'Users#ping',
+            controller: UsersController,
+            action: 'ping',
           }),
         ]),
       )
