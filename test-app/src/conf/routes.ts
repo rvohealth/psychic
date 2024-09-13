@@ -66,8 +66,4 @@ export default (r: PsychicRouter) => {
     r.get('hello', GreeterController, 'hello')
     r.get('justforspecs', GreeterController, 'justforspecs')
   })
-
-  // TODO do we still need these?
-  // r.get('route-exists-but-controller-doesnt')
-  // r.get('controller-exists-but-method-doesnt')
 }
