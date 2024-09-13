@@ -1,7 +1,7 @@
 import supertest from 'supertest'
 import PsychicServer from '../../../src/server'
 import PsychicRouter from '../../../src/router'
-import UsersController from '../../../test-app/app/controllers/UsersController'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('PsychicRouter', () => {
   describe('#get', () => {

@@ -25,7 +25,10 @@ export default (r: PsychicRouter) => {
   r.post('cast-param-test', ParamsTestController, 'testCastParam')
   r.post('openapi-validation-test', ParamsTestController, 'testOpenapiValidation')
   r.get('users/howyadoin', UsersController, 'howyadoin')
-  r.resources('users')
+  r.resources('users', r => {
+    r.resources('pets', { only: [] })
+    r.get('ping', UsersController, 'ping')
+  })
   r.resources('pets', { only: ['create', 'update'] }, r => {
     r.put('update2', PetsController, 'update2')
   })

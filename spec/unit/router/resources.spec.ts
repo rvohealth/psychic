@@ -1,8 +1,8 @@
 import supertest from 'supertest'
 import PsychicServer from '../../../src/server'
 import PsychicRouter from '../../../src/router'
-import PetsController from '../../../test-app/app/controllers/PetsController'
-import UsersController from '../../../test-app/app/controllers/UsersController'
+import PetsController from '../../../test-app/src/app/controllers/PetsController'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('PsychicRouter', () => {
   describe('resources', () => {

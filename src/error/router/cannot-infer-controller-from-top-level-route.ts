@@ -2,25 +2,33 @@ export default class CannotInferControllerFromTopLevelRouteError extends Error {
   constructor(
     private httpMethod: string,
     private path: string,
+    private controllerName: string,
+    private action: string,
   ) {
     super()
   }
 
   public get message() {
     return `
-cannot infer controller from top level route:
-  HTTP method: ${this.httpMethod}
-  path: ${this.path}
+ATTENTION!
 
-within conf/app.ts, you must have a call to "#load('controllers', pathToControllers)", i.e.
+An error has occurred while parsing the conf/routes.ts
+file within your application. The error is:
 
-  // in your conf/routes.ts file, instead of this:
-  router.get('/doesnt-exist')
+  cannot infer controller from top level route:
+    HTTP method: ${this.httpMethod}
+    path: ${this.path}
 
-  // try this:
-  router.resources('users', r => {
-    r.get('/doesnt-exist')
-  })
+  in your conf/routes.ts file, instead of this:
+    r.${this.httpMethod}('${this.path}')
+
+  try this:
+    r.resources('users', r => {
+      r.get('${this.path}')
+    })
+
+  or else, manually pass a controller and method to match up with your route, like so:
+    r.${this.httpMethod}('${this.path}', ${this.controllerName}, '${this.action}')
     `
   }
 }

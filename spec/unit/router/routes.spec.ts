@@ -1,7 +1,7 @@
-import PsychicServer from '../../../src/server'
 import PsychicRouter from '../../../src/router'
-import ApiPetsController from '../../../test-app/app/controllers/Api/Users/PetsController'
-import UsersController from '../../../test-app/app/controllers/UsersController'
+import PsychicServer from '../../../src/server'
+import UsersPetsController from '../../../test-app/src/app/controllers/Users/PetsController'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('PsychicRouter', () => {
   describe('#routes', () => {
@@ -13,18 +13,16 @@ describe('PsychicRouter', () => {
     })
 
     it('correctly namespaces nested routes as members of the resource', () => {
-      router.namespace('api', r => {
-        r.resources('users', r => {
-          r.resources('pets')
-        })
+      router.resources('users', r => {
+        r.resources('pets')
       })
       router.commit()
       expect(router.routes).toEqual(
         expect.arrayContaining([
           {
             httpMethod: 'put',
-            path: '/api/users/:userId/pets/:id',
-            controller: ApiPetsController,
+            path: '/users/:userId/pets/:id',
+            controller: UsersPetsController,
             action: 'update',
           },
         ]),

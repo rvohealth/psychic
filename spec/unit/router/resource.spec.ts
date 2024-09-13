@@ -1,8 +1,8 @@
 import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
 import PsychicRouter from '../../../src/router'
 import PsychicServer from '../../../src/server'
-import PetsController from '../../../test-app/app/controllers/PetsController'
-import UsersController from '../../../test-app/app/controllers/UsersController'
+import PetsController from '../../../test-app/src/app/controllers/PetsController'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('PsychicRouter', () => {
   beforeEach(async () => {
@@ -97,16 +97,14 @@ describe('PsychicRouter', () => {
         })
 
         it('successfully applies double-nested resource resources', () => {
-          router.namespace('api', r => {
-            r.resource('users', { except: ['show', 'update', 'destroy', 'create'] }, r => {
-              r.resource('pets', { only: [] }, r => {
-                r.get('count')
-              })
+          router.resource('users', { except: ['show', 'update', 'destroy', 'create'] }, r => {
+            r.resource('pets', { only: [] }, r => {
+              r.get('count')
             })
           })
           router.commit()
 
-          expect(server.app.get).toHaveBeenCalledWith('/api/users/pets/count', expect.any(Function))
+          expect(server.app.get).toHaveBeenCalledWith('/users/pets/count', expect.any(Function))
         })
       })
     })

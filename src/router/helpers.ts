@@ -1,9 +1,11 @@
-import { compact, pascalize } from '@rvohealth/dream'
+import { camelize, compact, pascalize } from '@rvohealth/dream'
+import PsychicController from '../controller'
+import CannotInferControllerFromTopLevelRouteError from '../error/router/cannot-infer-controller-from-top-level-route'
+import PsychicApplication from '../psychic-application'
 import PsychicRouter, { PsychicNestedRouter } from '../router'
 import { ResourcesMethodType, ResourcesOptions } from './types'
-import PsychicController from '../controller'
-import PsychicApplication from '../psychic-application'
-import CannotInferControllerFromTopLevelRouteError from '../error/router/cannot-infer-controller-from-top-level-route'
+import CannotFindInferredControllerFromProvidedNamespace from '../error/router/cannot-find-inferred-controller-from-provided-namespace'
+import pascalizeFileName from '../helpers/pascalizeFileName'
 
 export function routePath(routePath: string) {
   return `/${routePath.replace(/^\//, '')}`
@@ -61,11 +63,34 @@ export function lookupControllerOrFail(
 
   const filteredNamespaces = namespaces.filter(n => !n.isScope)
   if (!filteredNamespaces.length)
-    throw new CannotInferControllerFromTopLevelRouteError(opts.httpMethod, opts.path)
+    throw new CannotInferControllerFromTopLevelRouteError(
+      opts.httpMethod,
+      opts.path,
+      pascalize(opts.path.replace(/^\//, '') + 'Controller'),
+      camelize(opts.path.replace(/^\//, '')),
+    )
+
+  return inferControllerOrFail(filteredNamespaces, opts)
+}
+
+function inferControllerOrFail(
+  filteredNamespaces: NamespaceConfig[],
+  opts: LookupOpts,
+): typeof PsychicController {
   const filename = filteredNamespaces.map(str => pascalize(str.namespace)).join('/') + 'Controller'
-  const psychicApp = PsychicApplication.getOrFail()
-  const controller = psychicApp.controllers[`controllers/${filename}`]
-  if (!controller) throw new Error('inferred controller not found in list of known controllers')
+  const controllerName = filteredNamespaces.map(str => pascalize(str.namespace)).join('') + 'Controller'
+  const expectedPath = `controllers/${filename}`
+
+  const controller = PsychicApplication.getOrFail().controllers[expectedPath]
+  if (!controller)
+    throw new CannotFindInferredControllerFromProvidedNamespace({
+      expectedPath,
+      controllerName,
+      action: camelize(pascalizeFileName(opts.path)),
+      httpMethod: opts.httpMethod,
+      path: opts.path,
+    })
+
   return controller
 }
 
@@ -91,7 +116,10 @@ export function applyResourcesAction(
   routingMechanism: RoutingMechanism,
   options?: ResourcesOptions,
 ) {
-  const controller = options?.controller || lookupControllerOrFail(routingMechanism, { path: path })
+  const controller =
+    options?.controller ||
+    lookupControllerOrFail(routingMechanism, { path, httpMethod: 'get', resourceName: path })
+
   switch (action) {
     case 'index':
       routingMechanism.get(path, controller, 'index' as PsychicControllerActions<typeof controller>)
@@ -130,7 +158,10 @@ export function applyResourceAction(
   routingMechanism: PsychicRouter | PsychicNestedRouter,
   options?: ResourcesOptions,
 ) {
-  const controller = options?.controller || lookupControllerOrFail(routingMechanism, path)
+  const controller =
+    options?.controller ||
+    lookupControllerOrFail(routingMechanism, { path, httpMethod: 'get', resourceName: path })
+
   switch (action) {
     case 'create':
       routingMechanism.post(path, controller, 'create' as PsychicControllerActions<typeof controller>)

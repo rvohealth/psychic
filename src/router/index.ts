@@ -146,7 +146,7 @@ export default class PsychicRouter {
     action: string,
   ): void
   public crud(httpMethod: HttpMethod, path: string, controller?: typeof PsychicController, action?: string) {
-    controller ||= lookupControllerOrFail(this)
+    controller ||= lookupControllerOrFail(this, { path, httpMethod })
     action ||= path.replace(/^\//, '')
     if (action.match(/\//)) throw new Error('action cant have a slash in it - action was inferred from path')
 
