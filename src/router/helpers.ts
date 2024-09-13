@@ -78,14 +78,13 @@ function inferControllerOrFail(
   opts: LookupOpts,
 ): typeof PsychicController {
   const filename = filteredNamespaces.map(str => pascalize(str.namespace)).join('/') + 'Controller'
-  const controllerName = filteredNamespaces.map(str => pascalize(str.namespace)).join('') + 'Controller'
   const expectedPath = `controllers/${filename}`
 
   const controller = PsychicApplication.getOrFail().controllers[expectedPath]
   if (!controller)
     throw new CannotFindInferredControllerFromProvidedNamespace({
       expectedPath,
-      controllerName,
+      controllerName: filename,
       action: camelize(pascalizeFileName(opts.path)),
       httpMethod: opts.httpMethod,
       path: opts.path,
