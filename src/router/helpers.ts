@@ -84,7 +84,7 @@ function inferControllerOrFail(
   if (!controller)
     throw new CannotFindInferredControllerFromProvidedNamespace({
       expectedPath,
-      controllerName: filename,
+      controllerName: filename.replace(/\//g, ''),
       action: camelize(pascalizeFileName(opts.path)),
       httpMethod: opts.httpMethod,
       path: opts.path,
