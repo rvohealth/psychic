@@ -43,7 +43,7 @@ export default class PsychicApplication {
 
       if (psychicApp.encryption?.cookies?.current)
         this.checkKey(
-          'columns',
+          'cookies',
           psychicApp.encryption.cookies.current.key,
           psychicApp.encryption.cookies.current.algorithm,
         )
@@ -59,7 +59,7 @@ export default class PsychicApplication {
     return psychicApp!
   }
 
-  private static checkKey(encryptionIdentifier: 'columns', key: string, algorithm: EncryptAlgorithm) {
+  private static checkKey(encryptionIdentifier: 'cookies', key: string, algorithm: EncryptAlgorithm) {
     if (!Encrypt.validateKey(key, algorithm))
       console.warn(
         `
