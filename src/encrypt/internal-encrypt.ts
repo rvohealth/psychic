@@ -1,6 +1,4 @@
 import { Encrypt, EncryptOptions } from '@rvohealth/dream'
-import FailedToDecryptCookie from '../error/encrypt/failed-to-decrypt-cookie'
-import FailedToEncryptCookie from '../error/encrypt/failed-to-encrypt-cookie'
 import MissingCookieEncryptionOpts from '../error/encrypt/missing-cookie-encryption-options'
 import PsychicApplication from '../psychic-application'
 
@@ -11,10 +9,9 @@ export default class InternalEncrypt {
     const encryptOpts = psychicApp.encryption?.cookies
     if (!encryptOpts) throw new MissingCookieEncryptionOpts()
 
-    const res = this.doEncryption(data, encryptOpts.current)
-    if (!res) throw new FailedToEncryptCookie()
+    if (data === null || data === undefined) return null
 
-    return res
+    return this.doEncryption(data, encryptOpts.current)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -23,10 +20,9 @@ export default class InternalEncrypt {
     const encryptOpts = psychicApp.encryption?.cookies
     if (!encryptOpts) throw new MissingCookieEncryptionOpts()
 
-    const res = this.doDecryption(data, encryptOpts.current, encryptOpts.legacy)
-    if (!res) throw new FailedToDecryptCookie()
+    if (data === null || data === undefined) return null
 
-    return res
+    return this.doDecryption(data, encryptOpts.current, encryptOpts.legacy)
   }
 
   private static doEncryption(
