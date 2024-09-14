@@ -1,7 +1,7 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { describe as context } from '@jest/globals'
 import { Request, Response } from 'express'
-import { Encrypt } from '../../../src'
+import InternalEncrypt from '../../../src/encrypt/internal-encrypt'
 import Session, { CustomSessionCookieOptions } from '../../../src/session'
 import User from '../../../test-app/src/app/models/User'
 
@@ -20,7 +20,7 @@ describe('Session', () => {
     const subject = () => new Session(req, res).getCookie('auth_token')
 
     it('returns the value of an existing cookie, automatically decrypted', () => {
-      req.cookies = { auth_token: Encrypt.encrypt(user.id.toString()) }
+      req.cookies = { auth_token: InternalEncrypt.encryptCookie(user.id.toString()) }
       expect(subject()).toEqual(user.id.toString())
     })
 
@@ -39,7 +39,7 @@ describe('Session', () => {
 
     beforeEach(() => {
       cookieSpy = jest.spyOn(res, 'cookie')
-      encryptSpy = jest.spyOn(Encrypt, 'encrypt').mockReturnValue('abc123')
+      encryptSpy = jest.spyOn(InternalEncrypt, 'encryptCookie').mockReturnValue('abc123')
     })
 
     it('encrypts and stores the value as an httpOnly cookie, leveraging ttl from conf/app.ts cookie options', () => {

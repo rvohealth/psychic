@@ -1,4 +1,4 @@
-import Encrypt from '../../encryption/encrypt'
+import { Encrypt } from '@rvohealth/dream'
 
 export default class EnvBuilder {
   public static build({ env, appName }: { env: 'test' | 'development' | 'production'; appName: string }) {
@@ -7,7 +7,7 @@ DB_USER=
 DB_NAME=${snakeify(appName)}_${env}
 DB_PORT=5432
 DB_HOST=localhost
-APP_ENCRYPTION_KEY="${Encrypt.generateKey()}"
+APP_ENCRYPTION_KEY="${Encrypt.generateKey('aes-256-gcm')}"
 TZ=UTC
 `
   }

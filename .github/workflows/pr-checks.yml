@@ -40,6 +40,7 @@ jobs:
       TZ: UTC
       GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
+      LEGACY_APP_ENCRYPTION_KEY: ${{ secrets.LEGACY_APP_ENCRYPTION_KEY }}
       PSYCHIC_CORE_DEVELOPMENT: 1
     steps:
       - uses: actions/checkout@v4

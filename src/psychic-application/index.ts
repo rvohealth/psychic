@@ -2,6 +2,9 @@ import {
   DreamApplication,
   DreamLogLevel,
   DreamLogger,
+  Encrypt,
+  EncryptAlgorithm,
+  EncryptOptions,
   OpenapiSchemaBody,
   developmentOrTestEnv,
 } from '@rvohealth/dream'
@@ -11,11 +14,9 @@ import { CorsOptions } from 'cors'
 import { Application, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { Socket, Server as SocketServer } from 'socket.io'
-import Encrypt from '../encryption/encrypt'
 import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
-import PsychicApplicationInvalidEncryptionKey from '../error/psychic-application/invalid-encryption-key'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
 import envValue, { envInt } from '../helpers/envValue'
 import { OpenapiContent, OpenapiHeaders, OpenapiResponses } from '../openapi-renderer/endpoint'
@@ -40,8 +41,12 @@ export default class PsychicApplication {
       if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
       if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
 
-      if (psychicApp.encryptionKey && !Encrypt.validateKey(psychicApp.encryptionKey))
-        throw new PsychicApplicationInvalidEncryptionKey()
+      if (psychicApp.encryption?.cookies?.current)
+        this.checkKey(
+          'cookies',
+          psychicApp.encryption.cookies.current.key,
+          psychicApp.encryption.cookies.current.algorithm,
+        )
 
       await psychicApp.inflections?.()
 
@@ -52,6 +57,20 @@ export default class PsychicApplication {
     })
 
     return psychicApp!
+  }
+
+  private static checkKey(encryptionIdentifier: 'cookies', key: string, algorithm: EncryptAlgorithm) {
+    if (!Encrypt.validateKey(key, algorithm))
+      console.warn(
+        `
+Your current key value for ${encryptionIdentifier} encryption is invalid.
+Try setting it to something valid, like:
+  ${Encrypt.generateKey(algorithm)}
+
+(This was done by calling:
+  Encrypt.generateKey('${algorithm}')
+`,
+      )
   }
 
   /**
@@ -112,6 +131,11 @@ export default class PsychicApplication {
     return this._useWs
   }
 
+  private _encryption: PsychicApplicationEncryptionOptions | undefined
+  public get encryption() {
+    return this._encryption
+  }
+
   private _useRedis: boolean = false
   public get useRedis() {
     return this._useRedis
@@ -120,11 +144,6 @@ export default class PsychicApplication {
   private _appName: string = 'untitled app'
   public get appName() {
     return this._appName
-  }
-
-  private _encryptionKey: string
-  public get encryptionKey() {
-    return this._encryptionKey
   }
 
   private _port: number = envInt('PORT') || 7777
@@ -342,15 +361,15 @@ export default class PsychicApplication {
           ? boolean
           : Opt extends 'apiOnly'
             ? boolean
-            : Opt extends 'cors'
-              ? CorsOptions
-              : Opt extends 'cookie'
-                ? CustomCookieOptions
-                : Opt extends 'apiRoot'
-                  ? string
-                  : Opt extends 'sessionCookieName'
+            : Opt extends 'encryption'
+              ? PsychicApplicationEncryptionOptions
+              : Opt extends 'cors'
+                ? CorsOptions
+                : Opt extends 'cookie'
+                  ? CustomCookieOptions
+                  : Opt extends 'apiRoot'
                     ? string
-                    : Opt extends 'appEncryptionKey'
+                    : Opt extends 'sessionCookieName'
                       ? string
                       : Opt extends 'background'
                         ? PsychicBackgroundOptions
@@ -415,8 +434,8 @@ export default class PsychicApplication {
         this._sessionCookieName = value as string
         break
 
-      case 'appEncryptionKey':
-        this._encryptionKey = value as string
+      case 'encryption':
+        this._encryption = value as PsychicApplicationEncryptionOptions
         break
 
       case 'cors':
@@ -517,7 +536,7 @@ export type PsychicApplicationOption =
   | 'useRedis'
   | 'apiOnly'
   | 'apiRoot'
-  | 'appEncryptionKey'
+  | 'encryption'
   | 'sessionCookieName'
   | 'background'
   | 'background:queue'
@@ -596,3 +615,11 @@ export interface PsychicClientOptions {
 
 export type PsychicLogger = DreamLogger
 export type PsychicLogLevel = DreamLogLevel
+
+export interface PsychicApplicationEncryptionOptions {
+  cookies: SegmentedEncryptionOptions
+}
+interface SegmentedEncryptionOptions {
+  current: EncryptOptions
+  legacy?: EncryptOptions
+}

@@ -1,5 +1,5 @@
 import { CookieOptions, Request, Response } from 'express'
-import Encrypt from '../encryption/encrypt'
+import InternalEncrypt from '../encrypt/internal-encrypt'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
 import envValue from '../helpers/envValue'
 import PsychicApplication, { CustomCookieOptions } from '../psychic-application'
@@ -13,12 +13,12 @@ export default class Session {
   public getCookie(name: string) {
     const cookies = this.req.cookies as Record<string, string>
     const value = cookies[name]
-    if (value) return Encrypt.decrypt(value)
+    if (value) return InternalEncrypt.decryptCookie(value)
     return null
   }
 
   public setCookie(name: string, data: string, opts: CustomSessionCookieOptions = {}) {
-    this.res.cookie(name, Encrypt.encrypt(data), {
+    this.res.cookie(name, InternalEncrypt.encryptCookie(data), {
       secure: envValue('NODE_ENV') === 'production',
       httpOnly: true,
       ...opts,

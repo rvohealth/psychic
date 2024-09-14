@@ -1,4 +1,5 @@
-import { BeforeAction, Encrypt, OpenAPI } from '../../../../src'
+import { Encrypt } from '@rvohealth/dream'
+import { BeforeAction, OpenAPI } from '../../../../src'
 import User from '../models/User'
 import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer'
 import ApplicationController from './ApplicationController'
@@ -77,7 +78,10 @@ export default class UsersController extends ApplicationController {
 
     // this token is used for authenticating via websockets during tests. for more info,
     // see spec/features/visitor/websockets.spec.ts
-    const token = Encrypt.encrypt(user!.id.toString())
+    const token = Encrypt.encrypt(user!.id.toString(), {
+      algorithm: 'aes-256-gcm',
+      key: process.env.APP_ENCRYPTION_KEY!,
+    })
 
     this.ok(token)
   }

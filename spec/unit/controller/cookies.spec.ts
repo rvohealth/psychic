@@ -1,6 +1,6 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { Encrypt } from '../../../src'
 import PsychicController from '../../../src/controller'
+import InternalEncrypt from '../../../src/encrypt/internal-encrypt'
 import PsychicApplication from '../../../src/psychic-application'
 import User from '../../../test-app/src/app/models/User'
 
@@ -10,7 +10,7 @@ describe('PsychicController', () => {
       const user = await User.create({ email: 'how@yadoin', password: 'password' })
 
       const req = getMockReq()
-      req.cookies = { auth_token: Encrypt.encrypt(user.id.toString()) }
+      req.cookies = { auth_token: InternalEncrypt.encryptCookie(user.id.toString()) }
 
       const res = getMockRes().res
       const controller = new PsychicController(req, res, {
