@@ -11,7 +11,7 @@ export default class InternalEncrypt {
     const encryptOpts = psychicApp.encryption?.cookies
     if (!encryptOpts) throw new MissingCookieEncryptionOpts()
 
-    const res = this.doEncryption(data, encryptOpts.current, encryptOpts.legacy)
+    const res = this.doEncryption(data, encryptOpts.current)
     if (!res) throw new FailedToEncryptCookie()
 
     return res
@@ -33,53 +33,26 @@ export default class InternalEncrypt {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
     encryptionOpts: EncryptOptions,
-    legacyEncryptionOpts?: EncryptOptions,
   ) {
-    let res: string | null = null
-    try {
-      res = Encrypt.encrypt(data, encryptionOpts)
-    } catch {
-      // noop
-    }
-
-    if (res) return res
-
-    if (legacyEncryptionOpts) {
-      try {
-        res = Encrypt.encrypt(data, legacyEncryptionOpts)
-      } catch {
-        // noop
-      }
-    }
-
-    return res
+    return Encrypt.encrypt(data, encryptionOpts)
   }
 
-  private static doDecryption(
+  private static doDecryption<RetType>(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
     encryptionOpts: EncryptOptions,
     legacyEncryptionOpts?: EncryptOptions,
-  ) {
-    let res: string | null = null
+  ): RetType | null {
     try {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      res = Encrypt.decrypt(data, encryptionOpts)
-    } catch {
-      // noop
-    }
-
-    if (res) return res
-
-    if (legacyEncryptionOpts) {
-      try {
+      return Encrypt.decrypt<RetType>(data, encryptionOpts)
+    } catch (error) {
+      if (legacyEncryptionOpts) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        res = Encrypt.decrypt(data, legacyEncryptionOpts)
-      } catch {
-        // noop
+        return Encrypt.decrypt<RetType>(data, legacyEncryptionOpts)
+      } else {
+        throw error
       }
     }
-
-    return res
   }
 }
