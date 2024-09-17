@@ -367,7 +367,7 @@ export default class Params {
           return paramValue as ReturnType
 
         if (typeof paramValue === 'string') {
-          const dateTime = dateClass.fromISO(paramValue)
+          const dateTime = dateClass.fromISO(paramValue, { zone: 'UTC' })
           if (dateTime.isValid) return dateTime as ReturnType
         }
 
