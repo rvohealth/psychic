@@ -2,6 +2,7 @@ import { DreamBin, developmentOrTestEnv } from '@rvohealth/dream'
 import { Command } from 'commander'
 import PsychicBin from '../bin'
 import PsychicApplication from '../psychic-application'
+import { setEnvBool } from '../helpers/envValue'
 
 export default class PsychicCLI {
   public static provide(
@@ -182,6 +183,7 @@ export default class PsychicCLI {
         'creates a new database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars',
       )
       .action(async () => {
+        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', '1')
         await initializePsychicApplication()
         await DreamBin.dbCreate()
         process.exit()
@@ -192,8 +194,13 @@ export default class PsychicCLI {
       .description('db:migrate runs any outstanding database migrations')
       .option('--skip-sync', 'skips syncing local schema after running migrations')
       .action(async ({ skipSync }: { skipSync: boolean }) => {
+        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', '1')
         await initializePsychicApplication()
+
         await DreamBin.dbMigrate()
+
+        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', undefined)
+        await initializePsychicApplication()
 
         if (developmentOrTestEnv() && !skipSync) {
           await DreamBin.sync()
@@ -224,7 +231,9 @@ export default class PsychicCLI {
         'drops the database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars',
       )
       .action(async () => {
+        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', '1')
         await initializePsychicApplication()
+
         await DreamBin.dbDrop()
         process.exit()
       })
@@ -233,9 +242,15 @@ export default class PsychicCLI {
       .command('db:reset')
       .description('runs db:drop (safely), then db:create, db:migrate, and db:seed')
       .action(async () => {
+        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', '1')
         await initializePsychicApplication()
+
         await DreamBin.dbDrop()
         await DreamBin.dbCreate()
+
+        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', undefined)
+        await initializePsychicApplication()
+
         await DreamBin.dbMigrate()
         await DreamBin.sync()
         await seedDb()
