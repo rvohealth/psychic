@@ -136,6 +136,16 @@ export default class PsychicController {
   /**
    * @internal
    *
+   * Used for displaying routes when running `yarn psy routes`
+   * cli command
+   */
+  public static get disaplayName(): string {
+    return this.globalName.replace(/^controllers\//, '').replace(/Controller$/, '')
+  }
+
+  /**
+   * @internal
+   *
    * Returns a controller-action string which is used to signify both
    * the controller and the method to be called for a particular route.
    * For the controller "Api/V1/UsersController" and the method "show",
