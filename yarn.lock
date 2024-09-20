@@ -1158,7 +1158,7 @@ __metadata:
     dotenv: "npm:^16.4.5"
     eslint: "npm:^9.9.1"
     express: "npm:^4.21.0"
-    express-openapi-validator: "npm:^5.3.3"
+    express-openapi-validator: "npm:^5.3.7"
     iso-datestring-validator: "npm:^2.2.2"
     jest: "npm:^29.7.0"
     jest-plugin-context: "npm:^2.9.0"
@@ -1575,7 +1575,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/multer@npm:^1.4.11":
+"@types/multer@npm:^1.4.12":
   version: 1.4.12
   resolution: "@types/multer@npm:1.4.12"
   dependencies:
@@ -3215,12 +3215,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-openapi-validator@npm:^5.3.3":
-  version: 5.3.4
-  resolution: "express-openapi-validator@npm:5.3.4"
+"express-openapi-validator@npm:^5.3.7":
+  version: 5.3.7
+  resolution: "express-openapi-validator@npm:5.3.7"
   dependencies:
     "@apidevtools/json-schema-ref-parser": "npm:^11.7.0"
-    "@types/multer": "npm:^1.4.11"
+    "@types/multer": "npm:^1.4.12"
     ajv: "npm:^8.17.1"
     ajv-draft-04: "npm:^1.0.0"
     ajv-formats: "npm:^2.1.1"
@@ -3231,10 +3231,10 @@ __metadata:
     media-typer: "npm:^1.1.0"
     multer: "npm:^1.4.5-lts.1"
     ono: "npm:^7.1.3"
-    path-to-regexp: "npm:^6.2.2"
+    path-to-regexp: "npm:^8.1.0"
   peerDependencies:
     express: "*"
-  checksum: 10c0/5dbb031036744c16d63d3ebc9b2cfdf5c414c31fc08dc737187aabc4d839f151035d0dfe46647a1965efc9932e0e924daa5a20f04e49b20f0534bc069fe41227
+  checksum: 10c0/ef0b422b9a7445e69802ddbdc1d8425831849e7a634834e34355ea9072c848659f11eb2d48d53fc1db22dd50a38c20ba5eb02a6d0553b56edf7889028d32d2a1
   languageName: node
   linkType: hard
 
@@ -5678,10 +5678,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"path-to-regexp@npm:^6.2.2":
-  version: 6.2.2
-  resolution: "path-to-regexp@npm:6.2.2"
-  checksum: 10c0/4b60852d3501fd05ca9dd08c70033d73844e5eca14e41f499f069afa8364f780f15c5098002f93bd42af8b3514de62ac6e82a53b5662de881d2b08c9ef21ea6b
+"path-to-regexp@npm:^8.1.0":
+  version: 8.1.0
+  resolution: "path-to-regexp@npm:8.1.0"
+  checksum: 10c0/1c46be3806ab081bedc51eb238fcb026b61b15f19e8924b26e7dad88812dda499efe357a780665dc915dcab3be67213f145f5e2921b8fc8c6c497608d4e092ed
   languageName: node
   linkType: hard
 
