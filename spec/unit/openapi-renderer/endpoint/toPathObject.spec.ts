@@ -757,7 +757,7 @@ describe('OpenapiEndpointRenderer', () => {
                           type: 'object',
                           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
-                            species: { type: 'string', enum: ['cat', 'noncat'], nullable: true },
+                            species: { type: 'string', enum: ['cat', 'noncat', 'null'], nullable: true },
                           }),
                         },
                       },
@@ -782,7 +782,7 @@ describe('OpenapiEndpointRenderer', () => {
                               type: 'array',
                               items: {
                                 type: 'string',
-                                enum: ['efishy feesh', 'snick snowcks'],
+                                enum: ['efishy feesh', 'snick snowcks', 'null'],
                               },
                               nullable: true,
                             },
@@ -821,7 +821,7 @@ describe('OpenapiEndpointRenderer', () => {
                               type: 'array',
                               items: {
                                 type: 'string',
-                                enum: ['efishy feesh', 'snick snowcks'],
+                                enum: ['efishy feesh', 'snick snowcks', 'null'],
                               },
                               nullable: true,
                             },
@@ -861,7 +861,7 @@ describe('OpenapiEndpointRenderer', () => {
                           name: { type: 'string', nullable: true },
                           species: {
                             type: 'string',
-                            enum: ['cat', 'noncat'],
+                            enum: ['cat', 'noncat', 'null'],
                             nullable: true,
                           },
                         },
@@ -888,7 +888,7 @@ describe('OpenapiEndpointRenderer', () => {
                             name: { type: 'string', nullable: true },
                             species: {
                               type: 'string',
-                              enum: ['cat', 'noncat'],
+                              enum: ['cat', 'noncat', 'null'],
                               nullable: true,
                             },
                           },
