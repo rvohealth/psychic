@@ -1,8 +1,7 @@
-import { DreamBin, developmentOrTestEnv } from '@rvohealth/dream'
+import { DreamBin, DreamCLI } from '@rvohealth/dream'
 import { Command } from 'commander'
 import PsychicBin from '../bin'
 import PsychicApplication from '../psychic-application'
-import { setEnvBool } from '../helpers/envValue'
 
 export default class PsychicCLI {
   public static provide(
@@ -15,74 +14,7 @@ export default class PsychicCLI {
       seedDb: () => Promise<void> | void
     },
   ) {
-    program
-      .command('generate:migration')
-      .alias('g:migration')
-      .description('create a new migration')
-      .argument('<migrationName>', 'end with -to-table-name to prepopulate with an alterTable command')
-      .argument(
-        '[columnsWithTypes...]',
-        'properties of the model column1:text/string/enum/etc. column2:text/string/enum/etc. ... columnN:text/string/enum/etc.',
-      )
-      .action(async (migrationName: string, columnsWithTypes: string[]) => {
-        await initializePsychicApplication()
-        await DreamBin.generateMigration(migrationName, columnsWithTypes)
-        process.exit()
-      })
-
-    program
-      .command('generate:model')
-      .alias('g:model')
-      .alias('generate:dream')
-      .alias('g:dream')
-      .option('--no-serializer')
-      .description('create a new Dream model')
-      .argument(
-        '<modelName>',
-        'the name of the model to create, e.g. Post or Settings/CommunicationPreferences',
-      )
-      .argument(
-        '<columnsWithTypes...>',
-        'properties of the model property1:text/string/enum/etc. property2:text/string/enum/etc. ... propertyN:text/string/enum/etc.',
-      )
-      .action(async (modelName: string, columnsWithTypes: string[], options: { serializer: boolean }) => {
-        await initializePsychicApplication()
-        await DreamBin.generateDream(modelName, columnsWithTypes, options)
-        process.exit()
-      })
-
-    program
-      .command('generate:sti-child')
-      .alias('g:sti-child')
-      .description(
-        'create a new Dream model that extends another Dream model, leveraging STI (single table inheritance)',
-      )
-      .option('--no-serializer')
-      .argument(
-        '<childModelName>',
-        'the name of the model to create, e.g. Post or Settings/CommunicationPreferences',
-      )
-      .argument('<extends>', 'just the word extends')
-      .argument('<parentModelName>', 'name of the parent model')
-      .argument(
-        '[columnsWithTypes...]',
-        'properties of the model property1:text/string/enum/etc. property2:text/string/enum/etc. ... propertyN:text/string/enum/etc.',
-      )
-      .action(
-        async (
-          childModelName: string,
-          extendsWord: string,
-          parentModelName: string,
-          columnsWithTypes: string[],
-          options: { serializer: boolean },
-        ) => {
-          await initializePsychicApplication()
-          if (extendsWord !== 'extends')
-            throw new Error('Expecting: `<child-name> extends <parent-name> <columns-and-types>')
-          await DreamBin.generateStiChild(childModelName, parentModelName, columnsWithTypes, options)
-          process.exit()
-        },
-      )
+    DreamCLI.generateDreamCli(program, { initializeDreamApplication: initializePsychicApplication, seedDb })
 
     program
       .command('generate:resource')
@@ -174,100 +106,6 @@ export default class PsychicCLI {
         await initializePsychicApplication()
         await PsychicBin.syncOpenapiJson()
         await PsychicBin.syncOpenapiClientSchema()
-        process.exit()
-      })
-
-    program
-      .command('db:create')
-      .description(
-        'creates a new database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars',
-      )
-      .action(async () => {
-        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', '1')
-        await initializePsychicApplication()
-        await DreamBin.dbCreate()
-        process.exit()
-      })
-
-    program
-      .command('db:migrate')
-      .description('db:migrate runs any outstanding database migrations')
-      .option('--skip-sync', 'skips syncing local schema after running migrations')
-      .action(async ({ skipSync }: { skipSync: boolean }) => {
-        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', '1')
-        await initializePsychicApplication()
-
-        await DreamBin.dbMigrate()
-
-        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', undefined)
-        await initializePsychicApplication()
-
-        if (developmentOrTestEnv() && !skipSync) {
-          await DreamBin.sync()
-        }
-
-        process.exit()
-      })
-
-    program
-      .command('db:rollback')
-      .description('db:rollback rolls back the migration')
-      .option('--step [integer]', 'number of steps back to travel', '1')
-      .option('--skip-sync', 'skips syncing local schema after running migrations')
-      .action(async ({ steps, skipSync }: { steps: number; skipSync: boolean }) => {
-        await initializePsychicApplication()
-        await DreamBin.dbRollback({ steps })
-
-        if (developmentOrTestEnv() && !skipSync) {
-          await DreamBin.sync()
-        }
-
-        process.exit()
-      })
-
-    program
-      .command('db:drop')
-      .description(
-        'drops the database, seeding from local .env or .env.test if NODE_ENV=test is set for env vars',
-      )
-      .action(async () => {
-        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', '1')
-        await initializePsychicApplication()
-
-        await DreamBin.dbDrop()
-        process.exit()
-      })
-
-    program
-      .command('db:reset')
-      .description('runs db:drop (safely), then db:create, db:migrate, and db:seed')
-      .action(async () => {
-        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', '1')
-        await initializePsychicApplication()
-
-        await DreamBin.dbDrop()
-        await DreamBin.dbCreate()
-
-        setEnvBool('BYPASS_DB_CONNECTIONS_DURING_INIT', undefined)
-        await initializePsychicApplication()
-
-        await DreamBin.dbMigrate()
-        await DreamBin.sync()
-        await seedDb()
-        process.exit()
-      })
-
-    program
-      .command('db:seed')
-      .description('seeds the database using the file located in db/seed.ts')
-      .action(async () => {
-        if (process.env.NODE_ENV === 'test' && process.env.DREAM_SEED_DB_IN_TEST !== '1') {
-          console.log('skipping db seed for test env. To really seed for test, add DREAM_SEED_DB_IN_TEST=1')
-          return
-        }
-
-        await initializePsychicApplication()
-        await seedDb()
         process.exit()
       })
   }
