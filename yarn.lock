@@ -1073,9 +1073,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvohealth/dream@npm:=0.13.7":
-  version: 0.13.7
-  resolution: "@rvohealth/dream@npm:0.13.7::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40rvohealth%2Fdream%2F0.13.7%2F37d5ed1df23afe3bfee22aa0431c7f39a49a3bd6"
+"@rvohealth/dream@npm:=0.13.9":
+  version: 0.13.9
+  resolution: "@rvohealth/dream@npm:0.13.9::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40rvohealth%2Fdream%2F0.13.9%2F3f304e5c6fcaca9d68f3a4d3d7fc4c0eb12a4b7d"
   dependencies:
     "@types/lodash.clonedeep": "npm:^4.5.9"
     "@types/lodash.clonedeepwith": "npm:^4.5.9"
@@ -1105,7 +1105,7 @@ __metadata:
     pg: "*"
   bin:
     dream: ./dist/src/global-cli/dream.js
-  checksum: 10c0/5a8da66ff9cd0beb8087a0feb7327143aee4330a0ac8f067e3e6cd24449a638835c85d00705b9089fcdc4ff983a179bae4c1fdac8717a6d776b548e6ad192965
+  checksum: 10c0/58b03a2415d336e53651d9b2c70eaa8db8ad15f7c28c18f07679930bd0228dfa6cfc5b5fceb703f34a559e34e01e8a99b35e6697f65245307e6dfe435f2dd27a
   languageName: node
   linkType: hard
 
@@ -1133,7 +1133,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:=9.0.0"
     "@jest-mock/express": "npm:^2.1.0"
-    "@rvohealth/dream": "npm:=0.13.7"
+    "@rvohealth/dream": "npm:=0.13.9"
     "@rvohealth/dream-spec-helpers": "npm:^0.0.8"
     "@rvohealth/psychic-spec-helpers": "npm:^0.0.3"
     "@socket.io/redis-adapter": "npm:^8.3.0"
