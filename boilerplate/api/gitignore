@@ -1,5 +1,0 @@
-dist
-node_modules
-logs/!.gitkeep
-.env*
-src/.psy/*
