@@ -1194,8 +1194,6 @@ __metadata:
     redis: "*"
     socket.io: "*"
     socket.io-adapter: "*"
-  bin:
-    psy: ./dist/src/global-cli/psy.js
   languageName: unknown
   linkType: soft
 

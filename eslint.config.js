@@ -20,7 +20,6 @@ const config = typescriptEslint.config(
       'spec-boilerplate/**/*',
       '.yarn/**/*',
       '.yarnrc.yml',
-      '.global-cli-dist/*',
     ],
   },
 

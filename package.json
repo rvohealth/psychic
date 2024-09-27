@@ -7,12 +7,8 @@
   "repository": "https://github.com/rvohealth/psychic.git",
   "license": "MIT",
   "files": [
-    "boilerplate/**/*",
     "dist/**/*"
   ],
-  "bin": {
-    "psy": "./dist/src/global-cli/psy.js"
-  },
   "scripts": {
     "publish": "yarn npm publish",
     "psy": "yarn psyts",
