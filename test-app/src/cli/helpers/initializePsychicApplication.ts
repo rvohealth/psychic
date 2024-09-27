@@ -1,3 +1,5 @@
+import '../../conf/global'
+
 import { PsychicApplication } from '../../../../src'
 import psychicConfCb from '../../conf/app'
 import dreamCb from '../../conf/dream'
