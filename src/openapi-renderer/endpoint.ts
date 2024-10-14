@@ -26,6 +26,7 @@ import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment'
 import { DEFAULT_OPENAPI_RESPONSES } from './defaults'
 import openapiRoute from './helpers/openapiRoute'
 import OpenapiSerializerRenderer from './serializer'
+import cloneDeep from 'lodash.clonedeep'
 
 export default class OpenapiEndpointRenderer<
   DreamsOrSerializersOrViewModels extends
@@ -660,10 +661,10 @@ export default class OpenapiEndpointRenderer<
     const psychicApp = PsychicApplication.getOrFail()
 
     const defaultResponses = this.omitDefaultResponses ? {} : psychicApp.openapi?.defaults?.responses || {}
-    let responseData: OpenapiResponses = {
+    let responseData: OpenapiResponses = cloneDeep({
       ...DEFAULT_OPENAPI_RESPONSES,
       ...defaultResponses,
-    }
+    })
 
     const computedStatus: HttpStatusCodeNumber = this.status || this.defaultStatus
 
