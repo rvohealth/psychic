@@ -38,8 +38,19 @@ export class Background {
     if (!psychicApp?.useRedis)
       throw new Error(`attempting to use background jobs, but config.useRedis is not set to true.`)
 
+    const queueOptions = psychicApp.backgroundQueueOptions
+    const bullConnectionOpts = this.bullConnectionOptions
+
+    this.queue ||= new Queue(`${pascalize(psychicApp.appName)}BackgroundJobQueue`, {
+      ...queueOptions,
+      connection: bullConnectionOpts,
+    })
+    this.queueEvents = new QueueEvents(this.queue.name, { connection: bullConnectionOpts })
+  }
+
+  private get bullConnectionOptions(): ConnectionOptions {
     const connectionOptions = redisOptions('background_jobs')
-    const bullConnectionOpts = {
+    return {
       host: connectionOptions.host,
       username: connectionOptions.username,
       password: connectionOptions.password,
@@ -50,23 +61,20 @@ export class Background {
           }
         : undefined,
       connectTimeout: 5000,
-    } as ConnectionOptions
+    }
+  }
 
-    const queueOptions = psychicApp.backgroundQueueOptions
+  public work() {
+    this.connect()
 
-    this.queue ||= new Queue(`${pascalize(psychicApp.appName)}BackgroundJobQueue`, {
-      ...queueOptions,
-      connection: bullConnectionOpts,
-    })
-    this.queueEvents = new QueueEvents(this.queue.name, { connection: bullConnectionOpts })
-
+    const psychicApp = PsychicApplication.getOrFail()
     const workerOptions = psychicApp.backgroundWorkerOptions
 
     for (let i = 0; i < workerCount(); i++) {
       this.workers.push(
         new Worker(`${pascalize(psychicApp.appName)}BackgroundJobQueue`, data => this.handler(data), {
           ...workerOptions,
-          connection: bullConnectionOpts,
+          connection: this.bullConnectionOptions,
         }),
       )
     }
