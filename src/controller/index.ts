@@ -222,7 +222,7 @@ export default class PsychicController {
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
     ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
-    ValidatedType extends ValidatedReturnType<ExpectedType>,
+    ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
     FinalReturnType extends AllowNullOrUndefined extends true
       ? ValidatedType | null | undefined

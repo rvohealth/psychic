@@ -5,6 +5,9 @@ import Params, { ParamValidationError } from '../../../src/server/params'
 import Pet from '../../../test-app/src/app/models/Pet'
 import User from '../../../test-app/src/app/models/User'
 
+const TestEnumValues = ['hello', 'world'] as const
+type TestEnum = (typeof TestEnumValues)[number]
+
 describe('Params', () => {
   describe('.for', () => {
     context('erroring', () => {
@@ -1039,13 +1042,14 @@ describe('Params', () => {
         context('enum', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast('hello', 'string', { enum: ['hello', 'world'] })).toEqual('hello')
+              const result: TestEnum = Params.cast('hello', 'string', { enum: TestEnumValues })
+              expect(result).toEqual('hello')
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast('birld', 'string', { enum: ['hello', 'world'] })).toThrow(
+              expect(() => Params.cast('goodbye', 'string', { enum: TestEnumValues })).toThrow(
                 ParamValidationError,
               )
             })

@@ -5,6 +5,9 @@ import PsychicApplication from '../../../src/psychic-application'
 import { ParamValidationError } from '../../../src/server/params'
 import User from '../../../test-app/src/app/models/User'
 
+const TestEnumValues = ['hello', 'world'] as const
+type TestEnum = (typeof TestEnumValues)[number]
+
 describe('PsychicController', () => {
   describe('get #params', () => {
     it('returns both body and query params', () => {
@@ -34,6 +37,8 @@ describe('PsychicController', () => {
           subBody: { hello: 'world' },
           dotNotationToArray: ['a'],
           dotNotationToString: 'a',
+          hello: 'hello',
+          goodbye: 'goodbye',
         },
       })
       const res = getMockRes().res
@@ -50,6 +55,19 @@ describe('PsychicController', () => {
       const spy = jest.spyOn(Params, 'cast')
       expect(controller.castParam('subBody.hello', 'string')).toEqual('world')
       expect(spy).toHaveBeenCalledWith('world', 'string', undefined)
+    })
+
+    context('an enum', () => {
+      it('allows valid enum values (and type the response)', () => {
+        const result: TestEnum = controller.castParam('hello', 'string', { enum: TestEnumValues })
+        expect(result).toEqual('hello')
+      })
+
+      it('disallows values that aren’t allowed by the enum', () => {
+        expect(() => controller.castParam('goodbye', 'string', { enum: TestEnumValues })).toThrow(
+          ParamValidationError,
+        )
+      })
     })
 
     context('when specifying an invalid type for the nested attribute', () => {

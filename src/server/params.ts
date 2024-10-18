@@ -284,7 +284,7 @@ export default class Params {
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
     ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
-    ValidatedType extends ValidatedReturnType<ExpectedType>,
+    ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
     FinalReturnType extends AllowNullOrUndefined extends true
       ? ValidatedType | null | undefined
@@ -309,7 +309,7 @@ export default class Params {
     EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
     ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
-    ValidatedType extends ValidatedReturnType<ExpectedType>,
+    ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
     ReturnType extends AllowNullOrUndefined extends true ? ValidatedType | null | undefined : ValidatedType,
   >(
@@ -487,10 +487,14 @@ export default class Params {
 
 export class ParamValidationError extends Error {}
 
-export type ValidatedReturnType<ExpectedType> = ExpectedType extends RegExp
+export type ValidatedReturnType<ExpectedType, OptsType> = ExpectedType extends RegExp
   ? string
   : ExpectedType extends 'string'
-    ? string
+    ? OptsType extends { enum: infer EnumValue }
+      ? EnumValue extends readonly string[]
+        ? EnumValue[number]
+        : never
+      : string
     : ExpectedType extends 'number'
       ? number
       : ExpectedType extends 'datetime'
@@ -527,9 +531,7 @@ export type ValidatedReturnType<ExpectedType> = ExpectedType extends RegExp
                                       ? null[]
                                       : ExpectedType extends 'uuid[]'
                                         ? string[]
-                                        : ExpectedType extends { enum: infer EnumValue }
-                                          ? EnumValue
-                                          : never
+                                        : never
 
 export type ValidatedAllowsNull<ExpectedType, OptsValue> = ExpectedType extends { allowNull: infer R }
   ? R extends true
