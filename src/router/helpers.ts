@@ -6,7 +6,7 @@ import pascalizeFileName from '../helpers/pascalizeFileName'
 import { FunctionPropertyNames } from '../helpers/typeHelpers'
 import PsychicApplication from '../psychic-application'
 import PsychicRouter, { PsychicNestedRouter } from '../router'
-import { ResourcesMethodType, ResourcesOptions } from './types'
+import { HttpMethod, ResourcesMethodType, ResourcesOptions } from './types'
 
 export function routePath(routePath: string) {
   return `/${routePath.replace(/^\//, '')}`
@@ -113,7 +113,11 @@ export function applyResourcesAction(
 ) {
   const controller =
     options?.controller ||
-    lookupControllerOrFail(routingMechanism, { path, httpMethod: 'get', resourceName: path })
+    lookupControllerOrFail(routingMechanism, {
+      path: action,
+      httpMethod: httpMethodFromResourcefulAction(action),
+      resourceName: path,
+    })
 
   switch (action) {
     case 'index':
@@ -155,7 +159,11 @@ export function applyResourceAction(
 ) {
   const controller =
     options?.controller ||
-    lookupControllerOrFail(routingMechanism, { path, httpMethod: 'get', resourceName: path })
+    lookupControllerOrFail(routingMechanism, {
+      path: action,
+      httpMethod: httpMethodFromResourcefulAction(action),
+      resourceName: path,
+    })
 
   switch (action) {
     case 'create':
@@ -177,5 +185,22 @@ export function applyResourceAction(
 
     default:
       throw new Error(`unsupported resource method type: ${action}`)
+  }
+}
+
+function httpMethodFromResourcefulAction(action: ResourcesMethodType): HttpMethod {
+  switch (action) {
+    case 'index':
+      return 'get'
+    case 'show':
+      return 'get'
+    case 'create':
+      return 'post'
+    case 'update':
+      return 'patch'
+    case 'destroy':
+      return 'delete'
+    default:
+      throw new Error(`unexpected resourceful action: ${action as string}`)
   }
 }
