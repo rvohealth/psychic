@@ -146,11 +146,11 @@ describe('${fullyQualifiedControllerName}', () => {
       })).body
       const ${modelVariableName} = await ${modelClassName}.findOrFailBy({ userId: user.id })
 
-      expect(results).toEqual([
+      expect(results).toEqual(
         expect.objectContaining({
           id: ${modelVariableName}.id,${originalStringKeyValues.length ? '\n          ' + originalStringKeyValues.join('\n          ') : ''}
         }),
-      ])
+      )
     })
   })
 

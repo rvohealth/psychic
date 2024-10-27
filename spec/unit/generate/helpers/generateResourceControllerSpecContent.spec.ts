@@ -104,12 +104,12 @@ describe('V1/PostsController', () => {
       })).body
       const post = await Post.findOrFailBy({ userId: user.id })
 
-      expect(results).toEqual([
+      expect(results).toEqual(
         expect.objectContaining({
           id: post.id,
           body: 'The Post body',
         }),
-      ])
+      )
     })
   })
 
