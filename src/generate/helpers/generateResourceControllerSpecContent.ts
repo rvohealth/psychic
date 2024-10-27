@@ -117,11 +117,11 @@ describe('${fullyQualifiedControllerName}', () => {
       })
       const results = (await subject(${modelVariableName})).body
 
-      expect(results).toEqual([
+      expect(results).toEqual(
         expect.objectContaining({
           id: ${modelVariableName}.id,${originalStringKeyValues.length ? '\n          ' + originalStringKeyValues.join('\n          ') : ''}
         }),
-      ])
+      )
     })
 
     context('${fullyQualifiedModelName} created by another User', () => {

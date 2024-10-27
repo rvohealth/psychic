@@ -74,12 +74,12 @@ describe('V1/PostsController', () => {
       })
       const results = (await subject(post)).body
 
-      expect(results).toEqual([
+      expect(results).toEqual(
         expect.objectContaining({
           id: post.id,
           body: 'The Post body',
         }),
-      ])
+      )
     })
 
     context('Post created by another User', () => {
