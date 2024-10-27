@@ -3,7 +3,7 @@ import generateResourceControllerSpecContent from '../../../../src/generate/help
 describe('generateResourceControllerSpecContent', () => {
   it('generates a useful resource controller spec', () => {
     const res = generateResourceControllerSpecContent({
-      fullyQualifiedControllerName: 'PostsController',
+      fullyQualifiedControllerName: 'V1/PostsController',
       route: 'posts',
       fullyQualifiedModelName: 'Post',
       columnsWithTypes: ['body:text', 'rating:decimal:3,2', 'User:belongs_to'],
@@ -14,13 +14,13 @@ import { describe as context } from '@jest/globals'
 import { UpdateableProperties } from '@rvohealth/dream'
 import { PsychicServer } from '@rvohealth/psychic'
 import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
-import Post from '../../../src/app/models/Post'
-import User from '../../../src/app/models/User'
-import createPost from '../../factories/PostFactory'
-import createUser from '../../factories/UserFactory'
+import Post from '../../../../src/app/models/Post'
+import User from '../../../../src/app/models/User'
+import createPost from '../../../factories/PostFactory'
+import createUser from '../../../factories/UserFactory'
 import { addEndUserAuthHeader } from '../helpers/authentication'
 
-describe('PostsController', () => {
+describe('V1/PostsController', () => {
   let user: User
 
   beforeEach(async () => {

@@ -23,10 +23,10 @@ export default function generateResourceControllerSpecContent({
   const modelVariableName = camelize(modelClassName)
 
   const importStatements: string[] = [
-    importStatementForModel(fullyQualifiedModelName, fullyQualifiedModelName),
-    importStatementForModel(fullyQualifiedModelName, 'User'),
-    importStatementForModelFactory(fullyQualifiedModelName, fullyQualifiedModelName),
-    importStatementForModelFactory(fullyQualifiedModelName, 'User'),
+    importStatementForModel(fullyQualifiedControllerName, fullyQualifiedModelName),
+    importStatementForModel(fullyQualifiedControllerName, 'User'),
+    importStatementForModelFactory(fullyQualifiedControllerName, fullyQualifiedModelName),
+    importStatementForModelFactory(fullyQualifiedControllerName, 'User'),
   ]
 
   const specUnitUpdirs = updirsFromPath(fullyQualifiedModelName)
