@@ -134,7 +134,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
   describe('POST create', () => {
     function subject(data: UpdateableProperties<${modelClassName}>, expectedStatus: number = 201) {
-      return request.${modelVariableName}('/${route}', expectedStatus, {
+      return request.post('/${route}', expectedStatus, {
         data,
         headers: addEndUserAuthHeader(request, user, {}),
       })
