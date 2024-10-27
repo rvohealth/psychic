@@ -18,7 +18,7 @@ import Post from '../../../../src/app/models/Post'
 import User from '../../../../src/app/models/User'
 import createPost from '../../../factories/PostFactory'
 import createUser from '../../../factories/UserFactory'
-import { addEndUserAuthHeader } from '../helpers/authentication'
+import { addEndUserAuthHeader } from '../../helpers/authentication'
 
 describe('V1/PostsController', () => {
   let user: User

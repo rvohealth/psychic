@@ -29,7 +29,7 @@ export default function generateResourceControllerSpecContent({
     importStatementForModelFactory(fullyQualifiedControllerName, 'User'),
   ]
 
-  const specUnitUpdirs = updirsFromPath(fullyQualifiedModelName)
+  const specUnitUpdirs = updirsFromPath(fullyQualifiedControllerName)
   const originalStringKeyValues: string[] = []
   const updatedStringKeyValues: string[] = []
   const originalStringAttributeChecks: string[] = []
