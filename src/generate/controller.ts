@@ -27,6 +27,7 @@ export default async function generateController({
   fullyQualifiedControllerName = standardizeFullyQualifiedModelName(
     `${fullyQualifiedControllerName.replace(/Controller$/, '')}Controller`,
   )
+  const route = hyphenize(fullyQualifiedControllerName.replace(/Controller$/, ''))
 
   const allControllerNameParts = fullyQualifiedControllerName.split('/')
   const isAdmin = allControllerNameParts[0] === 'Admin'
@@ -101,7 +102,7 @@ export default async function generateController({
 
   await generateControllerSpec({
     fullyQualifiedControllerName,
-    route: hyphenize(fullyQualifiedControllerName),
+    route,
     fullyQualifiedModelName,
     columnsWithTypes,
     resourceSpecs,
