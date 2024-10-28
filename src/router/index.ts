@@ -236,9 +236,10 @@ export default class PsychicRouter {
       resourceMethods = resourceMethods.filter(m => !except.includes(m))
     }
 
+    const originalCurrentNamespaces = this.currentNamespaces
     this.makeRoomForNewIdParam(nestedRouter)
-
     this.runNestedCallbacks(path, nestedRouter, cb, { asMember: plural, resourceful: true })
+    this.currentNamespaces = originalCurrentNamespaces
 
     resourceMethods.forEach(action => {
       if (plural) {

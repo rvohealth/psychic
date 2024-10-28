@@ -1,9 +1,9 @@
-import PsychicServer from '../../../src/server'
-import PsychicRouter from '../../../src/router'
-import CannotInferControllerFromTopLevelRouteError from '../../../src/error/router/cannot-infer-controller-from-top-level-route'
-import UsersController from '../../../test-app/src/app/controllers/UsersController'
 import { PsychicApplication } from '../../../src'
 import CannotFindInferredControllerFromProvidedNamespace from '../../../src/error/router/cannot-find-inferred-controller-from-provided-namespace'
+import CannotInferControllerFromTopLevelRouteError from '../../../src/error/router/cannot-infer-controller-from-top-level-route'
+import PsychicRouter from '../../../src/router'
+import PsychicServer from '../../../src/server'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('PsychicRouter', () => {
   describe('#crud', () => {
@@ -19,7 +19,7 @@ describe('PsychicRouter', () => {
         expect.arrayContaining([
           {
             httpMethod: 'get',
-            path: '/users/:userId/ping',
+            path: '/users/:id/ping',
             controller: UsersController,
             action: 'ping',
           },
