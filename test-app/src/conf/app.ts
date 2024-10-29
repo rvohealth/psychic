@@ -70,6 +70,16 @@ export default async (psy: PsychicApplication) => {
         },
       },
 
+      securitySchemes: {
+        bearerToken: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'custom auth token',
+        },
+      },
+
+      security: [{ bearerToken: [] }],
+
       components: {
         responses: {
           CustomResponse: {

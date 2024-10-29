@@ -8,6 +8,7 @@ export default class ParamsTestController extends ApplicationController {
   }
 
   @OpenAPI({
+    security: [],
     requestBody: {
       type: 'object',
       properties: {

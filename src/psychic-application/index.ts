@@ -19,7 +19,13 @@ import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
 import envValue, { envInt } from '../helpers/envValue'
-import { OpenapiContent, OpenapiHeaders, OpenapiResponses } from '../openapi-renderer/endpoint'
+import {
+  OpenapiContent,
+  OpenapiHeaders,
+  OpenapiResponses,
+  OpenapiSecurity,
+  OpenapiSecuritySchemes,
+} from '../openapi-renderer/endpoint'
 import PsychicRouter from '../router'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache'
 import loadControllers, { getControllersOrFail } from './helpers/loadControllers'
@@ -591,6 +597,8 @@ export interface PsychicOpenapiOptions {
   defaults?: {
     headers?: OpenapiHeaders
     responses?: OpenapiResponses
+    securitySchemes?: OpenapiSecuritySchemes
+    security?: OpenapiSecurity
     components?: {
       [key: string]: {
         [key: string]: OpenapiSchemaBody | OpenapiContent

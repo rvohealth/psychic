@@ -44,6 +44,7 @@ export default class OpenapiEndpointRenderer<
   private query: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['query']
   private status: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['status']
   private tags: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['tags']
+  private security: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['security']
   private summary: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['summary']
   private description: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['description']
   private nullable: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['nullable']
@@ -80,6 +81,7 @@ export default class OpenapiEndpointRenderer<
       serializerKey,
       status,
       tags,
+      security,
       pathParams,
       description,
       nullable,
@@ -97,6 +99,7 @@ export default class OpenapiEndpointRenderer<
     this.serializerKey = serializerKey
     this.status = status
     this.tags = tags
+    this.security = security
     this.pathParams = pathParams
     this.summary = summary
     this.description = description
@@ -146,6 +149,10 @@ export default class OpenapiEndpointRenderer<
 
     if (this.description) {
       output[path][method].description = this.description
+    }
+
+    if (this.security) {
+      output[path][method].security = this.security
     }
 
     if (requestBody) {
@@ -983,6 +990,7 @@ export interface OpenapiEndpointRendererOpts<
   tags?: string[]
   description?: string
   summary?: string
+  security?: OpenapiSecurity
   responses?: Partial<
     Record<HttpStatusCode, (OpenapiSchemaBodyShorthand & { description?: string }) | { description: string }>
   >
@@ -1037,6 +1045,7 @@ export interface OpenapiSchema {
     description: string
   }
   paths: OpenapiEndpointResponse
+  security?: OpenapiSecurity
   components: {
     [key: string]: {
       [key: string]: OpenapiSchemaBody | OpenapiContent
@@ -1076,6 +1085,7 @@ export type OpenapiMethodResponse = {
 export interface OpenapiMethodBody {
   tags?: string[]
   summary?: string
+  security?: OpenapiSecurity
   description: string
   requestBody: OpenapiContent
   responses: OpenapiResponses
@@ -1106,6 +1116,49 @@ export type OpenapiContent = {
   }
   description?: string
 }
+
+// used to establish scopes for oauth2
+export type OpenapiSecurity = Record<string, string[]>[]
+
+export interface OpenapiSecuritySchemes {
+  [key: string]: OpenapiSecurityScheme
+}
+
+export type OpenapiSecurityScheme =
+  | OpenapiHttpSecurityScheme
+  | OpenapiApiKeySecurityScheme
+  | OpenapiOpenidConnectSecurityScheme
+  | OpenapiOAuth2SecurityScheme
+
+export interface OpenapiHttpSecurityScheme {
+  type: 'http'
+  scheme: 'basic' | 'bearer'
+  bearerFormat?: string
+}
+
+export interface OpenapiApiKeySecurityScheme {
+  type: 'apiKey'
+  in: 'header' | 'body'
+  name: string
+}
+
+export interface OpenapiOpenidConnectSecurityScheme {
+  type: 'openIdConnect'
+  openIdConnectUrl: string
+}
+
+export interface OpenapiOAuth2SecurityScheme {
+  type: 'oauth2'
+  flows: Record<
+    OpenapiOauth2Flow,
+    {
+      authorizationUrl: string
+      scopes: Record<string, string>
+    }
+  >
+}
+
+export type OpenapiOauth2Flow = 'authorizationCode' | 'implicit' | 'password' | 'clientCredentials'
 
 function statusDescription(status: HttpStatusCodeNumber | HttpStatusCode) {
   switch (status) {

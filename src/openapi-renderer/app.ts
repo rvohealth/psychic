@@ -70,6 +70,18 @@ export default class OpenapiAppRenderer {
       },
     }
 
+    if (psychicApp.openapi?.defaults?.securitySchemes) {
+      finalOutput.components = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+        securitySchemes: psychicApp.openapi.defaults.securitySchemes as any,
+        ...finalOutput.components,
+      }
+    }
+
+    if (psychicApp.openapi?.defaults?.security) {
+      finalOutput.security = psychicApp.openapi.defaults.security
+    }
+
     for (const [controllerName, controller] of Object.entries(controllers)) {
       for (const key of Object.keys(controller.openapi || {})) {
         if (envBool('DEBUG')) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
