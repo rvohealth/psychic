@@ -14,8 +14,17 @@ describe('OpenapiAppRenderer', () => {
             title: packageJson.name,
             description: packageJson.description,
           },
+          security: [{ bearerToken: [] }],
         }),
       )
+
+      expect(response.components.securitySchemes).toEqual({
+        bearerToken: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'custom auth token',
+        },
+      })
 
       expect(response.paths['/greeter/justforspecs']).toEqual(
         expect.objectContaining({

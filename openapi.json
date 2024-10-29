@@ -1,7 +1,7 @@
 {
   "openapi": "3.0.2",
   "info": {
-    "version": "0.7.24",
+    "version": "0.8.4",
     "title": "@rvohealth/psychic",
     "description": "Typescript web framework"
   },
@@ -846,6 +846,7 @@
       ],
       "post": {
         "tags": [],
+        "security": [],
         "requestBody": {
           "content": {
             "application/json": {
@@ -1942,6 +1943,13 @@
     }
   },
   "components": {
+    "securitySchemes": {
+      "bearerToken": {
+        "type": "http",
+        "scheme": "bearer",
+        "bearerFormat": "custom auth token"
+      }
+    },
     "responses": {
       "NoContent": {
         "description": "The request has succeeded, but there is no content to render"
@@ -2204,5 +2212,10 @@
         }
       }
     }
-  }
+  },
+  "security": [
+    {
+      "bearerToken": []
+    }
+  ]
 }

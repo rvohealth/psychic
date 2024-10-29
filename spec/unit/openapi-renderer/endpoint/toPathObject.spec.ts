@@ -48,6 +48,27 @@ describe('OpenapiEndpointRenderer', () => {
       })
     })
 
+    context('security', () => {
+      it('renders provided security', () => {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+          security: [{ customToken: [] }],
+        })
+
+        const response = renderer.toPathObject({}, routes)
+        expect(response).toEqual(
+          expect.objectContaining({
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            '/users/howyadoin': expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              get: expect.objectContaining({
+                security: [{ customToken: [] }],
+              }),
+            }),
+          }),
+        )
+      })
+    })
+
     context('tags', () => {
       it('renders provided tags', () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
