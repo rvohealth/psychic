@@ -202,12 +202,11 @@ function privateMethods(modelClassName: string, methods: string[]) {
     privateMethods.push(loadModelStatement(modelClassName))
 
   if (!privateMethods.length) return ''
-  return `\n${privateMethods.join('\n')}`
+  return `\n\n${privateMethods.join('\n\n')}`
 }
 
 function loadModelStatement(modelClassName: string) {
-  return `
-  private async ${camelize(modelClassName)}() {
+  return `  private async ${camelize(modelClassName)}() {
     return await this.currentUser.associationQuery('${pluralize(camelize(modelClassName))}').findOrFail(
       this.castParam('id', 'string')
     )
