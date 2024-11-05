@@ -1,7 +1,6 @@
 import { Attribute, DreamColumn, DreamSerializer, RendersMany, RendersOne } from '@rvohealth/dream'
 import Post from '../models/Post'
 import User from '../models/User'
-import { PostWithCommentsSerializer, PostWithRecentCommentSerializer } from './PostSerializer'
 
 export class UserSummarySerializer extends DreamSerializer {
   @Attribute(User)
@@ -38,9 +37,13 @@ export class UserExtraSerializer extends UserSummarySerializer {
 }
 
 export class UserWithPostsSerializer extends UserSummarySerializer {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @RendersMany(() => PostWithCommentsSerializer<any, any>)
+  @RendersMany(Post, { serializerKey: 'withComments' })
   public posts: Post[]
+}
+
+export class UserWithFlattenedPostSerializer extends UserSummarySerializer {
+  @RendersOne(Post, { serializerKey: 'withComments', flatten: true })
+  public post: Post
 }
 
 export class UserWithPostsMultiType2Serializer extends UserSummarySerializer {
@@ -49,7 +52,6 @@ export class UserWithPostsMultiType2Serializer extends UserSummarySerializer {
 }
 
 export class UserWithRecentPostSerializer extends UserSummarySerializer {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @RendersOne(() => PostWithRecentCommentSerializer<any, any>, { nullable: true })
+  @RendersOne(Post, { nullable: true, serializerKey: 'withRecentComment' })
   public recentPost: Post | null
 }

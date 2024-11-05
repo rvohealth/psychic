@@ -844,6 +844,57 @@ The following values will be allowed:
           )
         })
 
+        context('flatten=true', () => {
+          it('renders flattened serializers the same as regular serializers', () => {
+            const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'howyadoin', {
+              serializerKey: 'withFlattenedAssociation',
+            })
+            const response = renderer.toSchemaObject({})
+
+            expect(response).toEqual(
+              expect.objectContaining({
+                PetWithFlattenedAssociation: {
+                  type: 'object',
+                  required: ['user'],
+                  properties: { user: { $ref: '#/components/schemas/UserWithFlattenedPost' } },
+                },
+                UserWithFlattenedPost: {
+                  type: 'object',
+                  required: ['id', 'body', 'comments'],
+                  properties: {
+                    id: { type: 'string' },
+                    body: { type: 'string', nullable: true },
+                    comments: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Comment' },
+                    },
+                  },
+                },
+                PostWithComments: {
+                  type: 'object',
+                  required: ['id', 'body', 'comments'],
+                  properties: {
+                    id: { type: 'string' },
+                    body: { type: 'string', nullable: true },
+                    comments: {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/Comment' },
+                    },
+                  },
+                },
+                Comment: {
+                  type: 'object',
+                  required: ['id', 'body'],
+                  properties: {
+                    id: { type: 'string' },
+                    body: { type: 'string', nullable: true },
+                  },
+                },
+              }),
+            )
+          })
+        })
+
         context('with a nullable RendersOne', () => {
           it('treats association as nullable', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {

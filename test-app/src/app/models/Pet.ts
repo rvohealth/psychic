@@ -13,6 +13,7 @@ export default class Pet extends ApplicationModel {
       summary: 'PetSummarySerializer',
       additional: 'PetAdditionalSerializer',
       withAssociation: 'PetWithAssociationSerializer',
+      withFlattenedAssociation: 'PetWithFlattenedAssociationSerializer',
     }
   }
 

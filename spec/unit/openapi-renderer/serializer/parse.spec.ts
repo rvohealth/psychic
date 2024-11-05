@@ -329,6 +329,15 @@ describe('OpenapiSerializerRenderer', () => {
                 name: { type: 'string', nullable: true },
               },
             },
+            User: {
+              type: 'object',
+              required: ['id', 'email', 'name'],
+              properties: {
+                id: { type: 'integer' },
+                email: { type: 'string' },
+                name: { type: 'string', nullable: true },
+              },
+            },
           })
         })
       })
