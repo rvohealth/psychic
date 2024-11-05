@@ -143,7 +143,7 @@ export const schema = {
     createdAtField: 'createdAt',
     updatedAtField: 'updatedAt',
     deletedAtField: 'deletedAt',
-    serializerKeys: ['additional', 'default', 'summary', 'withAssociation'],
+    serializerKeys: ['additional', 'default', 'summary', 'withAssociation', 'withFlattenedAssociation'],
     scopes: {
       default: [],
       named: [],
@@ -819,6 +819,7 @@ export const globalSchema = {
       'PetSerializer',
       'PetSummarySerializer',
       'PetWithAssociationSerializer',
+      'PetWithFlattenedAssociationSerializer',
       'PostSerializer',
       'PostSummarySerializer',
       'PostWithCommentsSerializer',
@@ -826,6 +827,7 @@ export const globalSchema = {
       'UserExtraSerializer',
       'UserSerializer',
       'UserSummarySerializer',
+      'UserWithFlattenedPostSerializer',
       'UserWithPostsMultiType2Serializer',
       'UserWithPostsSerializer',
       'UserWithRecentPostSerializer'

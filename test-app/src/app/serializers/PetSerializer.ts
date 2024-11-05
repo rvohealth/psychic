@@ -1,7 +1,6 @@
 import { Attribute, DreamColumn, DreamSerializer, RendersOne } from '@rvohealth/dream'
 import Pet from '../models/Pet'
 import User from '../models/User'
-import UserSerializer from './UserSerializer'
 
 export class PetSummarySerializer extends DreamSerializer {
   @Attribute(Pet)
@@ -19,6 +18,11 @@ export class PetAdditionalSerializer extends PetSummarySerializer {
 }
 
 export class PetWithAssociationSerializer extends DreamSerializer {
-  @RendersOne(() => UserSerializer)
+  @RendersOne(User)
+  public user: User
+}
+
+export class PetWithFlattenedAssociationSerializer extends DreamSerializer {
+  @RendersOne(User, { serializerKey: 'withFlattenedPost' })
   public user: User
 }
