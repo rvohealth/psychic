@@ -1,6 +1,6 @@
 import { GlobalNameNotSet } from '@rvohealth/dream'
-import background, { BackgroundQueuePriority } from './'
 import { FunctionPropertyNames } from '../helpers/typeHelpers'
+import background, { BackgroundQueuePriority } from './'
 
 export default class BackgroundedService {
   public static get priority(): BackgroundQueuePriority {
@@ -18,8 +18,8 @@ export default class BackgroundedService {
   public static _globalName: string | undefined
 
   public static async background<
-    T,
-    MethodName extends PsychicBackgroundedServiceStaticMethods<T & typeof BackgroundedService>,
+    T extends typeof BackgroundedService,
+    MethodName extends PsychicBackgroundedServiceStaticMethods<T>,
     MethodFunc extends T[MethodName & keyof T],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     MethodArgs extends MethodFunc extends (...args: any) => any ? Parameters<MethodFunc> : never,
@@ -34,8 +34,8 @@ export default class BackgroundedService {
   }
 
   public static async backgroundWithDelay<
-    T,
-    MethodName extends PsychicBackgroundedServiceStaticMethods<T & typeof BackgroundedService>,
+    T extends typeof BackgroundedService,
+    MethodName extends PsychicBackgroundedServiceStaticMethods<T>,
     MethodFunc extends T[MethodName & keyof T],
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     MethodArgs extends MethodFunc extends (...args: any) => any ? Parameters<MethodFunc> : never,
