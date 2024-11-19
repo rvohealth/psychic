@@ -40,7 +40,7 @@ export default class PostsController extends AuthedController {
   })
   public async index() {
     //    const posts = await this.currentUser.associationQuery('posts').all()
-    //    this.ok(posts)
+    //    this.ok(posts, { serializerKey: 'summary' })
   }
 
   @OpenAPI(Post, {
@@ -136,7 +136,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
   })
   public async index() {
     //    const healthPosts = await this.currentUser.associationQuery('healthPosts').all()
-    //    this.ok(healthPosts)
+    //    this.ok(healthPosts, { serializerKey: 'summary' })
   }
 
   @OpenAPI(HealthPost, {

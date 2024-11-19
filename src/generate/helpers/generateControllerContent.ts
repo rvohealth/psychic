@@ -79,7 +79,7 @@ export default function generateControllerContent({
   })
   public async index() {
     //    const ${pluralizedModelAttributeName} = await this.currentUser.associationQuery('${pluralizedModelAttributeName}').all()
-    //    this.ok(${pluralizedModelAttributeName})
+    //    this.ok(${pluralizedModelAttributeName}, { serializerKey: 'summary' })
   }`
         else
           return `\
