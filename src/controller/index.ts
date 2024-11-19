@@ -301,7 +301,7 @@ export default class PsychicController {
     return this.session.clearCookie(this.config.sessionCookieName)
   }
 
-  private singleObjectJson<T>(data: T, opts: RenderOptions<T>): T | SerializerResult {
+  private singleObjectJson<T>(data: T, opts: RenderOptions): T | SerializerResult {
     if (!data) return data
     const dreamApp = DreamApplication.getOrFail()
     const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
@@ -341,7 +341,7 @@ The key in question is: "${serializerKey}"`,
 
   public json<T>(
     data: T,
-    opts: RenderOptions<T> = {},
+    opts: RenderOptions = {},
   ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any {
     if (Array.isArray(data))
@@ -362,23 +362,23 @@ The key in question is: "${serializerKey}"`,
     }
   }
 
-  public respond<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
+  public respond<T>(data: T = {} as T, opts: RenderOptions = {}) {
     const openapiData = (this.constructor as typeof PsychicController).openapi[this.action]
     this.res.status(openapiData?.['status'] || 200)
 
     this.json(data, opts)
   }
 
-  public ok<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
+  public ok<T>(data: T = {} as T, opts: RenderOptions = {}) {
     this.json(data, opts)
   }
 
-  public created<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
+  public created<T>(data: T = {} as T, opts: RenderOptions = {}) {
     this.res.status(201)
     this.json(data, opts)
   }
 
-  public accepted<T>(data: T = {} as T, opts: RenderOptions<T> = {}) {
+  public accepted<T>(data: T = {} as T, opts: RenderOptions = {}) {
     this.res.status(202)
     this.json(data, opts)
   }
@@ -514,14 +514,12 @@ export class ControllerSerializerIndex {
   }
 }
 
-export type RenderOptions<
-  T,
-  U = T extends (infer R)[] ? R : T,
-  SerializerType = U extends null
-    ? never
-    : U['serializers' & keyof U] extends object
-      ? keyof U['serializers' & keyof U]
-      : never,
-> = { serializerKey?: SerializerType }
+// Since Dream explicitly types the return type of
+// the serializers getter as, e.g., DreamSerializers<User>,
+// in order to enforce valid serializer global names as the
+// values of the serializers object, we can't make the
+// serializers object into a const and therefore can't
+// leverage the key values to enforce a valid serializerKey
+export type RenderOptions = { serializerKey?: string }
 
 export const controllerSerializerIndex = new ControllerSerializerIndex()
