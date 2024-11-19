@@ -11,7 +11,7 @@ export default class Comment extends ApplicationModel {
     return {
       default: 'CommentSerializer',
       summary: 'CommentSummarySerializer',
-    } as const
+    }
   }
 
   public id: DreamColumn<Comment, 'id'>

@@ -27,7 +27,7 @@ export default class UsersController extends ApplicationController {
   })
   public async create() {
     const user = await User.create(this.userParams)
-    this.created(user)
+    this.created(user, { serializerKey: 'extra' })
   }
 
   @OpenAPI(User, {
@@ -37,7 +37,7 @@ export default class UsersController extends ApplicationController {
   })
   public async index() {
     const users = await User.all()
-    this.ok(users)
+    this.ok(users, { serializerKey: 'extra' })
   }
 
   @OpenAPI(User, {
@@ -46,7 +46,7 @@ export default class UsersController extends ApplicationController {
   })
   public async show() {
     const user = await User.findOrFail(this.castParam('id', 'bigint'))
-    this.ok(user)
+    this.ok(user, { serializerKey: 'withPosts' })
   }
 
   @OpenAPI(User, {

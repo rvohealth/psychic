@@ -14,7 +14,7 @@ export default class Post extends ApplicationModel {
       summary: 'PostSummarySerializer',
       withRecentComment: 'PostWithRecentCommentSerializer',
       withComments: 'PostWithCommentsSerializer',
-    } as const
+    }
   }
 
   public id: DreamColumn<Post, 'id'>
