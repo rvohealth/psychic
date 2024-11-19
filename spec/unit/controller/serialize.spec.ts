@@ -2,7 +2,7 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Attribute, DreamApplication, DreamSerializer } from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller'
-import { BeforeAction } from '../../../src/controller/decorators'
+import { BeforeAction, OpenAPI } from '../../../src/controller/decorators'
 import PsychicApplication from '../../../src/psychic-application'
 import Pet from '../../../test-app/src/app/models/Pet'
 import User from '../../../test-app/src/app/models/User'
@@ -69,15 +69,36 @@ describe('PsychicController', () => {
 
         const user1 = await User.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
         const user2 = await User.create({ email: 'zed@zed', name: 'zed', passwordDigest: 'hello' })
-        const controller = new MyController(req, res, { config, action: 'show' })
+        const controller1 = new MyController(req, res, { config, action: 'index' })
 
-        await controller.index()
+        await controller1.index()
         expect(res.json).toHaveBeenCalledWith([{ id: user1.id }, { id: user2.id }])
 
         jest.spyOn(res, 'json').mockReset()
 
-        await controller.show()
+        const controller2 = new MyController(req, res, { config, action: 'show' })
+        await controller2.show()
         expect(res.json).toHaveBeenCalledWith({ id: user1.id, email: 'how@yadoin', name: 'fred' })
+      })
+
+      context('when the serializer is specified in the OpenAPI decorator', () => {
+        it('identifies serializer attached to model class and uses it to serialize', async () => {
+          class MyController extends PsychicController {
+            @OpenAPI([User, Pet], {
+              serializerKey: 'summary',
+            })
+            public async index() {
+              this.ok([...(await User.all()), ...(await Pet.all())])
+            }
+          }
+
+          const user1 = await User.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
+          const user2 = await User.create({ email: 'zed@zed', name: 'zed', passwordDigest: 'hello' })
+          const controller = new MyController(req, res, { config, action: 'index' })
+
+          await controller.index()
+          expect(res.json).toHaveBeenCalledWith([{ id: user1.id }, { id: user2.id }])
+        })
       })
 
       context('when the model is not a Dream', () => {

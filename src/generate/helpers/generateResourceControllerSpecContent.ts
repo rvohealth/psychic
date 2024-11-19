@@ -89,7 +89,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
       expect(results).toEqual([
         expect.objectContaining({
-          id: ${modelVariableName}.id,${originalStringKeyValues.length ? '\n          ' + originalStringKeyValues.join('\n          ') : ''}
+          id: ${modelVariableName}.id,
         }),
       ])
     })

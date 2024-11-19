@@ -17,6 +17,7 @@ import {
   SerializableDreamOrViewModel,
   compact,
 } from '@rvohealth/dream'
+import cloneDeep from 'lodash.clonedeep'
 import PsychicController from '../controller'
 import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes'
 import PsychicApplication from '../psychic-application'
@@ -26,7 +27,6 @@ import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment'
 import { DEFAULT_OPENAPI_RESPONSES } from './defaults'
 import openapiRoute from './helpers/openapiRoute'
 import OpenapiSerializerRenderer from './serializer'
-import cloneDeep from 'lodash.clonedeep'
 
 export default class OpenapiEndpointRenderer<
   DreamsOrSerializersOrViewModels extends
@@ -934,10 +934,7 @@ export default class OpenapiEndpointRenderer<
     } else {
       const modelClass = dreamOrSerializerOrViewModel as SerializableDreamClassOrViewModelClass
       const modelPrototype = modelClass.prototype as SerializableDreamOrViewModel
-      const serializerKey =
-        modelPrototype.serializers[
-          (this.serializerKey || 'default') as keyof typeof modelPrototype.serializers
-        ]
+      const serializerKey = modelPrototype.serializers[this.serializerKey || 'default']
       return dreamApp.serializers[serializerKey] || null
     }
   }
@@ -996,7 +993,7 @@ export interface OpenapiEndpointRendererOpts<
   >
   defaultResponse?: OpenapiEndpointRendererDefaultResponseOption
   serializerKey?: InstanceType<NonArrayT> extends { serializers: { [key: string]: typeof DreamSerializer } }
-    ? keyof InstanceType<NonArrayT>['serializers' & keyof InstanceType<NonArrayT>]
+    ? string
     : undefined
   status?: HttpStatusCodeNumber
   nullable?: boolean

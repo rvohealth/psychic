@@ -45,7 +45,6 @@ describe('V1/PostsController', () => {
       expect(results).toEqual([
         expect.objectContaining({
           id: post.id,
-          body: 'The Post body',
         }),
       ])
     })

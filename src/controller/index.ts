@@ -32,6 +32,13 @@ type SerializerResult = {
   any
 }
 
+export type ControllerActionMetadata = Record<
+  string,
+  {
+    serializerKey?: string
+  }
+>
+
 export type PsychicParamsPrimitive = string | number | boolean | null | undefined | PsychicParamsPrimitive[]
 
 export const PsychicParamsPrimitiveLiterals = [
@@ -73,6 +80,14 @@ export default class PsychicController {
   public static get isPsychicController() {
     return true
   }
+
+  /**
+   * @internal
+   *
+   * Storage for controller action metadata, set when using the association decorators like:
+   *   @OpenAPI
+   */
+  protected static controllerActionMetadata: ControllerActionMetadata = {}
 
   /**
    * @internal
@@ -289,6 +304,7 @@ export default class PsychicController {
   private singleObjectJson<T>(data: T, opts: RenderOptions<T>): T | SerializerResult {
     if (!data) return data
     const dreamApp = DreamApplication.getOrFail()
+    const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
@@ -300,7 +316,11 @@ export default class PsychicController {
     } else {
       const serializerKey =
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        (data as any).serializers?.[opts.serializerKey || 'default'] as string | undefined
+        (data as any).serializers?.[
+          opts.serializerKey ||
+            psychicControllerClass['controllerActionMetadata'][this.action]?.['serializerKey'] ||
+            'default'
+        ] as string | undefined
 
       if (serializerKey && Object.prototype.hasOwnProperty.call(dreamApp.serializers, serializerKey)) {
         const serializerClass = dreamApp.serializers[serializerKey]

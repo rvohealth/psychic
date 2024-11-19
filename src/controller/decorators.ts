@@ -56,29 +56,39 @@ export function OpenAPI<
 ): (target: PsychicController, methodName: string | symbol) => void {
   return function (target: PsychicController, methodName: string | symbol): void {
     const psychicControllerClass: typeof PsychicController = target.constructor as typeof PsychicController
+    const methodNameString = methodName.toString()
+
     if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'openapi'))
       psychicControllerClass.openapi = {}
 
+    if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'controllerActionMetadata'))
+      psychicControllerClass['controllerActionMetadata'] = {}
+
     if (opts) {
-      psychicControllerClass.openapi[methodName.toString()] = new OpenapiEndpointRenderer(
+      psychicControllerClass.openapi[methodNameString] = new OpenapiEndpointRenderer(
         modelOrSerializer as I,
         psychicControllerClass,
-        methodName.toString(),
+        methodNameString,
         opts,
       )
+
+      psychicControllerClass['controllerActionMetadata'][methodNameString] ||= {}
+      psychicControllerClass['controllerActionMetadata'][methodNameString]['serializerKey'] =
+        opts.serializerKey
+      //
     } else {
       if (isSerializable(modelOrSerializer)) {
-        psychicControllerClass.openapi[methodName.toString()] = new OpenapiEndpointRenderer(
+        psychicControllerClass.openapi[methodNameString] = new OpenapiEndpointRenderer(
           modelOrSerializer as I,
           psychicControllerClass,
-          methodName.toString(),
+          methodNameString,
           undefined,
         )
       } else {
-        psychicControllerClass.openapi[methodName.toString()] = new OpenapiEndpointRenderer(
+        psychicControllerClass.openapi[methodNameString] = new OpenapiEndpointRenderer(
           null,
           psychicControllerClass,
-          methodName.toString(),
+          methodNameString,
           modelOrSerializer as OpenapiEndpointRendererOpts<I>,
         )
       }
