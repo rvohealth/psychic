@@ -9,7 +9,7 @@ import {
   developmentOrTestEnv,
 } from '@rvohealth/dream'
 import bodyParser from 'body-parser'
-import { QueueOptions } from 'bullmq'
+import { Queue, QueueEvents, QueueOptions, Worker } from 'bullmq'
 import { CorsOptions } from 'cors'
 import { Application, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
@@ -120,8 +120,11 @@ Try setting it to something valid, like:
     return this._sessionCookieName
   }
 
-  private _backgroundOptions: PsychicBackgroundOptions = {
+  private _backgroundOptions: PsychicBackgroundConfig = {
     workerCount: developmentOrTestEnv() ? 1 : 0,
+    Queue,
+    QueueEvents,
+    Worker,
   }
   public get backgroundOptions() {
     return this._backgroundOptions
@@ -177,12 +180,12 @@ Try setting it to something valid, like:
     return this._logger
   }
 
-  private _backgroundQueueOptions: Omit<QueueOptions, 'connection'>
+  private _backgroundQueueOptions: PsychicQueueOptions
   public get backgroundQueueOptions() {
     return this._backgroundQueueOptions
   }
 
-  private _backgroundWorkerOptions: WorkerOptions
+  private _backgroundWorkerOptions: PsychicWorkerOptions
   public get backgroundWorkerOptions() {
     return this._backgroundWorkerOptions
   }
@@ -472,7 +475,10 @@ Try setting it to something valid, like:
         break
 
       case 'background':
-        this._backgroundOptions = { ...this._backgroundOptions, ...(value as PsychicBackgroundOptions) }
+        this._backgroundOptions = {
+          ...this._backgroundOptions,
+          ...(value as PsychicBackgroundOptions),
+        }
         break
 
       case 'background:queue':
@@ -615,6 +621,42 @@ interface PsychicPathOptions {
 
 interface PsychicBackgroundOptions {
   workerCount: number
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Queue?: any
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  QueueEvents?: any
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  Worker?: any
+}
+
+interface PsychicBackgroundConfig {
+  workerCount: number
+  Queue: typeof Queue
+  QueueEvents: typeof QueueEvents
+  Worker: typeof Worker
+}
+
+type PsychicQueueOptions = Omit<QueueOptions, 'connection'>
+
+type PsychicWorkerOptions = WorkerOptions & BullmqProWorkerOptions
+
+// worker options gathered by scanning various sub-pages from
+// https://docs.bullmq.io/bullmq-pro/groups
+type BullmqProWorkerOptions = {
+  group?: {
+    id?: string
+    maxSize?: number
+    limit?: {
+      max?: number
+      duration?: number
+    }
+    concurrency?: number
+    priority?: number
+  }
+  concurrency?: number
 }
 
 export interface PsychicClientOptions {

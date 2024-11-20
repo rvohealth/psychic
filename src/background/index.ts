@@ -41,11 +41,16 @@ export class Background {
     const queueOptions = psychicApp.backgroundQueueOptions
     const bullConnectionOpts = this.bullConnectionOptions
 
-    this.queue ||= new Queue(`${pascalize(psychicApp.appName)}BackgroundJobQueue`, {
-      ...queueOptions,
+    this.queue ||= new psychicApp.backgroundOptions.Queue(
+      `${pascalize(psychicApp.appName)}BackgroundJobQueue`,
+      {
+        ...queueOptions,
+        connection: bullConnectionOpts,
+      },
+    )
+    this.queueEvents = new psychicApp.backgroundOptions.QueueEvents(this.queue.name, {
       connection: bullConnectionOpts,
     })
-    this.queueEvents = new QueueEvents(this.queue.name, { connection: bullConnectionOpts })
   }
 
   private get bullConnectionOptions(): ConnectionOptions {
@@ -72,10 +77,14 @@ export class Background {
 
     for (let i = 0; i < workerCount(); i++) {
       this.workers.push(
-        new Worker(`${pascalize(psychicApp.appName)}BackgroundJobQueue`, data => this.handler(data), {
-          ...workerOptions,
-          connection: this.bullConnectionOptions,
-        }),
+        new psychicApp.backgroundOptions.Worker(
+          `${pascalize(psychicApp.appName)}BackgroundJobQueue`,
+          data => this.handler(data),
+          {
+            ...workerOptions,
+            connection: this.bullConnectionOptions,
+          },
+        ),
       )
     }
   }

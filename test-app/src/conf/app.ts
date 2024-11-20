@@ -6,6 +6,7 @@ import PsychicApplication from '../../../src/psychic-application'
 import User from '../app/models/User'
 import inflections from './inflections'
 import routesCb from './routes'
+import { Queue, QueueEvents, Worker } from 'bullmq'
 
 export default async (psy: PsychicApplication) => {
   await psy.load('controllers', path.join(__dirname, '..', 'app', 'controllers'))
@@ -122,6 +123,9 @@ export default async (psy: PsychicApplication) => {
 
   psy.set('background', {
     workerCount: parseInt(process.env.WORKER_COUNT || '0'),
+    Queue,
+    Worker,
+    QueueEvents,
   })
 
   // configuration options for bullmq queue (used for running background jobs in redis)
