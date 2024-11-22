@@ -39,6 +39,8 @@ describe('PsychicController', () => {
           dotNotationToString: 'a',
           hello: 'hello',
           goodbye: 'goodbye',
+          helloWorldArray: ['hello', 'world'],
+          helloGoodbyeArray: ['hello', 'goodbye'],
         },
       })
       const res = getMockRes().res
@@ -65,6 +67,21 @@ describe('PsychicController', () => {
 
       it('disallows values that aren’t allowed by the enum', () => {
         expect(() => controller.castParam('goodbye', 'string', { enum: TestEnumValues })).toThrow(
+          ParamValidationError,
+        )
+      })
+    })
+
+    context('an enum array', () => {
+      it('allows valid enum values (and type the response)', () => {
+        const results: TestEnum[] = controller.castParam('helloWorldArray', 'string[]', {
+          enum: TestEnumValues,
+        })
+        expect(results).toEqual(['hello', 'world'])
+      })
+
+      it('disallows values that aren’t allowed by the enum', () => {
+        expect(() => controller.castParam('helloGoodbyeArray', 'string[]', { enum: TestEnumValues })).toThrow(
           ParamValidationError,
         )
       })

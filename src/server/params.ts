@@ -518,7 +518,11 @@ export type ValidatedReturnType<ExpectedType, OptsType> = ExpectedType extends R
                         : ExpectedType extends 'date[]'
                           ? CalendarDate[]
                           : ExpectedType extends 'string[]'
-                            ? string[]
+                            ? OptsType extends { enum: infer EnumValue }
+                              ? EnumValue extends readonly string[]
+                                ? EnumValue[number][]
+                                : never
+                              : string[]
                             : ExpectedType extends 'bigint[]'
                               ? string[]
                               : ExpectedType extends 'number[]'
