@@ -122,29 +122,31 @@ export default async (psy: PsychicApplication) => {
   })
 
   psy.set('background', {
-    workerCount: parseInt(process.env.WORKER_COUNT || '0'),
-    Queue,
-    Worker,
-    QueueEvents,
-  })
-
-  // configuration options for bullmq queue (used for running background jobs in redis)
-  psy.set('background:queue', {
-    defaultJobOptions: {
-      removeOnComplete: 1000,
-      removeOnFail: 20000,
-      // 524,288,000 ms (~6.1 days) using algorithm:
-      // "2 ^ (attempts - 1) * delay"
-      attempts: 20,
-      backoff: {
-        type: 'exponential',
-        delay: 1000,
+    // workerCount: parseInt(process.env.WORKER_COUNT || '0'),
+    providers: {
+      Queue,
+      Worker,
+      QueueEvents,
+    },
+    defaultQueue: {
+      defaultJobOptions: {
+        removeOnComplete: 1000,
+        removeOnFail: 20000,
+        // 524,288,000 ms (~6.1 days) using algorithm:
+        // "2 ^ (attempts - 1) * delay"
+        attempts: 20,
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
       },
     },
-  })
 
-  // configuration options for bullmq worker (used for running background jobs in redis)
-  psy.set('background:worker', {})
+    defaultWorkerCount: parseInt(process.env.WORKER_COUNT || '0'),
+
+    // only done for configuration testing
+    namedWorkstreams: [{ parallelization: 1, name: 'extra-worker', rateLimit: { max: 1, duration: 1 } }],
+  })
 
   // redis background job credentials
   psy.set('redis:background', {

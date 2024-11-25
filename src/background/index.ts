@@ -25,9 +25,30 @@ export interface BackgroundJobData {
 }
 
 export class Background {
+  public static get defaultQueueName() {
+    const psychicApp = PsychicApplication.getOrFail()
+    return `${pascalize(psychicApp.appName)}BackgroundJobQueue`
+  }
+
+  public static get Worker(): typeof Worker {
+    const psychicApp = PsychicApplication.getOrFail()
+    return (psychicApp.backgroundOptions.providers?.Worker || Worker) as typeof Worker
+  }
+
+  public static get Queue(): typeof Queue {
+    const psychicApp = PsychicApplication.getOrFail()
+    return (psychicApp.backgroundOptions.providers?.Queue || Queue) as typeof Queue
+  }
+
+  public static get QueueEvents(): typeof QueueEvents {
+    const psychicApp = PsychicApplication.getOrFail()
+    return (psychicApp.backgroundOptions.providers?.QueueEvents || QueueEvents) as typeof QueueEvents
+  }
+
   public queue: Queue | null = null
   public queueEvents: QueueEvents
   public workers: Worker[] = []
+  public extraWorkers: Worker[] = []
 
   public connect() {
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) return
@@ -38,17 +59,15 @@ export class Background {
     if (!psychicApp?.useRedis)
       throw new Error(`attempting to use background jobs, but config.useRedis is not set to true.`)
 
-    const queueOptions = psychicApp.backgroundQueueOptions
+    const queueOptions = psychicApp.backgroundQueueOptions()
+
     const bullConnectionOpts = this.bullConnectionOptions
 
-    this.queue ||= new psychicApp.backgroundOptions.Queue(
-      `${pascalize(psychicApp.appName)}BackgroundJobQueue`,
-      {
-        ...queueOptions,
-        connection: bullConnectionOpts,
-      },
-    )
-    this.queueEvents = new psychicApp.backgroundOptions.QueueEvents(this.queue.name, {
+    this.queue ||= new Background.Queue(Background.defaultQueueName, {
+      ...queueOptions,
+      connection: bullConnectionOpts,
+    })
+    this.queueEvents = new Background.QueueEvents(this.queue.name, {
       connection: bullConnectionOpts,
     })
   }
@@ -73,20 +92,30 @@ export class Background {
     this.connect()
 
     const psychicApp = PsychicApplication.getOrFail()
-    const workerOptions = psychicApp.backgroundWorkerOptions
+    const defaultWorkerOptions = psychicApp.defaultBackgroundWorkerOptions()
 
     for (let i = 0; i < workerCount(); i++) {
       this.workers.push(
-        new psychicApp.backgroundOptions.Worker(
-          `${pascalize(psychicApp.appName)}BackgroundJobQueue`,
-          data => this.handler(data),
-          {
-            ...workerOptions,
-            connection: this.bullConnectionOptions,
-          },
-        ),
+        new Background.Worker(Background.defaultQueueName, data => this.handler(data), {
+          ...defaultWorkerOptions,
+          connection: this.bullConnectionOptions,
+        }),
       )
     }
+
+    const extraWorkerOptions = psychicApp.namedBackgroundWorkerOptions()
+    extraWorkerOptions.forEach(opts => {
+      this.extraWorkers.push(
+        new Background.Worker(Background.defaultQueueName, data => this.handler(data), {
+          ...opts,
+          connection: this.bullConnectionOptions,
+        }),
+      )
+    })
+  }
+
+  public get allWorkers() {
+    return [...this.workers, ...this.extraWorkers]
   }
 
   public async staticMethod(
@@ -337,14 +366,16 @@ export class Background {
 
 function workerCount() {
   const psychicApp = PsychicApplication.getOrFail()
-  return psychicApp.backgroundOptions.workerCount
+  const providedWorkerCount = psychicApp.backgroundOptions.defaultWorkerCount
+  if (providedWorkerCount !== undefined) return providedWorkerCount
+  return 1
 }
 
 const background = new Background()
 export default background
 
 export async function stopBackgroundWorkers() {
-  await Promise.all(background.workers.map(worker => worker.close()))
+  await Promise.all(background.allWorkers.map(worker => worker.close()))
 }
 
 export type BackgroundQueuePriority = 'default' | 'urgent' | 'not_urgent' | 'last'
