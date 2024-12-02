@@ -207,9 +207,9 @@ function privateMethods(modelClassName: string, methods: string[]) {
 
 function loadModelStatement(modelClassName: string) {
   return `  private async ${camelize(modelClassName)}() {
-    return await this.currentUser.associationQuery('${pluralize(camelize(modelClassName))}').findOrFail(
-      this.castParam('id', 'string')
-    )
+    // return await this.currentUser.associationQuery('${pluralize(camelize(modelClassName))}').findOrFail(
+    //   this.castParam('id', 'string')
+    // )
   }`
 }
 
