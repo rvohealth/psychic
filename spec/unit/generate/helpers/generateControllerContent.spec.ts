@@ -88,9 +88,9 @@ export default class PostsController extends AuthedController {
   }
 
   private async post() {
-    return await this.currentUser.associationQuery('posts').findOrFail(
-      this.castParam('id', 'string')
-    )
+    // return await this.currentUser.associationQuery('posts').findOrFail(
+    //   this.castParam('id', 'string')
+    // )
   }
 }
 `,
@@ -184,9 +184,9 @@ export default class ApiV1HealthPostsController extends AuthedController {
   }
 
   private async healthPost() {
-    return await this.currentUser.associationQuery('healthPosts').findOrFail(
-      this.castParam('id', 'string')
-    )
+    // return await this.currentUser.associationQuery('healthPosts').findOrFail(
+    //   this.castParam('id', 'string')
+    // )
   }
 }
 `,
