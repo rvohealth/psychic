@@ -359,7 +359,7 @@ export default class OpenapiEndpointRenderer<
     return (
       Object.keys(this.query || ({} as OpenapiQueries)).map((queryName: string) => {
         const queryParam = this.query![queryName]
-        const output = {
+        let output = {
           in: 'query',
           name: queryName,
           description: queryParam.description || queryName,
@@ -375,6 +375,19 @@ export default class OpenapiEndpointRenderer<
 
         if (typeof queryParam.allowReserved === 'boolean') {
           output.allowReserved = queryParam.allowReserved
+        }
+
+        if (queryParam.schema) {
+          output = {
+            ...output,
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+            schema: this.recursivelyParseBody(
+              queryParam.schema,
+              {},
+              { target: 'request' },
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            ) as any,
+          }
         }
 
         return output
@@ -1024,6 +1037,7 @@ export interface OpenapiQueryOption {
   description?: string
   allowReserved?: boolean
   allowEmptyValue?: boolean
+  schema?: OpenapiBodySegment
 }
 
 export type OpenapiQueries = Record<string, OpenapiQueryOption>

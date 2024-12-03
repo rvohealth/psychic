@@ -183,6 +183,44 @@ describe('OpenapiEndpointRenderer', () => {
         )
       })
 
+      context('custom type is provided', () => {
+        it('applies override', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+            query: {
+              search: {
+                required: true,
+                description: 'the search term',
+                schema: 'string[]',
+              },
+            },
+          })
+
+          const response = renderer.toPathObject({}, routes)
+          expect(response).toEqual(
+            expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              '/users/howyadoin': expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                parameters: expect.arrayContaining([
+                  {
+                    in: 'query',
+                    name: 'search',
+                    required: true,
+                    description: 'the search term',
+                    schema: {
+                      type: 'array',
+                      items: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                ]),
+              }),
+            }),
+          )
+        })
+      })
+
       context('allowReserved is overridden', () => {
         it('applies override', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
