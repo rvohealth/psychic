@@ -1,25 +1,14 @@
-import { createClient, RedisClientOptions } from 'redis'
-import redisOptions from '../psychic-application/helpers/redisOptions'
+import Redis from 'ioredis'
+import PsychicApplication from '../psychic-application'
 
-let redisWsClientCache: ReturnType<typeof createClient> | null = null
+let redisWsClientCache: Redis | null = null
 
-export default async function createWsRedisClient(): Promise<ReturnType<typeof createClient>> {
+export default async function createWsRedisClient(): Promise<Redis> {
   if (redisWsClientCache) return redisWsClientCache
 
-  const redisOpts = redisOptions('ws')
+  const psychicApp = PsychicApplication.getOrFail()
 
-  const creds = {
-    username: redisOpts.username,
-    password: redisOpts.password,
-    socket: {
-      host: redisOpts.host,
-      port: redisOpts.port ? parseInt(redisOpts.port) : 6379,
-      tls: (!!redisOpts.secure || undefined) as true,
-      rejectUnauthorized: !!redisOpts.secure,
-    },
-  } as RedisClientOptions
-
-  const client = createClient(creds)
+  const client = new Redis(psychicApp.redisWebsocketOptions.redis)
   redisWsClientCache = client
 
   await client.connect()

@@ -1,9 +1,15 @@
 import { Dream, IdType, pascalize, testEnv } from '@rvohealth/dream'
-import { ConnectionOptions, Job, Queue, QueueEvents, Worker } from 'bullmq'
+import { Job, Queue, QueueEvents, Worker } from 'bullmq'
+import Redis, { Cluster } from 'ioredis'
 import { devEnvBool } from '../helpers/envValue'
-import PsychicApplication from '../psychic-application'
+import PsychicApplication, {
+  BullMQNativeWorkerOptions,
+  PsychicBackgroundNativeBullMQOptions,
+  PsychicBackgroundSimpleOptions,
+  PsychicBackgroundWorkstreamOptions,
+  QueueOptionsWithConnectionInstance,
+} from '../psychic-application'
 import lookupClassByGlobalName from '../psychic-application/helpers/lookupClassByGlobalName'
-import redisOptions from '../psychic-application/helpers/redisOptions'
 
 type JobTypes =
   | 'BackgroundJobQueueFunctionJob'
@@ -45,77 +51,217 @@ export class Background {
     return (psychicApp.backgroundOptions.providers?.QueueEvents || QueueEvents) as typeof QueueEvents
   }
 
-  public queue: Queue | null = null
-  public queueEvents: QueueEvents
+  public queues: Queue[] = []
+  public queueEvents: QueueEvents[] = []
   public workers: Worker[] = []
-  public extraWorkers: Worker[] = []
 
-  public connect() {
+  public connect(
+    opts: {
+      activateWorkers: boolean
+    } = { activateWorkers: false },
+  ) {
+    const activateWorkers = opts.activateWorkers
+
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) return
-    if (this.queue) return
+    if (this.queues.length) return
 
     const psychicApp = PsychicApplication.getOrFail()
 
     if (!psychicApp?.useRedis)
       throw new Error(`attempting to use background jobs, but config.useRedis is not set to true.`)
 
-    const queueOptions = psychicApp.backgroundQueueOptions()
+    const defaultBullMQQueueOptions = psychicApp.backgroundOptions.defaultBullMQQueueOptions || {}
 
-    const bullConnectionOpts = this.bullConnectionOptions
+    if ((psychicApp.backgroundOptions as PsychicBackgroundNativeBullMQOptions).nativeBullMQ) {
+      ///////////////////////////
+      // native BullMQ options //
+      ///////////////////////////
 
-    this.queue ||= new Background.Queue(Background.defaultQueueName, {
-      ...queueOptions,
-      connection: bullConnectionOpts,
-    })
-    this.queueEvents = new Background.QueueEvents(this.queue.name, {
-      connection: bullConnectionOpts,
-    })
-  }
+      const backgroundOptions: PsychicBackgroundNativeBullMQOptions =
+        psychicApp.backgroundOptions as PsychicBackgroundNativeBullMQOptions
+      const nativeBullMQ = backgroundOptions.nativeBullMQ
+      const defaultConnection = nativeBullMQ.defaultQueueOptions?.connection || backgroundOptions.connection
+      const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultConnection)
 
-  private get bullConnectionOptions(): ConnectionOptions {
-    const connectionOptions = redisOptions('background_jobs')
-    return {
-      host: connectionOptions.host,
-      username: connectionOptions.username,
-      password: connectionOptions.password,
-      port: connectionOptions.port ? parseInt(connectionOptions.port) : undefined,
-      tls: connectionOptions.secure
-        ? {
-            rejectUnauthorized: false,
+      //////////////////////////
+      // create default queue //
+      //////////////////////////
+      this.queues.push(
+        new Background.Queue(formattedQueueName, {
+          ...defaultBullMQQueueOptions,
+          ...(nativeBullMQ.defaultQueueOptions || {}),
+          connection: defaultConnection,
+        }),
+      )
+      this.queueEvents.push(new Background.QueueEvents(formattedQueueName, { connection: defaultConnection }))
+      ///////////////////////////////
+      // end: create default queue //
+      ///////////////////////////////
+
+      /////////////////////////////
+      // create default workers //
+      /////////////////////////////
+      if (activateWorkers) {
+        for (let i = 0; i < (nativeBullMQ.defaultWorkerCount || 1); i++) {
+          this.workers.push(
+            new Background.Worker(formattedQueueName, data => this.handler(data), {
+              ...(backgroundOptions.nativeBullMQ.defaultWorkerOptions || {}),
+              connection: defaultConnection,
+            }),
+          )
+        }
+      }
+      /////////////////////////////////
+      // end: create default workers //
+      /////////////////////////////////
+
+      /////////////////////////
+      // create named queues //
+      /////////////////////////
+      const namedQueueOptionsMap: Record<string, QueueOptionsWithConnectionInstance> =
+        nativeBullMQ.namedQueueOptions || {}
+
+      Object.keys(namedQueueOptionsMap).forEach(queueName => {
+        const namedQueueOptions: QueueOptionsWithConnectionInstance = namedQueueOptionsMap[queueName]
+        const namedQueueConnection = namedQueueOptions.connection || defaultConnection
+        const formattedQueuename = nameToRedisQueueName(queueName, namedQueueConnection)
+
+        this.queues.push(
+          new Background.Queue(formattedQueuename, {
+            ...defaultBullMQQueueOptions,
+            ...namedQueueOptions,
+            connection: namedQueueConnection,
+          }),
+        )
+        this.queueEvents.push(
+          new Background.QueueEvents(formattedQueuename, { connection: namedQueueConnection }),
+        )
+
+        //////////////////////////
+        // create extra workers //
+        //////////////////////////
+        if (activateWorkers) {
+          ;(nativeBullMQ.extraWorkers || [])
+            .filter(extraWorkerOptions => extraWorkerOptions.queueName === queueName)
+            .forEach((extraWorkerOptions: BullMQNativeWorkerOptions) => {
+              for (let i = 0; i < (extraWorkerOptions.workerCount || 1); i++) {
+                this.workers.push(
+                  new Background.Worker(formattedQueuename, data => this.handler(data), {
+                    ...extraWorkerOptions,
+                    connection: namedQueueConnection,
+                  }),
+                )
+              }
+            })
+        }
+        ///////////////////////////////
+        // end: create extra workers //
+        ///////////////////////////////
+      })
+      //////////////////////////////
+      // end: create named queues //
+      //////////////////////////////
+
+      ////////////////////////////////
+      // end: native BullMQ options //
+      ////////////////////////////////
+    } else {
+      /////////////////////////////////
+      // Psychic background options //
+      /////////////////////////////////
+      const backgroundOptions: PsychicBackgroundSimpleOptions =
+        psychicApp.backgroundOptions as PsychicBackgroundSimpleOptions
+      const defaultConnection = backgroundOptions.connection
+      const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultConnection)
+
+      ///////////////////////////////
+      // create default workstream //
+      ///////////////////////////////
+      this.queues.push(
+        new Background.Queue(formattedQueueName, {
+          ...defaultBullMQQueueOptions,
+          connection: defaultConnection,
+        }),
+      )
+      this.queueEvents.push(new Background.QueueEvents(formattedQueueName, { connection: defaultConnection }))
+      ////////////////////////////////////
+      // end: create default workstream //
+      ////////////////////////////////////
+
+      /////////////////////////////
+      // create default workers //
+      /////////////////////////////
+      if (activateWorkers) {
+        for (let i = 0; i < (backgroundOptions.defaultWorkstream?.parallelization || 1); i++) {
+          this.workers.push(
+            new Background.Worker(formattedQueueName, data => this.handler(data), {
+              connection: defaultConnection,
+            }),
+          )
+        }
+      }
+      /////////////////////////////////
+      // end: create default workers //
+      /////////////////////////////////
+
+      //////////////////////////////
+      // create named workstreams //
+      //////////////////////////////
+      const namedWorkstreams: PsychicBackgroundWorkstreamOptions[] = backgroundOptions.namedWorkstreams || []
+
+      namedWorkstreams.forEach(namedWorkstream => {
+        const namedWorkstreamConnection = namedWorkstream.connection || defaultConnection
+        const namedWorkstreamFormattedQueueName = nameToRedisQueueName(
+          namedWorkstream.name,
+          namedWorkstreamConnection,
+        )
+
+        this.queues.push(
+          new Background.Queue(namedWorkstreamFormattedQueueName, {
+            ...defaultBullMQQueueOptions,
+            connection: namedWorkstreamConnection,
+          }),
+        )
+        this.queueEvents.push(
+          new Background.QueueEvents(namedWorkstreamFormattedQueueName, {
+            connection: namedWorkstreamConnection,
+          }),
+        )
+
+        //////////////////////////
+        // create named workers //
+        //////////////////////////
+        if (activateWorkers) {
+          for (let i = 0; i < (namedWorkstream.parallelization || 1); i++) {
+            this.workers.push(
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+              new Background.Worker(namedWorkstreamFormattedQueueName, data => this.handler(data), {
+                group: {
+                  limit: namedWorkstream.rateLimit,
+                },
+                connection: namedWorkstreamConnection,
+                // typing as any because Psychic can't be aware of BullMQ Pro options
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              } as any),
+            )
           }
-        : undefined,
-      connectTimeout: 5000,
+        }
+        ///////////////////////////////
+        // end: create named workers //
+        ///////////////////////////////
+      })
+      ///////////////////////////////////
+      // end: create named workstreams //
+      ///////////////////////////////////
+
+      ////////////////////////////////
+      // Psychic background options //
+      ////////////////////////////////
     }
   }
 
   public work() {
-    this.connect()
-
-    const psychicApp = PsychicApplication.getOrFail()
-    const defaultWorkerOptions = psychicApp.defaultBackgroundWorkerOptions()
-
-    for (let i = 0; i < workerCount(); i++) {
-      this.workers.push(
-        new Background.Worker(Background.defaultQueueName, data => this.handler(data), {
-          ...defaultWorkerOptions,
-          connection: this.bullConnectionOptions,
-        }),
-      )
-    }
-
-    const extraWorkerOptions = psychicApp.namedBackgroundWorkerOptions()
-    extraWorkerOptions.forEach(opts => {
-      this.extraWorkers.push(
-        new Background.Worker(Background.defaultQueueName, data => this.handler(data), {
-          ...opts,
-          connection: this.bullConnectionOptions,
-        }),
-      )
-    })
-  }
-
-  public get allWorkers() {
-    return [...this.workers, ...this.extraWorkers]
+    this.connect({ activateWorkers: true })
   }
 
   public async staticMethod(
@@ -364,18 +510,61 @@ export class Background {
   }
 }
 
-function workerCount() {
-  const psychicApp = PsychicApplication.getOrFail()
-  const providedWorkerCount = psychicApp.backgroundOptions.defaultWorkerCount
-  if (providedWorkerCount !== undefined) return providedWorkerCount
-  return 1
-}
-
 const background = new Background()
 export default background
 
 export async function stopBackgroundWorkers() {
-  await Promise.all(background.allWorkers.map(worker => worker.close()))
+  await Promise.all(background.workers.map(worker => worker.close()))
 }
 
 export type BackgroundQueuePriority = 'default' | 'urgent' | 'not_urgent' | 'last'
+
+// /**
+//  * @internal
+//  *
+//  * Returns either the namedNativeBullMQWorkers, or else the translated form of the
+//  * namedWorkstreams arg, or else a blank array
+//  */
+// public namedBackgroundWorkerOptions(): BullmqProWorkerOptions[] {
+//   const nativeOpts = this.backgroundOptions
+//   if (nativeOpts.namedNativeBullMQWorkers) {
+//     return nativeOpts.namedNativeBullMQWorkers
+//   }
+
+//   const simpleOpts = this.backgroundOptions as PsychicBackgroundSimpleOptions
+//   if (simpleOpts.namedWorkstreams) {
+//     return simpleOpts.namedWorkstreams.map(workstreamOpts =>
+//       this.transformWorkstreamOptsToWorkerOpts(workstreamOpts),
+//     )
+//   }
+
+//   return []
+// }
+
+// /**
+//  * @internal
+//  *
+//  * Translates provided namedWorkstream option into
+//  * a BullmqProWorkerOptions object, used by
+//  * #namedBackgroundWorkerOptions to build worker options
+//  * to provide to BullMQ (or BullMQ Pro).
+//  */
+// private transformWorkstreamOptsToWorkerOpts(
+//   workstreamOpts: PsychicBackgroundWorkstreamOptions,
+// ): BullmqProWorkerOptions {
+//   if (!workstreamOpts.name && workstreamOpts.rateLimit)
+//     throw new Error(`Must provide name when providing rateLimit`)
+
+//   return {
+//     group: {
+//       id: workstreamOpts.name,
+//       limit: workstreamOpts.rateLimit,
+//     },
+//   }
+// }
+
+function nameToRedisQueueName(queueName: string, redis: Redis | Cluster): string {
+  queueName = queueName.replace(/\{|\}/g, '')
+  if (redis instanceof Cluster) return `{${queueName}}`
+  return queueName
+}

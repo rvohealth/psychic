@@ -111,7 +111,7 @@ export default class Cable {
   }
 
   public async bindToRedis() {
-    const userRedisCreds = this.config.redisWsCredentials
+    const userRedisCreds = this.config.redisWebsocketOptions
     const creds = {
       username: userRedisCreds.username,
       password: userRedisCreds.password,
