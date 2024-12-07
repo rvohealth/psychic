@@ -54,9 +54,9 @@ export class Background {
     return (psychicApp.backgroundOptions.providers?.QueueEvents || QueueEvents) as typeof QueueEvents
   }
 
-  private defaultQueue: Queue | null = null
+  public defaultQueue: Queue | null = null
+  public queueNameMap: Record<string, string> = {}
   private namedQueues: Record<string, Queue> = {}
-  private queueNameMap: Record<string, string> = {}
   private queueEvents: QueueEvents[] = []
   public workers: Worker[] = []
 
