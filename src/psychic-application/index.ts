@@ -177,9 +177,9 @@ Try setting it to something valid, like:
     return this._logger
   }
 
-  private _redisWebsocketOptions: PsychicWebsocketOptions
+  private _websocketOptions: PsychicWebsocketOptions
   public get websocketOptions() {
-    return this._redisWebsocketOptions
+    return this._websocketOptions
   }
 
   private _sslCredentials?: PsychicSslCredentials
@@ -465,7 +465,7 @@ Try setting it to something valid, like:
         break
 
       case 'websockets':
-        this._redisWebsocketOptions = {
+        this._websocketOptions = {
           ...(value as PsychicWebsocketOptions),
         }
         break

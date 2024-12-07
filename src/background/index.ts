@@ -234,6 +234,7 @@ export class Background {
               // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
               new Background.Worker(namedWorkstreamFormattedQueueName, data => this.handler(data), {
                 group: {
+                  id: namedWorkstream.name,
                   limit: namedWorkstream.rateLimit,
                 },
                 connection: namedWorkstreamConnection,
