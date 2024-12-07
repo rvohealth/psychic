@@ -3,8 +3,8 @@ import path from 'path'
 import { BackgroundedService, PsychicApplication } from '../../../../src'
 
 export default class UrgentDummyService extends BackgroundedService {
-  public static get priority() {
-    return 'urgent' as const
+  public static get backgroundConfig() {
+    return { priority: 'urgent' as const }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

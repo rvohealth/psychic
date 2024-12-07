@@ -1,7 +1,7 @@
 import BaseDummyScheduledService from './BaseDummyScheduledService'
 
 export default class LastDummyScheduledService extends BaseDummyScheduledService {
-  public static get priority() {
-    return 'last' as const
+  public static get backgroundConfig() {
+    return { priority: 'last' as const }
   }
 }

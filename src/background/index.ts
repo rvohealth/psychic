@@ -3,8 +3,6 @@ import { Job, Queue, QueueEvents, Worker } from 'bullmq'
 import Redis, { Cluster } from 'ioredis'
 import NoQueueForSpecifiedQueueName from '../error/background/NoQueueForSpecifiedQueueName'
 import NoQueueForSpecifiedWorkstream from '../error/background/NoQueueForSpecifiedWorkstream'
-import WorkstreamIncompatibleWithGroupId from '../error/background/WorkstreamIncompatibleWithGroupId'
-import WorkstreamIncompatibleWithQueue from '../error/background/WorkstreamIncompatibleWithQueue'
 import { devEnvBool } from '../helpers/envValue'
 import PsychicApplication, {
   BullMQNativeWorkerOptions,
@@ -270,10 +268,7 @@ export class Background {
       delaySeconds,
       globalName,
       args = [],
-      workstream,
-      queue,
-      groupId,
-      priority = 'default',
+      backgroundConfig = {},
     }: {
       globalName: string
       filepath?: string
@@ -281,20 +276,9 @@ export class Background {
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      workstream?: string
-      queue?: string
-      groupId?: string
-      priority?: BackgroundQueuePriority
+      backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig
     },
   ) {
-    this.throwErrorIfInvalidWorkstreamQueueGroupIdCombination({
-      className: ObjectClass.name,
-      method,
-      workstream,
-      queue,
-      groupId,
-    })
-
     this.connect()
 
     await this._addToQueue(
@@ -303,10 +287,10 @@ export class Background {
         globalName,
         method,
         args,
-        groupId,
-        priority,
+        groupId: this.backgroundConfigToGroupId(backgroundConfig),
+        priority: this.backgroundConfigToPriority(backgroundConfig),
       },
-      { delaySeconds, workstream, queue },
+      { delaySeconds, backgroundConfig },
     )
   }
 
@@ -317,30 +301,16 @@ export class Background {
     {
       globalName,
       args = [],
-      workstream,
-      queue,
-      groupId,
-      priority = 'default',
+      backgroundConfig = {},
     }: {
       globalName: string
       filepath?: string
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      workstream?: string
-      queue?: string
-      groupId?: string
-      priority?: BackgroundQueuePriority
+      backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig
     },
   ) {
-    this.throwErrorIfInvalidWorkstreamQueueGroupIdCombination({
-      className: ObjectClass.name,
-      method,
-      workstream,
-      queue,
-      groupId,
-    })
-
     this.connect()
 
     // `jobId` is used to determine uniqueness along with name and repeat pattern.
@@ -351,56 +321,44 @@ export class Background {
     // See: https://docs.bullmq.io/guide/jobs/repeatable
     const jobId = `${ObjectClass.name}:${method}`
 
-    await this.queueInstance({ workstream, queue }).add(
+    await this.queueInstance(backgroundConfig).add(
       'BackgroundJobQueueStaticJob',
       {
         globalName,
         method,
         args,
-        group: groupId ? { id: groupId } : undefined,
-        priority,
+        groupID: this.backgroundConfigToGroupId(backgroundConfig),
+        priority: this.backgroundConfigToPriority(backgroundConfig),
       },
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       {
         repeat: {
           pattern,
         },
         jobId,
-        priority: this.getPriorityForQueue(priority),
-      },
+        group: this.backgroundConfigToGroup(backgroundConfig),
+        priority: this.mapPriorityWordToPriorityNumber(this.backgroundConfigToPriority(backgroundConfig)),
+        // typing as any because Psychic can't be aware of BullMQ Pro options
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any,
     )
   }
 
-  private queueInstance({ workstream, queue }: { workstream?: string; queue?: string }) {
-    const queueInstance: Queue | undefined = workstream
-      ? this.namedQueues[workstream]
-      : queue
-        ? this.namedQueues[queue]
+  private queueInstance(values: BackgroundWorkstreamConfig | BackgroundQueueConfig) {
+    const workstreamConfig = values as BackgroundWorkstreamConfig
+    const queueConfig = values as BackgroundQueueConfig
+    const queueInstance: Queue | undefined = workstreamConfig.workstream
+      ? this.namedQueues[workstreamConfig.workstream]
+      : queueConfig.queue
+        ? this.namedQueues[queueConfig.queue]
         : this.defaultQueue!
 
     if (!queueInstance) {
-      if (workstream) throw new NoQueueForSpecifiedWorkstream(workstream)
-      if (queue) throw new NoQueueForSpecifiedQueueName(queue)
+      if (workstreamConfig.workstream) throw new NoQueueForSpecifiedWorkstream(workstreamConfig.workstream)
+      if (queueConfig.queue) throw new NoQueueForSpecifiedQueueName(queueConfig.queue)
     }
 
     return queueInstance
-  }
-
-  private throwErrorIfInvalidWorkstreamQueueGroupIdCombination({
-    className,
-    method,
-    workstream,
-    queue,
-    groupId,
-  }: {
-    className: string
-    method: string
-    workstream?: string
-    queue?: string
-    groupId?: string
-  }) {
-    if (workstream && queue) throw new WorkstreamIncompatibleWithQueue(className, method, workstream, queue)
-    if (workstream && groupId)
-      throw new WorkstreamIncompatibleWithGroupId(className, method, workstream, groupId)
   }
 
   public async instanceMethod(
@@ -411,10 +369,7 @@ export class Background {
       globalName,
       args = [],
       constructorArgs = [],
-      workstream,
-      queue,
-      groupId,
-      priority = 'default',
+      backgroundConfig = {},
     }: {
       globalName: string
       delaySeconds?: number
@@ -424,19 +379,9 @@ export class Background {
       args?: any[]
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       constructorArgs?: any[]
-      workstream?: string
-      queue?: string
-      groupId?: string
-      priority?: BackgroundQueuePriority
+      backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig
     },
   ) {
-    this.throwErrorIfInvalidWorkstreamQueueGroupIdCombination({
-      className: ObjectClass.name,
-      method,
-      workstream,
-      queue,
-      groupId,
-    })
     this.connect()
 
     await this._addToQueue(
@@ -446,10 +391,10 @@ export class Background {
         method,
         args,
         constructorArgs,
-        groupId,
-        priority,
+        groupId: this.backgroundConfigToGroupId(backgroundConfig),
+        priority: this.backgroundConfigToPriority(backgroundConfig),
       },
-      { delaySeconds, workstream, queue },
+      { delaySeconds, backgroundConfig },
     )
   }
 
@@ -459,29 +404,15 @@ export class Background {
     {
       delaySeconds,
       args = [],
-      workstream,
-      queue,
-      groupId,
-      priority = 'default',
+      backgroundConfig = {},
     }: {
       delaySeconds?: number
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      workstream?: string
-      queue?: string
-      groupId?: string
-      priority?: BackgroundQueuePriority
+      backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig
     },
   ) {
-    this.throwErrorIfInvalidWorkstreamQueueGroupIdCombination({
-      className: modelInstance.constructor.name,
-      method,
-      workstream,
-      queue,
-      groupId,
-    })
-
     this.connect()
 
     await this._addToQueue(
@@ -491,10 +422,10 @@ export class Background {
         globalName: (modelInstance.constructor as typeof Dream).globalName,
         method,
         args,
-        groupId,
-        priority,
+        groupId: this.backgroundConfigToGroupId(backgroundConfig),
+        priority: this.backgroundConfigToPriority(backgroundConfig),
       },
-      { delaySeconds, workstream, queue },
+      { delaySeconds, backgroundConfig },
     )
   }
 
@@ -504,17 +435,15 @@ export class Background {
     jobData: BackgroundJobData,
     {
       delaySeconds,
-      workstream,
-      queue,
+      backgroundConfig,
     }: {
       delaySeconds?: number
-      workstream?: string
-      queue?: string
+      backgroundConfig: BackgroundWorkstreamConfig | BackgroundQueueConfig
     },
   ) {
     // set this variable out side of the conditional so that
     // mismatches will raise exceptions even in tests
-    const queueInstance = this.queueInstance({ workstream, queue })
+    const queueInstance = this.queueInstance(backgroundConfig)
 
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) {
       await this.doWork(jobType, jobData)
@@ -522,15 +451,47 @@ export class Background {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await queueInstance.add(jobType, jobData, {
         delay: delaySeconds ? delaySeconds * 1000 : undefined,
-        group: jobData.groupId ? { id: jobData.groupId } : undefined,
-        priority: this.getPriorityForQueue(jobData.priority),
+        group: this.groupIdToGroupConfig(jobData.groupId),
+        priority: this.mapPriorityWordToPriorityNumber(jobData.priority),
         // typing as any because Psychic can't be aware of BullMQ Pro options
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)
     }
   }
 
-  private getPriorityForQueue(priority: BackgroundQueuePriority) {
+  private backgroundConfigToPriority(
+    backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig,
+  ): BackgroundQueuePriority {
+    if (!backgroundConfig) return 'default'
+    return backgroundConfig.priority || 'default'
+  }
+
+  private backgroundConfigToGroupId(
+    backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig,
+  ): string | undefined {
+    if (!backgroundConfig) return
+
+    const workstreamConfig = backgroundConfig as BackgroundWorkstreamConfig
+    if (workstreamConfig.workstream) return workstreamConfig.workstream
+
+    const queueConfig = backgroundConfig as BackgroundQueueConfig
+    if (queueConfig.groupId) return queueConfig.groupId
+
+    return
+  }
+
+  private backgroundConfigToGroup(
+    backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig,
+  ): { id: string } | undefined {
+    return this.groupIdToGroupConfig(this.backgroundConfigToGroupId(backgroundConfig))
+  }
+
+  private groupIdToGroupConfig(groupId: string | undefined): { id: string } | undefined {
+    if (!groupId) return
+    return { id: groupId }
+  }
+
+  private mapPriorityWordToPriorityNumber(priority: BackgroundQueuePriority) {
     switch (priority) {
       case 'urgent':
         return 1
@@ -623,7 +584,18 @@ export async function stopBackgroundWorkers() {
   await Promise.all(background.workers.map(worker => worker.close()))
 }
 
-export type BackgroundQueuePriority = 'default' | 'urgent' | 'not_urgent' | 'last'
+type BackgroundQueuePriority = 'default' | 'urgent' | 'not_urgent' | 'last'
+
+export interface BackgroundWorkstreamConfig {
+  workstream?: string
+  priority?: BackgroundQueuePriority
+}
+
+export interface BackgroundQueueConfig {
+  queue?: string
+  groupId?: string
+  priority?: BackgroundQueuePriority
+}
 
 // /**
 //  * @internal
