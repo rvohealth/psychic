@@ -118,7 +118,7 @@ describe('background (app singleton)', () => {
         })
 
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(background.defaultQueue!.add).toHaveBeenCalledWith(
+        expect(background.namedQueues['snazzy'].add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
             globalName: 'services/DummyService',
