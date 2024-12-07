@@ -54,10 +54,10 @@ export class Background {
     return (psychicApp.backgroundOptions.providers?.QueueEvents || QueueEvents) as typeof QueueEvents
   }
 
-  public defaultQueue: Queue | null = null
-  public namedQueues: Record<string, Queue> = {}
-  public queueNameIsGroupName: boolean = true
-  public queueEvents: QueueEvents[] = []
+  private defaultQueue: Queue | null = null
+  private namedQueues: Record<string, Queue> = {}
+  private queueNameMap: Record<string, string> = {}
+  private queueEvents: QueueEvents[] = []
   public workers: Worker[] = []
 
   public connect({
@@ -76,8 +76,6 @@ export class Background {
     const defaultBullMQQueueOptions = psychicApp.backgroundOptions.defaultBullMQQueueOptions || {}
 
     if ((psychicApp.backgroundOptions as PsychicBackgroundNativeBullMQOptions).nativeBullMQ) {
-      this.queueNameIsGroupName = false
-
       ///////////////////////////
       // native BullMQ options //
       ///////////////////////////
@@ -128,6 +126,7 @@ export class Background {
         const namedQueueOptions: QueueOptionsWithConnectionInstance = namedQueueOptionsMap[queueName]
         const namedQueueConnection = namedQueueOptions.connection || defaultConnection
         const formattedQueuename = nameToRedisQueueName(queueName, namedQueueConnection)
+        this.queueNameMap[queueName] = formattedQueueName
 
         this.namedQueues[queueName] = new Background.Queue(formattedQueuename, {
           ...defaultBullMQQueueOptions,
@@ -214,6 +213,7 @@ export class Background {
           namedWorkstream.name,
           namedWorkstreamConnection,
         )
+        this.queueNameMap[namedWorkstream.name] = namedWorkstreamFormattedQueueName
 
         this.namedQueues[namedWorkstream.name] = new Background.Queue(namedWorkstreamFormattedQueueName, {
           ...defaultBullMQQueueOptions,
@@ -349,9 +349,9 @@ export class Background {
     const workstreamConfig = values as BackgroundWorkstreamConfig
     const queueConfig = values as BackgroundQueueConfig
     const queueInstance: Queue | undefined = workstreamConfig.workstream
-      ? this.namedQueues[workstreamConfig.workstream]
+      ? this.namedQueues[this.queueNameMap[workstreamConfig.workstream]]
       : queueConfig.queue
-        ? this.namedQueues[queueConfig.queue]
+        ? this.namedQueues[this.queueNameMap[queueConfig.queue]]
         : this.defaultQueue!
 
     if (!queueInstance) {
