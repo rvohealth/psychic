@@ -1,40 +1,41 @@
-import { DateTime } from 'luxon'
 import { Dream, IdType, testEnv, uniq } from '@rvohealth/dream'
-import { createClient } from 'redis'
 import { Emitter } from '@socket.io/redis-emitter'
-import createWsRedisClient from './createWsRedisClient'
+import Redis from 'ioredis'
+import { DateTime } from 'luxon'
 import { Socket } from 'socket.io'
+import PsychicApplication from '../psychic-application'
 import redisWsKey from './redisWsKey'
 
 export default class Ws<AllowedPaths extends readonly string[]> {
   public io: Emitter
-  private redisClient: ReturnType<typeof createClient>
+  private redisClient: Redis
   private booted = false
   private namespace: string
   private redisKeyPrefix: string
 
   public static async register(socket: Socket, id: IdType | Dream, redisKeyPrefix: string = 'user') {
-    const redisClient = await createWsRedisClient()
+    const psychicApp = PsychicApplication.getOrFail()
+    const redisClient = psychicApp.websocketOptions.connection
     const interpretedId = (id as Dream)?.isDreamInstance ? (id as Dream).primaryKeyValue : (id as IdType)
     const key = redisWsKey(interpretedId, redisKeyPrefix)
 
-    const socketIdsToKeep = await redisClient.lRange(redisWsKey(interpretedId, redisKeyPrefix), -2, -1)
+    const socketIdsToKeep = await redisClient.lrange(redisWsKey(interpretedId, redisKeyPrefix), -2, -1)
 
     await redisClient
       .multi()
       .del(key)
-      .rPush(key, [...socketIdsToKeep, socket.id])
-      .expireAt(
+      .rpush(key, ...socketIdsToKeep, socket.id)
+      .expireat(
         key,
         // TODO: make this configurable in non-test environments
         DateTime.now()
           .plus(testEnv() ? { seconds: 15 } : { day: 1 })
-          .toJSDate(),
+          .toSeconds(),
       )
       .exec()
 
     socket.on('disconnect', async () => {
-      await redisClient.lRem(key, 1, socket.id)
+      await redisClient.lrem(key, 1, socket.id)
     })
 
     const ws = new Ws(['/ops/connection-success'] as const)
@@ -57,10 +58,12 @@ export default class Ws<AllowedPaths extends readonly string[]> {
     this.redisKeyPrefix = redisKeyPrefix
   }
 
-  public async boot() {
+  public boot() {
     if (this.booted) return
 
-    this.redisClient = await createWsRedisClient()
+    const psychicApp = PsychicApplication.getOrFail()
+    this.redisClient = psychicApp.websocketOptions.connection
+
     this.io = new Emitter(this.redisClient).of(this.namespace)
     this.booted = true
   }
@@ -74,7 +77,7 @@ export default class Ws<AllowedPaths extends readonly string[]> {
   ) {
     if (this.allowedPaths.length && !this.allowedPaths.includes(path)) throw new InvalidWsPathError(path)
 
-    await this.boot()
+    this.boot()
     const socketIds = await this.findSocketIds(
       (id as Dream)?.isDreamInstance ? (id as Dream).primaryKeyValue : (id as IdType),
     )
@@ -85,8 +88,8 @@ export default class Ws<AllowedPaths extends readonly string[]> {
   }
 
   public async findSocketIds(id: IdType): Promise<string[]> {
-    await this.boot()
-    return uniq(await this.redisClient.lRange(this.redisKey(id), 0, -1))
+    this.boot()
+    return uniq(await this.redisClient.lrange(this.redisKey(id), 0, -1))
   }
 
   private redisKey(userId: IdType) {

@@ -23,7 +23,7 @@ describe('background (app singleton)', () => {
     const subject = async () => {
       await background.modelInstanceMethod(user, 'testBackground', {
         args: ['howyadoin'],
-        priority,
+        backgroundConfig: { priority },
       })
     }
     let priority: BackgroundQueuePriority
@@ -34,7 +34,7 @@ describe('background (app singleton)', () => {
 
     function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(background.queue!.add).toHaveBeenCalledWith(
+      expect(background.defaultQueue!.add).toHaveBeenCalledWith(
         'BackgroundJobQueueModelInstanceJob',
         {
           globalName: 'User',
@@ -51,7 +51,7 @@ describe('background (app singleton)', () => {
       process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
       background.connect()
 
-      jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
+      jest.spyOn(background.defaultQueue!, 'add').mockResolvedValue({} as Job)
     })
 
     afterEach(() => {
@@ -119,7 +119,7 @@ describe('background (app singleton)', () => {
 
     function expectAddedToQueueWithDelay(priority: BackgroundQueuePriority, delay: number) {
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(background.queue!.add).toHaveBeenCalledWith(
+      expect(background.defaultQueue!.add).toHaveBeenCalledWith(
         'BackgroundJobQueueModelInstanceJob',
         {
           globalName: 'User',
@@ -136,7 +136,7 @@ describe('background (app singleton)', () => {
       process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
       background.connect()
 
-      jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
+      jest.spyOn(background.defaultQueue!, 'add').mockResolvedValue({} as Job)
     })
 
     afterEach(() => {

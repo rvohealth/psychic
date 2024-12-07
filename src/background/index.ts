@@ -584,7 +584,7 @@ export async function stopBackgroundWorkers() {
   await Promise.all(background.workers.map(worker => worker.close()))
 }
 
-type BackgroundQueuePriority = 'default' | 'urgent' | 'not_urgent' | 'last'
+export type BackgroundQueuePriority = 'default' | 'urgent' | 'not_urgent' | 'last'
 
 export interface BackgroundWorkstreamConfig {
   workstream?: string

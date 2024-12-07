@@ -12,7 +12,7 @@ import { Queue, QueueEvents, QueueOptions, Worker } from 'bullmq'
 import { CorsOptions } from 'cors'
 import { Application, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
-import Redis, { Cluster, RedisOptions } from 'ioredis'
+import Redis, { Cluster } from 'ioredis'
 import { Socket, Server as SocketServer } from 'socket.io'
 import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
@@ -178,7 +178,7 @@ Try setting it to something valid, like:
   }
 
   private _redisWebsocketOptions: PsychicWebsocketOptions
-  public get redisWebsocketOptions() {
+  public get websocketOptions() {
     return this._redisWebsocketOptions
   }
 
@@ -586,7 +586,7 @@ interface PsychicPathOptions {
 }
 
 interface PsychicWebsocketOptions {
-  redis: RedisOptions
+  connection: Redis
 }
 
 type RedisOrRedisClusterConnection = Redis | Cluster

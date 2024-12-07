@@ -1,4 +1,6 @@
 import { developmentOrTestEnv, Encrypt } from '@rvohealth/dream'
+import { Queue, QueueEvents, Worker } from 'bullmq'
+import Redis from 'ioredis'
 import path from 'path'
 import winston from 'winston'
 import Ws from '../../../src/cable/ws'
@@ -6,7 +8,6 @@ import PsychicApplication from '../../../src/psychic-application'
 import User from '../app/models/User'
 import inflections from './inflections'
 import routesCb from './routes'
-import { Queue, QueueEvents, Worker } from 'bullmq'
 
 export default async (psy: PsychicApplication) => {
   await psy.load('controllers', path.join(__dirname, '..', 'app', 'controllers'))
@@ -122,13 +123,13 @@ export default async (psy: PsychicApplication) => {
   })
 
   psy.set('background', {
-    // workerCount: parseInt(process.env.WORKER_COUNT || '0'),
     providers: {
       Queue,
       Worker,
       QueueEvents,
     },
-    defaultQueue: {
+
+    defaultBullMQQueueOptions: {
       defaultJobOptions: {
         removeOnComplete: 1000,
         removeOnFail: 20000,
@@ -142,28 +143,32 @@ export default async (psy: PsychicApplication) => {
       },
     },
 
-    defaultWorkerCount: parseInt(process.env.WORKER_COUNT || '0'),
+    defaultWorkstream: {
+      parallelization: parseInt(process.env.WORKER_COUNT || '0'),
+    },
 
-    // only done for configuration testing
     namedWorkstreams: [{ parallelization: 1, name: 'extra-worker', rateLimit: { max: 1, duration: 1 } }],
-  })
 
-  // redis background job credentials
-  psy.set('redis:background', {
-    username: process.env.REDIS_USER,
-    password: process.env.REDIS_PASSWORD,
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    secure: process.env.REDIS_USE_SSL === '1',
+    connection: new Redis({
+      username: process.env.REDIS_USER,
+      password: process.env.REDIS_PASSWORD,
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
+      tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
+      maxRetriesPerRequest: null,
+    }),
   })
 
   // redis websocket credentials
-  psy.set('redis:ws', {
-    username: process.env.REDIS_USER,
-    password: process.env.REDIS_PASSWORD,
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    secure: process.env.REDIS_USE_SSL === '1',
+  psy.set('websockets', {
+    connection: new Redis({
+      username: process.env.REDIS_USER,
+      password: process.env.REDIS_PASSWORD,
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
+      tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
+      maxRetriesPerRequest: null,
+    }),
   })
 
   // ******

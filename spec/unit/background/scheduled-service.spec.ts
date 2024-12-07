@@ -21,7 +21,7 @@ describe('ScheduledService', () => {
 
     function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(background.queue!.add).toHaveBeenCalledWith(
+      expect(background.defaultQueue!.add).toHaveBeenCalledWith(
         'BackgroundJobQueueStaticJob',
         {
           globalName: `services/${serviceClass.name}`,
@@ -44,7 +44,7 @@ describe('ScheduledService', () => {
       process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
       background.connect()
 
-      jest.spyOn(background.queue!, 'add').mockResolvedValue({} as Job)
+      jest.spyOn(background.defaultQueue!, 'add').mockResolvedValue({} as Job)
     })
 
     afterEach(() => {
