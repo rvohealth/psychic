@@ -1,6 +1,10 @@
 import { Dream, IdType, pascalize, testEnv } from '@rvohealth/dream'
 import { Job, Queue, QueueEvents, Worker } from 'bullmq'
 import Redis, { Cluster } from 'ioredis'
+import NoQueueForSpecifiedQueueName from '../error/background/NoQueueForSpecifiedQueueName'
+import NoQueueForSpecifiedWorkstream from '../error/background/NoQueueForSpecifiedWorkstream'
+import WorkstreamIncompatibleWithGroupId from '../error/background/WorkstreamIncompatibleWithGroupId'
+import WorkstreamIncompatibleWithQueue from '../error/background/WorkstreamIncompatibleWithQueue'
 import { devEnvBool } from '../helpers/envValue'
 import PsychicApplication, {
   BullMQNativeWorkerOptions,
@@ -28,6 +32,7 @@ export interface BackgroundJobData {
   importKey?: string
   globalName?: string
   priority: BackgroundQueuePriority
+  groupId?: string
 }
 
 export class Background {
@@ -51,19 +56,19 @@ export class Background {
     return (psychicApp.backgroundOptions.providers?.QueueEvents || QueueEvents) as typeof QueueEvents
   }
 
-  public queues: Queue[] = []
+  public defaultQueue: Queue | null = null
+  public namedQueues: Record<string, Queue> = {}
+  public queueNameIsGroupName: boolean = true
   public queueEvents: QueueEvents[] = []
   public workers: Worker[] = []
 
-  public connect(
-    opts: {
-      activateWorkers: boolean
-    } = { activateWorkers: false },
-  ) {
-    const activateWorkers = opts.activateWorkers
-
+  public connect({
+    activateWorkers = false,
+  }: {
+    activateWorkers?: boolean
+  } = {}) {
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) return
-    if (this.queues.length) return
+    if (this.defaultQueue) return
 
     const psychicApp = PsychicApplication.getOrFail()
 
@@ -73,6 +78,8 @@ export class Background {
     const defaultBullMQQueueOptions = psychicApp.backgroundOptions.defaultBullMQQueueOptions || {}
 
     if ((psychicApp.backgroundOptions as PsychicBackgroundNativeBullMQOptions).nativeBullMQ) {
+      this.queueNameIsGroupName = false
+
       ///////////////////////////
       // native BullMQ options //
       ///////////////////////////
@@ -86,13 +93,11 @@ export class Background {
       //////////////////////////
       // create default queue //
       //////////////////////////
-      this.queues.push(
-        new Background.Queue(formattedQueueName, {
-          ...defaultBullMQQueueOptions,
-          ...(nativeBullMQ.defaultQueueOptions || {}),
-          connection: defaultConnection,
-        }),
-      )
+      this.defaultQueue = new Background.Queue(formattedQueueName, {
+        ...defaultBullMQQueueOptions,
+        ...(nativeBullMQ.defaultQueueOptions || {}),
+        connection: defaultConnection,
+      })
       this.queueEvents.push(new Background.QueueEvents(formattedQueueName, { connection: defaultConnection }))
       ///////////////////////////////
       // end: create default queue //
@@ -126,13 +131,11 @@ export class Background {
         const namedQueueConnection = namedQueueOptions.connection || defaultConnection
         const formattedQueuename = nameToRedisQueueName(queueName, namedQueueConnection)
 
-        this.queues.push(
-          new Background.Queue(formattedQueuename, {
-            ...defaultBullMQQueueOptions,
-            ...namedQueueOptions,
-            connection: namedQueueConnection,
-          }),
-        )
+        this.namedQueues[queueName] = new Background.Queue(formattedQueuename, {
+          ...defaultBullMQQueueOptions,
+          ...namedQueueOptions,
+          connection: namedQueueConnection,
+        })
         this.queueEvents.push(
           new Background.QueueEvents(formattedQueuename, { connection: namedQueueConnection }),
         )
@@ -177,12 +180,10 @@ export class Background {
       ///////////////////////////////
       // create default workstream //
       ///////////////////////////////
-      this.queues.push(
-        new Background.Queue(formattedQueueName, {
-          ...defaultBullMQQueueOptions,
-          connection: defaultConnection,
-        }),
-      )
+      this.defaultQueue = new Background.Queue(formattedQueueName, {
+        ...defaultBullMQQueueOptions,
+        connection: defaultConnection,
+      })
       this.queueEvents.push(new Background.QueueEvents(formattedQueueName, { connection: defaultConnection }))
       ////////////////////////////////////
       // end: create default workstream //
@@ -216,12 +217,10 @@ export class Background {
           namedWorkstreamConnection,
         )
 
-        this.queues.push(
-          new Background.Queue(namedWorkstreamFormattedQueueName, {
-            ...defaultBullMQQueueOptions,
-            connection: namedWorkstreamConnection,
-          }),
-        )
+        this.namedQueues[namedWorkstream.name] = new Background.Queue(namedWorkstreamFormattedQueueName, {
+          ...defaultBullMQQueueOptions,
+          connection: namedWorkstreamConnection,
+        })
         this.queueEvents.push(
           new Background.QueueEvents(namedWorkstreamFormattedQueueName, {
             connection: namedWorkstreamConnection,
@@ -271,6 +270,9 @@ export class Background {
       delaySeconds,
       globalName,
       args = [],
+      workstream,
+      queue,
+      groupId,
       priority = 'default',
     }: {
       globalName: string
@@ -279,19 +281,32 @@ export class Background {
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
+      workstream?: string
+      queue?: string
+      groupId?: string
       priority?: BackgroundQueuePriority
     },
   ) {
+    this.throwErrorIfInvalidWorkstreamQueueGroupIdCombination({
+      className: ObjectClass.name,
+      method,
+      workstream,
+      queue,
+      groupId,
+    })
+
     this.connect()
+
     await this._addToQueue(
       `BackgroundJobQueueStaticJob`,
       {
         globalName,
         method,
         args,
+        groupId,
         priority,
       },
-      { delaySeconds },
+      { delaySeconds, workstream, queue },
     )
   }
 
@@ -302,6 +317,9 @@ export class Background {
     {
       globalName,
       args = [],
+      workstream,
+      queue,
+      groupId,
       priority = 'default',
     }: {
       globalName: string
@@ -309,9 +327,20 @@ export class Background {
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
+      workstream?: string
+      queue?: string
+      groupId?: string
       priority?: BackgroundQueuePriority
     },
   ) {
+    this.throwErrorIfInvalidWorkstreamQueueGroupIdCombination({
+      className: ObjectClass.name,
+      method,
+      workstream,
+      queue,
+      groupId,
+    })
+
     this.connect()
 
     // `jobId` is used to determine uniqueness along with name and repeat pattern.
@@ -322,12 +351,13 @@ export class Background {
     // See: https://docs.bullmq.io/guide/jobs/repeatable
     const jobId = `${ObjectClass.name}:${method}`
 
-    await this.queue!.add(
+    await this.queueInstance({ workstream, queue }).add(
       'BackgroundJobQueueStaticJob',
       {
         globalName,
         method,
         args,
+        group: groupId ? { id: groupId } : undefined,
         priority,
       },
       {
@@ -340,6 +370,39 @@ export class Background {
     )
   }
 
+  private queueInstance({ workstream, queue }: { workstream?: string; queue?: string }) {
+    const queueInstance: Queue | undefined = workstream
+      ? this.namedQueues[workstream]
+      : queue
+        ? this.namedQueues[queue]
+        : this.defaultQueue!
+
+    if (!queueInstance) {
+      if (workstream) throw new NoQueueForSpecifiedWorkstream(workstream)
+      if (queue) throw new NoQueueForSpecifiedQueueName(queue)
+    }
+
+    return queueInstance
+  }
+
+  private throwErrorIfInvalidWorkstreamQueueGroupIdCombination({
+    className,
+    method,
+    workstream,
+    queue,
+    groupId,
+  }: {
+    className: string
+    method: string
+    workstream?: string
+    queue?: string
+    groupId?: string
+  }) {
+    if (workstream && queue) throw new WorkstreamIncompatibleWithQueue(className, method, workstream, queue)
+    if (workstream && groupId)
+      throw new WorkstreamIncompatibleWithGroupId(className, method, workstream, groupId)
+  }
+
   public async instanceMethod(
     ObjectClass: Record<'name', string>,
     method: string,
@@ -348,6 +411,9 @@ export class Background {
       globalName,
       args = [],
       constructorArgs = [],
+      workstream,
+      queue,
+      groupId,
       priority = 'default',
     }: {
       globalName: string
@@ -358,10 +424,21 @@ export class Background {
       args?: any[]
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       constructorArgs?: any[]
+      workstream?: string
+      queue?: string
+      groupId?: string
       priority?: BackgroundQueuePriority
     },
   ) {
+    this.throwErrorIfInvalidWorkstreamQueueGroupIdCombination({
+      className: ObjectClass.name,
+      method,
+      workstream,
+      queue,
+      groupId,
+    })
     this.connect()
+
     await this._addToQueue(
       'BackgroundJobQueueInstanceJob',
       {
@@ -369,9 +446,10 @@ export class Background {
         method,
         args,
         constructorArgs,
+        groupId,
         priority,
       },
-      { delaySeconds },
+      { delaySeconds, workstream, queue },
     )
   }
 
@@ -381,16 +459,31 @@ export class Background {
     {
       delaySeconds,
       args = [],
+      workstream,
+      queue,
+      groupId,
       priority = 'default',
     }: {
       delaySeconds?: number
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
+      workstream?: string
+      queue?: string
+      groupId?: string
       priority?: BackgroundQueuePriority
     },
   ) {
+    this.throwErrorIfInvalidWorkstreamQueueGroupIdCombination({
+      className: modelInstance.constructor.name,
+      method,
+      workstream,
+      queue,
+      groupId,
+    })
+
     this.connect()
+
     await this._addToQueue(
       'BackgroundJobQueueModelInstanceJob',
       {
@@ -398,9 +491,10 @@ export class Background {
         globalName: (modelInstance.constructor as typeof Dream).globalName,
         method,
         args,
+        groupId,
         priority,
       },
-      { delaySeconds },
+      { delaySeconds, workstream, queue },
     )
   }
 
@@ -410,17 +504,29 @@ export class Background {
     jobData: BackgroundJobData,
     {
       delaySeconds,
+      workstream,
+      queue,
     }: {
       delaySeconds?: number
+      workstream?: string
+      queue?: string
     },
   ) {
+    // set this variable out side of the conditional so that
+    // mismatches will raise exceptions even in tests
+    const queueInstance = this.queueInstance({ workstream, queue })
+
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) {
       await this.doWork(jobType, jobData)
     } else {
-      await this.queue!.add(jobType, jobData, {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+      await queueInstance.add(jobType, jobData, {
         delay: delaySeconds ? delaySeconds * 1000 : undefined,
+        group: jobData.groupId ? { id: jobData.groupId } : undefined,
         priority: this.getPriorityForQueue(jobData.priority),
-      })
+        // typing as any because Psychic can't be aware of BullMQ Pro options
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      } as any)
     }
   }
 
