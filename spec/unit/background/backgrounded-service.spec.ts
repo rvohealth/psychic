@@ -3,6 +3,7 @@ import { Job } from 'bullmq'
 import background, { BackgroundQueuePriority } from '../../../src/background'
 import DummyService from '../../../test-app/src/app/services/DummyService'
 import LastDummyService from '../../../test-app/src/app/services/LastDummyService'
+import LastDummyServiceInNamedWorkstream from '../../../test-app/src/app/services/LastDummyServiceInNamedWorkstream'
 import NotUrgentDummyService from '../../../test-app/src/app/services/NotUrgentDummyService'
 import UrgentDummyService from '../../../test-app/src/app/services/UrgentDummyService'
 
@@ -111,6 +112,40 @@ describe('BackgroundedService', () => {
         })
       })
     })
+
+    context('named workstream', () => {
+      beforeEach(() => {
+        process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
+        background.connect()
+        jest.spyOn(background.namedQueues['snazzy'], 'add').mockResolvedValue({} as Job)
+      })
+
+      afterEach(() => {
+        process.env.REALLY_TEST_BACKGROUND_QUEUE = undefined
+      })
+
+      it('adds the job to the queue corresponding to the workstream name with the workstream name as the group ID', async () => {
+        await new LastDummyServiceInNamedWorkstream('hello').background('instanceRunInBG', {
+          args: ['bottlearum'],
+          constructorArgs: ['bottleawhiskey'],
+        })
+
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        expect(background.namedQueues['snazzy'].add).toHaveBeenCalledWith(
+          'BackgroundJobQueueInstanceJob',
+          {
+            globalName: 'services/LastDummyServiceInNamedWorkstream',
+            args: ['bottlearum'],
+            constructorArgs: ['bottleawhiskey'],
+            groupId: 'snazzy',
+            priority: 'last',
+            importKey: undefined,
+            method: 'instanceRunInBG',
+          },
+          { priority: 4, group: { id: 'snazzy' } },
+        )
+      })
+    })
   })
 
   describe('.backgroundWithDelay', () => {
@@ -216,6 +251,40 @@ describe('BackgroundedService', () => {
           await subject()
           expectAddedToQueueWithPriority('last', 4)
         })
+      })
+    })
+
+    context('named workstream', () => {
+      beforeEach(() => {
+        process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
+        background.connect()
+        jest.spyOn(background.namedQueues['snazzy'], 'add').mockResolvedValue({} as Job)
+      })
+
+      afterEach(() => {
+        process.env.REALLY_TEST_BACKGROUND_QUEUE = undefined
+      })
+
+      it('adds the job to the queue corresponding to the workstream name with the workstream name as the group ID', async () => {
+        await new LastDummyServiceInNamedWorkstream('hello').backgroundWithDelay(7, 'instanceRunInBG', {
+          args: ['bottlearum'],
+          constructorArgs: ['bottleawhiskey'],
+        })
+
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        expect(background.namedQueues['snazzy'].add).toHaveBeenCalledWith(
+          'BackgroundJobQueueInstanceJob',
+          {
+            globalName: 'services/LastDummyServiceInNamedWorkstream',
+            args: ['bottlearum'],
+            constructorArgs: ['bottleawhiskey'],
+            groupId: 'snazzy',
+            priority: 'last',
+            importKey: undefined,
+            method: 'instanceRunInBG',
+          },
+          { delay: 7000, priority: 4, group: { id: 'snazzy' } },
+        )
       })
     })
   })

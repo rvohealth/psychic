@@ -1,9 +1,9 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { BackgroundedService, PsychicApplication } from '../../../../src'
+import { BackgroundedService, PsychicApplication, WorkstreamBackgroundJobConfig } from '../../../../src'
 
 export default class LastDummyService extends BackgroundedService {
-  public static get backgroundConfig() {
+  public static get backgroundConfig(): WorkstreamBackgroundJobConfig {
     return { priority: 'last' as const }
   }
 

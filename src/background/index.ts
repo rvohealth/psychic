@@ -55,8 +55,8 @@ export class Background {
   }
 
   public defaultQueue: Queue | null = null
-  public queueNameMap: Record<string, string> = {}
-  private namedQueues: Record<string, Queue> = {}
+  public namedQueues: Record<string, Queue> = {}
+  private queueNameMap: Record<string, string> = {}
   private queueEvents: QueueEvents[] = []
   public workers: Worker[] = []
 
@@ -277,7 +277,7 @@ export class Background {
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig
+      backgroundConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
@@ -309,7 +309,7 @@ export class Background {
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig
+      backgroundConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
@@ -345,9 +345,9 @@ export class Background {
     )
   }
 
-  private queueInstance(values: BackgroundWorkstreamConfig | BackgroundQueueConfig) {
-    const workstreamConfig = values as BackgroundWorkstreamConfig
-    const queueConfig = values as BackgroundQueueConfig
+  private queueInstance(values: BackgroundJobConfig) {
+    const workstreamConfig = values as WorkstreamBackgroundJobConfig
+    const queueConfig = values as QueueBackgroundJobConfig
     const queueInstance: Queue | undefined = workstreamConfig.workstream
       ? this.namedQueues[this.queueNameMap[workstreamConfig.workstream]]
       : queueConfig.queue
@@ -380,7 +380,7 @@ export class Background {
       args?: any[]
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       constructorArgs?: any[]
-      backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig
+      backgroundConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
@@ -411,7 +411,7 @@ export class Background {
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig
+      backgroundConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
@@ -439,7 +439,7 @@ export class Background {
       backgroundConfig,
     }: {
       delaySeconds?: number
-      backgroundConfig: BackgroundWorkstreamConfig | BackgroundQueueConfig
+      backgroundConfig: BackgroundJobConfig
     },
   ) {
     // set this variable out side of the conditional so that
@@ -460,30 +460,24 @@ export class Background {
     }
   }
 
-  private backgroundConfigToPriority(
-    backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig,
-  ): BackgroundQueuePriority {
+  private backgroundConfigToPriority(backgroundConfig?: BackgroundJobConfig): BackgroundQueuePriority {
     if (!backgroundConfig) return 'default'
     return backgroundConfig.priority || 'default'
   }
 
-  private backgroundConfigToGroupId(
-    backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig,
-  ): string | undefined {
+  private backgroundConfigToGroupId(backgroundConfig?: BackgroundJobConfig): string | undefined {
     if (!backgroundConfig) return
 
-    const workstreamConfig = backgroundConfig as BackgroundWorkstreamConfig
+    const workstreamConfig = backgroundConfig as WorkstreamBackgroundJobConfig
     if (workstreamConfig.workstream) return workstreamConfig.workstream
 
-    const queueConfig = backgroundConfig as BackgroundQueueConfig
+    const queueConfig = backgroundConfig as QueueBackgroundJobConfig
     if (queueConfig.groupId) return queueConfig.groupId
 
     return
   }
 
-  private backgroundConfigToGroup(
-    backgroundConfig?: BackgroundWorkstreamConfig | BackgroundQueueConfig,
-  ): { id: string } | undefined {
+  private backgroundConfigToGroup(backgroundConfig?: BackgroundJobConfig): { id: string } | undefined {
     return this.groupIdToGroupConfig(this.backgroundConfigToGroupId(backgroundConfig))
   }
 
@@ -587,16 +581,23 @@ export async function stopBackgroundWorkers() {
 
 export type BackgroundQueuePriority = 'default' | 'urgent' | 'not_urgent' | 'last'
 
-export interface BackgroundWorkstreamConfig {
-  workstream?: string
+interface BaseBackgroundJobConfig {
   priority?: BackgroundQueuePriority
 }
 
-export interface BackgroundQueueConfig {
-  queue?: string
-  groupId?: string
-  priority?: BackgroundQueuePriority
+export interface WorkstreamBackgroundJobConfig extends BaseBackgroundJobConfig {
+  groupId?: never
+  queue?: never
+  workstream?: string
 }
+
+export interface QueueBackgroundJobConfig extends BaseBackgroundJobConfig {
+  groupId?: string
+  queue?: string
+  workstream?: never
+}
+
+export type BackgroundJobConfig = WorkstreamBackgroundJobConfig | QueueBackgroundJobConfig
 
 // /**
 //  * @internal

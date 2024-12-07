@@ -1,9 +1,9 @@
 import { GlobalNameNotSet } from '@rvohealth/dream'
 import { FunctionPropertyNames } from '../helpers/typeHelpers'
-import background, { BackgroundQueueConfig, BackgroundWorkstreamConfig } from './'
+import background, { BackgroundJobConfig } from './'
 
 export default class BackgroundedService {
-  public static get backgroundConfig(): BackgroundWorkstreamConfig | BackgroundQueueConfig {
+  public static get backgroundConfig(): BackgroundJobConfig {
     return {}
   }
 

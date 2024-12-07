@@ -98,6 +98,42 @@ describe('background (app singleton)', () => {
       })
     })
 
+    context('named workstream', () => {
+      beforeEach(() => {
+        process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
+        background.connect()
+        jest.spyOn(background.namedQueues['snazzy'], 'add').mockResolvedValue({} as Job)
+      })
+
+      afterEach(() => {
+        process.env.REALLY_TEST_BACKGROUND_QUEUE = undefined
+      })
+
+      it('adds the job to the queue corresponding to the workstream name with the workstream name as the group ID', async () => {
+        await background.instanceMethod(DummyService, 'instanceRunInBG', {
+          args: ['bottlearum'],
+          constructorArgs: ['bottleawhiskey'],
+          globalName: 'services/DummyService',
+          backgroundConfig: { priority: 'last', workstream: 'snazzy' },
+        })
+
+        // eslint-disable-next-line @typescript-eslint/unbound-method
+        expect(background.defaultQueue!.add).toHaveBeenCalledWith(
+          'BackgroundJobQueueInstanceJob',
+          {
+            globalName: 'services/DummyService',
+            args: ['bottlearum'],
+            constructorArgs: ['bottleawhiskey'],
+            groupId: 'snazzy',
+            priority: 'last',
+            importKey: undefined,
+            method: 'instanceRunInBG',
+          },
+          { priority: 4, group: { id: 'snazzy' } },
+        )
+      })
+    })
+
     context('delaySeconds', () => {
       const subject = async () => {
         await background.instanceMethod(DummyService, 'instanceRunInBG', {

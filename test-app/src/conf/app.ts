@@ -147,7 +147,7 @@ export default async (psy: PsychicApplication) => {
       parallelization: parseInt(process.env.WORKER_COUNT || '0'),
     },
 
-    namedWorkstreams: [{ parallelization: 1, name: 'extra-worker', rateLimit: { max: 1, duration: 1 } }],
+    namedWorkstreams: [{ parallelization: 1, name: 'snazzy', rateLimit: { max: 1, duration: 1 } }],
 
     connection: new Redis({
       username: process.env.REDIS_USER,
