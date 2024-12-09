@@ -615,7 +615,10 @@ interface PsychicBackgroundSharedOptions {
   connection: RedisOrRedisClusterConnection
 }
 
-export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSharedOptions {
+export interface PsychicBackgroundSimpleBaseOptions extends PsychicBackgroundSharedOptions {
+  defaultBullMQQueueOptions?: Omit<QueueOptions, 'connection'>
+  connection: RedisOrRedisClusterConnection
+
   defaultWorkstream?: {
     parallelization?: number
   }
@@ -632,6 +635,15 @@ export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSharedO
    * for interacting with external APIs)
    */
   namedWorkstreams?: PsychicBackgroundWorkstreamOptions[]
+}
+
+export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSimpleBaseOptions {
+  /**
+   * When transitioning from one instance of Redis to another, we can set up transitionalWorkstreams
+   * so that jobs already added to the legacy Redis instance continue to be worked. Once all jobs
+   * from the legacy Redis have been run, this configuration may be removed.
+   */
+  transitionalWorkstreams?: PsychicBackgroundSimpleBaseOptions
 }
 
 // QueueOptionsWithConnectionInstance instead of QueueOptions because we need to be able to

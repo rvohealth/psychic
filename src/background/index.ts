@@ -1,5 +1,5 @@
 import { Dream, IdType, pascalize, testEnv } from '@rvohealth/dream'
-import { Job, Queue, QueueEvents, Worker } from 'bullmq'
+import { Job, Queue, QueueEvents, QueueOptions, Worker } from 'bullmq'
 import Redis, { Cluster } from 'ioredis'
 import NoQueueForSpecifiedQueueName from '../error/background/NoQueueForSpecifiedQueueName'
 import NoQueueForSpecifiedWorkstream from '../error/background/NoQueueForSpecifiedWorkstream'
@@ -7,6 +7,7 @@ import { devEnvBool } from '../helpers/envValue'
 import PsychicApplication, {
   BullMQNativeWorkerOptions,
   PsychicBackgroundNativeBullMQOptions,
+  PsychicBackgroundSimpleBaseOptions,
   PsychicBackgroundSimpleOptions,
   PsychicBackgroundWorkstreamOptions,
   QueueOptionsWithConnectionInstance,
@@ -76,186 +77,239 @@ export class Background {
     const defaultBullMQQueueOptions = psychicApp.backgroundOptions.defaultBullMQQueueOptions || {}
 
     if ((psychicApp.backgroundOptions as PsychicBackgroundNativeBullMQOptions).nativeBullMQ) {
-      ///////////////////////////
-      // native BullMQ options //
-      ///////////////////////////
-
-      const backgroundOptions: PsychicBackgroundNativeBullMQOptions =
-        psychicApp.backgroundOptions as PsychicBackgroundNativeBullMQOptions
-      const nativeBullMQ = backgroundOptions.nativeBullMQ
-      const defaultConnection = nativeBullMQ.defaultQueueOptions?.connection || backgroundOptions.connection
-      const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultConnection)
-
-      //////////////////////////
-      // create default queue //
-      //////////////////////////
-      this.defaultQueue = new Background.Queue(formattedQueueName, {
-        ...defaultBullMQQueueOptions,
-        ...(nativeBullMQ.defaultQueueOptions || {}),
-        connection: defaultConnection,
-      })
-      this.queueEvents.push(new Background.QueueEvents(formattedQueueName, { connection: defaultConnection }))
-      ///////////////////////////////
-      // end: create default queue //
-      ///////////////////////////////
-
-      /////////////////////////////
-      // create default workers //
-      /////////////////////////////
-      if (activateWorkers) {
-        for (let i = 0; i < (nativeBullMQ.defaultWorkerCount || 1); i++) {
-          this.workers.push(
-            new Background.Worker(formattedQueueName, data => this.handler(data), {
-              ...(backgroundOptions.nativeBullMQ.defaultWorkerOptions || {}),
-              connection: defaultConnection,
-            }),
-          )
-        }
-      }
-      /////////////////////////////////
-      // end: create default workers //
-      /////////////////////////////////
-
-      /////////////////////////
-      // create named queues //
-      /////////////////////////
-      const namedQueueOptionsMap: Record<string, QueueOptionsWithConnectionInstance> =
-        nativeBullMQ.namedQueueOptions || {}
-
-      Object.keys(namedQueueOptionsMap).forEach(queueName => {
-        const namedQueueOptions: QueueOptionsWithConnectionInstance = namedQueueOptionsMap[queueName]
-        const namedQueueConnection = namedQueueOptions.connection || defaultConnection
-        const formattedQueuename = nameToRedisQueueName(queueName, namedQueueConnection)
-        this.queueNameMap[queueName] = formattedQueueName
-
-        this.namedQueues[queueName] = new Background.Queue(formattedQueuename, {
-          ...defaultBullMQQueueOptions,
-          ...namedQueueOptions,
-          connection: namedQueueConnection,
-        })
-        this.queueEvents.push(
-          new Background.QueueEvents(formattedQueuename, { connection: namedQueueConnection }),
-        )
-
-        //////////////////////////
-        // create extra workers //
-        //////////////////////////
-        if (activateWorkers) {
-          ;(nativeBullMQ.extraWorkers || [])
-            .filter(extraWorkerOptions => extraWorkerOptions.queueName === queueName)
-            .forEach((extraWorkerOptions: BullMQNativeWorkerOptions) => {
-              for (let i = 0; i < (extraWorkerOptions.workerCount || 1); i++) {
-                this.workers.push(
-                  new Background.Worker(formattedQueuename, data => this.handler(data), {
-                    ...extraWorkerOptions,
-                    connection: namedQueueConnection,
-                  }),
-                )
-              }
-            })
-        }
-        ///////////////////////////////
-        // end: create extra workers //
-        ///////////////////////////////
-      })
-      //////////////////////////////
-      // end: create named queues //
-      //////////////////////////////
-
-      ////////////////////////////////
-      // end: native BullMQ options //
-      ////////////////////////////////
+      this.nativeBullMQConnect(
+        defaultBullMQQueueOptions,
+        psychicApp.backgroundOptions as PsychicBackgroundNativeBullMQOptions,
+        { activateWorkers },
+      )
     } else {
-      /////////////////////////////////
-      // Psychic background options //
-      /////////////////////////////////
-      const backgroundOptions: PsychicBackgroundSimpleOptions =
-        psychicApp.backgroundOptions as PsychicBackgroundSimpleOptions
-      const defaultConnection = backgroundOptions.connection
-      const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultConnection)
+      this.simpleConnect(
+        defaultBullMQQueueOptions,
+        psychicApp.backgroundOptions as PsychicBackgroundSimpleOptions,
+        { activateWorkers },
+      )
+    }
+  }
 
-      ///////////////////////////////
-      // create default workstream //
-      ///////////////////////////////
-      this.defaultQueue = new Background.Queue(formattedQueueName, {
-        ...defaultBullMQQueueOptions,
-        connection: defaultConnection,
-      })
-      this.queueEvents.push(new Background.QueueEvents(formattedQueueName, { connection: defaultConnection }))
-      ////////////////////////////////////
-      // end: create default workstream //
-      ////////////////////////////////////
+  private simpleConnect(
+    defaultBullMQQueueOptions: Omit<QueueOptions, 'connection'>,
+    backgroundOptions: PsychicBackgroundSimpleOptions | PsychicBackgroundSimpleBaseOptions,
 
-      /////////////////////////////
-      // create default workers //
-      /////////////////////////////
-      if (activateWorkers) {
-        for (let i = 0; i < (backgroundOptions.defaultWorkstream?.parallelization || 1); i++) {
-          this.workers.push(
-            new Background.Worker(formattedQueueName, data => this.handler(data), {
-              connection: defaultConnection,
-            }),
-          )
-        }
-      }
-      /////////////////////////////////
-      // end: create default workers //
-      /////////////////////////////////
+    {
+      activateWorkers = false,
+      activatingTransitionalWorkstreams = false,
+    }: {
+      activateWorkers?: boolean
+      activatingTransitionalWorkstreams?: boolean
+    },
+  ) {
+    /////////////////////////////////
+    // Psychic background options //
+    /////////////////////////////////
+    const defaultConnection = backgroundOptions.connection
+    const formattedQueueName = nameToRedisQueueName(
+      activatingTransitionalWorkstreams
+        ? `Transitional${Background.defaultQueueName}`
+        : Background.defaultQueueName,
+      defaultConnection,
+    )
 
-      //////////////////////////////
-      // create named workstreams //
-      //////////////////////////////
-      const namedWorkstreams: PsychicBackgroundWorkstreamOptions[] = backgroundOptions.namedWorkstreams || []
+    ///////////////////////////////
+    // create default workstream //
+    ///////////////////////////////
 
-      namedWorkstreams.forEach(namedWorkstream => {
-        const namedWorkstreamConnection = namedWorkstream.connection || defaultConnection
-        const namedWorkstreamFormattedQueueName = nameToRedisQueueName(
-          namedWorkstream.name,
-          namedWorkstreamConnection,
-        )
-        this.queueNameMap[namedWorkstream.name] = namedWorkstreamFormattedQueueName
+    const defaultQueue = new Background.Queue(formattedQueueName, {
+      ...defaultBullMQQueueOptions,
+      connection: defaultConnection,
+    })
+    this.queueEvents.push(new Background.QueueEvents(formattedQueueName, { connection: defaultConnection }))
+    if (!activatingTransitionalWorkstreams) this.defaultQueue = defaultQueue
+    ////////////////////////////////////
+    // end: create default workstream //
+    ////////////////////////////////////
 
-        this.namedQueues[namedWorkstream.name] = new Background.Queue(namedWorkstreamFormattedQueueName, {
-          ...defaultBullMQQueueOptions,
-          connection: namedWorkstreamConnection,
-        })
-        this.queueEvents.push(
-          new Background.QueueEvents(namedWorkstreamFormattedQueueName, {
-            connection: namedWorkstreamConnection,
+    /////////////////////////////
+    // create default workers //
+    /////////////////////////////
+    if (activateWorkers) {
+      for (let i = 0; i < (backgroundOptions.defaultWorkstream?.parallelization || 1); i++) {
+        this.workers.push(
+          new Background.Worker(formattedQueueName, data => this.handler(data), {
+            connection: defaultConnection,
           }),
         )
-
-        //////////////////////////
-        // create named workers //
-        //////////////////////////
-        if (activateWorkers) {
-          for (let i = 0; i < (namedWorkstream.parallelization || 1); i++) {
-            this.workers.push(
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-              new Background.Worker(namedWorkstreamFormattedQueueName, data => this.handler(data), {
-                group: {
-                  id: namedWorkstream.name,
-                  limit: namedWorkstream.rateLimit,
-                },
-                connection: namedWorkstreamConnection,
-                // typing as any because Psychic can't be aware of BullMQ Pro options
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              } as any),
-            )
-          }
-        }
-        ///////////////////////////////
-        // end: create named workers //
-        ///////////////////////////////
-      })
-      ///////////////////////////////////
-      // end: create named workstreams //
-      ///////////////////////////////////
-
-      ////////////////////////////////
-      // Psychic background options //
-      ////////////////////////////////
+      }
     }
+    /////////////////////////////////
+    // end: create default workers //
+    /////////////////////////////////
+
+    //////////////////////////////
+    // create named workstreams //
+    //////////////////////////////
+    const namedWorkstreams: PsychicBackgroundWorkstreamOptions[] = backgroundOptions.namedWorkstreams || []
+
+    namedWorkstreams.forEach(namedWorkstream => {
+      const namedWorkstreamConnection = namedWorkstream.connection || defaultConnection
+      const namedWorkstreamFormattedQueueName = nameToRedisQueueName(
+        activatingTransitionalWorkstreams ? `Transitional${namedWorkstream.name}` : namedWorkstream.name,
+        namedWorkstreamConnection,
+      )
+
+      const namedQueue = new Background.Queue(namedWorkstreamFormattedQueueName, {
+        ...defaultBullMQQueueOptions,
+        connection: namedWorkstreamConnection,
+      })
+
+      if (!activatingTransitionalWorkstreams) {
+        this.queueNameMap[namedWorkstream.name] = namedWorkstreamFormattedQueueName
+        this.namedQueues[namedWorkstream.name] = namedQueue
+      }
+
+      this.queueEvents.push(
+        new Background.QueueEvents(namedWorkstreamFormattedQueueName, {
+          connection: namedWorkstreamConnection,
+        }),
+      )
+
+      //////////////////////////
+      // create named workers //
+      //////////////////////////
+      if (activateWorkers) {
+        for (let i = 0; i < (namedWorkstream.parallelization || 1); i++) {
+          this.workers.push(
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+            new Background.Worker(namedWorkstreamFormattedQueueName, data => this.handler(data), {
+              group: {
+                id: namedWorkstream.name,
+                limit: namedWorkstream.rateLimit,
+              },
+              connection: namedWorkstreamConnection,
+              // typing as any because Psychic can't be aware of BullMQ Pro options
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            } as any),
+          )
+        }
+      }
+      ///////////////////////////////
+      // end: create named workers //
+      ///////////////////////////////
+    })
+    ///////////////////////////////////
+    // end: create named workstreams //
+    ///////////////////////////////////
+
+    ////////////////////////////////
+    // Psychic background options //
+    ////////////////////////////////
+
+    const transitionalWorkstreams = (backgroundOptions as PsychicBackgroundSimpleOptions)
+      .transitionalWorkstreams
+
+    if (transitionalWorkstreams) {
+      this.simpleConnect(defaultBullMQQueueOptions, transitionalWorkstreams, {
+        activateWorkers,
+        activatingTransitionalWorkstreams: true,
+      })
+    }
+  }
+
+  private nativeBullMQConnect(
+    defaultBullMQQueueOptions: Omit<QueueOptions, 'connection'>,
+    backgroundOptions: PsychicBackgroundNativeBullMQOptions,
+    {
+      activateWorkers = false,
+    }: {
+      activateWorkers?: boolean
+    },
+  ) {
+    ///////////////////////////
+    // native BullMQ options //
+    ///////////////////////////
+
+    const nativeBullMQ = backgroundOptions.nativeBullMQ
+    const defaultConnection = nativeBullMQ.defaultQueueOptions?.connection || backgroundOptions.connection
+    const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultConnection)
+
+    //////////////////////////
+    // create default queue //
+    //////////////////////////
+    this.defaultQueue = new Background.Queue(formattedQueueName, {
+      ...defaultBullMQQueueOptions,
+      ...(nativeBullMQ.defaultQueueOptions || {}),
+      connection: defaultConnection,
+    })
+    this.queueEvents.push(new Background.QueueEvents(formattedQueueName, { connection: defaultConnection }))
+    ///////////////////////////////
+    // end: create default queue //
+    ///////////////////////////////
+
+    /////////////////////////////
+    // create default workers //
+    /////////////////////////////
+    if (activateWorkers) {
+      for (let i = 0; i < (nativeBullMQ.defaultWorkerCount || 1); i++) {
+        this.workers.push(
+          new Background.Worker(formattedQueueName, data => this.handler(data), {
+            ...(backgroundOptions.nativeBullMQ.defaultWorkerOptions || {}),
+            connection: defaultConnection,
+          }),
+        )
+      }
+    }
+    /////////////////////////////////
+    // end: create default workers //
+    /////////////////////////////////
+
+    /////////////////////////
+    // create named queues //
+    /////////////////////////
+    const namedQueueOptionsMap: Record<string, QueueOptionsWithConnectionInstance> =
+      nativeBullMQ.namedQueueOptions || {}
+
+    Object.keys(namedQueueOptionsMap).forEach(queueName => {
+      const namedQueueOptions: QueueOptionsWithConnectionInstance = namedQueueOptionsMap[queueName]
+      const namedQueueConnection = namedQueueOptions.connection || defaultConnection
+      const formattedQueuename = nameToRedisQueueName(queueName, namedQueueConnection)
+      this.queueNameMap[queueName] = formattedQueueName
+
+      this.namedQueues[queueName] = new Background.Queue(formattedQueuename, {
+        ...defaultBullMQQueueOptions,
+        ...namedQueueOptions,
+        connection: namedQueueConnection,
+      })
+      this.queueEvents.push(
+        new Background.QueueEvents(formattedQueuename, { connection: namedQueueConnection }),
+      )
+
+      //////////////////////////
+      // create extra workers //
+      //////////////////////////
+      if (activateWorkers) {
+        ;(nativeBullMQ.extraWorkers || [])
+          .filter(extraWorkerOptions => extraWorkerOptions.queueName === queueName)
+          .forEach((extraWorkerOptions: BullMQNativeWorkerOptions) => {
+            for (let i = 0; i < (extraWorkerOptions.workerCount || 1); i++) {
+              this.workers.push(
+                new Background.Worker(formattedQueuename, data => this.handler(data), {
+                  ...extraWorkerOptions,
+                  connection: namedQueueConnection,
+                }),
+              )
+            }
+          })
+      }
+      ///////////////////////////////
+      // end: create extra workers //
+      ///////////////////////////////
+    })
+    //////////////////////////////
+    // end: create named queues //
+    //////////////////////////////
+
+    ////////////////////////////////
+    // end: native BullMQ options //
+    ////////////////////////////////
   }
 
   public work() {
