@@ -1,13 +1,7 @@
 import _pluralize from 'pluralize'
 export const pluralize = _pluralize
 
-export {
-  BackgroundJobConfig,
-  QueueBackgroundJobConfig,
-  WorkstreamBackgroundJobConfig,
-  default as background,
-  stopBackgroundWorkers,
-} from './background'
+export { BackgroundJobConfig, default as background, stopBackgroundWorkers } from './background'
 export { default as BackgroundedService } from './background/backgrounded-service'
 export { default as ScheduledService } from './background/scheduled-service'
 export { default as PsychicBin } from './bin'
