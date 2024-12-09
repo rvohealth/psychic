@@ -68,10 +68,6 @@ export class Background {
     if (this.defaultQueue) return
 
     const psychicApp = PsychicApplication.getOrFail()
-
-    if (!psychicApp?.useRedis)
-      throw new Error(`attempting to use background jobs, but config.useRedis is not set to true.`)
-
     const defaultBullMQQueueOptions = psychicApp.backgroundOptions.defaultBullMQQueueOptions || {}
 
     if ((psychicApp.backgroundOptions as PsychicBackgroundNativeBullMQOptions).nativeBullMQ) {
