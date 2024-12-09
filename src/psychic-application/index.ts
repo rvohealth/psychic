@@ -621,15 +621,6 @@ export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSharedO
   }
 
   /**
-   * Options to provide to configure additional workers under
-   * the hood. Usually, this is done to narrowly scope some workers
-   * to specific jobs, allowing you to apply targeted rate limiting
-   * rules (Which can only be done in BullMQ Pro).
-   *
-   * NOTE: this feature is exclusive to BullMQ Pro
-   */
-
-  /**
    * When running background jobs on BullMQ, each named workstream corresponds
    * to a specific queue and workers created for a named workstream are given
    * a groupId corresponding to the workstream name
