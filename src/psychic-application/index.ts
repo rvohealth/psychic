@@ -628,6 +628,18 @@ export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSharedO
    *
    * NOTE: this feature is exclusive to BullMQ Pro
    */
+
+  /**
+   * When running background jobs on BullMQ, each named workstream corresponds
+   * to a specific queue and workers created for a named workstream are given
+   * a groupId corresponding to the workstream name
+   *
+   * named workstreams are useful for dispersing queues among nodes in a Redis cluster
+   * and for running queues on different Redis instances
+   *
+   * With BullMQ Pro, named workstreams can be rate limited (useful
+   * for interacting with external APIs)
+   */
   namedWorkstreams?: PsychicBackgroundWorkstreamOptions[]
 }
 
@@ -642,6 +654,10 @@ export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundS
     // automatically wrap the queue name with {} on a cluster, and the best way to test if on
     // a redis cluster is when we have connection instances, not just connection configs
     defaultQueueOptions?: QueueOptionsWithConnectionInstance
+    /**
+     * named queues are useful for dispersing queues among nodes in a Redis cluster
+     * and for running queues on different Redis instances
+     */
     namedQueueOptions?: Record<string, QueueOptionsWithConnectionInstance>
 
     /**
@@ -664,12 +680,9 @@ export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundS
     defaultWorkerCount?: number
 
     /**
-     * Options to provide to configure additional workers under
-     * the hood. Usually, this is done to narrowly scope some workers
-     * to specific jobs, allowing you to apply targeted rate limiting
-     * rules (Which can only be done in BullMQ Pro).
-     *
-     * NOTE: this feature is exclusive to BullMQ Pro
+     * extraWorkers are necessary to work off namedQueues
+     * With BullMQ Pro, extraWorkers can be rate limited (useful
+     * for interacting with external APIs)
      */
     extraWorkers?: BullMQNativeWorkerOptions[]
   }
