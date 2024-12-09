@@ -709,11 +709,8 @@ export interface PsychicBackgroundWorkstreamOptions {
   workerCount?: number
 
   /**
-   * A unique identifier for this workstream. This will map to the
-   * groupId of the worker under the hood.
-   *
-   * NOTE: this feature is exclusive to BullMQ Pro, so don't bother
-   * providing it unless you are using BullMQ Pro.
+   * See https://docs.bullmq.io/bullmq-pro/groups/rate-limiting for documentation
+   * on rate limiting in BullMQ Pro (requires paid BullMQ Pro license)
    */
   rateLimit?: {
     max?: number
