@@ -30,8 +30,6 @@ export interface BackgroundJobData {
   filepath?: string
   importKey?: string
   globalName?: string
-  priority: BackgroundQueuePriority
-  groupId?: string
 }
 
 export class Background {
@@ -342,10 +340,13 @@ export class Background {
         globalName,
         method,
         args,
+      },
+      {
+        delaySeconds,
+        backgroundConfig,
         groupId: this.backgroundConfigToGroupId(backgroundConfig),
         priority: this.backgroundConfigToPriority(backgroundConfig),
       },
-      { delaySeconds, backgroundConfig },
     )
   }
 
@@ -382,8 +383,6 @@ export class Background {
         globalName,
         method,
         args,
-        groupID: this.backgroundConfigToGroupId(backgroundConfig),
-        priority: this.backgroundConfigToPriority(backgroundConfig),
       },
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       {
@@ -446,10 +445,13 @@ export class Background {
         method,
         args,
         constructorArgs,
+      },
+      {
+        delaySeconds,
+        backgroundConfig,
         groupId: this.backgroundConfigToGroupId(backgroundConfig),
         priority: this.backgroundConfigToPriority(backgroundConfig),
       },
-      { delaySeconds, backgroundConfig },
     )
   }
 
@@ -477,10 +479,13 @@ export class Background {
         globalName: (modelInstance.constructor as typeof Dream).globalName,
         method,
         args,
+      },
+      {
+        delaySeconds,
+        backgroundConfig,
         groupId: this.backgroundConfigToGroupId(backgroundConfig),
         priority: this.backgroundConfigToPriority(backgroundConfig),
       },
-      { delaySeconds, backgroundConfig },
     )
   }
 
@@ -491,9 +496,13 @@ export class Background {
     {
       delaySeconds,
       backgroundConfig,
+      priority,
+      groupId,
     }: {
       delaySeconds?: number
       backgroundConfig: BackgroundJobConfig
+      priority: BackgroundQueuePriority
+      groupId?: string
     },
   ) {
     // set this variable out side of the conditional so that
@@ -506,8 +515,8 @@ export class Background {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await queueInstance.add(jobType, jobData, {
         delay: delaySeconds ? delaySeconds * 1000 : undefined,
-        group: this.groupIdToGroupConfig(jobData.groupId),
-        priority: this.mapPriorityWordToPriorityNumber(jobData.priority),
+        group: this.groupIdToGroupConfig(groupId),
+        priority: this.mapPriorityWordToPriorityNumber(priority),
         // typing as any because Psychic can't be aware of BullMQ Pro options
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any)

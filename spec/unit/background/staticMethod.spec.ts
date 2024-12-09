@@ -30,7 +30,6 @@ describe('background (app singleton)', () => {
           {
             globalName: 'DummyService',
             args: ['bottlearum'],
-            priority,
             importKey: undefined,
             method: 'classRunInBG',
           },
@@ -111,7 +110,6 @@ describe('background (app singleton)', () => {
           {
             globalName: 'DummyService',
             args: ['bottlearum'],
-            priority,
             importKey: undefined,
             method: 'classRunInBG',
           },

@@ -28,7 +28,6 @@ describe('ScheduledService', () => {
           args: ['bottlearum'],
           importKey: undefined,
           method: 'classRunInBg',
-          priority,
         },
         {
           repeat: {
