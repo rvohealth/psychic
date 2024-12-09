@@ -653,7 +653,9 @@ export type TransitionalPsychicBackgroundSimpleOptions = Omit<
 // QueueOptionsWithConnectionInstance instead of QueueOptions because we need to be able to
 // automatically wrap the queue name with {} on a cluster, and the best way to test if on
 // a redis cluster is when we have connection instances, not just connection configs
-export type QueueOptionsWithConnectionInstance = QueueOptions & { connection: RedisOrRedisClusterConnection }
+export type QueueOptionsWithConnectionInstance = Omit<QueueOptions, 'connection'> & {
+  connection: RedisOrRedisClusterConnection
+}
 
 export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundSharedOptions {
   nativeBullMQ: {
