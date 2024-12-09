@@ -7,10 +7,10 @@ import { devEnvBool } from '../helpers/envValue'
 import PsychicApplication, {
   BullMQNativeWorkerOptions,
   PsychicBackgroundNativeBullMQOptions,
-  PsychicBackgroundSimpleBaseOptions,
   PsychicBackgroundSimpleOptions,
   PsychicBackgroundWorkstreamOptions,
   QueueOptionsWithConnectionInstance,
+  TransitionalPsychicBackgroundSimpleOptions,
 } from '../psychic-application'
 import lookupClassByGlobalName from '../psychic-application/helpers/lookupClassByGlobalName'
 
@@ -91,7 +91,7 @@ export class Background {
 
   private simpleConnect(
     defaultBullMQQueueOptions: Omit<QueueOptions, 'connection'>,
-    backgroundOptions: PsychicBackgroundSimpleOptions | PsychicBackgroundSimpleBaseOptions,
+    backgroundOptions: PsychicBackgroundSimpleOptions | TransitionalPsychicBackgroundSimpleOptions,
 
     {
       activateWorkers = false,

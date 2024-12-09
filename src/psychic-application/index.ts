@@ -611,11 +611,10 @@ interface PsychicBackgroundSharedOptions {
   }
 
   defaultBullMQQueueOptions?: Omit<QueueOptions, 'connection'>
+  connection: RedisOrRedisClusterConnection
 }
 
-export interface PsychicBackgroundSimpleBaseOptions extends PsychicBackgroundSharedOptions {
-  connection: RedisOrRedisClusterConnection
-
+export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSharedOptions {
   defaultWorkstream?: {
     parallelization?: number
   }
@@ -632,16 +631,19 @@ export interface PsychicBackgroundSimpleBaseOptions extends PsychicBackgroundSha
    * for interacting with external APIs)
    */
   namedWorkstreams?: PsychicBackgroundWorkstreamOptions[]
-}
 
-export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSimpleBaseOptions {
   /**
    * When transitioning from one instance of Redis to another, we can set up transitionalWorkstreams
    * so that jobs already added to the legacy Redis instance continue to be worked. Once all jobs
    * from the legacy Redis have been run, this configuration may be removed.
    */
-  transitionalWorkstreams?: PsychicBackgroundSimpleBaseOptions
+  transitionalWorkstreams?: TransitionalPsychicBackgroundSimpleOptions
 }
+
+export type TransitionalPsychicBackgroundSimpleOptions = Omit<
+  PsychicBackgroundSimpleOptions,
+  'providers' | 'defaultBullMQQueueOptions' | 'transitionalWorkstreams'
+>
 
 // QueueOptionsWithConnectionInstance instead of QueueOptions because we need to be able to
 // automatically wrap the queue name with {} on a cluster, and the best way to test if on
@@ -649,8 +651,6 @@ export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSimpleB
 export type QueueOptionsWithConnectionInstance = QueueOptions & { connection: RedisOrRedisClusterConnection }
 
 export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundSharedOptions {
-  connection: RedisOrRedisClusterConnection
-
   nativeBullMQ: {
     // QueueOptionsWithConnectionInstance instead of QueueOptions because we need to be able to
     // automatically wrap the queue name with {} on a cluster, and the best way to test if on
