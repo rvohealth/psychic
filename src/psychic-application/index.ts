@@ -611,12 +611,9 @@ interface PsychicBackgroundSharedOptions {
   }
 
   defaultBullMQQueueOptions?: Omit<QueueOptions, 'connection'>
-
-  connection: RedisOrRedisClusterConnection
 }
 
 export interface PsychicBackgroundSimpleBaseOptions extends PsychicBackgroundSharedOptions {
-  defaultBullMQQueueOptions?: Omit<QueueOptions, 'connection'>
   connection: RedisOrRedisClusterConnection
 
   defaultWorkstream?: {
@@ -652,6 +649,8 @@ export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSimpleB
 export type QueueOptionsWithConnectionInstance = QueueOptions & { connection: RedisOrRedisClusterConnection }
 
 export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundSharedOptions {
+  connection: RedisOrRedisClusterConnection
+
   nativeBullMQ: {
     // QueueOptionsWithConnectionInstance instead of QueueOptions because we need to be able to
     // automatically wrap the queue name with {} on a cluster, and the best way to test if on
