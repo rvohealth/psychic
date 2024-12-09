@@ -3,7 +3,7 @@ import path from 'path'
 import { BackgroundedService, PsychicApplication } from '../../../../src'
 
 export default class NotUrgentDummyService extends BackgroundedService {
-  public static get backgroundConfig() {
+  public static get backgroundJobConfig() {
     return { priority: 'not_urgent' as const }
   }
 

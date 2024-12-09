@@ -3,7 +3,7 @@ import { FunctionPropertyNames } from '../helpers/typeHelpers'
 import background, { BackgroundJobConfig } from './'
 
 export default class BackgroundedService {
-  public static get backgroundConfig(): BackgroundJobConfig {
+  public static get backgroundJobConfig(): BackgroundJobConfig {
     return {}
   }
 
@@ -29,7 +29,7 @@ export default class BackgroundedService {
     return await background.staticMethod(safeThis, methodName, {
       globalName: safeThis.globalName,
       args,
-      backgroundConfig: safeThis.backgroundConfig,
+      backgroundJobConfig: safeThis.backgroundJobConfig,
     })
   }
 
@@ -46,7 +46,7 @@ export default class BackgroundedService {
       globalName: safeThis.globalName,
       delaySeconds,
       args,
-      backgroundConfig: safeThis.backgroundConfig,
+      backgroundJobConfig: safeThis.backgroundJobConfig,
     })
   }
 
@@ -75,7 +75,7 @@ export default class BackgroundedService {
       globalName: constructor.globalName,
       args,
       constructorArgs,
-      backgroundConfig: constructor.backgroundConfig,
+      backgroundJobConfig: constructor.backgroundJobConfig,
     })
   }
 
@@ -106,7 +106,7 @@ export default class BackgroundedService {
       delaySeconds,
       args,
       constructorArgs,
-      backgroundConfig: constructor.backgroundConfig,
+      backgroundJobConfig: constructor.backgroundJobConfig,
     })
   }
 }

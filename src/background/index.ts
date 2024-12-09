@@ -321,7 +321,7 @@ export class Background {
       delaySeconds,
       globalName,
       args = [],
-      backgroundConfig = {},
+      backgroundJobConfig = {},
     }: {
       globalName: string
       filepath?: string
@@ -329,7 +329,7 @@ export class Background {
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      backgroundConfig?: BackgroundJobConfig
+      backgroundJobConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
@@ -343,9 +343,9 @@ export class Background {
       },
       {
         delaySeconds,
-        backgroundConfig,
-        groupId: this.backgroundConfigToGroupId(backgroundConfig),
-        priority: this.backgroundConfigToPriority(backgroundConfig),
+        backgroundJobConfig,
+        groupId: this.backgroundJobConfigToGroupId(backgroundJobConfig),
+        priority: this.backgroundJobConfigToPriority(backgroundJobConfig),
       },
     )
   }
@@ -357,14 +357,14 @@ export class Background {
     {
       globalName,
       args = [],
-      backgroundConfig = {},
+      backgroundJobConfig = {},
     }: {
       globalName: string
       filepath?: string
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      backgroundConfig?: BackgroundJobConfig
+      backgroundJobConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
@@ -377,7 +377,7 @@ export class Background {
     // See: https://docs.bullmq.io/guide/jobs/repeatable
     const jobId = `${ObjectClass.name}:${method}`
 
-    await this.queueInstance(backgroundConfig).add(
+    await this.queueInstance(backgroundJobConfig).add(
       'BackgroundJobQueueStaticJob',
       {
         globalName,
@@ -390,8 +390,10 @@ export class Background {
           pattern,
         },
         jobId,
-        group: this.backgroundConfigToGroup(backgroundConfig),
-        priority: this.mapPriorityWordToPriorityNumber(this.backgroundConfigToPriority(backgroundConfig)),
+        group: this.backgroundJobConfigToGroup(backgroundJobConfig),
+        priority: this.mapPriorityWordToPriorityNumber(
+          this.backgroundJobConfigToPriority(backgroundJobConfig),
+        ),
         // typing as any because Psychic can't be aware of BullMQ Pro options
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
       } as any,
@@ -423,7 +425,7 @@ export class Background {
       globalName,
       args = [],
       constructorArgs = [],
-      backgroundConfig = {},
+      backgroundJobConfig = {},
     }: {
       globalName: string
       delaySeconds?: number
@@ -433,7 +435,7 @@ export class Background {
       args?: any[]
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       constructorArgs?: any[]
-      backgroundConfig?: BackgroundJobConfig
+      backgroundJobConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
@@ -448,9 +450,9 @@ export class Background {
       },
       {
         delaySeconds,
-        backgroundConfig,
-        groupId: this.backgroundConfigToGroupId(backgroundConfig),
-        priority: this.backgroundConfigToPriority(backgroundConfig),
+        backgroundJobConfig,
+        groupId: this.backgroundJobConfigToGroupId(backgroundJobConfig),
+        priority: this.backgroundJobConfigToPriority(backgroundJobConfig),
       },
     )
   }
@@ -461,13 +463,13 @@ export class Background {
     {
       delaySeconds,
       args = [],
-      backgroundConfig = {},
+      backgroundJobConfig = {},
     }: {
       delaySeconds?: number
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      backgroundConfig?: BackgroundJobConfig
+      backgroundJobConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
@@ -482,9 +484,9 @@ export class Background {
       },
       {
         delaySeconds,
-        backgroundConfig,
-        groupId: this.backgroundConfigToGroupId(backgroundConfig),
-        priority: this.backgroundConfigToPriority(backgroundConfig),
+        backgroundJobConfig,
+        groupId: this.backgroundJobConfigToGroupId(backgroundJobConfig),
+        priority: this.backgroundJobConfigToPriority(backgroundJobConfig),
       },
     )
   }
@@ -495,19 +497,19 @@ export class Background {
     jobData: BackgroundJobData,
     {
       delaySeconds,
-      backgroundConfig,
+      backgroundJobConfig,
       priority,
       groupId,
     }: {
       delaySeconds?: number
-      backgroundConfig: BackgroundJobConfig
+      backgroundJobConfig: BackgroundJobConfig
       priority: BackgroundQueuePriority
       groupId?: string
     },
   ) {
     // set this variable out side of the conditional so that
     // mismatches will raise exceptions even in tests
-    const queueInstance = this.queueInstance(backgroundConfig)
+    const queueInstance = this.queueInstance(backgroundJobConfig)
 
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) {
       await this.doWork(jobType, jobData)
@@ -523,25 +525,25 @@ export class Background {
     }
   }
 
-  private backgroundConfigToPriority(backgroundConfig?: BackgroundJobConfig): BackgroundQueuePriority {
-    if (!backgroundConfig) return 'default'
-    return backgroundConfig.priority || 'default'
+  private backgroundJobConfigToPriority(backgroundJobConfig?: BackgroundJobConfig): BackgroundQueuePriority {
+    if (!backgroundJobConfig) return 'default'
+    return backgroundJobConfig.priority || 'default'
   }
 
-  private backgroundConfigToGroupId(backgroundConfig?: BackgroundJobConfig): string | undefined {
-    if (!backgroundConfig) return
+  private backgroundJobConfigToGroupId(backgroundJobConfig?: BackgroundJobConfig): string | undefined {
+    if (!backgroundJobConfig) return
 
-    const workstreamConfig = backgroundConfig as WorkstreamBackgroundJobConfig
+    const workstreamConfig = backgroundJobConfig as WorkstreamBackgroundJobConfig
     if (workstreamConfig.workstream) return workstreamConfig.workstream
 
-    const queueConfig = backgroundConfig as QueueBackgroundJobConfig
+    const queueConfig = backgroundJobConfig as QueueBackgroundJobConfig
     if (queueConfig.groupId) return queueConfig.groupId
 
     return
   }
 
-  private backgroundConfigToGroup(backgroundConfig?: BackgroundJobConfig): { id: string } | undefined {
-    return this.groupIdToGroupConfig(this.backgroundConfigToGroupId(backgroundConfig))
+  private backgroundJobConfigToGroup(backgroundJobConfig?: BackgroundJobConfig): { id: string } | undefined {
+    return this.groupIdToGroupConfig(this.backgroundJobConfigToGroupId(backgroundJobConfig))
   }
 
   private groupIdToGroupConfig(groupId: string | undefined): { id: string } | undefined {

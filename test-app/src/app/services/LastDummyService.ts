@@ -3,7 +3,7 @@ import path from 'path'
 import { BackgroundedService, PsychicApplication, WorkstreamBackgroundJobConfig } from '../../../../src'
 
 export default class LastDummyService extends BackgroundedService {
-  public static get backgroundConfig(): WorkstreamBackgroundJobConfig {
+  public static get backgroundJobConfig(): WorkstreamBackgroundJobConfig {
     return { priority: 'last' as const }
   }
 

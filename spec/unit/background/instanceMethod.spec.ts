@@ -21,7 +21,7 @@ describe('background (app singleton)', () => {
           args: ['bottlearum'],
           constructorArgs: ['bottleawhiskey'],
           globalName: 'services/DummyService',
-          backgroundConfig: { priority },
+          backgroundJobConfig: { priority },
         })
       }
       let priority: BackgroundQueuePriority
@@ -113,7 +113,7 @@ describe('background (app singleton)', () => {
           args: ['bottlearum'],
           constructorArgs: ['bottleawhiskey'],
           globalName: 'services/DummyService',
-          backgroundConfig: { priority: 'last', workstream: 'snazzy' },
+          backgroundJobConfig: { priority: 'last', workstream: 'snazzy' },
         })
 
         // eslint-disable-next-line @typescript-eslint/unbound-method

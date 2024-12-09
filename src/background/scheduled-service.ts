@@ -3,7 +3,7 @@ import background, { BackgroundJobConfig } from '.'
 import { FunctionPropertyNames } from '../helpers/typeHelpers'
 
 export default class ScheduledService {
-  public static get backgroundConfig(): BackgroundJobConfig {
+  public static get backgroundJobConfig(): BackgroundJobConfig {
     return {}
   }
 
@@ -29,7 +29,7 @@ export default class ScheduledService {
     return await background.scheduledMethod(safeThis, pattern, methodName, {
       globalName: safeThis.globalName,
       args,
-      backgroundConfig: safeThis.backgroundConfig,
+      backgroundJobConfig: safeThis.backgroundJobConfig,
     })
   }
 }
