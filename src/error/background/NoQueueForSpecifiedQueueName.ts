@@ -1,11 +1,11 @@
 export default class NoQueueForSpecifiedQueueName extends Error {
-  constructor(private workstream: string) {
+  constructor(private queue: string) {
     super()
   }
 
   public get message() {
     return `Error enqueueing background job
-No queue matches "${this.workstream}"
+No queue matches "${this.queue}"
 `
   }
 }
