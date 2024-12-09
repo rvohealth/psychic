@@ -615,8 +615,13 @@ interface PsychicBackgroundSharedOptions {
 }
 
 export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSharedOptions {
+  /**
+   * Every Psychic application that leverages simple background jobs will have a default
+   * workstream. Set workerCount to set the number of workers that will work through the
+   * default queue
+   */
   defaultWorkstream?: {
-    parallelization?: number
+    workerCount?: number
   }
 
   /**
@@ -699,7 +704,7 @@ export interface PsychicBackgroundWorkstreamOptions {
   /**
    * The number of workers you want to run on this configuration
    */
-  parallelization?: number
+  workerCount?: number
 
   /**
    * A unique identifier for this workstream. This will map to the

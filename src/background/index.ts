@@ -130,7 +130,7 @@ export class Background {
     // create default workers //
     /////////////////////////////
     if (activateWorkers) {
-      for (let i = 0; i < (backgroundOptions.defaultWorkstream?.parallelization || 1); i++) {
+      for (let i = 0; i < (backgroundOptions.defaultWorkstream?.workerCount || 1); i++) {
         this.workers.push(
           new Background.Worker(formattedQueueName, data => this.handler(data), {
             connection: defaultConnection,
@@ -174,7 +174,7 @@ export class Background {
       // create named workers //
       //////////////////////////
       if (activateWorkers) {
-        for (let i = 0; i < (namedWorkstream.parallelization || 1); i++) {
+        for (let i = 0; i < (namedWorkstream.workerCount || 1); i++) {
           this.workers.push(
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             new Background.Worker(namedWorkstreamFormattedQueueName, data => this.handler(data), {
