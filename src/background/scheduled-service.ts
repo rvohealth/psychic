@@ -29,7 +29,7 @@ export default class ScheduledService {
     return await background.scheduledMethod(safeThis, pattern, methodName, {
       globalName: safeThis.globalName,
       args,
-      backgroundJobConfig: safeThis.backgroundJobConfig,
+      jobConfig: safeThis.backgroundJobConfig,
     })
   }
 }

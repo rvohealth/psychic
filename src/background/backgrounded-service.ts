@@ -29,7 +29,7 @@ export default class BackgroundedService {
     return await background.staticMethod(safeThis, methodName, {
       globalName: safeThis.globalName,
       args,
-      backgroundJobConfig: safeThis.backgroundJobConfig,
+      jobConfig: safeThis.backgroundJobConfig,
     })
   }
 
@@ -46,7 +46,7 @@ export default class BackgroundedService {
       globalName: safeThis.globalName,
       delaySeconds,
       args,
-      backgroundJobConfig: safeThis.backgroundJobConfig,
+      jobConfig: safeThis.backgroundJobConfig,
     })
   }
 
@@ -75,7 +75,7 @@ export default class BackgroundedService {
       globalName: constructor.globalName,
       args,
       constructorArgs,
-      backgroundJobConfig: constructor.backgroundJobConfig,
+      jobConfig: constructor.backgroundJobConfig,
     })
   }
 
@@ -106,7 +106,7 @@ export default class BackgroundedService {
       delaySeconds,
       args,
       constructorArgs,
-      backgroundJobConfig: constructor.backgroundJobConfig,
+      jobConfig: constructor.backgroundJobConfig,
     })
   }
 }

@@ -23,7 +23,7 @@ describe('background (app singleton)', () => {
     const subject = async () => {
       await background.modelInstanceMethod(user, 'testBackground', {
         args: ['howyadoin'],
-        backgroundJobConfig: { priority },
+        jobConfig: { priority },
       })
     }
     let priority: BackgroundQueuePriority

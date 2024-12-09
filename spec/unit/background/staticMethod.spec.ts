@@ -18,7 +18,7 @@ describe('background (app singleton)', () => {
         await background.staticMethod(DummyService, 'classRunInBG', {
           globalName: 'DummyService',
           args: ['bottlearum'],
-          backgroundJobConfig: { priority },
+          jobConfig: { priority },
         })
       }
       let priority: BackgroundQueuePriority
