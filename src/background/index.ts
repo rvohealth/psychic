@@ -13,6 +13,7 @@ import PsychicApplication, {
   TransitionalPsychicBackgroundSimpleOptions,
 } from '../psychic-application'
 import lookupClassByGlobalName from '../psychic-application/helpers/lookupClassByGlobalName'
+import { Either } from '../psychic-application/types'
 
 type JobTypes =
   | 'BackgroundJobQueueFunctionJob'
@@ -87,10 +88,6 @@ export class Background {
    * Queue event emitters for all queues https://docs.bullmq.io/guide/events
    */
   public queueEvents: QueueEvents[] = []
-  // Maps the external queue name to the internal queue name, which, when using Redis cluster,
-  // is the queue name wrapped in curly braces (e.g. `{my-queue}`)
-  // This is used when adding jobs to a queue
-  private queueNameMap: Record<string, string> = {}
   public workers: Worker[] = []
 
   public connect({
@@ -182,7 +179,6 @@ export class Background {
       })
 
       if (!activatingTransitionalWorkstreams) {
-        this.queueNameMap[namedWorkstream.name] = namedWorkstreamFormattedQueueName
         this.namedQueues[namedWorkstream.name] = namedQueue
       }
 
@@ -291,7 +287,6 @@ export class Background {
         throw new NamedBullMQNativeOptionsMissingConnectionAndDefaultConnection(queueName)
 
       const formattedQueuename = nameToRedisQueueName(queueName, namedQueueConnection)
-      this.queueNameMap[queueName] = formattedQueueName
 
       this.namedQueues[queueName] = new Background.Queue(formattedQueuename, {
         ...defaultBullMQQueueOptions,
@@ -419,9 +414,9 @@ export class Background {
     const workstreamConfig = values as WorkstreamBackgroundJobConfig
     const queueConfig = values as QueueBackgroundJobConfig
     const queueInstance: Queue | undefined = workstreamConfig.workstream
-      ? this.namedQueues[this.queueNameMap[workstreamConfig.workstream]]
+      ? this.namedQueues[workstreamConfig.workstream]
       : queueConfig.queue
-        ? this.namedQueues[this.queueNameMap[queueConfig.queue]]
+        ? this.namedQueues[queueConfig.queue]
         : this.defaultQueue!
 
     if (!queueInstance) {
@@ -664,18 +659,31 @@ interface BaseBackgroundJobConfig {
 }
 
 export interface WorkstreamBackgroundJobConfig extends BaseBackgroundJobConfig {
-  groupId?: never
-  queue?: never
   workstream?: string
 }
 
 export interface QueueBackgroundJobConfig extends BaseBackgroundJobConfig {
   groupId?: string
   queue?: string
-  workstream?: never
 }
 
-export type BackgroundJobConfig = WorkstreamBackgroundJobConfig | QueueBackgroundJobConfig
+export type BackgroundJobConfig = Either<WorkstreamBackgroundJobConfig, QueueBackgroundJobConfig>
+
+export type PsychicBackgroundOptions =
+  | (PsychicBackgroundSimpleOptions &
+      Partial<
+        Record<
+          Exclude<keyof PsychicBackgroundNativeBullMQOptions, keyof PsychicBackgroundSimpleOptions>,
+          never
+        >
+      >)
+  | (PsychicBackgroundNativeBullMQOptions &
+      Partial<
+        Record<
+          Exclude<keyof PsychicBackgroundSimpleOptions, keyof PsychicBackgroundNativeBullMQOptions>,
+          never
+        >
+      >)
 
 function nameToRedisQueueName(queueName: string, redis: Redis | Cluster): string {
   queueName = queueName.replace(/\{|\}/g, '')

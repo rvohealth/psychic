@@ -29,7 +29,7 @@ import {
 import PsychicRouter from '../router'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache'
 import loadControllers, { getControllersOrFail } from './helpers/loadControllers'
-import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
+import { Either, PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
 
 export default class PsychicApplication {
   public static async init(
@@ -591,7 +591,10 @@ interface PsychicWebsocketOptions {
 
 type RedisOrRedisClusterConnection = Redis | Cluster
 
-export type PsychicBackgroundOptions = PsychicBackgroundSimpleOptions | PsychicBackgroundNativeBullMQOptions
+export type PsychicBackgroundOptions = Either<
+  PsychicBackgroundSimpleOptions,
+  PsychicBackgroundNativeBullMQOptions
+>
 
 interface PsychicBackgroundSharedOptions {
   /**
