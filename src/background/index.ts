@@ -101,12 +101,7 @@ export class Background {
     // Psychic background options //
     /////////////////////////////////
     const defaultConnection = backgroundOptions.connection
-    const formattedQueueName = nameToRedisQueueName(
-      activatingTransitionalWorkstreams
-        ? `Transitional${Background.defaultQueueName}`
-        : Background.defaultQueueName,
-      defaultConnection,
-    )
+    const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultConnection)
 
     ///////////////////////////////
     // create default workstream //
@@ -146,7 +141,7 @@ export class Background {
     namedWorkstreams.forEach(namedWorkstream => {
       const namedWorkstreamConnection = namedWorkstream.connection || defaultConnection
       const namedWorkstreamFormattedQueueName = nameToRedisQueueName(
-        activatingTransitionalWorkstreams ? `Transitional${namedWorkstream.name}` : namedWorkstream.name,
+        namedWorkstream.name,
         namedWorkstreamConnection,
       )
 
