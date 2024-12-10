@@ -655,7 +655,7 @@ export type TransitionalPsychicBackgroundSimpleOptions = Omit<
 // automatically wrap the queue name with {} on a cluster, and the best way to test if on
 // a redis cluster is when we have connection instances, not just connection configs
 export type QueueOptionsWithConnectionInstance = Omit<QueueOptions, 'connection'> & {
-  connection: RedisOrRedisClusterConnection
+  connection?: RedisOrRedisClusterConnection
 }
 
 export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundSharedOptions {
@@ -696,7 +696,7 @@ export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundS
      * With BullMQ Pro, namedQueueWorkers can be rate limited (useful
      * for interacting with external APIs)
      */
-    namedQueueWorkers?: BullMQNativeWorkerOptions[]
+    namedQueueWorkers?: Record<string, BullMQNativeWorkerOptions>
   }
 }
 
@@ -726,11 +726,9 @@ export interface PsychicBackgroundWorkstreamOptions {
   connection?: RedisOrRedisClusterConnection
 }
 
-export type BullMQNativeWorkerOptions = WorkerOptions & BullmqProWorkerOptions
-
 // worker options gathered by scanning various sub-pages from
 // https://docs.bullmq.io/bullmq-pro/groups
-type BullmqProWorkerOptions = {
+export interface BullMQNativeWorkerOptions extends WorkerOptions {
   group?: {
     id?: string
     maxSize?: number
@@ -745,8 +743,6 @@ type BullmqProWorkerOptions = {
   concurrency?: number
   // the number of workers to create with this configuration
   workerCount?: number
-  // the name of the queue to which to add these workers, or the default
-  queueName?: string
 }
 
 export interface PsychicClientOptions {

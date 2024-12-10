@@ -143,11 +143,17 @@ export default async (psy: PsychicApplication) => {
       },
     },
 
-    defaultWorkstream: {
-      workerCount: parseInt(process.env.WORKER_COUNT || '0'),
-    },
+    // defaultWorkstream: {
+    //   workerCount: parseInt(process.env.WORKER_COUNT || '0'),
+    // },
 
-    namedWorkstreams: [{ workerCount: 1, name: 'snazzy', rateLimit: { max: 1, duration: 1 } }],
+    // namedWorkstreams: [{ workerCount: 1, name: 'snazzy', rateLimit: { max: 1, duration: 1 } }],
+    nativeBullMQ: {
+      // defaultQueueOptions: {connection: }
+      namedQueueOptions: {
+        snazzy: {},
+      },
+    },
 
     defaultConnection: new Redis({
       username: process.env.REDIS_USER,

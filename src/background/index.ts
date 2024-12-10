@@ -306,18 +306,19 @@ export class Background {
       // create extra workers //
       //////////////////////////
       if (activateWorkers) {
-        ;(nativeBullMQ.namedQueueWorkers || [])
-          .filter(extraWorkerOptions => extraWorkerOptions.queueName === queueName)
-          .forEach((extraWorkerOptions: BullMQNativeWorkerOptions) => {
-            for (let i = 0; i < (extraWorkerOptions.workerCount ?? 1); i++) {
-              this.workers.push(
-                new Background.Worker(formattedQueuename, data => this.handler(data), {
-                  ...extraWorkerOptions,
-                  connection: namedQueueConnection,
-                }),
-              )
-            }
-          })
+        const extraWorkerOptionsMap: Record<string, BullMQNativeWorkerOptions> =
+          nativeBullMQ.namedQueueWorkers || {}
+        const extraWorkerOptions: BullMQNativeWorkerOptions = extraWorkerOptionsMap[queueName]
+        const extraWorkerCount = extraWorkerOptions ? (extraWorkerOptions.workerCount ?? 1) : 0
+
+        for (let i = 0; i < extraWorkerCount; i++) {
+          this.workers.push(
+            new Background.Worker(formattedQueuename, data => this.handler(data), {
+              ...extraWorkerOptions,
+              connection: namedQueueConnection,
+            }),
+          )
+        }
       }
       ///////////////////////////////
       // end: create extra workers //
