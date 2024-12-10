@@ -658,50 +658,6 @@ export interface QueueBackgroundJobConfig extends BaseBackgroundJobConfig {
 
 export type BackgroundJobConfig = WorkstreamBackgroundJobConfig | QueueBackgroundJobConfig
 
-// /**
-//  * @internal
-//  *
-//  * Returns either the namedNativeBullMQWorkers, or else the translated form of the
-//  * namedWorkstreams arg, or else a blank array
-//  */
-// public namedBackgroundWorkerOptions(): BullmqProWorkerOptions[] {
-//   const nativeOpts = this.backgroundOptions
-//   if (nativeOpts.namedNativeBullMQWorkers) {
-//     return nativeOpts.namedNativeBullMQWorkers
-//   }
-
-//   const simpleOpts = this.backgroundOptions as PsychicBackgroundSimpleOptions
-//   if (simpleOpts.namedWorkstreams) {
-//     return simpleOpts.namedWorkstreams.map(workstreamOpts =>
-//       this.transformWorkstreamOptsToWorkerOpts(workstreamOpts),
-//     )
-//   }
-
-//   return []
-// }
-
-// /**
-//  * @internal
-//  *
-//  * Translates provided namedWorkstream option into
-//  * a BullmqProWorkerOptions object, used by
-//  * #namedBackgroundWorkerOptions to build worker options
-//  * to provide to BullMQ (or BullMQ Pro).
-//  */
-// private transformWorkstreamOptsToWorkerOpts(
-//   workstreamOpts: PsychicBackgroundWorkstreamOptions,
-// ): BullmqProWorkerOptions {
-//   if (!workstreamOpts.name && workstreamOpts.rateLimit)
-//     throw new Error(`Must provide name when providing rateLimit`)
-
-//   return {
-//     group: {
-//       id: workstreamOpts.name,
-//       limit: workstreamOpts.rateLimit,
-//     },
-//   }
-// }
-
 function nameToRedisQueueName(queueName: string, redis: Redis | Cluster): string {
   queueName = queueName.replace(/\{|\}/g, '')
   if (redis instanceof Cluster) return `{${queueName}}`
