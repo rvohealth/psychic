@@ -32,6 +32,28 @@ export interface BackgroundJobData {
   globalName?: string
 }
 
+class DefaultBullMQNativeOptionsMissingConnectionAndDefaultConnection extends Error {
+  public get message() {
+    return `
+Native BullMQ options don't include a default connection, and the
+default queue does not include a connection
+`
+  }
+}
+
+class NamedBullMQNativeOptionsMissingConnectionAndDefaultConnection extends Error {
+  constructor(private queueName: string) {
+    super()
+  }
+
+  public get message() {
+    return `
+Native BullMQ options don't include a default connection, and the
+${this.queueName} queue does not include a connection
+`
+  }
+}
+
 export class Background {
   public static get defaultQueueName() {
     const psychicApp = PsychicApplication.getOrFail()
@@ -100,7 +122,7 @@ export class Background {
     /////////////////////////////////
     // Psychic background options //
     /////////////////////////////////
-    const defaultConnection = backgroundOptions.connection
+    const defaultConnection = backgroundOptions.defaultConnection
     const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultConnection)
 
     ///////////////////////////////
@@ -217,8 +239,12 @@ export class Background {
     ///////////////////////////
 
     const nativeBullMQ = backgroundOptions.nativeBullMQ
-    const defaultConnection = nativeBullMQ.defaultQueueOptions?.connection || backgroundOptions.connection
-    const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultConnection)
+    const defaultQueueConnection =
+      nativeBullMQ.defaultQueueOptions?.connection || backgroundOptions.defaultConnection
+
+    if (!defaultQueueConnection) throw new DefaultBullMQNativeOptionsMissingConnectionAndDefaultConnection()
+
+    const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultQueueConnection)
 
     //////////////////////////
     // create default queue //
@@ -226,9 +252,11 @@ export class Background {
     this.defaultQueue = new Background.Queue(formattedQueueName, {
       ...defaultBullMQQueueOptions,
       ...(nativeBullMQ.defaultQueueOptions || {}),
-      connection: defaultConnection,
+      connection: defaultQueueConnection,
     })
-    this.queueEvents.push(new Background.QueueEvents(formattedQueueName, { connection: defaultConnection }))
+    this.queueEvents.push(
+      new Background.QueueEvents(formattedQueueName, { connection: defaultQueueConnection }),
+    )
     ///////////////////////////////
     // end: create default queue //
     ///////////////////////////////
@@ -241,7 +269,7 @@ export class Background {
         this.workers.push(
           new Background.Worker(formattedQueueName, data => this.handler(data), {
             ...(backgroundOptions.nativeBullMQ.defaultWorkerOptions || {}),
-            connection: defaultConnection,
+            connection: defaultQueueConnection,
           }),
         )
       }
@@ -258,7 +286,11 @@ export class Background {
 
     Object.keys(namedQueueOptionsMap).forEach(queueName => {
       const namedQueueOptions: QueueOptionsWithConnectionInstance = namedQueueOptionsMap[queueName]
-      const namedQueueConnection = namedQueueOptions.connection || defaultConnection
+      const namedQueueConnection = namedQueueOptions.connection || backgroundOptions.defaultConnection
+
+      if (!namedQueueConnection)
+        throw new NamedBullMQNativeOptionsMissingConnectionAndDefaultConnection(queueName)
+
       const formattedQueuename = nameToRedisQueueName(queueName, namedQueueConnection)
       this.queueNameMap[queueName] = formattedQueueName
 

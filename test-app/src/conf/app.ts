@@ -149,7 +149,7 @@ export default async (psy: PsychicApplication) => {
 
     namedWorkstreams: [{ workerCount: 1, name: 'snazzy', rateLimit: { max: 1, duration: 1 } }],
 
-    connection: new Redis({
+    defaultConnection: new Redis({
       username: process.env.REDIS_USER,
       password: process.env.REDIS_PASSWORD,
       host: process.env.REDIS_HOST,

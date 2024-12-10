@@ -611,10 +611,11 @@ interface PsychicBackgroundSharedOptions {
   }
 
   defaultBullMQQueueOptions?: Omit<QueueOptions, 'connection'>
-  connection: RedisOrRedisClusterConnection
 }
 
 export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSharedOptions {
+  defaultConnection: RedisOrRedisClusterConnection
+
   /**
    * Every Psychic application that leverages simple background jobs will have a default
    * workstream. Set workerCount to set the number of workers that will work through the
@@ -658,6 +659,8 @@ export type QueueOptionsWithConnectionInstance = Omit<QueueOptions, 'connection'
 }
 
 export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundSharedOptions {
+  defaultConnection?: RedisOrRedisClusterConnection
+
   nativeBullMQ: {
     // QueueOptionsWithConnectionInstance instead of QueueOptions because we need to be able to
     // automatically wrap the queue name with {} on a cluster, and the best way to test if on
