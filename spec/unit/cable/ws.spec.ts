@@ -1,6 +1,6 @@
 import { describe as context } from '@jest/globals'
 import { DateTime } from 'luxon'
-import createWsRedisClient from '../../../src/cable/createWsRedisClient'
+import { PsychicApplication } from '../../../src'
 import redisWsKey, * as RedisWsKeyModule from '../../../src/cable/redisWsKey'
 import Ws, { InvalidWsPathError } from '../../../src/cable/ws'
 import User from '../../../test-app/src/app/models/User'
@@ -8,7 +8,8 @@ import User from '../../../test-app/src/app/models/User'
 describe('Ws', () => {
   describe('.register', () => {
     beforeEach(async () => {
-      const redisClient = await createWsRedisClient()
+      const psychicApp = PsychicApplication.getOrFail()
+      const redisClient = psychicApp.websocketOptions.connection
       await redisClient.del(`user:123:socket_ids`)
       await redisClient.del(`user:otheruserid:socket_ids`)
     })
@@ -87,9 +88,9 @@ describe('Ws', () => {
     let toSpy: jest.SpyInstance
     let emitSpy: jest.SpyInstance
 
-    async function buildWsInstanceForEmitTests(findSocketIdsValue: string[]) {
+    function buildWsInstanceForEmitTests(findSocketIdsValue: string[]) {
       ws = new Ws(['/ops/howyadoin'] as const)
-      await ws.boot()
+      ws.boot()
 
       findSocketIdsSpy = jest.spyOn(ws, 'findSocketIds').mockResolvedValue(findSocketIdsValue)
       emitSpy = jest.fn()
@@ -98,7 +99,7 @@ describe('Ws', () => {
     }
 
     it('emits to the passed id to the default socket.io namespace, using "user" (by default) as the redis key prefix', async () => {
-      await buildWsInstanceForEmitTests(['456'])
+      buildWsInstanceForEmitTests(['456'])
       await ws.emit(123, '/ops/howyadoin', { hello: 'world' })
       expect(findSocketIdsSpy).toHaveBeenCalledWith(123)
       expect(toSpy).toHaveBeenCalledWith('456')
@@ -107,7 +108,7 @@ describe('Ws', () => {
 
     context('findSocketIds does not find any socket ids for the user', () => {
       it('does not emit to the passed id with the "user" namespace', async () => {
-        await buildWsInstanceForEmitTests([])
+        buildWsInstanceForEmitTests([])
         await ws.emit(123, '/ops/howyadoin', { hello: 'world' })
         expect(toSpy).not.toHaveBeenCalled()
         expect(emitSpy).not.toHaveBeenCalled()
@@ -117,7 +118,7 @@ describe('Ws', () => {
     context('when passed a dream', () => {
       it('emits to the primaryKeyValue of that dream', async () => {
         const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
-        await buildWsInstanceForEmitTests(['456'])
+        buildWsInstanceForEmitTests(['456'])
         await ws.emit(user, '/ops/howyadoin', { hello: 'world' })
         expect(toSpy).toHaveBeenCalledWith('456')
         expect(findSocketIdsSpy).toHaveBeenCalledWith(user.id)
@@ -128,7 +129,7 @@ describe('Ws', () => {
     context('when passed an invalid path', () => {
       it('raises an exception', async () => {
         const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
-        await buildWsInstanceForEmitTests(['456'])
+        buildWsInstanceForEmitTests(['456'])
 
         await expect(
           // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -141,24 +142,26 @@ describe('Ws', () => {
   describe('#findSocketIds', () => {
     let ws: Ws<[]>
     beforeEach(async () => {
-      const redisClient = await createWsRedisClient()
+      const psychicApp = PsychicApplication.getOrFail()
+      const redisClient = psychicApp.websocketOptions.connection
+
       const key = redisWsKey('150', 'user')
       const otherKey = redisWsKey('160', 'howyadoin')
 
       await redisClient
         .multi()
-        .rPush(key, ['151'])
-        .expireAt(key, DateTime.now().plus({ seconds: 15 }).toJSDate())
+        .rpush(key, '151')
+        .expireat(key, DateTime.now().plus({ seconds: 15 }).toSeconds())
         .exec()
 
       await redisClient
         .multi()
-        .rPush(otherKey, ['161'])
-        .expireAt(key, DateTime.now().plus({ seconds: 15 }).toJSDate())
+        .rpush(otherKey, '161')
+        .expireat(key, DateTime.now().plus({ seconds: 15 }).toSeconds())
         .exec()
 
       ws = new Ws([] as const)
-      await ws.boot()
+      ws.boot()
     })
 
     it('calls to redis to find socket ids', async () => {

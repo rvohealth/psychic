@@ -2,9 +2,9 @@ import fs from 'fs/promises'
 import path from 'path'
 import { BackgroundedService, BackgroundJobConfig, PsychicApplication } from '../../../../src'
 
-export default class LastDummyService extends BackgroundedService {
+export default class LastDummyServiceInNamedWorkstream extends BackgroundedService {
   public static get backgroundJobConfig(): BackgroundJobConfig {
-    return { priority: 'last' }
+    return { priority: 'last', workstream: 'snazzy' }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

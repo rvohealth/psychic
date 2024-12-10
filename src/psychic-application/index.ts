@@ -6,13 +6,13 @@ import {
   EncryptAlgorithm,
   EncryptOptions,
   OpenapiSchemaBody,
-  developmentOrTestEnv,
 } from '@rvohealth/dream'
 import bodyParser from 'body-parser'
-import { QueueOptions } from 'bullmq'
+import { Queue, QueueEvents, QueueOptions, Worker } from 'bullmq'
 import { CorsOptions } from 'cors'
 import { Application, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
+import Redis, { Cluster } from 'ioredis'
 import { Socket, Server as SocketServer } from 'socket.io'
 import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
@@ -29,8 +29,7 @@ import {
 import PsychicRouter from '../router'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache'
 import loadControllers, { getControllersOrFail } from './helpers/loadControllers'
-import { PsychicRedisConnectionOptions } from './helpers/redisOptions'
-import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
+import { Either, PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
 
 export default class PsychicApplication {
   public static async init(
@@ -120,12 +119,13 @@ Try setting it to something valid, like:
     return this._sessionCookieName
   }
 
-  private _backgroundOptions: PsychicBackgroundOptions = {
-    workerCount: developmentOrTestEnv() ? 1 : 0,
-  }
+  /**
+   * Returns the background options provided by the user
+   */
   public get backgroundOptions() {
     return this._backgroundOptions
   }
+  private _backgroundOptions: PsychicBackgroundOptions
 
   private _clientRoot: string
   public get clientRoot() {
@@ -177,24 +177,9 @@ Try setting it to something valid, like:
     return this._logger
   }
 
-  private _backgroundQueueOptions: Omit<QueueOptions, 'connection'>
-  public get backgroundQueueOptions() {
-    return this._backgroundQueueOptions
-  }
-
-  private _backgroundWorkerOptions: WorkerOptions
-  public get backgroundWorkerOptions() {
-    return this._backgroundWorkerOptions
-  }
-
-  private _redisBackgroundJobCredentials: PsychicRedisConnectionOptions
-  public get redisBackgroundJobCredentials() {
-    return this._redisBackgroundJobCredentials
-  }
-
-  private _redisWsCredentials: PsychicRedisConnectionOptions
-  public get redisWsCredentials() {
-    return this._redisWsCredentials
+  private _websocketOptions: PsychicWebsocketOptions
+  public get websocketOptions() {
+    return this._websocketOptions
   }
 
   private _sslCredentials?: PsychicSslCredentials
@@ -379,37 +364,31 @@ Try setting it to something valid, like:
                       ? string
                       : Opt extends 'background'
                         ? PsychicBackgroundOptions
-                        : Opt extends 'clientRoot'
-                          ? string
-                          : Opt extends 'json'
-                            ? bodyParser.Options
-                            : Opt extends 'logger'
-                              ? PsychicLogger
-                              : Opt extends 'client'
-                                ? PsychicClientOptions
-                                : Opt extends 'background:queue'
-                                  ? Omit<QueueOptions, 'connection'>
-                                  : Opt extends 'background:worker'
-                                    ? WorkerOptions
-                                    : Opt extends 'redis:background'
-                                      ? PsychicRedisConnectionOptions
-                                      : Opt extends 'redis:ws'
-                                        ? PsychicRedisConnectionOptions
-                                        : Opt extends 'ssl'
-                                          ? PsychicSslCredentials
-                                          : Opt extends 'openapi'
-                                            ? PsychicOpenapiOptions
-                                            : Opt extends 'paths'
-                                              ? PsychicPathOptions
-                                              : Opt extends 'port'
-                                                ? number
-                                                : Opt extends 'saltRounds'
-                                                  ? number
-                                                  : Opt extends 'inflections'
-                                                    ? () => void | Promise<void>
-                                                    : Opt extends 'routes'
-                                                      ? (r: PsychicRouter) => void | Promise<void>
-                                                      : never,
+                        : Opt extends 'websockets'
+                          ? PsychicWebsocketOptions
+                          : Opt extends 'clientRoot'
+                            ? string
+                            : Opt extends 'json'
+                              ? bodyParser.Options
+                              : Opt extends 'logger'
+                                ? PsychicLogger
+                                : Opt extends 'client'
+                                  ? PsychicClientOptions
+                                  : Opt extends 'ssl'
+                                    ? PsychicSslCredentials
+                                    : Opt extends 'openapi'
+                                      ? PsychicOpenapiOptions
+                                      : Opt extends 'paths'
+                                        ? PsychicPathOptions
+                                        : Opt extends 'port'
+                                          ? number
+                                          : Opt extends 'saltRounds'
+                                            ? number
+                                            : Opt extends 'inflections'
+                                              ? () => void | Promise<void>
+                                              : Opt extends 'routes'
+                                                ? (r: PsychicRouter) => void | Promise<void>
+                                                : never,
   ) {
     switch (option) {
       case 'appName':
@@ -472,29 +451,23 @@ Try setting it to something valid, like:
         break
 
       case 'background':
-        this._backgroundOptions = { ...this._backgroundOptions, ...(value as PsychicBackgroundOptions) }
-        break
+        this._backgroundOptions = {
+          ...{
+            providers: {
+              Queue,
+              QueueEvents,
+              Worker,
+            },
+          },
 
-      case 'background:queue':
-        this._backgroundQueueOptions = {
-          ...this.backgroundQueueOptions,
-          ...(value as Omit<QueueOptions, 'connection'>),
+          ...(value as PsychicBackgroundOptions),
         }
         break
 
-      case 'background:worker':
-        this._backgroundWorkerOptions = { ...this.backgroundWorkerOptions, ...(value as WorkerOptions) }
-        break
-
-      case 'redis:background':
-        this._redisBackgroundJobCredentials = {
-          ...this.redisBackgroundJobCredentials,
-          ...(value as PsychicRedisConnectionOptions),
+      case 'websockets':
+        this._websocketOptions = {
+          ...(value as PsychicWebsocketOptions),
         }
-        break
-
-      case 'redis:ws':
-        this._redisWsCredentials = { ...this.redisWsCredentials, ...(value as PsychicRedisConnectionOptions) }
         break
 
       case 'ssl':
@@ -557,9 +530,8 @@ export type PsychicApplicationOption =
   | 'openapi'
   | 'paths'
   | 'port'
-  | 'redis:background'
-  | 'redis:ws'
   | 'routes'
+  | 'websockets'
   | 'saltRounds'
   | 'ssl'
 
@@ -613,8 +585,167 @@ interface PsychicPathOptions {
   controllerSpecs?: string
 }
 
-interface PsychicBackgroundOptions {
-  workerCount: number
+interface PsychicWebsocketOptions {
+  connection: Redis
+}
+
+type RedisOrRedisClusterConnection = Redis | Cluster
+
+export type PsychicBackgroundOptions = Either<
+  PsychicBackgroundSimpleOptions,
+  PsychicBackgroundNativeBullMQOptions
+>
+
+interface PsychicBackgroundSharedOptions {
+  /**
+   * If using BullMQ, these can be omitted. However, if you are using
+   * BullMQ Pro, you will need to provide the Queue, QueueEvents, and Worker
+   * classes custom from them.
+   */
+  providers?: {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Queue: any
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    QueueEvents: any
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    Worker: any
+  }
+
+  defaultBullMQQueueOptions?: Omit<QueueOptions, 'connection'>
+}
+
+export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSharedOptions {
+  defaultConnection: RedisOrRedisClusterConnection
+
+  /**
+   * Every Psychic application that leverages simple background jobs will have a default
+   * workstream. Set workerCount to set the number of workers that will work through the
+   * default queue
+   */
+  defaultWorkstream?: {
+    workerCount?: number
+  }
+
+  /**
+   * When running background jobs on BullMQ, each named workstream corresponds
+   * to a specific queue and workers created for a named workstream are given
+   * a groupId corresponding to the workstream name
+   *
+   * named workstreams are useful for dispersing queues among nodes in a Redis cluster
+   * and for running queues on different Redis instances
+   *
+   * With BullMQ Pro, named workstreams can be rate limited (useful
+   * for interacting with external APIs)
+   */
+  namedWorkstreams?: PsychicBackgroundWorkstreamOptions[]
+
+  /**
+   * When transitioning from one instance of Redis to another, we can set up transitionalWorkstreams
+   * so that jobs already added to the legacy Redis instance continue to be worked. Once all jobs
+   * from the legacy Redis have been run, this configuration may be removed.
+   */
+  transitionalWorkstreams?: TransitionalPsychicBackgroundSimpleOptions
+}
+
+export type TransitionalPsychicBackgroundSimpleOptions = Omit<
+  PsychicBackgroundSimpleOptions,
+  'providers' | 'defaultBullMQQueueOptions' | 'transitionalWorkstreams'
+>
+
+// QueueOptionsWithConnectionInstance instead of QueueOptions because we need to be able to
+// automatically wrap the queue name with {} on a cluster, and the best way to test if on
+// a redis cluster is when we have connection instances, not just connection configs
+export type QueueOptionsWithConnectionInstance = Omit<QueueOptions, 'connection'> & {
+  connection?: RedisOrRedisClusterConnection
+}
+
+export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundSharedOptions {
+  defaultConnection?: RedisOrRedisClusterConnection
+
+  nativeBullMQ: {
+    // QueueOptionsWithConnectionInstance instead of QueueOptions because we need to be able to
+    // automatically wrap the queue name with {} on a cluster, and the best way to test if on
+    // a redis cluster is when we have connection instances, not just connection configs
+    defaultQueueOptions?: QueueOptionsWithConnectionInstance
+    /**
+     * named queues are useful for dispersing queues among nodes in a Redis cluster
+     * and for running queues on different Redis instances
+     */
+    namedQueueOptions?: Record<string, QueueOptionsWithConnectionInstance>
+
+    /**
+     * Native BullMQ options to provide to configure the default workers
+     * for psychic. By default, Psychic leverages a single-queue system, with
+     * many workers running off the queue. Each worker receives the
+     * same worker configuration, so this configuration is really
+     * only used to supply the number of default workers that you want.
+     */
+    defaultWorkerOptions?: BullMQNativeWorkerOptions
+
+    /**
+     * The number of default workers to run against the default Psychic
+     * background queues.
+     *
+     * By default, Psychic leverages a single-queue system, with
+     * many workers running off a single queue. This number determines
+     * the number of those default workers to provide.
+     */
+    defaultWorkerCount?: number
+
+    /**
+     * namedQueueWorkers are necessary to work off namedQueues
+     * With BullMQ Pro, namedQueueWorkers can be rate limited (useful
+     * for interacting with external APIs)
+     */
+    namedQueueWorkers?: Record<string, BullMQNativeWorkerOptions>
+  }
+}
+
+export interface PsychicBackgroundWorkstreamOptions {
+  /**
+   * This will be the name of the queue (and the group if using BullMQ Pro)
+   */
+  name: string
+
+  /**
+   * The number of workers you want to run on this configuration
+   */
+  workerCount?: number
+
+  /**
+   * See https://docs.bullmq.io/bullmq-pro/groups/rate-limiting for documentation
+   * on rate limiting in BullMQ Pro (requires paid BullMQ Pro license)
+   */
+  rateLimit?: {
+    max?: number
+    duration?: number
+  }
+
+  /**
+   * Optional redis connection. If not provided, the default background redis connection will be used
+   */
+  connection?: RedisOrRedisClusterConnection
+}
+
+// worker options gathered by scanning various sub-pages from
+// https://docs.bullmq.io/bullmq-pro/groups
+export interface BullMQNativeWorkerOptions extends WorkerOptions {
+  group?: {
+    id?: string
+    maxSize?: number
+    limit?: {
+      max?: number
+      duration?: number
+    }
+    concurrency?: number
+    priority?: number
+  }
+  // https://docs.bullmq.io/guide/workers/concurrency
+  concurrency?: number
+  // the number of workers to create with this configuration
+  workerCount?: number
 }
 
 export interface PsychicClientOptions {

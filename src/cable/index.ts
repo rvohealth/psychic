@@ -3,7 +3,6 @@ import { createAdapter } from '@socket.io/redis-adapter'
 import * as colors from 'colorette'
 import { Application } from 'express'
 import http from 'http'
-import { createClient, RedisClientOptions } from 'redis'
 import socketio from 'socket.io'
 import { envBool } from '../helpers/envValue'
 import log from '../log'
@@ -111,19 +110,7 @@ export default class Cable {
   }
 
   public async bindToRedis() {
-    const userRedisCreds = this.config.redisWsCredentials
-    const creds = {
-      username: userRedisCreds.username,
-      password: userRedisCreds.password,
-      socket: {
-        host: userRedisCreds.host,
-        port: userRedisCreds.port ? parseInt(userRedisCreds.port) : 6379,
-        tls: (!!userRedisCreds.secure || undefined) as true,
-        rejectUnauthorized: !!userRedisCreds.secure,
-      },
-    } as RedisClientOptions
-
-    const pubClient = createClient(creds)
+    const pubClient = this.config.websocketOptions.connection
     const subClient = pubClient.duplicate()
 
     pubClient.on('error', error => {

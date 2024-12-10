@@ -1,7 +1,7 @@
 import _pluralize from 'pluralize'
 export const pluralize = _pluralize
 
-export { default as background, stopBackgroundWorkers } from './background'
+export { BackgroundJobConfig, default as background, stopBackgroundWorkers } from './background'
 export { default as BackgroundedService } from './background/backgrounded-service'
 export { default as ScheduledService } from './background/scheduled-service'
 export { default as PsychicBin } from './bin'
@@ -37,7 +37,6 @@ export {
   OpenapiPathParamOption as OpenapiUriOption,
 } from './openapi-renderer/endpoint'
 export { default as PsychicApplication, PsychicOpenapiOptions } from './psychic-application'
-export { PsychicRedisConnectionOptions } from './psychic-application/helpers/redisOptions'
 export { UUID } from './psychic-application/types'
 export { default as PsychicRouter } from './router'
 export { HttpMethod } from './router/types'

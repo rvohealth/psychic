@@ -1,10 +1,10 @@
 import { GlobalNameNotSet } from '@rvohealth/dream'
-import background, { BackgroundQueuePriority } from './'
 import { FunctionPropertyNames } from '../helpers/typeHelpers'
+import background, { BackgroundJobConfig } from './'
 
 export default class BackgroundedService {
-  public static get priority(): BackgroundQueuePriority {
-    return 'default' as const
+  public static get backgroundJobConfig(): BackgroundJobConfig {
+    return {}
   }
 
   public static get globalName(): string {
@@ -29,7 +29,7 @@ export default class BackgroundedService {
     return await background.staticMethod(safeThis, methodName, {
       globalName: safeThis.globalName,
       args,
-      priority: safeThis.priority,
+      jobConfig: safeThis.backgroundJobConfig,
     })
   }
 
@@ -46,7 +46,7 @@ export default class BackgroundedService {
       globalName: safeThis.globalName,
       delaySeconds,
       args,
-      priority: safeThis.priority,
+      jobConfig: safeThis.backgroundJobConfig,
     })
   }
 
@@ -75,7 +75,7 @@ export default class BackgroundedService {
       globalName: constructor.globalName,
       args,
       constructorArgs,
-      priority: constructor.priority,
+      jobConfig: constructor.backgroundJobConfig,
     })
   }
 
@@ -106,7 +106,7 @@ export default class BackgroundedService {
       delaySeconds,
       args,
       constructorArgs,
-      priority: constructor.priority,
+      jobConfig: constructor.backgroundJobConfig,
     })
   }
 }

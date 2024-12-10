@@ -1,4 +1,6 @@
 import { developmentOrTestEnv, Encrypt } from '@rvohealth/dream'
+import { Queue, QueueEvents, Worker } from 'bullmq'
+import Redis from 'ioredis'
 import path from 'path'
 import winston from 'winston'
 import Ws from '../../../src/cable/ws'
@@ -121,43 +123,97 @@ export default async (psy: PsychicApplication) => {
   })
 
   psy.set('background', {
-    workerCount: parseInt(process.env.WORKER_COUNT || '0'),
-  })
+    providers: {
+      Queue,
+      Worker,
+      QueueEvents,
+    },
 
-  // configuration options for bullmq queue (used for running background jobs in redis)
-  psy.set('background:queue', {
-    defaultJobOptions: {
-      removeOnComplete: 1000,
-      removeOnFail: 20000,
-      // 524,288,000 ms (~6.1 days) using algorithm:
-      // "2 ^ (attempts - 1) * delay"
-      attempts: 20,
-      backoff: {
-        type: 'exponential',
-        delay: 1000,
+    defaultBullMQQueueOptions: {
+      defaultJobOptions: {
+        removeOnComplete: 1000,
+        removeOnFail: 20000,
+        // 524,288,000 ms (~6.1 days) using algorithm:
+        // "2 ^ (attempts - 1) * delay"
+        attempts: 20,
+        backoff: {
+          type: 'exponential',
+          delay: 1000,
+        },
       },
     },
-  })
 
-  // configuration options for bullmq worker (used for running background jobs in redis)
-  psy.set('background:worker', {})
+    // Psychic background API
+    defaultWorkstream: {
+      workerCount: parseInt(process.env.WORKER_COUNT || '0'),
+    },
 
-  // redis background job credentials
-  psy.set('redis:background', {
-    username: process.env.REDIS_USER,
-    password: process.env.REDIS_PASSWORD,
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    secure: process.env.REDIS_USE_SSL === '1',
+    namedWorkstreams: [{ workerCount: 1, name: 'snazzy', rateLimit: { max: 1, duration: 1 } }],
+    // end: Psychic background API
+
+    // // native BullMQ background API
+    // nativeBullMQ: {
+    //   // defaultQueueOptions: {connection: }
+    //   namedQueueOptions: {
+    //     snazzy: {},
+    //   },
+    //   namedQueueWorkers: { snazzy: {} },
+    // },
+    // // end: native BullMQ background API
+
+    // transitionalWorkstreams: {
+    //   defaultConnection: new Redis({
+    //     username: process.env.REDIS_USER,
+    //     password: process.env.REDIS_PASSWORD,
+    //     host: process.env.REDIS_HOST,
+    //     port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
+    //     tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
+    //     maxRetriesPerRequest: null,
+    //   }),
+
+    //   namedWorkstreams: [
+    //     {
+    //       workerCount: 1,
+    //       name: 'snazzy',
+    //       rateLimit: { max: 1, duration: 1 },
+    //     },
+    //   ],
+    // },
+
+    defaultConnection: new Redis({
+      username: process.env.REDIS_USER,
+      password: process.env.REDIS_PASSWORD,
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
+      tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
+      maxRetriesPerRequest: null,
+    }),
+
+    // To set up a simple cluster on a dev machine for testing:
+    //   https://medium.com/@bertrandoubida/setting-up-redis-cluster-on-macos-cf35a21465a
+    // defaultConnection: new Cluster(
+    //   [6380, 6384, 6385, 6381, 6383, 6382].map(port => ({ host: '127.0.0.1', port })),
+    //   {
+    //     redisOptions: {
+    //       username: process.env.REDIS_USER,
+    //       password: process.env.REDIS_PASSWORD,
+    //       tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
+    //       maxRetriesPerRequest: null,
+    //     },
+    //   },
+    // ),
   })
 
   // redis websocket credentials
-  psy.set('redis:ws', {
-    username: process.env.REDIS_USER,
-    password: process.env.REDIS_PASSWORD,
-    host: process.env.REDIS_HOST,
-    port: process.env.REDIS_PORT,
-    secure: process.env.REDIS_USE_SSL === '1',
+  psy.set('websockets', {
+    connection: new Redis({
+      username: process.env.REDIS_USER,
+      password: process.env.REDIS_PASSWORD,
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
+      tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
+      maxRetriesPerRequest: null,
+    }),
   })
 
   // ******

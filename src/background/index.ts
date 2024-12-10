@@ -1,9 +1,19 @@
 import { Dream, IdType, pascalize, testEnv } from '@rvohealth/dream'
-import { ConnectionOptions, Job, Queue, QueueEvents, Worker } from 'bullmq'
+import { Job, JobsOptions, Queue, QueueEvents, QueueOptions, Worker, WorkerOptions } from 'bullmq'
+import Redis, { Cluster } from 'ioredis'
+import NoQueueForSpecifiedQueueName from '../error/background/NoQueueForSpecifiedQueueName'
+import NoQueueForSpecifiedWorkstream from '../error/background/NoQueueForSpecifiedWorkstream'
 import { devEnvBool } from '../helpers/envValue'
-import PsychicApplication from '../psychic-application'
+import PsychicApplication, {
+  BullMQNativeWorkerOptions,
+  PsychicBackgroundNativeBullMQOptions,
+  PsychicBackgroundSimpleOptions,
+  PsychicBackgroundWorkstreamOptions,
+  QueueOptionsWithConnectionInstance,
+  TransitionalPsychicBackgroundSimpleOptions,
+} from '../psychic-application'
 import lookupClassByGlobalName from '../psychic-application/helpers/lookupClassByGlobalName'
-import redisOptions from '../psychic-application/helpers/redisOptions'
+import { Either } from '../psychic-application/types'
 
 type JobTypes =
   | 'BackgroundJobQueueFunctionJob'
@@ -21,63 +31,301 @@ export interface BackgroundJobData {
   filepath?: string
   importKey?: string
   globalName?: string
-  priority: BackgroundQueuePriority
+}
+
+class DefaultBullMQNativeOptionsMissingConnectionAndDefaultConnection extends Error {
+  public get message() {
+    return `
+Native BullMQ options don't include a default connection, and the
+default queue does not include a connection
+`
+  }
+}
+
+class NamedBullMQNativeOptionsMissingConnectionAndDefaultConnection extends Error {
+  constructor(private queueName: string) {
+    super()
+  }
+
+  public get message() {
+    return `
+Native BullMQ options don't include a default connection, and the
+${this.queueName} queue does not include a connection
+`
+  }
 }
 
 export class Background {
-  public queue: Queue | null = null
-  public queueEvents: QueueEvents
-  public workers: Worker[] = []
-
-  public connect() {
-    if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) return
-    if (this.queue) return
-
+  public static get defaultQueueName() {
     const psychicApp = PsychicApplication.getOrFail()
-
-    if (!psychicApp?.useRedis)
-      throw new Error(`attempting to use background jobs, but config.useRedis is not set to true.`)
-
-    const queueOptions = psychicApp.backgroundQueueOptions
-    const bullConnectionOpts = this.bullConnectionOptions
-
-    this.queue ||= new Queue(`${pascalize(psychicApp.appName)}BackgroundJobQueue`, {
-      ...queueOptions,
-      connection: bullConnectionOpts,
-    })
-    this.queueEvents = new QueueEvents(this.queue.name, { connection: bullConnectionOpts })
+    return `${pascalize(psychicApp.appName)}BackgroundJobQueue`
   }
 
-  private get bullConnectionOptions(): ConnectionOptions {
-    const connectionOptions = redisOptions('background_jobs')
-    return {
-      host: connectionOptions.host,
-      username: connectionOptions.username,
-      password: connectionOptions.password,
-      port: connectionOptions.port ? parseInt(connectionOptions.port) : undefined,
-      tls: connectionOptions.secure
-        ? {
-            rejectUnauthorized: false,
-          }
-        : undefined,
-      connectTimeout: 5000,
+  public static get Worker(): typeof Worker {
+    const psychicApp = PsychicApplication.getOrFail()
+    return (psychicApp.backgroundOptions.providers?.Worker || Worker) as typeof Worker
+  }
+
+  public static get Queue(): typeof Queue {
+    const psychicApp = PsychicApplication.getOrFail()
+    return (psychicApp.backgroundOptions.providers?.Queue || Queue) as typeof Queue
+  }
+
+  public static get QueueEvents(): typeof QueueEvents {
+    const psychicApp = PsychicApplication.getOrFail()
+    return (psychicApp.backgroundOptions.providers?.QueueEvents || QueueEvents) as typeof QueueEvents
+  }
+
+  /**
+   * Used when adding jobs to the default queue
+   */
+  public defaultQueue: Queue | null = null
+  /**
+   * Used when adding jobs to a named queue
+   */
+  public namedQueues: Record<string, Queue> = {}
+  /**
+   * Queue event emitters for all queues https://docs.bullmq.io/guide/events
+   */
+  public queueEvents: QueueEvents[] = []
+  public workers: Worker[] = []
+
+  public connect({
+    activateWorkers = false,
+  }: {
+    activateWorkers?: boolean
+  } = {}) {
+    if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) return
+    if (this.defaultQueue) return
+
+    const psychicApp = PsychicApplication.getOrFail()
+    const defaultBullMQQueueOptions = psychicApp.backgroundOptions.defaultBullMQQueueOptions || {}
+
+    if ((psychicApp.backgroundOptions as PsychicBackgroundNativeBullMQOptions).nativeBullMQ) {
+      this.nativeBullMQConnect(
+        defaultBullMQQueueOptions,
+        psychicApp.backgroundOptions as PsychicBackgroundNativeBullMQOptions,
+        { activateWorkers },
+      )
+    } else {
+      this.simpleConnect(
+        defaultBullMQQueueOptions,
+        psychicApp.backgroundOptions as PsychicBackgroundSimpleOptions,
+        { activateWorkers },
+      )
     }
+  }
+
+  private simpleConnect(
+    defaultBullMQQueueOptions: Omit<QueueOptions, 'connection'>,
+    backgroundOptions: PsychicBackgroundSimpleOptions | TransitionalPsychicBackgroundSimpleOptions,
+
+    {
+      activateWorkers = false,
+      activatingTransitionalWorkstreams = false,
+    }: {
+      activateWorkers?: boolean
+      activatingTransitionalWorkstreams?: boolean
+    },
+  ) {
+    const defaultConnection = backgroundOptions.defaultConnection
+    const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultConnection)
+
+    ///////////////////////////////
+    // create default workstream //
+    ///////////////////////////////
+
+    const defaultQueue = new Background.Queue(formattedQueueName, {
+      ...defaultBullMQQueueOptions,
+      connection: defaultConnection,
+    })
+    this.queueEvents.push(new Background.QueueEvents(formattedQueueName, { connection: defaultConnection }))
+    if (!activatingTransitionalWorkstreams) this.defaultQueue = defaultQueue
+    ////////////////////////////////////
+    // end: create default workstream //
+    ////////////////////////////////////
+
+    /////////////////////////////
+    // create default workers //
+    /////////////////////////////
+    if (activateWorkers) {
+      for (let i = 0; i < (backgroundOptions.defaultWorkstream?.workerCount ?? 1); i++) {
+        this.workers.push(
+          new Background.Worker(formattedQueueName, data => this.handler(data), {
+            connection: defaultConnection,
+          }),
+        )
+      }
+    }
+    /////////////////////////////////
+    // end: create default workers //
+    /////////////////////////////////
+
+    //////////////////////////////
+    // create named workstreams //
+    //////////////////////////////
+    const namedWorkstreams: PsychicBackgroundWorkstreamOptions[] = backgroundOptions.namedWorkstreams || []
+
+    namedWorkstreams.forEach(namedWorkstream => {
+      const namedWorkstreamConnection = namedWorkstream.connection || defaultConnection
+      const namedWorkstreamFormattedQueueName = nameToRedisQueueName(
+        namedWorkstream.name,
+        namedWorkstreamConnection,
+      )
+
+      const namedQueue = new Background.Queue(namedWorkstreamFormattedQueueName, {
+        ...defaultBullMQQueueOptions,
+        connection: namedWorkstreamConnection,
+      })
+
+      if (!activatingTransitionalWorkstreams) {
+        this.namedQueues[namedWorkstream.name] = namedQueue
+      }
+
+      this.queueEvents.push(
+        new Background.QueueEvents(namedWorkstreamFormattedQueueName, {
+          connection: namedWorkstreamConnection,
+        }),
+      )
+
+      //////////////////////////
+      // create named workers //
+      //////////////////////////
+      if (activateWorkers) {
+        for (let i = 0; i < (namedWorkstream.workerCount ?? 1); i++) {
+          this.workers.push(
+            new Background.Worker(namedWorkstreamFormattedQueueName, data => this.handler(data), {
+              group: {
+                id: namedWorkstream.name,
+                limit: namedWorkstream.rateLimit,
+              },
+              connection: namedWorkstreamConnection,
+              // explicitly typing as WorkerOptions because Psychic can't be aware of BullMQ Pro options
+            } as WorkerOptions),
+          )
+        }
+      }
+      ///////////////////////////////
+      // end: create named workers //
+      ///////////////////////////////
+    })
+    ///////////////////////////////////
+    // end: create named workstreams //
+    ///////////////////////////////////
+
+    const transitionalWorkstreams = (backgroundOptions as PsychicBackgroundSimpleOptions)
+      .transitionalWorkstreams
+
+    if (transitionalWorkstreams) {
+      this.simpleConnect(defaultBullMQQueueOptions, transitionalWorkstreams, {
+        activateWorkers,
+        activatingTransitionalWorkstreams: true,
+      })
+    }
+  }
+
+  private nativeBullMQConnect(
+    defaultBullMQQueueOptions: Omit<QueueOptions, 'connection'>,
+    backgroundOptions: PsychicBackgroundNativeBullMQOptions,
+    {
+      activateWorkers = false,
+    }: {
+      activateWorkers?: boolean
+    },
+  ) {
+    const nativeBullMQ = backgroundOptions.nativeBullMQ
+    const defaultQueueConnection =
+      nativeBullMQ.defaultQueueOptions?.connection || backgroundOptions.defaultConnection
+
+    if (!defaultQueueConnection) throw new DefaultBullMQNativeOptionsMissingConnectionAndDefaultConnection()
+
+    const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultQueueConnection)
+
+    //////////////////////////
+    // create default queue //
+    //////////////////////////
+    this.defaultQueue = new Background.Queue(formattedQueueName, {
+      ...defaultBullMQQueueOptions,
+      ...(nativeBullMQ.defaultQueueOptions || {}),
+      connection: defaultQueueConnection,
+    })
+    this.queueEvents.push(
+      new Background.QueueEvents(formattedQueueName, { connection: defaultQueueConnection }),
+    )
+    ///////////////////////////////
+    // end: create default queue //
+    ///////////////////////////////
+
+    /////////////////////////////
+    // create default workers //
+    /////////////////////////////
+    if (activateWorkers) {
+      for (let i = 0; i < (nativeBullMQ.defaultWorkerCount ?? 1); i++) {
+        this.workers.push(
+          new Background.Worker(formattedQueueName, data => this.handler(data), {
+            ...(backgroundOptions.nativeBullMQ.defaultWorkerOptions || {}),
+            connection: defaultQueueConnection,
+          }),
+        )
+      }
+    }
+    /////////////////////////////////
+    // end: create default workers //
+    /////////////////////////////////
+
+    /////////////////////////
+    // create named queues //
+    /////////////////////////
+    const namedQueueOptionsMap: Record<string, QueueOptionsWithConnectionInstance> =
+      nativeBullMQ.namedQueueOptions || {}
+
+    Object.keys(namedQueueOptionsMap).forEach(queueName => {
+      const namedQueueOptions: QueueOptionsWithConnectionInstance = namedQueueOptionsMap[queueName]
+      const namedQueueConnection = namedQueueOptions.connection || backgroundOptions.defaultConnection
+
+      if (!namedQueueConnection)
+        throw new NamedBullMQNativeOptionsMissingConnectionAndDefaultConnection(queueName)
+
+      const formattedQueuename = nameToRedisQueueName(queueName, namedQueueConnection)
+
+      this.namedQueues[queueName] = new Background.Queue(formattedQueuename, {
+        ...defaultBullMQQueueOptions,
+        ...namedQueueOptions,
+        connection: namedQueueConnection,
+      })
+      this.queueEvents.push(
+        new Background.QueueEvents(formattedQueuename, { connection: namedQueueConnection }),
+      )
+
+      //////////////////////////
+      // create extra workers //
+      //////////////////////////
+      if (activateWorkers) {
+        const extraWorkerOptionsMap: Record<string, BullMQNativeWorkerOptions> =
+          nativeBullMQ.namedQueueWorkers || {}
+        const extraWorkerOptions: BullMQNativeWorkerOptions = extraWorkerOptionsMap[queueName]
+        const extraWorkerCount = extraWorkerOptions ? (extraWorkerOptions.workerCount ?? 1) : 0
+
+        for (let i = 0; i < extraWorkerCount; i++) {
+          this.workers.push(
+            new Background.Worker(formattedQueuename, data => this.handler(data), {
+              ...extraWorkerOptions,
+              connection: namedQueueConnection,
+            }),
+          )
+        }
+      }
+      ///////////////////////////////
+      // end: create extra workers //
+      ///////////////////////////////
+    })
+    //////////////////////////////
+    // end: create named queues //
+    //////////////////////////////
   }
 
   public work() {
-    this.connect()
-
-    const psychicApp = PsychicApplication.getOrFail()
-    const workerOptions = psychicApp.backgroundWorkerOptions
-
-    for (let i = 0; i < workerCount(); i++) {
-      this.workers.push(
-        new Worker(`${pascalize(psychicApp.appName)}BackgroundJobQueue`, data => this.handler(data), {
-          ...workerOptions,
-          connection: this.bullConnectionOptions,
-        }),
-      )
-    }
+    this.connect({ activateWorkers: true })
   }
 
   public async staticMethod(
@@ -87,7 +335,7 @@ export class Background {
       delaySeconds,
       globalName,
       args = [],
-      priority = 'default',
+      jobConfig = {},
     }: {
       globalName: string
       filepath?: string
@@ -95,19 +343,24 @@ export class Background {
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      priority?: BackgroundQueuePriority
+      jobConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
+
     await this._addToQueue(
       `BackgroundJobQueueStaticJob`,
       {
         globalName,
         method,
         args,
-        priority,
       },
-      { delaySeconds },
+      {
+        delaySeconds,
+        jobConfig: jobConfig,
+        groupId: this.jobConfigToGroupId(jobConfig),
+        priority: this.jobConfigToPriority(jobConfig),
+      },
     )
   }
 
@@ -118,14 +371,14 @@ export class Background {
     {
       globalName,
       args = [],
-      priority = 'default',
+      jobConfig = {},
     }: {
       globalName: string
       filepath?: string
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      priority?: BackgroundQueuePriority
+      jobConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
@@ -138,22 +391,40 @@ export class Background {
     // See: https://docs.bullmq.io/guide/jobs/repeatable
     const jobId = `${ObjectClass.name}:${method}`
 
-    await this.queue!.add(
+    await this.queueInstance(jobConfig).add(
       'BackgroundJobQueueStaticJob',
       {
         globalName,
         method,
         args,
-        priority,
       },
       {
         repeat: {
           pattern,
         },
         jobId,
-        priority: this.getPriorityForQueue(priority),
-      },
+        group: this.jobConfigToGroup(jobConfig),
+        priority: this.mapPriorityWordToPriorityNumber(this.jobConfigToPriority(jobConfig)),
+        // explicitly typing as JobsOptions because Psychic can't be aware of BullMQ Pro options
+      } as JobsOptions,
     )
+  }
+
+  private queueInstance(values: BackgroundJobConfig) {
+    const workstreamConfig = values as WorkstreamBackgroundJobConfig
+    const queueConfig = values as QueueBackgroundJobConfig
+    const queueInstance: Queue | undefined = workstreamConfig.workstream
+      ? this.namedQueues[workstreamConfig.workstream]
+      : queueConfig.queue
+        ? this.namedQueues[queueConfig.queue]
+        : this.defaultQueue!
+
+    if (!queueInstance) {
+      if (workstreamConfig.workstream) throw new NoQueueForSpecifiedWorkstream(workstreamConfig.workstream)
+      if (queueConfig.queue) throw new NoQueueForSpecifiedQueueName(queueConfig.queue)
+    }
+
+    return queueInstance
   }
 
   public async instanceMethod(
@@ -164,7 +435,7 @@ export class Background {
       globalName,
       args = [],
       constructorArgs = [],
-      priority = 'default',
+      jobConfig = {},
     }: {
       globalName: string
       delaySeconds?: number
@@ -174,10 +445,11 @@ export class Background {
       args?: any[]
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       constructorArgs?: any[]
-      priority?: BackgroundQueuePriority
+      jobConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
+
     await this._addToQueue(
       'BackgroundJobQueueInstanceJob',
       {
@@ -185,9 +457,13 @@ export class Background {
         method,
         args,
         constructorArgs,
-        priority,
       },
-      { delaySeconds },
+      {
+        delaySeconds,
+        jobConfig: jobConfig,
+        groupId: this.jobConfigToGroupId(jobConfig),
+        priority: this.jobConfigToPriority(jobConfig),
+      },
     )
   }
 
@@ -197,16 +473,17 @@ export class Background {
     {
       delaySeconds,
       args = [],
-      priority = 'default',
+      jobConfig = {},
     }: {
       delaySeconds?: number
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      priority?: BackgroundQueuePriority
+      jobConfig?: BackgroundJobConfig
     },
   ) {
     this.connect()
+
     await this._addToQueue(
       'BackgroundJobQueueModelInstanceJob',
       {
@@ -214,9 +491,13 @@ export class Background {
         globalName: (modelInstance.constructor as typeof Dream).globalName,
         method,
         args,
-        priority,
       },
-      { delaySeconds },
+      {
+        delaySeconds,
+        jobConfig: jobConfig,
+        groupId: this.jobConfigToGroupId(jobConfig),
+        priority: this.jobConfigToPriority(jobConfig),
+      },
     )
   }
 
@@ -226,21 +507,59 @@ export class Background {
     jobData: BackgroundJobData,
     {
       delaySeconds,
+      jobConfig,
+      priority,
+      groupId,
     }: {
       delaySeconds?: number
+      jobConfig: BackgroundJobConfig
+      priority: BackgroundQueuePriority
+      groupId?: string
     },
   ) {
+    // set this variable out side of the conditional so that
+    // mismatches will raise exceptions even in tests
+    const queueInstance = this.queueInstance(jobConfig)
+
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) {
       await this.doWork(jobType, jobData)
     } else {
-      await this.queue!.add(jobType, jobData, {
+      await queueInstance.add(jobType, jobData, {
         delay: delaySeconds ? delaySeconds * 1000 : undefined,
-        priority: this.getPriorityForQueue(jobData.priority),
-      })
+        group: this.groupIdToGroupConfig(groupId),
+        priority: this.mapPriorityWordToPriorityNumber(priority),
+        // explicitly typing as JobsOptions because Psychic can't be aware of BullMQ Pro options
+      } as JobsOptions)
     }
   }
 
-  private getPriorityForQueue(priority: BackgroundQueuePriority) {
+  private jobConfigToPriority(jobConfig?: BackgroundJobConfig): BackgroundQueuePriority {
+    if (!jobConfig) return 'default'
+    return jobConfig.priority || 'default'
+  }
+
+  private jobConfigToGroupId(jobConfig?: BackgroundJobConfig): string | undefined {
+    if (!jobConfig) return
+
+    const workstreamConfig = jobConfig as WorkstreamBackgroundJobConfig
+    if (workstreamConfig.workstream) return workstreamConfig.workstream
+
+    const queueConfig = jobConfig as QueueBackgroundJobConfig
+    if (queueConfig.groupId) return queueConfig.groupId
+
+    return
+  }
+
+  private jobConfigToGroup(jobConfig?: BackgroundJobConfig): { id: string } | undefined {
+    return this.groupIdToGroupConfig(this.jobConfigToGroupId(jobConfig))
+  }
+
+  private groupIdToGroupConfig(groupId: string | undefined): { id: string } | undefined {
+    if (!groupId) return
+    return { id: groupId }
+  }
+
+  private mapPriorityWordToPriorityNumber(priority: BackgroundQueuePriority) {
     switch (priority) {
       case 'urgent':
         return 1
@@ -326,11 +645,6 @@ export class Background {
   }
 }
 
-function workerCount() {
-  const psychicApp = PsychicApplication.getOrFail()
-  return psychicApp.backgroundOptions.workerCount
-}
-
 const background = new Background()
 export default background
 
@@ -339,3 +653,40 @@ export async function stopBackgroundWorkers() {
 }
 
 export type BackgroundQueuePriority = 'default' | 'urgent' | 'not_urgent' | 'last'
+
+interface BaseBackgroundJobConfig {
+  priority?: BackgroundQueuePriority
+}
+
+export interface WorkstreamBackgroundJobConfig extends BaseBackgroundJobConfig {
+  workstream?: string
+}
+
+export interface QueueBackgroundJobConfig extends BaseBackgroundJobConfig {
+  groupId?: string
+  queue?: string
+}
+
+export type BackgroundJobConfig = Either<WorkstreamBackgroundJobConfig, QueueBackgroundJobConfig>
+
+export type PsychicBackgroundOptions =
+  | (PsychicBackgroundSimpleOptions &
+      Partial<
+        Record<
+          Exclude<keyof PsychicBackgroundNativeBullMQOptions, keyof PsychicBackgroundSimpleOptions>,
+          never
+        >
+      >)
+  | (PsychicBackgroundNativeBullMQOptions &
+      Partial<
+        Record<
+          Exclude<keyof PsychicBackgroundSimpleOptions, keyof PsychicBackgroundNativeBullMQOptions>,
+          never
+        >
+      >)
+
+function nameToRedisQueueName(queueName: string, redis: Redis | Cluster): string {
+  queueName = queueName.replace(/\{|\}/g, '')
+  if (redis instanceof Cluster) return `{${queueName}}`
+  return queueName
+}
