@@ -1,5 +1,5 @@
 import { Dream, IdType, pascalize, testEnv } from '@rvohealth/dream'
-import { Job, Queue, QueueEvents, QueueOptions, Worker } from 'bullmq'
+import { Job, JobsOptions, Queue, QueueEvents, QueueOptions, Worker, WorkerOptions } from 'bullmq'
 import Redis, { Cluster } from 'ioredis'
 import NoQueueForSpecifiedQueueName from '../error/background/NoQueueForSpecifiedQueueName'
 import NoQueueForSpecifiedWorkstream from '../error/background/NoQueueForSpecifiedWorkstream'
@@ -75,9 +75,21 @@ export class Background {
     return (psychicApp.backgroundOptions.providers?.QueueEvents || QueueEvents) as typeof QueueEvents
   }
 
+  /**
+   * Used when adding jobs to the default queue
+   */
   public defaultQueue: Queue | null = null
+  /**
+   * Used when adding jobs to a named queue
+   */
   public namedQueues: Record<string, Queue> = {}
+  /**
+   * Queue event emitters for all queues https://docs.bullmq.io/guide/events
+   */
   public queueEvents: QueueEvents[] = []
+  // Maps the external queue name to the internal queue name, which, when using Redis cluster,
+  // is the queue name wrapped in curly braces (e.g. `{my-queue}`)
+  // This is used when adding jobs to a queue
   private queueNameMap: Record<string, string> = {}
   public workers: Worker[] = []
 
@@ -186,16 +198,14 @@ export class Background {
       if (activateWorkers) {
         for (let i = 0; i < (namedWorkstream.workerCount ?? 1); i++) {
           this.workers.push(
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             new Background.Worker(namedWorkstreamFormattedQueueName, data => this.handler(data), {
               group: {
                 id: namedWorkstream.name,
                 limit: namedWorkstream.rateLimit,
               },
               connection: namedWorkstreamConnection,
-              // typing as any because Psychic can't be aware of BullMQ Pro options
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            } as any),
+              // explicitly typing as WorkerOptions because Psychic can't be aware of BullMQ Pro options
+            } as WorkerOptions),
           )
         }
       }
@@ -392,7 +402,6 @@ export class Background {
         method,
         args,
       },
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       {
         repeat: {
           pattern,
@@ -400,9 +409,8 @@ export class Background {
         jobId,
         group: this.jobConfigToGroup(jobConfig),
         priority: this.mapPriorityWordToPriorityNumber(this.jobConfigToPriority(jobConfig)),
-        // typing as any because Psychic can't be aware of BullMQ Pro options
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any,
+        // explicitly typing as JobsOptions because Psychic can't be aware of BullMQ Pro options
+      } as JobsOptions,
     )
   }
 
@@ -520,14 +528,12 @@ export class Background {
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) {
       await this.doWork(jobType, jobData)
     } else {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       await queueInstance.add(jobType, jobData, {
         delay: delaySeconds ? delaySeconds * 1000 : undefined,
         group: this.groupIdToGroupConfig(groupId),
         priority: this.mapPriorityWordToPriorityNumber(priority),
-        // typing as any because Psychic can't be aware of BullMQ Pro options
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      } as any)
+        // explicitly typing as JobsOptions because Psychic can't be aware of BullMQ Pro options
+      } as JobsOptions)
     }
   }
 
