@@ -77,8 +77,8 @@ export class Background {
 
   public defaultQueue: Queue | null = null
   public namedQueues: Record<string, Queue> = {}
+  public queueEvents: QueueEvents[] = []
   private queueNameMap: Record<string, string> = {}
-  private queueEvents: QueueEvents[] = []
   public workers: Worker[] = []
 
   public connect({
@@ -119,9 +119,6 @@ export class Background {
       activatingTransitionalWorkstreams?: boolean
     },
   ) {
-    /////////////////////////////////
-    // Psychic background options //
-    /////////////////////////////////
     const defaultConnection = backgroundOptions.defaultConnection
     const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultConnection)
 
@@ -143,7 +140,7 @@ export class Background {
     // create default workers //
     /////////////////////////////
     if (activateWorkers) {
-      for (let i = 0; i < (backgroundOptions.defaultWorkstream?.workerCount || 1); i++) {
+      for (let i = 0; i < (backgroundOptions.defaultWorkstream?.workerCount ?? 1); i++) {
         this.workers.push(
           new Background.Worker(formattedQueueName, data => this.handler(data), {
             connection: defaultConnection,
@@ -187,7 +184,7 @@ export class Background {
       // create named workers //
       //////////////////////////
       if (activateWorkers) {
-        for (let i = 0; i < (namedWorkstream.workerCount || 1); i++) {
+        for (let i = 0; i < (namedWorkstream.workerCount ?? 1); i++) {
           this.workers.push(
             // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
             new Background.Worker(namedWorkstreamFormattedQueueName, data => this.handler(data), {
@@ -210,10 +207,6 @@ export class Background {
     // end: create named workstreams //
     ///////////////////////////////////
 
-    ////////////////////////////////
-    // Psychic background options //
-    ////////////////////////////////
-
     const transitionalWorkstreams = (backgroundOptions as PsychicBackgroundSimpleOptions)
       .transitionalWorkstreams
 
@@ -234,10 +227,6 @@ export class Background {
       activateWorkers?: boolean
     },
   ) {
-    ///////////////////////////
-    // native BullMQ options //
-    ///////////////////////////
-
     const nativeBullMQ = backgroundOptions.nativeBullMQ
     const defaultQueueConnection =
       nativeBullMQ.defaultQueueOptions?.connection || backgroundOptions.defaultConnection
@@ -265,7 +254,7 @@ export class Background {
     // create default workers //
     /////////////////////////////
     if (activateWorkers) {
-      for (let i = 0; i < (nativeBullMQ.defaultWorkerCount || 1); i++) {
+      for (let i = 0; i < (nativeBullMQ.defaultWorkerCount ?? 1); i++) {
         this.workers.push(
           new Background.Worker(formattedQueueName, data => this.handler(data), {
             ...(backgroundOptions.nativeBullMQ.defaultWorkerOptions || {}),
@@ -307,10 +296,10 @@ export class Background {
       // create extra workers //
       //////////////////////////
       if (activateWorkers) {
-        ;(nativeBullMQ.extraWorkers || [])
+        ;(nativeBullMQ.namedQueueWorkers || [])
           .filter(extraWorkerOptions => extraWorkerOptions.queueName === queueName)
           .forEach((extraWorkerOptions: BullMQNativeWorkerOptions) => {
-            for (let i = 0; i < (extraWorkerOptions.workerCount || 1); i++) {
+            for (let i = 0; i < (extraWorkerOptions.workerCount ?? 1); i++) {
               this.workers.push(
                 new Background.Worker(formattedQueuename, data => this.handler(data), {
                   ...extraWorkerOptions,
@@ -327,10 +316,6 @@ export class Background {
     //////////////////////////////
     // end: create named queues //
     //////////////////////////////
-
-    ////////////////////////////////
-    // end: native BullMQ options //
-    ////////////////////////////////
   }
 
   public work() {

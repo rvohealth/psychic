@@ -692,11 +692,11 @@ export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundS
     defaultWorkerCount?: number
 
     /**
-     * extraWorkers are necessary to work off namedQueues
-     * With BullMQ Pro, extraWorkers can be rate limited (useful
+     * namedQueueWorkers are necessary to work off namedQueues
+     * With BullMQ Pro, namedQueueWorkers can be rate limited (useful
      * for interacting with external APIs)
      */
-    extraWorkers?: BullMQNativeWorkerOptions[]
+    namedQueueWorkers?: BullMQNativeWorkerOptions[]
   }
 }
 
