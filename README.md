@@ -38,3 +38,13 @@ yarn gpsycore new myapp --redis --ws --primaryKey bigserial --client react
 ```
 
 NOTE: doing so will create the new app in the psychic folder, so once done testing remember to remove it.
+
+## Questions?
+
+- **Ask them on [Stack Overflow](https://stackoverflow.com)**, using the `[psychic]` tag.
+
+## Contributing
+
+Psychic is an open source library, so we encourage you to actively contribute. Visit our [Contributing](https://github.com/rvohealth/psychic/CONTRIBUTING.md) guide to learn more about the processes we use for submitting pull requests or issues.
+
+Are you trying to report a possible security vulnerability? Visit our [Security Policy](https://github.com/rvohealth/psychic/SECURITY.md) for guidelines about how to proceed.
