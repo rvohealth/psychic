@@ -38,6 +38,15 @@ export default class PsychicServer {
   public async boot() {
     if (this.booted) return
 
+    const psychicApp = PsychicApplication.getOrFail()
+
+    this.app.use((_, res, next) => {
+      Object.keys(psychicApp.defaultResponseHeaders).forEach(key => {
+        res.setHeader(key, psychicApp.defaultResponseHeaders[key]!)
+      })
+      next()
+    })
+
     await this.config['runHooksFor']('boot')
 
     this.initializeCors()
