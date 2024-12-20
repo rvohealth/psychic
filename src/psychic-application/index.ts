@@ -258,6 +258,17 @@ Try setting it to something valid, like:
     return this._loadedControllers
   }
 
+  private _baseDefaultResponseHeaders: Record<string, string | null> = {
+    ['cache-control']: 'max-age=0, private, must-revalidate',
+  }
+  private _defaultResponseHeaders: Record<string, string | null> = {}
+  public get defaultResponseHeaders() {
+    return {
+      ...this._baseDefaultResponseHeaders,
+      ...this._defaultResponseHeaders,
+    }
+  }
+
   public get controllers() {
     return getControllersOrFail()
   }
@@ -352,43 +363,45 @@ Try setting it to something valid, like:
           ? boolean
           : Opt extends 'apiOnly'
             ? boolean
-            : Opt extends 'encryption'
-              ? PsychicApplicationEncryptionOptions
-              : Opt extends 'cors'
-                ? CorsOptions
-                : Opt extends 'cookie'
-                  ? CustomCookieOptions
-                  : Opt extends 'apiRoot'
-                    ? string
-                    : Opt extends 'sessionCookieName'
+            : Opt extends 'defaultResponseHeaders'
+              ? Record<string, string | null>
+              : Opt extends 'encryption'
+                ? PsychicApplicationEncryptionOptions
+                : Opt extends 'cors'
+                  ? CorsOptions
+                  : Opt extends 'cookie'
+                    ? CustomCookieOptions
+                    : Opt extends 'apiRoot'
                       ? string
-                      : Opt extends 'background'
-                        ? PsychicBackgroundOptions
-                        : Opt extends 'websockets'
-                          ? PsychicWebsocketOptions
-                          : Opt extends 'clientRoot'
-                            ? string
-                            : Opt extends 'json'
-                              ? bodyParser.Options
-                              : Opt extends 'logger'
-                                ? PsychicLogger
-                                : Opt extends 'client'
-                                  ? PsychicClientOptions
-                                  : Opt extends 'ssl'
-                                    ? PsychicSslCredentials
-                                    : Opt extends 'openapi'
-                                      ? PsychicOpenapiOptions
-                                      : Opt extends 'paths'
-                                        ? PsychicPathOptions
-                                        : Opt extends 'port'
-                                          ? number
-                                          : Opt extends 'saltRounds'
+                      : Opt extends 'sessionCookieName'
+                        ? string
+                        : Opt extends 'background'
+                          ? PsychicBackgroundOptions
+                          : Opt extends 'websockets'
+                            ? PsychicWebsocketOptions
+                            : Opt extends 'clientRoot'
+                              ? string
+                              : Opt extends 'json'
+                                ? bodyParser.Options
+                                : Opt extends 'logger'
+                                  ? PsychicLogger
+                                  : Opt extends 'client'
+                                    ? PsychicClientOptions
+                                    : Opt extends 'ssl'
+                                      ? PsychicSslCredentials
+                                      : Opt extends 'openapi'
+                                        ? PsychicOpenapiOptions
+                                        : Opt extends 'paths'
+                                          ? PsychicPathOptions
+                                          : Opt extends 'port'
                                             ? number
-                                            : Opt extends 'inflections'
-                                              ? () => void | Promise<void>
-                                              : Opt extends 'routes'
-                                                ? (r: PsychicRouter) => void | Promise<void>
-                                                : never,
+                                            : Opt extends 'saltRounds'
+                                              ? number
+                                              : Opt extends 'inflections'
+                                                ? () => void | Promise<void>
+                                                : Opt extends 'routes'
+                                                  ? (r: PsychicRouter) => void | Promise<void>
+                                                  : never,
   ) {
     switch (option) {
       case 'appName':
@@ -413,6 +426,16 @@ Try setting it to something valid, like:
 
       case 'clientRoot':
         this._clientRoot = value as string
+        break
+
+      case 'defaultResponseHeaders':
+        this._defaultResponseHeaders = Object.keys(value as Record<string, string>).reduce(
+          (agg, key) => {
+            agg[key.toLowerCase()] = value[key as keyof typeof value] as string
+            return agg
+          },
+          {} as Record<string, string>,
+        ) as Record<string, string | null>
         break
 
       case 'sessionCookieName':
@@ -524,6 +547,7 @@ export type PsychicApplicationOption =
   | 'clientRoot'
   | 'cookie'
   | 'cors'
+  | 'defaultResponseHeaders'
   | 'inflections'
   | 'json'
   | 'logger'
