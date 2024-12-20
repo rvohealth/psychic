@@ -81,9 +81,17 @@ export class Background {
    */
   public defaultQueue: Queue | null = null
   /**
+   * Used when adding jobs to the default transitional queue
+   */
+  public defaultTransitionalQueue: Queue | null = null
+  /**
    * Used when adding jobs to a named queue
    */
   public namedQueues: Record<string, Queue> = {}
+  /**
+   * Used when adding jobs to a named transitioanl queue
+   */
+  public namedTransitionalQueues: Record<string, Queue> = {}
   /**
    * Queue event emitters for all queues https://docs.bullmq.io/guide/events
    */
@@ -140,7 +148,11 @@ export class Background {
       connection: defaultConnection,
     })
     this.queueEvents.push(new Background.QueueEvents(formattedQueueName, { connection: defaultConnection }))
-    if (!activatingTransitionalWorkstreams) this.defaultQueue = defaultQueue
+    if (activatingTransitionalWorkstreams) {
+      this.defaultTransitionalQueue = defaultQueue
+    } else {
+      this.defaultQueue = defaultQueue
+    }
     ////////////////////////////////////
     // end: create default workstream //
     ////////////////////////////////////
@@ -178,7 +190,9 @@ export class Background {
         connection: namedWorkstreamConnection,
       })
 
-      if (!activatingTransitionalWorkstreams) {
+      if (activatingTransitionalWorkstreams) {
+        this.namedTransitionalQueues[namedWorkstream.name] = namedQueue
+      } else {
         this.namedQueues[namedWorkstream.name] = namedQueue
       }
 
