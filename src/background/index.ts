@@ -137,10 +137,10 @@ export class Background {
     },
   ) {
     const defaultConnection = backgroundOptions.defaultConnection
-    const defaultQeueName = activatingTransitionalWorkstreams
-      ? `Transitional${Background.defaultQueueName}`
-      : Background.defaultQueueName
-    const formattedQueueName = nameToRedisQueueName(defaultQeueName, defaultConnection)
+    // transitional queues must have the same names they had prior to making them
+    // transitional since the name is what identifies the queues and enables the
+    // queues to be worked off
+    const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultConnection)
 
     ///////////////////////////////
     // create default workstream //
@@ -183,11 +183,11 @@ export class Background {
 
     namedWorkstreams.forEach(namedWorkstream => {
       const namedWorkstreamConnection = namedWorkstream.connection || defaultConnection
-      const workstreamName = activatingTransitionalWorkstreams
-        ? `Transitional${namedWorkstream.name}`
-        : namedWorkstream.name
+      // transitional queues must have the same names they had prior to making them
+      // transitional since the name is what identifies the queues and enables the
+      // queues to be worked off
       const namedWorkstreamFormattedQueueName = nameToRedisQueueName(
-        workstreamName,
+        namedWorkstream.name,
         namedWorkstreamConnection,
       )
 
