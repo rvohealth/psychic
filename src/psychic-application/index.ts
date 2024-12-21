@@ -650,6 +650,8 @@ export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSharedO
    */
   defaultWorkstream?: {
     workerCount?: number
+    // https://docs.bullmq.io/guide/workers/concurrency
+    concurrency?: number
   }
 
   /**
@@ -737,6 +739,8 @@ export interface PsychicBackgroundWorkstreamOptions {
    * The number of workers you want to run on this configuration
    */
   workerCount?: number
+  // https://docs.bullmq.io/guide/workers/concurrency
+  concurrency?: number
 
   /**
    * See https://docs.bullmq.io/bullmq-pro/groups/rate-limiting for documentation
