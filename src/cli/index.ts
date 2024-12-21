@@ -1,4 +1,4 @@
-import { DreamBin, DreamCLI } from '@rvohealth/dream'
+import { DreamCLI } from '@rvohealth/dream'
 import { Command } from 'commander'
 import PsychicBin from '../bin'
 import PsychicApplication from '../psychic-application'
@@ -69,15 +69,7 @@ export default class PsychicCLI {
       )
       .action(async () => {
         await initializePsychicApplication()
-        await DreamBin.sync()
-
-        const psychicApp = PsychicApplication.getOrFail()
-
-        if (psychicApp && !psychicApp?.apiOnly) {
-          await PsychicBin.syncOpenapiJson()
-          await PsychicBin.syncOpenapiClientSchema()
-        }
-
+        await PsychicBin.sync()
         process.exit()
       })
 

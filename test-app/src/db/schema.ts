@@ -379,7 +379,7 @@ export const schema = {
     createdAtField: 'createdAt',
     updatedAtField: 'updatedAt',
     deletedAtField: 'deletedAt',
-    serializerKeys: ['default', 'extra', 'summary', 'withPosts', 'withRecentPost'],
+    serializerKeys: ['default', 'extra', 'summary', 'withFlattenedPost', 'withPosts', 'withRecentPost'],
     scopes: {
       default: [],
       named: [],

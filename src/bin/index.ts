@@ -8,6 +8,7 @@ import PsychicApplication from '../psychic-application'
 import PsychicServer from '../server'
 import generateRouteTypes from './helpers/generateRouteTypes'
 import printRoutes from './helpers/printRoutes'
+import { DreamBin } from '@rvohealth/dream'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
@@ -24,6 +25,21 @@ export default class PsychicBin {
 
   public static async routes() {
     await printRoutes()
+  }
+
+  public static async sync() {
+    await DreamBin.sync()
+
+    const psychicApp = PsychicApplication.getOrFail()
+
+    if (!psychicApp.apiOnly) {
+      await PsychicBin.syncOpenapiJson()
+      await PsychicBin.syncOpenapiClientSchema()
+    }
+
+    for (const hook of psychicApp.specialHooks.sync) {
+      await hook(psychicApp)
+    }
   }
 
   public static async syncOpenapiJson() {
