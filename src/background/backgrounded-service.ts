@@ -1,5 +1,7 @@
 import { GlobalNameNotSet } from '@rvohealth/dream'
+import { Job } from 'bullmq'
 import { FunctionPropertyNames } from '../helpers/typeHelpers'
+import { OmitTypeFromArray } from '../psychic-application/types'
 import background, { BackgroundJobConfig } from './'
 
 export default class BackgroundedService {
@@ -21,8 +23,7 @@ export default class BackgroundedService {
     T,
     MethodName extends PsychicBackgroundedServiceStaticMethods<T & typeof BackgroundedService>,
     MethodFunc extends T[MethodName & keyof T],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    MethodArgs extends MethodFunc extends (...args: any) => any ? Parameters<MethodFunc> : never,
+    MethodArgs extends BackgroundableMethodArgs<MethodFunc>,
   >(this: T, methodName: MethodName, ...args: MethodArgs) {
     const safeThis: typeof BackgroundedService = this as typeof BackgroundedService
 
@@ -37,8 +38,7 @@ export default class BackgroundedService {
     T,
     MethodName extends PsychicBackgroundedServiceStaticMethods<T & typeof BackgroundedService>,
     MethodFunc extends T[MethodName & keyof T],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    MethodArgs extends MethodFunc extends (...args: any) => any ? Parameters<MethodFunc> : never,
+    MethodArgs extends BackgroundableMethodArgs<MethodFunc>,
   >(this: T, delaySeconds: number, methodName: MethodName, ...args: MethodArgs) {
     const safeThis: typeof BackgroundedService = this as typeof BackgroundedService
 
@@ -54,8 +54,7 @@ export default class BackgroundedService {
     T,
     MethodName extends PsychicBackgroundedServiceInstanceMethods<T & BackgroundedService>,
     MethodFunc extends T[MethodName & keyof T],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    MethodArgs extends MethodFunc extends (...args: any) => any ? Parameters<MethodFunc> : never,
+    MethodArgs extends BackgroundableMethodArgs<MethodFunc>,
   >(
     this: T,
     methodName: MethodName,
@@ -83,8 +82,7 @@ export default class BackgroundedService {
     T,
     MethodName extends PsychicBackgroundedServiceInstanceMethods<T & BackgroundedService>,
     MethodFunc extends T[MethodName & keyof T],
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    MethodArgs extends MethodFunc extends (...args: any) => any ? Parameters<MethodFunc> : never,
+    MethodArgs extends BackgroundableMethodArgs<MethodFunc>,
   >(
     this: T,
     delaySeconds: number,
@@ -120,3 +118,7 @@ export type PsychicBackgroundedServiceInstanceMethods<T extends BackgroundedServ
   FunctionPropertyNames<Required<T>>,
   FunctionPropertyNames<BackgroundedService>
 >
+
+type BackgroundableMethodArgs<MethodFunc> =
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  MethodFunc extends (...args: any) => any ? OmitTypeFromArray<Parameters<MethodFunc>, Job> : never

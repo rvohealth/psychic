@@ -12,7 +12,7 @@ describe('background (app singleton)', () => {
         constructorArgs: ['bottleawhiskey'],
         globalName: 'services/DummyService',
       })
-      expect(await readTmpFile()).toEqual('bottleawhiskey,bottlearum')
+      expect(await readTmpFile()).toEqual('bottleawhiskey,bottlearum,BackgroundJobQueueInstanceJob')
     })
 
     context('priority', () => {

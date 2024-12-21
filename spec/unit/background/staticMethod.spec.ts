@@ -13,6 +13,14 @@ describe('background (app singleton)', () => {
       expect(await readTmpFile()).toEqual('bottlearum')
     })
 
+    it('passes the Job as the last argument', async () => {
+      await background.staticMethod(DummyService, 'classRunInBGWithJobArg', {
+        globalName: 'services/DummyService',
+        args: ['bottlearum'],
+      })
+      expect(await readTmpFile()).toEqual('bottlearum,BackgroundJobQueueStaticJob')
+    })
+
     context('priority', () => {
       const subject = async () => {
         await background.staticMethod(DummyService, 'classRunInBG', {

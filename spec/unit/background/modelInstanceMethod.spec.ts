@@ -14,7 +14,7 @@ describe('background (app singleton)', () => {
       })
 
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(User.prototype._testBackground).toHaveBeenCalledWith(user.id, 'howyadoin')
+      expect(User.prototype._testBackground).toHaveBeenCalledWith(user.id, 'howyadoin', expect.any(Job))
     })
   })
 

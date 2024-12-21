@@ -11,9 +11,14 @@ describe('BackgroundedService', () => {
   describe('.background', () => {
     it('calls the static method, passing args', async () => {
       jest.spyOn(DummyService, 'classRunInBG').mockImplementation(async () => {})
+      jest.spyOn(DummyService, 'classRunInBGWithJobArg').mockImplementation(async () => {})
       await DummyService.background('classRunInBG', 'bottlearum')
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(DummyService.classRunInBG).toHaveBeenCalledWith('bottlearum')
+      expect(DummyService.classRunInBG).toHaveBeenCalledWith('bottlearum', expect.any(Job))
+
+      await DummyService.background('classRunInBGWithJobArg', 'bottlearum')
+      // eslint-disable-next-line @typescript-eslint/unbound-method
+      expect(DummyService.classRunInBGWithJobArg).toHaveBeenCalledWith('bottlearum', expect.any(Job))
     })
   })
 
@@ -25,7 +30,11 @@ describe('BackgroundedService', () => {
         constructorArgs: ['bottleawhiskey'],
       })
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(DummyService.prototype.instanceMethodToTest).toHaveBeenCalledWith('bottleawhiskey', 'bottlearum')
+      expect(DummyService.prototype.instanceMethodToTest).toHaveBeenCalledWith(
+        'bottleawhiskey',
+        'bottlearum',
+        expect.any(Job),
+      )
     })
 
     context('queue priority', () => {
@@ -150,7 +159,7 @@ describe('BackgroundedService', () => {
       jest.spyOn(DummyService, 'classRunInBG').mockImplementation(async () => {})
       await DummyService.backgroundWithDelay(25, 'classRunInBG', 'bottlearum')
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(DummyService.classRunInBG).toHaveBeenCalledWith('bottlearum')
+      expect(DummyService.classRunInBG).toHaveBeenCalledWith('bottlearum', expect.any(Job))
     })
   })
 
@@ -163,7 +172,11 @@ describe('BackgroundedService', () => {
       })
 
       // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(DummyService.prototype.instanceMethodToTest).toHaveBeenCalledWith('bottleawhiskey', 'bottlearum')
+      expect(DummyService.prototype.instanceMethodToTest).toHaveBeenCalledWith(
+        'bottleawhiskey',
+        'bottlearum',
+        expect.any(Job),
+      )
     })
 
     context('queue priority', () => {

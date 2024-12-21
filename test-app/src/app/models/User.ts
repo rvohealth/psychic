@@ -6,6 +6,7 @@ import {
   Validates,
   Virtual,
 } from '@rvohealth/dream'
+import { Job } from 'bullmq'
 import { randomBytes, scrypt, timingSafeEqual } from 'crypto'
 import ApplicationModel from './ApplicationModel'
 import Pet from './Pet'
@@ -111,12 +112,12 @@ export default class User extends ApplicationModel {
     return await insecurePasswordCompareSinceBcryptBringsInTooMuchGarbage(password, this.passwordDigest)
   }
 
-  public async testBackground(arg: string) {
-    return await this._testBackground(this.id, arg)
+  public async testBackground(arg: string, job: Job) {
+    return await this._testBackground(this.id, arg, job)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  public async _testBackground(userId: any, arg: string) {}
+  public async _testBackground(userId: any, arg: string, job: Job) {}
 }
 
 const keyLength = 64

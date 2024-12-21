@@ -166,7 +166,7 @@ export class Background {
     if (activateWorkers) {
       for (let i = 0; i < (backgroundOptions.defaultWorkstream?.workerCount ?? 1); i++) {
         this.workers.push(
-          new Background.Worker(formattedQueueName, data => this.handler(data), {
+          new Background.Worker(formattedQueueName, job => this.doWork(job), {
             connection: defaultConnection,
             concurrency: backgroundOptions.defaultWorkstream?.concurrency,
           }),
@@ -215,7 +215,7 @@ export class Background {
       if (activateWorkers) {
         for (let i = 0; i < (namedWorkstream.workerCount ?? 1); i++) {
           this.workers.push(
-            new Background.Worker(namedWorkstreamFormattedQueueName, data => this.handler(data), {
+            new Background.Worker(namedWorkstreamFormattedQueueName, job => this.doWork(job), {
               group: {
                 id: namedWorkstream.name,
                 limit: namedWorkstream.rateLimit,
@@ -284,7 +284,7 @@ export class Background {
     if (activateWorkers) {
       for (let i = 0; i < (nativeBullMQ.defaultWorkerCount ?? 1); i++) {
         this.workers.push(
-          new Background.Worker(formattedQueueName, data => this.handler(data), {
+          new Background.Worker(formattedQueueName, job => this.doWork(job), {
             ...(backgroundOptions.nativeBullMQ.defaultWorkerOptions || {}),
             connection: defaultQueueConnection,
           }),
@@ -330,7 +330,7 @@ export class Background {
 
         for (let i = 0; i < extraWorkerCount; i++) {
           this.workers.push(
-            new Background.Worker(formattedQueuename, data => this.handler(data), {
+            new Background.Worker(formattedQueuename, job => this.doWork(job), {
               ...extraWorkerOptions,
               connection: namedQueueConnection,
             }),
@@ -544,7 +544,9 @@ export class Background {
     const queueInstance = this.queueInstance(jobConfig)
 
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) {
-      await this.doWork(jobType, jobData)
+      const queue = new Background.Queue('TestQueue', { connection: {} })
+      const job = new Job(queue, jobType, jobData, {})
+      await this.doWork(job)
     } else {
       await queueInstance.add(jobType, jobData, {
         delay: delaySeconds ? delaySeconds * 1000 : undefined,
@@ -596,10 +598,10 @@ export class Background {
     }
   }
 
-  public async doWork(
-    jobType: JobTypes,
-    { id, method, args, constructorArgs, globalName }: BackgroundJobData,
-  ) {
+  public async doWork(job: Job) {
+    const jobType = job.name as JobTypes
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const { id, method, args, constructorArgs, globalName } = job.data as BackgroundJobData
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let objectClass: any
     let dreamClass: typeof Dream | undefined
@@ -614,7 +616,7 @@ export class Background {
         if (!objectClass) return
 
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-        await objectClass[method!](...args)
+        await objectClass[method!](...args, job)
         break
 
       case 'BackgroundJobQueueInstanceJob':
@@ -627,7 +629,7 @@ export class Background {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-call
           const instance = new objectClass(...constructorArgs)
           // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-          await instance[method!](...args)
+          await instance[method!](...args, job)
         }
 
         break
@@ -642,28 +644,10 @@ export class Background {
           if (!modelInstance) return
 
           // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
-          await (modelInstance as any)[method!](...args)
+          await (modelInstance as any)[method!](...args, job)
         }
         break
     }
-  }
-
-  public async handler(
-    job: Job<
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      any,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      any,
-      string
-    >,
-  ) {
-    const jobType = job.name as JobTypes
-
-    await this.doWork(
-      jobType,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      job.data,
-    )
   }
 }
 
