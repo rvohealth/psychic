@@ -243,6 +243,7 @@ Try setting it to something valid, like:
   }
 
   private _specialHooks: PsychicApplicationSpecialHooks = {
+    sync: [],
     expressInit: [],
     serverError: [],
     wsStart: [],
@@ -344,6 +345,10 @@ Try setting it to something valid, like:
 
       case 'after:routes':
         this._specialHooks['after:routes'].push(cb as (app: Application) => void | Promise<void>)
+        break
+
+      case 'sync':
+        this._specialHooks['sync'].push(cb as (psychicApp: PsychicApplication) => void | Promise<void>)
         break
 
       default:
@@ -560,6 +565,7 @@ export type PsychicApplicationOption =
   | 'ssl'
 
 export interface PsychicApplicationSpecialHooks {
+  sync: ((psychicApp: PsychicApplication) => void | Promise<void>)[]
   expressInit: ((app: Application) => void | Promise<void>)[]
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
   wsStart: ((server: SocketServer) => void | Promise<void>)[]
