@@ -19,11 +19,3 @@ export type PsychicHookLoadEventTypes = Exclude<
 
 type Only<T, U> = T & Partial<Record<Exclude<keyof U, keyof T>, never>>
 export type Either<T, U> = Only<T, U> | Only<U, T>
-
-export type OmitTypeFromArray<T extends unknown[], TypeToOmit> = T extends []
-  ? []
-  : T extends [infer H, ...infer R]
-    ? H extends TypeToOmit
-      ? OmitTypeFromArray<R, TypeToOmit>
-      : [H, ...OmitTypeFromArray<R, TypeToOmit>]
-    : T

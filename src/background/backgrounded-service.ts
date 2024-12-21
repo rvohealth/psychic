@@ -1,7 +1,6 @@
 import { GlobalNameNotSet } from '@rvohealth/dream'
 import { Job } from 'bullmq'
 import { FunctionPropertyNames } from '../helpers/typeHelpers'
-import { OmitTypeFromArray } from '../psychic-application/types'
 import background, { BackgroundJobConfig } from './'
 
 export default class BackgroundedService {
@@ -119,6 +118,21 @@ export type PsychicBackgroundedServiceInstanceMethods<T extends BackgroundedServ
   FunctionPropertyNames<BackgroundedService>
 >
 
-type BackgroundableMethodArgs<MethodFunc> =
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  MethodFunc extends (...args: any) => any ? OmitTypeFromArray<Parameters<MethodFunc>, Job> : never
+type OmitJobFromEndOfArguments<Original extends unknown[]> = Original extends [Job]
+  ? // this [string] check after [Job] check is in case the backgrounded method accepts
+    // an argument typed as `any`
+    Original extends [string]
+    ? Original
+    : []
+  : Original extends [...infer Rest, Job]
+    ? // this string check after Job check is in case the backgrounded method accepts
+      // an argument typed as `any`
+      Original extends [...unknown[], string]
+      ? Original
+      : Rest
+    : Original
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+type BackgroundableMethodArgs<MethodFunc> = MethodFunc extends (...args: any) => any
+  ? OmitJobFromEndOfArguments<Parameters<MethodFunc>>
+  : never
