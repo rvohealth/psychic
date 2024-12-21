@@ -17,7 +17,7 @@ export default async (psy: PsychicApplication) => {
   psy.set('useRedis', true)
   psy.set('apiOnly', false)
   psy.set('apiRoot', path.join(__dirname, '..', '..', '..'))
-  psy.set('clientRoot', path.join(__dirname, '..', '..', '..', '..', 'client'))
+  psy.set('clientRoot', path.join(__dirname, '..', '..', 'client'))
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
   psy.set('encryption', {
@@ -58,6 +58,7 @@ export default async (psy: PsychicApplication) => {
 
   // set options to configure openapi integration
   psy.set('openapi', {
+    syncEnumsToClient: true,
     defaults: {
       headers: {
         ['custom-header']: {

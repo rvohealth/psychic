@@ -595,6 +595,7 @@ export interface PsychicOpenapiOptions {
   outputFilename?: `${string}.json`
   clientOutputFilename?: `${string}.ts`
   suppressResponseEnums?: boolean
+  syncEnumsToClient?: boolean
   validation?: Partial<Parameters<(typeof OpenApiValidator)['middleware']>[0]>
   defaults?: {
     headers?: OpenapiHeaders
