@@ -1,3 +1,5 @@
+import { DreamBin } from '@rvohealth/dream'
+import fs from 'fs/promises'
 import path from 'path'
 import generateController from '../generate/controller'
 import generateResource from '../generate/resource'
@@ -6,9 +8,9 @@ import sspawn from '../helpers/sspawn'
 import OpenapiAppRenderer from '../openapi-renderer/app'
 import PsychicApplication from '../psychic-application'
 import PsychicServer from '../server'
+import enumsFileStr from './helpers/enumsFileStr'
 import generateRouteTypes from './helpers/generateRouteTypes'
 import printRoutes from './helpers/printRoutes'
-import { DreamBin } from '@rvohealth/dream'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
@@ -35,6 +37,10 @@ export default class PsychicBin {
     if (!psychicApp.apiOnly) {
       await PsychicBin.syncOpenapiJson()
       await PsychicBin.syncOpenapiClientSchema()
+    }
+
+    if (psychicApp.openapi?.syncEnumsToClient) {
+      await this.syncClientEnums()
     }
 
     for (const hook of psychicApp.specialHooks.sync) {
@@ -74,5 +80,17 @@ export default class PsychicBin {
     )
 
     console.log('done syncing client api schema!')
+  }
+
+  public static async syncClientEnums() {
+    console.log('syncing client enums...')
+
+    const psychicApp = PsychicApplication.getOrFail()
+    const apiPath = path.join(psychicApp.clientRoot, psychicApp.client.apiPath)
+
+    const enumsStr = await enumsFileStr()
+    await fs.writeFile(`${apiPath}/enums.ts`, enumsStr)
+
+    console.log('done syncing client enums!')
   }
 }

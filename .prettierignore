@@ -1,4 +1,5 @@
 # Ignore generated files
+test-app/client/src/api/*
 test-app/src/db/schema.ts
 test-app/src/db/sync.ts
 test-app/src/conf/routeTypes.ts
