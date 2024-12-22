@@ -103,7 +103,6 @@ export class Background {
   }: {
     activateWorkers?: boolean
   } = {}) {
-    if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) return
     if (this.defaultQueue) return
 
     const psychicApp = PsychicApplication.getOrFail()
