@@ -167,7 +167,7 @@ export class Background {
         this.workers.push(
           new Background.Worker(formattedQueueName, job => this.doWork(job), {
             connection: defaultConnection,
-            concurrency: backgroundOptions.defaultWorkstream?.concurrency,
+            concurrency: backgroundOptions.defaultWorkstream?.concurrency || 1,
           }),
         )
       }
@@ -220,7 +220,7 @@ export class Background {
                 limit: namedWorkstream.rateLimit,
               },
               connection: namedWorkstreamConnection,
-              concurrency: namedWorkstream.concurrency,
+              concurrency: namedWorkstream.concurrency || 1,
               // explicitly typing as WorkerOptions because Psychic can't be aware of BullMQ Pro options
             } as WorkerOptions),
           )
