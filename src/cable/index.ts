@@ -72,7 +72,7 @@ export default class Cable {
       }
     })
 
-    if (this.useRedis) await this.bindToRedis()
+    if (this.useRedis) this.bindToRedis()
 
     const psychicApp = PsychicApplication.getOrFail()
     await this.listen({
@@ -109,7 +109,7 @@ export default class Cable {
     })
   }
 
-  public async bindToRedis() {
+  public bindToRedis() {
     const pubClient = this.config.websocketOptions.connection
     const subClient = pubClient.duplicate()
 
@@ -119,12 +119,6 @@ export default class Cable {
     subClient.on('error', error => {
       PsychicApplication.log('sub CLIENT ERROR', error)
     })
-
-    try {
-      await Promise.all([pubClient.connect(), subClient.connect()])
-    } catch (error) {
-      PsychicApplication.log('REDIS CONNECT ERROR: ', error)
-    }
 
     try {
       this.io!.adapter(createAdapter(pubClient, subClient))
