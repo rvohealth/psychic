@@ -108,7 +108,7 @@ describe('background (app singleton)', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = undefined
       })
 
-      it('adds the job to the queue corresponding to the workstream name with the workstream name as the group ID', async () => {
+      it('adds the job to the queue corresponding to the workstream name with the workstream name as the group ID, and moves the priority into the group object', async () => {
         await background.instanceMethod(DummyService, 'instanceRunInBG', {
           args: ['bottlearum'],
           constructorArgs: ['bottleawhiskey'],
@@ -126,7 +126,7 @@ describe('background (app singleton)', () => {
             importKey: undefined,
             method: 'instanceRunInBG',
           },
-          { priority: 4, group: { id: 'snazzy' } },
+          { group: { id: 'snazzy', priority: 4 } },
         )
       })
     })

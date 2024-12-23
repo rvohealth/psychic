@@ -541,14 +541,26 @@ export class Background {
     // set this variable out side of the conditional so that
     // mismatches will raise exceptions even in tests
     const queueInstance = this.queueInstance(jobConfig)
+    const delay = delaySeconds ? delaySeconds * 1000 : undefined
 
     if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) {
       const queue = new Background.Queue('TestQueue', { connection: {} })
       const job = new Job(queue, jobType, jobData, {})
       await this.doWork(job)
+      //
+    } else if (groupId && priority) {
+      await queueInstance.add(jobType, jobData, {
+        delay,
+        group: {
+          ...this.groupIdToGroupConfig(groupId),
+          priority: this.mapPriorityWordToPriorityNumber(priority),
+        },
+        // explicitly typing as JobsOptions because Psychic can't be aware of BullMQ Pro options
+      } as JobsOptions)
+      //
     } else {
       await queueInstance.add(jobType, jobData, {
-        delay: delaySeconds ? delaySeconds * 1000 : undefined,
+        delay,
         group: this.groupIdToGroupConfig(groupId),
         priority: this.mapPriorityWordToPriorityNumber(priority),
         // explicitly typing as JobsOptions because Psychic can't be aware of BullMQ Pro options

@@ -132,7 +132,7 @@ describe('BackgroundedService', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = undefined
       })
 
-      it('adds the job to the queue corresponding to the workstream name with the workstream name as the group ID', async () => {
+      it('adds the job to the queue corresponding to the workstream name with the workstream name as the group ID, and moves the priority into the group object', async () => {
         await new LastDummyServiceInNamedWorkstream('hello').background('instanceRunInBG', {
           args: ['bottlearum'],
           constructorArgs: ['bottleawhiskey'],
@@ -148,7 +148,7 @@ describe('BackgroundedService', () => {
             importKey: undefined,
             method: 'instanceRunInBG',
           },
-          { priority: 4, group: { id: 'snazzy' } },
+          { group: { id: 'snazzy', priority: 4 } },
         )
       })
     })
@@ -274,7 +274,7 @@ describe('BackgroundedService', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = undefined
       })
 
-      it('adds the job to the queue corresponding to the workstream name with the workstream name as the group ID', async () => {
+      it('adds the job to the queue corresponding to the workstream name with the workstream name as the group ID, and moves the priority into the group object', async () => {
         await new LastDummyServiceInNamedWorkstream('hello').backgroundWithDelay(7, 'instanceRunInBG', {
           args: ['bottlearum'],
           constructorArgs: ['bottleawhiskey'],
@@ -290,7 +290,7 @@ describe('BackgroundedService', () => {
             importKey: undefined,
             method: 'instanceRunInBG',
           },
-          { delay: 7000, priority: 4, group: { id: 'snazzy' } },
+          { delay: 7000, group: { id: 'snazzy', priority: 4 } },
         )
       })
     })
