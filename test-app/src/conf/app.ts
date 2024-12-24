@@ -1,5 +1,5 @@
 import { developmentOrTestEnv, Encrypt } from '@rvohealth/dream'
-import { Queue, QueueEvents, Worker } from 'bullmq'
+import { Queue, Worker } from 'bullmq'
 import Redis from 'ioredis'
 import path from 'path'
 import winston from 'winston'
@@ -127,7 +127,6 @@ export default async (psy: PsychicApplication) => {
     providers: {
       Queue,
       Worker,
-      QueueEvents,
     },
 
     defaultBullMQQueueOptions: {

@@ -1,5 +1,5 @@
 import { compact, Dream, IdType, pascalize, testEnv } from '@rvohealth/dream'
-import { Job, JobsOptions, Queue, QueueEvents, QueueOptions, Worker, WorkerOptions } from 'bullmq'
+import { Job, JobsOptions, Queue, QueueOptions, Worker, WorkerOptions } from 'bullmq'
 import Redis, { Cluster } from 'ioredis'
 import NoQueueForSpecifiedQueueName from '../error/background/NoQueueForSpecifiedQueueName'
 import NoQueueForSpecifiedWorkstream from '../error/background/NoQueueForSpecifiedWorkstream'
@@ -94,11 +94,6 @@ export class Background {
     return (psychicApp.backgroundOptions.providers?.Queue || Queue) as typeof Queue
   }
 
-  public static get QueueEvents(): typeof QueueEvents {
-    const psychicApp = PsychicApplication.getOrFail()
-    return (psychicApp.backgroundOptions.providers?.QueueEvents || QueueEvents) as typeof QueueEvents
-  }
-
   /**
    * Used when adding jobs to the default queue
    */
@@ -115,10 +110,7 @@ export class Background {
    * Used when adding jobs to a named transitioanl queue
    */
   private namedTransitionalQueues: Record<string, Queue> = {}
-  /**
-   * Queue event emitters for all queues https://docs.bullmq.io/guide/events
-   */
-  private queueEvents: QueueEvents[] = []
+
   private _workers: Worker[] = []
 
   public connect({
@@ -206,10 +198,6 @@ export class Background {
     if (activateWorkers) {
       if (!defaultWorkerConnection) throw new ActivatingBackgroundWorkersWithoutDefaultWorkerConnection()
 
-      this.queueEvents.push(
-        new Background.QueueEvents(formattedQueueName, { connection: defaultWorkerConnection }),
-      )
-
       const workerCount = backgroundOptions.defaultWorkstream?.workerCount ?? 1
       for (let i = 0; i < workerCount; i++) {
         this._workers.push(
@@ -257,12 +245,6 @@ export class Background {
       if (activateWorkers) {
         if (!namedWorkstreamWorkerConnection)
           throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(namedWorkstream.name)
-
-        this.queueEvents.push(
-          new Background.QueueEvents(namedWorkstreamFormattedQueueName, {
-            connection: namedWorkstreamWorkerConnection,
-          }),
-        )
 
         const workerCount = namedWorkstream.workerCount ?? 1
         for (let i = 0; i < workerCount; i++) {
@@ -336,10 +318,6 @@ export class Background {
     if (activateWorkers) {
       if (!defaultWorkerConnection) throw new ActivatingBackgroundWorkersWithoutDefaultWorkerConnection()
 
-      this.queueEvents.push(
-        new Background.QueueEvents(formattedQueueName, { connection: defaultWorkerConnection }),
-      )
-
       const workerCount = nativeBullMQ.defaultWorkerCount ?? 1
       for (let i = 0; i < workerCount; i++) {
         this._workers.push(
@@ -384,12 +362,6 @@ export class Background {
       if (activateWorkers) {
         if (!namedWorkerConnection)
           throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(queueName)
-
-        this.queueEvents.push(
-          new Background.QueueEvents(formattedQueuename, {
-            connection: namedWorkerConnection,
-          }),
-        )
 
         const extraWorkerOptionsMap: Record<string, BullMQNativeWorkerOptions> =
           nativeBullMQ.namedQueueWorkers || {}

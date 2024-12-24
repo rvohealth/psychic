@@ -8,7 +8,7 @@ import {
   OpenapiSchemaBody,
 } from '@rvohealth/dream'
 import bodyParser from 'body-parser'
-import { Queue, QueueEvents, QueueOptions, Worker } from 'bullmq'
+import { Queue, QueueOptions, Worker } from 'bullmq'
 import { CorsOptions } from 'cors'
 import { Application, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
@@ -483,7 +483,6 @@ Try setting it to something valid, like:
           ...{
             providers: {
               Queue,
-              QueueEvents,
               Worker,
             },
           },
@@ -630,15 +629,12 @@ export type PsychicBackgroundOptions = Either<
 interface PsychicBackgroundSharedOptions {
   /**
    * If using BullMQ, these can be omitted. However, if you are using
-   * BullMQ Pro, you will need to provide the Queue, QueueEvents, and Worker
+   * BullMQ Pro, you will need to provide the Queue and Worker
    * classes custom from them.
    */
   providers?: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Queue: any
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    QueueEvents: any
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     Worker: any
