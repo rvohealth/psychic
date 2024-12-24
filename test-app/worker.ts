@@ -10,7 +10,7 @@ async function startBackgroundWorkers() {
 
   background.work()
 
-  background._workers.forEach(worker => {
+  background.workers.forEach(worker => {
     worker.on('failed', (job, error) => {
       console.error(job, error)
     })
@@ -18,7 +18,7 @@ async function startBackgroundWorkers() {
 
   console.log('FINISHED STARTING WORKERS')
 
-  process.on('SIGINT', () => {
+  process.on('SIGTERM', () => {
     stopBackgroundWorkers()
       .then(() => {
         closeAllDbConnections()
