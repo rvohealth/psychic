@@ -10,7 +10,7 @@ async function startBackgroundWorkers() {
 
   background.work()
 
-  background.workers.forEach(worker => {
+  background._workers.forEach(worker => {
     worker.on('failed', (job, error) => {
       console.error(job, error)
     })

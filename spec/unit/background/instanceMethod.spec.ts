@@ -28,7 +28,7 @@ describe('background (app singleton)', () => {
 
       function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(background.defaultQueue!.add).toHaveBeenCalledWith(
+        expect(background.queues[0].add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
             globalName: 'services/DummyService',
@@ -45,7 +45,7 @@ describe('background (app singleton)', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         background.connect()
 
-        jest.spyOn(background.defaultQueue!, 'add').mockResolvedValue({} as Job)
+        jest.spyOn(background.queues[0], 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {
@@ -101,7 +101,7 @@ describe('background (app singleton)', () => {
       beforeEach(() => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         background.connect()
-        jest.spyOn(background.namedQueues['snazzy'], 'add').mockResolvedValue({} as Job)
+        jest.spyOn(background.queues[1], 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {
@@ -117,7 +117,7 @@ describe('background (app singleton)', () => {
         })
 
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(background.namedQueues['snazzy'].add).toHaveBeenCalledWith(
+        expect(background.queues[1].add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
             globalName: 'services/DummyService',
@@ -144,7 +144,7 @@ describe('background (app singleton)', () => {
 
       function expectAddedToQueueWithDelay(priority: BackgroundQueuePriority, delay: number) {
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(background.defaultQueue!.add).toHaveBeenCalledWith(
+        expect(background.queues[0].add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
             globalName: 'services/DummyService',
@@ -161,7 +161,7 @@ describe('background (app singleton)', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         background.connect()
 
-        jest.spyOn(background.defaultQueue!, 'add').mockResolvedValue({} as Job)
+        jest.spyOn(background.queues[0], 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {

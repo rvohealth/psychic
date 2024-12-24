@@ -52,7 +52,7 @@ describe('BackgroundedService', () => {
 
       function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(background.defaultQueue!.add).toHaveBeenCalledWith(
+        expect(background.queues[0].add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
             globalName: `services/${serviceClass.name}`,
@@ -69,7 +69,7 @@ describe('BackgroundedService', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         background.connect()
 
-        jest.spyOn(background.defaultQueue!, 'add').mockResolvedValue({} as Job)
+        jest.spyOn(background.queues[0], 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {
@@ -125,7 +125,7 @@ describe('BackgroundedService', () => {
       beforeEach(() => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         background.connect()
-        jest.spyOn(background.namedQueues['snazzy'], 'add').mockResolvedValue({} as Job)
+        jest.spyOn(background.queues[1], 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {
@@ -139,7 +139,7 @@ describe('BackgroundedService', () => {
         })
 
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(background.namedQueues['snazzy'].add).toHaveBeenCalledWith(
+        expect(background.queues[1].add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
             globalName: 'services/LastDummyServiceInNamedWorkstream',
@@ -194,7 +194,7 @@ describe('BackgroundedService', () => {
 
       function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(background.defaultQueue!.add).toHaveBeenCalledWith(
+        expect(background.queues[0].add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
             globalName: `services/${serviceClass.name}`,
@@ -211,7 +211,7 @@ describe('BackgroundedService', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         background.connect()
 
-        jest.spyOn(background.defaultQueue!, 'add').mockResolvedValue({} as Job)
+        jest.spyOn(background.queues[0], 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {
@@ -267,7 +267,7 @@ describe('BackgroundedService', () => {
       beforeEach(() => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         background.connect()
-        jest.spyOn(background.namedQueues['snazzy'], 'add').mockResolvedValue({} as Job)
+        jest.spyOn(background.queues[1], 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {
@@ -281,7 +281,7 @@ describe('BackgroundedService', () => {
         })
 
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(background.namedQueues['snazzy'].add).toHaveBeenCalledWith(
+        expect(background.queues[1].add).toHaveBeenCalledWith(
           'BackgroundJobQueueInstanceJob',
           {
             globalName: 'services/LastDummyServiceInNamedWorkstream',

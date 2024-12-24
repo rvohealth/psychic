@@ -163,7 +163,15 @@ export default async (psy: PsychicApplication) => {
     // // end: native BullMQ background API
 
     // transitionalWorkstreams: {
-    //   defaultConnection: new Redis({
+    //   defaultQueueConnection: new Redis({
+    //     username: process.env.REDIS_USER,
+    //     password: process.env.REDIS_PASSWORD,
+    //     host: process.env.REDIS_HOST,
+    //     port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
+    //     tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
+    //     enableOfflineQueue: false,
+    //   }),
+    //   defaultWorkerConnection: new Redis({
     //     username: process.env.REDIS_USER,
     //     password: process.env.REDIS_PASSWORD,
     //     host: process.env.REDIS_HOST,
@@ -181,7 +189,16 @@ export default async (psy: PsychicApplication) => {
     //   ],
     // },
 
-    defaultConnection: new Redis({
+    defaultQueueConnection: new Redis({
+      username: process.env.REDIS_USER,
+      password: process.env.REDIS_PASSWORD,
+      host: process.env.REDIS_HOST,
+      port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
+      tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
+      enableOfflineQueue: false,
+    }),
+
+    defaultWorkerConnection: new Redis({
       username: process.env.REDIS_USER,
       password: process.env.REDIS_PASSWORD,
       host: process.env.REDIS_HOST,
@@ -192,7 +209,18 @@ export default async (psy: PsychicApplication) => {
 
     // To set up a simple cluster on a dev machine for testing:
     //   https://medium.com/@bertrandoubida/setting-up-redis-cluster-on-macos-cf35a21465a
-    // defaultConnection: new Cluster(
+    // defaultQueueConnection: new Cluster(
+    //   [6380, 6384, 6385, 6381, 6383, 6382].map(port => ({ host: '127.0.0.1', port })),
+    //   {
+    //     redisOptions: {
+    //       username: process.env.REDIS_USER,
+    //       password: process.env.REDIS_PASSWORD,
+    //       tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
+    //     },
+    //     enableOfflineQueue: false
+    //   },
+    // ),
+    // defaultWorkerConnection: new Cluster(
     //   [6380, 6384, 6385, 6381, 6383, 6382].map(port => ({ host: '127.0.0.1', port })),
     //   {
     //     redisOptions: {

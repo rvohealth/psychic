@@ -33,7 +33,7 @@ describe('background (app singleton)', () => {
 
       function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, priorityLevel: number) {
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(background.defaultQueue!.add).toHaveBeenCalledWith(
+        expect(background.queues[0].add).toHaveBeenCalledWith(
           'BackgroundJobQueueStaticJob',
           {
             globalName: 'DummyService',
@@ -49,7 +49,7 @@ describe('background (app singleton)', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         background.connect()
 
-        jest.spyOn(background.defaultQueue!, 'add').mockResolvedValue({} as Job)
+        jest.spyOn(background.queues[0], 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {
@@ -113,7 +113,7 @@ describe('background (app singleton)', () => {
 
       function expectAddedToQueueWithPriority(priority: BackgroundQueuePriority, delay: number) {
         // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(background.defaultQueue!.add).toHaveBeenCalledWith(
+        expect(background.queues[0].add).toHaveBeenCalledWith(
           'BackgroundJobQueueStaticJob',
           {
             globalName: 'DummyService',
@@ -129,7 +129,7 @@ describe('background (app singleton)', () => {
         process.env.REALLY_TEST_BACKGROUND_QUEUE = '1'
         background.connect()
 
-        jest.spyOn(background.defaultQueue!, 'add').mockResolvedValue({} as Job)
+        jest.spyOn(background.queues[0], 'add').mockResolvedValue({} as Job)
       })
 
       afterEach(() => {

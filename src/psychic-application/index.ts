@@ -648,7 +648,15 @@ interface PsychicBackgroundSharedOptions {
 }
 
 export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSharedOptions {
-  defaultConnection: RedisOrRedisClusterConnection
+  /**
+   * See https://docs.bullmq.io/guide/going-to-production for the different settings to use between
+   * queue and worker connections.
+   */
+  defaultQueueConnection: RedisOrRedisClusterConnection
+  /**
+   * defaultWorkerConnection is only optional when workers will not be activated (e.g. on the webserver)
+   */
+  defaultWorkerConnection?: RedisOrRedisClusterConnection
 
   /**
    * Every Psychic application that leverages simple background jobs will have a default
@@ -691,11 +699,21 @@ export type TransitionalPsychicBackgroundSimpleOptions = Omit<
 // automatically wrap the queue name with {} on a cluster, and the best way to test if on
 // a redis cluster is when we have connection instances, not just connection configs
 export type QueueOptionsWithConnectionInstance = Omit<QueueOptions, 'connection'> & {
-  connection?: RedisOrRedisClusterConnection
+  /**
+   * See https://docs.bullmq.io/guide/going-to-production for the different settings to use between
+   * queue and worker connections.
+   */
+  queueConnection?: RedisOrRedisClusterConnection
+  workerConnection?: RedisOrRedisClusterConnection
 }
 
 export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundSharedOptions {
-  defaultConnection?: RedisOrRedisClusterConnection
+  /**
+   * See https://docs.bullmq.io/guide/going-to-production for the different settings to use between
+   * queue and worker connections.
+   */
+  defaultQueueConnection?: RedisOrRedisClusterConnection
+  defaultWorkerConnection?: RedisOrRedisClusterConnection
 
   nativeBullMQ: {
     // QueueOptionsWithConnectionInstance instead of QueueOptions because we need to be able to
@@ -759,9 +777,12 @@ export interface PsychicBackgroundWorkstreamOptions {
   }
 
   /**
-   * Optional redis connection. If not provided, the default background redis connection will be used
+   * Optional redis connection. If not provided, the default background redis connection will be used.
+   * See https://docs.bullmq.io/guide/going-to-production for the different settings to use between
+   * queue and worker connections.
    */
-  connection?: RedisOrRedisClusterConnection
+  queueConnection?: RedisOrRedisClusterConnection
+  workerConnection?: RedisOrRedisClusterConnection
 }
 
 // worker options gathered by scanning various sub-pages from
