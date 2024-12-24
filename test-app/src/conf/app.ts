@@ -146,7 +146,9 @@ export default async (psy: PsychicApplication) => {
 
     // Psychic background API
     defaultWorkstream: {
+      // https://docs.bullmq.io/guide/parallelism-and-concurrency
       workerCount: parseInt(process.env.WORKER_COUNT || '0'),
+      concurrency: 100,
     },
 
     namedWorkstreams: [{ workerCount: 1, name: 'snazzy', rateLimit: { max: 1, duration: 1 } }],
