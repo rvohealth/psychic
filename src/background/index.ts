@@ -42,15 +42,6 @@ default config does not include a queue connection
   }
 }
 
-class DefaultBullMQNativeOptionsMissingWorkerConnectionAndDefaultWorkerConnection extends Error {
-  public get message() {
-    return `
-Native BullMQ options don't include a default worker connection, and the
-default config does not include a worker connection
-`
-  }
-}
-
 class NamedBullMQNativeOptionsMissingQueueConnectionAndDefaultQueueConnection extends Error {
   constructor(private queueName: string) {
     super()
@@ -64,15 +55,25 @@ ${this.queueName} queue does not include a queue connection
   }
 }
 
-class NamedBullMQNativeOptionsMissingWorkerConnectionAndDefaultWorkerConnection extends Error {
+class ActivatingBackgroundWorkersWithoutDefaultWorkerConnection extends Error {
+  public get message() {
+    return `
+defaultWorkerConnection is required when activating workers. For example,
+it may be omitted on webserver instances, but is required on worker instances.
+`
+  }
+}
+
+class ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection extends Error {
   constructor(private queueName: string) {
     super()
   }
 
   public get message() {
     return `
-Native BullMQ options don't include a default worker connection, and the
-${this.queueName} queue does not include a worker connection
+defaultWorkerConnection is missing, and the ${this.queueName} queue does not
+specify a workerConnection. A worker connection isrequired when activating workers.
+For example, it may be omitted on webserver instances, but is required on worker instances.
 `
   }
 }
@@ -190,7 +191,9 @@ export class Background {
       connection: defaultQueueConnection,
     })
     this.queueEvents.push(
-      new Background.QueueEvents(formattedQueueName, { connection: defaultWorkerConnection }),
+      new Background.QueueEvents(formattedQueueName, {
+        connection: defaultWorkerConnection || defaultQueueConnection,
+      }),
     )
     if (activatingTransitionalWorkstreams) {
       this.defaultTransitionalQueue = defaultQueue
@@ -205,10 +208,14 @@ export class Background {
     // create default workers //
     /////////////////////////////
     if (activateWorkers) {
-      for (let i = 0; i < (backgroundOptions.defaultWorkstream?.workerCount ?? 1); i++) {
+      const workerCount = backgroundOptions.defaultWorkstream?.workerCount ?? 1
+      if (workerCount > 0 && !defaultWorkerConnection)
+        throw new ActivatingBackgroundWorkersWithoutDefaultWorkerConnection()
+
+      for (let i = 0; i < workerCount; i++) {
         this._workers.push(
           new Background.Worker(formattedQueueName, job => this.doWork(job), {
-            connection: defaultWorkerConnection,
+            connection: defaultWorkerConnection!,
             concurrency: backgroundOptions.defaultWorkstream?.concurrency || 1,
           }),
         )
@@ -247,7 +254,7 @@ export class Background {
 
       this.queueEvents.push(
         new Background.QueueEvents(namedWorkstreamFormattedQueueName, {
-          connection: namedWorkstreamWorkerConnection,
+          connection: namedWorkstreamWorkerConnection || namedWorkstreamQueueConnection,
         }),
       )
 
@@ -255,7 +262,11 @@ export class Background {
       // create named workers //
       //////////////////////////
       if (activateWorkers) {
-        for (let i = 0; i < (namedWorkstream.workerCount ?? 1); i++) {
+        const workerCount = namedWorkstream.workerCount ?? 1
+        if (workerCount > 0 && !defaultWorkerConnection)
+          throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(namedWorkstream.name)
+
+        for (let i = 0; i < workerCount; i++) {
           this._workers.push(
             new Background.Worker(namedWorkstreamFormattedQueueName, job => this.doWork(job), {
               group: {
@@ -305,8 +316,6 @@ export class Background {
 
     if (!defaultQueueConnection)
       throw new DefaultBullMQNativeOptionsMissingQueueConnectionAndDefaultQueueConnection()
-    if (!defaultWorkerConnection)
-      throw new DefaultBullMQNativeOptionsMissingWorkerConnectionAndDefaultWorkerConnection()
 
     const formattedQueueName = nameToRedisQueueName(Background.defaultQueueName, defaultQueueConnection)
 
@@ -319,7 +328,9 @@ export class Background {
       connection: defaultQueueConnection,
     })
     this.queueEvents.push(
-      new Background.QueueEvents(formattedQueueName, { connection: defaultWorkerConnection }),
+      new Background.QueueEvents(formattedQueueName, {
+        connection: defaultWorkerConnection || defaultQueueConnection,
+      }),
     )
     ///////////////////////////////
     // end: create default queue //
@@ -329,11 +340,15 @@ export class Background {
     // create default workers //
     /////////////////////////////
     if (activateWorkers) {
-      for (let i = 0; i < (nativeBullMQ.defaultWorkerCount ?? 1); i++) {
+      const workerCount = nativeBullMQ.defaultWorkerCount ?? 1
+      if (workerCount > 0 && !defaultWorkerConnection)
+        throw new ActivatingBackgroundWorkersWithoutDefaultWorkerConnection()
+
+      for (let i = 0; i < workerCount; i++) {
         this._workers.push(
           new Background.Worker(formattedQueueName, job => this.doWork(job), {
             ...(backgroundOptions.nativeBullMQ.defaultWorkerOptions || {}),
-            connection: defaultWorkerConnection,
+            connection: defaultWorkerConnection!,
           }),
         )
       }
@@ -357,8 +372,6 @@ export class Background {
 
       if (!namedQueueConnection)
         throw new NamedBullMQNativeOptionsMissingQueueConnectionAndDefaultQueueConnection(queueName)
-      if (!namedWorkerConnection)
-        throw new NamedBullMQNativeOptionsMissingWorkerConnectionAndDefaultWorkerConnection(queueName)
 
       const formattedQueuename = nameToRedisQueueName(queueName, namedQueueConnection)
 
@@ -368,7 +381,9 @@ export class Background {
         connection: namedQueueConnection,
       })
       this.queueEvents.push(
-        new Background.QueueEvents(formattedQueuename, { connection: namedWorkerConnection }),
+        new Background.QueueEvents(formattedQueuename, {
+          connection: namedWorkerConnection || namedQueueConnection,
+        }),
       )
 
       //////////////////////////
@@ -379,12 +394,14 @@ export class Background {
           nativeBullMQ.namedQueueWorkers || {}
         const extraWorkerOptions: BullMQNativeWorkerOptions = extraWorkerOptionsMap[queueName]
         const extraWorkerCount = extraWorkerOptions ? (extraWorkerOptions.workerCount ?? 1) : 0
+        if (extraWorkerCount > 0 && !namedWorkerConnection)
+          throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(queueName)
 
         for (let i = 0; i < extraWorkerCount; i++) {
           this._workers.push(
             new Background.Worker(formattedQueuename, job => this.doWork(job), {
               ...extraWorkerOptions,
-              connection: namedWorkerConnection,
+              connection: namedWorkerConnection!,
             }),
           )
         }
