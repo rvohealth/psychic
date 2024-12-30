@@ -1,3 +1,4 @@
+import { describe as context } from '@jest/globals'
 import { Encrypt } from '@rvohealth/dream'
 import InternalEncrypt from '../../../src/encrypt/internal-encrypt'
 import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication'

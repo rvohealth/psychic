@@ -1,3 +1,4 @@
+import { describe as context } from '@jest/globals'
 import { PsychicServer } from '../../../../src'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
 import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'

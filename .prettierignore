@@ -14,6 +14,9 @@ admin.openapi.json
 .yarn/
 .yarnrc.yml
 
+client/eslint.config.js
+client/tsconfig.json
+
 # global-cli
 boilerplate/
 spec-boilerplate/

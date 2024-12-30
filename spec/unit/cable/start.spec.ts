@@ -1,3 +1,4 @@
+import { describe as context } from '@jest/globals'
 import http from 'http'
 import Cable from '../../../src/cable'
 import PsychicServer from '../../../src/server'

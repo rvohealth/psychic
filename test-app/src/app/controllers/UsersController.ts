@@ -6,7 +6,12 @@ import ApplicationController from './ApplicationController'
 
 export default class UsersController extends ApplicationController {
   public ping() {
-    this.ok('helloworld')
+    this.ok(this.pingMessage)
+  }
+
+  // stubbed in feature specs
+  public get pingMessage() {
+    return 'helloworld'
   }
 
   public beforeAllTest() {

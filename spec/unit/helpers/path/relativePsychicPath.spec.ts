@@ -1,3 +1,4 @@
+import { describe as context } from '@jest/globals'
 import relativePsychicPath, {
   psychicPathTypeRelativePath,
 } from '../../../../src/helpers/path/relativePsychicPath'

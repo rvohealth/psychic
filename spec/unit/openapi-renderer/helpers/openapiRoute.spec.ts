@@ -1,3 +1,4 @@
+import { describe as context } from '@jest/globals'
 import openapiRoute from '../../../../src/openapi-renderer/helpers/openapiRoute'
 
 describe('openapiRoute', () => {

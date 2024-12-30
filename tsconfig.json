@@ -5,5 +5,8 @@
     "include": ["src/**/*", "test-app/**/*"]
   },
   "ignore": ["spec/support/generators/**/*", "spec/tmp/**/*"],
-  "include": ["src/**/*", "spec/**/*", "test-app/**/*", "shared/**/*"]
+  "include": ["src/**/*", "spec/**/*", "test-app/**/*", "shared/**/*"],
+  "compilerOptions": {
+    "types": ["jest", "@types/jest", "jest-playwright-preset", "expect-playwright"]
+  }
 }

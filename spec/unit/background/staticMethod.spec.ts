@@ -1,3 +1,4 @@
+import { describe as context } from '@jest/globals'
 import { Job } from 'bullmq'
 import background, { BackgroundQueuePriority } from '../../../src/background'
 import DummyService from '../../../test-app/src/app/services/DummyService'

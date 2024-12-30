@@ -116,6 +116,13 @@ jobs:
         with:
           node-version: '20'
 
+      - name: "Check chrome and chromedriver are installed"
+        run: |
+          google-chrome --version
+          which google-chrome
+          chromedriver --version
+          which chromedriver
+
       - run: npm install -g corepack
       - run: corepack enable
 
@@ -136,9 +143,20 @@ jobs:
         continue-on-error: true
         run: yarn list
       - run: yarn install --immutable
-      - run: APP_ROOT_PATH=$(pwd) yarn psycore db:migrate --skip-sync
-      - run: mkdir -p /tmp/screenshots
-      - run: APP_ROOT_PATH=$(pwd) yarn fspec
+
+      - name: install client packages
+        run: yarn install --immutable
+        working-directory: ./client
+
+      - name: make screenshots dir
+        run: mkdir -p /tmp/screenshots
+
+      - name: run migrations
+        run: yarn psycore db:migrate --skip-sync
+
+      - name: run feature specs
+        run: yarn fspec
+
       - name: Archive screenshots
         uses: actions/upload-artifact@v4
         if: ${{ failure() }}

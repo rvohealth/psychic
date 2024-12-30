@@ -1,3 +1,4 @@
+import { describe as context } from '@jest/globals'
 import generateControllerContent from '../../../../src/generate/helpers/generateControllerContent'
 
 describe('psy generate:controller <name> [...methods]', () => {
