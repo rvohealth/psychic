@@ -1,4 +1,4 @@
-import { testEnv } from '@rvohealth/dream'
 import dotenv from 'dotenv'
+import EnvInternal from './EnvInternal'
 
-dotenv.config({ path: testEnv() ? '.env.test' : '.env' })
+dotenv.config({ path: EnvInternal.isTest ? '.env.test' : '.env' })

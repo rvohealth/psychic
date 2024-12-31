@@ -1,12 +1,12 @@
-import { testEnv } from '@rvohealth/dream'
 import dotenv from 'dotenv'
+import EnvInternal from '../helpers/EnvInternal'
 
-class Env {
+class EnvLoader {
   public loaded = false
 
   public load() {
     if (this.loaded) return
-    dotenv.config({ path: testEnv() ? '.env.test' : '.env' })
+    dotenv.config({ path: EnvInternal.isTest ? '.env.test' : '.env' })
     this.check()
   }
 
@@ -23,5 +23,5 @@ class Env {
   }
 }
 
-const env = new Env()
-export default env
+const envLoader = new EnvLoader()
+export default envLoader

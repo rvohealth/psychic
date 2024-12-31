@@ -6,7 +6,7 @@ export default class AuthedApplicationController extends PsychicController {
 
   @BeforeAction()
   public async authenticate() {
-    const userId = this.getCookie('auth_token')
+    const userId = this.getCookie<string>('auth_token')
     if (!userId) return this.unauthorized()
 
     const user = await User.find(userId)

@@ -39,16 +39,11 @@ export default class InternalEncrypt {
     encryptionOpts: EncryptOptions,
     legacyEncryptionOpts?: EncryptOptions,
   ): RetType | null {
-    try {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
+    let decrypted = Encrypt.decrypt<RetType>(data, encryptionOpts)
+    if (decrypted === null && legacyEncryptionOpts)
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      return Encrypt.decrypt<RetType>(data, encryptionOpts)
-    } catch (error) {
-      if (legacyEncryptionOpts) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-        return Encrypt.decrypt<RetType>(data, legacyEncryptionOpts)
-      } else {
-        throw error
-      }
-    }
+      decrypted = Encrypt.decrypt<RetType>(data, legacyEncryptionOpts)
+    return decrypted
   }
 }

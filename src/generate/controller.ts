@@ -1,6 +1,7 @@
-import { hyphenize, standardizeFullyQualifiedModelName, testEnv } from '@rvohealth/dream'
+import { hyphenize, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
 import { existsSync } from 'fs'
 import fs from 'fs/promises'
+import EnvInternal from '../helpers/EnvInternal'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths'
 import psychicPath from '../helpers/path/psychicPath'
 import generateControllerContent from './helpers/generateControllerContent'
@@ -78,7 +79,7 @@ export default async function generateController({
   await fs.mkdir(absDirPath, { recursive: true })
 
   try {
-    if (!testEnv()) console.log(`generating controller: ${relFilePath}`)
+    if (!EnvInternal.isTest) console.log(`generating controller: ${relFilePath}`)
 
     await fs.writeFile(
       absFilePath,
@@ -142,7 +143,7 @@ async function generateControllerSpec({
   )
 
   try {
-    if (!testEnv()) console.log(`generating controller: ${relFilePath}`)
+    if (!EnvInternal.isTest) console.log(`generating controller: ${relFilePath}`)
     await fs.mkdir(absDirPath, { recursive: true })
     await fs.writeFile(
       absFilePath,

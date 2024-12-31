@@ -1,7 +1,7 @@
 import fs from 'fs/promises'
 import groupBy from 'lodash.groupby'
 import path from 'path'
-import { envBool } from '../helpers/envValue'
+import EnvInternal from '../helpers/EnvInternal'
 import openapiJsonPath from '../helpers/openapiJsonPath'
 import PsychicApplication from '../psychic-application'
 import { HttpMethod, HttpMethods } from '../router/types'
@@ -84,7 +84,7 @@ export default class OpenapiAppRenderer {
 
     for (const [controllerName, controller] of Object.entries(controllers)) {
       for (const key of Object.keys(controller.openapi || {})) {
-        if (envBool('DEBUG')) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
+        if (EnvInternal.isDebug) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
 
         const renderer = controller.openapi[key]
 

@@ -1,10 +1,9 @@
-import { testEnv } from '@rvohealth/dream'
 import { createAdapter } from '@socket.io/redis-adapter'
 import * as colors from 'colorette'
 import { Application } from 'express'
 import http from 'http'
 import socketio from 'socket.io'
-import { envBool } from '../helpers/envValue'
+import EnvInternal from '../helpers/EnvInternal'
 import log from '../log'
 import PsychicApplication from '../psychic-application'
 import { getPsychicHttpInstance } from '../server/helpers/startPsychicServer'
@@ -51,7 +50,7 @@ export default class Cable {
           await hook(socket)
         }
       } catch (error) {
-        if (envBool('PSYCHIC_DANGEROUSLY_PERMIT_WS_EXCEPTIONS')) throw error
+        if (EnvInternal.boolean('PSYCHIC_DANGEROUSLY_PERMIT_WS_EXCEPTIONS')) throw error
         else {
           PsychicApplication.logWithLevel(
             'error',
@@ -93,7 +92,7 @@ export default class Cable {
   }) {
     return new Promise(accept => {
       this.http.listen(port, () => {
-        if (!testEnv()) {
+        if (!EnvInternal.isTest) {
           log.welcome()
           log.puts('\n')
           log.puts(colors.cyan('socket server started                                      '))

@@ -1,8 +1,9 @@
-import { Dream, IdType, testEnv, uniq } from '@rvohealth/dream'
+import { Dream, IdType, uniq } from '@rvohealth/dream'
 import { Emitter } from '@socket.io/redis-emitter'
 import Redis from 'ioredis'
 import { DateTime } from 'luxon'
 import { Socket } from 'socket.io'
+import EnvInternal from '../helpers/EnvInternal'
 import PsychicApplication from '../psychic-application'
 import redisWsKey from './redisWsKey'
 
@@ -29,7 +30,7 @@ export default class Ws<AllowedPaths extends readonly string[]> {
         key,
         // TODO: make this configurable in non-test environments
         DateTime.now()
-          .plus(testEnv() ? { seconds: 15 } : { day: 1 })
+          .plus(EnvInternal.isTest ? { seconds: 15 } : { day: 1 })
           .toSeconds(),
       )
       .exec()

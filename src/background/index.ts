@@ -1,9 +1,9 @@
-import { compact, Dream, IdType, pascalize, testEnv } from '@rvohealth/dream'
+import { compact, Dream, IdType, pascalize } from '@rvohealth/dream'
 import { Job, JobsOptions, Queue, QueueOptions, Worker, WorkerOptions } from 'bullmq'
 import Redis, { Cluster } from 'ioredis'
 import NoQueueForSpecifiedQueueName from '../error/background/NoQueueForSpecifiedQueueName'
 import NoQueueForSpecifiedWorkstream from '../error/background/NoQueueForSpecifiedWorkstream'
-import { devEnvBool } from '../helpers/envValue'
+import EnvInternal from '../helpers/EnvInternal'
 import PsychicApplication, {
   BullMQNativeWorkerOptions,
   PsychicBackgroundNativeBullMQOptions,
@@ -584,7 +584,7 @@ export class Background {
     const queueInstance = this.queueInstance(jobConfig)
     const delay = delaySeconds ? delaySeconds * 1000 : undefined
 
-    if (testEnv() && !devEnvBool('REALLY_TEST_BACKGROUND_QUEUE')) {
+    if (EnvInternal.isTest && !EnvInternal.boolean('REALLY_TEST_BACKGROUND_QUEUE')) {
       const queue = new Background.Queue('TestQueue', { connection: {} })
       const job = new Job(queue, jobType, jobData, {})
       await this.doWork(job)

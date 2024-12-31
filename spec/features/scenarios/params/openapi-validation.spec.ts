@@ -18,7 +18,7 @@ describe('hitting an endpoint with openapi validation activated', () => {
     psychicApp.set('openapi', {
       validation: {
         validateRequests: true,
-        // validateResponses: testEnv(),
+        // validateResponses: EnvInternal.isTest,
         // ignoreUndocumented: true,
         formats: {
           'date-time': {

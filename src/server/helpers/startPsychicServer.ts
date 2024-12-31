@@ -1,8 +1,8 @@
-import { testEnv } from '@rvohealth/dream'
 import { Application } from 'express'
 import fs from 'fs'
 import http, { Server } from 'http'
 import https from 'https'
+import EnvInternal from '../../helpers/EnvInternal'
 import log from '../../log'
 import { PsychicSslCredentials } from '../../psychic-application'
 
@@ -51,7 +51,7 @@ function welcomeMessage({
   withFrontEndClient: boolean
   frontEndPort: number
 }) {
-  if (!testEnv()) {
+  if (!EnvInternal.isTest) {
     log.welcome()
     log.puts(`psychic dev server started at port ${port}`)
     if (withFrontEndClient) log.puts(`client dev server on port ${frontEndPort}`)

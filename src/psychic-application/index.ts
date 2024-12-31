@@ -18,7 +18,7 @@ import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/i
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
-import envValue, { envInt } from '../helpers/envValue'
+import EnvInternal from '../helpers/EnvInternal'
 import {
   OpenapiContent,
   OpenapiHeaders,
@@ -152,7 +152,7 @@ Try setting it to something valid, like:
     return this._appName
   }
 
-  private _port: number = envInt('PORT') || 7777
+  private _port: number = EnvInternal.integer('PORT', { optional: true }) || 7777
   public get port() {
     return this._port
   }
@@ -291,7 +291,7 @@ Try setting it to something valid, like:
 
     await this.runHooksFor('load')
 
-    switch (envValue('NODE_ENV')) {
+    switch (EnvInternal.nodeEnv) {
       case 'development':
         await this.runHooksFor('load:dev')
         break

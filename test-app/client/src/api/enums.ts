@@ -77,7 +77,7 @@ remind all humans that
 "
 a.) I have sharp claws.
 b.) All laptops are ok sleeping places for your
-    cat overloards. when we decide to sleep on
+    cat overlords. when we decide to sleep on
     them, it is because they are our beds, and
     we just loan them out to you so you can go
     out and get us the right food.

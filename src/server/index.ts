@@ -7,7 +7,7 @@ import { Server } from 'http'
 import path from 'path'
 import { stopBackgroundWorkers } from '../background'
 import Cable from '../cable'
-import { envBool } from '../helpers/envValue'
+import EnvInternal from '../helpers/EnvInternal'
 import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError'
 import PsychicApplication from '../psychic-application'
 import PsychicRouter from '../router'
@@ -85,7 +85,7 @@ export default class PsychicServer {
   public async start(
     port?: number,
     {
-      withFrontEndClient = envBool('CLIENT'),
+      withFrontEndClient = EnvInternal.boolean('CLIENT'),
       frontEndPort = 3000,
     }: {
       withFrontEndClient?: boolean
@@ -178,7 +178,7 @@ export default class PsychicServer {
 
       this.app.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
         if (isOpenapiError(err)) {
-          if (envBool('DEBUG')) {
+          if (EnvInternal.isDebug) {
             PsychicApplication.log(JSON.stringify(err))
             console.trace()
           }
@@ -188,7 +188,7 @@ export default class PsychicServer {
             errors: err.errors,
           })
         } else {
-          if (envBool('DEBUG')) {
+          if (EnvInternal.isDebug) {
             PsychicApplication.logWithLevel('error', err)
           }
           next()

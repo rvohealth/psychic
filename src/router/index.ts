@@ -1,9 +1,9 @@
-import { ValidationError, ValidationType, camelize, developmentOrTestEnv, testEnv } from '@rvohealth/dream'
+import { ValidationError, ValidationType, camelize } from '@rvohealth/dream'
 import { Application, Request, Response, Router } from 'express'
 import pluralize from 'pluralize'
 import PsychicController from '../controller'
 import HttpError from '../error/http'
-import { devEnvBool } from '../helpers/envValue'
+import EnvInternal from '../helpers/EnvInternal'
 import log from '../log'
 import PsychicApplication from '../psychic-application'
 import {
@@ -336,7 +336,7 @@ export default class PsychicRouter {
       await controllerInstance.runAction(action)
     } catch (error) {
       const err = error as Error
-      if (!testEnv()) log.error(err.message)
+      if (!EnvInternal.isTest) log.error(err.message)
 
       let validationError: ValidationError
       let paramValidationError: ParamValidationError
@@ -389,7 +389,7 @@ export default class PsychicRouter {
           // to have to apply an ugly and annoying try-catch pattern to our controllers
           // and manually console log the error to determine what the actual error was.
           // this block enables us to not have to do that anymore.
-          if (testEnv() && !devEnvBool('PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR')) {
+          if (EnvInternal.isTest && !EnvInternal.boolean('PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR')) {
             PsychicApplication.log('ATTENTION: a server error was detected:')
             PsychicApplication.logWithLevel('error', err)
           }
@@ -400,7 +400,7 @@ export default class PsychicRouter {
                 await hook(err, req, res)
               }
             } catch (error) {
-              if (developmentOrTestEnv()) {
+              if (EnvInternal.isDevelopmentOrTest) {
                 // In development and test, we want to throw so that, for example, double-setting of
                 // status headers throws an error in specs. We couldn't figure out how to write
                 // a spec for ensuring that such errors made it through because Supertest would

@@ -1,9 +1,10 @@
-import { developmentOrTestEnv, Encrypt } from '@rvohealth/dream'
+import { Encrypt } from '@rvohealth/dream'
 import { Queue, Worker } from 'bullmq'
 import Redis from 'ioredis'
 import path from 'path'
 import winston from 'winston'
 import Ws from '../../../src/cable/ws'
+import EnvInternal from '../../../src/helpers/EnvInternal'
 import PsychicApplication from '../../../src/psychic-application'
 import User from '../app/models/User'
 import inflections from './inflections'
@@ -289,7 +290,7 @@ export default async (psy: PsychicApplication) => {
     __forTestingOnly('server:error')
 
     if (!res.headersSent) res.sendStatus(500)
-    else if (developmentOrTestEnv()) throw err
+    else if (EnvInternal.isDevelopmentOrTest) throw err
   })
 
   psy.on('ws:start', io => {
@@ -297,10 +298,10 @@ export default async (psy: PsychicApplication) => {
 
     io.of('/').on('connection', async socket => {
       const token = socket.handshake.auth.token as string
-      const userId = Encrypt.decrypt(token, {
+      const userId = Encrypt.decrypt<string>(token, {
         algorithm: 'aes-256-gcm',
         key: process.env.APP_ENCRYPTION_KEY!,
-      })
+      })!
       const user = await User.find(userId)
 
       if (user) {

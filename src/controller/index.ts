@@ -279,8 +279,8 @@ export default class PsychicController {
     )
   }
 
-  public getCookie(name: string) {
-    return this.session.getCookie(name)
+  public getCookie<RetType>(name: string): RetType | null {
+    return (this.session.getCookie(name) ?? null) as RetType | null
   }
 
   public setCookie(name: string, data: string, opts: CustomSessionCookieOptions = {}) {
