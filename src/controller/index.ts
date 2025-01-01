@@ -172,6 +172,15 @@ export default class PsychicController {
     return `${this.globalName.replace(/^controllers\//, '').replace(/Controller$/, '')}#${methodName.toString()}`
   }
 
+  public static get openapiName(): PsychicOpenapiNames<PsychicController> {
+    return 'default'
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public get psychicTypes(): any {
+    throw new Error('Must define psychicTypes getter in ApplicationController class within your application')
+  }
+
   /**
    * @internal
    *
@@ -514,6 +523,8 @@ export class ControllerSerializerIndex {
   }
 }
 
+export const controllerSerializerIndex = new ControllerSerializerIndex()
+
 // Since Dream explicitly types the return type of
 // the serializers getter as, e.g., DreamSerializers<User>,
 // in order to enforce valid serializer global names as the
@@ -522,4 +533,9 @@ export class ControllerSerializerIndex {
 // leverage the key values to enforce a valid serializerKey
 export type RenderOptions = { serializerKey?: string }
 
-export const controllerSerializerIndex = new ControllerSerializerIndex()
+export type PsychicOpenapiNames<
+  T extends PsychicController,
+  PsyTypes extends T['psychicTypes'] = T['psychicTypes'],
+  OpenapiNames extends PsyTypes['openapiNames'] = PsyTypes['openapiNames'],
+  OpenapiName extends OpenapiNames[number] = OpenapiNames[number],
+> = OpenapiName

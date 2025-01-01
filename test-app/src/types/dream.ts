@@ -104,7 +104,7 @@ import {
   PetTreatsEnumValues,
   SpeciesTypesEnum,
   SpeciesTypesEnumValues
-} from './sync'
+} from './db'
 
 export const schema = {
   comments: {

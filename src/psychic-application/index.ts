@@ -197,11 +197,12 @@ Try setting it to something valid, like:
     return this._routesCb
   }
 
-  private _openapi: PsychicOpenapiOptions &
-    Required<Pick<PsychicOpenapiOptions, 'clientOutputFilename' | 'outputFilename' | 'schemaDelimeter'>> = {
-    clientOutputFilename: 'openapi.ts',
-    outputFilename: 'openapi.json',
-    schemaDelimeter: '',
+  private _openapi: Record<string, NamedPsychicOpenapiOptions> = {
+    default: {
+      clientOutputFilename: 'openapi.ts',
+      outputFilename: 'openapi.json',
+      schemaDelimeter: '',
+    },
   }
   public get openapi() {
     return this._openapi
@@ -358,6 +359,7 @@ Try setting it to something valid, like:
     }
   }
 
+  public set(option: 'openapi', name: string, value: NamedPsychicOpenapiOptions): void
   public set<Opt extends PsychicApplicationOption>(
     option: Opt,
     value: Opt extends 'appName'
@@ -395,7 +397,7 @@ Try setting it to something valid, like:
                                     : Opt extends 'ssl'
                                       ? PsychicSslCredentials
                                       : Opt extends 'openapi'
-                                        ? PsychicOpenapiOptions
+                                        ? DefaultPsychicOpenapiOptions
                                         : Opt extends 'paths'
                                           ? PsychicPathOptions
                                           : Opt extends 'port'
@@ -407,7 +409,10 @@ Try setting it to something valid, like:
                                                 : Opt extends 'routes'
                                                   ? (r: PsychicRouter) => void | Promise<void>
                                                   : never,
-  ) {
+  ): void
+  public set<Opt extends PsychicApplicationOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
+    const value = unknown2 || unknown1
+
     switch (option) {
       case 'appName':
         this._appName = value as string
@@ -436,7 +441,8 @@ Try setting it to something valid, like:
       case 'defaultResponseHeaders':
         this._defaultResponseHeaders = Object.keys(value as Record<string, string>).reduce(
           (agg, key) => {
-            agg[key.toLowerCase()] = value[key as keyof typeof value] as string
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+            agg[key.toLowerCase()] = (value as any)[key as keyof typeof value] as string
             return agg
           },
           {} as Record<string, string>,
@@ -510,7 +516,13 @@ Try setting it to something valid, like:
         break
 
       case 'openapi':
-        this._openapi = { ...this.openapi, ...(value as PsychicOpenapiOptions) }
+        this._openapi = {
+          ...this.openapi,
+          [unknown2 ? (unknown1 as string) : 'default']: {
+            outputFilename: 'openapi.json',
+            ...(value as DefaultPsychicOpenapiOptions | NamedPsychicOpenapiOptions),
+          },
+        }
         break
 
       case 'paths':
@@ -589,9 +601,16 @@ export interface PsychicSslCredentials {
   cert: string
 }
 
-export interface PsychicOpenapiOptions {
-  schemaDelimeter?: string
+export interface DefaultPsychicOpenapiOptions extends PsychicOpenapiBaseOptions {
   outputFilename?: `${string}.json`
+}
+
+export interface NamedPsychicOpenapiOptions extends PsychicOpenapiBaseOptions {
+  outputFilename: `${string}.json`
+}
+
+interface PsychicOpenapiBaseOptions {
+  schemaDelimeter?: string
   clientOutputFilename?: `${string}.ts`
   suppressResponseEnums?: boolean
   syncEnumsToClient?: boolean

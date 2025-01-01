@@ -15,8 +15,10 @@ import {
 import EnvInternal from '../helpers/EnvInternal'
 import PsychicApplication from '../psychic-application'
 import OpenapiBodySegmentRenderer from './body-segment'
+import PsychicController from '../controller'
 
 export default class OpenapiSerializerRenderer {
+  private controllerClass: typeof PsychicController
   private serializerClass: typeof DreamSerializer
   private serializers: { [key: string]: typeof DreamSerializer }
   private schemaDelimeter: string
@@ -30,18 +32,21 @@ export default class OpenapiSerializerRenderer {
    * within nested openapi objects
    */
   constructor({
+    controllerClass,
     serializerClass,
     serializers,
     schemaDelimeter,
     processedSchemas,
     target,
   }: {
+    controllerClass: typeof PsychicController
     serializerClass: typeof DreamSerializer
     serializers: { [key: string]: typeof DreamSerializer }
     schemaDelimeter: string
     processedSchemas: Record<string, boolean>
     target: OpenapiBodyTarget
   }) {
+    this.controllerClass = controllerClass
     this.serializerClass = serializerClass
     this.serializers = serializers
     this.schemaDelimeter = schemaDelimeter
@@ -94,6 +99,7 @@ export default class OpenapiSerializerRenderer {
     openApiShape?: SerializableTypes
   }): OpenapiEndpointParseResults {
     return new OpenapiBodySegmentRenderer({
+      controllerClass: this.controllerClass,
       bodySegment: openApiShape,
       serializers: this.serializers,
       schemaDelimeter: this.schemaDelimeter,
@@ -224,6 +230,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     }
 
     const associatedSchema = new OpenapiSerializerRenderer({
+      controllerClass: this.controllerClass,
       serializerClass: associatedSerializer,
       serializers: this.serializers,
       schemaDelimeter: this.schemaDelimeter,
@@ -254,6 +261,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     },
   ): Record<string, OpenapiSchemaObject> {
     const serialized = new OpenapiSerializerRenderer({
+      controllerClass: this.controllerClass,
       serializerClass: associatedSerializer,
       serializers: this.serializers,
       schemaDelimeter: this.schemaDelimeter,
@@ -319,6 +327,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
       }
 
       const associatedSchema = new OpenapiSerializerRenderer({
+        controllerClass: this.controllerClass,
         serializerClass: associatedSerializer,
         serializers: this.serializers,
         schemaDelimeter: this.schemaDelimeter,

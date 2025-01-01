@@ -1,7 +1,6 @@
 # Ignore generated files
 test-app/client/src/api/*
-test-app/src/db/schema.ts
-test-app/src/db/sync.ts
+test-app/src/types/*
 test-app/src/conf/routeTypes.ts
 test-app/client/apiRoutes.ts
 test-app/client/schema.ts
@@ -11,6 +10,7 @@ spec/support/generators/**/*
 .github/
 dist/
 openapi.json
+admin.openapi.json
 .yarn/
 .yarnrc.yml
 

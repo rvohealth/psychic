@@ -857,7 +857,7 @@ describe('OpenapiEndpointRenderer', () => {
             context('suppressResponseEnums=true', () => {
               beforeEach(() => {
                 const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
-                psychicApp.openapi.suppressResponseEnums = true
+                psychicApp.openapi.default.suppressResponseEnums = true
 
                 jest
                   .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
@@ -1661,7 +1661,7 @@ describe('OpenapiEndpointRenderer', () => {
         context('suppressResponseEnums=true', () => {
           beforeEach(() => {
             const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
-            psychicApp.openapi.suppressResponseEnums = true
+            psychicApp.openapi.default.suppressResponseEnums = true
 
             jest
               .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')

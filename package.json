@@ -67,7 +67,7 @@
   "devDependencies": {
     "@eslint/js": "=9.0.0",
     "@jest-mock/express": "^2.1.0",
-    "@rvohealth/dream": "=0.17.0",
+    "@rvohealth/dream": "=0.18.0",
     "@rvohealth/dream-spec-helpers": "^0.0.8",
     "@rvohealth/psychic-spec-helpers": "^0.0.3",
     "@socket.io/redis-adapter": "^8.3.0",

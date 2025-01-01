@@ -1,10 +1,12 @@
 import OpenapiBodySegmentRenderer from '../../../../src/openapi-renderer/body-segment'
 import { OpenapiBodySegment } from '../../../../src/openapi-renderer/serializer'
+import ApplicationController from '../../../../test-app/src/app/controllers/ApplicationController'
 
 describe('OpenapiBodySegmentRenderer', () => {
   describe('#parse', () => {
     const subject = (bodySegment: OpenapiBodySegment) =>
       new OpenapiBodySegmentRenderer({
+        controllerClass: ApplicationController,
         bodySegment,
         serializers: {},
         schemaDelimeter: '',

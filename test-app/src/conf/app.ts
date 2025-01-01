@@ -106,6 +106,55 @@ export default async (psy: PsychicApplication) => {
     },
   })
 
+  psy.set('openapi', 'admin', {
+    outputFilename: 'admin.openapi.json',
+    syncEnumsToClient: true,
+    defaults: {
+      headers: {
+        ['custom-admin-header']: {
+          required: true,
+          description: 'custom admin header',
+        },
+      },
+
+      responses: {
+        490: {
+          $ref: '#/components/responses/CustomAdminResponse',
+        },
+      },
+
+      securitySchemes: {
+        bearerToken: {
+          type: 'http',
+          scheme: 'bearer',
+          bearerFormat: 'custom admin auth token',
+        },
+      },
+
+      security: [{ bearerToken: [] }],
+
+      components: {
+        responses: {
+          CustomAdminResponse: {
+            description: 'my custom admin response',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'string',
+                },
+              },
+            },
+          },
+        },
+        schemas: {
+          CustomAdminSchema: {
+            type: 'string',
+          },
+        },
+      },
+    },
+  })
+
   // set options to pass to express.json when middleware is booted
   psy.set('json', {
     limit: '20mb',

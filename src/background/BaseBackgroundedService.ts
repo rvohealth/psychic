@@ -1,10 +1,10 @@
 import { GlobalNameNotSet } from '@rvohealth/dream'
 import { Job } from 'bullmq'
 import { FunctionPropertyNames } from '../helpers/typeHelpers'
-import background, { BackgroundJobConfig } from './'
+import background, { BackgroundJobConfig } from '.'
 
-export default class BackgroundedService {
-  public static get backgroundJobConfig(): BackgroundJobConfig {
+export default class BaseBackgroundedService {
+  public static get backgroundJobConfig(): BackgroundJobConfig<BaseBackgroundedService> {
     return {}
   }
 
@@ -20,11 +20,11 @@ export default class BackgroundedService {
 
   public static async background<
     T,
-    MethodName extends PsychicBackgroundedServiceStaticMethods<T & typeof BackgroundedService>,
+    MethodName extends PsychicBackgroundedServiceStaticMethods<T & typeof BaseBackgroundedService>,
     MethodFunc extends T[MethodName & keyof T],
     MethodArgs extends BackgroundableMethodArgs<MethodFunc>,
   >(this: T, methodName: MethodName, ...args: MethodArgs) {
-    const safeThis: typeof BackgroundedService = this as typeof BackgroundedService
+    const safeThis: typeof BaseBackgroundedService = this as typeof BaseBackgroundedService
 
     return await background.staticMethod(safeThis, methodName, {
       globalName: safeThis.globalName,
@@ -35,11 +35,11 @@ export default class BackgroundedService {
 
   public static async backgroundWithDelay<
     T,
-    MethodName extends PsychicBackgroundedServiceStaticMethods<T & typeof BackgroundedService>,
+    MethodName extends PsychicBackgroundedServiceStaticMethods<T & typeof BaseBackgroundedService>,
     MethodFunc extends T[MethodName & keyof T],
     MethodArgs extends BackgroundableMethodArgs<MethodFunc>,
   >(this: T, delaySeconds: number, methodName: MethodName, ...args: MethodArgs) {
-    const safeThis: typeof BackgroundedService = this as typeof BackgroundedService
+    const safeThis: typeof BaseBackgroundedService = this as typeof BaseBackgroundedService
 
     return await background.staticMethod(safeThis, methodName, {
       globalName: safeThis.globalName,
@@ -49,9 +49,14 @@ export default class BackgroundedService {
     })
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public get psychicTypes(): any {
+    throw new Error('Must define psychicTypes getter in BackgroundedService class within your application')
+  }
+
   public async background<
     T,
-    MethodName extends PsychicBackgroundedServiceInstanceMethods<T & BackgroundedService>,
+    MethodName extends PsychicBackgroundedServiceInstanceMethods<T & BaseBackgroundedService>,
     MethodFunc extends T[MethodName & keyof T],
     MethodArgs extends BackgroundableMethodArgs<MethodFunc>,
   >(
@@ -67,7 +72,7 @@ export default class BackgroundedService {
     } = {},
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    const constructor = (this as any).constructor as typeof BackgroundedService
+    const constructor = (this as any).constructor as typeof BaseBackgroundedService
 
     return await background.instanceMethod(constructor, methodName, {
       globalName: constructor.globalName,
@@ -79,7 +84,7 @@ export default class BackgroundedService {
 
   public async backgroundWithDelay<
     T,
-    MethodName extends PsychicBackgroundedServiceInstanceMethods<T & BackgroundedService>,
+    MethodName extends PsychicBackgroundedServiceInstanceMethods<T & BaseBackgroundedService>,
     MethodFunc extends T[MethodName & keyof T],
     MethodArgs extends BackgroundableMethodArgs<MethodFunc>,
   >(
@@ -96,7 +101,7 @@ export default class BackgroundedService {
     } = {},
   ) {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    const constructor = (this as any).constructor as typeof BackgroundedService
+    const constructor = (this as any).constructor as typeof BaseBackgroundedService
 
     return await background.instanceMethod(constructor, methodName, {
       globalName: constructor.globalName,
@@ -108,14 +113,14 @@ export default class BackgroundedService {
   }
 }
 
-export type PsychicBackgroundedServiceStaticMethods<T extends typeof BackgroundedService> = Exclude<
+export type PsychicBackgroundedServiceStaticMethods<T extends typeof BaseBackgroundedService> = Exclude<
   FunctionPropertyNames<Required<T>>,
-  FunctionPropertyNames<typeof BackgroundedService>
+  FunctionPropertyNames<typeof BaseBackgroundedService>
 >
 
-export type PsychicBackgroundedServiceInstanceMethods<T extends BackgroundedService> = Exclude<
+export type PsychicBackgroundedServiceInstanceMethods<T extends BaseBackgroundedService> = Exclude<
   FunctionPropertyNames<Required<T>>,
-  FunctionPropertyNames<BackgroundedService>
+  FunctionPropertyNames<BaseBackgroundedService>
 >
 
 type OmitJobFromEndOfArguments<Original extends unknown[]> = Original extends [Job]
