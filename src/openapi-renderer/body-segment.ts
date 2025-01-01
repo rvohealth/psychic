@@ -26,8 +26,10 @@ import {
 import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import isBlankDescription from './helpers/isBlankDescription'
 import OpenapiSerializerRenderer from './serializer'
+import PsychicController from '../controller'
 
 export default class OpenapiBodySegmentRenderer {
+  private controllerClass: typeof PsychicController
   private bodySegment: OpenapiBodySegment
   private serializers: { [key: string]: typeof DreamSerializer }
   private schemaDelimeter: string
@@ -42,18 +44,21 @@ export default class OpenapiBodySegmentRenderer {
    * within nested openapi objects
    */
   constructor({
+    controllerClass,
     bodySegment,
     serializers,
     schemaDelimeter,
     processedSchemas,
     target,
   }: {
+    controllerClass: typeof PsychicController
     bodySegment: OpenapiBodySegment
     serializers: { [key: string]: typeof DreamSerializer }
     schemaDelimeter: string
     processedSchemas: Record<string, boolean>
     target: OpenapiBodyTarget
   }) {
+    this.controllerClass = controllerClass
     this.bodySegment = bodySegment
     this.serializers = serializers
     this.schemaDelimeter = schemaDelimeter
@@ -388,7 +393,7 @@ export default class OpenapiBodySegmentRenderer {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         anyObj?.type === 'string' &&
         this.target === 'response' &&
-        psychicApp.openapi?.suppressResponseEnums
+        psychicApp.openapi?.[this.controllerClass.openapiName as string]?.suppressResponseEnums
       ) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const enums = anyObj.enum as string[] | null
@@ -434,6 +439,7 @@ The following values will be allowed:
     this.computedExtraComponents = {
       ...this.computedExtraComponents,
       ...new OpenapiSerializerRenderer({
+        controllerClass: this.controllerClass,
         serializerClass: serializerRefBodySegment.$serializer,
         serializers: this.serializers,
         schemaDelimeter: this.schemaDelimeter,

@@ -18,10 +18,14 @@ export default class OpenapiAppRenderer {
    */
   public static async sync() {
     const openapiContents = await OpenapiAppRenderer.toObject()
-    const jsonPath = openapiJsonPath()
-    await fs.writeFile(jsonPath, JSON.stringify(openapiContents, null, 2), {
-      flag: 'w+',
-    })
+
+    const psychicApp = PsychicApplication.getOrFail()
+    for (const key in psychicApp.openapi) {
+      const jsonPath = openapiJsonPath(key)
+      await fs.writeFile(jsonPath, JSON.stringify(openapiContents[key], null, 2), {
+        flag: 'w+',
+      })
+    }
   }
 
   /**
@@ -31,7 +35,18 @@ export default class OpenapiAppRenderer {
    * payloads of all `@Openapi` decorator calls used throughout
    * the controller layer.
    */
-  public static async toObject(): Promise<OpenapiSchema> {
+  public static async toObject(): Promise<Record<string, OpenapiSchema>> {
+    const psychicApp = PsychicApplication.getOrFail()
+
+    const output: Record<string, OpenapiSchema> = {}
+    for (const key in psychicApp.openapi) {
+      output[key] = await this._toObject(key)
+    }
+
+    return output
+  }
+
+  public static async _toObject(openapiName: string): Promise<OpenapiSchema> {
     const processedSchemas: Record<string, boolean> = {}
     const psychicApp = PsychicApplication.getOrFail()
     const controllers = psychicApp.controllers
@@ -57,32 +72,34 @@ export default class OpenapiAppRenderer {
       },
       paths: {},
       components: {
-        ...(psychicApp.openapi?.defaults?.components || {}),
+        ...(psychicApp.openapi?.[openapiName]?.defaults?.components || {}),
         schemas: {
           ...DEFAULT_OPENAPI_COMPONENT_SCHEMAS,
-          ...((psychicApp.openapi?.defaults?.components?.schemas ||
+          ...((psychicApp.openapi?.[openapiName]?.defaults?.components?.schemas ||
             {}) as typeof DEFAULT_OPENAPI_COMPONENT_SCHEMAS),
         },
         responses: {
           ...DEFAULT_OPENAPI_COMPONENT_RESPONSES,
-          ...(psychicApp.openapi?.defaults?.components?.responses || {}),
+          ...(psychicApp.openapi?.[openapiName]?.defaults?.components?.responses || {}),
         },
       },
     }
 
-    if (psychicApp.openapi?.defaults?.securitySchemes) {
+    if (psychicApp.openapi?.[openapiName]?.defaults?.securitySchemes) {
       finalOutput.components = {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-        securitySchemes: psychicApp.openapi.defaults.securitySchemes as any,
+        securitySchemes: psychicApp.openapi?.[openapiName].defaults.securitySchemes as any,
         ...finalOutput.components,
       }
     }
 
-    if (psychicApp.openapi?.defaults?.security) {
-      finalOutput.security = psychicApp.openapi.defaults.security
+    if (psychicApp.openapi?.[openapiName]?.defaults?.security) {
+      finalOutput.security = psychicApp.openapi?.[openapiName].defaults.security
     }
 
-    for (const [controllerName, controller] of Object.entries(controllers)) {
+    for (const [controllerName, controller] of Object.entries(controllers).filter(
+      ([, controller]) => controller.openapiName === openapiName,
+    )) {
       for (const key of Object.keys(controller.openapi || {})) {
         if (EnvInternal.isDebug) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
 

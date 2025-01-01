@@ -2,12 +2,18 @@ import _pluralize from 'pluralize'
 export const pluralize = _pluralize
 
 export { default as background, BackgroundJobConfig, stopBackgroundWorkers } from './background'
-export { default as BackgroundedService } from './background/backgrounded-service'
-export { default as ScheduledService } from './background/scheduled-service'
+export { default as BaseBackgroundedService } from './background/BaseBackgroundedService'
+export { default as BaseScheduledService } from './background/BaseScheduledService'
+
 export { default as PsychicBin } from './bin'
 export { default as Ws } from './cable/ws'
 export { default as PsychicCLI } from './cli'
-export { default as PsychicController, PsychicParamsDictionary, PsychicParamsPrimitive } from './controller'
+export {
+  default as PsychicController,
+  PsychicOpenapiNames,
+  PsychicParamsDictionary,
+  PsychicParamsPrimitive,
+} from './controller'
 export { BeforeAction, OpenAPI } from './controller/decorators'
 export { default as envLoader } from './env/Loader'
 export { default as Forbidden } from './error/http/forbidden'
@@ -25,8 +31,8 @@ export {
   OpenapiEndpointRendererOpts,
   OpenapiEndpointResponse,
   OpenapiHeaderOption,
-  OpenapiHeaders,
   OpenapiHeaderType,
+  OpenapiHeaders,
   OpenapiMethodBody,
   OpenapiParameterResponse,
   OpenapiPathParams,
@@ -35,7 +41,11 @@ export {
   OpenapiSchema,
   OpenapiPathParamOption as OpenapiUriOption,
 } from './openapi-renderer/endpoint'
-export { default as PsychicApplication, PsychicOpenapiOptions } from './psychic-application'
+export {
+  default as PsychicApplication,
+  DefaultPsychicOpenapiOptions,
+  NamedPsychicOpenapiOptions,
+} from './psychic-application'
 export { UUID } from './psychic-application/types'
 export { default as PsychicRouter } from './router'
 export { HttpMethod } from './router/types'

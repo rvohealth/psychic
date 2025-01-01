@@ -3,7 +3,6 @@ import fs from 'fs/promises'
 import path from 'path'
 import generateController from '../generate/controller'
 import generateResource from '../generate/resource'
-import openapiJsonPath from '../helpers/openapiJsonPath'
 import sspawn from '../helpers/sspawn'
 import OpenapiAppRenderer from '../openapi-renderer/app'
 import PsychicApplication from '../psychic-application'
@@ -11,6 +10,7 @@ import PsychicServer from '../server'
 import enumsFileStr from './helpers/enumsFileStr'
 import generateRouteTypes from './helpers/generateRouteTypes'
 import printRoutes from './helpers/printRoutes'
+import TypesBuilder from '../cli/helpers/TypesBuilder'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
@@ -31,6 +31,7 @@ export default class PsychicBin {
 
   public static async sync() {
     await DreamBin.sync()
+    await PsychicBin.syncTypes()
 
     const psychicApp = PsychicApplication.getOrFail()
 
@@ -48,12 +49,20 @@ export default class PsychicBin {
     }
   }
 
+  public static async syncTypes() {
+    console.log(`syncing types/psychic.ts...`)
+
+    await TypesBuilder.sync()
+
+    console.log(`done syncing types/psychic.ts!`)
+  }
+
   public static async syncOpenapiJson() {
-    console.log(`syncing ${openapiJsonPath()}...`)
+    console.log(`syncing openapi...`)
 
     await OpenapiAppRenderer.sync()
 
-    console.log(`done syncing ${openapiJsonPath()}!`)
+    console.log(`done syncing openapi!`)
   }
 
   public static async syncRoutes() {
@@ -73,11 +82,15 @@ export default class PsychicBin {
     const psychicApp = PsychicApplication.getOrFail()
 
     const apiPath = path.join(psychicApp.clientRoot, psychicApp.client.apiPath)
-    const clientApiSchemaFilename = psychicApp.openapi?.clientOutputFilename
+    for (const openapiName in psychicApp.openapi) {
+      const clientApiSchemaFilename = psychicApp.openapi[openapiName]?.clientOutputFilename
 
-    await sspawn(
-      `npx openapi-typescript ${psychicApp.apiRoot}/openapi.json -o ${apiPath}/${clientApiSchemaFilename}`,
-    )
+      if (clientApiSchemaFilename) {
+        await sspawn(
+          `npx openapi-typescript ${psychicApp.apiRoot}/openapi.json -o ${apiPath}/${clientApiSchemaFilename}`,
+        )
+      }
+    }
 
     console.log('done syncing client api schema!')
   }

@@ -191,6 +191,7 @@ export default class OpenapiEndpointRenderer<
       output = {
         ...output,
         ...new OpenapiSerializerRenderer({
+          controllerClass: this.controllerClass,
           serializerClass,
           schemaDelimeter: this.schemaDelimeter,
           serializers: this.serializers,
@@ -322,9 +323,7 @@ export default class OpenapiEndpointRenderer<
    * "parameters" field for a single endpoint.
    */
   private headersArray(): OpenapiParameterResponse[] {
-    const psychicApp = PsychicApplication.getOrFail()
-
-    const defaultHeaders = this.omitDefaultHeaders ? {} : psychicApp.openapi?.defaults?.headers || {}
+    const defaultHeaders = this.omitDefaultHeaders ? {} : this.openapiOpts?.defaults?.headers || {}
     const headers = { ...defaultHeaders, ...(this.headers || []) } as OpenapiHeaders
 
     return (
@@ -672,15 +671,18 @@ export default class OpenapiEndpointRenderer<
     }
   }
 
+  private get openapiOpts() {
+    const psychicApp = PsychicApplication.getOrFail()
+    return psychicApp.openapi[this.controllerClass.openapiName as string]
+  }
+
   /**
    * @internal
    *
    * Generates the responses portion of the endpoint
    */
   private parseResponses(processedSchemas: Record<string, boolean>): OpenapiResponses {
-    const psychicApp = PsychicApplication.getOrFail()
-
-    const defaultResponses = this.omitDefaultResponses ? {} : psychicApp.openapi?.defaults?.responses || {}
+    const defaultResponses = this.omitDefaultResponses ? {} : this.openapiOpts?.defaults?.responses || {}
     let responseData: OpenapiResponses = cloneDeep({
       ...DEFAULT_OPENAPI_RESPONSES,
       ...defaultResponses,
@@ -865,8 +867,7 @@ export default class OpenapiEndpointRenderer<
    * NOTE: this is only public for testing purposes.
    */
   public get schemaDelimeter() {
-    const psychicApp = PsychicApplication.getOrFail()
-    return psychicApp.openapi?.schemaDelimeter || ''
+    return this.openapiOpts?.schemaDelimeter || ''
   }
 
   /**
@@ -881,6 +882,7 @@ export default class OpenapiEndpointRenderer<
     { target }: { target: 'request' | 'response' },
   ): OpenapiSchemaBody {
     const { results, extraComponents } = new OpenapiBodySegmentRenderer({
+      controllerClass: this.controllerClass,
       bodySegment,
       serializers: this.serializers,
       schemaDelimeter: this.schemaDelimeter,

@@ -15,6 +15,7 @@ export default async function configureDream(app: DreamApplication) {
   app.set('paths', {
     conf: 'test-app/src/conf',
     db: 'test-app/src/db',
+    types: 'test-app/src/types',
     factories: 'test-app/spec/factories',
     models: 'test-app/src/app/models',
     modelSpecs: 'test-app/spec/unit/models',

@@ -171,29 +171,32 @@ export default class PsychicServer {
 
   private initializeOpenapiValidation() {
     const psychicApp = PsychicApplication.getOrFail()
-    if (psychicApp.openapi?.validation) {
-      const opts = psychicApp.openapi?.validation
-      opts.apiSpec ||= path.join(psychicApp.apiRoot, 'openapi.json')
-      this.app.use(OpenApiValidator.middleware(opts as Required<typeof opts>))
+    for (const openapiName in psychicApp.openapi) {
+      const openapiOpts = psychicApp.openapi[openapiName]
+      if (openapiOpts?.validation) {
+        const opts = openapiOpts.validation
+        opts.apiSpec ||= path.join(psychicApp.apiRoot, 'openapi.json')
+        this.app.use(OpenApiValidator.middleware(opts as Required<typeof opts>))
 
-      this.app.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
-        if (isOpenapiError(err)) {
-          if (EnvInternal.isDebug) {
-            PsychicApplication.log(JSON.stringify(err))
-            console.trace()
-          }
+        this.app.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
+          if (isOpenapiError(err)) {
+            if (EnvInternal.isDebug) {
+              PsychicApplication.log(JSON.stringify(err))
+              console.trace()
+            }
 
-          res.status(err.status).json({
-            message: err.message,
-            errors: err.errors,
-          })
-        } else {
-          if (EnvInternal.isDebug) {
-            PsychicApplication.logWithLevel('error', err)
+            res.status(err.status).json({
+              message: err.message,
+              errors: err.errors,
+            })
+          } else {
+            if (EnvInternal.isDebug) {
+              PsychicApplication.logWithLevel('error', err)
+            }
+            next()
           }
-          next()
-        }
-      })
+        })
+      }
     }
   }
 

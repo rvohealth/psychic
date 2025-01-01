@@ -1,6 +1,6 @@
 import { Dream } from '@rvohealth/dream'
-import { globalSchema, schema } from '../../db/schema'
-import { DBClass } from '../../db/sync'
+import { globalSchema, schema } from '../../types/dream'
+import { DBClass } from '../../types/db'
 
 export default class ApplicationModel extends Dream {
   public DB: DBClass

@@ -18,11 +18,13 @@ import {
   CommentWithFlattenedUserSerializer,
 } from '../../../../test-app/src/app/serializers/CommentSerializer'
 import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer'
+import ApplicationController from '../../../../test-app/src/app/controllers/ApplicationController'
 
 describe('OpenapiSerializerRenderer', () => {
   describe('#parse', () => {
     const subject = (serializerClass: typeof DreamSerializer) =>
       new OpenapiSerializerRenderer({
+        controllerClass: ApplicationController,
         serializerClass,
         serializers: {},
         schemaDelimeter: '',

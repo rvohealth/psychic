@@ -1,4 +1,5 @@
 import PsychicRouter from '../../../src/router'
+import AdminTestController from '../app/controllers/Admin/TestController'
 import ApiUsersController from '../app/controllers/Api/UsersController'
 import ApiV1UsersController from '../app/controllers/Api/V1/UsersController'
 import AuthedUsersController from '../app/controllers/AuthedUsersController'
@@ -66,4 +67,6 @@ export default (r: PsychicRouter) => {
     r.get('hello', GreeterController, 'hello')
     r.get('justforspecs', GreeterController, 'justforspecs')
   })
+
+  r.get('/admin/test', AdminTestController, 'test')
 }

@@ -14,6 +14,8 @@ import PsychicApplication, {
 } from '../psychic-application'
 import lookupClassByGlobalName from '../psychic-application/helpers/lookupClassByGlobalName'
 import { Either } from '../psychic-application/types'
+import BaseBackgroundedService from './BaseBackgroundedService'
+import BaseScheduledService from './BaseScheduledService'
 
 type JobTypes =
   | 'BackgroundJobQueueFunctionJob'
@@ -106,6 +108,11 @@ export class Background {
    * Used when adding jobs to a named queue
    */
   private namedQueues: Record<string, Queue> = {}
+
+  private groupNames: Record<string, string[]> = {}
+
+  private workstreamNames: string[] = []
+
   /**
    * Used when adding jobs to a named transitioanl queue
    */
@@ -237,15 +244,16 @@ export class Background {
         this.namedTransitionalQueues[namedWorkstream.name] = namedQueue
       } else {
         this.namedQueues[namedWorkstream.name] = namedQueue
+        this.workstreamNames.push(namedWorkstream.name)
       }
 
       //////////////////////////
       // create named workers //
       //////////////////////////
-      if (activateWorkers) {
-        if (!namedWorkstreamWorkerConnection)
-          throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(namedWorkstream.name)
+      if (!namedWorkstreamWorkerConnection)
+        throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(namedWorkstream.name)
 
+      if (activateWorkers) {
         const workerCount = namedWorkstream.workerCount ?? 1
         for (let i = 0; i < workerCount; i++) {
           this._workers.push(
@@ -359,15 +367,18 @@ export class Background {
       //////////////////////////
       // create extra workers //
       //////////////////////////
+      if (!namedWorkerConnection)
+        throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(queueName)
+
+      const extraWorkerOptionsMap: Record<string, BullMQNativeWorkerOptions> =
+        nativeBullMQ.namedQueueWorkers || {}
+      const extraWorkerOptions: BullMQNativeWorkerOptions = extraWorkerOptionsMap[queueName]
+      const extraWorkerCount = extraWorkerOptions ? (extraWorkerOptions.workerCount ?? 1) : 0
+
+      this.groupNames[queueName] ||= []
+      if (extraWorkerOptions.group?.id) this.groupNames[queueName].push(extraWorkerOptions.group.id)
+
       if (activateWorkers) {
-        if (!namedWorkerConnection)
-          throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(queueName)
-
-        const extraWorkerOptionsMap: Record<string, BullMQNativeWorkerOptions> =
-          nativeBullMQ.namedQueueWorkers || {}
-        const extraWorkerOptions: BullMQNativeWorkerOptions = extraWorkerOptionsMap[queueName]
-        const extraWorkerCount = extraWorkerOptions ? (extraWorkerOptions.workerCount ?? 1) : 0
-
         for (let i = 0; i < extraWorkerCount; i++) {
           this._workers.push(
             new Background.Worker(formattedQueuename, job => this.doWork(job), {
@@ -405,7 +416,8 @@ export class Background {
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      jobConfig?: BackgroundJobConfig
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jobConfig?: BackgroundJobConfig<any>
     },
   ) {
     this.connect()
@@ -440,7 +452,8 @@ export class Background {
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      jobConfig?: BackgroundJobConfig
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jobConfig?: BackgroundJobConfig<any>
     },
   ) {
     this.connect()
@@ -472,18 +485,23 @@ export class Background {
     )
   }
 
-  private queueInstance(values: BackgroundJobConfig) {
-    const workstreamConfig = values as WorkstreamBackgroundJobConfig
-    const queueConfig = values as QueueBackgroundJobConfig
-    const queueInstance: Queue | undefined = workstreamConfig.workstream
-      ? this.namedQueues[workstreamConfig.workstream]
-      : queueConfig.queue
-        ? this.namedQueues[queueConfig.queue]
-        : this.defaultQueue!
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private queueInstance(values: BackgroundJobConfig<any>) {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const workstreamConfig = values as WorkstreamBackgroundJobConfig<any>
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const queueConfig = values as QueueBackgroundJobConfig<any>
+    const queueInstance: Queue | undefined =
+      typeof workstreamConfig.workstream === 'string'
+        ? this.namedQueues[workstreamConfig.workstream]
+        : typeof queueConfig.queue === 'string'
+          ? this.namedQueues[queueConfig.queue]
+          : this.defaultQueue!
 
     if (!queueInstance) {
-      if (workstreamConfig.workstream) throw new NoQueueForSpecifiedWorkstream(workstreamConfig.workstream)
-      if (queueConfig.queue) throw new NoQueueForSpecifiedQueueName(queueConfig.queue)
+      if (typeof workstreamConfig.workstream === 'string')
+        throw new NoQueueForSpecifiedWorkstream(workstreamConfig.workstream)
+      if (typeof queueConfig.queue === 'string') throw new NoQueueForSpecifiedQueueName(queueConfig.queue)
     }
 
     return queueInstance
@@ -507,7 +525,8 @@ export class Background {
       args?: any[]
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       constructorArgs?: any[]
-      jobConfig?: BackgroundJobConfig
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jobConfig?: BackgroundJobConfig<any>
     },
   ) {
     this.connect()
@@ -541,7 +560,8 @@ export class Background {
       importKey?: string
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       args?: any[]
-      jobConfig?: BackgroundJobConfig
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jobConfig?: BackgroundJobConfig<any>
     },
   ) {
     this.connect()
@@ -574,7 +594,8 @@ export class Background {
       groupId,
     }: {
       delaySeconds?: number
-      jobConfig: BackgroundJobConfig
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      jobConfig: BackgroundJobConfig<any>
       priority: BackgroundQueuePriority
       groupId?: string
     },
@@ -609,24 +630,29 @@ export class Background {
     }
   }
 
-  private jobConfigToPriority(jobConfig?: BackgroundJobConfig): BackgroundQueuePriority {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private jobConfigToPriority(jobConfig?: BackgroundJobConfig<any>): BackgroundQueuePriority {
     if (!jobConfig) return 'default'
     return jobConfig.priority || 'default'
   }
 
-  private jobConfigToGroupId(jobConfig?: BackgroundJobConfig): string | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private jobConfigToGroupId(jobConfig?: BackgroundJobConfig<any>): string | undefined {
     if (!jobConfig) return
 
-    const workstreamConfig = jobConfig as WorkstreamBackgroundJobConfig
-    if (workstreamConfig.workstream) return workstreamConfig.workstream
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const workstreamConfig = jobConfig as WorkstreamBackgroundJobConfig<any>
+    if (typeof workstreamConfig.workstream === 'string') return workstreamConfig.workstream
 
-    const queueConfig = jobConfig as QueueBackgroundJobConfig
-    if (queueConfig.groupId) return queueConfig.groupId
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const queueConfig = jobConfig as QueueBackgroundJobConfig<any>
+    if (typeof queueConfig.groupId === 'string') return queueConfig.groupId
 
     return
   }
 
-  private jobConfigToGroup(jobConfig?: BackgroundJobConfig): { id: string } | undefined {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private jobConfigToGroup(jobConfig?: BackgroundJobConfig<any>): { id: string } | undefined {
     return this.groupIdToGroupConfig(this.jobConfigToGroupId(jobConfig))
   }
 
@@ -716,16 +742,27 @@ interface BaseBackgroundJobConfig {
   priority?: BackgroundQueuePriority
 }
 
-export interface WorkstreamBackgroundJobConfig extends BaseBackgroundJobConfig {
-  workstream?: string
+export interface WorkstreamBackgroundJobConfig<T extends BaseScheduledService | BaseBackgroundedService>
+  extends BaseBackgroundJobConfig {
+  workstream?: T['psychicTypes']['workstreamNames'][number]
 }
 
-export interface QueueBackgroundJobConfig extends BaseBackgroundJobConfig {
-  groupId?: string
-  queue?: string
+export interface QueueBackgroundJobConfig<
+  T extends BaseScheduledService | BaseBackgroundedService,
+  PsyTypes extends T['psychicTypes'] = T['psychicTypes'],
+  QueueGroupMap = PsyTypes['queueGroupMap'],
+  Queue extends keyof QueueGroupMap = keyof QueueGroupMap,
+  Groups extends QueueGroupMap[Queue] = QueueGroupMap[Queue],
+  GroupId = Groups[number & keyof Groups],
+> extends BaseBackgroundJobConfig {
+  groupId?: GroupId
+  queue?: Queue
 }
 
-export type BackgroundJobConfig = Either<WorkstreamBackgroundJobConfig, QueueBackgroundJobConfig>
+export type BackgroundJobConfig<T extends BaseScheduledService | BaseBackgroundedService> = Either<
+  WorkstreamBackgroundJobConfig<T>,
+  QueueBackgroundJobConfig<T>
+>
 
 export type PsychicBackgroundOptions =
   | (PsychicBackgroundSimpleOptions &

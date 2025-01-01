@@ -1,9 +1,10 @@
 import fs from 'fs/promises'
 import path from 'path'
-import { BackgroundedService, BackgroundJobConfig, PsychicApplication } from '../../../../src'
+import { BackgroundJobConfig, PsychicApplication } from '../../../../src'
+import BackgroundedService from './BackgroundedService'
 
 export default class NotUrgentDummyService extends BackgroundedService {
-  public static get backgroundJobConfig(): BackgroundJobConfig {
+  public static get backgroundJobConfig(): BackgroundJobConfig<BackgroundedService> {
     return { priority: 'not_urgent' }
   }
 

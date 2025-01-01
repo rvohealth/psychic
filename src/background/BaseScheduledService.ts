@@ -2,8 +2,8 @@ import { GlobalNameNotSet } from '@rvohealth/dream'
 import background, { BackgroundJobConfig } from '.'
 import { FunctionPropertyNames } from '../helpers/typeHelpers'
 
-export default class ScheduledService {
-  public static get backgroundJobConfig(): BackgroundJobConfig {
+export default class BaseScheduledService {
+  public static get backgroundJobConfig(): BackgroundJobConfig<BaseScheduledService> {
     return {}
   }
 
@@ -24,7 +24,7 @@ export default class ScheduledService {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     MethodArgs extends MethodFunc extends (...args: any) => any ? Parameters<MethodFunc> : never,
   >(this: T, pattern: string, methodName: MethodName, ...args: MethodArgs) {
-    const safeThis: typeof ScheduledService = this as typeof ScheduledService
+    const safeThis: typeof BaseScheduledService = this as typeof BaseScheduledService
 
     return await background.scheduledMethod(safeThis, pattern, methodName, {
       globalName: safeThis.globalName,
@@ -32,9 +32,14 @@ export default class ScheduledService {
       jobConfig: safeThis.backgroundJobConfig,
     })
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public get psychicTypes(): any {
+    throw new Error('Must define psychicTypes getter in BackgroundedService class within your application')
+  }
 }
 
-export type PsychicScheduledServiceStaticMethods<T extends typeof ScheduledService> = Exclude<
+export type PsychicScheduledServiceStaticMethods<T extends typeof BaseScheduledService> = Exclude<
   FunctionPropertyNames<Required<T>>,
-  FunctionPropertyNames<typeof ScheduledService>
+  FunctionPropertyNames<typeof BaseScheduledService>
 >

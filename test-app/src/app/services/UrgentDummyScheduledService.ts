@@ -1,8 +1,8 @@
 import { BackgroundJobConfig } from '../../../../src'
-import BaseDummyScheduledService from './BaseDummyScheduledService'
+import ScheduledService from './ScheduledService'
 
-export default class UrgentDummyScheduledService extends BaseDummyScheduledService {
-  public static get backgroundJobConfig(): BackgroundJobConfig {
+export default class UrgentDummyScheduledService extends ScheduledService {
+  public static get backgroundJobConfig(): BackgroundJobConfig<ScheduledService> {
     return { priority: 'urgent' }
   }
 }
