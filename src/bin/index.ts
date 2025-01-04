@@ -29,8 +29,8 @@ export default class PsychicBin {
     await printRoutes()
   }
 
-  public static async sync() {
-    await DreamBin.sync()
+  public static async sync({ bypassDreamSync = false }: { bypassDreamSync?: boolean } = {}) {
+    if (!bypassDreamSync) await DreamBin.sync(() => {})
     await PsychicBin.syncTypes()
 
     const psychicApp = PsychicApplication.getOrFail()
