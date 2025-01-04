@@ -2,9 +2,9 @@ import { Job } from 'bullmq'
 import fs from 'fs/promises'
 import path from 'path'
 import { PsychicApplication } from '../../../../src'
-import BackgroundedService from './BackgroundedService'
+import ApplicationBackgroundedService from './ApplicationBackgroundedService'
 
-export default class DummyService extends BackgroundedService {
+export default class DummyService extends ApplicationBackgroundedService {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static async classRunInBG(arg: any) {
     const psychicApp = PsychicApplication.getOrFail()

@@ -597,8 +597,8 @@ export interface CustomCookieMaxAgeOptions {
 }
 
 export interface PsychicSslCredentials {
-  key: string
-  cert: string
+  key: string | undefined
+  cert: string | undefined
 }
 
 export interface DefaultPsychicOpenapiOptions extends PsychicOpenapiBaseOptions {
