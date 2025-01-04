@@ -1,3 +1,3 @@
-import ScheduledService from './ScheduledService'
+import ApplicationScheduledService from './ApplicationScheduledService'
 
-export default class DummyScheduledService extends ScheduledService {}
+export default class DummyScheduledService extends ApplicationScheduledService {}

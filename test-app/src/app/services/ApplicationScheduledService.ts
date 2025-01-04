@@ -1,7 +1,7 @@
 import BaseScheduledService from '../../../../src/background/BaseScheduledService'
 import psychicTypes from '../../types/psychic'
 
-export default class ScheduledService extends BaseScheduledService {
+export default class ApplicationScheduledService extends BaseScheduledService {
   public get psychicTypes() {
     return psychicTypes
   }
