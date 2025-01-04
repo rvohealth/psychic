@@ -250,10 +250,10 @@ export class Background {
       //////////////////////////
       // create named workers //
       //////////////////////////
-      if (!namedWorkstreamWorkerConnection)
-        throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(namedWorkstream.name)
-
       if (activateWorkers) {
+        if (!namedWorkstreamWorkerConnection)
+          throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(namedWorkstream.name)
+
         const workerCount = namedWorkstream.workerCount ?? 1
         for (let i = 0; i < workerCount; i++) {
           this._workers.push(
@@ -367,9 +367,6 @@ export class Background {
       //////////////////////////
       // create extra workers //
       //////////////////////////
-      if (!namedWorkerConnection)
-        throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(queueName)
-
       const extraWorkerOptionsMap: Record<string, BullMQNativeWorkerOptions> =
         nativeBullMQ.namedQueueWorkers || {}
       const extraWorkerOptions: BullMQNativeWorkerOptions = extraWorkerOptionsMap[queueName]
@@ -379,6 +376,9 @@ export class Background {
       if (extraWorkerOptions.group?.id) this.groupNames[queueName].push(extraWorkerOptions.group.id)
 
       if (activateWorkers) {
+        if (!namedWorkerConnection)
+          throw new ActivatingNamedQueueBackgroundWorkersWithoutWorkerConnection(queueName)
+
         for (let i = 0; i < extraWorkerCount; i++) {
           this._workers.push(
             new Background.Worker(formattedQueuename, job => this.doWork(job), {
