@@ -14,7 +14,13 @@ export default class PsychicCLI {
       seedDb: () => Promise<void> | void
     },
   ) {
-    DreamCLI.generateDreamCli(program, { initializeDreamApplication: initializePsychicApplication, seedDb })
+    DreamCLI.generateDreamCli(program, {
+      initializeDreamApplication: initializePsychicApplication,
+      seedDb,
+      onSync: async () => {
+        await PsychicBin.sync({ bypassDreamSync: true })
+      },
+    })
 
     program
       .command('generate:resource')
