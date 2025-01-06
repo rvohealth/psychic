@@ -5,7 +5,7 @@ async function start() {
   const server = new PsychicServer()
   await server.start()
 
-  process.on('SIGINT', () => {
+  process.on('SIGTERM', () => {
     server
       .stop()
       .then(() => {})

@@ -97,10 +97,6 @@ export default class PsychicServer {
     if (withFrontEndClient) {
       this.frontEndClient = new FrontEndClientServer()
       this.frontEndClient.start(frontEndPort)
-
-      process.on('SIGTERM', () => {
-        this.frontEndClient?.stop()
-      })
     }
 
     if (this.config.useWs && this.cable) {
@@ -127,13 +123,23 @@ export default class PsychicServer {
       })
     }
 
+    process.on('SIGTERM', () => {
+      this.frontEndClient?.stop()
+      this.stop()
+        .then(() => {
+          process.exit()
+        })
+        .catch(() => {
+          process.exit()
+        })
+    })
+
     return true
   }
 
   public async stop() {
     this.server?.close()
-    await stopBackgroundWorkers()
-    await closeAllDbConnections()
+    await Promise.all([stopBackgroundWorkers(), closeAllDbConnections()])
   }
 
   public async serveForRequestSpecs(block: () => void | Promise<void>) {
