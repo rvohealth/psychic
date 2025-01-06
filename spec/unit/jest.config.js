@@ -6,7 +6,7 @@ module.exports = {
   preset: 'ts-jest',
   testEnvironment: 'node',
   transform: { '^.+\\.tsx?$': 'ts-jest' },
-  setupFiles: ['jest-plugin-context/setup'],
+  setupFiles: [],
   setupFilesAfterEnv: ['<rootDir>setup/hooks.ts'],
   globalSetup: '<rootDir>setup/beforeAll.ts',
   globalTeardown: '<rootDir>setup/afterAll.ts',

@@ -1339,7 +1339,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvohealth/psychic-spec-helpers@npm:^0.0.3":
+"@rvohealth/psychic-spec-helpers@npm:=0.0.3":
   version: 0.0.3
   resolution: "@rvohealth/psychic-spec-helpers@npm:0.0.3::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40rvohealth%2Fpsychic-spec-helpers%2F0.0.3%2Fa94437f1ffb128816ccf827ebc3489f6b272d540"
   dependencies:
@@ -1366,14 +1366,13 @@ __metadata:
     "@playwright/test": "npm:^1.49.1"
     "@rvohealth/dream": "npm:^0.18.1"
     "@rvohealth/dream-spec-helpers": "npm:^0.0.8"
-    "@rvohealth/psychic-spec-helpers": "npm:^0.0.3"
+    "@rvohealth/psychic-spec-helpers": "npm:=0.0.3"
     "@socket.io/redis-adapter": "npm:^8.3.0"
     "@socket.io/redis-emitter": "npm:^5.1.0"
     "@types/cookie-parser": "npm:^1.4.7"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^4.17.21"
     "@types/jest": "npm:^29.5.12"
-    "@types/jest-plugin-context": "npm:^2.9.7"
     "@types/lodash.clonedeep": "npm:^4.5.9"
     "@types/lodash.groupby": "npm:^4.6.9"
     "@types/lodash.sortby": "npm:^4.7.9"
@@ -1396,7 +1395,6 @@ __metadata:
     jest: "npm:^29.7.0"
     jest-dev-server: "npm:^11.0.0"
     jest-playwright-preset: "npm:^4.0.0"
-    jest-plugin-context: "npm:^2.9.0"
     kysely: "npm:^0.27.4"
     kysely-codegen: "npm:~0.17.0"
     lodash.clonedeep: "npm:^4.5.0"
@@ -1724,16 +1722,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/jest-plugin-context@npm:^2.9.7":
-  version: 2.9.7
-  resolution: "@types/jest-plugin-context@npm:2.9.7"
-  dependencies:
-    "@types/jest": "npm:*"
-  checksum: 10c0/8f7c1dd1b38fac6f9398625fa905d44c6229cb3bafb13da51e9b996cfc6f50251d52a39c7fb68a175cf11fe1069ce7103af18bb53c3279ae1732fa89a6f80264
-  languageName: node
-  linkType: hard
-
-"@types/jest@npm:*, @types/jest@npm:^29.5.12":
+"@types/jest@npm:^29.5.12":
   version: 29.5.12
   resolution: "@types/jest@npm:29.5.12"
   dependencies:
@@ -5132,15 +5121,6 @@ __metadata:
     jest-environment-node: ^29.3.1
     jest-runner: ^29.3.1
   checksum: 10c0/c51b00dde02ab6a102589f97ca6c9679886c806da82f73ff0d4822cc06e988333eb8c62c2b2f8381d5e7fa2edfa5cc33e624a36107903d6b98ddd26dd0035a05
-  languageName: node
-  linkType: hard
-
-"jest-plugin-context@npm:^2.9.0":
-  version: 2.9.0
-  resolution: "jest-plugin-context@npm:2.9.0"
-  peerDependencies:
-    jest: "*"
-  checksum: 10c0/e2f4070eade5ff62c56471ea576c1ce3749836c6792cc1d047784fe8ab44ea7af4d84ba42554bfa84e83f1715027051cbbf54b1502c758dd7d223a32cd296f65
   languageName: node
   linkType: hard
 

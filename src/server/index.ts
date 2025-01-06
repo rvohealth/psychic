@@ -130,10 +130,13 @@ export default class PsychicServer {
     return true
   }
 
-  public async stop() {
+  public async stop({ bypassClosingDbConnections = false }: { bypassClosingDbConnections?: boolean } = {}) {
     this.server?.close()
     await stopBackgroundWorkers()
-    await closeAllDbConnections()
+
+    if (!bypassClosingDbConnections) {
+      await closeAllDbConnections()
+    }
   }
 
   public async serveForRequestSpecs(block: () => void | Promise<void>) {

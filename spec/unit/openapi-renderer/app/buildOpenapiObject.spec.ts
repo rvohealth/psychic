@@ -1,3 +1,4 @@
+import { describe as context } from '@jest/globals'
 import packageJson from '../../../../package.json'
 import OpenapiAppRenderer from '../../../../src/openapi-renderer/app'
 
