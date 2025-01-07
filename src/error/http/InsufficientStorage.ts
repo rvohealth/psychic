@@ -1,6 +1,6 @@
 import HttpError from './index'
 
-export default class InsufficientStorage extends HttpError {
+export default class HttpStatusInsufficientStorage extends HttpError {
   public get status() {
     return 507
   }

@@ -48,10 +48,6 @@ export default (r: PsychicRouter) => {
   r.get('non-authoritative-information', ResponseStatusesController, 'sendNonAuthoritativeInformation') // 203
   r.get('no-content', ResponseStatusesController, 'sendNoContent') // 204
   r.get('reset-content', ResponseStatusesController, 'sendResetContent') // 205
-  r.get('partial-content', ResponseStatusesController, 'sendPartialContent') // 206
-  r.get('multi-status', ResponseStatusesController, 'sendMultiStatus') // 207
-  r.get('already-reported', ResponseStatusesController, 'sendAlreadyReported') // 208
-  r.get('im-used', ResponseStatusesController, 'sendIMUsed') // 226
 
   // 3xx series
   r.get('moved-permanently', ResponseStatusesController, 'sendMovedPermanently') // 301
@@ -71,23 +67,17 @@ export default (r: PsychicRouter) => {
   r.get('method-not-allowed', ResponseStatusesController, 'throwMethodNotAllowed') // 405
   r.get('not-acceptable', ResponseStatusesController, 'throwNotAcceptable') // 406
   r.get('proxy-authentication-required', ResponseStatusesController, 'throwProxyAuthenticationRequired') // 407
-  r.get('request-timeout', ResponseStatusesController, 'throwRequestTimeout') // 408
   r.get('conflict', ResponseStatusesController, 'throwConflict') // 409
   r.get('gone', ResponseStatusesController, 'throwGone') // 410
-  r.get('length-required', ResponseStatusesController, 'throwLengthRequired') // 411
   r.get('precondition-failed', ResponseStatusesController, 'throwPreconditionFailed') // 412
-  r.get('payload-too-large', ResponseStatusesController, 'throwPayloadTooLarge') // 413
-  r.get('uri-too-long', ResponseStatusesController, 'throwUriTooLong') // 414
+  r.get('content-too-large', ResponseStatusesController, 'throwContentTooLarge') // 413
   r.get('unsupported-media-type', ResponseStatusesController, 'throwUnsupportedMediaType') // 415
-  r.get('range-not-satisfiable', ResponseStatusesController, 'throwRangeNotSatisfiable') // 416
   r.get('expectation-failed', ResponseStatusesController, 'throwExpectationFailed') // 417
   r.get('im-a-teapot', ResponseStatusesController, 'throwImATeampot') // 418
   r.get('misdirected-request', ResponseStatusesController, 'throwMisdirectedRequest') // 421
-  r.get('unprocessable-entity', ResponseStatusesController, 'throwUnprocessableEntity') // 422
+  r.get('unprocessable-content', ResponseStatusesController, 'throwUnprocessableContent') // 422
   r.get('locked', ResponseStatusesController, 'throwLocked') // 423
   r.get('failed-dependency', ResponseStatusesController, 'throwFailedDependency') // 424
-  r.get('too-early', ResponseStatusesController, 'throwTooEarly') // 425
-  r.get('upgrade-required', ResponseStatusesController, 'throwUpgradeRequired') // 426
   r.get('precondition-required', ResponseStatusesController, 'throwPreconditionRequired') // 428
   r.get('too-many-requests', ResponseStatusesController, 'throwTooManyRequests') // 429
   r.get('request-header-fields-too-large', ResponseStatusesController, 'throwRequestHeaderFieldsTooLarge') // 431
@@ -99,12 +89,8 @@ export default (r: PsychicRouter) => {
   r.get('bad-gateway', ResponseStatusesController, 'throwBadGateway') // 502
   r.get('service-unavailable', ResponseStatusesController, 'throwServiceUnavailable') // 503
   r.get('gateway-timeout', ResponseStatusesController, 'throwGatewayTimeout') // 504
-  r.get('http-version-not-supported', ResponseStatusesController, 'throwHttpVersionNotSupported') // 505
-  r.get('variant-also-negotiates', ResponseStatusesController, 'throwVariantAlsoNegotiates') // 506
   r.get('insufficient-storage', ResponseStatusesController, 'throwInsufficientStorage') // 507
-  r.get('loop-detected', ResponseStatusesController, 'throwLoopDetected') // 508
   r.get('not-extended', ResponseStatusesController, 'throwNotExtended') // 510
-  r.get('network-authentication-required', ResponseStatusesController, 'throwNetworkAuthenticationRequired') // 511
   // end: response status tests
 
   r.namespace('api', r => {

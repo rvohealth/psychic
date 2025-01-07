@@ -1,6 +1,6 @@
 import HttpError from './index'
 
-export default class NotFound extends HttpError {
+export default class HttpStatusNotFound extends HttpError {
   public get status() {
     return 404
   }

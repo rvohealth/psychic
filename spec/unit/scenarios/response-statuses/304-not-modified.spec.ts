@@ -7,6 +7,7 @@ describe('a visitor attempts to hit a route that will respond with a 304', () =>
   })
 
   it('returns 304', async () => {
-    await request.get('/not-modified', 304)
+    const res = await request.get('/not-modified', 304)
+    expect(res.header.location).toEqual('/chalupas')
   })
 })

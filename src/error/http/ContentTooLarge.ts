@@ -1,6 +1,6 @@
 import HttpError from './index'
 
-export default class PayloadTooLarge extends HttpError {
+export default class HttpStatusContentTooLarge extends HttpError {
   public get status() {
     return 413
   }

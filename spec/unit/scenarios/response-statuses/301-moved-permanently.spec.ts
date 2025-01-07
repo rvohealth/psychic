@@ -7,6 +7,7 @@ describe('a visitor attempts to hit a route that will respond with a 301', () =>
   })
 
   it('returns 301', async () => {
-    await request.get('/moved-permanently', 301)
+    const res = await request.get('/moved-permanently', 301)
+    expect(res.header.location).toEqual('/chalupas')
   })
 })

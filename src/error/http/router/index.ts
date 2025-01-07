@@ -5,14 +5,14 @@ export default class RouterError extends HttpError {
     return 500
   }
 
-  constructor(message: string) {
-    super(message)
+  protected get messageString(): string {
+    throw new Error('Must define messageString in child error class')
   }
 
   public get message() {
     return `
       A Router error occured, causing psychic to crash. The message recieved was:
-        ${this._message}
+        ${this.messageString}
     `
   }
 }

@@ -7,6 +7,7 @@ describe('a visitor attempts to hit a route that will respond with a 303', () =>
   })
 
   it('returns 303', async () => {
-    await request.get('/see-other', 303)
+    const res = await request.get('/see-other', 303)
+    expect(res.header.location).toEqual('/chalupas')
   })
 })

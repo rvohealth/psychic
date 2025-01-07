@@ -69,7 +69,7 @@
     "@eslint/js": "=9.0.0",
     "@jest-mock/express": "^2.1.0",
     "@playwright/test": "^1.49.1",
-    "@rvohealth/dream": "^0.18.1",
+    "@rvohealth/dream": "^0.18.3",
     "@rvohealth/dream-spec-helpers": "^0.0.8",
     "@rvohealth/psychic-spec-helpers": "=0.0.3",
     "@socket.io/redis-adapter": "^8.3.0",

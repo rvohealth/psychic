@@ -1,7 +1,6 @@
 import HttpError from './index'
 
-export default class InternalServerError extends HttpError {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default class HttpStatusInternalServerError extends HttpError {
   public get status() {
     return 500
   }

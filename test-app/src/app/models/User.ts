@@ -94,7 +94,7 @@ export default class User extends ApplicationModel {
   @User.HasMany('Post')
   public posts: Post[]
 
-  @User.HasOne('Post', { order: { id: 'desc' } })
+  @User.HasOne('Post')
   public recentPost: Post | null
 
   public static backgroundTest() {}

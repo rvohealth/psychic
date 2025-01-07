@@ -3,30 +3,18 @@ export default class HttpError extends Error {
     throw new Error('Must define status on child class')
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public data: any
-
-  protected _message: string | undefined
-
   /**
-   * @params.message - can be either an object, in which case it will
-   * be treated as "data" and the message will be blank, or
-   * it will be a string, in which case it will be treated
-   * as "message", and data will be undefined.
+   * @params.data - Whatever is passed here will be json
+   * stringified and rendered as the response body.
    */
   constructor(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    message: any,
+    public data: any = undefined,
   ) {
     super()
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    this.data = typeof message === 'object' ? message : undefined
-
-    this._message = typeof message === 'string' ? message : undefined
   }
 
   public get message() {
-    return this._message || ''
+    return `Http status ${this.status} thrown`
   }
 }
