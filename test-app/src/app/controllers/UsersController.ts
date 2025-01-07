@@ -18,6 +18,20 @@ export default class UsersController extends ApplicationController {
     this.ok(this.beforeAllTestContent)
   }
 
+  @BeforeAction({ only: ['beforeActionSequence'] })
+  public beforeActionSequence1() {
+    this.send({ body: 'before action 1' })
+  }
+
+  @BeforeAction({ only: ['beforeActionSequence'] })
+  public beforeActionSequence2() {
+    this.send({ body: 'before action 2' })
+  }
+
+  public beforeActionSequence() {
+    this.ok('no before actions run')
+  }
+
   public async failedToSaveTest() {
     await User.create({ email: 'invalidemail', password: 'howyadoin' })
   }

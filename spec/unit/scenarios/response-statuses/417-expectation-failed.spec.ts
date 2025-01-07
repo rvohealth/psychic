@@ -1,0 +1,13 @@
+import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { PsychicServer } from '../../../../src'
+
+describe('a visitor attempts to hit a route that will trigger a 417', () => {
+  beforeEach(async () => {
+    await request.init(PsychicServer)
+  })
+
+  it('returns 417', async () => {
+    const res = await request.get('/expectation-failed', 417)
+    expect(res.body).toEqual('custom message')
+  })
+})

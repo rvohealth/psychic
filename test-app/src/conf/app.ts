@@ -338,6 +338,10 @@ export default async (psy: PsychicApplication) => {
   psy.on('server:error', (err, req, res) => {
     __forTestingOnly('server:error')
 
+    if (EnvInternal.boolean('DEBUG')) {
+      console.error(err)
+    }
+
     if (!res.headersSent) res.sendStatus(500)
     else if (EnvInternal.isDevelopmentOrTest) throw err
   })
