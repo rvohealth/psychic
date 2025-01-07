@@ -7,7 +7,7 @@ describe('a visitor attempts to hit a route that will trigger a 422', () => {
   })
 
   it('returns 422', async () => {
-    const res = await request.get('/unprocessable-entity', 422)
+    const res = await request.get('/unprocessable-content', 422)
     expect(res.body).toEqual({ errors: { hello: ['world'] } })
   })
 })

@@ -7,6 +7,7 @@ describe('a visitor attempts to hit a route that will respond with a 308', () =>
   })
 
   it('returns 308', async () => {
-    await request.get('/permanent-redirect', 308)
+    const res = await request.get('/permanent-redirect', 308)
+    expect(res.header.location).toEqual('/chalupas')
   })
 })

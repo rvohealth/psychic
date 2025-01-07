@@ -1,13 +1,18 @@
 import RouterError from './index'
 
 export default class RouterMissingControllerMethod extends RouterError {
-  constructor(controllerPath: string, method: string) {
-    super(
-      `\
+  protected get messageString(): string {
+    return `\
 The method on the controller you are attempting to load was not found:
-  controller: ${controllerPath}
-  method: ${method}
-      `,
-    )
+  controller: ${this.controllerPath}
+  method: ${this.method}
+      `
+  }
+
+  constructor(
+    protected controllerPath: string,
+    protected method: string,
+  ) {
+    super()
   }
 }

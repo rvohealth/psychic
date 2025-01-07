@@ -1,6 +1,6 @@
 import HttpError from './index'
 
-export default class RequestHeaderFieldsTooLarge extends HttpError {
+export default class HttpStatusRequestHeaderFieldsTooLarge extends HttpError {
   public get status() {
     return 431
   }

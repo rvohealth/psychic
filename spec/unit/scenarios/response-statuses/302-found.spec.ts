@@ -7,6 +7,7 @@ describe('a visitor attempts to hit a route that will respond with a 302', () =>
   })
 
   it('returns 302', async () => {
-    await request.get('/found', 302)
+    const res = await request.get('/found', 302)
+    expect(res.header.location).toEqual('/chalupas')
   })
 })

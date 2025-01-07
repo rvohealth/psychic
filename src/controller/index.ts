@@ -7,15 +7,37 @@ import {
 } from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import { ControllerHook } from '../controller/hooks'
-import BadRequest from '../error/http/BadRequest'
-import Conflict from '../error/http/Conflict'
-import Forbidden from '../error/http/Forbidden'
-import InternalServerError from '../error/http/InternalServerError'
-import NotFound from '../error/http/NotFound'
-import ServiceUnavailable from '../error/http/ServiceUnavailable'
+import HttpStatusBadGateway from '../error/http/BadGateway'
+import HttpStatusBadRequest from '../error/http/BadRequest'
+import HttpStatusConflict from '../error/http/Conflict'
+import HttpStatusContentTooLarge from '../error/http/ContentTooLarge'
+import HttpStatusExpectationFailed from '../error/http/ExpectationFailed'
+import HttpStatusFailedDependency from '../error/http/FailedDependency'
+import HttpStatusForbidden from '../error/http/Forbidden'
+import HttpStatusGatewayTimeout from '../error/http/GatewayTimeout'
+import HttpStatusGone from '../error/http/Gone'
+import HttpStatusImATeapot from '../error/http/ImATeapot'
+import HttpStatusInsufficientStorage from '../error/http/InsufficientStorage'
+import HttpStatusInternalServerError from '../error/http/InternalServerError'
+import HttpStatusLocked from '../error/http/Locked'
+import HttpStatusMethodNotAllowed from '../error/http/MethodNotAllowed'
+import HttpStatusMisdirectedRequest from '../error/http/MisdirectedRequest'
+import HttpStatusNotAcceptable from '../error/http/NotAcceptable'
+import HttpStatusNotExtended from '../error/http/NotExtended'
+import HttpStatusNotFound from '../error/http/NotFound'
+import HttpStatusNotImplemented from '../error/http/NotImplemented'
+import HttpStatusPaymentRequired from '../error/http/PaymentRequired'
+import HttpStatusPreconditionFailed from '../error/http/PreconditionFailed'
+import HttpStatusPreconditionRequired from '../error/http/PreconditionRequired'
+import HttpStatusProxyAuthenticationRequired from '../error/http/ProxyAuthenticationRequired'
+import HttpStatusRequestHeaderFieldsTooLarge from '../error/http/RequestHeaderFieldsTooLarge'
+import HttpStatusServiceUnavailable from '../error/http/ServiceUnavailable'
 import HttpStatusCodeMap, { HttpStatusCodeInt, HttpStatusSymbol } from '../error/http/status-codes'
-import Unauthorized from '../error/http/Unauthorized'
-import UnprocessableEntity from '../error/http/UnprocessableEntity'
+import HttpStatusTooManyRequests from '../error/http/TooManyRequests'
+import HttpStatusUnauthorized from '../error/http/Unauthorized'
+import HttpStatusUnavailableForLegalReasons from '../error/http/UnavailableForLegalReasons'
+import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent'
+import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint'
 import PsychicApplication from '../psychic-application'
 import Params, {
@@ -26,38 +48,6 @@ import Params, {
   ValidatedReturnType,
 } from '../server/params'
 import Session, { CustomSessionCookieOptions } from '../session'
-import MethodNotAllowed from '../error/http/MethodNotAllowed'
-import NotAcceptable from '../error/http/NotAcceptable'
-import ProxyAuthenticationRequired from '../error/http/ProxyAuthenticationRequired'
-import RequestTimeout from '../error/http/RequestTimeout'
-import Gone from '../error/http/Gone'
-import LengthRequired from '../error/http/LengthRequired'
-import PreconditionFailed from '../error/http/PreconditionFailed'
-import PayloadTooLarge from '../error/http/PayloadTooLarge'
-import URITooLong from '../error/http/URITooLong'
-import UnsupportedMediaType from '../error/http/UnsupportedMediaType'
-import RangeNotSatisfiable from '../error/http/RangeNotSatisfiable'
-import ExpectationFailed from '../error/http/ExpectationFailed'
-import ImATeapot from '../error/http/ImATeapot'
-import MisdirectedRequest from '../error/http/MisdirectedRequest'
-import BadGateway from '../error/http/BadGateway'
-import FailedDependency from '../error/http/FailedDependency'
-import TooEarly from '../error/http/TooEarly'
-import UpgradeRequired from '../error/http/UpgradeRequired'
-import PreconditionRequired from '../error/http/PreconditionRequired'
-import TooManyRequests from '../error/http/TooManyRequests'
-import RequestHeaderFieldsTooLarge from '../error/http/RequestHeaderFieldsTooLarge'
-import UnavailableForLegalReasons from '../error/http/UnavailableForLegalReasons'
-import Locked from '../error/http/Locked'
-import GatewayTimeout from '../error/http/GatewayTimeout'
-import HttpVersionNotSupported from '../error/http/HttpVersionNotSupported'
-import VariantAlsoNegotiates from '../error/http/VariantAlsoNegotiates'
-import InsufficientStorage from '../error/http/InsufficientStorage'
-import LoopDetected from '../error/http/LoopDetected'
-import NotExtended from '../error/http/NotExtended'
-import NetworkAuthenticationRequired from '../error/http/NetworkAuthenticationRequired'
-import PaymentRequired from '../error/http/PaymentRequired'
-import NotImplemented from '../error/http/NotImplemented'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -431,26 +421,6 @@ The key in question is: "${serializerKey}"`,
   }
 
   // begin: http status codes
-  // 100
-  public continue() {
-    this.res.sendStatus(100)
-  }
-
-  // 101
-  public switchingProtocols() {
-    this.res.sendStatus(101)
-  }
-
-  // 102
-  public processing() {
-    this.res.sendStatus(102)
-  }
-
-  // 103
-  public earlyHints() {
-    this.res.sendStatus(103)
-  }
-
   // 200
   public ok<T>(data: T = {} as T, opts: RenderOptions = {}) {
     this.json(data, opts)
@@ -469,8 +439,13 @@ The key in question is: "${serializerKey}"`,
   }
 
   // 203
-  public nonAuthoritativeInformation() {
-    this.res.sendStatus(203)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public nonAuthoritativeInformation(message: any = undefined) {
+    if (message) {
+      this.res.status(203).json(message)
+    } else {
+      this.res.sendStatus(203)
+    }
   }
 
   // 204
@@ -479,33 +454,15 @@ The key in question is: "${serializerKey}"`,
   }
 
   // 205
-  public resetContent(message: string | undefined = undefined) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public resetContent(message: any = undefined) {
     this.res.status(205).send(message)
   }
 
-  // 206
-  public partialContent(message: string | undefined = undefined) {
-    this.res.status(206).send(message)
-  }
-
-  // 207
-  public multiStatus(message: string | undefined = undefined) {
-    this.res.status(207).send(message)
-  }
-
   // 208
-  public alreadyReported(message: string | undefined = undefined) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public alreadyReported(message: any = undefined) {
     this.res.status(208).send(message)
-  }
-
-  // 226
-  public imUsed(message: string | undefined = undefined) {
-    this.res.status(226).send(message)
-  }
-
-  // 300
-  public multipleChoices(message: string) {
-    this.res.redirect(300, message)
   }
 
   // 301
@@ -540,202 +497,179 @@ The key in question is: "${serializerKey}"`,
 
   // 400
   public badRequest(data: SerializerResult = {}) {
-    throw new BadRequest(data)
+    throw new HttpStatusBadRequest(data)
   }
 
   // 401
-  public unauthorized(message: string | undefined = undefined) {
-    throw new Unauthorized(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public unauthorized(message: any = undefined) {
+    throw new HttpStatusUnauthorized(message)
   }
 
   // 402
-  public paymentRequired(message: string | undefined = undefined) {
-    throw new PaymentRequired(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public paymentRequired(message: any = undefined) {
+    throw new HttpStatusPaymentRequired(message)
   }
 
   // 403
-  public forbidden(message: string | undefined = undefined) {
-    throw new Forbidden(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public forbidden(message: any = undefined) {
+    throw new HttpStatusForbidden(message)
   }
 
   // 404
-  public notFound(message: string | undefined = undefined) {
-    throw new NotFound(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public notFound(message: any = undefined) {
+    throw new HttpStatusNotFound(message)
   }
 
   // 405
-  public methodNotAllowed(message: string | undefined = undefined) {
-    throw new MethodNotAllowed(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public methodNotAllowed(message: any = undefined) {
+    throw new HttpStatusMethodNotAllowed(message)
   }
 
   // 406
-  public notAcceptable(message: string | undefined = undefined) {
-    throw new NotAcceptable(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public notAcceptable(message: any = undefined) {
+    throw new HttpStatusNotAcceptable(message)
   }
 
   // 407
-  public proxyAuthenticationRequired(message: string | undefined = undefined) {
-    throw new ProxyAuthenticationRequired(message)
-  }
-
-  // 408
-  public requestTimeout(message: string | undefined = undefined) {
-    throw new RequestTimeout(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public proxyAuthenticationRequired(message: any = undefined) {
+    throw new HttpStatusProxyAuthenticationRequired(message)
   }
 
   // 409
-  public conflict(message: string | undefined = undefined) {
-    throw new Conflict(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public conflict(message: any = undefined) {
+    throw new HttpStatusConflict(message)
   }
 
   // 410
-  public gone(message: string | undefined = undefined) {
-    throw new Gone(message)
-  }
-
-  // 411
-  public lengthRequired(message: string | undefined = undefined) {
-    throw new LengthRequired(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public gone(message: any = undefined) {
+    throw new HttpStatusGone(message)
   }
 
   // 412
-  public preconditionFailed(message: string | undefined = undefined) {
-    throw new PreconditionFailed(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public preconditionFailed(message: any = undefined) {
+    throw new HttpStatusPreconditionFailed(message)
   }
 
   // 413
-  public payloadTooLarge(message: string | undefined = undefined) {
-    throw new PayloadTooLarge(message)
-  }
-
-  // 414
-  public uriTooLong(message: string | undefined = undefined) {
-    throw new URITooLong(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public contentTooLarge(message: any = undefined) {
+    throw new HttpStatusContentTooLarge(message)
   }
 
   // 415
-  public unsupportedMediaType(message: string | undefined = undefined) {
-    throw new UnsupportedMediaType(message)
-  }
-
-  // 416
-  public rangeNotSatisfiable(message: string | undefined = undefined) {
-    throw new RangeNotSatisfiable(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public unsupportedMediaType(message: any = undefined) {
+    throw new HttpStatusUnsupportedMediaType(message)
   }
 
   // 417
-  public expectationFailed(message: string | undefined = undefined) {
-    throw new ExpectationFailed(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public expectationFailed(message: any = undefined) {
+    throw new HttpStatusExpectationFailed(message)
   }
 
   // 418
-  public imATeampot(message: string | undefined = undefined) {
-    throw new ImATeapot(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public imATeampot(message: any = undefined) {
+    throw new HttpStatusImATeapot(message)
   }
 
   // 421
-  public misdirectedRequest(message: string | undefined = undefined) {
-    throw new MisdirectedRequest(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public misdirectedRequest(message: any = undefined) {
+    throw new HttpStatusMisdirectedRequest(message)
   }
 
   // 422
-  public unprocessableEntity(data: SerializerResult = {}) {
-    throw new UnprocessableEntity(data)
+  public unprocessableContent(data: SerializerResult = {}) {
+    throw new HttpStatusUnprocessableContent(data)
   }
 
   // 423
-  public locked(message: string | undefined = undefined) {
-    throw new Locked(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public locked(message: any = undefined) {
+    throw new HttpStatusLocked(message)
   }
 
   // 424
-  public failedDependency(message: string | undefined = undefined) {
-    throw new FailedDependency(message)
-  }
-
-  // 425
-  public tooEarly(message: string | undefined = undefined) {
-    throw new TooEarly(message)
-  }
-
-  // 426
-  public upgradeRequired(message: string | undefined = undefined) {
-    throw new UpgradeRequired(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public failedDependency(message: any = undefined) {
+    throw new HttpStatusFailedDependency(message)
   }
 
   // 428
-  public preconditionRequired(message: string | undefined = undefined) {
-    throw new PreconditionRequired(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public preconditionRequired(message: any = undefined) {
+    throw new HttpStatusPreconditionRequired(message)
   }
 
   // 429
-  public tooManyRequests(message: string | undefined = undefined) {
-    throw new TooManyRequests(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public tooManyRequests(message: any = undefined) {
+    throw new HttpStatusTooManyRequests(message)
   }
 
   // 431
-  public requestHeaderFieldsTooLarge(message: string | undefined = undefined) {
-    throw new RequestHeaderFieldsTooLarge(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public requestHeaderFieldsTooLarge(message: any = undefined) {
+    throw new HttpStatusRequestHeaderFieldsTooLarge(message)
   }
 
   // 451
-  public unavailableForLegalReasons(message: string | undefined = undefined) {
-    throw new UnavailableForLegalReasons(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public unavailableForLegalReasons(message: any = undefined) {
+    throw new HttpStatusUnavailableForLegalReasons(message)
   }
 
   // 500
   public internalServerError(data: SerializerResult = {}) {
-    throw new InternalServerError(data)
+    throw new HttpStatusInternalServerError(data)
   }
 
   // 501
-  public notImplemented(message: string | undefined = undefined) {
-    throw new NotImplemented(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public notImplemented(message: any = undefined) {
+    throw new HttpStatusNotImplemented(message)
   }
 
   // 502
-  public badGateway(message: string | undefined = undefined) {
-    throw new BadGateway(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public badGateway(message: any = undefined) {
+    throw new HttpStatusBadGateway(message)
   }
 
   // 503
-  public serviceUnavailable(message: string | undefined = undefined) {
-    throw new ServiceUnavailable(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public serviceUnavailable(message: any = undefined) {
+    throw new HttpStatusServiceUnavailable(message)
   }
 
   // 504
-  public gatewayTimeout(message: string | undefined = undefined) {
-    throw new GatewayTimeout(message)
-  }
-
-  // 505
-  public httpVersionNotSupported(message: string | undefined = undefined) {
-    throw new HttpVersionNotSupported(message)
-  }
-
-  // 506
-  public variantAlsoNegotiates(message: string | undefined = undefined) {
-    throw new VariantAlsoNegotiates(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public gatewayTimeout(message: any = undefined) {
+    throw new HttpStatusGatewayTimeout(message)
   }
 
   // 507
-  public insufficientStorage(message: string | undefined = undefined) {
-    throw new InsufficientStorage(message)
-  }
-
-  // 508
-  public loopDetected(message: string | undefined = undefined) {
-    throw new LoopDetected(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public insufficientStorage(message: any = undefined) {
+    throw new HttpStatusInsufficientStorage(message)
   }
 
   // 510
-  public notExtended(message: string | undefined = undefined) {
-    throw new NotExtended(message)
-  }
-
-  // 511
-  public networkAuthenticationRequired(message: string | undefined = undefined) {
-    throw new NetworkAuthenticationRequired(message)
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public notExtended(message: any = undefined) {
+    throw new HttpStatusNotExtended(message)
   }
   // end: http status codes
 

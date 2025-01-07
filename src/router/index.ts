@@ -1,9 +1,10 @@
-import { ValidationError, ValidationType, camelize } from '@rvohealth/dream'
+import { RecordNotFound, ValidationError, camelize } from '@rvohealth/dream'
 import { Application, Request, Response, Router } from 'express'
 import pluralize from 'pluralize'
 import PsychicController from '../controller'
 import HttpError from '../error/http'
 import EnvInternal from '../helpers/EnvInternal'
+import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError'
 import log from '../log'
 import PsychicApplication from '../psychic-application'
 import {
@@ -17,7 +18,6 @@ import {
 import { ParamValidationError } from '../server/params'
 import RouteManager from './route-manager'
 import { HttpMethod, ResourceMethods, ResourcesMethodType, ResourcesMethods, ResourcesOptions } from './types'
-import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError'
 
 export default class PsychicRouter {
   public app: Application
@@ -339,91 +339,64 @@ export default class PsychicRouter {
       const err = error as Error
       if (!EnvInternal.isTest) log.error(err.message)
 
-      let validationError: ValidationError
-      let paramValidationError: ParamValidationError
-      let validationErrors: Record<string, ValidationType[]>
-      let errorsJson: object = {}
-
       if (errorIsRescuableHttpError(err)) {
         const httpErr = err as HttpError
-        if (typeof httpErr.data === 'object' && Object.keys(httpErr.data as object).length) {
+        if (httpErr.data) {
           res.status(httpErr.status).json(httpErr.data)
-        } else if (err.message) {
-          res.status(httpErr.status).json(httpErr.message)
         } else {
           res.sendStatus(httpErr.status)
         }
+      } else if (err instanceof RecordNotFound) {
+        res.sendStatus(404)
+      } else if (err instanceof ValidationError) {
+        res.status(422).json({ errors: err.errors || {} })
+      } else if (err instanceof ParamValidationError) {
+        let errorsJson: object = {}
+        try {
+          errorsJson = JSON.parse(err.message) as Record<string, string>
+        } catch {
+          // noop
+        }
 
-        return
-      }
+        res.status(400).json({
+          errors: errorsJson,
+        })
+      } else {
+        // by default, ts-node will mask these errors for no good reason, causing us
+        // to have to apply an ugly and annoying try-catch pattern to our controllers
+        // and manually console log the error to determine what the actual error was.
+        // this block enables us to not have to do that anymore.
+        if (EnvInternal.isTest && !EnvInternal.boolean('PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR')) {
+          PsychicApplication.log('ATTENTION: a server error was detected:')
+          PsychicApplication.logWithLevel('error', err)
+        }
 
-      switch (err.constructor?.name) {
-        case 'RecordNotFound':
-          res.sendStatus(404)
-          break
-
-        case 'ValidationError':
-          validationError = err as ValidationError
-          validationErrors = validationError.errors || {}
-          res.status(422).json({
-            errors: validationErrors,
-          })
-          break
-
-        case 'ParamValidationError':
-          paramValidationError = error as ParamValidationError
+        if (this.config.specialHooks.serverError.length) {
           try {
-            errorsJson = JSON.parse(paramValidationError.message) as Record<string, string>
-          } catch {
-            // noop
-          }
-
-          res.status(400).json({
-            errors: errorsJson,
-          })
-          break
-
-        case 'UnprocessableEntity':
-          res.status(422).json((err as HttpError).data)
-          break
-
-        case 'InternalServerError':
-        default:
-          // by default, ts-node will mask these errors for no good reason, causing us
-          // to have to apply an ugly and annoying try-catch pattern to our controllers
-          // and manually console log the error to determine what the actual error was.
-          // this block enables us to not have to do that anymore.
-          if (EnvInternal.isTest && !EnvInternal.boolean('PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR')) {
-            PsychicApplication.log('ATTENTION: a server error was detected:')
-            PsychicApplication.logWithLevel('error', err)
-          }
-
-          if (this.config.specialHooks.serverError.length) {
-            try {
-              for (const hook of this.config.specialHooks.serverError) {
-                await hook(err, req, res)
-              }
-            } catch (error) {
-              if (EnvInternal.isDevelopmentOrTest) {
-                // In development and test, we want to throw so that, for example, double-setting of
-                // status headers throws an error in specs. We couldn't figure out how to write
-                // a spec for ensuring that such errors made it through because Supertest would
-                // respond with the first header sent, which was successful, and the exception only
-                // happened when Jest ended the spec.
-                throw error
-              } else {
-                PsychicApplication.logWithLevel(
-                  'error',
-                  `
+            for (const hook of this.config.specialHooks.serverError) {
+              await hook(err, req, res)
+            }
+          } catch (error) {
+            if (EnvInternal.isDevelopmentOrTest) {
+              // In development and test, we want to throw so that, for example, double-setting of
+              // status headers throws an error in specs. We couldn't figure out how to write
+              // a spec for ensuring that such errors made it through because Supertest would
+              // respond with the first header sent, which was successful, and the exception only
+              // happened when Jest ended the spec.
+              throw error
+            } else {
+              PsychicApplication.logWithLevel(
+                'error',
+                `
                   Something went wrong while attempting to call your custom server:error hooks.
                   Psychic will rescue errors thrown here to prevent the server from crashing.
                   The error thrown is:
                 `,
-                )
-                PsychicApplication.logWithLevel('error', error)
-              }
+              )
+              PsychicApplication.logWithLevel('error', error)
             }
-          } else throw err
+          }
+        } else throw err
       }
     }
   }

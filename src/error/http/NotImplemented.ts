@@ -1,6 +1,6 @@
 import HttpError from './index'
 
-export default class NotImplemented extends HttpError {
+export default class HttpStatusNotImplemented extends HttpError {
   public get status() {
     return 501
   }

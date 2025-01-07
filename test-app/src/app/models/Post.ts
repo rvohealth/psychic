@@ -29,6 +29,6 @@ export default class Post extends ApplicationModel {
   @Post.HasMany('Comment')
   public comments: Comment[]
 
-  @Post.HasOne('Comment', { order: { id: 'desc' } })
+  @Post.HasOne('Comment')
   public recentComment: Comment | null
 }

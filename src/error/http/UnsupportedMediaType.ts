@@ -1,6 +1,6 @@
 import HttpError from './index'
 
-export default class UnsupportedMediaType extends HttpError {
+export default class HttpStatusUnsupportedMediaType extends HttpError {
   public get status() {
     return 415
   }

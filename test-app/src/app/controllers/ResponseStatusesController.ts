@@ -19,7 +19,7 @@ export default class ResponseStatusesController extends ApplicationController {
 
   // 203
   public sendNonAuthoritativeInformation() {
-    this.nonAuthoritativeInformation()
+    this.nonAuthoritativeInformation('custom content')
   }
 
   // 204
@@ -30,26 +30,6 @@ export default class ResponseStatusesController extends ApplicationController {
   // 205
   public sendResetContent() {
     this.resetContent('custom content')
-  }
-
-  // 206
-  public sendPartialContent() {
-    this.partialContent('custom content')
-  }
-
-  // 207
-  public sendMultiStatus() {
-    this.multiStatus('custom content')
-  }
-
-  // 208
-  public sendAlreadyReported() {
-    this.alreadyReported('custom content')
-  }
-
-  // 226
-  public sendIMUsed() {
-    this.imUsed('custom content')
   }
 
   // 301
@@ -128,11 +108,6 @@ export default class ResponseStatusesController extends ApplicationController {
     this.proxyAuthenticationRequired('custom message')
   }
 
-  // 408
-  public throwRequestTimeout() {
-    this.requestTimeout('custom message')
-  }
-
   // 409
   public throwConflict() {
     this.conflict('custom message')
@@ -143,34 +118,19 @@ export default class ResponseStatusesController extends ApplicationController {
     this.gone('custom message')
   }
 
-  // 411
-  public throwLengthRequired() {
-    this.lengthRequired('custom message')
-  }
-
   // 412
   public throwPreconditionFailed() {
     this.preconditionFailed('custom message')
   }
 
   // 413
-  public throwPayloadTooLarge() {
-    this.payloadTooLarge('custom message')
-  }
-
-  // 414
-  public throwUriTooLong() {
-    this.uriTooLong('custom message')
+  public throwContentTooLarge() {
+    this.contentTooLarge('custom message')
   }
 
   // 415
   public throwUnsupportedMediaType() {
     this.unsupportedMediaType('custom message')
-  }
-
-  // 416
-  public throwRangeNotSatisfiable() {
-    this.rangeNotSatisfiable('custom message')
   }
 
   // 417
@@ -189,8 +149,8 @@ export default class ResponseStatusesController extends ApplicationController {
   }
 
   // 422
-  public throwUnprocessableEntity() {
-    this.unprocessableEntity({ errors: { hello: ['world'] } })
+  public throwUnprocessableContent() {
+    this.unprocessableContent({ errors: { hello: ['world'] } })
   }
 
   // 423
@@ -201,16 +161,6 @@ export default class ResponseStatusesController extends ApplicationController {
   // 424
   public throwFailedDependency() {
     this.failedDependency('custom message')
-  }
-
-  // 425
-  public throwTooEarly() {
-    this.tooEarly('custom message')
-  }
-
-  // 426
-  public throwUpgradeRequired() {
-    this.upgradeRequired('custom message')
   }
 
   // 428
@@ -258,33 +208,13 @@ export default class ResponseStatusesController extends ApplicationController {
     this.gatewayTimeout('custom message')
   }
 
-  // 505
-  public throwHttpVersionNotSupported() {
-    this.httpVersionNotSupported('custom message')
-  }
-
-  // 506
-  public throwVariantAlsoNegotiates() {
-    this.variantAlsoNegotiates('custom message')
-  }
-
   // 507
   public throwInsufficientStorage() {
     this.insufficientStorage('custom message')
   }
 
-  // 508
-  public throwLoopDetected() {
-    this.loopDetected('custom message')
-  }
-
   // 510
   public throwNotExtended() {
     this.notExtended('custom message')
-  }
-
-  // 511
-  public throwNetworkAuthenticationRequired() {
-    this.networkAuthenticationRequired('custom message')
   }
 }
