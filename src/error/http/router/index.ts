@@ -1,8 +1,12 @@
 import HttpError from '../index'
 
 export default class RouterError extends HttpError {
-  constructor(message: string, httpStatusCode = 500) {
-    super(httpStatusCode, message)
+  public get status() {
+    return 500
+  }
+
+  constructor(message: string) {
+    super(message)
   }
 
   public get message() {
