@@ -1,7 +1,7 @@
 import HttpError from './index'
 
 export default class ServiceUnavailable extends HttpError {
-  constructor(message: string | undefined) {
-    super(503, message)
+  public get status() {
+    return 503
   }
 }
