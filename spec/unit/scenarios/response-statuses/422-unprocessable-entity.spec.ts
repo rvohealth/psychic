@@ -1,0 +1,13 @@
+import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { PsychicServer } from '../../../../src'
+
+describe('a visitor attempts to hit a route that will trigger a 422', () => {
+  beforeEach(async () => {
+    await request.init(PsychicServer)
+  })
+
+  it('returns 422', async () => {
+    const res = await request.get('/unprocessable-entity', 422)
+    expect(res.body).toEqual({ errors: { hello: ['world'] } })
+  })
+})

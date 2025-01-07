@@ -17,6 +17,7 @@ import {
 import { ParamValidationError } from '../server/params'
 import RouteManager from './route-manager'
 import { HttpMethod, ResourceMethods, ResourcesMethodType, ResourcesMethods, ResourcesOptions } from './types'
+import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError'
 
 export default class PsychicRouter {
   public app: Application
@@ -343,17 +344,20 @@ export default class PsychicRouter {
       let validationErrors: Record<string, ValidationType[]>
       let errorsJson: object = {}
 
-      switch (err.constructor?.name) {
-        case 'Unauthorized':
-        case 'Forbidden':
-        case 'NotFound':
-        case 'Conflict':
-        case 'BadRequest':
-        case 'NotImplemented':
-        case 'ServiceUnavailable':
-          res.sendStatus((err as HttpError).status)
-          break
+      if (errorIsRescuableHttpError(err)) {
+        const httpErr = err as HttpError
+        if (typeof httpErr.data === 'object' && Object.keys(httpErr.data as object).length) {
+          res.status(httpErr.status).json(httpErr.data)
+        } else if (err.message) {
+          res.status(httpErr.status).json(httpErr.message)
+        } else {
+          res.sendStatus(httpErr.status)
+        }
 
+        return
+      }
+
+      switch (err.constructor?.name) {
         case 'RecordNotFound':
           res.sendStatus(404)
           break

@@ -1,5 +1,7 @@
+import { describe as context } from '@jest/globals'
 import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
 import { PsychicServer } from '../../../src'
+import UsersController from '../../../test-app/src/app/controllers/UsersController'
 
 describe('controller before hooks', () => {
   beforeEach(async () => {
@@ -9,5 +11,19 @@ describe('controller before hooks', () => {
   it('calls before actions before running a method', async () => {
     const response = await request.get('/users-before-all-test', 200)
     expect(response.body).toEqual('before all action was called for all!')
+  })
+
+  context('one of the before actions responds', () => {
+    it('does not fire subsequent before actions on that controller, does not call endpoint', async () => {
+      const beforeActionSpy = jest.spyOn(UsersController.prototype, 'beforeActionSequence2')
+      const actionSpy = jest.spyOn(UsersController.prototype, 'beforeActionSequence')
+
+      const response = await request.get('/users-before-action-sequence', 200)
+
+      expect(beforeActionSpy).not.toHaveBeenCalled()
+      expect(actionSpy).not.toHaveBeenCalled()
+
+      expect(response.body).toEqual('before action 1')
+    })
   })
 })

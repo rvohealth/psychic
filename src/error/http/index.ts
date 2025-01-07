@@ -2,9 +2,9 @@ export default class HttpError extends Error {
   public status: number
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public data: any
-  protected _message: string
+  protected _message: string | undefined
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  constructor(statusCode: number, message: string, data?: any) {
+  constructor(statusCode: number, message: string | undefined, data?: any) {
     super()
     this.status = statusCode
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -13,9 +13,6 @@ export default class HttpError extends Error {
   }
 
   public get message() {
-    return `
-      An Http error with status ${this.status} has been thrown with message:
-        ${this._message}
-    `
+    return this._message || ''
   }
 }

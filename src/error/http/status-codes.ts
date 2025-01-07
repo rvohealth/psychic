@@ -370,6 +370,7 @@ export default HttpStatusCodeMap
 
 export type HttpStatusSymbol = keyof typeof HttpStatusCodeMap
 export type HttpStatusCode = `${HttpStatusCodeMap}`
+export type HttpStatusCodeInt = (typeof HttpStatusCodeMap)[keyof typeof HttpStatusCodeMap]
 export type HttpStatusCodeNumber =
   | 100
   | 101
