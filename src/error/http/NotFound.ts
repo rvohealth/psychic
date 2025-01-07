@@ -1,7 +1,7 @@
 import HttpError from './index'
 
 export default class NotFound extends HttpError {
-  constructor(message: string | undefined) {
-    super(404, message)
+  public get status() {
+    return 404
   }
 }

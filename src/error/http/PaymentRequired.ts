@@ -1,7 +1,7 @@
 import HttpError from './index'
 
 export default class PaymentRequired extends HttpError {
-  constructor(message: string | undefined) {
-    super(402, message)
+  public get status() {
+    return 402
   }
 }

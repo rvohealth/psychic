@@ -7,15 +7,15 @@ import {
 } from '@rvohealth/dream'
 import { Request, Response } from 'express'
 import { ControllerHook } from '../controller/hooks'
-import BadRequest from '../error/http/bad-request'
-import Conflict from '../error/http/conflict'
-import Forbidden from '../error/http/forbidden'
-import InternalServerError from '../error/http/internal-server-error'
-import NotFound from '../error/http/not-found'
-import ServiceUnavailable from '../error/http/service-unavailable'
+import BadRequest from '../error/http/BadRequest'
+import Conflict from '../error/http/Conflictz'
+import Forbidden from '../error/http/Forbiddenz'
+import InternalServerError from '../error/http/InternalServerError'
+import NotFound from '../error/http/NotFound'
+import ServiceUnavailable from '../error/http/ServiceUnavailable'
 import HttpStatusCodeMap, { HttpStatusCodeInt, HttpStatusSymbol } from '../error/http/status-codes'
-import Unauthorized from '../error/http/unauthorized'
-import UnprocessableEntity from '../error/http/unprocessable-entity'
+import Unauthorized from '../error/http/Unauthorizedz'
+import UnprocessableEntity from '../error/http/UnprocessableEntity'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint'
 import PsychicApplication from '../psychic-application'
 import Params, {
@@ -57,7 +57,7 @@ import LoopDetected from '../error/http/LoopDetected'
 import NotExtended from '../error/http/NotExtended'
 import NetworkAuthenticationRequired from '../error/http/NetworkAuthenticationRequired'
 import PaymentRequired from '../error/http/PaymentRequired'
-import NotImplemented from '../error/http/not-implemented'
+import NotImplemented from '../error/http/NotImplemented'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -640,7 +640,7 @@ The key in question is: "${serializerKey}"`,
 
   // 422
   public unprocessableEntity(data: SerializerResult = {}) {
-    throw new UnprocessableEntity('The data passed contained an invalid shape', data)
+    throw new UnprocessableEntity(data)
   }
 
   // 423
@@ -685,10 +685,7 @@ The key in question is: "${serializerKey}"`,
 
   // 500
   public internalServerError(data: SerializerResult = {}) {
-    throw new InternalServerError(
-      'The server has encountered a situation it does not know how to handle.',
-      data,
-    )
+    throw new InternalServerError(data)
   }
 
   // 501
