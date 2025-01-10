@@ -496,7 +496,8 @@ The key in question is: "${serializerKey}"`,
   }
 
   // 400
-  public badRequest(data: SerializerResult = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public badRequest(data: any = undefined) {
     throw new HttpStatusBadRequest(data)
   }
 
@@ -591,7 +592,8 @@ The key in question is: "${serializerKey}"`,
   }
 
   // 422
-  public unprocessableContent(data: SerializerResult = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public unprocessableContent(data: any = undefined) {
     throw new HttpStatusUnprocessableContent(data)
   }
 
@@ -632,7 +634,8 @@ The key in question is: "${serializerKey}"`,
   }
 
   // 500
-  public internalServerError(data: SerializerResult = {}) {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public internalServerError(data: any = undefined) {
     throw new HttpStatusInternalServerError(data)
   }
 
