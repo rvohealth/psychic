@@ -1,5 +1,5 @@
-import { describe as context } from '@jest/globals'
 import { getMockReq, getMockRes } from '@jest-mock/express'
+import { describe as context } from '@jest/globals'
 import { Params } from '../../../src'
 import PsychicController from '../../../src/controller'
 import PsychicApplication from '../../../src/psychic-application'
@@ -141,6 +141,27 @@ describe('PsychicController', () => {
       })
 
       expect(controller.paramsFor(User)).toEqual({ name: 'howyadoin' })
+    })
+
+    context('leading and trailing whitespace is filtered from strings', () => {
+      it('returns filtered params', () => {
+        const req = getMockReq({
+          body: {
+            id: 1,
+            name: 'howyadoin   ',
+            createdAt: 'hello',
+            updatedAt: 'birld',
+            deletedAt: 'sometimeago',
+          },
+        })
+        const res = getMockRes().res
+        const controller = new PsychicController(req, res, {
+          config: new PsychicApplication(),
+          action: 'hello',
+        })
+
+        expect(controller.paramsFor(User)).toEqual({ name: 'howyadoin' })
+      })
     })
 
     context('with a key passed', () => {

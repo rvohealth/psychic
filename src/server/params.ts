@@ -290,7 +290,11 @@ export default class Params {
       ? ValidatedType | null | undefined
       : ValidatedType,
   >(param: PsychicParamsPrimitive, expectedType: ExpectedType, opts?: OptsType): FinalReturnType {
-    return new this().cast(param, expectedType, opts) as FinalReturnType
+    return new this().cast(
+      typeof param === 'string' ? param.trim() : param,
+      expectedType,
+      opts,
+    ) as FinalReturnType
   }
 
   public static casing<T extends typeof Params>(this: T, casing: 'snake' | 'camel') {

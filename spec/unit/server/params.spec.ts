@@ -715,6 +715,42 @@ describe('Params', () => {
             })
           })
 
+          context('with trailing space characters', () => {
+            it('the trailing spaces are trimmed', () => {
+              expect(Params.cast('howyadoin     ', 'string')).toEqual('howyadoin')
+            })
+          })
+
+          context('with leading space characters', () => {
+            it('the leading spaces are trimmed', () => {
+              expect(Params.cast('     howyadoin', 'string')).toEqual('howyadoin')
+            })
+          })
+
+          context('with trailing newline characters', () => {
+            it('the trailing newlines are trimmed', () => {
+              expect(Params.cast('howyadoin\n\n\n', 'string')).toEqual('howyadoin')
+            })
+          })
+
+          context('with leading newline characters', () => {
+            it('the leading newlines are trimmed', () => {
+              expect(Params.cast('\n\n\nhowyadoin', 'string')).toEqual('howyadoin')
+            })
+          })
+
+          context('with trailing tab characters', () => {
+            it('the trailing tabs are trimmed', () => {
+              expect(Params.cast('howyadoin\t\t\t', 'string')).toEqual('howyadoin')
+            })
+          })
+
+          context('with leading tab characters', () => {
+            it('the leading tabs are trimmed', () => {
+              expect(Params.cast('\t\t\thowyadoin', 'string')).toEqual('howyadoin')
+            })
+          })
+
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
               expect(() => Params.cast(7, 'string')).toThrow(ParamValidationError)
