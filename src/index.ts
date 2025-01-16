@@ -73,6 +73,7 @@ export {
   default as PsychicApplication,
   DefaultPsychicOpenapiOptions,
   NamedPsychicOpenapiOptions,
+  PsychicApplicationInitOptions,
 } from './psychic-application'
 export { UUID } from './psychic-application/types'
 export { default as PsychicRouter } from './router'

@@ -6,6 +6,7 @@ import {
   EncryptAlgorithm,
   EncryptOptions,
   OpenapiSchemaBody,
+  DreamApplicationInitOptions,
 } from '@rvohealth/dream'
 import bodyParser from 'body-parser'
 import { Queue, QueueOptions, Worker } from 'bullmq'
@@ -35,32 +36,36 @@ export default class PsychicApplication {
   public static async init(
     cb: (app: PsychicApplication) => void | Promise<void>,
     dreamCb: (app: DreamApplication) => void | Promise<void>,
-    { bypassModelIntegrityCheck = false }: { bypassModelIntegrityCheck?: boolean } = {},
+    opts: PsychicApplicationInitOptions = {},
   ) {
     let psychicApp: PsychicApplication
 
-    await DreamApplication.init(dreamCb, { bypassModelIntegrityCheck }, async dreamApp => {
-      psychicApp = new PsychicApplication()
-      await cb(psychicApp)
+    await DreamApplication.init(
+      dreamCb,
+      { bypassModelIntegrityCheck: opts.bypassModelIntegrityCheck },
+      async dreamApp => {
+        psychicApp = new PsychicApplication()
+        await cb(psychicApp)
 
-      if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
-      if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
-      if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
+        if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
+        if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
+        if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
 
-      if (psychicApp.encryption?.cookies?.current)
-        this.checkKey(
-          'cookies',
-          psychicApp.encryption.cookies.current.key,
-          psychicApp.encryption.cookies.current.algorithm,
-        )
+        if (psychicApp.encryption?.cookies?.current)
+          this.checkKey(
+            'cookies',
+            psychicApp.encryption.cookies.current.key,
+            psychicApp.encryption.cookies.current.algorithm,
+          )
 
-      await psychicApp.inflections?.()
+        await psychicApp.inflections?.()
 
-      dreamApp.set('projectRoot', psychicApp.apiRoot)
-      dreamApp.set('logger', psychicApp.logger)
+        dreamApp.set('projectRoot', psychicApp.apiRoot)
+        dreamApp.set('logger', psychicApp.logger)
 
-      cachePsychicApplication(psychicApp)
-    })
+        cachePsychicApplication(psychicApp)
+      },
+    )
 
     return psychicApp!
   }
@@ -826,6 +831,8 @@ export interface PsychicClientOptions {
 
 export type PsychicLogger = DreamLogger
 export type PsychicLogLevel = DreamLogLevel
+
+export type PsychicApplicationInitOptions = DreamApplicationInitOptions
 
 export interface PsychicApplicationEncryptionOptions {
   cookies: SegmentedEncryptionOptions
