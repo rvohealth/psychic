@@ -10,7 +10,9 @@ export default class PsychicCLI {
       initializePsychicApplication,
       seedDb,
     }: {
-      initializePsychicApplication: () => Promise<PsychicApplication>
+      initializePsychicApplication: (opts?: {
+        bypassModelIntegrityCheck?: boolean
+      }) => Promise<PsychicApplication>
       seedDb: () => Promise<void> | void
     },
   ) {

@@ -35,10 +35,11 @@ export default class PsychicApplication {
   public static async init(
     cb: (app: PsychicApplication) => void | Promise<void>,
     dreamCb: (app: DreamApplication) => void | Promise<void>,
+    { bypassModelIntegrityCheck = false }: { bypassModelIntegrityCheck?: boolean } = {},
   ) {
     let psychicApp: PsychicApplication
 
-    await DreamApplication.init(dreamCb, {}, async dreamApp => {
+    await DreamApplication.init(dreamCb, { bypassModelIntegrityCheck }, async dreamApp => {
       psychicApp = new PsychicApplication()
       await cb(psychicApp)
 
