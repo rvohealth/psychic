@@ -1,7 +1,7 @@
 import { DreamCLI } from '@rvohealth/dream'
 import { Command } from 'commander'
 import PsychicBin from '../bin'
-import PsychicApplication from '../psychic-application'
+import PsychicApplication, { PsychicApplicationInitOptions } from '../psychic-application'
 
 export default class PsychicCLI {
   public static provide(
@@ -10,9 +10,7 @@ export default class PsychicCLI {
       initializePsychicApplication,
       seedDb,
     }: {
-      initializePsychicApplication: (opts?: {
-        bypassModelIntegrityCheck?: boolean
-      }) => Promise<PsychicApplication>
+      initializePsychicApplication: (opts?: PsychicApplicationInitOptions) => Promise<PsychicApplication>
       seedDb: () => Promise<void> | void
     },
   ) {
