@@ -11,7 +11,7 @@ describe('PsychicRouter#handle', () => {
   beforeEach(async () => {
     server = new PsychicServer()
     await server.boot()
-    router = new PsychicRouter(server.app, server.config)
+    router = new PsychicRouter(server.expressApp, server.config)
   })
 
   it('calls the matching method on a corresponding controller', async () => {

@@ -8,8 +8,8 @@ describe('cable#start', () => {
   let cable: Cable
   beforeEach(() => {
     server = new PsychicServer()
-    cable = new Cable(server.app, server.config)
-    http.createServer(server.app)
+    cable = new Cable(server.expressApp, server.config)
+    http.createServer(server.expressApp)
     cable.connect()
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any

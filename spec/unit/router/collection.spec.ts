@@ -8,12 +8,12 @@ describe('PsychicRouter', () => {
     let router: PsychicRouter
     beforeEach(() => {
       server = new PsychicServer()
-      router = new PsychicRouter(server.app, server.config)
-      jest.spyOn(server.app, 'get')
-      jest.spyOn(server.app, 'post')
-      jest.spyOn(server.app, 'put')
-      jest.spyOn(server.app, 'patch')
-      jest.spyOn(server.app, 'delete')
+      router = new PsychicRouter(server.expressApp, server.config)
+      jest.spyOn(server.expressApp, 'get')
+      jest.spyOn(server.expressApp, 'post')
+      jest.spyOn(server.expressApp, 'put')
+      jest.spyOn(server.expressApp, 'patch')
+      jest.spyOn(server.expressApp, 'delete')
     })
 
     it('does not enforce id param on subsequent routes', () => {
@@ -24,11 +24,11 @@ describe('PsychicRouter', () => {
       })
 
       router.commit()
-      expect(server.app.get).toHaveBeenCalledWith('/users/howyadoin', expect.any(Function))
-      expect(server.app.post).not.toHaveBeenCalled()
-      expect(server.app.put).not.toHaveBeenCalled()
-      expect(server.app.patch).not.toHaveBeenCalled()
-      expect(server.app.delete).not.toHaveBeenCalled()
+      expect(server.expressApp.get).toHaveBeenCalledWith('/users/howyadoin', expect.any(Function))
+      expect(server.expressApp.post).not.toHaveBeenCalled()
+      expect(server.expressApp.put).not.toHaveBeenCalled()
+      expect(server.expressApp.patch).not.toHaveBeenCalled()
+      expect(server.expressApp.delete).not.toHaveBeenCalled()
     })
   })
 })

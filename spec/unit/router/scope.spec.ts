@@ -7,7 +7,7 @@ describe('PsychicRouter', () => {
       const server = new PsychicServer()
       await server.boot()
 
-      const res = await supertest(server.app).get('/scoped-things/testing-scopes').expect(200)
+      const res = await supertest(server.expressApp).get('/scoped-things/testing-scopes').expect(200)
 
       expect(res.body).toEqual('helloscopedworld')
     })

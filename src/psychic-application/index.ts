@@ -31,6 +31,7 @@ import PsychicRouter from '../router'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache'
 import loadControllers, { getControllersOrFail } from './helpers/loadControllers'
 import { Either, PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
+import PsychicServer from '../server'
 
 export default class PsychicApplication {
   public static async init(
@@ -326,7 +327,7 @@ Try setting it to something valid, like:
         : T extends 'ws:connect'
           ? (socket: Socket) => void | Promise<void>
           : T extends 'server:init'
-            ? (app: Application) => void | Promise<void>
+            ? (psychicServer: PsychicServer) => void | Promise<void>
             : T extends 'after:routes'
               ? (app: Application) => void | Promise<void>
               : (conf: PsychicApplication) => void | Promise<void>,
@@ -339,7 +340,7 @@ Try setting it to something valid, like:
         break
 
       case 'server:init':
-        this._specialHooks.expressInit.push(cb as (app: Application) => void | Promise<void>)
+        this._specialHooks.expressInit.push(cb as (psychicServer: PsychicServer) => void | Promise<void>)
         break
 
       case 'ws:start':
@@ -583,7 +584,7 @@ export type PsychicApplicationOption =
 
 export interface PsychicApplicationSpecialHooks {
   sync: ((psychicApp: PsychicApplication) => void | Promise<void>)[]
-  expressInit: ((app: Application) => void | Promise<void>)[]
+  expressInit: ((server: PsychicServer) => void | Promise<void>)[]
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
   wsStart: ((server: SocketServer) => void | Promise<void>)[]
   wsConnect: ((socket: Socket) => void | Promise<void>)[]
