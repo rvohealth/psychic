@@ -1,4 +1,4 @@
-import { compact, Dream, IdType, pascalize } from '@rvohealth/dream'
+import { closeAllDbConnections, compact, Dream, IdType, pascalize } from '@rvohealth/dream'
 import { Job, JobsOptions, Queue, QueueOptions, Worker, WorkerOptions } from 'bullmq'
 import Redis, { Cluster } from 'ioredis'
 import NoQueueForSpecifiedQueueName from '../error/background/NoQueueForSpecifiedQueueName'
@@ -10,6 +10,7 @@ import PsychicApplication, {
   PsychicBackgroundSimpleOptions,
   PsychicBackgroundWorkstreamOptions,
   QueueOptionsWithConnectionInstance,
+  RedisOrRedisClusterConnection,
   TransitionalPsychicBackgroundSimpleOptions,
 } from '../psychic-application'
 import lookupClassByGlobalName from '../psychic-application/helpers/lookupClassByGlobalName'
@@ -120,6 +121,8 @@ export class Background {
 
   private _workers: Worker[] = []
 
+  private redisConnections: RedisOrRedisClusterConnection[] = []
+
   public connect({
     activateWorkers = false,
   }: {
@@ -158,8 +161,39 @@ export class Background {
     return [...this._workers]
   }
 
+  private async shutdownAndExit() {
+    await this.shutdown()
+    process.exit()
+  }
+
   public async shutdown() {
     await Promise.all(this._workers.map(worker => worker.close()))
+
+    const psychicApp = PsychicApplication.getOrFail()
+    for (const hook of psychicApp.specialHooks.workerShutdown) {
+      await hook()
+    }
+
+    await closeAllDbConnections()
+    await this.closeAllRedisConnections()
+  }
+
+  public async closeAllRedisConnections() {
+    for (const queue of this.queues) {
+      await queue.close()
+    }
+
+    for (const worker of this.workers) {
+      await worker.close()
+    }
+
+    for (const connection of this.redisConnections) {
+      try {
+        connection.disconnect()
+      } catch {
+        // noop
+      }
+    }
   }
 
   private simpleConnect(
@@ -176,6 +210,10 @@ export class Background {
   ) {
     const defaultQueueConnection = backgroundOptions.defaultQueueConnection
     const defaultWorkerConnection = backgroundOptions.defaultWorkerConnection
+
+    if (defaultQueueConnection) this.redisConnections.push(defaultQueueConnection)
+    if (defaultWorkerConnection) this.redisConnections.push(defaultWorkerConnection)
+
     // transitional queues must have the same names they had prior to making them
     // transitional since the name is what identifies the queues and enables the
     // queues to be worked off
@@ -225,6 +263,9 @@ export class Background {
     const namedWorkstreams: PsychicBackgroundWorkstreamOptions[] = backgroundOptions.namedWorkstreams || []
 
     namedWorkstreams.forEach(namedWorkstream => {
+      if (namedWorkstream.queueConnection) this.redisConnections.push(namedWorkstream.queueConnection)
+      if (namedWorkstream.workerConnection) this.redisConnections.push(namedWorkstream.workerConnection)
+
       const namedWorkstreamQueueConnection = namedWorkstream.queueConnection || defaultQueueConnection
       const namedWorkstreamWorkerConnection = namedWorkstream.workerConnection || defaultWorkerConnection
       // transitional queues must have the same names they had prior to making them
@@ -303,6 +344,9 @@ export class Background {
     const defaultWorkerConnection =
       nativeBullMQ.defaultQueueOptions?.workerConnection || backgroundOptions.defaultWorkerConnection
 
+    if (defaultQueueConnection) this.redisConnections.push(defaultQueueConnection)
+    if (defaultWorkerConnection) this.redisConnections.push(defaultWorkerConnection)
+
     if (!defaultQueueConnection)
       throw new DefaultBullMQNativeOptionsMissingQueueConnectionAndDefaultQueueConnection()
 
@@ -348,10 +392,12 @@ export class Background {
 
     Object.keys(namedQueueOptionsMap).forEach(queueName => {
       const namedQueueOptions: QueueOptionsWithConnectionInstance = namedQueueOptionsMap[queueName]
-      const namedQueueConnection =
-        namedQueueOptions.queueConnection || backgroundOptions.defaultQueueConnection
-      const namedWorkerConnection =
-        namedQueueOptions.workerConnection || backgroundOptions.defaultWorkerConnection
+
+      if (namedQueueOptions.queueConnection) this.redisConnections.push(namedQueueOptions.queueConnection)
+      if (namedQueueOptions.workerConnection) this.redisConnections.push(namedQueueOptions.workerConnection)
+
+      const namedQueueConnection = namedQueueOptions.queueConnection || defaultQueueConnection
+      const namedWorkerConnection = namedQueueOptions.workerConnection || defaultWorkerConnection
 
       if (!namedQueueConnection)
         throw new NamedBullMQNativeOptionsMissingQueueConnectionAndDefaultQueueConnection(queueName)
@@ -399,6 +445,14 @@ export class Background {
 
   public work() {
     this.connect({ activateWorkers: true })
+
+    process.on('SIGTERM', () => {
+      void this.shutdownAndExit()
+    })
+
+    process.on('SIGINT', () => {
+      void this.shutdownAndExit()
+    })
   }
 
   public async staticMethod(

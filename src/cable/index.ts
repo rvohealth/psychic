@@ -5,15 +5,17 @@ import http from 'http'
 import socketio from 'socket.io'
 import EnvInternal from '../helpers/EnvInternal'
 import log from '../log'
-import PsychicApplication from '../psychic-application'
+import PsychicApplication, { RedisOrRedisClusterConnection } from '../psychic-application'
 import { getPsychicHttpInstance } from '../server/helpers/startPsychicServer'
+import MissingWsRedisConnection from '../error/ws/MissingWsRedisConnection'
 
 export default class Cable {
   public app: Application
   public io: socketio.Server | undefined
   public httpServer: http.Server
-  public useRedis: boolean
   private config: PsychicApplication
+  private redisConnections: RedisOrRedisClusterConnection[] = []
+
   constructor(app: Application, config: PsychicApplication) {
     this.app = app
     this.config = config
@@ -25,7 +27,6 @@ export default class Cable {
     // psychic server so that we can bind socket.io to the http instance.
     this.httpServer = getPsychicHttpInstance(this.app, this.config.sslCredentials)
     this.io = new socketio.Server(this.httpServer, { cors: this.config.corsOptions })
-    this.useRedis = this.config.useRedis
   }
 
   public async start(
@@ -71,7 +72,7 @@ export default class Cable {
       }
     })
 
-    if (this.useRedis) this.bindToRedis()
+    this.bindToRedis()
 
     const psychicApp = PsychicApplication.getOrFail()
     await this.listen({
@@ -79,6 +80,22 @@ export default class Cable {
       withFrontEndClient,
       frontEndPort,
     })
+  }
+
+  public stop() {
+    try {
+      this.io?.disconnectSockets()
+    } catch {
+      // noop
+    }
+
+    for (const connection of this.redisConnections) {
+      try {
+        connection.disconnect()
+      } catch {
+        // noop
+      }
+    }
   }
 
   public async listen({
@@ -110,7 +127,12 @@ export default class Cable {
 
   public bindToRedis() {
     const pubClient = this.config.websocketOptions.connection
-    const subClient = pubClient.duplicate()
+    const subClient = this.config.websocketOptions.subConnection
+
+    if (!pubClient || !subClient) throw new MissingWsRedisConnection()
+
+    this.redisConnections.push(pubClient)
+    this.redisConnections.push(subClient)
 
     pubClient.on('error', error => {
       PsychicApplication.log('PUB CLIENT ERROR', error)
