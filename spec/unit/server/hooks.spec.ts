@@ -16,8 +16,14 @@ describe('PsychicServer hooks', () => {
     )
   }
 
-  it('loads conf/app.ts and processes hooks for load:test', async () => {
+  it('loads conf/app.ts and processes hooks for server:init', async () => {
     await server.boot()
     expectHookCalled('server:init')
+  })
+
+  it('loads conf/app.ts and processes hooks for server:start', async () => {
+    await server.start()
+    expectHookCalled('server:start')
+    await server.stop()
   })
 })

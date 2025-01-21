@@ -103,28 +103,26 @@ export default class PsychicServer {
       })
     }
 
+    const psychicApp = PsychicApplication.getOrFail()
+
     if (this.config.useWs && this.cable) {
       // cable starting will also start
       // an encapsulating http server
       await this.cable.start(port, { withFrontEndClient, frontEndPort })
       this.httpServer = this.cable.httpServer
     } else {
-      await new Promise(accept => {
-        const psychicApp = PsychicApplication.getOrFail()
-
-        startPsychicServer({
-          app: this.expressApp,
-          port: port || psychicApp.port,
-          withFrontEndClient,
-          frontEndPort,
-          sslCredentials: this.config.sslCredentials,
-        })
-          .then(server => {
-            this.httpServer = server
-            accept({})
-          })
-          .catch(() => {})
+      const httpServer = await startPsychicServer({
+        app: this.expressApp,
+        port: port || psychicApp.port,
+        withFrontEndClient,
+        frontEndPort,
+        sslCredentials: this.config.sslCredentials,
       })
+      this.httpServer = httpServer
+    }
+
+    for (const hook of psychicApp.specialHooks.serverStart) {
+      await hook(this)
     }
 
     return true

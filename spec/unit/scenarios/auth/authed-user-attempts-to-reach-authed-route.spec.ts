@@ -10,7 +10,7 @@ describe('an authed user attempts to hit an authed route', () => {
 
   it('returns 200', async () => {
     const authedSession = await request.session('/auth', { email: 'how@yadoin', password: 'password' }, 204)
-    const res = await authedSession.get('/auth-ping').expect(200)
+    const res = await authedSession.get('/auth-ping', 200)
     expect(res.body).toEqual('helloworld')
   })
 })

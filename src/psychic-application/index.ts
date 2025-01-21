@@ -253,6 +253,7 @@ Try setting it to something valid, like:
   private _specialHooks: PsychicApplicationSpecialHooks = {
     sync: [],
     expressInit: [],
+    serverStart: [],
     serverError: [],
     wsStart: [],
     wsConnect: [],
@@ -328,9 +329,11 @@ Try setting it to something valid, like:
           ? (socket: Socket) => void | Promise<void>
           : T extends 'server:init'
             ? (psychicServer: PsychicServer) => void | Promise<void>
-            : T extends 'after:routes'
-              ? (app: Application) => void | Promise<void>
-              : (conf: PsychicApplication) => void | Promise<void>,
+            : T extends 'server:start'
+              ? (psychicServer: PsychicServer) => void | Promise<void>
+              : T extends 'after:routes'
+                ? (app: Application) => void | Promise<void>
+                : (conf: PsychicApplication) => void | Promise<void>,
   ) {
     switch (hookEventType) {
       case 'server:error':
@@ -341,6 +344,10 @@ Try setting it to something valid, like:
 
       case 'server:init':
         this._specialHooks.expressInit.push(cb as (psychicServer: PsychicServer) => void | Promise<void>)
+        break
+
+      case 'server:start':
+        this._specialHooks.serverStart.push(cb as (psychicServer: PsychicServer) => void | Promise<void>)
         break
 
       case 'ws:start':
@@ -585,6 +592,7 @@ export type PsychicApplicationOption =
 export interface PsychicApplicationSpecialHooks {
   sync: ((psychicApp: PsychicApplication) => void | Promise<void>)[]
   expressInit: ((server: PsychicServer) => void | Promise<void>)[]
+  serverStart: ((server: PsychicServer) => void | Promise<void>)[]
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
   wsStart: ((server: SocketServer) => void | Promise<void>)[]
   wsConnect: ((socket: Socket) => void | Promise<void>)[]

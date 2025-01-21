@@ -9,13 +9,14 @@ export type PsychicHookEventType =
   | 'load:prod'
   | 'load:test'
   | 'server:init'
+  | 'server:start'
   | 'server:error'
   | 'ws:connect'
   | 'ws:start'
 
 export type PsychicHookLoadEventTypes = Exclude<
   PsychicHookEventType,
-  'server:error' | 'ws:connect' | 'ws:start' | 'server:init' | 'after:routes' | 'sync'
+  'server:error' | 'ws:connect' | 'ws:start' | 'server:init' | 'server:start' | 'after:routes' | 'sync'
 >
 
 type Only<T, U> = T & Partial<Record<Exclude<keyof U, keyof T>, never>>
