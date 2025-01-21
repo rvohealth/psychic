@@ -14,8 +14,6 @@ export default async (psy: PsychicApplication) => {
   await psy.load('controllers', path.join(__dirname, '..', 'app', 'controllers'))
 
   psy.set('appName', 'testapp')
-  psy.set('useWs', true)
-  psy.set('useRedis', true)
   psy.set('apiOnly', false)
   psy.set('apiRoot', path.join(__dirname, '..', '..', '..'))
   psy.set('clientRoot', path.join(__dirname, '..', '..', 'client'))
@@ -348,6 +346,14 @@ export default async (psy: PsychicApplication) => {
 
     if (!res.headersSent) res.sendStatus(500)
     else if (EnvInternal.isDevelopmentOrTest) throw err
+  })
+
+  psy.on('server:shutdown', () => {
+    __forTestingOnly('server:shutdown')
+  })
+
+  psy.on('workers:shutdown', () => {
+    __forTestingOnly('workers:shutdown')
   })
 
   psy.on('ws:start', io => {

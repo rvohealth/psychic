@@ -139,19 +139,13 @@ Try setting it to something valid, like:
     return this._clientRoot
   }
 
-  private _useWs: boolean = false
   public get useWs() {
-    return this._useWs
+    return !!this._websocketOptions
   }
 
   private _encryption: PsychicApplicationEncryptionOptions | undefined
   public get encryption() {
     return this._encryption
-  }
-
-  private _useRedis: boolean = false
-  public get useRedis() {
-    return this._useRedis
   }
 
   private _appName: string = 'untitled app'
@@ -184,7 +178,7 @@ Try setting it to something valid, like:
     return this._logger
   }
 
-  private _websocketOptions: PsychicWebsocketOptions
+  private _websocketOptions: PsychicWebsocketOptions & { subConnection?: RedisOrRedisClusterConnection }
   public get websocketOptions() {
     return this._websocketOptions
   }
@@ -255,6 +249,8 @@ Try setting it to something valid, like:
     expressInit: [],
     serverStart: [],
     serverError: [],
+    serverShutdown: [],
+    workerShutdown: [],
     wsStart: [],
     wsConnect: [],
     'after:routes': [],
@@ -331,9 +327,13 @@ Try setting it to something valid, like:
             ? (psychicServer: PsychicServer) => void | Promise<void>
             : T extends 'server:start'
               ? (psychicServer: PsychicServer) => void | Promise<void>
-              : T extends 'after:routes'
-                ? (app: Application) => void | Promise<void>
-                : (conf: PsychicApplication) => void | Promise<void>,
+              : T extends 'server:shutdown'
+                ? (psychicServer: PsychicServer) => void | Promise<void>
+                : T extends 'workers:shutdown'
+                  ? () => void | Promise<void>
+                  : T extends 'after:routes'
+                    ? (app: Application) => void | Promise<void>
+                    : (conf: PsychicApplication) => void | Promise<void>,
   ) {
     switch (hookEventType) {
       case 'server:error':
@@ -348,6 +348,14 @@ Try setting it to something valid, like:
 
       case 'server:start':
         this._specialHooks.serverStart.push(cb as (psychicServer: PsychicServer) => void | Promise<void>)
+        break
+
+      case 'server:shutdown':
+        this._specialHooks.serverShutdown.push(cb as (psychicServer: PsychicServer) => void | Promise<void>)
+        break
+
+      case 'workers:shutdown':
+        this._specialHooks.workerShutdown.push(cb as () => void | Promise<void>)
         break
 
       case 'ws:start':
@@ -378,51 +386,47 @@ Try setting it to something valid, like:
     option: Opt,
     value: Opt extends 'appName'
       ? string
-      : Opt extends 'useWs'
+      : Opt extends 'apiOnly'
         ? boolean
-        : Opt extends 'useRedis'
-          ? boolean
-          : Opt extends 'apiOnly'
-            ? boolean
-            : Opt extends 'defaultResponseHeaders'
-              ? Record<string, string | null>
-              : Opt extends 'encryption'
-                ? PsychicApplicationEncryptionOptions
-                : Opt extends 'cors'
-                  ? CorsOptions
-                  : Opt extends 'cookie'
-                    ? CustomCookieOptions
-                    : Opt extends 'apiRoot'
-                      ? string
-                      : Opt extends 'sessionCookieName'
-                        ? string
-                        : Opt extends 'background'
-                          ? PsychicBackgroundOptions
-                          : Opt extends 'websockets'
-                            ? PsychicWebsocketOptions
-                            : Opt extends 'clientRoot'
-                              ? string
-                              : Opt extends 'json'
-                                ? bodyParser.Options
-                                : Opt extends 'logger'
-                                  ? PsychicLogger
-                                  : Opt extends 'client'
-                                    ? PsychicClientOptions
-                                    : Opt extends 'ssl'
-                                      ? PsychicSslCredentials
-                                      : Opt extends 'openapi'
-                                        ? DefaultPsychicOpenapiOptions
-                                        : Opt extends 'paths'
-                                          ? PsychicPathOptions
-                                          : Opt extends 'port'
-                                            ? number
-                                            : Opt extends 'saltRounds'
-                                              ? number
-                                              : Opt extends 'inflections'
-                                                ? () => void | Promise<void>
-                                                : Opt extends 'routes'
-                                                  ? (r: PsychicRouter) => void | Promise<void>
-                                                  : never,
+        : Opt extends 'defaultResponseHeaders'
+          ? Record<string, string | null>
+          : Opt extends 'encryption'
+            ? PsychicApplicationEncryptionOptions
+            : Opt extends 'cors'
+              ? CorsOptions
+              : Opt extends 'cookie'
+                ? CustomCookieOptions
+                : Opt extends 'apiRoot'
+                  ? string
+                  : Opt extends 'sessionCookieName'
+                    ? string
+                    : Opt extends 'background'
+                      ? PsychicBackgroundOptions
+                      : Opt extends 'websockets'
+                        ? PsychicWebsocketOptions
+                        : Opt extends 'clientRoot'
+                          ? string
+                          : Opt extends 'json'
+                            ? bodyParser.Options
+                            : Opt extends 'logger'
+                              ? PsychicLogger
+                              : Opt extends 'client'
+                                ? PsychicClientOptions
+                                : Opt extends 'ssl'
+                                  ? PsychicSslCredentials
+                                  : Opt extends 'openapi'
+                                    ? DefaultPsychicOpenapiOptions
+                                    : Opt extends 'paths'
+                                      ? PsychicPathOptions
+                                      : Opt extends 'port'
+                                        ? number
+                                        : Opt extends 'saltRounds'
+                                          ? number
+                                          : Opt extends 'inflections'
+                                            ? () => void | Promise<void>
+                                            : Opt extends 'routes'
+                                              ? (r: PsychicRouter) => void | Promise<void>
+                                              : never,
   ): void
   public set<Opt extends PsychicApplicationOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -430,14 +434,6 @@ Try setting it to something valid, like:
     switch (option) {
       case 'appName':
         this._appName = value as string
-        break
-
-      case 'useWs':
-        this._useWs = value as boolean
-        break
-
-      case 'useRedis':
-        this._useRedis = value as boolean
         break
 
       case 'apiOnly':
@@ -514,6 +510,7 @@ Try setting it to something valid, like:
       case 'websockets':
         this._websocketOptions = {
           ...(value as PsychicWebsocketOptions),
+          subConnection: (value as PsychicWebsocketOptions | undefined)?.connection?.duplicate(),
         }
         break
 
@@ -564,8 +561,6 @@ Try setting it to something valid, like:
 
 export type PsychicApplicationOption =
   | 'appName'
-  | 'useWs'
-  | 'useRedis'
   | 'apiOnly'
   | 'apiRoot'
   | 'encryption'
@@ -593,6 +588,8 @@ export interface PsychicApplicationSpecialHooks {
   sync: ((psychicApp: PsychicApplication) => void | Promise<void>)[]
   expressInit: ((server: PsychicServer) => void | Promise<void>)[]
   serverStart: ((server: PsychicServer) => void | Promise<void>)[]
+  serverShutdown: ((server: PsychicServer) => void | Promise<void>)[]
+  workerShutdown: (() => void | Promise<void>)[]
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
   wsStart: ((server: SocketServer) => void | Promise<void>)[]
   wsConnect: ((socket: Socket) => void | Promise<void>)[]
@@ -653,7 +650,7 @@ interface PsychicWebsocketOptions {
   connection: Redis
 }
 
-type RedisOrRedisClusterConnection = Redis | Cluster
+export type RedisOrRedisClusterConnection = Redis | Cluster
 
 export type PsychicBackgroundOptions = Either<
   PsychicBackgroundSimpleOptions,

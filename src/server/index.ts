@@ -5,7 +5,7 @@ import express, { Application, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { Server } from 'http'
 import path from 'path'
-import { stopBackgroundWorkers } from '../background'
+import background from '../background'
 import Cable from '../cable'
 import EnvInternal from '../helpers/EnvInternal'
 import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError'
@@ -16,9 +16,9 @@ import startPsychicServer from './helpers/startPsychicServer'
 
 export default class PsychicServer {
   public expressApp: Application
-  public cable: Cable
   public frontEndClient: FrontEndClientServer
   public httpServer: Server
+  private cable: Cable
   private booted = false
   constructor() {
     this.buildApp()
@@ -97,10 +97,6 @@ export default class PsychicServer {
     if (withFrontEndClient) {
       this.frontEndClient = new FrontEndClientServer()
       this.frontEndClient.start(frontEndPort)
-
-      process.on('SIGTERM', () => {
-        this.frontEndClient?.stop()
-      })
     }
 
     const psychicApp = PsychicApplication.getOrFail()
@@ -125,12 +121,33 @@ export default class PsychicServer {
       await hook(this)
     }
 
+    process.on('SIGINT', () => {
+      void this.shutdownAndExit()
+    })
+
+    process.on('SIGTERM', () => {
+      void this.shutdownAndExit()
+    })
+
     return true
   }
 
+  private async shutdownAndExit() {
+    await this.stop()
+    process.exit()
+  }
+
   public async stop({ bypassClosingDbConnections = false }: { bypassClosingDbConnections?: boolean } = {}) {
+    const psychicApp = PsychicApplication.getOrFail()
+    for (const hook of psychicApp.specialHooks.serverShutdown) {
+      await hook(this)
+    }
+
+    this.frontEndClient?.stop()
     this.httpServer?.close()
-    await stopBackgroundWorkers()
+
+    this.cable?.stop()
+    await background.closeAllRedisConnections()
 
     if (!bypassClosingDbConnections) {
       await closeAllDbConnections()
