@@ -15,10 +15,10 @@ import FrontEndClientServer from './front-end-client'
 import startPsychicServer from './helpers/startPsychicServer'
 
 export default class PsychicServer {
-  public app: Application
+  public expressApp: Application
   public cable: Cable
   public frontEndClient: FrontEndClientServer
-  public server: Server
+  public httpServer: Server
   private booted = false
   constructor() {
     this.buildApp()
@@ -29,7 +29,7 @@ export default class PsychicServer {
   }
 
   public async routes() {
-    const r = new PsychicRouter(this.app, this.config)
+    const r = new PsychicRouter(this.expressApp, this.config)
     const psychicApp = PsychicApplication.getOrFail()
     await psychicApp.routesCb(r)
     return r.routes
@@ -40,7 +40,7 @@ export default class PsychicServer {
 
     const psychicApp = PsychicApplication.getOrFail()
 
-    this.app.use((_, res, next) => {
+    this.expressApp.use((_, res, next) => {
       Object.keys(psychicApp.defaultResponseHeaders).forEach(key => {
         res.setHeader(key, psychicApp.defaultResponseHeaders[key]!)
       })
@@ -64,7 +64,7 @@ export default class PsychicServer {
     }
 
     for (const expressInitHook of this.config.specialHooks.expressInit) {
-      await expressInitHook(this.app)
+      await expressInitHook(this)
     }
 
     this.initializeOpenapiValidation()
@@ -72,10 +72,10 @@ export default class PsychicServer {
     await this.buildRoutes()
 
     for (const afterRoutesHook of this.config.specialHooks['after:routes']) {
-      await afterRoutesHook(this.app)
+      await afterRoutesHook(this.expressApp)
     }
 
-    if (this.config.useWs) this.cable = new Cable(this.app, this.config)
+    if (this.config.useWs) this.cable = new Cable(this.expressApp, this.config)
 
     this.booted = true
     return true
@@ -107,20 +107,20 @@ export default class PsychicServer {
       // cable starting will also start
       // an encapsulating http server
       await this.cable.start(port, { withFrontEndClient, frontEndPort })
-      this.server = this.cable.http
+      this.httpServer = this.cable.httpServer
     } else {
       await new Promise(accept => {
         const psychicApp = PsychicApplication.getOrFail()
 
         startPsychicServer({
-          app: this.app,
+          app: this.expressApp,
           port: port || psychicApp.port,
           withFrontEndClient,
           frontEndPort,
           sslCredentials: this.config.sslCredentials,
         })
           .then(server => {
-            this.server = server
+            this.httpServer = server
             accept({})
           })
           .catch(() => {})
@@ -131,7 +131,7 @@ export default class PsychicServer {
   }
 
   public async stop({ bypassClosingDbConnections = false }: { bypassClosingDbConnections?: boolean } = {}) {
-    this.server?.close()
+    this.httpServer?.close()
     await stopBackgroundWorkers()
 
     if (!bypassClosingDbConnections) {
@@ -148,7 +148,7 @@ export default class PsychicServer {
     let server: Server
 
     await new Promise(accept => {
-      server = this.app.listen(port, () => accept({}))
+      server = this.expressApp.listen(port, () => accept({}))
     })
 
     await block()
@@ -159,17 +159,17 @@ export default class PsychicServer {
   }
 
   public buildApp() {
-    this.app = express()
+    this.expressApp = express()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.app.use(cookieParser() as any)
+    this.expressApp.use(cookieParser() as any)
   }
 
   private initializeCors() {
-    this.app.use(cors(this.config.corsOptions))
+    this.expressApp.use(cors(this.config.corsOptions))
   }
 
   private initializeJSON() {
-    this.app.use(express.json(this.config.jsonOptions))
+    this.expressApp.use(express.json(this.config.jsonOptions))
   }
 
   private initializeOpenapiValidation() {
@@ -179,9 +179,9 @@ export default class PsychicServer {
       if (openapiOpts?.validation) {
         const opts = openapiOpts.validation
         opts.apiSpec ||= path.join(psychicApp.apiRoot, 'openapi.json')
-        this.app.use(OpenApiValidator.middleware(opts as Required<typeof opts>))
+        this.expressApp.use(OpenApiValidator.middleware(opts as Required<typeof opts>))
 
-        this.app.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
+        this.expressApp.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
           if (isOpenapiError(err)) {
             if (EnvInternal.isDebug) {
               PsychicApplication.log(JSON.stringify(err))
@@ -204,7 +204,7 @@ export default class PsychicServer {
   }
 
   private async buildRoutes() {
-    const r = new PsychicRouter(this.app, this.config)
+    const r = new PsychicRouter(this.expressApp, this.config)
     const psychicApp = PsychicApplication.getOrFail()
     await psychicApp.routesCb(r)
     r.commit()

@@ -10,14 +10,14 @@ describe('PsychicRouter', () => {
 
     beforeEach(() => {
       server = new PsychicServer()
-      router = new PsychicRouter(server.app, server.config)
+      router = new PsychicRouter(server.expressApp, server.config)
     })
 
     describe('end-to-end specs', () => {
       it('can direct get requests to controller', async () => {
         await server.boot()
 
-        const res = await supertest(server.app).get('/ping').expect(200)
+        const res = await supertest(server.expressApp).get('/ping').expect(200)
 
         expect(res.body).toEqual('helloworld')
       })

@@ -10,7 +10,7 @@ describe('PsychicRouter', () => {
 
     beforeEach(() => {
       server = new PsychicServer()
-      router = new PsychicRouter(server.app, server.config)
+      router = new PsychicRouter(server.expressApp, server.config)
     })
 
     describe('end-to-end specs', () => {
@@ -18,7 +18,7 @@ describe('PsychicRouter', () => {
         const server = new PsychicServer()
         await server.boot()
 
-        const res = await supertest(server.app).put('/ping').expect(200)
+        const res = await supertest(server.expressApp).put('/ping').expect(200)
 
         expect(res.body).toEqual('helloworld')
       })

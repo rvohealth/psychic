@@ -28,12 +28,12 @@ describe('PsychicRouter', () => {
     })
 
     it('raises an exception with a top level route that cannot be inferred', () => {
-      const router = new PsychicRouter(server.app, PsychicApplication.getOrFail())
+      const router = new PsychicRouter(server.expressApp, PsychicApplication.getOrFail())
       expect(() => router.crud('get', '/doesnt-exist')).toThrow(CannotInferControllerFromTopLevelRouteError)
     })
 
     it('raises an exception with a nested route that does not point to an existing controller', () => {
-      const router = new PsychicRouter(server.app, PsychicApplication.getOrFail())
+      const router = new PsychicRouter(server.expressApp, PsychicApplication.getOrFail())
       expect(() => {
         router.namespace('nonexistent-namespace', r => {
           r.resources('users', { only: [] }, r => {

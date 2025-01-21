@@ -6,7 +6,7 @@ describe('PsychicRouter', () => {
     it('can direct post requests to controller', async () => {
       const server = new PsychicServer()
       await server.boot()
-      await supertest(server.app).options('/ping').expect(204)
+      await supertest(server.expressApp).options('/ping').expect(204)
     })
   })
 })

@@ -11,7 +11,7 @@ import { getPsychicHttpInstance } from '../server/helpers/startPsychicServer'
 export default class Cable {
   public app: Application
   public io: socketio.Server | undefined
-  public http: http.Server
+  public httpServer: http.Server
   public useRedis: boolean
   private config: PsychicApplication
   constructor(app: Application, config: PsychicApplication) {
@@ -23,8 +23,8 @@ export default class Cable {
     if (this.io) return
     // for socket.io, we have to circumvent the normal process for starting a
     // psychic server so that we can bind socket.io to the http instance.
-    this.http = getPsychicHttpInstance(this.app, this.config.sslCredentials)
-    this.io = new socketio.Server(this.http, { cors: this.config.corsOptions })
+    this.httpServer = getPsychicHttpInstance(this.app, this.config.sslCredentials)
+    this.io = new socketio.Server(this.httpServer, { cors: this.config.corsOptions })
     this.useRedis = this.config.useRedis
   }
 
@@ -91,7 +91,7 @@ export default class Cable {
     frontEndPort: number
   }) {
     return new Promise(accept => {
-      this.http.listen(port, () => {
+      this.httpServer.listen(port, () => {
         if (!EnvInternal.isTest) {
           log.welcome()
           log.puts('\n')

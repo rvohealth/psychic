@@ -25,33 +25,33 @@ describe('PsychicRouter', () => {
       let router: PsychicRouter
       beforeEach(() => {
         server = new PsychicServer()
-        router = new PsychicRouter(server.app, server.config)
-        jest.spyOn(server.app, 'get')
-        jest.spyOn(server.app, 'post')
-        jest.spyOn(server.app, 'put')
-        jest.spyOn(server.app, 'patch')
-        jest.spyOn(server.app, 'delete')
+        router = new PsychicRouter(server.expressApp, server.config)
+        jest.spyOn(server.expressApp, 'get')
+        jest.spyOn(server.expressApp, 'post')
+        jest.spyOn(server.expressApp, 'put')
+        jest.spyOn(server.expressApp, 'patch')
+        jest.spyOn(server.expressApp, 'delete')
       })
 
       it('renders show, update, and destroy routes for a resource', () => {
         router.resource('users')
         router.commit()
-        expect(server.app.post).toHaveBeenCalledWith('/users', expect.any(Function))
-        expect(server.app.get).toHaveBeenCalledWith('/users', expect.any(Function))
-        expect(server.app.patch).toHaveBeenCalledWith('/users', expect.any(Function))
-        expect(server.app.put).toHaveBeenCalledWith('/users', expect.any(Function))
-        expect(server.app.delete).toHaveBeenCalledWith('/users', expect.any(Function))
+        expect(server.expressApp.post).toHaveBeenCalledWith('/users', expect.any(Function))
+        expect(server.expressApp.get).toHaveBeenCalledWith('/users', expect.any(Function))
+        expect(server.expressApp.patch).toHaveBeenCalledWith('/users', expect.any(Function))
+        expect(server.expressApp.put).toHaveBeenCalledWith('/users', expect.any(Function))
+        expect(server.expressApp.delete).toHaveBeenCalledWith('/users', expect.any(Function))
       })
 
       context('only is passed', () => {
         it('does not call methods that were omitted with only', () => {
           router.resource('users', { only: ['show', 'destroy'] })
           router.commit()
-          expect(server.app.get).toHaveBeenCalledWith('/users', expect.any(Function))
-          expect(server.app.delete).toHaveBeenCalledWith('/users', expect.any(Function))
-          expect(server.app.post).not.toHaveBeenCalled()
-          expect(server.app.patch).not.toHaveBeenCalled()
-          expect(server.app.put).not.toHaveBeenCalled()
+          expect(server.expressApp.get).toHaveBeenCalledWith('/users', expect.any(Function))
+          expect(server.expressApp.delete).toHaveBeenCalledWith('/users', expect.any(Function))
+          expect(server.expressApp.post).not.toHaveBeenCalled()
+          expect(server.expressApp.patch).not.toHaveBeenCalled()
+          expect(server.expressApp.put).not.toHaveBeenCalled()
         })
       })
 
@@ -59,11 +59,11 @@ describe('PsychicRouter', () => {
         it('does not call methods that were omitted with except', () => {
           router.resource('users', { except: ['show', 'update', 'destroy'] })
           router.commit()
-          expect(server.app.get).not.toHaveBeenCalled()
-          expect(server.app.patch).not.toHaveBeenCalled()
-          expect(server.app.put).not.toHaveBeenCalled()
-          expect(server.app.delete).not.toHaveBeenCalled()
-          expect(server.app.post).toHaveBeenCalledWith('/users', expect.any(Function))
+          expect(server.expressApp.get).not.toHaveBeenCalled()
+          expect(server.expressApp.patch).not.toHaveBeenCalled()
+          expect(server.expressApp.put).not.toHaveBeenCalled()
+          expect(server.expressApp.delete).not.toHaveBeenCalled()
+          expect(server.expressApp.post).toHaveBeenCalledWith('/users', expect.any(Function))
         })
       })
 
@@ -86,7 +86,7 @@ describe('PsychicRouter', () => {
             })
           })
           router.commit()
-          expect(server.app.get).toHaveBeenCalledWith('/api/v1/users/hello', expect.any(Function))
+          expect(server.expressApp.get).toHaveBeenCalledWith('/api/v1/users/hello', expect.any(Function))
         })
 
         it('successfully applies nested resource routes', () => {
@@ -94,7 +94,7 @@ describe('PsychicRouter', () => {
             r.get('hello', UsersController, 'hello')
           })
           router.commit()
-          expect(server.app.get).toHaveBeenCalledWith('/users/hello', expect.any(Function))
+          expect(server.expressApp.get).toHaveBeenCalledWith('/users/hello', expect.any(Function))
         })
 
         it('successfully applies double-nested resource resources', () => {
@@ -105,7 +105,7 @@ describe('PsychicRouter', () => {
           })
           router.commit()
 
-          expect(server.app.get).toHaveBeenCalledWith('/users/pets/count', expect.any(Function))
+          expect(server.expressApp.get).toHaveBeenCalledWith('/users/pets/count', expect.any(Function))
         })
       })
     })
