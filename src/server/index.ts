@@ -146,7 +146,7 @@ export default class PsychicServer {
     this.frontEndClient?.stop()
     this.httpServer?.close()
 
-    this.cable?.stop()
+    await this.cable?.stop()
     await background.closeAllRedisConnections()
 
     if (!bypassClosingDbConnections) {

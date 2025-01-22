@@ -82,9 +82,9 @@ export default class Cable {
     })
   }
 
-  public stop() {
+  public async stop() {
     try {
-      this.io?.disconnectSockets()
+      await this.io?.close()
     } catch {
       // noop
     }
