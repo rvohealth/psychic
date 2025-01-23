@@ -11,6 +11,7 @@ import enumsFileStr from './helpers/enumsFileStr'
 import generateRouteTypes from './helpers/generateRouteTypes'
 import printRoutes from './helpers/printRoutes'
 import TypesBuilder from '../cli/helpers/TypesBuilder'
+import { isObject } from '../helpers/typechecks'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
@@ -44,15 +45,28 @@ export default class PsychicBin {
       await this.syncClientEnums()
     }
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    let output: any = {}
+
     for (const hook of psychicApp.specialHooks.sync) {
-      await hook(psychicApp)
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      const res = await hook()
+      if (isObject(res)) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        output = { ...output, ...(res as object) }
+      }
+    }
+
+    if (Object.keys(output as object).length) {
+      await PsychicBin.syncTypes(output)
     }
   }
 
-  public static async syncTypes() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static async syncTypes(customTypes: any = undefined) {
     console.log(`syncing types/psychic.ts...`)
 
-    await TypesBuilder.sync()
+    await TypesBuilder.sync(customTypes)
 
     console.log(`done syncing types/psychic.ts!`)
   }
