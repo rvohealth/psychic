@@ -246,14 +246,14 @@ Try setting it to something valid, like:
 
   private _specialHooks: PsychicApplicationSpecialHooks = {
     sync: [],
-    expressInit: [],
+    serverInit: [],
+    serverInitAfterRoutes: [],
     serverStart: [],
     serverError: [],
     serverShutdown: [],
     workerShutdown: [],
     wsStart: [],
     wsConnect: [],
-    'after:routes': [],
   }
   public get specialHooks() {
     return this._specialHooks
@@ -331,7 +331,7 @@ Try setting it to something valid, like:
                 ? (psychicServer: PsychicServer) => void | Promise<void>
                 : T extends 'workers:shutdown'
                   ? () => void | Promise<void>
-                  : T extends 'after:routes'
+                  : T extends 'server:init:after-routes'
                     ? (app: Application) => void | Promise<void>
                     : (conf: PsychicApplication) => void | Promise<void>,
   ) {
@@ -343,7 +343,7 @@ Try setting it to something valid, like:
         break
 
       case 'server:init':
-        this._specialHooks.expressInit.push(cb as (psychicServer: PsychicServer) => void | Promise<void>)
+        this._specialHooks.serverInit.push(cb as (psychicServer: PsychicServer) => void | Promise<void>)
         break
 
       case 'server:start':
@@ -366,8 +366,8 @@ Try setting it to something valid, like:
         this._specialHooks.wsConnect.push(cb as (socket: Socket) => void | Promise<void>)
         break
 
-      case 'after:routes':
-        this._specialHooks['after:routes'].push(cb as (app: Application) => void | Promise<void>)
+      case 'server:init:after-routes':
+        this._specialHooks.serverInitAfterRoutes.push(cb as (server: PsychicServer) => void | Promise<void>)
         break
 
       case 'sync':
@@ -586,14 +586,14 @@ export type PsychicApplicationOption =
 
 export interface PsychicApplicationSpecialHooks {
   sync: ((psychicApp: PsychicApplication) => void | Promise<void>)[]
-  expressInit: ((server: PsychicServer) => void | Promise<void>)[]
+  serverInit: ((server: PsychicServer) => void | Promise<void>)[]
+  serverInitAfterRoutes: ((server: PsychicServer) => void | Promise<void>)[]
   serverStart: ((server: PsychicServer) => void | Promise<void>)[]
   serverShutdown: ((server: PsychicServer) => void | Promise<void>)[]
   workerShutdown: (() => void | Promise<void>)[]
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
   wsStart: ((server: SocketServer) => void | Promise<void>)[]
   wsConnect: ((socket: Socket) => void | Promise<void>)[]
-  ['after:routes']: ((app: Application) => void | Promise<void>)[]
 }
 
 export interface CustomCookieOptions {
