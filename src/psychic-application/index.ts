@@ -11,7 +11,7 @@ import {
 import bodyParser from 'body-parser'
 import { Queue, QueueOptions, Worker } from 'bullmq'
 import { CorsOptions } from 'cors'
-import { Application, Request, Response } from 'express'
+import { Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import Redis, { Cluster } from 'ioredis'
 import { Socket, Server as SocketServer } from 'socket.io'
@@ -332,7 +332,7 @@ Try setting it to something valid, like:
                 : T extends 'workers:shutdown'
                   ? () => void | Promise<void>
                   : T extends 'server:init:after-routes'
-                    ? (app: Application) => void | Promise<void>
+                    ? (psychicServer: PsychicServer) => void | Promise<void>
                     : (conf: PsychicApplication) => void | Promise<void>,
   ) {
     switch (hookEventType) {
