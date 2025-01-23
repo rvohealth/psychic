@@ -307,13 +307,13 @@ export default async (psy: PsychicApplication) => {
     __forTestingOnly('server:init')
   })
 
-  psy.on('server:start', () => {
-    __forTestingOnly('server:start')
+  // run a callback after routes are done processing
+  psy.on('server:init:after-routes', () => {
+    __forTestingOnly('server:init:after-routes')
   })
 
-  // run a callback after routes are done processing
-  psy.on('after:routes', () => {
-    __forTestingOnly('after:routes')
+  psy.on('server:start', () => {
+    __forTestingOnly('server:start')
   })
 
   // run a callback after the config is loaded

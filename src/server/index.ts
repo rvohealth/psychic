@@ -63,7 +63,7 @@ export default class PsychicServer {
       `)
     }
 
-    for (const expressInitHook of this.config.specialHooks.expressInit) {
+    for (const expressInitHook of this.config.specialHooks.serverInit) {
       await expressInitHook(this)
     }
 
@@ -71,8 +71,8 @@ export default class PsychicServer {
 
     await this.buildRoutes()
 
-    for (const afterRoutesHook of this.config.specialHooks['after:routes']) {
-      await afterRoutesHook(this.expressApp)
+    for (const afterRoutesHook of this.config.specialHooks.serverInitAfterRoutes) {
+      await afterRoutesHook(this)
     }
 
     if (this.config.useWs) this.cable = new Cable(this.expressApp, this.config)

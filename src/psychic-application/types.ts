@@ -1,7 +1,6 @@
 export type UUID = string
 
 export type PsychicHookEventType =
-  | 'after:routes'
   | 'boot'
   | 'sync'
   | 'load'
@@ -9,6 +8,7 @@ export type PsychicHookEventType =
   | 'load:prod'
   | 'load:test'
   | 'server:init'
+  | 'server:init:after-routes'
   | 'server:start'
   | 'server:error'
   | 'server:shutdown'
@@ -23,9 +23,9 @@ export type PsychicHookLoadEventTypes = Exclude<
   | 'ws:start'
   | 'workers:shutdown'
   | 'server:init'
+  | 'server:init:after-routes'
   | 'server:start'
   | 'server:shutdown'
-  | 'after:routes'
   | 'sync'
 >
 
