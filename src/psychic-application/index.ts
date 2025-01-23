@@ -333,7 +333,11 @@ Try setting it to something valid, like:
                   ? () => void | Promise<void>
                   : T extends 'server:init:after-routes'
                     ? (psychicServer: PsychicServer) => void | Promise<void>
-                    : (conf: PsychicApplication) => void | Promise<void>,
+                    : T extends 'sync'
+                      ? // NOTE: this is really any | Promise<any>, but eslint complains about this foolery
+                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                        () => any
+                      : (conf: PsychicApplication) => void | Promise<void>,
   ) {
     switch (hookEventType) {
       case 'server:error':
@@ -371,7 +375,8 @@ Try setting it to something valid, like:
         break
 
       case 'sync':
-        this._specialHooks['sync'].push(cb as (psychicApp: PsychicApplication) => void | Promise<void>)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this._specialHooks['sync'].push(cb as () => any)
         break
 
       default:
@@ -585,7 +590,8 @@ export type PsychicApplicationOption =
   | 'ssl'
 
 export interface PsychicApplicationSpecialHooks {
-  sync: ((psychicApp: PsychicApplication) => void | Promise<void>)[]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  sync: (() => any)[]
   serverInit: ((server: PsychicServer) => void | Promise<void>)[]
   serverInitAfterRoutes: ((server: PsychicServer) => void | Promise<void>)[]
   serverStart: ((server: PsychicServer) => void | Promise<void>)[]

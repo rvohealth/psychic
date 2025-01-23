@@ -377,6 +377,10 @@ export default async (psy: PsychicApplication) => {
   psy.on('ws:connect', () => {
     __forTestingOnly('ws:connect')
   })
+
+  psy.on('sync', () => {
+    return { customField: { customNestedField: 'custom value' } }
+  })
 }
 
 export function __forTestingOnly(message: string) {

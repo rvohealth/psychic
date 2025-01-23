@@ -5,23 +5,26 @@ import background from '../../background'
 import PsychicApplication from '../../psychic-application'
 
 export default class TypesBuilder {
-  public static async sync() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static async sync(customTypes: any = undefined) {
     const dreamApp = DreamApplication.getOrFail()
     const schemaPath = path.join(dreamApp.projectRoot, dreamApp.paths.types, 'psychic.ts')
 
-    await fs.writeFile(schemaPath, this.build())
+    await fs.writeFile(schemaPath, this.build(customTypes))
   }
 
-  public static build() {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static build(customTypes: any = undefined) {
     background.connect()
 
     const psychicApp = PsychicApplication.getOrFail()
 
-    const output: PsychicTypeSync = {
+    const output = {
       workstreamNames: [...background['workstreamNames']],
       queueGroupMap: { ...background['groupNames'] },
       openapiNames: Object.keys(psychicApp.openapi),
-    }
+      ...(customTypes || {}),
+    } as PsychicTypeSync
 
     return `const psychicTypes = ${JSON.stringify(output, null, 2)} as const
 
