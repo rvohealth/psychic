@@ -1,12 +1,7 @@
 import _pluralize from 'pluralize'
 export const pluralize = _pluralize
 
-export { default as background, BackgroundJobConfig, stopBackgroundWorkers } from './background'
-export { default as BaseBackgroundedService } from './background/BaseBackgroundedService'
-export { default as BaseScheduledService } from './background/BaseScheduledService'
-
 export { default as PsychicBin } from './bin'
-export { default as Ws } from './cable/ws'
 export { default as PsychicCLI } from './cli'
 export {
   default as PsychicController,
@@ -79,6 +74,6 @@ export { UUID } from './psychic-application/types'
 export { default as PsychicRouter } from './router'
 export { HttpMethod } from './router/types'
 export { default as PsychicServer } from './server'
-export { getPsychicHttpInstance } from './server/helpers/startPsychicServer'
+export { createPsychicHttpInstance as getPsychicHttpInstance } from './server/helpers/startPsychicServer'
 export { default as Params, ParamValidationError } from './server/params'
 export { default as PsychicSession } from './session'

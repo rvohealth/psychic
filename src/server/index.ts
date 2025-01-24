@@ -5,20 +5,36 @@ import express, { Application, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { Server } from 'http'
 import path from 'path'
-import background from '../background'
-import Cable from '../cable'
 import EnvInternal from '../helpers/EnvInternal'
 import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError'
-import PsychicApplication from '../psychic-application'
+import PsychicApplication, { PsychicSslCredentials } from '../psychic-application'
 import PsychicRouter from '../router'
 import FrontEndClientServer from './front-end-client'
-import startPsychicServer from './helpers/startPsychicServer'
+import startPsychicServer, {
+  createPsychicHttpInstance,
+  StartPsychicServerOptions,
+} from './helpers/startPsychicServer'
+import logo from '../psychic-application/logo'
 
 export default class PsychicServer {
+  public static async startPsychicServer(opts: StartPsychicServerOptions): Promise<Server> {
+    return await startPsychicServer(opts)
+  }
+
+  public static createPsychicHttpInstance(
+    app: Application,
+    sslCredentials: PsychicSslCredentials | undefined,
+  ) {
+    return createPsychicHttpInstance(app, sslCredentials)
+  }
+
+  public static asciiLogo() {
+    return logo()
+  }
+
   public expressApp: Application
   public frontEndClient: FrontEndClientServer
   public httpServer: Server
-  private cable: Cable
   private booted = false
   constructor() {
     this.buildApp()
@@ -75,8 +91,6 @@ export default class PsychicServer {
       await afterRoutesHook(this)
     }
 
-    if (this.config.useWs) this.cable = new Cable(this.expressApp, this.config)
-
     this.booted = true
     return true
   }
@@ -101,11 +115,9 @@ export default class PsychicServer {
 
     const psychicApp = PsychicApplication.getOrFail()
 
-    if (this.config.useWs && this.cable) {
-      // cable starting will also start
-      // an encapsulating http server
-      await this.cable.start(port, { withFrontEndClient, frontEndPort })
-      this.httpServer = this.cable.httpServer
+    const startOverride = psychicApp['overrides']['server:start']
+    if (startOverride) {
+      this.httpServer = await startOverride(this, { port, withFrontEndClient, frontEndPort })
     } else {
       const httpServer = await startPsychicServer({
         app: this.expressApp,
@@ -132,6 +144,14 @@ export default class PsychicServer {
     return true
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public attach(id: string, obj: any) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    this.$attached[id] = obj
+  }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public $attached: Record<string, any> = {}
+
   private async shutdownAndExit() {
     await this.stop()
     process.exit()
@@ -145,9 +165,6 @@ export default class PsychicServer {
 
     this.frontEndClient?.stop()
     this.httpServer?.close()
-
-    await this.cable?.stop()
-    await background.closeAllRedisConnections()
 
     if (!bypassClosingDbConnections) {
       await closeAllDbConnections()

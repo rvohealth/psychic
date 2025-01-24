@@ -1,7 +1,6 @@
 import { DreamApplication } from '@rvohealth/dream'
 import fs from 'fs/promises'
 import path from 'path'
-import background from '../../background'
 import PsychicApplication from '../../psychic-application'
 
 export default class TypesBuilder {
@@ -15,13 +14,9 @@ export default class TypesBuilder {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static build(customTypes: any = undefined) {
-    background.connect()
-
     const psychicApp = PsychicApplication.getOrFail()
 
     const output = {
-      workstreamNames: [...background['workstreamNames']],
-      queueGroupMap: { ...background['groupNames'] },
       openapiNames: Object.keys(psychicApp.openapi),
       ...(customTypes || {}),
     } as PsychicTypeSync
@@ -33,7 +28,5 @@ export default psychicTypes`
 }
 
 export interface PsychicTypeSync {
-  workstreamNames: string[]
-  queueGroupMap: Record<string, string[]>
   openapiNames: string[]
 }

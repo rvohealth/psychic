@@ -1,8 +1,4 @@
 const psychicTypes = {
-  "workstreamNames": [
-    "snazzy"
-  ],
-  "queueGroupMap": {},
   "openapiNames": [
     "default",
     "admin"

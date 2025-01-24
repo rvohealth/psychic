@@ -1,4 +1,4 @@
-import { background, PsychicServer } from '../../../src'
+import { PsychicServer } from '../../../src'
 import { PsychicHookEventType } from '../../../src/psychic-application/types'
 
 describe('PsychicServer hooks', () => {
@@ -31,11 +31,5 @@ describe('PsychicServer hooks', () => {
     await server.start()
     await server.stop()
     expectHookCalled('server:shutdown')
-  })
-
-  it('processes hooks for workers:shutdown', async () => {
-    background.connect()
-    await background.shutdown()
-    expectHookCalled('workers:shutdown')
   })
 })

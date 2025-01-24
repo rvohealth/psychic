@@ -1,12 +1,7 @@
-import { Encrypt } from '@rvohealth/dream'
-import { Queue, Worker } from 'bullmq'
-import Redis from 'ioredis'
 import path from 'path'
 import winston from 'winston'
-import Ws from '../../../src/cable/ws'
 import EnvInternal from '../../../src/helpers/EnvInternal'
 import PsychicApplication from '../../../src/psychic-application'
-import User from '../app/models/User'
 import inflections from './inflections'
 import routesCb from './routes'
 
@@ -171,129 +166,6 @@ export default async (psy: PsychicApplication) => {
     },
   })
 
-  psy.set('background', {
-    providers: {
-      Queue,
-      Worker,
-    },
-
-    defaultBullMQQueueOptions: {
-      defaultJobOptions: {
-        removeOnComplete: 1000,
-        removeOnFail: 20000,
-        // 524,288,000 ms (~6.1 days) using algorithm:
-        // "2 ^ (attempts - 1) * delay"
-        attempts: 20,
-        backoff: {
-          type: 'exponential',
-          delay: 1000,
-        },
-      },
-    },
-
-    // Psychic background API
-    defaultWorkstream: {
-      // https://docs.bullmq.io/guide/parallelism-and-concurrency
-      workerCount: parseInt(process.env.WORKER_COUNT || '0'),
-      concurrency: 100,
-    },
-
-    namedWorkstreams: [{ workerCount: 1, name: 'snazzy', rateLimit: { max: 1, duration: 1 } }],
-    // end: Psychic background API
-
-    // // native BullMQ background API
-    // nativeBullMQ: {
-    //   // defaultQueueOptions: {connection: }
-    //   namedQueueOptions: {
-    //     snazzy: {},
-    //   },
-    //   namedQueueWorkers: { snazzy: {} },
-    // },
-    // // end: native BullMQ background API
-
-    // transitionalWorkstreams: {
-    //   defaultQueueConnection: new Redis({
-    //     username: process.env.REDIS_USER,
-    //     password: process.env.REDIS_PASSWORD,
-    //     host: process.env.REDIS_HOST,
-    //     port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
-    //     tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
-    //     enableOfflineQueue: false,
-    //   }),
-    //   defaultWorkerConnection: new Redis({
-    //     username: process.env.REDIS_USER,
-    //     password: process.env.REDIS_PASSWORD,
-    //     host: process.env.REDIS_HOST,
-    //     port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
-    //     tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
-    //     maxRetriesPerRequest: null,
-    //   }),
-
-    //   namedWorkstreams: [
-    //     {
-    //       workerCount: 1,
-    //       name: 'snazzy',
-    //       rateLimit: { max: 1, duration: 1 },
-    //     },
-    //   ],
-    // },
-
-    defaultQueueConnection: new Redis({
-      username: process.env.REDIS_USER,
-      password: process.env.REDIS_PASSWORD,
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
-      tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
-      enableOfflineQueue: false,
-    }),
-
-    defaultWorkerConnection: new Redis({
-      username: process.env.REDIS_USER,
-      password: process.env.REDIS_PASSWORD,
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
-      tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
-      maxRetriesPerRequest: null,
-    }),
-
-    // To set up a simple cluster on a dev machine for testing:
-    //   https://medium.com/@bertrandoubida/setting-up-redis-cluster-on-macos-cf35a21465a
-    // defaultQueueConnection: new Cluster(
-    //   [6380, 6384, 6385, 6381, 6383, 6382].map(port => ({ host: '127.0.0.1', port })),
-    //   {
-    //     redisOptions: {
-    //       username: process.env.REDIS_USER,
-    //       password: process.env.REDIS_PASSWORD,
-    //       tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
-    //     },
-    //     enableOfflineQueue: false
-    //   },
-    // ),
-    // defaultWorkerConnection: new Cluster(
-    //   [6380, 6384, 6385, 6381, 6383, 6382].map(port => ({ host: '127.0.0.1', port })),
-    //   {
-    //     redisOptions: {
-    //       username: process.env.REDIS_USER,
-    //       password: process.env.REDIS_PASSWORD,
-    //       tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
-    //       maxRetriesPerRequest: null,
-    //     },
-    //   },
-    // ),
-  })
-
-  // redis websocket credentials
-  psy.set('websockets', {
-    connection: new Redis({
-      username: process.env.REDIS_USER,
-      password: process.env.REDIS_PASSWORD,
-      host: process.env.REDIS_HOST,
-      port: process.env.REDIS_PORT ? Number(process.env.REDIS_PORT) : undefined,
-      tls: process.env.REDIS_USE_SSL === '1' ? {} : undefined,
-      maxRetriesPerRequest: null,
-    }),
-  })
-
   // ******
   // HOOKS:
   // ******
@@ -350,32 +222,6 @@ export default async (psy: PsychicApplication) => {
 
   psy.on('server:shutdown', () => {
     __forTestingOnly('server:shutdown')
-  })
-
-  psy.on('workers:shutdown', () => {
-    __forTestingOnly('workers:shutdown')
-  })
-
-  psy.on('ws:start', io => {
-    __forTestingOnly('ws:start')
-
-    io.of('/').on('connection', async socket => {
-      const token = socket.handshake.auth.token as string
-      const userId = Encrypt.decrypt<string>(token, {
-        algorithm: 'aes-256-gcm',
-        key: process.env.APP_ENCRYPTION_KEY!,
-      })!
-      const user = await User.find(userId)
-
-      if (user) {
-        // this automatically fires the /ops/connection-success message
-        await Ws.register(socket, user.id)
-      }
-    })
-  })
-
-  psy.on('ws:connect', () => {
-    __forTestingOnly('ws:connect')
   })
 
   psy.on('sync', () => {
