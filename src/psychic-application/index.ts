@@ -1,20 +1,18 @@
 import {
   DreamApplication,
+  DreamApplicationInitOptions,
   DreamLogLevel,
   DreamLogger,
   Encrypt,
   EncryptAlgorithm,
   EncryptOptions,
   OpenapiSchemaBody,
-  DreamApplicationInitOptions,
 } from '@rvohealth/dream'
 import bodyParser from 'body-parser'
-import { Queue, QueueOptions, Worker } from 'bullmq'
 import { CorsOptions } from 'cors'
 import { Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
-import Redis, { Cluster } from 'ioredis'
-import { Socket, Server as SocketServer } from 'socket.io'
+import http from 'http'
 import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
@@ -28,10 +26,11 @@ import {
   OpenapiSecuritySchemes,
 } from '../openapi-renderer/endpoint'
 import PsychicRouter from '../router'
+import PsychicServer from '../server'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache'
 import loadControllers, { getControllersOrFail } from './helpers/loadControllers'
-import { Either, PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
-import PsychicServer from '../server'
+import lookupClassByGlobalName from './helpers/lookupClassByGlobalName'
+import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
 
 export default class PsychicApplication {
   public static async init(
@@ -69,6 +68,11 @@ export default class PsychicApplication {
     )
 
     return psychicApp!
+  }
+
+  public static lookupClassByGlobalName(name: string) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+    return lookupClassByGlobalName(name)
   }
 
   private static checkKey(encryptionIdentifier: 'cookies', key: string, algorithm: EncryptAlgorithm) {
@@ -126,21 +130,9 @@ Try setting it to something valid, like:
     return this._sessionCookieName
   }
 
-  /**
-   * Returns the background options provided by the user
-   */
-  public get backgroundOptions() {
-    return this._backgroundOptions
-  }
-  private _backgroundOptions: PsychicBackgroundOptions
-
   private _clientRoot: string
   public get clientRoot() {
     return this._clientRoot
-  }
-
-  public get useWs() {
-    return !!this._websocketOptions
   }
 
   private _encryption: PsychicApplicationEncryptionOptions | undefined
@@ -176,11 +168,6 @@ Try setting it to something valid, like:
   private _logger: PsychicLogger = console
   public get logger() {
     return this._logger
-  }
-
-  private _websocketOptions: PsychicWebsocketOptions & { subConnection?: RedisOrRedisClusterConnection }
-  public get websocketOptions() {
-    return this._websocketOptions
   }
 
   private _sslCredentials?: PsychicSslCredentials
@@ -251,12 +238,16 @@ Try setting it to something valid, like:
     serverStart: [],
     serverError: [],
     serverShutdown: [],
-    workerShutdown: [],
-    wsStart: [],
-    wsConnect: [],
   }
   public get specialHooks() {
     return this._specialHooks
+  }
+
+  private _overrides: PsychicApplicationOverrides = {
+    ['server:start']: null,
+  }
+  private get overrides() {
+    return this._overrides
   }
 
   private _loadedControllers: boolean = false
@@ -319,25 +310,19 @@ Try setting it to something valid, like:
     hookEventType: T,
     cb: T extends 'server:error'
       ? (err: Error, req: Request, res: Response) => void | Promise<void>
-      : T extends 'ws:start'
-        ? (server: SocketServer) => void | Promise<void>
-        : T extends 'ws:connect'
-          ? (socket: Socket) => void | Promise<void>
-          : T extends 'server:init'
+      : T extends 'server:init'
+        ? (psychicServer: PsychicServer) => void | Promise<void>
+        : T extends 'server:start'
+          ? (psychicServer: PsychicServer) => void | Promise<void>
+          : T extends 'server:shutdown'
             ? (psychicServer: PsychicServer) => void | Promise<void>
-            : T extends 'server:start'
+            : T extends 'server:init:after-routes'
               ? (psychicServer: PsychicServer) => void | Promise<void>
-              : T extends 'server:shutdown'
-                ? (psychicServer: PsychicServer) => void | Promise<void>
-                : T extends 'workers:shutdown'
-                  ? () => void | Promise<void>
-                  : T extends 'server:init:after-routes'
-                    ? (psychicServer: PsychicServer) => void | Promise<void>
-                    : T extends 'sync'
-                      ? // NOTE: this is really any | Promise<any>, but eslint complains about this foolery
-                        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                        () => any
-                      : (conf: PsychicApplication) => void | Promise<void>,
+              : T extends 'sync'
+                ? // NOTE: this is really any | Promise<any>, but eslint complains about this foolery
+                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  () => any
+                : (conf: PsychicApplication) => void | Promise<void>,
   ) {
     switch (hookEventType) {
       case 'server:error':
@@ -356,18 +341,6 @@ Try setting it to something valid, like:
 
       case 'server:shutdown':
         this._specialHooks.serverShutdown.push(cb as (psychicServer: PsychicServer) => void | Promise<void>)
-        break
-
-      case 'workers:shutdown':
-        this._specialHooks.workerShutdown.push(cb as () => void | Promise<void>)
-        break
-
-      case 'ws:start':
-        this._specialHooks.wsStart.push(cb as (server: SocketServer) => void | Promise<void>)
-        break
-
-      case 'ws:connect':
-        this._specialHooks.wsConnect.push(cb as (socket: Socket) => void | Promise<void>)
         break
 
       case 'server:init:after-routes':
@@ -405,33 +378,29 @@ Try setting it to something valid, like:
                   ? string
                   : Opt extends 'sessionCookieName'
                     ? string
-                    : Opt extends 'background'
-                      ? PsychicBackgroundOptions
-                      : Opt extends 'websockets'
-                        ? PsychicWebsocketOptions
-                        : Opt extends 'clientRoot'
-                          ? string
-                          : Opt extends 'json'
-                            ? bodyParser.Options
-                            : Opt extends 'logger'
-                              ? PsychicLogger
-                              : Opt extends 'client'
-                                ? PsychicClientOptions
-                                : Opt extends 'ssl'
-                                  ? PsychicSslCredentials
-                                  : Opt extends 'openapi'
-                                    ? DefaultPsychicOpenapiOptions
-                                    : Opt extends 'paths'
-                                      ? PsychicPathOptions
-                                      : Opt extends 'port'
-                                        ? number
-                                        : Opt extends 'saltRounds'
-                                          ? number
-                                          : Opt extends 'inflections'
-                                            ? () => void | Promise<void>
-                                            : Opt extends 'routes'
-                                              ? (r: PsychicRouter) => void | Promise<void>
-                                              : never,
+                    : Opt extends 'clientRoot'
+                      ? string
+                      : Opt extends 'json'
+                        ? bodyParser.Options
+                        : Opt extends 'logger'
+                          ? PsychicLogger
+                          : Opt extends 'client'
+                            ? PsychicClientOptions
+                            : Opt extends 'ssl'
+                              ? PsychicSslCredentials
+                              : Opt extends 'openapi'
+                                ? DefaultPsychicOpenapiOptions
+                                : Opt extends 'paths'
+                                  ? PsychicPathOptions
+                                  : Opt extends 'port'
+                                    ? number
+                                    : Opt extends 'saltRounds'
+                                      ? number
+                                      : Opt extends 'inflections'
+                                        ? () => void | Promise<void>
+                                        : Opt extends 'routes'
+                                          ? (r: PsychicRouter) => void | Promise<void>
+                                          : never,
   ): void
   public set<Opt extends PsychicApplicationOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -499,26 +468,6 @@ Try setting it to something valid, like:
         this._logger = value as PsychicLogger
         break
 
-      case 'background':
-        this._backgroundOptions = {
-          ...{
-            providers: {
-              Queue,
-              Worker,
-            },
-          },
-
-          ...(value as PsychicBackgroundOptions),
-        }
-        break
-
-      case 'websockets':
-        this._websocketOptions = {
-          ...(value as PsychicWebsocketOptions),
-          subConnection: (value as PsychicWebsocketOptions | undefined)?.connection?.duplicate(),
-        }
-        break
-
       case 'ssl':
         this._sslCredentials = { ...this.sslCredentials, ...(value as PsychicSslCredentials) }
         break
@@ -557,6 +506,16 @@ Try setting it to something valid, like:
     }
   }
 
+  public override<Override extends keyof PsychicApplicationOverrides>(
+    override: Override,
+    value: PsychicApplicationOverrides[Override],
+  ) {
+    switch (override) {
+      case 'server:start':
+        this.overrides['server:start'] = value
+    }
+  }
+
   private async runHooksFor(hookEventType: PsychicHookLoadEventTypes) {
     for (const hook of this.bootHooks[hookEventType]) {
       await hook(this)
@@ -570,9 +529,6 @@ export type PsychicApplicationOption =
   | 'apiRoot'
   | 'encryption'
   | 'sessionCookieName'
-  | 'background'
-  | 'background:queue'
-  | 'background:worker'
   | 'client'
   | 'clientRoot'
   | 'cookie'
@@ -585,7 +541,6 @@ export type PsychicApplicationOption =
   | 'paths'
   | 'port'
   | 'routes'
-  | 'websockets'
   | 'saltRounds'
   | 'ssl'
 
@@ -596,10 +551,26 @@ export interface PsychicApplicationSpecialHooks {
   serverInitAfterRoutes: ((server: PsychicServer) => void | Promise<void>)[]
   serverStart: ((server: PsychicServer) => void | Promise<void>)[]
   serverShutdown: ((server: PsychicServer) => void | Promise<void>)[]
-  workerShutdown: (() => void | Promise<void>)[]
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
-  wsStart: ((server: SocketServer) => void | Promise<void>)[]
-  wsConnect: ((socket: Socket) => void | Promise<void>)[]
+}
+
+export interface PsychicApplicationOverrides {
+  // a function which overrides the server's default start mechanisms.
+  // by doing so, it must both instantiate its own http.Server instance,
+  // start that instance, and then return the http server, after the instance
+  // has started.
+  ['server:start']:
+    | ((
+        psychicServer: PsychicServer,
+        opts: PsychicServerStartProviderOptions,
+      ) => http.Server | Promise<http.Server>)
+    | null
+}
+
+export interface PsychicServerStartProviderOptions {
+  port: number | undefined
+  withFrontEndClient: boolean
+  frontEndPort: number | undefined
 }
 
 export interface CustomCookieOptions {
@@ -650,191 +621,6 @@ interface PsychicPathOptions {
   apiRoutes?: string
   controllers?: string
   controllerSpecs?: string
-}
-
-interface PsychicWebsocketOptions {
-  connection: Redis
-}
-
-export type RedisOrRedisClusterConnection = Redis | Cluster
-
-export type PsychicBackgroundOptions = Either<
-  PsychicBackgroundSimpleOptions,
-  PsychicBackgroundNativeBullMQOptions
->
-
-interface PsychicBackgroundSharedOptions {
-  /**
-   * If using BullMQ, these can be omitted. However, if you are using
-   * BullMQ Pro, you will need to provide the Queue and Worker
-   * classes custom from them.
-   */
-  providers?: {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Queue: any
-
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    Worker: any
-  }
-
-  defaultBullMQQueueOptions?: Omit<QueueOptions, 'connection'>
-}
-
-export interface PsychicBackgroundSimpleOptions extends PsychicBackgroundSharedOptions {
-  /**
-   * See https://docs.bullmq.io/guide/going-to-production for the different settings to use between
-   * queue and worker connections.
-   */
-  defaultQueueConnection: RedisOrRedisClusterConnection
-  /**
-   * defaultWorkerConnection is only optional when workers will not be activated (e.g. on the webserver)
-   */
-  defaultWorkerConnection?: RedisOrRedisClusterConnection
-
-  /**
-   * Every Psychic application that leverages simple background jobs will have a default
-   * workstream. Set workerCount to set the number of workers that will work through the
-   * default queue
-   */
-  defaultWorkstream?: {
-    workerCount?: number
-    // https://docs.bullmq.io/guide/workers/concurrency
-    concurrency?: number
-  }
-
-  /**
-   * When running background jobs on BullMQ, each named workstream corresponds
-   * to a specific queue and workers created for a named workstream are given
-   * a groupId corresponding to the workstream name
-   *
-   * named workstreams are useful for dispersing queues among nodes in a Redis cluster
-   * and for running queues on different Redis instances
-   *
-   * With BullMQ Pro, named workstreams can be rate limited (useful
-   * for interacting with external APIs)
-   */
-  namedWorkstreams?: PsychicBackgroundWorkstreamOptions[]
-
-  /**
-   * When transitioning from one instance of Redis to another, we can set up transitionalWorkstreams
-   * so that jobs already added to the legacy Redis instance continue to be worked. Once all jobs
-   * from the legacy Redis have been run, this configuration may be removed.
-   */
-  transitionalWorkstreams?: TransitionalPsychicBackgroundSimpleOptions
-}
-
-export type TransitionalPsychicBackgroundSimpleOptions = Omit<
-  PsychicBackgroundSimpleOptions,
-  'providers' | 'defaultBullMQQueueOptions' | 'transitionalWorkstreams'
->
-
-// QueueOptionsWithConnectionInstance instead of QueueOptions because we need to be able to
-// automatically wrap the queue name with {} on a cluster, and the best way to test if on
-// a redis cluster is when we have connection instances, not just connection configs
-export type QueueOptionsWithConnectionInstance = Omit<QueueOptions, 'connection'> & {
-  /**
-   * See https://docs.bullmq.io/guide/going-to-production for the different settings to use between
-   * queue and worker connections.
-   */
-  queueConnection?: RedisOrRedisClusterConnection
-  workerConnection?: RedisOrRedisClusterConnection
-}
-
-export interface PsychicBackgroundNativeBullMQOptions extends PsychicBackgroundSharedOptions {
-  /**
-   * See https://docs.bullmq.io/guide/going-to-production for the different settings to use between
-   * queue and worker connections.
-   */
-  defaultQueueConnection?: RedisOrRedisClusterConnection
-  defaultWorkerConnection?: RedisOrRedisClusterConnection
-
-  nativeBullMQ: {
-    // QueueOptionsWithConnectionInstance instead of QueueOptions because we need to be able to
-    // automatically wrap the queue name with {} on a cluster, and the best way to test if on
-    // a redis cluster is when we have connection instances, not just connection configs
-    defaultQueueOptions?: QueueOptionsWithConnectionInstance
-    /**
-     * named queues are useful for dispersing queues among nodes in a Redis cluster
-     * and for running queues on different Redis instances
-     */
-    namedQueueOptions?: Record<string, QueueOptionsWithConnectionInstance>
-
-    /**
-     * Native BullMQ options to provide to configure the default workers
-     * for psychic. By default, Psychic leverages a single-queue system, with
-     * many workers running off the queue. Each worker receives the
-     * same worker configuration, so this configuration is really
-     * only used to supply the number of default workers that you want.
-     */
-    defaultWorkerOptions?: BullMQNativeWorkerOptions
-
-    /**
-     * The number of default workers to run against the default Psychic
-     * background queues.
-     *
-     * By default, Psychic leverages a single-queue system, with
-     * many workers running off a single queue. This number determines
-     * the number of those default workers to provide.
-     */
-    defaultWorkerCount?: number
-
-    /**
-     * namedQueueWorkers are necessary to work off namedQueues
-     * With BullMQ Pro, namedQueueWorkers can be rate limited (useful
-     * for interacting with external APIs)
-     */
-    namedQueueWorkers?: Record<string, BullMQNativeWorkerOptions>
-  }
-}
-
-export interface PsychicBackgroundWorkstreamOptions {
-  /**
-   * This will be the name of the queue (and the group if using BullMQ Pro)
-   */
-  name: string
-
-  /**
-   * The number of workers you want to run on this configuration
-   */
-  workerCount?: number
-  // https://docs.bullmq.io/guide/workers/concurrency
-  concurrency?: number
-
-  /**
-   * See https://docs.bullmq.io/bullmq-pro/groups/rate-limiting for documentation
-   * on rate limiting in BullMQ Pro (requires paid BullMQ Pro license)
-   */
-  rateLimit?: {
-    max?: number
-    duration?: number
-  }
-
-  /**
-   * Optional redis connection. If not provided, the default background redis connection will be used.
-   * See https://docs.bullmq.io/guide/going-to-production for the different settings to use between
-   * queue and worker connections.
-   */
-  queueConnection?: RedisOrRedisClusterConnection
-  workerConnection?: RedisOrRedisClusterConnection
-}
-
-// worker options gathered by scanning various sub-pages from
-// https://docs.bullmq.io/bullmq-pro/groups
-export interface BullMQNativeWorkerOptions extends WorkerOptions {
-  group?: {
-    id?: string
-    maxSize?: number
-    limit?: {
-      max?: number
-      duration?: number
-    }
-    concurrency?: number
-    priority?: number
-  }
-  // https://docs.bullmq.io/guide/workers/concurrency
-  concurrency?: number
-  // the number of workers to create with this configuration
-  workerCount?: number
 }
 
 export interface PsychicClientOptions {

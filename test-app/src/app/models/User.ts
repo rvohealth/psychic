@@ -6,7 +6,6 @@ import {
   Validates,
   Virtual,
 } from '@rvohealth/dream'
-import { Job } from 'bullmq'
 import { randomBytes, scrypt, timingSafeEqual } from 'crypto'
 import ApplicationModel from './ApplicationModel'
 import Pet from './Pet'
@@ -97,8 +96,6 @@ export default class User extends ApplicationModel {
   @User.HasOne('Post')
   public recentPost: Post | null
 
-  public static backgroundTest() {}
-
   @BeforeCreate()
   @BeforeUpdate()
   public async hashPass() {
@@ -111,13 +108,6 @@ export default class User extends ApplicationModel {
     if (!this.passwordDigest) return false
     return await insecurePasswordCompareSinceBcryptBringsInTooMuchGarbage(password, this.passwordDigest)
   }
-
-  public async testBackground(arg: string, job: Job) {
-    return await this._testBackground(this.id, arg, job)
-  }
-
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars, @typescript-eslint/no-explicit-any
-  public async _testBackground(userId: any, arg: string, job: Job) {}
 }
 
 const keyLength = 64

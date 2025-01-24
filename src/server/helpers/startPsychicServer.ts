@@ -6,21 +6,23 @@ import EnvInternal from '../../helpers/EnvInternal'
 import log from '../../log'
 import { PsychicSslCredentials } from '../../psychic-application'
 
+export interface StartPsychicServerOptions {
+  app: Application
+  port: number
+  withFrontEndClient: boolean
+  frontEndPort: number
+  sslCredentials: PsychicSslCredentials | undefined
+}
+
 export default async function startPsychicServer({
   app,
   port,
   withFrontEndClient,
   frontEndPort,
   sslCredentials,
-}: {
-  app: Application
-  port: number
-  withFrontEndClient: boolean
-  frontEndPort: number
-  sslCredentials: PsychicSslCredentials | undefined
-}): Promise<Server> {
+}: StartPsychicServerOptions): Promise<Server> {
   return await new Promise(accept => {
-    const httpOrHttps = getPsychicHttpInstance(app, sslCredentials)
+    const httpOrHttps = createPsychicHttpInstance(app, sslCredentials)
     const server = httpOrHttps.listen(port, () => {
       welcomeMessage({ port, withFrontEndClient, frontEndPort })
       accept(server)
@@ -28,7 +30,10 @@ export default async function startPsychicServer({
   })
 }
 
-export function getPsychicHttpInstance(app: Application, sslCredentials: PsychicSslCredentials | undefined) {
+export function createPsychicHttpInstance(
+  app: Application,
+  sslCredentials: PsychicSslCredentials | undefined,
+) {
   if (sslCredentials?.key && sslCredentials?.cert) {
     return https.createServer(
       {
