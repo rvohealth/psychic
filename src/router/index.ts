@@ -5,7 +5,6 @@ import PsychicController from '../controller'
 import HttpError from '../error/http'
 import EnvInternal from '../helpers/EnvInternal'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError'
-import log from '../log'
 import PsychicApplication from '../psychic-application'
 import {
   NamespaceConfig,
@@ -337,7 +336,8 @@ export default class PsychicRouter {
       await controllerInstance.runAction(action)
     } catch (error) {
       const err = error as Error
-      if (!EnvInternal.isTest) log.error(err.message)
+      const psychicApp = PsychicApplication.getOrFail()
+      if (!EnvInternal.isTest) psychicApp.logger.error(err.message)
 
       if (errorIsRescuableHttpError(err)) {
         const httpErr = err as HttpError

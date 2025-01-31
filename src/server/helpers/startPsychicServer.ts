@@ -3,8 +3,8 @@ import fs from 'fs'
 import http, { Server } from 'http'
 import https from 'https'
 import EnvInternal from '../../helpers/EnvInternal'
-import log from '../../log'
-import { PsychicSslCredentials } from '../../psychic-application'
+import PsychicApplication, { PsychicSslCredentials } from '../../psychic-application'
+import PsychicServer from '../../server'
 
 export interface StartPsychicServerOptions {
   app: Application
@@ -57,8 +57,9 @@ function welcomeMessage({
   frontEndPort: number
 }) {
   if (!EnvInternal.isTest) {
-    log.welcome()
-    log.puts(`psychic dev server started at port ${port}`)
-    if (withFrontEndClient) log.puts(`client dev server on port ${frontEndPort}`)
+    const psychicApp = PsychicApplication.getOrFail()
+    psychicApp.logger.info(PsychicServer.asciiLogo())
+    psychicApp.logger.info(`psychic dev server started at port ${port}`)
+    if (withFrontEndClient) psychicApp.logger.info(`client dev server on port ${frontEndPort}`)
   }
 }
