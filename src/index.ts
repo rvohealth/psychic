@@ -47,7 +47,6 @@ export { default as generateController } from './generate/controller'
 export { default as generateResource } from './generate/resource'
 export { default as cookieMaxAgeFromCookieOpts } from './helpers/cookieMaxAgeFromCookieOpts'
 export { default as pathifyNestedObject } from './helpers/pathifyNestedObject'
-export { default as log } from './log'
 export {
   MissingControllerActionPairingInRoutes,
   OpenapiContent,
