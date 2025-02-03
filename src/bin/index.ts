@@ -1,17 +1,16 @@
 import { DreamBin } from '@rvohealth/dream'
 import fs from 'fs/promises'
 import path from 'path'
+import TypesBuilder from '../cli/helpers/TypesBuilder'
 import generateController from '../generate/controller'
 import generateResource from '../generate/resource'
-import sspawn from '../helpers/sspawn'
+import { isObject } from '../helpers/typechecks'
 import OpenapiAppRenderer from '../openapi-renderer/app'
 import PsychicApplication from '../psychic-application'
 import PsychicServer from '../server'
 import enumsFileStr from './helpers/enumsFileStr'
 import generateRouteTypes from './helpers/generateRouteTypes'
 import printRoutes from './helpers/printRoutes'
-import TypesBuilder from '../cli/helpers/TypesBuilder'
-import { isObject } from '../helpers/typechecks'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
@@ -38,7 +37,6 @@ export default class PsychicBin {
 
     if (!psychicApp.apiOnly) {
       await PsychicBin.syncOpenapiJson()
-      await PsychicBin.syncOpenapiClientSchema()
     }
 
     if (psychicApp.openapi?.syncEnumsToClient) {
@@ -89,24 +87,6 @@ export default class PsychicBin {
     await generateRouteTypes(routes)
 
     console.log('done syncing routes!')
-  }
-
-  public static async syncOpenapiClientSchema() {
-    console.log('syncing client api schema...')
-    const psychicApp = PsychicApplication.getOrFail()
-
-    const apiPath = path.join(psychicApp.clientRoot, psychicApp.client.apiPath)
-    for (const openapiName in psychicApp.openapi) {
-      const clientApiSchemaFilename = psychicApp.openapi[openapiName]?.clientOutputFilename
-
-      if (clientApiSchemaFilename) {
-        await sspawn(
-          `npx openapi-typescript ${psychicApp.apiRoot}/openapi.json -o ${apiPath}/${clientApiSchemaFilename}`,
-        )
-      }
-    }
-
-    console.log('done syncing client api schema!')
   }
 
   public static async syncClientEnums() {
