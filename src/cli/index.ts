@@ -103,7 +103,6 @@ export default class PsychicCLI {
       .action(async () => {
         await initializePsychicApplication()
         await PsychicBin.syncOpenapiJson()
-        await PsychicBin.syncOpenapiClientSchema()
         process.exit()
       })
   }

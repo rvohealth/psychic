@@ -187,7 +187,6 @@ Try setting it to something valid, like:
 
   private _openapi: Record<string, NamedPsychicOpenapiOptions> = {
     default: {
-      clientOutputFilename: 'openapi.ts',
       outputFilename: 'openapi.json',
       schemaDelimeter: '',
     },
@@ -600,7 +599,6 @@ export interface NamedPsychicOpenapiOptions extends PsychicOpenapiBaseOptions {
 
 interface PsychicOpenapiBaseOptions {
   schemaDelimeter?: string
-  clientOutputFilename?: `${string}.ts`
   suppressResponseEnums?: boolean
   syncEnumsToClient?: boolean
   validation?: Partial<Parameters<(typeof OpenApiValidator)['middleware']>[0]>
