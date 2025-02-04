@@ -1,7 +1,7 @@
 {
   "name": "@rvohealth/psychic",
   "description": "Typescript web framework",
-  "version": "0.20.1",
+  "version": "0.20.2",
   "main": "dist/src/index.js",
   "author": "RVOHealth",
   "repository": "https://github.com/rvohealth/psychic.git",
@@ -61,7 +61,7 @@
     "@eslint/js": "^9.19.0",
     "@jest-mock/express": "^2.1.0",
     "@playwright/test": "^1.49.1",
-    "@rvohealth/dream": "^0.19.2",
+    "@rvohealth/dream": "^0.20.0",
     "@rvohealth/dream-spec-helpers": "^0.0.8",
     "@rvohealth/psychic-spec-helpers": "^0.1.0",
     "@types/express": "^4.17.21",
