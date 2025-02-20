@@ -29,7 +29,14 @@ import {
   CommentWithOneOfArraySerializer,
   CommentWithOneOfObjectSerializer,
 } from '../../../../test-app/src/app/serializers/CommentSerializer'
-import { UserWithPostsMultiType2Serializer } from '../../../../test-app/src/app/serializers/UserSerializer'
+import {
+  UserWithMultipleFlattenedPolymorphicAssociationsSerializer,
+  UserWithOptionalFlattenedPolymorphicPostOrUserSerializer,
+  UserWithPostsMultiType2Serializer,
+} from '../../../../test-app/src/app/serializers/UserSerializer'
+import OpenapiDecoratorTestController from '../../../../test-app/src/app/controllers/OpenapiDecoratorTestsController'
+import Comment from '../../../../test-app/src/app/models/Comment'
+import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../../../../src/error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations'
 
 describe('OpenapiEndpointRenderer', () => {
   describe('#toSchemaObject', () => {
@@ -38,7 +45,7 @@ describe('OpenapiEndpointRenderer', () => {
         serializerKey: 'extra',
       })
 
-      const response = renderer.toSchemaObject({})
+      const response = renderer.toSchemaObject('default', {})
       expect(response).toEqual({
         UserExtra: {
           type: 'object',
@@ -97,7 +104,7 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingString: {
@@ -136,7 +143,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = renderer.toSchemaObject({})
+          const response = renderer.toSchemaObject('default', {})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingString: {
@@ -171,7 +178,7 @@ The following values will be allowed:
           {},
         )
 
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingInteger: {
@@ -198,7 +205,7 @@ The following values will be allowed:
             {},
           )
 
-          const response = renderer.toSchemaObject({})
+          const response = renderer.toSchemaObject('default', {})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingIntegerShorthand: {
@@ -225,7 +232,7 @@ The following values will be allowed:
           {},
         )
 
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDecimal: {
@@ -253,7 +260,7 @@ The following values will be allowed:
             {},
           )
 
-          const response = renderer.toSchemaObject({})
+          const response = renderer.toSchemaObject('default', {})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingDecimalShorthand: {
@@ -281,7 +288,7 @@ The following values will be allowed:
           {},
         )
 
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDouble: {
@@ -310,7 +317,7 @@ The following values will be allowed:
             {},
           )
 
-          const response = renderer.toSchemaObject({})
+          const response = renderer.toSchemaObject('default', {})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingDoubleShorthand: {
@@ -337,7 +344,7 @@ The following values will be allowed:
             {},
           )
 
-          const response = renderer.toSchemaObject({})
+          const response = renderer.toSchemaObject('default', {})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingDoubleArrayShorthand: {
@@ -368,7 +375,7 @@ The following values will be allowed:
           {},
         )
 
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDate: {
@@ -402,7 +409,7 @@ The following values will be allowed:
           {},
         )
 
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDateTime: {
@@ -436,7 +443,7 @@ The following values will be allowed:
           {},
         )
 
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingRootSerializerRef: {
@@ -490,7 +497,7 @@ The following values will be allowed:
           },
         )
 
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingDefaultObjectFields: {
@@ -520,7 +527,7 @@ The following values will be allowed:
             serializerKey: 'default',
           },
         )
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentWithAnyOfObject: {
@@ -545,7 +552,7 @@ The following values will be allowed:
             serializerKey: 'default',
           },
         )
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentWithAllOfObject: {
@@ -570,7 +577,7 @@ The following values will be allowed:
             serializerKey: 'default',
           },
         )
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentWithOneOfObject: {
@@ -595,7 +602,7 @@ The following values will be allowed:
             serializerKey: 'default',
           },
         )
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingObjectWithSerializerRef: {
@@ -650,7 +657,7 @@ The following values will be allowed:
                 serializerKey: 'default',
               },
             )
-            const response = renderer.toSchemaObject({})
+            const response = renderer.toSchemaObject('default', {})
             expect(response).toEqual(
               expect.objectContaining({
                 CommentWithAnyOfArray: {
@@ -680,7 +687,7 @@ The following values will be allowed:
                 serializerKey: 'default',
               },
             )
-            const response = renderer.toSchemaObject({})
+            const response = renderer.toSchemaObject('default', {})
             expect(response).toEqual(
               expect.objectContaining({
                 CommentWithAllOfArray: {
@@ -710,7 +717,7 @@ The following values will be allowed:
                 serializerKey: 'default',
               },
             )
-            const response = renderer.toSchemaObject({})
+            const response = renderer.toSchemaObject('default', {})
             expect(response).toEqual(
               expect.objectContaining({
                 CommentWithOneOfArray: {
@@ -739,7 +746,7 @@ The following values will be allowed:
               serializerKey: 'default',
             },
           )
-          const response = renderer.toSchemaObject({})
+          const response = renderer.toSchemaObject('default', {})
           expect(response).toEqual(
             expect.objectContaining({
               CommentTestingArrayWithSerializerRef: {
@@ -791,7 +798,7 @@ The following values will be allowed:
           serializerKey: 'default',
         })
 
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             Pet: {
@@ -816,13 +823,62 @@ The following values will be allowed:
       })
     })
 
+    context('when rendering a serializer which leverages multiple serializable classes', () => {
+      it('joins the serializable classes with anyOf', () => {
+        const renderer = new OpenapiEndpointRenderer(
+          UserWithPostsMultiType2Serializer,
+          UsersController,
+          'howyadoin',
+          {
+            serializerKey: 'default',
+          },
+        )
+
+        const response = renderer.toSchemaObject('default', {})
+        expect(response).toEqual(
+          expect.objectContaining({
+            UserWithPostsMultiType2: {
+              type: 'object',
+              required: ['id', 'posts'],
+              properties: {
+                id: { type: 'integer' },
+                posts: {
+                  anyOf: [
+                    {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/PostSummary' },
+                    },
+                    {
+                      type: 'array',
+                      items: { $ref: '#/components/schemas/UserSummary' },
+                    },
+                  ],
+                },
+              },
+            },
+
+            PostSummary: {
+              type: 'object',
+              required: ['id'],
+              properties: { id: { type: 'string' } },
+            },
+            UserSummary: {
+              type: 'object',
+              required: ['id'],
+              properties: { id: { type: 'integer' } },
+            },
+          }),
+        )
+      })
+    })
+
     context('with a serializer that contains an association', () => {
       context('RendersOne', () => {
         it('renders the association as a ref, also providing a schema definition for the associated serializer', () => {
           const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'howyadoin', {
             serializerKey: 'withAssociation',
           })
-          const response = renderer.toSchemaObject({})
+          const response = renderer.toSchemaObject('default', {})
           expect(response).toEqual(
             expect.objectContaining({
               PetWithAssociation: {
@@ -850,7 +906,7 @@ The following values will be allowed:
             const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'howyadoin', {
               serializerKey: 'withFlattenedAssociation',
             })
-            const response = renderer.toSchemaObject({})
+            const response = renderer.toSchemaObject('default', {})
 
             expect(response).toEqual(
               expect.objectContaining({
@@ -894,6 +950,32 @@ The following values will be allowed:
               }),
             )
           })
+
+          context('optional=true', () => {
+            it('omits flattened fields from required statement', () => {
+              const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+                serializerKey: 'withOptionalFlattenedPost',
+              })
+              const response = renderer.toSchemaObject('default', {})
+
+              expect(response).toEqual(
+                expect.objectContaining({
+                  UserWithOptionalFlattenedPost: {
+                    type: 'object',
+                    required: ['id'],
+                    properties: {
+                      id: { type: 'string' },
+                      body: { type: 'string', nullable: true },
+                      comments: {
+                        type: 'array',
+                        items: { $ref: '#/components/schemas/Comment' },
+                      },
+                    },
+                  },
+                }),
+              )
+            })
+          })
         })
 
         context('with a nullable RendersOne', () => {
@@ -902,7 +984,7 @@ The following values will be allowed:
               serializerKey: 'withRecentPost',
             })
 
-            const response = renderer.toSchemaObject({})
+            const response = renderer.toSchemaObject('default', {})
             expect(response).toEqual(
               expect.objectContaining({
                 UserWithRecentPost: {
@@ -911,7 +993,7 @@ The following values will be allowed:
                   properties: {
                     id: { type: 'integer' },
                     recentPost: {
-                      allOf: [{ $ref: '#/components/schemas/PostWithRecentComment' }, { nullable: true }],
+                      anyOf: [{ $ref: '#/components/schemas/PostWithRecentComment' }, { type: 'null' }],
                     },
                   },
                 },
@@ -926,7 +1008,7 @@ The following values will be allowed:
               serializerKey: 'withRecentPost',
             })
 
-            const response = renderer.toSchemaObject({})
+            const response = renderer.toSchemaObject('default', {})
             expect(response).toEqual(
               expect.objectContaining({
                 Comment: {
@@ -949,7 +1031,7 @@ The following values will be allowed:
             serializerKey: 'withComments',
           })
 
-          const response = renderer.toSchemaObject({})
+          const response = renderer.toSchemaObject('default', {})
           expect(response).toEqual(
             expect.objectContaining({
               PostWithComments: {
@@ -979,7 +1061,7 @@ The following values will be allowed:
               serializerKey: 'withPosts',
             })
 
-            const response = renderer.toSchemaObject({})
+            const response = renderer.toSchemaObject('default', {})
             expect(response).toEqual(
               expect.objectContaining({
                 Comment: {
@@ -996,7 +1078,7 @@ The following values will be allowed:
         })
       })
 
-      context('rendering an association which contains an array of dreams', () => {
+      context('rendering an association which contains a polymorphic array of dreams', () => {
         it('extracts serializers from each dream, then encases expression in an anyOf, wrapping all identified serializers', () => {
           const renderer = new OpenapiEndpointRenderer(
             UserWithPostsMultiType2Serializer,
@@ -1005,7 +1087,7 @@ The following values will be allowed:
             {},
           )
 
-          const response = renderer.toSchemaObject({})
+          const response = renderer.toSchemaObject('default', {})
           expect(response).toEqual(
             expect.objectContaining({
               UserWithPostsMultiType2: {
@@ -1030,6 +1112,83 @@ The following values will be allowed:
             }),
           )
         })
+
+        context('when flattening a polymorphic array of dreams', () => {
+          it('encases the outer expression in an anyOf', () => {
+            const renderer = new OpenapiEndpointRenderer(
+              UserWithOptionalFlattenedPolymorphicPostOrUserSerializer,
+              UsersController,
+              'howyadoin',
+              {},
+            )
+
+            const response = renderer.toSchemaObject('default', {})
+            expect(response).toEqual(
+              expect.objectContaining({
+                UserWithOptionalFlattenedPolymorphicPostOrUser: {
+                  anyOf: [
+                    {
+                      allOf: [
+                        {
+                          type: 'object',
+                          required: ['id', 'email'],
+                          properties: {
+                            id: { type: 'integer' },
+                            email: { type: 'string' },
+                          },
+                        },
+
+                        { $schema: 'PostSummary' },
+                      ],
+                    },
+                    {
+                      allOf: [
+                        {
+                          type: 'object',
+                          required: ['id', 'email'],
+                          properties: {
+                            id: { type: 'integer' },
+                            email: { type: 'string' },
+                          },
+                        },
+
+                        { $schema: 'CommentSummary' },
+                      ],
+                    },
+                  ],
+                },
+                PostSummary: {
+                  type: 'object',
+                  required: ['id'],
+                  properties: { id: { type: 'string' } },
+                },
+                CommentSummary: {
+                  type: 'object',
+                  required: ['id', 'body'],
+                  properties: {
+                    id: { type: 'string' },
+                    body: { type: 'string', nullable: true },
+                  },
+                },
+              }),
+            )
+          })
+
+          context('when the serializer contains multiple flattened polymiorphic associations', () => {
+            it('raises a targeted exception', () => {
+              const renderer = new OpenapiEndpointRenderer(
+                UserWithMultipleFlattenedPolymorphicAssociationsSerializer,
+                UsersController,
+                'howyadoin',
+                {},
+              )
+
+              expect(() => renderer.toSchemaObject('default', {})).toThrow(
+                CannotFlattenMultiplePolymorphicRendersOneAssociations,
+              )
+            })
+          })
+        })
       })
     })
 
@@ -1048,7 +1207,7 @@ The following values will be allowed:
           },
         )
 
-        const response = renderer.toSchemaObject({})
+        const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
           expect.objectContaining({
             CommentTestingBasicSerializerRef: {
@@ -1077,6 +1236,85 @@ The following values will be allowed:
             },
           }),
         )
+      })
+    })
+
+    context('when responses includes $serializable refs', () => {
+      it('extracts serializers and renders them in components.schemas', () => {
+        const renderer = new OpenapiEndpointRenderer(
+          CommentTestingBasicSerializerRefSerializer,
+          UsersController,
+          'howyadoin',
+          {
+            responses: {
+              201: {
+                $serializable: Comment,
+                key: 'summary',
+              },
+            },
+          },
+        )
+
+        const response = renderer.toSchemaObject('default', {})
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentSummary: {
+              type: 'object',
+              required: ['id', 'body'],
+              properties: {
+                id: { type: 'string' },
+                body: { type: 'string', nullable: true },
+              },
+            },
+          }),
+        )
+      })
+    })
+
+    context('when a controller contains multiple openapiNames', () => {
+      it('renders spec for the given openapiName', () => {
+        const renderer = new OpenapiEndpointRenderer(
+          CommentTestingStringSerializer,
+          OpenapiDecoratorTestController,
+          'testMultipleOpenapiNames',
+          {
+            status: 200,
+          },
+        )
+
+        expect(renderer.toSchemaObject('mobile', {})).toEqual({
+          CommentTestingString: {
+            type: 'object',
+            required: ['howyadoin'],
+            properties: {
+              howyadoin: {
+                type: 'string',
+                format: 'date',
+                pattern: '/^helloworld$/',
+                minLength: 2,
+                maxLength: 4,
+                description: '\nThe following values will be allowed:\n  hello,\n  world',
+              },
+            },
+          },
+        })
+
+        expect(renderer.toSchemaObject('admin', {})).toEqual({
+          CommentTestingString: {
+            type: 'object',
+            required: ['howyadoin'],
+            properties: {
+              howyadoin: {
+                type: 'string',
+                enum: ['hello', 'world'],
+                format: 'date',
+                pattern: '/^helloworld$/',
+                minLength: 2,
+                maxLength: 4,
+              },
+            },
+          },
+        })
       })
     })
   })

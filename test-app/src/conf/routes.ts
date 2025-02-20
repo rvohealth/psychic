@@ -11,6 +11,7 @@ import PetsController from '../app/controllers/PetsController'
 import ScopeTestController from '../app/controllers/ScopeTestController'
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController'
 import UsersController from '../app/controllers/UsersController'
+import OpenapiDecoratorTestController from '../app/controllers/OpenapiDecoratorTestsController'
 
 export default (r: PsychicRouter) => {
   r.get('circular', CircularController, 'hello')
@@ -26,6 +27,8 @@ export default (r: PsychicRouter) => {
   r.post('cast-param-test', ParamsTestController, 'testCastParam')
   r.post('openapi-validation-test', ParamsTestController, 'testOpenapiValidation')
   r.get('users/howyadoin', UsersController, 'howyadoin')
+  r.get('openapi/multiple-openapi-names', OpenapiDecoratorTestController, 'testMultipleOpenapiNames')
+
   r.resources('users', r => {
     r.resources('pets', { only: [] })
     r.get('ping', UsersController, 'ping')

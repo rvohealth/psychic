@@ -1,6 +1,8 @@
 import { Attribute, DreamColumn, DreamSerializer, RendersMany, RendersOne } from '@rvohealth/dream'
 import Post from '../models/Post'
 import User from '../models/User'
+import Comment from '../models/Comment'
+import Pet from '../models/Pet'
 
 export class UserSummarySerializer extends DreamSerializer {
   @Attribute(User)
@@ -44,6 +46,30 @@ export class UserWithPostsSerializer extends UserSummarySerializer {
 export class UserWithFlattenedPostSerializer extends UserSummarySerializer {
   @RendersOne(Post, { serializerKey: 'withComments', flatten: true })
   public post: Post
+}
+
+export class UserWithOptionalFlattenedPostSerializer extends UserSummarySerializer {
+  @RendersOne(Post, { serializerKey: 'withComments', flatten: true, optional: true })
+  public post: Post
+}
+
+export class UserWithOptionalFlattenedPolymorphicPostOrUserSerializer extends UserSummarySerializer {
+  @RendersOne([Post, Comment], { serializerKey: 'summary', flatten: true, optional: true })
+  public post: Post | Comment
+
+  @Attribute('string')
+  public email: string
+}
+
+export class UserWithMultipleFlattenedPolymorphicAssociationsSerializer extends UserSummarySerializer {
+  @RendersOne([Post, Comment], { serializerKey: 'summary', flatten: true, optional: true })
+  public post: Post | Comment
+
+  @RendersOne([User, Pet], { serializerKey: 'summary', flatten: true, optional: true })
+  public userOrPet: User | Pet
+
+  @Attribute('string')
+  public email: string
 }
 
 export class UserWithPostsMultiType2Serializer extends UserSummarySerializer {

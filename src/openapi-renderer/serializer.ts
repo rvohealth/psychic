@@ -4,7 +4,7 @@ import {
   OpenapiSchemaArray,
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
-  OpenapiSchemaExpressionAllOf,
+  OpenapiSchemaExpressionAnyOf,
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
   OpenapiSchemaObjectBase,
@@ -12,12 +12,14 @@ import {
   SerializableTypes,
   uniq,
 } from '@rvohealth/dream'
+import PsychicController from '../controller'
+import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations'
 import EnvInternal from '../helpers/EnvInternal'
 import PsychicApplication from '../psychic-application'
 import OpenapiBodySegmentRenderer from './body-segment'
-import PsychicController from '../controller'
 
 export default class OpenapiSerializerRenderer {
+  private openapiName: string
   private controllerClass: typeof PsychicController
   private serializerClass: typeof DreamSerializer
   private serializers: { [key: string]: typeof DreamSerializer }
@@ -32,6 +34,7 @@ export default class OpenapiSerializerRenderer {
    * within nested openapi objects
    */
   constructor({
+    openapiName,
     controllerClass,
     serializerClass,
     serializers,
@@ -39,6 +42,7 @@ export default class OpenapiSerializerRenderer {
     processedSchemas,
     target,
   }: {
+    openapiName: string
     controllerClass: typeof PsychicController
     serializerClass: typeof DreamSerializer
     serializers: { [key: string]: typeof DreamSerializer }
@@ -46,6 +50,7 @@ export default class OpenapiSerializerRenderer {
     processedSchemas: Record<string, boolean>
     target: OpenapiBodyTarget
   }) {
+    this.openapiName = openapiName
     this.controllerClass = controllerClass
     this.serializerClass = serializerClass
     this.serializers = serializers
@@ -99,6 +104,7 @@ export default class OpenapiSerializerRenderer {
     openApiShape?: SerializableTypes
   }): OpenapiEndpointParseResults {
     return new OpenapiBodySegmentRenderer({
+      openapiName: this.openapiName,
       controllerClass: this.controllerClass,
       bodySegment: openApiShape,
       serializers: this.serializers,
@@ -126,6 +132,7 @@ export default class OpenapiSerializerRenderer {
     const associations = this.serializerClass['associationStatements']
 
     let finalOutput = { ...serializerPayload }
+    let flattenedPolymorphicSchemas: string[] = []
 
     associations.forEach(association => {
       const associatedSerializers = DreamSerializer.getAssociatedSerializersForOpenapi(association)
@@ -144,16 +151,30 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
         })
       } else {
         // leverage anyOf to handle an array of serializers
-        finalOutput = this.addMultiSerializerAssociationToOutput({
+        const data = this.addMultiSerializerAssociationToOutput({
           association,
           serializerKey,
           finalOutput,
           associatedSerializers,
+          flattenedPolymorphicSchemas,
         })
+        finalOutput = data.finalOutput
+        flattenedPolymorphicSchemas = data.flattenedPolymorphicSchemas
       }
     })
 
-    return finalOutput
+    if (flattenedPolymorphicSchemas.length) {
+      return {
+        ...finalOutput,
+        [serializerKey]: {
+          anyOf: flattenedPolymorphicSchemas.map(schema => ({
+            allOf: [{ ...finalOutput[serializerKey] }, { $schema: schema }],
+          })),
+        },
+      } as Record<string, OpenapiSchemaObject>
+    } else {
+      return finalOutput
+    }
   }
 
   /**
@@ -208,10 +229,12 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
           ;(finalOutput as any)[serializerKey].properties = flattenedData
 
-          finalOutput[serializerKey].required = uniq([
-            ...(finalOutput[serializerKey].required || []),
-            ...Object.keys(flattenedData),
-          ])
+          if (!association.optional) {
+            finalOutput[serializerKey].required = uniq([
+              ...(finalOutput[serializerKey].required || []),
+              ...Object.keys(flattenedData),
+            ])
+          }
         } else {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
           ;(finalOutput as any)[serializerKey].properties![association.field] = this.accountForNullableOption(
@@ -230,6 +253,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     }
 
     const associatedSchema = new OpenapiSerializerRenderer({
+      openapiName: this.openapiName,
       controllerClass: this.controllerClass,
       serializerClass: associatedSerializer,
       serializers: this.serializers,
@@ -261,6 +285,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     },
   ): Record<string, OpenapiSchemaObject> {
     const serialized = new OpenapiSerializerRenderer({
+      openapiName: this.openapiName,
       controllerClass: this.controllerClass,
       serializerClass: associatedSerializer,
       serializers: this.serializers,
@@ -290,67 +315,97 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     finalOutput,
     serializerKey,
     association,
+    flattenedPolymorphicSchemas,
   }: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     associatedSerializers: (typeof DreamSerializer<any, any>)[]
     finalOutput: Record<string, OpenapiSchemaObject>
     serializerKey: string
     association: DreamSerializerAssociationStatement
+    flattenedPolymorphicSchemas: string[]
   }) {
-    const anyOf: (OpenapiSchemaExpressionRef | OpenapiSchemaArray)[] = []
+    if (association.flatten) {
+      if (flattenedPolymorphicSchemas.length)
+        throw new CannotFlattenMultiplePolymorphicRendersOneAssociations(
+          this.serializerClass,
+          association.field,
+        )
+      // TODO: handle required
 
-    associatedSerializers.forEach(associatedSerializer => {
-      const associatedSerializerKey = associatedSerializer.openapiName
+      associatedSerializers.forEach(associatedSerializer => {
+        const associatedSchema = new OpenapiSerializerRenderer({
+          openapiName: this.openapiName,
+          controllerClass: this.controllerClass,
+          serializerClass: associatedSerializer,
+          serializers: this.serializers,
+          schemaDelimeter: this.schemaDelimeter,
+          processedSchemas: this.processedSchemas,
+          target: this.target,
+        }).parse()
+        finalOutput = { ...finalOutput, ...associatedSchema }
+      })
 
-      if (EnvInternal.isDebug) PsychicApplication.log(`Processing serializer ${associatedSerializerKey}`)
-
-      finalOutput[serializerKey].required = uniq([
-        ...(finalOutput[serializerKey].required || []),
-        association.field,
-      ])
-
-      switch (association.type) {
-        case 'RendersMany':
-          anyOf.push({
-            type: 'array',
-            items: {
-              $ref: `#/components/schemas/${associatedSerializerKey}`,
-            },
-          })
-          break
-
-        case 'RendersOne':
-          anyOf.push({
-            $ref: `#/components/schemas/${associatedSerializerKey}`,
-          })
-          break
+      return {
+        finalOutput,
+        flattenedPolymorphicSchemas: associatedSerializers.map(ser => ser.openapiName),
       }
+    } else {
+      const anyOf: (OpenapiSchemaExpressionRef | OpenapiSchemaArray)[] = []
 
-      const associatedSchema = new OpenapiSerializerRenderer({
-        controllerClass: this.controllerClass,
-        serializerClass: associatedSerializer,
-        serializers: this.serializers,
-        schemaDelimeter: this.schemaDelimeter,
-        processedSchemas: this.processedSchemas,
-        target: this.target,
-      }).parse()
+      associatedSerializers.forEach(associatedSerializer => {
+        const associatedSerializerKey = associatedSerializer.openapiName
 
-      finalOutput = { ...finalOutput, ...associatedSchema }
-    })
+        if (EnvInternal.isDebug) PsychicApplication.log(`Processing serializer ${associatedSerializerKey}`)
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-    ;(finalOutput as any)[serializerKey].properties![association.field] = {
-      anyOf,
+        finalOutput[serializerKey].required = uniq([
+          ...(finalOutput[serializerKey].required || []),
+          association.field,
+        ])
+
+        switch (association.type) {
+          case 'RendersMany':
+            anyOf.push({
+              type: 'array',
+              items: {
+                $ref: `#/components/schemas/${associatedSerializerKey}`,
+              },
+            })
+            break
+
+          case 'RendersOne':
+            anyOf.push({
+              $ref: `#/components/schemas/${associatedSerializerKey}`,
+            })
+            break
+        }
+
+        const associatedSchema = new OpenapiSerializerRenderer({
+          openapiName: this.openapiName,
+          controllerClass: this.controllerClass,
+          serializerClass: associatedSerializer,
+          serializers: this.serializers,
+          schemaDelimeter: this.schemaDelimeter,
+          processedSchemas: this.processedSchemas,
+          target: this.target,
+        }).parse()
+
+        finalOutput = { ...finalOutput, ...associatedSchema }
+      })
+
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+      ;(finalOutput as any)[serializerKey].properties![association.field] = {
+        anyOf,
+      }
     }
 
-    return finalOutput
+    return { finalOutput, flattenedPolymorphicSchemas: [] }
   }
 
-  private accountForNullableOption<T>(bodySegment: T, nullable: boolean): T | OpenapiSchemaExpressionAllOf {
+  private accountForNullableOption<T>(bodySegment: T, nullable: boolean): T | OpenapiSchemaExpressionAnyOf {
     if (nullable) {
       return {
-        allOf: [bodySegment, { nullable: true }],
-      } as OpenapiSchemaExpressionAllOf
+        anyOf: [bodySegment, { type: 'null' }],
+      } as OpenapiSchemaExpressionAnyOf
     } else {
       return bodySegment
     }

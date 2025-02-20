@@ -52,6 +52,7 @@ export default async (psy: PsychicApplication) => {
 
   // set options to configure openapi integration
   psy.set('openapi', {
+    servers: [{ url: 'howyadoin.com', variables: { region: { default: 'a', enum: ['a', 'b'] } } }],
     syncEnumsToClient: true,
     defaults: {
       headers: {
@@ -62,6 +63,9 @@ export default async (psy: PsychicApplication) => {
       },
 
       responses: {
+        418: {
+          $ref: '#/components/responses/CustomResponse',
+        },
         490: {
           $ref: '#/components/responses/CustomResponse',
         },
@@ -97,6 +101,11 @@ export default async (psy: PsychicApplication) => {
         },
       },
     },
+  })
+
+  psy.set('openapi', 'mobile', {
+    outputFilename: 'mobile.openapi.json',
+    suppressResponseEnums: true,
   })
 
   psy.set('openapi', 'admin', {

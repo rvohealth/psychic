@@ -194,8 +194,8 @@ export default class PsychicController {
     return `${this.globalName.replace(/^controllers\//, '').replace(/Controller$/, '')}#${methodName.toString()}`
   }
 
-  public static get openapiName(): PsychicOpenapiNames<PsychicController> {
-    return 'default'
+  public static get openapiNames(): PsychicOpenapiNames<PsychicController>[] {
+    return ['default']
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

@@ -25,6 +25,7 @@ describe('OpenapiSerializerRenderer', () => {
   describe('#parse', () => {
     const subject = (serializerClass: typeof DreamSerializer) =>
       new OpenapiSerializerRenderer({
+        openapiName: 'default',
         controllerClass: ApplicationController,
         serializerClass,
         serializers: {},

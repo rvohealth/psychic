@@ -23,6 +23,7 @@ export default class User extends ApplicationModel {
       withPosts: 'UserWithPostsSerializer',
       withRecentPost: 'UserWithRecentPostSerializer',
       withFlattenedPost: 'UserWithFlattenedPostSerializer',
+      withOptionalFlattenedPost: 'UserWithOptionalFlattenedPostSerializer',
     }
   }
 

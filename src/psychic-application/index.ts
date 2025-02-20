@@ -24,6 +24,7 @@ import {
   OpenapiResponses,
   OpenapiSecurity,
   OpenapiSecuritySchemes,
+  OpenapiServer,
 } from '../openapi-renderer/endpoint'
 import PsychicRouter from '../router'
 import PsychicServer from '../server'
@@ -598,6 +599,7 @@ export interface NamedPsychicOpenapiOptions extends PsychicOpenapiBaseOptions {
 }
 
 interface PsychicOpenapiBaseOptions {
+  servers?: OpenapiServer[]
   schemaDelimeter?: string
   suppressResponseEnums?: boolean
   syncEnumsToClient?: boolean

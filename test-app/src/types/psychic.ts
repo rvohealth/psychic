@@ -1,6 +1,7 @@
 const psychicTypes = {
   "openapiNames": [
     "default",
+    "mobile",
     "admin"
   ],
   "customField": {
