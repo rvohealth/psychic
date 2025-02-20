@@ -1,4 +1,5 @@
 import {
+  Dream,
   DreamSerializer,
   OpenapiPrimitiveTypes,
   OpenapiSchemaArray,
@@ -16,17 +17,19 @@ import {
   OpenapiSchemaShorthandExpressionAllOf,
   OpenapiSchemaShorthandExpressionAnyOf,
   OpenapiSchemaShorthandExpressionOneOf,
+  OpenapiSchemaShorthandExpressionSerializableRef,
   OpenapiSchemaShorthandExpressionSerializerRef,
   OpenapiSchemaShorthandPrimitiveGeneric,
   OpenapiShorthandPrimitiveTypes,
   SerializableTypes,
   compact,
+  inferSerializerFromDreamOrViewModel,
   openapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream'
+import PsychicController from '../controller'
 import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
 import isBlankDescription from './helpers/isBlankDescription'
 import OpenapiSerializerRenderer from './serializer'
-import PsychicController from '../controller'
 
 export default class OpenapiBodySegmentRenderer {
   private controllerClass: typeof PsychicController
@@ -36,6 +39,7 @@ export default class OpenapiBodySegmentRenderer {
   private computedExtraComponents: { [key: string]: OpenapiSchemaObject } = {}
   private processedSchemas: Record<string, boolean>
   private target: OpenapiBodyTarget
+  private openapiName: string
 
   /**
    * @internal
@@ -44,6 +48,7 @@ export default class OpenapiBodySegmentRenderer {
    * within nested openapi objects
    */
   constructor({
+    openapiName,
     controllerClass,
     bodySegment,
     serializers,
@@ -51,6 +56,7 @@ export default class OpenapiBodySegmentRenderer {
     processedSchemas,
     target,
   }: {
+    openapiName: string
     controllerClass: typeof PsychicController
     bodySegment: OpenapiBodySegment
     serializers: { [key: string]: typeof DreamSerializer }
@@ -58,6 +64,7 @@ export default class OpenapiBodySegmentRenderer {
     processedSchemas: Record<string, boolean>
     target: OpenapiBodyTarget
   }) {
+    this.openapiName = openapiName
     this.controllerClass = controllerClass
     this.bodySegment = bodySegment
     this.serializers = serializers
@@ -119,6 +126,9 @@ export default class OpenapiBodySegmentRenderer {
       case '$serializer':
         return this.serializerStatement(bodySegment)
 
+      case '$serializable':
+        return this.serializableStatement(bodySegment)
+
       case 'unknown_object':
         return this.unknownObjectStatement(bodySegment)
 
@@ -143,9 +153,11 @@ export default class OpenapiBodySegmentRenderer {
     const refBodySegment = bodySegment as OpenapiSchemaExpressionRef
     const schemaRefBodySegment = bodySegment as OpenapiSchemaExpressionRefSchemaShorthand
     const serializerRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializerRef
+    const serializableRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializableRef
 
     if (isBlankDescription(bodySegment)) return 'blank_description'
     if (serializerRefBodySegment.$serializer) return '$serializer'
+    if (serializableRefBodySegment.$serializable) return '$serializable'
     if (refBodySegment.$ref) return '$ref'
     if (schemaRefBodySegment.$schema) return '$schema'
     if (oneOfBodySegment.oneOf) return 'oneOf'
@@ -393,7 +405,7 @@ export default class OpenapiBodySegmentRenderer {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         anyObj?.type === 'string' &&
         this.target === 'response' &&
-        psychicApp.openapi?.[this.controllerClass.openapiName as string]?.suppressResponseEnums
+        psychicApp.openapi?.[this.openapiName]?.suppressResponseEnums
       ) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const enums = anyObj.enum as string[] | null
@@ -439,6 +451,7 @@ The following values will be allowed:
     this.computedExtraComponents = {
       ...this.computedExtraComponents,
       ...new OpenapiSerializerRenderer({
+        openapiName: this.openapiName,
         controllerClass: this.controllerClass,
         serializerClass: serializerRefBodySegment.$serializer,
         serializers: this.serializers,
@@ -470,6 +483,27 @@ The following values will be allowed:
         }
       }
     }
+  }
+
+  private serializableStatement(
+    bodySegment: OpenapiBodySegment,
+  ): OpenapiSchemaExpressionRef | OpenapiSchemaArray | OpenapiSchemaExpressionAllOf {
+    const serializableRef = bodySegment as OpenapiSchemaShorthandExpressionSerializableRef
+    const key = serializableRef.key || 'default'
+    const serializerClass = inferSerializerFromDreamOrViewModel(
+      serializableRef.$serializable.prototype as Dream,
+      key,
+    )
+
+    if (!serializerClass)
+      throw new Error(
+        `Failed to locate serializers getter from: ${serializableRef.$serializable.name} using key: ${key}`,
+      )
+
+    return this.serializerStatement({
+      $serializer: serializerClass,
+      ...serializableRef,
+    })
   }
 
   /**

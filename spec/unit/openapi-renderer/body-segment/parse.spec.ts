@@ -7,6 +7,7 @@ describe('OpenapiBodySegmentRenderer', () => {
   describe('#parse', () => {
     const subject = (bodySegment: OpenapiBodySegment) =>
       new OpenapiBodySegmentRenderer({
+        openapiName: 'default',
         controllerClass: ApplicationController,
         bodySegment,
         serializers: {},

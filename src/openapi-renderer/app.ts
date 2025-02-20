@@ -20,12 +20,14 @@ export default class OpenapiAppRenderer {
     const openapiContents = await OpenapiAppRenderer.toObject()
 
     const psychicApp = PsychicApplication.getOrFail()
-    for (const key in psychicApp.openapi) {
+    const asyncWriteOpenapiFile = async (key: string) => {
       const jsonPath = openapiJsonPath(key)
       await fs.writeFile(jsonPath, JSON.stringify(openapiContents[key], null, 2), {
         flag: 'w+',
       })
     }
+
+    await Promise.all(Object.keys(psychicApp.openapi).map(key => asyncWriteOpenapiFile(key)))
   }
 
   /**
@@ -38,10 +40,14 @@ export default class OpenapiAppRenderer {
   public static async toObject(): Promise<Record<string, OpenapiSchema>> {
     const psychicApp = PsychicApplication.getOrFail()
 
-    const output: Record<string, OpenapiSchema> = {}
-    for (const key in psychicApp.openapi) {
+    const convertToObjectAndStoreInOutput = async (output: Record<string, OpenapiSchema>, key: string) => {
       output[key] = await this._toObject(key)
     }
+
+    const output: Record<string, OpenapiSchema> = {}
+    await Promise.all(
+      Object.keys(psychicApp.openapi).map(key => convertToObjectAndStoreInOutput(output, key)),
+    )
 
     return output
   }
@@ -64,7 +70,7 @@ export default class OpenapiAppRenderer {
     }
 
     const finalOutput: OpenapiSchema = {
-      openapi: '3.0.2',
+      openapi: '3.1.0',
       info: {
         version: packageJson.version,
         title: packageJson.name,
@@ -85,6 +91,10 @@ export default class OpenapiAppRenderer {
       },
     }
 
+    if (psychicApp.openapi?.[openapiName]?.servers) {
+      finalOutput.servers = psychicApp.openapi?.[openapiName]?.servers
+    }
+
     if (psychicApp.openapi?.[openapiName]?.defaults?.securitySchemes) {
       finalOutput.components = {
         // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
@@ -97,8 +107,8 @@ export default class OpenapiAppRenderer {
       finalOutput.security = psychicApp.openapi?.[openapiName].defaults.security
     }
 
-    for (const [controllerName, controller] of Object.entries(controllers).filter(
-      ([, controller]) => controller.openapiName === openapiName,
+    for (const [controllerName, controller] of Object.entries(controllers).filter(([, controller]) =>
+      controller.openapiNames.includes(openapiName),
     )) {
       for (const key of Object.keys(controller.openapi || {})) {
         if (EnvInternal.isDebug) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
@@ -107,10 +117,10 @@ export default class OpenapiAppRenderer {
 
         finalOutput.components.schemas = {
           ...finalOutput.components.schemas,
-          ...renderer.toSchemaObject(processedSchemas),
+          ...renderer.toSchemaObject(openapiName, processedSchemas),
         }
 
-        const endpointPayload = renderer.toPathObject(processedSchemas, routes)
+        const endpointPayload = renderer.toPathObject(openapiName, processedSchemas, routes)
         const path = Object.keys(endpointPayload)[0]
 
         const method = (Object.keys(endpointPayload[path]) as HttpMethod[]).find(key =>

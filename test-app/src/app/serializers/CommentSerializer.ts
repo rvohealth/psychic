@@ -177,6 +177,14 @@ export class CommentTestingBasicArraySerializerRefSerializer extends DreamSerial
   public howyadoin: string
 }
 
+export class CommentTestingBasicArraySerializableRefSerializer extends DreamSerializer {
+  @Attribute({
+    $serializable: Comment,
+    many: true,
+  })
+  public howyadoin: string
+}
+
 export class CommentTestingRootSerializerRefSerializer extends DreamSerializer {
   @Attribute({
     $serializer: CommentTestingDoubleShorthandSerializer,

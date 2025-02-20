@@ -90,7 +90,7 @@ export default class UsersController extends ApplicationController {
   }
 
   public async login() {
-    const user = await User.findBy({ email: this.param('email') })
+    const user = await User.findBy({ email: this.castParam('email', 'string') })
     if (!user || !(await user.checkPassword(this.param('password')))) this.notFound()
 
     this.startSession(user!)

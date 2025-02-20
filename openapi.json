@@ -1,7 +1,7 @@
 {
-  "openapi": "3.0.2",
+  "openapi": "3.1.0",
   "info": {
-    "version": "0.19.0",
+    "version": "0.21.0",
     "title": "@rvohealth/psychic",
     "description": "Typescript web framework"
   },
@@ -45,6 +45,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
           },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
@@ -99,6 +102,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
           },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
@@ -403,6 +409,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
           },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
@@ -716,6 +725,9 @@
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
           },
@@ -768,6 +780,9 @@
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
           },
@@ -819,6 +834,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
           },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
@@ -880,6 +898,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
           },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
@@ -1005,6 +1026,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
           },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
@@ -1132,6 +1156,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
           },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
@@ -1443,6 +1470,9 @@
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
           },
@@ -1484,6 +1514,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
           },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
@@ -1545,6 +1578,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
           },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
@@ -1837,6 +1873,9 @@
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
           },
@@ -1868,6 +1907,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
           },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
@@ -1928,6 +1970,9 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
           },
           "422": {
             "$ref": "#/components/responses/ValidationErrors"
@@ -2213,6 +2258,20 @@
       }
     }
   },
+  "servers": [
+    {
+      "url": "howyadoin.com",
+      "variables": {
+        "region": {
+          "default": "a",
+          "enum": [
+            "a",
+            "b"
+          ]
+        }
+      }
+    }
+  ],
   "security": [
     {
       "bearerToken": []

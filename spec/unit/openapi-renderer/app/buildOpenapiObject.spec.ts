@@ -10,12 +10,13 @@ describe('OpenapiAppRenderer', () => {
 
         expect(response.default).toEqual(
           expect.objectContaining({
-            openapi: '3.0.2',
+            openapi: '3.1.0',
             info: {
               version: packageJson.version,
               title: packageJson.name,
               description: packageJson.description,
             },
+            servers: [{ url: 'howyadoin.com', variables: { region: { default: 'a', enum: ['a', 'b'] } } }],
             security: [{ bearerToken: [] }],
           }),
         )
@@ -414,7 +415,7 @@ describe('OpenapiAppRenderer', () => {
 
         expect(response.admin).toEqual(
           expect.objectContaining({
-            openapi: '3.0.2',
+            openapi: '3.1.0',
             info: {
               version: packageJson.version,
               title: packageJson.name,

@@ -10,7 +10,7 @@ spec/support/generators/**/*
 .github/
 dist/
 openapi.json
-admin.openapi.json
+*.openapi.json
 .yarn/
 .yarnrc.yml
 
