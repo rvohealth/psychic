@@ -96,6 +96,13 @@ export class CommentTestingDefaultObjectFieldsSerializer extends DreamSerializer
   public howyadoin: string | boolean
 }
 
+export class CommentTestingDefaultNullFieldsSerializer extends DreamSerializer {
+  @Attribute({
+    oneOf: [{ type: 'null' }, { type: 'string' }],
+  })
+  public howyadoin: null
+}
+
 export class CommentTestingIntegerSerializer extends DreamSerializer {
   @Attribute({
     type: 'integer',
