@@ -13,6 +13,7 @@ import {
   CommentTestingDateTimeSerializer,
   CommentTestingDecimalSerializer,
   CommentTestingDecimalShorthandSerializer,
+  CommentTestingDefaultNullFieldsSerializer,
   CommentTestingDefaultObjectFieldsSerializer,
   CommentTestingDoubleArrayShorthandSerializer,
   CommentTestingDoubleSerializer,
@@ -479,6 +480,32 @@ The following values will be allowed:
                     $ref: '#/components/schemas/CommentTestingDoubleShorthand',
                   },
                   nullable: true,
+                },
+              },
+            },
+          }),
+        )
+      })
+    })
+
+    context('with a null type passed', () => {
+      it('supports type: null statements', () => {
+        const renderer = new OpenapiEndpointRenderer(
+          CommentTestingDefaultNullFieldsSerializer,
+          UsersController,
+          'howyadoin',
+          {},
+        )
+
+        const response = renderer.toSchemaObject('default', {})
+        expect(response).toEqual(
+          expect.objectContaining({
+            CommentTestingDefaultNullFields: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  oneOf: [{ type: 'null' }, { type: 'string' }],
                 },
               },
             },
