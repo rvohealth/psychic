@@ -748,8 +748,8 @@ export default class OpenapiEndpointRenderer<
       : this.openapiOpts(openapiName)?.defaults?.responses || {}
 
     const psychicAndConfigLevelDefaults = cloneDeep({
-      ...defaultResponses,
       ...DEFAULT_OPENAPI_RESPONSES,
+      ...defaultResponses,
     })
 
     Object.keys(psychicAndConfigLevelDefaults).forEach(key => {

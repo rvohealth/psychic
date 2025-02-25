@@ -133,6 +133,7 @@ export default class OpenapiSerializerRenderer {
 
     let finalOutput = { ...serializerPayload }
     let flattenedPolymorphicSchemas: string[] = []
+    let flattenedPolymorphicAssociation: DreamSerializerAssociationStatement
 
     associations.forEach(association => {
       const associatedSerializers = DreamSerializer.getAssociatedSerializersForOpenapi(association)
@@ -157,21 +158,43 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
           finalOutput,
           associatedSerializers,
           flattenedPolymorphicSchemas,
+          flattenedPolymorphicAssociation,
         })
         finalOutput = data.finalOutput
         flattenedPolymorphicSchemas = data.flattenedPolymorphicSchemas
+        if (data.flattenedPolymorphicAssociation) {
+          flattenedPolymorphicAssociation = data.flattenedPolymorphicAssociation
+        }
       }
     })
 
-    if (flattenedPolymorphicSchemas.length) {
-      return {
-        ...finalOutput,
-        [serializerKey]: {
-          anyOf: flattenedPolymorphicSchemas.map(schema => ({
-            allOf: [{ ...finalOutput[serializerKey] }, { $schema: schema }],
-          })),
-        },
-      } as Record<string, OpenapiSchemaObject>
+    if (flattenedPolymorphicSchemas.length && flattenedPolymorphicAssociation!) {
+      if (flattenedPolymorphicAssociation.optional) {
+        return {
+          ...finalOutput,
+          [serializerKey]: {
+            anyOf: [
+              { ...finalOutput[serializerKey] },
+              {
+                allOf: [
+                  { ...finalOutput[serializerKey] },
+                  { anyOf: flattenedPolymorphicSchemas.map(schema => ({ $schema: schema })) },
+                ],
+              },
+            ],
+          },
+        } as Record<string, OpenapiSchemaObject>
+      } else {
+        return {
+          ...finalOutput,
+          [serializerKey]: {
+            allOf: [
+              { ...finalOutput[serializerKey] },
+              { anyOf: flattenedPolymorphicSchemas.map(schema => ({ $schema: schema })) },
+            ],
+          },
+        } as Record<string, OpenapiSchemaObject>
+      }
     } else {
       return finalOutput
     }
@@ -316,6 +339,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     serializerKey,
     association,
     flattenedPolymorphicSchemas,
+    flattenedPolymorphicAssociation,
   }: {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     associatedSerializers: (typeof DreamSerializer<any, any>)[]
@@ -323,6 +347,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     serializerKey: string
     association: DreamSerializerAssociationStatement
     flattenedPolymorphicSchemas: string[]
+    flattenedPolymorphicAssociation: DreamSerializerAssociationStatement | null
   }) {
     if (association.flatten) {
       if (flattenedPolymorphicSchemas.length)
@@ -330,7 +355,6 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
           this.serializerClass,
           association.field,
         )
-      // TODO: handle required
 
       associatedSerializers.forEach(associatedSerializer => {
         const associatedSchema = new OpenapiSerializerRenderer({
@@ -348,6 +372,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
       return {
         finalOutput,
         flattenedPolymorphicSchemas: associatedSerializers.map(ser => ser.openapiName),
+        flattenedPolymorphicAssociation: association,
       }
     } else {
       const anyOf: (OpenapiSchemaExpressionRef | OpenapiSchemaArray)[] = []
@@ -398,7 +423,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
       }
     }
 
-    return { finalOutput, flattenedPolymorphicSchemas: [] }
+    return { finalOutput, flattenedPolymorphicSchemas, flattenedPolymorphicAssociation }
   }
 
   private accountForNullableOption<T>(bodySegment: T, nullable: boolean): T | OpenapiSchemaExpressionAnyOf {
