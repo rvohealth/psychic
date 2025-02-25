@@ -33,6 +33,7 @@ import {
   UserWithMultipleFlattenedPolymorphicAssociationsSerializer,
   UserWithOptionalFlattenedPolymorphicPostOrUserSerializer,
   UserWithPostsMultiType2Serializer,
+  UserWithRequiredFlattenedPolymorphicPostOrUserSerializer,
 } from '../../../../test-app/src/app/serializers/UserSerializer'
 import OpenapiDecoratorTestController from '../../../../test-app/src/app/controllers/OpenapiDecoratorTestsController'
 import Comment from '../../../../test-app/src/app/models/Comment'
@@ -1116,7 +1117,7 @@ The following values will be allowed:
         context('when flattening a polymorphic array of dreams', () => {
           it('encases the outer expression in an anyOf', () => {
             const renderer = new OpenapiEndpointRenderer(
-              UserWithOptionalFlattenedPolymorphicPostOrUserSerializer,
+              UserWithRequiredFlattenedPolymorphicPostOrUserSerializer,
               UsersController,
               'howyadoin',
               {},
@@ -1125,36 +1126,18 @@ The following values will be allowed:
             const response = renderer.toSchemaObject('default', {})
             expect(response).toEqual(
               expect.objectContaining({
-                UserWithOptionalFlattenedPolymorphicPostOrUser: {
-                  anyOf: [
+                UserWithRequiredFlattenedPolymorphicPostOrUser: {
+                  allOf: [
                     {
-                      allOf: [
-                        {
-                          type: 'object',
-                          required: ['id', 'email'],
-                          properties: {
-                            id: { type: 'integer' },
-                            email: { type: 'string' },
-                          },
-                        },
-
-                        { $schema: 'PostSummary' },
-                      ],
+                      type: 'object',
+                      required: ['id', 'email'],
+                      properties: {
+                        id: { type: 'integer' },
+                        email: { type: 'string' },
+                      },
                     },
-                    {
-                      allOf: [
-                        {
-                          type: 'object',
-                          required: ['id', 'email'],
-                          properties: {
-                            id: { type: 'integer' },
-                            email: { type: 'string' },
-                          },
-                        },
 
-                        { $schema: 'CommentSummary' },
-                      ],
-                    },
+                    { anyOf: [{ $schema: 'PostSummary' }, { $schema: 'CommentSummary' }] },
                   ],
                 },
                 PostSummary: {
@@ -1172,6 +1155,62 @@ The following values will be allowed:
                 },
               }),
             )
+          })
+
+          context('with an optional flattened association', () => {
+            it('encases the outer expression in an anyOf', () => {
+              const renderer = new OpenapiEndpointRenderer(
+                UserWithOptionalFlattenedPolymorphicPostOrUserSerializer,
+                UsersController,
+                'howyadoin',
+                {},
+              )
+
+              const response = renderer.toSchemaObject('default', {})
+              expect(response).toEqual(
+                expect.objectContaining({
+                  UserWithOptionalFlattenedPolymorphicPostOrUser: {
+                    anyOf: [
+                      {
+                        type: 'object',
+                        required: ['id', 'email'],
+                        properties: {
+                          id: { type: 'integer' },
+                          email: { type: 'string' },
+                        },
+                      },
+                      {
+                        allOf: [
+                          {
+                            type: 'object',
+                            required: ['id', 'email'],
+                            properties: {
+                              id: { type: 'integer' },
+                              email: { type: 'string' },
+                            },
+                          },
+
+                          { anyOf: [{ $schema: 'PostSummary' }, { $schema: 'CommentSummary' }] },
+                        ],
+                      },
+                    ],
+                  },
+                  PostSummary: {
+                    type: 'object',
+                    required: ['id'],
+                    properties: { id: { type: 'string' } },
+                  },
+                  CommentSummary: {
+                    type: 'object',
+                    required: ['id', 'body'],
+                    properties: {
+                      id: { type: 'string' },
+                      body: { type: 'string', nullable: true },
+                    },
+                  },
+                }),
+              )
+            })
           })
 
           context('when the serializer contains multiple flattened polymiorphic associations', () => {

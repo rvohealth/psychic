@@ -53,6 +53,14 @@ export class UserWithOptionalFlattenedPostSerializer extends UserSummarySerializ
   public post: Post
 }
 
+export class UserWithRequiredFlattenedPolymorphicPostOrUserSerializer extends UserSummarySerializer {
+  @RendersOne([Post, Comment], { serializerKey: 'summary', flatten: true })
+  public post: Post | Comment
+
+  @Attribute('string')
+  public email: string
+}
+
 export class UserWithOptionalFlattenedPolymorphicPostOrUserSerializer extends UserSummarySerializer {
   @RendersOne([Post, Comment], { serializerKey: 'summary', flatten: true, optional: true })
   public post: Post | Comment
