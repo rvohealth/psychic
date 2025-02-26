@@ -1006,7 +1006,7 @@ The following values will be allowed:
           })
         })
 
-        context('with a nullable RendersOne', () => {
+        context('with an optional RendersOne', () => {
           it('treats association as nullable', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               serializerKey: 'withRecentPost',
