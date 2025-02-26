@@ -86,6 +86,6 @@ export class UserWithPostsMultiType2Serializer extends UserSummarySerializer {
 }
 
 export class UserWithRecentPostSerializer extends UserSummarySerializer {
-  @RendersOne(Post, { nullable: true, serializerKey: 'withRecentComment' })
+  @RendersOne(Post, { optional: true, serializerKey: 'withRecentComment' })
   public recentPost: Post | null
 }

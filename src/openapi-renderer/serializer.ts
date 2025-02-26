@@ -264,7 +264,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
             {
               $ref: `#/components/schemas/${associatedSerializerKey}`,
             },
-            association.nullable,
+            association.optional,
           )
 
           finalOutput[serializerKey].required = uniq([
