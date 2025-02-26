@@ -98,14 +98,20 @@ export default class OpenapiEndpointRenderer<
     this.responses = responses
     this.serializerKey = serializerKey
     this.status = status
-    this.tags = tags
     this.security = security
     this.pathParams = pathParams
     this.summary = summary
     this.description = description
     this.nullable = nullable
-    this.omitDefaultHeaders = omitDefaultHeaders
-    this.omitDefaultResponses = omitDefaultResponses
+    this.tags = tags === undefined ? controllerClass.openapiConfig?.tags || [] : tags
+    this.omitDefaultHeaders =
+      omitDefaultHeaders === undefined
+        ? controllerClass.openapiConfig?.omitDefaultHeaders || false
+        : omitDefaultHeaders
+    this.omitDefaultResponses =
+      omitDefaultResponses === undefined
+        ? controllerClass.openapiConfig?.omitDefaultResponses || false
+        : omitDefaultResponses
     this.defaultResponse = defaultResponse
   }
 
@@ -747,10 +753,12 @@ export default class OpenapiEndpointRenderer<
       ? {}
       : this.openapiOpts(openapiName)?.defaults?.responses || {}
 
-    const psychicAndConfigLevelDefaults = cloneDeep({
-      ...DEFAULT_OPENAPI_RESPONSES,
-      ...defaultResponses,
-    })
+    const psychicAndConfigLevelDefaults = this.omitDefaultResponses
+      ? {}
+      : cloneDeep({
+          ...DEFAULT_OPENAPI_RESPONSES,
+          ...defaultResponses,
+        })
 
     Object.keys(psychicAndConfigLevelDefaults).forEach(key => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any

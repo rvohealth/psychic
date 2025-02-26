@@ -5,7 +5,7 @@ export { default as PsychicBin } from './bin'
 export { default as PsychicCLI } from './cli'
 export {
   default as PsychicController,
-  PsychicOpenapiNames,
+  PsychicOpenapiControllerConfig,
   PsychicParamsDictionary,
   PsychicParamsPrimitive,
 } from './controller'

@@ -976,6 +976,7 @@ export const globalSchema = {
       'CommentTestingDateTimeSerializer',
       'CommentTestingDecimalSerializer',
       'CommentTestingDecimalShorthandSerializer',
+      'CommentTestingDefaultNullFieldsSerializer',
       'CommentTestingDefaultObjectFieldsSerializer',
       'CommentTestingDoubleArrayShorthandSerializer',
       'CommentTestingDoubleSerializer',
@@ -1013,7 +1014,8 @@ export const globalSchema = {
       'UserWithOptionalFlattenedPostSerializer',
       'UserWithPostsMultiType2Serializer',
       'UserWithPostsSerializer',
-      'UserWithRecentPostSerializer'
+      'UserWithRecentPostSerializer',
+      'UserWithRequiredFlattenedPolymorphicPostOrUserSerializer'
     ],
   },
 } as const

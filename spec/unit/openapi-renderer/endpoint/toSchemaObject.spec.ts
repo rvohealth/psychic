@@ -1,7 +1,10 @@
 import { describe as context } from '@jest/globals'
+import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../../../../src/error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
 import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
+import OpenapiDecoratorTestController from '../../../../test-app/src/app/controllers/OpenapiDecoratorTestsController'
 import UsersController from '../../../../test-app/src/app/controllers/UsersController'
+import Comment from '../../../../test-app/src/app/models/Comment'
 import Pet from '../../../../test-app/src/app/models/Pet'
 import Post from '../../../../test-app/src/app/models/Post'
 import User from '../../../../test-app/src/app/models/User'
@@ -36,9 +39,6 @@ import {
   UserWithPostsMultiType2Serializer,
   UserWithRequiredFlattenedPolymorphicPostOrUserSerializer,
 } from '../../../../test-app/src/app/serializers/UserSerializer'
-import OpenapiDecoratorTestController from '../../../../test-app/src/app/controllers/OpenapiDecoratorTestsController'
-import Comment from '../../../../test-app/src/app/models/Comment'
-import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../../../../src/error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations'
 
 describe('OpenapiEndpointRenderer', () => {
   describe('#toSchemaObject', () => {

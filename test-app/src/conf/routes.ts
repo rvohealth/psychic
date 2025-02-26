@@ -12,6 +12,7 @@ import ScopeTestController from '../app/controllers/ScopeTestController'
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController'
 import UsersController from '../app/controllers/UsersController'
 import OpenapiDecoratorTestController from '../app/controllers/OpenapiDecoratorTestsController'
+import OpenapiOverridesTestController from '../app/controllers/OpenapiOverridesTestsController'
 
 export default (r: PsychicRouter) => {
   r.get('circular', CircularController, 'hello')
@@ -28,6 +29,7 @@ export default (r: PsychicRouter) => {
   r.post('openapi-validation-test', ParamsTestController, 'testOpenapiValidation')
   r.get('users/howyadoin', UsersController, 'howyadoin')
   r.get('openapi/multiple-openapi-names', OpenapiDecoratorTestController, 'testMultipleOpenapiNames')
+  r.get('openapi/openapi-overrides', OpenapiOverridesTestController, 'testOpenapiConfigOverrides')
 
   r.resources('users', r => {
     r.resources('pets', { only: [] })
