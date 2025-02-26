@@ -9,12 +9,16 @@ import UsersController from '../../../../test-app/src/app/controllers/UsersContr
 import Pet from '../../../../test-app/src/app/models/Pet'
 import Post from '../../../../test-app/src/app/models/Post'
 import User from '../../../../test-app/src/app/models/User'
-import { CommentTestingDoubleShorthandSerializer } from '../../../../test-app/src/app/serializers/CommentSerializer'
+import {
+  CommentTestingDoubleShorthandSerializer,
+  CommentTestingStringSerializer,
+} from '../../../../test-app/src/app/serializers/CommentSerializer'
 import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer'
 import UserSerializer, {
   UserWithPostsSerializer,
 } from '../../../../test-app/src/app/serializers/UserSerializer'
 import initializePsychicApplication from '../../../../test-app/src/cli/helpers/initializePsychicApplication'
+import OpenapiOverridesTestController from '../../../../test-app/src/app/controllers/OpenapiOverridesTestsController'
 
 describe('OpenapiEndpointRenderer', () => {
   let routes: RouteConfig[]
@@ -1841,6 +1845,38 @@ The following values will be allowed:
               },
             }),
           )
+        })
+      })
+    })
+
+    context('when a controller contains overrides', () => {
+      it('those overrides supercede defaults', () => {
+        const renderer = new OpenapiEndpointRenderer(
+          CommentTestingStringSerializer,
+          OpenapiOverridesTestController,
+          'testOpenapiConfigOverrides',
+          {
+            status: 200,
+          },
+        )
+
+        expect(renderer.toPathObject('default', {}, routes)).toEqual({
+          '/openapi/openapi-overrides': expect.objectContaining({
+            parameters: [],
+            get: expect.objectContaining({
+              responses: {
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/CommentTestingString' },
+                    },
+                  },
+                  description: 'Success',
+                },
+              },
+              tags: ['hello', 'world'],
+            }) as object,
+          }) as object,
         })
       })
     })

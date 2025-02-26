@@ -914,6 +914,20 @@
         }
       }
     },
+    "/openapi/openapi-overrides": {
+      "parameters": [],
+      "get": {
+        "tags": [
+          "hello",
+          "world"
+        ],
+        "responses": {
+          "200": {
+            "description": "Success"
+          }
+        }
+      }
+    },
     "/pets": {
       "parameters": [
         {

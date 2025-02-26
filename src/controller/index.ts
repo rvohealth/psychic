@@ -194,8 +194,12 @@ export default class PsychicController {
     return `${this.globalName.replace(/^controllers\//, '').replace(/Controller$/, '')}#${methodName.toString()}`
   }
 
-  public static get openapiNames(): PsychicOpenapiNames<PsychicController>[] {
+  public static get openapiNames(): PsychicOpenapiNames<PsychicController> {
     return ['default']
+  }
+
+  public static get openapiConfig(): PsychicOpenapiControllerConfig {
+    return {}
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -741,9 +745,15 @@ export const controllerSerializerIndex = new ControllerSerializerIndex()
 // leverage the key values to enforce a valid serializerKey
 export type RenderOptions = { serializerKey?: string }
 
+export type PsychicOpenapiControllerConfig = {
+  omitDefaultHeaders?: boolean
+  omitDefaultResponses?: boolean
+  tags?: string[]
+}
+
 export type PsychicOpenapiNames<
   T extends PsychicController,
   PsyTypes extends T['psychicTypes'] = T['psychicTypes'],
   OpenapiNames extends PsyTypes['openapiNames'] = PsyTypes['openapiNames'],
   OpenapiName extends OpenapiNames[number] = OpenapiNames[number],
-> = OpenapiName
+> = OpenapiName[]
