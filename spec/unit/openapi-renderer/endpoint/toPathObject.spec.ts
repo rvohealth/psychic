@@ -156,7 +156,7 @@ describe('OpenapiEndpointRenderer', () => {
     })
 
     context('query', () => {
-      it('renders params within the parameters array', () => {
+      it('renders params within the parameters array, automatically applying allowReserved: true', () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
           query: {
             search: {
@@ -177,6 +177,7 @@ describe('OpenapiEndpointRenderer', () => {
                   in: 'query',
                   name: 'search',
                   required: true,
+                  allowReserved: true,
                   description: 'the search term',
                   schema: {
                     type: 'string',
@@ -186,6 +187,35 @@ describe('OpenapiEndpointRenderer', () => {
             }),
           }),
         )
+      })
+
+      context('allowReserved is explicitly set to false', () => {
+        it('sets allowReserved: false', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+            query: {
+              search: {
+                required: true,
+                description: 'the search term',
+                allowReserved: false,
+              },
+            },
+          })
+
+          const response = renderer.toPathObject('default', {}, routes)
+          expect(response).toEqual(
+            expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              '/users/howyadoin': expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                parameters: expect.arrayContaining([
+                  expect.objectContaining({
+                    allowReserved: false,
+                  }),
+                ]),
+              }),
+            }),
+          )
+        })
       })
 
       context('custom type is provided', () => {
@@ -211,6 +241,7 @@ describe('OpenapiEndpointRenderer', () => {
                     in: 'query',
                     name: 'search',
                     required: true,
+                    allowReserved: true,
                     description: 'the search term',
                     schema: {
                       type: 'array',
@@ -290,6 +321,7 @@ describe('OpenapiEndpointRenderer', () => {
                       type: 'string',
                     },
                     allowEmptyValue: true,
+                    allowReserved: true,
                   },
                 ]),
               }),
