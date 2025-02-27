@@ -7,6 +7,7 @@ export {
   default as PsychicController,
   PsychicOpenapiControllerConfig,
   PsychicParamsDictionary,
+  PsychicOpenapiNames,
   PsychicParamsPrimitive,
 } from './controller'
 export { BeforeAction, OpenAPI } from './controller/decorators'
