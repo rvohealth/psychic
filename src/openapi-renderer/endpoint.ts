@@ -379,6 +379,7 @@ export default class OpenapiEndpointRenderer<
           in: 'query',
           name: queryName,
           description: queryParam.description || queryName,
+          allowReserved: true,
           ...queryParam,
           schema: {
             type: 'string',
