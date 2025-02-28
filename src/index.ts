@@ -12,6 +12,7 @@ export {
 } from './controller'
 export { BeforeAction, OpenAPI } from './controller/decorators'
 export { default as envLoader } from './env/Loader'
+export { default as I18nProvider } from './i18n/provider'
 
 export { default as HttpStatusBadGateway } from './error/http/BadGateway'
 export { default as HttpStatusBadRequest } from './error/http/BadRequest'
