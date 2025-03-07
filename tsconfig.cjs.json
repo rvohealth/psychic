@@ -1,0 +1,4 @@
+{
+  "extends": "./tsconfig.cjs.build.json",
+  "include": ["src/**/*", "shared/**/*", "test-app/**/*", "spec/**/*"]
+}

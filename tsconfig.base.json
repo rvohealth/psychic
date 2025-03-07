@@ -1,0 +1,21 @@
+{
+  "compilerOptions": {
+    "declaration": true,
+    "forceConsistentCasingInFileNames": true,
+    "module": "ESNext",
+    "target": "ESNext",
+    "moduleResolution": "Node",
+    "noImplicitAny": true,
+    "resolveJsonModule": true,
+    /* rootDir and outDir together help maintain dist/src folder */
+    "rootDir": "./",
+    "skipLibCheck": true,
+    "strict": true,
+    "strictNullChecks": true,
+    /* do not require all properties to be initialized in constructor */
+    "strictPropertyInitialization": false,
+    /* TRYING TO GET DREAM WORKING with useDefineForClassFields set to true */
+    "useDefineForClassFields": true
+  },
+  "include": ["src/**/*", "shared/**/*"]
+}
