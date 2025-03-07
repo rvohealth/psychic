@@ -1193,27 +1193,14 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvohealth/dream@npm:0.28.0":
-  version: 0.28.0
-  resolution: "@rvohealth/dream@npm:0.28.0::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40rvohealth%2Fdream%2F0.28.0%2Ff6fb57f7bf0f1aeeb96d61f7e20b6c3ea4345152"
+"@rvohealth/dream@npm:=0.29.0-fgbeta-2":
+  version: 0.29.0-fgbeta-2
+  resolution: "@rvohealth/dream@npm:0.29.0-fgbeta-2::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40rvohealth%2Fdream%2F0.29.0-fgbeta-2%2F3015cb3a21e0394f35d66a6f2d8631598168c784"
   dependencies:
-    "@types/lodash.clonedeep": "npm:^4.5.9"
-    "@types/lodash.clonedeepwith": "npm:^4.5.9"
-    "@types/lodash.isempty": "npm:^4.4.9"
-    "@types/lodash.sortby": "npm:^4.7.9"
-    "@types/lodash.uniq": "npm:^4.5.9"
-    "@types/lodash.uniqwith": "npm:^4.5.9"
-    "@types/pluralize": "npm:^0.0.33"
     colorette: "npm:^2.0.20"
     commander: "npm:^12.1.0"
     dotenv: "npm:^16.4.5"
-    lodash.clonedeep: "npm:^4.5.0"
-    lodash.clonedeepwith: "npm:^4.5.0"
-    lodash.isempty: "npm:^4.4.0"
-    lodash.sortby: "npm:^4.7.0"
-    lodash.uniq: "npm:^4.5.0"
-    lodash.uniqwith: "npm:^4.5.0"
-    pluralize: "npm:^8.0.0"
+    pluralize-esm: "npm:^9.0.5"
   peerDependencies:
     "@rvohealth/dream-spec-helpers": "*"
     "@types/luxon": ^3.4.2
@@ -1225,7 +1212,7 @@ __metadata:
     pg: "*"
   bin:
     dream: ./dist/src/global-cli/dream.js
-  checksum: 10c0/dde2f32292f386848b7195c2ccab6ea8261a37c95a7694802c9d3d5a059f8f78194a529ef8a383d4e19e5366a159b50611c4b04f17809358f9962e4ca97e0ae4
+  checksum: 10c0/2da41e0e10b805f1491dd26a1ffb4cc7f3d32e6473ea972652ec9a41fee07e255cb64302b71a040cd2b8b66eaf626dfd8b95f8a5d75861708efcd84dea153313
   languageName: node
   linkType: hard
 
@@ -1254,7 +1241,7 @@ __metadata:
     "@eslint/js": "npm:^9.19.0"
     "@jest-mock/express": "npm:^2.1.0"
     "@playwright/test": "npm:^1.49.1"
-    "@rvohealth/dream": "npm:0.28.0"
+    "@rvohealth/dream": "npm:=0.29.0-fgbeta-2"
     "@rvohealth/dream-spec-helpers": "npm:^0.0.8"
     "@rvohealth/psychic-spec-helpers": "npm:^0.1.0"
     "@types/cookie-parser": "npm:^1.4.7"
@@ -1586,15 +1573,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash.clonedeepwith@npm:^4.5.9":
-  version: 4.5.9
-  resolution: "@types/lodash.clonedeepwith@npm:4.5.9"
-  dependencies:
-    "@types/lodash": "npm:*"
-  checksum: 10c0/64077f4a77ab80918404af74a9186bf943a4b39589bb48f4ad09603625c2ac0df1641bf66a3254d5731a86259ba2bf6154c20ce136fd470ee4e59cee14a84abc
-  languageName: node
-  linkType: hard
-
 "@types/lodash.groupby@npm:^4.6.9":
   version: 4.6.9
   resolution: "@types/lodash.groupby@npm:4.6.9"
@@ -1604,39 +1582,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/lodash.isempty@npm:^4.4.9":
-  version: 4.4.9
-  resolution: "@types/lodash.isempty@npm:4.4.9"
-  dependencies:
-    "@types/lodash": "npm:*"
-  checksum: 10c0/581b3b1e896524b00cb32dc08f1aea328cec0ab95720f24e0f6d9e8a2c9be5b65e4ad030ec45f58f656ab8dcf555f039863862e04c91051a24ee27cac8a994ab
-  languageName: node
-  linkType: hard
-
 "@types/lodash.sortby@npm:^4.7.9":
   version: 4.7.9
   resolution: "@types/lodash.sortby@npm:4.7.9"
   dependencies:
     "@types/lodash": "npm:*"
   checksum: 10c0/682547c7bb210db87ebc172a95c71c3d35d89e87f4eb959c28772b8d80c767bd8cb95ac48390302ac649b3e6450e26c1512818d2d0f0749393c49b5dcbf437c3
-  languageName: node
-  linkType: hard
-
-"@types/lodash.uniq@npm:^4.5.9":
-  version: 4.5.9
-  resolution: "@types/lodash.uniq@npm:4.5.9"
-  dependencies:
-    "@types/lodash": "npm:*"
-  checksum: 10c0/feb01dfd7b6e3d2b4d29bdb0d00cce8ffa685f1c219b34ae531f098811faab11696b7bdfc3654edcf65f6180ad0cda6471cec7da8a9e7688f294b5c8177cfea7
-  languageName: node
-  linkType: hard
-
-"@types/lodash.uniqwith@npm:^4.5.9":
-  version: 4.5.9
-  resolution: "@types/lodash.uniqwith@npm:4.5.9"
-  dependencies:
-    "@types/lodash": "npm:*"
-  checksum: 10c0/0e6e917d02458c487ad28b3e6c6c358d3b091086c29bbee4d7f0318702727ba9691bf745e2bfa3847c99d4e1f4e74a850de081b4c68e593cca79e10eb3c68dfe
   languageName: node
   linkType: hard
 
@@ -5292,13 +5243,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.clonedeepwith@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "lodash.clonedeepwith@npm:4.5.0"
-  checksum: 10c0/a7de84be9ad796811e8084deb79ef07f8f87122d87adffcd52ce4e6fa528fbe917f3dc6cc1d556362dc5dfadef68405e54f4b4d3ae72056e32ec5e84492a3fc2
-  languageName: node
-  linkType: hard
-
 "lodash.flattendeep@npm:^4.4.0":
   version: 4.4.0
   resolution: "lodash.flattendeep@npm:4.4.0"
@@ -5320,13 +5264,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"lodash.isempty@npm:^4.4.0":
-  version: 4.4.0
-  resolution: "lodash.isempty@npm:4.4.0"
-  checksum: 10c0/6c7eaa0802398736809b9e8aed8b8ac1abca9be71788fd719ba9d7f5b4c23e8dc63b7f049df4131713dda30a2fdedc2f655268e9deb8cd5a985dfc934afca194
-  languageName: node
-  linkType: hard
-
 "lodash.memoize@npm:^4.1.2":
   version: 4.1.2
   resolution: "lodash.memoize@npm:4.1.2"
@@ -5345,20 +5282,6 @@ __metadata:
   version: 4.7.0
   resolution: "lodash.sortby@npm:4.7.0"
   checksum: 10c0/fc48fb54ff7669f33bb32997cab9460757ee99fafaf72400b261c3e10fde21538e47d8cfcbe6a25a31bcb5b7b727c27d52626386fc2de24eb059a6d64a89cdf5
-  languageName: node
-  linkType: hard
-
-"lodash.uniq@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "lodash.uniq@npm:4.5.0"
-  checksum: 10c0/262d400bb0952f112162a320cc4a75dea4f66078b9e7e3075ffbc9c6aa30b3e9df3cf20e7da7d566105e1ccf7804e4fbd7d804eee0b53de05d83f16ffbf41c5e
-  languageName: node
-  linkType: hard
-
-"lodash.uniqwith@npm:^4.5.0":
-  version: 4.5.0
-  resolution: "lodash.uniqwith@npm:4.5.0"
-  checksum: 10c0/3db1748302f5903cd2e4c361eb084bcfc48fe4062e37be4860363a0be643bf6617c1f115d61189b69623056a55acbcd451a52b3042b4864d5acc86a3b0ac83df
   languageName: node
   linkType: hard
 
@@ -6369,6 +6292,13 @@ __metadata:
   bin:
     playwright: cli.js
   checksum: 10c0/2368762c898920d4a0a5788b153dead45f9c36c3f5cf4d2af5228d0b8ea65823e3bbe998877950a2b9bb23a211e4633996f854c6188769dc81a25543ac818ab5
+  languageName: node
+  linkType: hard
+
+"pluralize-esm@npm:^9.0.5":
+  version: 9.0.5
+  resolution: "pluralize-esm@npm:9.0.5"
+  checksum: 10c0/99708b7e9ff7b98f333bb7373e3d7f6db44edf0e700d0de18f82fd4e3bf80e47ecdcdfbbefbc91cdf304af00d0553fa8ccc79aedd7b57a2972a3355afcbf4037
   languageName: node
   linkType: hard
 
