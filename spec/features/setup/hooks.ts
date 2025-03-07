@@ -3,10 +3,10 @@ import { truncate } from '@rvohealth/dream-spec-helpers'
 import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication'
 import { PsychicServer } from '../../../src'
 
-jest.setTimeout(
-  (process.env.JEST_FEATURE_TIMEOUT_SECONDS && parseInt(process.env.JEST_FEATURE_TIMEOUT_SECONDS) * 1000) ||
-    125000,
-)
+// vi.setTimeout(
+//   (process.env.JEST_FEATURE_TIMEOUT_SECONDS && parseInt(process.env.JEST_FEATURE_TIMEOUT_SECONDS) * 1000) ||
+//     125000,
+// )
 
 let server: PsychicServer
 

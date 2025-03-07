@@ -1,6 +1,6 @@
 import { hyphenize, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
 import { existsSync } from 'fs'
-import fs from 'fs/promises'
+import * as fs from 'fs/promises'
 import EnvInternal from '../helpers/EnvInternal'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths'
 import psychicPath from '../helpers/path/psychicPath'

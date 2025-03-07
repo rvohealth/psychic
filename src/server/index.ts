@@ -1,20 +1,22 @@
 import { closeAllDbConnections } from '@rvohealth/dream'
-import cookieParser from 'cookie-parser'
-import cors from 'cors'
-import express, { Application, Request, Response } from 'express'
+import * as cookieParser from 'cookie-parser'
+import * as cors from 'cors'
+
+import * as express from 'express'
+import { Application, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { Server } from 'http'
-import path from 'path'
+import * as path from 'path'
 import EnvInternal from '../helpers/EnvInternal'
 import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError'
 import PsychicApplication, { PsychicSslCredentials } from '../psychic-application'
+import logo from '../psychic-application/logo'
 import PsychicRouter from '../router'
 import FrontEndClientServer from './front-end-client'
 import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
 } from './helpers/startPsychicServer'
-import logo from '../psychic-application/logo'
 
 export default class PsychicServer {
   public static async startPsychicServer(opts: StartPsychicServerOptions): Promise<Server> {
@@ -191,13 +193,14 @@ export default class PsychicServer {
   }
 
   public buildApp() {
-    this.expressApp = express()
+    this.expressApp = (express as unknown as { default: () => Application }).default()
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.expressApp.use(cookieParser() as any)
+    this.expressApp.use((cookieParser as unknown as { default: () => any }).default())
   }
 
   private initializeCors() {
-    this.expressApp.use(cors(this.config.corsOptions))
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.expressApp.use((cors as unknown as { default: (opts: any) => any }).default(this.config.corsOptions))
   }
 
   private initializeJSON() {

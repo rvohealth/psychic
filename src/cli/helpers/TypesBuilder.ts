@@ -1,6 +1,6 @@
 import { DreamApplication } from '@rvohealth/dream'
-import fs from 'fs/promises'
-import path from 'path'
+import * as fs from 'fs/promises'
+import * as path from 'path'
 import PsychicApplication from '../../psychic-application'
 
 export default class TypesBuilder {

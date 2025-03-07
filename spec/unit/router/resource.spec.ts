@@ -1,4 +1,3 @@
-import { describe as context } from '@jest/globals'
 import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
 import PsychicRouter from '../../../src/router'
 import PsychicServer from '../../../src/server'
@@ -26,11 +25,11 @@ describe('PsychicRouter', () => {
       beforeEach(() => {
         server = new PsychicServer()
         router = new PsychicRouter(server.expressApp, server.config)
-        jest.spyOn(server.expressApp, 'get')
-        jest.spyOn(server.expressApp, 'post')
-        jest.spyOn(server.expressApp, 'put')
-        jest.spyOn(server.expressApp, 'patch')
-        jest.spyOn(server.expressApp, 'delete')
+        vi.spyOn(server.expressApp, 'get')
+        vi.spyOn(server.expressApp, 'post')
+        vi.spyOn(server.expressApp, 'put')
+        vi.spyOn(server.expressApp, 'patch')
+        vi.spyOn(server.expressApp, 'delete')
       })
 
       it('renders show, update, and destroy routes for a resource', () => {

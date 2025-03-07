@@ -12,7 +12,7 @@ export class CommentSummarySerializer<
   // `body` in CommentSummarySerializer, which is inherited by CommentSerializer,
   // which also includes a `body` Attribute reproduced an error in a Psychic project
   // wherein the same attribute appeared multiple times as a `required` attribute,
-  // which is invalid OpenAPI
+  // which is invalid OpenAPI. However, with modern decorators, this is no longer possible.
   @Attribute(Comment)
   public body: DreamColumn<Comment, 'body'>
 }
@@ -20,10 +20,7 @@ export class CommentSummarySerializer<
 export default class CommentSerializer<
   DataType extends Comment,
   Passthrough extends object,
-> extends CommentSummarySerializer<DataType, Passthrough> {
-  @Attribute(Comment)
-  public body: DreamColumn<Comment, 'body'>
-}
+> extends CommentSummarySerializer<DataType, Passthrough> {}
 
 export class CommentWithFlattenedUserSerializer extends DreamSerializer {
   @Attribute(Comment)

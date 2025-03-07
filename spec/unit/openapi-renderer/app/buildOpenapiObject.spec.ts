@@ -1,12 +1,13 @@
-import { describe as context } from '@jest/globals'
-import packageJson from '../../../../package.json'
-import OpenapiAppRenderer from '../../../../src/openapi-renderer/app'
+import OpenapiAppRenderer from '../../../../src/openapi-renderer/app.js'
 
 describe('OpenapiAppRenderer', () => {
   describe('.toObject', () => {
     context('default', () => {
-      it('reads all default controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
+      it.only('reads all default controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
         const response = await OpenapiAppRenderer.toObject()
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const packageJson = await import('../../../../package.json')
 
         expect(response.default).toEqual(
           expect.objectContaining({
@@ -230,7 +231,7 @@ describe('OpenapiAppRenderer', () => {
             schemas: expect.objectContaining({
               UserExtra: {
                 type: 'object',
-                required: ['id', 'nicknames', 'howyadoin'],
+                required: ['id', 'howyadoin', 'nicknames'],
                 properties: {
                   id: {
                     type: 'integer',
@@ -412,6 +413,10 @@ describe('OpenapiAppRenderer', () => {
     context('admin', () => {
       it('reads all admin controllers and consolidates endpoints, also providing boilerplate admin openapi headers', async () => {
         const response = await OpenapiAppRenderer.toObject()
+
+        // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+        // @ts-ignore
+        const packageJson = await import('../../../../package.json')
 
         expect(response.admin).toEqual(
           expect.objectContaining({

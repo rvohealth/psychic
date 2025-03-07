@@ -1,7 +1,6 @@
-import { describe as context } from '@jest/globals'
 import { existsSync } from 'fs'
-import fs from 'fs/promises'
-import path from 'path'
+import * as fs from 'fs/promises'
+import * as path from 'path'
 import { generateController, PsychicApplication } from '../../../../src'
 import * as psychicPathModule from '../../../../src/helpers/path/psychicPath'
 
@@ -20,7 +19,7 @@ describe('generateController', () => {
     adminTmpControllersFilepath = path.join(tmpControllersFilepath, 'Admin')
     supportDir = path.join(psychicApp.apiRoot, 'spec', 'support', 'generators', 'controllers')
     adminSupportDir = path.join(supportDir, 'Admin')
-    jest.spyOn(psychicPathModule, 'default').mockReturnValue(tmpControllersFileRelativePath)
+    vi.spyOn(psychicPathModule, 'default').mockReturnValue(tmpControllersFileRelativePath)
   })
 
   it('the controller extends AuthedController', async () => {

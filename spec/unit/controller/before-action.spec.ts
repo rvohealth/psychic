@@ -1,9 +1,9 @@
-import { describe as context } from '@jest/globals'
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller'
 import { BeforeAction } from '../../../src/controller/decorators'
 import PsychicApplication from '../../../src/psychic-application'
+import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers'
 
 describe('PsychicController BeforeAction', () => {
   let req: Request
@@ -11,8 +11,8 @@ describe('PsychicController BeforeAction', () => {
   let config: PsychicApplication
 
   beforeEach(() => {
-    req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
-    res = getMockRes().res
+    req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
+    res = getMockRes().res as unknown as Response
     config = new PsychicApplication()
   })
 
@@ -29,6 +29,7 @@ describe('PsychicController BeforeAction', () => {
       if (!this.customValue) this.customValue = 'hello'
     }
   }
+  processDynamicallyDefinedControllers(MyController)
 
   it('is called before the action', async () => {
     const controller = new MyController(req, res, { config, action: 'show' })
@@ -53,6 +54,7 @@ describe('PsychicController BeforeAction', () => {
           if (!this.customValue2) this.customValue2 = 'hello2'
         }
       }
+      processDynamicallyDefinedControllers(MyOtherController)
 
       it('still calls the before action in the ancestor', async () => {
         const controller = new MyOtherController(req, res, { config, action: 'show' })

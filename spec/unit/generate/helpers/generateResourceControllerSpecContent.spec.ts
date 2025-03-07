@@ -10,7 +10,6 @@ describe('generateResourceControllerSpecContent', () => {
     })
     expect(res).toEqual(`\
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { describe as context } from '@jest/globals'
 import { UpdateableProperties } from '@rvohealth/dream'
 import { PsychicServer } from '@rvohealth/psychic'
 import { specRequest as request } from '@rvohealth/psychic-spec-helpers'

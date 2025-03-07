@@ -1,12 +1,8 @@
 {
-  "extends": "./tsconfig.build.json",
+  "extends": "./tsconfig.esm.build.json",
+  "include": ["src/**/*", "test-app/**/*", "spec/**/*"],
   "ts-node": {
-    "ignore": [],
-    "include": ["src/**/*", "test-app/**/*"]
-  },
-  "ignore": ["spec/support/generators/**/*", "spec/tmp/**/*"],
-  "include": ["src/**/*", "spec/**/*", "test-app/**/*", "shared/**/*"],
-  "compilerOptions": {
-    "types": ["jest", "@types/jest", "jest-playwright-preset", "expect-playwright"]
+    "esm": true,
+    "experimentalSpecifierResolution": "node"
   }
 }

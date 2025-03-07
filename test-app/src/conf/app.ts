@@ -1,17 +1,22 @@
-import path from 'path'
-import winston from 'winston'
+import { dirname, join } from 'node:path'
+import { fileURLToPath } from 'node:url'
+import * as winston from 'winston'
 import EnvInternal from '../../../src/helpers/EnvInternal'
 import PsychicApplication from '../../../src/psychic-application'
 import inflections from './inflections'
+import loadControllers from './loaders/loadControllers'
 import routesCb from './routes'
 
+const __filename = fileURLToPath(import.meta.url)
+const __dirname = dirname(__filename)
+
 export default async (psy: PsychicApplication) => {
-  await psy.load('controllers', path.join(__dirname, '..', 'app', 'controllers'))
+  psy.load('controllers', join(__dirname, '..', 'app', 'controllers'), await loadControllers())
 
   psy.set('appName', 'testapp')
   psy.set('apiOnly', false)
-  psy.set('apiRoot', path.join(__dirname, '..', '..', '..'))
-  psy.set('clientRoot', path.join(__dirname, '..', '..', 'client'))
+  psy.set('apiRoot', join(__dirname, '..', '..', '..'))
+  psy.set('clientRoot', join(__dirname, '..', '..', 'client'))
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
   psy.set('encryption', {

@@ -1,6 +1,7 @@
 import { Attribute, DreamColumn, DreamSerializer, RendersMany, RendersOne } from '@rvohealth/dream'
 import Post from '../models/Post'
 import CommentSerializer from './CommentSerializer'
+import Comment from '../models/Comment'
 
 export class PostSummarySerializer<DataType extends Post, Passthrough extends object> extends DreamSerializer<
   DataType,

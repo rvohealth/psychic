@@ -1,4 +1,4 @@
-import path from 'path'
+import * as path from 'path'
 import PsychicApplication from '../psychic-application'
 
 export default function openapiJsonPath(openapiName: string = 'default') {

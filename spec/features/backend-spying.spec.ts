@@ -3,7 +3,7 @@ import visit from './helpers/visit'
 
 describe('test that spying on backend modules works within fspec runs', () => {
   it('can spy on backend methods', async () => {
-    jest.spyOn(UsersController.prototype, 'pingMessage', 'get').mockReturnValue('chalupas dujour 1')
+    vi.spyOn(UsersController.prototype, 'pingMessage', 'get').mockReturnValue('chalupas dujour 1')
 
     await visit('/')
 

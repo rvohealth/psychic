@@ -13,6 +13,6 @@ export default ({
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: { [key: string]: any }
 } = {}): { req: Request; res: Response } => ({
-  req: getMockReq({ params, body }),
-  res: getMockRes().res,
+  req: getMockReq({ params, body }) as unknown as Request,
+  res: getMockRes().res as unknown as Response,
 })

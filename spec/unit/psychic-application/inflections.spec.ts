@@ -1,4 +1,4 @@
-import pluralize from 'pluralize'
+import pluralize from 'pluralize-esm'
 import PsychicApplication from '../../../src/psychic-application'
 
 describe('PsychicApplication', () => {

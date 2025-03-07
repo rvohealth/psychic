@@ -17,7 +17,7 @@ import {
   SerializableDreamOrViewModel,
   compact,
 } from '@rvohealth/dream'
-import cloneDeep from 'lodash.clonedeep'
+import { cloneDeep } from 'lodash-es'
 import PsychicController from '../controller'
 import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes'
 import PsychicApplication from '../psychic-application'

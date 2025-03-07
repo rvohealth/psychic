@@ -1,4 +1,3 @@
-import { describe as context } from '@jest/globals'
 import I18nDefaultLocales from '../../../src/i18n/conf/I18nDefaultLocales'
 import I18nProvider, {
   I18nInterpolationReceivedNull,

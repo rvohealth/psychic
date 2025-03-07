@@ -1,4 +1,4 @@
-import dotenv from 'dotenv'
+import * as dotenv from 'dotenv'
 import EnvInternal from '../helpers/EnvInternal'
 
 class EnvLoader {

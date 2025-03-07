@@ -1,4 +1,3 @@
-import { describe as context } from '@jest/globals'
 import PsychicRouter from '../../../src/router'
 import PsychicServer from '../../../src/server'
 import PetsController from '../../../test-app/src/app/controllers/PetsController'

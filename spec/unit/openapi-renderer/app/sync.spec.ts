@@ -1,4 +1,4 @@
-import fs from 'fs/promises'
+import * as fs from 'fs/promises'
 import OpenapiAppRenderer from '../../../../src/openapi-renderer/app'
 
 describe('OpenapiAppRenderer', () => {

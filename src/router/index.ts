@@ -1,6 +1,6 @@
 import { RecordNotFound, ValidationError, camelize } from '@rvohealth/dream'
 import { Application, Request, Response, Router } from 'express'
-import pluralize from 'pluralize'
+import pluralize from 'pluralize-esm'
 import PsychicController from '../controller'
 import HttpError from '../error/http'
 import EnvInternal from '../helpers/EnvInternal'

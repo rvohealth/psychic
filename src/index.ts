@@ -1,4 +1,4 @@
-import _pluralize from 'pluralize'
+import _pluralize from 'pluralize-esm'
 export const pluralize = _pluralize
 
 export { default as PsychicBin } from './bin'

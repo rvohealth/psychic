@@ -106,6 +106,18 @@ export default class PsychicController {
   /**
    * @internal
    *
+   * Certain features (e.g. building OpenAPI specs from Attribute and RendersOne/Many decorators)
+   * need static access to things set up by decorators. Stage 3 Decorators change the context that is available
+   * at decoration time such that the class of a property being decorated is only avilable during instance instantiation. In order
+   * to only apply static values once, on boot, `globallyInitializingDecorators` is set to true on PsychicController,
+   * and all controllers are instantiated.
+   *
+   */
+  public static globallyInitializingDecorators: boolean = false
+
+  /**
+   * @internal
+   *
    * Storage for controller action metadata, set when using the association decorators like:
    *   @OpenAPI
    */

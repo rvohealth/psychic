@@ -1,4 +1,5 @@
 import {
+  DecoratorContext,
   DreamSerializer,
   SerializableDreamClassOrViewModelClass,
   SerializableDreamOrViewModel,
@@ -13,15 +14,26 @@ export function BeforeAction(
     only?: string[]
     except?: string[]
   } = {},
-): (target: PsychicController, methodName: string | symbol) => void {
-  return function (target: PsychicController, methodName: string | symbol): void {
-    const psychicControllerClass: typeof PsychicController = target.constructor as typeof PsychicController
-    if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'controllerHooks'))
-      psychicControllerClass.controllerHooks = [...psychicControllerClass.controllerHooks]
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any {
+  return function (_: undefined, context: DecoratorContext) {
+    const methodName = context.name
 
-    psychicControllerClass.controllerHooks.push(
-      new ControllerHook(psychicControllerClass.name, methodName.toString(), opts),
-    )
+    context.addInitializer(function (this: PsychicController) {
+      const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
+      if (!psychicControllerClass['globallyInitializingDecorators']) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+        delete (this as any)[methodName]
+        return
+      }
+
+      if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'controllerHooks'))
+        psychicControllerClass.controllerHooks = [...psychicControllerClass.controllerHooks]
+
+      psychicControllerClass.controllerHooks.push(
+        new ControllerHook(psychicControllerClass.name, methodName.toString(), opts),
+      )
+    })
   }
 }
 
@@ -50,49 +62,57 @@ export function OpenAPI<
     | SerializableDreamClassOrViewModelClass
     | SerializableDreamClassOrViewModelClass[]
     | typeof DreamSerializer,
->(
-  modelOrSerializer?: I | OpenapiEndpointRendererOpts<I>,
-  opts?: OpenapiEndpointRendererOpts<I>,
-): (target: PsychicController, methodName: string | symbol) => void {
-  return function (target: PsychicController, methodName: string | symbol): void {
-    const psychicControllerClass: typeof PsychicController = target.constructor as typeof PsychicController
-    const methodNameString = methodName.toString()
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+>(modelOrSerializer?: I | OpenapiEndpointRendererOpts<I>, opts?: OpenapiEndpointRendererOpts<I>): any {
+  return function (_: undefined, context: DecoratorContext) {
+    const methodName = context.name
 
-    if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'openapi'))
-      psychicControllerClass.openapi = {}
+    context.addInitializer(function (this: PsychicController) {
+      const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
+      if (!psychicControllerClass['globallyInitializingDecorators']) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+        delete (this as any)[methodName]
+        return
+      }
 
-    if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'controllerActionMetadata'))
-      psychicControllerClass['controllerActionMetadata'] = {}
+      const methodNameString = methodName.toString()
 
-    if (opts) {
-      psychicControllerClass.openapi[methodNameString] = new OpenapiEndpointRenderer(
-        modelOrSerializer as I,
-        psychicControllerClass,
-        methodNameString,
-        opts,
-      )
+      if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'openapi'))
+        psychicControllerClass.openapi = {}
 
-      psychicControllerClass['controllerActionMetadata'][methodNameString] ||= {}
-      psychicControllerClass['controllerActionMetadata'][methodNameString]['serializerKey'] =
-        opts.serializerKey
-      //
-    } else {
-      if (isSerializable(modelOrSerializer)) {
+      if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'controllerActionMetadata'))
+        psychicControllerClass['controllerActionMetadata'] = {}
+
+      if (opts) {
         psychicControllerClass.openapi[methodNameString] = new OpenapiEndpointRenderer(
           modelOrSerializer as I,
           psychicControllerClass,
           methodNameString,
-          undefined,
+          opts,
         )
+
+        psychicControllerClass['controllerActionMetadata'][methodNameString] ||= {}
+        psychicControllerClass['controllerActionMetadata'][methodNameString]['serializerKey'] =
+          opts.serializerKey
+        //
       } else {
-        psychicControllerClass.openapi[methodNameString] = new OpenapiEndpointRenderer(
-          null,
-          psychicControllerClass,
-          methodNameString,
-          modelOrSerializer as OpenapiEndpointRendererOpts<I>,
-        )
+        if (isSerializable(modelOrSerializer)) {
+          psychicControllerClass.openapi[methodNameString] = new OpenapiEndpointRenderer(
+            modelOrSerializer as I,
+            psychicControllerClass,
+            methodNameString,
+            undefined,
+          )
+        } else {
+          psychicControllerClass.openapi[methodNameString] = new OpenapiEndpointRenderer(
+            null,
+            psychicControllerClass,
+            methodNameString,
+            modelOrSerializer as OpenapiEndpointRendererOpts<I>,
+          )
+        }
       }
-    }
+    })
   }
 }
 

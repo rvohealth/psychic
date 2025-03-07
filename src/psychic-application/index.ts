@@ -8,11 +8,12 @@ import {
   EncryptOptions,
   OpenapiSchemaBody,
 } from '@rvohealth/dream'
-import bodyParser from 'body-parser'
+import * as bodyParser from 'body-parser'
 import { CorsOptions } from 'cors'
 import { Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
-import http from 'http'
+import * as http from 'http'
+import PsychicController from '../controller'
 import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
@@ -29,8 +30,8 @@ import {
 import PsychicRouter from '../router'
 import PsychicServer from '../server'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache'
-import loadControllers, { getControllersOrFail } from './helpers/loadControllers'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName'
+import processControllers, { getControllersOrFail } from './helpers/processControllers'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
 
 export default class PsychicApplication {
@@ -98,10 +99,6 @@ Try setting it to something valid, like:
    */
   public static getOrFail() {
     return getCachedPsychicApplicationOrFail()
-  }
-
-  public static async loadControllers(controllersPath: string) {
-    return await loadControllers(controllersPath)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -270,10 +267,14 @@ Try setting it to something valid, like:
     return getControllersOrFail()
   }
 
-  public async load(resourceType: 'controllers', resourcePath: string) {
+  public load<RT extends 'controllers'>(
+    resourceType: RT,
+    resourcePath: string,
+    resources: RT extends 'controllers' ? [string, typeof PsychicController][] : never,
+  ) {
     switch (resourceType) {
       case 'controllers':
-        await loadControllers(resourcePath)
+        processControllers(this, resourcePath, resources)
         this._loadedControllers = true
         break
     }

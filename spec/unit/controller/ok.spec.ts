@@ -1,4 +1,3 @@
-import { describe as context } from '@jest/globals'
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller'
@@ -17,10 +16,10 @@ describe('PsychicController', () => {
     }
 
     beforeEach(() => {
-      req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
-      res = getMockRes().res
+      req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
+      res = getMockRes().res as unknown as Response
       config = new PsychicApplication()
-      jest.spyOn(res, 'json')
+      vi.spyOn(res, 'json')
     })
 
     it('renders the data as json', () => {

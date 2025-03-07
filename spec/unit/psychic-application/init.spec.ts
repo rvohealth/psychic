@@ -1,15 +1,14 @@
-import { describe as context } from '@jest/globals'
 import { PsychicApplication } from '../../../src'
 import PsychicApplicationInitMissingApiRoot from '../../../src/error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../../../src/error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../../../src/error/psychic-application/init-missing-routes-callback'
-import * as LoadControllersModule from '../../../src/psychic-application/helpers/loadControllers'
+import * as LoadControllersModule from '../../../src/psychic-application/helpers/processControllers'
 import dreamCb from '../../../test-app/src/conf/dream'
 
 describe('DreamApplication#init', () => {
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-    jest.spyOn(LoadControllersModule, 'default').mockResolvedValue({} as any)
+    vi.spyOn(LoadControllersModule, 'default').mockResolvedValue({} as any)
   })
 
   context('with a valid config', () => {

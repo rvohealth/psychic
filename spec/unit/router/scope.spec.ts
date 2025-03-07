@@ -1,4 +1,4 @@
-import supertest from 'supertest'
+import { agent as supertest } from 'supertest'
 import PsychicServer from '../../../src/server'
 
 describe('PsychicRouter', () => {

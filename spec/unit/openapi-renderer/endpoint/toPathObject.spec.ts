@@ -1,4 +1,3 @@
-import { describe as context } from '@jest/globals'
 import { PsychicServer } from '../../../../src'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
 import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
@@ -896,9 +895,9 @@ describe('OpenapiEndpointRenderer', () => {
                 const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
                 psychicApp.openapi.default.suppressResponseEnums = true
 
-                jest
-                  .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
-                  .mockReturnValue(psychicApp)
+                vi.spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail').mockReturnValue(
+                  psychicApp,
+                )
               })
 
               it('does not suppress enums for request bodies', () => {
@@ -1728,9 +1727,9 @@ describe('OpenapiEndpointRenderer', () => {
             const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
             psychicApp.openapi.default.suppressResponseEnums = true
 
-            jest
-              .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
-              .mockReturnValue(psychicApp)
+            vi.spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail').mockReturnValue(
+              psychicApp,
+            )
           })
 
           it('suppresses enums, instead using description to clarify enum options', () => {

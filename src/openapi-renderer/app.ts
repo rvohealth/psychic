@@ -1,6 +1,6 @@
-import fs from 'fs/promises'
-import groupBy from 'lodash.groupby'
-import path from 'path'
+import * as fs from 'fs/promises'
+import { groupBy } from 'lodash-es'
+import * as path from 'path'
 import EnvInternal from '../helpers/EnvInternal'
 import openapiJsonPath from '../helpers/openapiJsonPath'
 import PsychicApplication from '../psychic-application'
@@ -56,14 +56,18 @@ export default class OpenapiAppRenderer {
     const processedSchemas: Record<string, boolean> = {}
     const psychicApp = PsychicApplication.getOrFail()
     const controllers = psychicApp.controllers
+
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
     const packageJsonPath = path.join(psychicApp.apiRoot, 'package.json')
 
     const server = new PsychicServer()
     await server.boot()
     const routes = await server.routes()
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const packageJson = (await import(packageJsonPath)).default as {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const packageJson = (await import(packageJsonPath, { assert: { type: 'json' } })) as {
       version: string
       name: string
       description?: string

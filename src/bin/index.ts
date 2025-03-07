@@ -1,6 +1,6 @@
 import { DreamBin } from '@rvohealth/dream'
-import fs from 'fs/promises'
-import path from 'path'
+import * as fs from 'fs/promises'
+import * as path from 'path'
 import TypesBuilder from '../cli/helpers/TypesBuilder'
 import generateController from '../generate/controller'
 import generateResource from '../generate/resource'

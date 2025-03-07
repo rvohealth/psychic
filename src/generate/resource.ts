@@ -1,5 +1,5 @@
 import { generateDream, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
-import pluralize from 'pluralize'
+import pluralize from 'pluralize-esm'
 import generateController from './controller'
 import addResourceToRoutes from './helpers/addResourceToRoutes'
 
