@@ -11,6 +11,7 @@ export default defineConfig({
     minWorkers: 1,
     mockReset: true,
     watch: false,
+    printConsoleTrace: true,
 
     globalSetup: './spec/features/setup/globalSetup.ts',
   },

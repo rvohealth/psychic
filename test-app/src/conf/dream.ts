@@ -1,7 +1,7 @@
 import { DreamApplication } from '@rvohealth/dream'
 import srcPath from '../app/helpers/srcPath'
 import importModels from './importers/importModels'
-import loadSerializers from './importers/importSerializers'
+import importSerializers from './importers/importSerializers'
 import importServices from './importers/importServices'
 import inflections from './inflections'
 
@@ -10,7 +10,7 @@ export default async function configureDream(app: DreamApplication) {
   app.set('inflections', inflections)
 
   app.load('models', srcPath('app', 'models'), await importModels())
-  app.load('serializers', srcPath('app', 'serializers'), await loadSerializers())
+  app.load('serializers', srcPath('app', 'serializers'), await importSerializers())
   app.load('services', srcPath('app', 'services'), await importServices())
 
   // provides a list of path overrides for your app. This is optional, and will default
