@@ -1,7 +1,7 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "version": "0.24.0",
+    "version": "0.24.0-fgbeta-1",
     "title": "@rvohealth/psychic",
     "description": "Typescript web framework"
   },

@@ -70,7 +70,6 @@
     "@rvohealth/dream": "=0.29.0-fgbeta-20",
     "@rvohealth/dream-spec-helpers": "=0.1.0-fgbeta-15",
     "@rvohealth/psychic-spec-helpers": "=0.2.0-fgbeta-1",
-    "@testing-library/dom": "^10.4.0",
     "@types/express": "^4.17.21",
     "@types/lodash-es": "^4",
     "@types/lodash.clonedeep": "^4.5.9",
