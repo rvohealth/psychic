@@ -12,11 +12,11 @@ import {
   SerializableTypes,
   uniq,
 } from '@rvohealth/dream'
-import PsychicController from '../controller'
-import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations'
-import EnvInternal from '../helpers/EnvInternal'
-import PsychicApplication from '../psychic-application'
-import OpenapiBodySegmentRenderer from './body-segment'
+import PsychicController from '../controller/index.js'
+import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations.js'
+import EnvInternal from '../helpers/EnvInternal.js'
+import PsychicApplication from '../psychic-application/index.js'
+import OpenapiBodySegmentRenderer from './body-segment.js'
 
 export default class OpenapiSerializerRenderer {
   private openapiName: string

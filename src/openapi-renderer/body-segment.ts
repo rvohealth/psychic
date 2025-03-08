@@ -26,10 +26,10 @@ import {
   inferSerializerFromDreamOrViewModel,
   openapiShorthandPrimitiveTypes,
 } from '@rvohealth/dream'
-import PsychicController from '../controller'
-import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache'
-import isBlankDescription from './helpers/isBlankDescription'
-import OpenapiSerializerRenderer from './serializer'
+import PsychicController from '../controller/index.js'
+import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache.js'
+import isBlankDescription from './helpers/isBlankDescription.js'
+import OpenapiSerializerRenderer from './serializer.js'
 
 export default class OpenapiBodySegmentRenderer {
   private controllerClass: typeof PsychicController

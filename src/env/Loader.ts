@@ -1,5 +1,5 @@
 import * as dotenv from 'dotenv'
-import EnvInternal from '../helpers/EnvInternal'
+import EnvInternal from '../helpers/EnvInternal.js'
 
 class EnvLoader {
   public loaded = false

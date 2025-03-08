@@ -1,5 +1,5 @@
 import { lookupClassByGlobalName as dreamLookupClassByGlobalName } from '@rvohealth/dream'
-import { getControllersOrFail } from './processControllers'
+import { getControllersOrFail } from './processControllers.js'
 
 export default function lookupClassByGlobalName(name: string) {
   // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

@@ -1,22 +1,21 @@
 import { closeAllDbConnections } from '@rvohealth/dream'
 import * as cookieParser from 'cookie-parser'
 import * as cors from 'cors'
-
 import * as express from 'express'
 import { Application, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { Server } from 'http'
 import * as path from 'path'
-import EnvInternal from '../helpers/EnvInternal'
-import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError'
-import PsychicApplication, { PsychicSslCredentials } from '../psychic-application'
-import logo from '../psychic-application/logo'
-import PsychicRouter from '../router'
-import FrontEndClientServer from './front-end-client'
+import EnvInternal from '../helpers/EnvInternal.js'
+import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError.js'
+import PsychicApplication, { PsychicSslCredentials } from '../psychic-application/index.js'
+import logo from '../psychic-application/logo.js'
+import PsychicRouter from '../router/index.js'
+import FrontEndClientServer from './front-end-client.js'
 import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
-} from './helpers/startPsychicServer'
+} from './helpers/startPsychicServer.js'
 
 export default class PsychicServer {
   public static async startPsychicServer(opts: StartPsychicServerOptions): Promise<Server> {

@@ -4,9 +4,9 @@ import {
   SerializableDreamClassOrViewModelClass,
   SerializableDreamOrViewModel,
 } from '@rvohealth/dream'
-import PsychicController from '.'
-import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint'
-import { ControllerHook } from './hooks'
+import PsychicController from './index.js'
+import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint.js'
+import { ControllerHook } from './hooks.js'
 
 export function BeforeAction(
   opts: {

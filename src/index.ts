@@ -1,81 +1,81 @@
 import _pluralize from 'pluralize-esm'
 export const pluralize = _pluralize
 
-export { default as PsychicBin } from './bin'
-export { default as PsychicCLI } from './cli'
+export { default as PsychicBin } from './bin/index.js'
+export { default as PsychicCLI } from './cli/index.js'
 export {
   default as PsychicController,
-  PsychicOpenapiControllerConfig,
-  PsychicParamsDictionary,
-  PsychicOpenapiNames,
-  PsychicParamsPrimitive,
+  type PsychicOpenapiControllerConfig,
+  type PsychicParamsDictionary,
+  type PsychicOpenapiNames,
+  type PsychicParamsPrimitive,
 } from './controller'
-export { BeforeAction, OpenAPI } from './controller/decorators'
-export { default as envLoader } from './env/Loader'
-export { default as I18nProvider } from './i18n/provider'
+export { BeforeAction, OpenAPI } from './controller/decorators.js'
+export { default as envLoader } from './env/Loader.js'
+export { default as I18nProvider } from './i18n/provider.js'
 
-export { default as HttpStatusBadGateway } from './error/http/BadGateway'
-export { default as HttpStatusBadRequest } from './error/http/BadRequest'
-export { default as HttpStatusConflict } from './error/http/Conflict'
-export { default as HttpStatusContentTooLarge } from './error/http/ContentTooLarge'
-export { default as HttpStatusExpectationFailed } from './error/http/ExpectationFailed'
-export { default as HttpStatusFailedDependency } from './error/http/FailedDependency'
-export { default as HttpStatusForbidden } from './error/http/Forbidden'
-export { default as HttpStatusGatewayTimeout } from './error/http/GatewayTimeout'
-export { default as HttpStatusGone } from './error/http/Gone'
-export { default as HttpStatusImATeapot } from './error/http/ImATeapot'
-export { default as HttpStatusInsufficientStorage } from './error/http/InsufficientStorage'
-export { default as HttpStatusInternalServerError } from './error/http/InternalServerError'
-export { default as HttpStatusLocked } from './error/http/Locked'
-export { default as HttpStatusMethodNotAllowed } from './error/http/MethodNotAllowed'
-export { default as HttpStatusMisdirectedRequest } from './error/http/MisdirectedRequest'
-export { default as HttpStatusNotAcceptable } from './error/http/NotAcceptable'
-export { default as HttpStatusNotExtended } from './error/http/NotExtended'
-export { default as HttpStatusNotFound } from './error/http/NotFound'
-export { default as HttpStatusNotImplemented } from './error/http/NotImplemented'
-export { default as HttpStatusPaymentRequired } from './error/http/PaymentRequired'
-export { default as HttpStatusPreconditionFailed } from './error/http/PreconditionFailed'
-export { default as HttpStatusPreconditionRequired } from './error/http/PreconditionRequired'
-export { default as HttpStatusProxyAuthenticationRequired } from './error/http/ProxyAuthenticationRequired'
-export { default as HttpStatusRequestHeaderFieldsTooLarge } from './error/http/RequestHeaderFieldsTooLarge'
-export { default as HttpStatusServiceUnavailable } from './error/http/ServiceUnavailable'
-export { default as HttpStatusTooManyRequests } from './error/http/TooManyRequests'
-export { default as HttpStatusUnauthorized } from './error/http/Unauthorized'
-export { default as HttpStatusUnavailableForLegalReasons } from './error/http/UnavailableForLegalReasons'
-export { default as HttpStatusUnprocessableContent } from './error/http/UnprocessableContent'
-export { default as HttpStatusUnsupportedMediaType } from './error/http/UnsupportedMediaType'
+export { default as HttpStatusBadGateway } from './error/http/BadGateway.js'
+export { default as HttpStatusBadRequest } from './error/http/BadRequest.js'
+export { default as HttpStatusConflict } from './error/http/Conflict.js'
+export { default as HttpStatusContentTooLarge } from './error/http/ContentTooLarge.js'
+export { default as HttpStatusExpectationFailed } from './error/http/ExpectationFailed.js'
+export { default as HttpStatusFailedDependency } from './error/http/FailedDependency.js'
+export { default as HttpStatusForbidden } from './error/http/Forbidden.js'
+export { default as HttpStatusGatewayTimeout } from './error/http/GatewayTimeout.js'
+export { default as HttpStatusGone } from './error/http/Gone.js'
+export { default as HttpStatusImATeapot } from './error/http/ImATeapot.js'
+export { default as HttpStatusInsufficientStorage } from './error/http/InsufficientStorage.js'
+export { default as HttpStatusInternalServerError } from './error/http/InternalServerError.js'
+export { default as HttpStatusLocked } from './error/http/Locked.js'
+export { default as HttpStatusMethodNotAllowed } from './error/http/MethodNotAllowed.js'
+export { default as HttpStatusMisdirectedRequest } from './error/http/MisdirectedRequest.js'
+export { default as HttpStatusNotAcceptable } from './error/http/NotAcceptable.js'
+export { default as HttpStatusNotExtended } from './error/http/NotExtended.js'
+export { default as HttpStatusNotFound } from './error/http/NotFound.js'
+export { default as HttpStatusNotImplemented } from './error/http/NotImplemented.js'
+export { default as HttpStatusPaymentRequired } from './error/http/PaymentRequired.js'
+export { default as HttpStatusPreconditionFailed } from './error/http/PreconditionFailed.js'
+export { default as HttpStatusPreconditionRequired } from './error/http/PreconditionRequired.js'
+export { default as HttpStatusProxyAuthenticationRequired } from './error/http/ProxyAuthenticationRequired.js'
+export { default as HttpStatusRequestHeaderFieldsTooLarge } from './error/http/RequestHeaderFieldsTooLarge.js'
+export { default as HttpStatusServiceUnavailable } from './error/http/ServiceUnavailable.js'
+export { default as HttpStatusTooManyRequests } from './error/http/TooManyRequests.js'
+export { default as HttpStatusUnauthorized } from './error/http/Unauthorized.js'
+export { default as HttpStatusUnavailableForLegalReasons } from './error/http/UnavailableForLegalReasons.js'
+export { default as HttpStatusUnprocessableContent } from './error/http/UnprocessableContent.js'
+export { default as HttpStatusUnsupportedMediaType } from './error/http/UnsupportedMediaType.js'
 
-export { default as generateController } from './generate/controller'
-export { default as generateResource } from './generate/resource'
-export { default as cookieMaxAgeFromCookieOpts } from './helpers/cookieMaxAgeFromCookieOpts'
-export { default as pathifyNestedObject } from './helpers/pathifyNestedObject'
+export { default as generateController } from './generate/controller.js'
+export { default as generateResource } from './generate/resource.js'
+export { default as cookieMaxAgeFromCookieOpts } from './helpers/cookieMaxAgeFromCookieOpts.js'
+export { default as pathifyNestedObject } from './helpers/pathifyNestedObject.js'
 export {
   MissingControllerActionPairingInRoutes,
-  OpenapiContent,
-  OpenapiEndpointRendererOpts,
-  OpenapiEndpointResponse,
-  OpenapiHeaderOption,
-  OpenapiHeaderType,
-  OpenapiHeaders,
-  OpenapiMethodBody,
-  OpenapiParameterResponse,
-  OpenapiPathParams,
-  OpenapiQueryOption,
-  OpenapiResponses,
-  OpenapiSchema,
-  OpenapiPathParamOption as OpenapiUriOption,
-} from './openapi-renderer/endpoint'
+  type OpenapiContent,
+  type OpenapiEndpointRendererOpts,
+  type OpenapiEndpointResponse,
+  type OpenapiHeaderOption,
+  type OpenapiHeaderType,
+  type OpenapiHeaders,
+  type OpenapiMethodBody,
+  type OpenapiParameterResponse,
+  type OpenapiPathParams,
+  type OpenapiQueryOption,
+  type OpenapiResponses,
+  type OpenapiSchema,
+  type OpenapiPathParamOption as OpenapiUriOption,
+} from './openapi-renderer/endpoint.js'
 export {
   default as PsychicApplication,
-  DefaultPsychicOpenapiOptions,
-  NamedPsychicOpenapiOptions,
-  PsychicApplicationInitOptions,
-} from './psychic-application'
-export { default as PsychicImporter } from './psychic-application/helpers/PsychicImporter'
-export { UUID } from './psychic-application/types'
-export { default as PsychicRouter } from './router'
-export { HttpMethod } from './router/types'
-export { default as PsychicServer } from './server'
-export { createPsychicHttpInstance as getPsychicHttpInstance } from './server/helpers/startPsychicServer'
-export { default as Params, ParamValidationError } from './server/params'
-export { default as PsychicSession } from './session'
+  type DefaultPsychicOpenapiOptions,
+  type NamedPsychicOpenapiOptions,
+  type PsychicApplicationInitOptions,
+} from './psychic-application/index.js'
+export { default as PsychicImporter } from './psychic-application/helpers/PsychicImporter.js'
+export { type UUID } from './psychic-application/types.js'
+export { default as PsychicRouter } from './router/index.js'
+export { type HttpMethod } from './router/types.js'
+export { default as PsychicServer } from './server/index.js'
+export { createPsychicHttpInstance as getPsychicHttpInstance } from './server/helpers/startPsychicServer.js'
+export { default as Params, ParamValidationError } from './server/params.js'
+export { default as PsychicSession } from './session/index.js'

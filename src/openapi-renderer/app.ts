@@ -1,13 +1,13 @@
 import * as fs from 'fs/promises'
 import { groupBy } from 'lodash-es'
 import * as path from 'path'
-import EnvInternal from '../helpers/EnvInternal'
-import openapiJsonPath from '../helpers/openapiJsonPath'
-import PsychicApplication from '../psychic-application'
-import { HttpMethod, HttpMethods } from '../router/types'
+import EnvInternal from '../helpers/EnvInternal.js'
+import openapiJsonPath from '../helpers/openapiJsonPath.js'
+import PsychicApplication from '../psychic-application/index.js'
+import { HttpMethod, HttpMethods } from '../router/types.js'
 import PsychicServer from '../server'
-import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults'
-import { OpenapiEndpointResponsePath, OpenapiParameterResponse, OpenapiSchema } from './endpoint'
+import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults.js'
+import { OpenapiEndpointResponsePath, OpenapiParameterResponse, OpenapiSchema } from './endpoint.js'
 
 export default class OpenapiAppRenderer {
   /**

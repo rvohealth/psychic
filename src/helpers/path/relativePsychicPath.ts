@@ -1,6 +1,6 @@
 import { pascalize, sharedPathPrefix, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
-import psychicPath, { PsychicPaths } from './psychicPath'
-import updirsFromPath from './updirsFromPath'
+import psychicPath, { PsychicPaths } from './psychicPath.js'
+import updirsFromPath from './updirsFromPath.js'
 
 export default function (
   originDreamPathType: PsychicPaths,

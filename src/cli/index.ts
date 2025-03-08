@@ -1,8 +1,8 @@
 import { DreamCLI } from '@rvohealth/dream'
 import { Command } from 'commander'
-import PsychicBin from '../bin'
-import PsychicApplication, { PsychicApplicationInitOptions } from '../psychic-application'
-import EnvInternal from '../helpers/EnvInternal'
+import PsychicBin from '../bin/index.js'
+import PsychicApplication, { PsychicApplicationInitOptions } from '../psychic-application/index.js'
+import EnvInternal from '../helpers/EnvInternal.js'
 
 export default class PsychicCLI {
   public static provide(

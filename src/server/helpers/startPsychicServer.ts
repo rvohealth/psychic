@@ -3,9 +3,9 @@ import * as fs from 'fs'
 import * as http from 'http'
 import { Server } from 'http'
 import * as https from 'https'
-import EnvInternal from '../../helpers/EnvInternal'
-import PsychicApplication, { PsychicSslCredentials } from '../../psychic-application'
-import PsychicServer from '../../server'
+import EnvInternal from '../../helpers/EnvInternal.js'
+import PsychicApplication, { PsychicSslCredentials } from '../../psychic-application/index.js'
+import PsychicServer from '../../server/index.js'
 
 export interface StartPsychicServerOptions {
   app: Application

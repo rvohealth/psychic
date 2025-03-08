@@ -5,7 +5,7 @@ import {
   standardizeFullyQualifiedModelName,
 } from '@rvohealth/dream'
 import pluralize from 'pluralize-esm'
-import relativePsychicPath from '../../helpers/path/relativePsychicPath'
+import relativePsychicPath from '../../helpers/path/relativePsychicPath.js'
 
 export default function generateControllerContent({
   ancestorName,

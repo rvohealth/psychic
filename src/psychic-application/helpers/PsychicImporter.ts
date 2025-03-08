@@ -1,5 +1,5 @@
 import { DreamImporter } from '@rvohealth/dream'
-import PsychicController from '../../controller'
+import PsychicController from '../../controller/index.js'
 
 export default class PsychicImporter {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

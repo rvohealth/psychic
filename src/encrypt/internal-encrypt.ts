@@ -1,6 +1,6 @@
 import { Encrypt, EncryptOptions } from '@rvohealth/dream'
-import MissingCookieEncryptionOpts from '../error/encrypt/missing-cookie-encryption-options'
-import PsychicApplication from '../psychic-application'
+import MissingCookieEncryptionOpts from '../error/encrypt/missing-cookie-encryption-options.js'
+import PsychicApplication from '../psychic-application/index.js'
 
 export default class InternalEncrypt {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

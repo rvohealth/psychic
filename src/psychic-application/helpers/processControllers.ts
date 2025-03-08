@@ -1,7 +1,7 @@
 import { Request, Response } from 'express'
-import PsychicApplication from '..'
-import PsychicController from '../../controller'
-import globalControllerKeyFromPath from './globalControllerKeyFromPath'
+import PsychicApplication from '../index.js'
+import PsychicController from '../../controller/index.js'
+import globalControllerKeyFromPath from './globalControllerKeyFromPath.js'
 
 let _controllers: Record<string, typeof PsychicController>
 
