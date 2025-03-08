@@ -1,39 +1,17 @@
 import { DreamApplication } from '@rvohealth/dream'
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
+import srcPath from '../app/helpers/srcPath'
+import importModels from './importers/importModels'
+import loadSerializers from './importers/importSerializers'
+import importServices from './importers/importServices'
 import inflections from './inflections'
-import loadModels from './loaders/loadModels'
-import loadSerializers from './loaders/loadSerializers'
-import loadServices from './loaders/loadServices'
-
-declare const importMeta: unique symbol
-let finalDirname: string
-
-if (typeof importMeta !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const __filename = fileURLToPath(import.meta.url)
-  finalDirname = dirname(__filename)
-} else {
-  try {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    finalDirname = __dirname
-  } catch {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const __filename = fileURLToPath(import.meta.url)
-    finalDirname = dirname(__filename)
-  }
-}
 
 export default async function configureDream(app: DreamApplication) {
   app.set('primaryKeyType', 'bigserial')
   app.set('inflections', inflections)
 
-  app.load('models', join(finalDirname, '..', 'app', 'models'), await loadModels())
-  app.load('serializers', join(finalDirname, '..', 'app', 'serializers'), await loadSerializers())
-  app.load('services', join(finalDirname, '..', 'app', 'services'), await loadServices())
+  app.load('models', srcPath('app', 'models'), await importModels())
+  app.load('serializers', srcPath('app', 'serializers'), await loadSerializers())
+  app.load('services', srcPath('app', 'services'), await importServices())
 
   // provides a list of path overrides for your app. This is optional, and will default
   // to the paths expected for a typical psychic application.

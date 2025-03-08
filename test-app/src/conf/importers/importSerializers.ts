@@ -1,7 +1,7 @@
 import { DreamImporter } from '@rvohealth/dream'
 import srcPath from '../../app/helpers/srcPath'
 
-export default async function loadServices() {
+export default async function importServices() {
   return await DreamImporter.importSerializers(
     srcPath('app', 'serializers'),
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return

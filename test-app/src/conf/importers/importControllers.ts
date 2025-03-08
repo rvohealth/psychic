@@ -1,7 +1,7 @@
 import PsychicImporter from '../../../../src/psychic-application/helpers/PsychicImporter'
 import srcPath from '../../app/helpers/srcPath'
 
-export default async function loadControllers() {
+export default async function importControllers() {
   return await PsychicImporter.importControllers(
     srcPath('app', 'controllers'),
 

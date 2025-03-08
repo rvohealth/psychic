@@ -1,40 +1,18 @@
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
 import * as winston from 'winston'
 import EnvInternal from '../../../src/helpers/EnvInternal'
 import PsychicApplication from '../../../src/psychic-application'
+import srcPath from '../app/helpers/srcPath'
+import importControllers from './importers/importControllers'
 import inflections from './inflections'
-import loadControllers from './loaders/loadControllers'
 import routesCb from './routes'
 
-declare const importMeta: unique symbol
-let finalDirname: string
-
-if (typeof importMeta !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const __filename = fileURLToPath(import.meta.url)
-  finalDirname = dirname(__filename)
-} else {
-  try {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    finalDirname = __dirname
-  } catch {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const __filename = fileURLToPath(import.meta.url)
-    finalDirname = dirname(__filename)
-  }
-}
-
 export default async (psy: PsychicApplication) => {
-  psy.load('controllers', join(finalDirname, '..', 'app', 'controllers'), await loadControllers())
+  psy.load('controllers', srcPath('app', 'controllers'), await importControllers())
 
   psy.set('appName', 'testapp')
   psy.set('apiOnly', false)
-  psy.set('apiRoot', join(finalDirname, '..', '..', '..'))
-  psy.set('clientRoot', join(finalDirname, '..', '..', 'client'))
+  psy.set('apiRoot', srcPath('..'))
+  psy.set('clientRoot', srcPath('..', 'client'))
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
   psy.set('encryption', {
