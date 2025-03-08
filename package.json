@@ -24,7 +24,7 @@
     "publish": "yarn npm publish",
     "psy": "yarn psyts",
     "psyjs": "node ./dist/test-app/src/cli/index.js",
-    "psyts": "node --experimental-specifier-resolution=node --trace-warnings --loader ts-node/esm -r ts-node/register/transpile-only ./test-app/src/cli/index.ts",
+    "psyts": "node --experimental-specifier-resolution=node --loader ts-node/esm -r ts-node/register/transpile-only ./test-app/src/cli/index.ts",
     "psycore": "PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts",
     "gpsycore": "PSYCHIC_CORE_DEVELOPMENT=1 npx ts-node --transpile-only ./global-cli/main.ts",
     "build": "echo \"building cjs...\" && rm -rf dist && npx tsc -p ./tsconfig.cjs.build.json && echo \"building esm...\" && npx tsc -p ./tsconfig.esm.build.json",
@@ -67,7 +67,7 @@
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@jest-mock/express": "^3.0.0",
-    "@rvohealth/dream": "=0.29.0-fgbeta-20",
+    "@rvohealth/dream": "=0.29.0-fgbeta-21",
     "@rvohealth/dream-spec-helpers": "=0.1.0-fgbeta-15",
     "@rvohealth/psychic-spec-helpers": "=0.2.0-fgbeta-1",
     "@types/express": "^4.17.21",
