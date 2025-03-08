@@ -9,7 +9,7 @@ export {
   type PsychicParamsDictionary,
   type PsychicOpenapiNames,
   type PsychicParamsPrimitive,
-} from './controller'
+} from './controller/index.js'
 export { BeforeAction, OpenAPI } from './controller/decorators.js'
 export { default as envLoader } from './env/Loader.js'
 export { default as I18nProvider } from './i18n/provider.js'
