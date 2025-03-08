@@ -4,10 +4,8 @@ import getAllTextContentFromPage from './helpers/getAllTextContentFromPage'
 
 expect.extend({
   async toMatchBidiText(received: any, expected: string) {
-    console.log({ received, keys: Object.keys(received) })
     if (isBidiPage(received)) {
       received = await getAllTextContentFromPage(received as Page)
-      console.log({ received })
     }
 
     const pass = received === expected || received.includes(expected)

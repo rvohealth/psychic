@@ -1,7 +1,9 @@
-// import { test } from '@playwright/test'
-//
-// // describe('test that spying on backend modules works within fspec runs', () => {
-// test('can spy on backend methods', async ({ page }) => {
-//   // await page.goto('http://localhost:3000')
-// })
-// // })
+import launchBrowser from './setup/helpers/launchBrowser'
+
+describe('ensures that a second feature spec can run', () => {
+  it('can run multiple feature specs', async () => {
+    const browser = await launchBrowser()
+    const page = await browser.newPage()
+    await page.goto('http://localhost:3000')
+  })
+})
