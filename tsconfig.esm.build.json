@@ -10,7 +10,7 @@
 
     // "types": ["@vitest/browser/providers/playwright"]
 
-    "types": ["spec/global.d.ts", "vitest-puppeteer"]
+    "types": ["spec/global.d.ts"]
     // "isolatedModules": true,
   }
 }
