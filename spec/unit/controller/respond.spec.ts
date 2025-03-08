@@ -34,7 +34,7 @@ describe('PsychicController', () => {
       vi.spyOn(res, 'status')
     })
 
-    it.only('sets status and sends json', () => {
+    it('sets status and sends json', () => {
       const controller = new MyController(req, res, { config, action: 'create' })
       controller.create()
       expect(res.json).toHaveBeenCalledWith('created')
