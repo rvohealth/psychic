@@ -5,7 +5,7 @@ import EnvInternal from '../helpers/EnvInternal.js'
 import openapiJsonPath from '../helpers/openapiJsonPath.js'
 import PsychicApplication from '../psychic-application/index.js'
 import { HttpMethod, HttpMethods } from '../router/types.js'
-import PsychicServer from '../server'
+import PsychicServer from '../server/index.js'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults.js'
 import { OpenapiEndpointResponsePath, OpenapiParameterResponse, OpenapiSchema } from './endpoint.js'
 
