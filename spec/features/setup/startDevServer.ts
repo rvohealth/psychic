@@ -1,8 +1,9 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
+import sleep from '../../helpers/sleep'
 
 let serverProcess: ChildProcessWithoutNullStreams
 
-export function startDevServer() {
+export async function startDevServer() {
   if (process.env.DEBUG === '1') console.log('Starting server...')
   serverProcess = spawn('yarn', ['client'], {
     env: {
@@ -11,6 +12,7 @@ export function startDevServer() {
       VITE_PSYCHIC_ENV: 'test',
     },
   })
+  await sleep(4000)
 
   // TODO: add polling to ensure port is ready
 

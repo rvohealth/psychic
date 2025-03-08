@@ -5,8 +5,7 @@ import { startDevServer, stopDevServer } from './startDevServer'
 
 export async function setup() {
   await initializePsychicApplication()
-
-  startDevServer()
+  await startDevServer()
 }
 
 export function teardown() {
