@@ -11,7 +11,7 @@ export default async (psy: PsychicApplication) => {
 
   psy.set('appName', 'testapp')
   psy.set('apiOnly', false)
-  psy.set('apiRoot', srcPath('..'))
+  psy.set('apiRoot', srcPath('..', '..'))
   psy.set('clientRoot', srcPath('..', 'client'))
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
