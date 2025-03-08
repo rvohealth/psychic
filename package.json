@@ -79,7 +79,7 @@
     "@eslint/js": "^9.19.0",
     "@jest-mock/express": "^3.0.0",
     "@playwright/test": "^1.51.0",
-    "@rvohealth/dream": "=0.29.0-fgbeta-15",
+    "@rvohealth/dream": "=0.29.0-fgbeta-18",
     "@rvohealth/dream-spec-helpers": "=0.1.0-fgbeta-15",
     "@rvohealth/psychic-spec-helpers": "=0.2.0-fgbeta-1",
     "@testing-library/dom": "^10.4.0",
