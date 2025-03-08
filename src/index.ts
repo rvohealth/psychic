@@ -71,6 +71,7 @@ export {
   NamedPsychicOpenapiOptions,
   PsychicApplicationInitOptions,
 } from './psychic-application'
+export { default as PsychicImporter } from './psychic-application/helpers/PsychicImporter'
 export { UUID } from './psychic-application/types'
 export { default as PsychicRouter } from './router'
 export { HttpMethod } from './router/types'
