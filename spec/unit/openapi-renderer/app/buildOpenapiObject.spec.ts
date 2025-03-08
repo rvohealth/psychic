@@ -3,7 +3,7 @@ import OpenapiAppRenderer from '../../../../src/openapi-renderer/app.js'
 describe('OpenapiAppRenderer', () => {
   describe('.toObject', () => {
     context('default', () => {
-      it.only('reads all default controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
+      it('reads all default controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
         const response = await OpenapiAppRenderer.toObject()
         // eslint-disable-next-line @typescript-eslint/ban-ts-comment
         // @ts-ignore
