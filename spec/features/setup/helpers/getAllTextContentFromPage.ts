@@ -10,8 +10,11 @@ export default async function getAllTextContentFromPage(page: Page) {
 
     const textContentArray: string[] = []
 
-    elements.forEach(element => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    ;(elements as any[]).forEach(element => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
       if (element.textContent.trim() !== '') {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access
         textContentArray.push(element.innerText.trim())
       }
     })

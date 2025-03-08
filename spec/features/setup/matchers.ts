@@ -3,12 +3,13 @@ import isPuppeteerPage from './helpers/isPuppeteerPage'
 import getAllTextContentFromPage from './helpers/getAllTextContentFromPage'
 
 expect.extend({
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
   async toMatchTextContent(received: any, expected: string) {
     if (isPuppeteerPage(received)) {
       received = await getAllTextContentFromPage(received as Page)
     }
 
-    const pass = received === expected || received.includes(expected)
+    const pass = received === expected || (received as string[]).includes(expected)
 
     if (pass) {
       return {
