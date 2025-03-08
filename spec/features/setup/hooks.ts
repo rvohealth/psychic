@@ -1,5 +1,9 @@
-import { DreamApplication } from '@rvohealth/dream'
+// import 'vitest-puppeteer'
+// import 'expect-puppeteer'
+import './matchers'
+
 import { truncate } from '@rvohealth/dream-spec-helpers'
+import { DreamApplication } from '@rvohealth/dream'
 import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication'
 import { PsychicServer } from '../../../src'
 

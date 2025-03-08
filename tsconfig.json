@@ -1,8 +1,4 @@
 {
   "extends": "./tsconfig.esm.build.json",
-  "include": ["src/**/*", "test-app/**/*", "spec/**/*"],
-  "ts-node": {
-    "esm": true,
-    "experimentalSpecifierResolution": "node"
-  }
+  "include": ["src/**/*", "test-app/**/*", "spec/**/*"]
 }

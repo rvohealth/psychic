@@ -6,9 +6,11 @@
     "declarationDir": "./dist/types",
 
     "target": "ES2022",
-    "lib": ["ES2022"]
+    "lib": ["ES2022"],
 
-    // "types": ["spec/global.d.ts"]
+    // "types": ["@vitest/browser/providers/playwright"]
+
+    "types": ["spec/global.d.ts", "vitest-puppeteer"]
     // "isolatedModules": true,
   }
 }

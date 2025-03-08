@@ -2,13 +2,16 @@ import { defineConfig } from 'vitest/config'
 
 export default defineConfig({
   test: {
-    dir: './spec/unit',
+    dir: './spec/features',
     globals: true,
-    setupFiles: ['luxon-jest-matchers', './spec/unit/setup/beforeAll.ts', './spec/unit/setup/hooks.ts'],
+    setupFiles: ['luxon-jest-matchers', './spec/features/setup/hooks.ts'],
+
     maxConcurrency: 1,
     maxWorkers: 1,
     minWorkers: 1,
     mockReset: true,
     watch: false,
+
+    globalSetup: './spec/features/setup/globalSetup.ts',
   },
 })

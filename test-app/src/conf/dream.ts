@@ -6,16 +6,34 @@ import loadModels from './loaders/loadModels'
 import loadSerializers from './loaders/loadSerializers'
 import loadServices from './loaders/loadServices'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+declare const importMeta: unique symbol
+let finalDirname: string
+
+if (typeof importMeta !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const __filename = fileURLToPath(import.meta.url)
+  finalDirname = dirname(__filename)
+} else {
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    finalDirname = __dirname
+  } catch {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const __filename = fileURLToPath(import.meta.url)
+    finalDirname = dirname(__filename)
+  }
+}
 
 export default async function configureDream(app: DreamApplication) {
   app.set('primaryKeyType', 'bigserial')
   app.set('inflections', inflections)
 
-  app.load('models', join(__dirname, '..', 'app', 'models'), await loadModels())
-  app.load('serializers', join(__dirname, '..', 'app', 'serializers'), await loadSerializers())
-  app.load('services', join(__dirname, '..', 'app', 'services'), await loadServices())
+  app.load('models', join(finalDirname, '..', 'app', 'models'), await loadModels())
+  app.load('serializers', join(finalDirname, '..', 'app', 'serializers'), await loadSerializers())
+  app.load('services', join(finalDirname, '..', 'app', 'services'), await loadServices())
 
   // provides a list of path overrides for your app. This is optional, and will default
   // to the paths expected for a typical psychic application.

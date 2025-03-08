@@ -7,16 +7,34 @@ import inflections from './inflections'
 import loadControllers from './loaders/loadControllers'
 import routesCb from './routes'
 
-const __filename = fileURLToPath(import.meta.url)
-const __dirname = dirname(__filename)
+declare const importMeta: unique symbol
+let finalDirname: string
+
+if (typeof importMeta !== 'undefined') {
+  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+  // @ts-ignore
+  const __filename = fileURLToPath(import.meta.url)
+  finalDirname = dirname(__filename)
+} else {
+  try {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    finalDirname = __dirname
+  } catch {
+    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    const __filename = fileURLToPath(import.meta.url)
+    finalDirname = dirname(__filename)
+  }
+}
 
 export default async (psy: PsychicApplication) => {
-  psy.load('controllers', join(__dirname, '..', 'app', 'controllers'), await loadControllers())
+  psy.load('controllers', join(finalDirname, '..', 'app', 'controllers'), await loadControllers())
 
   psy.set('appName', 'testapp')
   psy.set('apiOnly', false)
-  psy.set('apiRoot', join(__dirname, '..', '..', '..'))
-  psy.set('clientRoot', join(__dirname, '..', '..', 'client'))
+  psy.set('apiRoot', join(finalDirname, '..', '..', '..'))
+  psy.set('clientRoot', join(finalDirname, '..', '..', 'client'))
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
   psy.set('encryption', {
@@ -43,7 +61,10 @@ export default async (psy: PsychicApplication) => {
         // - Write all logs with importance level of `error` or less to `error.log`
         // - Write all logs with importance level of `info` or less to `combined.log`
         //
-        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({
+          filename: 'error.log',
+          // level: 'error'
+        }),
         new winston.transports.File({ filename: 'combined.log' }),
       ],
     }),

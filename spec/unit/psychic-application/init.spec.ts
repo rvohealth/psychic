@@ -4,6 +4,7 @@ import PsychicApplicationInitMissingCallToLoadControllers from '../../../src/err
 import PsychicApplicationInitMissingRoutesCallback from '../../../src/error/psychic-application/init-missing-routes-callback'
 import * as LoadControllersModule from '../../../src/psychic-application/helpers/processControllers'
 import dreamCb from '../../../test-app/src/conf/dream'
+import loadControllers from '../../../test-app/src/conf/loaders/loadControllers'
 
 describe('DreamApplication#init', () => {
   beforeEach(() => {
@@ -16,7 +17,7 @@ describe('DreamApplication#init', () => {
       const cb = async (app: PsychicApplication) => {
         app.set('apiRoot', 'how/yadoin')
         app.set('routes', () => {})
-        await app.load('controllers', 'how/yadoin')
+        app.load('controllers', 'how/yadoin', await loadControllers())
       }
 
       await expect(PsychicApplication.init(cb, dreamCb)).resolves.not.toThrow()
@@ -40,7 +41,7 @@ describe('DreamApplication#init', () => {
     context('apiRoot not set', () => {
       it('throws targeted exception', async () => {
         const cb = async (app: PsychicApplication) => {
-          await app.load('controllers', 'how/yadoin')
+          app.load('controllers', 'how/yadoin', await loadControllers())
           app.set('routes', () => {})
         }
 
@@ -54,7 +55,7 @@ describe('DreamApplication#init', () => {
       it('throws targeted exception', async () => {
         const cb = async (app: PsychicApplication) => {
           app.set('apiRoot', 'how/yadoin')
-          await app.load('controllers', 'how/yadoin')
+          app.load('controllers', 'how/yadoin', await loadControllers())
         }
 
         await expect(PsychicApplication.init(cb, dreamCb)).rejects.toThrow(
