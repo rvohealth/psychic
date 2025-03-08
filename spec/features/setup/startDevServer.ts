@@ -3,7 +3,7 @@ import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 let serverProcess: ChildProcessWithoutNullStreams
 
 export function startDevServer() {
-  console.log('Starting server...')
+  if (process.env.DEBUG === '1') console.log('Starting server...')
   serverProcess = spawn('yarn', ['client'], {
     env: {
       ...process.env,
@@ -11,20 +11,23 @@ export function startDevServer() {
       VITE_PSYCHIC_ENV: 'test',
     },
   })
-  // serverProcess.stdout.on('data', data => {
-  // console.log(`Server output: ${data}`)
-  // })
+
+  // TODO: add polling to ensure port is ready
+
+  serverProcess.stdout.on('data', data => {
+    if (process.env.DEBUG === '1') console.log(`Server output: ${data}`)
+  })
 
   serverProcess.on('error', err => {
     throw err
   })
 
   serverProcess.stdout.on('data', data => {
-    console.log(`Server output: ${data}`)
+    if (process.env.DEBUG === '1') console.log(`Server output: ${data}`)
   })
 
   serverProcess.stderr.on('data', data => {
-    console.error(`Server error: ${data}`)
+    if (process.env.DEBUG === '1') console.error(`Server error: ${data}`)
   })
 
   serverProcess.on('error', err => {
@@ -32,7 +35,7 @@ export function startDevServer() {
   })
 
   serverProcess.on('close', code => {
-    console.log(`Server process exited with code ${code}`)
+    if (process.env.DEBUG === '1') console.log(`Server process exited with code ${code}`)
   })
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
@@ -41,8 +44,8 @@ export function startDevServer() {
 
 export function stopDevServer() {
   if (serverProcess) {
-    console.log('Stopping server...')
+    if (process.env.DEBUG === '1') console.log('Stopping server...')
     serverProcess.kill('SIGINT')
-    console.log('server stopped')
+    if (process.env.DEBUG === '1') console.log('server stopped')
   }
 }
