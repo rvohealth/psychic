@@ -1,14 +1,14 @@
 import '../../../src/helpers/loadEnv'
 
+import { PsychicBin } from '../../../src'
 import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication'
-import { startDevServer, stopDevServer } from './startDevServer'
+import rmTmpFile from '../../helpers/rmTmpFile'
 
 export async function setup() {
   await initializePsychicApplication()
-
-  startDevServer()
+  await PsychicBin.syncOpenapiJson()
 }
 
-export function teardown() {
-  stopDevServer()
+export async function teardown() {
+  await rmTmpFile()
 }
