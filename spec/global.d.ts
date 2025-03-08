@@ -34,7 +34,7 @@ declare module 'vitest' {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     toEqualCalendarDate(expected: any): CustomMatcherResult
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    toMatchBidiText(expected: any): Promise<CustomMatcherResult>
+    toMatchTextContent(expected: any): Promise<CustomMatcherResult>
   }
 
   interface Assertion {
@@ -46,7 +46,7 @@ declare module 'vitest' {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     toEqualCalendarDate(expected: any): CustomMatcherResult
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    toMatchBidiText(expected: any): Promise<CustomMatcherResult>
+    toMatchTextContent(expected: any): Promise<CustomMatcherResult>
   }
 }
 

@@ -1,10 +1,10 @@
 import { Page } from 'puppeteer'
-import isBidiPage from './helpers/isBidiPage'
+import isPuppeteerPage from './helpers/isPuppeteerPage'
 import getAllTextContentFromPage from './helpers/getAllTextContentFromPage'
 
 expect.extend({
-  async toMatchBidiText(received: any, expected: string) {
-    if (isBidiPage(received)) {
+  async toMatchTextContent(received: any, expected: string) {
+    if (isPuppeteerPage(received)) {
       received = await getAllTextContentFromPage(received as Page)
     }
 

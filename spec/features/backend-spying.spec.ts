@@ -11,7 +11,7 @@ describe('test that spying on backend modules works within fspec runs', () => {
     await page.goto('http://localhost:3000/')
 
     const text = 'chalupas dujour 1'
-    await expect(page).toMatchBidiText(text)
+    await expect(page).toMatchTextContent(text)
   })
 })
 
@@ -21,5 +21,5 @@ it('resets spies between tests', async () => {
   await page.goto('http://localhost:3000/')
 
   const text = 'helloworld'
-  await expect(page).toMatchBidiText(text)
+  await expect(page).toMatchTextContent(text)
 })
