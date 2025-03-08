@@ -1,42 +1,11 @@
-import { dirname, join } from 'node:path'
-import { fileURLToPath } from 'node:url'
-import { PsychicController } from '../../../../src'
-import getFiles from './getFiles'
-
-declare const importMeta: unique symbol
-let finalDirname: string
-
-if (typeof importMeta !== 'undefined') {
-  // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-  // @ts-ignore
-  const __filename = fileURLToPath(import.meta.url)
-  finalDirname = dirname(__filename)
-} else {
-  try {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    finalDirname = __dirname
-  } catch {
-    // eslint-disable-next-line @typescript-eslint/ban-ts-comment
-    // @ts-ignore
-    const __filename = fileURLToPath(import.meta.url)
-    finalDirname = dirname(__filename)
-  }
-}
+import PsychicImporter from '../../../../src/psychic-application/helpers/PsychicImporter'
+import srcPath from '../../app/helpers/srcPath'
 
 export default async function loadControllers() {
-  const controllersPath = join(finalDirname, '..', '..', 'app', 'controllers')
-  const controllerPaths = (await getFiles(controllersPath)).filter(path => /\.[jt]s$/.test(path))
+  return await PsychicImporter.importControllers(
+    srcPath('app', 'controllers'),
 
-  const controllerClasses: [string, typeof PsychicController][] = []
-
-  for (const controllerPath of controllerPaths) {
-    controllerClasses.push([
-      controllerPath,
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      (await import(controllerPath)).default as typeof PsychicController,
-    ])
-  }
-
-  return controllerClasses
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
+    async path => (await import(path)).default,
+  )
 }
