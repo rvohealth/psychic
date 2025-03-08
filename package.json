@@ -33,8 +33,8 @@
     "syncb": "NODE_ENV=development yarn --cwd=node_modules/@rvohealth/dream build-boot && NODE_ENV=development yarn dream sync:config-cache && yarn --cwd=node_modules/@rvohealth/dream build && yarn build",
     "dev": "PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=development ts-node ./test-app/main.ts",
     "console": "PSYCHIC_CORE_DEVELOPMENT=1 npx ts-node --transpile-only --project ./tsconfig.json ./test-app/src/conf/repl.ts",
-    "uspec": "PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=test vitest --config ./spec/unit/vite.config.ts",
-    "fspec": "PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=test vitest run --config=./spec/features/vite.config.ts",
+    "uspec": "PSYCHIC_CORE_DEVELOPMENT=1 vitest --config ./spec/unit/vite.config.ts",
+    "fspec": "PSYCHIC_CORE_DEVELOPMENT=1 vitest run --config=./spec/features/vite.config.ts",
     "format": "yarn run prettier . --write",
     "lint": "yarn run eslint --no-warn-ignored \"src/**/*.ts\" \"spec/**/*.ts\" \"test-app/**/*.ts\" && yarn run prettier . --check",
     "prepack": "yarn build"
