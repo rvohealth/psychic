@@ -679,9 +679,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvohealth/dream-spec-helpers@npm:=0.1.0-fgbeta-15":
-  version: 0.1.0-fgbeta-15
-  resolution: "@rvohealth/dream-spec-helpers@npm:0.1.0-fgbeta-15::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40rvohealth%2Fdream-spec-helpers%2F0.1.0-fgbeta-15%2Fd93ad1823e0ae6ea657c8a3aaf2e95c9874de32a"
+"@rvohealth/dream-spec-helpers@npm:=0.1.0-fgbeta-16":
+  version: 0.1.0-fgbeta-16
+  resolution: "@rvohealth/dream-spec-helpers@npm:0.1.0-fgbeta-16::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40rvohealth%2Fdream-spec-helpers%2F0.1.0-fgbeta-16%2F2f5718d6c2b9b2836722b229323abcd280abe68a"
   dependencies:
     lodash.sortby: "npm:^4.7.0"
   peerDependencies:
@@ -689,7 +689,7 @@ __metadata:
     "@types/pg": "*"
     pg: "*"
     ts-node: "*"
-  checksum: 10c0/8614aec5c40b8ba3880e70b9e5de13cb4acc731ac0a8f463ea3c0f9c9b4df7ea59fc71e791fd1ce0bb22f7e71bd17013a9d25d9df8732e0d93f40053bcd07034
+  checksum: 10c0/36e274af69aa6e5cead30e997be48c8db25af700fe7bdf89848ecd088b8c359947380a08ff2fde0a7d48b33f372a8494e3b38a2da7359b9add6f3684193a4bcd
   languageName: node
   linkType: hard
 
@@ -716,19 +716,19 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvohealth/psychic-spec-helpers@npm:=0.2.0-fgbeta-2":
-  version: 0.2.0-fgbeta-2
-  resolution: "@rvohealth/psychic-spec-helpers@npm:0.2.0-fgbeta-2::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40rvohealth%2Fpsychic-spec-helpers%2F0.2.0-fgbeta-2%2Ffc68d085d79502c8c2c80c4f88de0a5d7bf3b57c"
+"@rvohealth/psychic-spec-helpers@npm:=0.2.0-fgbeta-12":
+  version: 0.2.0-fgbeta-12
+  resolution: "@rvohealth/psychic-spec-helpers@npm:0.2.0-fgbeta-12::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40rvohealth%2Fpsychic-spec-helpers%2F0.2.0-fgbeta-12%2F648aad181118e8352bfa3f6ce29bc11fe3de3f82"
   dependencies:
     cookiejar: "npm:^2.1.4"
   peerDependencies:
     "@types/node": "*"
     "@types/supertest": "*"
+    puppeteer: "*"
     supertest: "*"
     ts-node: "*"
     typescript: "*"
-    vitest: "*"
-  checksum: 10c0/568ae71af2a8f465fb62b6780fef66e82b9783919281983dfc2eafc4a2fc0c01a06d639313b4d1ca198591360be52a14b4971392e045e3c9d01ac96eaea5566c
+  checksum: 10c0/250ce38e5f2022d71ddbb1de4059fb039ac7694824b605cb0e831a4e5ed5c642f8660a3bcc427a7b2242c5ee9140b5c4c1a79f1e8c649a51135915491c10bf6c
   languageName: node
   linkType: hard
 
@@ -739,8 +739,8 @@ __metadata:
     "@eslint/js": "npm:^9.19.0"
     "@jest-mock/express": "npm:^3.0.0"
     "@rvohealth/dream": "npm:=0.29.0-fgbeta-21"
-    "@rvohealth/dream-spec-helpers": "npm:=0.1.0-fgbeta-15"
-    "@rvohealth/psychic-spec-helpers": "npm:=0.2.0-fgbeta-2"
+    "@rvohealth/dream-spec-helpers": "npm:=0.1.0-fgbeta-16"
+    "@rvohealth/psychic-spec-helpers": "npm:=0.2.0-fgbeta-12"
     "@types/cookie-parser": "npm:^1.4.7"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^4.17.21"
