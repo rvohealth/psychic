@@ -716,9 +716,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvohealth/psychic-spec-helpers@npm:=0.2.0-fgbeta-12":
-  version: 0.2.0-fgbeta-12
-  resolution: "@rvohealth/psychic-spec-helpers@npm:0.2.0-fgbeta-12::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40rvohealth%2Fpsychic-spec-helpers%2F0.2.0-fgbeta-12%2F648aad181118e8352bfa3f6ce29bc11fe3de3f82"
+"@rvohealth/psychic-spec-helpers@npm:=0.2.0-fgbeta-13":
+  version: 0.2.0-fgbeta-13
+  resolution: "@rvohealth/psychic-spec-helpers@npm:0.2.0-fgbeta-13::__archiveUrl=https%3A%2F%2Fnpm.pkg.github.com%2Fdownload%2F%40rvohealth%2Fpsychic-spec-helpers%2F0.2.0-fgbeta-13%2F9c42c6567094d6e4c8c1a840974ac9d60af484e8"
   dependencies:
     cookiejar: "npm:^2.1.4"
   peerDependencies:
@@ -728,7 +728,7 @@ __metadata:
     supertest: "*"
     ts-node: "*"
     typescript: "*"
-  checksum: 10c0/250ce38e5f2022d71ddbb1de4059fb039ac7694824b605cb0e831a4e5ed5c642f8660a3bcc427a7b2242c5ee9140b5c4c1a79f1e8c649a51135915491c10bf6c
+  checksum: 10c0/03c58cbf5f09e45bb853473a999a128033bf4bfb5e1ecfb5ced0874fc65b9e560a00074161dfcd9128587deeaa26a8fa4477221c1c110ec71be35a02fd727ac5
   languageName: node
   linkType: hard
 
@@ -740,7 +740,7 @@ __metadata:
     "@jest-mock/express": "npm:^3.0.0"
     "@rvohealth/dream": "npm:=0.29.0-fgbeta-21"
     "@rvohealth/dream-spec-helpers": "npm:=0.1.0-fgbeta-16"
-    "@rvohealth/psychic-spec-helpers": "npm:=0.2.0-fgbeta-12"
+    "@rvohealth/psychic-spec-helpers": "npm:=0.2.0-fgbeta-13"
     "@types/cookie-parser": "npm:^1.4.7"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^4.17.21"
