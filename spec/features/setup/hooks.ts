@@ -1,11 +1,11 @@
 import { DreamApplication } from '@rvohealth/dream'
 import { provideDreamViteMatchers, truncate } from '@rvohealth/dream-spec-helpers'
-import { providePuppeteerMatchers } from '@rvohealth/psychic-spec-helpers'
+import { providePuppeteerViteMatchers } from '@rvohealth/psychic-spec-helpers'
 import { PsychicServer } from '../../../src'
 import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication'
 
 provideDreamViteMatchers()
-providePuppeteerMatchers()
+providePuppeteerViteMatchers()
 
 // vi.setTimeout(
 //   (process.env.JEST_FEATURE_TIMEOUT_SECONDS && parseInt(process.env.JEST_FEATURE_TIMEOUT_SECONDS) * 1000) ||
