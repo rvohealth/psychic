@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvohealth/psychic",
   "description": "Typescript web framework",
-  "version": "0.24.0-fgbeta-7",
+  "version": "0.24.0-fgbeta-8",
   "author": "RVOHealth",
   "repository": "https://github.com/rvohealth/psychic.git",
   "license": "MIT",

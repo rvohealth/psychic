@@ -67,7 +67,10 @@ export default class OpenapiAppRenderer {
 
     // eslint-disable-next-line @typescript-eslint/ban-ts-comment
     // @ts-ignore
-    const packageJson = (await import(packageJsonPath, { with: { type: 'json' } })) as {
+    const packageJson = // eslint-disable-next-line @typescript-eslint/ban-ts-comment
+    // @ts-ignore
+    ((await import(packageJsonPath, { with: { type: 'json' } })) as { default: Record<string, string> })
+      .default as {
       version: string
       name: string
       description?: string
