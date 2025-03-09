@@ -187,6 +187,11 @@ Try setting it to something valid, like:
     default: {
       outputFilename: 'openapi.json',
       schemaDelimeter: '',
+      info: {
+        title: 'untitled openapi spec',
+        version: 'unknown version',
+        description: '',
+      },
     },
   }
   public get openapi() {
@@ -600,6 +605,7 @@ export interface NamedPsychicOpenapiOptions extends PsychicOpenapiBaseOptions {
 }
 
 interface PsychicOpenapiBaseOptions {
+  info?: PsychicOpenapiInfo
   servers?: OpenapiServer[]
   schemaDelimeter?: string
   suppressResponseEnums?: boolean
@@ -616,6 +622,12 @@ interface PsychicOpenapiBaseOptions {
       }
     }
   }
+}
+
+interface PsychicOpenapiInfo {
+  version: string
+  title: string
+  description: string
 }
 
 interface PsychicPathOptions {

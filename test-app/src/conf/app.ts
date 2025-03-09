@@ -113,6 +113,11 @@ export default async (psy: PsychicApplication) => {
   })
 
   psy.set('openapi', 'admin', {
+    info: {
+      title: 'admin',
+      description: 'admin desc',
+      version: '1.1.1',
+    },
     outputFilename: 'admin.openapi.json',
     syncEnumsToClient: true,
     defaults: {
