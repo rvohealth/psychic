@@ -28,7 +28,7 @@
     "psycore": "PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts",
     "gpsycore": "PSYCHIC_CORE_DEVELOPMENT=1 npx ts-node --transpile-only ./global-cli/main.ts",
     "build": "echo \"building cjs...\" && rm -rf dist && npx tsc -p ./tsconfig.cjs.build.json && echo \"building esm...\" && npx tsc -p ./tsconfig.esm.build.json",
-    "build:core": "rm -rf dist && echo \"building psychic core...\" && npx tsc -p ./tsconfig.build-core.json",
+    "build:core": "rm -rf dist && echo \"building psychic core...\" && npx tsc -p ./tsconfig.esm.build.core.json",
     "sync": "NODE_ENV=development yarn --cwd=node_modules/@rvohealth/dream build-boot && NODE_ENV=development yarn --cwd=node_modules/@rvohealth/dream build",
     "syncb": "NODE_ENV=development yarn --cwd=node_modules/@rvohealth/dream build-boot && NODE_ENV=development yarn dream sync:config-cache && yarn --cwd=node_modules/@rvohealth/dream build && yarn build",
     "dev": "PSYCHIC_CORE_DEVELOPMENT=1 NODE_ENV=development ts-node ./test-app/main.ts",
@@ -67,7 +67,7 @@
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@jest-mock/express": "^3.0.0",
-    "@rvohealth/dream": "=0.29.0-fgbeta-22",
+    "@rvohealth/dream": "=0.29.0-beta.30",
     "@rvohealth/dream-spec-helpers": "=0.1.0-fgbeta-19",
     "@rvohealth/psychic-spec-helpers": "=0.2.0-fgbeta-19",
     "@types/express": "^4.17.21",

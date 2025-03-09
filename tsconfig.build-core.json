@@ -1,5 +1,0 @@
-{
-  "extends": "./tsconfig.build.json",
-  "ignore": [],
-  "include": ["src/**/*", "shared/**/*", "test-app/**/*"]
-}
