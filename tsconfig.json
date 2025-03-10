@@ -2,6 +2,10 @@
   "extends": "./tsconfig.esm.build.json",
   "include": ["src/**/*", "test-app/**/*", "spec/**/*"],
 
+  "compilerOptions": {
+    "typeRoots": ["spec/global.d.ts"]
+  },
+
   /*  this ts-node block is necessary to get node commands to leverage the ts-node esm loader
    *  removing this block will lead to ambiguous crashing in node with no stack traces.
    * */
