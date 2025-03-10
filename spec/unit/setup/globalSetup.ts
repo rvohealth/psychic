@@ -10,5 +10,6 @@ export async function setup() {
 }
 
 export async function teardown() {
-  await rmTmpFile()
+  // await rmTmpFile()
+  process.exit()
 }
