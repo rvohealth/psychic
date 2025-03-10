@@ -1,4 +1,4 @@
-import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import { isValidISODateString } from 'iso-datestring-validator'
 import { DateTime } from 'luxon'
 import { PsychicApplication, PsychicServer } from '../../../../src'

@@ -1,4 +1,4 @@
-import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import { PsychicServer } from '../../../../src'
 
 describe('a visitor attempts to hit a route that will trigger a 404', () => {

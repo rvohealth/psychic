@@ -1,4 +1,4 @@
-import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import PsychicServer from '../../../../src/server'
 
 describe('hitting an endpoint that calls castParam', () => {

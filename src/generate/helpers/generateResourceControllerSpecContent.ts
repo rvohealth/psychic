@@ -62,7 +62,7 @@ export default function generateResourceControllerSpecContent({
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { UpdateableProperties } from '@rvohealth/dream'
 import { PsychicServer } from '@rvohealth/psychic'
-import { specRequest as request } from '@rvohealth/psychic-spec-helpers'${uniq(importStatements).join('')}
+import { specRequest as request } from '@rvoh/psychic-spec-helpers'${uniq(importStatements).join('')}
 import { addEndUserAuthHeader } from '${specUnitUpdirs}helpers/authentication'
 
 describe('${fullyQualifiedControllerName}', () => {

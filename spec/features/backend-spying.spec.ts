@@ -1,4 +1,4 @@
-import { visit } from '@rvohealth/psychic-spec-helpers'
+import { visit } from '@rvoh/psychic-spec-helpers'
 import UsersController from '../../test-app/src/app/controllers/UsersController'
 
 describe('test that spying on backend modules works within fspec runs', () => {

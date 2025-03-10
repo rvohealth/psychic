@@ -12,7 +12,7 @@ describe('generateResourceControllerSpecContent', () => {
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { UpdateableProperties } from '@rvohealth/dream'
 import { PsychicServer } from '@rvohealth/psychic'
-import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import Post from '../../../../src/app/models/Post'
 import User from '../../../../src/app/models/User'
 import createPost from '../../../factories/PostFactory'
