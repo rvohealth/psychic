@@ -1,4 +1,4 @@
-import { DreamSerializer, RendersOne } from '@rvohealth/dream'
+import { DreamSerializer, RendersOne } from '@rvoh/dream'
 import User from '../../models/User'
 import WorldSerializer from './WorldSerializer'
 

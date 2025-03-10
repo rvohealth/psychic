@@ -1,4 +1,4 @@
-import { Attribute, DreamSerializer } from '@rvohealth/dream'
+import { Attribute, DreamSerializer } from '@rvoh/dream'
 
 export class AdminPetSummarySerializer extends DreamSerializer {
   @Attribute('string')

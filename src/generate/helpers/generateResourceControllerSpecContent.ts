@@ -3,7 +3,7 @@ import {
   globalClassNameFromFullyQualifiedModelName,
   standardizeFullyQualifiedModelName,
   uniq,
-} from '@rvohealth/dream'
+} from '@rvoh/dream'
 import relativePsychicPath from '../../helpers/path/relativePsychicPath.js'
 import updirsFromPath from '../../helpers/path/updirsFromPath.js'
 
@@ -60,7 +60,7 @@ export default function generateResourceControllerSpecContent({
 
   return `\
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { UpdateableProperties } from '@rvohealth/dream'
+import { UpdateableProperties } from '@rvoh/dream'
 import { PsychicServer } from '@rvohealth/psychic'
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'${uniq(importStatements).join('')}
 import { addEndUserAuthHeader } from '${specUnitUpdirs}helpers/authentication'

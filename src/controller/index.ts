@@ -4,7 +4,7 @@ import {
   DreamParamSafeAttributes,
   DreamSerializer,
   GlobalNameNotSet,
-} from '@rvohealth/dream'
+} from '@rvoh/dream'
 import { Request, Response } from 'express'
 import { ControllerHook } from '../controller/hooks.js'
 import HttpStatusBadGateway from '../error/http/BadGateway.js'

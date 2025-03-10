@@ -1,6 +1,6 @@
 import '../../../src/helpers/loadEnv'
 
-import { Encrypt, loadRepl } from '@rvohealth/dream'
+import { Encrypt, loadRepl } from '@rvoh/dream'
 import * as repl from 'node:repl'
 import initializePsychicApplication from '../cli/helpers/initializePsychicApplication'
 

@@ -1,5 +1,5 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { Attribute, DreamApplication, DreamSerializer } from '@rvohealth/dream'
+import { Attribute, DreamApplication, DreamSerializer } from '@rvoh/dream'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller'
 import { BeforeAction, OpenAPI } from '../../../src/controller/decorators'

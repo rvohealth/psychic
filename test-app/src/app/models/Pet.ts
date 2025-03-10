@@ -1,4 +1,4 @@
-import { Decorators, DreamColumn, DreamSerializers, IdType } from '@rvohealth/dream'
+import { Decorators, DreamColumn, DreamSerializers, IdType } from '@rvoh/dream'
 import ApplicationModel from './ApplicationModel'
 import User from './User'
 

@@ -1,4 +1,4 @@
-import { DreamSerializer } from '@rvohealth/dream'
+import { DreamSerializer } from '@rvoh/dream'
 import OpenapiSerializerRenderer from '../../../../src/openapi-renderer/serializer'
 import {
   CommentTestingAdditionalPropertiesSerializer,

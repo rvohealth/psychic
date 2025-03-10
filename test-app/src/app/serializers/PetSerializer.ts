@@ -1,4 +1,4 @@
-import { Attribute, DreamColumn, DreamSerializer, RendersOne } from '@rvohealth/dream'
+import { Attribute, DreamColumn, DreamSerializer, RendersOne } from '@rvoh/dream'
 import Pet from '../models/Pet'
 import User from '../models/User'
 

@@ -7,7 +7,7 @@ import {
   DreamParamSafeAttributes,
   DreamParamSafeColumnNames,
   snakeify,
-} from '@rvohealth/dream'
+} from '@rvoh/dream'
 import { DateTime } from 'luxon'
 import {
   PsychicParamsDictionary,

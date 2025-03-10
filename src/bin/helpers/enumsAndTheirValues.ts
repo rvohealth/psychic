@@ -1,4 +1,4 @@
-import { db } from '@rvohealth/dream'
+import { db } from '@rvoh/dream'
 import { sql } from 'kysely'
 
 export default async function enumsAndTheirValues() {

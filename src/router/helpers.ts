@@ -1,4 +1,4 @@
-import { camelize, compact, pascalize } from '@rvohealth/dream'
+import { camelize, compact, pascalize } from '@rvoh/dream'
 import PsychicController from '../controller/index.js'
 import CannotFindInferredControllerFromProvidedNamespace from '../error/router/cannot-find-inferred-controller-from-provided-namespace.js'
 import CannotInferControllerFromTopLevelRouteError from '../error/router/cannot-infer-controller-from-top-level-route.js'

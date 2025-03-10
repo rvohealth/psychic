@@ -68,7 +68,7 @@
     "@jest-mock/express": "^3.0.0",
     "@rvoh/dream-spec-helpers": "=0.1.0",
     "@rvoh/psychic-spec-helpers": "=0.2.0",
-    "@rvohealth/dream": "=0.29.0",
+    "@rvoh/dream": "=0.29.0",
     "@types/express": "^4.17.21",
     "@types/lodash-es": "^4",
     "@types/lodash.clonedeep": "^4.5.9",

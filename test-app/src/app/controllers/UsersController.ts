@@ -1,4 +1,4 @@
-import { Encrypt } from '@rvohealth/dream'
+import { Encrypt } from '@rvoh/dream'
 import { BeforeAction, OpenAPI } from '../../../../src'
 import User from '../models/User'
 import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer'

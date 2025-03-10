@@ -1,4 +1,4 @@
-import { dreamPath } from '@rvohealth/dream'
+import { dreamPath } from '@rvoh/dream'
 import PsychicApplication from '../../psychic-application/index.js'
 
 export default function (dreamPathType: PsychicPaths) {
