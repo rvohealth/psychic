@@ -113,7 +113,7 @@ export default class PsychicController {
    * and all controllers are instantiated.
    *
    */
-  public static globallyInitializingDecorators: boolean = false
+  private static globallyInitializingDecorators: boolean = false
 
   /**
    * @internal
