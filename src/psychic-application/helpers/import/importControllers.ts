@@ -40,7 +40,6 @@ export default async function importControllers(
 
   for (const [, controllerClass] of controllerClasses) {
     if (controllerClass?.isPsychicController) {
-      // try {
       /**
        * Certain features (e.g. passing a Dream instance to `create` so that it automatically destructures polymorphic type and primary key)
        * need static access to things set up by decorators (e.g. associations). Stage 3 Decorators change the context that is available
@@ -51,12 +50,6 @@ export default async function importControllers(
         action: 'a',
         config: psychicApp,
       })
-      // } catch (error) {
-      //   throw error
-      //   // // ApplicationModel will automatically raise an exception here,
-      //   // // since it does not have a table.
-      //   // if (!(error instanceof MissingTable)) throw error
-      // }
     }
   }
 
