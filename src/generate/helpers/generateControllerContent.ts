@@ -183,7 +183,7 @@ export default function generateControllerContent({
     }
   })
 
-  const openApiImport = `import { OpenAPI } from '@rvohealth/psychic'`
+  const openApiImport = `import { OpenAPI } from '@rvoh/psychic'`
 
   const openApiTags = `const openApiTags = ['${hyphenize(pluralizedModelAttributeName || controllerClassName.replace(/Controller$/, ''))}']`
 

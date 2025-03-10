@@ -14,7 +14,7 @@ describe('psy generate:controller <name> [...methods]', () => {
 
         expect(res).toEqual(
           `\
-import { OpenAPI } from '@rvohealth/psychic'
+import { OpenAPI } from '@rvoh/psychic'
 import AuthedController from './AuthedController'
 import Post from '../models/Post'
 
@@ -110,7 +110,7 @@ export default class PostsController extends AuthedController {
 
         expect(res).toEqual(
           `\
-import { OpenAPI } from '@rvohealth/psychic'
+import { OpenAPI } from '@rvoh/psychic'
 import AuthedController from '../../../AuthedController'
 import HealthPost from '../../../../models/Health/Post'
 
@@ -205,7 +205,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
 
         expect(res).toEqual(
           `\
-import { OpenAPI } from '@rvohealth/psychic'
+import { OpenAPI } from '@rvoh/psychic'
 import AuthedController from '../../AuthedController'
 
 const openApiTags = ['api-v1-users']
