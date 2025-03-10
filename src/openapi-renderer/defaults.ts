@@ -1,5 +1,5 @@
 import { OpenapiSchemaBody } from '@rvohealth/dream'
-import { OpenapiContent, OpenapiResponses } from './endpoint'
+import { OpenapiContent, OpenapiResponses } from './endpoint.js'
 
 export const DEFAULT_OPENAPI_RESPONSES = {
   400: {

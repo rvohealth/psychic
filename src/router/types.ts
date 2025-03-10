@@ -1,4 +1,4 @@
-import PsychicController from '../controller'
+import PsychicController from '../controller/index.js'
 
 export type ResourcesMethodType = 'index' | 'create' | 'update' | 'show' | 'destroy'
 export const ResourcesMethods = ['index', 'create', 'update', 'show', 'destroy'] as ResourcesMethodType[]

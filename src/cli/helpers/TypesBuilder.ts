@@ -1,7 +1,7 @@
 import { DreamApplication } from '@rvohealth/dream'
-import fs from 'fs/promises'
-import path from 'path'
-import PsychicApplication from '../../psychic-application'
+import * as fs from 'fs/promises'
+import * as path from 'path'
+import PsychicApplication from '../../psychic-application/index.js'
 
 export default class TypesBuilder {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

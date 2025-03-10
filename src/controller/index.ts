@@ -6,48 +6,48 @@ import {
   GlobalNameNotSet,
 } from '@rvohealth/dream'
 import { Request, Response } from 'express'
-import { ControllerHook } from '../controller/hooks'
-import HttpStatusBadGateway from '../error/http/BadGateway'
-import HttpStatusBadRequest from '../error/http/BadRequest'
-import HttpStatusConflict from '../error/http/Conflict'
-import HttpStatusContentTooLarge from '../error/http/ContentTooLarge'
-import HttpStatusExpectationFailed from '../error/http/ExpectationFailed'
-import HttpStatusFailedDependency from '../error/http/FailedDependency'
-import HttpStatusForbidden from '../error/http/Forbidden'
-import HttpStatusGatewayTimeout from '../error/http/GatewayTimeout'
-import HttpStatusGone from '../error/http/Gone'
-import HttpStatusImATeapot from '../error/http/ImATeapot'
-import HttpStatusInsufficientStorage from '../error/http/InsufficientStorage'
-import HttpStatusInternalServerError from '../error/http/InternalServerError'
-import HttpStatusLocked from '../error/http/Locked'
-import HttpStatusMethodNotAllowed from '../error/http/MethodNotAllowed'
-import HttpStatusMisdirectedRequest from '../error/http/MisdirectedRequest'
-import HttpStatusNotAcceptable from '../error/http/NotAcceptable'
-import HttpStatusNotExtended from '../error/http/NotExtended'
-import HttpStatusNotFound from '../error/http/NotFound'
-import HttpStatusNotImplemented from '../error/http/NotImplemented'
-import HttpStatusPaymentRequired from '../error/http/PaymentRequired'
-import HttpStatusPreconditionFailed from '../error/http/PreconditionFailed'
-import HttpStatusPreconditionRequired from '../error/http/PreconditionRequired'
-import HttpStatusProxyAuthenticationRequired from '../error/http/ProxyAuthenticationRequired'
-import HttpStatusRequestHeaderFieldsTooLarge from '../error/http/RequestHeaderFieldsTooLarge'
-import HttpStatusServiceUnavailable from '../error/http/ServiceUnavailable'
-import HttpStatusCodeMap, { HttpStatusCodeInt, HttpStatusSymbol } from '../error/http/status-codes'
-import HttpStatusTooManyRequests from '../error/http/TooManyRequests'
-import HttpStatusUnauthorized from '../error/http/Unauthorized'
-import HttpStatusUnavailableForLegalReasons from '../error/http/UnavailableForLegalReasons'
-import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent'
-import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType'
-import OpenapiEndpointRenderer from '../openapi-renderer/endpoint'
-import PsychicApplication from '../psychic-application'
+import { ControllerHook } from '../controller/hooks.js'
+import HttpStatusBadGateway from '../error/http/BadGateway.js'
+import HttpStatusBadRequest from '../error/http/BadRequest.js'
+import HttpStatusConflict from '../error/http/Conflict.js'
+import HttpStatusContentTooLarge from '../error/http/ContentTooLarge.js'
+import HttpStatusExpectationFailed from '../error/http/ExpectationFailed.js'
+import HttpStatusFailedDependency from '../error/http/FailedDependency.js'
+import HttpStatusForbidden from '../error/http/Forbidden.js'
+import HttpStatusGatewayTimeout from '../error/http/GatewayTimeout.js'
+import HttpStatusGone from '../error/http/Gone.js'
+import HttpStatusImATeapot from '../error/http/ImATeapot.js'
+import HttpStatusInsufficientStorage from '../error/http/InsufficientStorage.js'
+import HttpStatusInternalServerError from '../error/http/InternalServerError.js'
+import HttpStatusLocked from '../error/http/Locked.js'
+import HttpStatusMethodNotAllowed from '../error/http/MethodNotAllowed.js'
+import HttpStatusMisdirectedRequest from '../error/http/MisdirectedRequest.js'
+import HttpStatusNotAcceptable from '../error/http/NotAcceptable.js'
+import HttpStatusNotExtended from '../error/http/NotExtended.js'
+import HttpStatusNotFound from '../error/http/NotFound.js'
+import HttpStatusNotImplemented from '../error/http/NotImplemented.js'
+import HttpStatusPaymentRequired from '../error/http/PaymentRequired.js'
+import HttpStatusPreconditionFailed from '../error/http/PreconditionFailed.js'
+import HttpStatusPreconditionRequired from '../error/http/PreconditionRequired.js'
+import HttpStatusProxyAuthenticationRequired from '../error/http/ProxyAuthenticationRequired.js'
+import HttpStatusRequestHeaderFieldsTooLarge from '../error/http/RequestHeaderFieldsTooLarge.js'
+import HttpStatusServiceUnavailable from '../error/http/ServiceUnavailable.js'
+import HttpStatusCodeMap, { HttpStatusCodeInt, HttpStatusSymbol } from '../error/http/status-codes.js'
+import HttpStatusTooManyRequests from '../error/http/TooManyRequests.js'
+import HttpStatusUnauthorized from '../error/http/Unauthorized.js'
+import HttpStatusUnavailableForLegalReasons from '../error/http/UnavailableForLegalReasons.js'
+import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent.js'
+import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType.js'
+import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
+import PsychicApplication from '../psychic-application/index.js'
 import Params, {
   ParamValidationError,
   ParamsCastOptions,
   ParamsForOpts,
   ValidatedAllowsNull,
   ValidatedReturnType,
-} from '../server/params'
-import Session, { CustomSessionCookieOptions } from '../session'
+} from '../server/params.js'
+import Session, { CustomSessionCookieOptions } from '../session/index.js'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -102,6 +102,18 @@ export default class PsychicController {
   public static get isPsychicController() {
     return true
   }
+
+  /**
+   * @internal
+   *
+   * Certain features (e.g. building OpenAPI specs from Attribute and RendersOne/Many decorators)
+   * need static access to things set up by decorators. Stage 3 Decorators change the context that is available
+   * at decoration time such that the class of a property being decorated is only avilable during instance instantiation. In order
+   * to only apply static values once, on boot, `globallyInitializingDecorators` is set to true on PsychicController,
+   * and all controllers are instantiated.
+   *
+   */
+  private static globallyInitializingDecorators: boolean = false
 
   /**
    * @internal

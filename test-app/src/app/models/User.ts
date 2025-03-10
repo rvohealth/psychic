@@ -1,6 +1,7 @@
 import {
   BeforeCreate,
   BeforeUpdate,
+  Decorators,
   DreamColumn,
   DreamSerializers,
   Validates,
@@ -10,6 +11,9 @@ import { randomBytes, scrypt, timingSafeEqual } from 'crypto'
 import ApplicationModel from './ApplicationModel'
 import Pet from './Pet'
 import Post from './Post'
+
+const Deco = new Decorators<InstanceType<typeof User>>()
+
 export default class User extends ApplicationModel {
   public get table() {
     return 'users' as const
@@ -88,13 +92,13 @@ export default class User extends ApplicationModel {
   @Virtual('string[]')
   public openapiVirtualSpecTest2?: string | null
 
-  @User.HasMany('Pet')
+  @Deco.HasMany('Pet')
   public pets: Pet[]
 
-  @User.HasMany('Post')
+  @Deco.HasMany('Post')
   public posts: Post[]
 
-  @User.HasOne('Post')
+  @Deco.HasOne('Post')
   public recentPost: Post | null
 
   @BeforeCreate()

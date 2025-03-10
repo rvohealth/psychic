@@ -1,10 +1,10 @@
-import { describe as context } from '@jest/globals'
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller'
 import { OpenAPI } from '../../../src/controller/decorators'
 import PsychicApplication from '../../../src/psychic-application'
 import User from '../../../test-app/src/app/models/User'
+import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers'
 
 describe('PsychicController', () => {
   describe('#respond', () => {
@@ -24,13 +24,14 @@ describe('PsychicController', () => {
         this.respond('updated')
       }
     }
+    processDynamicallyDefinedControllers(MyController)
 
     beforeEach(() => {
-      req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
-      res = getMockRes().res
+      req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
+      res = getMockRes().res as unknown as Response
       config = new PsychicApplication()
-      jest.spyOn(res, 'json')
-      jest.spyOn(res, 'status')
+      vi.spyOn(res, 'json')
+      vi.spyOn(res, 'status')
     })
 
     it('sets status and sends json', () => {

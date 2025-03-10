@@ -1,5 +1,5 @@
-import path from 'path'
-import PsychicApplication from '../../psychic-application'
+import * as path from 'path'
+import PsychicApplication from '../../psychic-application/index.js'
 
 export default function (relDirPath: string, partialFilePath: string) {
   const psychicApp = PsychicApplication.getOrFail()

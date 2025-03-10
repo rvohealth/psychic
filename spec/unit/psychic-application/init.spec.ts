@@ -1,15 +1,15 @@
-import { describe as context } from '@jest/globals'
 import { PsychicApplication } from '../../../src'
 import PsychicApplicationInitMissingApiRoot from '../../../src/error/psychic-application/init-missing-api-root'
 import PsychicApplicationInitMissingCallToLoadControllers from '../../../src/error/psychic-application/init-missing-call-to-load-controllers'
 import PsychicApplicationInitMissingRoutesCallback from '../../../src/error/psychic-application/init-missing-routes-callback'
-import * as LoadControllersModule from '../../../src/psychic-application/helpers/loadControllers'
+import * as LoadControllersModule from '../../../src/psychic-application/helpers/import/importControllers'
+import importDefault from '../../../test-app/src/app/helpers/importDefault'
 import dreamCb from '../../../test-app/src/conf/dream'
 
 describe('DreamApplication#init', () => {
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-    jest.spyOn(LoadControllersModule, 'default').mockResolvedValue({} as any)
+    vi.spyOn(LoadControllersModule, 'default').mockResolvedValue({} as any)
   })
 
   context('with a valid config', () => {
@@ -17,7 +17,7 @@ describe('DreamApplication#init', () => {
       const cb = async (app: PsychicApplication) => {
         app.set('apiRoot', 'how/yadoin')
         app.set('routes', () => {})
-        await app.load('controllers', 'how/yadoin')
+        await app.load('controllers', 'how/yadoin', path => importDefault(path))
       }
 
       await expect(PsychicApplication.init(cb, dreamCb)).resolves.not.toThrow()
@@ -41,7 +41,7 @@ describe('DreamApplication#init', () => {
     context('apiRoot not set', () => {
       it('throws targeted exception', async () => {
         const cb = async (app: PsychicApplication) => {
-          await app.load('controllers', 'how/yadoin')
+          await app.load('controllers', 'how/yadoin', path => importDefault(path))
           app.set('routes', () => {})
         }
 
@@ -55,7 +55,7 @@ describe('DreamApplication#init', () => {
       it('throws targeted exception', async () => {
         const cb = async (app: PsychicApplication) => {
           app.set('apiRoot', 'how/yadoin')
-          await app.load('controllers', 'how/yadoin')
+          await app.load('controllers', 'how/yadoin', path => importDefault(path))
         }
 
         await expect(PsychicApplication.init(cb, dreamCb)).rejects.toThrow(

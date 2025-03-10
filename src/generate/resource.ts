@@ -1,7 +1,7 @@
 import { generateDream, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
-import pluralize from 'pluralize'
-import generateController from './controller'
-import addResourceToRoutes from './helpers/addResourceToRoutes'
+import pluralize from 'pluralize-esm'
+import generateController from './controller.js'
+import addResourceToRoutes from './helpers/addResourceToRoutes.js'
 
 export default async function generateResource({
   route,

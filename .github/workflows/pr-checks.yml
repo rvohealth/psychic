@@ -164,6 +164,9 @@ jobs:
         run: yarn install --immutable
         working-directory: ./client
 
+      - name: install puppeteer browsers
+        run: yarn puppeteer browsers install firefox
+
       - name: make screenshots dir
         run: mkdir -p /tmp/screenshots
 

@@ -17,16 +17,16 @@ import {
   SerializableDreamOrViewModel,
   compact,
 } from '@rvohealth/dream'
-import cloneDeep from 'lodash.clonedeep'
-import PsychicController from '../controller'
-import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes'
-import PsychicApplication from '../psychic-application'
-import { RouteConfig } from '../router/route-manager'
-import { HttpMethod } from '../router/types'
-import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment'
-import { DEFAULT_OPENAPI_RESPONSES } from './defaults'
-import openapiRoute from './helpers/openapiRoute'
-import OpenapiSerializerRenderer from './serializer'
+import { cloneDeep } from 'lodash-es'
+import PsychicController from '../controller/index.js'
+import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes.js'
+import PsychicApplication from '../psychic-application/index.js'
+import { RouteConfig } from '../router/route-manager.js'
+import { HttpMethod } from '../router/types.js'
+import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment.js'
+import { DEFAULT_OPENAPI_RESPONSES } from './defaults.js'
+import openapiRoute from './helpers/openapiRoute.js'
+import OpenapiSerializerRenderer from './serializer.js'
 
 export default class OpenapiEndpointRenderer<
   DreamsOrSerializersOrViewModels extends

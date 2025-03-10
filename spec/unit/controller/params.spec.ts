@@ -1,5 +1,5 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { describe as context } from '@jest/globals'
+import { Request, Response } from 'express'
 import { Params } from '../../../src'
 import PsychicController from '../../../src/controller'
 import PsychicApplication from '../../../src/psychic-application'
@@ -12,8 +12,11 @@ type TestEnum = (typeof TestEnumValues)[number]
 describe('PsychicController', () => {
   describe('get #params', () => {
     it('returns both body and query params', () => {
-      const req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
-      const res = getMockRes().res
+      const req = getMockReq({
+        body: { search: 'abc' },
+        query: { cool: 'boyjohnson' },
+      }) as unknown as Request
+      const res = getMockRes().res as unknown as Response
       const controller = new PsychicController(req, res, {
         config: new PsychicApplication(),
         action: 'hello',
@@ -43,19 +46,19 @@ describe('PsychicController', () => {
           helloWorldArray: ['hello', 'world'],
           helloGoodbyeArray: ['hello', 'goodbye'],
         },
-      })
-      const res = getMockRes().res
+      }) as unknown as Request
+      const res = getMockRes().res as unknown as Response
       controller = new PsychicController(req, res, { config: new PsychicApplication(), action: 'hello' })
     })
 
     it('returns the result of Params.cast', () => {
-      const spy = jest.spyOn(Params, 'cast').mockReturnValue('chalupas dujour')
+      const spy = vi.spyOn(Params, 'cast').mockReturnValue('chalupas dujour')
       expect(controller.castParam('name', 'string', { allowNull: true })).toEqual('chalupas dujour')
       expect(spy).toHaveBeenCalledWith('howyadoin', 'string', { allowNull: true })
     })
 
     it('can traverse dot notation', () => {
-      const spy = jest.spyOn(Params, 'cast')
+      const spy = vi.spyOn(Params, 'cast')
       expect(controller.castParam('subBody.hello', 'string')).toEqual('world')
       expect(spy).toHaveBeenCalledWith('world', 'string', undefined)
     })
@@ -116,7 +119,7 @@ describe('PsychicController', () => {
 
     context('with allowNull', () => {
       it('can traverse dot notation', () => {
-        const spy = jest.spyOn(Params, 'cast')
+        const spy = vi.spyOn(Params, 'cast')
         expect(controller.castParam('subBody.hello', 'string', { allowNull: true })).toEqual('world')
         expect(spy).toHaveBeenCalledWith('world', 'string', { allowNull: true })
       })
@@ -133,8 +136,8 @@ describe('PsychicController', () => {
     it('returns filtered params', () => {
       const req = getMockReq({
         body: { id: 1, name: 'howyadoin', createdAt: 'hello', updatedAt: 'birld', deletedAt: 'sometimeago' },
-      })
-      const res = getMockRes().res
+      }) as unknown as Request
+      const res = getMockRes().res as unknown as Response
       const controller = new PsychicController(req, res, {
         config: new PsychicApplication(),
         action: 'hello',
@@ -153,8 +156,8 @@ describe('PsychicController', () => {
             updatedAt: 'birld',
             deletedAt: 'sometimeago',
           },
-        })
-        const res = getMockRes().res
+        }) as unknown as Request
+        const res = getMockRes().res as unknown as Response
         const controller = new PsychicController(req, res, {
           config: new PsychicApplication(),
           action: 'hello',
@@ -176,8 +179,8 @@ describe('PsychicController', () => {
               deletedAt: 'sometimeago',
             },
           },
-        })
-        const res = getMockRes().res
+        }) as unknown as Request
+        const res = getMockRes().res as unknown as Response
         const controller = new PsychicController(req, res, {
           config: new PsychicApplication(),
           action: 'hello',
@@ -190,9 +193,9 @@ describe('PsychicController', () => {
         it('does not raise an exception', () => {
           const req = getMockReq({
             body: {},
-          })
+          }) as unknown as Request
 
-          const res = getMockRes().res
+          const res = getMockRes().res as unknown as Response
           const controller = new PsychicController(req, res, {
             config: new PsychicApplication(),
             action: 'hello',
@@ -214,8 +217,8 @@ describe('PsychicController', () => {
             updatedAt: 'birld',
             deletedAt: 'sometimeago',
           },
-        })
-        const res = getMockRes().res
+        }) as unknown as Request
+        const res = getMockRes().res as unknown as Response
         const controller = new PsychicController(req, res, {
           config: new PsychicApplication(),
           action: 'hello',

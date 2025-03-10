@@ -1,4 +1,3 @@
-import { describe as context } from '@jest/globals'
 import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../../../../src/error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
 import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
@@ -51,7 +50,7 @@ describe('OpenapiEndpointRenderer', () => {
       expect(response).toEqual({
         UserExtra: {
           type: 'object',
-          required: ['id', 'nicknames', 'howyadoin'],
+          required: ['id', 'howyadoin', 'nicknames'],
           properties: {
             id: {
               type: 'integer',
@@ -132,9 +131,9 @@ describe('OpenapiEndpointRenderer', () => {
           const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
           psychicApp.openapi.default.suppressResponseEnums = true
 
-          jest
-            .spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail')
-            .mockReturnValue(psychicApp)
+          vi.spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail').mockReturnValue(
+            psychicApp,
+          )
         })
 
         it('suppresses enums, instead using description to clarify enum options', () => {

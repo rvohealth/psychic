@@ -1,11 +1,11 @@
 import { RecordNotFound, ValidationError, camelize } from '@rvohealth/dream'
 import { Application, Request, Response, Router } from 'express'
-import pluralize from 'pluralize'
-import PsychicController from '../controller'
-import HttpError from '../error/http'
-import EnvInternal from '../helpers/EnvInternal'
-import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError'
-import PsychicApplication from '../psychic-application'
+import pluralize from 'pluralize-esm'
+import PsychicController from '../controller/index.js'
+import HttpError from '../error/http/index.js'
+import EnvInternal from '../helpers/EnvInternal.js'
+import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
+import PsychicApplication from '../psychic-application/index.js'
 import {
   NamespaceConfig,
   PsychicControllerActions,
@@ -13,10 +13,16 @@ import {
   applyResourcesAction,
   lookupControllerOrFail,
   routePath,
-} from '../router/helpers'
-import { ParamValidationError } from '../server/params'
-import RouteManager from './route-manager'
-import { HttpMethod, ResourceMethods, ResourcesMethodType, ResourcesMethods, ResourcesOptions } from './types'
+} from '../router/helpers.js'
+import { ParamValidationError } from '../server/params.js'
+import RouteManager from './route-manager.js'
+import {
+  HttpMethod,
+  ResourceMethods,
+  ResourcesMethodType,
+  ResourcesMethods,
+  ResourcesOptions,
+} from './types.js'
 
 export default class PsychicRouter {
   public app: Application

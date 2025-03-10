@@ -1,9 +1,9 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { describe as context } from '@jest/globals'
 import { Request, Response } from 'express'
 import InternalEncrypt from '../../../src/encrypt/internal-encrypt'
 import Session, { CustomSessionCookieOptions } from '../../../src/session'
 import User from '../../../test-app/src/app/models/User'
+import { MockInstance } from 'vitest'
 
 describe('Session', () => {
   let user: User
@@ -12,8 +12,8 @@ describe('Session', () => {
 
   beforeEach(async () => {
     user = await User.create({ email: 'how@yadoin', password: 'password' })
-    req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
-    res = getMockRes().res
+    req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
+    res = getMockRes().res as unknown as Response
   })
 
   describe('#getCookie', () => {
@@ -34,12 +34,12 @@ describe('Session', () => {
   describe('#setCookie', () => {
     const subject = (value: string, opts: CustomSessionCookieOptions = {}) =>
       new Session(req, res).setCookie('auth_token', value, opts)
-    let cookieSpy: jest.SpyInstance
-    let encryptSpy: jest.SpyInstance
+    let cookieSpy: MockInstance
+    let encryptSpy: MockInstance
 
     beforeEach(() => {
-      cookieSpy = jest.spyOn(res, 'cookie')
-      encryptSpy = jest.spyOn(InternalEncrypt, 'encryptCookie').mockReturnValue('abc123')
+      cookieSpy = vi.spyOn(res, 'cookie')
+      encryptSpy = vi.spyOn(InternalEncrypt, 'encryptCookie').mockReturnValue('abc123')
     })
 
     it('encrypts and stores the value as an httpOnly cookie, leveraging ttl from conf/app.ts cookie options', () => {

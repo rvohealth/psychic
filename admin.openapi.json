@@ -1,9 +1,9 @@
 {
   "openapi": "3.1.0",
   "info": {
-    "version": "0.23.2",
-    "title": "@rvohealth/psychic",
-    "description": "Typescript web framework"
+    "version": "1.1.1",
+    "title": "admin",
+    "description": "admin desc"
   },
   "paths": {
     "/admin/test": {

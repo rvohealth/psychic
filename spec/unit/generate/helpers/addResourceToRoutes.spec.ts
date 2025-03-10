@@ -1,6 +1,5 @@
-import { describe as context } from '@jest/globals'
-import fs from 'fs/promises'
-import path from 'path'
+import * as fs from 'fs/promises'
+import * as path from 'path'
 import { PsychicApplication } from '../../../../src'
 import addResourceToRoutes, {
   addResourceToRoutes_routeToRegexAndReplacements,
@@ -18,7 +17,7 @@ describe('addResourceToRoutes', () => {
     tmpRoutesFileRelativePath = path.join('spec', 'tmp', 'routes.ts')
     tmpRoutesFilepath = path.join(psychicApp.apiRoot, tmpRoutesFileRelativePath)
     supportDir = path.join(psychicApp.apiRoot, 'spec', 'support', 'generators', 'routes')
-    jest.spyOn(psychicPathModule, 'default').mockReturnValue(tmpRoutesFileRelativePath)
+    vi.spyOn(psychicPathModule, 'default').mockReturnValue(tmpRoutesFileRelativePath)
   })
 
   context('with the boilerplate routes file', () => {

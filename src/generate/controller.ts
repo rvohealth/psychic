@@ -1,12 +1,12 @@
 import { hyphenize, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
 import { existsSync } from 'fs'
-import fs from 'fs/promises'
-import EnvInternal from '../helpers/EnvInternal'
-import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths'
-import psychicPath from '../helpers/path/psychicPath'
-import generateControllerContent from './helpers/generateControllerContent'
-import generateControllerSpecContent from './helpers/generateControllerSpecContent'
-import generateResourceControllerSpecContent from './helpers/generateResourceControllerSpecContent'
+import * as fs from 'fs/promises'
+import EnvInternal from '../helpers/EnvInternal.js'
+import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths.js'
+import psychicPath from '../helpers/path/psychicPath.js'
+import generateControllerContent from './helpers/generateControllerContent.js'
+import generateControllerSpecContent from './helpers/generateControllerSpecContent.js'
+import generateResourceControllerSpecContent from './helpers/generateResourceControllerSpecContent.js'
 
 export default async function generateController({
   fullyQualifiedControllerName,

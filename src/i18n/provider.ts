@@ -1,5 +1,5 @@
-import I18nDefaultLocales from './conf/I18nDefaultLocales'
-import { DottedLanguageObjectStringPaths, GenericI18nObject } from './conf/types'
+import I18nDefaultLocales from './conf/I18nDefaultLocales.js'
+import { DottedLanguageObjectStringPaths, GenericI18nObject } from './conf/types.js'
 
 const SUPPORTED_LOCALES = ['en-US']
 export function supportedLocales() {

@@ -1,4 +1,3 @@
-import { describe as context } from '@jest/globals'
 import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
 import PsychicServer from '../../../src/server'
 import User from '../../../test-app/src/app/models/User'

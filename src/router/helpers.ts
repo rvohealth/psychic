@@ -1,12 +1,12 @@
 import { camelize, compact, pascalize } from '@rvohealth/dream'
-import PsychicController from '../controller'
-import CannotFindInferredControllerFromProvidedNamespace from '../error/router/cannot-find-inferred-controller-from-provided-namespace'
-import CannotInferControllerFromTopLevelRouteError from '../error/router/cannot-infer-controller-from-top-level-route'
-import pascalizeFileName from '../helpers/pascalizeFileName'
-import { FunctionPropertyNames } from '../helpers/typeHelpers'
-import PsychicApplication from '../psychic-application'
-import PsychicRouter, { PsychicNestedRouter } from '../router'
-import { HttpMethod, ResourcesMethodType, ResourcesOptions } from './types'
+import PsychicController from '../controller/index.js'
+import CannotFindInferredControllerFromProvidedNamespace from '../error/router/cannot-find-inferred-controller-from-provided-namespace.js'
+import CannotInferControllerFromTopLevelRouteError from '../error/router/cannot-infer-controller-from-top-level-route.js'
+import pascalizeFileName from '../helpers/pascalizeFileName.js'
+import { FunctionPropertyNames } from '../helpers/typeHelpers.js'
+import PsychicApplication from '../psychic-application/index.js'
+import PsychicRouter, { PsychicNestedRouter } from '../router/index.js'
+import { HttpMethod, ResourcesMethodType, ResourcesOptions } from './types.js'
 
 export function routePath(routePath: string) {
   return `/${routePath.replace(/^\//, '')}`

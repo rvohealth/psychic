@@ -1,17 +1,18 @@
-import path from 'path'
-import winston from 'winston'
+import * as winston from 'winston'
 import EnvInternal from '../../../src/helpers/EnvInternal'
 import PsychicApplication from '../../../src/psychic-application'
+import srcPath from '../app/helpers/srcPath'
 import inflections from './inflections'
 import routesCb from './routes'
+import importDefault from '../app/helpers/importDefault'
 
 export default async (psy: PsychicApplication) => {
-  await psy.load('controllers', path.join(__dirname, '..', 'app', 'controllers'))
+  await psy.load('controllers', srcPath('app', 'controllers'), path => importDefault(path))
 
   psy.set('appName', 'testapp')
   psy.set('apiOnly', false)
-  psy.set('apiRoot', path.join(__dirname, '..', '..', '..'))
-  psy.set('clientRoot', path.join(__dirname, '..', '..', 'client'))
+  psy.set('apiRoot', srcPath('..', '..'))
+  psy.set('clientRoot', srcPath('..', 'client'))
   psy.set('inflections', inflections)
   psy.set('routes', routesCb)
   psy.set('encryption', {
@@ -38,7 +39,10 @@ export default async (psy: PsychicApplication) => {
         // - Write all logs with importance level of `error` or less to `error.log`
         // - Write all logs with importance level of `info` or less to `combined.log`
         //
-        new winston.transports.File({ filename: 'error.log', level: 'error' }),
+        new winston.transports.File({
+          filename: 'error.log',
+          // level: 'error'
+        }),
         new winston.transports.File({ filename: 'combined.log' }),
       ],
     }),
@@ -109,6 +113,11 @@ export default async (psy: PsychicApplication) => {
   })
 
   psy.set('openapi', 'admin', {
+    info: {
+      title: 'admin',
+      description: 'admin desc',
+      version: '1.1.1',
+    },
     outputFilename: 'admin.openapi.json',
     syncEnumsToClient: true,
     defaults: {

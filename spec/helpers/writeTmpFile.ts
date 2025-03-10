@@ -1,5 +1,5 @@
-import fs from 'fs/promises'
-import path from 'path'
+import * as fs from 'fs/promises'
+import * as path from 'path'
 import PsychicApplication from '../../src/psychic-application'
 
 export default async function writeTmpFile(content: string) {

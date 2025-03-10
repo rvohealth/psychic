@@ -1,19 +1,21 @@
 // @ts-check
 
-const eslint = require('@eslint/js')
-const typescriptEslint = require('typescript-eslint')
-const typescriptParser = require('@typescript-eslint/parser')
+import eslint from '@eslint/js'
+import typescriptEslint from 'typescript-eslint'
+import typescriptParser from '@typescript-eslint/parser'
 
 const config = typescriptEslint.config(
   eslint.configs.recommended,
   ...typescriptEslint.configs.recommendedTypeChecked,
-
   {
     ignores: [
+      'docs/**/*',
+      'test-app/types/psychic.ts',
+      'test-app/types/dream.ts',
+      'test-app/types/db.ts',
+
       'spec/support/generators/**/*',
       'spec/tmp/**/*',
-      'test-app/src/db/schema.ts',
-      'test-app/src/db/sync.ts',
       'test-app/client/apiRoutes.ts',
       'test-app/client/schema.ts',
       'boilerplate/**/*',
@@ -31,4 +33,4 @@ const config = typescriptEslint.config(
     },
   },
 )
-module.exports = config
+export default config

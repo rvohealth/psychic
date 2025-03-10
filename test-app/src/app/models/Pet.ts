@@ -1,6 +1,8 @@
-import { DreamColumn, DreamSerializers, IdType } from '@rvohealth/dream'
+import { Decorators, DreamColumn, DreamSerializers, IdType } from '@rvohealth/dream'
 import ApplicationModel from './ApplicationModel'
 import User from './User'
+
+const Deco = new Decorators<InstanceType<typeof Pet>>()
 
 export default class Pet extends ApplicationModel {
   public get table() {
@@ -34,7 +36,7 @@ export default class Pet extends ApplicationModel {
   public createdAt: DreamColumn<Pet, 'createdAt'>
   public updatedAt: DreamColumn<Pet, 'updatedAt'>
 
-  @Pet.BelongsTo('User')
+  @Deco.BelongsTo('User')
   public user: User
   public userId: IdType
 }

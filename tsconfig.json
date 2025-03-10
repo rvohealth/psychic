@@ -1,12 +1,16 @@
 {
-  "extends": "./tsconfig.build.json",
-  "ts-node": {
-    "ignore": [],
-    "include": ["src/**/*", "test-app/**/*"]
-  },
-  "ignore": ["spec/support/generators/**/*", "spec/tmp/**/*"],
-  "include": ["src/**/*", "spec/**/*", "test-app/**/*", "shared/**/*"],
+  "extends": "./tsconfig.esm.build.json",
+  "include": ["src/**/*", "test-app/**/*", "spec/**/*"],
+
   "compilerOptions": {
-    "types": ["jest", "@types/jest", "jest-playwright-preset", "expect-playwright"]
+    "typeRoots": ["spec/global.d.ts"]
+  },
+
+  /*  this ts-node block is necessary to get node commands to leverage the ts-node esm loader
+   *  removing this block will lead to ambiguous crashing in node with no stack traces.
+   * */
+  "ts-node": {
+    "transpileOnly": true,
+    "esm": true
   }
 }

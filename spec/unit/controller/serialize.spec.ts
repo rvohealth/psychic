@@ -1,4 +1,3 @@
-import { describe as context } from '@jest/globals'
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Attribute, DreamApplication, DreamSerializer } from '@rvohealth/dream'
 import { Request, Response } from 'express'
@@ -11,6 +10,8 @@ import UserSerializer, {
   UserExtraSerializer,
   UserSummarySerializer,
 } from '../../../test-app/src/app/serializers/UserSerializer'
+import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers'
+import processDynamicallyDefinedSerializers from '../../helpers/processDynamicallyDefinedSerializers'
 
 describe('PsychicController', () => {
   describe('#serialize', () => {
@@ -19,10 +20,10 @@ describe('PsychicController', () => {
     let config: PsychicApplication
 
     beforeEach(() => {
-      req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
-      res = getMockRes().res
+      req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
+      res = getMockRes().res as unknown as Response
       config = new PsychicApplication()
-      jest.spyOn(res, 'json')
+      vi.spyOn(res, 'json')
     })
 
     it('serializes the data using the provided serializer', async () => {
@@ -30,14 +31,15 @@ describe('PsychicController', () => {
         @Attribute()
         public email: string
       }
+      processDynamicallyDefinedSerializers(MySerializer)
 
       const dreamApp = DreamApplication.getOrFail()
-      jest.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
+      vi.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
         ...dreamApp.serializers,
         MySerializer,
       })
 
-      jest.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
+      vi.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
 
       class MyController extends PsychicController {
         static {
@@ -48,6 +50,7 @@ describe('PsychicController', () => {
           this.ok(await User.first())
         }
       }
+      processDynamicallyDefinedControllers(MyController)
 
       await User.create({ email: 'how@yadoin', passwordDigest: 'hello' })
       const controller = new MyController(req, res, { config, action: 'show' })
@@ -67,6 +70,7 @@ describe('PsychicController', () => {
             this.ok(await User.first())
           }
         }
+        processDynamicallyDefinedControllers(MyController)
 
         const user1 = await User.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
         const user2 = await User.create({ email: 'zed@zed', name: 'zed', passwordDigest: 'hello' })
@@ -75,7 +79,7 @@ describe('PsychicController', () => {
         await controller1.index()
         expect(res.json).toHaveBeenCalledWith([{ id: user1.id }, { id: user2.id }])
 
-        jest.spyOn(res, 'json').mockReset()
+        vi.spyOn(res, 'json').mockReset()
 
         const controller2 = new MyController(req, res, { config, action: 'show' })
         await controller2.show()
@@ -92,6 +96,7 @@ describe('PsychicController', () => {
               this.ok([...(await User.all()), ...(await Pet.all())])
             }
           }
+          processDynamicallyDefinedControllers(MyController)
 
           const user1 = await User.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
           const user2 = await User.create({ email: 'zed@zed', name: 'zed', passwordDigest: 'hello' })
@@ -116,6 +121,7 @@ describe('PsychicController', () => {
             return `${(this.$data as Greeting).word} goodbye`
           }
         }
+        processDynamicallyDefinedSerializers(GreetSerializer, GreetSerializer2)
 
         class Greeting {
           public word: string
@@ -150,16 +156,17 @@ describe('PsychicController', () => {
             this.ok(new Greeting('hello'))
           }
         }
+        processDynamicallyDefinedControllers(MyController)
 
         beforeEach(() => {
           const dreamApp = DreamApplication.getOrFail()
-          jest.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
+          vi.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
             ...dreamApp.serializers,
             GreetSerializer,
             GreetSerializer2,
           })
 
-          jest.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
+          vi.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
         })
 
         it('identifies serializer attached to model class and uses it to serialize the object', () => {
@@ -229,6 +236,7 @@ describe('PsychicController', () => {
           return this.$passthroughData.howyadoin
         }
       }
+      processDynamicallyDefinedSerializers(User2Serializer, User2SummarySerializer, User2ExtraSerializer)
 
       class MyController extends PsychicController {
         public async show() {
@@ -240,20 +248,21 @@ describe('PsychicController', () => {
           this.serializerPassthrough({ howyadoin: 'howyadoin' })
         }
       }
+      processDynamicallyDefinedControllers(MyController)
 
       let user2: User2
 
       beforeEach(async () => {
         user2 = await User2.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
         const dreamApp = DreamApplication.getOrFail()
-        jest.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
+        vi.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
           ...dreamApp.serializers,
           User2Serializer,
           User2SummarySerializer,
           User2ExtraSerializer,
         })
 
-        jest.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
+        vi.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
       })
 
       it('passes the passthrough data through to the child serializers', async () => {

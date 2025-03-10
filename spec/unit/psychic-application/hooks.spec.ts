@@ -1,4 +1,3 @@
-import { describe as context } from '@jest/globals'
 import PsychicApplication from '../../../src/psychic-application'
 import { PsychicHookEventType } from '../../../src/psychic-application/types'
 

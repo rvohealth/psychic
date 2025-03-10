@@ -8,16 +8,16 @@ import {
   EncryptOptions,
   OpenapiSchemaBody,
 } from '@rvohealth/dream'
-import bodyParser from 'body-parser'
+import * as bodyParser from 'body-parser'
 import { CorsOptions } from 'cors'
 import { Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
-import http from 'http'
-import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root'
-import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers'
-import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback'
-import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts'
-import EnvInternal from '../helpers/EnvInternal'
+import * as http from 'http'
+import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root.js'
+import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers.js'
+import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback.js'
+import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js'
+import EnvInternal from '../helpers/EnvInternal.js'
 import {
   OpenapiContent,
   OpenapiHeaders,
@@ -25,13 +25,13 @@ import {
   OpenapiSecurity,
   OpenapiSecuritySchemes,
   OpenapiServer,
-} from '../openapi-renderer/endpoint'
-import PsychicRouter from '../router'
-import PsychicServer from '../server'
-import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache'
-import loadControllers, { getControllersOrFail } from './helpers/loadControllers'
-import lookupClassByGlobalName from './helpers/lookupClassByGlobalName'
-import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types'
+} from '../openapi-renderer/endpoint.js'
+import PsychicRouter from '../router/index.js'
+import PsychicServer from '../server/index.js'
+import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache.js'
+import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
+import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
+import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
 
 export default class PsychicApplication {
   public static async init(
@@ -98,10 +98,6 @@ Try setting it to something valid, like:
    */
   public static getOrFail() {
     return getCachedPsychicApplicationOrFail()
-  }
-
-  public static async loadControllers(controllersPath: string) {
-    return await loadControllers(controllersPath)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -190,6 +186,11 @@ Try setting it to something valid, like:
     default: {
       outputFilename: 'openapi.json',
       schemaDelimeter: '',
+      info: {
+        title: 'untitled openapi spec',
+        version: 'unknown version',
+        description: '',
+      },
     },
   }
   public get openapi() {
@@ -270,10 +271,15 @@ Try setting it to something valid, like:
     return getControllersOrFail()
   }
 
-  public async load(resourceType: 'controllers', resourcePath: string) {
+  public async load<RT extends 'controllers'>(
+    resourceType: RT,
+    resourcePath: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    importCb: (path: string) => Promise<any>,
+  ) {
     switch (resourceType) {
       case 'controllers':
-        await loadControllers(resourcePath)
+        await importControllers(this, resourcePath, importCb)
         this._loadedControllers = true
         break
     }
@@ -599,6 +605,7 @@ export interface NamedPsychicOpenapiOptions extends PsychicOpenapiBaseOptions {
 }
 
 interface PsychicOpenapiBaseOptions {
+  info?: PsychicOpenapiInfo
   servers?: OpenapiServer[]
   schemaDelimeter?: string
   suppressResponseEnums?: boolean
@@ -615,6 +622,12 @@ interface PsychicOpenapiBaseOptions {
       }
     }
   }
+}
+
+interface PsychicOpenapiInfo {
+  version: string
+  title: string
+  description: string
 }
 
 interface PsychicPathOptions {

@@ -1,6 +1,6 @@
 import * as colors from 'colorette'
-import { RouteConfig } from '../../router/route-manager'
-import PsychicServer from '../../server'
+import { RouteConfig } from '../../router/route-manager.js'
+import PsychicServer from '../../server/index.js'
 
 export default async function printRoutes() {
   const server = new PsychicServer()

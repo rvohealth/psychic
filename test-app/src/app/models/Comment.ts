@@ -1,6 +1,8 @@
-import { DreamColumn, DreamSerializers } from '@rvohealth/dream'
+import { Decorators, DreamColumn, DreamSerializers } from '@rvohealth/dream'
 import ApplicationModel from './ApplicationModel'
 import Post from './Post'
+
+const Deco = new Decorators<InstanceType<typeof Comment>>()
 
 export default class Comment extends ApplicationModel {
   public get table() {
@@ -19,7 +21,7 @@ export default class Comment extends ApplicationModel {
   public createdAt: DreamColumn<Comment, 'createdAt'>
   public updatedAt: DreamColumn<Comment, 'updatedAt'>
 
-  @Comment.BelongsTo('Post')
+  @Deco.BelongsTo('Post')
   public post: Post
   public postId: DreamColumn<Comment, 'postId'>
 }
