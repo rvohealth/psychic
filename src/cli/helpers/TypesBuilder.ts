@@ -1,4 +1,4 @@
-import { DreamApplication } from '@rvohealth/dream'
+import { DreamApplication } from '@rvoh/dream'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import PsychicApplication from '../../psychic-application/index.js'

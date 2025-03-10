@@ -1,4 +1,4 @@
-import { DreamSerializer } from '@rvohealth/dream'
+import { DreamSerializer } from '@rvoh/dream'
 
 export default function processDynamicallyDefinedSerializers(
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

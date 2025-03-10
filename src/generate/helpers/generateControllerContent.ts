@@ -3,7 +3,7 @@ import {
   globalClassNameFromFullyQualifiedModelName,
   hyphenize,
   standardizeFullyQualifiedModelName,
-} from '@rvohealth/dream'
+} from '@rvoh/dream'
 import pluralize from 'pluralize-esm'
 import relativePsychicPath from '../../helpers/path/relativePsychicPath.js'
 

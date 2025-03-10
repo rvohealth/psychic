@@ -1,4 +1,4 @@
-import { hyphenize, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
+import { hyphenize, standardizeFullyQualifiedModelName } from '@rvoh/dream'
 import { existsSync } from 'fs'
 import * as fs from 'fs/promises'
 import EnvInternal from '../helpers/EnvInternal.js'

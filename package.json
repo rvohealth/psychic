@@ -1,8 +1,8 @@
 {
   "type": "module",
-  "name": "@rvohealth/psychic",
+  "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "0.24.0",
+  "version": "0.24.1",
   "author": "RVOHealth",
   "repository": "https://github.com/rvohealth/psychic.git",
   "license": "MIT",
@@ -21,7 +21,6 @@
   ],
   "scripts": {
     "client": "yarn --cwd=./client start",
-    "publish": "yarn npm publish",
     "psy": "yarn psyts",
     "psyjs": "node ./dist/test-app/src/cli/index.js",
     "psyts": "node --experimental-specifier-resolution=node --import=./node/esm.js ./test-app/src/cli/index.ts",
@@ -67,9 +66,9 @@
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@jest-mock/express": "^3.0.0",
-    "@rvohealth/dream": "=0.29.0",
-    "@rvohealth/dream-spec-helpers": "=0.1.0",
-    "@rvohealth/psychic-spec-helpers": "=0.2.0",
+    "@rvoh/dream": "^0.29.1",
+    "@rvoh/dream-spec-helpers": "=0.1.0",
+    "@rvoh/psychic-spec-helpers": "=0.2.0",
     "@types/express": "^4.17.21",
     "@types/lodash-es": "^4",
     "@types/lodash.clonedeep": "^4.5.9",

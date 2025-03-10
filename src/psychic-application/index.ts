@@ -7,7 +7,7 @@ import {
   EncryptAlgorithm,
   EncryptOptions,
   OpenapiSchemaBody,
-} from '@rvohealth/dream'
+} from '@rvoh/dream'
 import * as bodyParser from 'body-parser'
 import { CorsOptions } from 'cors'
 import { Request, Response } from 'express'

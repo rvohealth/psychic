@@ -1,4 +1,4 @@
-import { lookupClassByGlobalName as dreamLookupClassByGlobalName } from '@rvohealth/dream'
+import { lookupClassByGlobalName as dreamLookupClassByGlobalName } from '@rvoh/dream'
 import { getControllersOrFail } from './import/importControllers.js'
 
 export default function lookupClassByGlobalName(name: string) {

@@ -25,7 +25,7 @@ import {
   compact,
   inferSerializerFromDreamOrViewModel,
   openapiShorthandPrimitiveTypes,
-} from '@rvohealth/dream'
+} from '@rvoh/dream'
 import PsychicController from '../controller/index.js'
 import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache.js'
 import isBlankDescription from './helpers/isBlankDescription.js'

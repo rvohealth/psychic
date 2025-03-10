@@ -1,4 +1,4 @@
-import { DreamApplication } from '@rvohealth/dream'
+import { DreamApplication } from '@rvoh/dream'
 import importAll from '../app/helpers/importAll'
 import importDefault from '../app/helpers/importDefault'
 import srcPath from '../app/helpers/srcPath'

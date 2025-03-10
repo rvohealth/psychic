@@ -95,7 +95,7 @@ b.) All laptops are ok sleeping places for your
 
 */
 
-import { CalendarDate } from '@rvohealth/dream'
+import { CalendarDate } from '@rvoh/dream'
 import { DateTime } from 'luxon'
 import {
   IdType,

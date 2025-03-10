@@ -1,4 +1,4 @@
-import { UpdateableProperties } from '@rvohealth/dream'
+import { UpdateableProperties } from '@rvoh/dream'
 import User from '../../test-app/src/app/models/User'
 
 let counter = 1

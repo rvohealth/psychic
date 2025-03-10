@@ -1,4 +1,4 @@
-import { DreamBin } from '@rvohealth/dream'
+import { DreamBin } from '@rvoh/dream'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import TypesBuilder from '../cli/helpers/TypesBuilder.js'

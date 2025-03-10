@@ -1,4 +1,4 @@
-import { DreamSerializer, RendersOne } from '@rvohealth/dream'
+import { DreamSerializer, RendersOne } from '@rvoh/dream'
 import { HelloSerializer } from './HelloSerializer'
 
 export default class WorldSerializer extends DreamSerializer {

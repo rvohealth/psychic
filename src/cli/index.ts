@@ -1,4 +1,4 @@
-import { DreamCLI } from '@rvohealth/dream'
+import { DreamCLI } from '@rvoh/dream'
 import { Command } from 'commander'
 import PsychicBin from '../bin/index.js'
 import PsychicApplication, { PsychicApplicationInitOptions } from '../psychic-application/index.js'

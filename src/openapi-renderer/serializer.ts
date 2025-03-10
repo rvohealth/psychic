@@ -11,7 +11,7 @@ import {
   OpenapiShorthandPrimitiveTypes,
   SerializableTypes,
   uniq,
-} from '@rvohealth/dream'
+} from '@rvoh/dream'
 import PsychicController from '../controller/index.js'
 import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations.js'
 import EnvInternal from '../helpers/EnvInternal.js'

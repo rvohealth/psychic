@@ -3,7 +3,7 @@ import {
   DreamSerializer,
   SerializableDreamClassOrViewModelClass,
   SerializableDreamOrViewModel,
-} from '@rvohealth/dream'
+} from '@rvoh/dream'
 import PsychicController from './index.js'
 import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint.js'
 import { ControllerHook } from './hooks.js'

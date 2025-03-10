@@ -1,4 +1,4 @@
-import { pascalize, sharedPathPrefix, standardizeFullyQualifiedModelName } from '@rvohealth/dream'
+import { pascalize, sharedPathPrefix, standardizeFullyQualifiedModelName } from '@rvoh/dream'
 import psychicPath, { PsychicPaths } from './psychicPath.js'
 import updirsFromPath from './updirsFromPath.js'
 

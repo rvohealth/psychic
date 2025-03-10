@@ -1,4 +1,4 @@
-import { DreamImporter } from '@rvohealth/dream'
+import { DreamImporter } from '@rvoh/dream'
 import PsychicController from '../../controller/index.js'
 
 export default class PsychicImporter {

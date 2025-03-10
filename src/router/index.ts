@@ -1,4 +1,4 @@
-import { RecordNotFound, ValidationError, camelize } from '@rvohealth/dream'
+import { RecordNotFound, ValidationError, camelize } from '@rvoh/dream'
 import { Application, Request, Response, Router } from 'express'
 import pluralize from 'pluralize-esm'
 import PsychicController from '../controller/index.js'

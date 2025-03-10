@@ -1,4 +1,4 @@
-import { Env } from '@rvohealth/dream'
+import { Env } from '@rvoh/dream'
 
 const EnvInternal = new Env<{
   string: 'SPEC_SERVER_PORT' | 'NODE_ENV' | 'PSYCHIC_CORE_DEVELOPMENT'

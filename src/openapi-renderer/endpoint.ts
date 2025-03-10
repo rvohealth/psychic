@@ -16,7 +16,7 @@ import {
   SerializableDreamClassOrViewModelClass,
   SerializableDreamOrViewModel,
   compact,
-} from '@rvohealth/dream'
+} from '@rvoh/dream'
 import { cloneDeep } from 'lodash-es'
 import PsychicController from '../controller/index.js'
 import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes.js'

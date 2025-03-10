@@ -6,7 +6,7 @@ import {
   DreamSerializers,
   Validates,
   Virtual,
-} from '@rvohealth/dream'
+} from '@rvoh/dream'
 import { randomBytes, scrypt, timingSafeEqual } from 'crypto'
 import ApplicationModel from './ApplicationModel'
 import Pet from './Pet'

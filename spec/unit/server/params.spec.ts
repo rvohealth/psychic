@@ -1,4 +1,4 @@
-import { CalendarDate } from '@rvohealth/dream'
+import { CalendarDate } from '@rvoh/dream'
 import { DateTime } from 'luxon'
 import { PsychicParamsDictionary } from '../../../src/controller'
 import Params, { ParamValidationError } from '../../../src/server/params'

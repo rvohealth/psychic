@@ -1,4 +1,4 @@
-import { specRequest as request } from '@rvohealth/psychic-spec-helpers'
+import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import PsychicRouter from '../../../src/router'
 import PsychicServer from '../../../src/server'
 import PetsController from '../../../test-app/src/app/controllers/PetsController'
