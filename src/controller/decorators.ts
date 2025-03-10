@@ -68,8 +68,6 @@ export function OpenAPI<
     context.addInitializer(function (this: PsychicController) {
       const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
       if (!psychicControllerClass['globallyInitializingDecorators']) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        delete (this as any)[methodName]
         return
       }
 
