@@ -13,9 +13,7 @@
     "strict": true,
     "strictNullChecks": true,
     /* do not require all properties to be initialized in constructor */
-    "strictPropertyInitialization": false,
-    /* TRYING TO GET DREAM WORKING with useDefineForClassFields set to true */
-    "useDefineForClassFields": true
+    "strictPropertyInitialization": false
   },
   "include": ["src/**/*", "shared/**/*"]
 }
