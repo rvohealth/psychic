@@ -1,15 +1,18 @@
 import { Request, Response } from 'express'
-import PsychicApplication from '../index.js'
-import PsychicController from '../../controller/index.js'
-import globalControllerKeyFromPath from './globalControllerKeyFromPath.js'
+import PsychicController from '../../../controller/index.js'
+import globalControllerKeyFromPath from '../globalControllerKeyFromPath.js'
+import PsychicImporter from '../PsychicImporter.js'
+import PsychicApplication from '../../index.js'
 
 let _controllers: Record<string, typeof PsychicController>
 
-export default function processControllers(
+export default async function importControllers(
   psychicApp: PsychicApplication,
   controllersPath: string,
-  controllerClasses: [string, typeof PsychicController][],
-): Record<string, typeof PsychicController> {
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  importCb: (path: string) => Promise<any>,
+): Promise<Record<string, typeof PsychicController>> {
   if (_controllers) return _controllers
 
   /**
@@ -21,6 +24,8 @@ export default function processControllers(
   PsychicController['globallyInitializingDecorators'] = true
 
   _controllers = {}
+
+  const controllerClasses = await PsychicImporter.importControllers(controllersPath, importCb)
 
   for (const [controllerPath, potentialControllerClass] of controllerClasses) {
     if (potentialControllerClass?.isPsychicController) {

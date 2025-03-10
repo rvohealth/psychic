@@ -2,12 +2,12 @@ import * as winston from 'winston'
 import EnvInternal from '../../../src/helpers/EnvInternal'
 import PsychicApplication from '../../../src/psychic-application'
 import srcPath from '../app/helpers/srcPath'
-import importControllers from './importers/importControllers'
 import inflections from './inflections'
 import routesCb from './routes'
+import importDefault from '../app/helpers/importDefault'
 
 export default async (psy: PsychicApplication) => {
-  psy.load('controllers', srcPath('app', 'controllers'), await importControllers())
+  await psy.load('controllers', srcPath('app', 'controllers'), path => importDefault(path))
 
   psy.set('appName', 'testapp')
   psy.set('apiOnly', false)

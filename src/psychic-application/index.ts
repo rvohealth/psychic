@@ -31,7 +31,7 @@ import PsychicRouter from '../router/index.js'
 import PsychicServer from '../server/index.js'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
-import processControllers, { getControllersOrFail } from './helpers/processControllers.js'
+import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
 
 export default class PsychicApplication {
@@ -272,14 +272,15 @@ Try setting it to something valid, like:
     return getControllersOrFail()
   }
 
-  public load<RT extends 'controllers'>(
+  public async load<RT extends 'controllers'>(
     resourceType: RT,
     resourcePath: string,
-    resources: RT extends 'controllers' ? [string, typeof PsychicController][] : never,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    importCb: (path: string) => Promise<any>,
   ) {
     switch (resourceType) {
       case 'controllers':
-        processControllers(this, resourcePath, resources)
+        await importControllers(this, resourcePath, importCb)
         this._loadedControllers = true
         break
     }
