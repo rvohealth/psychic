@@ -11,7 +11,7 @@ describe('generateResourceControllerSpecContent', () => {
     expect(res).toEqual(`\
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { UpdateableProperties } from '@rvoh/dream'
-import { PsychicServer } from '@rvohealth/psychic'
+import { PsychicServer } from '@rvoh/psychic'
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import Post from '../../../../src/app/models/Post'
 import User from '../../../../src/app/models/User'

@@ -1,4 +1,4 @@
-import { OpenAPI } from '@rvohealth/psychic'
+import { OpenAPI } from '@rvoh/psychic'
 import AdminApiV1BaseController from './BaseController'
 
 const openApiTags = ['admin-api-v1-posts']
