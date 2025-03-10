@@ -13,7 +13,6 @@ import { CorsOptions } from 'cors'
 import { Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import * as http from 'http'
-import PsychicController from '../controller/index.js'
 import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root.js'
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers.js'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback.js'
@@ -30,8 +29,8 @@ import {
 import PsychicRouter from '../router/index.js'
 import PsychicServer from '../server/index.js'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache.js'
-import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
 import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
+import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
 
 export default class PsychicApplication {
