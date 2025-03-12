@@ -19,8 +19,13 @@ export default class Post extends ApplicationModel {
     }
   }
 
+  public get paramSafeColumns() {
+    return ['body'] as const
+  }
+
   public id: DreamColumn<Post, 'id'>
   public body: DreamColumn<Post, 'body'>
+  public explicitlyOmittedFromParamSafeColumns: DreamColumn<Post, 'explicitlyOmittedFromParamSafeColumns'>
   public createdAt: DreamColumn<Post, 'createdAt'>
   public updatedAt: DreamColumn<Post, 'updatedAt'>
 

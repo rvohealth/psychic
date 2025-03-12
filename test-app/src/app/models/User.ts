@@ -1,12 +1,4 @@
-import {
-  BeforeCreate,
-  BeforeUpdate,
-  Decorators,
-  DreamColumn,
-  DreamSerializers,
-  Validates,
-  Virtual,
-} from '@rvoh/dream'
+import { Decorators, DreamColumn, DreamSerializers, Validates, Virtual } from '@rvoh/dream'
 import { randomBytes, scrypt, timingSafeEqual } from 'crypto'
 import ApplicationModel from './ApplicationModel'
 import Pet from './Pet'
@@ -101,8 +93,8 @@ export default class User extends ApplicationModel {
   @Deco.HasOne('Post')
   public recentPost: Post | null
 
-  @BeforeCreate()
-  @BeforeUpdate()
+  @Deco.BeforeCreate()
+  @Deco.BeforeUpdate()
   public async hashPass() {
     if (this.password)
       this.passwordDigest = await insecurePasswordHashSinceBcryptBringsInTooMuchGarbage(this.password)

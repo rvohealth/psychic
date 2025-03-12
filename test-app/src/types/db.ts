@@ -187,6 +187,7 @@ export interface Pets {
 export interface Posts {
   body: string | null;
   createdAt: Timestamp;
+  explicitlyOmittedFromParamSafeColumns: string | null;
   id: Generated<Int8>;
   updatedAt: Timestamp;
   userId: Int8;

@@ -165,7 +165,6 @@ export const schema = {
       },
     },
     virtualColumns: [],
-    encryptedColumns: [],
     associations: {
       post: {
         type: 'BelongsTo',
@@ -243,7 +242,6 @@ export const schema = {
       },
     },
     virtualColumns: [],
-    encryptedColumns: [],
     associations: {
       
     },
@@ -414,7 +412,6 @@ export const schema = {
       },
     },
     virtualColumns: [],
-    encryptedColumns: [],
     associations: {
       user: {
         type: 'BelongsTo',
@@ -454,6 +451,15 @@ export const schema = {
         allowNull: false,
         isArray: false,
       },
+      explicitlyOmittedFromParamSafeColumns: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'character varying',
+        allowNull: true,
+        isArray: false,
+      },
       id: {
         coercedType: {} as IdType,
         enumType: null,
@@ -483,7 +489,6 @@ export const schema = {
       },
     },
     virtualColumns: [],
-    encryptedColumns: [],
     associations: {
       comments: {
         type: 'HasMany',
@@ -917,7 +922,6 @@ export const schema = {
       },
     },
     virtualColumns: ['openapiVirtualSpecTest', 'openapiVirtualSpecTest2', 'password'],
-    encryptedColumns: [],
     associations: {
       pets: {
         type: 'HasMany',

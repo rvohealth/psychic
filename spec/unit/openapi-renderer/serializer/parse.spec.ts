@@ -1,5 +1,6 @@
 import { DreamSerializer } from '@rvoh/dream'
 import OpenapiSerializerRenderer from '../../../../src/openapi-renderer/serializer'
+import ApplicationController from '../../../../test-app/src/app/controllers/ApplicationController'
 import {
   CommentTestingAdditionalPropertiesSerializer,
   CommentTestingAdditionalPropertiesShorthandSerializer,
@@ -18,7 +19,6 @@ import {
   CommentWithFlattenedUserSerializer,
 } from '../../../../test-app/src/app/serializers/CommentSerializer'
 import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer'
-import ApplicationController from '../../../../test-app/src/app/controllers/ApplicationController'
 
 describe('OpenapiSerializerRenderer', () => {
   describe('#parse', () => {
@@ -300,10 +300,11 @@ describe('OpenapiSerializerRenderer', () => {
           expect(subject(PostSerializer<any, any>)).toEqual({
             Post: {
               type: 'object',
-              required: ['id', 'body', 'comments'],
+              required: ['id', 'body', 'explicitlyOmittedFromParamSafeColumns', 'comments'],
               properties: {
                 id: { type: 'string' },
                 body: { type: 'string', nullable: true },
+                explicitlyOmittedFromParamSafeColumns: { type: 'string', nullable: true },
                 comments: {
                   type: 'array',
                   items: { $ref: '#/components/schemas/Comment' },

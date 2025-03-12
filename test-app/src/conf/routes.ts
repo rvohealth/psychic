@@ -4,15 +4,15 @@ import ApiUsersController from '../app/controllers/Api/UsersController'
 import ApiV1UsersController from '../app/controllers/Api/V1/UsersController'
 import AuthedUsersController from '../app/controllers/AuthedUsersController'
 import CircularController from '../app/controllers/CircularController'
-import ResponseStatusesController from '../app/controllers/ResponseStatusesController'
 import GreeterController from '../app/controllers/GreeterController'
+import OpenapiDecoratorTestController from '../app/controllers/OpenapiDecoratorTestsController'
+import OpenapiOverridesTestController from '../app/controllers/OpenapiOverridesTestsController'
 import ParamsTestController from '../app/controllers/ParamsTestController'
 import PetsController from '../app/controllers/PetsController'
+import ResponseStatusesController from '../app/controllers/ResponseStatusesController'
 import ScopeTestController from '../app/controllers/ScopeTestController'
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController'
 import UsersController from '../app/controllers/UsersController'
-import OpenapiDecoratorTestController from '../app/controllers/OpenapiDecoratorTestsController'
-import OpenapiOverridesTestController from '../app/controllers/OpenapiOverridesTestsController'
 
 export default (r: PsychicRouter) => {
   r.get('circular', CircularController, 'hello')
@@ -37,6 +37,7 @@ export default (r: PsychicRouter) => {
   })
   r.resources('pets', { only: ['create', 'update'] }, r => {
     r.put('update2', PetsController, 'update2')
+    r.post('my-posts', PetsController, 'myPosts')
   })
 
   // hooks tests

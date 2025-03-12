@@ -1,5 +1,6 @@
 import { OpenAPI } from '../../../../src'
 import Pet from '../models/Pet'
+import Post from '../models/Post'
 import ApplicationController from './ApplicationController'
 
 export default class PetsController extends ApplicationController {
@@ -30,5 +31,12 @@ export default class PetsController extends ApplicationController {
 
   private get petParams() {
     return this.paramsFor(Pet)
+  }
+
+  @OpenAPI(Post, {
+    status: 204,
+  })
+  public myPosts() {
+    this.noContent()
   }
 }
