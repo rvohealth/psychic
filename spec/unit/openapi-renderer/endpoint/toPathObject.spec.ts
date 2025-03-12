@@ -3,6 +3,7 @@ import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
 import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
 import { RouteConfig } from '../../../../src/router/route-manager'
 import ApiPetsController from '../../../../test-app/src/app/controllers/Api/PetsController'
+import OpenapiOverridesTestController from '../../../../test-app/src/app/controllers/OpenapiOverridesTestsController'
 import PetsController from '../../../../test-app/src/app/controllers/PetsController'
 import UsersController from '../../../../test-app/src/app/controllers/UsersController'
 import Pet from '../../../../test-app/src/app/models/Pet'
@@ -17,7 +18,6 @@ import UserSerializer, {
   UserWithPostsSerializer,
 } from '../../../../test-app/src/app/serializers/UserSerializer'
 import initializePsychicApplication from '../../../../test-app/src/cli/helpers/initializePsychicApplication'
-import OpenapiOverridesTestController from '../../../../test-app/src/app/controllers/OpenapiOverridesTestsController'
 
 describe('OpenapiEndpointRenderer', () => {
   let routes: RouteConfig[]
@@ -1016,6 +1016,28 @@ describe('OpenapiEndpointRenderer', () => {
                   })
                 })
               })
+            })
+          })
+
+          context('columns explicitly excluded from paramSafeColumns', () => {
+            it('are omitted', () => {
+              const renderer = new OpenapiEndpointRenderer(Post, PetsController, 'myPosts')
+
+              const response = renderer.toPathObject('default', {}, routes)
+              expect(response['/pets/{id}/my-posts'].post.requestBody).toEqual(
+                expect.objectContaining({
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          body: { type: 'string', nullable: true },
+                        },
+                      },
+                    },
+                  },
+                }),
+              )
             })
           })
         })

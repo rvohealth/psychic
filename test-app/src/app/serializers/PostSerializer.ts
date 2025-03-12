@@ -1,7 +1,7 @@
 import { Attribute, DreamColumn, DreamSerializer, RendersMany, RendersOne } from '@rvoh/dream'
+import Comment from '../models/Comment'
 import Post from '../models/Post'
 import CommentSerializer from './CommentSerializer'
-import Comment from '../models/Comment'
 
 export class PostSummarySerializer<DataType extends Post, Passthrough extends object> extends DreamSerializer<
   DataType,
@@ -21,6 +21,9 @@ export default class PostSerializer<
 
   @Attribute(Post)
   public body: DreamColumn<Post, 'body'>
+
+  @Attribute(Post)
+  public explicitlyOmittedFromParamSafeColumns: DreamColumn<Post, 'explicitlyOmittedFromParamSafeColumns'>
 }
 
 export class PostWithRecentCommentSerializer<
