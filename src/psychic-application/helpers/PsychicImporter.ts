@@ -6,11 +6,11 @@ export default class PsychicImporter {
   public static async importControllers(controllersPath: string, importCb: (path: string) => Promise<any>) {
     const controllerPaths = await DreamImporter.ls(controllersPath)
 
-    const controllerClasses: [string, typeof PsychicController][] = []
-
-    for (const controllerPath of controllerPaths) {
-      controllerClasses.push([controllerPath, (await importCb(controllerPath)) as typeof PsychicController])
-    }
+    const controllerClasses = (await Promise.all(
+      controllerPaths.map(controllerPath =>
+        importCb(controllerPath).then(dreamClass => [controllerPath, dreamClass as typeof PsychicController]),
+      ),
+    )) as [string, typeof PsychicController][]
 
     return controllerClasses
   }
