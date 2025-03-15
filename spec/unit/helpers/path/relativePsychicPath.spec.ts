@@ -26,7 +26,7 @@ describe('relativePsychicPath', () => {
 
     context('from serializers with a nested model name', () => {
       it('returns ../models/<NestedName>/<ModelName>.js', () => {
-        expect(relativePsychicPath('serializers', 'models', 'Graph/Edge.js')).toEqual(
+        expect(relativePsychicPath('serializers', 'models', 'Graph/Edge')).toEqual(
           '../../models/Graph/Edge.js',
         )
       })
@@ -34,7 +34,7 @@ describe('relativePsychicPath', () => {
 
     context('from factories with a nested model name', () => {
       it('returns ../../src/app/models/<NestedName>/<ModelName>.js', () => {
-        expect(relativePsychicPath('factories', 'models', 'Graph/Edge.js')).toEqual(
+        expect(relativePsychicPath('factories', 'models', 'Graph/Edge')).toEqual(
           '../../../src/app/models/Graph/Edge.js',
         )
       })
@@ -43,7 +43,7 @@ describe('relativePsychicPath', () => {
     context('to models with a different origin and destination model', () => {
       context('from serializers with a model name', () => {
         it('returns ../models/<DestinationModelName>.js', () => {
-          expect(relativePsychicPath('serializers', 'models', 'User', 'Graph/Edge.js')).toEqual(
+          expect(relativePsychicPath('serializers', 'models', 'User', 'Graph/Edge')).toEqual(
             '../models/Graph/Edge.js',
           )
         })
@@ -51,7 +51,7 @@ describe('relativePsychicPath', () => {
 
       context('from factories with a model name', () => {
         it('returns ../../src/app/models/<ModelName>.js', () => {
-          expect(relativePsychicPath('factories', 'models', 'User', 'Graph/Edge.js')).toEqual(
+          expect(relativePsychicPath('factories', 'models', 'User', 'Graph/Edge')).toEqual(
             '../../src/app/models/Graph/Edge.js',
           )
         })
@@ -75,7 +75,7 @@ describe('relativePsychicPath', () => {
 
       context('from models with a model name', () => {
         it('returns ./<NestedName>/<ModelName>.js', () => {
-          expect(relativePsychicPath('models', 'models', 'User', 'Graph/Edge.js')).toEqual('./Graph/Edge.js')
+          expect(relativePsychicPath('models', 'models', 'User', 'Graph/Edge')).toEqual('./Graph/Edge.js')
         })
       })
 
@@ -88,11 +88,11 @@ describe('relativePsychicPath', () => {
 
     context('from model with a nested model name to a model in the same directory', () => {
       it('returns ./<ModelName>.js', () => {
-        expect(relativePsychicPath('models', 'models', 'Graph/Edge', 'Graph/Base.js')).toEqual('./Base.js')
-        expect(relativePsychicPath('models', 'models', 'Graph/Edge/Hello', 'Graph/Base.js')).toEqual(
+        expect(relativePsychicPath('models', 'models', 'Graph/Edge', 'Graph/Base')).toEqual('./Base.js')
+        expect(relativePsychicPath('models', 'models', 'Graph/Edge/Hello', 'Graph/Base')).toEqual(
           '../Base.js',
         )
-        expect(relativePsychicPath('models', 'models', 'Graph/Edge', 'Graph/Hello/World.js')).toEqual(
+        expect(relativePsychicPath('models', 'models', 'Graph/Edge', 'Graph/Hello/World')).toEqual(
           './Hello/World.js',
         )
       })
@@ -110,7 +110,7 @@ describe('relativePsychicPath', () => {
 
     context('from models with a nested model name', () => {
       it('returns ../serializers/<NestedName>/<ModelName>Serializer.js', () => {
-        expect(relativePsychicPath('models', 'serializers', 'Graph/Edge.js')).toEqual(
+        expect(relativePsychicPath('models', 'serializers', 'Graph/Edge')).toEqual(
           '../../serializers/Graph/EdgeSerializer.js',
         )
       })
@@ -118,15 +118,15 @@ describe('relativePsychicPath', () => {
 
     context('from serializer with a nested model name to a serializer in the same directory', () => {
       it('returns ./<ModelName>Serializer.js', () => {
-        expect(relativePsychicPath('serializers', 'serializers', 'Graph/Edge', 'Graph/Base.js')).toEqual(
+        expect(relativePsychicPath('serializers', 'serializers', 'Graph/Edge', 'Graph/Base')).toEqual(
           './BaseSerializer.js',
         )
-        expect(
-          relativePsychicPath('serializers', 'serializers', 'Graph/Edge/Hello', 'Graph/Base.js'),
-        ).toEqual('../BaseSerializer.js')
-        expect(
-          relativePsychicPath('serializers', 'serializers', 'Graph/Edge', 'Graph/Hello/World.js'),
-        ).toEqual('./Hello/WorldSerializer.js')
+        expect(relativePsychicPath('serializers', 'serializers', 'Graph/Edge/Hello', 'Graph/Base')).toEqual(
+          '../BaseSerializer.js',
+        )
+        expect(relativePsychicPath('serializers', 'serializers', 'Graph/Edge', 'Graph/Hello/World')).toEqual(
+          './Hello/WorldSerializer.js',
+        )
       })
     })
   })
@@ -140,7 +140,7 @@ describe('relativePsychicPath', () => {
 
     context('from models with a nested model name', () => {
       it('returns ../serializers/<NestedName>/<ModelName>Serializer.js', () => {
-        expect(relativePsychicPath('models', 'db', 'Graph/Edge.js')).toEqual('../../../db/')
+        expect(relativePsychicPath('models', 'db', 'Graph/Edge')).toEqual('../../../db/')
       })
     })
   })
@@ -156,7 +156,7 @@ describe('relativePsychicPath', () => {
 
     context('from models with a nested model name', () => {
       it('returns ../factories/<NestedName>/<ModelName>Factory.js', () => {
-        expect(relativePsychicPath('models', 'factories', 'Graph/Edge.js')).toEqual(
+        expect(relativePsychicPath('models', 'factories', 'Graph/Edge')).toEqual(
           '../../../../spec/factories/Graph/EdgeFactory.js',
         )
       })

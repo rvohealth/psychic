@@ -36,7 +36,7 @@ export default function (
 
   switch (destinationDreamPathType) {
     case 'db':
-      return `${destinationPath}.js`
+      return destinationPath
 
     case 'factories':
       return `${destinationPath}${fullyQualifiedDestinationModelName}Factory.js`
