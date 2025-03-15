@@ -1,4 +1,4 @@
-import '../../../src/helpers/loadEnv'
+import '../../../src/helpers/loadEnv.js'
 
 import { Encrypt, loadRepl } from '@rvoh/dream'
 import * as repl from 'node:repl'

@@ -1,4 +1,4 @@
-import '../../../src/helpers/loadEnv'
+import '../../../src/helpers/loadEnv.js'
 
 import { PsychicBin } from '../../../src.js'
 import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication.js'

@@ -1,4 +1,4 @@
-import '../../conf/global'
+import '../../conf/global.js'
 
 import { PsychicApplication } from '../../../../src.js'
 import { PsychicApplicationInitOptions } from '../../../../src/psychic-application.js'
