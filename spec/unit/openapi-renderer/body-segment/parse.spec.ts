@@ -1,6 +1,6 @@
-import OpenapiBodySegmentRenderer from '../../../../src/openapi-renderer/body-segment'
-import { OpenapiBodySegment } from '../../../../src/openapi-renderer/serializer'
-import ApplicationController from '../../../../test-app/src/app/controllers/ApplicationController'
+import OpenapiBodySegmentRenderer from '../../../../src/openapi-renderer/body-segment.js'
+import { OpenapiBodySegment } from '../../../../src/openapi-renderer/serializer.js'
+import ApplicationController from '../../../../test-app/src/app/controllers/ApplicationController.js'
 
 describe('OpenapiBodySegmentRenderer', () => {
   describe('#parse', () => {

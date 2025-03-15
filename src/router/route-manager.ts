@@ -1,5 +1,5 @@
-import PsychicController from '../controller/index.js'
-import { HttpMethod } from './types.js'
+import PsychicController from '../controller/index.js.js'
+import { HttpMethod } from './types.js.js'
 
 export default class RouteManager {
   public routes: RouteConfig[] = []

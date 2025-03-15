@@ -1,5 +1,5 @@
-import User from '../models/User'
-import ApplicationController from './ApplicationController'
+import User from '../models/User.js'
+import ApplicationController from './ApplicationController.js'
 
 export default class ResponseStatusesController extends ApplicationController {
   // 200

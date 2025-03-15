@@ -1,6 +1,6 @@
 import axios from 'axios'
 import { useEffect, useState } from 'react'
-import viteEnvValue from './helpers/viteEnvValue'
+import viteEnvValue from './helpers/viteEnvValue.js'
 
 import { Route, Routes } from 'react-router'
 import './App.css'

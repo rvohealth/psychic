@@ -1,4 +1,4 @@
-import PsychicApplication from '../../../../src/psychic-application'
+import PsychicApplication from '../../../../src/psychic-application.js'
 
 describe('PsychicApplication set("cookie", ...opts)', () => {
   let config: PsychicApplication

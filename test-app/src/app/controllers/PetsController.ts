@@ -1,7 +1,7 @@
-import { OpenAPI } from '../../../../src'
-import Pet from '../models/Pet'
-import Post from '../models/Post'
-import ApplicationController from './ApplicationController'
+import { OpenAPI } from '../../../../src.js'
+import Pet from '../models/Pet.js'
+import Post from '../models/Post.js'
+import ApplicationController from './ApplicationController.js'
 
 export default class PetsController extends ApplicationController {
   @OpenAPI(Pet, {

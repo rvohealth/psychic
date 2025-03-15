@@ -1,7 +1,7 @@
 import { generateDream, standardizeFullyQualifiedModelName } from '@rvoh/dream'
 import pluralize from 'pluralize-esm'
-import generateController from './controller.js'
-import addResourceToRoutes from './helpers/addResourceToRoutes.js'
+import generateController from './controller.js.js'
+import addResourceToRoutes from './helpers/addResourceToRoutes.js.js'
 
 export default async function generateResource({
   route,

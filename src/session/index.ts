@@ -1,8 +1,8 @@
 import { CookieOptions, Request, Response } from 'express'
-import InternalEncrypt from '../encrypt/internal-encrypt.js'
-import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js'
-import EnvInternal from '../helpers/EnvInternal.js'
-import PsychicApplication, { CustomCookieOptions } from '../psychic-application/index.js'
+import InternalEncrypt from '../encrypt/internal-encrypt.js.js'
+import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js.js'
+import EnvInternal from '../helpers/EnvInternal.js.js'
+import PsychicApplication, { CustomCookieOptions } from '../psychic-application/index.js.js'
 
 export default class Session {
   constructor(

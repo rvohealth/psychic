@@ -1,10 +1,10 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
-import PsychicController from '../../../src/controller'
-import { OpenAPI } from '../../../src/controller/decorators'
-import PsychicApplication from '../../../src/psychic-application'
-import User from '../../../test-app/src/app/models/User'
-import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers'
+import PsychicController from '../../../src/controller.js'
+import { OpenAPI } from '../../../src/controller/decorators.js'
+import PsychicApplication from '../../../src/psychic-application.js'
+import User from '../../../test-app/src/app/models/User.js'
+import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers.js'
 
 describe('PsychicController', () => {
   describe('#respond', () => {

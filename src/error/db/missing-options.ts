@@ -1,4 +1,4 @@
-import DBError from './index.js'
+import DBError from './index.js.js'
 
 export default class DBMissingOptions extends DBError {
   constructor(error: Error) {

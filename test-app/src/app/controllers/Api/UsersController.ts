@@ -1,6 +1,6 @@
-import { OpenAPI } from '../../../../../src'
-import User from '../../models/User'
-import ApplicationController from '../ApplicationController'
+import { OpenAPI } from '../../../../../src.js'
+import User from '../../models/User.js'
+import ApplicationController from '../ApplicationController.js'
 
 export default class ApiUsersController extends ApplicationController {
   public ping() {

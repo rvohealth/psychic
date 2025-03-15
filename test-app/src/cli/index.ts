@@ -8,9 +8,9 @@
 import '../conf/loadEnv'
 
 import { Command } from 'commander'
-import { PsychicCLI } from '../../../src'
-import seedDb from '../db/seed'
-import initializePsychicApplication from './helpers/initializePsychicApplication'
+import { PsychicCLI } from '../../../src.js'
+import seedDb from '../db/seed.js'
+import initializePsychicApplication from './helpers/initializePsychicApplication.js'
 
 const program = new Command()
 

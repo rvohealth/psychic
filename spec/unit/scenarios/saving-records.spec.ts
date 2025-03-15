@@ -1,6 +1,6 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import PsychicServer from '../../../src/server'
-import User from '../../../test-app/src/app/models/User'
+import PsychicServer from '../../../src/server.js'
+import User from '../../../test-app/src/app/models/User.js'
 
 describe('a visitor attempts to save a record', () => {
   beforeEach(async () => {

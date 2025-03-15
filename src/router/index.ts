@@ -1,11 +1,11 @@
 import { RecordNotFound, ValidationError, camelize } from '@rvoh/dream'
 import { Application, Request, Response, Router } from 'express'
 import pluralize from 'pluralize-esm'
-import PsychicController from '../controller/index.js'
-import HttpError from '../error/http/index.js'
-import EnvInternal from '../helpers/EnvInternal.js'
-import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
-import PsychicApplication from '../psychic-application/index.js'
+import PsychicController from '../controller/index.js.js'
+import HttpError from '../error/http/index.js.js'
+import EnvInternal from '../helpers/EnvInternal.js.js'
+import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js.js'
+import PsychicApplication from '../psychic-application/index.js.js'
 import {
   NamespaceConfig,
   PsychicControllerActions,
@@ -14,8 +14,8 @@ import {
   lookupControllerOrFail,
   routePath,
 } from '../router/helpers.js'
-import { ParamValidationError } from '../server/params.js'
-import RouteManager from './route-manager.js'
+import { ParamValidationError } from '../server/params.js.js'
+import RouteManager from './route-manager.js.js'
 import {
   HttpMethod,
   ResourceMethods,

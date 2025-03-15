@@ -1,4 +1,4 @@
-import generateResourceControllerSpecContent from '../../../../src/generate/helpers/generateResourceControllerSpecContent'
+import generateResourceControllerSpecContent from '../../../../src/generate/helpers/generateResourceControllerSpecContent.js'
 
 describe('generateResourceControllerSpecContent', () => {
   it('generates a useful resource controller spec', () => {
@@ -13,11 +13,11 @@ describe('generateResourceControllerSpecContent', () => {
 import { UpdateableProperties } from '@rvoh/dream'
 import { PsychicServer } from '@rvoh/psychic'
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import Post from '../../../../src/app/models/Post'
-import User from '../../../../src/app/models/User'
-import createPost from '../../../factories/PostFactory'
-import createUser from '../../../factories/UserFactory'
-import { addEndUserAuthHeader } from '../../helpers/authentication'
+import Post from '../../../../src/app/models/Post.js'
+import User from '../../../../src/app/models/User.js'
+import createPost from '../../../factories/PostFactory.js'
+import createUser from '../../../factories/UserFactory.js'
+import { addEndUserAuthHeader } from '../../helpers/authentication.js'
 
 describe('V1/PostsController', () => {
   let user: User

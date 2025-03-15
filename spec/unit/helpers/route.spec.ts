@@ -1,4 +1,4 @@
-import route from '../../../test-app/src/app/helpers/route'
+import route from '../../../test-app/src/app/helpers/route.js'
 
 describe('route', () => {
   it('returns the route passed to it (providing type assertions in this case)', () => {

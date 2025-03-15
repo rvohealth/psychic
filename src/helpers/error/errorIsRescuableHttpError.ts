@@ -1,4 +1,4 @@
-import { rescuableHttpErrorClasses } from './httpErrorClasses.js'
+import { rescuableHttpErrorClasses } from './httpErrorClasses.js.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function errorIsRescuableHttpError(err: any) {

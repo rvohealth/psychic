@@ -1,8 +1,8 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import PsychicRouter from '../../../src/router'
-import PsychicServer from '../../../src/server'
-import PetsController from '../../../test-app/src/app/controllers/PetsController'
-import UsersController from '../../../test-app/src/app/controllers/UsersController'
+import PsychicRouter from '../../../src/router.js'
+import PsychicServer from '../../../src/server.js'
+import PetsController from '../../../test-app/src/app/controllers/PetsController.js'
+import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
 
 describe('PsychicRouter', () => {
   beforeEach(async () => {

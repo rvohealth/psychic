@@ -1,7 +1,7 @@
 import { agent as supertest } from 'supertest'
-import PsychicRouter from '../../../src/router'
-import PsychicServer from '../../../src/server'
-import UsersController from '../../../test-app/src/app/controllers/UsersController'
+import PsychicRouter from '../../../src/router.js'
+import PsychicServer from '../../../src/server.js'
+import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
 
 describe('PsychicRouter', () => {
   describe('#delete', () => {

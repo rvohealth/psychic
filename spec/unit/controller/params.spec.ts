@@ -1,10 +1,10 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
-import { Params } from '../../../src'
-import PsychicController from '../../../src/controller'
-import PsychicApplication from '../../../src/psychic-application'
-import { ParamValidationError } from '../../../src/server/params'
-import User from '../../../test-app/src/app/models/User'
+import { Params } from '../../../src.js'
+import PsychicController from '../../../src/controller.js'
+import PsychicApplication from '../../../src/psychic-application.js'
+import { ParamValidationError } from '../../../src/server/params.js'
+import User from '../../../test-app/src/app/models/User.js'
 
 const TestEnumValues = ['hello', 'world'] as const
 type TestEnum = (typeof TestEnumValues)[number]

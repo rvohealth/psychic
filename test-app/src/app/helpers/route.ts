@@ -1,5 +1,5 @@
 import { IdType } from '@rvoh/dream'
-import { RouteTypes } from '../../conf/routeTypes'
+import { RouteTypes } from '../../conf/routeTypes.js'
 
 export default function route(routePath: RouteTypes, ...interpolationArgs: IdType[]) {
   let route = routePath as string

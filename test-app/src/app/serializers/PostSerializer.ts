@@ -1,7 +1,7 @@
 import { Attribute, DreamColumn, DreamSerializer, RendersMany, RendersOne } from '@rvoh/dream'
-import Comment from '../models/Comment'
-import Post from '../models/Post'
-import CommentSerializer from './CommentSerializer'
+import Comment from '../models/Comment.js'
+import Post from '../models/Post.js'
+import CommentSerializer from './CommentSerializer.js'
 
 export class PostSummarySerializer<DataType extends Post, Passthrough extends object> extends DreamSerializer<
   DataType,

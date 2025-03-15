@@ -1,8 +1,8 @@
 import { uniq } from '@rvoh/dream'
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import PsychicApplication from '../../psychic-application/index.js'
-import { RouteConfig } from '../../router/route-manager.js'
+import PsychicApplication from '../../psychic-application/index.js.js'
+import { RouteConfig } from '../../router/route-manager.js.js'
 
 export default async function generateRouteTypes(routes: RouteConfig[]) {
   const fileStr = `\

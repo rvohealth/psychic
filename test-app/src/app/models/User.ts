@@ -1,8 +1,8 @@
 import { Decorators, DreamColumn, DreamSerializers, Validates, Virtual } from '@rvoh/dream'
 import { randomBytes, scrypt, timingSafeEqual } from 'crypto'
-import ApplicationModel from './ApplicationModel'
-import Pet from './Pet'
-import Post from './Post'
+import ApplicationModel from './ApplicationModel.js'
+import Pet from './Pet.js'
+import Post from './Post.js'
 
 const Deco = new Decorators<InstanceType<typeof User>>()
 

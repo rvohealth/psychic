@@ -1,7 +1,7 @@
 import { Decorators, DreamColumn, DreamSerializers } from '@rvoh/dream'
-import ApplicationModel from './ApplicationModel'
-import Comment from './Comment'
-import User from './User'
+import ApplicationModel from './ApplicationModel.js'
+import Comment from './Comment.js'
+import User from './User.js'
 
 const Deco = new Decorators<InstanceType<typeof Post>>()
 

@@ -1,6 +1,6 @@
 import { Encrypt } from '@rvoh/dream'
-import InternalEncrypt from '../../../src/encrypt/internal-encrypt'
-import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication'
+import InternalEncrypt from '../../../src/encrypt/internal-encrypt.js'
+import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication.js'
 
 describe('InternalEncrypt', () => {
   describe('#encryptColumn, #decryptColumn', () => {

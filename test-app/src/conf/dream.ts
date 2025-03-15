@@ -1,8 +1,8 @@
 import { DreamApplication } from '@rvoh/dream'
-import importAll from '../app/helpers/importAll'
-import importDefault from '../app/helpers/importDefault'
-import srcPath from '../app/helpers/srcPath'
-import inflections from './inflections'
+import importAll from '../app/helpers/importAll.js'
+import importDefault from '../app/helpers/importDefault.js'
+import srcPath from '../app/helpers/srcPath.js'
+import inflections from './inflections.js'
 
 export default async function configureDream(app: DreamApplication) {
   app.set('primaryKeyType', 'bigserial')

@@ -1,7 +1,7 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import psychicPath from '../../helpers/path/psychicPath.js'
-import PsychicApplication from '../../psychic-application/index.js'
+import psychicPath from '../../helpers/path/psychicPath.js.js'
+import PsychicApplication from '../../psychic-application/index.js.js'
 
 export default async function addResourceToRoutes(route: string) {
   const psychicApp = PsychicApplication.getOrFail()

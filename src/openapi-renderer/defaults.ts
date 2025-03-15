@@ -1,5 +1,5 @@
 import { OpenapiSchemaBody } from '@rvoh/dream'
-import { OpenapiContent, OpenapiResponses } from './endpoint.js'
+import { OpenapiContent, OpenapiResponses } from './endpoint.js.js'
 
 export const DEFAULT_OPENAPI_RESPONSES = {
   400: {

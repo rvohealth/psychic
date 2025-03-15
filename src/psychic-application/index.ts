@@ -13,11 +13,11 @@ import { CorsOptions } from 'cors'
 import { Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import * as http from 'http'
-import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root.js'
-import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers.js'
-import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback.js'
-import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js'
-import EnvInternal from '../helpers/EnvInternal.js'
+import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root.js.js'
+import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers.js.js'
+import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback.js.js'
+import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js.js'
+import EnvInternal from '../helpers/EnvInternal.js.js'
 import {
   OpenapiContent,
   OpenapiHeaders,
@@ -26,12 +26,12 @@ import {
   OpenapiSecuritySchemes,
   OpenapiServer,
 } from '../openapi-renderer/endpoint.js'
-import PsychicRouter from '../router/index.js'
-import PsychicServer from '../server/index.js'
-import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache.js'
-import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
-import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
-import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
+import PsychicRouter from '../router/index.js.js'
+import PsychicServer from '../server/index.js.js'
+import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache.js.js'
+import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js.js'
+import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js.js'
+import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js.js'
 
 export default class PsychicApplication {
   public static async init(

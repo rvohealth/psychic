@@ -1,5 +1,5 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import { PsychicServer } from '../../../../src'
+import { PsychicServer } from '../../../../src.js'
 
 describe('default caching behavior', () => {
   beforeEach(async () => {

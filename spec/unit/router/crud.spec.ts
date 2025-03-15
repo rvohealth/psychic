@@ -1,9 +1,9 @@
-import { PsychicApplication } from '../../../src'
-import CannotFindInferredControllerFromProvidedNamespace from '../../../src/error/router/cannot-find-inferred-controller-from-provided-namespace'
-import CannotInferControllerFromTopLevelRouteError from '../../../src/error/router/cannot-infer-controller-from-top-level-route'
-import PsychicRouter from '../../../src/router'
-import PsychicServer from '../../../src/server'
-import UsersController from '../../../test-app/src/app/controllers/UsersController'
+import { PsychicApplication } from '../../../src.js'
+import CannotFindInferredControllerFromProvidedNamespace from '../../../src/error/router/cannot-find-inferred-controller-from-provided-namespace.js'
+import CannotInferControllerFromTopLevelRouteError from '../../../src/error/router/cannot-infer-controller-from-top-level-route.js'
+import PsychicRouter from '../../../src/router.js'
+import PsychicServer from '../../../src/server.js'
+import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
 
 describe('PsychicRouter', () => {
   describe('#crud', () => {

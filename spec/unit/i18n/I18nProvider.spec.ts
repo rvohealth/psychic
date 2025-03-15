@@ -1,4 +1,4 @@
-import I18nDefaultLocales from '../../../src/i18n/conf/I18nDefaultLocales'
+import I18nDefaultLocales from '../../../src/i18n/conf/I18nDefaultLocales.js'
 import I18nProvider, {
   I18nInterpolationReceivedNull,
   I18nInterpolationReceivedUndefined,

@@ -6,12 +6,12 @@ import { Application, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { Server } from 'http'
 import * as path from 'path'
-import EnvInternal from '../helpers/EnvInternal.js'
-import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError.js'
-import PsychicApplication, { PsychicSslCredentials } from '../psychic-application/index.js'
-import logo from '../psychic-application/logo.js'
-import PsychicRouter from '../router/index.js'
-import FrontEndClientServer from './front-end-client.js'
+import EnvInternal from '../helpers/EnvInternal.js.js'
+import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError.js.js'
+import PsychicApplication, { PsychicSslCredentials } from '../psychic-application/index.js.js'
+import logo from '../psychic-application/logo.js.js'
+import PsychicRouter from '../router/index.js.js'
+import FrontEndClientServer from './front-end-client.js.js'
 import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,

@@ -1,5 +1,5 @@
 import { visit } from '@rvoh/psychic-spec-helpers'
-import UsersController from '../../test-app/src/app/controllers/UsersController'
+import UsersController from '../../test-app/src/app/controllers/UsersController.js'
 
 describe('test that spying on backend modules works within fspec runs', () => {
   it('can spy on backend methods', async () => {

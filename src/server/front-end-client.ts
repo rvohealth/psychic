@@ -1,5 +1,5 @@
 import { ChildProcess } from 'child_process'
-import { ssspawn } from '../helpers/sspawn.js'
+import { ssspawn } from '../helpers/sspawn.js.js'
 
 export default class FrontEndClientServer {
   private child: ChildProcess

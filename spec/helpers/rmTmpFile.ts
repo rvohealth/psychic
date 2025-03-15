@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import PsychicApplication from '../../src/psychic-application'
+import PsychicApplication from '../../src/psychic-application.js'
 
 export default async function rmTmpFile() {
   try {

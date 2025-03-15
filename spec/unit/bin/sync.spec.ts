@@ -1,4 +1,4 @@
-import { PsychicApplication, PsychicBin } from '../../../src'
+import { PsychicApplication, PsychicBin } from '../../../src.js'
 
 describe('PsychicBin#on', () => {
   describe('on("sync")', () => {

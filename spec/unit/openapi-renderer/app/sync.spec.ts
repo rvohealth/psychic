@@ -1,5 +1,5 @@
 import * as fs from 'fs/promises'
-import OpenapiAppRenderer from '../../../../src/openapi-renderer/app'
+import OpenapiAppRenderer from '../../../../src/openapi-renderer/app.js'
 
 describe('OpenapiAppRenderer', () => {
   describe('.sync', () => {

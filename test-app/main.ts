@@ -1,7 +1,7 @@
 import './src/conf/global'
 
-import PsychicServer from '../src/server'
-import initializePsychicApplication from './src/cli/helpers/initializePsychicApplication'
+import PsychicServer from '../src/server.js'
+import initializePsychicApplication from './src/cli/helpers/initializePsychicApplication.js'
 
 async function start() {
   await initializePsychicApplication()

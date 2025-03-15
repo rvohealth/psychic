@@ -1,5 +1,5 @@
-import PsychicApplication from '../../../src/psychic-application'
-import { PsychicHookEventType } from '../../../src/psychic-application/types'
+import PsychicApplication from '../../../src/psychic-application.js'
+import { PsychicHookEventType } from '../../../src/psychic-application/types.js'
 
 describe('PsychicApplication hooks', () => {
   let config: PsychicApplication

@@ -1,8 +1,8 @@
 import { Attribute, DreamColumn, DreamSerializer, RendersMany, RendersOne } from '@rvoh/dream'
-import Post from '../models/Post'
-import User from '../models/User'
-import Comment from '../models/Comment'
-import Pet from '../models/Pet'
+import Comment from '../models/Comment.js'
+import Pet from '../models/Pet.js'
+import Post from '../models/Post.js'
+import User from '../models/User.js'
 
 export class UserSummarySerializer extends DreamSerializer {
   @Attribute(User)

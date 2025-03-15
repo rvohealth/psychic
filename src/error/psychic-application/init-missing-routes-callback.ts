@@ -11,7 +11,7 @@ within conf/app.ts, you must have a call to "#set('routes', routesCb)", i.e.
 
 
   // conf/app.ts
-  import routes from './routes'
+  import routes from './routes.js'
 
   export default async (app: PsychicApplication) => {
     await app.set('routes', routes)

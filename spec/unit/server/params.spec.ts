@@ -1,9 +1,9 @@
 import { CalendarDate } from '@rvoh/dream'
 import { DateTime } from 'luxon'
-import { PsychicParamsDictionary } from '../../../src/controller'
-import Params, { ParamValidationError } from '../../../src/server/params'
-import Pet from '../../../test-app/src/app/models/Pet'
-import User from '../../../test-app/src/app/models/User'
+import { PsychicParamsDictionary } from '../../../src/controller.js'
+import Params, { ParamValidationError } from '../../../src/server/params.js'
+import Pet from '../../../test-app/src/app/models/Pet.js'
+import User from '../../../test-app/src/app/models/User.js'
 
 const TestEnumValues = ['hello', 'world'] as const
 type TestEnum = (typeof TestEnumValues)[number]

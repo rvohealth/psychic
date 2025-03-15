@@ -1,9 +1,9 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
-import InternalEncrypt from '../../../src/encrypt/internal-encrypt'
-import Session, { CustomSessionCookieOptions } from '../../../src/session'
-import User from '../../../test-app/src/app/models/User'
 import { MockInstance } from 'vitest'
+import InternalEncrypt from '../../../src/encrypt/internal-encrypt.js'
+import Session, { CustomSessionCookieOptions } from '../../../src/session.js'
+import User from '../../../test-app/src/app/models/User.js'
 
 describe('Session', () => {
   let user: User

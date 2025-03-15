@@ -1,12 +1,12 @@
-import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../../../../src/error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations'
-import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
-import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
-import OpenapiDecoratorTestController from '../../../../test-app/src/app/controllers/OpenapiDecoratorTestsController'
-import UsersController from '../../../../test-app/src/app/controllers/UsersController'
-import Comment from '../../../../test-app/src/app/models/Comment'
-import Pet from '../../../../test-app/src/app/models/Pet'
-import Post from '../../../../test-app/src/app/models/Post'
-import User from '../../../../test-app/src/app/models/User'
+import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../../../../src/error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations.js'
+import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint.js'
+import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache.js'
+import OpenapiDecoratorTestController from '../../../../test-app/src/app/controllers/OpenapiDecoratorTestsController.js'
+import UsersController from '../../../../test-app/src/app/controllers/UsersController.js'
+import Comment from '../../../../test-app/src/app/models/Comment.js'
+import Pet from '../../../../test-app/src/app/models/Pet.js'
+import Post from '../../../../test-app/src/app/models/Post.js'
+import User from '../../../../test-app/src/app/models/User.js'
 import {
   CommentTestingArrayWithSerializerRefSerializer,
   CommentTestingBasicArraySerializerRefSerializer,

@@ -1,10 +1,10 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import { PsychicApplication } from '../../../../src'
+import { PsychicApplication } from '../../../../src.js'
 import addResourceToRoutes, {
   addResourceToRoutes_routeToRegexAndReplacements,
 } from '../../../../src/generate/helpers/addResourceToRoutes'
-import * as psychicPathModule from '../../../../src/helpers/path/psychicPath'
+import * as psychicPathModule from '../../../../src/helpers/path/psychicPath.js'
 
 describe('addResourceToRoutes', () => {
   let psychicApp: PsychicApplication

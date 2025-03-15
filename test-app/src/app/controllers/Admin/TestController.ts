@@ -1,5 +1,5 @@
-import { OpenAPI } from '../../../../../src'
-import AdminBaseController from './BaseController'
+import { OpenAPI } from '../../../../../src.js'
+import AdminBaseController from './BaseController.js'
 
 export default class AdminTestController extends AdminBaseController {
   @OpenAPI({

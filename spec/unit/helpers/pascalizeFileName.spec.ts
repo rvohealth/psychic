@@ -1,4 +1,4 @@
-import pascalizeFileName from '../../../src/helpers/pascalizeFileName'
+import pascalizeFileName from '../../../src/helpers/pascalizeFileName.js'
 
 describe('pascalizeFileName', () => {
   it('pascalizes the route segments into a class name', () => {

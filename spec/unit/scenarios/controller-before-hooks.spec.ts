@@ -1,6 +1,6 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import { PsychicServer } from '../../../src'
-import UsersController from '../../../test-app/src/app/controllers/UsersController'
+import { PsychicServer } from '../../../src.js'
+import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
 
 describe('controller before hooks', () => {
   beforeEach(async () => {

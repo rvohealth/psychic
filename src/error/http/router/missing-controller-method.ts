@@ -1,4 +1,4 @@
-import RouterError from './index.js'
+import RouterError from './index.js.js'
 
 export default class RouterMissingControllerMethod extends RouterError {
   protected get messageString(): string {

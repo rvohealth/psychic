@@ -1,5 +1,5 @@
 import * as path from 'path'
-import PsychicApplication from '../psychic-application/index.js'
+import PsychicApplication from '../psychic-application/index.js.js'
 
 export default function openapiJsonPath(openapiName: string = 'default') {
   const psychicApp = PsychicApplication.getOrFail()
