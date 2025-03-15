@@ -39,13 +39,13 @@ export default function (
       return destinationPath
 
     case 'factories':
-      return `${destinationPath}${fullyQualifiedDestinationModelName}Factory`
+      return `${destinationPath}${fullyQualifiedDestinationModelName}Factory.js`
 
     case 'serializers':
-      return `${destinationPath}${fullyQualifiedDestinationModelName}Serializer`
+      return `${destinationPath}${fullyQualifiedDestinationModelName}Serializer.js`
 
     default:
-      return `${destinationPath}${fullyQualifiedDestinationModelName}`
+      return `${destinationPath}${fullyQualifiedDestinationModelName}.js`
   }
 }
 

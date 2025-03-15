@@ -1,7 +1,7 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
-import PsychicController from '../../../src/controller'
-import PsychicApplication from '../../../src/psychic-application'
+import PsychicController from '../../../src/controller/index.js'
+import PsychicApplication from '../../../src/psychic-application/index.js'
 
 describe('PsychicController', () => {
   describe('#ok', () => {

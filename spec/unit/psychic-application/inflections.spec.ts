@@ -1,5 +1,5 @@
 import pluralize from 'pluralize-esm'
-import PsychicApplication from '../../../src/psychic-application'
+import PsychicApplication from '../../../src/psychic-application/index.js'
 
 describe('PsychicApplication', () => {
   let config: PsychicApplication

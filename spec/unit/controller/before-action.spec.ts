@@ -1,9 +1,9 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
-import PsychicController from '../../../src/controller'
-import { BeforeAction } from '../../../src/controller/decorators'
-import PsychicApplication from '../../../src/psychic-application'
-import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers'
+import { BeforeAction } from '../../../src/controller/decorators.js'
+import PsychicController from '../../../src/controller/index.js'
+import PsychicApplication from '../../../src/psychic-application/index.js'
+import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers.js'
 
 describe('PsychicController BeforeAction', () => {
   let req: Request

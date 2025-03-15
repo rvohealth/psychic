@@ -1,8 +1,8 @@
-import I18nDefaultLocales from '../../../src/i18n/conf/I18nDefaultLocales'
+import I18nDefaultLocales from '../../../src/i18n/conf/I18nDefaultLocales.js'
 import I18nProvider, {
   I18nInterpolationReceivedNull,
   I18nInterpolationReceivedUndefined,
-} from '../../../src/i18n/provider'
+} from '../../../src/i18n/provider.js'
 
 type LocalesEnum = (typeof I18nDefaultLocales)[number]
 

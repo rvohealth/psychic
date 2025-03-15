@@ -1,6 +1,6 @@
 import { DreamSerializer } from '@rvoh/dream'
-import OpenapiSerializerRenderer from '../../../../src/openapi-renderer/serializer'
-import ApplicationController from '../../../../test-app/src/app/controllers/ApplicationController'
+import OpenapiSerializerRenderer from '../../../../src/openapi-renderer/serializer.js'
+import ApplicationController from '../../../../test-app/src/app/controllers/ApplicationController.js'
 import {
   CommentTestingAdditionalPropertiesSerializer,
   CommentTestingAdditionalPropertiesShorthandSerializer,
@@ -17,8 +17,8 @@ import {
   CommentTestingStringSerializer,
   CommentTestingStringShorthandSerializer,
   CommentWithFlattenedUserSerializer,
-} from '../../../../test-app/src/app/serializers/CommentSerializer'
-import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer'
+} from '../../../../test-app/src/app/serializers/CommentSerializer.js'
+import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer.js'
 
 describe('OpenapiSerializerRenderer', () => {
   describe('#parse', () => {

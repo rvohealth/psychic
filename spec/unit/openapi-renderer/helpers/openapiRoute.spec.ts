@@ -1,4 +1,4 @@
-import openapiRoute from '../../../../src/openapi-renderer/helpers/openapiRoute'
+import openapiRoute from '../../../../src/openapi-renderer/helpers/openapiRoute.js'
 
 describe('openapiRoute', () => {
   context('/hello/world', () => {

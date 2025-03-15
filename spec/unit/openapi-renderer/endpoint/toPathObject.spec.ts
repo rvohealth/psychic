@@ -1,23 +1,23 @@
-import { PsychicServer } from '../../../../src'
-import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint'
-import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache'
-import { RouteConfig } from '../../../../src/router/route-manager'
-import ApiPetsController from '../../../../test-app/src/app/controllers/Api/PetsController'
-import OpenapiOverridesTestController from '../../../../test-app/src/app/controllers/OpenapiOverridesTestsController'
-import PetsController from '../../../../test-app/src/app/controllers/PetsController'
-import UsersController from '../../../../test-app/src/app/controllers/UsersController'
-import Pet from '../../../../test-app/src/app/models/Pet'
-import Post from '../../../../test-app/src/app/models/Post'
-import User from '../../../../test-app/src/app/models/User'
+import { PsychicServer } from '../../../../src/index.js'
+import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint.js'
+import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache.js'
+import { RouteConfig } from '../../../../src/router/route-manager.js'
+import ApiPetsController from '../../../../test-app/src/app/controllers/Api/PetsController.js'
+import OpenapiOverridesTestController from '../../../../test-app/src/app/controllers/OpenapiOverridesTestsController.js'
+import PetsController from '../../../../test-app/src/app/controllers/PetsController.js'
+import UsersController from '../../../../test-app/src/app/controllers/UsersController.js'
+import Pet from '../../../../test-app/src/app/models/Pet.js'
+import Post from '../../../../test-app/src/app/models/Post.js'
+import User from '../../../../test-app/src/app/models/User.js'
 import {
   CommentTestingDoubleShorthandSerializer,
   CommentTestingStringSerializer,
-} from '../../../../test-app/src/app/serializers/CommentSerializer'
-import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer'
+} from '../../../../test-app/src/app/serializers/CommentSerializer.js'
+import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer.js'
 import UserSerializer, {
   UserWithPostsSerializer,
-} from '../../../../test-app/src/app/serializers/UserSerializer'
-import initializePsychicApplication from '../../../../test-app/src/cli/helpers/initializePsychicApplication'
+} from '../../../../test-app/src/app/serializers/UserSerializer.js'
+import initializePsychicApplication from '../../../../test-app/src/cli/helpers/initializePsychicApplication.js'
 
 describe('OpenapiEndpointRenderer', () => {
   let routes: RouteConfig[]

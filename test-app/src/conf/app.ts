@@ -1,10 +1,10 @@
 import * as winston from 'winston'
-import EnvInternal from '../../../src/helpers/EnvInternal'
-import PsychicApplication from '../../../src/psychic-application'
-import srcPath from '../app/helpers/srcPath'
-import inflections from './inflections'
-import routesCb from './routes'
-import importDefault from '../app/helpers/importDefault'
+import EnvInternal from '../../../src/helpers/EnvInternal.js'
+import PsychicApplication from '../../../src/psychic-application/index.js'
+import importDefault from '../app/helpers/importDefault.js'
+import srcPath from '../app/helpers/srcPath.js'
+import inflections from './inflections.js'
+import routesCb from './routes.js'
 
 export default async (psy: PsychicApplication) => {
   await psy.load('controllers', srcPath('app', 'controllers'), path => importDefault(path))

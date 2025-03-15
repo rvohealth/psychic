@@ -1,5 +1,5 @@
-import { OpenAPI, PsychicOpenapiControllerConfig } from '../../../../src'
-import ApplicationController from './ApplicationController'
+import { OpenAPI, PsychicOpenapiControllerConfig } from '../../../../src/index.js'
+import ApplicationController from './ApplicationController.js'
 
 export default class OpenapiOverridesTestController extends ApplicationController {
   public static get openapiConfig(): PsychicOpenapiControllerConfig {

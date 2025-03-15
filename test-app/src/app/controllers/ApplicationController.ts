@@ -1,5 +1,5 @@
-import { PsychicController } from '../../../../src'
-import psychicTypes from '../../types/psychic'
+import { PsychicController } from '../../../../src/index.js'
+import psychicTypes from '../../types/psychic.js'
 
 export default class ApplicationController extends PsychicController {
   public get psychicTypes() {

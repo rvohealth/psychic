@@ -1,6 +1,6 @@
-import { OpenAPI } from '../../../../src'
-import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer'
-import ApplicationController from './ApplicationController'
+import { OpenAPI } from '../../../../src/index.js'
+import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer.js'
+import ApplicationController from './ApplicationController.js'
 
 export default class GreeterController extends ApplicationController {
   public show() {

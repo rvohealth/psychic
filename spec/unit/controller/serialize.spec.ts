@@ -1,17 +1,17 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Attribute, DreamApplication, DreamSerializer } from '@rvoh/dream'
 import { Request, Response } from 'express'
-import PsychicController from '../../../src/controller'
-import { BeforeAction, OpenAPI } from '../../../src/controller/decorators'
-import PsychicApplication from '../../../src/psychic-application'
-import Pet from '../../../test-app/src/app/models/Pet'
-import User from '../../../test-app/src/app/models/User'
+import { BeforeAction, OpenAPI } from '../../../src/controller/decorators.js'
+import PsychicController from '../../../src/controller/index.js'
+import PsychicApplication from '../../../src/psychic-application/index.js'
+import Pet from '../../../test-app/src/app/models/Pet.js'
+import User from '../../../test-app/src/app/models/User.js'
 import UserSerializer, {
   UserExtraSerializer,
   UserSummarySerializer,
-} from '../../../test-app/src/app/serializers/UserSerializer'
-import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers'
-import processDynamicallyDefinedSerializers from '../../helpers/processDynamicallyDefinedSerializers'
+} from '../../../test-app/src/app/serializers/UserSerializer.js'
+import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers.js'
+import processDynamicallyDefinedSerializers from '../../helpers/processDynamicallyDefinedSerializers.js'
 
 describe('PsychicController', () => {
   describe('#serialize', () => {

@@ -1,6 +1,6 @@
 import { Attribute, DreamSerializer, RendersMany } from '@rvoh/dream'
-import Pet from '../../models/Pet'
-import { AdminPetSummarySerializer } from './PetSerializer'
+import Pet from '../../models/Pet.js'
+import { AdminPetSummarySerializer } from './PetSerializer.js'
 
 export class AdminUserSummarySerializer extends DreamSerializer {
   @Attribute('string')

@@ -1,5 +1,5 @@
-import PsychicServer from '../../../src/server'
-import UsersController from '../../../test-app/src/app/controllers/UsersController'
+import PsychicServer from '../../../src/server/index.js'
+import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
 
 describe('PsychicServer', () => {
   describe('#routes', () => {

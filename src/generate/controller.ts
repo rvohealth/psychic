@@ -119,9 +119,9 @@ function baseAncestorNameAndImport(
   const dotFiles = forBaseController ? '..' : '.'
   return controllerNameParts.length === (isAdmin ? 2 : 1)
     ? isAdmin
-      ? [`AdminAuthedController`, `import AdminAuthedController from '${dotFiles}/AuthedController'`]
-      : [`AuthedController`, `import AuthedController from '${dotFiles}/AuthedController'`]
-    : [maybeAncestorNameForBase, `import ${maybeAncestorNameForBase} from '${dotFiles}/BaseController'`]
+      ? [`AdminAuthedController`, `import AdminAuthedController from '${dotFiles}/AuthedController.js'`]
+      : [`AuthedController`, `import AuthedController from '${dotFiles}/AuthedController.js'`]
+    : [maybeAncestorNameForBase, `import ${maybeAncestorNameForBase} from '${dotFiles}/BaseController.js'`]
 }
 
 async function generateControllerSpec({

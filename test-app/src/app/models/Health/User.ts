@@ -1,5 +1,5 @@
-import { DateTime } from 'luxon'
-import ApplicationModel from '../ApplicationModel'
+import { DateTime } from '@rvoh/dream'
+import ApplicationModel from '../ApplicationModel.js'
 
 export default class HealthUser extends ApplicationModel {
   public get table() {

@@ -1,6 +1,6 @@
 import { Attribute, DreamColumn, DreamSerializer, RendersOne } from '@rvoh/dream'
-import Comment from '../models/Comment'
-import User from '../models/User'
+import Comment from '../models/Comment.js'
+import User from '../models/User.js'
 
 export class CommentSummarySerializer<
   DataType extends Comment,

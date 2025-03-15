@@ -1,5 +1,5 @@
-import { OpenAPI } from '../../../../src'
-import ApplicationController from './ApplicationController'
+import { OpenAPI } from '../../../../src/index.js'
+import ApplicationController from './ApplicationController.js'
 
 export default class ParamsTestController extends ApplicationController {
   public testCastParam() {

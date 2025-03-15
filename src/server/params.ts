@@ -2,13 +2,13 @@ import {
   CalendarDate,
   camelize,
   compact,
+  DateTime,
   Dream,
   DreamAttributes,
   DreamParamSafeAttributes,
   DreamParamSafeColumnNames,
   snakeify,
 } from '@rvoh/dream'
-import { DateTime } from 'luxon'
 import {
   PsychicParamsDictionary,
   PsychicParamsPrimitive,

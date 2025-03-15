@@ -1,5 +1,5 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import { PsychicServer } from '../../../../src'
+import { PsychicServer } from '../../../../src/index.js'
 
 describe('a visitor attempts to hit a route that will trigger a 428', () => {
   beforeEach(async () => {

@@ -1,10 +1,10 @@
-import { PsychicApplication } from '../../../src'
-import PsychicApplicationInitMissingApiRoot from '../../../src/error/psychic-application/init-missing-api-root'
-import PsychicApplicationInitMissingCallToLoadControllers from '../../../src/error/psychic-application/init-missing-call-to-load-controllers'
-import PsychicApplicationInitMissingRoutesCallback from '../../../src/error/psychic-application/init-missing-routes-callback'
-import * as LoadControllersModule from '../../../src/psychic-application/helpers/import/importControllers'
-import importDefault from '../../../test-app/src/app/helpers/importDefault'
-import dreamCb from '../../../test-app/src/conf/dream'
+import PsychicApplicationInitMissingApiRoot from '../../../src/error/psychic-application/init-missing-api-root.js'
+import PsychicApplicationInitMissingCallToLoadControllers from '../../../src/error/psychic-application/init-missing-call-to-load-controllers.js'
+import PsychicApplicationInitMissingRoutesCallback from '../../../src/error/psychic-application/init-missing-routes-callback.js'
+import { PsychicApplication } from '../../../src/index.js'
+import * as LoadControllersModule from '../../../src/psychic-application/helpers/import/importControllers.js'
+import importDefault from '../../../test-app/src/app/helpers/importDefault.js'
+import dreamCb from '../../../test-app/src/conf/dream.js'
 
 describe('DreamApplication#init', () => {
   beforeEach(() => {

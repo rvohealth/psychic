@@ -5,12 +5,12 @@
 // commanderjs docs:
 // https://github.com/tj/commander.js#quick-start
 
-import '../conf/loadEnv'
+import '../conf/loadEnv.js'
 
 import { Command } from 'commander'
-import { PsychicCLI } from '../../../src'
-import seedDb from '../db/seed'
-import initializePsychicApplication from './helpers/initializePsychicApplication'
+import { PsychicCLI } from '../../../src/index.js'
+import seedDb from '../db/seed.js'
+import initializePsychicApplication from './helpers/initializePsychicApplication.js'
 
 const program = new Command()
 

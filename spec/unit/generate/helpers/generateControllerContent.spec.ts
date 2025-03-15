@@ -1,11 +1,11 @@
-import generateControllerContent from '../../../../src/generate/helpers/generateControllerContent'
+import generateControllerContent from '../../../../src/generate/helpers/generateControllerContent.js'
 
 describe('psy generate:controller <name> [...methods]', () => {
   context('when provided methods', () => {
     context('passing a model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
         const res = generateControllerContent({
-          ancestorImportStatement: "import AuthedController from './AuthedController'",
+          ancestorImportStatement: "import AuthedController from './AuthedController.js'",
           ancestorName: 'AuthedController',
           fullyQualifiedControllerName: 'PostsController',
           fullyQualifiedModelName: 'Post',
@@ -15,8 +15,8 @@ describe('psy generate:controller <name> [...methods]', () => {
         expect(res).toEqual(
           `\
 import { OpenAPI } from '@rvoh/psychic'
-import AuthedController from './AuthedController'
-import Post from '../models/Post'
+import AuthedController from './AuthedController.js'
+import Post from '../models/Post.js'
 
 const openApiTags = ['posts']
 
@@ -75,16 +75,14 @@ export default class PostsController extends AuthedController {
     //    this.noContent()
   }
 
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
+  @OpenAPI(Post, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a Post',
   })
   public async preview() {
+    //    const post = await this.post()
+    //    this.ok(post)
   }
 
   private async post() {
@@ -101,7 +99,7 @@ export default class PostsController extends AuthedController {
     context('passing a namespaced model and a path', () => {
       it('generates a controller adding requested methods, and autofilling those matching standard crud names', () => {
         const res = generateControllerContent({
-          ancestorImportStatement: "import AuthedController from '../../../AuthedController'",
+          ancestorImportStatement: "import AuthedController from '../../../AuthedController.js'",
           ancestorName: 'AuthedController',
           fullyQualifiedControllerName: 'Api/V1/Health/PostsController',
           fullyQualifiedModelName: 'Health/Post',
@@ -111,8 +109,8 @@ export default class PostsController extends AuthedController {
         expect(res).toEqual(
           `\
 import { OpenAPI } from '@rvoh/psychic'
-import AuthedController from '../../../AuthedController'
-import HealthPost from '../../../../models/Health/Post'
+import AuthedController from '../../../AuthedController.js'
+import HealthPost from '../../../../models/Health/Post.js'
 
 const openApiTags = ['health-posts']
 
@@ -171,16 +169,14 @@ export default class ApiV1HealthPostsController extends AuthedController {
     //    this.noContent()
   }
 
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
+  @OpenAPI(HealthPost, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a HealthPost',
   })
   public async preview() {
+    //    const healthPost = await this.healthPost()
+    //    this.ok(healthPost)
   }
 
   private async healthPost() {
@@ -197,7 +193,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
     context('when provided with a nested path', () => {
       it('generates a controller with pascal-cased naming', () => {
         const res = generateControllerContent({
-          ancestorImportStatement: "import AuthedController from '../../AuthedController'",
+          ancestorImportStatement: "import AuthedController from '../../AuthedController.js'",
           ancestorName: 'AuthedController',
           fullyQualifiedControllerName: 'Api/V1/UsersController',
           actions: ['hello', 'world'],
@@ -206,32 +202,24 @@ export default class ApiV1HealthPostsController extends AuthedController {
         expect(res).toEqual(
           `\
 import { OpenAPI } from '@rvoh/psychic'
-import AuthedController from '../../AuthedController'
+import AuthedController from '../../AuthedController.js'
 
 const openApiTags = ['api-v1-users']
 
 export default class ApiV1UsersController extends AuthedController {
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
-  })
+  // @OpenAPI(<model, view model, or serializer>, {
+  //   status: 200,
+  //   tags: openApiTags,
+  //   description: '<tbd>',
+  // })
   public async hello() {
   }
 
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
-  })
+  // @OpenAPI(<model, view model, or serializer>, {
+  //   status: 200,
+  //   tags: openApiTags,
+  //   description: '<tbd>',
+  // })
   public async world() {
   }
 }

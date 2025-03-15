@@ -1,5 +1,5 @@
 import { DreamSerializer, RendersOne } from '@rvoh/dream'
-import { HelloSerializer } from './HelloSerializer'
+import { HelloSerializer } from './HelloSerializer.js'
 
 export default class WorldSerializer extends DreamSerializer {
   @RendersOne(() => HelloSerializer)

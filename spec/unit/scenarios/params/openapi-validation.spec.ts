@@ -1,7 +1,7 @@
+import { DateTime } from '@rvoh/dream'
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import { isValidISODateString } from 'iso-datestring-validator'
-import { DateTime } from 'luxon'
-import { PsychicApplication, PsychicServer } from '../../../../src'
+import { PsychicApplication, PsychicServer } from '../../../../src/index.js'
 
 describe('hitting an endpoint with openapi validation activated', () => {
   const subject = async (data: object, expectedStatus: number) =>

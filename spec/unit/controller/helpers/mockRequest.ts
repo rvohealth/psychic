@@ -1,6 +1,6 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
-import { HttpMethod } from '../../../../src/router/types'
+import { HttpMethod } from '../../../../src/router/types.js'
 
 export default ({
   // method = 'get',

@@ -1,4 +1,4 @@
-import AuthedApplicationController from './AuthedApplicationController'
+import AuthedApplicationController from './AuthedApplicationController.js'
 
 export default class AuthedUsersController extends AuthedApplicationController {
   public ping() {
