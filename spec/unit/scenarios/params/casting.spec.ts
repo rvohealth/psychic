@@ -1,5 +1,5 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import PsychicServer from '../../../../src/server.js'
+import PsychicServer from '../../../../src/server/index.js'
 
 describe('hitting an endpoint that calls castParam', () => {
   beforeEach(async () => {

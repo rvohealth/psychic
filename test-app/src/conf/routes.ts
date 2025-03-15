@@ -1,4 +1,4 @@
-import PsychicRouter from '../../../src/router.js'
+import PsychicRouter from '../../../src/router/index.js'
 import AdminTestController from '../app/controllers/Admin/TestController.js'
 import ApiUsersController from '../app/controllers/Api/UsersController.js'
 import ApiV1UsersController from '../app/controllers/Api/V1/UsersController.js'

@@ -1,6 +1,6 @@
 import '../../../src/helpers/loadEnv.js'
 
-import { PsychicBin } from '../../../src.js'
+import { PsychicBin } from '../../../src/index.js'
 import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication.js'
 import rmTmpFile from '../../helpers/rmTmpFile.js'
 

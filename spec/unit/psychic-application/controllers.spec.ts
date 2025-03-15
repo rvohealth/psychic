@@ -1,4 +1,4 @@
-import PsychicApplication from '../../../src/psychic-application.js'
+import PsychicApplication from '../../../src/psychic-application/index.js'
 import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
 
 describe('PsychicApplication', () => {

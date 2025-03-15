@@ -63,7 +63,7 @@ export default function generateResourceControllerSpecContent({
 import { UpdateableProperties } from '@rvoh/dream'
 import { PsychicServer } from '@rvoh/psychic'
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'${uniq(importStatements).join('')}
-import { addEndUserAuthHeader } from '${specUnitUpdirs}helpers/authentication'
+import { addEndUserAuthHeader } from '${specUnitUpdirs}helpers/authentication.js'
 
 describe('${fullyQualifiedControllerName}', () => {
   let user: User

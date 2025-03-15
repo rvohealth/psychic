@@ -1,8 +1,8 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
-import { Params } from '../../../src.js'
-import PsychicController from '../../../src/controller.js'
-import PsychicApplication from '../../../src/psychic-application.js'
+import PsychicController from '../../../src/controller/index.js'
+import { Params } from '../../../src/index.js'
+import PsychicApplication from '../../../src/psychic-application/index.js'
 import { ParamValidationError } from '../../../src/server/params.js'
 import User from '../../../test-app/src/app/models/User.js'
 

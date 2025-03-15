@@ -1,5 +1,5 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import { PsychicServer } from '../../../../src.js'
+import { PsychicServer } from '../../../../src/index.js'
 import User from '../../../../test-app/src/app/models/User.js'
 
 describe('an authed user attempts to hit an authed route', () => {

@@ -1,6 +1,6 @@
 import * as winston from 'winston'
 import EnvInternal from '../../../src/helpers/EnvInternal.js'
-import PsychicApplication from '../../../src/psychic-application.js'
+import PsychicApplication from '../../../src/psychic-application/index.js'
 import importDefault from '../app/helpers/importDefault.js'
 import srcPath from '../app/helpers/srcPath.js'
 import inflections from './inflections.js'

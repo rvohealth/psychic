@@ -55,8 +55,8 @@ export {
   type OpenapiEndpointRendererOpts,
   type OpenapiEndpointResponse,
   type OpenapiHeaderOption,
-  type OpenapiHeaderType,
   type OpenapiHeaders,
+  type OpenapiHeaderType,
   type OpenapiMethodBody,
   type OpenapiParameterResponse,
   type OpenapiPathParams,
@@ -77,5 +77,5 @@ export { default as PsychicRouter } from './router/index.js'
 export { type HttpMethod } from './router/types.js'
 export { createPsychicHttpInstance as getPsychicHttpInstance } from './server/helpers/startPsychicServer.js'
 export { default as PsychicServer } from './server/index.js'
-export { ParamValidationError, default as Params } from './server/params.js'
+export { default as Params, ParamValidationError } from './server/params.js'
 export { default as PsychicSession } from './session/index.js'

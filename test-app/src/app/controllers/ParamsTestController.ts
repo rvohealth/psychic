@@ -1,4 +1,4 @@
-import { OpenAPI } from '../../../../src.js'
+import { OpenAPI } from '../../../../src/index.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class ParamsTestController extends ApplicationController {

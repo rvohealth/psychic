@@ -1,4 +1,4 @@
-import { BeforeAction, PsychicController } from '../../../../src.js'
+import { BeforeAction, PsychicController } from '../../../../src/index.js'
 import User from '../models/User.js'
 
 export default class AuthedApplicationController extends PsychicController {

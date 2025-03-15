@@ -1,4 +1,4 @@
-import { PsychicServer } from '../../../src.js'
+import { PsychicServer } from '../../../src/index.js'
 import { PsychicHookEventType } from '../../../src/psychic-application/types.js'
 
 describe('PsychicServer hooks', () => {

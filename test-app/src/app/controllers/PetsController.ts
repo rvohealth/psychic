@@ -1,4 +1,4 @@
-import { OpenAPI } from '../../../../src.js'
+import { OpenAPI } from '../../../../src/index.js'
 import Pet from '../models/Pet.js'
 import Post from '../models/Post.js'
 import ApplicationController from './ApplicationController.js'

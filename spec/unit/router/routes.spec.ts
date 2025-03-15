@@ -1,5 +1,5 @@
-import PsychicRouter from '../../../src/router.js'
-import PsychicServer from '../../../src/server.js'
+import PsychicRouter from '../../../src/router/index.js'
+import PsychicServer from '../../../src/server/index.js'
 import PetsController from '../../../test-app/src/app/controllers/PetsController.js'
 import UsersPetsController from '../../../test-app/src/app/controllers/Users/PetsController.js'
 import UsersController from '../../../test-app/src/app/controllers/UsersController.js'

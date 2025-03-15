@@ -1,7 +1,7 @@
-import { PsychicApplication } from '../../../src.js'
 import PsychicApplicationInitMissingApiRoot from '../../../src/error/psychic-application/init-missing-api-root.js'
 import PsychicApplicationInitMissingCallToLoadControllers from '../../../src/error/psychic-application/init-missing-call-to-load-controllers.js'
 import PsychicApplicationInitMissingRoutesCallback from '../../../src/error/psychic-application/init-missing-routes-callback.js'
+import { PsychicApplication } from '../../../src/index.js'
 import * as LoadControllersModule from '../../../src/psychic-application/helpers/import/importControllers.js'
 import importDefault from '../../../test-app/src/app/helpers/importDefault.js'
 import dreamCb from '../../../test-app/src/conf/dream.js'

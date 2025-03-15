@@ -1,5 +1,5 @@
-import { OpenAPI } from '../../../../src.js'
-import { PsychicOpenapiNames } from '../../../../src/controller.js'
+import { PsychicOpenapiNames } from '../../../../src/controller/index.js'
+import { OpenAPI } from '../../../../src/index.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class OpenapiDecoratorTestController extends ApplicationController {

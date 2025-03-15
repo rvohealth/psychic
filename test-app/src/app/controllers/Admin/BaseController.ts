@@ -1,4 +1,4 @@
-import { PsychicOpenapiNames } from '../../../../../src/controller.js'
+import { PsychicOpenapiNames } from '../../../../../src/controller/index.js'
 import ApplicationController from '../ApplicationController.js'
 
 export default class AdminBaseController extends ApplicationController {

@@ -1,5 +1,5 @@
 import { agent as supertest } from 'supertest'
-import PsychicServer from '../../../src/server.js'
+import PsychicServer from '../../../src/server/index.js'
 
 describe('PsychicRouter', () => {
   describe('namespaced routes', () => {

@@ -1,6 +1,6 @@
 import { agent as supertest } from 'supertest'
-import PsychicRouter from '../../../src/router.js'
-import PsychicServer from '../../../src/server.js'
+import PsychicRouter from '../../../src/router/index.js'
+import PsychicServer from '../../../src/server/index.js'
 import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
 
 describe('PsychicRouter', () => {

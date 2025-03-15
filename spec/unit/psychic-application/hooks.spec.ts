@@ -1,4 +1,4 @@
-import PsychicApplication from '../../../src/psychic-application.js'
+import PsychicApplication from '../../../src/psychic-application/index.js'
 import { PsychicHookEventType } from '../../../src/psychic-application/types.js'
 
 describe('PsychicApplication hooks', () => {

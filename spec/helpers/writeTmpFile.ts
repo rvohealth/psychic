@@ -1,6 +1,6 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
-import PsychicApplication from '../../src/psychic-application.js'
+import PsychicApplication from '../../src/psychic-application/index.js'
 
 export default async function writeTmpFile(content: string) {
   const psychicApp = PsychicApplication.getOrFail()

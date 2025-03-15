@@ -1,4 +1,4 @@
-import { PsychicServer } from '../../../../src.js'
+import { PsychicServer } from '../../../../src/index.js'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint.js'
 import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache.js'
 import { RouteConfig } from '../../../../src/router/route-manager.js'

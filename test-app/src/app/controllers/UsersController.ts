@@ -1,5 +1,5 @@
 import { Encrypt } from '@rvoh/dream'
-import { BeforeAction, OpenAPI } from '../../../../src.js'
+import { BeforeAction, OpenAPI } from '../../../../src/index.js'
 import User from '../models/User.js'
 import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer.js'
 import ApplicationController from './ApplicationController.js'
