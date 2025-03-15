@@ -55,15 +55,11 @@ export default function generateControllerContent({
   }`
         else
           return `\
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
-  })
+  // @OpenAPI(<model, view model, or serializer>, {
+  //   status: 201,
+  //   tags: openApiTags,
+  //   description: '<tbd>',
+  // })
   public async create() {
   }`
 
@@ -83,15 +79,13 @@ export default function generateControllerContent({
   }`
         else
           return `\
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
-  })
+  // @OpenAPI(<model, view model, or serializer>, {
+  //   status: 200,
+  //   tags: openApiTags,
+  //   description: '<tbd>',
+  //   many: true,
+  //   serializerKey: 'summary',
+  // })
   public async index() {
   }`
 
@@ -109,15 +103,11 @@ export default function generateControllerContent({
   }`
         else
           return `\
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
-  })
+  // @OpenAPI(<model, view model, or serializer>, {
+  //   status: 200,
+  //   tags: openApiTags,
+  //   description: '<tbd>',
+  // })
   public async show() {
   }`
 
@@ -136,11 +126,11 @@ export default function generateControllerContent({
   }`
         else
           return `\
-  @OpenAPI({
-    status: 204,
-    tags: openApiTags,
-    description: '<tbd>',
-  })
+  // @OpenAPI(<model, view model, or serializer>, {
+  //   status: 204,
+  //   tags: openApiTags,
+  //   description: '<tbd>',
+  // })
   public async update() {
   }`
 
@@ -159,25 +149,33 @@ export default function generateControllerContent({
   }`
         else
           return `\
-  @OpenAPI({
-    status: 204,
-    tags: openApiTags,
-    description: '<tbd>',
-  })
+  // @OpenAPI({
+  //   status: 204,
+  //   tags: openApiTags,
+  //   description: '<tbd>',
+  // })
   public async destroy() {
   }`
 
       default:
-        return `\
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
+        if (modelAttributeName)
+          return `\
+  @OpenAPI(${modelClassName}, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch ${aOrAnDreamModelName(modelClassName!)}',
   })
+  public async ${methodName}() {
+    //    const ${modelAttributeName} = await this.${modelAttributeName}()
+    //    this.ok(${modelAttributeName})
+  }`
+        else
+          return `\
+  // @OpenAPI(<model, view model, or serializer>, {
+  //   status: 200,
+  //   tags: openApiTags,
+  //   description: '<tbd>',
+  // })
   public async ${methodName}() {
   }`
     }

@@ -75,16 +75,14 @@ export default class PostsController extends AuthedController {
     //    this.noContent()
   }
 
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
+  @OpenAPI(Post, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a Post',
   })
   public async preview() {
+    //    const post = await this.post()
+    //    this.ok(post)
   }
 
   private async post() {
@@ -171,16 +169,14 @@ export default class ApiV1HealthPostsController extends AuthedController {
     //    this.noContent()
   }
 
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
+  @OpenAPI(HealthPost, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a HealthPost',
   })
   public async preview() {
+    //    const healthPost = await this.healthPost()
+    //    this.ok(healthPost)
   }
 
   private async healthPost() {
@@ -211,27 +207,19 @@ import AuthedController from '../../AuthedController.js'
 const openApiTags = ['api-v1-users']
 
 export default class ApiV1UsersController extends AuthedController {
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
-  })
+  // @OpenAPI(<model, view model, or serializer>, {
+  //   status: 200,
+  //   tags: openApiTags,
+  //   description: '<tbd>',
+  // })
   public async hello() {
   }
 
-  @OpenAPI({
-    response: {
-      200: {
-        tags: openApiTags,
-        description: '<tbd>',
-        // add openapi definition for your custom endpoint
-      }
-    }
-  })
+  // @OpenAPI(<model, view model, or serializer>, {
+  //   status: 200,
+  //   tags: openApiTags,
+  //   description: '<tbd>',
+  // })
   public async world() {
   }
 }
