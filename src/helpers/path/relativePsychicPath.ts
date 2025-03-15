@@ -36,16 +36,16 @@ export default function (
 
   switch (destinationDreamPathType) {
     case 'db':
-      return destinationPath
+      return `${destinationPath}.js`
 
     case 'factories':
-      return `${destinationPath}${fullyQualifiedDestinationModelName}Factory`
+      return `${destinationPath}${fullyQualifiedDestinationModelName}Factory.js`
 
     case 'serializers':
-      return `${destinationPath}${fullyQualifiedDestinationModelName}Serializer`
+      return `${destinationPath}${fullyQualifiedDestinationModelName}Serializer.js`
 
     default:
-      return `${destinationPath}${fullyQualifiedDestinationModelName}`
+      return `${destinationPath}${fullyQualifiedDestinationModelName}.js`
   }
 }
 
