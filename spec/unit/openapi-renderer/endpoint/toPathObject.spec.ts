@@ -12,11 +12,11 @@ import User from '../../../../test-app/src/app/models/User.js'
 import {
   CommentTestingDoubleShorthandSerializer,
   CommentTestingStringSerializer,
-} from '../../../../test-app/src/app/serializers/CommentSerializer'
+} from '../../../../test-app/src/app/serializers/CommentSerializer.js'
 import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer.js'
 import UserSerializer, {
   UserWithPostsSerializer,
-} from '../../../../test-app/src/app/serializers/UserSerializer'
+} from '../../../../test-app/src/app/serializers/UserSerializer.js'
 import initializePsychicApplication from '../../../../test-app/src/cli/helpers/initializePsychicApplication.js'
 
 describe('OpenapiEndpointRenderer', () => {

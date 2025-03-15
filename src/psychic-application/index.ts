@@ -25,7 +25,7 @@ import {
   OpenapiSecurity,
   OpenapiSecuritySchemes,
   OpenapiServer,
-} from '../openapi-renderer/endpoint.js'
+} from '../openapi-renderer/endpoint.js.js'
 import PsychicRouter from '../router/index.js.js'
 import PsychicServer from '../server/index.js.js'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache.js.js'

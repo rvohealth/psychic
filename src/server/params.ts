@@ -13,7 +13,7 @@ import {
   PsychicParamsDictionary,
   PsychicParamsPrimitive,
   PsychicParamsPrimitiveLiterals,
-} from '../controller/index.js'
+} from '../controller/index.js.js'
 import isUuid from '../helpers/isUuid.js.js'
 import { isObject } from '../helpers/typechecks.js.js'
 

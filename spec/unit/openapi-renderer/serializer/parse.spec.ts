@@ -17,7 +17,7 @@ import {
   CommentTestingStringSerializer,
   CommentTestingStringShorthandSerializer,
   CommentWithFlattenedUserSerializer,
-} from '../../../../test-app/src/app/serializers/CommentSerializer'
+} from '../../../../test-app/src/app/serializers/CommentSerializer.js'
 import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer.js'
 
 describe('OpenapiSerializerRenderer', () => {

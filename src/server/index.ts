@@ -15,7 +15,7 @@ import FrontEndClientServer from './front-end-client.js.js'
 import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
-} from './helpers/startPsychicServer.js'
+} from './helpers/startPsychicServer.js.js'
 
 export default class PsychicServer {
   public static async startPsychicServer(opts: StartPsychicServerOptions): Promise<Server> {

@@ -1,6 +1,6 @@
 import relativePsychicPath, {
   psychicPathTypeRelativePath,
-} from '../../../../src/helpers/path/relativePsychicPath'
+} from '../../../../src/helpers/path/relativePsychicPath.js'
 
 describe('relativePsychicPath', () => {
   context('to models', () => {

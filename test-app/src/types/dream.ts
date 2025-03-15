@@ -98,13 +98,13 @@ b.) All laptops are ok sleeping places for your
 import { CalendarDate } from '@rvoh/dream'
 import { DateTime } from 'luxon'
 import {
-  IdType,
-  Json,
-  PetTreatsEnum,
-  PetTreatsEnumValues,
-  SpeciesTypesEnum,
-  SpeciesTypesEnumValues
-} from './db'
+    IdType,
+    Json,
+    PetTreatsEnum,
+    PetTreatsEnumValues,
+    SpeciesTypesEnum,
+    SpeciesTypesEnumValues
+} from './db.js'
 
 export const schema = {
   comments: {

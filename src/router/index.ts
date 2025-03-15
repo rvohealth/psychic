@@ -13,7 +13,7 @@ import {
   applyResourcesAction,
   lookupControllerOrFail,
   routePath,
-} from '../router/helpers.js'
+} from '../router/helpers.js.js'
 import { ParamValidationError } from '../server/params.js.js'
 import RouteManager from './route-manager.js.js'
 import {
@@ -22,7 +22,7 @@ import {
   ResourcesMethodType,
   ResourcesMethods,
   ResourcesOptions,
-} from './types.js'
+} from './types.js.js'
 
 export default class PsychicRouter {
   public app: Application

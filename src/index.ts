@@ -3,14 +3,14 @@ export const pluralize = _pluralize
 
 export { default as PsychicBin } from './bin/index.js'
 export { default as PsychicCLI } from './cli/index.js'
+export { BeforeAction, OpenAPI } from './controller/decorators.js'
 export {
   default as PsychicController,
   type PsychicOpenapiControllerConfig,
-  type PsychicParamsDictionary,
   type PsychicOpenapiNames,
+  type PsychicParamsDictionary,
   type PsychicParamsPrimitive,
-} from './controller/index.js'
-export { BeforeAction, OpenAPI } from './controller/decorators.js'
+} from './controller/index.js.js'
 export { default as envLoader } from './env/Loader.js'
 export { default as I18nProvider } from './i18n/provider.js'
 
@@ -64,18 +64,18 @@ export {
   type OpenapiResponses,
   type OpenapiSchema,
   type OpenapiPathParamOption as OpenapiUriOption,
-} from './openapi-renderer/endpoint.js'
+} from './openapi-renderer/endpoint.js.js'
+export { default as PsychicImporter } from './psychic-application/helpers/PsychicImporter.js'
 export {
   default as PsychicApplication,
   type DefaultPsychicOpenapiOptions,
   type NamedPsychicOpenapiOptions,
   type PsychicApplicationInitOptions,
-} from './psychic-application/index.js'
-export { default as PsychicImporter } from './psychic-application/helpers/PsychicImporter.js'
+} from './psychic-application/index.js.js'
 export { type UUID } from './psychic-application/types.js'
 export { default as PsychicRouter } from './router/index.js'
 export { type HttpMethod } from './router/types.js'
-export { default as PsychicServer } from './server/index.js'
 export { createPsychicHttpInstance as getPsychicHttpInstance } from './server/helpers/startPsychicServer.js'
-export { default as Params, ParamValidationError } from './server/params.js'
+export { default as PsychicServer } from './server/index.js'
+export { ParamValidationError, default as Params } from './server/params.js'
 export { default as PsychicSession } from './session/index.js'

@@ -46,7 +46,7 @@ import Params, {
   ParamsForOpts,
   ValidatedAllowsNull,
   ValidatedReturnType,
-} from '../server/params.js'
+} from '../server/params.js.js'
 import Session, { CustomSessionCookieOptions } from '../session/index.js.js'
 
 type SerializerResult = {

@@ -31,13 +31,13 @@ import {
   CommentWithAnyOfObjectSerializer,
   CommentWithOneOfArraySerializer,
   CommentWithOneOfObjectSerializer,
-} from '../../../../test-app/src/app/serializers/CommentSerializer'
+} from '../../../../test-app/src/app/serializers/CommentSerializer.js'
 import {
   UserWithMultipleFlattenedPolymorphicAssociationsSerializer,
   UserWithOptionalFlattenedPolymorphicPostOrUserSerializer,
   UserWithPostsMultiType2Serializer,
   UserWithRequiredFlattenedPolymorphicPostOrUserSerializer,
-} from '../../../../test-app/src/app/serializers/UserSerializer'
+} from '../../../../test-app/src/app/serializers/UserSerializer.js'
 
 describe('OpenapiEndpointRenderer', () => {
   describe('#toSchemaObject', () => {

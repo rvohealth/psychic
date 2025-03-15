@@ -9,7 +9,7 @@ import User from '../../../test-app/src/app/models/User.js'
 import UserSerializer, {
   UserExtraSerializer,
   UserSummarySerializer,
-} from '../../../test-app/src/app/serializers/UserSerializer'
+} from '../../../test-app/src/app/serializers/UserSerializer.js'
 import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers.js'
 import processDynamicallyDefinedSerializers from '../../helpers/processDynamicallyDefinedSerializers.js'
 
