@@ -5,7 +5,7 @@ import {
   standardizeFullyQualifiedModelName,
 } from '@rvoh/dream'
 import pluralize from 'pluralize-esm'
-import relativePsychicPath from '../../helpers/path/relativePsychicPath.js.js'
+import relativePsychicPath from '../../helpers/path/relativePsychicPath.js'
 
 export default function generateControllerContent({
   ancestorName,

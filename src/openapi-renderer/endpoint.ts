@@ -18,15 +18,15 @@ import {
   compact,
 } from '@rvoh/dream'
 import { cloneDeep } from 'lodash-es'
-import PsychicController from '../controller/index.js.js'
-import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes.js.js'
-import PsychicApplication from '../psychic-application/index.js.js'
-import { RouteConfig } from '../router/route-manager.js.js'
-import { HttpMethod } from '../router/types.js.js'
-import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment.js.js'
-import { DEFAULT_OPENAPI_RESPONSES } from './defaults.js.js'
-import openapiRoute from './helpers/openapiRoute.js.js'
-import OpenapiSerializerRenderer from './serializer.js.js'
+import PsychicController from '../controller/index.js'
+import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes.js'
+import PsychicApplication from '../psychic-application/index.js'
+import { RouteConfig } from '../router/route-manager.js'
+import { HttpMethod } from '../router/types.js'
+import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment.js'
+import { DEFAULT_OPENAPI_RESPONSES } from './defaults.js'
+import openapiRoute from './helpers/openapiRoute.js'
+import OpenapiSerializerRenderer from './serializer.js'
 
 export default class OpenapiEndpointRenderer<
   DreamsOrSerializersOrViewModels extends

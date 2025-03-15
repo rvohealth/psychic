@@ -10,7 +10,7 @@ export {
   type PsychicOpenapiNames,
   type PsychicParamsDictionary,
   type PsychicParamsPrimitive,
-} from './controller/index.js.js'
+} from './controller/index.js'
 export { default as envLoader } from './env/Loader.js'
 export { default as I18nProvider } from './i18n/provider.js'
 
@@ -64,14 +64,14 @@ export {
   type OpenapiResponses,
   type OpenapiSchema,
   type OpenapiPathParamOption as OpenapiUriOption,
-} from './openapi-renderer/endpoint.js.js'
+} from './openapi-renderer/endpoint.js'
 export { default as PsychicImporter } from './psychic-application/helpers/PsychicImporter.js'
 export {
   default as PsychicApplication,
   type DefaultPsychicOpenapiOptions,
   type NamedPsychicOpenapiOptions,
   type PsychicApplicationInitOptions,
-} from './psychic-application/index.js.js'
+} from './psychic-application/index.js'
 export { type UUID } from './psychic-application/types.js'
 export { default as PsychicRouter } from './router/index.js'
 export { type HttpMethod } from './router/types.js'

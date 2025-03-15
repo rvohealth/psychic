@@ -1,4 +1,4 @@
-import OpenapiAppRenderer from '../../../../src/openapi-renderer/app.js.js'
+import OpenapiAppRenderer from '../../../../src/openapi-renderer/app.js'
 
 describe('OpenapiAppRenderer', () => {
   describe('.toObject', () => {

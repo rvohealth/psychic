@@ -1,4 +1,4 @@
-import { isObject } from './typechecks.js.js'
+import { isObject } from './typechecks.js'
 
 type NestedObject = {
   [k: string]: string | number | boolean | string[] | number[] | boolean[] | NestedObject

@@ -13,9 +13,9 @@ import {
   PsychicParamsDictionary,
   PsychicParamsPrimitive,
   PsychicParamsPrimitiveLiterals,
-} from '../controller/index.js.js'
-import isUuid from '../helpers/isUuid.js.js'
-import { isObject } from '../helpers/typechecks.js.js'
+} from '../controller/index.js'
+import isUuid from '../helpers/isUuid.js'
+import { isObject } from '../helpers/typechecks.js'
 
 export default class Params {
   /**

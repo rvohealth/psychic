@@ -4,8 +4,8 @@ import {
   standardizeFullyQualifiedModelName,
   uniq,
 } from '@rvoh/dream'
-import relativePsychicPath from '../../helpers/path/relativePsychicPath.js.js'
-import updirsFromPath from '../../helpers/path/updirsFromPath.js.js'
+import relativePsychicPath from '../../helpers/path/relativePsychicPath.js'
+import updirsFromPath from '../../helpers/path/updirsFromPath.js'
 
 export default function generateResourceControllerSpecContent({
   fullyQualifiedControllerName,

@@ -1,4 +1,4 @@
-import DBError from './index.js.js'
+import DBError from './index.js'
 
 export default class DBFailedToConnect extends DBError {
   constructor(error: Error) {

@@ -1,4 +1,4 @@
-import HttpError from './index.js.js'
+import HttpError from './index.js'
 
 export default class HttpStatusUnprocessableContent extends HttpError {
   public get status() {
