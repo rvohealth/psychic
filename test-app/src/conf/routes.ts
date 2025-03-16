@@ -3,6 +3,11 @@ import AdminTestController from '../app/controllers/Admin/TestController.js'
 import ApiUsersController from '../app/controllers/Api/UsersController.js'
 import ApiV1UsersController from '../app/controllers/Api/V1/UsersController.js'
 import AuthedUsersController from '../app/controllers/AuthedUsersController.js'
+import HelloController from '../app/controllers/BeforeActions/HelloController.js'
+import GoodbyeController from '../app/controllers/BeforeActions/NestedBeforeAction/GoodbyeController.js'
+import GoodbyeErrorController from '../app/controllers/BeforeActions/NestedBeforeAction/GoodbyeErrorController.js'
+import WorldController from '../app/controllers/BeforeActions/NestedBeforeAction/WorldController.js'
+import WorldErrorController from '../app/controllers/BeforeActions/NestedBeforeAction/WorldErrorController.js'
 import CircularController from '../app/controllers/CircularController.js'
 import GreeterController from '../app/controllers/GreeterController.js'
 import OpenapiDecoratorTestController from '../app/controllers/OpenapiDecoratorTestsController.js'
@@ -15,6 +20,11 @@ import UnauthedUsersController from '../app/controllers/UnauthedUsersController.
 import UsersController from '../app/controllers/UsersController.js'
 
 export default (r: PsychicRouter) => {
+  r.get('before-actions/hello', HelloController, 'hello')
+  r.get('before-actions/hello/world', WorldController, 'world')
+  r.get('before-actions/hello/goodbye', GoodbyeController, 'goodbye')
+  r.get('before-actions/hello/world-error', WorldErrorController, 'world')
+  r.get('before-actions/hello/goodbye-error', GoodbyeErrorController, 'goodbye')
   r.get('circular', CircularController, 'hello')
   r.get('ping', UsersController, 'ping')
   r.post('ping', UsersController, 'ping')
