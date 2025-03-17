@@ -1,4 +1,4 @@
-import { DreamBin } from '@rvoh/dream'
+import { DreamBin, DreamCLI } from '@rvoh/dream'
 import * as fs from 'fs/promises'
 import * as path from 'path'
 import TypesBuilder from '../cli/helpers/TypesBuilder.js'
@@ -62,23 +62,23 @@ export default class PsychicBin {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static async syncTypes(customTypes: any = undefined) {
-    console.log(`syncing types/psychic.ts...`)
+    const spinner = DreamCLI.logger.log(`syncing types/psychic.ts...`, { spinner: true })
 
     await TypesBuilder.sync(customTypes)
 
-    console.log(`done syncing types/psychic.ts!`)
+    spinner.stop()
   }
 
   public static async syncOpenapiJson() {
-    console.log(`syncing openapi...`)
+    const spinner = DreamCLI.logger.log(`syncing openapi...`, { spinner: true })
 
     await OpenapiAppRenderer.sync()
 
-    console.log(`done syncing openapi!`)
+    spinner.stop()
   }
 
   public static async syncRoutes() {
-    console.log('syncing routes...')
+    const spinner = DreamCLI.logger.log(`syncing routes...`, { spinner: true })
 
     const server = new PsychicServer()
     await server.boot()
@@ -86,11 +86,11 @@ export default class PsychicBin {
     const routes = await server.routes()
     await generateRouteTypes(routes)
 
-    console.log('done syncing routes!')
+    spinner.stop()
   }
 
   public static async syncClientEnums() {
-    console.log('syncing client enums...')
+    const spinner = DreamCLI.logger.log(`syncing client enums...`, { spinner: true })
 
     const psychicApp = PsychicApplication.getOrFail()
     const apiPath = path.join(psychicApp.clientRoot, psychicApp.client.apiPath)
@@ -98,6 +98,6 @@ export default class PsychicBin {
     const enumsStr = await enumsFileStr()
     await fs.writeFile(`${apiPath}/enums.ts`, enumsStr)
 
-    console.log('done syncing client enums!')
+    spinner.stop()
   }
 }

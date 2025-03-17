@@ -1,4 +1,4 @@
-import { Decorators, DreamColumn, DreamSerializers, Validates, Virtual } from '@rvoh/dream'
+import { Decorators, DreamColumn, DreamSerializers } from '@rvoh/dream'
 import { randomBytes, scrypt, timingSafeEqual } from 'crypto'
 import ApplicationModel from './ApplicationModel.js'
 import Pet from './Pet.js'
@@ -70,18 +70,18 @@ export default class User extends ApplicationModel {
   public createdAt: DreamColumn<User, 'createdAt'>
   public updatedAt: DreamColumn<User, 'updatedAt'>
 
-  @Validates('contains', '@')
-  @Validates('presence')
+  @Deco.Validates('contains', '@')
+  @Deco.Validates('presence')
   public email: DreamColumn<User, 'email'>
 
-  @Virtual()
+  @Deco.Virtual()
   public password?: string | null
   public passwordDigest: string
 
-  @Virtual({ type: 'string', nullable: true })
+  @Deco.Virtual({ type: 'string', nullable: true })
   public openapiVirtualSpecTest?: string | null
 
-  @Virtual('string[]')
+  @Deco.Virtual('string[]')
   public openapiVirtualSpecTest2?: string | null
 
   @Deco.HasMany('Pet')

@@ -24,7 +24,7 @@ providePuppeteerViteMatchers()
 
 let server: PsychicServer
 
-beforeEach(async () => {
+beforeAll(async () => {
   try {
     await initializePsychicApplication()
   } catch (err) {
@@ -34,10 +34,12 @@ beforeEach(async () => {
 
   server = new PsychicServer()
   await server.start(parseInt(process.env.DEV_SERVER_PORT || '7778'))
+})
 
+beforeEach(async () => {
   await truncate(DreamApplication)
-}, 120000)
+})
 
-afterEach(async () => {
-  await server.stop({ bypassClosingDbConnections: true })
+afterAll(async () => {
+  await server.stop()
 })
