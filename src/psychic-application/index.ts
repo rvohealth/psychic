@@ -142,6 +142,11 @@ Try setting it to something valid, like:
     return this._appName
   }
 
+  private _packageManager: PsychicPackageManager = 'yarn'
+  public get packageManager() {
+    return this._packageManager
+  }
+
   private _port: number = EnvInternal.integer('PORT', { optional: true }) || 7777
   public get port() {
     return this._port
@@ -404,9 +409,11 @@ Try setting it to something valid, like:
                                       ? number
                                       : Opt extends 'inflections'
                                         ? () => void | Promise<void>
-                                        : Opt extends 'routes'
-                                          ? (r: PsychicRouter) => void | Promise<void>
-                                          : never,
+                                        : Opt extends 'packageManager'
+                                          ? PsychicPackageManager
+                                          : Opt extends 'routes'
+                                            ? (r: PsychicRouter) => void | Promise<void>
+                                            : never,
   ): void
   public set<Opt extends PsychicApplicationOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -414,6 +421,10 @@ Try setting it to something valid, like:
     switch (option) {
       case 'appName':
         this._appName = value as string
+        break
+
+      case 'packageManager':
+        this._packageManager = value as PsychicPackageManager
         break
 
       case 'apiOnly':
@@ -549,6 +560,10 @@ export type PsychicApplicationOption =
   | 'routes'
   | 'saltRounds'
   | 'ssl'
+  | 'packageManager'
+
+export const psychicPackageManagers = ['yarn', 'npm', 'pnpm', 'bun'] as const
+export type PsychicPackageManager = (typeof psychicPackageManagers)[number]
 
 export interface PsychicApplicationSpecialHooks {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
