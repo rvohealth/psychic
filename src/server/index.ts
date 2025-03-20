@@ -1,4 +1,4 @@
-import { closeAllDbConnections } from '@rvoh/dream'
+import { closeAllDbConnections, DreamGlam } from '@rvoh/dream'
 import * as cookieParser from 'cookie-parser'
 import * as cors from 'cors'
 import * as express from 'express'
@@ -9,7 +9,6 @@ import * as path from 'path'
 import EnvInternal from '../helpers/EnvInternal.js'
 import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError.js'
 import PsychicApplication, { PsychicSslCredentials } from '../psychic-application/index.js'
-import logo from '../psychic-application/logo.js'
 import PsychicRouter from '../router/index.js'
 import startPsychicServer, {
   createPsychicHttpInstance,
@@ -29,7 +28,7 @@ export default class PsychicServer {
   }
 
   public static asciiLogo() {
-    return logo()
+    return DreamGlam.fluffstopherwalkin()
   }
 
   public expressApp: Application

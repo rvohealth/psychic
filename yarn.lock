@@ -842,15 +842,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvoh/dream@npm:^0.30.2":
-  version: 0.30.2
-  resolution: "@rvoh/dream@npm:0.30.2"
+"@rvoh/dream@npm:^0.30.3":
+  version: 0.30.3
+  resolution: "@rvoh/dream@npm:0.30.3"
   dependencies:
     colorette: "npm:^2.0.20"
     commander: "npm:^12.1.0"
     dotenv: "npm:^16.4.5"
     pluralize-esm: "npm:^9.0.5"
     yocto-spinner: "npm:^0.2.1"
+    yoctocolors: "npm:^2.1.1"
   peerDependencies:
     "@rvoh/dream-spec-helpers": "*"
     "@types/luxon": ^3.4.2
@@ -862,7 +863,7 @@ __metadata:
     pg: "*"
   bin:
     dream: dist/esm/src/global-cli/dream.js
-  checksum: 10c0/45753cdc34bfa0b7e60e5b17830de8893e441e1af0563ef0b505ccc901a67a377bd6e650479c8eee1b095fe5aad61eef745fa704d7b432802fa813ac86fffc6f
+  checksum: 10c0/8affafd4bee900f0fbab28f2a37034b391a0ecfade2d7d477f85d2269392305d02f9750c4ab88931adb3d9e907ebaab7d5d9586236e8a1344a7ffdf90156a5d6
   languageName: node
   linkType: hard
 
@@ -888,7 +889,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.19.0"
     "@jest-mock/express": "npm:^3.0.0"
-    "@rvoh/dream": "npm:^0.30.2"
+    "@rvoh/dream": "npm:^0.30.3"
     "@rvoh/dream-spec-helpers": "npm:=0.1.0"
     "@rvoh/psychic-spec-helpers": "npm:=0.2.0"
     "@types/cookie-parser": "npm:^1.4.7"
@@ -902,7 +903,6 @@ __metadata:
     "@types/node": "npm:^22.5.1"
     "@types/pg": "npm:^8.11.8"
     "@types/supertest": "npm:^6.0.2"
-    colorette: "npm:^2.0.20"
     commander: "npm:^12.1.0"
     cookie-parser: "npm:^1.4.7"
     cors: "npm:^2.8.5"
@@ -932,6 +932,7 @@ __metadata:
     typescript-eslint: "npm:=7.18.0"
     vitest: "npm:^3.0.8"
     winston: "npm:^3.14.2"
+    yoctocolors: "npm:^2.1.1"
   peerDependencies:
     "@rvoh/dream": "*"
     "@types/express": "*"
