@@ -23,7 +23,7 @@
     "client": "yarn --cwd=./client start",
     "psy": "yarn psyts",
     "psyjs": "node ./dist/test-app/src/cli/index.js",
-    "psyts": "tsx ./test-app/src/cli/index.ts",
+    "psyts": "NODE_ENV=${NODE_ENV:-test} tsx ./test-app/src/cli/index.ts",
     "psycore": "PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts",
     "gpsycore": "PSYCHIC_CORE_DEVELOPMENT=1 tsx ./global-cli/main.ts",
     "build": "echo \"building cjs...\" && rm -rf dist && npx tsc -p ./tsconfig.cjs.build.json && echo \"building esm...\" && npx tsc -p ./tsconfig.esm.build.json",
