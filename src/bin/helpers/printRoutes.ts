@@ -1,4 +1,4 @@
-import * as colors from 'colorette'
+import colors from 'yoctocolors'
 import { RouteConfig } from '../../router/route-manager.js'
 import PsychicServer from '../../server/index.js'
 

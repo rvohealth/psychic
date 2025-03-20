@@ -1,13 +1,13 @@
+import { DreamCLI } from '@rvoh/dream'
 import * as winston from 'winston'
 import EnvInternal from '../../../src/helpers/EnvInternal.js'
+import { PsychicDevtools } from '../../../src/index.js'
 import PsychicApplication from '../../../src/psychic-application/index.js'
 import importDefault from '../app/helpers/importDefault.js'
 import srcPath from '../app/helpers/srcPath.js'
+import AppEnv from './AppEnv.js'
 import inflections from './inflections.js'
 import routesCb from './routes.js'
-import AppEnv from './AppEnv.js'
-import { PsychicDevtools } from '../../../src/index.js'
-import { DreamCLI } from '@rvoh/dream'
 
 export default async (psy: PsychicApplication) => {
   await psy.load('controllers', srcPath('app', 'controllers'), path => importDefault(path))
