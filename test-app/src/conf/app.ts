@@ -5,6 +5,9 @@ import importDefault from '../app/helpers/importDefault.js'
 import srcPath from '../app/helpers/srcPath.js'
 import inflections from './inflections.js'
 import routesCb from './routes.js'
+import AppEnv from './AppEnv.js'
+import { PsychicDevtools } from '../../../src/index.js'
+import { DreamCLI } from '@rvoh/dream'
 
 export default async (psy: PsychicApplication) => {
   await psy.load('controllers', srcPath('app', 'controllers'), path => importDefault(path))
@@ -28,25 +31,27 @@ export default async (psy: PsychicApplication) => {
     },
   })
 
-  psy.set(
-    'logger',
-    winston.createLogger({
-      level: 'info',
-      format: winston.format.json(),
-      defaultMeta: { service: 'user-service' },
-      transports: [
-        //
-        // - Write all logs with importance level of `error` or less to `error.log`
-        // - Write all logs with importance level of `info` or less to `combined.log`
-        //
-        new winston.transports.File({
-          filename: 'error.log',
-          // level: 'error'
-        }),
-        new winston.transports.File({ filename: 'combined.log' }),
-      ],
-    }),
-  )
+  if (AppEnv.isProduction) {
+    psy.set(
+      'logger',
+      winston.createLogger({
+        level: 'info',
+        format: winston.format.json(),
+        defaultMeta: { service: 'user-service' },
+        transports: [
+          //
+          // - Write all logs with importance level of `error` or less to `error.log`
+          // - Write all logs with importance level of `info` or less to `combined.log`
+          //
+          new winston.transports.File({
+            filename: 'error.log',
+            // level: 'error'
+          }),
+          new winston.transports.File({ filename: 'combined.log' }),
+        ],
+      }),
+    )
+  }
 
   psy.set('paths', {
     apiRoutes: 'test-app/src/conf/routes.ts',
@@ -202,10 +207,6 @@ export default async (psy: PsychicApplication) => {
     __forTestingOnly('server:init:after-routes')
   })
 
-  psy.on('server:start', () => {
-    __forTestingOnly('server:start')
-  })
-
   // run a callback after the config is loaded
   psy.on('load', () => {
     __forTestingOnly('load')
@@ -238,8 +239,24 @@ export default async (psy: PsychicApplication) => {
     else if (EnvInternal.isDevelopmentOrTest) throw err
   })
 
+  psy.on('server:start', async () => {
+    __forTestingOnly('server:start')
+
+    if (AppEnv.isDevelopment && AppEnv.boolean('CLIENT')) {
+      const spinner = DreamCLI.logger.log('dev server starting...', { spinner: true })
+      await PsychicDevtools.launchDevServer('devReactApp', { port: 3000, cmd: 'yarn client' })
+      spinner.stop()
+    }
+  })
+
   psy.on('server:shutdown', () => {
     __forTestingOnly('server:shutdown')
+
+    if (AppEnv.isDevelopment && AppEnv.boolean('CLIENT')) {
+      const spinner = DreamCLI.logger.log('dev server closing...', { spinner: true })
+      PsychicDevtools.stopDevServer('devReactApp')
+      spinner.stop()
+    }
   })
 
   psy.on('sync', () => {

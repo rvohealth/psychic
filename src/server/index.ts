@@ -11,7 +11,6 @@ import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError.js'
 import PsychicApplication, { PsychicSslCredentials } from '../psychic-application/index.js'
 import logo from '../psychic-application/logo.js'
 import PsychicRouter from '../router/index.js'
-import FrontEndClientServer from './front-end-client.js'
 import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
@@ -34,7 +33,6 @@ export default class PsychicServer {
   }
 
   public expressApp: Application
-  public frontEndClient: FrontEndClientServer
   public httpServer: Server
   private booted = false
   constructor() {
@@ -97,34 +95,18 @@ export default class PsychicServer {
   }
 
   // TODO: use config helper for fetching default port
-  public async start(
-    port?: number,
-    {
-      withFrontEndClient = EnvInternal.boolean('CLIENT'),
-      frontEndPort = 3000,
-    }: {
-      withFrontEndClient?: boolean
-      frontEndPort?: number
-    } = {},
-  ) {
+  public async start(port?: number) {
     await this.boot()
-
-    if (withFrontEndClient) {
-      this.frontEndClient = new FrontEndClientServer()
-      this.frontEndClient.start(frontEndPort)
-    }
 
     const psychicApp = PsychicApplication.getOrFail()
 
     const startOverride = psychicApp['overrides']['server:start']
     if (startOverride) {
-      this.httpServer = await startOverride(this, { port, withFrontEndClient, frontEndPort })
+      this.httpServer = await startOverride(this, { port })
     } else {
       const httpServer = await startPsychicServer({
         app: this.expressApp,
         port: port || psychicApp.port,
-        withFrontEndClient,
-        frontEndPort,
         sslCredentials: this.config.sslCredentials,
       })
       this.httpServer = httpServer
@@ -164,7 +146,6 @@ export default class PsychicServer {
       await hook(this)
     }
 
-    this.frontEndClient?.stop()
     this.httpServer?.close()
 
     if (!bypassClosingDbConnections) {
