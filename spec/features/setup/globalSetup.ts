@@ -1,13 +1,13 @@
 import '../../../src/helpers/loadEnv.js'
 
-import { launchViteServer, stopViteServer } from '@rvoh/psychic-spec-helpers'
+import { PsychicDevtools } from '../../../src/index.js'
 import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication.js'
 
 export async function setup() {
   await initializePsychicApplication()
-  await launchViteServer({ port: 3000, cmd: 'yarn client' })
+  await PsychicDevtools.launchDevServer('client', { port: 3000, cmd: 'yarn client' })
 }
 
 export function teardown() {
-  stopViteServer()
+  PsychicDevtools.stopDevServers()
 }

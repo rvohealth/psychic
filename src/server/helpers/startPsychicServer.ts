@@ -1,31 +1,28 @@
+import { DreamCLI } from '@rvoh/dream'
 import { Application } from 'express'
 import * as fs from 'fs'
 import * as http from 'http'
 import { Server } from 'http'
 import * as https from 'https'
 import EnvInternal from '../../helpers/EnvInternal.js'
-import PsychicApplication, { PsychicSslCredentials } from '../../psychic-application/index.js'
+import { PsychicSslCredentials } from '../../psychic-application/index.js'
 import PsychicServer from '../../server/index.js'
 
 export interface StartPsychicServerOptions {
   app: Application
   port: number
-  withFrontEndClient: boolean
-  frontEndPort: number
   sslCredentials: PsychicSslCredentials | undefined
 }
 
 export default async function startPsychicServer({
   app,
   port,
-  withFrontEndClient,
-  frontEndPort,
   sslCredentials,
 }: StartPsychicServerOptions): Promise<Server> {
   return await new Promise(accept => {
     const httpOrHttps = createPsychicHttpInstance(app, sslCredentials)
     const server = httpOrHttps.listen(port, () => {
-      welcomeMessage({ port, withFrontEndClient, frontEndPort })
+      welcomeMessage({ port })
       accept(server)
     })
   })
@@ -48,19 +45,12 @@ export function createPsychicHttpInstance(
   }
 }
 
-function welcomeMessage({
-  port,
-  withFrontEndClient,
-  frontEndPort,
-}: {
-  port: number
-  withFrontEndClient: boolean
-  frontEndPort: number
-}) {
+function welcomeMessage({ port }: { port: number }) {
   if (!EnvInternal.isTest) {
-    const psychicApp = PsychicApplication.getOrFail()
-    psychicApp.logger.info(PsychicServer.asciiLogo())
-    psychicApp.logger.info(`psychic dev server started at port ${port}`)
-    if (withFrontEndClient) psychicApp.logger.info(`client dev server on port ${frontEndPort}`)
+    // const psychicApp = PsychicApplication.getOrFail()
+    const spinner = DreamCLI.logger.log('starting psychic server...', { spinner: true })
+    DreamCLI.logger.log(PsychicServer.asciiLogo(), { permanent: true, logPrefix: '' })
+    spinner.stop()
+    DreamCLI.logger.log(`psychic dev server started at port ${port}`)
   }
 }

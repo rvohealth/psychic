@@ -3,6 +3,7 @@ export const pluralize = _pluralize
 
 export { default as PsychicBin } from './bin/index.js'
 export { default as PsychicCLI } from './cli/index.js'
+export { default as PsychicDevtools } from './devtools/PsychicDevtools.js'
 export { BeforeAction, OpenAPI } from './controller/decorators.js'
 export {
   default as PsychicController,

@@ -575,8 +575,6 @@ export interface PsychicApplicationOverrides {
 
 export interface PsychicServerStartProviderOptions {
   port: number | undefined
-  withFrontEndClient: boolean
-  frontEndPort: number | undefined
 }
 
 export interface CustomCookieOptions {
