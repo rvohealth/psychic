@@ -1,6 +1,5 @@
 import { DateTime } from '@rvoh/dream'
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import { isValidISODateString } from 'iso-datestring-validator'
 import { PsychicApplication, PsychicServer } from '../../../../src/index.js'
 
 describe('hitting an endpoint with openapi validation activated', () => {
@@ -24,7 +23,11 @@ describe('hitting an endpoint with openapi validation activated', () => {
           'date-time': {
             type: 'string',
             validate: (value: DateTime | string) => {
-              return value instanceof DateTime ? value?.isValid : isValidISODateString(value)
+              return value instanceof DateTime
+                ? value.isValid
+                : typeof value === 'string'
+                  ? DateTime.fromISO(value).isValid
+                  : false
             },
           },
           decimal: {

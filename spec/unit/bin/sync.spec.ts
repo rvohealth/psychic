@@ -23,7 +23,7 @@ describe('PsychicBin#on', () => {
     // compiled to the psychic types file.
     it('persists returned data to the sync payload', async () => {
       await PsychicBin.sync()
-      const syncFile = (await import('../../../test-app/src/types/psychic')).default
+      const syncFile = (await import('../../../test-app/src/types/psychic.js')).default
       expect(syncFile.customField).toEqual({ customNestedField: 'custom value' })
     })
   })

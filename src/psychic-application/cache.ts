@@ -1,4 +1,4 @@
-import PsychicApplication from '.'
+import PsychicApplication from './index.js'
 
 let _psychicApp: PsychicApplication | undefined = undefined
 
