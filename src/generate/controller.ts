@@ -1,6 +1,6 @@
 import { hyphenize, standardizeFullyQualifiedModelName } from '@rvoh/dream'
-import { existsSync } from 'fs'
 import * as fs from 'fs/promises'
+import { existsSync } from 'node:fs'
 import EnvInternal from '../helpers/EnvInternal.js'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths.js'
 import psychicPath from '../helpers/path/psychicPath.js'
@@ -35,7 +35,7 @@ export default async function generateController({
   const controllerNameParts: string[] = isAdmin ? [allControllerNameParts.shift()!] : []
 
   for (let index = 0; index < allControllerNameParts.length; index++) {
-    if (controllerNameParts.length) {
+    if (controllerNameParts.length > (isAdmin ? 1 : 0)) {
       // Write the ancestor controller
       const [baseAncestorName, baseAncestorImportStatement] = baseAncestorNameAndImport(
         controllerNameParts,

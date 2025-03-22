@@ -1,8 +1,8 @@
 import { PsychicOpenapiNames } from '../../../../../src/controller/index.js'
 import ApplicationController from '../ApplicationController.js'
 
-export default class AdminBaseController extends ApplicationController {
-  public static get openapiNames(): PsychicOpenapiNames<AdminBaseController> {
+export default class AdminAuthedController extends ApplicationController {
+  public static get openapiNames(): PsychicOpenapiNames<AdminAuthedController> {
     return ['admin']
   }
 }
