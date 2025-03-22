@@ -82,7 +82,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('returns the index of ${fullyQualifiedModelName}s', async () => {
       const ${modelVariableName} = await create${modelClassName}({
-        user${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join(',\n        ') : ''}
+        user${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
       })
       const results = (await subject()).body
 
@@ -112,7 +112,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('returns the specified ${fullyQualifiedModelName}', async () => {
       const ${modelVariableName} = await create${modelClassName}({
-        user${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join(',\n        ') : ''}
+        user${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
       })
       const results = (await subject(${modelVariableName})).body
 
@@ -141,7 +141,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('creates a ${fullyQualifiedModelName} for this User', async () => {
       const results = (await subject({
-        ${originalStringKeyValues.length ? originalStringKeyValues.join(',\n        ') : ''}
+        ${originalStringKeyValues.length ? originalStringKeyValues.join('\n        ') : ''}
       })).body
       const ${modelVariableName} = await ${modelClassName}.findOrFailBy({ userId: user.id })
 
@@ -163,10 +163,10 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('updates the ${fullyQualifiedModelName}', async () => {
       const ${modelVariableName} = await create${modelClassName}({
-        user${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join(',\n        ') : ''}
+        user${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
       })
       await subject(${modelVariableName}, {
-        ${updatedStringKeyValues.length ? updatedStringKeyValues.join(',\n        ') : ''}
+        ${updatedStringKeyValues.length ? updatedStringKeyValues.join('\n        ') : ''}
       })
 
       await ${modelVariableName}.reload()
@@ -176,10 +176,10 @@ describe('${fullyQualifiedControllerName}', () => {
     context('a ${fullyQualifiedModelName} created by another User', () => {
       it('is not updated', async () => {
         const ${modelVariableName} = await create${modelClassName}({
-          ${originalStringKeyValues.length ? originalStringKeyValues.join(',\n          ') : ''}
+          ${originalStringKeyValues.length ? originalStringKeyValues.join('\n          ') : ''}
         })
         await subject(${modelVariableName}, {
-          ${updatedStringKeyValues.length ? updatedStringKeyValues.join(',\n          ') : ''}
+          ${updatedStringKeyValues.length ? updatedStringKeyValues.join('\n          ') : ''}
         }, 404)
 
         await ${modelVariableName}.reload()
