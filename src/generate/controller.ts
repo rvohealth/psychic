@@ -35,7 +35,7 @@ export default async function generateController({
   const controllerNameParts: string[] = isAdmin ? [allControllerNameParts.shift()!] : []
 
   for (let index = 0; index < allControllerNameParts.length; index++) {
-    if (controllerNameParts.length) {
+    if (controllerNameParts.length > (isAdmin ? 1 : 0)) {
       // Write the ancestor controller
       const [baseAncestorName, baseAncestorImportStatement] = baseAncestorNameAndImport(
         controllerNameParts,
