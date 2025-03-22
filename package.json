@@ -21,7 +21,7 @@
   ],
   "scripts": {
     "client": "yarn --cwd=./client start",
-    "psy": "yarn psyts",
+    "psy": "NODE_ENV=${NODE_ENV:-test} yarn psyts",
     "psyjs": "node ./dist/test-app/src/cli/index.js",
     "psyts": "NODE_ENV=${NODE_ENV:-test} tsx ./test-app/src/cli/index.ts",
     "psycore": "PSYCHIC_CORE_DEVELOPMENT=1 yarn psyts",
@@ -89,5 +89,5 @@
     "vitest": "^3.0.8",
     "winston": "^3.14.2"
   },
-  "packageManager": "yarn@4.4.1"
+  "packageManager": "yarn@4.7.0"
 }
