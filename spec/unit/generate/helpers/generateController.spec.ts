@@ -1,5 +1,5 @@
-import { existsSync } from 'fs'
 import * as fs from 'fs/promises'
+import { existsSync } from 'node:fs'
 import * as path from 'path'
 import * as psychicPathModule from '../../../../src/helpers/path/psychicPath.js'
 import { generateController, PsychicApplication } from '../../../../src/index.js'

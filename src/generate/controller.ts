@@ -1,6 +1,6 @@
 import { hyphenize, standardizeFullyQualifiedModelName } from '@rvoh/dream'
-import { existsSync } from 'fs'
 import * as fs from 'fs/promises'
+import { existsSync } from 'node:fs'
 import EnvInternal from '../helpers/EnvInternal.js'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths.js'
 import psychicPath from '../helpers/path/psychicPath.js'
