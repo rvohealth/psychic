@@ -17,7 +17,7 @@ import Post from '../../../../src/app/models/Post.js'
 import User from '../../../../src/app/models/User.js'
 import createPost from '../../../factories/PostFactory.js'
 import createUser from '../../../factories/UserFactory.js'
-import { addEndUserAuthHeader } from '../../helpers/authentication.js'
+import addEndUserAuthHeader from '../../helpers/authentication.js'
 
 describe('V1/PostsController', () => {
   let user: User
@@ -28,9 +28,9 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET index', () => {
-    function subject(expectedStatus: number = 200) {
+    const subject = async (expectedStatus: number = 200) => {
       return request.get('/posts', expectedStatus, {
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -59,9 +59,9 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET show', () => {
-    function subject(post: Post, expectedStatus: number = 200) {
+    const subject = async (post: Post, expectedStatus: number = 200) => {
       return request.get(\`/posts/\${post.id}\`, expectedStatus, {
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -89,10 +89,10 @@ describe('V1/PostsController', () => {
   })
 
   describe('POST create', () => {
-    function subject(data: UpdateableProperties<Post>, expectedStatus: number = 201) {
+    const subject = async (data: UpdateableProperties<Post>, expectedStatus: number = 201) => {
       return request.post('/posts', expectedStatus, {
         data,
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -112,10 +112,10 @@ describe('V1/PostsController', () => {
   })
 
   describe('PATCH update', () => {
-    function subject(post: Post, data: UpdateableProperties<Post>, expectedStatus: number = 204) {
+    const subject = async (post: Post, data: UpdateableProperties<Post>, expectedStatus: number = 204) => {
       return request.patch(\`/posts/\${post.id}\`, expectedStatus, {
         data,
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -148,9 +148,9 @@ describe('V1/PostsController', () => {
   })
 
   describe('DELETE destroy', () => {
-    function subject(post: Post, expectedStatus: number = 204) {
+    const subject = async (post: Post, expectedStatus: number = 204) => {
       return request.delete(\`/posts/\${post.id}\`, expectedStatus, {
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -198,7 +198,7 @@ import LocalizedText from '../../../../../src/app/models/LocalizedText.js'
 import User from '../../../../../src/app/models/User.js'
 import createLocalizedText from '../../../../factories/LocalizedTextFactory.js'
 import createUser from '../../../../factories/UserFactory.js'
-import { addEndUserAuthHeader } from '../../../helpers/authentication.js'
+import addEndUserAuthHeader from '../../../helpers/authentication.js'
 
 describe('V1/Host/LocalizedTextsController', () => {
   let user: User
@@ -209,9 +209,9 @@ describe('V1/Host/LocalizedTextsController', () => {
   })
 
   describe('GET index', () => {
-    function subject(expectedStatus: number = 200) {
+    const subject = async (expectedStatus: number = 200) => {
       return request.get('/v1/host/localized-texts', expectedStatus, {
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -241,9 +241,9 @@ describe('V1/Host/LocalizedTextsController', () => {
   })
 
   describe('GET show', () => {
-    function subject(localizedText: LocalizedText, expectedStatus: number = 200) {
+    const subject = async (localizedText: LocalizedText, expectedStatus: number = 200) => {
       return request.get(\`/v1/host/localized-texts/\${localizedText.id}\`, expectedStatus, {
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -273,10 +273,10 @@ describe('V1/Host/LocalizedTextsController', () => {
   })
 
   describe('POST create', () => {
-    function subject(data: UpdateableProperties<LocalizedText>, expectedStatus: number = 201) {
+    const subject = async (data: UpdateableProperties<LocalizedText>, expectedStatus: number = 201) => {
       return request.post('/v1/host/localized-texts', expectedStatus, {
         data,
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -298,10 +298,10 @@ describe('V1/Host/LocalizedTextsController', () => {
   })
 
   describe('PATCH update', () => {
-    function subject(localizedText: LocalizedText, data: UpdateableProperties<LocalizedText>, expectedStatus: number = 204) {
+    const subject = async (localizedText: LocalizedText, data: UpdateableProperties<LocalizedText>, expectedStatus: number = 204) => {
       return request.patch(\`/v1/host/localized-texts/\${localizedText.id}\`, expectedStatus, {
         data,
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -340,9 +340,9 @@ describe('V1/Host/LocalizedTextsController', () => {
   })
 
   describe('DELETE destroy', () => {
-    function subject(localizedText: LocalizedText, expectedStatus: number = 204) {
+    const subject = async (localizedText: LocalizedText, expectedStatus: number = 204) => {
       return request.delete(\`/v1/host/localized-texts/\${localizedText.id}\`, expectedStatus, {
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 

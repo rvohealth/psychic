@@ -63,7 +63,7 @@ export default function generateResourceControllerSpecContent({
 import { UpdateableProperties } from '@rvoh/dream'
 import { PsychicServer } from '@rvoh/psychic'
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'${uniq(importStatements).join('')}
-import { addEndUserAuthHeader } from '${specUnitUpdirs}helpers/authentication.js'
+import addEndUserAuthHeader from '${specUnitUpdirs}helpers/authentication.js'
 
 describe('${fullyQualifiedControllerName}', () => {
   let user: User
@@ -74,9 +74,9 @@ describe('${fullyQualifiedControllerName}', () => {
   })
 
   describe('GET index', () => {
-    function subject(expectedStatus: number = 200) {
+    const subject = async (expectedStatus: number = 200) => {
       return request.get('/${route}', expectedStatus, {
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -104,9 +104,9 @@ describe('${fullyQualifiedControllerName}', () => {
   })
 
   describe('GET show', () => {
-    function subject(${modelVariableName}: ${modelClassName}, expectedStatus: number = 200) {
+    const subject = async (${modelVariableName}: ${modelClassName}, expectedStatus: number = 200) => {
       return request.get(\`/${route}/\${${modelVariableName}.id}\`, expectedStatus, {
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -132,10 +132,10 @@ describe('${fullyQualifiedControllerName}', () => {
   })
 
   describe('POST create', () => {
-    function subject(data: UpdateableProperties<${modelClassName}>, expectedStatus: number = 201) {
+    const subject = async (data: UpdateableProperties<${modelClassName}>, expectedStatus: number = 201) => {
       return request.post('/${route}', expectedStatus, {
         data,
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -154,10 +154,10 @@ describe('${fullyQualifiedControllerName}', () => {
   })
 
   describe('PATCH update', () => {
-    function subject(${modelVariableName}: ${modelClassName}, data: UpdateableProperties<${modelClassName}>, expectedStatus: number = 204) {
+    const subject = async (${modelVariableName}: ${modelClassName}, data: UpdateableProperties<${modelClassName}>, expectedStatus: number = 204) => {
       return request.patch(\`/${route}/\${${modelVariableName}.id}\`, expectedStatus, {
         data,
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
@@ -189,9 +189,9 @@ describe('${fullyQualifiedControllerName}', () => {
   })
 
   describe('DELETE destroy', () => {
-    function subject(${modelVariableName}: ${modelClassName}, expectedStatus: number = 204) {
+    const subject = async (${modelVariableName}: ${modelClassName}, expectedStatus: number = 204) => {
       return request.delete(\`/${route}/\${${modelVariableName}.id}\`, expectedStatus, {
-        headers: addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
