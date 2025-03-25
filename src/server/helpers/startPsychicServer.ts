@@ -47,10 +47,8 @@ export function createPsychicHttpInstance(
 
 function welcomeMessage({ port }: { port: number }) {
   if (!EnvInternal.isTest) {
-    // const psychicApp = PsychicApplication.getOrFail()
-    const spinner = DreamCLI.logger.log('starting psychic server...', { spinner: true })
-    DreamCLI.logger.log(PsychicServer.asciiLogo(), { permanent: true, logPrefix: '' })
-    spinner.stop()
+    DreamCLI.logger.log('starting psychic server...')
+    DreamCLI.logger.log(PsychicServer.asciiLogo(), { logPrefix: '' })
     DreamCLI.logger.log(`psychic dev server started at port ${port}`)
   }
 }

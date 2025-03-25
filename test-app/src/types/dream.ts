@@ -95,7 +95,7 @@ b.) All laptops are ok sleeping places for your
 
 */
 
-import { CalendarDate, DateTime } from '@rvoh/dream'
+import { type CalendarDate, type DateTime } from '@rvoh/dream'
 import {
   IdType,
   Json,

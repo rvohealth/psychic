@@ -59,23 +59,23 @@ export default class PsychicBin {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static async syncTypes(customTypes: any = undefined) {
-    const spinner = DreamCLI.logger.log(`syncing types/psychic.ts...`, { spinner: true })
+    DreamCLI.logger.logStartProgress(`syncing types/psychic.ts...`)
 
     await TypesBuilder.sync(customTypes)
 
-    spinner.stop()
+    DreamCLI.logger.logEndProgress()
   }
 
   public static async syncOpenapiJson() {
-    const spinner = DreamCLI.logger.log(`syncing openapi...`, { spinner: true })
+    DreamCLI.logger.logStartProgress(`syncing openapi...`)
 
     await OpenapiAppRenderer.sync()
 
-    spinner.stop()
+    DreamCLI.logger.logEndProgress()
   }
 
   public static async syncRoutes() {
-    const spinner = DreamCLI.logger.log(`syncing routes...`, { spinner: true })
+    DreamCLI.logger.logStartProgress(`syncing routes...`)
 
     const server = new PsychicServer()
     await server.boot()
@@ -83,11 +83,11 @@ export default class PsychicBin {
     const routes = await server.routes()
     await generateRouteTypes(routes)
 
-    spinner.stop()
+    DreamCLI.logger.logEndProgress()
   }
 
   public static async syncClientEnums() {
-    const spinner = DreamCLI.logger.log(`syncing client enums...`, { spinner: true })
+    DreamCLI.logger.logStartProgress(`syncing client enums...`)
 
     const psychicApp = PsychicApplication.getOrFail()
     const apiPath = path.join(psychicApp.clientRoot, psychicApp.client.apiPath)
@@ -95,6 +95,6 @@ export default class PsychicBin {
     const enumsStr = await enumsFileStr()
     await fs.writeFile(`${apiPath}/enums.ts`, enumsStr)
 
-    spinner.stop()
+    DreamCLI.logger.logEndProgress()
   }
 }
