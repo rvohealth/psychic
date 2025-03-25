@@ -31,13 +31,10 @@ export default class PsychicBin {
 
   public static async sync({ bypassDreamSync = false }: { bypassDreamSync?: boolean } = {}) {
     if (!bypassDreamSync) await DreamBin.sync(() => {})
+
     await PsychicBin.syncTypes()
-
     const psychicApp = PsychicApplication.getOrFail()
-
-    if (!psychicApp.apiOnly) {
-      await PsychicBin.syncOpenapiJson()
-    }
+    await PsychicBin.syncOpenapiJson()
 
     if (psychicApp.openapi?.syncEnumsToClient) {
       await this.syncClientEnums()
