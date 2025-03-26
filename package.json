@@ -2,9 +2,12 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "0.26.2",
+  "version": "0.26.3",
   "author": "RVOHealth",
-  "repository": "https://github.com/rvohealth/psychic.git",
+  "repository": {
+    "type": "git",
+    "url": "git+https://github.com/rvohealth/psychic.git"
+  },
   "license": "MIT",
   "main": "./dist/cjs/src/index.js",
   "module": "./dist/esm/src/index.js",
