@@ -66,7 +66,10 @@ function applyInterpolations(
 }
 
 function _i18n(i18nHash: GenericI18nObject, i18nPath: string[]): string {
-  const translation: string | GenericI18nObject = i18nHash[i18nPath[0]]
+  const index = i18nPath[0]
+  if (index === undefined) throw new TranslationMissing()
+
+  const translation: string | GenericI18nObject | undefined = i18nHash[index]
   if (translation === undefined) throw new TranslationMissing()
 
   if (typeof translation === 'string') return translation
@@ -84,7 +87,7 @@ export class I18nInterpolationReceivedUndefined extends Error {
     this.interpolationKey = interpolationKey
   }
 
-  public get message() {
+  public override get message() {
     return `
 undefined interpolation value received:
 i18n path string: ${this.i18nPathString}
@@ -104,7 +107,7 @@ export class I18nInterpolationReceivedNull extends Error {
     this.interpolationKey = interpolationKey
   }
 
-  public get message() {
+  public override get message() {
     return `
 null interpolation value received:
 i18n path string: ${this.i18nPathString}

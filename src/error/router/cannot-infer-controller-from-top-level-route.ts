@@ -8,7 +8,7 @@ export default class CannotInferControllerFromTopLevelRouteError extends Error {
     super()
   }
 
-  public get message() {
+  public override get message() {
     return `
 ATTENTION!
 

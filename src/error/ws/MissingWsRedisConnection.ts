@@ -1,5 +1,5 @@
 export default class MissingWsRedisConnection extends Error {
-  public get message() {
+  public override get message() {
     return `
 No websocket redis connection was found, even though
 the application is configured to establish websockets.

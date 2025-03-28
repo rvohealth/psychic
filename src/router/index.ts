@@ -438,7 +438,7 @@ export class PsychicNestedRouter extends PsychicRouter {
     this.routeManager = routeManager
   }
 
-  public get routingMechanism() {
+  public override get routingMechanism() {
     return this.router
   }
 }

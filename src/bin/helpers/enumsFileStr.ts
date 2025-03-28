@@ -9,7 +9,7 @@ export default async function enumsFileStr() {
 
   Object.keys(enums).forEach(enumName => {
     const exportedTypeName = pascalizeFileName(enumName) + 'Values'
-    const values = enums[enumName]
+    const values = enums[enumName] || []
 
     enumsFileStr += `\
 export const ${exportedTypeName} = [

@@ -5,7 +5,7 @@ export default class DBError extends Error {
     this._message = message
   }
 
-  public get message() {
+  public override get message() {
     return `
       A Database error occured, causing psychic to crash. The message recieved was:
         ${this._message}

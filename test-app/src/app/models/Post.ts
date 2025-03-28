@@ -6,7 +6,7 @@ import User from './User.js'
 const Deco = new Decorators<InstanceType<typeof Post>>()
 
 export default class Post extends ApplicationModel {
-  public get table() {
+  public override get table() {
     return 'posts' as const
   }
 

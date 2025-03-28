@@ -7,7 +7,7 @@ import Post from './Post.js'
 const Deco = new Decorators<InstanceType<typeof User>>()
 
 export default class User extends ApplicationModel {
-  public get table() {
+  public override get table() {
     return 'users' as const
   }
 
@@ -75,14 +75,14 @@ export default class User extends ApplicationModel {
   public email: DreamColumn<User, 'email'>
 
   @Deco.Virtual()
-  public password?: string | null
+  public password: string | null | undefined
   public passwordDigest: string
 
   @Deco.Virtual({ type: 'string', nullable: true })
-  public openapiVirtualSpecTest?: string | null
+  public openapiVirtualSpecTest: string | null | undefined
 
   @Deco.Virtual('string[]')
-  public openapiVirtualSpecTest2?: string | null
+  public openapiVirtualSpecTest2: string | null | undefined
 
   @Deco.HasMany('Pet')
   public pets: Pet[]
@@ -136,9 +136,9 @@ export const insecurePasswordCompareSinceBcryptBringsInTooMuchGarbage = (
 ): Promise<boolean> => {
   return new Promise((resolve, reject) => {
     const [salt, hashKey] = hash.split('.')
-    const hashKeyBuff = Buffer.from(hashKey, 'hex')
+    const hashKeyBuff = Buffer.from(hashKey ?? '', 'hex')
 
-    scrypt(password, salt, keyLength, (err, derivedKey) => {
+    scrypt(password, salt ?? '', keyLength, (err, derivedKey) => {
       if (err) reject(err)
       resolve(timingSafeEqual(hashKeyBuff, derivedKey))
     })

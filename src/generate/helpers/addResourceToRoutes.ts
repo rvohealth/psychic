@@ -1,5 +1,6 @@
 import * as fs from 'fs/promises'
 import * as path from 'path'
+import UnexpectedUndefined from '../../error/UnexpectedUndefined.js'
 import psychicPath from '../../helpers/path/psychicPath.js'
 import PsychicApplication from '../../psychic-application/index.js'
 
@@ -11,6 +12,8 @@ export default async function addResourceToRoutes(route: string) {
   const matchesAndReplacements = addResourceToRoutes_routeToRegexAndReplacements(route)
   for (let index = 0; index < matchesAndReplacements.length; index++) {
     const matchAndReplacement = matchesAndReplacements[index]
+    if (matchAndReplacement === undefined) throw new UnexpectedUndefined()
+
     if (matchAndReplacement.regex.test(routes)) {
       routes = routes.replace(
         matchAndReplacement.regex,

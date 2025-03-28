@@ -1,6 +1,7 @@
 import { hyphenize, standardizeFullyQualifiedModelName } from '@rvoh/dream'
 import * as fs from 'fs/promises'
 import { existsSync } from 'node:fs'
+import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths.js'
 import psychicPath from '../helpers/path/psychicPath.js'
@@ -43,6 +44,9 @@ export default async function generateController({
         { forBaseController: true },
       )
 
+      if (baseAncestorName === undefined) throw new UnexpectedUndefined()
+      if (baseAncestorImportStatement === undefined) throw new UnexpectedUndefined()
+
       const baseControllerName = [...controllerNameParts, 'BaseController'].join('/')
       const { absDirPath, absFilePath } = psychicFileAndDirPaths(
         psychicPath('controllers'),
@@ -64,13 +68,17 @@ export default async function generateController({
       }
     }
 
-    controllerNameParts.push(allControllerNameParts[index])
+    const namedPart = allControllerNameParts[index]
+    if (namedPart) controllerNameParts.push(namedPart)
   }
 
   // Write the controller
   const [ancestorName, ancestorImportStatement] = baseAncestorNameAndImport(controllerNameParts, isAdmin, {
     forBaseController: false,
   })
+
+  if (ancestorName === undefined) throw new UnexpectedUndefined()
+  if (ancestorImportStatement === undefined) throw new UnexpectedUndefined()
 
   const { relFilePath, absDirPath, absFilePath } = psychicFileAndDirPaths(
     psychicPath('controllers'),

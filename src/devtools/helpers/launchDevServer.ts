@@ -1,6 +1,7 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 import { createServer } from 'net'
 import sleep from '../../../spec/helpers/sleep.js'
+import UnexpectedUndefined from '../../error/UnexpectedUndefined.js'
 
 const devServerProcesses: Record<string, ChildProcessWithoutNullStreams | undefined> = {}
 
@@ -12,6 +13,7 @@ export async function launchDevServer(
 
   if (process.env.DEBUG === '1') console.log('Starting server...')
   const [_cmd, ...args] = cmd.split(' ')
+  if (_cmd === undefined) throw new UnexpectedUndefined()
 
   const proc = spawn(_cmd, args, {
     detached: true,

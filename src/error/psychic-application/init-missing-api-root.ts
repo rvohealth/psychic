@@ -3,7 +3,7 @@ export default class PsychicApplicationInitMissingApiRoot extends Error {
     super()
   }
 
-  public get message() {
+  public override get message() {
     return `
 must set apiRoot when initializing a new PsychicApplication.
 

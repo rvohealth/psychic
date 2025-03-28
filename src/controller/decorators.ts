@@ -89,7 +89,7 @@ export function OpenAPI<
 
         psychicControllerClass['controllerActionMetadata'][methodNameString] ||= {}
         psychicControllerClass['controllerActionMetadata'][methodNameString]['serializerKey'] =
-          opts.serializerKey
+          opts.serializerKey!
         //
       } else {
         if (isSerializable(modelOrSerializer)) {

@@ -8,9 +8,11 @@ SELECT pg_type.typname AS enum_type, pg_enum.enumlabel AS enum_label FROM pg_typ
 `.execute(db('primary'))
 
   const rowData: Record<string, string[]> = {}
+
   rows.forEach(row => {
-    rowData[row.enumType] ||= []
-    rowData[row.enumType].push(row.enumLabel)
+    const enumType = row.enumType
+    rowData[enumType] ||= []
+    rowData[enumType].push(row.enumLabel)
   })
 
   return rowData

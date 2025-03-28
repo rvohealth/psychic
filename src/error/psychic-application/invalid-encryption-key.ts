@@ -3,7 +3,7 @@ export default class PsychicApplicationInvalidEncryptionKey extends Error {
     super()
   }
 
-  public get message() {
+  public override get message() {
     return `
 When providing an app encryption key to psychic, it must be a
 32-bit, base64 encoded string.
