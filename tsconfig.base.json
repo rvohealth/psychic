@@ -16,6 +16,7 @@
     "rootDir": "./",
     "skipLibCheck": true,
     "strict": true,
+    "strictBindCallApply": true,
     "strictNullChecks": true,
     /* Dream models are initialized from options passed into .new/.create and from the database. */
     "strictPropertyInitialization": false,
