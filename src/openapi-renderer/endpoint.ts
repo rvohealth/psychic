@@ -154,23 +154,26 @@ export default class OpenapiEndpointRenderer<
       },
     } as unknown as OpenapiEndpointResponse
 
+    const outputPath = output[path]
+    if (outputPath === undefined) throw new Error(`no output for path ${path}`)
+
     if (this.summary) {
-      output[path][method].summary = this.summary
+      outputPath[method].summary = this.summary
     }
 
     if (this.description) {
-      output[path][method].description = this.description
+      outputPath[method].description = this.description
     }
 
     if (this.security) {
-      output[path][method].security = this.security
+      outputPath[method].security = this.security
     }
 
     if (requestBody) {
-      output[path][method]['requestBody'] = requestBody
+      outputPath[method]['requestBody'] = requestBody
     }
 
-    output[path][method].responses = responses
+    outputPath[method].responses = responses
 
     return output
   }
@@ -344,24 +347,28 @@ export default class OpenapiEndpointRenderer<
     const headers = { ...defaultHeaders, ...(this.headers || []) } as OpenapiHeaders
 
     return (
-      Object.keys(headers).map((headerName: string) => {
-        const header = headers[headerName]
-        const data = {
-          in: 'header',
-          name: headerName,
-          required: header.required,
-          description: header.description || headerName,
-          schema: {
-            type: 'string',
-          },
-        } as OpenapiParameterResponse
+      compact(
+        Object.keys(headers).map((headerName: string) => {
+          const header = headers[headerName]
+          if (header === undefined) return null
 
-        if (header.format) {
-          data.schema.format = header.format
-        }
+          const data = {
+            in: 'header',
+            name: headerName,
+            required: header.required,
+            description: header.description || headerName,
+            schema: {
+              type: 'string',
+            },
+          } as OpenapiParameterResponse
 
-        return data
-      }) || []
+          if (header.format) {
+            data.schema.format = header.format
+          }
+
+          return data
+        }),
+      ) || []
     )
   }
 
@@ -378,7 +385,7 @@ export default class OpenapiEndpointRenderer<
         let output = {
           in: 'query',
           name: queryName,
-          description: queryParam.description || queryName,
+          description: queryParam?.description || queryName,
           allowReserved: true,
           ...queryParam,
           schema: {
@@ -386,15 +393,15 @@ export default class OpenapiEndpointRenderer<
           },
         } as OpenapiParameterResponse
 
-        if (typeof queryParam.allowEmptyValue === 'boolean') {
+        if (typeof queryParam?.allowEmptyValue === 'boolean') {
           output.allowEmptyValue = queryParam.allowEmptyValue
         }
 
-        if (typeof queryParam.allowReserved === 'boolean') {
+        if (typeof queryParam?.allowReserved === 'boolean') {
           output.allowReserved = queryParam.allowReserved
         }
 
-        if (queryParam.schema) {
+        if (queryParam?.schema) {
           output = {
             ...output,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -762,10 +769,20 @@ export default class OpenapiEndpointRenderer<
         })
 
     Object.keys(psychicAndConfigLevelDefaults).forEach(key => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-      if (!responseData[key as any]) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        responseData[key as any] = psychicAndConfigLevelDefaults[key as any]
+      if (!responseData[key as keyof typeof responseData]) {
+        const data = psychicAndConfigLevelDefaults[key as keyof typeof psychicAndConfigLevelDefaults]
+
+        switch (key) {
+          case 'summary':
+          case 'description':
+            responseData[key] = data as string
+            break
+          default:
+            responseData[key as unknown as number] = data as
+              | OpenapiContent
+              | OpenapiSchemaExpressionRef
+              | { description: string }
+        }
       }
     })
 
@@ -827,6 +844,8 @@ export default class OpenapiEndpointRenderer<
    */
   private parseSingleEntitySerializerResponseShape(): OpenapiContent {
     const serializerClass = this.getSerializerClasses()![0]
+    if (serializerClass === undefined) throw new Error('getSerializerClasses returned no serializer classes')
+
     const serializerKey = serializerClass.openapiName
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -986,15 +1005,19 @@ export default class OpenapiEndpointRenderer<
    */
   private getSerializerClass(
     dreamOrSerializerOrViewModel: SerializableDreamClassOrViewModelClass | typeof DreamSerializer,
-  ): typeof DreamSerializer {
+  ): typeof DreamSerializer | null {
     const dreamApp = DreamApplication.getOrFail()
     if ((dreamOrSerializerOrViewModel as typeof DreamSerializer).isDreamSerializer) {
       return dreamOrSerializerOrViewModel as typeof DreamSerializer
     } else {
       const modelClass = dreamOrSerializerOrViewModel as SerializableDreamClassOrViewModelClass
       const modelPrototype = modelClass.prototype as SerializableDreamOrViewModel
+
       const serializerKey = modelPrototype.serializers[this.serializerKey || 'default']
-      return dreamApp.serializers[serializerKey] || null
+      if (serializerKey === undefined)
+        throw new Error(`no serializerKey for ${this.serializerKey || 'default'}`)
+
+      return dreamApp.serializers[serializerKey] ?? null
     }
   }
 }
@@ -1006,7 +1029,7 @@ export class MissingControllerActionPairingInRoutes extends Error {
   ) {
     super()
   }
-  public get message() {
+  public override get message() {
     return `
 OpenAPI decorator has been applied to method '${this.action}' in '${this.controllerClass.name}',
 but no route maps to this method in your conf/routes.ts file.

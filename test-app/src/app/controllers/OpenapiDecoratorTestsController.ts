@@ -3,7 +3,7 @@ import { OpenAPI } from '../../../../src/index.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class OpenapiDecoratorTestController extends ApplicationController {
-  public static get openapiNames(): PsychicOpenapiNames<ApplicationController> {
+  public static override get openapiNames(): PsychicOpenapiNames<ApplicationController> {
     return ['mobile', 'admin']
   }
 

@@ -1,5 +1,7 @@
+import { compact } from '@rvoh/dream'
 import * as fs from 'fs/promises'
 import { groupBy } from 'lodash-es'
+import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import openapiJsonPath from '../helpers/openapiJsonPath.js'
 import PsychicApplication from '../psychic-application/index.js'
@@ -107,6 +109,7 @@ export default class OpenapiAppRenderer {
         if (EnvInternal.isDebug) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
 
         const renderer = controller.openapi[key]
+        if (renderer === undefined) throw new UnexpectedUndefined()
 
         finalOutput.components.schemas = {
           ...finalOutput.components.schemas,
@@ -114,9 +117,13 @@ export default class OpenapiAppRenderer {
         }
 
         const endpointPayload = renderer.toPathObject(openapiName, processedSchemas, routes)
+        if (endpointPayload === undefined) throw new UnexpectedUndefined()
         const path = Object.keys(endpointPayload)[0]
+        if (path === undefined) throw new UnexpectedUndefined()
+        const endpointPayloadPath = endpointPayload[path]
+        if (endpointPayloadPath === undefined) throw new UnexpectedUndefined()
 
-        const method = (Object.keys(endpointPayload[path]) as HttpMethod[]).find(key =>
+        const method = (Object.keys(endpointPayloadPath) as HttpMethod[]).find(key =>
           HttpMethods.includes(key),
         )!
 
@@ -124,14 +131,12 @@ export default class OpenapiAppRenderer {
           finalOutput.paths[path] = { parameters: [] } as unknown as OpenapiEndpointResponsePath
         }
 
-        const pathObj = finalOutput.paths[path]
-        const otherPathObj = endpointPayload[path]
+        const finalPathObject = finalOutput.paths[path]
+        finalPathObject[method] = endpointPayloadPath[method]
 
-        pathObj[method] = otherPathObj[method]
-
-        pathObj.parameters = this.combineParameters([
-          ...pathObj.parameters,
-          ...endpointPayload[path].parameters,
+        finalPathObject.parameters = this.combineParameters([
+          ...finalPathObject.parameters,
+          ...endpointPayloadPath.parameters,
         ])
       }
     }
@@ -139,31 +144,31 @@ export default class OpenapiAppRenderer {
     return this.sortedSchemaPayload(finalOutput)
   }
 
-  private static combineParameters(parameters: OpenapiParameterResponse[]) {
+  private static combineParameters(parameters: OpenapiParameterResponse[]): OpenapiParameterResponse[] {
     const groupedParams = groupBy(parameters, 'name')
 
-    const result = Object.keys(groupedParams).map(paramName => {
-      const identicalParams = groupedParams[paramName]
-      return identicalParams.reduce((compositeParam, param) => {
-        compositeParam.description ||= param.description
+    return compact(
+      Object.keys(groupedParams).map(paramName => {
+        const identicalParams = groupedParams[paramName] || []
 
-        if (compositeParam.allowEmptyValue !== undefined)
-          compositeParam.allowEmptyValue = param.allowEmptyValue
+        return identicalParams.reduce((compositeParam, param) => {
+          if (compositeParam === undefined) throw new UnexpectedUndefined()
+          compositeParam.description ||= param.description
 
-        if (compositeParam.allowReserved !== undefined) compositeParam.allowReserved = param.allowReserved
+          if (param.allowEmptyValue !== undefined) compositeParam.allowEmptyValue = param.allowEmptyValue
+          if (param.allowReserved !== undefined) compositeParam.allowReserved = param.allowReserved
+          if (param.required !== undefined) compositeParam.required = param.required
 
-        if (compositeParam.required !== undefined) compositeParam.required = param.required
-
-        return compositeParam
-      }, identicalParams[0])
-    })
-
-    return result
+          return compositeParam
+        }, identicalParams[0])
+      }),
+    )
   }
 
   private static sortedSchemaPayload(schema: OpenapiSchema) {
     const sortedPaths = Object.keys(schema.paths).sort()
-    const sortedSchemas = Object.keys(schema.components.schemas).sort()
+    const schemas = schema.components.schemas || {}
+    const sortedSchemaNames = Object.keys(schemas).sort()
 
     const sortedSchema: typeof schema = { ...schema }
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
@@ -177,9 +182,9 @@ export default class OpenapiAppRenderer {
     }, {} as any)
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    sortedSchema.components.schemas = sortedSchemas.reduce((agg, key) => {
+    sortedSchema.components.schemas = sortedSchemaNames.reduce((agg, key) => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      agg[key] = schema.components.schemas[key]
+      agg[key] = schemas[key]
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return agg

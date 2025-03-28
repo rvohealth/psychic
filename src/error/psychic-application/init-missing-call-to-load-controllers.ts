@@ -3,7 +3,7 @@ export default class PsychicApplicationInitMissingCallToLoadControllers extends 
     super()
   }
 
-  public get message() {
+  public override get message() {
     return `
 must load controllers when initializing a new PsychicApplication.
 

@@ -14,7 +14,7 @@ export default class HttpError extends Error {
     super()
   }
 
-  public get message() {
+  public override get message() {
     return `Http status ${this.status} thrown`
   }
 }

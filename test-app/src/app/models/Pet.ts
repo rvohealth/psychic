@@ -5,7 +5,7 @@ import User from './User.js'
 const Deco = new Decorators<InstanceType<typeof Pet>>()
 
 export default class Pet extends ApplicationModel {
-  public get table() {
+  public override get table() {
     return 'pets' as const
   }
 

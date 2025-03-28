@@ -1,7 +1,7 @@
 import HttpError from '../index.js'
 
 export default class RouterError extends HttpError {
-  public get status() {
+  public override get status() {
     return 500
   }
 
@@ -9,7 +9,7 @@ export default class RouterError extends HttpError {
     throw new Error('Must define messageString in child error class')
   }
 
-  public get message() {
+  public override get message() {
     return `
       A Router error occured, causing psychic to crash. The message recieved was:
         ${this.messageString}

@@ -5,7 +5,7 @@ import Post from './Post.js'
 const Deco = new Decorators<InstanceType<typeof Comment>>()
 
 export default class Comment extends ApplicationModel {
-  public get table() {
+  public override get table() {
     return 'comments' as const
   }
 

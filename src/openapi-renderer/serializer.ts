@@ -14,6 +14,7 @@ import {
 } from '@rvoh/dream'
 import PsychicController from '../controller/index.js'
 import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations.js'
+import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import PsychicApplication from '../psychic-application/index.js'
 import OpenapiBodySegmentRenderer from './body-segment.js'
@@ -135,6 +136,9 @@ export default class OpenapiSerializerRenderer {
     let flattenedPolymorphicSchemas: string[] = []
     let flattenedPolymorphicAssociation: DreamSerializerAssociationStatement
 
+    const finalOutputForSerializerKey = finalOutput[serializerKey]
+    if (finalOutputForSerializerKey === undefined) throw new UnexpectedUndefined()
+
     associations.forEach(association => {
       const associatedSerializers = DreamSerializer.getAssociatedSerializersForOpenapi(association)
       if (!associatedSerializers)
@@ -174,10 +178,10 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
           ...finalOutput,
           [serializerKey]: {
             anyOf: [
-              { ...finalOutput[serializerKey] },
+              { ...finalOutputForSerializerKey },
               {
                 allOf: [
-                  { ...finalOutput[serializerKey] },
+                  { ...finalOutputForSerializerKey },
                   { anyOf: flattenedPolymorphicSchemas.map(schema => ({ $schema: schema })) },
                 ],
               },
@@ -189,7 +193,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
           ...finalOutput,
           [serializerKey]: {
             allOf: [
-              { ...finalOutput[serializerKey] },
+              { ...finalOutputForSerializerKey },
               { anyOf: flattenedPolymorphicSchemas.map(schema => ({ $schema: schema })) },
             ],
           },
@@ -220,24 +224,27 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     association: DreamSerializerAssociationStatement
   }) {
     const associatedSerializer = associatedSerializers[0]
+    if (associatedSerializer === undefined) throw new UnexpectedUndefined()
     const associatedSerializerKey = associatedSerializer.openapiName
 
     if (EnvInternal.isDebug) PsychicApplication.log(`Processing serializer ${associatedSerializerKey}`)
 
     let flattenedData: Record<string, OpenapiSchemaObject>
+    const finalOutputForSerializerKey = finalOutput[serializerKey]
+    if (finalOutputForSerializerKey === undefined) throw new UnexpectedUndefined()
 
     switch (association.type) {
       case 'RendersMany':
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-        ;(finalOutput as any)[serializerKey].properties![association.field] = {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        ;(finalOutputForSerializerKey as any).properties![association.field] = {
           type: 'array',
           items: {
             $ref: `#/components/schemas/${associatedSerializerKey}`,
           },
         }
 
-        finalOutput[serializerKey].required = uniq([
-          ...(finalOutput[serializerKey].required || []),
+        finalOutputForSerializerKey.required = uniq([
+          ...(finalOutputForSerializerKey.required || []),
           association.field,
         ])
         break
@@ -253,8 +260,8 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
           ;(finalOutput as any)[serializerKey].properties = flattenedData
 
           if (!association.optional) {
-            finalOutput[serializerKey].required = uniq([
-              ...(finalOutput[serializerKey].required || []),
+            finalOutputForSerializerKey.required = uniq([
+              ...(finalOutputForSerializerKey.required || []),
               ...Object.keys(flattenedData),
             ])
           }
@@ -267,8 +274,8 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
             association.optional,
           )
 
-          finalOutput[serializerKey].required = uniq([
-            ...(finalOutput[serializerKey].required || []),
+          finalOutputForSerializerKey.required = uniq([
+            ...(finalOutputForSerializerKey.required || []),
             association.field,
           ])
         }
@@ -349,6 +356,9 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     flattenedPolymorphicSchemas: string[]
     flattenedPolymorphicAssociation: DreamSerializerAssociationStatement | null
   }) {
+    const finalOutputForSerializerKey = finalOutput[serializerKey]
+    if (finalOutputForSerializerKey === undefined) throw new UnexpectedUndefined()
+
     if (association.flatten) {
       if (flattenedPolymorphicSchemas.length)
         throw new CannotFlattenMultiplePolymorphicRendersOneAssociations(
@@ -382,8 +392,8 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
 
         if (EnvInternal.isDebug) PsychicApplication.log(`Processing serializer ${associatedSerializerKey}`)
 
-        finalOutput[serializerKey].required = uniq([
-          ...(finalOutput[serializerKey].required || []),
+        finalOutputForSerializerKey.required = uniq([
+          ...(finalOutputForSerializerKey.required || []),
           association.field,
         ])
 

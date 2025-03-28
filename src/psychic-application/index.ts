@@ -43,7 +43,7 @@ export default class PsychicApplication {
 
     await DreamApplication.init(
       dreamCb,
-      { bypassModelIntegrityCheck: opts.bypassModelIntegrityCheck },
+      { bypassModelIntegrityCheck: opts.bypassModelIntegrityCheck! },
       async dreamApp => {
         psychicApp = new PsychicApplication()
         await cb(psychicApp)

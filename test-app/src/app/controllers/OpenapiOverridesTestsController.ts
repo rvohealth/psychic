@@ -2,7 +2,7 @@ import { OpenAPI, PsychicOpenapiControllerConfig } from '../../../../src/index.j
 import ApplicationController from './ApplicationController.js'
 
 export default class OpenapiOverridesTestController extends ApplicationController {
-  public static get openapiConfig(): PsychicOpenapiControllerConfig {
+  public static override get openapiConfig(): PsychicOpenapiControllerConfig {
     return { omitDefaultHeaders: true, omitDefaultResponses: true, tags: ['hello', 'world'] }
   }
 

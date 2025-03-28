@@ -26,7 +26,7 @@ export default class CannotFindInferredControllerFromProvidedNamespace extends E
     this.action = action
   }
 
-  public get message() {
+  public override get message() {
     return `
 ATTENTION!
 

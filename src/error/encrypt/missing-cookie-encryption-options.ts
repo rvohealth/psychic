@@ -1,5 +1,5 @@
 export default class MissingCookieEncryptionOpts extends Error {
-  public get message() {
+  public override get message() {
     return `
       In order to use the Encrypt library to encrypt cookies,
       encryption keys must be provided to psychic:

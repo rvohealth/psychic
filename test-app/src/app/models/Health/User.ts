@@ -2,7 +2,7 @@ import { DateTime } from '@rvoh/dream'
 import ApplicationModel from '../ApplicationModel.js'
 
 export default class HealthUser extends ApplicationModel {
-  public get table() {
+  public override get table() {
     return 'health_users' as const
   }
 

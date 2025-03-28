@@ -10,7 +10,7 @@ export default class CannotFlattenMultiplePolymorphicRendersOneAssociations exte
     super()
   }
 
-  public get message() {
+  public override get message() {
     return `
 Each serializer may only include a single flattened polymorphic RendersOne.
 

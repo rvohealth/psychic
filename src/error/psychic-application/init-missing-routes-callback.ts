@@ -3,7 +3,7 @@ export default class PsychicApplicationInitMissingRoutesCallback extends Error {
     super()
   }
 
-  public get message() {
+  public override get message() {
     return `
 must set routes when initializing a new PsychicApplication.
 

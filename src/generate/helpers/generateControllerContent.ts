@@ -18,9 +18,9 @@ export default function generateControllerContent({
   ancestorName: string
   ancestorImportStatement: string
   fullyQualifiedControllerName: string
-  fullyQualifiedModelName?: string
-  actions?: string[]
-  omitOpenApi?: boolean
+  fullyQualifiedModelName?: string | undefined
+  actions?: string[] | undefined
+  omitOpenApi?: boolean | undefined
 }) {
   fullyQualifiedControllerName = standardizeFullyQualifiedModelName(fullyQualifiedControllerName)
 
