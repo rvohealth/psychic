@@ -17,8 +17,9 @@
     "skipLibCheck": true,
     "strict": true,
     "strictNullChecks": true,
-    /* do not require all properties to be initialized in constructor */
-    "strictPropertyInitialization": false
+    /* Dream models are initialized from options passed into .new/.create and from the database. */
+    "strictPropertyInitialization": false,
+    "useUnknownInCatchVariables": true
   },
   "include": ["src/**/*", "shared/**/*"]
 }
