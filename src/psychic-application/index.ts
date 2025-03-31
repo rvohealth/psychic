@@ -67,6 +67,10 @@ export default class PsychicApplication {
         dreamApp.set('projectRoot', psychicApp.apiRoot)
         dreamApp.set('logger', psychicApp.logger)
 
+        for (const plugin of psychicApp.plugins) {
+          await plugin(psychicApp)
+        }
+
         cachePsychicApplication(psychicApp)
       },
     )
@@ -305,6 +309,11 @@ Try setting it to something valid, like:
     return getControllersOrFail()
   }
 
+  private _plugins: ((app: PsychicApplication) => void | Promise<void>)[] = []
+  public get plugins() {
+    return this._plugins
+  }
+
   public async load<RT extends 'controllers'>(
     resourceType: RT,
     resourcePath: string,
@@ -344,6 +353,10 @@ Try setting it to something valid, like:
     await this.inflections?.()
 
     this.booted = true
+  }
+
+  public plugin(cb: (app: PsychicApplication) => void | Promise<void>) {
+    this._plugins.push(cb)
   }
 
   public on<T extends PsychicHookEventType>(

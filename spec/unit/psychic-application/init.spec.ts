@@ -7,7 +7,7 @@ import * as LoadControllersModule from '../../../src/psychic-application/helpers
 import importDefault from '../../../test-app/src/app/helpers/importDefault.js'
 import dreamCb from '../../../test-app/src/conf/dream.js'
 
-describe('DreamApplication#init', () => {
+describe('PsychicApplication#init', () => {
   beforeEach(() => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
     vi.spyOn(LoadControllersModule, 'default').mockResolvedValue({} as any)
