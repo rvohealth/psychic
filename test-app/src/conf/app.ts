@@ -13,6 +13,7 @@ export default async (psy: PsychicApplication) => {
   await psy.load('controllers', srcPath('app', 'controllers'), path => importDefault(path))
 
   psy.set('appName', 'testapp')
+  psy.set('packageManager', 'yarn')
   psy.set('apiOnly', false)
   psy.set('apiRoot', srcPath('..', '..'))
   psy.set('clientRoot', srcPath('..', 'client'))

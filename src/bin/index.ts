@@ -11,6 +11,7 @@ import PsychicServer from '../server/index.js'
 import enumsFileStr from './helpers/enumsFileStr.js'
 import generateRouteTypes from './helpers/generateRouteTypes.js'
 import printRoutes from './helpers/printRoutes.js'
+import sspawn from '../helpers/sspawn.js'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
@@ -33,6 +34,24 @@ export default class PsychicBin {
     if (!bypassDreamSync) await DreamBin.sync(() => {})
 
     await PsychicBin.syncTypes()
+
+    const psychicApp = PsychicApplication.getOrFail()
+    DreamCLI.logger.logStartProgress('running post-sync operations...')
+
+    // call post-sync command in a separate process, so that newly-generated
+    // types can be reloaded and brought into all classes.
+    await sspawn(psychicApp.psyCmd('post-sync'), {
+      onStdout: message => {
+        DreamCLI.logger.logContinueProgress(`[post-sync]` + ' ' + message, {
+          logPrefixColor: 'cyan',
+        })
+      },
+    })
+
+    DreamCLI.logger.logEndProgress()
+  }
+
+  public static async postSync() {
     const psychicApp = PsychicApplication.getOrFail()
     await PsychicBin.syncOpenapiJson()
 

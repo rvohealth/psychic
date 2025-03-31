@@ -32,6 +32,7 @@ import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './ca
 import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
+import PsychicApplicationInitMissingPackageManager from '../error/psychic-application/init-missing-package-manager.js'
 
 export default class PsychicApplication {
   public static async init(
@@ -51,6 +52,8 @@ export default class PsychicApplication {
         if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
         if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
         if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
+        if (!PsychicApplicationAllowedPackageManagersEnumValues.includes(psychicApp.packageManager))
+          throw new PsychicApplicationInitMissingPackageManager()
 
         if (psychicApp.encryption?.cookies?.current)
           this.checkKey(
@@ -74,6 +77,32 @@ export default class PsychicApplication {
   public static lookupClassByGlobalName(name: string) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return lookupClassByGlobalName(name)
+  }
+
+  /**
+   * @internal
+   *
+   * used to provide the correct package manager syntax for running a script
+   * inside of the package.json "scripts" section.
+   */
+  public packageManagerRunCmd(cmd: string) {
+    switch (this.packageManager) {
+      case 'npm':
+        return `npm run ${cmd}`
+
+      default:
+        return `${this.packageManager} ${cmd}`
+    }
+  }
+
+  /**
+   * @internal
+   *
+   * adds the necessary package manager prefix to the psy command provided
+   * i.e. `psyCmd('sync')`
+   */
+  public psyCmd(cmd: string) {
+    return this.packageManagerRunCmd(`psy ${cmd}`)
   }
 
   private static checkKey(encryptionIdentifier: 'cookies', key: string, algorithm: EncryptAlgorithm) {
@@ -167,14 +196,19 @@ Try setting it to something valid, like:
     return this._logger
   }
 
-  private _sslCredentials?: PsychicSslCredentials
+  private _sslCredentials: PsychicSslCredentials | undefined = undefined
   public get sslCredentials() {
     return this._sslCredentials
   }
 
-  private _saltRounds?: number
+  private _saltRounds: number | undefined = undefined
   public get saltRounds() {
     return this._saltRounds
+  }
+
+  private _packageManager: PsychicApplicationAllowedPackageManagersEnum
+  public get packageManager() {
+    return this._packageManager
   }
 
   private _routesCb: (r: PsychicRouter) => void | Promise<void>
@@ -402,11 +436,13 @@ Try setting it to something valid, like:
                                     ? number
                                     : Opt extends 'saltRounds'
                                       ? number
-                                      : Opt extends 'inflections'
-                                        ? () => void | Promise<void>
-                                        : Opt extends 'routes'
-                                          ? (r: PsychicRouter) => void | Promise<void>
-                                          : never,
+                                      : Opt extends 'packageManager'
+                                        ? PsychicApplicationAllowedPackageManagersEnum
+                                        : Opt extends 'inflections'
+                                          ? () => void | Promise<void>
+                                          : Opt extends 'routes'
+                                            ? (r: PsychicRouter) => void | Promise<void>
+                                            : never,
   ): void
   public set<Opt extends PsychicApplicationOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -482,6 +518,10 @@ Try setting it to something valid, like:
         this._port = value as number
         break
 
+      case 'packageManager':
+        this._packageManager = value as PsychicApplicationAllowedPackageManagersEnum
+        break
+
       case 'saltRounds':
         this._saltRounds = value as number
         break
@@ -544,11 +584,16 @@ export type PsychicApplicationOption =
   | 'json'
   | 'logger'
   | 'openapi'
+  | 'packageManager'
   | 'paths'
   | 'port'
   | 'routes'
   | 'saltRounds'
   | 'ssl'
+
+export const PsychicApplicationAllowedPackageManagersEnumValues = ['yarn', 'npm', 'pnpm'] as const
+export type PsychicApplicationAllowedPackageManagersEnum =
+  (typeof PsychicApplicationAllowedPackageManagersEnumValues)[number]
 
 export interface PsychicApplicationSpecialHooks {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

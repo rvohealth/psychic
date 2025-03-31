@@ -85,7 +85,7 @@ jobs:
         continue-on-error: true
         run: yarn list
       - run: yarn install --immutable
-      - run: APP_ROOT_PATH=$(pwd) yarn psycore db:migrate --skip-sync
+      - run: APP_ROOT_PATH=$(pwd) yarn psy db:migrate --skip-sync
       - run: APP_ROOT_PATH=$(pwd) yarn uspec
 
   fspec:
@@ -171,7 +171,7 @@ jobs:
         run: mkdir -p /tmp/screenshots
 
       - name: run migrations
-        run: yarn psycore db:migrate --skip-sync
+        run: yarn psy db:migrate --skip-sync
 
       - name: run feature specs
         run: yarn fspec
