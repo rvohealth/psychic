@@ -33,6 +33,8 @@ import importControllers, { getControllersOrFail } from './helpers/import/import
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
 import PsychicApplicationInitMissingPackageManager from '../error/psychic-application/init-missing-package-manager.js'
+import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
+import pascalizeFileName from '../helpers/pascalizeFileName.js'
 
 export default class PsychicApplication {
   public static async init(
@@ -66,6 +68,18 @@ export default class PsychicApplication {
 
         dreamApp.set('projectRoot', psychicApp.apiRoot)
         dreamApp.set('logger', psychicApp.logger)
+
+        dreamApp.on('repl:start', context => {
+          const psychicApp = PsychicApplication.getOrFail()
+
+          for (const globalName of Object.keys(psychicApp.services)) {
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+            if (!(context as any)[globalName]) {
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+              ;(context as any)[pascalizeFileName(globalName)] = psychicApp.services[globalName]
+            }
+          }
+        })
 
         for (const plugin of psychicApp.plugins) {
           await plugin(psychicApp)
@@ -245,6 +259,7 @@ Try setting it to something valid, like:
   private _paths: Required<PsychicPathOptions> = {
     apiRoutes: 'src/conf/routes.ts',
     controllers: 'src/app/controllers',
+    services: 'src/app/services',
     controllerSpecs: 'spec/unit/controllers',
   }
   public get paths() {
@@ -294,6 +309,11 @@ Try setting it to something valid, like:
     return this._loadedControllers
   }
 
+  private _loadedServices: boolean = false
+  public get loadedServices() {
+    return this._loadedServices
+  }
+
   private _baseDefaultResponseHeaders: Record<string, string | null> = {
     ['cache-control']: 'max-age=0, private, must-revalidate',
   }
@@ -309,12 +329,16 @@ Try setting it to something valid, like:
     return getControllersOrFail()
   }
 
+  public get services() {
+    return getServicesOrFail()
+  }
+
   private _plugins: ((app: PsychicApplication) => void | Promise<void>)[] = []
   public get plugins() {
     return this._plugins
   }
 
-  public async load<RT extends 'controllers'>(
+  public async load<RT extends 'controllers' | 'services'>(
     resourceType: RT,
     resourcePath: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -324,6 +348,11 @@ Try setting it to something valid, like:
       case 'controllers':
         await importControllers(this, resourcePath, importCb)
         this._loadedControllers = true
+        break
+
+      case 'services':
+        await importServices(resourcePath, importCb)
+        this._loadedServices = true
         break
     }
   }
@@ -688,6 +717,7 @@ interface PsychicOpenapiInfo {
 
 interface PsychicPathOptions {
   apiRoutes?: string
+  services?: string
   controllers?: string
   controllerSpecs?: string
 }

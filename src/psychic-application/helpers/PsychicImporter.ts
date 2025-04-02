@@ -14,4 +14,23 @@ export default class PsychicImporter {
 
     return controllerClasses
   }
+
+  public static async importServices(
+    pathToServices: string,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    importCb: (path: string) => Promise<any>,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): Promise<[string, any][]> {
+    const servicePaths = await DreamImporter.ls(pathToServices)
+
+    const serviceClasses = (await Promise.all(
+      servicePaths.map(servicePath =>
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+        importCb(servicePath).then(serviceClass => [servicePath, serviceClass]),
+      ),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    )) as [string, any][]
+
+    return serviceClasses
+  }
 }
