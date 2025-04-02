@@ -10,7 +10,6 @@ export default async function configureDream(app: DreamApplication) {
 
   await app.load('models', srcPath('app', 'models'), path => importDefault(path))
   await app.load('serializers', srcPath('app', 'serializers'), path => importAll(path))
-  await app.load('services', srcPath('app', 'services'), path => importDefault(path))
 
   // provides a list of path overrides for your app. This is optional, and will default
   // to the paths expected for a typical psychic application.

@@ -3,6 +3,7 @@ import * as winston from 'winston'
 import EnvInternal from '../../../src/helpers/EnvInternal.js'
 import { PsychicDevtools } from '../../../src/index.js'
 import PsychicApplication from '../../../src/psychic-application/index.js'
+import importAll from '../app/helpers/importAll.js'
 import importDefault from '../app/helpers/importDefault.js'
 import srcPath from '../app/helpers/srcPath.js'
 import AppEnv from './AppEnv.js'
@@ -11,6 +12,7 @@ import routesCb from './routes.js'
 
 export default async (psy: PsychicApplication) => {
   await psy.load('controllers', srcPath('app', 'controllers'), path => importDefault(path))
+  await psy.load('services', srcPath('app', 'services'), path => importAll(path))
 
   psy.set('appName', 'testapp')
   psy.set('packageManager', 'yarn')
@@ -57,6 +59,7 @@ export default async (psy: PsychicApplication) => {
   psy.set('paths', {
     apiRoutes: 'test-app/src/conf/routes.ts',
     controllers: 'test-app/src/app/controllers',
+    services: 'test-app/src/app/services',
     controllerSpecs: 'test-app/spec/unit/controllers',
   })
 
