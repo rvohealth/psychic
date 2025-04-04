@@ -267,6 +267,10 @@ export default async (psy: PsychicApplication) => {
     }
   })
 
+  psy.on('server:shutdown:final', () => {
+    __forTestingOnly('server:shutdown:final')
+  })
+
   psy.on('sync', () => {
     return { customField: { customNestedField: 'custom value' } }
   })
