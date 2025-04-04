@@ -32,4 +32,10 @@ describe('PsychicServer hooks', () => {
     await server.stop()
     expectHookCalled('server:shutdown')
   })
+
+  it('processes hooks for server:shutdown:final', async () => {
+    await server.start()
+    await server.stop()
+    expectHookCalled('server:shutdown:final')
+  })
 })

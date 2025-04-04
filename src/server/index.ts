@@ -145,6 +145,10 @@ export default class PsychicServer {
       await hook(this)
     }
 
+    for (const hook of psychicApp.specialHooks.serverShutdownFinal) {
+      await hook(this)
+    }
+
     this.httpServer?.close()
 
     if (!bypassClosingDbConnections) {
