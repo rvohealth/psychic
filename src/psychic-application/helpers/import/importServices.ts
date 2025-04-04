@@ -26,10 +26,8 @@ export default async function importServices(
 
     const serviceKey = globalServiceKeyFromPath(servicePath, servicesPath)
 
-    if (typeof typedServiceClass['setGlobalName'] === 'function') {
+    if (typeof typedServiceClass?.['setGlobalName'] === 'function') {
       typedServiceClass['setGlobalName'](serviceKey)
-    } else {
-      typedServiceClass.globalName = serviceKey
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
