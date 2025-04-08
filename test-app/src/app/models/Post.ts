@@ -3,7 +3,7 @@ import ApplicationModel from './ApplicationModel.js'
 import Comment from './Comment.js'
 import User from './User.js'
 
-const Deco = new Decorators<InstanceType<typeof Post>>()
+const deco = new Decorators<typeof Post>()
 
 export default class Post extends ApplicationModel {
   public override get table() {
@@ -29,13 +29,13 @@ export default class Post extends ApplicationModel {
   public createdAt: DreamColumn<Post, 'createdAt'>
   public updatedAt: DreamColumn<Post, 'updatedAt'>
 
-  @Deco.BelongsTo('User')
+  @deco.BelongsTo('User')
   public user: User
   public userId: DreamColumn<Post, 'userId'>
 
-  @Deco.HasMany('Comment')
+  @deco.HasMany('Comment')
   public comments: Comment[]
 
-  @Deco.HasOne('Comment')
+  @deco.HasOne('Comment')
   public recentComment: Comment | null
 }

@@ -2,7 +2,7 @@ import { Decorators, DreamColumn, DreamSerializers, IdType } from '@rvoh/dream'
 import ApplicationModel from './ApplicationModel.js'
 import User from './User.js'
 
-const Deco = new Decorators<InstanceType<typeof Pet>>()
+const deco = new Decorators<typeof Pet>()
 
 export default class Pet extends ApplicationModel {
   public override get table() {
@@ -36,7 +36,7 @@ export default class Pet extends ApplicationModel {
   public createdAt: DreamColumn<Pet, 'createdAt'>
   public updatedAt: DreamColumn<Pet, 'updatedAt'>
 
-  @Deco.BelongsTo('User')
+  @deco.BelongsTo('User')
   public user: User
   public userId: IdType
 }

@@ -2,7 +2,7 @@ import { Decorators, DreamColumn, DreamSerializers } from '@rvoh/dream'
 import ApplicationModel from './ApplicationModel.js'
 import Post from './Post.js'
 
-const Deco = new Decorators<InstanceType<typeof Comment>>()
+const deco = new Decorators<typeof Comment>()
 
 export default class Comment extends ApplicationModel {
   public override get table() {
@@ -21,7 +21,7 @@ export default class Comment extends ApplicationModel {
   public createdAt: DreamColumn<Comment, 'createdAt'>
   public updatedAt: DreamColumn<Comment, 'updatedAt'>
 
-  @Deco.BelongsTo('Post')
+  @deco.BelongsTo('Post')
   public post: Post
   public postId: DreamColumn<Comment, 'postId'>
 }

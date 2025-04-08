@@ -4,7 +4,7 @@ import ApplicationModel from './ApplicationModel.js'
 import Pet from './Pet.js'
 import Post from './Post.js'
 
-const Deco = new Decorators<InstanceType<typeof User>>()
+const deco = new Decorators<typeof User>()
 
 export default class User extends ApplicationModel {
   public override get table() {
@@ -70,31 +70,31 @@ export default class User extends ApplicationModel {
   public createdAt: DreamColumn<User, 'createdAt'>
   public updatedAt: DreamColumn<User, 'updatedAt'>
 
-  @Deco.Validates('contains', '@')
-  @Deco.Validates('presence')
+  @deco.Validates('contains', '@')
+  @deco.Validates('presence')
   public email: DreamColumn<User, 'email'>
 
-  @Deco.Virtual()
+  @deco.Virtual()
   public password: string | null | undefined
   public passwordDigest: string
 
-  @Deco.Virtual({ type: 'string', nullable: true })
+  @deco.Virtual({ type: 'string', nullable: true })
   public openapiVirtualSpecTest: string | null | undefined
 
-  @Deco.Virtual('string[]')
+  @deco.Virtual('string[]')
   public openapiVirtualSpecTest2: string | null | undefined
 
-  @Deco.HasMany('Pet')
+  @deco.HasMany('Pet')
   public pets: Pet[]
 
-  @Deco.HasMany('Post')
+  @deco.HasMany('Post')
   public posts: Post[]
 
-  @Deco.HasOne('Post')
+  @deco.HasOne('Post')
   public recentPost: Post | null
 
-  @Deco.BeforeCreate()
-  @Deco.BeforeUpdate()
+  @deco.BeforeCreate()
+  @deco.BeforeUpdate()
   public async hashPass() {
     if (this.password)
       this.passwordDigest = await insecurePasswordHashSinceBcryptBringsInTooMuchGarbage(this.password)

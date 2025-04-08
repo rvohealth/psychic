@@ -1,4 +1,4 @@
-import { closeAllDbConnections, DreamGlam } from '@rvoh/dream'
+import { closeAllDbConnections, DreamLogos } from '@rvoh/dream'
 import * as cookieParser from 'cookie-parser'
 import * as cors from 'cors'
 import * as express from 'express'
@@ -28,7 +28,7 @@ export default class PsychicServer {
   }
 
   public static asciiLogo() {
-    return DreamGlam.fluffstopherwalkin()
+    return DreamLogos.colorful()
   }
 
   public expressApp: Application
