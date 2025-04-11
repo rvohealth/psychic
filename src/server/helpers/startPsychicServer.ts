@@ -38,10 +38,12 @@ export function createPsychicHttpInstance(
         key: fs.readFileSync(sslCredentials.key),
         cert: fs.readFileSync(sslCredentials.cert),
       },
-      app,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+      app as any,
     )
   } else {
-    return http.createServer(app)
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+    return http.createServer(app as any)
   }
 }
 
