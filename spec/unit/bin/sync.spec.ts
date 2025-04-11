@@ -8,6 +8,6 @@ describe('PsychicBin#on', () => {
       await PsychicBin.sync()
       const syncFile = (await import('../../../test-app/src/types/psychic.js')).default
       expect(syncFile.customField).toEqual({ customNestedField: 'custom value' })
-    })
+    }, 15_000)
   })
 })

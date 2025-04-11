@@ -71,7 +71,7 @@
     "@types/lodash.sortby": "^4.7.9",
     "@types/node": "^22.5.1",
     "@types/pg": "^8.11.8",
-    "@types/supertest": "^6.0.2",
+    "@types/supertest": "^6.0.3",
     "eslint": "^9.19.0",
     "express": "^5.1.0",
     "jsdom": "^26.0.0",
