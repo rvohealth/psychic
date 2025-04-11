@@ -58,6 +58,7 @@ jobs:
       APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
       LEGACY_APP_ENCRYPTION_KEY: ${{ secrets.LEGACY_APP_ENCRYPTION_KEY }}
       PSYCHIC_CORE_DEVELOPMENT: 1
+      DREAM_PARALLEL_TESTS: 4
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -85,8 +86,8 @@ jobs:
         continue-on-error: true
         run: yarn list
       - run: yarn install --immutable
-      - run: APP_ROOT_PATH=$(pwd) yarn psy db:migrate --skip-sync
-      - run: APP_ROOT_PATH=$(pwd) yarn uspec
+      - run: yarn psy db:migrate --skip-sync
+      - run: yarn uspec
 
   fspec:
     name: Feature tests
