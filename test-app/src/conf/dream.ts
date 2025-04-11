@@ -7,6 +7,7 @@ import inflections from './inflections.js'
 export default async function configureDream(app: DreamApplication) {
   app.set('primaryKeyType', 'bigserial')
   app.set('inflections', inflections)
+  app.set('parallelTests', Number(process.env.DREAM_PARALLEL_TESTS))
 
   await app.load('models', srcPath('app', 'models'), path => importDefault(path))
   await app.load('serializers', srcPath('app', 'serializers'), path => importAll(path))
