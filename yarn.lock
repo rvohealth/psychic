@@ -828,17 +828,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvoh/dream-spec-helpers@npm:=0.2.3":
-  version: 0.2.3
-  resolution: "@rvoh/dream-spec-helpers@npm:0.2.3"
+"@rvoh/dream-spec-helpers@npm:^0.2.4":
+  version: 0.2.4
+  resolution: "@rvoh/dream-spec-helpers@npm:0.2.4"
   dependencies:
     lodash.sortby: "npm:^4.7.0"
   peerDependencies:
     "@types/node": "*"
     "@types/pg": "*"
     pg: "*"
-    ts-node: "*"
-  checksum: 10c0/af7a14b711985f8cad1bd14d6bbf4a67a455fd08b82949dd6145a7a153d8414e73c1f4c3706a2daf3625c8828dbaac0acb08f3320e167bbbd232c57755af3bd2
+  checksum: 10c0/4e3e91f9a1c6a641d3b726afa48911d1825fac8b7548631e270096a88d44097237f3f2aca45b2f54a97dcb483c755449ef4a6ca88b781b876bc4e39774f2e264
   languageName: node
   linkType: hard
 
@@ -863,9 +862,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvoh/psychic-spec-helpers@npm:=0.2.0":
-  version: 0.2.0
-  resolution: "@rvoh/psychic-spec-helpers@npm:0.2.0"
+"@rvoh/psychic-spec-helpers@npm:^0.4.3":
+  version: 0.4.3
+  resolution: "@rvoh/psychic-spec-helpers@npm:0.4.3"
   dependencies:
     cookiejar: "npm:^2.1.4"
   peerDependencies:
@@ -873,9 +872,8 @@ __metadata:
     "@types/supertest": "*"
     puppeteer: "*"
     supertest: "*"
-    ts-node: "*"
     typescript: "*"
-  checksum: 10c0/5d148a52f14278d4981864a3a014bebb2f5dbbfa0043481f1b863c7ab82bb094da423605eff97f445a651c3523d30a6d40347149ebbcec41c85bd429fbc094b1
+  checksum: 10c0/3be2252fa5539a0f0aca4fc2cc669d0ad2c93d86650f907ed44d7d6e22ca932e119e3d9227b580f147c542ed7430dd29b7a8fe64e1082a004b9f5f30de002fde
   languageName: node
   linkType: hard
 
@@ -886,9 +884,9 @@ __metadata:
     "@eslint/js": "npm:^9.19.0"
     "@jest-mock/express": "npm:^3.0.0"
     "@rvoh/dream": "npm:^0.35.3"
-    "@rvoh/dream-spec-helpers": "npm:=0.2.3"
-    "@rvoh/psychic-spec-helpers": "npm:=0.2.0"
-    "@types/cookie-parser": "npm:^1.4.7"
+    "@rvoh/dream-spec-helpers": "npm:^0.2.4"
+    "@rvoh/psychic-spec-helpers": "npm:^0.4.3"
+    "@types/cookie-parser": "npm:^1.4.8"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^5.0.1"
     "@types/lodash-es": "npm:^4"
@@ -969,12 +967,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@types/cookie-parser@npm:^1.4.7":
-  version: 1.4.7
-  resolution: "@types/cookie-parser@npm:1.4.7"
-  dependencies:
-    "@types/express": "npm:*"
-  checksum: 10c0/af37fea5399950e59ceb2e1f25c633f3df360c4f17e8b3f26418e672fe5c926a20993b86f8e1df72cfe2c4dc8967d9a18d3d78b5c6a5f751a297d0418e5690fa
+"@types/cookie-parser@npm:^1.4.8":
+  version: 1.4.8
+  resolution: "@types/cookie-parser@npm:1.4.8"
+  peerDependencies:
+    "@types/express": "*"
+  checksum: 10c0/c9a39da983203624a56ba16f9a7cb4b9d5fe113d863f05b60be15b2743699e8d3cea34c634a21a15c03054feb10a49f981a699d979357bff549d09e246561966
   languageName: node
   linkType: hard
 

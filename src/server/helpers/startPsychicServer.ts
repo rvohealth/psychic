@@ -1,15 +1,15 @@
 import { DreamCLI } from '@rvoh/dream'
-import { Application } from 'express'
-import * as fs from 'fs'
-import * as http from 'http'
-import { Server } from 'http'
-import * as https from 'https'
+import { Express } from 'express'
+import * as fs from 'node:fs'
+import * as http from 'node:http'
+import { Server } from 'node:http'
+import * as https from 'node:https'
 import EnvInternal from '../../helpers/EnvInternal.js'
 import { PsychicSslCredentials } from '../../psychic-application/index.js'
 import PsychicServer from '../../server/index.js'
 
 export interface StartPsychicServerOptions {
-  app: Application
+  app: Express
   port: number
   sslCredentials: PsychicSslCredentials | undefined
 }
@@ -28,22 +28,19 @@ export default async function startPsychicServer({
   })
 }
 
-export function createPsychicHttpInstance(
-  app: Application,
-  sslCredentials: PsychicSslCredentials | undefined,
-) {
+export function createPsychicHttpInstance(app: Express, sslCredentials: PsychicSslCredentials | undefined) {
   if (sslCredentials?.key && sslCredentials?.cert) {
     return https.createServer(
       {
         key: fs.readFileSync(sslCredentials.key),
         cert: fs.readFileSync(sslCredentials.cert),
       },
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-      app as any,
+      app as http.RequestListener<typeof http.IncomingMessage, typeof http.ServerResponse>,
     )
   } else {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-    return http.createServer(app as any)
+    return http.createServer(
+      app as http.RequestListener<typeof http.IncomingMessage, typeof http.ServerResponse>,
+    )
   }
 }
 

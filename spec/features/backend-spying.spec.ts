@@ -5,7 +5,7 @@ describe('test that spying on backend modules works within fspec runs', () => {
   it('can spy on backend methods', async () => {
     vi.spyOn(UsersController.prototype, 'pingMessage', 'get').mockReturnValue('chalupas dujour 1')
 
-    const page = await visit('/')
+    await visit('/')
 
     const text = 'chalupas dujour 1'
     await expect(page).toMatchTextContent(text)
@@ -13,7 +13,7 @@ describe('test that spying on backend modules works within fspec runs', () => {
 })
 
 it('resets spies between tests', async () => {
-  const page = await visit('/')
+  await visit('/')
   const text = 'helloworld'
   await expect(page).toMatchTextContent(text)
 })

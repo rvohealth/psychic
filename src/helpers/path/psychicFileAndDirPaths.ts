@@ -1,4 +1,4 @@
-import * as path from 'path'
+import * as path from 'node:path'
 import PsychicApplication from '../../psychic-application/index.js'
 
 export default function (relDirPath: string, partialFilePath: string) {

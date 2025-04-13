@@ -1,4 +1,4 @@
-import * as path from 'path'
+import * as path from 'node:path'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import PsychicApplication from '../psychic-application/index.js'
 

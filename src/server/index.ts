@@ -2,10 +2,10 @@ import { closeAllDbConnections, DreamLogos } from '@rvoh/dream'
 import * as cookieParser from 'cookie-parser'
 import * as cors from 'cors'
 import * as express from 'express'
-import { Application, Request, Response } from 'express'
+import { Express, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
-import { Server } from 'http'
-import * as path from 'path'
+import { Server } from 'node:http'
+import * as path from 'node:path'
 import EnvInternal from '../helpers/EnvInternal.js'
 import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError.js'
 import PsychicApplication, { PsychicSslCredentials } from '../psychic-application/index.js'
@@ -20,10 +20,7 @@ export default class PsychicServer {
     return await startPsychicServer(opts)
   }
 
-  public static createPsychicHttpInstance(
-    app: Application,
-    sslCredentials: PsychicSslCredentials | undefined,
-  ) {
+  public static createPsychicHttpInstance(app: Express, sslCredentials: PsychicSslCredentials | undefined) {
     return createPsychicHttpInstance(app, sslCredentials)
   }
 
@@ -31,7 +28,7 @@ export default class PsychicServer {
     return DreamLogos.colorful()
   }
 
-  public expressApp: Application
+  public expressApp: Express
   public httpServer: Server
   private booted = false
   constructor() {
@@ -172,9 +169,8 @@ export default class PsychicServer {
   }
 
   public buildApp() {
-    this.expressApp = (express as unknown as { default: () => Application }).default()
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.expressApp.use((cookieParser as unknown as { default: () => any }).default())
+    this.expressApp = express.default()
+    this.expressApp.use(cookieParser.default())
   }
 
   private initializeCors() {

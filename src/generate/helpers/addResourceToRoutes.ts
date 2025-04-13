@@ -1,5 +1,5 @@
-import * as fs from 'fs/promises'
-import * as path from 'path'
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
 import UnexpectedUndefined from '../../error/UnexpectedUndefined.js'
 import psychicPath from '../../helpers/path/psychicPath.js'
 import PsychicApplication from '../../psychic-application/index.js'

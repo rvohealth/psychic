@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "0.28.3",
+  "version": "0.28.4",
   "author": "RVOHealth",
   "repository": {
     "type": "git",
@@ -39,7 +39,7 @@
     "prepack": "yarn build"
   },
   "dependencies": {
-    "@types/cookie-parser": "^1.4.7",
+    "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "@types/lodash.groupby": "^4.6.9",
     "commander": "^12.1.0",
@@ -63,8 +63,8 @@
     "@eslint/js": "^9.19.0",
     "@jest-mock/express": "^3.0.0",
     "@rvoh/dream": "^0.35.3",
-    "@rvoh/dream-spec-helpers": "=0.2.3",
-    "@rvoh/psychic-spec-helpers": "=0.2.0",
+    "@rvoh/dream-spec-helpers": "^0.2.4",
+    "@rvoh/psychic-spec-helpers": "^0.4.3",
     "@types/express": "^5.0.1",
     "@types/lodash-es": "^4",
     "@types/lodash.clonedeep": "^4.5.9",

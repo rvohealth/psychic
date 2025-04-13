@@ -1,5 +1,5 @@
 import { RecordNotFound, ValidationError, camelize } from '@rvoh/dream'
-import { Application, Request, Response, Router } from 'express'
+import { Express, Request, Response, Router } from 'express'
 import pluralize from 'pluralize-esm'
 import PsychicController from '../controller/index.js'
 import HttpError from '../error/http/index.js'
@@ -25,16 +25,16 @@ import {
 } from './types.js'
 
 export default class PsychicRouter {
-  public app: Application
+  public app: Express
   public config: PsychicApplication
   public currentNamespaces: NamespaceConfig[] = []
   public routeManager: RouteManager = new RouteManager()
-  constructor(app: Application, config: PsychicApplication) {
+  constructor(app: Express, config: PsychicApplication) {
     this.app = app
     this.config = config
   }
 
-  public get routingMechanism(): Application | Router {
+  public get routingMechanism(): Express | Router {
     return this.app
   }
 
@@ -423,7 +423,7 @@ export default class PsychicRouter {
 export class PsychicNestedRouter extends PsychicRouter {
   public router: Router
   constructor(
-    app: Application,
+    app: Express,
     config: PsychicApplication,
     routeManager: RouteManager,
     {

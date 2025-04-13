@@ -12,12 +12,14 @@ import * as bodyParser from 'body-parser'
 import { CorsOptions } from 'cors'
 import { Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
-import * as http from 'http'
+import * as http from 'node:http'
 import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root.js'
 import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers.js'
+import PsychicApplicationInitMissingPackageManager from '../error/psychic-application/init-missing-package-manager.js'
 import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback.js'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js'
 import EnvInternal from '../helpers/EnvInternal.js'
+import pascalizeFileName from '../helpers/pascalizeFileName.js'
 import {
   OpenapiContent,
   OpenapiHeaders,
@@ -30,11 +32,9 @@ import PsychicRouter from '../router/index.js'
 import PsychicServer from '../server/index.js'
 import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache.js'
 import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
+import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
-import PsychicApplicationInitMissingPackageManager from '../error/psychic-application/init-missing-package-manager.js'
-import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
-import pascalizeFileName from '../helpers/pascalizeFileName.js'
 
 export default class PsychicApplication {
   public static async init(

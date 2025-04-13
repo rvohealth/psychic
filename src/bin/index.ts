@@ -1,6 +1,6 @@
 import { DreamBin, DreamCLI } from '@rvoh/dream'
-import * as fs from 'fs/promises'
-import * as path from 'path'
+import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
 import TypesBuilder from '../cli/helpers/TypesBuilder.js'
 import generateController from '../generate/controller.js'
 import generateResource from '../generate/resource.js'

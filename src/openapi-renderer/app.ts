@@ -1,6 +1,6 @@
 import { compact } from '@rvoh/dream'
-import * as fs from 'fs/promises'
 import { groupBy } from 'lodash-es'
+import * as fs from 'node:fs/promises'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import openapiJsonPath from '../helpers/openapiJsonPath.js'
