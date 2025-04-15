@@ -39,7 +39,11 @@ describe('OpenapiAppRenderer', () => {
       const syncFile = JSON.parse((await fs.readFile(filename)).toString())
 
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
-      expect(Object.keys(syncFile.paths)).toEqual(['/admin/test', '/openapi/multiple-openapi-names'])
+      expect(Object.keys(syncFile.paths)).toEqual([
+        '/admin/test',
+        '/openapi/multiple-openapi-names',
+        '/openapi/multiple-serializer-statements',
+      ])
     })
   })
 })

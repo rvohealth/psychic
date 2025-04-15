@@ -37,10 +37,84 @@
           }
         }
       }
+    },
+    "/openapi/multiple-serializer-statements": {
+      "parameters": [],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "properties": {
+                    "field1": {
+                      "$ref": "#/components/schemas/Comment1OnlyUsedInOneController"
+                    },
+                    "field2": {
+                      "$ref": "#/components/schemas/Comment2OnlyUsedInOneController"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "Comment1OnlyUsedInOneController": {
+        "type": "object",
+        "required": [
+          "howyadoin"
+        ],
+        "properties": {
+          "howyadoin": {
+            "type": "string",
+            "format": "date"
+          }
+        }
+      },
+      "Comment2OnlyUsedInOneController": {
+        "type": "object",
+        "required": [
+          "howyadoins"
+        ],
+        "properties": {
+          "howyadoins": {
+            "type": "array",
+            "items": {
+              "type": "string",
+              "format": "date"
+            }
+          }
+        }
+      },
       "ValidationErrors": {
         "type": "object",
         "properties": {

@@ -739,7 +739,9 @@ export default class OpenapiEndpointRenderer<
 
     Object.keys(this.responses || {}).forEach(statusCode => {
       const statusCodeInt: HttpStatusCodeNumber = parseInt(statusCode) as HttpStatusCodeNumber
-      const response = this.responses![statusCodeInt] as OpenapiSchemaBodyShorthand & { description?: string }
+      const response = cloneDeep(
+        this.responses![statusCodeInt] as OpenapiSchemaBodyShorthand & { description?: string },
+      )
       responseData[statusCodeInt] ||= { description: statusDescription(statusCodeInt) } as OpenapiContent
       const statusResponse: OpenapiContent = responseData[statusCodeInt] as OpenapiContent
 

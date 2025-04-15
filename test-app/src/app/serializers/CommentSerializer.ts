@@ -318,3 +318,13 @@ export class CommentTestingAdditionalPropertiesSerializer extends DreamSerialize
   })
   public howyadoin: Record<string, { code: string; text: string }>
 }
+
+export class Comment1OnlyUsedInOneControllerSerializer extends DreamSerializer {
+  @Attribute('date')
+  public howyadoin: string
+}
+
+export class Comment2OnlyUsedInOneControllerSerializer extends DreamSerializer {
+  @Attribute('date[]')
+  public howyadoins: string
+}

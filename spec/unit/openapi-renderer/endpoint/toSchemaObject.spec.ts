@@ -129,7 +129,7 @@ describe('OpenapiEndpointRenderer', () => {
       context('suppressResponseEnums=true', () => {
         beforeEach(() => {
           const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
-          psychicApp.openapi.default.suppressResponseEnums = true
+          psychicApp.openapi.default!.suppressResponseEnums = true
 
           vi.spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail').mockReturnValue(
             psychicApp,
@@ -1266,7 +1266,15 @@ The following values will be allowed:
           {
             responses: {
               204: {
-                $serializer: CommentTestingBasicArraySerializerRefSerializer,
+                type: 'object',
+                properties: {
+                  comment1: {
+                    $serializer: CommentTestingBasicArraySerializerRefSerializer,
+                  },
+                  comment2: {
+                    $serializer: CommentTestingDateSerializer,
+                  },
+                },
               },
             },
           },
