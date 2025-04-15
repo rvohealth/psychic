@@ -18,7 +18,7 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
-        expect(response.default.components.securitySchemes).toEqual({
+        expect(response.default!.components.securitySchemes).toEqual({
           bearerToken: {
             type: 'http',
             scheme: 'bearer',
@@ -26,7 +26,7 @@ describe('OpenapiAppRenderer', () => {
           },
         })
 
-        expect(response.default.paths['/greeter/justforspecs']).toEqual(
+        expect(response.default!.paths['/greeter/justforspecs']).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             parameters: expect.arrayContaining([
@@ -60,7 +60,7 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
-        expect(response.default.paths['/users/{id}/justforspecs']).toEqual(
+        expect(response.default!.paths['/users/{id}/justforspecs']).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             parameters: expect.arrayContaining([
@@ -94,7 +94,7 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
-        expect(response.default.paths['/users']).toEqual(
+        expect(response.default!.paths['/users']).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             parameters: expect.arrayContaining([
@@ -111,7 +111,7 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
-        expect(response.default.paths['/users']).toEqual(
+        expect(response.default!.paths['/users']).toEqual(
           expect.objectContaining({
             post: {
               tags: [],
@@ -155,7 +155,7 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
-        expect(response.default.paths['/users']).toEqual(
+        expect(response.default!.paths['/users']).toEqual(
           expect.objectContaining({
             get: {
               tags: [],
@@ -179,7 +179,7 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
-        expect(response.default.paths).toEqual(
+        expect(response.default!.paths).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/users/{id}': expect.objectContaining({
@@ -221,7 +221,7 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
-        expect(response.default.components).toEqual(
+        expect(response.default!.components).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             schemas: expect.objectContaining({
@@ -406,6 +406,20 @@ describe('OpenapiAppRenderer', () => {
       })
     })
 
+    context('multiple openapi schemas', () => {
+      it('correctly renders all schemas in all secondary openapi files', async () => {
+        const response = await OpenapiAppRenderer.toObject()
+        const comment1Content = {
+          type: 'object',
+          required: ['howyadoin'],
+          properties: { howyadoin: { type: 'string', format: 'date' } },
+        }
+
+        expect(response.mobile!.components.schemas!.Comment1OnlyUsedInOneController).toEqual(comment1Content)
+        expect(response.admin!.components.schemas!.Comment1OnlyUsedInOneController).toEqual(comment1Content)
+      })
+    })
+
     context('admin', () => {
       it('reads all admin controllers and consolidates endpoints, also providing boilerplate admin openapi headers', async () => {
         const response = await OpenapiAppRenderer.toObject()
@@ -422,7 +436,7 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
-        expect(response.admin.components.securitySchemes).toEqual({
+        expect(response.admin!.components.securitySchemes).toEqual({
           bearerToken: {
             type: 'http',
             scheme: 'bearer',
@@ -430,7 +444,7 @@ describe('OpenapiAppRenderer', () => {
           },
         })
 
-        expect(response.admin.paths['/admin/test']).toEqual({
+        expect(response.admin!.paths['/admin/test']).toEqual({
           parameters: [
             {
               in: 'header',
@@ -455,7 +469,7 @@ describe('OpenapiAppRenderer', () => {
             },
           },
         })
-        expect(response.admin.paths['/greeter/justforspecs']).toBeUndefined()
+        expect(response.admin!.paths['/greeter/justforspecs']).toBeUndefined()
       })
     })
   })

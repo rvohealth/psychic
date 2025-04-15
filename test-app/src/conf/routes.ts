@@ -29,6 +29,7 @@ export default (r: PsychicRouter) => {
   r.post('openapi-validation-test', ParamsTestController, 'testOpenapiValidation')
   r.get('users/howyadoin', UsersController, 'howyadoin')
   r.get('openapi/multiple-openapi-names', OpenapiDecoratorTestController, 'testMultipleOpenapiNames')
+  r.get('openapi/multiple-serializer-statements', OpenapiDecoratorTestController, 'testMultipleSerializers')
   r.get('openapi/openapi-overrides', OpenapiOverridesTestController, 'testOpenapiConfigOverrides')
 
   r.resources('users', r => {

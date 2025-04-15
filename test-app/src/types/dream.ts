@@ -929,6 +929,8 @@ export const globalSchema = {
       'Admin/V2/PetSerializer',
       'Circular/HelloSerializer',
       'Circular/WorldSerializer',
+      'Comment1OnlyUsedInOneControllerSerializer',
+      'Comment2OnlyUsedInOneControllerSerializer',
       'CommentSerializer',
       'CommentSummarySerializer',
       'CommentTestingAdditionalPropertiesSerializer',
