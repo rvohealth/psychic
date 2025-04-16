@@ -672,7 +672,7 @@ export default class OpenapiEndpointRenderer<
                   type: 'array',
                   items: {
                     type: 'string',
-                    enum: [...columnMetadata.enumValues, ...(columnMetadata.allowNull ? ['null'] : [])],
+                    enum: [...columnMetadata.enumValues],
                   },
                 },
               }
@@ -681,7 +681,7 @@ export default class OpenapiEndpointRenderer<
                 ...paramsShape.properties,
                 [columnName]: {
                   type: 'string',
-                  enum: [...columnMetadata.enumValues, ...(columnMetadata.allowNull ? ['null'] : [])],
+                  enum: [...columnMetadata.enumValues],
                 },
               }
             }

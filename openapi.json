@@ -966,8 +966,7 @@
                       "type": "string",
                       "enum": [
                         "efishy feesh",
-                        "snick snowcks",
-                        "null"
+                        "snick snowcks"
                       ]
                     },
                     "nullable": true
@@ -1005,8 +1004,7 @@
                     "type": "string",
                     "enum": [
                       "cat",
-                      "noncat",
-                      "null"
+                      "noncat"
                     ],
                     "nullable": true
                   }
@@ -1102,8 +1100,7 @@
                       "type": "string",
                       "enum": [
                         "efishy feesh",
-                        "snick snowcks",
-                        "null"
+                        "snick snowcks"
                       ]
                     },
                     "nullable": true
@@ -1141,8 +1138,7 @@
                     "type": "string",
                     "enum": [
                       "cat",
-                      "noncat",
-                      "null"
+                      "noncat"
                     ],
                     "nullable": true
                   }
