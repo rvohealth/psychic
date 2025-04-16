@@ -93,8 +93,7 @@ describe('OpenapiSerializerRenderer', () => {
                   type: 'array',
                   description: 'my array',
                   items: {
-                    type: 'string',
-                    nullable: true,
+                    type: ['null', 'string'],
                     description: 'my array item',
                   },
                 },
@@ -303,8 +302,8 @@ describe('OpenapiSerializerRenderer', () => {
               required: ['id', 'body', 'explicitlyOmittedFromParamSafeColumns', 'comments'],
               properties: {
                 id: { type: 'string' },
-                body: { type: 'string', nullable: true },
-                explicitlyOmittedFromParamSafeColumns: { type: 'string', nullable: true },
+                body: { type: ['string', 'null'] },
+                explicitlyOmittedFromParamSafeColumns: { type: ['string', 'null'] },
                 comments: {
                   type: 'array',
                   items: { $ref: '#/components/schemas/Comment' },
@@ -314,7 +313,7 @@ describe('OpenapiSerializerRenderer', () => {
             Comment: {
               type: 'object',
               required: ['id', 'body'],
-              properties: { id: { type: 'string' }, body: { type: 'string', nullable: true } },
+              properties: { id: { type: 'string' }, body: { type: ['string', 'null'] } },
             },
           })
         })
@@ -327,10 +326,10 @@ describe('OpenapiSerializerRenderer', () => {
               type: 'object',
               required: ['body', 'id', 'email', 'name'],
               properties: {
-                body: { type: 'string', nullable: true },
+                body: { type: ['string', 'null'] },
                 id: { type: 'integer' },
                 email: { type: 'string' },
-                name: { type: 'string', nullable: true },
+                name: { type: ['string', 'null'] },
               },
             },
             User: {
@@ -339,7 +338,7 @@ describe('OpenapiSerializerRenderer', () => {
               properties: {
                 id: { type: 'integer' },
                 email: { type: 'string' },
-                name: { type: 'string', nullable: true },
+                name: { type: ['string', 'null'] },
               },
             },
           })

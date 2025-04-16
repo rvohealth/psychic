@@ -78,7 +78,7 @@ export default class User extends ApplicationModel {
   public password: string | null | undefined
   public passwordDigest: string
 
-  @deco.Virtual({ type: 'string', nullable: true })
+  @deco.Virtual({ type: ['string', 'null'] })
   public openapiVirtualSpecTest: string | null | undefined
 
   @deco.Virtual('string[]')

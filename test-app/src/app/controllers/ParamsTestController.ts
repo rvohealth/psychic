@@ -13,8 +13,7 @@ export default class ParamsTestController extends ApplicationController {
       type: 'object',
       properties: {
         howyadoin: {
-          type: 'string',
-          nullable: true,
+          type: ['string', 'null'],
         },
       },
     },

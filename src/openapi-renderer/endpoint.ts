@@ -26,6 +26,7 @@ import { HttpMethod } from '../router/types.js'
 import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment.js'
 import { DEFAULT_OPENAPI_RESPONSES } from './defaults.js'
 import openapiRoute from './helpers/openapiRoute.js'
+import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import OpenapiSerializerRenderer from './serializer.js'
 
 export default class OpenapiEndpointRenderer<
@@ -47,7 +48,6 @@ export default class OpenapiEndpointRenderer<
   private security: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['security']
   private summary: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['summary']
   private description: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['description']
-  private nullable: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['nullable']
   private omitDefaultHeaders: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['omitDefaultHeaders']
   private omitDefaultResponses: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['omitDefaultResponses']
   private defaultResponse: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['defaultResponse']
@@ -84,7 +84,6 @@ export default class OpenapiEndpointRenderer<
       security,
       pathParams,
       description,
-      nullable,
       summary,
       omitDefaultHeaders,
       omitDefaultResponses,
@@ -102,7 +101,6 @@ export default class OpenapiEndpointRenderer<
     this.pathParams = pathParams
     this.summary = summary
     this.description = description
-    this.nullable = nullable
     this.tags = tags === undefined ? controllerClass.openapiConfig?.tags || [] : tags
     this.omitDefaultHeaders =
       omitDefaultHeaders === undefined
@@ -527,6 +525,8 @@ export default class OpenapiEndpointRenderer<
         enumValues: unknown[] | null
       }
 
+      const nullableColumn = columnMetadata?.allowNull
+
       switch (columnMetadata?.dbType) {
         case 'boolean':
         case 'boolean[]':
@@ -536,9 +536,7 @@ export default class OpenapiEndpointRenderer<
         case 'integer[]':
           paramsShape.properties = {
             ...paramsShape.properties,
-            [columnName]: {
-              type: columnMetadata.dbType,
-            },
+            [columnName]: primitiveOpenapiStatementToOpenapi(columnMetadata.dbType, nullableColumn),
           }
           break
 
@@ -549,9 +547,7 @@ export default class OpenapiEndpointRenderer<
         case 'bigint':
           paramsShape.properties = {
             ...paramsShape.properties,
-            [columnName]: {
-              type: 'string',
-            },
+            [columnName]: primitiveOpenapiStatementToOpenapi('string', nullableColumn),
           }
           break
 
@@ -562,12 +558,7 @@ export default class OpenapiEndpointRenderer<
         case 'bigint[]':
           paramsShape.properties = {
             ...paramsShape.properties,
-            [columnName]: {
-              type: 'array',
-              items: {
-                type: 'string',
-              },
-            },
+            [columnName]: primitiveOpenapiStatementToOpenapi('string[]', nullableColumn),
           }
           break
 
@@ -576,9 +567,7 @@ export default class OpenapiEndpointRenderer<
         case 'timestamp without time zone':
           paramsShape.properties = {
             ...paramsShape.properties,
-            [columnName]: {
-              type: 'date-time',
-            },
+            [columnName]: primitiveOpenapiStatementToOpenapi('date-time', nullableColumn),
           }
           break
 
@@ -587,12 +576,7 @@ export default class OpenapiEndpointRenderer<
         case 'timestamp without time zone[]':
           paramsShape.properties = {
             ...paramsShape.properties,
-            [columnName]: {
-              type: 'array',
-              items: {
-                type: 'date-time',
-              },
-            },
+            [columnName]: primitiveOpenapiStatementToOpenapi('date-time[]', nullableColumn),
           }
           break
 
@@ -601,7 +585,7 @@ export default class OpenapiEndpointRenderer<
           paramsShape.properties = {
             ...paramsShape.properties,
             [columnName]: {
-              type: 'object',
+              type: nullableColumn ? ['object', 'null'] : 'object',
             },
           }
           break
@@ -611,7 +595,7 @@ export default class OpenapiEndpointRenderer<
           paramsShape.properties = {
             ...paramsShape.properties,
             [columnName]: {
-              type: 'array',
+              type: nullableColumn ? ['array', 'null'] : 'array',
               items: {
                 type: 'object',
               },
@@ -622,21 +606,14 @@ export default class OpenapiEndpointRenderer<
         case 'numeric':
           paramsShape.properties = {
             ...paramsShape.properties,
-            [columnName]: {
-              type: 'number',
-            },
+            [columnName]: primitiveOpenapiStatementToOpenapi('number', nullableColumn),
           }
           break
 
         case 'numeric[]':
           paramsShape.properties = {
             ...paramsShape.properties,
-            [columnName]: {
-              type: 'array',
-              items: {
-                type: 'number',
-              },
-            },
+            [columnName]: primitiveOpenapiStatementToOpenapi('number[]', nullableColumn),
           }
           break
 
@@ -657,9 +634,9 @@ export default class OpenapiEndpointRenderer<
                 ...paramsShape.properties,
                 [columnName]: {
                   anyOf: [
-                    { type: 'string', nullable: true },
-                    { type: 'number', nullable: true },
-                    { type: 'object', nullable: true },
+                    { type: ['string', 'null'] },
+                    { type: ['number', 'null'] },
+                    { type: ['object', 'null'] },
                   ],
                 },
               }
@@ -669,7 +646,7 @@ export default class OpenapiEndpointRenderer<
               paramsShape.properties = {
                 ...paramsShape.properties,
                 [columnName]: {
-                  type: 'array',
+                  type: nullableColumn ? ['array', 'null'] : 'array',
                   items: {
                     type: 'string',
                     enum: [...columnMetadata.enumValues],
@@ -680,16 +657,12 @@ export default class OpenapiEndpointRenderer<
               paramsShape.properties = {
                 ...paramsShape.properties,
                 [columnName]: {
-                  type: 'string',
+                  type: nullableColumn ? ['string', 'null'] : 'string',
                   enum: [...columnMetadata.enumValues],
                 },
               }
             }
           }
-      }
-
-      if (columnMetadata?.allowNull && paramsShape.properties![columnName]) {
-        ;(paramsShape.properties![columnName] as OpenapiSchemaObject).nullable = true
       }
     }
 
@@ -823,16 +796,6 @@ export default class OpenapiEndpointRenderer<
     return this.parseSingleEntitySerializerResponseShape()
   }
 
-  private accountForNullableOption<T>(bodySegment: T, nullable: boolean): T | OpenapiSchemaExpressionAllOf {
-    if (nullable) {
-      return {
-        allOf: [bodySegment, { nullable: true }],
-      } as OpenapiSchemaExpressionAllOf
-    } else {
-      return bodySegment
-    }
-  }
-
   /**
    * @internal
    *
@@ -849,22 +812,16 @@ export default class OpenapiEndpointRenderer<
     if (serializerClass === undefined) throw new Error('getSerializerClasses returned no serializer classes')
 
     const serializerKey = serializerClass.openapiName
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const serializerObject: OpenapiSchemaBody = this.accountForNullableOption(
-      {
-        $ref: `#/components/schemas/${serializerKey}`,
-      },
-      this.nullable || false,
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    ) as any
+    const serializerObject: OpenapiSchemaBody = { $ref: `#/components/schemas/${serializerKey}` }
 
     const baseSchema = this.many
       ? {
           type: 'array',
           items: serializerObject,
         }
-      : serializerObject
+      : this.defaultResponse?.maybeNull
+        ? { anyOf: [serializerObject, { type: 'null' }] }
+        : serializerObject
 
     const finalOutput: OpenapiContent = {
       content: {
@@ -1080,13 +1037,13 @@ export interface OpenapiEndpointRendererOpts<
     ? string
     : undefined
   status?: HttpStatusCodeNumber
-  nullable?: boolean
   omitDefaultHeaders?: boolean
   omitDefaultResponses?: boolean
 }
 
 export interface OpenapiEndpointRendererDefaultResponseOption {
   description?: string
+  maybeNull?: boolean
 }
 
 export interface OpenapiSchemaRequestBodyOnlyOption {

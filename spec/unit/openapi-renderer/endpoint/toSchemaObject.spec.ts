@@ -56,8 +56,7 @@ describe('OpenapiEndpointRenderer', () => {
               type: 'integer',
             },
             nicknames: {
-              type: 'array',
-              nullable: true,
+              type: ['array', 'null'],
               items: {
                 type: 'string',
               },
@@ -470,15 +469,14 @@ The following values will be allowed:
                     {
                       $ref: '#/components/schemas/CommentTestingDoubleShorthand',
                     },
-                    { nullable: true },
+                    { type: 'null' },
                   ],
                 },
                 manyHowyadoins: {
-                  type: 'array',
+                  type: ['array', 'null'],
                   items: {
                     $ref: '#/components/schemas/CommentTestingDoubleShorthand',
                   },
-                  nullable: true,
                 },
               },
             },
@@ -653,15 +651,14 @@ The following values will be allowed:
                         {
                           $ref: '#/components/schemas/CommentTestingDoubleShorthand',
                         },
-                        { nullable: true },
+                        { type: 'null' },
                       ],
                     },
                     myNullableProperties: {
-                      type: 'array',
+                      type: ['array', 'null'],
                       items: {
                         $ref: '#/components/schemas/CommentTestingDoubleShorthand',
                       },
-                      nullable: true,
                     },
                   },
                 },
@@ -793,7 +790,7 @@ The following values will be allowed:
                         {
                           $ref: '#/components/schemas/CommentTestingDoubleShorthand',
                         },
-                        { nullable: true },
+                        { type: 'null' },
                       ],
                     },
                   },
@@ -833,7 +830,7 @@ The following values will be allowed:
               required: ['id', 'name'],
               properties: {
                 id: { type: 'string' },
-                name: { type: 'string', nullable: true },
+                name: { type: ['string', 'null'] },
               },
             },
             User: {
@@ -842,7 +839,7 @@ The following values will be allowed:
               properties: {
                 id: { type: 'integer' },
                 email: { type: 'string' },
-                name: { type: 'string', nullable: true },
+                name: { type: ['string', 'null'] },
               },
             },
           }),
@@ -921,7 +918,7 @@ The following values will be allowed:
                 properties: {
                   id: { type: 'integer' },
                   email: { type: 'string' },
-                  name: { type: 'string', nullable: true },
+                  name: { type: ['string', 'null'] },
                 },
               },
             }),
@@ -947,7 +944,7 @@ The following values will be allowed:
                   required: ['id', 'body', 'comments'],
                   properties: {
                     id: { type: 'string' },
-                    body: { type: 'string', nullable: true },
+                    body: { type: ['string', 'null'] },
                     comments: {
                       type: 'array',
                       items: { $ref: '#/components/schemas/Comment' },
@@ -959,7 +956,7 @@ The following values will be allowed:
                   required: ['id', 'body', 'comments'],
                   properties: {
                     id: { type: 'string' },
-                    body: { type: 'string', nullable: true },
+                    body: { type: ['string', 'null'] },
                     comments: {
                       type: 'array',
                       items: { $ref: '#/components/schemas/Comment' },
@@ -971,7 +968,7 @@ The following values will be allowed:
                   required: ['id', 'body'],
                   properties: {
                     id: { type: 'string' },
-                    body: { type: 'string', nullable: true },
+                    body: { type: ['string', 'null'] },
                   },
                 },
               }),
@@ -992,7 +989,7 @@ The following values will be allowed:
                     required: ['id'],
                     properties: {
                       id: { type: 'string' },
-                      body: { type: 'string', nullable: true },
+                      body: { type: ['string', 'null'] },
                       comments: {
                         type: 'array',
                         items: { $ref: '#/components/schemas/Comment' },
@@ -1043,7 +1040,7 @@ The following values will be allowed:
                   required: ['id', 'body'],
                   properties: {
                     id: { type: 'string' },
-                    body: { type: 'string', nullable: true },
+                    body: { type: ['string', 'null'] },
                   },
                 },
               }),
@@ -1066,7 +1063,7 @@ The following values will be allowed:
                 required: ['id', 'body', 'comments'],
                 properties: {
                   id: { type: 'string' },
-                  body: { type: 'string', nullable: true },
+                  body: { type: ['string', 'null'] },
                   comments: { type: 'array', items: { $ref: '#/components/schemas/Comment' } },
                 },
               },
@@ -1075,7 +1072,7 @@ The following values will be allowed:
                 required: ['id', 'body'],
                 properties: {
                   id: { type: 'string' },
-                  body: { type: 'string', nullable: true },
+                  body: { type: ['string', 'null'] },
                 },
               },
             }),
@@ -1096,7 +1093,7 @@ The following values will be allowed:
                   required: ['id', 'body'],
                   properties: {
                     id: { type: 'string' },
-                    body: { type: 'string', nullable: true },
+                    body: { type: ['string', 'null'] },
                   },
                 },
               }),
@@ -1176,7 +1173,7 @@ The following values will be allowed:
                   required: ['id', 'body'],
                   properties: {
                     id: { type: 'string' },
-                    body: { type: 'string', nullable: true },
+                    body: { type: ['string', 'null'] },
                   },
                 },
               }),
@@ -1231,7 +1228,7 @@ The following values will be allowed:
                     required: ['id', 'body'],
                     properties: {
                       id: { type: 'string' },
-                      body: { type: 'string', nullable: true },
+                      body: { type: ['string', 'null'] },
                     },
                   },
                 }),
@@ -1336,7 +1333,7 @@ The following values will be allowed:
               required: ['id', 'body'],
               properties: {
                 id: { type: 'string' },
-                body: { type: 'string', nullable: true },
+                body: { type: ['string', 'null'] },
               },
             },
           }),

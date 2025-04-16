@@ -142,8 +142,10 @@
                     "type": "string"
                   },
                   "birthdate": {
-                    "type": "string",
-                    "nullable": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date"
                   },
                   "createdOn": {
@@ -154,118 +156,156 @@
                     "type": "string"
                   },
                   "favoriteBigint": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "favoriteBigints": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteBooleans": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "boolean"
                     }
                   },
                   "favoriteCitext": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "favoriteCitexts": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteDates": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string",
                       "format": "date"
                     }
                   },
                   "favoriteDatetimes": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string",
                       "format": "date-time"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteIntegers": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "integer"
                     }
                   },
                   "favoriteJsonbs": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "object"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteJsons": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "object"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteNumerics": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "number"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteTexts": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteUuids": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "jsonData": {
-                    "type": "object",
-                    "nullable": true
+                    "type": [
+                      "object",
+                      "null"
+                    ]
                   },
                   "jsonbData": {
-                    "type": "object",
-                    "nullable": true
+                    "type": [
+                      "object",
+                      "null"
+                    ]
                   },
                   "name": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "nicknames": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "notes": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "optionalUuid": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "passwordDigest": {
                     "type": "string"
@@ -362,22 +402,30 @@
                   "password": {
                     "anyOf": [
                       {
-                        "type": "string",
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       },
                       {
-                        "type": "number",
-                        "nullable": true
+                        "type": [
+                          "number",
+                          "null"
+                        ]
                       },
                       {
-                        "type": "object",
-                        "nullable": true
+                        "type": [
+                          "object",
+                          "null"
+                        ]
                       }
                     ]
                   },
                   "openapiVirtualSpecTest": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "openapiVirtualSpecTest2": {
                     "type": "array",
@@ -457,8 +505,10 @@
                     "type": "string"
                   },
                   "birthdate": {
-                    "type": "string",
-                    "nullable": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date"
                   },
                   "createdOn": {
@@ -469,118 +519,156 @@
                     "type": "string"
                   },
                   "favoriteBigint": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "favoriteBigints": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteBooleans": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "boolean"
                     }
                   },
                   "favoriteCitext": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "favoriteCitexts": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteDates": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string",
                       "format": "date"
                     }
                   },
                   "favoriteDatetimes": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string",
                       "format": "date-time"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteIntegers": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "integer"
                     }
                   },
                   "favoriteJsonbs": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "object"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteJsons": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "object"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteNumerics": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "number"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteTexts": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteUuids": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "jsonData": {
-                    "type": "object",
-                    "nullable": true
+                    "type": [
+                      "object",
+                      "null"
+                    ]
                   },
                   "jsonbData": {
-                    "type": "object",
-                    "nullable": true
+                    "type": [
+                      "object",
+                      "null"
+                    ]
                   },
                   "name": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "nicknames": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "notes": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "optionalUuid": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "passwordDigest": {
                     "type": "string"
@@ -677,22 +765,30 @@
                   "password": {
                     "anyOf": [
                       {
-                        "type": "string",
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       },
                       {
-                        "type": "number",
-                        "nullable": true
+                        "type": [
+                          "number",
+                          "null"
+                        ]
                       },
                       {
-                        "type": "object",
-                        "nullable": true
+                        "type": [
+                          "object",
+                          "null"
+                        ]
                       }
                     ]
                   },
                   "openapiVirtualSpecTest": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "openapiVirtualSpecTest2": {
                     "type": "array",
@@ -872,8 +968,10 @@
                 "type": "object",
                 "properties": {
                   "howyadoin": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   }
                 }
               }
@@ -949,47 +1047,61 @@
                 "type": "object",
                 "properties": {
                   "collarCount": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "collarCountInt": {
-                    "type": "integer",
-                    "nullable": true
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
                   },
                   "collarCountNumeric": {
-                    "type": "number",
-                    "nullable": true
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "favoriteTreats": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string",
                       "enum": [
                         "efishy feesh",
                         "snick snowcks"
                       ]
-                    },
-                    "nullable": true
+                    }
                   },
                   "lastHeardAt": {
                     "type": "string",
                     "format": "date-time"
                   },
                   "lastSeenAt": {
-                    "type": "string",
-                    "nullable": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time"
                   },
                   "likesTreats": {
                     "type": "boolean"
                   },
                   "likesWalks": {
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "name": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "requiredCollarCount": {
                     "type": "string"
@@ -1001,12 +1113,14 @@
                     "type": "number"
                   },
                   "species": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "enum": [
                       "cat",
                       "noncat"
-                    ],
-                    "nullable": true
+                    ]
                   }
                 }
               }
@@ -1083,47 +1197,61 @@
                 "type": "object",
                 "properties": {
                   "collarCount": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "collarCountInt": {
-                    "type": "integer",
-                    "nullable": true
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
                   },
                   "collarCountNumeric": {
-                    "type": "number",
-                    "nullable": true
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "favoriteTreats": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string",
                       "enum": [
                         "efishy feesh",
                         "snick snowcks"
                       ]
-                    },
-                    "nullable": true
+                    }
                   },
                   "lastHeardAt": {
                     "type": "string",
                     "format": "date-time"
                   },
                   "lastSeenAt": {
-                    "type": "string",
-                    "nullable": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date-time"
                   },
                   "likesTreats": {
                     "type": "boolean"
                   },
                   "likesWalks": {
-                    "type": "boolean",
-                    "nullable": true
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
                   },
                   "name": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "requiredCollarCount": {
                     "type": "string"
@@ -1135,12 +1263,14 @@
                     "type": "number"
                   },
                   "species": {
-                    "type": "string",
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "enum": [
                       "cat",
                       "noncat"
-                    ],
-                    "nullable": true
+                    ]
                   }
                 }
               }
@@ -1211,8 +1341,10 @@
                 "type": "object",
                 "properties": {
                   "body": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   }
                 }
               }
@@ -1278,8 +1410,10 @@
                     "type": "string"
                   },
                   "birthdate": {
-                    "type": "string",
-                    "nullable": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date"
                   },
                   "createdOn": {
@@ -1290,118 +1424,156 @@
                     "type": "string"
                   },
                   "favoriteBigint": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "favoriteBigints": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteBooleans": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "boolean"
                     }
                   },
                   "favoriteCitext": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "favoriteCitexts": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteDates": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string",
                       "format": "date"
                     }
                   },
                   "favoriteDatetimes": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string",
                       "format": "date-time"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteIntegers": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "integer"
                     }
                   },
                   "favoriteJsonbs": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "object"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteJsons": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "object"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteNumerics": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "number"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteTexts": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteUuids": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "jsonData": {
-                    "type": "object",
-                    "nullable": true
+                    "type": [
+                      "object",
+                      "null"
+                    ]
                   },
                   "jsonbData": {
-                    "type": "object",
-                    "nullable": true
+                    "type": [
+                      "object",
+                      "null"
+                    ]
                   },
                   "name": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "nicknames": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "notes": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "optionalUuid": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "passwordDigest": {
                     "type": "string"
@@ -1498,22 +1670,30 @@
                   "password": {
                     "anyOf": [
                       {
-                        "type": "string",
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       },
                       {
-                        "type": "number",
-                        "nullable": true
+                        "type": [
+                          "number",
+                          "null"
+                        ]
                       },
                       {
-                        "type": "object",
-                        "nullable": true
+                        "type": [
+                          "object",
+                          "null"
+                        ]
                       }
                     ]
                   },
                   "openapiVirtualSpecTest": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "openapiVirtualSpecTest2": {
                     "type": "array",
@@ -1687,8 +1867,10 @@
                     "type": "string"
                   },
                   "birthdate": {
-                    "type": "string",
-                    "nullable": true,
+                    "type": [
+                      "string",
+                      "null"
+                    ],
                     "format": "date"
                   },
                   "createdOn": {
@@ -1699,118 +1881,156 @@
                     "type": "string"
                   },
                   "favoriteBigint": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "favoriteBigints": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteBooleans": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "boolean"
                     }
                   },
                   "favoriteCitext": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "favoriteCitexts": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteDates": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string",
                       "format": "date"
                     }
                   },
                   "favoriteDatetimes": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string",
                       "format": "date-time"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteIntegers": {
-                    "type": "array",
-                    "nullable": true,
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "integer"
                     }
                   },
                   "favoriteJsonbs": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "object"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteJsons": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "object"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteNumerics": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "number"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteTexts": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "favoriteUuids": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "jsonData": {
-                    "type": "object",
-                    "nullable": true
+                    "type": [
+                      "object",
+                      "null"
+                    ]
                   },
                   "jsonbData": {
-                    "type": "object",
-                    "nullable": true
+                    "type": [
+                      "object",
+                      "null"
+                    ]
                   },
                   "name": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "nicknames": {
-                    "type": "array",
+                    "type": [
+                      "array",
+                      "null"
+                    ],
                     "items": {
                       "type": "string"
-                    },
-                    "nullable": true
+                    }
                   },
                   "notes": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "optionalUuid": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "passwordDigest": {
                     "type": "string"
@@ -1907,22 +2127,30 @@
                   "password": {
                     "anyOf": [
                       {
-                        "type": "string",
-                        "nullable": true
+                        "type": [
+                          "string",
+                          "null"
+                        ]
                       },
                       {
-                        "type": "number",
-                        "nullable": true
+                        "type": [
+                          "number",
+                          "null"
+                        ]
                       },
                       {
-                        "type": "object",
-                        "nullable": true
+                        "type": [
+                          "object",
+                          "null"
+                        ]
                       }
                     ]
                   },
                   "openapiVirtualSpecTest": {
-                    "type": "string",
-                    "nullable": true
+                    "type": [
+                      "string",
+                      "null"
+                    ]
                   },
                   "openapiVirtualSpecTest2": {
                     "type": "array",
@@ -2132,8 +2360,10 @@
             "type": "string"
           },
           "body": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -2182,8 +2412,10 @@
             "type": "string"
           },
           "name": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -2198,8 +2430,10 @@
             "type": "string"
           },
           "name": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -2216,12 +2450,16 @@
             "type": "string"
           },
           "body": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "explicitlyOmittedFromParamSafeColumns": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "comments": {
             "type": "array",
@@ -2243,8 +2481,10 @@
             "type": "string"
           },
           "body": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           },
           "comments": {
             "type": "array",
@@ -2269,8 +2509,10 @@
             "type": "string"
           },
           "name": {
-            "type": "string",
-            "nullable": true
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       },
@@ -2315,11 +2557,13 @@
             }
           },
           "nicknames": {
-            "type": "array",
+            "type": [
+              "array",
+              "null"
+            ],
             "items": {
               "type": "string"
-            },
-            "nullable": true
+            }
           }
         }
       },
