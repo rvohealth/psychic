@@ -123,14 +123,13 @@ describe('OpenapiAppRenderer', () => {
                       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                       properties: expect.objectContaining({
                         bio: { type: 'string' },
-                        birthdate: { type: 'string', format: 'date', nullable: true },
+                        birthdate: { type: ['string', 'null'], format: 'date' },
                         createdOn: { type: 'string', format: 'date' },
                         email: { type: 'string' },
-                        favoriteBigint: { type: 'string', nullable: true },
+                        favoriteBigint: { type: ['string', 'null'] },
                         favoriteBigints: {
-                          type: 'array',
+                          type: ['array', 'null'],
                           items: { type: 'string' },
-                          nullable: true,
                         },
                       }),
                     },
@@ -233,8 +232,7 @@ describe('OpenapiAppRenderer', () => {
                     type: 'integer',
                   },
                   nicknames: {
-                    type: 'array',
-                    nullable: true,
+                    type: ['array', 'null'],
                     items: {
                       type: 'string',
                     },
@@ -288,7 +286,7 @@ describe('OpenapiAppRenderer', () => {
                 required: ['id', 'body', 'comments'],
                 properties: {
                   id: { type: 'string' },
-                  body: { type: 'string', nullable: true },
+                  body: { type: ['string', 'null'] },
                   comments: {
                     type: 'array',
                     items: { $ref: '#/components/schemas/Comment' },
@@ -301,7 +299,7 @@ describe('OpenapiAppRenderer', () => {
                 required: ['id', 'body'],
                 properties: {
                   id: { type: 'string' },
-                  body: { type: 'string', nullable: true },
+                  body: { type: ['string', 'null'] },
                 },
               },
 

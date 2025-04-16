@@ -469,8 +469,7 @@ describe('OpenapiEndpointRenderer', () => {
             properties: {
               email: 'string',
               password: {
-                type: 'string',
-                nullable: true,
+                type: ['string', 'null'],
               },
               settings: {
                 type: 'object',
@@ -494,8 +493,7 @@ describe('OpenapiEndpointRenderer', () => {
                     type: 'string',
                   },
                   password: {
-                    type: 'string',
-                    nullable: true,
+                    type: ['string', 'null'],
                   },
                   settings: {
                     type: 'object',
@@ -534,44 +532,41 @@ describe('OpenapiEndpointRenderer', () => {
                       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                       properties: expect.objectContaining({
                         bio: { type: 'string' },
-                        birthdate: { type: 'string', format: 'date', nullable: true },
+                        birthdate: { type: ['string', 'null'], format: 'date' },
                         createdOn: { type: 'string', format: 'date' },
                         email: { type: 'string' },
-                        favoriteBooleans: { type: 'array', items: { type: 'boolean' }, nullable: true },
-                        favoriteCitext: { type: 'string', nullable: true },
+                        favoriteBooleans: { type: ['array', 'null'], items: { type: 'boolean' } },
+                        favoriteCitext: { type: ['string', 'null'] },
                         favoriteCitexts: {
-                          type: 'array',
+                          type: ['array', 'null'],
                           items: { type: 'string' },
-                          nullable: true,
                         },
                         favoriteDates: {
-                          type: 'array',
+                          type: ['array', 'null'],
                           items: { type: 'string', format: 'date' },
-                          nullable: true,
                         },
                         favoriteDatetimes: {
-                          type: 'array',
+                          type: ['array', 'null'],
                           items: { type: 'string', format: 'date-time' },
-                          nullable: true,
                         },
-                        favoriteIntegers: { type: 'array', items: { type: 'integer' }, nullable: true },
+                        favoriteIntegers: {
+                          type: ['array', 'null'],
+                          items: { type: 'integer' },
+                        },
                         favoriteNumerics: {
-                          type: 'array',
+                          type: ['array', 'null'],
                           items: { type: 'number' },
-                          nullable: true,
                         },
                         favoriteTexts: {
-                          type: 'array',
+                          type: ['array', 'null'],
                           items: { type: 'string' },
-                          nullable: true,
                         },
-                        name: { type: 'string', nullable: true },
+                        name: { type: ['string', 'null'] },
                         nicknames: {
-                          type: 'array',
+                          type: ['array', 'null'],
                           items: { type: 'string' },
-                          nullable: true,
                         },
-                        notes: { type: 'string', nullable: true },
+                        notes: { type: ['string', 'null'] },
                         passwordDigest: { type: 'string' },
                         requiredFavoriteBooleans: { type: 'array', items: { type: 'boolean' } },
                         requiredFavoriteCitext: { type: 'string' },
@@ -675,7 +670,10 @@ describe('OpenapiEndpointRenderer', () => {
                             type: 'object',
                             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             properties: expect.objectContaining({
-                              favoriteUuids: { type: 'array', items: { type: 'string' }, nullable: true },
+                              favoriteUuids: {
+                                type: ['array', 'null'],
+                                items: { type: 'string' },
+                              },
                             }),
                           },
                         },
@@ -699,7 +697,7 @@ describe('OpenapiEndpointRenderer', () => {
                           type: 'object',
                           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
-                            jsonData: { type: 'object', nullable: true },
+                            jsonData: { type: ['object', 'null'] },
                           }),
                         },
                       },
@@ -721,7 +719,10 @@ describe('OpenapiEndpointRenderer', () => {
                             type: 'object',
                             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             properties: expect.objectContaining({
-                              favoriteJsons: { type: 'array', items: { type: 'object' }, nullable: true },
+                              favoriteJsons: {
+                                type: ['array', 'null'],
+                                items: { type: 'object' },
+                              },
                             }),
                           },
                         },
@@ -745,7 +746,7 @@ describe('OpenapiEndpointRenderer', () => {
                           type: 'object',
                           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
-                            jsonbData: { type: 'object', nullable: true },
+                            jsonbData: { type: ['object', 'null'] },
                           }),
                         },
                       },
@@ -767,7 +768,10 @@ describe('OpenapiEndpointRenderer', () => {
                             type: 'object',
                             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             properties: expect.objectContaining({
-                              favoriteJsonbs: { type: 'array', items: { type: 'object' }, nullable: true },
+                              favoriteJsonbs: {
+                                type: ['array', 'null'],
+                                items: { type: 'object' },
+                              },
                             }),
                           },
                         },
@@ -793,9 +797,9 @@ describe('OpenapiEndpointRenderer', () => {
                           properties: expect.objectContaining({
                             password: {
                               anyOf: [
-                                { type: 'string', nullable: true },
-                                { type: 'number', nullable: true },
-                                { type: 'object', nullable: true },
+                                { type: ['string', 'null'] },
+                                { type: ['number', 'null'] },
+                                { type: ['object', 'null'] },
                               ],
                             },
                           }),
@@ -820,8 +824,7 @@ describe('OpenapiEndpointRenderer', () => {
                             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             properties: expect.objectContaining({
                               openapiVirtualSpecTest: {
-                                type: 'string',
-                                nullable: true,
+                                type: ['string', 'null'],
                               },
                               openapiVirtualSpecTest2: {
                                 type: 'array',
@@ -852,7 +855,7 @@ describe('OpenapiEndpointRenderer', () => {
                           type: 'object',
                           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
-                            species: { type: 'string', enum: ['cat', 'noncat'], nullable: true },
+                            species: { type: ['string', 'null'], enum: ['cat', 'noncat'] },
                           }),
                         },
                       },
@@ -874,12 +877,11 @@ describe('OpenapiEndpointRenderer', () => {
                           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
                             favoriteTreats: {
-                              type: 'array',
+                              type: ['array', 'null'],
                               items: {
                                 type: 'string',
                                 enum: ['efishy feesh', 'snick snowcks'],
                               },
-                              nullable: true,
                             },
                           }),
                         },
@@ -913,12 +915,11 @@ describe('OpenapiEndpointRenderer', () => {
                           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
                             favoriteTreats: {
-                              type: 'array',
+                              type: ['array', 'null'],
                               items: {
                                 type: 'string',
                                 enum: ['efishy feesh', 'snick snowcks'],
                               },
-                              nullable: true,
                             },
                           }),
                         },
@@ -953,11 +954,10 @@ describe('OpenapiEndpointRenderer', () => {
                       schema: {
                         type: 'object',
                         properties: {
-                          name: { type: 'string', nullable: true },
+                          name: { type: ['string', 'null'] },
                           species: {
-                            type: 'string',
+                            type: ['string', 'null'],
                             enum: ['cat', 'noncat'],
-                            nullable: true,
                           },
                         },
                       },
@@ -980,11 +980,10 @@ describe('OpenapiEndpointRenderer', () => {
                           type: 'object',
                           required: ['species'],
                           properties: {
-                            name: { type: 'string', nullable: true },
+                            name: { type: ['string', 'null'] },
                             species: {
-                              type: 'string',
+                              type: ['string', 'null'],
                               enum: ['cat', 'noncat'],
-                              nullable: true,
                             },
                           },
                         },
@@ -1031,7 +1030,7 @@ describe('OpenapiEndpointRenderer', () => {
                       schema: {
                         type: 'object',
                         properties: {
-                          body: { type: 'string', nullable: true },
+                          body: { type: ['string', 'null'] },
                         },
                       },
                     },
@@ -1056,8 +1055,7 @@ describe('OpenapiEndpointRenderer', () => {
                       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                       properties: expect.objectContaining({
                         collarCount: {
-                          nullable: true,
-                          type: 'string',
+                          type: ['string', 'null'],
                         },
                       }),
                     },
@@ -1225,7 +1223,7 @@ describe('OpenapiEndpointRenderer', () => {
           it('makes the top level serializer nullable', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               serializerKey: 'withRecentPost',
-              nullable: true,
+              defaultResponse: { maybeNull: true },
             })
 
             const response = renderer.toPathObject('default', {}, routes)
@@ -1236,7 +1234,7 @@ describe('OpenapiEndpointRenderer', () => {
                   content: {
                     'application/json': {
                       schema: {
-                        allOf: [{ $ref: '#/components/schemas/UserWithRecentPost' }, { nullable: true }],
+                        anyOf: [{ $ref: '#/components/schemas/UserWithRecentPost' }, { type: 'null' }],
                       },
                     },
                   },
@@ -1435,8 +1433,12 @@ describe('OpenapiEndpointRenderer', () => {
                       type: 'string',
                     },
                     {
-                      $serializer: CommentTestingDoubleShorthandSerializer,
-                      nullable: true,
+                      anyOf: [
+                        {
+                          $serializer: CommentTestingDoubleShorthandSerializer,
+                        },
+                        { type: 'null' },
+                      ],
                     },
                   ],
                 },
@@ -1456,11 +1458,11 @@ describe('OpenapiEndpointRenderer', () => {
                             type: 'string',
                           },
                           {
-                            allOf: [
+                            anyOf: [
                               {
                                 $ref: '#/components/schemas/CommentTestingDoubleShorthand',
                               },
-                              { nullable: true },
+                              { type: 'null' },
                             ],
                           },
                         ],
@@ -1684,10 +1686,9 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'extra',
             responses: {
               201: {
-                type: 'object',
+                type: ['object', 'null'],
                 description: 'my description',
                 summary: 'my summary',
-                nullable: true,
               },
             },
           })
@@ -1700,10 +1701,9 @@ describe('OpenapiEndpointRenderer', () => {
                 content: {
                   'application/json': {
                     schema: {
-                      type: 'object',
+                      type: ['object', 'null'],
                       description: 'my description',
                       summary: 'my summary',
-                      nullable: true,
                     },
                   },
                 },
@@ -1834,8 +1834,7 @@ The following values will be allowed:
                       name: 'string',
                       email: 'string',
                       firstName: {
-                        type: 'string',
-                        nullable: true,
+                        type: ['string', 'null'],
                       },
                       things: {
                         type: 'array',
@@ -1875,8 +1874,7 @@ The following values will be allowed:
                               type: 'string',
                             },
                             firstName: {
-                              type: 'string',
-                              nullable: true,
+                              type: ['string', 'null'],
                             },
                             things: {
                               type: 'array',

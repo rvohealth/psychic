@@ -203,14 +203,14 @@ export class CommentTestingRootSerializerRefSerializer extends DreamSerializer {
 
   @Attribute({
     $serializer: CommentTestingDoubleShorthandSerializer,
-    nullable: true,
+    maybeNull: true,
   })
   public singleHowyadoin: string
 
   @Attribute({
     $serializer: CommentTestingDoubleShorthandSerializer,
     many: true,
-    nullable: true,
+    maybeNull: true,
   })
   public manyHowyadoins: string
 }
@@ -228,12 +228,12 @@ export class CommentTestingObjectWithSerializerRefSerializer extends DreamSerial
       },
       myNullableProperty: {
         $serializer: CommentTestingDoubleShorthandSerializer,
-        nullable: true,
+        maybeNull: true,
       },
       myNullableProperties: {
         $serializer: CommentTestingDoubleShorthandSerializer,
         many: true,
-        nullable: true,
+        maybeNull: true,
       },
     },
   })
@@ -253,7 +253,7 @@ export class CommentTestingArrayWithSerializerRefSerializer extends DreamSeriali
     type: 'array',
     items: {
       $serializer: CommentTestingDoubleShorthandSerializer,
-      nullable: true,
+      maybeNull: true,
     },
   })
   public nullableHowyadoins: string
@@ -295,8 +295,7 @@ export class CommentTestingStringArraySerializer extends DreamSerializer {
     type: 'array',
     description: 'my array',
     items: {
-      type: 'string',
-      nullable: true,
+      type: ['null', 'string'],
       description: 'my array item',
     },
   })

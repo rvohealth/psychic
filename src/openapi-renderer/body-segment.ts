@@ -1,8 +1,8 @@
 import {
   Dream,
   DreamSerializer,
-  OpenapiPrimitiveTypes,
   OpenapiSchemaArray,
+  OpenapiSchemaBase,
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
   OpenapiSchemaExpressionAllOf,
@@ -19,16 +19,17 @@ import {
   OpenapiSchemaShorthandExpressionOneOf,
   OpenapiSchemaShorthandExpressionSerializableRef,
   OpenapiSchemaShorthandExpressionSerializerRef,
-  OpenapiSchemaShorthandPrimitiveGeneric,
   OpenapiShorthandPrimitiveTypes,
-  SerializableTypes,
-  compact,
   inferSerializerFromDreamOrViewModel,
   openapiShorthandPrimitiveTypes,
 } from '@rvoh/dream'
 import PsychicController from '../controller/index.js'
 import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache.js'
 import isBlankDescription from './helpers/isBlankDescription.js'
+import primitiveOpenapiStatementToOpenapi, {
+  MaybeNullPrimitive,
+  maybeNullPrimitiveToPrimitive,
+} from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import OpenapiSerializerRenderer from './serializer.js'
 
 export default class OpenapiBodySegmentRenderer {
@@ -228,10 +229,6 @@ export default class OpenapiBodySegmentRenderer {
       items: this.recursivelyParseBody((bodySegment as any).items),
     })
 
-    if ((bodySegment as OpenapiSchemaArray).nullable) {
-      data.nullable = true
-    }
-
     const description = (bodySegment as OpenapiSchemaArray).description
 
     if (description) {
@@ -254,10 +251,6 @@ export default class OpenapiBodySegmentRenderer {
 
     if (objectBodySegment.description) {
       data.description = objectBodySegment.description
-    }
-
-    if (objectBodySegment.nullable) {
-      data.nullable = true
     }
 
     if (objectBodySegment.summary) {
@@ -330,7 +323,7 @@ export default class OpenapiBodySegmentRenderer {
   private primitiveLiteralStatement(
     bodySegment: OpenapiShorthandPrimitiveTypes,
   ): OpenapiSchemaPrimitiveGeneric {
-    return this.parseAttributeValue(bodySegment) as OpenapiSchemaPrimitiveGeneric
+    return primitiveOpenapiStatementToOpenapi(bodySegment) as OpenapiSchemaPrimitiveGeneric
   }
 
   /**
@@ -339,62 +332,27 @@ export default class OpenapiBodySegmentRenderer {
    * recursively parses a primitive object type (i.e. { type: 'string[]' })
    */
   private primitiveObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaPrimitiveGeneric {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
-    if (/\[\]$/.test((bodySegment as any).type)) {
+    const safeBodySegment = bodySegment as Extract<OpenapiSchemaBase, { type: MaybeNullPrimitive }>
+
+    if (this.typeIsOpenapiArrayPrimitive(safeBodySegment.type)) {
       return this.applyConfigurationOptions(
-        this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-          this.expandShorthandArray(bodySegment as OpenapiSchemaShorthandPrimitiveGeneric) as any,
-        ),
+        this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>({
+          ...safeBodySegment,
+          ...primitiveOpenapiStatementToOpenapi(safeBodySegment.type),
+        } as OpenapiSchemaPrimitiveGeneric),
       )
     } else {
       return this.applyConfigurationOptions(
-        this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>(
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-          this.expandType(bodySegment as OpenapiSchemaShorthandPrimitiveGeneric) as any,
-        ),
+        this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>({
+          ...safeBodySegment,
+          ...primitiveOpenapiStatementToOpenapi(safeBodySegment.type),
+        } as OpenapiSchemaPrimitiveGeneric),
       )
     }
   }
 
-  private expandShorthandArray(bodySegment: OpenapiSchemaShorthandPrimitiveGeneric) {
-    const retObj: OpenapiSchemaArray = {
-      ...bodySegment,
-      type: 'array',
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      items: this.expandType({
-        // ...bodySegment,
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-        type: bodySegment.type.replace(/\[\]$/, '') as any,
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      }) as any,
-    }
-
-    if (bodySegment.nullable) {
-      retObj.nullable = true
-    }
-
-    return retObj
-  }
-
-  private expandType(bodySegment: OpenapiSchemaShorthandPrimitiveGeneric) {
-    switch (bodySegment.type) {
-      case 'decimal':
-      case 'double':
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        ;(bodySegment as any).format = bodySegment.type
-        bodySegment.type = 'number'
-        break
-
-      case 'date':
-      case 'date-time':
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        ;(bodySegment as any).format = bodySegment.type
-        bodySegment.type = 'string'
-        break
-    }
-
-    return bodySegment
+  private typeIsOpenapiArrayPrimitive(openapiType: MaybeNullPrimitive): boolean {
+    return /\[\]$/.test(maybeNullPrimitiveToPrimitive(openapiType))
   }
 
   private applyConfigurationOptions<T>(obj: T): T {
@@ -465,19 +423,17 @@ The following values will be allowed:
 
     if (serializerRefBodySegment.many) {
       const returnVal = {
-        type: 'array',
+        type: serializerRefBodySegment.maybeNull ? ['array', 'null'] : 'array',
         items: {
           $ref: `#/components/schemas/${serializerKey}`,
         },
       } as OpenapiSchemaArray
 
-      if (serializerRefBodySegment.nullable) returnVal.nullable = true
-
       return returnVal
     } else {
-      if (serializerRefBodySegment.nullable) {
+      if (serializerRefBodySegment.maybeNull) {
         return {
-          allOf: [{ $ref: `#/components/schemas/${serializerKey}` }, { nullable: true }],
+          allOf: [{ $ref: `#/components/schemas/${serializerKey}` }, { type: 'null' }],
         }
       } else {
         return {
@@ -533,90 +489,6 @@ The following values will be allowed:
   /**
    * @internal
    *
-   * parses a primitive stored type
-   */
-  private parseAttributeValue(data: SerializableTypes | undefined): OpenapiSchemaBody {
-    if (!data)
-      return {
-        type: 'object',
-        nullable: true,
-      }
-
-    switch (data) {
-      case 'string[]':
-      case 'number[]':
-      case 'boolean[]':
-      case 'integer[]':
-        return compact({
-          type: 'array',
-          items: {
-            type: this.serializerTypeToOpenapiType(data),
-          },
-        }) as OpenapiSchemaBody
-
-      case 'decimal[]':
-      case 'double[]':
-        return compact({
-          type: 'array',
-          items: {
-            type: 'number',
-            format: data.replace(/\[\]$/, '') as 'double' | 'decimal',
-          },
-        }) as OpenapiSchemaBody
-
-      case 'date[]':
-      case 'date-time[]':
-        return compact({
-          type: 'array',
-          items: {
-            type: 'string',
-            format: data.replace(/\[\]$/, ''),
-          },
-        }) as OpenapiSchemaBody
-
-      case 'decimal':
-      case 'double':
-        return compact({
-          type: 'number',
-          format: data,
-        }) as OpenapiSchemaBody
-
-      case 'date':
-      case 'date-time':
-        return compact({
-          type: 'string',
-          format: data,
-        }) as OpenapiSchemaBody
-
-      default:
-        return compact({
-          type: this.serializerTypeToOpenapiType(data),
-        }) as OpenapiSchemaBody
-    }
-  }
-
-  /**
-   * @internal
-   *
-   * sanitizes primitive openapi type before putting in
-   * openapi type fields
-   */
-  private serializerTypeToOpenapiType(type: SerializableTypes): OpenapiPrimitiveTypes {
-    switch (type) {
-      case 'date':
-      case 'date-time':
-      case 'date[]':
-      case 'date-time[]':
-        return 'string'
-
-      default:
-        return (type as string).replace(/\[\]$/, '') as OpenapiPrimitiveTypes
-    }
-  }
-
-  /**
-   * @internal
-   *
    * binds shared openapi fields to any object
    */
   private applyCommonFieldsToPayload<
@@ -625,11 +497,6 @@ The following values will be allowed:
     const objectCast = obj as OpenapiSchemaObject
     const returnObj: Obj = {
       ...obj,
-    }
-
-    if (objectCast.nullable) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-      ;(returnObj as any).nullable = true
     }
 
     if (objectCast.description) {
