@@ -142,5 +142,12 @@ export type MaybeNullPrimitive =
   | [PrimitiveWithArrayString, 'null']
   | ['null', PrimitiveWithArrayString]
 
+type PrimitiveOrObjectOrArray = PrimitiveWithArrayString | 'object' | 'array'
+
+export type MaybeNullPrimitiveOrObjectOrArray =
+  | PrimitiveOrObjectOrArray
+  | [PrimitiveOrObjectOrArray, 'null']
+  | ['null', PrimitiveOrObjectOrArray]
+
 export type NonArrayPrimitiveString = (typeof openapiPrimitiveTypes)[number]
 export type PrimitiveWithArrayString = (typeof openapiShorthandPrimitiveTypes)[number]

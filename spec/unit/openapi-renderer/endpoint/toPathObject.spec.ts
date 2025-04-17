@@ -1689,6 +1689,19 @@ describe('OpenapiEndpointRenderer', () => {
                 type: ['object', 'null'],
                 description: 'my description',
                 summary: 'my summary',
+                properties: {
+                  name: 'string',
+                  names: 'string[]',
+                  maybeNullNames: {
+                    type: ['string[]', 'null'],
+                  },
+                  maybeNullArray: {
+                    type: ['array', 'null'],
+                    items: {
+                      type: 'number',
+                    },
+                  },
+                },
               },
             },
           })
@@ -1704,6 +1717,29 @@ describe('OpenapiEndpointRenderer', () => {
                       type: ['object', 'null'],
                       description: 'my description',
                       summary: 'my summary',
+                      properties: {
+                        name: {
+                          type: 'string',
+                        },
+                        names: {
+                          type: 'array',
+                          items: {
+                            type: 'string',
+                          },
+                        },
+                        maybeNullNames: {
+                          type: ['array', 'null'],
+                          items: {
+                            type: 'string',
+                          },
+                        },
+                        maybeNullArray: {
+                          type: ['array', 'null'],
+                          items: {
+                            type: 'number',
+                          },
+                        },
+                      },
                     },
                   },
                 },

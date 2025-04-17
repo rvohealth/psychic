@@ -28,6 +28,7 @@ import { getCachedPsychicApplicationOrFail } from '../psychic-application/cache.
 import isBlankDescription from './helpers/isBlankDescription.js'
 import primitiveOpenapiStatementToOpenapi, {
   MaybeNullPrimitive,
+  MaybeNullPrimitiveOrObjectOrArray,
   maybeNullPrimitiveToPrimitive,
 } from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import OpenapiSerializerRenderer from './serializer.js'
@@ -107,10 +108,10 @@ export default class OpenapiBodySegmentRenderer {
         return this.allOfStatement(bodySegment)
 
       case 'object':
-        return this.objectStatement(bodySegment)
+        return this.objectStatement(bodySegment as OpenapiSchemaObject)
 
       case 'array':
-        return this.arrayStatement(bodySegment)
+        return this.arrayStatement(bodySegment as OpenapiSchemaArray)
 
       case 'openapi_primitive_literal':
         return this.primitiveLiteralStatement(bodySegment as OpenapiShorthandPrimitiveTypes)
@@ -164,19 +165,38 @@ export default class OpenapiBodySegmentRenderer {
     if (oneOfBodySegment.oneOf) return 'oneOf'
     if (anyOfBodySegment.anyOf) return 'anyOf'
     if (allOfBodySegment.allOf) return 'allOf'
-    if (objectBodySegment.type === 'object') return 'object'
-    else if (arrayBodySegment.type === 'array') return 'array'
+    if (this.maybeNullTypeToType(objectBodySegment) === 'object') return 'object'
+    else if (this.maybeNullTypeToType(arrayBodySegment) === 'array') return 'array'
     else {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
       if (openapiShorthandPrimitiveTypes.includes(bodySegment as any)) return 'openapi_primitive_literal'
 
       if (typeof bodySegment === 'object') {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-        if (openapiShorthandPrimitiveTypes.includes((bodySegment as any).type))
+        if (
+          openapiShorthandPrimitiveTypes.includes(
+            this.maybeNullTypeToType(bodySegment) as (typeof openapiShorthandPrimitiveTypes)[number],
+          )
+        )
           return 'openapi_primitive_object'
       }
 
       if (typeof bodySegment === 'object') return 'unknown_object'
+    }
+  }
+
+  private maybeNullTypeToType(bodySegment: OpenapiBodySegment | OpenapiSchemaObject | OpenapiSchemaArray) {
+    if (bodySegment === undefined) return undefined
+    if (typeof bodySegment === 'string') return bodySegment
+
+    const safeBodySegment = bodySegment as { type: MaybeNullPrimitiveOrObjectOrArray }
+    const openapiType = safeBodySegment.type
+
+    if (Array.isArray(openapiType)) {
+      if (openapiType[1] === 'null') return openapiType[0]
+      if (openapiType[0] === 'null') return openapiType[1]
+      return undefined
+    } else {
+      return openapiType
     }
   }
 
@@ -221,15 +241,13 @@ export default class OpenapiBodySegmentRenderer {
    *
    * recursively parses an array statement
    */
-  private arrayStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaArray {
+  private arrayStatement(bodySegment: OpenapiSchemaArray): OpenapiSchemaArray {
     const data = this.applyCommonFieldsToPayload<OpenapiSchemaArray>({
-      type: 'array',
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-      items: this.recursivelyParseBody((bodySegment as any).items),
+      type: bodySegment.type,
+      items: this.recursivelyParseBody(bodySegment.items),
     })
 
-    const description = (bodySegment as OpenapiSchemaArray).description
+    const description = bodySegment.description
 
     if (description) {
       data.description = description
@@ -243,10 +261,10 @@ export default class OpenapiBodySegmentRenderer {
    *
    * recursively parses an object statement
    */
-  private objectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaObject {
+  private objectStatement(bodySegment: OpenapiSchemaObject): OpenapiSchemaObject {
     const objectBodySegment = bodySegment as OpenapiSchemaObjectBase
     const data: OpenapiSchemaObjectBase = {
-      type: 'object',
+      type: bodySegment.type,
     }
 
     if (objectBodySegment.description) {

@@ -93,7 +93,7 @@ describe('OpenapiSerializerRenderer', () => {
                   type: 'array',
                   description: 'my array',
                   items: {
-                    type: ['null', 'string'],
+                    type: ['string', 'null'],
                     description: 'my array item',
                   },
                 },
