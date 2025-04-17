@@ -292,6 +292,7 @@ Try setting it to something valid, like:
     serverStart: [],
     serverError: [],
     serverShutdown: [],
+    serverShutdownFinal: [],
   }
   public get specialHooks() {
     return this._specialHooks
@@ -398,13 +399,15 @@ Try setting it to something valid, like:
           ? (psychicServer: PsychicServer) => void | Promise<void>
           : T extends 'server:shutdown'
             ? (psychicServer: PsychicServer) => void | Promise<void>
-            : T extends 'server:init:after-routes'
+            : T extends 'server:shutdown:final'
               ? (psychicServer: PsychicServer) => void | Promise<void>
-              : T extends 'sync'
-                ? // NOTE: this is really any | Promise<any>, but eslint complains about this foolery
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  () => any
-                : (conf: PsychicApplication) => void | Promise<void>,
+              : T extends 'server:init:after-routes'
+                ? (psychicServer: PsychicServer) => void | Promise<void>
+                : T extends 'sync'
+                  ? // NOTE: this is really any | Promise<any>, but eslint complains about this foolery
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    () => any
+                  : (conf: PsychicApplication) => void | Promise<void>,
   ) {
     switch (hookEventType) {
       case 'server:error':
@@ -423,6 +426,12 @@ Try setting it to something valid, like:
 
       case 'server:shutdown':
         this._specialHooks.serverShutdown.push(cb as (psychicServer: PsychicServer) => void | Promise<void>)
+        break
+
+      case 'server:shutdown:final':
+        this._specialHooks.serverShutdownFinal.push(
+          cb as (psychicServer: PsychicServer) => void | Promise<void>,
+        )
         break
 
       case 'server:init:after-routes':
@@ -644,6 +653,7 @@ export interface PsychicApplicationSpecialHooks {
   serverInitAfterRoutes: ((server: PsychicServer) => void | Promise<void>)[]
   serverStart: ((server: PsychicServer) => void | Promise<void>)[]
   serverShutdown: ((server: PsychicServer) => void | Promise<void>)[]
+  serverShutdownFinal: ((server: PsychicServer) => void | Promise<void>)[]
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
 }
 
