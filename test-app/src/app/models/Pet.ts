@@ -22,7 +22,9 @@ export default class Pet extends ApplicationModel {
   public id: DreamColumn<Pet, 'id'>
   public name: DreamColumn<Pet, 'name'>
   public species: DreamColumn<Pet, 'species'>
+  public nonNullSpecies: DreamColumn<Pet, 'nonNullSpecies'>
   public favoriteTreats: DreamColumn<Pet, 'favoriteTreats'>
+  public nonNullFavoriteTreats: DreamColumn<Pet, 'nonNullFavoriteTreats'>
   public collarCount: DreamColumn<Pet, 'collarCount'>
   public collarCountInt: DreamColumn<Pet, 'collarCountInt'>
   public collarCountNumeric: DreamColumn<Pet, 'collarCountNumeric'>

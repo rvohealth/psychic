@@ -137,6 +137,8 @@ export interface Pets {
   likesTreats: Generated<boolean>;
   likesWalks: boolean | null;
   name: string | null;
+  nonNullFavoriteTreats: ArrayType<PetTreatsEnum>;
+  nonNullSpecies: SpeciesTypesEnum;
   requiredCollarCount: Generated<Int8>;
   requiredCollarCountInt: Generated<number>;
   requiredCollarCountNumeric: Generated<Numeric>;

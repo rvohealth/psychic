@@ -855,7 +855,8 @@ describe('OpenapiEndpointRenderer', () => {
                           type: 'object',
                           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
-                            species: { type: ['string', 'null'], enum: ['cat', 'noncat'] },
+                            species: { type: ['string', 'null'], enum: ['cat', 'noncat', null] },
+                            nonNullSpecies: { type: 'string', enum: ['cat', 'noncat'] },
                           }),
                         },
                       },
@@ -878,6 +879,14 @@ describe('OpenapiEndpointRenderer', () => {
                           properties: expect.objectContaining({
                             favoriteTreats: {
                               type: ['array', 'null'],
+                              items: {
+                                type: 'string',
+                                enum: ['efishy feesh', 'snick snowcks', null],
+                              },
+                            },
+
+                            nonNullFavoriteTreats: {
+                              type: 'array',
                               items: {
                                 type: 'string',
                                 enum: ['efishy feesh', 'snick snowcks'],
@@ -918,7 +927,7 @@ describe('OpenapiEndpointRenderer', () => {
                               type: ['array', 'null'],
                               items: {
                                 type: 'string',
-                                enum: ['efishy feesh', 'snick snowcks'],
+                                enum: ['efishy feesh', 'snick snowcks', null],
                               },
                             },
                           }),
@@ -957,7 +966,7 @@ describe('OpenapiEndpointRenderer', () => {
                           name: { type: ['string', 'null'] },
                           species: {
                             type: ['string', 'null'],
-                            enum: ['cat', 'noncat'],
+                            enum: ['cat', 'noncat', null],
                           },
                         },
                       },
@@ -983,7 +992,7 @@ describe('OpenapiEndpointRenderer', () => {
                             name: { type: ['string', 'null'] },
                             species: {
                               type: ['string', 'null'],
-                              enum: ['cat', 'noncat'],
+                              enum: ['cat', 'noncat', null],
                             },
                           },
                         },
@@ -1785,6 +1794,38 @@ describe('OpenapiEndpointRenderer', () => {
               },
             }),
           )
+        })
+
+        context('maybe null', () => {
+          it('includes null in the allowed enum values', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+              serializerKey: 'extra',
+              status: 201,
+              responses: {
+                201: {
+                  type: ['string', 'null'],
+                  enum: ['hello', 'world', null],
+                },
+              },
+            })
+
+            const response = renderer.toPathObject('default', {}, routes)
+            expect(response['/users/howyadoin']!.get.responses).toEqual(
+              expect.objectContaining({
+                201: {
+                  description: 'Created',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: ['string', 'null'],
+                        enum: ['hello', 'world', null],
+                      },
+                    },
+                  },
+                },
+              }),
+            )
+          })
         })
 
         context('suppressResponseEnums=true', () => {
