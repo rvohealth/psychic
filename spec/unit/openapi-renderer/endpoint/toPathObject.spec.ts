@@ -1692,7 +1692,8 @@ describe('OpenapiEndpointRenderer', () => {
                 properties: {
                   name: 'string',
                   names: 'string[]',
-                  maybeNullNames: {
+                  maybeNullNames: ['string[]', 'null'],
+                  maybeNullNames2: {
                     type: ['string[]', 'null'],
                   },
                   maybeNullArray: {
@@ -1728,6 +1729,12 @@ describe('OpenapiEndpointRenderer', () => {
                           },
                         },
                         maybeNullNames: {
+                          type: ['array', 'null'],
+                          items: {
+                            type: 'string',
+                          },
+                        },
+                        maybeNullNames2: {
                           type: ['array', 'null'],
                           items: {
                             type: 'string',

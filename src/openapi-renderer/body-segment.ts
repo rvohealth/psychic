@@ -168,8 +168,8 @@ export default class OpenapiBodySegmentRenderer {
     if (this.maybeNullTypeToType(objectBodySegment) === 'object') return 'object'
     else if (this.maybeNullTypeToType(arrayBodySegment) === 'array') return 'array'
     else {
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-      if (openapiShorthandPrimitiveTypes.includes(bodySegment as any)) return 'openapi_primitive_literal'
+      const primitiveString = maybeNullPrimitiveToPrimitive(bodySegment as MaybeNullPrimitive)
+      if (openapiShorthandPrimitiveTypes.includes(primitiveString)) return 'openapi_primitive_literal'
 
       if (typeof bodySegment === 'object') {
         if (
