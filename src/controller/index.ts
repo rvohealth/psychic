@@ -41,13 +41,13 @@ import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType.j
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
 import PsychicApplication from '../psychic-application/index.js'
 import Params, {
-  ParamValidationError,
   ParamsCastOptions,
   ParamsForOpts,
   ValidatedAllowsNull,
   ValidatedReturnType,
 } from '../server/params.js'
 import Session, { CustomSessionCookieOptions } from '../session/index.js'
+import ParamValidationError from '../error/controller/ParamValidationError.js'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -275,7 +275,7 @@ export default class PsychicController {
       return this._castParam(key.split('.'), this.params, expectedType, opts)
     } catch (error) {
       if (error instanceof InvalidDotNotationPath)
-        throw new ParamValidationError(`Invalid dot notation in castParam: ${key}`)
+        throw new ParamValidationError(key, [`Invalid dot notation in castParam: ${key}`])
       throw error
     }
   }
@@ -296,7 +296,7 @@ export default class PsychicController {
     opts?: OptsType,
   ): FinalReturnType {
     const key = keys.shift() as string
-    if (!keys.length) return Params.cast(params[key] as PsychicParamsPrimitive, expectedType, opts)
+    if (!keys.length) return Params.cast(params, key, expectedType, opts)
 
     const nestedParams = params[key]
 

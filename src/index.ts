@@ -9,8 +9,6 @@ export {
   default as PsychicController,
   type PsychicOpenapiControllerConfig,
   type PsychicOpenapiNames,
-  type PsychicParamsDictionary,
-  type PsychicParamsPrimitive,
 } from './controller/index.js'
 export { default as envLoader } from './env/Loader.js'
 export { default as I18nProvider } from './i18n/provider.js'
@@ -78,5 +76,7 @@ export { default as PsychicRouter } from './router/index.js'
 export { type HttpMethod } from './router/types.js'
 export { createPsychicHttpInstance as getPsychicHttpInstance } from './server/helpers/startPsychicServer.js'
 export { default as PsychicServer } from './server/index.js'
-export { default as Params, ParamValidationError } from './server/params.js'
+export { default as Params } from './server/params.js'
+export { default as ParamValidationError } from './error/controller/ParamValidationError.js'
+export { default as ParamValidationErrors } from './error/controller/ParamValidationErrors.js'
 export { default as PsychicSession } from './session/index.js'
