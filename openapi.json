@@ -2348,7 +2348,14 @@
         "description": "The request has succeeded, but there is no content to render"
       },
       "BadRequest": {
-        "description": "The server would not process the request due to something the server considered to be a client error"
+        "description": "The server would not process the request due to something the server considered to be a client error",
+        "content": {
+          "application/json": {
+            "schema": {
+              "$ref": "#/components/schemas/ValidationErrors"
+            }
+          }
+        }
       },
       "Unauthorized": {
         "description": "The request was not successful because it lacks valid authentication credentials for the requested resource"

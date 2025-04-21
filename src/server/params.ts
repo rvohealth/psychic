@@ -16,6 +16,8 @@ import {
 } from '../controller/index.js'
 import isUuid from '../helpers/isUuid.js'
 import { isObject } from '../helpers/typechecks.js'
+import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
+import ParamValidationError from '../error/controller/ParamValidationError.js'
 
 export default class Params {
   /**
@@ -113,7 +115,8 @@ export default class Params {
           case 'json':
           case 'json[]':
             returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params[columnName as keyof typeof params],
+              params,
+              columnName.toString(),
               columnMetadata.dbType,
               { allowNull: columnMetadata.allowNull },
             )
@@ -123,7 +126,8 @@ export default class Params {
           case 'citext':
           case 'text':
             returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params[columnName as keyof typeof params],
+              params,
+              columnName.toString(),
               'string',
               { allowNull: columnMetadata.allowNull },
             )
@@ -133,7 +137,8 @@ export default class Params {
           case 'citext[]':
           case 'text[]':
             returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params[columnName as keyof typeof params],
+              params,
+              columnName.toString(),
               'string[]',
               {
                 allowNull: columnMetadata.allowNull,
@@ -145,7 +150,8 @@ export default class Params {
           case 'timestamp with time zone':
           case 'timestamp without time zone':
             returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params[columnName as keyof typeof params],
+              params,
+              columnName.toString(),
               'datetime',
               { allowNull: columnMetadata.allowNull },
             )
@@ -155,7 +161,8 @@ export default class Params {
           case 'timestamp with time zone[]':
           case 'timestamp without time zone[]':
             returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params[columnName as keyof typeof params],
+              params,
+              columnName.toString(),
               'datetime[]',
               { allowNull: columnMetadata.allowNull },
             )
@@ -163,7 +170,8 @@ export default class Params {
 
           case 'jsonb':
             returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params[columnName as keyof typeof params],
+              params,
+              columnName.toString(),
               'json',
               { allowNull: columnMetadata.allowNull },
             )
@@ -171,7 +179,8 @@ export default class Params {
 
           case 'jsonb[]':
             returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params[columnName as keyof typeof params],
+              params,
+              columnName.toString(),
               'json[]',
               { allowNull: columnMetadata.allowNull },
             )
@@ -179,7 +188,8 @@ export default class Params {
 
           case 'numeric':
             returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params[columnName as keyof typeof params],
+              params,
+              columnName.toString(),
               'number',
               { allowNull: columnMetadata.allowNull },
             )
@@ -187,7 +197,8 @@ export default class Params {
 
           case 'numeric[]':
             returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params[columnName as keyof typeof params],
+              params,
+              columnName.toString(),
               'number[]',
               { allowNull: columnMetadata.allowNull },
             )
@@ -199,12 +210,14 @@ export default class Params {
 
             if (columnMetadata?.enumValues) {
               const paramValue = params[columnName as keyof typeof params]
+
               if (columnMetadata.isArray) {
                 if (!Array.isArray(paramValue))
                   returnObj[columnName as keyof typeof returnObj] = ['expected an array of enum values']
 
-                returnObj[columnName as keyof typeof returnObj] = (paramValue as string[]).map(p =>
-                  this.cast(
+                returnObj[columnName as keyof typeof returnObj] = (paramValue as string[]).map(p => {
+                  return new this(params).cast(
+                    columnName.toString(),
                     p,
 
                     // casting to allow enum handling at lower level
@@ -214,11 +227,12 @@ export default class Params {
                       allowNull: columnMetadata.allowNull,
                       enum: columnMetadata.enumValues as readonly string[],
                     },
-                  ),
-                )
+                  )
+                })
               } else {
                 returnObj[columnName as keyof typeof returnObj] = this.cast(
-                  paramValue,
+                  params,
+                  columnName.toString(),
 
                   // casting to allow enum handling at lower level
                   'string',
@@ -233,8 +247,8 @@ export default class Params {
             }
         }
       } catch (err) {
-        if (err instanceof Error) {
-          errors[columnName as string] = [err.message]
+        if (err instanceof ParamValidationError) {
+          errors[err.paramName] = err.errorMessages
         } else {
           throw err
         }
@@ -242,18 +256,14 @@ export default class Params {
     }
 
     if (Object.keys(errors).length) {
-      throw new ParamValidationError(JSON.stringify(errors, null, 2))
+      throw new ParamValidationErrors(errors)
     }
 
     return returnObj as ReturnPayload
   }
 
-  public static restrict<T extends typeof Params>(
-    this: T,
-    params: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
-    allowed: string[],
-  ) {
-    return new this().restrict(params, allowed)
+  public static restrict<T extends typeof Params>(this: T, params: object, allowed: string[]) {
+    return new this(params).restrict(allowed)
   }
 
   /**
@@ -289,20 +299,22 @@ export default class Params {
     FinalReturnType extends AllowNullOrUndefined extends true
       ? ValidatedType | null | undefined
       : ValidatedType,
-  >(param: PsychicParamsPrimitive, expectedType: ExpectedType, opts?: OptsType): FinalReturnType {
-    return new this().cast(
+  >(params: object, paramName: string, expectedType: ExpectedType, opts?: OptsType): FinalReturnType {
+    const param = (params as Record<string, unknown>)[paramName] as PsychicParamsPrimitive
+    return new this(params).cast(
+      paramName,
       typeof param === 'string' ? param.trim() : param,
       expectedType,
       opts,
     ) as FinalReturnType
   }
 
-  public static casing<T extends typeof Params>(this: T, casing: 'snake' | 'camel') {
-    return new this().casing(casing)
+  public static casing<T extends typeof Params>(this: T, params: object, casing: 'snake' | 'camel') {
+    return new this(params).casing(casing)
   }
 
   private _casing: 'snake' | 'camel' | null = null
-  constructor() {}
+  constructor(private $params: object) {}
 
   public casing(casing: 'snake' | 'camel') {
     this._casing = casing
@@ -317,17 +329,18 @@ export default class Params {
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
     ReturnType extends AllowNullOrUndefined extends true ? ValidatedType | null | undefined : ValidatedType,
   >(
+    paramName: string,
     paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
     expectedType: ExpectedType,
     opts?: OptsType,
   ): AllowNullOrUndefined extends true ? ValidatedType | null | undefined : ValidatedType {
     if (expectedType instanceof RegExp) {
-      return this.matchRegexOrThrow(paramValue as string, expectedType) as ReturnType
+      return this.matchRegexOrThrow(paramName, paramValue as string, expectedType) as ReturnType
     }
 
     if (paramValue === null || paramValue === undefined) {
       if (expectedType === 'null') return null as ReturnType
-      this.throwUnlessAllowNull(paramValue, typeToError(expectedType), opts)
+      this.throwUnlessAllowNull(paramName, paramValue, typeToError(expectedType), opts)
       return paramValue as ReturnType
     }
 
@@ -335,23 +348,25 @@ export default class Params {
     const integerRegexp = /^-?\d+$/
     switch (expectedType) {
       case 'string':
-        if (typeof paramValue !== 'string') throw new ParamValidationError(typeToError(expectedType))
+        if (typeof paramValue !== 'string')
+          throw new ParamValidationError(paramName, [typeToError(expectedType)])
+
         if (opts?.enum && !opts.enum.includes(paramValue))
-          throw new ParamValidationError('did not match expected enum values')
-        if (opts?.match) return this.matchRegexOrThrow(paramValue, opts.match) as ReturnType
+          throw new ParamValidationError(paramName, ['did not match expected enum values'])
+        if (opts?.match) return this.matchRegexOrThrow(paramName, paramValue, opts.match) as ReturnType
         return paramValue as ReturnType
 
       case 'bigint':
         if (typeof paramValue !== 'string' && typeof paramValue !== 'number')
-          throw new ParamValidationError(typeToError(expectedType))
+          throw new ParamValidationError(paramName, [typeToError(expectedType)])
         if (!integerRegexp.test(paramValue?.toString()))
-          throw new ParamValidationError(typeToError(expectedType))
+          throw new ParamValidationError(paramName, [typeToError(expectedType)])
         return paramValue.toString() as ReturnType
 
       case 'boolean':
         if ([true, 'true', 1, '1'].includes(paramValue as string)) return true as ReturnType
         if ([false, 'false', 0, '0'].includes(paramValue as string)) return false as ReturnType
-        throw new ParamValidationError(typeToError(expectedType))
+        throw new ParamValidationError(paramName, [typeToError(expectedType)])
 
       case 'datetime':
       case 'date':
@@ -375,35 +390,36 @@ export default class Params {
           if (dateTime.isValid) return dateTime as ReturnType
         }
 
-        throw new ParamValidationError(typeToError(expectedType))
+        throw new ParamValidationError(paramName, [typeToError(expectedType)])
 
       case 'integer':
         if (typeof paramValue !== 'string' && typeof paramValue !== 'number')
-          throw new ParamValidationError(typeToError(expectedType))
+          throw new ParamValidationError(paramName, [typeToError(expectedType)])
         if (!integerRegexp.test(paramValue?.toString()))
-          throw new ParamValidationError(typeToError(expectedType))
+          throw new ParamValidationError(paramName, [typeToError(expectedType)])
         return parseInt(paramValue as string, 10) as ReturnType
 
       case 'json':
-        if (typeof paramValue !== 'object') throw new ParamValidationError(typeToError(expectedType))
+        if (typeof paramValue !== 'object')
+          throw new ParamValidationError(paramName, [typeToError(expectedType)])
         return paramValue as ReturnType
 
       case 'number':
         if (typeof paramValue === 'number') return paramValue as ReturnType
         if (typeof paramValue === 'string') {
           if (paramValue.length === 0 || Number.isNaN(Number(paramValue)))
-            throw new ParamValidationError(typeToError(expectedType))
+            throw new ParamValidationError(paramName, [typeToError(expectedType)])
           return Number(paramValue) as ReturnType
         }
-        throw new ParamValidationError(typeToError(expectedType))
+        throw new ParamValidationError(paramName, [typeToError(expectedType)])
 
       case 'null':
-        if (paramValue !== null) throw new ParamValidationError(typeToError(expectedType))
+        if (paramValue !== null) throw new ParamValidationError(paramName, [typeToError(expectedType)])
         return null as ReturnType
 
       case 'uuid':
         if (isUuid(paramValue)) return paramValue as ReturnType
-        throw new ParamValidationError(typeToError(expectedType))
+        throw new ParamValidationError(paramName, [typeToError(expectedType)])
 
       case 'bigint[]':
       case 'boolean[]':
@@ -414,17 +430,17 @@ export default class Params {
       case 'number[]':
       case 'string[]':
       case 'uuid[]':
-        if (!Array.isArray(paramValue)) throw new ParamValidationError(typeToError(expectedType))
+        if (!Array.isArray(paramValue)) throw new ParamValidationError(paramName, [typeToError(expectedType)])
         return compact(
           paramValue.map(param =>
-            this.cast(param, arrayTypeToNonArrayType(expectedType), { ...opts, allowNull: true }),
+            this.cast(paramName, param, arrayTypeToNonArrayType(expectedType), { ...opts, allowNull: true }),
           ),
         ) as ReturnType
 
       case 'null[]':
-        if (!Array.isArray(paramValue)) throw new ParamValidationError(typeToError(expectedType))
+        if (!Array.isArray(paramValue)) throw new ParamValidationError(paramName, [typeToError(expectedType)])
         return paramValue.map(param =>
-          this.cast(param, arrayTypeToNonArrayType(expectedType), { ...opts, allowNull: true }),
+          this.cast(paramName, param, arrayTypeToNonArrayType(expectedType), { ...opts, allowNull: true }),
         ) as ReturnType
 
       default:
@@ -435,17 +451,15 @@ export default class Params {
     }
   }
 
-  public restrict(
-    param: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
-    allowed: string[],
-  ) {
+  public restrict(allowed: string[]) {
+    const params = this.$params
     const permitted: PsychicParamsDictionary = {}
-    if (param === null || param === undefined) return permitted
+    if (params === null || params === undefined) return permitted
 
-    if (!isObject(param))
-      throw new Error(`Params.restrict expects object or null, received: ${JSON.stringify(param)}`)
+    if (!isObject(params))
+      throw new Error(`Params.restrict expects object or null, received: ${JSON.stringify(params)}`)
 
-    const objectParam = param as PsychicParamsDictionary
+    const objectParam = params as PsychicParamsDictionary
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let transformedParams: any
 
@@ -467,29 +481,24 @@ export default class Params {
     return permitted
   }
 
-  private matchRegexOrThrow(paramValue: string, expectedType: RegExp): string {
-    if (typeof paramValue !== 'string') throw new ParamValidationError(typeToError(expectedType))
+  private matchRegexOrThrow(paramName: string, paramValue: string, expectedType: RegExp): string {
+    if (typeof paramValue !== 'string') throw new ParamValidationError(paramName, [typeToError(expectedType)])
     if (paramValue.length > 1000) throw new Error('We do not accept strings over 1000 chars')
     if (expectedType.test(paramValue)) return paramValue
-    throw new ParamValidationError(typeToError(expectedType))
+    throw new ParamValidationError(paramName, [typeToError(expectedType)])
   }
 
   private throwUnlessAllowNull(
+    paramName: string,
     paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
     message: string,
     { allowNull = false }: ParamsCastOptions<readonly string[]> = {},
   ) {
     const isNullOrUndefined = [null, undefined].includes(paramValue as null | undefined)
     if (allowNull && isNullOrUndefined) return
-    this.throw(message)
-  }
-
-  private throw(message: string) {
-    throw new ParamValidationError(message)
+    throw new ParamValidationError(paramName, [message])
   }
 }
-
-export class ParamValidationError extends Error {}
 
 export type ValidatedReturnType<ExpectedType, OptsType> = ExpectedType extends RegExp
   ? string

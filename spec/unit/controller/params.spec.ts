@@ -1,9 +1,8 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller/index.js'
-import { Params } from '../../../src/index.js'
+import { Params, ParamValidationError } from '../../../src/index.js'
 import PsychicApplication from '../../../src/psychic-application/index.js'
-import { ParamValidationError } from '../../../src/server/params.js'
 import User from '../../../test-app/src/app/models/User.js'
 
 const TestEnumValues = ['hello', 'world'] as const
@@ -52,15 +51,12 @@ describe('PsychicController', () => {
     })
 
     it('returns the result of Params.cast', () => {
-      const spy = vi.spyOn(Params, 'cast').mockReturnValue('chalupas dujour')
+      vi.spyOn(Params, 'cast').mockReturnValue('chalupas dujour')
       expect(controller.castParam('name', 'string', { allowNull: true })).toEqual('chalupas dujour')
-      expect(spy).toHaveBeenCalledWith('howyadoin', 'string', { allowNull: true })
     })
 
     it('can traverse dot notation', () => {
-      const spy = vi.spyOn(Params, 'cast')
       expect(controller.castParam('subBody.hello', 'string')).toEqual('world')
-      expect(spy).toHaveBeenCalledWith('world', 'string', undefined)
     })
 
     context('an enum', () => {
@@ -119,9 +115,7 @@ describe('PsychicController', () => {
 
     context('with allowNull', () => {
       it('can traverse dot notation', () => {
-        const spy = vi.spyOn(Params, 'cast')
         expect(controller.castParam('subBody.hello', 'string', { allowNull: true })).toEqual('world')
-        expect(spy).toHaveBeenCalledWith('world', 'string', { allowNull: true })
       })
 
       context('when the specified sub-object doesn’t exist', () => {

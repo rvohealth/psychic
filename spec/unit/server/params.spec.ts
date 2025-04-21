@@ -1,6 +1,7 @@
 import { CalendarDate, DateTime } from '@rvoh/dream'
 import { PsychicParamsDictionary } from '../../../src/controller/index.js'
-import Params, { ParamValidationError } from '../../../src/server/params.js'
+import { ParamValidationError, ParamValidationErrors } from '../../../src/index.js'
+import Params from '../../../src/server/params.js'
 import Pet from '../../../test-app/src/app/models/Pet.js'
 import User from '../../../test-app/src/app/models/User.js'
 
@@ -11,23 +12,17 @@ describe('Params', () => {
   describe('.for', () => {
     context('erroring', () => {
       it('raises an exception containing a payload which tells us of all invalid values', () => {
-        let error: Error | undefined = undefined
+        let error: ParamValidationErrors
         try {
           Params.for({ species: 'invalid', name: 123 }, Pet)
         } catch (err) {
-          error = err as Error
+          error = err as ParamValidationErrors
         }
 
-        expect(error!.message).toEqual(
-          JSON.stringify(
-            {
-              name: ['expected string'],
-              species: ['did not match expected enum values'],
-            },
-            null,
-            2,
-          ),
-        )
+        expect(error!.errors).toEqual({
+          name: ['expected string'],
+          species: ['did not match expected enum values'],
+        })
       })
     })
 
@@ -112,7 +107,16 @@ describe('Params', () => {
       })
 
       it('rejects values outside the enum', () => {
-        expect(() => Params.for({ species: 'invalid' }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ species: 'invalid' }, Pet)).toThrow(ParamValidationErrors)
+
+        let error: ParamValidationErrors
+        try {
+          Params.for({ species: 'invalid' }, Pet)
+        } catch (err) {
+          error = err as ParamValidationErrors
+        }
+
+        expect(error!.errors).toEqual({ species: ['did not match expected enum values'] })
       })
 
       context('with an enum[]', () => {
@@ -120,6 +124,15 @@ describe('Params', () => {
           expect(Params.for({ favoriteTreats: ['efishy feesh'] }, Pet)).toEqual({
             favoriteTreats: ['efishy feesh'],
           })
+
+          let error: ParamValidationErrors
+          try {
+            Params.for({ favoriteTreats: ['efishy feeshzzz'] }, Pet)
+          } catch (err) {
+            error = err as ParamValidationErrors
+          }
+
+          expect(error!.errors).toEqual({ favoriteTreats: ['did not match expected enum values'] })
         })
       })
     })
@@ -136,13 +149,22 @@ describe('Params', () => {
       })
 
       it('rejects a string non-integer', () => {
-        expect(() => Params.for({ collarCount: '1.2' }, Pet)).toThrow(ParamValidationError)
-        expect(() => Params.for({ collarCount: '' }, Pet)).toThrow(ParamValidationError)
-        expect(() => Params.for({ collarCount: true }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ collarCount: '1.2' }, Pet)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ collarCount: '' }, Pet)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ collarCount: true }, Pet)).toThrow(ParamValidationErrors)
+
+        let error: ParamValidationErrors
+        try {
+          Params.for({ collarCount: '1.2' }, Pet)
+        } catch (err) {
+          error = err as ParamValidationErrors
+        }
+
+        expect(error!.errors).toEqual({ collarCount: ['expected bigint'] })
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ requiredCollarCount: null }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ requiredCollarCount: null }, Pet)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -162,15 +184,17 @@ describe('Params', () => {
       })
 
       it('rejects non-integer arrays', () => {
-        expect(() => Params.for({ favoriteBigints: ['1.2'] }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteBigints: [''] }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteBigints: ['abc'] }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteBigints: [true] }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteBigints: [{ data: 'hello' }] }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ favoriteBigints: ['1.2'] }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteBigints: [''] }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteBigints: ['abc'] }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteBigints: [true] }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteBigints: [{ data: 'hello' }] }, User)).toThrow(
+          ParamValidationErrors,
+        )
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ requiredFavoriteBigints: null }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ requiredFavoriteBigints: null }, User)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -199,23 +223,23 @@ describe('Params', () => {
       })
 
       it('rejects a non-1-or-0-number', () => {
-        expect(() => Params.for({ likesWalks: 3 }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ likesWalks: 3 }, Pet)).toThrow(ParamValidationErrors)
       })
 
       it('rejects a string float value', () => {
-        expect(() => Params.for({ likesWalks: '1.2' }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ likesWalks: '1.2' }, Pet)).toThrow(ParamValidationErrors)
       })
 
       it('rejects a blank string', () => {
-        expect(() => Params.for({ likesWalks: '' }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ likesWalks: '' }, Pet)).toThrow(ParamValidationErrors)
       })
 
       it('rejects a non-blank string', () => {
-        expect(() => Params.for({ likesWalks: 'abc' }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ likesWalks: 'abc' }, Pet)).toThrow(ParamValidationErrors)
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ likesTreats: null }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ likesTreats: null }, Pet)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -233,17 +257,17 @@ describe('Params', () => {
       })
 
       it('rejects non-boolean arrays', () => {
-        expect(() => Params.for({ favoriteBooleans: ['1.2'] }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteBooleans: [''] }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteBooleans: ['abc'] }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteBooleans: [3] }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ favoriteBooleans: ['1.2'] }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteBooleans: [''] }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteBooleans: ['abc'] }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteBooleans: [3] }, User)).toThrow(ParamValidationErrors)
         expect(() => Params.for({ favoriteBooleans: [{ data: 'hello' }] }, User)).toThrow(
-          ParamValidationError,
+          ParamValidationErrors,
         )
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ requiredFavoriteBooleans: null }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ requiredFavoriteBooleans: null }, User)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -263,13 +287,13 @@ describe('Params', () => {
       })
 
       it('rejects a non-integer', () => {
-        expect(() => Params.for({ collarCountInt: '1.2' }, Pet)).toThrow(ParamValidationError)
-        expect(() => Params.for({ collarCountInt: 1.2 }, Pet)).toThrow(ParamValidationError)
-        expect(() => Params.for({ collarCountInt: '' }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ collarCountInt: '1.2' }, Pet)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ collarCountInt: 1.2 }, Pet)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ collarCountInt: '' }, Pet)).toThrow(ParamValidationErrors)
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ requiredCollarCountInt: null }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ requiredCollarCountInt: null }, Pet)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -289,13 +313,13 @@ describe('Params', () => {
       })
 
       it('rejects a non-integer array', () => {
-        expect(() => Params.for({ favoriteIntegers: ['1.2'] }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteIntegers: [1.2] }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteIntegers: [''] }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ favoriteIntegers: ['1.2'] }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteIntegers: [1.2] }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteIntegers: [''] }, User)).toThrow(ParamValidationErrors)
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ requiredFavoriteIntegers: null }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ requiredFavoriteIntegers: null }, User)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -319,16 +343,16 @@ describe('Params', () => {
       })
 
       it('rejects a non-number', () => {
-        expect(() => Params.for({ collarCountNumeric: '' }, Pet)).toThrow(ParamValidationError)
-        expect(() => Params.for({ collarCountNumeric: 'abc' }, Pet)).toThrow(ParamValidationError)
-        expect(() => Params.for({ collarCountNumeric: true }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ collarCountNumeric: '' }, Pet)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ collarCountNumeric: 'abc' }, Pet)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ collarCountNumeric: true }, Pet)).toThrow(ParamValidationErrors)
         expect(() => Params.for({ collarCountNumeric: { hello: 'world' } }, Pet)).toThrow(
-          ParamValidationError,
+          ParamValidationErrors,
         )
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ requiredCollarCountNumeric: null }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ requiredCollarCountNumeric: null }, Pet)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -353,20 +377,22 @@ describe('Params', () => {
       })
 
       it('rejects a non-number array', () => {
-        expect(() => Params.for({ favoriteNumerics: [''] }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteNumerics: ['abc'] }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteNumerics: [true] }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ favoriteNumerics: [''] }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteNumerics: ['abc'] }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteNumerics: [true] }, User)).toThrow(ParamValidationErrors)
         expect(() => Params.for({ favoriteNumerics: [{ hello: 'world' }] }, User)).toThrow(
-          ParamValidationError,
+          ParamValidationErrors,
         )
-        expect(() => Params.for({ favoriteNumerics: '' }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteNumerics: 'abc' }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteNumerics: true }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ favoriteNumerics: { hello: 'world' } }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ favoriteNumerics: '' }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteNumerics: 'abc' }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteNumerics: true }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ favoriteNumerics: { hello: 'world' } }, User)).toThrow(
+          ParamValidationErrors,
+        )
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ requiredFavoriteNumerics: null }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ requiredFavoriteNumerics: null }, User)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -396,11 +422,11 @@ describe('Params', () => {
           })
 
           it('rejects a number', () => {
-            expect(() => Params.for({ [notNullField]: 1.2 }, notNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [notNullField]: 1.2 }, notNullModel)).toThrow(ParamValidationErrors)
           })
 
           it('rejects null', () => {
-            expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrow(ParamValidationErrors)
           })
 
           context('the field allows null', () => {
@@ -438,16 +464,16 @@ describe('Params', () => {
           })
 
           it('rejects non-strings', () => {
-            expect(() => Params.for({ [notNullField]: 1 }, notNullModel)).toThrow(ParamValidationError)
-            expect(() => Params.for({ [notNullField]: 1.2 }, notNullModel)).toThrow(ParamValidationError)
-            expect(() => Params.for({ [notNullField]: true }, notNullModel)).toThrow(ParamValidationError)
-            expect(() => Params.for({ [notNullField]: [1] }, notNullModel)).toThrow(ParamValidationError)
-            expect(() => Params.for({ [notNullField]: [1.2] }, notNullModel)).toThrow(ParamValidationError)
-            expect(() => Params.for({ [notNullField]: [true] }, notNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [notNullField]: 1 }, notNullModel)).toThrow(ParamValidationErrors)
+            expect(() => Params.for({ [notNullField]: 1.2 }, notNullModel)).toThrow(ParamValidationErrors)
+            expect(() => Params.for({ [notNullField]: true }, notNullModel)).toThrow(ParamValidationErrors)
+            expect(() => Params.for({ [notNullField]: [1] }, notNullModel)).toThrow(ParamValidationErrors)
+            expect(() => Params.for({ [notNullField]: [1.2] }, notNullModel)).toThrow(ParamValidationErrors)
+            expect(() => Params.for({ [notNullField]: [true] }, notNullModel)).toThrow(ParamValidationErrors)
           })
 
           it('rejects null', () => {
-            expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrow(ParamValidationErrors)
           })
 
           context('the field allows null', () => {
@@ -476,19 +502,21 @@ describe('Params', () => {
           })
 
           it('rejects a string', () => {
-            expect(() => Params.for({ [notNullField]: 'abc123' }, notNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [notNullField]: 'abc123' }, notNullModel)).toThrow(
+              ParamValidationErrors,
+            )
           })
 
           it('rejects a blank string', () => {
-            expect(() => Params.for({ [notNullField]: '' }, notNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [notNullField]: '' }, notNullModel)).toThrow(ParamValidationErrors)
           })
 
           it('rejects a number', () => {
-            expect(() => Params.for({ [notNullField]: 1 }, notNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [notNullField]: 1 }, notNullModel)).toThrow(ParamValidationErrors)
           })
 
           it('rejects null', () => {
-            expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrow(ParamValidationErrors)
           })
 
           context('the field allows null', () => {
@@ -522,14 +550,14 @@ describe('Params', () => {
 
           it('rejects a non-object array', () => {
             expect(() => Params.for({ [notNullField]: ['abc123'] }, notNullModel)).toThrow(
-              ParamValidationError,
+              ParamValidationErrors,
             )
-            expect(() => Params.for({ [notNullField]: [''] }, notNullModel)).toThrow(ParamValidationError)
-            expect(() => Params.for({ [notNullField]: [1] }, notNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [notNullField]: [''] }, notNullModel)).toThrow(ParamValidationErrors)
+            expect(() => Params.for({ [notNullField]: [1] }, notNullModel)).toThrow(ParamValidationErrors)
           })
 
           it('rejects null', () => {
-            expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrow(ParamValidationErrors)
           })
 
           context('the field allows null', () => {
@@ -557,13 +585,13 @@ describe('Params', () => {
       })
 
       it('rejects a string non-datetime', () => {
-        expect(() => Params.for({ lastSeenAt: '1.2' }, Pet)).toThrow(ParamValidationError)
-        expect(() => Params.for({ lastSeenAt: '' }, Pet)).toThrow(ParamValidationError)
-        expect(() => Params.for({ lastSeenAt: 'abc' }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ lastSeenAt: '1.2' }, Pet)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ lastSeenAt: '' }, Pet)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ lastSeenAt: 'abc' }, Pet)).toThrow(ParamValidationErrors)
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ lastHeardAt: null }, Pet)).toThrow(ParamValidationError)
+        expect(() => Params.for({ lastHeardAt: null }, Pet)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -591,13 +619,13 @@ describe('Params', () => {
       })
 
       it('rejects a string non-datetime', () => {
-        expect(() => Params.for({ birthdate: '1.2' }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ birthdate: '' }, User)).toThrow(ParamValidationError)
-        expect(() => Params.for({ birthdate: 'abc' }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ birthdate: '1.2' }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ birthdate: '' }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ birthdate: 'abc' }, User)).toThrow(ParamValidationErrors)
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ createdOn: null }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ createdOn: null }, User)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -631,16 +659,18 @@ describe('Params', () => {
 
           it('rejects a string non-datetime array', () => {
             expect(() => Params.for({ [allowNullField]: ['1.2'] }, allowNullModel)).toThrow(
-              ParamValidationError,
+              ParamValidationErrors,
             )
-            expect(() => Params.for({ [allowNullField]: [''] }, allowNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [allowNullField]: [''] }, allowNullModel)).toThrow(
+              ParamValidationErrors,
+            )
             expect(() => Params.for({ [allowNullField]: ['abc'] }, allowNullModel)).toThrow(
-              ParamValidationError,
+              ParamValidationErrors,
             )
           })
 
           it('rejects null', () => {
-            expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrow(ParamValidationError)
+            expect(() => Params.for({ [notNullField]: null }, notNullModel)).toThrow(ParamValidationErrors)
           })
 
           context('the field allows null', () => {
@@ -663,12 +693,12 @@ describe('Params', () => {
 
       it('rejects non-uuid', () => {
         expect(() => Params.for({ uuid: '883b3fc3-70a8-401c-a04a-a14b196ef83' }, User)).toThrow(
-          ParamValidationError,
+          ParamValidationErrors,
         )
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ uuid: null }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ uuid: null }, User)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -687,12 +717,12 @@ describe('Params', () => {
 
       it('rejects non-uuid[]', () => {
         expect(() => Params.for({ favoriteUuids: ['883b3fc3-70a8-401c-a04a-a14b196ef83'] }, User)).toThrow(
-          ParamValidationError,
+          ParamValidationErrors,
         )
       })
 
       it('rejects null', () => {
-        expect(() => Params.for({ requiredFavoriteUuids: null }, User)).toThrow(ParamValidationError)
+        expect(() => Params.for({ requiredFavoriteUuids: null }, User)).toThrow(ParamValidationErrors)
       })
 
       context('the field allows null', () => {
@@ -709,65 +739,77 @@ describe('Params', () => {
         context('string', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast('howyadoin', 'string')).toEqual('howyadoin')
+              expect(Params.cast({ howyadoin: 'howyadoin' }, 'howyadoin', 'string')).toEqual('howyadoin')
             })
           })
 
           context('with trailing space characters', () => {
             it('the trailing spaces are trimmed', () => {
-              expect(Params.cast('howyadoin     ', 'string')).toEqual('howyadoin')
+              expect(Params.cast({ howyadoin: 'howyadoin     ' }, 'howyadoin', 'string')).toEqual('howyadoin')
             })
           })
 
           context('with leading space characters', () => {
             it('the leading spaces are trimmed', () => {
-              expect(Params.cast('     howyadoin', 'string')).toEqual('howyadoin')
+              expect(Params.cast({ howyadoin: '     howyadoin' }, 'howyadoin', 'string')).toEqual('howyadoin')
             })
           })
 
           context('with trailing newline characters', () => {
             it('the trailing newlines are trimmed', () => {
-              expect(Params.cast('howyadoin\n\n\n', 'string')).toEqual('howyadoin')
+              expect(Params.cast({ howyadoin: 'howyadoin\n\n\n' }, 'howyadoin', 'string')).toEqual(
+                'howyadoin',
+              )
             })
           })
 
           context('with leading newline characters', () => {
             it('the leading newlines are trimmed', () => {
-              expect(Params.cast('\n\n\nhowyadoin', 'string')).toEqual('howyadoin')
+              expect(Params.cast({ howyadoin: '\n\n\nhowyadoin' }, 'howyadoin', 'string')).toEqual(
+                'howyadoin',
+              )
             })
           })
 
           context('with trailing tab characters', () => {
             it('the trailing tabs are trimmed', () => {
-              expect(Params.cast('howyadoin\t\t\t', 'string')).toEqual('howyadoin')
+              expect(Params.cast({ howyadoin: 'howyadoin\t\t\t' }, 'howyadoin', 'string')).toEqual(
+                'howyadoin',
+              )
             })
           })
 
           context('with leading tab characters', () => {
             it('the leading tabs are trimmed', () => {
-              expect(Params.cast('\t\t\thowyadoin', 'string')).toEqual('howyadoin')
+              expect(Params.cast({ howyadoin: '\t\t\thowyadoin' }, 'howyadoin', 'string')).toEqual(
+                'howyadoin',
+              )
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast(7, 'string')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: 7 }, 'howyadoin', 'string')).toThrow(ParamValidationError)
             })
           })
 
           context('with match passed', () => {
             context('with a valid value', () => {
               it('returns the requsted value', () => {
-                expect(Params.cast('howyadoin', 'string', { match: /howya.*/ })).toEqual('howyadoin')
+                expect(
+                  Params.cast({ howyadoin: 'howyadoin' }, 'howyadoin', 'string', { match: /howya.*/ }),
+                ).toEqual('howyadoin')
               })
             })
 
             context('with an invalid value', () => {
               it('raises a validation exception', () => {
-                expect(() => Params.cast('howyadoin', 'string', { match: /howya.*zzz/ })).toThrow(
-                  ParamValidationError,
-                )
-                expect(() => Params.cast(7, 'string', { match: /howya.*zzz/ })).toThrow(ParamValidationError)
+                expect(() =>
+                  Params.cast({ howyadoin: 'howyadoin' }, 'howyadoin', 'string', { match: /howya.*zzz/ }),
+                ).toThrow(ParamValidationError)
+                expect(() =>
+                  Params.cast({ howyadoin: 7 }, 'howyadoin', 'string', { match: /howya.*zzz/ }),
+                ).toThrow(ParamValidationError)
               })
             })
           })
@@ -776,14 +818,18 @@ describe('Params', () => {
         context('regex', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast('howyadoin', /howya.*/)).toEqual('howyadoin')
+              expect(Params.cast({ howyadoin: 'howyadoin' }, 'howyadoin', /howya.*/)).toEqual('howyadoin')
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast('howyadoin', /howya.*zzz/)).toThrow(ParamValidationError)
-              expect(() => Params.cast(7, /howya.*zzz/)).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: 'howyadoin' }, 'howyadoin', /howya.*zzz/)).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: 7 }, 'howyadoin', /howya.*zzz/)).toThrow(
+                ParamValidationError,
+              )
             })
           })
         })
@@ -791,21 +837,29 @@ describe('Params', () => {
         context('number', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast(7, 'number')).toEqual(7)
-              expect(Params.cast('7', 'number')).toEqual(7)
-              expect(Params.cast('7.1', 'number')).toEqual(7.1)
-              expect(Params.cast(-7, 'number')).toEqual(-7)
-              expect(Params.cast('-7', 'number')).toEqual(-7)
-              expect(Params.cast('-7.1', 'number')).toEqual(-7.1)
-              expect(Params.cast(7.1234567898765e30, 'number')).toEqual(7.1234567898765e30)
-              expect(Params.cast('7.1234567898765e30', 'number')).toEqual(7.1234567898765e30)
+              expect(Params.cast({ howyadoin: 7 }, 'howyadoin', 'number')).toEqual(7)
+              expect(Params.cast({ howyadoin: '7' }, 'howyadoin', 'number')).toEqual(7)
+              expect(Params.cast({ howyadoin: '7.1' }, 'howyadoin', 'number')).toEqual(7.1)
+              expect(Params.cast({ howyadoin: -7 }, 'howyadoin', 'number')).toEqual(-7)
+              expect(Params.cast({ howyadoin: '-7' }, 'howyadoin', 'number')).toEqual(-7)
+              expect(Params.cast({ howyadoin: '-7.1' }, 'howyadoin', 'number')).toEqual(-7.1)
+              expect(Params.cast({ howyadoin: 7.1234567898765e30 }, 'howyadoin', 'number')).toEqual(
+                7.1234567898765e30,
+              )
+              expect(Params.cast({ howyadoin: '7.1234567898765e30' }, 'howyadoin', 'number')).toEqual(
+                7.1234567898765e30,
+              )
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast('hello', 'number')).toThrow(ParamValidationError)
-              expect(() => Params.cast('777hello', 'number')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: 'hello' }, 'howyadoin', 'number')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: '777hello' }, 'howyadoin', 'number')).toThrow(
+                ParamValidationError,
+              )
             })
           })
         })
@@ -813,17 +867,21 @@ describe('Params', () => {
         context('integer', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast(7, 'integer')).toEqual(7)
-              expect(Params.cast('7', 'integer')).toEqual(7)
-              expect(Params.cast(-7, 'integer')).toEqual(-7)
-              expect(Params.cast('-7', 'integer')).toEqual(-7)
+              expect(Params.cast({ howyadoin: 7 }, 'howyadoin', 'integer')).toEqual(7)
+              expect(Params.cast({ howyadoin: '7' }, 'howyadoin', 'integer')).toEqual(7)
+              expect(Params.cast({ howyadoin: -7 }, 'howyadoin', 'integer')).toEqual(-7)
+              expect(Params.cast({ howyadoin: '-7' }, 'howyadoin', 'integer')).toEqual(-7)
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast(7.1, 'integer')).toThrow(ParamValidationError)
-              expect(() => Params.cast('0x777', 'integer')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: 7.1 }, 'howyadoin', 'integer')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: '0x777' }, 'howyadoin', 'integer')).toThrow(
+                ParamValidationError,
+              )
             })
           })
         })
@@ -831,19 +889,25 @@ describe('Params', () => {
         context('bigint', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast('9999999999999999999999999', 'bigint')).toEqual('9999999999999999999999999')
-              expect(Params.cast(7, 'bigint')).toEqual('7')
-              expect(Params.cast('-9999999999999999999999999', 'bigint')).toEqual(
+              expect(Params.cast({ howyadoin: '9999999999999999999999999' }, 'howyadoin', 'bigint')).toEqual(
+                '9999999999999999999999999',
+              )
+              expect(Params.cast({ howyadoin: 7 }, 'howyadoin', 'bigint')).toEqual('7')
+              expect(Params.cast({ howyadoin: '-9999999999999999999999999' }, 'howyadoin', 'bigint')).toEqual(
                 '-9999999999999999999999999',
               )
-              expect(Params.cast(-7, 'bigint')).toEqual('-7')
+              expect(Params.cast({ howyadoin: -7 }, 'howyadoin', 'bigint')).toEqual('-7')
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast('9i', 'bigint')).toThrow(ParamValidationError)
-              expect(() => Params.cast(7.1, 'bigint')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: '9i' }, 'howyadoin', 'bigint')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: 7.1 }, 'howyadoin', 'bigint')).toThrow(
+                ParamValidationError,
+              )
             })
           })
         })
@@ -851,14 +915,16 @@ describe('Params', () => {
         context('boolean', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast(true, 'boolean')).toEqual(true)
-              expect(Params.cast(false, 'boolean')).toEqual(false)
+              expect(Params.cast({ howyadoin: true }, 'howyadoin', 'boolean')).toEqual(true)
+              expect(Params.cast({ howyadoin: false }, 'howyadoin', 'boolean')).toEqual(false)
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast('hello', 'boolean')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: 'hello' }, 'howyadoin', 'boolean')).toThrow(
+                ParamValidationError,
+              )
             })
           })
         })
@@ -866,13 +932,15 @@ describe('Params', () => {
         context('null', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast(null, 'null')).toEqual(null)
+              expect(Params.cast({ howyadoin: null }, 'howyadoin', 'null')).toEqual(null)
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast('hello', 'null')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: 'hello' }, 'howyadoin', 'null')).toThrow(
+                ParamValidationError,
+              )
             })
           })
         })
@@ -880,30 +948,45 @@ describe('Params', () => {
         context('string[]', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast(['hello', 'world'], 'string[]')).toEqual(['hello', 'world'])
+              expect(Params.cast({ howyadoin: ['hello', 'world'] }, 'howyadoin', 'string[]')).toEqual([
+                'hello',
+                'world',
+              ])
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast(['hello', 1], 'string[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: ['hello', 1] }, 'howyadoin', 'string[]')).toThrow(
+                ParamValidationError,
+              )
             })
           })
 
           context('with null', () => {
             it('compacts null and undefined inner values', () => {
-              expect(Params.cast(['hello', null, undefined], 'string[]')).toEqual(['hello'])
+              expect(Params.cast({ howyadoin: ['hello', null, undefined] }, 'howyadoin', 'string[]')).toEqual(
+                ['hello'],
+              )
             })
 
             it('rejects null or undefined as outer values', () => {
-              expect(() => Params.cast(null, 'string[]')).toThrow(ParamValidationError)
-              expect(() => Params.cast(undefined, 'string[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: null }, 'howyadoin', 'string[]')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: undefined }, 'howyadoin', 'string[]')).toThrow(
+                ParamValidationError,
+              )
             })
 
             context('null is explicitly allowed', () => {
               it('does not reject null or undefined as outer values', () => {
-                expect(Params.cast(null, 'string[]', { allowNull: true })).toEqual(null)
-                expect(Params.cast(undefined, 'string[]', { allowNull: true })).toEqual(undefined)
+                expect(
+                  Params.cast({ howyadoin: null }, 'howyadoin', 'string[]', { allowNull: true }),
+                ).toEqual(null)
+                expect(
+                  Params.cast({ howyadoin: undefined }, 'howyadoin', 'string[]', { allowNull: true }),
+                ).toEqual(undefined)
               })
             })
           })
@@ -911,21 +994,26 @@ describe('Params', () => {
           context('with match passed', () => {
             context('with a valid value', () => {
               it('returns the requsted value', () => {
-                expect(Params.cast(['howyadoin', 'howyanotdoin'], 'string[]', { match: /howya.*/ })).toEqual([
-                  'howyadoin',
-                  'howyanotdoin',
-                ])
+                expect(
+                  Params.cast({ howyadoin: ['howyadoin', 'howyanotdoin'] }, 'howyadoin', 'string[]', {
+                    match: /howya.*/,
+                  }),
+                ).toEqual(['howyadoin', 'howyanotdoin'])
               })
             })
 
             context('with an invalid value', () => {
               it('raises a validation exception', () => {
                 expect(() =>
-                  Params.cast(['howyadoin', 'howyadoinzzz'], 'string[]', { match: /howya.*zzz/ }),
+                  Params.cast({ howyadoin: ['howyadoin', 'howyadoinzzz'] }, 'howyadoin', 'string[]', {
+                    match: /howya.*zzz/,
+                  }),
                 ).toThrow(ParamValidationError)
-                expect(() => Params.cast([1, 'howyadoinzzz'], 'string[]', { match: /howya.*zzz/ })).toThrow(
-                  ParamValidationError,
-                )
+                expect(() =>
+                  Params.cast({ howyadoin: [1, 'howyadoinzzz'] }, 'howyadoin', 'string[]', {
+                    match: /howya.*zzz/,
+                  }),
+                ).toThrow(ParamValidationError)
               })
             })
           })
@@ -934,30 +1022,40 @@ describe('Params', () => {
         context('number[]', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast([1, 2], 'number[]')).toEqual([1, 2])
+              expect(Params.cast({ howyadoin: [1, 2] }, 'howyadoin', 'number[]')).toEqual([1, 2])
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast(['hello', 1], 'number[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: ['hello', 1] }, 'howyadoin', 'number[]')).toThrow(
+                ParamValidationError,
+              )
             })
           })
 
           context('with null', () => {
             it('compacts null and undefined inner values', () => {
-              expect(Params.cast([1, null, undefined], 'number[]')).toEqual([1])
+              expect(Params.cast({ howyadoin: [1, null, undefined] }, 'howyadoin', 'number[]')).toEqual([1])
             })
 
             it('rejects null or undefined as outer values', () => {
-              expect(() => Params.cast(null, 'number[]')).toThrow(ParamValidationError)
-              expect(() => Params.cast(undefined, 'number[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: null }, 'howyadoin', 'number[]')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: undefined }, 'howyadoin', 'number[]')).toThrow(
+                ParamValidationError,
+              )
             })
 
             context('null is explicitly allowed', () => {
               it('does not reject null or undefined as outer values', () => {
-                expect(Params.cast(null, 'number[]', { allowNull: true })).toEqual(null)
-                expect(Params.cast(undefined, 'number[]', { allowNull: true })).toEqual(undefined)
+                expect(
+                  Params.cast({ howyadoin: null }, 'howyadoin', 'number[]', { allowNull: true }),
+                ).toEqual(null)
+                expect(
+                  Params.cast({ howyadoin: undefined }, 'howyadoin', 'number[]', { allowNull: true }),
+                ).toEqual(undefined)
               })
             })
           })
@@ -966,30 +1064,40 @@ describe('Params', () => {
         context('integer[]', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast([1, 2], 'integer[]')).toEqual([1, 2])
+              expect(Params.cast({ howyadoin: [1, 2] }, 'howyadoin', 'integer[]')).toEqual([1, 2])
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast([1.1, 1], 'integer[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: [1.1, 1] }, 'howyadoin', 'integer[]')).toThrow(
+                ParamValidationError,
+              )
             })
           })
 
           context('with null', () => {
             it('compacts null and undefined inner values', () => {
-              expect(Params.cast([1, null, undefined], 'integer[]')).toEqual([1])
+              expect(Params.cast({ howyadoin: [1, null, undefined] }, 'howyadoin', 'integer[]')).toEqual([1])
             })
 
             it('rejects null or undefined as outer values', () => {
-              expect(() => Params.cast(null, 'integer[]')).toThrow(ParamValidationError)
-              expect(() => Params.cast(undefined, 'integer[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: null }, 'howyadoin', 'integer[]')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: undefined }, 'howyadoin', 'integer[]')).toThrow(
+                ParamValidationError,
+              )
             })
 
             context('null is explicitly allowed', () => {
               it('does not reject null or undefined as outer values', () => {
-                expect(Params.cast(null, 'integer[]', { allowNull: true })).toEqual(null)
-                expect(Params.cast(undefined, 'integer[]', { allowNull: true })).toEqual(undefined)
+                expect(
+                  Params.cast({ howyadoin: null }, 'howyadoin', 'integer[]', { allowNull: true }),
+                ).toEqual(null)
+                expect(
+                  Params.cast({ howyadoin: undefined }, 'howyadoin', 'integer[]', { allowNull: true }),
+                ).toEqual(undefined)
               })
             })
           })
@@ -998,31 +1106,43 @@ describe('Params', () => {
         context('bigint[]', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast(['1', '2'], 'bigint[]')).toEqual(['1', '2'])
-              expect(Params.cast([1, 2], 'bigint[]')).toEqual(['1', '2'])
+              expect(Params.cast({ howyadoin: ['1', '2'] }, 'howyadoin', 'bigint[]')).toEqual(['1', '2'])
+              expect(Params.cast({ howyadoin: [1, 2] }, 'howyadoin', 'bigint[]')).toEqual(['1', '2'])
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast(['1.1', '1'], 'bigint[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: ['1.1', '1'] }, 'howyadoin', 'bigint[]')).toThrow(
+                ParamValidationError,
+              )
             })
           })
 
           context('with null', () => {
             it('compacts null and undefined inner values', () => {
-              expect(Params.cast(['1', null, undefined], 'bigint[]')).toEqual(['1'])
+              expect(Params.cast({ howyadoin: ['1', null, undefined] }, 'howyadoin', 'bigint[]')).toEqual([
+                '1',
+              ])
             })
 
             it('rejects null or undefined as outer values', () => {
-              expect(() => Params.cast(null, 'bigint[]')).toThrow(ParamValidationError)
-              expect(() => Params.cast(undefined, 'bigint[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: null }, 'howyadoin', 'bigint[]')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: undefined }, 'howyadoin', 'bigint[]')).toThrow(
+                ParamValidationError,
+              )
             })
 
             context('null is explicitly allowed', () => {
               it('does not reject null or undefined as outer values', () => {
-                expect(Params.cast(null, 'bigint[]', { allowNull: true })).toEqual(null)
-                expect(Params.cast(undefined, 'bigint[]', { allowNull: true })).toEqual(undefined)
+                expect(
+                  Params.cast({ howyadoin: null }, 'howyadoin', 'bigint[]', { allowNull: true }),
+                ).toEqual(null)
+                expect(
+                  Params.cast({ howyadoin: undefined }, 'howyadoin', 'bigint[]', { allowNull: true }),
+                ).toEqual(undefined)
               })
             })
           })
@@ -1031,30 +1151,45 @@ describe('Params', () => {
         context('boolean[]', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast([true, false], 'boolean[]')).toEqual([true, false])
+              expect(Params.cast({ howyadoin: [true, false] }, 'howyadoin', 'boolean[]')).toEqual([
+                true,
+                false,
+              ])
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast(['hello', true], 'boolean[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: ['hello', true] }, 'howyadoin', 'boolean[]')).toThrow(
+                ParamValidationError,
+              )
             })
           })
 
           context('with null', () => {
             it('compacts null and undefined inner values', () => {
-              expect(Params.cast([true, null, undefined], 'boolean[]')).toEqual([true])
+              expect(Params.cast({ howyadoin: [true, null, undefined] }, 'howyadoin', 'boolean[]')).toEqual([
+                true,
+              ])
             })
 
             it('rejects null or undefined as outer values', () => {
-              expect(() => Params.cast(null, 'boolean[]')).toThrow(ParamValidationError)
-              expect(() => Params.cast(undefined, 'boolean[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: null }, 'howyadoin', 'boolean[]')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: undefined }, 'howyadoin', 'boolean[]')).toThrow(
+                ParamValidationError,
+              )
             })
 
             context('null is explicitly allowed', () => {
               it('does not reject null or undefined as outer values', () => {
-                expect(Params.cast(null, 'boolean[]', { allowNull: true })).toEqual(null)
-                expect(Params.cast(undefined, 'boolean[]', { allowNull: true })).toEqual(undefined)
+                expect(
+                  Params.cast({ howyadoin: null }, 'howyadoin', 'boolean[]', { allowNull: true }),
+                ).toEqual(null)
+                expect(
+                  Params.cast({ howyadoin: undefined }, 'howyadoin', 'boolean[]', { allowNull: true }),
+                ).toEqual(undefined)
               })
             })
           })
@@ -1063,13 +1198,15 @@ describe('Params', () => {
         context('null[]', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast([null, null], 'null[]')).toEqual([null, null])
+              expect(Params.cast({ howyadoin: [null, null] }, 'howyadoin', 'null[]')).toEqual([null, null])
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast(['hello', null], 'null[]')).toThrow(ParamValidationError)
+              expect(() => Params.cast({ howyadoin: ['hello', null] }, 'howyadoin', 'null[]')).toThrow(
+                ParamValidationError,
+              )
             })
           })
         })
@@ -1077,16 +1214,28 @@ describe('Params', () => {
         context('enum', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              const result: TestEnum = Params.cast('hello', 'string', { enum: TestEnumValues })
+              const result: TestEnum = Params.cast({ howyadoin: 'hello' }, 'howyadoin', 'string', {
+                enum: TestEnumValues,
+              })
               expect(result).toEqual('hello')
             })
           })
 
           context('with an invalid value', () => {
             it('raises a validation exception', () => {
-              expect(() => Params.cast('goodbye', 'string', { enum: TestEnumValues })).toThrow(
-                ParamValidationError,
-              )
+              let error: ParamValidationError
+              try {
+                Params.cast({ howyadoin: 'goodbye' }, 'howyadoin', 'string', { enum: TestEnumValues })
+              } catch (err) {
+                error = err as ParamValidationError
+              }
+
+              expect(error!.paramName).toEqual('howyadoin')
+              expect(error!.errorMessages).toEqual(['did not match expected enum values'])
+
+              expect(() =>
+                Params.cast({ howyadoin: 'goodbye' }, 'howyadoin', 'string', { enum: TestEnumValues }),
+              ).toThrow(ParamValidationError)
             })
           })
         })
@@ -1130,13 +1279,13 @@ describe('Params', () => {
 
   describe('#casing', () => {
     it('works together with restrict to snakeify attribute keys when ingesting params', () => {
-      expect(Params.casing('snake').restrict({ HelloWorld: 'HowAreYou' }, ['hello_world'])).toEqual({
+      expect(Params.casing({ HelloWorld: 'HowAreYou' }, 'snake').restrict(['hello_world'])).toEqual({
         hello_world: 'HowAreYou',
       })
     })
 
     it('works together with restrict to camelize attribute keys when ingesting params', () => {
-      expect(Params.casing('camel').restrict({ hello_world: 'HowAreYou' }, ['helloWorld'])).toEqual({
+      expect(Params.casing({ hello_world: 'HowAreYou' }, 'camel').restrict(['helloWorld'])).toEqual({
         helloWorld: 'HowAreYou',
       })
     })

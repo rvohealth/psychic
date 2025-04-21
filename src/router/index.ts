@@ -14,7 +14,6 @@ import {
   lookupControllerOrFail,
   routePath,
 } from '../router/helpers.js'
-import { ParamValidationError } from '../server/params.js'
 import RouteManager from './route-manager.js'
 import {
   HttpMethod,
@@ -23,6 +22,8 @@ import {
   ResourcesMethods,
   ResourcesOptions,
 } from './types.js'
+import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
+import ParamValidationError from '../error/controller/ParamValidationError.js'
 
 export default class PsychicRouter {
   public app: Express
@@ -357,15 +358,14 @@ export default class PsychicRouter {
       } else if (err instanceof ValidationError) {
         res.status(422).json({ errors: err.errors || {} })
       } else if (err instanceof ParamValidationError) {
-        let errorsJson: object = {}
-        try {
-          errorsJson = JSON.parse(err.message) as Record<string, string>
-        } catch {
-          // noop
-        }
-
         res.status(400).json({
-          errors: errorsJson,
+          errors: {
+            [err.paramName]: err.errorMessages,
+          },
+        })
+      } else if (err instanceof ParamValidationErrors) {
+        res.status(400).json({
+          errors: err.errors,
         })
       } else {
         // by default, ts-node will mask these errors for no good reason, causing us
