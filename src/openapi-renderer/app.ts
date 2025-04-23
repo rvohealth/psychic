@@ -4,7 +4,7 @@ import * as fs from 'node:fs/promises'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import openapiJsonPath from '../helpers/openapiJsonPath.js'
-import PsychicApplication from '../psychic-application/index.js'
+import PsychicApp from '../psychic-app/index.js'
 import { HttpMethod, HttpMethods } from '../router/types.js'
 import PsychicServer from '../server/index.js'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults.js'
@@ -20,7 +20,7 @@ export default class OpenapiAppRenderer {
   public static async sync() {
     const openapiContents = await OpenapiAppRenderer.toObject()
 
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     const asyncWriteOpenapiFile = async (key: string) => {
       const jsonPath = openapiJsonPath(key)
       await fs.writeFile(jsonPath, JSON.stringify(openapiContents[key], null, 2), {
@@ -39,7 +39,7 @@ export default class OpenapiAppRenderer {
    * the controller layer.
    */
   public static async toObject(): Promise<Record<string, OpenapiSchema>> {
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
 
     const convertToObjectAndStoreInOutput = async (output: Record<string, OpenapiSchema>, key: string) => {
       output[key] = await this._toObject(key)
@@ -55,7 +55,7 @@ export default class OpenapiAppRenderer {
 
   public static async _toObject(openapiName: string): Promise<OpenapiSchema> {
     const processedSchemas: Record<string, boolean> = {}
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     const controllers = psychicApp.controllers
 
     const server = new PsychicServer()

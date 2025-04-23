@@ -1,7 +1,7 @@
 import { DreamApp } from '@rvoh/dream'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
-import PsychicApplication from '../../psychic-application/index.js'
+import PsychicApp from '../../psychic-app/index.js'
 
 export default class TypesBuilder {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -14,7 +14,7 @@ export default class TypesBuilder {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static build(customTypes: any = undefined) {
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
 
     const output = {
       openapiNames: Object.keys(psychicApp.openapi),

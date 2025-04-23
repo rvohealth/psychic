@@ -2,10 +2,10 @@ import { existsSync } from 'node:fs'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import * as psychicPathModule from '../../../../src/helpers/path/psychicPath.js'
-import { generateController, PsychicApplication } from '../../../../src/index.js'
+import { generateController, PsychicApp } from '../../../../src/index.js'
 
 describe('generateController', () => {
-  let psychicApp: PsychicApplication
+  let psychicApp: PsychicApp
   let tmpControllersFileRelativePath: string
   let tmpControllersFilepath: string
   let adminTmpControllersFilepath: string
@@ -13,7 +13,7 @@ describe('generateController', () => {
   let adminSupportDir: string
 
   beforeEach(() => {
-    psychicApp = PsychicApplication.getOrFail()
+    psychicApp = PsychicApp.getOrFail()
     tmpControllersFileRelativePath = path.join('spec', 'tmp', 'controllers')
     tmpControllersFilepath = path.join(psychicApp.apiRoot, tmpControllersFileRelativePath)
     adminTmpControllersFilepath = path.join(tmpControllersFilepath, 'Admin')

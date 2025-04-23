@@ -1,4 +1,4 @@
-import globalControllerKeyFromPath from '../../../../src/psychic-application/helpers/globalControllerKeyFromPath.js'
+import globalControllerKeyFromPath from '../../../../src/psychic-app/helpers/globalControllerKeyFromPath.js'
 
 describe('globalControllerKeyFromPath', () => {
   it('converts test-app/app/controllers/Graph/Edge.ts to controllers/Graph/Edge', () => {

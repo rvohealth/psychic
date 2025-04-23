@@ -3,7 +3,7 @@ import { Attribute, DreamApp, DreamSerializer } from '@rvoh/dream'
 import { Request, Response } from 'express'
 import { BeforeAction, OpenAPI } from '../../../src/controller/decorators.js'
 import PsychicController from '../../../src/controller/index.js'
-import PsychicApplication from '../../../src/psychic-application/index.js'
+import PsychicApp from '../../../src/psychic-app/index.js'
 import Pet from '../../../test-app/src/app/models/Pet.js'
 import User from '../../../test-app/src/app/models/User.js'
 import UserSerializer, {
@@ -17,12 +17,12 @@ describe('PsychicController', () => {
   describe('#serialize', () => {
     let req: Request
     let res: Response
-    let config: PsychicApplication
+    let config: PsychicApp
 
     beforeEach(() => {
       req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
       res = getMockRes().res as unknown as Response
-      config = new PsychicApplication()
+      config = new PsychicApp()
       vi.spyOn(res, 'json')
     })
 

@@ -1,8 +1,8 @@
 import { dreamPath } from '@rvoh/dream'
-import PsychicApplication from '../../psychic-application/index.js'
+import PsychicApp from '../../psychic-app/index.js'
 
 export default function (dreamPathType: PsychicPaths) {
-  const psychicApp = PsychicApplication.getOrFail()
+  const psychicApp = PsychicApp.getOrFail()
 
   switch (dreamPathType) {
     case 'apiRoutes':

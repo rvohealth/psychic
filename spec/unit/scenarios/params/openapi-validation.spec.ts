@@ -1,6 +1,6 @@
 import { DateTime } from '@rvoh/dream'
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import { PsychicApplication, PsychicServer } from '../../../../src/index.js'
+import { PsychicApp, PsychicServer } from '../../../../src/index.js'
 
 describe('hitting an endpoint with openapi validation activated', () => {
   const subject = async (data: object, expectedStatus: number) =>
@@ -12,7 +12,7 @@ describe('hitting an endpoint with openapi validation activated', () => {
     })
 
   beforeEach(async () => {
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
 
     psychicApp.set('openapi', {
       validation: {

@@ -1,4 +1,4 @@
-export default class PsychicApplicationInvalidEncryptionKey extends Error {
+export default class PsychicAppInvalidEncryptionKey extends Error {
   constructor() {
     super()
   }

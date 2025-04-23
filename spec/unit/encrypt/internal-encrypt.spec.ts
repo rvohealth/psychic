@@ -1,6 +1,6 @@
 import { Encrypt } from '@rvoh/dream'
 import InternalEncrypt from '../../../src/encrypt/internal-encrypt.js'
-import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication.js'
+import initializePsychicApp from '../../../test-app/src/cli/helpers/initializePsychicApp.js'
 
 describe('InternalEncrypt', () => {
   describe('#encryptColumn, #decryptColumn', () => {
@@ -8,12 +8,12 @@ describe('InternalEncrypt', () => {
 
     beforeEach(async () => {
       originalEncryptionKey = process.env.APP_ENCRYPTION_KEY!
-      await initializePsychicApplication()
+      await initializePsychicApp()
     })
 
     afterEach(async () => {
       process.env.APP_ENCRYPTION_KEY = originalEncryptionKey
-      await initializePsychicApplication()
+      await initializePsychicApp()
     })
 
     context('when current encryption key is valid', () => {

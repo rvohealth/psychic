@@ -9,7 +9,7 @@ In conf/app.ts, either:
   1.) disable websockets by omitting the call to psy.set('websockets', ...), OR
   2.) provide a redis connection for your websockets, as shown below:
 
-export default async (psy: PsychicApplication) => {
+export default async (psy: PsychicApp) => {
   ...
 
   psy.set('websockets', {

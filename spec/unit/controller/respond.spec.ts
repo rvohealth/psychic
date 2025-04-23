@@ -2,7 +2,7 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import { OpenAPI } from '../../../src/controller/decorators.js'
 import PsychicController from '../../../src/controller/index.js'
-import PsychicApplication from '../../../src/psychic-application/index.js'
+import PsychicApp from '../../../src/psychic-app/index.js'
 import User from '../../../test-app/src/app/models/User.js'
 import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers.js'
 
@@ -10,7 +10,7 @@ describe('PsychicController', () => {
   describe('#respond', () => {
     let req: Request
     let res: Response
-    let config: PsychicApplication
+    let config: PsychicApp
 
     class MyController extends PsychicController {
       @OpenAPI(User, {
@@ -29,7 +29,7 @@ describe('PsychicController', () => {
     beforeEach(() => {
       req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
       res = getMockRes().res as unknown as Response
-      config = new PsychicApplication()
+      config = new PsychicApp()
       vi.spyOn(res, 'json')
       vi.spyOn(res, 'status')
     })

@@ -4,16 +4,16 @@ import addResourceToRoutes, {
   addResourceToRoutes_routeToRegexAndReplacements,
 } from '../../../../src/generate/helpers/addResourceToRoutes.js'
 import * as psychicPathModule from '../../../../src/helpers/path/psychicPath.js'
-import { PsychicApplication } from '../../../../src/index.js'
+import { PsychicApp } from '../../../../src/index.js'
 
 describe('addResourceToRoutes', () => {
-  let psychicApp: PsychicApplication
+  let psychicApp: PsychicApp
   let tmpRoutesFileRelativePath: string
   let tmpRoutesFilepath: string
   let supportDir: string
 
   beforeEach(() => {
-    psychicApp = PsychicApplication.getOrFail()
+    psychicApp = PsychicApp.getOrFail()
     tmpRoutesFileRelativePath = path.join('spec', 'tmp', 'routes.ts')
     tmpRoutesFilepath = path.join(psychicApp.apiRoot, tmpRoutesFileRelativePath)
     supportDir = path.join(psychicApp.apiRoot, 'spec', 'support', 'generators', 'routes')

@@ -8,7 +8,7 @@ import { Server } from 'node:http'
 import * as path from 'node:path'
 import EnvInternal from '../helpers/EnvInternal.js'
 import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError.js'
-import PsychicApplication, { PsychicSslCredentials } from '../psychic-application/index.js'
+import PsychicApp, { PsychicSslCredentials } from '../psychic-app/index.js'
 import PsychicRouter from '../router/index.js'
 import startPsychicServer, {
   createPsychicHttpInstance,
@@ -36,12 +36,12 @@ export default class PsychicServer {
   }
 
   public get config() {
-    return PsychicApplication.getOrFail()
+    return PsychicApp.getOrFail()
   }
 
   public async routes() {
     const r = new PsychicRouter(this.expressApp, this.config)
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     await psychicApp.routesCb(r)
     return r.routes
   }
@@ -49,7 +49,7 @@ export default class PsychicServer {
   public async boot() {
     if (this.booted) return
 
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
 
     this.expressApp.use((_, res, next) => {
       Object.keys(psychicApp.defaultResponseHeaders).forEach(key => {
@@ -67,7 +67,7 @@ export default class PsychicServer {
       await this.config.boot()
     } catch (err) {
       const error = err as Error
-      PsychicApplication.logWithLevel('error', error)
+      PsychicApp.logWithLevel('error', error)
       throw new Error(`
         Failed to boot psychic config. the error thrown was:
           ${error.message}
@@ -94,7 +94,7 @@ export default class PsychicServer {
   public async start(port?: number) {
     await this.boot()
 
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
 
     const startOverride = psychicApp['overrides']['server:start']
     if (startOverride) {
@@ -137,7 +137,7 @@ export default class PsychicServer {
   }
 
   public async stop({ bypassClosingDbConnections = false }: { bypassClosingDbConnections?: boolean } = {}) {
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     for (const hook of psychicApp.specialHooks.serverShutdown) {
       await hook(this)
     }
@@ -150,7 +150,7 @@ export default class PsychicServer {
   }
 
   public async serveForRequestSpecs(block: () => void | Promise<void>) {
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     const port = psychicApp.port
 
     await this.boot()
@@ -183,7 +183,7 @@ export default class PsychicServer {
   }
 
   private initializeOpenapiValidation() {
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     for (const openapiName in psychicApp.openapi) {
       const openapiOpts = psychicApp.openapi[openapiName]
       if (openapiOpts?.validation) {
@@ -194,7 +194,7 @@ export default class PsychicServer {
         this.expressApp.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
           if (isOpenapiError(err)) {
             if (EnvInternal.isDebug) {
-              PsychicApplication.log(JSON.stringify(err))
+              PsychicApp.log(JSON.stringify(err))
               console.trace()
             }
 
@@ -204,7 +204,7 @@ export default class PsychicServer {
             })
           } else {
             if (EnvInternal.isDebug) {
-              PsychicApplication.logWithLevel('error', err)
+              PsychicApp.logWithLevel('error', err)
             }
             next()
           }
@@ -215,7 +215,7 @@ export default class PsychicServer {
 
   private async buildRoutes() {
     const r = new PsychicRouter(this.expressApp, this.config)
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     await psychicApp.routesCb(r)
     r.commit()
   }

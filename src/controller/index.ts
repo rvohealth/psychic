@@ -33,7 +33,7 @@ import HttpStatusUnavailableForLegalReasons from '../error/http/UnavailableForLe
 import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent.js'
 import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType.js'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
-import PsychicApplication from '../psychic-application/index.js'
+import PsychicApp from '../psychic-app/index.js'
 import Params, {
   ParamsCastOptions,
   ParamsForOpts,
@@ -163,7 +163,7 @@ export default class PsychicController {
    * you provide are organized into a map of key-value pairs,
    * where the keys are global identifiers for each controller, and
    * the values are the matching controllers. The key returned here
-   * enables a lookup of the controller from the PsychicApplication
+   * enables a lookup of the controller from the PsychicApp
    * class.
    */
   public static get globalName(): string {
@@ -226,7 +226,7 @@ export default class PsychicController {
   public req: Request
   public res: Response
   public session: Session
-  public config: PsychicApplication
+  public config: PsychicApp
   public action: string
   constructor(
     req: Request,
@@ -235,7 +235,7 @@ export default class PsychicController {
       config,
       action,
     }: {
-      config: PsychicApplication
+      config: PsychicApp
       action: string
     },
   ) {

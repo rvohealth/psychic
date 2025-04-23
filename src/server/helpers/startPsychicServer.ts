@@ -5,7 +5,7 @@ import * as http from 'node:http'
 import { Server } from 'node:http'
 import * as https from 'node:https'
 import EnvInternal from '../../helpers/EnvInternal.js'
-import { PsychicSslCredentials } from '../../psychic-application/index.js'
+import { PsychicSslCredentials } from '../../psychic-app/index.js'
 import PsychicServer from '../../server/index.js'
 
 export interface StartPsychicServerOptions {

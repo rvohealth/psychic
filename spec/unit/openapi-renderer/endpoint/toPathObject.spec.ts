@@ -1,6 +1,6 @@
 import { PsychicServer } from '../../../../src/index.js'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint.js'
-import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache.js'
+import * as PsychicAppCacheModule from '../../../../src/psychic-app/cache.js'
 import { RouteConfig } from '../../../../src/router/route-manager.js'
 import ApiPetsController from '../../../../test-app/src/app/controllers/Api/PetsController.js'
 import OpenapiOverridesTestController from '../../../../test-app/src/app/controllers/OpenapiOverridesTestsController.js'
@@ -17,12 +17,12 @@ import PostSerializer from '../../../../test-app/src/app/serializers/PostSeriali
 import UserSerializer, {
   UserWithPostsSerializer,
 } from '../../../../test-app/src/app/serializers/UserSerializer.js'
-import initializePsychicApplication from '../../../../test-app/src/cli/helpers/initializePsychicApplication.js'
+import initializePsychicApp from '../../../../test-app/src/cli/helpers/initializePsychicApp.js'
 
 describe('OpenapiEndpointRenderer', () => {
   let routes: RouteConfig[]
   beforeAll(async () => {
-    await initializePsychicApplication()
+    await initializePsychicApp()
     const server = new PsychicServer()
     await server.boot()
     routes = await server.routes()
@@ -903,12 +903,10 @@ describe('OpenapiEndpointRenderer', () => {
 
             context('suppressResponseEnums=true', () => {
               beforeEach(() => {
-                const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
+                const psychicApp = PsychicAppCacheModule.getCachedPsychicAppOrFail()
                 psychicApp.openapi.default!.suppressResponseEnums = true
 
-                vi.spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail').mockReturnValue(
-                  psychicApp,
-                )
+                vi.spyOn(PsychicAppCacheModule, 'getCachedPsychicAppOrFail').mockReturnValue(psychicApp)
               })
 
               it('does not suppress enums for request bodies', () => {
@@ -1830,12 +1828,10 @@ describe('OpenapiEndpointRenderer', () => {
 
         context('suppressResponseEnums=true', () => {
           beforeEach(() => {
-            const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
+            const psychicApp = PsychicAppCacheModule.getCachedPsychicAppOrFail()
             psychicApp.openapi.default!.suppressResponseEnums = true
 
-            vi.spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail').mockReturnValue(
-              psychicApp,
-            )
+            vi.spyOn(PsychicAppCacheModule, 'getCachedPsychicAppOrFail').mockReturnValue(psychicApp)
           })
 
           it('suppresses enums, instead using description to clarify enum options', () => {

@@ -20,7 +20,7 @@ import {
 import { cloneDeep } from 'lodash-es'
 import PsychicController from '../controller/index.js'
 import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes.js'
-import PsychicApplication from '../psychic-application/index.js'
+import PsychicApp from '../psychic-app/index.js'
 import { RouteConfig } from '../router/route-manager.js'
 import { HttpMethod } from '../router/types.js'
 import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment.js'
@@ -678,7 +678,7 @@ export default class OpenapiEndpointRenderer<
   }
 
   private openapiOpts(openapiName: string) {
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     if (!psychicApp.openapi[openapiName])
       throw new Error(`missing openapi settings for name: "${openapiName}"`)
     return psychicApp.openapi[openapiName]

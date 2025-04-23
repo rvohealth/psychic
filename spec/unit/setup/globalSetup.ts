@@ -1,11 +1,11 @@
 import '../../../src/helpers/loadEnv.js'
 
 import { PsychicBin } from '../../../src/index.js'
-import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication.js'
+import initializePsychicApp from '../../../test-app/src/cli/helpers/initializePsychicApp.js'
 import rmTmpFile from '../../helpers/rmTmpFile.js'
 
 export async function setup() {
-  await initializePsychicApplication()
+  await initializePsychicApp()
   await PsychicBin.syncOpenapiJson()
 }
 

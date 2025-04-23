@@ -2,11 +2,11 @@ import '../../../src/helpers/loadEnv.js'
 
 import { Encrypt, loadRepl } from '@rvoh/dream'
 import * as repl from 'node:repl'
-import initializePsychicApplication from '../cli/helpers/initializePsychicApplication.js'
+import initializePsychicApp from '../cli/helpers/initializePsychicApp.js'
 
 const replServer = repl.start('> ')
 export default (async function () {
-  await initializePsychicApplication()
+  await initializePsychicApp()
   await loadRepl(replServer.context)
 
   replServer.context.Encrypt = Encrypt

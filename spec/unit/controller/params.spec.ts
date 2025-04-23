@@ -2,7 +2,7 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller/index.js'
 import { Params, ParamValidationError } from '../../../src/index.js'
-import PsychicApplication from '../../../src/psychic-application/index.js'
+import PsychicApp from '../../../src/psychic-app/index.js'
 import User from '../../../test-app/src/app/models/User.js'
 
 const TestEnumValues = ['hello', 'world'] as const
@@ -17,7 +17,7 @@ describe('PsychicController', () => {
       }) as unknown as Request
       const res = getMockRes().res as unknown as Response
       const controller = new PsychicController(req, res, {
-        config: new PsychicApplication(),
+        config: new PsychicApp(),
         action: 'hello',
       })
 
@@ -47,7 +47,7 @@ describe('PsychicController', () => {
         },
       }) as unknown as Request
       const res = getMockRes().res as unknown as Response
-      controller = new PsychicController(req, res, { config: new PsychicApplication(), action: 'hello' })
+      controller = new PsychicController(req, res, { config: new PsychicApp(), action: 'hello' })
     })
 
     it('returns the result of Params.cast', () => {
@@ -133,7 +133,7 @@ describe('PsychicController', () => {
       }) as unknown as Request
       const res = getMockRes().res as unknown as Response
       const controller = new PsychicController(req, res, {
-        config: new PsychicApplication(),
+        config: new PsychicApp(),
         action: 'hello',
       })
 
@@ -153,7 +153,7 @@ describe('PsychicController', () => {
         }) as unknown as Request
         const res = getMockRes().res as unknown as Response
         const controller = new PsychicController(req, res, {
-          config: new PsychicApplication(),
+          config: new PsychicApp(),
           action: 'hello',
         })
 
@@ -176,7 +176,7 @@ describe('PsychicController', () => {
         }) as unknown as Request
         const res = getMockRes().res as unknown as Response
         const controller = new PsychicController(req, res, {
-          config: new PsychicApplication(),
+          config: new PsychicApp(),
           action: 'hello',
         })
 
@@ -191,7 +191,7 @@ describe('PsychicController', () => {
 
           const res = getMockRes().res as unknown as Response
           const controller = new PsychicController(req, res, {
-            config: new PsychicApplication(),
+            config: new PsychicApp(),
             action: 'hello',
           })
 
@@ -214,7 +214,7 @@ describe('PsychicController', () => {
         }) as unknown as Request
         const res = getMockRes().res as unknown as Response
         const controller = new PsychicController(req, res, {
-          config: new PsychicApplication(),
+          config: new PsychicApp(),
           action: 'hello',
         })
 

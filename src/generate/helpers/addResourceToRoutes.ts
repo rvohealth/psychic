@@ -2,10 +2,10 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import UnexpectedUndefined from '../../error/UnexpectedUndefined.js'
 import psychicPath from '../../helpers/path/psychicPath.js'
-import PsychicApplication from '../../psychic-application/index.js'
+import PsychicApp from '../../psychic-app/index.js'
 
 export default async function addResourceToRoutes(route: string) {
-  const psychicApp = PsychicApplication.getOrFail()
+  const psychicApp = PsychicApp.getOrFail()
   const routesFilePath = path.join(psychicApp.apiRoot, psychicPath('apiRoutes'))
   let routes = (await fs.readFile(routesFilePath)).toString()
 

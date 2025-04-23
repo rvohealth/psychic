@@ -13,10 +13,10 @@ import { CorsOptions } from 'cors'
 import { Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import * as http from 'node:http'
-import PsychicApplicationInitMissingApiRoot from '../error/psychic-application/init-missing-api-root.js'
-import PsychicApplicationInitMissingCallToLoadControllers from '../error/psychic-application/init-missing-call-to-load-controllers.js'
-import PsychicApplicationInitMissingPackageManager from '../error/psychic-application/init-missing-package-manager.js'
-import PsychicApplicationInitMissingRoutesCallback from '../error/psychic-application/init-missing-routes-callback.js'
+import PsychicAppInitMissingApiRoot from '../error/psychic-app/init-missing-api-root.js'
+import PsychicAppInitMissingCallToLoadControllers from '../error/psychic-app/init-missing-call-to-load-controllers.js'
+import PsychicAppInitMissingPackageManager from '../error/psychic-app/init-missing-package-manager.js'
+import PsychicAppInitMissingRoutesCallback from '../error/psychic-app/init-missing-routes-callback.js'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import pascalizeFileName from '../helpers/pascalizeFileName.js'
@@ -30,32 +30,32 @@ import {
 } from '../openapi-renderer/endpoint.js'
 import PsychicRouter from '../router/index.js'
 import PsychicServer from '../server/index.js'
-import { cachePsychicApplication, getCachedPsychicApplicationOrFail } from './cache.js'
+import { cachePsychicApp, getCachedPsychicAppOrFail } from './cache.js'
 import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
 import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
 
-export default class PsychicApplication {
+export default class PsychicApp {
   public static async init(
-    cb: (app: PsychicApplication) => void | Promise<void>,
+    cb: (app: PsychicApp) => void | Promise<void>,
     dreamCb: (app: DreamApp) => void | Promise<void>,
-    opts: PsychicApplicationInitOptions = {},
+    opts: PsychicAppInitOptions = {},
   ) {
-    let psychicApp: PsychicApplication
+    let psychicApp: PsychicApp
 
     await DreamApp.init(
       dreamCb,
       { bypassModelIntegrityCheck: opts.bypassModelIntegrityCheck! },
       async dreamApp => {
-        psychicApp = new PsychicApplication()
+        psychicApp = new PsychicApp()
         await cb(psychicApp)
 
-        if (!psychicApp.loadedControllers) throw new PsychicApplicationInitMissingCallToLoadControllers()
-        if (!psychicApp.apiRoot) throw new PsychicApplicationInitMissingApiRoot()
-        if (!psychicApp.routesCb) throw new PsychicApplicationInitMissingRoutesCallback()
-        if (!PsychicApplicationAllowedPackageManagersEnumValues.includes(psychicApp.packageManager))
-          throw new PsychicApplicationInitMissingPackageManager()
+        if (!psychicApp.loadedControllers) throw new PsychicAppInitMissingCallToLoadControllers()
+        if (!psychicApp.apiRoot) throw new PsychicAppInitMissingApiRoot()
+        if (!psychicApp.routesCb) throw new PsychicAppInitMissingRoutesCallback()
+        if (!PsychicAppAllowedPackageManagersEnumValues.includes(psychicApp.packageManager))
+          throw new PsychicAppInitMissingPackageManager()
 
         if (psychicApp.encryption?.cookies?.current)
           this.checkKey(
@@ -70,7 +70,7 @@ export default class PsychicApplication {
         dreamApp.set('logger', psychicApp.logger)
 
         dreamApp.on('repl:start', context => {
-          const psychicApp = PsychicApplication.getOrFail()
+          const psychicApp = PsychicApp.getOrFail()
 
           for (const globalName of Object.keys(psychicApp.services)) {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
@@ -85,7 +85,7 @@ export default class PsychicApplication {
           await plugin(psychicApp)
         }
 
-        cachePsychicApplication(psychicApp)
+        cachePsychicApp(psychicApp)
       },
     )
 
@@ -141,10 +141,10 @@ Try setting it to something valid, like:
    * Returns the cached psychic application if it has been set.
    * If it has not been set, an exception is raised.
    *
-   * The psychic application can be set by calling PsychicApplication#init
+   * The psychic application can be set by calling PsychicApp#init
    */
   public static getOrFail() {
-    return getCachedPsychicApplicationOrFail()
+    return getCachedPsychicAppOrFail()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -179,7 +179,7 @@ Try setting it to something valid, like:
     return this._clientRoot
   }
 
-  private _encryption: PsychicApplicationEncryptionOptions | undefined
+  private _encryption: PsychicAppEncryptionOptions | undefined
   public get encryption() {
     return this._encryption
   }
@@ -224,7 +224,7 @@ Try setting it to something valid, like:
     return this._saltRounds
   }
 
-  private _packageManager: PsychicApplicationAllowedPackageManagersEnum
+  private _packageManager: PsychicAppAllowedPackageManagersEnum
   public get packageManager() {
     return this._packageManager
   }
@@ -271,10 +271,7 @@ Try setting it to something valid, like:
     return this._inflections
   }
 
-  private _bootHooks: Record<
-    PsychicHookLoadEventTypes,
-    ((conf: PsychicApplication) => void | Promise<void>)[]
-  > = {
+  private _bootHooks: Record<PsychicHookLoadEventTypes, ((conf: PsychicApp) => void | Promise<void>)[]> = {
     boot: [],
     load: [],
     'load:dev': [],
@@ -285,7 +282,7 @@ Try setting it to something valid, like:
     return this._bootHooks
   }
 
-  private _specialHooks: PsychicApplicationSpecialHooks = {
+  private _specialHooks: PsychicAppSpecialHooks = {
     sync: [],
     serverInit: [],
     serverInitAfterRoutes: [],
@@ -297,7 +294,7 @@ Try setting it to something valid, like:
     return this._specialHooks
   }
 
-  private _overrides: PsychicApplicationOverrides = {
+  private _overrides: PsychicAppOverrides = {
     ['server:start']: null,
   }
   private get overrides() {
@@ -333,7 +330,7 @@ Try setting it to something valid, like:
     return getServicesOrFail()
   }
 
-  private _plugins: ((app: PsychicApplication) => void | Promise<void>)[] = []
+  private _plugins: ((app: PsychicApp) => void | Promise<void>)[] = []
   public get plugins() {
     return this._plugins
   }
@@ -384,7 +381,7 @@ Try setting it to something valid, like:
     this.booted = true
   }
 
-  public plugin(cb: (app: PsychicApplication) => void | Promise<void>) {
+  public plugin(cb: (app: PsychicApp) => void | Promise<void>) {
     this._plugins.push(cb)
   }
 
@@ -404,7 +401,7 @@ Try setting it to something valid, like:
                 ? // NOTE: this is really any | Promise<any>, but eslint complains about this foolery
                   // eslint-disable-next-line @typescript-eslint/no-explicit-any
                   () => any
-                : (conf: PsychicApplication) => void | Promise<void>,
+                : (conf: PsychicApp) => void | Promise<void>,
   ) {
     switch (hookEventType) {
       case 'server:error':
@@ -436,13 +433,13 @@ Try setting it to something valid, like:
 
       default:
         this.bootHooks[hookEventType as PsychicHookLoadEventTypes].push(
-          cb as (conf: PsychicApplication) => void | Promise<void>,
+          cb as (conf: PsychicApp) => void | Promise<void>,
         )
     }
   }
 
   public set(option: 'openapi', name: string, value: NamedPsychicOpenapiOptions): void
-  public set<Opt extends PsychicApplicationOption>(
+  public set<Opt extends PsychicAppOption>(
     option: Opt,
     value: Opt extends 'appName'
       ? string
@@ -451,7 +448,7 @@ Try setting it to something valid, like:
         : Opt extends 'defaultResponseHeaders'
           ? Record<string, string | null>
           : Opt extends 'encryption'
-            ? PsychicApplicationEncryptionOptions
+            ? PsychicAppEncryptionOptions
             : Opt extends 'cors'
               ? CorsOptions
               : Opt extends 'cookie'
@@ -479,14 +476,14 @@ Try setting it to something valid, like:
                                     : Opt extends 'saltRounds'
                                       ? number
                                       : Opt extends 'packageManager'
-                                        ? PsychicApplicationAllowedPackageManagersEnum
+                                        ? PsychicAppAllowedPackageManagersEnum
                                         : Opt extends 'inflections'
                                           ? () => void | Promise<void>
                                           : Opt extends 'routes'
                                             ? (r: PsychicRouter) => void | Promise<void>
                                             : never,
   ): void
-  public set<Opt extends PsychicApplicationOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
+  public set<Opt extends PsychicAppOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
 
     switch (option) {
@@ -522,7 +519,7 @@ Try setting it to something valid, like:
         break
 
       case 'encryption':
-        this._encryption = value as PsychicApplicationEncryptionOptions
+        this._encryption = value as PsychicAppEncryptionOptions
         break
 
       case 'cors':
@@ -561,7 +558,7 @@ Try setting it to something valid, like:
         break
 
       case 'packageManager':
-        this._packageManager = value as PsychicApplicationAllowedPackageManagersEnum
+        this._packageManager = value as PsychicAppAllowedPackageManagersEnum
         break
 
       case 'saltRounds':
@@ -590,13 +587,13 @@ Try setting it to something valid, like:
         break
 
       default:
-        throw new Error(`Unhandled option type passed to PsychicApplication#set: ${option}`)
+        throw new Error(`Unhandled option type passed to PsychicApp#set: ${option}`)
     }
   }
 
-  public override<Override extends keyof PsychicApplicationOverrides>(
+  public override<Override extends keyof PsychicAppOverrides>(
     override: Override,
-    value: PsychicApplicationOverrides[Override],
+    value: PsychicAppOverrides[Override],
   ) {
     switch (override) {
       case 'server:start':
@@ -611,7 +608,7 @@ Try setting it to something valid, like:
   }
 }
 
-export type PsychicApplicationOption =
+export type PsychicAppOption =
   | 'appName'
   | 'apiOnly'
   | 'apiRoot'
@@ -633,11 +630,10 @@ export type PsychicApplicationOption =
   | 'saltRounds'
   | 'ssl'
 
-export const PsychicApplicationAllowedPackageManagersEnumValues = ['yarn', 'npm', 'pnpm'] as const
-export type PsychicApplicationAllowedPackageManagersEnum =
-  (typeof PsychicApplicationAllowedPackageManagersEnumValues)[number]
+export const PsychicAppAllowedPackageManagersEnumValues = ['yarn', 'npm', 'pnpm'] as const
+export type PsychicAppAllowedPackageManagersEnum = (typeof PsychicAppAllowedPackageManagersEnumValues)[number]
 
-export interface PsychicApplicationSpecialHooks {
+export interface PsychicAppSpecialHooks {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   sync: (() => any)[]
   serverInit: ((server: PsychicServer) => void | Promise<void>)[]
@@ -647,7 +643,7 @@ export interface PsychicApplicationSpecialHooks {
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
 }
 
-export interface PsychicApplicationOverrides {
+export interface PsychicAppOverrides {
   // a function which overrides the server's default start mechanisms.
   // by doing so, it must both instantiate its own http.Server instance,
   // start that instance, and then return the http server, after the instance
@@ -729,9 +725,9 @@ export interface PsychicClientOptions {
 export type PsychicLogger = DreamLogger
 export type PsychicLogLevel = DreamLogLevel
 
-export type PsychicApplicationInitOptions = DreamAppInitOptions
+export type PsychicAppInitOptions = DreamAppInitOptions
 
-export interface PsychicApplicationEncryptionOptions {
+export interface PsychicAppEncryptionOptions {
   cookies: SegmentedEncryptionOptions
 }
 interface SegmentedEncryptionOptions {

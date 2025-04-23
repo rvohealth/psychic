@@ -1,6 +1,6 @@
 import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../../../../src/error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations.js'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint.js'
-import * as PsychicApplicationCacheModule from '../../../../src/psychic-application/cache.js'
+import * as PsychicAppCacheModule from '../../../../src/psychic-app/cache.js'
 import OpenapiDecoratorTestController from '../../../../test-app/src/app/controllers/OpenapiDecoratorTestsController.js'
 import UsersController from '../../../../test-app/src/app/controllers/UsersController.js'
 import Comment from '../../../../test-app/src/app/models/Comment.js'
@@ -127,12 +127,10 @@ describe('OpenapiEndpointRenderer', () => {
 
       context('suppressResponseEnums=true', () => {
         beforeEach(() => {
-          const psychicApp = PsychicApplicationCacheModule.getCachedPsychicApplicationOrFail()
+          const psychicApp = PsychicAppCacheModule.getCachedPsychicAppOrFail()
           psychicApp.openapi.default!.suppressResponseEnums = true
 
-          vi.spyOn(PsychicApplicationCacheModule, 'getCachedPsychicApplicationOrFail').mockReturnValue(
-            psychicApp,
-          )
+          vi.spyOn(PsychicAppCacheModule, 'getCachedPsychicAppOrFail').mockReturnValue(psychicApp)
         })
 
         it('suppresses enums, instead using description to clarify enum options', () => {

@@ -1,11 +1,11 @@
 import pluralize from 'pluralize-esm'
-import PsychicApplication from '../../../src/psychic-application/index.js'
+import PsychicApp from '../../../src/psychic-app/index.js'
 
-describe('PsychicApplication', () => {
-  let config: PsychicApplication
+describe('PsychicApp', () => {
+  let config: PsychicApp
 
   beforeEach(() => {
-    config = new PsychicApplication()
+    config = new PsychicApp()
   })
 
   it('loads inflections.ts', async () => {

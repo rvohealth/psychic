@@ -1,13 +1,13 @@
 import { Request, Response } from 'express'
 import PsychicController from '../../../controller/index.js'
-import PsychicApplication from '../../index.js'
+import PsychicApp from '../../index.js'
 import globalControllerKeyFromPath from '../globalControllerKeyFromPath.js'
 import PsychicImporter from '../PsychicImporter.js'
 
 let _controllers: Record<string, typeof PsychicController>
 
 export default async function importControllers(
-  psychicApp: PsychicApplication,
+  psychicApp: PsychicApp,
   controllersPath: string,
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

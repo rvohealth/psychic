@@ -1,11 +1,11 @@
 import { Encrypt, EncryptOptions } from '@rvoh/dream'
 import MissingCookieEncryptionOpts from '../error/encrypt/missing-cookie-encryption-options.js'
-import PsychicApplication from '../psychic-application/index.js'
+import PsychicApp from '../psychic-app/index.js'
 
 export default class InternalEncrypt {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static encryptCookie(data: any) {
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     const encryptOpts = psychicApp.encryption?.cookies
     if (!encryptOpts) throw new MissingCookieEncryptionOpts()
 
@@ -16,7 +16,7 @@ export default class InternalEncrypt {
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static decryptCookie(data: any) {
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     const encryptOpts = psychicApp.encryption?.cookies
     if (!encryptOpts) throw new MissingCookieEncryptionOpts()
 

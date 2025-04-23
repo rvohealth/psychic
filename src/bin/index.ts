@@ -6,7 +6,7 @@ import generateController from '../generate/controller.js'
 import generateResource from '../generate/resource.js'
 import { isObject } from '../helpers/typechecks.js'
 import OpenapiAppRenderer from '../openapi-renderer/app.js'
-import PsychicApplication from '../psychic-application/index.js'
+import PsychicApp from '../psychic-app/index.js'
 import PsychicServer from '../server/index.js'
 import enumsFileStr from './helpers/enumsFileStr.js'
 import generateRouteTypes from './helpers/generateRouteTypes.js'
@@ -34,7 +34,7 @@ export default class PsychicBin {
 
     await PsychicBin.syncTypes()
 
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     DreamCLI.logger.logStartProgress('running post-sync operations...')
 
     // call post-sync command in a separate process, so that newly-generated
@@ -51,7 +51,7 @@ export default class PsychicBin {
   }
 
   public static async postSync() {
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     await PsychicBin.syncOpenapiJson()
 
     if (psychicApp.openapi?.syncEnumsToClient) {
@@ -107,7 +107,7 @@ export default class PsychicBin {
   public static async syncClientEnums() {
     DreamCLI.logger.logStartProgress(`syncing client enums...`)
 
-    const psychicApp = PsychicApplication.getOrFail()
+    const psychicApp = PsychicApp.getOrFail()
     const apiPath = path.join(psychicApp.clientRoot, psychicApp.client.apiPath)
 
     const enumsStr = await enumsFileStr()

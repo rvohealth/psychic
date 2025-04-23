@@ -5,7 +5,7 @@ import PsychicController from '../controller/index.js'
 import HttpError from '../error/http/index.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
-import PsychicApplication from '../psychic-application/index.js'
+import PsychicApp from '../psychic-app/index.js'
 import {
   NamespaceConfig,
   PsychicControllerActions,
@@ -27,10 +27,10 @@ import ParamValidationError from '../error/controller/ParamValidationError.js'
 
 export default class PsychicRouter {
   public app: Express
-  public config: PsychicApplication
+  public config: PsychicApp
   public currentNamespaces: NamespaceConfig[] = []
   public routeManager: RouteManager = new RouteManager()
-  constructor(app: Express, config: PsychicApplication) {
+  constructor(app: Express, config: PsychicApp) {
     this.app = app
     this.config = config
   }
@@ -343,7 +343,7 @@ export default class PsychicRouter {
       await controllerInstance.runAction(action)
     } catch (error) {
       const err = error as Error
-      const psychicApp = PsychicApplication.getOrFail()
+      const psychicApp = PsychicApp.getOrFail()
       if (!EnvInternal.isTest) psychicApp.logger.error(err.message)
 
       if (errorIsRescuableHttpError(err)) {
@@ -373,8 +373,8 @@ export default class PsychicRouter {
         // and manually console log the error to determine what the actual error was.
         // this block enables us to not have to do that anymore.
         if (EnvInternal.isTest && !EnvInternal.boolean('PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR')) {
-          PsychicApplication.log('ATTENTION: a server error was detected:')
-          PsychicApplication.logWithLevel('error', err)
+          PsychicApp.log('ATTENTION: a server error was detected:')
+          PsychicApp.logWithLevel('error', err)
         }
 
         if (this.config.specialHooks.serverError.length) {
@@ -391,7 +391,7 @@ export default class PsychicRouter {
               // happened when Jest ended the spec.
               throw error
             } else {
-              PsychicApplication.logWithLevel(
+              PsychicApp.logWithLevel(
                 'error',
                 `
                   Something went wrong while attempting to call your custom server:error hooks.
@@ -399,7 +399,7 @@ export default class PsychicRouter {
                   The error thrown is:
                 `,
               )
-              PsychicApplication.logWithLevel('error', error)
+              PsychicApp.logWithLevel('error', error)
             }
           }
         } else throw err
@@ -424,7 +424,7 @@ export class PsychicNestedRouter extends PsychicRouter {
   public router: Router
   constructor(
     app: Express,
-    config: PsychicApplication,
+    config: PsychicApp,
     routeManager: RouteManager,
     {
       namespaces = [],

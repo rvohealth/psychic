@@ -1,21 +1,21 @@
 import { DreamCLI } from '@rvoh/dream'
 import { Command } from 'commander'
 import PsychicBin from '../bin/index.js'
-import PsychicApplication, { PsychicApplicationInitOptions } from '../psychic-application/index.js'
+import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 
 export default class PsychicCLI {
   public static provide(
     program: Command,
     {
-      initializePsychicApplication,
+      initializePsychicApp,
       seedDb,
     }: {
-      initializePsychicApplication: (opts?: PsychicApplicationInitOptions) => Promise<PsychicApplication>
+      initializePsychicApp: (opts?: PsychicAppInitOptions) => Promise<PsychicApp>
       seedDb: () => Promise<void> | void
     },
   ) {
     DreamCLI.generateDreamCli(program, {
-      initializeDreamApp: initializePsychicApplication,
+      initializeDreamApp: initializePsychicApp,
       seedDb,
       onSync: async () => {
         await PsychicBin.sync({ bypassDreamSync: true })
@@ -36,7 +36,7 @@ export default class PsychicCLI {
         'properties of the model property1:text/string/enum/etc. property2:text/string/enum/etc. ... propertyN:text/string/enum/etc.',
       )
       .action(async (route: string, modelName: string, columnsWithTypes: string[]) => {
-        await initializePsychicApplication()
+        await initializePsychicApp()
         await PsychicBin.generateResource(route, modelName, columnsWithTypes)
         process.exit()
       })
@@ -52,7 +52,7 @@ export default class PsychicCLI {
       .argument('[actions...]', 'the names of controller actions to create')
 
       .action(async (controllerName: string, actions: string[]) => {
-        await initializePsychicApplication()
+        await initializePsychicApp()
         await PsychicBin.generateController(controllerName, actions)
         process.exit()
       })
@@ -63,7 +63,7 @@ export default class PsychicCLI {
         'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.',
       )
       .action(async () => {
-        await initializePsychicApplication()
+        await initializePsychicApp()
         await PsychicBin.routes()
         process.exit()
       })
@@ -74,7 +74,7 @@ export default class PsychicCLI {
         'sync introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration',
       )
       .action(async () => {
-        await initializePsychicApplication()
+        await initializePsychicApp()
         await PsychicBin.sync()
         process.exit()
       })
@@ -85,7 +85,7 @@ export default class PsychicCLI {
         'an internal command that runs as the second stage of the `sync` command, since after types are rebuit, the application needs to be reloaded before autogenerating certain files, since those files will need to leverage the updated types',
       )
       .action(async () => {
-        await initializePsychicApplication()
+        await initializePsychicApp()
         await PsychicBin.postSync()
         process.exit()
       })
@@ -103,7 +103,7 @@ export default class PsychicCLI {
       .command('sync:openapi')
       .description('syncs openapi.json file to current state of all psychic controllers within the app')
       .action(async () => {
-        await initializePsychicApplication()
+        await initializePsychicApp()
         await PsychicBin.syncOpenapiJson()
         process.exit()
       })

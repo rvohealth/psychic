@@ -1,8 +1,8 @@
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
-import PsychicApplication from '../../src/psychic-application/index.js'
+import PsychicApp from '../../src/psychic-app/index.js'
 
 export default async function writeTmpFile(content: string) {
-  const psychicApp = PsychicApplication.getOrFail()
+  const psychicApp = PsychicApp.getOrFail()
   return await fs.writeFile(path.join(psychicApp.apiRoot, 'spec', 'tmp.txt'), content)
 }

@@ -5,7 +5,7 @@ export default class MissingCookieEncryptionOpts extends Error {
       encryption keys must be provided to psychic:
 
         // conf/app.ts
-        export default (psy: PsychicApplication) => {
+        export default (psy: PsychicApp) => {
           dream.set('encryption', {
             cookies: {
               current: {

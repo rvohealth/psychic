@@ -1,12 +1,12 @@
-import PsychicApplication from '../../../src/psychic-application/index.js'
-import { PsychicHookEventType } from '../../../src/psychic-application/types.js'
+import PsychicApp from '../../../src/psychic-app/index.js'
+import { PsychicHookEventType } from '../../../src/psychic-app/types.js'
 
-describe('PsychicApplication hooks', () => {
-  let config: PsychicApplication
+describe('PsychicApp hooks', () => {
+  let config: PsychicApp
 
   beforeEach(() => {
     process.env.__PSYCHIC_HOOKS_TEST_CACHE = ''
-    config = PsychicApplication.getOrFail()
+    config = PsychicApp.getOrFail()
   })
 
   function expectHookCalled(hookEventType: PsychicHookEventType) {

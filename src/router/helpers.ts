@@ -4,7 +4,7 @@ import CannotFindInferredControllerFromProvidedNamespace from '../error/router/c
 import CannotInferControllerFromTopLevelRouteError from '../error/router/cannot-infer-controller-from-top-level-route.js'
 import pascalizeFileName from '../helpers/pascalizeFileName.js'
 import { FunctionPropertyNames } from '../helpers/typeHelpers.js'
-import PsychicApplication from '../psychic-application/index.js'
+import PsychicApp from '../psychic-app/index.js'
 import PsychicRouter, { PsychicNestedRouter } from '../router/index.js'
 import { HttpMethod, ResourcesMethodType, ResourcesOptions } from './types.js'
 
@@ -81,7 +81,7 @@ function inferControllerOrFail(
   const filename = filteredNamespaces.map(str => pascalize(str.namespace)).join('/') + 'Controller'
   const expectedPath = `controllers/${filename}`
 
-  const controller = PsychicApplication.getOrFail().controllers[expectedPath]
+  const controller = PsychicApp.getOrFail().controllers[expectedPath]
   if (!controller)
     throw new CannotFindInferredControllerFromProvidedNamespace({
       expectedPath,

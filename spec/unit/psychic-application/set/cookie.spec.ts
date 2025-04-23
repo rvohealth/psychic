@@ -1,10 +1,10 @@
-import PsychicApplication from '../../../../src/psychic-application/index.js'
+import PsychicApp from '../../../../src/psychic-app/index.js'
 
-describe('PsychicApplication set("cookie", ...opts)', () => {
-  let config: PsychicApplication
+describe('PsychicApp set("cookie", ...opts)', () => {
+  let config: PsychicApp
 
   beforeEach(() => {
-    config = new PsychicApplication()
+    config = new PsychicApp()
   })
 
   context('milliseconds unit is passed for maxAge', () => {
