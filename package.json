@@ -59,9 +59,9 @@
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@jest-mock/express": "^3.0.0",
-    "@rvoh/dream": "^0.36.1",
+    "@rvoh/dream": "^0.39.0",
     "@rvoh/dream-spec-helpers": "^0.2.4",
-    "@rvoh/psychic-spec-helpers": "^0.4.3",
+    "@rvoh/psychic-spec-helpers": "^0.5.1",
     "@types/express": "^5.0.1",
     "@types/lodash-es": "^4",
     "@types/node": "^22.5.1",

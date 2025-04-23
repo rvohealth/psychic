@@ -24,7 +24,7 @@ import {
   openapiShorthandPrimitiveTypes,
 } from '@rvoh/dream'
 import PsychicController from '../controller/index.js'
-import { getCachedPsychicAppOrFail } from '../psychic-app/cache.js'
+import PsychicApp from '../psychic-app/index.js'
 import isBlankDescription from './helpers/isBlankDescription.js'
 import primitiveOpenapiStatementToOpenapi, {
   MaybeNullPrimitive,
@@ -376,7 +376,7 @@ export default class OpenapiBodySegmentRenderer {
   private applyConfigurationOptions<T>(obj: T): T {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
     const anyObj = obj as any
-    const psychicApp = getCachedPsychicAppOrFail()
+    const psychicApp = PsychicApp.getOrFail()
 
     if (typeof anyObj === 'object') {
       if (

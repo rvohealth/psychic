@@ -841,9 +841,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvoh/dream@npm:^0.36.1":
-  version: 0.36.1
-  resolution: "@rvoh/dream@npm:0.36.1"
+"@rvoh/dream@npm:^0.39.0":
+  version: 0.39.0
+  resolution: "@rvoh/dream@npm:0.39.0"
   dependencies:
     colorette: "npm:^2.0.20"
     commander: "npm:^12.1.0"
@@ -858,13 +858,13 @@ __metadata:
     kysely: ^0.27.4
     kysely-codegen: ~0.17.0
     pg: "*"
-  checksum: 10c0/fe5fda918fa0f596a1505cc0125ceeaa02be51ed1c69eb234c6c4daaeee087bbb9abe149f5e7d7960ad34cad25a55b22692c398c0eda6b852c0632962c31baab
+  checksum: 10c0/086ef2c323b97370d5852b25e1555aa812862cfefd1190a70fa50cf54417409f9f730959275b316ce82b643fa16d08d69ad560329a4f12c53495d1468125da3e
   languageName: node
   linkType: hard
 
-"@rvoh/psychic-spec-helpers@npm:^0.4.3":
-  version: 0.4.3
-  resolution: "@rvoh/psychic-spec-helpers@npm:0.4.3"
+"@rvoh/psychic-spec-helpers@npm:^0.5.1":
+  version: 0.5.1
+  resolution: "@rvoh/psychic-spec-helpers@npm:0.5.1"
   dependencies:
     cookiejar: "npm:^2.1.4"
   peerDependencies:
@@ -873,7 +873,7 @@ __metadata:
     puppeteer: "*"
     supertest: "*"
     typescript: "*"
-  checksum: 10c0/3be2252fa5539a0f0aca4fc2cc669d0ad2c93d86650f907ed44d7d6e22ca932e119e3d9227b580f147c542ed7430dd29b7a8fe64e1082a004b9f5f30de002fde
+  checksum: 10c0/c85281dc02809a029134808c337c1ed193897fc62095b35a0a99dd65bc8d5fe09f9c44b79945c6f7a6fcb1f3123d95300ef2c0b9120e38996926d670ac5a405a
   languageName: node
   linkType: hard
 
@@ -883,9 +883,9 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.19.0"
     "@jest-mock/express": "npm:^3.0.0"
-    "@rvoh/dream": "npm:^0.36.1"
+    "@rvoh/dream": "npm:^0.39.0"
     "@rvoh/dream-spec-helpers": "npm:^0.2.4"
-    "@rvoh/psychic-spec-helpers": "npm:^0.4.3"
+    "@rvoh/psychic-spec-helpers": "npm:^0.5.1"
     "@types/cookie-parser": "npm:^1.4.8"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^5.0.1"
