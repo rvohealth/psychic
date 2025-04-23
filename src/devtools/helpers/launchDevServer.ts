@@ -19,8 +19,6 @@ export async function launchDevServer(
     detached: true,
     env: {
       ...process.env,
-      BROWSER: 'none',
-      VITE_PSYCHIC_ENV: 'test',
     },
   })
 

@@ -5,7 +5,7 @@ import initializePsychicApp from '../../../test-app/src/cli/helpers/initializePs
 
 export async function setup() {
   await initializePsychicApp()
-  await PsychicDevtools.launchDevServer('client', { port: 3000, cmd: 'yarn client' })
+  await PsychicDevtools.launchDevServer('client', { port: 3000, cmd: 'yarn client:fspec' })
 }
 
 export function teardown() {
