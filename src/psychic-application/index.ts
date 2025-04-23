@@ -150,13 +150,13 @@ Try setting it to something valid, like:
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static log(...args: any[]) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    this.getOrFail().logger.info(...args)
+    DreamApplication.log(...args)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static logWithLevel(level: DreamLogLevel, ...args: any[]) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    this.getOrFail().logger[level](...args)
+    DreamApplication.logWithLevel(level, ...args)
   }
 
   private _apiOnly: boolean = false
