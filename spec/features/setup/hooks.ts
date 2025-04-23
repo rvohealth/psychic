@@ -1,4 +1,4 @@
-import { DreamApplication } from '@rvoh/dream'
+import { DreamApp } from '@rvoh/dream'
 import { provideDreamViteMatchers, truncate } from '@rvoh/dream-spec-helpers'
 import { providePuppeteerViteMatchers } from '@rvoh/psychic-spec-helpers'
 import { PsychicServer } from '../../../src/index.js'
@@ -44,7 +44,7 @@ beforeAll(async () => {
 })
 
 beforeEach(async () => {
-  await truncate(DreamApplication)
+  await truncate(DreamApp)
 })
 
 afterAll(async () => {

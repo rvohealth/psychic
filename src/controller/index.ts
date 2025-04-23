@@ -1,10 +1,4 @@
-import {
-  Dream,
-  DreamApplication,
-  DreamParamSafeAttributes,
-  DreamSerializer,
-  GlobalNameNotSet,
-} from '@rvoh/dream'
+import { Dream, DreamApp, DreamParamSafeAttributes, DreamSerializer, GlobalNameNotSet } from '@rvoh/dream'
 import { Request, Response } from 'express'
 import { ControllerHook } from '../controller/hooks.js'
 import HttpStatusBadGateway from '../error/http/BadGateway.js'
@@ -350,7 +344,7 @@ export default class PsychicController {
 
   private singleObjectJson<T>(data: T, opts: RenderOptions): T | SerializerResult {
     if (!data) return data
-    const dreamApp = DreamApplication.getOrFail()
+    const dreamApp = DreamApp.getOrFail()
     const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access

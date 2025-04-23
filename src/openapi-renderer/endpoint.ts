@@ -1,6 +1,6 @@
 import {
   Dream,
-  DreamApplication,
+  DreamApp,
   DreamSerializer,
   OpenapiAllTypes,
   OpenapiFormats,
@@ -132,7 +132,7 @@ export default class OpenapiEndpointRenderer<
     processedSchemas: Record<string, boolean>,
     routes: RouteConfig[],
   ): OpenapiEndpointResponse {
-    this.serializers = DreamApplication.getOrFail().serializers
+    this.serializers = DreamApp.getOrFail().serializers
 
     const path = this.computedPath(routes)
     const method = this.computedMethod(routes)
@@ -197,7 +197,7 @@ export default class OpenapiEndpointRenderer<
   ): Record<string, OpenapiSchemaBody> {
     this.computedExtraComponents = {}
 
-    this.serializers = DreamApplication.getOrFail().serializers
+    this.serializers = DreamApp.getOrFail().serializers
     const serializerClasses = this.getSerializerClasses()
 
     let output: Record<string, OpenapiSchemaBody> = {}
@@ -965,7 +965,7 @@ export default class OpenapiEndpointRenderer<
   private getSerializerClass(
     dreamOrSerializerOrViewModel: SerializableDreamClassOrViewModelClass | typeof DreamSerializer,
   ): typeof DreamSerializer | null {
-    const dreamApp = DreamApplication.getOrFail()
+    const dreamApp = DreamApp.getOrFail()
     if ((dreamOrSerializerOrViewModel as typeof DreamSerializer).isDreamSerializer) {
       return dreamOrSerializerOrViewModel as typeof DreamSerializer
     } else {

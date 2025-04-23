@@ -1,4 +1,4 @@
-import { DreamApplication } from '@rvoh/dream'
+import { DreamApp } from '@rvoh/dream'
 import { provideDreamViteMatchers, truncate } from '@rvoh/dream-spec-helpers'
 import initializePsychicApplication from '../../../test-app/src/cli/helpers/initializePsychicApplication.js'
 
@@ -22,5 +22,5 @@ beforeEach(async () => {
     throw error
   }
 
-  await truncate(DreamApplication)
+  await truncate(DreamApp)
 })

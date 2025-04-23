@@ -1,6 +1,6 @@
 import {
-  DreamApplication,
-  DreamApplicationInitOptions,
+  DreamApp,
+  DreamAppInitOptions,
   DreamLogLevel,
   DreamLogger,
   Encrypt,
@@ -39,12 +39,12 @@ import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
 export default class PsychicApplication {
   public static async init(
     cb: (app: PsychicApplication) => void | Promise<void>,
-    dreamCb: (app: DreamApplication) => void | Promise<void>,
+    dreamCb: (app: DreamApp) => void | Promise<void>,
     opts: PsychicApplicationInitOptions = {},
   ) {
     let psychicApp: PsychicApplication
 
-    await DreamApplication.init(
+    await DreamApp.init(
       dreamCb,
       { bypassModelIntegrityCheck: opts.bypassModelIntegrityCheck! },
       async dreamApp => {
@@ -150,13 +150,13 @@ Try setting it to something valid, like:
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static log(...args: any[]) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    DreamApplication.log(...args)
+    DreamApp.log(...args)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static logWithLevel(level: DreamLogLevel, ...args: any[]) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    DreamApplication.logWithLevel(level, ...args)
+    DreamApp.logWithLevel(level, ...args)
   }
 
   private _apiOnly: boolean = false
@@ -729,7 +729,7 @@ export interface PsychicClientOptions {
 export type PsychicLogger = DreamLogger
 export type PsychicLogLevel = DreamLogLevel
 
-export type PsychicApplicationInitOptions = DreamApplicationInitOptions
+export type PsychicApplicationInitOptions = DreamAppInitOptions
 
 export interface PsychicApplicationEncryptionOptions {
   cookies: SegmentedEncryptionOptions

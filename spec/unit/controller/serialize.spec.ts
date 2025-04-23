@@ -1,5 +1,5 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { Attribute, DreamApplication, DreamSerializer } from '@rvoh/dream'
+import { Attribute, DreamApp, DreamSerializer } from '@rvoh/dream'
 import { Request, Response } from 'express'
 import { BeforeAction, OpenAPI } from '../../../src/controller/decorators.js'
 import PsychicController from '../../../src/controller/index.js'
@@ -33,13 +33,13 @@ describe('PsychicController', () => {
       }
       processDynamicallyDefinedSerializers(MySerializer)
 
-      const dreamApp = DreamApplication.getOrFail()
+      const dreamApp = DreamApp.getOrFail()
       vi.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
         ...dreamApp.serializers,
         MySerializer,
       })
 
-      vi.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
+      vi.spyOn(DreamApp, 'getOrFail').mockReturnValue(dreamApp)
 
       class MyController extends PsychicController {
         static {
@@ -159,14 +159,14 @@ describe('PsychicController', () => {
         processDynamicallyDefinedControllers(MyController)
 
         beforeEach(() => {
-          const dreamApp = DreamApplication.getOrFail()
+          const dreamApp = DreamApp.getOrFail()
           vi.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
             ...dreamApp.serializers,
             GreetSerializer,
             GreetSerializer2,
           })
 
-          vi.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
+          vi.spyOn(DreamApp, 'getOrFail').mockReturnValue(dreamApp)
         })
 
         it('identifies serializer attached to model class and uses it to serialize the object', () => {
@@ -254,7 +254,7 @@ describe('PsychicController', () => {
 
       beforeEach(async () => {
         user2 = await User2.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
-        const dreamApp = DreamApplication.getOrFail()
+        const dreamApp = DreamApp.getOrFail()
         vi.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
           ...dreamApp.serializers,
           User2Serializer,
@@ -262,7 +262,7 @@ describe('PsychicController', () => {
           User2ExtraSerializer,
         })
 
-        vi.spyOn(DreamApplication, 'getOrFail').mockReturnValue(dreamApp)
+        vi.spyOn(DreamApp, 'getOrFail').mockReturnValue(dreamApp)
       })
 
       it('passes the passthrough data through to the child serializers', async () => {

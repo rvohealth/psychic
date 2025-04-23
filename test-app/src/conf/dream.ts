@@ -1,10 +1,10 @@
-import { DreamApplication } from '@rvoh/dream'
+import { DreamApp } from '@rvoh/dream'
 import importAll from '../app/helpers/importAll.js'
 import importDefault from '../app/helpers/importDefault.js'
 import srcPath from '../app/helpers/srcPath.js'
 import inflections from './inflections.js'
 
-export default async function configureDream(app: DreamApplication) {
+export default async function configureDream(app: DreamApp) {
   app.set('primaryKeyType', 'bigserial')
   app.set('inflections', inflections)
   app.set('parallelTests', Number(process.env.DREAM_PARALLEL_TESTS))

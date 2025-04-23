@@ -1,4 +1,4 @@
-import { DreamApplication } from '@rvoh/dream'
+import { DreamApp } from '@rvoh/dream'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import PsychicApplication from '../../psychic-application/index.js'
@@ -6,7 +6,7 @@ import PsychicApplication from '../../psychic-application/index.js'
 export default class TypesBuilder {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static async sync(customTypes: any = undefined) {
-    const dreamApp = DreamApplication.getOrFail()
+    const dreamApp = DreamApp.getOrFail()
     const schemaPath = path.join(dreamApp.projectRoot, dreamApp.paths.types, 'psychic.ts')
 
     await fs.writeFile(schemaPath, this.build(customTypes))

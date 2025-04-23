@@ -15,7 +15,7 @@ export default class PsychicCLI {
     },
   ) {
     DreamCLI.generateDreamCli(program, {
-      initializeDreamApplication: initializePsychicApplication,
+      initializeDreamApp: initializePsychicApplication,
       seedDb,
       onSync: async () => {
         await PsychicBin.sync({ bypassDreamSync: true })
