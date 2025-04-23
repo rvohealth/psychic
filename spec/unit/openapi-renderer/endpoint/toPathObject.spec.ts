@@ -519,7 +519,7 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('for a POST http method', () => {
-          it('prvoides request body matching the model', () => {
+          it('provides request body matching the model', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
             const response = renderer.toPathObject('default', {}, routes)
