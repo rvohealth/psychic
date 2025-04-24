@@ -14,10 +14,10 @@ import {
   PsychicParamsPrimitive,
   PsychicParamsPrimitiveLiterals,
 } from '../controller/index.js'
+import ParamValidationError from '../error/controller/ParamValidationError.js'
+import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
 import isUuid from '../helpers/isUuid.js'
 import { isObject } from '../helpers/typechecks.js'
-import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
-import ParamValidationError from '../error/controller/ParamValidationError.js'
 
 export default class Params {
   /**
@@ -262,7 +262,14 @@ export default class Params {
     return returnObj as ReturnPayload
   }
 
-  public static restrict<T extends typeof Params>(this: T, params: object, allowed: string[]) {
+  public static restrict<T extends typeof Params>(
+    this: T,
+    params: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+    allowed: string[],
+  ) {
+    if (params === null || params === undefined) return {}
+    if (Array.isArray(params)) return {}
+    if (typeof params !== 'object') return {}
     return new this(params).restrict(allowed)
   }
 
