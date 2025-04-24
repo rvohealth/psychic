@@ -31,6 +31,7 @@ import primitiveOpenapiStatementToOpenapi, {
   MaybeNullPrimitiveOrObjectOrArray,
   maybeNullPrimitiveToPrimitive,
 } from './helpers/primitiveOpenapiStatementToOpenapi.js'
+import schemaToRef from './helpers/schemaToRef.js'
 import OpenapiSerializerRenderer from './serializer.js'
 
 export default class OpenapiBodySegmentRenderer {
@@ -123,7 +124,7 @@ export default class OpenapiBodySegmentRenderer {
         return this.refStatement(bodySegment)
 
       case '$schema':
-        return this.schemaRefStatement(bodySegment)
+        return schemaToRef(bodySegment)
 
       case '$serializer':
         return this.serializerStatement(bodySegment)
@@ -480,18 +481,6 @@ The following values will be allowed:
       $serializer: serializerClass,
       ...serializableRef,
     })
-  }
-
-  /**
-   * @internal
-   *
-   * recursively a $schema statement
-   */
-  private schemaRefStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaExpressionRef {
-    const schemaRefBodySegment = bodySegment as OpenapiSchemaExpressionRefSchemaShorthand
-    return {
-      $ref: `#/components/schemas/${schemaRefBodySegment.$schema.replace(/^#\/components\/schemas\//, '')}`,
-    }
   }
 
   /**

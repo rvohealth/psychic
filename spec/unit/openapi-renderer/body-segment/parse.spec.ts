@@ -1,5 +1,6 @@
-import OpenapiBodySegmentRenderer from '../../../../src/openapi-renderer/body-segment.js'
-import { OpenapiBodySegment } from '../../../../src/openapi-renderer/serializer.js'
+import OpenapiBodySegmentRenderer, {
+  OpenapiBodySegment,
+} from '../../../../src/openapi-renderer/body-segment.js'
 import ApplicationController from '../../../../test-app/src/app/controllers/ApplicationController.js'
 
 describe('OpenapiBodySegmentRenderer', () => {

@@ -2,13 +2,10 @@ import {
   DreamSerializer,
   DreamSerializerAssociationStatement,
   OpenapiSchemaArray,
-  OpenapiSchemaBody,
-  OpenapiSchemaBodyShorthand,
   OpenapiSchemaExpressionAnyOf,
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
   OpenapiSchemaObjectBase,
-  OpenapiShorthandPrimitiveTypes,
   SerializableTypes,
   uniq,
 } from '@rvoh/dream'
@@ -17,7 +14,8 @@ import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../error/ope
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import PsychicApp from '../psychic-app/index.js'
-import OpenapiBodySegmentRenderer from './body-segment.js'
+import OpenapiBodySegmentRenderer, { OpenapiBodyTarget, OpenapiEndpointParseResults } from './body-segment.js'
+import schemaToRef from './helpers/schemaToRef.js'
 
 export default class OpenapiSerializerRenderer {
   private openapiName: string
@@ -182,7 +180,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
               {
                 allOf: [
                   { ...finalOutputForSerializerKey },
-                  { anyOf: flattenedPolymorphicSchemas.map(schema => ({ $schema: schema })) },
+                  { anyOf: flattenedPolymorphicSchemas.map(schema => schemaToRef({ $schema: schema })) },
                 ],
               },
             ],
@@ -194,7 +192,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
           [serializerKey]: {
             allOf: [
               { ...finalOutputForSerializerKey },
-              { anyOf: flattenedPolymorphicSchemas.map(schema => ({ $schema: schema })) },
+              { anyOf: flattenedPolymorphicSchemas.map(schema => schemaToRef({ $schema: schema })) },
             ],
           },
         } as Record<string, OpenapiSchemaObject>
@@ -446,16 +444,3 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     }
   }
 }
-
-export type OpenapiEndpointParseResults = {
-  results: OpenapiSchemaBody
-  extraComponents: { [key: string]: OpenapiSchemaObject }
-}
-
-export type OpenapiBodySegment =
-  | OpenapiSchemaBodyShorthand
-  | OpenapiShorthandPrimitiveTypes
-  | { description: string }
-  | undefined
-
-export type OpenapiBodyTarget = 'request' | 'response'

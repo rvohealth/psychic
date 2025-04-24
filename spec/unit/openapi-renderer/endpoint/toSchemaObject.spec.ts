@@ -1156,7 +1156,12 @@ The following values will be allowed:
                       },
                     },
 
-                    { anyOf: [{ $schema: 'PostSummary' }, { $schema: 'CommentSummary' }] },
+                    {
+                      anyOf: [
+                        { $ref: '#/components/schemas/PostSummary' },
+                        { $ref: '#/components/schemas/CommentSummary' },
+                      ],
+                    },
                   ],
                 },
                 PostSummary: {
@@ -1209,7 +1214,12 @@ The following values will be allowed:
                             },
                           },
 
-                          { anyOf: [{ $schema: 'PostSummary' }, { $schema: 'CommentSummary' }] },
+                          {
+                            anyOf: [
+                              { $ref: '#/components/schemas/PostSummary' },
+                              { $ref: '#/components/schemas/CommentSummary' },
+                            ],
+                          },
                         ],
                       },
                     ],
