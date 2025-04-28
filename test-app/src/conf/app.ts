@@ -1,4 +1,5 @@
 import { DreamCLI } from '@rvoh/dream'
+import { debuglog } from 'node:util'
 import * as winston from 'winston'
 import EnvInternal from '../../../src/helpers/EnvInternal.js'
 import { PsychicDevtools } from '../../../src/index.js'
@@ -8,6 +9,8 @@ import srcPath from '../app/helpers/srcPath.js'
 import AppEnv from './AppEnv.js'
 import inflections from './inflections.js'
 import routesCb from './routes.js'
+
+const debugEnabled = debuglog('psychic').enabled
 
 export default async (psy: PsychicApp) => {
   await psy.load('controllers', srcPath('app', 'controllers'), path => importDefault(path))
@@ -234,7 +237,7 @@ export default async (psy: PsychicApp) => {
   psy.on('server:error', (err, req, res) => {
     __forTestingOnly('server:error')
 
-    if (EnvInternal.boolean('DEBUG')) {
+    if (debugEnabled) {
       console.error(err)
     }
 

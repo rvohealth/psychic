@@ -5,7 +5,6 @@ const EnvInternal = new Env<{
   integer: 'PORT'
   boolean:
     | 'CLIENT'
-    | 'DEBUG'
     | 'PSYCHIC_DANGEROUSLY_PERMIT_WS_EXCEPTIONS'
     | 'BYPASS_DB_CONNECTIONS_DURING_INIT'
     | 'PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR'

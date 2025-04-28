@@ -6,7 +6,7 @@ import { Express, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { Server } from 'node:http'
 import * as path from 'node:path'
-import EnvInternal from '../helpers/EnvInternal.js'
+import { debuglog } from 'node:util'
 import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError.js'
 import PsychicApp, { PsychicSslCredentials } from '../psychic-app/index.js'
 import PsychicRouter from '../router/index.js'
@@ -14,6 +14,8 @@ import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
 } from './helpers/startPsychicServer.js'
+
+const debugEnabled = debuglog('psychic').enabled
 
 export default class PsychicServer {
   public static async startPsychicServer(opts: StartPsychicServerOptions): Promise<Server> {
@@ -193,7 +195,7 @@ export default class PsychicServer {
 
         this.expressApp.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
           if (isOpenapiError(err)) {
-            if (EnvInternal.isDebug) {
+            if (debugEnabled) {
               PsychicApp.log(JSON.stringify(err))
               console.trace()
             }
@@ -203,7 +205,7 @@ export default class PsychicServer {
               errors: err.errors,
             })
           } else {
-            if (EnvInternal.isDebug) {
+            if (debugEnabled) {
               PsychicApp.logWithLevel('error', err)
             }
             next()

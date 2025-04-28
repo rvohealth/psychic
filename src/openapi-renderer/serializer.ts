@@ -9,13 +9,15 @@ import {
   SerializableTypes,
   uniq,
 } from '@rvoh/dream'
+import { debuglog } from 'node:util'
 import PsychicController from '../controller/index.js'
 import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations.js'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
-import EnvInternal from '../helpers/EnvInternal.js'
 import PsychicApp from '../psychic-app/index.js'
 import OpenapiBodySegmentRenderer, { OpenapiBodyTarget, OpenapiEndpointParseResults } from './body-segment.js'
 import schemaToRef from './helpers/schemaToRef.js'
+
+const debugEnabled = debuglog('psychic').enabled
 
 export default class OpenapiSerializerRenderer {
   private openapiName: string
@@ -225,7 +227,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
     if (associatedSerializer === undefined) throw new UnexpectedUndefined()
     const associatedSerializerKey = associatedSerializer.openapiName
 
-    if (EnvInternal.isDebug) PsychicApp.log(`Processing serializer ${associatedSerializerKey}`)
+    if (debugEnabled) PsychicApp.log(`Processing serializer ${associatedSerializerKey}`)
 
     let flattenedData: Record<string, OpenapiSchemaObject>
     const finalOutputForSerializerKey = finalOutput[serializerKey]
@@ -388,7 +390,7 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
       associatedSerializers.forEach(associatedSerializer => {
         const associatedSerializerKey = associatedSerializer.openapiName
 
-        if (EnvInternal.isDebug) PsychicApp.log(`Processing serializer ${associatedSerializerKey}`)
+        if (debugEnabled) PsychicApp.log(`Processing serializer ${associatedSerializerKey}`)
 
         finalOutputForSerializerKey.required = uniq([
           ...(finalOutputForSerializerKey.required || []),

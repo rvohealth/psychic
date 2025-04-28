@@ -1,14 +1,16 @@
 import { compact } from '@rvoh/dream'
 import { groupBy } from 'lodash-es'
 import * as fs from 'node:fs/promises'
+import { debuglog } from 'node:util'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
-import EnvInternal from '../helpers/EnvInternal.js'
 import openapiJsonPath from '../helpers/openapiJsonPath.js'
 import PsychicApp from '../psychic-app/index.js'
 import { HttpMethod, HttpMethods } from '../router/types.js'
 import PsychicServer from '../server/index.js'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults.js'
 import { OpenapiEndpointResponsePath, OpenapiParameterResponse, OpenapiSchema } from './endpoint.js'
+
+const debugEnabled = debuglog('psychic').enabled
 
 export default class OpenapiAppRenderer {
   /**
@@ -106,7 +108,7 @@ export default class OpenapiAppRenderer {
       controller.openapiNames.includes(openapiName),
     )) {
       for (const key of Object.keys(controller.openapi || {})) {
-        if (EnvInternal.isDebug) console.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
+        if (debugEnabled) PsychicApp.log(`Processing OpenAPI key ${key} for controller ${controllerName}`)
 
         const renderer = controller.openapi[key]
         if (renderer === undefined) throw new UnexpectedUndefined()

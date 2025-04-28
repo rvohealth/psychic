@@ -1,9 +1,12 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 import { createServer } from 'net'
+import { debuglog } from 'node:util'
 import sleep from '../../../spec/helpers/sleep.js'
 import UnexpectedUndefined from '../../error/UnexpectedUndefined.js'
+import PsychicApp from '../../psychic-app/index.js'
 
 const devServerProcesses: Record<string, ChildProcessWithoutNullStreams | undefined> = {}
+const debugEnabled = debuglog('psychic').enabled
 
 export async function launchDevServer(
   key: string,
@@ -11,7 +14,7 @@ export async function launchDevServer(
 ) {
   if (devServerProcesses[key]) return
 
-  if (process.env.DEBUG === '1') console.log('Starting server...')
+  if (debugEnabled) PsychicApp.log('Starting server...')
   const [_cmd, ...args] = cmd.split(' ')
   if (_cmd === undefined) throw new UnexpectedUndefined()
 
@@ -31,19 +34,19 @@ export async function launchDevServer(
   })
 
   proc.stdout.on('data', data => {
-    if (process.env.DEBUG === '1') console.log(`Server output: ${data}`)
+    if (debugEnabled) PsychicApp.log(`Server output: ${data}`)
   })
 
   proc.stderr.on('data', data => {
-    if (process.env.DEBUG === '1') console.error(`Server error: ${data}`)
+    if (debugEnabled) PsychicApp.logWithLevel('error', `Server error: ${data}`)
   })
 
   proc.on('error', err => {
-    console.error(`Server process error: ${err as unknown as string}`)
+    PsychicApp.logWithLevel('error', `Server process error: ${err as unknown as string}`)
   })
 
   proc.on('close', code => {
-    if (process.env.DEBUG === '1') console.log(`Server process exited with code ${code}`)
+    if (debugEnabled) PsychicApp.log(`Server process exited with code ${code}`)
   })
 }
 
@@ -54,7 +57,7 @@ export function stopDevServer(key: string) {
   }
 
   if (proc?.pid) {
-    if (process.env.DEBUG === '1') console.log('Stopping server...')
+    if (debugEnabled) PsychicApp.log('Stopping server...')
     try {
       // proc.kill('SIGINT')
       process.kill(-proc.pid, 'SIGKILL')
@@ -64,7 +67,7 @@ export function stopDevServer(key: string) {
 
     delete devServerProcesses[key]
 
-    if (process.env.DEBUG === '1') console.log('server stopped')
+    if (debugEnabled) PsychicApp.log('server stopped')
   }
 }
 

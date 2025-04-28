@@ -1,7 +1,7 @@
 import { Env } from '@rvoh/dream'
 
 class AppEnvClass extends Env<{
-  boolean: 'DEBUG' | 'CLIENT'
+  boolean: 'CLIENT'
 }> {}
 
 const AppEnv = new AppEnvClass()
