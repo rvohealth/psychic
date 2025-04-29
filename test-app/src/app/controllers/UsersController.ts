@@ -119,6 +119,10 @@ export default class UsersController extends ApplicationController {
     this.noContent()
   }
 
+  public postHowyadoin() {
+    this.noContent()
+  }
+
   public doathing() {
     this.noContent()
   }

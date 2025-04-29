@@ -27,7 +27,18 @@ export default (r: PsychicRouter) => {
   r.get('api-ping', ApiUsersController, 'ping')
   r.post('cast-param-test', ParamsTestController, 'testCastParam')
   r.post('openapi-validation-test', ParamsTestController, 'testOpenapiValidation')
+  r.get(
+    'openapi-validation-on-explicit-query-arrays',
+    ParamsTestController,
+    'testOpenapiValidationOnExplicitQueryArrays',
+  )
+  r.get(
+    'openapi-validation-on-explicit-query-arrays-without-brackets',
+    ParamsTestController,
+    'testOpenapiValidationOnExplicitQueryArraysWithoutBrackets',
+  )
   r.get('users/howyadoin', UsersController, 'howyadoin')
+  r.post('users/post-howyadoin', UsersController, 'postHowyadoin')
   r.get('openapi/multiple-openapi-names', OpenapiDecoratorTestController, 'testMultipleOpenapiNames')
   r.get('openapi/multiple-serializer-statements', OpenapiDecoratorTestController, 'testMultipleSerializers')
   r.get('openapi/openapi-overrides', OpenapiOverridesTestController, 'testOpenapiConfigOverrides')

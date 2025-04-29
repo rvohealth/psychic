@@ -18,6 +18,8 @@ import ParamValidationError from '../error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
 import isUuid from '../helpers/isUuid.js'
 import { isObject } from '../helpers/typechecks.js'
+import isArrayParamName from '../helpers/isArrayParamName.js'
+import alternateParamName from '../helpers/alternateParamName.js'
 
 export default class Params {
   /**
@@ -306,8 +308,13 @@ export default class Params {
     FinalReturnType extends AllowNullOrUndefined extends true
       ? ValidatedType | null | undefined
       : ValidatedType,
-  >(params: object, paramName: string, expectedType: ExpectedType, opts?: OptsType): FinalReturnType {
-    const param = (params as Record<string, unknown>)[paramName] as PsychicParamsPrimitive
+  >(_params: object, paramName: string, expectedType: ExpectedType, opts?: OptsType): FinalReturnType {
+    const params = _params as Record<string, PsychicParamsPrimitive>
+    let param = params[paramName]
+    if (param === undefined && isArrayParamName(expectedType)) {
+      param = params[alternateParamName(paramName)]
+    }
+
     return new this(params).cast(
       paramName,
       typeof param === 'string' ? param.trim() : param,

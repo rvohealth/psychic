@@ -946,6 +946,130 @@
         }
       }
     },
+    "/openapi-validation-on-explicit-query-arrays": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": true,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "myArray[]",
+          "description": "myArray[]",
+          "allowReserved": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "required": false
+        }
+      ],
+      "get": {
+        "tags": [],
+        "security": [],
+        "responses": {
+          "204": {
+            "description": "Success, no content"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/openapi-validation-on-explicit-query-arrays-without-brackets": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": true,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "myArray",
+          "description": "myArray",
+          "allowReserved": true,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          },
+          "required": false
+        }
+      ],
+      "get": {
+        "tags": [],
+        "security": [],
+        "responses": {
+          "204": {
+            "description": "Success, no content"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/openapi-validation-test": {
       "parameters": [
         {

@@ -187,6 +187,41 @@ describe('OpenapiEndpointRenderer', () => {
         )
       })
 
+      context('for a POST request', () => {
+        it('renders the query parameters', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'postHowyadoin', {
+            query: {
+              search: {
+                required: true,
+                description: 'the search term',
+              },
+            },
+          })
+
+          const response = renderer.toPathObject('default', {}, routes)
+          expect(response).toEqual(
+            expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              '/users/post-howyadoin': expect.objectContaining({
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+                parameters: expect.arrayContaining([
+                  {
+                    in: 'query',
+                    name: 'search',
+                    required: true,
+                    allowReserved: true,
+                    description: 'the search term',
+                    schema: {
+                      type: 'string',
+                    },
+                  },
+                ]),
+              }),
+            }),
+          )
+        })
+      })
+
       context('allowReserved is explicitly set to false', () => {
         it('sets allowReserved: false', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {

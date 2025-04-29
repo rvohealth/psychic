@@ -21,4 +21,44 @@ export default class ParamsTestController extends ApplicationController {
   public testOpenapiValidation() {
     this.noContent()
   }
+
+  @OpenAPI({
+    security: [],
+    query: {
+      'myArray[]': {
+        schema: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+        required: false,
+      },
+    },
+  })
+  public testOpenapiValidationOnExplicitQueryArrays() {
+    this.castParam('myArray[]', 'string[]', { enum: ['a', 'b', 'c'] })
+    this.castParam('myArray', 'string[]', { enum: ['a', 'b', 'c'] })
+    this.noContent()
+  }
+
+  @OpenAPI({
+    security: [],
+    query: {
+      myArray: {
+        schema: {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        },
+        required: false,
+      },
+    },
+  })
+  public testOpenapiValidationOnExplicitQueryArraysWithoutBrackets() {
+    this.castParam('myArray', 'string[]', { enum: ['a', 'b', 'c'] })
+    this.castParam('myArray[]', 'string[]', { enum: ['a', 'b', 'c'] })
+    this.noContent()
+  }
 }

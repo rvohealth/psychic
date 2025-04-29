@@ -33,6 +33,7 @@ import primitiveOpenapiStatementToOpenapi, {
 } from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import schemaToRef from './helpers/schemaToRef.js'
 import OpenapiSerializerRenderer from './serializer.js'
+import isArrayParamName from '../helpers/isArrayParamName.js'
 
 export default class OpenapiBodySegmentRenderer {
   private controllerClass: typeof PsychicController
@@ -371,7 +372,7 @@ export default class OpenapiBodySegmentRenderer {
   }
 
   private typeIsOpenapiArrayPrimitive(openapiType: MaybeNullPrimitive): boolean {
-    return /\[\]$/.test(maybeNullPrimitiveToPrimitive(openapiType))
+    return isArrayParamName(maybeNullPrimitiveToPrimitive(openapiType))
   }
 
   private applyConfigurationOptions<T>(obj: T): T {
