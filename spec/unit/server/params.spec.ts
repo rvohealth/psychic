@@ -963,6 +963,21 @@ describe('Params', () => {
             })
           })
 
+          it('can correctly find a param, with or without array brackets', () => {
+            expect(Params.cast({ 'howyadoin[]': ['hello', 'world'] }, 'howyadoin[]', 'string[]')).toEqual([
+              'hello',
+              'world',
+            ])
+            expect(Params.cast({ 'howyadoin[]': ['hello', 'world'] }, 'howyadoin', 'string[]')).toEqual([
+              'hello',
+              'world',
+            ])
+            expect(Params.cast({ howyadoin: ['hello', 'world'] }, 'howyadoin[]', 'string[]')).toEqual([
+              'hello',
+              'world',
+            ])
+          })
+
           context('with null', () => {
             it('compacts null and undefined inner values', () => {
               expect(Params.cast({ howyadoin: ['hello', null, undefined] }, 'howyadoin', 'string[]')).toEqual(
@@ -1022,7 +1037,9 @@ describe('Params', () => {
         context('number[]', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast({ howyadoin: [1, 2] }, 'howyadoin', 'number[]')).toEqual([1, 2])
+              expect(Params.cast({ howyadoin: [1, 2.2, '1', '3.3'] }, 'howyadoin', 'number[]')).toEqual([
+                1, 2.2, 1, 3.3,
+              ])
             })
           })
 
@@ -1032,6 +1049,14 @@ describe('Params', () => {
                 ParamValidationError,
               )
             })
+          })
+
+          it('can correctly find a param with array brackets', () => {
+            expect(Params.cast({ 'howyadoin[]': [1, 2] }, 'howyadoin[]', 'number[]')).toEqual([1, 2])
+          })
+
+          it('can correctly find a param with array brackets, even when the brackets are left off', () => {
+            expect(Params.cast({ 'howyadoin[]': [1, 2] }, 'howyadoin', 'number[]')).toEqual([1, 2])
           })
 
           context('with null', () => {
@@ -1065,6 +1090,7 @@ describe('Params', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
               expect(Params.cast({ howyadoin: [1, 2] }, 'howyadoin', 'integer[]')).toEqual([1, 2])
+              expect(Params.cast({ howyadoin: ['1', '2'] }, 'howyadoin', 'integer[]')).toEqual([1, 2])
             })
           })
 
@@ -1074,6 +1100,16 @@ describe('Params', () => {
                 ParamValidationError,
               )
             })
+          })
+
+          it('can correctly find a param with array brackets', () => {
+            expect(Params.cast({ 'howyadoin[]': [1, 2] }, 'howyadoin[]', 'integer[]')).toEqual([1, 2])
+            expect(Params.cast({ 'howyadoin[]': ['1', '2'] }, 'howyadoin[]', 'integer[]')).toEqual([1, 2])
+          })
+
+          it('can correctly find a param with array brackets, even when the brackets are left off', () => {
+            expect(Params.cast({ 'howyadoin[]': [1, 2] }, 'howyadoin', 'integer[]')).toEqual([1, 2])
+            expect(Params.cast({ 'howyadoin[]': ['1', '2'] }, 'howyadoin', 'integer[]')).toEqual([1, 2])
           })
 
           context('with null', () => {
@@ -1117,6 +1153,16 @@ describe('Params', () => {
                 ParamValidationError,
               )
             })
+          })
+
+          it('can correctly find a param with array brackets', () => {
+            expect(Params.cast({ 'howyadoin[]': [1, 2] }, 'howyadoin[]', 'bigint[]')).toEqual(['1', '2'])
+            expect(Params.cast({ 'howyadoin[]': ['1', '2'] }, 'howyadoin[]', 'bigint[]')).toEqual(['1', '2'])
+          })
+
+          it('can correctly find a param with array brackets, even when the brackets are left off', () => {
+            expect(Params.cast({ 'howyadoin[]': [1, 2] }, 'howyadoin', 'bigint[]')).toEqual(['1', '2'])
+            expect(Params.cast({ 'howyadoin[]': ['1', '2'] }, 'howyadoin', 'bigint[]')).toEqual(['1', '2'])
           })
 
           context('with null', () => {
@@ -1166,6 +1212,20 @@ describe('Params', () => {
             })
           })
 
+          it('can correctly find a param with array brackets', () => {
+            expect(Params.cast({ 'howyadoin[]': [true, false] }, 'howyadoin[]', 'boolean[]')).toEqual([
+              true,
+              false,
+            ])
+          })
+
+          it('can correctly find a param with array brackets, even when the brackets are left off', () => {
+            expect(Params.cast({ 'howyadoin[]': [true, false] }, 'howyadoin', 'boolean[]')).toEqual([
+              true,
+              false,
+            ])
+          })
+
           context('with null', () => {
             it('compacts null and undefined inner values', () => {
               expect(Params.cast({ howyadoin: [true, null, undefined] }, 'howyadoin', 'boolean[]')).toEqual([
@@ -1200,6 +1260,17 @@ describe('Params', () => {
             it('returns the requsted value', () => {
               expect(Params.cast({ howyadoin: [null, null] }, 'howyadoin', 'null[]')).toEqual([null, null])
             })
+          })
+
+          it('can correctly find a param with array brackets', () => {
+            expect(Params.cast({ 'howyadoin[]': [null, null] }, 'howyadoin[]', 'null[]')).toEqual([
+              null,
+              null,
+            ])
+          })
+
+          it('can correctly find a param with array brackets, even when the brackets are left off', () => {
+            expect(Params.cast({ 'howyadoin[]': [null, null] }, 'howyadoin', 'null[]')).toEqual([null, null])
           })
 
           context('with an invalid value', () => {

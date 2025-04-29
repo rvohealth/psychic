@@ -43,6 +43,7 @@ describe('PsychicController', () => {
           hello: 'hello',
           goodbye: 'goodbye',
           helloWorldArray: ['hello', 'world'],
+          'helloWorldBracketedArray[]': ['hello', 'world'],
           helloGoodbyeArray: ['hello', 'goodbye'],
         },
       }) as unknown as Request
@@ -53,6 +54,29 @@ describe('PsychicController', () => {
     it('returns the result of Params.cast', () => {
       vi.spyOn(Params, 'cast').mockReturnValue('chalupas dujour')
       expect(controller.castParam('name', 'string', { allowNull: true })).toEqual('chalupas dujour')
+    })
+
+    context('arrays', () => {
+      context('string[]', () => {
+        it('correctly casts valid string array values', () => {
+          const results = controller.castParam('helloWorldArray', 'string[]')
+          expect(results).toEqual(['hello', 'world'])
+        })
+
+        it('disallows values that aren’t valid string[]', () => {
+          expect(() => controller.castParam('goodbye', 'string[]')).toThrow(ParamValidationError)
+        })
+
+        it('can correctly find a param with array brackets', () => {
+          const results = controller.castParam('helloWorldBracketedArray[]', 'string[]')
+          expect(results).toEqual(['hello', 'world'])
+        })
+
+        it('can correctly find a param with array brackets, even when the brackets are left off', () => {
+          const results = controller.castParam('helloWorldBracketedArray', 'string[]')
+          expect(results).toEqual(['hello', 'world'])
+        })
+      })
     })
 
     it('can traverse dot notation', () => {

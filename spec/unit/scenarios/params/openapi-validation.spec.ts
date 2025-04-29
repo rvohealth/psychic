@@ -59,4 +59,54 @@ describe('hitting an endpoint with openapi validation activated', () => {
       await subject({ howyadoin: 1 }, 400)
     })
   })
+
+  context('openapi arrays', () => {
+    context('explicit array field with array brackets in query', () => {
+      it('succeeds with the correct value for the myArray[] query param', async () => {
+        await request.get('/openapi-validation-on-explicit-query-arrays', 204, {
+          headers: {
+            'custom-header': 'hi',
+          },
+          query: {
+            'myArray[]': ['a', 'b', 'c'],
+          },
+        })
+      })
+
+      it('fails with the incorrect value for the myArray[] query param', async () => {
+        await request.get('/openapi-validation-on-explicit-query-arrays', 400, {
+          headers: {
+            'custom-header': 'hi',
+          },
+          query: {
+            'myArray[]': ['a', 'b', 'd'],
+          },
+        })
+      })
+    })
+
+    context('explicit array field without array brackets in query', () => {
+      it('succeeds with the correct value for the myArray query param', async () => {
+        await request.get('/openapi-validation-on-explicit-query-arrays-without-brackets', 204, {
+          headers: {
+            'custom-header': 'hi',
+          },
+          query: {
+            myArray: ['a', 'b', 'c'],
+          },
+        })
+      })
+
+      it('fails with the incorrect value for the myArray query param', async () => {
+        await request.get('/openapi-validation-on-explicit-query-arrays-without-brackets', 400, {
+          headers: {
+            'custom-header': 'hi',
+          },
+          query: {
+            myArray: ['a', 'b', 'd'],
+          },
+        })
+      })
+    })
+  })
 })
