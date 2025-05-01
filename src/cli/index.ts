@@ -4,7 +4,7 @@ import PsychicBin from '../bin/index.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 
 export default class PsychicCLI {
-  public static provide(
+  public static async provide(
     program: Command,
     {
       initializePsychicApp,
@@ -107,5 +107,9 @@ export default class PsychicCLI {
         await PsychicBin.syncOpenapiJson()
         process.exit()
       })
+
+    for (const hook of PsychicApp.getOrFail().specialHooks.cliStart) {
+      await hook(program)
+    }
   }
 }

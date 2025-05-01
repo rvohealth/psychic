@@ -14,9 +14,15 @@ import initializePsychicApp from './helpers/initializePsychicApp.js'
 
 const program = new Command()
 
-PsychicCLI.provide(program, {
-  initializePsychicApp,
-  seedDb,
-})
+async function buildProgram() {
+  await initializePsychicApp()
 
-program.parse(process.argv)
+  await PsychicCLI.provide(program, {
+    initializePsychicApp,
+    seedDb,
+  })
+
+  program.parse(process.argv)
+}
+
+void buildProgram()
