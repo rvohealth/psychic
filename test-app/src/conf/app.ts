@@ -15,6 +15,7 @@ const debugEnabled = debuglog('psychic').enabled
 export default async (psy: PsychicApp) => {
   await psy.load('controllers', srcPath('app', 'controllers'), path => importDefault(path))
   await psy.load('services', srcPath('app', 'services'), path => importDefault(path))
+  await psy.load('initializers', srcPath('conf', 'initializers'), path => importDefault(path))
 
   psy.set('appName', 'testapp')
   psy.set('packageManager', 'yarn')

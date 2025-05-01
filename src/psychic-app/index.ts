@@ -35,6 +35,8 @@ import importControllers, { getControllersOrFail } from './helpers/import/import
 import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
+import { Command } from 'commander'
+import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
 
 export default class PsychicApp {
   public static async init(
@@ -83,6 +85,10 @@ export default class PsychicApp {
 
         for (const plugin of psychicApp.plugins) {
           await plugin(psychicApp)
+        }
+
+        for (const initializerCb of Object.values(PsychicApp.getInitializersOrBlank())) {
+          await initializerCb(psychicApp)
         }
 
         cachePsychicApp(psychicApp)
@@ -145,6 +151,10 @@ Try setting it to something valid, like:
    */
   public static getOrFail() {
     return getCachedPsychicAppOrFail()
+  }
+
+  public static getInitializersOrBlank() {
+    return getInitializersOrBlank()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -289,6 +299,7 @@ Try setting it to something valid, like:
     serverStart: [],
     serverError: [],
     serverShutdown: [],
+    cliStart: [],
   }
   public get specialHooks() {
     return this._specialHooks
@@ -335,7 +346,7 @@ Try setting it to something valid, like:
     return this._plugins
   }
 
-  public async load<RT extends 'controllers' | 'services'>(
+  public async load<RT extends 'controllers' | 'services' | 'initializers'>(
     resourceType: RT,
     resourcePath: string,
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -350,6 +361,10 @@ Try setting it to something valid, like:
       case 'services':
         await importServices(resourcePath, importCb)
         this._loadedServices = true
+        break
+
+      case 'initializers':
+        await importInitializers(resourcePath, importCb)
         break
     }
   }
@@ -397,11 +412,13 @@ Try setting it to something valid, like:
             ? (psychicServer: PsychicServer) => void | Promise<void>
             : T extends 'server:init:after-routes'
               ? (psychicServer: PsychicServer) => void | Promise<void>
-              : T extends 'sync'
-                ? // NOTE: this is really any | Promise<any>, but eslint complains about this foolery
-                  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                  () => any
-                : (conf: PsychicApp) => void | Promise<void>,
+              : T extends 'cli:start'
+                ? (program: Command) => void | Promise<void>
+                : T extends 'sync'
+                  ? // NOTE: this is really any | Promise<any>, but eslint complains about this foolery
+                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                    () => any
+                  : (conf: PsychicApp) => void | Promise<void>,
   ) {
     switch (hookEventType) {
       case 'server:error':
@@ -424,6 +441,10 @@ Try setting it to something valid, like:
 
       case 'server:init:after-routes':
         this._specialHooks.serverInitAfterRoutes.push(cb as (server: PsychicServer) => void | Promise<void>)
+        break
+
+      case 'cli:start':
+        this._specialHooks.cliStart.push(cb as (program: Command) => void | Promise<void>)
         break
 
       case 'sync':
@@ -641,6 +662,7 @@ export interface PsychicAppSpecialHooks {
   serverStart: ((server: PsychicServer) => void | Promise<void>)[]
   serverShutdown: ((server: PsychicServer) => void | Promise<void>)[]
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
+  cliStart: ((program: Command) => void | Promise<void>)[]
 }
 
 export interface PsychicAppOverrides {

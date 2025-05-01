@@ -1,5 +1,6 @@
 import { DreamImporter } from '@rvoh/dream'
 import PsychicController from '../../controller/index.js'
+import { PsychicAppInitializerCb } from '../types.js'
 
 export default class PsychicImporter {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -13,6 +14,22 @@ export default class PsychicImporter {
     )) as [string, typeof PsychicController][]
 
     return controllerClasses
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  public static async importInitializers(initializersPath: string, importCb: (path: string) => Promise<any>) {
+    const initializerPaths = await DreamImporter.ls(initializersPath)
+
+    const initializerCbs = (await Promise.all(
+      initializerPaths.map(initializerPath =>
+        importCb(initializerPath).then(initializerCb => [
+          initializerPath,
+          initializerCb as PsychicAppInitializerCb,
+        ]),
+      ),
+    )) as [string, PsychicAppInitializerCb][]
+
+    return initializerCbs
   }
 
   public static async importServices(
