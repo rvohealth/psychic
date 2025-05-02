@@ -1,6 +1,7 @@
 import { DreamCLI } from '@rvoh/dream'
 import { Command } from 'commander'
 import PsychicBin from '../bin/index.js'
+import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 
 export default class PsychicCLI {
@@ -50,12 +51,57 @@ export default class PsychicCLI {
         'the name of the controller to create, including namespaces, e.g. Posts or Api/V1/Posts',
       )
       .argument('[actions...]', 'the names of controller actions to create')
-
       .action(async (controllerName: string, actions: string[]) => {
         await initializePsychicApp()
         await PsychicBin.generateController(controllerName, actions)
         process.exit()
       })
+
+    program
+      .command('generate:openapi:redux')
+      .alias('g:openapi:redux')
+      .description(
+        'generates openapi redux bindings to connect one of your openapi files to one of your clients',
+      )
+      .option(
+        '--schema-file',
+        'the path from your api root to the openapi file you wish to use to generate your schema, i.e. ./openapi/openapi.json',
+      )
+      .option(
+        '--api-file',
+        'the path to the boilerplate api file that will be used to scaffold your backend endpoints together with, i.e. ../client/app/api.ts',
+      )
+      .option('--api-import', 'the camelCased name of the export from your api module, i.e. emptyBackendApi')
+      .option(
+        '--output-file',
+        'the path to the file that will contain your typescript openapi redux bindings, i.e. ../client/app/myBackendApi.ts',
+      )
+      .option('--export-name', 'the camelCased name to use for your exported api, i.e. myBackendApi')
+      .action(
+        async ({
+          schemaFile,
+          apiFile,
+          apiImport,
+          outputFile,
+          exportName,
+        }: {
+          schemaFile: string
+          apiFile: string
+          apiImport: string
+          outputFile: string
+          exportName: string
+        }) => {
+          await initializePsychicApp()
+          await generateOpenapiReduxBindings({
+            exportName,
+            schemaFile,
+            apiFile,
+            apiImport,
+            outputFile,
+          })
+          process.exit()
+        },
+      )
 
     program
       .command('routes')
