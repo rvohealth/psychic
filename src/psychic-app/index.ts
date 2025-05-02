@@ -37,6 +37,7 @@ import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
 import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
 import { Command } from 'commander'
 import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
+import PackageManager from '../cli/helpers/PackageManager.js'
 
 export default class PsychicApp {
   public static async init(
@@ -106,27 +107,11 @@ export default class PsychicApp {
   /**
    * @internal
    *
-   * used to provide the correct package manager syntax for running a script
-   * inside of the package.json "scripts" section.
-   */
-  public packageManagerRunCmd(cmd: string) {
-    switch (this.packageManager) {
-      case 'npm':
-        return `npm run ${cmd}`
-
-      default:
-        return `${this.packageManager} ${cmd}`
-    }
-  }
-
-  /**
-   * @internal
-   *
    * adds the necessary package manager prefix to the psy command provided
    * i.e. `psyCmd('sync')`
    */
   public psyCmd(cmd: string) {
-    return this.packageManagerRunCmd(`psy ${cmd}`)
+    return PackageManager.run(`psy ${cmd}`)
   }
 
   private static checkKey(encryptionIdentifier: 'cookies', key: string, algorithm: EncryptAlgorithm) {

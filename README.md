@@ -1,4 +1,4 @@
-> ATTENTION: we are currently in the process of releasing this code to the world, as of the afternoon of March 10th, 2025. This notice will be removed, and the version of this repo will be bumped to 1.0.0, once all of the repos have been migrated to the new spaces and we can verify that it is all working. This is anticipated to be done in early April, 2025.
+> ATTENTION: we are currently in the process of releasing this code to the world, as of the afternoon of May 2nd, 2025. This notice will be removed, and the version of this repo will be bumped to 1.0.0, once all of the repos have been migrated to the new spaces and we can verify that it is all working. This is anticipated to be done sometime in the next month
 
 # Psychic
 
