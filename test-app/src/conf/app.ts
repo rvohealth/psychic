@@ -69,7 +69,6 @@ export default async (psy: PsychicApp) => {
   // set options to configure openapi integration
   psy.set('openapi', {
     servers: [{ url: 'howyadoin.com', variables: { region: { default: 'a', enum: ['a', 'b'] } } }],
-    syncEnumsToClient: true,
     defaults: {
       headers: {
         ['custom-header']: {
@@ -131,7 +130,6 @@ export default async (psy: PsychicApp) => {
       version: '1.1.1',
     },
     outputFilename: 'admin.openapi.json',
-    syncEnumsToClient: true,
     defaults: {
       headers: {
         ['custom-admin-header']: {
