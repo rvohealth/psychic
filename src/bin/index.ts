@@ -54,10 +54,6 @@ export default class PsychicBin {
     const psychicApp = PsychicApp.getOrFail()
     await PsychicBin.syncOpenapiJson()
 
-    if (psychicApp.openapi?.syncEnumsToClient) {
-      await this.syncClientEnums()
-    }
-
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let output: any = {}
 
@@ -104,14 +100,19 @@ export default class PsychicBin {
     DreamCLI.logger.logEndProgress()
   }
 
-  public static async syncClientEnums() {
+  public static async syncClientEnums(outfile: string) {
     DreamCLI.logger.logStartProgress(`syncing client enums...`)
 
-    const psychicApp = PsychicApp.getOrFail()
-    const apiPath = path.join(psychicApp.clientRoot, psychicApp.client.apiPath)
-
     const enumsStr = await enumsFileStr()
-    await fs.writeFile(`${apiPath}/enums.ts`, enumsStr)
+
+    try {
+      const dir = path.dirname(outfile)
+      await fs.mkdir(dir, { recursive: true })
+    } catch {
+      // noop
+    }
+
+    await fs.writeFile(outfile, enumsStr, {})
 
     DreamCLI.logger.logEndProgress()
   }

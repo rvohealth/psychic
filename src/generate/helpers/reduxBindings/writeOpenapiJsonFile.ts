@@ -21,9 +21,9 @@ export default async function writeOpenapiJsonFile({
   const destPath = path.join(destDir, destFilename)
 
   const jsonData = {
-    schemaFile: path.join('..', '..', '..', schemaFile),
-    apiFile: path.join('..', '..', '..', apiFile),
-    outputFile: path.join('..', '..', '..', outputFile),
+    schemaFile: `../../../${schemaFile.replace(/^\.\//, '')}`,
+    apiFile: `../../../${apiFile.replace(/^\.\//, '')}`,
+    outputFile: `../../../${outputFile.replace(/^\.\//, '')}`,
     apiImport,
     exportName,
   }

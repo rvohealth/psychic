@@ -3,6 +3,7 @@ import { Command } from 'commander'
 import PsychicBin from '../bin/index.js'
 import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
+import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
 
 export default class PsychicCLI {
   public static async provide(
@@ -104,6 +105,33 @@ export default class PsychicCLI {
       )
 
     program
+      .command('generate:initializer:sync-enums')
+      .alias('g:initializer:sync-enums')
+      .description('generates an initializer in your app for syncing enums to a particular path.')
+      .argument(
+        '<outfile>',
+        'the path from your backend directory to the location which you want the enums copied. Should end with .ts, i.e. "../client/src/api/enums.ts"',
+      )
+      .option(
+        '--initializer-filename',
+        'the name you want the file to be in your initializers folder. defaults to `sync-enums.ts`',
+      )
+      .action(
+        async (
+          outfile: string,
+          {
+            initializerName,
+          }: {
+            initializerName: string
+          },
+        ) => {
+          await initializePsychicApp()
+          await generateSyncEnumsInitializer(outfile, initializerName)
+          process.exit()
+        },
+      )
+
+    program
       .command('routes')
       .description(
         'examines your current models, building a type-map of the associations so that the ORM can understand your relational setup. This is commited to your repo, and synced to the dream repo for consumption within the underlying library.',
@@ -151,6 +179,19 @@ export default class PsychicCLI {
       .action(async () => {
         await initializePsychicApp()
         await PsychicBin.syncOpenapiJson()
+        process.exit()
+      })
+
+    program
+      .command('sync:client:enums')
+      .argument(
+        '<outfile>',
+        'the path from your backend directory to the location which you want the enums copied. Should end with .ts, i.e. "../client/src/api/enums.ts"',
+      )
+      .description('syncs your backend enums to a location of your choosing')
+      .action(async (outfile: string) => {
+        await initializePsychicApp()
+        await PsychicBin.syncClientEnums(outfile)
         process.exit()
       })
 

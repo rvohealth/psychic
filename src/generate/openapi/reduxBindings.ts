@@ -37,9 +37,4 @@ export interface OpenapiReduxBindingsOptions {
   apiFile?: string
   apiImport?: string
   outputFile?: string
-  // schemaFile: '../../../api/openapi/admin.openapi.json',
-  // apiFile: '../app/api/api.ts',
-  // apiImport: 'emptySplitApi',
-  // outputFile: '../app/api/wellos-central.ts',
-  // exportName: 'wellosCentralApi',
 }

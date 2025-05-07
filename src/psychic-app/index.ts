@@ -697,7 +697,6 @@ interface PsychicOpenapiBaseOptions {
   servers?: OpenapiServer[]
   schemaDelimeter?: string
   suppressResponseEnums?: boolean
-  syncEnumsToClient?: boolean
   validation?: Partial<Parameters<(typeof OpenApiValidator)['middleware']>[0]>
   defaults?: {
     headers?: OpenapiHeaders
