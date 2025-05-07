@@ -2,6 +2,8 @@ import { RecordNotFound, ValidationError, camelize } from '@rvoh/dream'
 import { Express, Request, Response, Router } from 'express'
 import pluralize from 'pluralize-esm'
 import PsychicController from '../controller/index.js'
+import ParamValidationError from '../error/controller/ParamValidationError.js'
+import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
 import HttpError from '../error/http/index.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
@@ -22,8 +24,6 @@ import {
   ResourcesMethods,
   ResourcesOptions,
 } from './types.js'
-import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
-import ParamValidationError from '../error/controller/ParamValidationError.js'
 
 export default class PsychicRouter {
   public app: Express
@@ -343,8 +343,7 @@ export default class PsychicRouter {
       await controllerInstance.runAction(action)
     } catch (error) {
       const err = error as Error
-      const psychicApp = PsychicApp.getOrFail()
-      if (!EnvInternal.isTest) psychicApp.logger.error(err.message)
+      if (!EnvInternal.isTest) PsychicApp.logWithLevel('error', err.message)
 
       if (errorIsRescuableHttpError(err)) {
         const httpErr = err as HttpError
