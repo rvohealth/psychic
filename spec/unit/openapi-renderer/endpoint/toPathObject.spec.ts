@@ -1355,10 +1355,10 @@ describe('OpenapiEndpointRenderer', () => {
                     schema: {
                       anyOf: [
                         {
-                          $ref: '#/components/schemas/User',
+                          $ref: '#/components/schemas/Post',
                         },
                         {
-                          $ref: '#/components/schemas/Post',
+                          $ref: '#/components/schemas/User',
                         },
                       ],
                     },
@@ -1390,10 +1390,10 @@ describe('OpenapiEndpointRenderer', () => {
                     schema: {
                       anyOf: [
                         {
-                          $ref: '#/components/schemas/User',
+                          $ref: '#/components/schemas/Post',
                         },
                         {
-                          $ref: '#/components/schemas/Post',
+                          $ref: '#/components/schemas/User',
                         },
                       ],
                     },

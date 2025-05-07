@@ -1,8 +1,10 @@
 import {
   DecoratorContext,
+  DreamSerializable,
+  DreamSerializableArray,
   DreamSerializer,
-  SerializableDreamClassOrViewModelClass,
-  SerializableDreamOrViewModel,
+  ViewModel,
+  ViewModelClass,
 } from '@rvoh/dream'
 import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint.js'
 import { ControllerHook } from './hooks.js'
@@ -35,6 +37,14 @@ export function BeforeAction(
   }
 }
 
+export function OpenAPI<
+  const I extends DreamSerializable | DreamSerializableArray,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+>(modelOrSerializer: I, opts?: OpenapiEndpointRendererOpts<I>): any
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function OpenAPI(modelOrSerializer?: OpenapiEndpointRendererOpts): any
+
 /**
  * Used to annotate your controller method in a way that enables
  * Psychic to automatically generate an openapi spec for you. Using
@@ -55,13 +65,11 @@ export function BeforeAction(
  * @param tags - Optional. string array
  * @param uri - Optional. A list of uri segments that this endpoint uses
  */
-export function OpenAPI<
-  I extends
-    | SerializableDreamClassOrViewModelClass
-    | SerializableDreamClassOrViewModelClass[]
-    | typeof DreamSerializer,
+export function OpenAPI(
+  modelOrSerializer?: unknown,
+  _opts?: unknown,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
->(modelOrSerializer?: I | OpenapiEndpointRendererOpts<I>, opts?: OpenapiEndpointRendererOpts<I>): any {
+): any {
   return function (_: undefined, context: DecoratorContext) {
     const methodName = context.name
 
@@ -79,22 +87,26 @@ export function OpenAPI<
       if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'controllerActionMetadata'))
         psychicControllerClass['controllerActionMetadata'] = {}
 
-      if (opts) {
+      if (_opts) {
+        const opts = _opts as OpenapiEndpointRendererOpts
         psychicControllerClass.openapi[methodNameString] = new OpenapiEndpointRenderer(
-          modelOrSerializer as I,
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          modelOrSerializer as any,
           psychicControllerClass,
           methodNameString,
           opts,
         )
 
         psychicControllerClass['controllerActionMetadata'][methodNameString] ||= {}
-        psychicControllerClass['controllerActionMetadata'][methodNameString]['serializerKey'] =
-          opts.serializerKey!
+        psychicControllerClass['controllerActionMetadata'][methodNameString]['serializerKey'] = (
+          opts as { serializerKey: string }
+        ).serializerKey
         //
       } else {
         if (isSerializable(modelOrSerializer)) {
           psychicControllerClass.openapi[methodNameString] = new OpenapiEndpointRenderer(
-            modelOrSerializer as I,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            modelOrSerializer as any,
             psychicControllerClass,
             methodNameString,
             undefined,
@@ -104,7 +116,8 @@ export function OpenAPI<
             null,
             psychicControllerClass,
             methodNameString,
-            modelOrSerializer as OpenapiEndpointRendererOpts<I>,
+            // eslint-disable-next-line @typescript-eslint/no-explicit-any
+            modelOrSerializer as OpenapiEndpointRendererOpts<any>,
           )
         }
       }
@@ -116,14 +129,14 @@ export function OpenAPI<
 function isSerializable(dreamOrSerializerClass: any) {
   return (
     Array.isArray(dreamOrSerializerClass) ||
-    hasSerializersGetter(dreamOrSerializerClass as SerializableDreamClassOrViewModelClass) ||
+    hasSerializersGetter(dreamOrSerializerClass as ViewModelClass) ||
     !!(dreamOrSerializerClass as typeof DreamSerializer)?.isDreamSerializer
   )
 }
 
-function hasSerializersGetter(dreamOrSerializerClass: SerializableDreamClassOrViewModelClass): boolean {
+function hasSerializersGetter(dreamOrSerializerClass: ViewModelClass): boolean {
   try {
-    return !!(dreamOrSerializerClass?.prototype as SerializableDreamOrViewModel)?.serializers
+    return !!(dreamOrSerializerClass?.prototype as ViewModel)?.serializers
   } catch {
     return false
   }

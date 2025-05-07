@@ -1,8 +1,10 @@
 import CannotFlattenMultiplePolymorphicRendersOneAssociations from '../../../../src/error/openapi/CannotFlattenMultiplePolymorphicRendersOneAssociations.js'
 import { PsychicApp } from '../../../../src/index.js'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint.js'
+import BalloonsController from '../../../../test-app/src/app/controllers/BalloonsController.js'
 import OpenapiDecoratorTestController from '../../../../test-app/src/app/controllers/OpenapiDecoratorTestsController.js'
 import UsersController from '../../../../test-app/src/app/controllers/UsersController.js'
+import Balloon from '../../../../test-app/src/app/models/Balloon.js'
 import Comment from '../../../../test-app/src/app/models/Comment.js'
 import Pet from '../../../../test-app/src/app/models/Pet.js'
 import Post from '../../../../test-app/src/app/models/Post.js'
@@ -38,6 +40,7 @@ import {
   UserWithPostsMultiType2Serializer,
   UserWithRequiredFlattenedPolymorphicPostOrUserSerializer,
 } from '../../../../test-app/src/app/serializers/UserSerializer.js'
+import MyViewModel from '../../../../test-app/src/app/view-models/MyViewModel.js'
 
 describe('OpenapiEndpointRenderer', () => {
   describe('#toSchemaObject', () => {
@@ -91,6 +94,121 @@ describe('OpenapiEndpointRenderer', () => {
               },
             },
           },
+        },
+      })
+    })
+
+    it('automatically expands Dream STI base models to the STI child serializer shapes', () => {
+      const renderer = new OpenapiEndpointRenderer(Balloon, BalloonsController, 'howyadoin', {
+        serializerKey: 'default',
+      })
+
+      const response = renderer.toSchemaObject('default', {})
+      expect(response).toEqual({
+        Latex: {
+          properties: {
+            color: {
+              enum: ['blue', 'green', 'red'],
+              type: ['string', 'null'],
+            },
+            id: {
+              type: 'string',
+            },
+            latexOnlyAttr: {
+              type: 'string',
+            },
+          },
+          required: ['id', 'color', 'latexOnlyAttr'],
+          type: 'object',
+        },
+
+        Mylar: {
+          properties: {
+            color: {
+              enum: ['blue', 'green', 'red'],
+              type: ['string', 'null'],
+            },
+            id: {
+              type: 'string',
+            },
+            mylarOnlyAttr: {
+              type: 'string',
+            },
+          },
+          required: ['id', 'color', 'mylarOnlyAttr'],
+          type: 'object',
+        },
+      })
+    })
+
+    it('automatically expands a combination of STI base model, Dream model, and view model', () => {
+      const renderer = new OpenapiEndpointRenderer(
+        [Balloon, Pet, MyViewModel],
+        BalloonsController,
+        'howyadoin',
+        {
+          serializerKey: 'default',
+        },
+      )
+
+      const response = renderer.toSchemaObject('default', {})
+      expect(response).toEqual({
+        Latex: {
+          properties: {
+            color: {
+              enum: ['blue', 'green', 'red'],
+              type: ['string', 'null'],
+            },
+            id: {
+              type: 'string',
+            },
+            latexOnlyAttr: {
+              type: 'string',
+            },
+          },
+          required: ['id', 'color', 'latexOnlyAttr'],
+          type: 'object',
+        },
+        MyViewModel: {
+          properties: {
+            favoriteNumber: {
+              type: 'number',
+            },
+            name: {
+              type: 'string',
+            },
+          },
+          required: ['name', 'favoriteNumber'],
+          type: 'object',
+        },
+        Mylar: {
+          properties: {
+            color: {
+              enum: ['blue', 'green', 'red'],
+              type: ['string', 'null'],
+            },
+            id: {
+              type: 'string',
+            },
+            mylarOnlyAttr: {
+              type: 'string',
+            },
+          },
+          required: ['id', 'color', 'mylarOnlyAttr'],
+          type: 'object',
+        },
+
+        Pet: {
+          properties: {
+            id: {
+              type: 'string',
+            },
+            name: {
+              type: ['string', 'null'],
+            },
+          },
+          required: ['id', 'name'],
+          type: 'object',
         },
       })
     })
@@ -513,9 +631,6 @@ The following values will be allowed:
           CommentTestingDefaultObjectFieldsSerializer,
           UsersController,
           'howyadoin',
-          {
-            serializerKey: 'default',
-          },
         )
 
         const response = renderer.toSchemaObject('default', {})
@@ -544,9 +659,6 @@ The following values will be allowed:
           CommentWithAnyOfObjectSerializer,
           UsersController,
           'howyadoin',
-          {
-            serializerKey: 'default',
-          },
         )
         const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
@@ -569,9 +681,6 @@ The following values will be allowed:
           CommentWithAllOfObjectSerializer,
           UsersController,
           'howyadoin',
-          {
-            serializerKey: 'default',
-          },
         )
         const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
@@ -594,9 +703,6 @@ The following values will be allowed:
           CommentWithOneOfObjectSerializer,
           UsersController,
           'howyadoin',
-          {
-            serializerKey: 'default',
-          },
         )
         const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
@@ -619,9 +725,6 @@ The following values will be allowed:
           CommentTestingObjectWithSerializerRefSerializer,
           UsersController,
           'howyadoin',
-          {
-            serializerKey: 'default',
-          },
         )
         const response = renderer.toSchemaObject('default', {})
         expect(response).toEqual(
@@ -673,9 +776,6 @@ The following values will be allowed:
               CommentWithAnyOfArraySerializer,
               UsersController,
               'howyadoin',
-              {
-                serializerKey: 'default',
-              },
             )
             const response = renderer.toSchemaObject('default', {})
             expect(response).toEqual(
@@ -703,9 +803,6 @@ The following values will be allowed:
               CommentWithAllOfArraySerializer,
               UsersController,
               'howyadoin',
-              {
-                serializerKey: 'default',
-              },
             )
             const response = renderer.toSchemaObject('default', {})
             expect(response).toEqual(
@@ -733,9 +830,6 @@ The following values will be allowed:
               CommentWithOneOfArraySerializer,
               UsersController,
               'howyadoin',
-              {
-                serializerKey: 'default',
-              },
             )
             const response = renderer.toSchemaObject('default', {})
             expect(response).toEqual(
@@ -762,9 +856,6 @@ The following values will be allowed:
             CommentTestingArrayWithSerializerRefSerializer,
             UsersController,
             'howyadoin',
-            {
-              serializerKey: 'default',
-            },
           )
           const response = renderer.toSchemaObject('default', {})
           expect(response).toEqual(
@@ -849,9 +940,6 @@ The following values will be allowed:
           UserWithPostsMultiType2Serializer,
           UsersController,
           'howyadoin',
-          {
-            serializerKey: 'default',
-          },
         )
 
         const response = renderer.toSchemaObject('default', {})

@@ -203,7 +203,8 @@ export default class PsychicRouter {
       namespaces: replacedNamespaces,
     })
     const currentNamespace = replacedNamespaces[replacedNamespaces.length - 1]
-    if (!currentNamespace) throw new Error('Must be within a resource to call the collection method')
+    if (!currentNamespace)
+      throw new Error('Must be within a `resources` declaration to call the collection method')
 
     cb(nestedRouter)
   }

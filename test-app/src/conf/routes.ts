@@ -3,6 +3,7 @@ import AdminTestController from '../app/controllers/Admin/TestController.js'
 import ApiUsersController from '../app/controllers/Api/UsersController.js'
 import ApiV1UsersController from '../app/controllers/Api/V1/UsersController.js'
 import AuthedUsersController from '../app/controllers/AuthedUsersController.js'
+import BalloonsController from '../app/controllers/BalloonsController.js'
 import CircularController from '../app/controllers/CircularController.js'
 import GreeterController from '../app/controllers/GreeterController.js'
 import OpenapiDecoratorTestController from '../app/controllers/OpenapiDecoratorTestsController.js'
@@ -136,6 +137,13 @@ export default (r: PsychicRouter) => {
   r.resource('greeter', { only: ['show'] }, r => {
     r.get('hello', GreeterController, 'hello')
     r.get('justforspecs', GreeterController, 'justforspecs')
+  })
+
+  r.resources('balloons', { only: ['index', 'show'] }, r => {
+    r.collection(r => {
+      r.get('index-different-dreams', BalloonsController, 'indexDifferentDreams')
+      r.get('index-dreams-and-view-model', BalloonsController, 'indexDreamsAndViewModel')
+    })
   })
 
   r.get('/admin/test', AdminTestController, 'test')

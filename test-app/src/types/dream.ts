@@ -59,6 +59,8 @@ us humans, he says:
 
 import { type CalendarDate, type DateTime } from '@rvoh/dream'
 import {
+  BalloonColorsEnum,
+  BalloonColorsEnumValues,
   IdType,
   Json,
   PetTreatsEnum,
@@ -68,6 +70,59 @@ import {
 } from './db.js'
 
 export const schema = {
+  balloons: {
+    primaryKey: 'id',
+    createdAtField: 'createdAt',
+    updatedAtField: 'updatedAt',
+    deletedAtField: 'deletedAt',
+    serializerKeys: ['default'],
+    scopes: {
+      default: ['dream:STI'],
+      named: [],
+    },
+    columns: {
+      color: {
+        coercedType: {} as BalloonColorsEnum | null,
+        enumType: {} as BalloonColorsEnum,
+        enumArrayType: [] as BalloonColorsEnum[],
+        enumValues: BalloonColorsEnumValues,
+        dbType: 'balloon_colors_enum',
+        allowNull: true,
+        isArray: false,
+      },
+      createdAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+      id: {
+        coercedType: {} as IdType,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+      updatedAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+    },
+    virtualColumns: [],
+    associations: {
+      
+    },
+  },
   comments: {
     primaryKey: 'id',
     createdAtField: 'createdAt',
@@ -929,9 +984,12 @@ export const schema = {
 
 export const globalSchema = {
   passthroughColumns: [],
-  allDefaultScopeNames: [],
+  allDefaultScopeNames: ['dream:STI'],
   globalNames: {
     models: {
+      'Balloon/Latex': 'balloons',
+      'Balloon/Mylar': 'balloons',
+      'Balloon': 'balloons',
       'Comment': 'comments',
       'Health/User': 'health_users',
       'Pet': 'pets',
@@ -945,6 +1003,12 @@ export const globalSchema = {
       'Admin/UserSummarySerializer',
       'Admin/V2/AdminV2PetSummarySerializer',
       'Admin/V2/PetSerializer',
+      'Balloon/LatexSerializer',
+      'Balloon/LatexSummarySerializer',
+      'Balloon/MylarSerializer',
+      'Balloon/MylarSummarySerializer',
+      'BalloonSerializer',
+      'BalloonSummarySerializer',
       'Circular/HelloSerializer',
       'Circular/WorldSerializer',
       'Comment1OnlyUsedInOneControllerSerializer',
@@ -1000,7 +1064,9 @@ export const globalSchema = {
       'UserWithPostsMultiType2Serializer',
       'UserWithPostsSerializer',
       'UserWithRecentPostSerializer',
-      'UserWithRequiredFlattenedPolymorphicPostOrUserSerializer'
+      'UserWithRequiredFlattenedPolymorphicPostOrUserSerializer',
+      'view-models/MyViewModelSerializer',
+      'view-models/MyViewModelSummarySerializer'
     ],
   },
 } as const

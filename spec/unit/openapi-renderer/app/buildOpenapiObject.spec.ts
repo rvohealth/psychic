@@ -178,6 +178,136 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
+        expect(response.default!.paths['/balloons']).toEqual(
+          expect.objectContaining({
+            get: {
+              tags: [],
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        items: {
+                          anyOf: [
+                            {
+                              $ref: '#/components/schemas/Latex',
+                            },
+                            {
+                              $ref: '#/components/schemas/Mylar',
+                            },
+                          ],
+                        },
+                        type: 'array',
+                      },
+                    },
+                  },
+                  description: 'Success',
+                },
+              }),
+            },
+          }),
+        )
+
+        expect(response.default!.paths['/balloons/index-different-dreams']).toEqual(
+          expect.objectContaining({
+            get: {
+              tags: [],
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        items: {
+                          anyOf: [
+                            {
+                              $ref: '#/components/schemas/Latex',
+                            },
+                            {
+                              $ref: '#/components/schemas/Mylar',
+                            },
+                            {
+                              $ref: '#/components/schemas/Pet',
+                            },
+                          ],
+                        },
+                        type: 'array',
+                      },
+                    },
+                  },
+                  description: 'Success',
+                },
+              }),
+            },
+          }),
+        )
+
+        expect(response.default!.paths['/balloons/index-dreams-and-view-model']).toEqual(
+          expect.objectContaining({
+            get: {
+              tags: [],
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        items: {
+                          anyOf: [
+                            {
+                              $ref: '#/components/schemas/Latex',
+                            },
+                            {
+                              $ref: '#/components/schemas/Mylar',
+                            },
+                            {
+                              $ref: '#/components/schemas/MyViewModel',
+                            },
+                            {
+                              $ref: '#/components/schemas/Pet',
+                            },
+                          ],
+                        },
+                        type: 'array',
+                      },
+                    },
+                  },
+                  description: 'Success',
+                },
+              }),
+            },
+          }),
+        )
+
+        expect(response.default!.paths['/balloons/{id}']).toEqual(
+          expect.objectContaining({
+            get: {
+              tags: [],
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        anyOf: [
+                          {
+                            $ref: '#/components/schemas/Latex',
+                          },
+                          {
+                            $ref: '#/components/schemas/Mylar',
+                          },
+                        ],
+                      },
+                    },
+                  },
+                  description: 'Success',
+                },
+              }),
+            },
+          }),
+        )
+
         expect(response.default!.paths).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment

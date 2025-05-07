@@ -72,6 +72,14 @@ export type ArrayTypeImpl<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S[], I[], U[]>
   : T[];
 
+export type BalloonColorsEnum = "blue" | "green" | "red";
+export const BalloonColorsEnumValues = [
+  "blue",
+  "green",
+  "red"
+] as const
+
+
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
@@ -107,6 +115,13 @@ export const SpeciesTypesEnumValues = [
 
 export type IdType = string | number | bigint
 export type Timestamp = ColumnType<DateTime | CalendarDate>
+
+export interface Balloons {
+  color: BalloonColorsEnum | null;
+  createdAt: Timestamp;
+  id: Generated<Int8>;
+  updatedAt: Timestamp;
+}
 
 export interface Comments {
   body: string | null;
@@ -204,6 +219,7 @@ export interface Users {
 }
 
 export interface DB {
+  balloons: Balloons;
   comments: Comments;
   health_users: HealthUsers;
   pets: Pets;
@@ -213,6 +229,7 @@ export interface DB {
 
 
 export class DBClass {
+  balloons: Balloons
   comments: Comments
   health_users: HealthUsers
   pets: Pets
