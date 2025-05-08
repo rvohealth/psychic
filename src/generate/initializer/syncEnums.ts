@@ -1,7 +1,6 @@
 import { camelize } from '@rvoh/dream'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
-import PackageManager from '../../cli/helpers/PackageManager.js'
 import psychicPath from '../../helpers/path/psychicPath.js'
 
 export default async function generateSyncEnumsInitializer(
@@ -29,20 +28,14 @@ export default async function generateSyncEnumsInitializer(
 
   const contents = `\
 import { DreamCLI } from '@rvoh/dream'
-import { PsychicApp } from '@rvoh/psychic'
+import { PsychicApp, PsychicBin } from "@rvoh/psychic"
 import AppEnv from '../AppEnv.js'
 
 export default function ${camelized}(psy: PsychicApp) {
   psy.on('sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       DreamCLI.logger.logStartProgress(\`[${camelized}] syncing enums to ${outfile}...\`)
-      await DreamCLI.spawn('${PackageManager.run(`psy sync:client:enums ${outfile}`)}', {
-        onStdout: message => {
-          DreamCLI.logger.logContinueProgress(\`[${camelized}]\` + ' ' + message, {
-            logPrefixColor: 'green',
-          })
-        },
-      })
+      await PsychicBin.syncClientEnums('${outfile}')
       DreamCLI.logger.logEndProgress()
     }
   })

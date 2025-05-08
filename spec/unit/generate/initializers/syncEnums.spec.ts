@@ -34,20 +34,14 @@ describe('generateSyncEnumsInitializer', () => {
     const contents = (await fs.readFile('test-app/src/conf/initializers/sync-custom-enums.ts')).toString()
     expect(contents).toEqual(`\
 import { DreamCLI } from '@rvoh/dream'
-import { PsychicApp } from '@rvoh/psychic'
+import { PsychicApp, PsychicBin } from "@rvoh/psychic"
 import AppEnv from '../AppEnv.js'
 
 export default function syncCustomEnums(psy: PsychicApp) {
   psy.on('sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       DreamCLI.logger.logStartProgress(\`[syncCustomEnums] syncing enums to ./client/howyadoin/enums.ts...\`)
-      await DreamCLI.spawn('yarn psy sync:client:enums ./client/howyadoin/enums.ts', {
-        onStdout: message => {
-          DreamCLI.logger.logContinueProgress(\`[syncCustomEnums]\` + ' ' + message, {
-            logPrefixColor: 'green',
-          })
-        },
-      })
+      await PsychicBin.syncClientEnums('./client/howyadoin/enums.ts')
       DreamCLI.logger.logEndProgress()
     }
   })
