@@ -202,7 +202,7 @@ describe('PsychicController', () => {
 
     context('with default passthrough data set on the controller', () => {
       class User2 extends User {
-        public get serializers() {
+        public override get serializers() {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           return {
             default: 'User2Serializer',
@@ -231,7 +231,7 @@ describe('PsychicController', () => {
 
       class User2ExtraSerializer extends UserExtraSerializer {
         @Attribute()
-        public howyadoin() {
+        public override howyadoin() {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
           return this.$passthroughData.howyadoin
         }

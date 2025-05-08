@@ -1,4 +1,9 @@
 {
   "extends": "./tsconfig.esm.build.json",
-  "include": ["src/**/*", "test-app/**/*"]
+  "include": ["src/**/*", "test-app/**/*", "spec/**/*"],
+  "exclude": ["spec/support/**/*"],
+
+  "compilerOptions": {
+    "typeRoots": ["spec/global.d.ts"]
+  }
 }

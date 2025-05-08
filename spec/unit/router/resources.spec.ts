@@ -69,8 +69,8 @@ describe('PsychicRouter', () => {
         it('uses the passed controller instead of assuming', () => {
           router.resources('users', { only: ['create'], controller: PetsController })
           router.commit()
-          expect(router.routes[0].controller).toEqual(PetsController)
-          expect(router.routes[0].action).toEqual('create')
+          expect(router.routes[0]!.controller).toEqual(PetsController)
+          expect(router.routes[0]!.action).toEqual('create')
         })
       })
 

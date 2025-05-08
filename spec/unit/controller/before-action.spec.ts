@@ -43,7 +43,7 @@ describe('PsychicController BeforeAction', () => {
       class MyOtherController extends MyController {
         public customValue2: string
 
-        public show() {
+        public override show() {
           if (!this.customValue) this.customValue = 'goodbye'
           if (!this.customValue2) this.customValue2 = 'goodbye2'
           this.ok({ customValue: this.customValue, customValue2: this.customValue2 })
