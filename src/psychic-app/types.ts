@@ -14,17 +14,10 @@ export type PsychicHookEventType =
   | 'server:start'
   | 'server:error'
   | 'server:shutdown'
-  | 'cli:start'
 
 export type PsychicHookLoadEventTypes = Exclude<
   PsychicHookEventType,
-  | 'server:error'
-  | 'server:init'
-  | 'server:init:after-routes'
-  | 'server:start'
-  | 'server:shutdown'
-  | 'sync'
-  | 'cli:start'
+  'server:error' | 'server:init' | 'server:init:after-routes' | 'server:start' | 'server:shutdown' | 'sync'
 >
 
 export type PsychicAppInitializerCb = (psychicApp: PsychicApp) => void | Promise<void>
