@@ -6,7 +6,7 @@ import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
 
 export default class PsychicCLI {
-  public static async provide(
+  public static provide(
     program: Command,
     {
       initializePsychicApp,
@@ -194,9 +194,5 @@ export default class PsychicCLI {
         await PsychicBin.syncClientEnums(outfile)
         process.exit()
       })
-
-    for (const hook of PsychicApp.getOrFail().specialHooks.cliStart) {
-      await hook(program)
-    }
   }
 }

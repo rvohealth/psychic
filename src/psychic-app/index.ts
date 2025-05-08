@@ -284,7 +284,6 @@ Try setting it to something valid, like:
     serverStart: [],
     serverError: [],
     serverShutdown: [],
-    cliStart: [],
   }
   public get specialHooks() {
     return this._specialHooks
@@ -426,10 +425,6 @@ Try setting it to something valid, like:
 
       case 'server:init:after-routes':
         this._specialHooks.serverInitAfterRoutes.push(cb as (server: PsychicServer) => void | Promise<void>)
-        break
-
-      case 'cli:start':
-        this._specialHooks.cliStart.push(cb as (program: Command) => void | Promise<void>)
         break
 
       case 'sync':
@@ -647,7 +642,6 @@ export interface PsychicAppSpecialHooks {
   serverStart: ((server: PsychicServer) => void | Promise<void>)[]
   serverShutdown: ((server: PsychicServer) => void | Promise<void>)[]
   serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
-  cliStart: ((program: Command) => void | Promise<void>)[]
 }
 
 export interface PsychicAppOverrides {
