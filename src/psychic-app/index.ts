@@ -84,12 +84,12 @@ export default class PsychicApp {
           }
         })
 
-        for (const plugin of psychicApp.plugins) {
-          await plugin(psychicApp)
-        }
-
         for (const initializerCb of Object.values(PsychicApp.getInitializersOrBlank())) {
           await initializerCb(psychicApp)
+        }
+
+        for (const plugin of psychicApp.plugins) {
+          await plugin(psychicApp)
         }
 
         cachePsychicApp(psychicApp)
