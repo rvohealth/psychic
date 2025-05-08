@@ -181,18 +181,5 @@ export default class PsychicCLI {
         await PsychicBin.syncOpenapiJson()
         process.exit()
       })
-
-    program
-      .command('sync:client:enums')
-      .argument(
-        '<outfile>',
-        'the path from your backend directory to the location which you want the enums copied. Should end with .ts, i.e. "../client/src/api/enums.ts"',
-      )
-      .description('syncs your backend enums to a location of your choosing')
-      .action(async (outfile: string) => {
-        await initializePsychicApp()
-        await PsychicBin.syncClientEnums(outfile)
-        process.exit()
-      })
   }
 }
