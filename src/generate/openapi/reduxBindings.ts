@@ -27,8 +27,22 @@ export default async function generateOpenapiReduxBindings(options: OpenapiRedux
 
   await writeApiFile(opts)
   await writeInitializer(opts)
-  await DreamCLI.spawn(PackageManager.add(['@rtk-query/codegen-openapi', 'ts-node'], { dev: true }))
-  printFinalStepsMessage(opts)
+
+  let rtkError = false
+  try {
+    await DreamCLI.spawn(PackageManager.add('@rtk-query/codegen-openapi', { dev: true }))
+  } catch {
+    rtkError = true
+  }
+
+  let tsNodeError = false
+  try {
+    await DreamCLI.spawn(PackageManager.add('ts-node', { dev: true }))
+  } catch {
+    tsNodeError = true
+  }
+
+  printFinalStepsMessage(opts, { rtkError, tsNodeError })
 }
 
 export interface OpenapiReduxBindingsOptions {
