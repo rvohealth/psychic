@@ -5,6 +5,7 @@ import BalloonsController from '../../../../test-app/src/app/controllers/Balloon
 import OpenapiDecoratorTestController from '../../../../test-app/src/app/controllers/OpenapiDecoratorTestsController.js'
 import UsersController from '../../../../test-app/src/app/controllers/UsersController.js'
 import Balloon from '../../../../test-app/src/app/models/Balloon.js'
+import BalloonLatex from '../../../../test-app/src/app/models/Balloon/Latex.js'
 import Comment from '../../../../test-app/src/app/models/Comment.js'
 import Pet from '../../../../test-app/src/app/models/Pet.js'
 import Post from '../../../../test-app/src/app/models/Post.js'
@@ -209,6 +210,24 @@ describe('OpenapiEndpointRenderer', () => {
           },
           required: ['id', 'name'],
           type: 'object',
+        },
+      })
+    })
+
+    it('does not expand STI children', () => {
+      const renderer = new OpenapiEndpointRenderer(BalloonLatex, BalloonsController, 'howyadoin', {
+        serializerKey: 'default',
+      })
+      const response = renderer.toSchemaObject('default', {})
+      expect(response).toEqual({
+        Latex: {
+          type: 'object',
+          required: ['id', 'color', 'latexOnlyAttr'],
+          properties: {
+            id: { type: 'string' },
+            color: { type: ['string', 'null'], enum: ['blue', 'green', 'red'] },
+            latexOnlyAttr: { type: 'string' },
+          },
         },
       })
     })

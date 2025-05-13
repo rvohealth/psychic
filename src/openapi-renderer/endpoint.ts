@@ -35,6 +35,7 @@ import { DEFAULT_OPENAPI_RESPONSES } from './defaults.js'
 import openapiRoute from './helpers/openapiRoute.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import OpenapiSerializerRenderer from './serializer.js'
+import OpenApiFailedToLookupSerializerForEndpoint from '../error/openapi/FailedToLookupSerializerForEndpoint.js'
 
 export default class OpenapiEndpointRenderer<
   DreamsOrSerializersOrViewModels extends DreamSerializable | DreamSerializableArray,
@@ -812,7 +813,8 @@ export default class OpenapiEndpointRenderer<
    */
   private parseSingleEntitySerializerResponseShape(): OpenapiContent {
     const serializerClass = this.getSerializerClasses()![0]
-    if (serializerClass === undefined) throw new Error('getSerializerClasses returned no serializer classes')
+    if (serializerClass === undefined)
+      throw new OpenApiFailedToLookupSerializerForEndpoint(this.controllerClass, this.action)
 
     const serializerKey = serializerClass.openapiName
     const serializerObject: OpenapiSchemaBody = { $ref: `#/components/schemas/${serializerKey}` }
@@ -963,8 +965,9 @@ export default class OpenapiEndpointRenderer<
     return [dreamsOrSerializers as ViewModelClass]
   }
 
-  private expandDreamStiClasses(dreamClass: typeof Dream) {
-    return dreamClass['extendedBy'] ? [...dreamClass['extendedBy']] : [dreamClass]
+  private expandDreamStiClasses(dreamClass: typeof Dream): (typeof Dream)[] {
+    if (dreamClass['isSTIBase']) return [...dreamClass['extendedBy']!] as (typeof Dream)[]
+    return [dreamClass]
   }
 
   /**
