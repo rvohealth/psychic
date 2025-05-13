@@ -970,16 +970,13 @@ The following values will be allowed:
               properties: {
                 id: { type: 'integer' },
                 posts: {
-                  anyOf: [
-                    {
-                      type: 'array',
-                      items: { $ref: '#/components/schemas/PostSummary' },
-                    },
-                    {
-                      type: 'array',
-                      items: { $ref: '#/components/schemas/UserSummary' },
-                    },
-                  ],
+                  type: 'array',
+                  items: {
+                    anyOf: [
+                      { $ref: '#/components/schemas/PostSummary' },
+                      { $ref: '#/components/schemas/UserSummary' },
+                    ],
+                  },
                 },
               },
             },
@@ -1223,16 +1220,13 @@ The following values will be allowed:
                 properties: {
                   id: { type: 'integer' },
                   posts: {
-                    anyOf: [
-                      {
-                        type: 'array',
-                        items: { $ref: '#/components/schemas/PostSummary' },
-                      },
-                      {
-                        type: 'array',
-                        items: { $ref: '#/components/schemas/UserSummary' },
-                      },
-                    ],
+                    type: 'array',
+                    items: {
+                      anyOf: [
+                        { $ref: '#/components/schemas/PostSummary' },
+                        { $ref: '#/components/schemas/UserSummary' },
+                      ],
+                    },
                   },
                 },
               },

@@ -397,22 +397,9 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
           association.field,
         ])
 
-        switch (association.type) {
-          case 'RendersMany':
-            anyOf.push({
-              type: 'array',
-              items: {
-                $ref: `#/components/schemas/${associatedSerializerKey}`,
-              },
-            })
-            break
-
-          case 'RendersOne':
-            anyOf.push({
-              $ref: `#/components/schemas/${associatedSerializerKey}`,
-            })
-            break
-        }
+        anyOf.push({
+          $ref: `#/components/schemas/${associatedSerializerKey}`,
+        })
 
         const associatedSchema = new OpenapiSerializerRenderer({
           openapiName: this.openapiName,
@@ -427,9 +414,21 @@ Error: ${this.serializerClass.name} missing explicit serializer definition for $
         finalOutput = { ...finalOutput, ...associatedSchema }
       })
 
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-      ;(finalOutput as any)[serializerKey].properties![association.field] = {
-        anyOf,
+      switch (association.type) {
+        case 'RendersMany':
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+          ;(finalOutput as any)[serializerKey].properties![association.field] = {
+            type: 'array',
+            items: { anyOf },
+          }
+          break
+
+        case 'RendersOne':
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+          ;(finalOutput as any)[serializerKey].properties![association.field] = {
+            anyOf,
+          }
+          break
       }
     }
 
