@@ -41,7 +41,7 @@ export const ${apiImport} = createApi({
   keepUnusedDataFor: 0,
 
   baseQuery: fetchBaseQuery({
-    baseUrl: baseURL(),
+    baseUrl: baseUrl(),
     credentials: 'include',
 
     // we recommend that you use a function like this for preparing
