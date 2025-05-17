@@ -246,6 +246,10 @@ export default class PsychicController {
     this.action = action
   }
 
+  public get headers() {
+    return this.req.headers
+  }
+
   public get params(): PsychicParamsDictionary {
     const params: PsychicParamsDictionary = {
       ...this.req.params,
