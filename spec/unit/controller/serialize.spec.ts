@@ -187,6 +187,23 @@ describe('PsychicController', () => {
             ])
           })
         })
+
+        context('with instances of serializers', () => {
+          class MyController2 extends PsychicController {
+            public index() {
+              this.ok([GreetSerializer(new Greeting('hello')), GreetSerializer2(new Greeting2('hello'))])
+            }
+          }
+
+          it('calls render on each serializer', () => {
+            const controller = new MyController2(req, res, { config, action: 'show' })
+            controller.index()
+            expect(res.json).toHaveBeenCalledWith([
+              { greeting: 'hello world' },
+              { greeting: 'hello goodbye' },
+            ])
+          })
+        })
       })
     })
 

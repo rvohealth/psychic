@@ -3,8 +3,10 @@ import {
   DreamApp,
   DreamModelSerializerType,
   DreamParamSafeAttributes,
+  DreamSerializerBuilder,
   GlobalNameNotSet,
   isDreamSerializer,
+  ObjectSerializerBuilder,
   SimpleObjectSerializerType,
 } from '@rvoh/dream'
 import { Request, Response } from 'express'
@@ -255,6 +257,10 @@ export default class PsychicController {
     this.action = action
   }
 
+  public get headers() {
+    return this.req.headers
+  }
+
   public get params(): PsychicParamsDictionary {
     const params: PsychicParamsDictionary = {
       ...this.req.params,
@@ -355,6 +361,11 @@ export default class PsychicController {
     if (!data) return data
     const dreamApp = DreamApp.getOrFail()
     const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
+
+    // if we already have a serializer, let's just render it
+    if (data instanceof DreamSerializerBuilder || data instanceof ObjectSerializerBuilder) {
+      return data.render(this.defaultSerializerPassthrough)
+    }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
