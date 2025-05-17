@@ -347,6 +347,11 @@ export default class PsychicController {
     const dreamApp = DreamApp.getOrFail()
     const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
 
+    // if we already have a serializer, let's just render it
+    if (data instanceof DreamSerializer) {
+      return data.passthrough(this.defaultSerializerPassthrough).render()
+    }
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
     if (lookup?.length) {
