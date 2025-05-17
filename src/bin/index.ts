@@ -57,7 +57,7 @@ export default class PsychicBin {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let output: any = {}
 
-    for (const hook of psychicApp.specialHooks.sync) {
+    for (const hook of psychicApp.specialHooks.cliSync) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       const res = await hook()
       if (isObject(res)) {

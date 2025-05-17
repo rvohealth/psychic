@@ -60,7 +60,9 @@ export default class PsychicServer {
       next()
     })
 
-    await this.config['runHooksFor']('boot')
+    for (const serverInitBeforeMiddlewareHook of this.config.specialHooks.serverInitBeforeMiddleware) {
+      await serverInitBeforeMiddlewareHook(this)
+    }
 
     this.initializeCors()
     this.initializeJSON()
@@ -76,8 +78,8 @@ export default class PsychicServer {
       `)
     }
 
-    for (const expressInitHook of this.config.specialHooks.serverInit) {
-      await expressInitHook(this)
+    for (const serverInitAfterMiddlewareHook of this.config.specialHooks.serverInitAfterMiddleware) {
+      await serverInitAfterMiddlewareHook(this)
     }
 
     this.initializeOpenapiValidation()

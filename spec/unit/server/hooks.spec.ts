@@ -18,7 +18,9 @@ describe('PsychicServer hooks', () => {
 
   it('processes hooks for server:init', async () => {
     await server.boot()
-    expectHookCalled('server:init')
+    expectHookCalled('server:init:before-middleware')
+    expectHookCalled('server:init:after-middleware')
+    expectHookCalled('server:init:after-routes')
   })
 
   it('processes hooks for server:start', async () => {
