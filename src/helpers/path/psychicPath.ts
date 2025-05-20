@@ -17,10 +17,13 @@ export default function (dreamPathType: PsychicPaths) {
     case 'services':
       return psychicApp.paths.services
 
+    case 'types':
+      return psychicApp.paths.types
+
     default:
       return dreamPath(dreamPathType)
   }
 }
 
 type DreamPaths = 'models' | 'modelSpecs' | 'serializers' | 'db' | 'conf' | 'factories'
-export type PsychicPaths = DreamPaths | 'apiRoutes' | 'controllers' | 'controllerSpecs' | 'services'
+export type PsychicPaths = DreamPaths | 'apiRoutes' | 'controllers' | 'controllerSpecs' | 'services' | 'types'

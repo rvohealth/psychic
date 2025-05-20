@@ -4,6 +4,7 @@ import PsychicBin from '../bin/index.js'
 import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
+import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/syncOpenapiTypescript.js'
 
 export default class PsychicCLI {
   public static provide(
@@ -127,6 +128,44 @@ export default class PsychicCLI {
         ) => {
           await initializePsychicApp()
           await generateSyncEnumsInitializer(outfile, initializerName)
+          process.exit()
+        },
+      )
+
+    program
+      .command('generate:initializer:sync-openapi-typescript')
+      .alias('g:initializer:sync-openapi-typescript')
+      .description(
+        'generates an initializer in your app for converting one of your openapi files to typescript',
+      )
+      .argument(
+        '<openapiFilepath>',
+        'the path from your backend directory to the openapi file you wish to scan, i.e. "./openapi/openapi.json"',
+      )
+      .argument(
+        '<outfile>',
+        'the path from your backend directory to the location which you want the openapi types written to. Must end with .d.ts, i.e. "./src/conf/openapi/openapi.types.d.ts"',
+      )
+      .option(
+        '--initializer-filename',
+        'the name you want the file to be in your initializers folder. defaults to `sync-openapi-typescript.ts`',
+      )
+      .action(
+        async (
+          openapiFilepath: string,
+          outfile: string,
+          {
+            initializerName,
+          }: {
+            initializerName: string
+          },
+        ) => {
+          await initializePsychicApp()
+          await generateSyncOpenapiTypescriptInitializer(
+            openapiFilepath,
+            outfile,
+            initializerName as `${string}.d.ts`,
+          )
           process.exit()
         },
       )

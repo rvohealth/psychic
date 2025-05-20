@@ -255,6 +255,7 @@ Try setting it to something valid, like:
     apiRoutes: 'src/conf/routes.ts',
     controllers: 'src/app/controllers',
     services: 'src/app/services',
+    types: 'src/types',
     controllerSpecs: 'spec/unit/controllers',
   }
   public get paths() {
@@ -689,6 +690,7 @@ interface PsychicPathOptions {
   services?: string
   controllers?: string
   controllerSpecs?: string
+  types?: string
 }
 
 export interface PsychicClientOptions {
