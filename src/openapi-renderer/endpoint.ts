@@ -41,6 +41,7 @@ export default class OpenapiEndpointRenderer<
   DreamsOrSerializersOrViewModels extends DreamSerializable | DreamSerializableArray,
 > {
   private many: OpenapiEndpointRendererOpts['many']
+  private paginate: OpenapiEndpointRendererOpts['paginate']
   private responses: OpenapiEndpointRendererOpts['responses']
   private serializerKey: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['serializerKey']
   private pathParams: OpenapiEndpointRendererOpts['pathParams']
@@ -80,6 +81,7 @@ export default class OpenapiEndpointRenderer<
       requestBody,
       headers,
       many,
+      paginate,
       query,
       responses,
       serializerKey,
@@ -97,6 +99,7 @@ export default class OpenapiEndpointRenderer<
     this.requestBody = requestBody
     this.headers = headers
     this.many = many
+    this.paginate = paginate
     this.query = query
     this.responses = responses
     this.serializerKey = serializerKey
@@ -816,17 +819,9 @@ export default class OpenapiEndpointRenderer<
     if (serializerClass === undefined)
       throw new OpenApiFailedToLookupSerializerForEndpoint(this.controllerClass, this.action)
 
-    const serializerKey = serializerClass.openapiName
-    const serializerObject: OpenapiSchemaBody = { $ref: `#/components/schemas/${serializerKey}` }
-
-    const baseSchema = this.many
-      ? {
-          type: 'array',
-          items: serializerObject,
-        }
-      : this.defaultResponse?.maybeNull
-        ? { anyOf: [serializerObject, { type: 'null' }] }
-        : serializerObject
+    const baseSchema = this.baseSchemaForSerializerObject({
+      $ref: `#/components/schemas/${serializerClass.openapiName}`,
+    })
 
     const finalOutput: OpenapiContent = {
       content: {
@@ -839,6 +834,49 @@ export default class OpenapiEndpointRenderer<
     }
 
     return finalOutput
+  }
+
+  /**
+   * @internal
+   *
+   * takes a base serializer object (i.e. { $ref: '#/components/schemas/MySerializer' })
+   * and transforms it based on the openapi renderer options.
+   *
+   * if many, it will return an array of this serializer object.
+   * if paginate, it will return a pagination object with an array of this serializer object
+   * if defaultResponse.maybeNull is set, it will optionally return null as well (only for non-many and non-paginate cases)
+   */
+  private baseSchemaForSerializerObject(serializerObject: OpenapiSchemaBody) {
+    if (this.paginate)
+      return {
+        type: 'object',
+        required: ['recordCount', 'pageCount', 'currentPage', 'results'],
+        properties: {
+          recordCount: {
+            type: 'number',
+          },
+          pageCount: {
+            type: 'number',
+          },
+          currentPage: {
+            type: 'number',
+          },
+          results: {
+            type: 'array',
+            items: serializerObject,
+          },
+        },
+      }
+
+    if (this.many)
+      return {
+        type: 'array',
+        items: serializerObject,
+      }
+
+    if (this.defaultResponse?.maybeNull) return { anyOf: [serializerObject, { type: 'null' }] }
+
+    return serializerObject
   }
 
   /**
@@ -1042,19 +1080,207 @@ routes file which will direct to this controller class and method.`
 export interface OpenapiEndpointRendererOpts<
   I extends DreamSerializable | DreamSerializableArray | undefined = undefined,
 > {
+  /**
+   * when true, it will render an openapi document which produces an array of serializables,
+   * rather than a single one.
+   */
   many?: boolean
+
+  /**
+   * when true, it will render an openapi document which
+   * produces an object containing pagination data. This
+   * output is formatted to match the format returned
+   * when calling the `paginate` method
+   * within Dream, i.e.
+   *
+   * ```ts
+   * \@OpenAPI(Post, {
+   *   paginate: true,
+   *   status: 200,
+   * })
+   * public async index() {
+   *   const page = this.castParam('page', 'integer')
+   *   const posts = await Post.where(...).paginate({ pageSize: 100, page })
+   *   this.ok(posts)
+   * }
+   * ```
+   */
+  paginate?: boolean
+
+  /**
+   * specify path params. This is usually not necessary, since path params
+   * are automatically computed for your endpoint by matching against the
+   * corresponding routes.ts entry.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 204,
+   *    pathParams: { id: { description: 'The ID of the User' } },
+   *  })
+   * ```
+   */
   pathParams?: OpenapiPathParams
+
+  /**
+   * specify additional headers for this request
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 204,
+   *    headers: {
+   *      myDate: {
+   *        required: true,
+   *        description: 'my date',
+   *        format: 'date'
+   *      }
+   *    }
+   *  })
+   * ```
+   */
   headers?: OpenapiHeaders
+
+  /**
+   * specify query parameters for the request
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 204,
+   *    query: {
+   *      search: {
+   *        required: false,
+   *        description: 'my query param',
+   *        schema: {
+   *          type: 'string',
+   *        },
+   *        allowReserved: true,
+   *        allowEmptyValue: true,
+   *      },
+   *    },
+   *  })
+   * ```
+   */
   query?: OpenapiQueries
+
+  /**
+   * specify the shape of the request body. For POST, PATCH, and PUT,
+   * this will automatically be done for you if you provide a Dream
+   * class as the first argument. Otherwise, you can specify this
+   * manually, like so:
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 204,
+   *    requestBody: {
+   *      type: 'object',
+   *      properties: {
+   *        myFiend: 'string',
+   *      }
+   *    }
+   *  })
+   * ```
+   */
   requestBody?: OpenapiSchemaBodyShorthand | OpenapiSchemaRequestBodyOnlyOption | null
+
+  /**
+   * an array of tag names you wish to apply to this endpoint.
+   * tag names will determine placement of this request within
+   * the swagger editor, which is used for previewing openapi
+   * documents.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 204,
+   *    tags: ['users']
+   *  })
+   * ```
+   */
   tags?: string[]
+
+  /**
+   * The top-level description for this endpoint.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 204,
+   *    description: 'my endpoint description'
+   *  })
+   * ```
+   */
   description?: string
+
+  /**
+   * The top-level summary for this endpoint.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 204,
+   *    summary: 'my endpoint summary'
+   *  })
+   * ```
+   */
   summary?: string
+
+  /**
+   * which security scheme to use for this endpoint.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 204,
+   *    security: { customAuth: [] },
+   *  })
+   * ```
+   */
   security?: OpenapiSecurity
+
+  /**
+   * a list of responses to provide for this endpoint. Only
+   * provide this if you intend to override the automatic
+   * response generation mechanisms built into Psychic.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 201,
+   *    responses: {
+   *      201: {
+   *        type: 'string'
+   *      }
+   *    }
+   *  })
+   * ```
+   */
   responses?: Partial<
     Record<HttpStatusCode, (OpenapiSchemaBodyShorthand & { description?: string }) | { description: string }>
   >
+
+  /**
+   * enables you to augment the default response that Psychic
+   * renders. This enables you to allow Psychic to mix in your
+   * custom options with the default response it provides.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 201,
+   *    defaultResponse: {
+   *      description: 'my custom description',
+   *    }
+   *  })
+   * ```
+   */
   defaultResponse?: OpenapiEndpointRendererDefaultResponseOption
+
+  /**
+   * provide a custom serializerKey to specify which
+   * serializer should be used when rendering your
+   * serializable entity, i.e.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 201,
+   *    many: true,
+   *    serializerKey: 'summary'
+   *  })
+   * ```
+   */
   serializerKey?: I extends undefined
     ? never
     : I extends DreamSerializableArray
@@ -1062,8 +1288,44 @@ export interface OpenapiEndpointRendererOpts<
       : I extends typeof Dream | ViewModelClass
         ? DreamOrViewModelClassSerializerKey<I>
         : never
+
+  /**
+   * the status code that your endpoint will render
+   * when it succeeds.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 201,
+   *  })
+   * ```
+   */
   status?: HttpStatusCodeNumber
+
+  /**
+   * Whether or not to omit the default headers provided
+   * by your Psychic and your application. When set to true,
+   * you will have to manually specify all headers that
+   * are required for this endpoint.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    omitDefaultHeaders: true
+   *  })
+   * ```
+   */
   omitDefaultHeaders?: boolean
+
+  /**
+   * Whether or not to omit the default response provided
+   * by your Psychic and your application. When set to true,
+   * you will have to manually specify the response shape.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    omitDefaultResponses: true
+   *  })
+   * ```
+   */
   omitDefaultResponses?: boolean
 }
 

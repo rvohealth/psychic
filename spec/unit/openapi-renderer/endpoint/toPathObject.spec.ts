@@ -1927,6 +1927,66 @@ The following values will be allowed:
         })
       })
 
+      context('with paginate=true', () => {
+        const expectedPagination = {
+          200: {
+            description: 'Success',
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  required: ['recordCount', 'pageCount', 'currentPage', 'results'],
+                  properties: {
+                    recordCount: {
+                      type: 'number',
+                    },
+                    pageCount: {
+                      type: 'number',
+                    },
+                    currentPage: {
+                      type: 'number',
+                    },
+                    results: {
+                      type: 'array',
+                      items: {
+                        $ref: '#/components/schemas/UserExtra',
+                      },
+                    },
+                  },
+                },
+              },
+            },
+          },
+        }
+
+        it('captures results into an array and includes pagination fields in response shape', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+            serializerKey: 'extra',
+            paginate: true,
+          })
+
+          const response = renderer.toPathObject('default', {}, routes)
+          expect(response['/users/howyadoin']!.get.responses).toEqual(
+            expect.objectContaining(expectedPagination),
+          )
+        })
+
+        context('when many is also passed', () => {
+          it('paginate correctly overrides many option', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+              serializerKey: 'extra',
+              many: true,
+              paginate: true,
+            })
+
+            const response = renderer.toPathObject('default', {}, routes)
+            expect(response['/users/howyadoin']!.get.responses).toEqual(
+              expect.objectContaining(expectedPagination),
+            )
+          })
+        })
+      })
+
       context('with extra response fields sent', () => {
         it('includes extra response payloads', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {

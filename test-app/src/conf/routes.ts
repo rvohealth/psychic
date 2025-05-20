@@ -45,6 +45,9 @@ export default (r: PsychicRouter) => {
   r.get('openapi/openapi-overrides', OpenapiOverridesTestController, 'testOpenapiConfigOverrides')
 
   r.resources('users', r => {
+    r.collection(r => {
+      r.get('paginated', UsersController, 'paginated')
+    })
     r.resources('pets', { only: [] })
     r.get('ping', UsersController, 'ping')
   })
