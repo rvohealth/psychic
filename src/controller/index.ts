@@ -42,6 +42,7 @@ import Params, {
 } from '../server/params.js'
 import Session, { CustomSessionCookieOptions } from '../session/index.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
+import isPaginatedResult from './helpers/isPaginatedResult.js'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -392,6 +393,13 @@ The key in question is: "${serializerKey}"`,
           this.singleObjectJson(d, opts),
         ),
       )
+
+    if (isPaginatedResult(data))
+      return this.res.json({
+        ...data,
+        results: (data as { results: unknown[] }).results.map(result => this.singleObjectJson(result, opts)),
+      })
+
     return this.res.json(this.singleObjectJson(data, opts))
   }
 
