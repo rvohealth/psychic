@@ -24,10 +24,12 @@ describe('generateSyncOpenapiTypescriptInitializer', () => {
     }
   }
 
-  it('generates a psychic initializer to conduct the enum sync', async () => {
+  it('generates a psychic initializer to conduct the openapi-typescript type sync', async () => {
     await generateSyncOpenapiTypescriptInitializer('./openapi.json', './sync-custom-openapi-typescript.d.ts')
 
-    const contents = (await fs.readFile('test-app/src/conf/initializers/sync-custom-enums.ts')).toString()
+    const contents = (
+      await fs.readFile('test-app/src/conf/initializers/sync-openapi-typescript.ts')
+    ).toString()
     expect(contents).toEqual(`\
 import { DreamCLI } from '@rvoh/dream'
 import { PsychicApp } from "@rvoh/psychic"
@@ -36,8 +38,7 @@ import AppEnv from '../AppEnv.js'
 export default (psy: PsychicApp) => {
   psy.on('sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
-      DreamCLI.logger.logStartProgress(\`[syncCustomOpenapiTypescript] extracting types from ./openapi.json...\`)
-      await PsychicBin.syncClientEnums('./client/howyadoin/enums.ts')
+      DreamCLI.logger.logStartProgress(\`[sync-openapi-typescript] extracting types from ./openapi.json to ./sync-custom-openapi-typescript.d.ts...\`)
       await DreamCLI.spawn('npx openapi-typescript ./openapi.json -o ./sync-custom-openapi-typescript.d.ts')
       DreamCLI.logger.logEndProgress()
     }

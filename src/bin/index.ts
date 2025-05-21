@@ -11,7 +11,7 @@ import PsychicServer from '../server/index.js'
 import enumsFileStr from './helpers/enumsFileStr.js'
 import generateRouteTypes from './helpers/generateRouteTypes.js'
 import printRoutes from './helpers/printRoutes.js'
-// import syncTypescriptOpenapiFiles from './helpers/syncTypescriptOpenapiFiles.js'
+import syncTypescriptOpenapiFiles from './helpers/syncTypescriptOpenapiFiles.js'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
@@ -70,30 +70,26 @@ export default class PsychicBin {
     if (Object.keys(output as object).length) {
       await PsychicBin.syncTypes(output)
     }
+
+    await this.syncTypescriptOpenapi()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public static async syncTypes(customTypes: any = undefined) {
     DreamCLI.logger.logStartProgress(`syncing types/psychic.ts...`)
-
     await TypesBuilder.sync(customTypes)
-
     DreamCLI.logger.logEndProgress()
   }
 
-  // public static async syncTypescriptOpenapi() {
-  //   DreamCLI.logger.logStartProgress(`syncing types/psychic.ts...`)
-  //
-  //   await syncTypescriptOpenapiFiles()
-  //
-  //   DreamCLI.logger.logEndProgress()
-  // }
-  //
+  public static async syncTypescriptOpenapi() {
+    DreamCLI.logger.logStartProgress(`syncing openapi types...`)
+    await syncTypescriptOpenapiFiles()
+    DreamCLI.logger.logEndProgress()
+  }
+
   public static async syncOpenapiJson() {
     DreamCLI.logger.logStartProgress(`syncing openapi...`)
-
     await OpenapiAppRenderer.sync()
-
     DreamCLI.logger.logEndProgress()
   }
 

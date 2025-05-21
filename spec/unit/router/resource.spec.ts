@@ -3,6 +3,8 @@ import PsychicRouter from '../../../src/router/index.js'
 import PsychicServer from '../../../src/server/index.js'
 import PetsController from '../../../test-app/src/app/controllers/PetsController.js'
 import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
+import { openapiPaths } from '../../../src/types/openapi.js'
+import { OpenapiResponseBody } from '../../../src/helpers/openapiTypeHelpers.js'
 
 describe('PsychicRouter', () => {
   beforeEach(async () => {
@@ -13,7 +15,13 @@ describe('PsychicRouter', () => {
     describe('extra actions', () => {
       it('are directed to the same controller', async () => {
         const res = await request.get('/greeter/hello', 200)
-        expect(res.body).toEqual('goodbye')
+        const t: OpenapiResponseBody<openapiPaths, '/pets', 'get'> = ''
+        // const t: OpenapiResponseBody<openapiPaths, '/pets', 'get', '200'> = {
+        //   howyadoin: { howyadoin: 1 },
+        // }
+        expect(res.body as openapiPaths['/greeter/justforspecs']['get']['responses']['200']).toEqual(
+          'goodbye',
+        )
       })
     })
   })
