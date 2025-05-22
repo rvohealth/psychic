@@ -199,37 +199,17 @@ export default async (psy: PsychicApp) => {
   // ******
 
   // run a callback on server boot (but before routes are processed)
-  psy.on('boot', () => {
-    __forTestingOnly('boot')
+  psy.on('server:init:before-middleware', () => {
+    __forTestingOnly('server:init:before-middleware')
   })
 
-  psy.on('server:init', () => {
-    __forTestingOnly('server:init')
+  psy.on('server:init:after-middleware', () => {
+    __forTestingOnly('server:init:after-middleware')
   })
 
   // run a callback after routes are done processing
   psy.on('server:init:after-routes', () => {
     __forTestingOnly('server:init:after-routes')
-  })
-
-  // run a callback after the config is loaded
-  psy.on('load', () => {
-    __forTestingOnly('load')
-  })
-
-  // run a callback after the config is loaded, but only if NODE_ENV=development
-  psy.on('load:dev', () => {
-    __forTestingOnly('load:dev')
-  })
-
-  // run a callback after the config is loaded, but only if NODE_ENV=test
-  psy.on('load:test', () => {
-    __forTestingOnly('load:test')
-  })
-
-  // run a callback after the config is loaded, but only if NODE_ENV=prod
-  psy.on('load:prod', () => {
-    __forTestingOnly('load:prod')
   })
 
   // run a callback after the config is loaded, but only if NODE_ENV=prod
@@ -268,7 +248,7 @@ export default async (psy: PsychicApp) => {
     }
   })
 
-  psy.on('sync', () => {
+  psy.on('cli:sync', () => {
     return { customField: { customNestedField: 'custom value' } }
   })
 }

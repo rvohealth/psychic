@@ -34,7 +34,7 @@ import { cachePsychicApp, getCachedPsychicAppOrFail } from './cache.js'
 import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
 import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
-import { PsychicHookEventType, PsychicHookLoadEventTypes } from './types.js'
+import { PsychicHookEventType } from './types.js'
 import { Command } from 'commander'
 import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
 import PackageManager from '../cli/helpers/PackageManager.js'
@@ -266,20 +266,10 @@ Try setting it to something valid, like:
     return this._inflections
   }
 
-  private _bootHooks: Record<PsychicHookLoadEventTypes, ((conf: PsychicApp) => void | Promise<void>)[]> = {
-    boot: [],
-    load: [],
-    'load:dev': [],
-    'load:test': [],
-    'load:prod': [],
-  }
-  public get bootHooks() {
-    return this._bootHooks
-  }
-
   private _specialHooks: PsychicAppSpecialHooks = {
-    sync: [],
-    serverInit: [],
+    cliSync: [],
+    serverInitBeforeMiddleware: [],
+    serverInitAfterMiddleware: [],
     serverInitAfterRoutes: [],
     serverStart: [],
     serverError: [],
@@ -358,23 +348,6 @@ Try setting it to something valid, like:
     if (this.booted && !force) return
 
     // await new IntegrityChecker().check()
-
-    await this.runHooksFor('load')
-
-    switch (EnvInternal.nodeEnv) {
-      case 'development':
-        await this.runHooksFor('load:dev')
-        break
-
-      case 'production':
-        await this.runHooksFor('load:prod')
-        break
-
-      case 'test':
-        await this.runHooksFor('load:test')
-        break
-    }
-
     await this.inflections?.()
 
     this.booted = true
@@ -388,21 +361,23 @@ Try setting it to something valid, like:
     hookEventType: T,
     cb: T extends 'server:error'
       ? (err: Error, req: Request, res: Response) => void | Promise<void>
-      : T extends 'server:init'
+      : T extends 'server:init:before-middleware'
         ? (psychicServer: PsychicServer) => void | Promise<void>
-        : T extends 'server:start'
+        : T extends 'server:init:after-middleware'
           ? (psychicServer: PsychicServer) => void | Promise<void>
-          : T extends 'server:shutdown'
+          : T extends 'server:start'
             ? (psychicServer: PsychicServer) => void | Promise<void>
-            : T extends 'server:init:after-routes'
+            : T extends 'server:shutdown'
               ? (psychicServer: PsychicServer) => void | Promise<void>
-              : T extends 'cli:start'
-                ? (program: Command) => void | Promise<void>
-                : T extends 'sync'
-                  ? // NOTE: this is really any | Promise<any>, but eslint complains about this foolery
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-                    () => any
-                  : (conf: PsychicApp) => void | Promise<void>,
+              : T extends 'server:init:after-routes'
+                ? (psychicServer: PsychicServer) => void | Promise<void>
+                : T extends 'cli:start'
+                  ? (program: Command) => void | Promise<void>
+                  : T extends 'cli:sync'
+                    ? // NOTE: this is really any | Promise<any>, but eslint complains about this foolery
+                      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                      () => any
+                    : (conf: PsychicApp) => void | Promise<void>,
   ) {
     switch (hookEventType) {
       case 'server:error':
@@ -411,8 +386,16 @@ Try setting it to something valid, like:
         )
         break
 
-      case 'server:init':
-        this._specialHooks.serverInit.push(cb as (psychicServer: PsychicServer) => void | Promise<void>)
+      case 'server:init:before-middleware':
+        this._specialHooks.serverInitBeforeMiddleware.push(
+          cb as (psychicServer: PsychicServer) => void | Promise<void>,
+        )
+        break
+
+      case 'server:init:after-middleware':
+        this._specialHooks.serverInitAfterMiddleware.push(
+          cb as (psychicServer: PsychicServer) => void | Promise<void>,
+        )
         break
 
       case 'server:start':
@@ -427,15 +410,10 @@ Try setting it to something valid, like:
         this._specialHooks.serverInitAfterRoutes.push(cb as (server: PsychicServer) => void | Promise<void>)
         break
 
-      case 'sync':
+      case 'cli:sync':
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        this._specialHooks['sync'].push(cb as () => any)
+        this._specialHooks['cliSync'].push(cb as () => any)
         break
-
-      default:
-        this.bootHooks[hookEventType as PsychicHookLoadEventTypes].push(
-          cb as (conf: PsychicApp) => void | Promise<void>,
-        )
     }
   }
 
@@ -601,12 +579,6 @@ Try setting it to something valid, like:
         this.overrides['server:start'] = value
     }
   }
-
-  private async runHooksFor(hookEventType: PsychicHookLoadEventTypes) {
-    for (const hook of this.bootHooks[hookEventType]) {
-      await hook(this)
-    }
-  }
 }
 
 export type PsychicAppOption =
@@ -636,8 +608,9 @@ export type PsychicAppAllowedPackageManagersEnum = (typeof PsychicAppAllowedPack
 
 export interface PsychicAppSpecialHooks {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  sync: (() => any)[]
-  serverInit: ((server: PsychicServer) => void | Promise<void>)[]
+  cliSync: (() => any)[]
+  serverInitBeforeMiddleware: ((server: PsychicServer) => void | Promise<void>)[]
+  serverInitAfterMiddleware: ((server: PsychicServer) => void | Promise<void>)[]
   serverInitAfterRoutes: ((server: PsychicServer) => void | Promise<void>)[]
   serverStart: ((server: PsychicServer) => void | Promise<void>)[]
   serverShutdown: ((server: PsychicServer) => void | Promise<void>)[]
