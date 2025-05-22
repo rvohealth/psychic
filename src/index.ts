@@ -48,7 +48,7 @@ export { default as generateController } from './generate/controller.js'
 export { default as generateResource } from './generate/resource.js'
 export { default as cookieMaxAgeFromCookieOpts } from './helpers/cookieMaxAgeFromCookieOpts.js'
 export { default as pathifyNestedObject } from './helpers/pathifyNestedObject.js'
-export { type OpenapiResponseBody } from './helpers/openapiTypeHelpers.js'
+export { type OpenapiResponseBody, type OpenapiRequestBody } from './helpers/openapiTypeHelpers.js'
 export {
   MissingControllerActionPairingInRoutes,
   type OpenapiContent,
