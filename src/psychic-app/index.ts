@@ -660,16 +660,261 @@ export interface NamedPsychicOpenapiOptions extends PsychicOpenapiBaseOptions {
 }
 
 interface PsychicOpenapiBaseOptions {
+  /**
+   * an optional block containing the version, title, and description of your app.
+   *
+   * ```ts
+   * psy.set('openapi', {
+   *   info: {
+   *     version: 1,
+   *     title: 'my app',
+   *     description: 'openapi spec for my app'
+   *   }
+   * })
+   * ```
+   */
   info?: PsychicOpenapiInfo
+
+  /**
+   * an array of servers that your application is hosted on.
+   *
+   * ```ts
+   * psy.set('openapi', {
+   *   servers: [
+   *     {
+   *       url: 'https://myapp.com',
+   *       variables: {
+   *         myVar: {
+   *           default: 'a',
+   *           enum: ['a', 'b', 'c']
+   *         }
+   *       }
+   *     }
+   *   ],
+   * })
+   * ```
+   */
   servers?: OpenapiServer[]
+
+  /**
+   * DEPRECATED. TODO: remove schemaDelimiter
+   */
   schemaDelimeter?: string
+
+  /**
+   * When true, all response fields utilizing openapi enums
+   * will be converted strictly to strings, with a description
+   * that explains the possible enum values instead. This approach
+   * tends to be safer when your api is being consumed by
+   * mobile applications, since they have strict deserialization
+   * rules that will not permit new enum values to flow through,
+   * meaning that if you ever decide to add or rename an enum
+   * value, it would break that endpoint for users any time that
+   * unrecognized enum value is sent. Mobile devs can push a fix
+   * to accept the new version, but anyone on an outdated version
+   * of the app would continue to experience the issue.
+   *
+   * ```ts
+   * psy.set('openapi', 'mobile.openapi.json', {
+   *   suppressResponseEnums: true,
+   * })
+   * ```
+   */
   suppressResponseEnums?: boolean
+
+  /**
+   * When true, psychic will use the `openapi-typescript` package
+   * to read this openapi.json file and create typescript interfaces
+   * from it, which can then be leveraged throughout your app to
+   * cast the values of response bodies. This is especially useful
+   * in tests, where you are capturing your response bodies and
+   * making assertions on their shape.
+   *
+   * ```ts
+   * psy.set('openapi', {
+   *   syncTypes: true,
+   * })
+   * ```
+   *
+   * With this done, you can leverage the `OpenapiResponseBody` type
+   * utility to read the openapi paths exported from this types file
+   * and use it to easily capture the response body payload.
+   *
+   * ```ts
+   * import { openapiPaths } from '../../../src/types/openapi.js'
+   *
+   * it('succeeds', async () => {
+   *   const res = await request.get('/posts', 200)
+   *   const body = res.body as OpenapiResponseBody<openapiPaths, '/posts', 'get', 200>
+   * })
+   * ```
+   */
+  syncTypes?: boolean
+
+  /**
+   * provide validation for this file. If this is set, Psychic will
+   * automatically bootstrap your server upon starting using the
+   * `express-openapi-validator` package, which will create validation
+   * rules out of each endpoint in accordance with the corresponding
+   * openapi file.
+   *
+   * ```ts
+   * const ignorePaths = [
+   *   'webhooks',
+   *   'account/security-code',
+   *   'central/v1/salesforce/twilio-proxy/*',
+   *   'central/v1/salesforce/twilio-media-proxy/*',
+   * ]
+   *
+   * const datetimeValidator: OpenAPIValidatorFormat = {
+   *   type: 'string',
+   *   validate: (value: DateTime | string) => {
+   *     return value instanceof DateTime ? value?.isValid : DateTime.fromISO(value).isValid
+   *   },
+   * }
+   *
+   * psy.set('openapi', {
+   *   validation: {
+   *     validateRequests: true,
+   *     validateSecurity: false,
+   *     validateResponses: AppEnv.isTest,
+   *     ignoreUndocumented: true,
+   *     formats: {
+   *       'date-time': datetimeValidator,
+   *       decimal: {
+   *         type: 'string',
+   *         validate: (value: string) => /^-?(\d+\.?\d*|\d*\.?\d+)$/.test(value),
+   *       },
+   *     },
+   *     serDes: [
+   *       {
+   *         format: 'date-time',
+   *         deserialize: s => DateTime.fromISO(s),
+   *         serialize: (o: unknown) => (o instanceof DateTime ? o.toISO() : o)! as string,
+   *       },
+   *     ],
+   *     ignorePaths: ignorePaths.length ? new RegExp(ignorePaths.join('|')) : undefined,
+   *   }
+   * })
+   * ```
+   */
   validation?: Partial<Parameters<(typeof OpenApiValidator)['middleware']>[0]>
+
+  /**
+   * an object containing default values for all endpoints,
+   * like headers and responses.
+   *
+   * ```ts
+   * psy.set('openapi', {
+   *   defaults: {
+   *     headers: {
+   *       locale: {
+   *         type: 'string',
+   *         enum: LocalesEnumValues,
+   *       }
+   *     }
+   *   }
+   * })
+   * ```
+   */
   defaults?: {
+    /**
+     * an object containing the default headers for your app.
+     * This will be applied to all endpoints, unless they
+     * explicitly bypass default headers.
+     *
+     * ```ts
+     * psy.set('openapi', {
+     *   defaults: {
+     *     headers: {
+     *       locale: {
+     *         type: 'string',
+     *         enum: LocalesEnumValues,
+     *       }
+     *     }
+     *   }
+     * })
+     * ```
+     */
     headers?: OpenapiHeaders
+
+    /**
+     * an object containing the default responses for your app.
+     * This will be applied to all endpoints, unless they
+     * explicitly bypass default responses.
+     *
+     * Psychic provides default responses for errors like 400,
+     * 401, 403, 404, 409, and 422, so only override these if
+     * you need to either change or add to these values.
+     *
+     * ```ts
+     * psy.set('openapi', {
+     *   defaults: {
+     *     headers: {
+     *       locale: {
+     *         type: 'string',
+     *         enum: LocalesEnumValues,
+     *       }
+     *     }
+     *   }
+     * })
+     * ```
+     */
     responses?: OpenapiResponses
+
+    /**
+     * an object containing the default security schemes
+     * for your app.
+     *
+     * ```ts
+     * psy.set('openapi', {
+     *   defaults: {
+     *     securitySchemes: {
+     *       myHttpAuth: {
+     *         type: 'http'
+     *         scheme: 'bearer'
+     *       }
+     *     }
+     *   }
+     * })
+     * ```
+     */
     securitySchemes?: OpenapiSecuritySchemes
+
+    /**
+     * an object containing the default security
+     * for your app.
+     *
+     * ```ts
+     * psy.set('openapi', {
+     *   defaults: {
+     *     security: {
+     *       myHttpAuth: []
+     *     }
+     *   }
+     * })
+     * ```
+     */
     security?: OpenapiSecurity
+
+    /**
+     * an object containing the default components
+     * for your app.
+     *
+     * ```ts
+     * psy.set('openapi', {
+     *   defaults: {
+     *     components: {
+     *       schemas: {
+     *         Chalupa: {
+     *           delicious: boolean
+     *         }
+     *       }
+     *     }
+     *   }
+     * })
+     * ```
+     */
     components?: {
       [key: string]: {
         [key: string]: OpenapiSchemaBody | OpenapiContent

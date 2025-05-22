@@ -4,6 +4,7 @@ import PsychicBin from '../bin/index.js'
 import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
+import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/syncOpenapiTypescript.js'
 
 export default class PsychicCLI {
   public static provide(
@@ -59,8 +60,33 @@ export default class PsychicCLI {
       })
 
     program
-      .command('generate:openapi:redux')
-      .alias('g:openapi:redux')
+      .command('setup:sync:enums')
+      .description('generates an initializer in your app for syncing enums to a particular path.')
+      .argument(
+        '<outfile>',
+        'the path from your backend directory to the location which you want the enums copied. Should end with .ts, i.e. "../client/src/api/enums.ts"',
+      )
+      .option(
+        '--initializer-filename',
+        'the name you want the file to be in your initializers folder. defaults to `sync-enums.ts`',
+      )
+      .action(
+        async (
+          outfile: string,
+          {
+            initializerName,
+          }: {
+            initializerName: string
+          },
+        ) => {
+          await initializePsychicApp()
+          await generateSyncEnumsInitializer(outfile, initializerName)
+          process.exit()
+        },
+      )
+
+    program
+      .command('setup:sync:openapi-redux')
       .description(
         'generates openapi redux bindings to connect one of your openapi files to one of your clients',
       )
@@ -105,19 +131,25 @@ export default class PsychicCLI {
       )
 
     program
-      .command('generate:initializer:sync-enums')
-      .alias('g:initializer:sync-enums')
-      .description('generates an initializer in your app for syncing enums to a particular path.')
+      .command('setup:sync:openapi-typescript')
+      .description(
+        'generates an initializer in your app for converting one of your openapi files to typescript',
+      )
+      .argument(
+        '<openapiFilepath>',
+        'the path from your backend directory to the openapi file you wish to scan, i.e. "./openapi/openapi.json"',
+      )
       .argument(
         '<outfile>',
-        'the path from your backend directory to the location which you want the enums copied. Should end with .ts, i.e. "../client/src/api/enums.ts"',
+        'the path from your backend directory to the location which you want the openapi types written to. Must end with .d.ts, i.e. "./src/conf/openapi/openapi.types.d.ts"',
       )
       .option(
         '--initializer-filename',
-        'the name you want the file to be in your initializers folder. defaults to `sync-enums.ts`',
+        'the name you want the file to be in your initializers folder. defaults to `sync-openapi-typescript.ts`',
       )
       .action(
         async (
+          openapiFilepath: string,
           outfile: string,
           {
             initializerName,
@@ -126,7 +158,11 @@ export default class PsychicCLI {
           },
         ) => {
           await initializePsychicApp()
-          await generateSyncEnumsInitializer(outfile, initializerName)
+          await generateSyncOpenapiTypescriptInitializer(
+            openapiFilepath,
+            outfile,
+            initializerName as `${string}.d.ts`,
+          )
           process.exit()
         },
       )

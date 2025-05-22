@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "0.35.0",
+  "version": "0.35.1",
   "author": "RVOHealth",
   "repository": {
     "type": "git",
@@ -74,6 +74,7 @@
     "kysely": "^0.27.4",
     "kysely-codegen": "~0.17.0",
     "luxon-jest-matchers": "^0.1.14",
+    "openapi-typescript": "^7.8.0",
     "pg": "^8.12.0",
     "prettier": "^3.3.3",
     "puppeteer": "^24.4.0",
