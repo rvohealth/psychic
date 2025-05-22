@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { PsychicApp, PsychicServer } from '../../../../src/index.js'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint.js'
 import { RouteConfig } from '../../../../src/router/route-manager.js'
@@ -38,9 +39,7 @@ describe('OpenapiEndpointRenderer', () => {
         const response = renderer.toPathObject('default', {}, routes)
         expect(response).toEqual(
           expect.objectContaining({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/users/howyadoin': expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               get: expect.objectContaining({
                 description: 'hello',
                 summary: 'world',
@@ -60,9 +59,7 @@ describe('OpenapiEndpointRenderer', () => {
         const response = renderer.toPathObject('default', {}, routes)
         expect(response).toEqual(
           expect.objectContaining({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/users/howyadoin': expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               get: expect.objectContaining({
                 security: [{ customToken: [] }],
               }),
@@ -81,9 +78,7 @@ describe('OpenapiEndpointRenderer', () => {
         const response = renderer.toPathObject('default', {}, routes)
         expect(response).toEqual(
           expect.objectContaining({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/users/howyadoin': expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               get: expect.objectContaining({
                 tags: ['hello', 'world'],
               }),
@@ -100,11 +95,8 @@ describe('OpenapiEndpointRenderer', () => {
         const response = renderer.toPathObject('default', {}, routes)
         expect(response).toEqual(
           expect.objectContaining({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/users/{id}': expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               get: expect.objectContaining({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 responses: expect.objectContaining({
                   '200': {
                     description: 'Success',
@@ -133,9 +125,7 @@ describe('OpenapiEndpointRenderer', () => {
         const response = renderer.toPathObject('default', {}, routes)
         expect(response).toEqual(
           expect.objectContaining({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/users/{id}': expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               parameters: expect.arrayContaining([
                 {
                   in: 'path',
@@ -167,9 +157,7 @@ describe('OpenapiEndpointRenderer', () => {
         const response = renderer.toPathObject('default', {}, routes)
         expect(response).toEqual(
           expect.objectContaining({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/users/howyadoin': expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               parameters: expect.arrayContaining([
                 {
                   in: 'query',
@@ -187,6 +175,141 @@ describe('OpenapiEndpointRenderer', () => {
         )
       })
 
+      context('pagination', () => {
+        context('paginate=true', () => {
+          it('renders a request body reflecting the Dream.paginate response shape', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+              paginate: true,
+            })
+
+            const response = renderer.toPathObject('default', {}, routes)
+            expect(response).toEqual(
+              expect.objectContaining({
+                '/users/howyadoin': expect.objectContaining({
+                  get: expect.objectContaining({
+                    responses: expect.objectContaining({
+                      200: {
+                        content: {
+                          'application/json': {
+                            schema: {
+                              type: 'object',
+                              required: ['recordCount', 'pageCount', 'currentPage', 'results'],
+                              properties: {
+                                recordCount: { type: 'number' },
+                                pageCount: { type: 'number' },
+                                currentPage: { type: 'number' },
+                                results: {
+                                  type: 'array',
+                                  items: { $ref: '#/components/schemas/User' },
+                                },
+                              },
+                            },
+                          },
+                        },
+                        description: 'Success',
+                      },
+                    }),
+                  }),
+                }),
+              }),
+            )
+          })
+
+          context('paginate={ query: "page" }', () => {
+            it('adds query page param to openapi spec', () => {
+              const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+                paginate: { query: 'page' },
+              })
+
+              const response = renderer.toPathObject('default', {}, routes)
+              expect(response).toEqual(
+                expect.objectContaining({
+                  '/users/howyadoin': expect.objectContaining({
+                    parameters: expect.arrayContaining([
+                      {
+                        in: 'query',
+                        name: 'page',
+                        required: false,
+                        allowReserved: true,
+                        description: 'Page number',
+                        schema: {
+                          type: 'string',
+                        },
+                      },
+                    ]),
+                  }),
+                }),
+              )
+            })
+          })
+
+          context('paginate={ body: "page" }', () => {
+            it('adds requestBody page param to openapi spec', () => {
+              const renderer = new OpenapiEndpointRenderer(User, UsersController, 'paginatedPost', {
+                paginate: { body: 'page' },
+              })
+
+              const response = renderer.toPathObject('default', {}, routes)
+              expect(response).toEqual(
+                expect.objectContaining({
+                  '/users/paginated-post': expect.objectContaining({
+                    post: expect.objectContaining({
+                      requestBody: expect.objectContaining({
+                        content: expect.objectContaining({
+                          'application/json': expect.objectContaining({
+                            schema: expect.objectContaining({
+                              properties: expect.objectContaining({
+                                page: {
+                                  type: 'integer',
+                                  description: 'Page number',
+                                },
+                              }),
+                            }),
+                          }),
+                        }),
+                      }),
+                    }),
+                  }),
+                }),
+              )
+            })
+
+            context('without a model', () => {
+              it('adds requestBody page param to openapi spec', () => {
+                const renderer = new OpenapiEndpointRenderer(null, UsersController, 'paginatedPost', {
+                  paginate: { body: 'page' },
+                })
+
+                const response = renderer.toPathObject('default', {}, routes)
+                // console.dir(response, { depth: null })
+                expect(response).toEqual(
+                  expect.objectContaining({
+                    '/users/paginated-post': expect.objectContaining({
+                      post: expect.objectContaining({
+                        requestBody: expect.objectContaining({
+                          content: expect.objectContaining({
+                            'application/json': expect.objectContaining({
+                              schema: expect.objectContaining({
+                                properties: expect.objectContaining({
+                                  page: {
+                                    type: 'integer',
+                                    description: 'Page number',
+                                  },
+                                }),
+                              }),
+                            }),
+                          }),
+                        }),
+                      }),
+                    }),
+                  }),
+                )
+              })
+            })
+          })
+        })
+      })
+
       context('for a POST request', () => {
         it('renders the query parameters', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'postHowyadoin', {
@@ -201,9 +324,7 @@ describe('OpenapiEndpointRenderer', () => {
           const response = renderer.toPathObject('default', {}, routes)
           expect(response).toEqual(
             expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               '/users/post-howyadoin': expect.objectContaining({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 parameters: expect.arrayContaining([
                   {
                     in: 'query',
@@ -237,9 +358,7 @@ describe('OpenapiEndpointRenderer', () => {
           const response = renderer.toPathObject('default', {}, routes)
           expect(response).toEqual(
             expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               '/users/howyadoin': expect.objectContaining({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 parameters: expect.arrayContaining([
                   expect.objectContaining({
                     allowReserved: false,
@@ -266,9 +385,7 @@ describe('OpenapiEndpointRenderer', () => {
           const response = renderer.toPathObject('default', {}, routes)
           expect(response).toEqual(
             expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               '/users/howyadoin': expect.objectContaining({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 parameters: expect.arrayContaining([
                   {
                     in: 'query',
@@ -305,9 +422,7 @@ describe('OpenapiEndpointRenderer', () => {
           const response = renderer.toPathObject('default', {}, routes)
           expect(response).toEqual(
             expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               '/users/howyadoin': expect.objectContaining({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 parameters: expect.arrayContaining([
                   {
                     in: 'query',
@@ -341,9 +456,7 @@ describe('OpenapiEndpointRenderer', () => {
           const response = renderer.toPathObject('default', {}, routes)
           expect(response).toEqual(
             expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               '/users/howyadoin': expect.objectContaining({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 parameters: expect.arrayContaining([
                   {
                     in: 'query',
@@ -383,9 +496,7 @@ describe('OpenapiEndpointRenderer', () => {
         const response = renderer.toPathObject('default', {}, routes)
         expect(response).toEqual(
           expect.objectContaining({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             '/users/howyadoin': expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               parameters: expect.arrayContaining([
                 {
                   in: 'header',
@@ -427,9 +538,7 @@ describe('OpenapiEndpointRenderer', () => {
           const response = renderer.toPathObject('default', {}, routes)
           expect(response).toEqual(
             expect.objectContaining({
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               '/users/howyadoin': expect.objectContaining({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 parameters: expect.arrayContaining([
                   {
                     in: 'header',
@@ -472,7 +581,6 @@ describe('OpenapiEndpointRenderer', () => {
             const response = renderer.toPathObject('default', {}, routes)
             expect(response).toEqual(
               expect.objectContaining({
-                // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                 '/users/howyadoin': expect.objectContaining({
                   parameters: [
                     {
@@ -563,7 +671,6 @@ describe('OpenapiEndpointRenderer', () => {
                   'application/json': {
                     schema: {
                       type: 'object',
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                       properties: expect.objectContaining({
                         bio: { type: 'string' },
                         birthdate: { type: ['string', 'null'], format: 'date' },
@@ -634,7 +741,6 @@ describe('OpenapiEndpointRenderer', () => {
                       'application/json': {
                         schema: {
                           type: 'object',
-                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
                             requiredFavoriteBigint: { type: 'string' },
                           }),
@@ -656,7 +762,6 @@ describe('OpenapiEndpointRenderer', () => {
                         'application/json': {
                           schema: {
                             type: 'object',
-                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             properties: expect.objectContaining({
                               requiredFavoriteBigints: { type: 'array', items: { type: 'string' } },
                             }),
@@ -680,7 +785,6 @@ describe('OpenapiEndpointRenderer', () => {
                       'application/json': {
                         schema: {
                           type: 'object',
-                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
                             uuid: { type: 'string' },
                           }),
@@ -702,7 +806,6 @@ describe('OpenapiEndpointRenderer', () => {
                         'application/json': {
                           schema: {
                             type: 'object',
-                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             properties: expect.objectContaining({
                               favoriteUuids: {
                                 type: ['array', 'null'],
@@ -729,7 +832,6 @@ describe('OpenapiEndpointRenderer', () => {
                       'application/json': {
                         schema: {
                           type: 'object',
-                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
                             jsonData: { type: ['object', 'null'] },
                           }),
@@ -751,7 +853,6 @@ describe('OpenapiEndpointRenderer', () => {
                         'application/json': {
                           schema: {
                             type: 'object',
-                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             properties: expect.objectContaining({
                               favoriteJsons: {
                                 type: ['array', 'null'],
@@ -778,7 +879,6 @@ describe('OpenapiEndpointRenderer', () => {
                       'application/json': {
                         schema: {
                           type: 'object',
-                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
                             jsonbData: { type: ['object', 'null'] },
                           }),
@@ -800,7 +900,6 @@ describe('OpenapiEndpointRenderer', () => {
                         'application/json': {
                           schema: {
                             type: 'object',
-                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             properties: expect.objectContaining({
                               favoriteJsonbs: {
                                 type: ['array', 'null'],
@@ -827,7 +926,6 @@ describe('OpenapiEndpointRenderer', () => {
                       'application/json': {
                         schema: {
                           type: 'object',
-                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
                             password: {
                               anyOf: [
@@ -855,7 +953,6 @@ describe('OpenapiEndpointRenderer', () => {
                         'application/json': {
                           schema: {
                             type: 'object',
-                            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                             properties: expect.objectContaining({
                               openapiVirtualSpecTest: {
                                 type: ['string', 'null'],
@@ -887,7 +984,6 @@ describe('OpenapiEndpointRenderer', () => {
                       'application/json': {
                         schema: {
                           type: 'object',
-                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
                             species: { type: ['string', 'null'], enum: ['cat', 'noncat', null] },
                             nonNullSpecies: { type: 'string', enum: ['cat', 'noncat'] },
@@ -909,7 +1005,6 @@ describe('OpenapiEndpointRenderer', () => {
                       'application/json': {
                         schema: {
                           type: 'object',
-                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
                             favoriteTreats: {
                               type: ['array', 'null'],
@@ -951,7 +1046,6 @@ describe('OpenapiEndpointRenderer', () => {
                       'application/json': {
                         schema: {
                           type: 'object',
-                          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                           properties: expect.objectContaining({
                             favoriteTreats: {
                               type: ['array', 'null'],
@@ -1091,7 +1185,6 @@ describe('OpenapiEndpointRenderer', () => {
                   'application/json': {
                     schema: {
                       type: 'object',
-                      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
                       properties: expect.objectContaining({
                         collarCount: {
                           type: ['string', 'null'],

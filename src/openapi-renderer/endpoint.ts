@@ -36,6 +36,8 @@ import openapiRoute from './helpers/openapiRoute.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import OpenapiSerializerRenderer from './serializer.js'
 import OpenApiFailedToLookupSerializerForEndpoint from '../error/openapi/FailedToLookupSerializerForEndpoint.js'
+import openapiPageParamProperty from './helpers/pageParamOpenapiProperty.js'
+import safelyAttachPaginationParamToRequestBodySegment from './helpers/safelyAttachPaginationParamsToBodySegment.js'
 
 export default class OpenapiEndpointRenderer<
   DreamsOrSerializersOrViewModels extends DreamSerializable | DreamSerializableArray,
@@ -384,7 +386,7 @@ export default class OpenapiEndpointRenderer<
    * "parameters" field for a single endpoint.
    */
   private queryArray(openapiName: string): OpenapiParameterResponse[] {
-    return (
+    const queryParams =
       Object.keys(this.query || ({} as OpenapiQueries)).map((queryName: string) => {
         const queryParam = this.query![queryName]
         let output = {
@@ -422,7 +424,22 @@ export default class OpenapiEndpointRenderer<
 
         return output
       }) || []
-    )
+
+    const paginationName = (this.paginate as { query?: string })?.query
+    if (paginationName) {
+      queryParams.push({
+        in: 'query',
+        required: false,
+        name: paginationName,
+        description: 'Page number',
+        allowReserved: true,
+        schema: {
+          type: 'string',
+        },
+      })
+    }
+
+    return queryParams
   }
 
   /**
@@ -436,17 +453,17 @@ export default class OpenapiEndpointRenderer<
     routes: RouteConfig[],
   ): OpenapiContent | undefined {
     const method = this.computedMethod(routes)
-    if (this.requestBody === null) return undefined
+    if (this.requestBody === null) return this.defaultRequestBody()
 
     const httpMethodsThatAllowBody: HttpMethod[] = ['post', 'patch', 'put']
-    if (!httpMethodsThatAllowBody.includes(method)) return undefined
+    if (!httpMethodsThatAllowBody.includes(method)) return this.defaultRequestBody()
 
     if (this.shouldAutogenerateBody()) {
       return this.generateRequestBodyForModel(openapiName, processedSchemas)
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const schema = this.recursivelyParseBody(
+    let schema = this.recursivelyParseBody(
       openapiName,
       this.requestBody as OpenapiSchemaBodyShorthand,
       processedSchemas,
@@ -455,6 +472,12 @@ export default class OpenapiEndpointRenderer<
       },
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any
+
+    const bodyPageParam = (this.paginate as { body: string })?.body
+    if (bodyPageParam) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      schema = safelyAttachPaginationParamToRequestBodySegment(bodyPageParam, schema)
+    }
 
     if (!schema) return undefined
 
@@ -466,6 +489,26 @@ export default class OpenapiEndpointRenderer<
         },
       },
     }
+  }
+
+  private defaultRequestBody(): OpenapiContent | undefined {
+    const bodyPageParam = (this.paginate as { body: string })?.body
+    if (bodyPageParam) {
+      return {
+        content: {
+          'application/json': {
+            schema: {
+              type: 'object',
+              properties: {
+                [bodyPageParam]: openapiPageParamProperty(),
+              },
+            },
+          },
+        },
+      }
+    }
+
+    return undefined
   }
 
   /**
@@ -500,7 +543,7 @@ export default class OpenapiEndpointRenderer<
   ): OpenapiContent | undefined {
     const forDreamClass = (this.requestBody as OpenapiSchemaRequestBodyOnlyOption)?.for
     const dreamClass = forDreamClass || this.getSingleDreamModelClass()
-    if (!dreamClass) return undefined
+    if (!dreamClass) return this.defaultRequestBody()
 
     let paramSafeColumns = dreamClass.paramSafeColumnsOrFallback()
     const only = (this.requestBody as OpenapiSchemaRequestBodyOnlyOption)?.only
@@ -673,12 +716,19 @@ export default class OpenapiEndpointRenderer<
       }
     }
 
+    let processedSchema = this.recursivelyParseBody(openapiName, paramsShape, processedSchemas, {
+      target: 'request',
+    })
+
+    const bodyPageParam = (this.paginate as { body: string })?.body
+    if (bodyPageParam) {
+      processedSchema = safelyAttachPaginationParamToRequestBodySegment(bodyPageParam, processedSchema)
+    }
+
     return {
       content: {
         'application/json': {
-          schema: this.recursivelyParseBody(openapiName, paramsShape, processedSchemas, {
-            target: 'request',
-          }),
+          schema: processedSchema,
         },
       },
     }
@@ -1105,7 +1155,7 @@ export interface OpenapiEndpointRendererOpts<
    * }
    * ```
    */
-  paginate?: boolean
+  paginate?: boolean | CustomPaginationOpts
 
   /**
    * specify path params. This is usually not necessary, since path params
@@ -1328,6 +1378,56 @@ export interface OpenapiEndpointRendererOpts<
    */
   omitDefaultResponses?: boolean
 }
+
+export type CustomPaginationOpts =
+  | {
+      /**
+       * if provided, a query param will be added to the
+       * openapi spec with the name provided.
+       *
+       * ```ts
+       * @OpenAPI(Post, {
+       *   paginate: {
+       *     query: 'page'
+       *   },
+       * })
+       * public async index() {
+       *   this.ok(
+       *     await this.currentUser
+       *      .associationQuery('posts')
+       *      .paginate({
+       *        page: this.castParam('page', 'integer')
+       *      })
+       *   )
+       * }
+       * ```
+       */
+      query: string
+    }
+  | {
+      /**
+       * if provided, a requestBody field will be added
+       * to the openapi spec with the name provided.
+       *
+       * ```ts
+       * @OpenAPI(Post, {
+       *   paginate: {
+       *     body: 'page'
+       *   },
+       * })
+       * public async index() {
+       *   this.ok(
+       *     await this.currentUser
+       *      .associationQuery('posts')
+       *      .paginate({
+       *        page: this.castParam('page', 'integer')
+       *      })
+       *   )
+       * }
+       * ```
+       */
+      body: string
+    }
 
 export interface OpenapiEndpointRendererDefaultResponseOption {
   description?: string

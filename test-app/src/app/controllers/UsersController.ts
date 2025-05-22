@@ -61,10 +61,26 @@ export default class UsersController extends ApplicationController {
 
   @OpenAPI(User, {
     status: 200,
-    paginate: true,
+    paginate: {
+      query: 'page',
+    },
     serializerKey: 'summary',
   })
   public async paginated() {
+    const users = await User.order('createdAt').paginate({
+      page: this.castParam('page', 'integer', { allowNull: true }),
+    })
+    this.ok(users)
+  }
+
+  @OpenAPI(User, {
+    status: 200,
+    paginate: {
+      body: 'page',
+    },
+    serializerKey: 'summary',
+  })
+  public async paginatedPost() {
     const users = await User.order('createdAt').paginate({
       page: this.castParam('page', 'integer', { allowNull: true }),
     })
