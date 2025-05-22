@@ -71,7 +71,7 @@ export default class PsychicBin {
       await PsychicBin.syncTypes(output)
     }
 
-    await this.syncTypescriptOpenapi()
+    await this.syncTypescriptOpenapiFiles()
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -81,7 +81,7 @@ export default class PsychicBin {
     DreamCLI.logger.logEndProgress()
   }
 
-  public static async syncTypescriptOpenapi() {
+  public static async syncTypescriptOpenapiFiles() {
     DreamCLI.logger.logStartProgress(`syncing openapi types...`)
     await syncTypescriptOpenapiFiles()
     DreamCLI.logger.logEndProgress()

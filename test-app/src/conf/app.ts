@@ -64,7 +64,6 @@ export default async (psy: PsychicApp) => {
     controllers: 'test-app/src/app/controllers',
     services: 'test-app/src/app/services',
     controllerSpecs: 'test-app/spec/unit/controllers',
-    types: 'test-app/src/types',
   })
 
   // set options to configure openapi integration

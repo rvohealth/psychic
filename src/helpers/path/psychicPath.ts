@@ -17,9 +17,6 @@ export default function (dreamPathType: PsychicPaths) {
     case 'services':
       return psychicApp.paths.services
 
-    case 'types':
-      return psychicApp.paths.types
-
     default:
       return dreamPath(dreamPathType)
   }

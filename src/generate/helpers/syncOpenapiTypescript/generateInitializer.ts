@@ -17,13 +17,6 @@ export default async function generateInitializer(
   const initializerPath = path.join(destDir, `${initializerFilenameWithoutExtension}.ts`)
 
   try {
-    await fs.access(initializerPath)
-    return // early return if the file already exists
-  } catch {
-    // noop
-  }
-
-  try {
     await fs.access(destDir)
   } catch {
     await fs.mkdir(destDir, { recursive: true })
