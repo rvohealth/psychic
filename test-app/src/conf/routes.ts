@@ -47,6 +47,7 @@ export default (r: PsychicRouter) => {
   r.resources('users', r => {
     r.collection(r => {
       r.get('paginated', UsersController, 'paginated')
+      r.post('paginated-post', UsersController, 'paginatedPost')
     })
     r.resources('pets', { only: [] })
     r.get('ping', UsersController, 'ping')

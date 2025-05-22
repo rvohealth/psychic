@@ -2238,10 +2238,408 @@
           "schema": {
             "type": "string"
           }
+        },
+        {
+          "in": "query",
+          "required": false,
+          "name": "page",
+          "description": "Page number",
+          "allowReserved": true,
+          "schema": {
+            "type": "string"
+          }
         }
       ],
       "get": {
         "tags": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "recordCount",
+                    "pageCount",
+                    "currentPage",
+                    "results"
+                  ],
+                  "properties": {
+                    "recordCount": {
+                      "type": "number"
+                    },
+                    "pageCount": {
+                      "type": "number"
+                    },
+                    "currentPage": {
+                      "type": "number"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/users/paginated-post": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": true,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bio": {
+                    "type": "string"
+                  },
+                  "birthdate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "createdOn": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "favoriteBigint": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "favoriteBigints": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "favoriteBooleans": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "boolean"
+                    }
+                  },
+                  "favoriteCitext": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "favoriteCitexts": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "favoriteDates": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  },
+                  "favoriteDatetimes": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "favoriteIntegers": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "favoriteJsonbs": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "favoriteJsons": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "favoriteNumerics": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "favoriteTexts": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "favoriteUuids": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "jsonData": {
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  },
+                  "jsonbData": {
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "nicknames": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "notes": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "optionalUuid": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "passwordDigest": {
+                    "type": "string"
+                  },
+                  "requiredFavoriteBigint": {
+                    "type": "string"
+                  },
+                  "requiredFavoriteBigints": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requiredFavoriteBooleans": {
+                    "type": "array",
+                    "items": {
+                      "type": "boolean"
+                    }
+                  },
+                  "requiredFavoriteCitext": {
+                    "type": "string"
+                  },
+                  "requiredFavoriteCitexts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requiredFavoriteDates": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  },
+                  "requiredFavoriteDatetimes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "requiredFavoriteIntegers": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "requiredFavoriteJsonbs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "requiredFavoriteJsons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "requiredFavoriteNumerics": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "requiredFavoriteTexts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requiredFavoriteUuids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requiredJsonData": {
+                    "type": "object"
+                  },
+                  "requiredJsonbData": {
+                    "type": "object"
+                  },
+                  "requiredNicknames": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "uuid": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "anyOf": [
+                      {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      {
+                        "type": [
+                          "object",
+                          "null"
+                        ]
+                      }
+                    ]
+                  },
+                  "openapiVirtualSpecTest": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "openapiVirtualSpecTest2": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "Page number"
+                  }
+                }
+              }
+            }
+          }
+        },
         "responses": {
           "200": {
             "content": {
