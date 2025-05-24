@@ -1,14 +1,17 @@
-import { compact } from '@rvoh/dream'
+import { compact, SerializerCasing, sortObjectByKey } from '@rvoh/dream'
 import { groupBy } from 'lodash-es'
 import * as fs from 'node:fs/promises'
 import { debuglog } from 'node:util'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import openapiJsonPath from '../helpers/openapiJsonPath.js'
 import PsychicApp from '../psychic-app/index.js'
+import { RouteConfig } from '../router/route-manager.js'
 import { HttpMethod, HttpMethods } from '../router/types.js'
 import PsychicServer from '../server/index.js'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults.js'
 import { OpenapiEndpointResponsePath, OpenapiParameterResponse, OpenapiSchema } from './endpoint.js'
+import schemaDelimiter from './helpers/schemaDelimiter.js'
+import suppressResponseEnums from './helpers/suppressResponseEnums.js'
 
 const debugEnabled = debuglog('psychic').enabled
 
@@ -42,27 +45,35 @@ export default class OpenapiAppRenderer {
    */
   public static async toObject(): Promise<Record<string, OpenapiSchema>> {
     const psychicApp = PsychicApp.getOrFail()
-
-    const convertToObjectAndStoreInOutput = async (output: Record<string, OpenapiSchema>, key: string) => {
-      output[key] = await this._toObject(key)
-    }
-
     const output: Record<string, OpenapiSchema> = {}
-    await Promise.all(
-      Object.keys(psychicApp.openapi).map(key => convertToObjectAndStoreInOutput(output, key)),
-    )
-
-    return output
-  }
-
-  public static async _toObject(openapiName: string): Promise<OpenapiSchema> {
-    const processedSchemas: Record<string, boolean> = {}
-    const psychicApp = PsychicApp.getOrFail()
-    const controllers = psychicApp.controllers
 
     const server = new PsychicServer()
     await server.boot()
     const routes = await server.routes()
+
+    Object.keys(psychicApp.openapi).forEach(key => {
+      output[key] = this._toObject(routes, key)
+    })
+
+    return output
+  }
+
+  public static _toObject(routes: RouteConfig[], openapiName: string): OpenapiSchema {
+    const opts: {
+      openapiName: string
+      casing: SerializerCasing
+      schemaDelimiter: string
+      suppressResponseEnums: boolean
+    } = {
+      openapiName,
+      casing: 'camel',
+      schemaDelimiter: schemaDelimiter(openapiName),
+      suppressResponseEnums: suppressResponseEnums(openapiName),
+    }
+
+    let processedSchemas: Record<string, boolean> = {}
+    const psychicApp = PsychicApp.getOrFail()
+    const controllers = psychicApp.controllers
 
     const openapiConfig = psychicApp.openapi?.[openapiName]
 
@@ -113,12 +124,11 @@ export default class OpenapiAppRenderer {
         const renderer = controller.openapi[key]
         if (renderer === undefined) throw new UnexpectedUndefined()
 
-        finalOutput.components.schemas = {
-          ...finalOutput.components.schemas,
-          ...renderer.toSchemaObject(openapiName, processedSchemas),
-        }
+        const endpointPayloadAndReferencedSerializers = renderer.toPathObject(routes, opts)
+        const serializersAppearingInHandWrittenOpenapi =
+          endpointPayloadAndReferencedSerializers.referencedSerializers
+        const endpointPayload = endpointPayloadAndReferencedSerializers.openapi
 
-        const endpointPayload = renderer.toPathObject(openapiName, processedSchemas, routes)
         if (endpointPayload === undefined) throw new UnexpectedUndefined()
         const path = Object.keys(endpointPayload)[0]
         if (path === undefined) throw new UnexpectedUndefined()
@@ -140,10 +150,30 @@ export default class OpenapiAppRenderer {
           ...finalPathObject.parameters,
           ...endpointPayloadPath.parameters,
         ])
+
+        const schemaRenderingResults = renderer.toSchemaObject({
+          ...opts,
+          processedSchemas,
+          serializersAppearingInHandWrittenOpenapi,
+        })
+
+        processedSchemas = { ...processedSchemas, ...schemaRenderingResults.processedSchemas }
+
+        finalOutput.components.schemas = {
+          ...finalOutput.components.schemas,
+          ...schemaRenderingResults.renderedSchemas,
+        }
       }
     }
 
-    return this.sortedSchemaPayload(finalOutput)
+    const components = finalOutput.components
+    const paths = finalOutput.paths ?? {}
+    const schemas = components.schemas ?? {}
+
+    finalOutput.paths = sortObjectByKey(paths)
+    components.schemas = sortObjectByKey(schemas)
+
+    return finalOutput
   }
 
   private static combineParameters(parameters: OpenapiParameterResponse[]): OpenapiParameterResponse[] {
@@ -165,34 +195,5 @@ export default class OpenapiAppRenderer {
         }, identicalParams[0])
       }),
     )
-  }
-
-  private static sortedSchemaPayload(schema: OpenapiSchema) {
-    const sortedPaths = Object.keys(schema.paths).sort()
-    const schemas = schema.components.schemas || {}
-    const sortedSchemaNames = Object.keys(schemas).sort()
-
-    const sortedSchema: typeof schema = { ...schema }
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    sortedSchema.paths = sortedPaths.reduce((agg, path) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      agg[path] = schema.paths[path]
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return agg
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }, {} as any)
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    sortedSchema.components.schemas = sortedSchemaNames.reduce((agg, key) => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      agg[key] = schemas[key]
-
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-      return agg
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    }, {} as any)
-
-    return sortedSchema
   }
 }

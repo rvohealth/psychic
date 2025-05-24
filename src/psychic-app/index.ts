@@ -9,10 +9,12 @@ import {
   OpenapiSchemaBody,
 } from '@rvoh/dream'
 import * as bodyParser from 'body-parser'
+import { Command } from 'commander'
 import { CorsOptions } from 'cors'
 import { Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import * as http from 'node:http'
+import PackageManager from '../cli/helpers/PackageManager.js'
 import PsychicAppInitMissingApiRoot from '../error/psychic-app/init-missing-api-root.js'
 import PsychicAppInitMissingCallToLoadControllers from '../error/psychic-app/init-missing-call-to-load-controllers.js'
 import PsychicAppInitMissingPackageManager from '../error/psychic-app/init-missing-package-manager.js'
@@ -32,12 +34,10 @@ import PsychicRouter from '../router/index.js'
 import PsychicServer from '../server/index.js'
 import { cachePsychicApp, getCachedPsychicAppOrFail } from './cache.js'
 import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
+import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
 import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
 import { PsychicHookEventType } from './types.js'
-import { Command } from 'commander'
-import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
-import PackageManager from '../cli/helpers/PackageManager.js'
 
 export default class PsychicApp {
   public static async init(
@@ -232,7 +232,7 @@ Try setting it to something valid, like:
   private _openapi: Record<string, NamedPsychicOpenapiOptions> = {
     default: {
       outputFilename: 'openapi.json',
-      schemaDelimeter: '',
+      schemaDelimiter: '',
       info: {
         title: 'untitled openapi spec',
         version: 'unknown version',
@@ -699,7 +699,7 @@ interface PsychicOpenapiBaseOptions {
   /**
    * DEPRECATED. TODO: remove schemaDelimiter
    */
-  schemaDelimeter?: string
+  schemaDelimiter?: string
 
   /**
    * When true, all response fields utilizing openapi enums

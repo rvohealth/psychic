@@ -1,91 +1,47 @@
-import { Attribute, DreamColumn, DreamSerializer, RendersMany, RendersOne } from '@rvoh/dream'
-import Comment from '../models/Comment.js'
-import Pet from '../models/Pet.js'
-import Post from '../models/Post.js'
+import { DreamSerializer } from '@rvoh/dream'
 import User from '../models/User.js'
 
-export class UserSummarySerializer extends DreamSerializer {
-  @Attribute(User)
-  public id: DreamColumn<User, 'id'>
-}
+// Summary serializer: only id
+export const UserSummarySerializer = (data: User, passthrough?: { howyadoin: string }) =>
+  DreamSerializer(User, data, passthrough).attribute('id')
 
-export default class UserSerializer extends UserSummarySerializer {
-  @Attribute(User)
-  public email: DreamColumn<User, 'email'>
+// Full user serializer: id, email, name
+export default (data: User, passthrough?: { howyadoin: string }) =>
+  UserSummarySerializer(data, passthrough).attribute('email').attribute('name')
 
-  @Attribute(User)
-  public name: DreamColumn<User, 'name'>
-}
-
-export class UserExtraSerializer extends UserSummarySerializer {
-  @Attribute(User)
-  public nicknames: DreamColumn<User, 'nicknames'>
-
-  @Attribute({
-    type: 'object',
-    properties: {
-      name: 'string',
-      stuff: 'string[]',
-      nestedStuff: {
+// UserExtraSerializer: id, nicknames, howyadoin (complex object)
+export const UserExtraSerializer = (data: User, passthrough?: { howyadoin: string }) =>
+  UserSummarySerializer(data, passthrough)
+    .attribute('nicknames')
+    .customAttribute('howyadoin', () => null, {
+      openapi: {
         type: 'object',
         properties: {
-          nested1: 'boolean',
-          nested2: 'decimal[]',
+          name: 'string',
+          stuff: 'string[]',
+          nestedStuff: {
+            type: 'object',
+            properties: {
+              nested1: 'boolean',
+              nested2: 'decimal[]',
+            },
+          },
         },
       },
-    },
+    })
+
+export const UserWithPostsSerializer = (user: User) =>
+  UserSummarySerializer(user).rendersMany('posts', { serializerKey: 'withComments' })
+
+export const UserWithRecentPostSerializer = (user: User) =>
+  UserSummarySerializer(user).rendersOne('recentPost', { serializerKey: 'withRecentComment', optional: true })
+
+export const UserWithFlattenedPostSerializer = (user: User) =>
+  UserSummarySerializer(user).rendersOne('recentPost', { serializerKey: 'withComments', flatten: true })
+
+export const UserWithOptionalFlattenedPostSerializer = (user: User) =>
+  UserSummarySerializer(user).rendersOne('recentPost', {
+    serializerKey: 'withComments',
+    flatten: true,
+    optional: true,
   })
-  public howyadoin() {}
-}
-
-export class UserWithPostsSerializer extends UserSummarySerializer {
-  @RendersMany(Post, { serializerKey: 'withComments' })
-  public posts: Post[]
-}
-
-export class UserWithFlattenedPostSerializer extends UserSummarySerializer {
-  @RendersOne(Post, { serializerKey: 'withComments', flatten: true })
-  public post: Post
-}
-
-export class UserWithOptionalFlattenedPostSerializer extends UserSummarySerializer {
-  @RendersOne(Post, { serializerKey: 'withComments', flatten: true, optional: true })
-  public post: Post
-}
-
-export class UserWithRequiredFlattenedPolymorphicPostOrUserSerializer extends UserSummarySerializer {
-  @RendersOne([Post, Comment], { serializerKey: 'summary', flatten: true })
-  public post: Post | Comment
-
-  @Attribute('string')
-  public email: string
-}
-
-export class UserWithOptionalFlattenedPolymorphicPostOrUserSerializer extends UserSummarySerializer {
-  @RendersOne([Post, Comment], { serializerKey: 'summary', flatten: true, optional: true })
-  public post: Post | Comment
-
-  @Attribute('string')
-  public email: string
-}
-
-export class UserWithMultipleFlattenedPolymorphicAssociationsSerializer extends UserSummarySerializer {
-  @RendersOne([Post, Comment], { serializerKey: 'summary', flatten: true, optional: true })
-  public post: Post | Comment
-
-  @RendersOne([User, Pet], { serializerKey: 'summary', flatten: true, optional: true })
-  public userOrPet: User | Pet
-
-  @Attribute('string')
-  public email: string
-}
-
-export class UserWithPostsMultiType2Serializer extends UserSummarySerializer {
-  @RendersMany([Post, User], { serializerKey: 'summary' })
-  public posts: Post[]
-}
-
-export class UserWithRecentPostSerializer extends UserSummarySerializer {
-  @RendersOne(Post, { optional: true, serializerKey: 'withRecentComment' })
-  public recentPost: Post | null
-}

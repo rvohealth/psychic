@@ -859,149 +859,10 @@
                   "items": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/Latex"
+                        "$ref": "#/components/schemas/BalloonLatex"
                       },
                       {
-                        "$ref": "#/components/schemas/Mylar"
-                      }
-                    ]
-                  }
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "418": {
-            "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
-          "490": {
-            "$ref": "#/components/responses/CustomResponse"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/balloons/index-different-dreams": {
-      "parameters": [
-        {
-          "in": "header",
-          "name": "custom-header",
-          "required": true,
-          "description": "custom header",
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "get": {
-        "tags": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/Latex"
-                      },
-                      {
-                        "$ref": "#/components/schemas/Mylar"
-                      },
-                      {
-                        "$ref": "#/components/schemas/Pet"
-                      }
-                    ]
-                  }
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "418": {
-            "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
-          "490": {
-            "$ref": "#/components/responses/CustomResponse"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/balloons/index-dreams-and-view-model": {
-      "parameters": [
-        {
-          "in": "header",
-          "name": "custom-header",
-          "required": true,
-          "description": "custom header",
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "get": {
-        "tags": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "array",
-                  "items": {
-                    "anyOf": [
-                      {
-                        "$ref": "#/components/schemas/Latex"
-                      },
-                      {
-                        "$ref": "#/components/schemas/Mylar"
-                      },
-                      {
-                        "$ref": "#/components/schemas/MyViewModel"
-                      },
-                      {
-                        "$ref": "#/components/schemas/Pet"
+                        "$ref": "#/components/schemas/BalloonMylar"
                       }
                     ]
                   }
@@ -1069,12 +930,151 @@
                 "schema": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/Latex"
+                      "$ref": "#/components/schemas/BalloonLatex"
                     },
                     {
-                      "$ref": "#/components/schemas/Mylar"
+                      "$ref": "#/components/schemas/BalloonMylar"
                     }
                   ]
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/balloons/index-different-dreams": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": true,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/BalloonLatex"
+                      },
+                      {
+                        "$ref": "#/components/schemas/BalloonMylar"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Pet"
+                      }
+                    ]
+                  }
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/balloons/index-dreams-and-view-model": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": true,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "anyOf": [
+                      {
+                        "$ref": "#/components/schemas/BalloonLatex"
+                      },
+                      {
+                        "$ref": "#/components/schemas/BalloonMylar"
+                      },
+                      {
+                        "$ref": "#/components/schemas/Pet"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ViewModelsMyViewModel"
+                      }
+                    ]
+                  }
                 }
               }
             },
@@ -1129,7 +1129,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Hello"
+                  "$ref": "#/components/schemas/CircularHello"
                 }
               }
             },
@@ -2228,482 +2228,6 @@
         }
       }
     },
-    "/users/paginated": {
-      "parameters": [
-        {
-          "in": "header",
-          "name": "custom-header",
-          "required": true,
-          "description": "custom header",
-          "schema": {
-            "type": "string"
-          }
-        },
-        {
-          "in": "query",
-          "required": false,
-          "name": "page",
-          "description": "Page number",
-          "allowReserved": true,
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "get": {
-        "tags": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "recordCount",
-                    "pageCount",
-                    "currentPage",
-                    "results"
-                  ],
-                  "properties": {
-                    "recordCount": {
-                      "type": "number"
-                    },
-                    "pageCount": {
-                      "type": "number"
-                    },
-                    "currentPage": {
-                      "type": "number"
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/UserSummary"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "418": {
-            "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
-          "490": {
-            "$ref": "#/components/responses/CustomResponse"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
-    "/users/paginated-post": {
-      "parameters": [
-        {
-          "in": "header",
-          "name": "custom-header",
-          "required": true,
-          "description": "custom header",
-          "schema": {
-            "type": "string"
-          }
-        }
-      ],
-      "post": {
-        "tags": [],
-        "requestBody": {
-          "content": {
-            "application/json": {
-              "schema": {
-                "type": "object",
-                "properties": {
-                  "bio": {
-                    "type": "string"
-                  },
-                  "birthdate": {
-                    "type": [
-                      "string",
-                      "null"
-                    ],
-                    "format": "date"
-                  },
-                  "createdOn": {
-                    "type": "string",
-                    "format": "date"
-                  },
-                  "email": {
-                    "type": "string"
-                  },
-                  "favoriteBigint": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "favoriteBigints": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "favoriteBooleans": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "boolean"
-                    }
-                  },
-                  "favoriteCitext": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "favoriteCitexts": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "favoriteDates": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "string",
-                      "format": "date"
-                    }
-                  },
-                  "favoriteDatetimes": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "favoriteIntegers": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "integer"
-                    }
-                  },
-                  "favoriteJsonbs": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "favoriteJsons": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "favoriteNumerics": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "number"
-                    }
-                  },
-                  "favoriteTexts": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "favoriteUuids": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "jsonData": {
-                    "type": [
-                      "object",
-                      "null"
-                    ]
-                  },
-                  "jsonbData": {
-                    "type": [
-                      "object",
-                      "null"
-                    ]
-                  },
-                  "name": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "nicknames": {
-                    "type": [
-                      "array",
-                      "null"
-                    ],
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "notes": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "optionalUuid": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "passwordDigest": {
-                    "type": "string"
-                  },
-                  "requiredFavoriteBigint": {
-                    "type": "string"
-                  },
-                  "requiredFavoriteBigints": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "requiredFavoriteBooleans": {
-                    "type": "array",
-                    "items": {
-                      "type": "boolean"
-                    }
-                  },
-                  "requiredFavoriteCitext": {
-                    "type": "string"
-                  },
-                  "requiredFavoriteCitexts": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "requiredFavoriteDates": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "format": "date"
-                    }
-                  },
-                  "requiredFavoriteDatetimes": {
-                    "type": "array",
-                    "items": {
-                      "type": "string",
-                      "format": "date-time"
-                    }
-                  },
-                  "requiredFavoriteIntegers": {
-                    "type": "array",
-                    "items": {
-                      "type": "integer"
-                    }
-                  },
-                  "requiredFavoriteJsonbs": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "requiredFavoriteJsons": {
-                    "type": "array",
-                    "items": {
-                      "type": "object"
-                    }
-                  },
-                  "requiredFavoriteNumerics": {
-                    "type": "array",
-                    "items": {
-                      "type": "number"
-                    }
-                  },
-                  "requiredFavoriteTexts": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "requiredFavoriteUuids": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "requiredJsonData": {
-                    "type": "object"
-                  },
-                  "requiredJsonbData": {
-                    "type": "object"
-                  },
-                  "requiredNicknames": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "uuid": {
-                    "type": "string"
-                  },
-                  "password": {
-                    "anyOf": [
-                      {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "number",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "object",
-                          "null"
-                        ]
-                      }
-                    ]
-                  },
-                  "openapiVirtualSpecTest": {
-                    "type": [
-                      "string",
-                      "null"
-                    ]
-                  },
-                  "openapiVirtualSpecTest2": {
-                    "type": "array",
-                    "items": {
-                      "type": "string"
-                    }
-                  },
-                  "page": {
-                    "type": "integer",
-                    "description": "Page number"
-                  }
-                }
-              }
-            }
-          }
-        },
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "type": "object",
-                  "required": [
-                    "recordCount",
-                    "pageCount",
-                    "currentPage",
-                    "results"
-                  ],
-                  "properties": {
-                    "recordCount": {
-                      "type": "number"
-                    },
-                    "pageCount": {
-                      "type": "number"
-                    },
-                    "currentPage": {
-                      "type": "number"
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/UserSummary"
-                      }
-                    }
-                  }
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "418": {
-            "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
-          "490": {
-            "$ref": "#/components/responses/CustomResponse"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/users/{id}": {
       "parameters": [
         {
@@ -3207,6 +2731,482 @@
           }
         }
       }
+    },
+    "/users/paginated": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": true,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "required": false,
+          "name": "page",
+          "description": "Page number",
+          "allowReserved": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "recordCount",
+                    "pageCount",
+                    "currentPage",
+                    "results"
+                  ],
+                  "properties": {
+                    "recordCount": {
+                      "type": "number"
+                    },
+                    "pageCount": {
+                      "type": "number"
+                    },
+                    "currentPage": {
+                      "type": "number"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/users/paginated-post": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": true,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "bio": {
+                    "type": "string"
+                  },
+                  "birthdate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "createdOn": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "favoriteBigint": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "favoriteBigints": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "favoriteBooleans": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "boolean"
+                    }
+                  },
+                  "favoriteCitext": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "favoriteCitexts": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "favoriteDates": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  },
+                  "favoriteDatetimes": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "favoriteIntegers": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "favoriteJsonbs": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "favoriteJsons": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "favoriteNumerics": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "favoriteTexts": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "favoriteUuids": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "jsonData": {
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  },
+                  "jsonbData": {
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "nicknames": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "notes": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "optionalUuid": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "passwordDigest": {
+                    "type": "string"
+                  },
+                  "requiredFavoriteBigint": {
+                    "type": "string"
+                  },
+                  "requiredFavoriteBigints": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requiredFavoriteBooleans": {
+                    "type": "array",
+                    "items": {
+                      "type": "boolean"
+                    }
+                  },
+                  "requiredFavoriteCitext": {
+                    "type": "string"
+                  },
+                  "requiredFavoriteCitexts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requiredFavoriteDates": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  },
+                  "requiredFavoriteDatetimes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "requiredFavoriteIntegers": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "requiredFavoriteJsonbs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "requiredFavoriteJsons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "requiredFavoriteNumerics": {
+                    "type": "array",
+                    "items": {
+                      "type": "number"
+                    }
+                  },
+                  "requiredFavoriteTexts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requiredFavoriteUuids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requiredJsonData": {
+                    "type": "object"
+                  },
+                  "requiredJsonbData": {
+                    "type": "object"
+                  },
+                  "requiredNicknames": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "uuid": {
+                    "type": "string"
+                  },
+                  "password": {
+                    "anyOf": [
+                      {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      {
+                        "type": [
+                          "object",
+                          "null"
+                        ]
+                      }
+                    ]
+                  },
+                  "openapiVirtualSpecTest": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "openapiVirtualSpecTest2": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "page": {
+                    "type": "integer",
+                    "description": "Page number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "recordCount",
+                    "pageCount",
+                    "currentPage",
+                    "results"
+                  ],
+                  "properties": {
+                    "recordCount": {
+                      "type": "number"
+                    },
+                    "pageCount": {
+                      "type": "number"
+                    },
+                    "currentPage": {
+                      "type": "number"
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
@@ -3268,21 +3268,116 @@
       }
     },
     "schemas": {
-      "Comment": {
+      "BalloonLatex": {
+        "type": "object",
+        "required": [
+          "color",
+          "id",
+          "latexOnlyAttr"
+        ],
+        "properties": {
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "blue",
+              "green",
+              "red"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "latexOnlyAttr": {
+            "type": "string"
+          }
+        }
+      },
+      "BalloonLatexSummary": {
         "type": "object",
         "required": [
           "id",
-          "body"
+          "latexOnlySummaryAttr"
         ],
         "properties": {
           "id": {
             "type": "string"
           },
+          "latexOnlySummaryAttr": {
+            "type": "string"
+          }
+        }
+      },
+      "BalloonMylar": {
+        "type": "object",
+        "required": [
+          "color",
+          "id",
+          "mylarOnlyAttr"
+        ],
+        "properties": {
+          "color": {
+            "type": [
+              "string",
+              "null"
+            ],
+            "enum": [
+              "blue",
+              "green",
+              "red"
+            ]
+          },
+          "id": {
+            "type": "string"
+          },
+          "mylarOnlyAttr": {
+            "type": "string"
+          }
+        }
+      },
+      "CircularHello": {
+        "type": "object",
+        "required": [
+          "user",
+          "world"
+        ],
+        "properties": {
+          "user": {
+            "$ref": "#/components/schemas/User"
+          },
+          "world": {
+            "$ref": "#/components/schemas/CircularWorld"
+          }
+        }
+      },
+      "CircularWorld": {
+        "type": "object",
+        "required": [
+          "hello"
+        ],
+        "properties": {
+          "hello": {
+            "$ref": "#/components/schemas/CircularHello"
+          }
+        }
+      },
+      "Comment": {
+        "type": "object",
+        "required": [
+          "body",
+          "id"
+        ],
+        "properties": {
           "body": {
             "type": [
               "string",
               "null"
             ]
+          },
+          "id": {
+            "type": "string"
           }
         }
       },
@@ -3293,119 +3388,12 @@
         ],
         "properties": {
           "howyadoin": {
-            "$ref": "#/components/schemas/CommentTestingDoubleShorthand"
-          }
-        }
-      },
-      "CommentTestingDoubleShorthand": {
-        "type": "object",
-        "required": [
-          "howyadoin"
-        ],
-        "properties": {
-          "howyadoin": {
-            "type": "number",
-            "format": "double"
+            "$ref": "#/components/schemas/BalloonLatexSummary"
           }
         }
       },
       "CustomSchema": {
         "type": "string"
-      },
-      "Hello": {
-        "type": "object",
-        "required": [
-          "world",
-          "id",
-          "email",
-          "name"
-        ],
-        "properties": {
-          "world": {
-            "$ref": "#/components/schemas/World"
-          },
-          "id": {
-            "type": "integer"
-          },
-          "email": {
-            "type": "string"
-          },
-          "name": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        }
-      },
-      "Latex": {
-        "type": "object",
-        "required": [
-          "id",
-          "color",
-          "latexOnlyAttr"
-        ],
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "color": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "enum": [
-              "blue",
-              "green",
-              "red"
-            ]
-          },
-          "latexOnlyAttr": {
-            "type": "string"
-          }
-        }
-      },
-      "MyViewModel": {
-        "type": "object",
-        "required": [
-          "name",
-          "favoriteNumber"
-        ],
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "favoriteNumber": {
-            "type": "number"
-          }
-        }
-      },
-      "Mylar": {
-        "type": "object",
-        "required": [
-          "id",
-          "color",
-          "mylarOnlyAttr"
-        ],
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "color": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "enum": [
-              "blue",
-              "green",
-              "red"
-            ]
-          },
-          "mylarOnlyAttr": {
-            "type": "string"
-          }
-        }
       },
       "Pet": {
         "type": "object",
@@ -3428,20 +3416,23 @@
       "Post": {
         "type": "object",
         "required": [
-          "id",
           "body",
+          "comments",
           "explicitlyOmittedFromParamSafeColumns",
-          "comments"
+          "id"
         ],
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "body": {
             "type": [
               "string",
               "null"
             ]
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            }
           },
           "explicitlyOmittedFromParamSafeColumns": {
             "type": [
@@ -3449,25 +3440,19 @@
               "null"
             ]
           },
-          "comments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Comment"
-            }
+          "id": {
+            "type": "string"
           }
         }
       },
       "PostWithComments": {
         "type": "object",
         "required": [
-          "id",
           "body",
-          "comments"
+          "comments",
+          "id"
         ],
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "body": {
             "type": [
               "string",
@@ -3479,22 +3464,25 @@
             "items": {
               "$ref": "#/components/schemas/Comment"
             }
+          },
+          "id": {
+            "type": "string"
           }
         }
       },
       "User": {
         "type": "object",
         "required": [
-          "id",
           "email",
+          "id",
           "name"
         ],
         "properties": {
-          "id": {
-            "type": "integer"
-          },
           "email": {
             "type": "string"
+          },
+          "id": {
+            "type": "integer"
           },
           "name": {
             "type": [
@@ -3507,14 +3495,11 @@
       "UserExtra": {
         "type": "object",
         "required": [
-          "id",
           "howyadoin",
+          "id",
           "nicknames"
         ],
         "properties": {
-          "id": {
-            "type": "integer"
-          },
           "howyadoin": {
             "type": "object",
             "properties": {
@@ -3543,6 +3528,9 @@
                 }
               }
             }
+          },
+          "id": {
+            "type": "integer"
           },
           "nicknames": {
             "type": [
@@ -3598,14 +3586,24 @@
           }
         }
       },
-      "World": {
+      "ViewModelsMyViewModel": {
         "type": "object",
         "required": [
-          "hello"
+          "favoriteNumber",
+          "name"
         ],
         "properties": {
-          "hello": {
-            "$ref": "#/components/schemas/Hello"
+          "favoriteNumber": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       }

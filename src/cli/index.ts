@@ -1,10 +1,10 @@
 import { DreamCLI } from '@rvoh/dream'
 import { Command } from 'commander'
 import PsychicBin from '../bin/index.js'
-import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
-import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/syncOpenapiTypescript.js'
+import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
+import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 
 export default class PsychicCLI {
   public static provide(
@@ -29,6 +29,10 @@ export default class PsychicCLI {
       .command('generate:resource')
       .alias('g:resource')
       .description('create a Dream model, migration, controller, serializer, and spec placeholders')
+      .option(
+        '--sti-base-serializer',
+        'Omits the serializer from the dream model, but does create the serializer so it can be extended by STI children',
+      )
       .argument('<path>', 'URL path from root domain')
       .argument(
         '<modelName>',
@@ -38,11 +42,18 @@ export default class PsychicCLI {
         '[columnsWithTypes...]',
         'properties of the model property1:text/string/enum/etc. property2:text/string/enum/etc. ... propertyN:text/string/enum/etc.',
       )
-      .action(async (route: string, modelName: string, columnsWithTypes: string[]) => {
-        await initializePsychicApp()
-        await PsychicBin.generateResource(route, modelName, columnsWithTypes)
-        process.exit()
-      })
+      .action(
+        async (
+          route: string,
+          modelName: string,
+          columnsWithTypes: string[],
+          options: { stiBaseSerializer: boolean },
+        ) => {
+          await initializePsychicApp()
+          await PsychicBin.generateResource(route, modelName, columnsWithTypes, options)
+          process.exit()
+        },
+      )
 
     program
       .command('generate:controller')

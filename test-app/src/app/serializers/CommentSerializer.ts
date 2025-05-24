@@ -1,329 +1,265 @@
-import { Attribute, DreamColumn, DreamSerializer, RendersOne } from '@rvoh/dream'
+/* eslint-disable @typescript-eslint/no-explicit-any */
+import { DreamSerializer, ObjectSerializer } from '@rvoh/dream'
 import Comment from '../models/Comment.js'
-import User from '../models/User.js'
+import { LatexSummarySerializer } from './Balloon/LatexSerializer.js'
+import { MylarSummarySerializer } from './Balloon/MylarSerializer.js'
 
-export class CommentSummarySerializer<
-  DataType extends Comment,
-  Passthrough extends object,
-> extends DreamSerializer<DataType, Passthrough> {
-  @Attribute(Comment)
-  public id: DreamColumn<Comment, 'id'>
+export const CommentSummarySerializer = (data: Comment, passthrough: object) =>
+  DreamSerializer(Comment, data, passthrough)
+    .attribute('id')
+    // `body` in CommentSummarySerializer, which is inherited by CommentSerializer,
+    // which also includes a `body` Attribute reproduced an error in a Psychic project
+    // wherein the same attribute appeared multiple times as a `required` attribute,
+    // which is invalid OpenAPI. However, with modern decorators, this is no longer possible.
+    .attribute('body')
 
-  // `body` in CommentSummarySerializer, which is inherited by CommentSerializer,
-  // which also includes a `body` Attribute reproduced an error in a Psychic project
-  // wherein the same attribute appeared multiple times as a `required` attribute,
-  // which is invalid OpenAPI. However, with modern decorators, this is no longer possible.
-  @Attribute(Comment)
-  public body: DreamColumn<Comment, 'body'>
-}
+export default (data: Comment, passthrough: object) => CommentSummarySerializer(data, passthrough)
 
-export default class CommentSerializer<
-  DataType extends Comment,
-  Passthrough extends object,
-> extends CommentSummarySerializer<DataType, Passthrough> {}
+export const CommentWithFlattenedUserSerializer = (data: Comment) =>
+  DreamSerializer(Comment, data).attribute('body').rendersOne('post', { flatten: true })
 
-export class CommentWithFlattenedUserSerializer extends DreamSerializer {
-  @Attribute(Comment)
-  public body: DreamColumn<Comment, 'body'>
+export const CommentWithAnyOfArraySerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      type: 'array',
+      items: {
+        anyOf: [{ type: 'string' }, { type: 'boolean' }],
+      },
+    },
+  })
 
-  @RendersOne(User, { flatten: true })
-  public user: DreamColumn<Comment, 'body'>
-}
+export const CommentWithAllOfArraySerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      type: 'array',
+      items: {
+        allOf: [{ type: 'string' }, { type: 'boolean' }],
+      },
+    },
+  })
 
-export class CommentWithAnyOfArraySerializer extends DreamSerializer {
-  @Attribute({
-    type: 'array',
-    items: {
+export const CommentWithOneOfArraySerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      type: 'array',
+      items: {
+        oneOf: [{ type: 'string' }, { type: 'boolean' }],
+      },
+    },
+  })
+
+export const CommentWithAnyOfObjectSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
       anyOf: [{ type: 'string' }, { type: 'boolean' }],
     },
   })
-  public howyadoin: string | boolean
-}
 
-export class CommentWithAllOfArraySerializer extends DreamSerializer {
-  @Attribute({
-    type: 'array',
-    items: {
+export const CommentWithAllOfObjectSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
       allOf: [{ type: 'string' }, { type: 'boolean' }],
     },
   })
-  public howyadoin: string | boolean
-}
 
-export class CommentWithOneOfArraySerializer extends DreamSerializer {
-  @Attribute({
-    type: 'array',
-    items: {
+export const CommentWithOneOfObjectSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
       oneOf: [{ type: 'string' }, { type: 'boolean' }],
     },
   })
-  public howyadoin: string | boolean
-}
 
-export class CommentWithAnyOfObjectSerializer extends DreamSerializer {
-  @Attribute({
-    anyOf: [{ type: 'string' }, { type: 'boolean' }],
-  })
-  public howyadoin: string | boolean
-}
-
-export class CommentWithAllOfObjectSerializer extends DreamSerializer {
-  @Attribute({
-    allOf: [{ type: 'string' }, { type: 'boolean' }],
-  })
-  public howyadoin: string | boolean
-}
-
-export class CommentWithOneOfObjectSerializer extends DreamSerializer {
-  @Attribute({
-    oneOf: [{ type: 'string' }, { type: 'boolean' }],
-  })
-  public howyadoin: string | boolean
-}
-
-export class CommentTestingDefaultObjectFieldsSerializer extends DreamSerializer {
-  @Attribute({
-    type: 'object',
-    minProperties: 8,
-    maxProperties: 10,
-    additionalProperties: {
-      oneOf: [{ type: 'string' }, { type: 'boolean' }],
-    },
-  })
-  public howyadoin: string | boolean
-}
-
-export class CommentTestingDefaultNullFieldsSerializer extends DreamSerializer {
-  @Attribute({
-    oneOf: [{ type: 'null' }, { type: 'string' }],
-  })
-  public howyadoin: null
-}
-
-export class CommentTestingIntegerSerializer extends DreamSerializer {
-  @Attribute({
-    type: 'integer',
-    minimum: 10,
-    maximum: 20,
-  })
-  public howyadoin: number
-}
-
-export class CommentTestingIntegerShorthandSerializer extends DreamSerializer {
-  @Attribute('integer')
-  public howyadoin: number
-}
-
-export class CommentTestingDecimalSerializer extends DreamSerializer {
-  @Attribute({
-    type: 'number',
-    format: 'decimal',
-    minimum: 10,
-    maximum: 20,
-  })
-  public howyadoin: number
-}
-
-export class CommentTestingDecimalShorthandSerializer extends DreamSerializer {
-  @Attribute('decimal')
-  public howyadoin: number
-}
-
-export class CommentTestingDoubleSerializer extends DreamSerializer {
-  @Attribute({
-    type: 'number',
-    format: 'double',
-    multipleOf: 2.5,
-    minimum: 10,
-    maximum: 20,
-  })
-  public howyadoin: number
-}
-
-export class CommentTestingDoubleShorthandSerializer extends DreamSerializer {
-  @Attribute('double')
-  public howyadoin: number
-}
-
-export class CommentTestingDoubleArrayShorthandSerializer extends DreamSerializer {
-  @Attribute('double[]')
-  public howyadoin: number[]
-}
-
-export class CommentTestingDateSerializer extends DreamSerializer {
-  @Attribute('date')
-  public howyadoin: string
-
-  @Attribute('date[]')
-  public howyadoins: string
-}
-
-export class CommentTestingDateTimeSerializer extends DreamSerializer {
-  @Attribute('date-time')
-  public howyadoin: string
-
-  @Attribute('date-time[]')
-  public howyadoins: string
-}
-
-export class CommentTestingBasicSerializerRefSerializer extends DreamSerializer {
-  @Attribute({
-    $serializer: CommentTestingDoubleShorthandSerializer,
-  })
-  public howyadoin: string
-}
-
-export class CommentTestingBasicArraySerializerRefSerializer extends DreamSerializer {
-  @Attribute({
-    $serializer: CommentTestingDoubleShorthandSerializer,
-    many: true,
-  })
-  public howyadoin: string
-}
-
-export class CommentTestingBasicArraySerializableRefSerializer extends DreamSerializer {
-  @Attribute({
-    $serializable: Comment,
-    many: true,
-  })
-  public howyadoin: string
-}
-
-export class CommentTestingRootSerializerRefSerializer extends DreamSerializer {
-  @Attribute({
-    $serializer: CommentTestingDoubleShorthandSerializer,
-  })
-  public nonNullableHowyadoin: string
-
-  @Attribute({
-    $serializer: CommentTestingDoubleShorthandSerializer,
-    many: true,
-  })
-  public nonNullableHowyadoins: string
-
-  @Attribute({
-    $serializer: CommentTestingDoubleShorthandSerializer,
-    maybeNull: true,
-  })
-  public singleHowyadoin: string
-
-  @Attribute({
-    $serializer: CommentTestingDoubleShorthandSerializer,
-    many: true,
-    maybeNull: true,
-  })
-  public manyHowyadoins: string
-}
-
-export class CommentTestingObjectWithSerializerRefSerializer extends DreamSerializer {
-  @Attribute({
-    type: 'object',
-    properties: {
-      myProperty: {
-        $serializer: CommentTestingDoubleShorthandSerializer,
-      },
-      myProperties: {
-        $serializer: CommentTestingDoubleShorthandSerializer,
-        many: true,
-      },
-      myNullableProperty: {
-        $serializer: CommentTestingDoubleShorthandSerializer,
-        maybeNull: true,
-      },
-      myNullableProperties: {
-        $serializer: CommentTestingDoubleShorthandSerializer,
-        many: true,
-        maybeNull: true,
-      },
-    },
-  })
-  public howyadoin: string
-}
-
-export class CommentTestingArrayWithSerializerRefSerializer extends DreamSerializer {
-  @Attribute({
-    type: 'array',
-    items: {
-      $serializer: CommentTestingDoubleShorthandSerializer,
-    },
-  })
-  public howyadoins: string
-
-  @Attribute({
-    type: 'array',
-    items: {
-      $serializer: CommentTestingDoubleShorthandSerializer,
-      maybeNull: true,
-    },
-  })
-  public nullableHowyadoins: string
-
-  @Attribute({
-    type: 'array',
-    items: {
-      $serializer: CommentTestingDoubleShorthandSerializer,
-      many: true,
-    },
-  })
-  public howyadoinsNestedArray: string
-}
-
-export class CommentTestingStringSerializer extends DreamSerializer {
-  @Attribute({
-    type: 'string',
-    enum: ['hello', 'world'],
-    format: 'date',
-    pattern: '/^helloworld$/',
-    minLength: 2,
-    maxLength: 4,
-  })
-  public howyadoin: string
-}
-
-export class CommentTestingStringShorthandSerializer extends DreamSerializer {
-  @Attribute('string')
-  public howyadoin: string
-}
-
-export class CommentTestingStringArrayShorthandSerializer extends DreamSerializer {
-  @Attribute('string[]')
-  public howyadoin: string
-}
-
-export class CommentTestingStringArraySerializer extends DreamSerializer {
-  @Attribute({
-    type: 'array',
-    description: 'my array',
-    items: {
-      type: ['null', 'string'],
-      description: 'my array item',
-    },
-  })
-  public howyadoin: string
-}
-
-export class CommentTestingAdditionalPropertiesShorthandSerializer extends DreamSerializer {
-  @Attribute({ type: 'object', additionalProperties: 'number' })
-  public howyadoin: Record<string, number>
-}
-
-export class CommentTestingAdditionalPropertiesSerializer extends DreamSerializer {
-  @Attribute({
-    type: 'object',
-    additionalProperties: {
+export const CommentTestingDefaultObjectFieldsSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
       type: 'object',
-      properties: { code: { type: 'integer' }, text: { type: 'string' } },
+      minProperties: 8,
+      maxProperties: 10,
+      additionalProperties: {
+        oneOf: [{ type: 'string' }, { type: 'boolean' }],
+      },
     },
   })
-  public howyadoin: Record<string, { code: string; text: string }>
-}
 
-export class Comment1OnlyUsedInOneControllerSerializer extends DreamSerializer {
-  @Attribute('date')
-  public howyadoin: string
-}
+export const CommentTestingDefaultNullFieldsSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      oneOf: [{ type: 'null' }, { type: 'string' }],
+    },
+  })
 
-export class Comment2OnlyUsedInOneControllerSerializer extends DreamSerializer {
-  @Attribute('date[]')
-  public howyadoins: string
-}
+export const CommentTestingIntegerSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      type: 'integer',
+      minimum: 10,
+      maximum: 20,
+    },
+  })
+
+export const CommentTestingIntegerShorthandSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: 'integer',
+  })
+
+export const CommentTestingDecimalSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      type: 'number',
+      format: 'decimal',
+      minimum: 10,
+      maximum: 20,
+    },
+  })
+
+export const CommentTestingDecimalShorthandSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: 'decimal',
+  })
+
+export const CommentTestingDateSerializer = (data: any) =>
+  ObjectSerializer(data)
+    .attribute('howyadoin', { openapi: 'date' })
+    .attribute('howyadoins', { openapi: 'date[]' })
+
+export const CommentTestingDateTimeSerializer = (data: any) =>
+  ObjectSerializer(data)
+    .attribute('howyadoin', { openapi: 'date-time' })
+    .attribute('howyadoins', { openapi: 'date-time[]' })
+
+export const CommentTestingStringSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      type: 'string',
+      enum: ['hello', 'world'],
+      format: 'date',
+      pattern: '/^helloworld$/',
+      minLength: 2,
+      maxLength: 4,
+    },
+  })
+
+export const CommentTestingStringShorthandSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', { openapi: 'string' })
+
+export const CommentTestingStringArrayShorthandSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', { openapi: 'string[]' })
+
+export const CommentTestingStringArraySerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      type: 'array',
+      description: 'my array',
+      items: {
+        type: ['null', 'string'],
+        description: 'my array item',
+      },
+    },
+  })
+
+export const CommentTestingAdditionalPropertiesShorthandSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: { type: 'object', additionalProperties: 'number' },
+  })
+
+export const CommentTestingAdditionalPropertiesSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      type: 'object',
+      additionalProperties: {
+        type: 'object',
+        properties: { code: { type: 'integer' }, text: { type: 'string' } },
+      },
+    },
+  })
+
+export const Comment1OnlyUsedInOneControllerSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', { openapi: 'date' })
+
+export const Comment2OnlyUsedInOneControllerSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', { openapi: 'date[]' })
+
+export const CommentTestingBasicArraySerializerRefSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      type: 'array',
+      items: {
+        $serializer: MylarSummarySerializer,
+      },
+    },
+  })
+
+export const CommentTestingRootSerializerRefSerializer = (data: any) =>
+  ObjectSerializer(data)
+    .attribute('nonNullableHowyadoin', {
+      openapi: {
+        $serializer: CommentTestingDecimalShorthandSerializer,
+      },
+    })
+    .attribute('nonNullableHowyadoins', {
+      openapi: {
+        type: 'array',
+        items: {
+          $serializer: CommentTestingDecimalShorthandSerializer,
+        },
+      },
+    })
+    .attribute('singleHowyadoin', {
+      openapi: {
+        anyOf: [
+          {
+            $serializer: CommentTestingDecimalShorthandSerializer,
+          },
+          {
+            type: 'null',
+          },
+        ],
+      },
+    })
+    .attribute('manyHowyadoins', {
+      openapi: {
+        type: ['array', 'null'],
+        items: {
+          $serializer: CommentTestingDecimalShorthandSerializer,
+        },
+      },
+    })
+
+export const CommentTestingBasicSerializerRefSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      $serializer: LatexSummarySerializer,
+    },
+  })
+
+export const CommentTestingObjectWithSerializerRefSerializer = (data: any) =>
+  ObjectSerializer(data).attribute('howyadoin', {
+    openapi: {
+      type: 'object',
+      properties: {
+        myProperty: {
+          $serializer: CommentTestingDecimalShorthandSerializer,
+        },
+        myProperties: {
+          type: 'array',
+          items: {
+            $serializer: CommentTestingDecimalShorthandSerializer,
+          },
+        },
+        myNullableProperty: {
+          anyOf: [
+            {
+              $serializer: CommentTestingDecimalShorthandSerializer,
+            },
+            { type: 'null' },
+          ],
+        },
+        myNullableProperties: {
+          type: ['array', 'null'],
+          items: {
+            $serializer: CommentTestingDecimalShorthandSerializer,
+          },
+        },
+      },
+    },
+  })

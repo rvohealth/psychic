@@ -103,10 +103,10 @@
       "Comment2OnlyUsedInOneController": {
         "type": "object",
         "required": [
-          "howyadoins"
+          "howyadoin"
         ],
         "properties": {
-          "howyadoins": {
+          "howyadoin": {
             "type": "array",
             "items": {
               "type": "string",

@@ -6,7 +6,7 @@ import { Express, Request, Response } from 'express'
 import * as OpenApiValidator from 'express-openapi-validator'
 import { Server } from 'node:http'
 import * as path from 'node:path'
-import { debuglog } from 'node:util'
+import { debuglog, inspect } from 'node:util'
 import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError.js'
 import PsychicApp, { PsychicSslCredentials } from '../psychic-app/index.js'
 import PsychicRouter from '../router/index.js'
@@ -198,7 +198,7 @@ export default class PsychicServer {
         this.expressApp.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
           if (isOpenapiError(err)) {
             if (debugEnabled) {
-              PsychicApp.log(JSON.stringify(err))
+              PsychicApp.log(inspect(err))
               console.trace()
             }
 

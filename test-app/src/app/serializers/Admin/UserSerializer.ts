@@ -1,16 +1,10 @@
-import { Attribute, DreamSerializer, RendersMany } from '@rvoh/dream'
-import Pet from '../../models/Pet.js'
+import { DreamSerializer } from '@rvoh/dream'
+import User from '../../models/User.js'
 import { AdminPetSummarySerializer } from './PetSerializer.js'
 
-export class AdminUserSummarySerializer extends DreamSerializer {
-  @Attribute('string')
-  public id: string
-}
+export const AdminUserSummarySerializer = (data: User) => DreamSerializer(User, data).attribute('id')
 
-export default class AdminUserSerializer extends AdminUserSummarySerializer {
-  @Attribute('string')
-  public name: string
-
-  @RendersMany(() => AdminPetSummarySerializer)
-  public pets: Pet[]
-}
+export default (data: User) =>
+  AdminUserSummarySerializer(data)
+    .attribute('name')
+    .rendersMany('pets', { serializerCallback: () => AdminPetSummarySerializer })

@@ -1,12 +1,9 @@
-import { DreamSerializer, RendersOne } from '@rvoh/dream'
+import { ObjectSerializer } from '@rvoh/dream'
 import User from '../../models/User.js'
 import WorldSerializer from './WorldSerializer.js'
 
-export class HelloSerializer extends DreamSerializer {
-  @RendersOne(() => WorldSerializer)
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public world: any
-
-  @RendersOne(User, { flatten: true })
-  public user: User
-}
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export default (data: { world: any; user: User }) =>
+  ObjectSerializer(data)
+    .rendersOne('world', { serializerCallback: () => WorldSerializer })
+    .rendersOne('user', { dreamClass: User })

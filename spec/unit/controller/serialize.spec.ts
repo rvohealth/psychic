@@ -1,5 +1,5 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
-import { Attribute, DreamApp, DreamSerializer } from '@rvoh/dream'
+import { DreamApp, DreamSerializer, ObjectSerializer } from '@rvoh/dream'
 import { Request, Response } from 'express'
 import { BeforeAction, OpenAPI } from '../../../src/controller/decorators.js'
 import PsychicController from '../../../src/controller/index.js'
@@ -11,7 +11,6 @@ import UserSerializer, {
   UserSummarySerializer,
 } from '../../../test-app/src/app/serializers/UserSerializer.js'
 import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers.js'
-import processDynamicallyDefinedSerializers from '../../helpers/processDynamicallyDefinedSerializers.js'
 
 describe('PsychicController', () => {
   describe('#serialize', () => {
@@ -27,11 +26,7 @@ describe('PsychicController', () => {
     })
 
     it('serializes the data using the provided serializer', async () => {
-      class MySerializer extends DreamSerializer {
-        @Attribute()
-        public email: string
-      }
-      processDynamicallyDefinedSerializers(MySerializer)
+      const MySerializer = (dream: User) => DreamSerializer(User, dream).attribute('email')
 
       const dreamApp = DreamApp.getOrFail()
       vi.spyOn(dreamApp, 'serializers', 'get').mockReturnValue({
@@ -108,20 +103,15 @@ describe('PsychicController', () => {
       })
 
       context('when the model is not a Dream', () => {
-        class GreetSerializer extends DreamSerializer {
-          @Attribute()
-          public greeting(): string {
-            return `${(this.$data as Greeting).word} world`
-          }
-        }
+        const GreetSerializer = (data: Greeting) =>
+          ObjectSerializer(data).customAttribute('greeting', () => `${data.word} world`, {
+            openapi: 'string',
+          })
 
-        class GreetSerializer2 extends DreamSerializer {
-          @Attribute()
-          public greeting(): string {
-            return `${(this.$data as Greeting).word} goodbye`
-          }
-        }
-        processDynamicallyDefinedSerializers(GreetSerializer, GreetSerializer2)
+        const GreetSerializer2 = (data: Greeting2) =>
+          ObjectSerializer(data).customAttribute('greeting', () => `${data.word} goodbye`, {
+            openapi: 'string',
+          })
 
         class Greeting {
           public word: string
@@ -213,30 +203,20 @@ describe('PsychicController', () => {
         }
       }
 
-      class User2Serializer extends UserSerializer {
-        @Attribute()
-        public howyadoin() {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-          return this.$passthroughData.howyadoin
-        }
-      }
+      const User2Serializer = (user: User, passthrough: { howyadoin: string }) =>
+        UserSerializer(user, passthrough).customAttribute('howyadoin', () => passthrough.howyadoin, {
+          openapi: 'string',
+        })
 
-      class User2SummarySerializer extends UserSummarySerializer {
-        @Attribute()
-        public howyadoin() {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-          return this.$passthroughData.howyadoin
-        }
-      }
+      const User2SummarySerializer = (user: User, passthrough: { howyadoin: string }) =>
+        UserSummarySerializer(user, passthrough).customAttribute('howyadoin', () => passthrough.howyadoin, {
+          openapi: 'string',
+        })
 
-      class User2ExtraSerializer extends UserExtraSerializer {
-        @Attribute()
-        public override howyadoin() {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return, @typescript-eslint/no-unsafe-member-access
-          return this.$passthroughData.howyadoin
-        }
-      }
-      processDynamicallyDefinedSerializers(User2Serializer, User2SummarySerializer, User2ExtraSerializer)
+      const User2ExtraSerializer = (user: User, passthrough: { howyadoin: string }) =>
+        UserExtraSerializer(user, passthrough).customAttribute('howyadoin', () => passthrough.howyadoin, {
+          openapi: 'string',
+        })
 
       class MyController extends PsychicController {
         public async show() {

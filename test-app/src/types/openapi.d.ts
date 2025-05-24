@@ -321,107 +321,7 @@ export interface openapiPaths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": (components["schemas"]["Latex"] | components["schemas"]["Mylar"])[];
-                    };
-                };
-                400: components["responses"]["BadRequest"];
-                401: components["responses"]["Unauthorized"];
-                403: components["responses"]["Forbidden"];
-                404: components["responses"]["NotFound"];
-                409: components["responses"]["Conflict"];
-                418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
-                490: components["responses"]["CustomResponse"];
-                500: components["responses"]["InternalServerError"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/balloons/index-different-dreams": {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description custom header */
-                "custom-header": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header: {
-                    /** @description custom header */
-                    "custom-header": string;
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": (components["schemas"]["Latex"] | components["schemas"]["Mylar"] | components["schemas"]["Pet"])[];
-                    };
-                };
-                400: components["responses"]["BadRequest"];
-                401: components["responses"]["Unauthorized"];
-                403: components["responses"]["Forbidden"];
-                404: components["responses"]["NotFound"];
-                409: components["responses"]["Conflict"];
-                418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
-                490: components["responses"]["CustomResponse"];
-                500: components["responses"]["InternalServerError"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
-    "/balloons/index-dreams-and-view-model": {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description custom header */
-                "custom-header": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header: {
-                    /** @description custom header */
-                    "custom-header": string;
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": (components["schemas"]["Latex"] | components["schemas"]["Mylar"] | components["schemas"]["MyViewModel"] | components["schemas"]["Pet"])[];
+                        "application/json": (components["schemas"]["BalloonLatex"] | components["schemas"]["BalloonMylar"])[];
                     };
                 };
                 400: components["responses"]["BadRequest"];
@@ -475,7 +375,107 @@ export interface openapiPaths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Latex"] | components["schemas"]["Mylar"];
+                        "application/json": components["schemas"]["BalloonLatex"] | components["schemas"]["BalloonMylar"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/balloons/index-different-dreams": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": (components["schemas"]["BalloonLatex"] | components["schemas"]["BalloonMylar"] | components["schemas"]["Pet"])[];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/balloons/index-dreams-and-view-model": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": (components["schemas"]["BalloonLatex"] | components["schemas"]["BalloonMylar"] | components["schemas"]["Pet"] | components["schemas"]["ViewModelsMyViewModel"])[];
                     };
                 };
                 400: components["responses"]["BadRequest"];
@@ -525,7 +525,7 @@ export interface openapiPaths {
                         [name: string]: unknown;
                     };
                     content: {
-                        "application/json": components["schemas"]["Hello"];
+                        "application/json": components["schemas"]["CircularHello"];
                     };
                 };
                 400: components["responses"]["BadRequest"];
@@ -1122,61 +1122,6 @@ export interface openapiPaths {
         patch?: never;
         trace?: never;
     };
-    "/users/paginated": {
-        parameters: {
-            query?: never;
-            header: {
-                /** @description custom header */
-                "custom-header": string;
-            };
-            path?: never;
-            cookie?: never;
-        };
-        get: {
-            parameters: {
-                query?: never;
-                header: {
-                    /** @description custom header */
-                    "custom-header": string;
-                };
-                path?: never;
-                cookie?: never;
-            };
-            requestBody?: never;
-            responses: {
-                /** @description Success */
-                200: {
-                    headers: {
-                        [name: string]: unknown;
-                    };
-                    content: {
-                        "application/json": {
-                            recordCount: number;
-                            pageCount: number;
-                            currentPage: number;
-                            results: components["schemas"]["UserSummary"][];
-                        };
-                    };
-                };
-                400: components["responses"]["BadRequest"];
-                401: components["responses"]["Unauthorized"];
-                403: components["responses"]["Forbidden"];
-                404: components["responses"]["NotFound"];
-                409: components["responses"]["Conflict"];
-                418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
-                490: components["responses"]["CustomResponse"];
-                500: components["responses"]["InternalServerError"];
-            };
-        };
-        put?: never;
-        post?: never;
-        delete?: never;
-        options?: never;
-        head?: never;
-        patch?: never;
-        trace?: never;
-    };
     "/users/{id}": {
         parameters: {
             query?: never;
@@ -1397,66 +1342,231 @@ export interface openapiPaths {
         patch?: never;
         trace?: never;
     };
+    "/users/paginated": {
+        parameters: {
+            query?: {
+                /** @description Page number */
+                page?: string;
+            };
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Page number */
+                    page?: string;
+                };
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            recordCount: number;
+                            pageCount: number;
+                            currentPage: number;
+                            results: components["schemas"]["UserSummary"][];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/paginated-post": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description custom header */
+                "custom-header": string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header": string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        bio?: string;
+                        /** Format: date */
+                        birthdate?: string | null;
+                        /** Format: date */
+                        createdOn?: string;
+                        email?: string;
+                        favoriteBigint?: string | null;
+                        favoriteBigints?: string[] | null;
+                        favoriteBooleans?: boolean[] | null;
+                        favoriteCitext?: string | null;
+                        favoriteCitexts?: string[] | null;
+                        favoriteDates?: string[] | null;
+                        favoriteDatetimes?: string[] | null;
+                        favoriteIntegers?: number[] | null;
+                        favoriteJsonbs?: Record<string, never>[] | null;
+                        favoriteJsons?: Record<string, never>[] | null;
+                        favoriteNumerics?: number[] | null;
+                        favoriteTexts?: string[] | null;
+                        favoriteUuids?: string[] | null;
+                        jsonData?: Record<string, never> | null;
+                        jsonbData?: Record<string, never> | null;
+                        name?: string | null;
+                        nicknames?: string[] | null;
+                        notes?: string | null;
+                        optionalUuid?: string | null;
+                        passwordDigest?: string;
+                        requiredFavoriteBigint?: string;
+                        requiredFavoriteBigints?: string[];
+                        requiredFavoriteBooleans?: boolean[];
+                        requiredFavoriteCitext?: string;
+                        requiredFavoriteCitexts?: string[];
+                        requiredFavoriteDates?: string[];
+                        requiredFavoriteDatetimes?: string[];
+                        requiredFavoriteIntegers?: number[];
+                        requiredFavoriteJsonbs?: Record<string, never>[];
+                        requiredFavoriteJsons?: Record<string, never>[];
+                        requiredFavoriteNumerics?: number[];
+                        requiredFavoriteTexts?: string[];
+                        requiredFavoriteUuids?: string[];
+                        requiredJsonData?: Record<string, never>;
+                        requiredJsonbData?: Record<string, never>;
+                        requiredNicknames?: string[];
+                        uuid?: string;
+                        password?: (string | null) | (number | null) | (Record<string, never> | null);
+                        openapiVirtualSpecTest?: string | null;
+                        openapiVirtualSpecTest2?: string[];
+                        /** @description Page number */
+                        page?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            recordCount: number;
+                            pageCount: number;
+                            currentPage: number;
+                            results: components["schemas"]["UserSummary"][];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {
     schemas: {
-        Comment: {
-            id: string;
-            body: string | null;
-        };
-        CommentTestingBasicSerializerRef: {
-            howyadoin: components["schemas"]["CommentTestingDoubleShorthand"];
-        };
-        CommentTestingDoubleShorthand: {
-            /** Format: double */
-            howyadoin: number;
-        };
-        CustomSchema: string;
-        Hello: {
-            world: components["schemas"]["World"];
-            id: number;
-            email: string;
-            name: string | null;
-        };
-        Latex: {
-            id: string;
+        BalloonLatex: {
             /** @enum {string|null} */
             color: "blue" | "green" | "red" | null;
+            id: string;
             latexOnlyAttr: string;
         };
-        MyViewModel: {
-            name: string;
-            favoriteNumber: number;
-        };
-        Mylar: {
+        BalloonLatexSummary: {
             id: string;
+            latexOnlySummaryAttr: string;
+        };
+        BalloonMylar: {
             /** @enum {string|null} */
             color: "blue" | "green" | "red" | null;
+            id: string;
             mylarOnlyAttr: string;
         };
+        CircularHello: {
+            user: components["schemas"]["User"];
+            world: components["schemas"]["CircularWorld"];
+        };
+        CircularWorld: {
+            hello: components["schemas"]["CircularHello"];
+        };
+        Comment: {
+            body: string | null;
+            id: string;
+        };
+        CommentTestingBasicSerializerRef: {
+            howyadoin: components["schemas"]["BalloonLatexSummary"];
+        };
+        CustomSchema: string;
         Pet: {
             id: string;
             name: string | null;
         };
         Post: {
-            id: string;
             body: string | null;
-            explicitlyOmittedFromParamSafeColumns: string | null;
             comments: components["schemas"]["Comment"][];
+            explicitlyOmittedFromParamSafeColumns: string | null;
+            id: string;
         };
         PostWithComments: {
-            id: string;
             body: string | null;
             comments: components["schemas"]["Comment"][];
+            id: string;
         };
         User: {
-            id: number;
             email: string;
+            id: number;
             name: string | null;
         };
         UserExtra: {
-            id: number;
             howyadoin: {
                 name?: string;
                 stuff?: string[];
@@ -1465,6 +1575,7 @@ export interface components {
                     nested2?: number[];
                 };
             };
+            id: number;
             nicknames: string[] | null;
         };
         UserSummary: {
@@ -1479,8 +1590,9 @@ export interface components {
                 [key: string]: string[];
             };
         };
-        World: {
-            hello: components["schemas"]["Hello"];
+        ViewModelsMyViewModel: {
+            favoriteNumber: number | null;
+            name: string | null;
         };
     };
     responses: {

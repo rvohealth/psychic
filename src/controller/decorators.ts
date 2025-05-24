@@ -1,12 +1,6 @@
-import {
-  DecoratorContext,
-  DreamSerializable,
-  DreamSerializableArray,
-  DreamSerializer,
-  ViewModel,
-  ViewModelClass,
-} from '@rvoh/dream'
+import { DecoratorContext, DreamSerializable, DreamSerializableArray } from '@rvoh/dream'
 import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint.js'
+import isSerializable from './helpers/isSerializable.js'
 import { ControllerHook } from './hooks.js'
 import PsychicController from './index.js'
 
@@ -122,22 +116,5 @@ export function OpenAPI(
         }
       }
     })
-  }
-}
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isSerializable(dreamOrSerializerClass: any) {
-  return (
-    Array.isArray(dreamOrSerializerClass) ||
-    hasSerializersGetter(dreamOrSerializerClass as ViewModelClass) ||
-    !!(dreamOrSerializerClass as typeof DreamSerializer)?.isDreamSerializer
-  )
-}
-
-function hasSerializersGetter(dreamOrSerializerClass: ViewModelClass): boolean {
-  try {
-    return !!(dreamOrSerializerClass?.prototype as ViewModel)?.serializers
-  } catch {
-    return false
   }
 }

@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { PsychicApp, PsychicServer } from '../../../../src/index.js'
+import { SerializerCasing } from '@rvoh/dream'
+import { PsychicServer } from '../../../../src/index.js'
 import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint.js'
 import { RouteConfig } from '../../../../src/router/route-manager.js'
 import ApiPetsController from '../../../../test-app/src/app/controllers/Api/PetsController.js'
@@ -10,7 +11,7 @@ import Pet from '../../../../test-app/src/app/models/Pet.js'
 import Post from '../../../../test-app/src/app/models/Post.js'
 import User from '../../../../test-app/src/app/models/User.js'
 import {
-  CommentTestingDoubleShorthandSerializer,
+  CommentTestingDecimalShorthandSerializer,
   CommentTestingStringSerializer,
 } from '../../../../test-app/src/app/serializers/CommentSerializer.js'
 import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer.js'
@@ -21,6 +22,19 @@ import initializePsychicApp from '../../../../test-app/src/cli/helpers/initializ
 
 describe('OpenapiEndpointRenderer', () => {
   let routes: RouteConfig[]
+
+  const defaultToPathObjectOpts: {
+    openapiName: string
+    casing: SerializerCasing
+    schemaDelimiter: string
+    suppressResponseEnums: boolean
+  } = {
+    openapiName: 'default',
+    casing: 'camel',
+    schemaDelimiter: '_',
+    suppressResponseEnums: false,
+  }
+
   beforeAll(async () => {
     await initializePsychicApp()
     const server = new PsychicServer()
@@ -36,7 +50,7 @@ describe('OpenapiEndpointRenderer', () => {
           summary: 'world',
         })
 
-        const response = renderer.toPathObject('default', {}, routes)
+        const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
         expect(response).toEqual(
           expect.objectContaining({
             '/users/howyadoin': expect.objectContaining({
@@ -56,7 +70,7 @@ describe('OpenapiEndpointRenderer', () => {
           security: [{ customToken: [] }],
         })
 
-        const response = renderer.toPathObject('default', {}, routes)
+        const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
         expect(response).toEqual(
           expect.objectContaining({
             '/users/howyadoin': expect.objectContaining({
@@ -75,7 +89,7 @@ describe('OpenapiEndpointRenderer', () => {
           tags: ['hello', 'world'],
         })
 
-        const response = renderer.toPathObject('default', {}, routes)
+        const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
         expect(response).toEqual(
           expect.objectContaining({
             '/users/howyadoin': expect.objectContaining({
@@ -92,7 +106,7 @@ describe('OpenapiEndpointRenderer', () => {
       it('infers the method by examining routes', () => {
         const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show')
 
-        const response = renderer.toPathObject('default', {}, routes)
+        const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
         expect(response).toEqual(
           expect.objectContaining({
             '/users/{id}': expect.objectContaining({
@@ -122,7 +136,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         })
 
-        const response = renderer.toPathObject('default', {}, routes)
+        const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
         expect(response).toEqual(
           expect.objectContaining({
             '/users/{id}': expect.objectContaining({
@@ -154,7 +168,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         })
 
-        const response = renderer.toPathObject('default', {}, routes)
+        const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
         expect(response).toEqual(
           expect.objectContaining({
             '/users/howyadoin': expect.objectContaining({
@@ -182,7 +196,7 @@ describe('OpenapiEndpointRenderer', () => {
               paginate: true,
             })
 
-            const response = renderer.toPathObject('default', {}, routes)
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
             expect(response).toEqual(
               expect.objectContaining({
                 '/users/howyadoin': expect.objectContaining({
@@ -221,7 +235,7 @@ describe('OpenapiEndpointRenderer', () => {
                 paginate: { query: 'page' },
               })
 
-              const response = renderer.toPathObject('default', {}, routes)
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
               expect(response).toEqual(
                 expect.objectContaining({
                   '/users/howyadoin': expect.objectContaining({
@@ -249,7 +263,7 @@ describe('OpenapiEndpointRenderer', () => {
                 paginate: { body: 'page' },
               })
 
-              const response = renderer.toPathObject('default', {}, routes)
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
               expect(response).toEqual(
                 expect.objectContaining({
                   '/users/paginated-post': expect.objectContaining({
@@ -280,8 +294,7 @@ describe('OpenapiEndpointRenderer', () => {
                   paginate: { body: 'page' },
                 })
 
-                const response = renderer.toPathObject('default', {}, routes)
-                // console.dir(response, { depth: null })
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                 expect(response).toEqual(
                   expect.objectContaining({
                     '/users/paginated-post': expect.objectContaining({
@@ -321,7 +334,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response).toEqual(
             expect.objectContaining({
               '/users/post-howyadoin': expect.objectContaining({
@@ -355,7 +368,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response).toEqual(
             expect.objectContaining({
               '/users/howyadoin': expect.objectContaining({
@@ -382,7 +395,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response).toEqual(
             expect.objectContaining({
               '/users/howyadoin': expect.objectContaining({
@@ -419,7 +432,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response).toEqual(
             expect.objectContaining({
               '/users/howyadoin': expect.objectContaining({
@@ -453,7 +466,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response).toEqual(
             expect.objectContaining({
               '/users/howyadoin': expect.objectContaining({
@@ -493,7 +506,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         })
 
-        const response = renderer.toPathObject('default', {}, routes)
+        const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
         expect(response).toEqual(
           expect.objectContaining({
             '/users/howyadoin': expect.objectContaining({
@@ -535,7 +548,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response).toEqual(
             expect.objectContaining({
               '/users/howyadoin': expect.objectContaining({
@@ -578,7 +591,7 @@ describe('OpenapiEndpointRenderer', () => {
               omitDefaultHeaders: true,
             })
 
-            const response = renderer.toPathObject('default', {}, routes)
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
             expect(response).toEqual(
               expect.objectContaining({
                 '/users/howyadoin': expect.objectContaining({
@@ -623,7 +636,7 @@ describe('OpenapiEndpointRenderer', () => {
           },
         })
 
-        const response = renderer.toPathObject('default', {}, routes)
+        const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
         expect(response['/users']!.post.requestBody).toEqual({
           content: {
             'application/json': {
@@ -656,7 +669,7 @@ describe('OpenapiEndpointRenderer', () => {
         it('does not provide request body', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show')
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/{id}']!.get.requestBody).toBeUndefined()
         })
 
@@ -664,7 +677,7 @@ describe('OpenapiEndpointRenderer', () => {
           it('provides request body matching the model', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-            const response = renderer.toPathObject('default', {}, routes)
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
             expect(response['/users']!.post.requestBody).toEqual(
               expect.objectContaining({
                 content: {
@@ -734,7 +747,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('returns string', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = renderer.toPathObject('default', {}, routes)
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                 expect(response['/users']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -755,7 +768,7 @@ describe('OpenapiEndpointRenderer', () => {
                 it('returns string within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = renderer.toPathObject('default', {}, routes)
+                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                   expect(response['/users']!.post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -778,7 +791,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('returns string', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = renderer.toPathObject('default', {}, routes)
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                 expect(response['/users']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -799,7 +812,7 @@ describe('OpenapiEndpointRenderer', () => {
                 it('returns string within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = renderer.toPathObject('default', {}, routes)
+                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                   expect(response['/users']!.post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -825,7 +838,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('returns object schema', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = renderer.toPathObject('default', {}, routes)
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                 expect(response['/users']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -846,7 +859,7 @@ describe('OpenapiEndpointRenderer', () => {
                 it('returns object schema within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = renderer.toPathObject('default', {}, routes)
+                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                   expect(response['/users']!.post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -872,7 +885,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('returns object schema', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = renderer.toPathObject('default', {}, routes)
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                 expect(response['/users']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -893,7 +906,7 @@ describe('OpenapiEndpointRenderer', () => {
                 it('returns object schema within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = renderer.toPathObject('default', {}, routes)
+                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                   expect(response['/users']!.post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -919,7 +932,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('returns an anyOf statement, allowing all types', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = renderer.toPathObject('default', {}, routes)
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                 expect(response['/users']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -946,7 +959,7 @@ describe('OpenapiEndpointRenderer', () => {
                 it('uses the provided type', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = renderer.toPathObject('default', {}, routes)
+                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                   expect(response['/users']!.post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -977,7 +990,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('renders enums as string with enum option', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
-                const response = renderer.toPathObject('default', {}, routes)
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                 expect(response['/pets']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -998,7 +1011,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('renders enum[] as array with string with enum option', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
-                const response = renderer.toPathObject('default', {}, routes)
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                 expect(response['/pets']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -1031,15 +1044,13 @@ describe('OpenapiEndpointRenderer', () => {
             })
 
             context('suppressResponseEnums=true', () => {
-              beforeEach(() => {
-                const psychicApp = PsychicApp.getOrFail()
-                psychicApp.openapi.default!.suppressResponseEnums = true
-              })
-
               it('does not suppress enums for request bodies', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
-                const response = renderer.toPathObject('default', {}, routes)
+                const response = renderer.toPathObject(routes, {
+                  ...defaultToPathObjectOpts,
+                  suppressResponseEnums: true,
+                }).openapi
                 expect(response['/pets']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -1069,7 +1080,7 @@ describe('OpenapiEndpointRenderer', () => {
                   requestBody: null,
                 })
 
-                const response = renderer.toPathObject('default', {}, routes)
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                 expect(response['/api/pets']!.post.requestBody).toBeUndefined()
               })
             })
@@ -1080,7 +1091,7 @@ describe('OpenapiEndpointRenderer', () => {
                   requestBody: { only: ['species', 'name'] },
                 })
 
-                const response = renderer.toPathObject('default', {}, routes)
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                 expect(response['/api/pets']!.post.requestBody).toEqual({
                   content: {
                     'application/json': {
@@ -1105,7 +1116,7 @@ describe('OpenapiEndpointRenderer', () => {
                     requestBody: { only: ['species', 'name'], required: ['species'] },
                   })
 
-                  const response = renderer.toPathObject('default', {}, routes)
+                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                   expect(response['/api/pets']!.post.requestBody).toEqual({
                     content: {
                       'application/json': {
@@ -1132,7 +1143,7 @@ describe('OpenapiEndpointRenderer', () => {
                     requestBody: { for: User, only: ['email'], required: ['email'] },
                   })
 
-                  const response = renderer.toPathObject('default', {}, routes)
+                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
                   expect(response['/api/pets']!.post.requestBody).toEqual({
                     content: {
                       'application/json': {
@@ -1155,7 +1166,7 @@ describe('OpenapiEndpointRenderer', () => {
             it('are omitted', () => {
               const renderer = new OpenapiEndpointRenderer(Post, PetsController, 'myPosts')
 
-              const response = renderer.toPathObject('default', {}, routes)
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
               expect(response['/pets/{id}/my-posts']!.post.requestBody).toEqual(
                 expect.objectContaining({
                   content: {
@@ -1178,7 +1189,7 @@ describe('OpenapiEndpointRenderer', () => {
           it('prvoides request body matching the model', () => {
             const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'update')
 
-            const response = renderer.toPathObject('default', {}, routes)
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
             expect(response['/pets/{id}']!.patch.requestBody).toEqual(
               expect.objectContaining({
                 content: {
@@ -1205,7 +1216,7 @@ describe('OpenapiEndpointRenderer', () => {
         it('system-level default responses are automatically provided', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {})
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               400: {
@@ -1223,7 +1234,7 @@ describe('OpenapiEndpointRenderer', () => {
         it('config-level default responses are automatically provided', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {})
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               490: {
@@ -1243,7 +1254,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               '418': {
@@ -1267,7 +1278,7 @@ describe('OpenapiEndpointRenderer', () => {
               omitDefaultResponses: true,
             })
 
-            const response = renderer.toPathObject('default', {}, routes)
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
             expect(response['/users/howyadoin']!.get.responses).toEqual(
               expect.not.objectContaining({
                 490: {
@@ -1285,7 +1296,7 @@ describe('OpenapiEndpointRenderer', () => {
             status: 204,
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses['200']).toBeUndefined()
           expect(response['/users/howyadoin']!.get.responses['204']).toEqual({
             description: 'Success, no content',
@@ -1308,7 +1319,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses['200']).toBeUndefined()
           expect(response['/users/howyadoin']!.get.responses['204']).toEqual({
             description: 'World',
@@ -1334,7 +1345,7 @@ describe('OpenapiEndpointRenderer', () => {
             serializerKey: 'extra',
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -1358,7 +1369,7 @@ describe('OpenapiEndpointRenderer', () => {
               defaultResponse: { maybeNull: true },
             })
 
-            const response = renderer.toPathObject('default', {}, routes)
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
             expect(response['/users/howyadoin']!.get.responses).toEqual(
               expect.objectContaining({
                 200: {
@@ -1386,7 +1397,7 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -1416,7 +1427,7 @@ describe('OpenapiEndpointRenderer', () => {
         it("uses the provided serializer, converting it's payload shape to openapi format", () => {
           const renderer = new OpenapiEndpointRenderer(MyViewModel, UsersController, 'howyadoin', {})
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -1438,7 +1449,7 @@ describe('OpenapiEndpointRenderer', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", () => {
           const renderer = new OpenapiEndpointRenderer([User, Post], UsersController, 'howyadoin', {})
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -1466,14 +1477,13 @@ describe('OpenapiEndpointRenderer', () => {
       context('with an array of dream serializers passed', () => {
         it("uses the corresponding serializer to the dream model and converts it's payload shape to openapi format", () => {
           const renderer = new OpenapiEndpointRenderer(
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-            [UserSerializer, PostSerializer<any, any>],
+            [UserSerializer, PostSerializer],
             UsersController,
             'howyadoin',
             {},
           )
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -1521,7 +1531,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1567,7 +1577,7 @@ describe('OpenapiEndpointRenderer', () => {
                     {
                       anyOf: [
                         {
-                          $serializer: CommentTestingDoubleShorthandSerializer,
+                          $serializer: CommentTestingDecimalShorthandSerializer,
                         },
                         { type: 'null' },
                       ],
@@ -1577,7 +1587,7 @@ describe('OpenapiEndpointRenderer', () => {
               },
             })
 
-            const response = renderer.toPathObject('default', {}, routes)
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
             expect(response['/users/howyadoin']!.get.responses).toEqual(
               expect.objectContaining({
                 201: {
@@ -1592,7 +1602,7 @@ describe('OpenapiEndpointRenderer', () => {
                           {
                             anyOf: [
                               {
-                                $ref: '#/components/schemas/CommentTestingDoubleShorthand',
+                                $ref: '#/components/schemas/CommentTestingDecimalShorthand',
                               },
                               { type: 'null' },
                             ],
@@ -1631,7 +1641,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1687,7 +1697,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1739,7 +1749,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1776,7 +1786,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1802,7 +1812,7 @@ describe('OpenapiEndpointRenderer', () => {
             description: 'world',
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get).toEqual(
             expect.objectContaining({
               summary: 'hello',
@@ -1839,7 +1849,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1901,7 +1911,7 @@ describe('OpenapiEndpointRenderer', () => {
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -1932,7 +1942,7 @@ describe('OpenapiEndpointRenderer', () => {
               },
             })
 
-            const response = renderer.toPathObject('default', {}, routes)
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
             expect(response['/users/howyadoin']!.get.responses).toEqual(
               expect.objectContaining({
                 201: {
@@ -1952,11 +1962,6 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         context('suppressResponseEnums=true', () => {
-          beforeEach(() => {
-            const psychicApp = PsychicApp.getOrFail()
-            psychicApp.openapi.default!.suppressResponseEnums = true
-          })
-
           it('suppresses enums, instead using description to clarify enum options', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
               serializerKey: 'extra',
@@ -1969,7 +1974,10 @@ describe('OpenapiEndpointRenderer', () => {
               },
             })
 
-            const response = renderer.toPathObject('default', {}, routes)
+            const response = renderer.toPathObject(routes, {
+              ...defaultToPathObjectOpts,
+              suppressResponseEnums: true,
+            }).openapi
             expect(response['/users/howyadoin']!.get.responses).toEqual(
               expect.objectContaining({
                 201: {
@@ -1999,7 +2007,7 @@ The following values will be allowed:
             many: true,
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               200: {
@@ -2058,7 +2066,7 @@ The following values will be allowed:
             paginate: true,
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining(expectedPagination),
           )
@@ -2072,7 +2080,7 @@ The following values will be allowed:
               paginate: true,
             })
 
-            const response = renderer.toPathObject('default', {}, routes)
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
             expect(response['/users/howyadoin']!.get.responses).toEqual(
               expect.objectContaining(expectedPagination),
             )
@@ -2115,7 +2123,7 @@ The following values will be allowed:
             },
           })
 
-          const response = renderer.toPathObject('default', {}, routes)
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts).openapi
           expect(response['/users/howyadoin']!.get.responses).toEqual(
             expect.objectContaining({
               201: {
@@ -2174,7 +2182,7 @@ The following values will be allowed:
           },
         )
 
-        expect(renderer.toPathObject('default', {}, routes)).toEqual({
+        expect(renderer.toPathObject(routes, defaultToPathObjectOpts).openapi).toEqual({
           '/openapi/openapi-overrides': expect.objectContaining({
             parameters: [],
             get: expect.objectContaining({

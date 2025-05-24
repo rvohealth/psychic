@@ -6,13 +6,19 @@ import addResourceToRoutes from './helpers/addResourceToRoutes.js'
 export default async function generateResource({
   route,
   fullyQualifiedModelName,
+  options,
   columnsWithTypes,
 }: {
   route: string
   fullyQualifiedModelName: string
+  options: { stiBaseSerializer: boolean }
   columnsWithTypes: string[]
 }) {
-  await generateDream({ fullyQualifiedModelName, columnsWithTypes, options: { serializer: true } })
+  await generateDream({
+    fullyQualifiedModelName,
+    columnsWithTypes,
+    options: { serializer: true, stiBaseSerializer: options.stiBaseSerializer },
+  })
 
   route = pluralize(route)
 

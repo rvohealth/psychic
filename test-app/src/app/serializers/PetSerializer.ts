@@ -1,28 +1,14 @@
-import { Attribute, DreamColumn, DreamSerializer, RendersOne } from '@rvoh/dream'
+import { DreamSerializer } from '@rvoh/dream'
 import Pet from '../models/Pet.js'
-import User from '../models/User.js'
 
-export class PetSummarySerializer extends DreamSerializer {
-  @Attribute(Pet)
-  public id: DreamColumn<Pet, 'id'>
-}
+export const PetSummarySerializer = (data: Pet) => DreamSerializer(Pet, data).attribute('id')
 
-export default class PetSerializer extends PetSummarySerializer {
-  @Attribute(Pet)
-  public name: DreamColumn<Pet, 'name'>
-}
+export default (data: Pet) => PetSummarySerializer(data).attribute('name')
 
-export class PetAdditionalSerializer extends PetSummarySerializer {
-  @Attribute('string')
-  public nickname: 'string'
-}
+export const PetAdditionalSerializer = (data: Pet) =>
+  PetSummarySerializer(data).customAttribute('nickname', () => `nick${data.name}`, { openapi: 'string' })
 
-export class PetWithAssociationSerializer extends DreamSerializer {
-  @RendersOne(User)
-  public user: User
-}
+export const PetWithAssociationSerializer = (data: Pet) => DreamSerializer(Pet, data).rendersOne('user')
 
-export class PetWithFlattenedAssociationSerializer extends DreamSerializer {
-  @RendersOne(User, { serializerKey: 'withFlattenedPost' })
-  public user: User
-}
+export const PetWithFlattenedAssociationSerializer = (data: Pet) =>
+  DreamSerializer(Pet, data).rendersOne('user', { serializerKey: 'withFlattenedPost' })

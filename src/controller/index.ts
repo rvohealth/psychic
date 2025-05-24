@@ -1,6 +1,16 @@
-import { Dream, DreamApp, DreamParamSafeAttributes, DreamSerializer, GlobalNameNotSet } from '@rvoh/dream'
+import {
+  Dream,
+  DreamApp,
+  DreamModelSerializerType,
+  DreamParamSafeAttributes,
+  GlobalNameNotSet,
+  isDreamSerializer,
+  SerializerRenderer,
+  SimpleObjectSerializerType,
+} from '@rvoh/dream'
 import { Request, Response } from 'express'
 import { ControllerHook } from '../controller/hooks.js'
+import ParamValidationError from '../error/controller/ParamValidationError.js'
 import HttpStatusBadGateway from '../error/http/BadGateway.js'
 import HttpStatusBadRequest from '../error/http/BadRequest.js'
 import HttpStatusConflict from '../error/http/Conflict.js'
@@ -41,7 +51,6 @@ import Params, {
   ValidatedReturnType,
 } from '../server/params.js'
 import Session, { CustomSessionCookieOptions } from '../session/index.js'
-import ParamValidationError from '../error/controller/ParamValidationError.js'
 import isPaginatedResult from './helpers/isPaginatedResult.js'
 
 type SerializerResult = {
@@ -149,7 +158,7 @@ export default class PsychicController {
    */
   public static serializes(ModelClass: typeof Dream) {
     return {
-      with: (SerializerClass: typeof DreamSerializer) => {
+      with: (SerializerClass: DreamModelSerializerType | SimpleObjectSerializerType) => {
         controllerSerializerIndex.add(this, SerializerClass, ModelClass)
         return this
       },
@@ -343,7 +352,7 @@ export default class PsychicController {
     return this.session.clearCookie(this.config.sessionCookieName)
   }
 
-  private singleObjectJson<T>(data: T, opts: RenderOptions): T | SerializerResult {
+  private singleObjectJson<T>(data: T, opts: RenderOptions): T | SerializerResult | null {
     if (!data) return data
     const dreamApp = DreamApp.getOrFail()
     const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
@@ -351,9 +360,24 @@ export default class PsychicController {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
     if (lookup?.length) {
-      const serializerClass = lookup?.[1]
-      if (typeof serializerClass === 'function' && serializerClass.isDreamSerializer) {
-        return new serializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
+      const serializer = lookup?.[1]
+      if (isDreamSerializer(serializer)) {
+        return new SerializerRenderer(
+          // passthrough data going into the serializer is the argument that gets
+          // used in the custom attribute callback function
+          serializer(data, this.defaultSerializerPassthrough),
+
+          // passthrough data must be passed both into the serializer and the SerializerRenderer
+          // because, if the serializer does accept passthrough data, then passing it in is how
+          // it gets into the serializer, but if it does not accept passthrough data, and therefore
+          // does not pass it into the call to DreamSerializer/ObjectSerializer,
+          // then it would be lost to serializers rendered via rendersOne/Many, and SerializerRenderer
+          // handles passing its passthrough data into those
+          this.defaultSerializerPassthrough,
+          {
+            casing: 'camel',
+          },
+        ).render()
       }
     } else {
       const serializerKey =
@@ -365,9 +389,24 @@ export default class PsychicController {
         ] as string | undefined
 
       if (serializerKey && Object.prototype.hasOwnProperty.call(dreamApp.serializers, serializerKey)) {
-        const serializerClass = dreamApp.serializers[serializerKey]
-        if (typeof serializerClass === 'function' && serializerClass.isDreamSerializer) {
-          return new serializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
+        const serializer = dreamApp.serializers[serializerKey]
+        if (serializer && isDreamSerializer(serializer)) {
+          return new SerializerRenderer(
+            // passthrough data going into the serializer is the argument that gets
+            // used in the custom attribute callback function
+            serializer(data, this.defaultSerializerPassthrough),
+
+            // passthrough data must be passed both into the serializer and the SerializerRenderer
+            // because, if the serializer does accept passthrough data, then passing it in is how
+            // it gets into the serializer, but if it does not accept passthrough data, and therefore
+            // does not pass it into the call to DreamSerializer/ObjectSerializer,
+            // then it would be lost to serializers rendered via rendersOne/Many, and SerializerRenderer
+            // handles passing its passthrough data into those
+            this.defaultSerializerPassthrough,
+            {
+              casing: 'camel',
+            },
+          ).render()
         } else {
           throw new Error(
             `
@@ -723,11 +762,15 @@ The key in question is: "${serializerKey}"`,
 }
 
 export class ControllerSerializerIndex {
-  public associations: [typeof PsychicController, typeof DreamSerializer, typeof Dream][] = []
+  public associations: [
+    typeof PsychicController,
+    DreamModelSerializerType | SimpleObjectSerializerType,
+    typeof Dream,
+  ][] = []
 
   public add(
     ControllerClass: typeof PsychicController,
-    SerializerClass: typeof DreamSerializer,
+    SerializerClass: DreamModelSerializerType | SimpleObjectSerializerType,
     ModelClass: typeof Dream,
   ) {
     this.associations.push([ControllerClass, SerializerClass, ModelClass])
@@ -741,7 +784,7 @@ export class ControllerSerializerIndex {
 
   public lookupSerializer(
     ControllerClass: typeof PsychicController,
-    SerializerClass: typeof DreamSerializer,
+    SerializerClass: DreamModelSerializerType | SimpleObjectSerializerType,
   ) {
     return this.associations.find(
       association => association[0] === ControllerClass && association[1] === SerializerClass,

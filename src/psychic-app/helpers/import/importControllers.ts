@@ -59,7 +59,7 @@ export default async function importControllers(
 }
 
 export function getControllersOrFail() {
-  if (!_controllers) throw new Error('Must call loadModels before calling getModelsOrFail')
+  if (!_controllers) throw new Error('Must call importControllers before calling getControllersOrFail')
   return _controllers
 }
 

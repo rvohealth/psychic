@@ -26,7 +26,8 @@ describe('OpenapiAppRenderer', () => {
           },
         })
 
-        expect(response.default!.paths['/greeter/justforspecs']).toEqual(
+        const result = response.default!.paths['/greeter/justforspecs']
+        expect(result).toEqual(
           expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             parameters: expect.arrayContaining([
@@ -191,10 +192,10 @@ describe('OpenapiAppRenderer', () => {
                         items: {
                           anyOf: [
                             {
-                              $ref: '#/components/schemas/Latex',
+                              $ref: '#/components/schemas/BalloonLatex',
                             },
                             {
-                              $ref: '#/components/schemas/Mylar',
+                              $ref: '#/components/schemas/BalloonMylar',
                             },
                           ],
                         },
@@ -222,10 +223,10 @@ describe('OpenapiAppRenderer', () => {
                         items: {
                           anyOf: [
                             {
-                              $ref: '#/components/schemas/Latex',
+                              $ref: '#/components/schemas/BalloonLatex',
                             },
                             {
-                              $ref: '#/components/schemas/Mylar',
+                              $ref: '#/components/schemas/BalloonMylar',
                             },
                             {
                               $ref: '#/components/schemas/Pet',
@@ -256,16 +257,16 @@ describe('OpenapiAppRenderer', () => {
                         items: {
                           anyOf: [
                             {
-                              $ref: '#/components/schemas/Latex',
+                              $ref: '#/components/schemas/BalloonLatex',
                             },
                             {
-                              $ref: '#/components/schemas/Mylar',
-                            },
-                            {
-                              $ref: '#/components/schemas/MyViewModel',
+                              $ref: '#/components/schemas/BalloonMylar',
                             },
                             {
                               $ref: '#/components/schemas/Pet',
+                            },
+                            {
+                              $ref: '#/components/schemas/ViewModelsMyViewModel',
                             },
                           ],
                         },
@@ -292,10 +293,10 @@ describe('OpenapiAppRenderer', () => {
                       schema: {
                         anyOf: [
                           {
-                            $ref: '#/components/schemas/Latex',
+                            $ref: '#/components/schemas/BalloonLatex',
                           },
                           {
-                            $ref: '#/components/schemas/Mylar',
+                            $ref: '#/components/schemas/BalloonMylar',
                           },
                         ],
                       },
@@ -350,125 +351,165 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
-        expect(response.default!.components).toEqual(
+        expect(response.default!.components.schemas).toEqual(
           expect.objectContaining({
-            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            schemas: expect.objectContaining({
-              UserExtra: {
-                type: 'object',
-                required: ['id', 'howyadoin', 'nicknames'],
-                properties: {
-                  id: {
-                    type: 'integer',
+            UserExtra: {
+              type: 'object',
+              required: ['howyadoin', 'id', 'nicknames'],
+              properties: {
+                id: {
+                  type: 'integer',
+                },
+                nicknames: {
+                  type: ['array', 'null'],
+                  items: {
+                    type: 'string',
                   },
-                  nicknames: {
-                    type: ['array', 'null'],
-                    items: {
+                },
+                howyadoin: {
+                  type: 'object',
+                  properties: {
+                    name: {
                       type: 'string',
                     },
-                  },
-                  howyadoin: {
-                    type: 'object',
-                    properties: {
-                      name: {
-                        type: 'string',
-                      },
-                      stuff: {
-                        type: 'array',
-                        items: {
-                          type: 'string',
-                        },
-                      },
-                      nestedStuff: {
-                        type: 'object',
-                        properties: {
-                          nested1: {
-                            type: 'boolean',
-                          },
-                          nested2: {
-                            type: 'array',
-                            items: {
-                              type: 'number',
-                              format: 'decimal',
-                            },
-                          },
-                        },
-                      },
-                    },
-                  },
-                },
-              },
-
-              UserWithPosts: {
-                type: 'object',
-                required: ['id', 'posts'],
-                properties: {
-                  id: { type: 'integer' },
-                  posts: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/PostWithComments' },
-                  },
-                },
-              },
-
-              PostWithComments: {
-                type: 'object',
-                required: ['id', 'body', 'comments'],
-                properties: {
-                  id: { type: 'string' },
-                  body: { type: ['string', 'null'] },
-                  comments: {
-                    type: 'array',
-                    items: { $ref: '#/components/schemas/Comment' },
-                  },
-                },
-              },
-
-              Comment: {
-                type: 'object',
-                required: ['id', 'body'],
-                properties: {
-                  id: { type: 'string' },
-                  body: { type: ['string', 'null'] },
-                },
-              },
-
-              CommentTestingBasicSerializerRef: {
-                type: 'object',
-                required: ['howyadoin'],
-                properties: {
-                  howyadoin: {
-                    $ref: '#/components/schemas/CommentTestingDoubleShorthand',
-                  },
-                },
-              },
-
-              CommentTestingDoubleShorthand: {
-                type: 'object',
-                required: ['howyadoin'],
-                properties: { howyadoin: { type: 'number', format: 'double' } },
-              },
-
-              ValidationErrors: {
-                type: 'object',
-                properties: {
-                  errors: {
-                    type: 'object',
-                    additionalProperties: {
+                    stuff: {
                       type: 'array',
                       items: {
                         type: 'string',
                       },
                     },
+                    nestedStuff: {
+                      type: 'object',
+                      properties: {
+                        nested1: {
+                          type: 'boolean',
+                        },
+                        nested2: {
+                          type: 'array',
+                          items: {
+                            type: 'number',
+                            format: 'decimal',
+                          },
+                        },
+                      },
+                    },
                   },
                 },
               },
+            },
+          }),
+        )
 
-              CustomSchema: {
-                type: 'string',
+        expect(response.default!.components.schemas).toEqual(
+          expect.objectContaining({
+            UserWithPosts: {
+              type: 'object',
+              required: ['id', 'posts'],
+              properties: {
+                id: { type: 'integer' },
+                posts: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/PostWithComments' },
+                },
               },
-            }),
+            },
+          }),
+        )
 
+        expect(response.default!.components.schemas).toEqual(
+          expect.objectContaining({
+            PostWithComments: {
+              type: 'object',
+              required: ['body', 'comments', 'id'],
+              properties: {
+                id: { type: 'string' },
+                body: { type: ['string', 'null'] },
+                comments: {
+                  type: 'array',
+                  items: { $ref: '#/components/schemas/Comment' },
+                },
+              },
+            },
+          }),
+        )
+
+        expect(response.default!.components.schemas).toEqual(
+          expect.objectContaining({
+            Comment: {
+              type: 'object',
+              required: ['body', 'id'],
+              properties: {
+                id: { type: 'string' },
+                body: { type: ['string', 'null'] },
+              },
+            },
+          }),
+        )
+
+        expect(response.default!.components.schemas).toEqual(
+          expect.objectContaining({
+            CommentTestingBasicSerializerRef: {
+              type: 'object',
+              required: ['howyadoin'],
+              properties: {
+                howyadoin: {
+                  $ref: '#/components/schemas/BalloonLatexSummary',
+                },
+              },
+            },
+          }),
+        )
+
+        expect(response.default!.components.schemas).toEqual(
+          expect.objectContaining({
+            BalloonLatex: {
+              properties: {
+                color: {
+                  enum: ['blue', 'green', 'red'],
+                  type: ['string', 'null'],
+                },
+                id: {
+                  type: 'string',
+                },
+                latexOnlyAttr: {
+                  type: 'string',
+                },
+              },
+              required: ['color', 'id', 'latexOnlyAttr'],
+              type: 'object',
+            },
+          }),
+        )
+
+        expect(response.default!.components.schemas).toEqual(
+          expect.objectContaining({
+            ValidationErrors: {
+              type: 'object',
+              properties: {
+                errors: {
+                  type: 'object',
+                  additionalProperties: {
+                    type: 'array',
+                    items: {
+                      type: 'string',
+                    },
+                  },
+                },
+              },
+            },
+          }),
+        )
+
+        expect(response.default!.components.schemas).toEqual(
+          expect.objectContaining({
+            CustomSchema: {
+              type: 'string',
+            },
+          }),
+        )
+
+        expect(response.default!.components).toEqual(
+          expect.objectContaining({
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             responses: expect.objectContaining({
               CustomResponse: {

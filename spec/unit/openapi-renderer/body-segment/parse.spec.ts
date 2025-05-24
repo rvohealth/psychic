@@ -1,20 +1,27 @@
+import { SerializerCasing } from '@rvoh/dream'
 import OpenapiBodySegmentRenderer, {
   OpenapiBodySegment,
+  OpenapiBodyTarget,
 } from '../../../../src/openapi-renderer/body-segment.js'
-import ApplicationController from '../../../../test-app/src/app/controllers/ApplicationController.js'
 
 describe('OpenapiBodySegmentRenderer', () => {
+  const defaultBodySegmentRendererOpts: {
+    openapiName: string
+    schemaDelimiter: string
+    casing: SerializerCasing
+    suppressResponseEnums: boolean
+    target: OpenapiBodyTarget
+  } = {
+    openapiName: 'default',
+    casing: 'camel',
+    schemaDelimiter: '_',
+    suppressResponseEnums: false,
+    target: 'response',
+  }
+
   describe('#parse', () => {
     const subject = (bodySegment: OpenapiBodySegment) =>
-      new OpenapiBodySegmentRenderer({
-        openapiName: 'default',
-        controllerClass: ApplicationController,
-        bodySegment,
-        serializers: {},
-        schemaDelimeter: '',
-        processedSchemas: {},
-        target: 'response',
-      }).parse().results
+      new OpenapiBodySegmentRenderer(bodySegment, defaultBodySegmentRendererOpts).render().openapi
 
     it('can handle primitive types', () => {
       expect(subject('string')).toEqual({ type: 'string' })
@@ -26,7 +33,6 @@ describe('OpenapiBodySegmentRenderer', () => {
     it('can handle computed types', () => {
       expect(subject('date')).toEqual({ type: 'string', format: 'date' })
       expect(subject('date-time')).toEqual({ type: 'string', format: 'date-time' })
-      expect(subject('double')).toEqual({ type: 'number', format: 'double' })
       expect(subject('decimal')).toEqual({ type: 'number', format: 'decimal' })
     })
 
@@ -40,7 +46,6 @@ describe('OpenapiBodySegmentRenderer', () => {
         expect(subject({ type: 'boolean' })).toEqual({ type: 'boolean' })
         expect(subject({ type: 'number' })).toEqual({ type: 'number' })
         expect(subject({ type: 'integer' })).toEqual({ type: 'integer' })
-        expect(subject({ type: 'double' })).toEqual({ type: 'number', format: 'double' })
         expect(subject({ type: 'decimal' })).toEqual({ type: 'number', format: 'decimal' })
         expect(subject({ type: 'date' })).toEqual({ type: 'string', format: 'date' })
         expect(subject({ type: 'date-time' })).toEqual({ type: 'string', format: 'date-time' })
@@ -51,10 +56,7 @@ describe('OpenapiBodySegmentRenderer', () => {
         expect(subject({ type: 'boolean[]' })).toEqual({ type: 'array', items: { type: 'boolean' } })
         expect(subject({ type: 'number[]' })).toEqual({ type: 'array', items: { type: 'number' } })
         expect(subject({ type: 'integer[]' })).toEqual({ type: 'array', items: { type: 'integer' } })
-        expect(subject({ type: 'double[]' })).toEqual({
-          type: 'array',
-          items: { type: 'number', format: 'double' },
-        })
+
         expect(subject({ type: 'decimal[]' })).toEqual({
           type: 'array',
           items: { type: 'number', format: 'decimal' },
@@ -92,7 +94,6 @@ describe('OpenapiBodySegmentRenderer', () => {
         expect(subject('boolean[]')).toEqual({ type: 'array', items: { type: 'boolean' } })
         expect(subject('number[]')).toEqual({ type: 'array', items: { type: 'number' } })
         expect(subject('integer[]')).toEqual({ type: 'array', items: { type: 'integer' } })
-        expect(subject('double[]')).toEqual({ type: 'array', items: { type: 'number', format: 'double' } })
         expect(subject('decimal[]')).toEqual({ type: 'array', items: { type: 'number', format: 'decimal' } })
         expect(subject('date[]')).toEqual({ type: 'array', items: { type: 'string', format: 'date' } })
         expect(subject('date-time[]')).toEqual({
@@ -106,10 +107,7 @@ describe('OpenapiBodySegmentRenderer', () => {
         expect(subject({ type: 'boolean[]' })).toEqual({ type: 'array', items: { type: 'boolean' } })
         expect(subject({ type: 'number[]' })).toEqual({ type: 'array', items: { type: 'number' } })
         expect(subject({ type: 'integer[]' })).toEqual({ type: 'array', items: { type: 'integer' } })
-        expect(subject({ type: 'double[]' })).toEqual({
-          type: 'array',
-          items: { type: 'number', format: 'double' },
-        })
+
         expect(subject({ type: 'decimal[]' })).toEqual({
           type: 'array',
           items: { type: 'number', format: 'decimal' },
