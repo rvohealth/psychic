@@ -2,7 +2,6 @@ import {
   DecoratorContext,
   DreamSerializable,
   DreamSerializableArray,
-  DreamSerializer,
   ViewModel,
   ViewModelClass,
 } from '@rvoh/dream'
@@ -130,7 +129,7 @@ function isSerializable(dreamOrSerializerClass: any) {
   return (
     Array.isArray(dreamOrSerializerClass) ||
     hasSerializersGetter(dreamOrSerializerClass as ViewModelClass) ||
-    !!(dreamOrSerializerClass as typeof DreamSerializer)?.isDreamSerializer
+    !!(dreamOrSerializerClass as SerializerType<any>)?.isDreamSerializer
   )
 }
 

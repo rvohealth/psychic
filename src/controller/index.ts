@@ -1,6 +1,7 @@
-import { Dream, DreamApp, DreamParamSafeAttributes, DreamSerializer, GlobalNameNotSet } from '@rvoh/dream'
+import { Dream, DreamApp, DreamParamSafeAttributes, GlobalNameNotSet } from '@rvoh/dream'
 import { Request, Response } from 'express'
 import { ControllerHook } from '../controller/hooks.js'
+import ParamValidationError from '../error/controller/ParamValidationError.js'
 import HttpStatusBadGateway from '../error/http/BadGateway.js'
 import HttpStatusBadRequest from '../error/http/BadRequest.js'
 import HttpStatusConflict from '../error/http/Conflict.js'
@@ -41,7 +42,6 @@ import Params, {
   ValidatedReturnType,
 } from '../server/params.js'
 import Session, { CustomSessionCookieOptions } from '../session/index.js'
-import ParamValidationError from '../error/controller/ParamValidationError.js'
 import isPaginatedResult from './helpers/isPaginatedResult.js'
 
 type SerializerResult = {
@@ -149,7 +149,7 @@ export default class PsychicController {
    */
   public static serializes(ModelClass: typeof Dream) {
     return {
-      with: (SerializerClass: typeof DreamSerializer) => {
+      with: (SerializerClass: SerializerType<any>) => {
         controllerSerializerIndex.add(this, SerializerClass, ModelClass)
         return this
       },
@@ -723,11 +723,11 @@ The key in question is: "${serializerKey}"`,
 }
 
 export class ControllerSerializerIndex {
-  public associations: [typeof PsychicController, typeof DreamSerializer, typeof Dream][] = []
+  public associations: [typeof PsychicController, SerializerType<any>, typeof Dream][] = []
 
   public add(
     ControllerClass: typeof PsychicController,
-    SerializerClass: typeof DreamSerializer,
+    SerializerClass: SerializerType<any>,
     ModelClass: typeof Dream,
   ) {
     this.associations.push([ControllerClass, SerializerClass, ModelClass])
@@ -739,10 +739,7 @@ export class ControllerSerializerIndex {
     )
   }
 
-  public lookupSerializer(
-    ControllerClass: typeof PsychicController,
-    SerializerClass: typeof DreamSerializer,
-  ) {
+  public lookupSerializer(ControllerClass: typeof PsychicController, SerializerClass: SerializerType<any>) {
     return this.associations.find(
       association => association[0] === ControllerClass && association[1] === SerializerClass,
     )

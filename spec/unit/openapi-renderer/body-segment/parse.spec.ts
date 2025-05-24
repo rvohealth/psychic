@@ -14,7 +14,7 @@ describe('OpenapiBodySegmentRenderer', () => {
         schemaDelimeter: '',
         processedSchemas: {},
         target: 'response',
-      }).parse().results
+      }).render().results
 
     it('can handle primitive types', () => {
       expect(subject('string')).toEqual({ type: 'string' })

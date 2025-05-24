@@ -1,10 +1,8 @@
-import { DreamSerializer } from '@rvoh/dream'
-
 // We can't support multiple polymorphic RendersOne associations at the openapi level
 // because the resulting openapi types will be combinatorially inflated.
 export default class CannotFlattenMultiplePolymorphicRendersOneAssociations extends Error {
   constructor(
-    private serializerClass: typeof DreamSerializer,
+    private serializerClass: SerializerType<any>,
     private associationName: string,
   ) {
     super()

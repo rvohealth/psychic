@@ -1,6 +1,7 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Dream,
-  DreamSerializer,
+  OpenapiPrimitiveTypes,
   OpenapiSchemaArray,
   OpenapiSchemaBase,
   OpenapiSchemaBody,
@@ -19,26 +20,25 @@ import {
   OpenapiSchemaShorthandExpressionOneOf,
   OpenapiSchemaShorthandExpressionSerializableRef,
   OpenapiSchemaShorthandExpressionSerializerRef,
+  OpenapiShorthandAllTypes,
   OpenapiShorthandPrimitiveTypes,
+  SerializerOpenapiRenderer,
+  SerializerType,
   inferSerializerFromDreamOrViewModel,
+  maybeNullOpenapiShorthandToOpenapiShorthand,
   openapiShorthandPrimitiveTypes,
 } from '@rvoh/dream'
 import PsychicController from '../controller/index.js'
+import isArrayParamName from '../helpers/isArrayParamName.js'
 import PsychicApp from '../psychic-app/index.js'
 import isBlankDescription from './helpers/isBlankDescription.js'
-import primitiveOpenapiStatementToOpenapi, {
-  MaybeNullPrimitive,
-  MaybeNullPrimitiveOrObjectOrArray,
-  maybeNullPrimitiveToPrimitive,
-} from './helpers/primitiveOpenapiStatementToOpenapi.js'
+import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import schemaToRef from './helpers/schemaToRef.js'
-import OpenapiSerializerRenderer from './serializer.js'
-import isArrayParamName from '../helpers/isArrayParamName.js'
 
 export default class OpenapiBodySegmentRenderer {
   private controllerClass: typeof PsychicController
   private bodySegment: OpenapiBodySegment
-  private serializers: { [key: string]: typeof DreamSerializer }
+  private serializers: { [key: string]: SerializerType<any> }
   private schemaDelimeter: string
   private computedExtraComponents: { [key: string]: OpenapiSchemaObject } = {}
   private processedSchemas: Record<string, boolean>
@@ -63,7 +63,7 @@ export default class OpenapiBodySegmentRenderer {
     openapiName: string
     controllerClass: typeof PsychicController
     bodySegment: OpenapiBodySegment
-    serializers: { [key: string]: typeof DreamSerializer }
+    serializers: { [key: string]: SerializerType<any> }
     schemaDelimeter: string
     processedSchemas: Record<string, boolean>
     target: OpenapiBodyTarget
@@ -78,10 +78,10 @@ export default class OpenapiBodySegmentRenderer {
   }
 
   /**
-   * returns the shorthanded body segment, parsed
+   * returns the shorthanded body segment, rendered
    * to the appropriate openapi shape
    */
-  public parse(): OpenapiEndpointParseResults {
+  public render(): OpenapiEndpointParseResults {
     const results = this.recursivelyParseBody(this.bodySegment)
     return {
       results,
@@ -160,7 +160,7 @@ export default class OpenapiBodySegmentRenderer {
     const serializableRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializableRef
 
     if (isBlankDescription(bodySegment)) return 'blank_description'
-    if (serializerRefBodySegment.$serializer) return '$serializer'
+    if (typeof serializerRefBodySegment.$serializer === 'function') return '$serializer'
     if (serializableRefBodySegment.$serializable) return '$serializable'
     if (refBodySegment.$ref) return '$ref'
     if (schemaRefBodySegment.$schema) return '$schema'
@@ -170,8 +170,11 @@ export default class OpenapiBodySegmentRenderer {
     if (this.maybeNullTypeToType(objectBodySegment) === 'object') return 'object'
     else if (this.maybeNullTypeToType(arrayBodySegment) === 'array') return 'array'
     else {
-      const primitiveString = maybeNullPrimitiveToPrimitive(bodySegment as MaybeNullPrimitive)
-      if (openapiShorthandPrimitiveTypes.includes(primitiveString)) return 'openapi_primitive_literal'
+      const primitiveString = maybeNullOpenapiShorthandToOpenapiShorthand(
+        bodySegment as OpenapiPrimitiveTypes,
+      )
+      if (typeof primitiveString === 'string' && openapiShorthandPrimitiveTypes.includes(primitiveString))
+        return 'openapi_primitive_literal'
 
       if (typeof bodySegment === 'object') {
         if (
@@ -190,7 +193,7 @@ export default class OpenapiBodySegmentRenderer {
     if (bodySegment === undefined) return undefined
     if (typeof bodySegment === 'string') return bodySegment
 
-    const safeBodySegment = bodySegment as { type: MaybeNullPrimitiveOrObjectOrArray }
+    const safeBodySegment = bodySegment as { type: OpenapiShorthandAllTypes }
     const openapiType = safeBodySegment.type
 
     if (Array.isArray(openapiType)) {
@@ -321,14 +324,14 @@ export default class OpenapiBodySegmentRenderer {
       (propertySegment as OpenapiSchemaExpressionAllOf).allOf ||
       (propertySegment as OpenapiSchemaExpressionAnyOf).anyOf
     ) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
       return this.recursivelyParseBody(propertySegment as any) as unknown as OpenapiSchemaProperties
     }
 
     const objectBodySegment = propertySegment as unknown as OpenapiSchemaObjectBase
     Object.keys(objectBodySegment || {}).forEach(key => {
       ;(propertySegment as Record<string, OpenapiSchemaBody | OpenapiSchemaBodyShorthand>)[key] =
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
         this.recursivelyParseBody((objectBodySegment as any)[key])
     })
 
@@ -352,7 +355,7 @@ export default class OpenapiBodySegmentRenderer {
    * recursively parses a primitive object type (i.e. { type: 'string[]' })
    */
   private primitiveObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaPrimitiveGeneric {
-    const safeBodySegment = bodySegment as Extract<OpenapiSchemaBase, { type: MaybeNullPrimitive }>
+    const safeBodySegment = bodySegment as Extract<OpenapiSchemaBase, { type: OpenapiPrimitiveTypes }>
 
     if (this.typeIsOpenapiArrayPrimitive(safeBodySegment.type)) {
       return this.applyConfigurationOptions(
@@ -371,12 +374,12 @@ export default class OpenapiBodySegmentRenderer {
     }
   }
 
-  private typeIsOpenapiArrayPrimitive(openapiType: MaybeNullPrimitive): boolean {
-    return isArrayParamName(maybeNullPrimitiveToPrimitive(openapiType))
+  private typeIsOpenapiArrayPrimitive(openapiType: OpenapiPrimitiveTypes): boolean {
+    return isArrayParamName(maybeNullOpenapiShorthandToOpenapiShorthand(openapiType))
   }
 
   private applyConfigurationOptions<T>(obj: T): T {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const anyObj = obj as any
     const psychicApp = PsychicApp.getOrFail()
 
@@ -426,39 +429,22 @@ The following values will be allowed:
     bodySegment: OpenapiBodySegment,
   ): OpenapiSchemaExpressionRef | OpenapiSchemaArray | OpenapiSchemaExpressionAllOf {
     const serializerRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializerRef
-    const serializerKey = serializerRefBodySegment.$serializer.openapiName
-
-    this.computedExtraComponents = {
-      ...this.computedExtraComponents,
-      ...new OpenapiSerializerRenderer({
-        openapiName: this.openapiName,
-        controllerClass: this.controllerClass,
-        serializerClass: serializerRefBodySegment.$serializer,
-        serializers: this.serializers,
-        schemaDelimeter: this.schemaDelimeter,
-        processedSchemas: this.processedSchemas,
-        target: this.target,
-      }).parse(),
-    }
+    const serializerRef = new SerializerOpenapiRenderer(serializerRefBodySegment.$serializer).serializerRef
 
     if (serializerRefBodySegment.many) {
       const returnVal = {
         type: serializerRefBodySegment.maybeNull ? ['array', 'null'] : 'array',
-        items: {
-          $ref: `#/components/schemas/${serializerKey}`,
-        },
+        items: serializerRef,
       } as OpenapiSchemaArray
 
       return returnVal
     } else {
       if (serializerRefBodySegment.maybeNull) {
         return {
-          allOf: [{ $ref: `#/components/schemas/${serializerKey}` }, { type: 'null' }],
+          allOf: [serializerRef, { type: 'null' }],
         }
       } else {
-        return {
-          $ref: `#/components/schemas/${serializerKey}`,
-        }
+        return serializerRef
       }
     }
   }
@@ -490,7 +476,6 @@ The following values will be allowed:
    * recursively an unknown_object statement
    */
   private unknownObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaBody {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return this.applyCommonFieldsToPayload(bodySegment as any) as OpenapiSchemaBody
   }
 
@@ -508,12 +493,12 @@ The following values will be allowed:
     }
 
     if (objectCast.description) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       ;(returnObj as any).description = objectCast.description
     }
 
     if (objectCast.summary) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
       ;(returnObj as any).summary = objectCast.summary
     }
 

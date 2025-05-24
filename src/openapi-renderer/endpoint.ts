@@ -1,3 +1,4 @@
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
   Dream,
   DreamApp,
@@ -5,7 +6,6 @@ import {
   DreamOrViewModelClassSerializerKey,
   DreamSerializable,
   DreamSerializableArray,
-  DreamSerializer,
   OpenapiAllTypes,
   OpenapiFormats,
   OpenapiSchemaArray,
@@ -17,26 +17,26 @@ import {
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
   OpenapiSchemaProperties,
-  ViewModel,
+  SerializerCasing,
+  SerializerOpenapiRenderer,
+  SerializerType,
   ViewModelClass,
   compact,
+  inferSerializerFromDreamClassOrViewModelClass,
   sortBy,
 } from '@rvoh/dream'
 import { cloneDeep } from 'lodash-es'
 import PsychicController from '../controller/index.js'
 import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes.js'
-import OpenApiDecoratorModelMissingSerializer from '../error/openapi/OpenApiDecoratorModelMissingSerializer.js'
-import OpenApiDecoratorModelMissingSerializerGetter from '../error/openapi/OpenApiDecoratorModelMissingSerializerGetter.js'
+import OpenApiFailedToLookupSerializerForEndpoint from '../error/openapi/FailedToLookupSerializerForEndpoint.js'
 import PsychicApp from '../psychic-app/index.js'
 import { RouteConfig } from '../router/route-manager.js'
 import { HttpMethod } from '../router/types.js'
 import OpenapiBodySegmentRenderer, { OpenapiBodySegment } from './body-segment.js'
 import { DEFAULT_OPENAPI_RESPONSES } from './defaults.js'
 import openapiRoute from './helpers/openapiRoute.js'
-import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
-import OpenapiSerializerRenderer from './serializer.js'
-import OpenApiFailedToLookupSerializerForEndpoint from '../error/openapi/FailedToLookupSerializerForEndpoint.js'
 import openapiPageParamProperty from './helpers/pageParamOpenapiProperty.js'
+import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import safelyAttachPaginationParamToRequestBodySegment from './helpers/safelyAttachPaginationParamsToBodySegment.js'
 
 export default class OpenapiEndpointRenderer<
@@ -58,8 +58,7 @@ export default class OpenapiEndpointRenderer<
   private omitDefaultHeaders: OpenapiEndpointRendererOpts['omitDefaultHeaders']
   private omitDefaultResponses: OpenapiEndpointRendererOpts['omitDefaultResponses']
   private defaultResponse: OpenapiEndpointRendererOpts['defaultResponse']
-  private serializers: { [key: string]: typeof DreamSerializer }
-  private computedExtraComponents: { [key: string]: OpenapiSchemaObject } = {}
+  private serializers: Record<string, any>
 
   /**
    * instantiates a new OpenapiEndpointRenderer.
@@ -200,37 +199,16 @@ export default class OpenapiEndpointRenderer<
    * final openapi.json output, adding any relevant entries that were uncovered
    * while parsing the responses and provided callback function.
    */
-  public toSchemaObject(
-    openapiName: string,
-    processedSchemas: Record<string, boolean>,
-  ): Record<string, OpenapiSchemaBody> {
-    this.computedExtraComponents = {}
-
-    this.serializers = DreamApp.getOrFail().serializers
-    const serializerClasses = this.getSerializerClasses()
-
-    let output: Record<string, OpenapiSchemaBody> = {}
-
-    ;(serializerClasses || ([] as (typeof DreamSerializer)[])).forEach(serializerClass => {
-      output = {
-        ...output,
-        ...new OpenapiSerializerRenderer({
-          openapiName,
-          controllerClass: this.controllerClass,
-          serializerClass,
-          schemaDelimeter: this.schemaDelimeter(openapiName),
-          serializers: this.serializers,
-          processedSchemas,
-          target: 'response',
-        }).parse(),
-      }
-    })
-
-    // run this to extract all $serializer refs from responses object
-    // and put them into the computedExtraComponents field
-    this.parseResponses(openapiName, processedSchemas)
-
-    return { ...output, ...this.computedExtraComponents }
+  public toSchemaObject(opts: {
+    casing: SerializerCasing
+    processedSchemas: Record<string, boolean>
+    schemaDelimiter: string
+  }): {
+    processedSchemas: Record<string, boolean>
+    renderedSchemas: Record<string, OpenapiSchemaBodyShorthand>
+  } {
+    const serializers = this.getSerializerClasses() ?? ({} as SerializerType<any>[])
+    return serializersToSchemaObjects(serializers, opts)
   }
 
   /**
@@ -412,12 +390,11 @@ export default class OpenapiEndpointRenderer<
           output = {
             ...output,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            schema: this.recursivelyParseBody(
+            schema: this.recursivelyTranslateShorthandIntoOpenapi(
               openapiName,
               queryParam.schema,
               {},
               { target: 'request' },
-              // eslint-disable-next-line @typescript-eslint/no-explicit-any
             ) as any,
           }
         }
@@ -463,14 +440,13 @@ export default class OpenapiEndpointRenderer<
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    let schema = this.recursivelyParseBody(
+    let schema = this.recursivelyTranslateShorthandIntoOpenapi(
       openapiName,
       this.requestBody as OpenapiSchemaBodyShorthand,
       processedSchemas,
       {
         target: 'request',
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
     ) as any
 
     const bodyPageParam = (this.paginate as { body: string })?.body
@@ -675,9 +651,14 @@ export default class OpenapiEndpointRenderer<
             if (metadata?.type) {
               paramsShape.properties = {
                 ...paramsShape.properties,
-                [columnName]: this.recursivelyParseBody(openapiName, metadata.type, processedSchemas, {
-                  target: 'request',
-                }),
+                [columnName]: this.recursivelyTranslateShorthandIntoOpenapi(
+                  openapiName,
+                  metadata.type,
+                  processedSchemas,
+                  {
+                    target: 'request',
+                  },
+                ),
               }
             } else {
               paramsShape.properties = {
@@ -716,9 +697,14 @@ export default class OpenapiEndpointRenderer<
       }
     }
 
-    let processedSchema = this.recursivelyParseBody(openapiName, paramsShape, processedSchemas, {
-      target: 'request',
-    })
+    let processedSchema = this.recursivelyTranslateShorthandIntoOpenapi(
+      openapiName,
+      paramsShape,
+      processedSchemas,
+      {
+        target: 'request',
+      },
+    )
 
     const bodyPageParam = (this.paginate as { body: string })?.body
     if (bodyPageParam) {
@@ -778,13 +764,9 @@ export default class OpenapiEndpointRenderer<
       statusResponse.content = {
         'application/json': {
           // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          schema: this.recursivelyParseBody(
-            openapiName,
-            response,
-            processedSchemas,
-            { target: 'response' },
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ) as any,
+          schema: this.recursivelyTranslateShorthandIntoOpenapi(openapiName, response, processedSchemas, {
+            target: 'response',
+          }) as any,
         },
       }
     })
@@ -865,19 +847,14 @@ export default class OpenapiEndpointRenderer<
    * ```
    */
   private parseSingleEntitySerializerResponseShape(): OpenapiContent {
-    const serializerClass = this.getSerializerClasses()![0]
-    if (serializerClass === undefined)
+    const serializer = this.getSerializerClasses()![0]
+    if (serializer === undefined)
       throw new OpenApiFailedToLookupSerializerForEndpoint(this.controllerClass, this.action)
-
-    const baseSchema = this.baseSchemaForSerializerObject({
-      $ref: `#/components/schemas/${serializerClass.openapiName}`,
-    })
 
     const finalOutput: OpenapiContent = {
       content: {
         'application/json': {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
-          schema: baseSchema as any,
+          schema: new SerializerOpenapiRenderer(serializer).serializerRef,
         },
       },
       description: this.description || this.action,
@@ -945,16 +922,11 @@ export default class OpenapiEndpointRenderer<
 
     const sortedSerializerClasses = sortBy(
       this.getSerializerClasses() || [],
-      serializerClass => serializerClass.openapiName,
+      serializer => new SerializerOpenapiRenderer(serializer).openapiName,
     )
 
-    sortedSerializerClasses.forEach(serializerClass => {
-      const serializerKey = serializerClass.openapiName
-
-      const serializerObject: OpenapiSchemaBody = {
-        $ref: `#/components/schemas/${serializerKey}`,
-      } as OpenapiSchemaBody
-      anyOf.anyOf.push(serializerObject)
+    sortedSerializerClasses.forEach(serializer => {
+      anyOf.anyOf.push(new SerializerOpenapiRenderer(serializer).serializerRef)
     })
 
     const baseSchema = this.many
@@ -967,7 +939,7 @@ export default class OpenapiEndpointRenderer<
     const finalOutput: OpenapiContent = {
       content: {
         'application/json': {
-          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
           schema: baseSchema as any,
         },
       },
@@ -992,12 +964,13 @@ export default class OpenapiEndpointRenderer<
    * recursive function used to parse nested
    * openapi shorthand objects
    */
-  private recursivelyParseBody(
+  private recursivelyTranslateShorthandIntoOpenapi(
     openapiName: string,
     bodySegment: OpenapiBodySegment,
     processedSchemas: Record<string, boolean>,
     { target }: { target: 'request' | 'response' },
   ): OpenapiSchemaBody {
+    // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const { results, extraComponents } = new OpenapiBodySegmentRenderer({
       openapiName,
       controllerClass: this.controllerClass,
@@ -1006,12 +979,13 @@ export default class OpenapiEndpointRenderer<
       schemaDelimeter: this.schemaDelimeter(openapiName),
       processedSchemas,
       target,
-    }).parse()
+    }).render()
 
-    this.computedExtraComponents = {
-      ...this.computedExtraComponents,
-      ...extraComponents,
-    }
+    // TODO: need new way to handle extraComponents
+    // this.computedExtraComponents = {
+    //   ...this.computedExtraComponents,
+    //   ...extraComponents,
+    // }
 
     return results
   }
@@ -1024,38 +998,10 @@ export default class OpenapiEndpointRenderer<
    * attached dream or view model to identify a serializer
    * match.
    */
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  private getSerializerClasses(): (typeof DreamSerializer<any, any>)[] | null {
+
+  private getSerializerClasses(): SerializerType<any>[] | null {
     if (!this.dreamsOrSerializers) return null
-
-    const dreamsOrSerializers = this.expandStiSerializersInDreamsOrSerializers(this.dreamsOrSerializers)
-
-    return compact(dreamsOrSerializers.map(s => this.getSerializerClass(s)))
-  }
-
-  private expandStiSerializersInDreamsOrSerializers(
-    dreamsOrSerializers: DreamsOrSerializersOrViewModels,
-  ): ViewModelClass[] | (typeof DreamSerializer)[] {
-    if (Array.isArray(dreamsOrSerializers))
-      return dreamsOrSerializers.flatMap(
-        dreamOrSerializer =>
-          this.expandStiSerializersInDreamsOrSerializers(
-            dreamOrSerializer as DreamsOrSerializersOrViewModels,
-          ) as ViewModelClass[],
-      )
-
-    if ((dreamsOrSerializers as typeof DreamSerializer).prototype instanceof DreamSerializer)
-      return [dreamsOrSerializers as typeof DreamSerializer]
-
-    if ((dreamsOrSerializers as typeof Dream).prototype instanceof Dream)
-      return this.expandDreamStiClasses(dreamsOrSerializers as typeof Dream) as unknown as ViewModelClass[]
-
-    return [dreamsOrSerializers as ViewModelClass]
-  }
-
-  private expandDreamStiClasses(dreamClass: typeof Dream): (typeof Dream)[] {
-    if (dreamClass['isSTIBase']) return [...dreamClass['extendedBy']!] as (typeof Dream)[]
-    return [dreamClass]
+    return compact([this.dreamsOrSerializers].flat().map(s => this.getSerializerClass(s)))
   }
 
   /**
@@ -1082,31 +1028,13 @@ export default class OpenapiEndpointRenderer<
    * Uses the provided entity to resolve to a serializer class.
    */
   private getSerializerClass(
-    dreamOrSerializerOrViewModel: ViewModelClass | typeof DreamSerializer,
-  ): typeof DreamSerializer | null {
-    const dreamApp = DreamApp.getOrFail()
-    if ((dreamOrSerializerOrViewModel as typeof DreamSerializer).isDreamSerializer) {
-      return dreamOrSerializerOrViewModel as typeof DreamSerializer
-    } else {
-      const modelClass = dreamOrSerializerOrViewModel as ViewModelClass
-      const modelPrototype = modelClass.prototype as ViewModel
-
-      const serializerKey = this.serializerKey || 'default'
-      let serializerGlobalName: string | undefined
-
-      try {
-        serializerGlobalName =
-          modelPrototype.serializers[serializerKey as keyof (typeof modelPrototype)['serializers']]
-      } catch {
-        throw new OpenApiDecoratorModelMissingSerializerGetter(modelClass)
-      }
-
-      if (serializerGlobalName === undefined) {
-        throw new OpenApiDecoratorModelMissingSerializer(modelClass, serializerKey as string)
-      }
-
-      return dreamApp.serializers[serializerGlobalName] ?? null
+    dreamOrSerializerOrViewModel: typeof Dream | ViewModelClass | SerializerType<any>,
+  ): SerializerType<any> | null {
+    if (typeof dreamOrSerializerOrViewModel === 'function') {
+      return dreamOrSerializerOrViewModel as SerializerType<any>
     }
+
+    return inferSerializerFromDreamClassOrViewModelClass(dreamOrSerializerOrViewModel)
   }
 }
 
@@ -1710,5 +1638,54 @@ function statusDescription(status: HttpStatusCodeNumber | HttpStatusCode) {
 
     default:
       return `Status ${status}`
+  }
+}
+
+function serializersToSchemaObjects(
+  serializers: SerializerType<any>[],
+  {
+    casing,
+    processedSchemas,
+    schemaDelimiter,
+  }: {
+    casing: SerializerCasing
+    processedSchemas: Record<string, boolean>
+    schemaDelimiter: string
+  },
+): {
+  processedSchemas: Record<string, boolean>
+  renderedSchemas: Record<string, OpenapiSchemaBodyShorthand>
+} {
+  const renderedSchemas: Record<string, OpenapiSchemaBodyShorthand> = {}
+
+  let dependentOnSerializers: SerializerType<any>[] = []
+
+  serializers = serializers.filter(serializer => {
+    const serializerOpenapiRenderer = new SerializerOpenapiRenderer(serializer)
+    return !processedSchemas[serializerOpenapiRenderer.globalName]
+  })
+
+  serializers.forEach(serializer => {
+    const renderer = new SerializerOpenapiRenderer(serializer, { casing, schemaDelimiter })
+    const globalName = renderer.globalName
+    processedSchemas = { ...processedSchemas, [globalName]: true }
+    const results = renderer.renderedOpenapi(processedSchemas)
+    renderedSchemas[renderer.openapiName] = results.openapi
+    dependentOnSerializers = [...dependentOnSerializers, ...results.referencedSerializers]
+  })
+
+  const recursiveResults = serializersToSchemaObjects(
+    dependentOnSerializers,
+
+    {
+      casing,
+      processedSchemas,
+      schemaDelimiter,
+    },
+  )
+
+  return {
+    processedSchemas: { ...processedSchemas, ...recursiveResults.processedSchemas },
+    renderedSchemas: { ...renderedSchemas, ...recursiveResults.renderedSchemas },
   }
 }
