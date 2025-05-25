@@ -1,5 +1,5 @@
 import { OpenAPI } from '../../../../src/index.js'
-import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer.js'
+import { CommentWithAnyOfArraySerializer } from '../serializers/CommentSerializer.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class GreeterController extends ApplicationController {
@@ -15,7 +15,7 @@ export default class GreeterController extends ApplicationController {
     status: 200,
     responses: {
       200: {
-        $serializer: CommentTestingBasicSerializerRefSerializer,
+        $serializer: CommentWithAnyOfArraySerializer,
       },
     },
   })

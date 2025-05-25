@@ -1,4 +1,14 @@
-import { Dream, DreamApp, DreamParamSafeAttributes, GlobalNameNotSet } from '@rvoh/dream'
+import {
+  Dream,
+  DreamApp,
+  DreamModelSerializerType,
+  DreamParamSafeAttributes,
+  GlobalNameNotSet,
+  isDreamSerializer,
+  SerializerRenderer,
+  SimpleModelSerializerType,
+  ViewModelSerializerType,
+} from '@rvoh/dream'
 import { Request, Response } from 'express'
 import { ControllerHook } from '../controller/hooks.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
@@ -149,7 +159,9 @@ export default class PsychicController {
    */
   public static serializes(ModelClass: typeof Dream) {
     return {
-      with: (SerializerClass: SerializerType<any>) => {
+      with: (
+        SerializerClass: DreamModelSerializerType | ViewModelSerializerType | SimpleModelSerializerType,
+      ) => {
         controllerSerializerIndex.add(this, SerializerClass, ModelClass)
         return this
       },
@@ -343,7 +355,7 @@ export default class PsychicController {
     return this.session.clearCookie(this.config.sessionCookieName)
   }
 
-  private singleObjectJson<T>(data: T, opts: RenderOptions): T | SerializerResult {
+  private singleObjectJson<T>(data: T, opts: RenderOptions): T | SerializerResult | null {
     if (!data) return data
     const dreamApp = DreamApp.getOrFail()
     const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
@@ -352,8 +364,10 @@ export default class PsychicController {
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
     if (lookup?.length) {
       const serializerClass = lookup?.[1]
-      if (typeof serializerClass === 'function' && serializerClass.isDreamSerializer) {
-        return new serializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
+      if (isDreamSerializer(serializerClass)) {
+        return new SerializerRenderer(serializerClass(data, {}), this.defaultSerializerPassthrough, {
+          casing: 'camel',
+        }).render()
       }
     } else {
       const serializerKey =
@@ -366,8 +380,10 @@ export default class PsychicController {
 
       if (serializerKey && Object.prototype.hasOwnProperty.call(dreamApp.serializers, serializerKey)) {
         const serializerClass = dreamApp.serializers[serializerKey]
-        if (typeof serializerClass === 'function' && serializerClass.isDreamSerializer) {
-          return new serializerClass(data).passthrough(this.defaultSerializerPassthrough).render()
+        if (serializerClass && isDreamSerializer(serializerClass)) {
+          return new SerializerRenderer(serializerClass(data, {}), this.defaultSerializerPassthrough, {
+            casing: 'camel',
+          }).render()
         } else {
           throw new Error(
             `
@@ -723,11 +739,15 @@ The key in question is: "${serializerKey}"`,
 }
 
 export class ControllerSerializerIndex {
-  public associations: [typeof PsychicController, SerializerType<any>, typeof Dream][] = []
+  public associations: [
+    typeof PsychicController,
+    DreamModelSerializerType | ViewModelSerializerType | SimpleModelSerializerType,
+    typeof Dream,
+  ][] = []
 
   public add(
     ControllerClass: typeof PsychicController,
-    SerializerClass: SerializerType<any>,
+    SerializerClass: DreamModelSerializerType | ViewModelSerializerType | SimpleModelSerializerType,
     ModelClass: typeof Dream,
   ) {
     this.associations.push([ControllerClass, SerializerClass, ModelClass])
@@ -739,7 +759,10 @@ export class ControllerSerializerIndex {
     )
   }
 
-  public lookupSerializer(ControllerClass: typeof PsychicController, SerializerClass: SerializerType<any>) {
+  public lookupSerializer(
+    ControllerClass: typeof PsychicController,
+    SerializerClass: DreamModelSerializerType | ViewModelSerializerType | SimpleModelSerializerType,
+  ) {
     return this.associations.find(
       association => association[0] === ControllerClass && association[1] === SerializerClass,
     )

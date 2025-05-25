@@ -859,10 +859,10 @@
                   "items": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/Latex"
+                        "$ref": "#/components/schemas/BalloonLatex"
                       },
                       {
-                        "$ref": "#/components/schemas/Mylar"
+                        "$ref": "#/components/schemas/BalloonMylar"
                       }
                     ]
                   }
@@ -924,10 +924,10 @@
                   "items": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/Latex"
+                        "$ref": "#/components/schemas/BalloonLatex"
                       },
                       {
-                        "$ref": "#/components/schemas/Mylar"
+                        "$ref": "#/components/schemas/BalloonMylar"
                       },
                       {
                         "$ref": "#/components/schemas/Pet"
@@ -992,16 +992,16 @@
                   "items": {
                     "anyOf": [
                       {
-                        "$ref": "#/components/schemas/Latex"
+                        "$ref": "#/components/schemas/BalloonLatex"
                       },
                       {
-                        "$ref": "#/components/schemas/Mylar"
-                      },
-                      {
-                        "$ref": "#/components/schemas/MyViewModel"
+                        "$ref": "#/components/schemas/BalloonMylar"
                       },
                       {
                         "$ref": "#/components/schemas/Pet"
+                      },
+                      {
+                        "$ref": "#/components/schemas/ViewModelsMyViewModel"
                       }
                     ]
                   }
@@ -1069,10 +1069,10 @@
                 "schema": {
                   "anyOf": [
                     {
-                      "$ref": "#/components/schemas/Latex"
+                      "$ref": "#/components/schemas/BalloonLatex"
                     },
                     {
-                      "$ref": "#/components/schemas/Mylar"
+                      "$ref": "#/components/schemas/BalloonMylar"
                     }
                   ]
                 }
@@ -1129,7 +1129,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/Hello"
+                  "$ref": "#/components/schemas/"
                 }
               }
             },
@@ -1185,7 +1185,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommentTestingBasicSerializerRef"
+                  "$ref": "#/components/schemas/"
                 }
               }
             }
@@ -2189,10 +2189,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "array",
-                  "items": {
-                    "$ref": "#/components/schemas/UserExtra"
-                  }
+                  "$ref": "#/components/schemas/UserExtra"
                 }
               }
             },
@@ -2257,30 +2254,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "recordCount",
-                    "pageCount",
-                    "currentPage",
-                    "results"
-                  ],
-                  "properties": {
-                    "recordCount": {
-                      "type": "number"
-                    },
-                    "pageCount": {
-                      "type": "number"
-                    },
-                    "currentPage": {
-                      "type": "number"
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/UserSummary"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/UserSummary"
                 }
               }
             },
@@ -2645,30 +2619,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "type": "object",
-                  "required": [
-                    "recordCount",
-                    "pageCount",
-                    "currentPage",
-                    "results"
-                  ],
-                  "properties": {
-                    "recordCount": {
-                      "type": "number"
-                    },
-                    "pageCount": {
-                      "type": "number"
-                    },
-                    "currentPage": {
-                      "type": "number"
-                    },
-                    "results": {
-                      "type": "array",
-                      "items": {
-                        "$ref": "#/components/schemas/UserSummary"
-                      }
-                    }
-                  }
+                  "$ref": "#/components/schemas/UserSummary"
                 }
               }
             },
@@ -3173,7 +3124,7 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/CommentTestingBasicSerializerRef"
+                  "$ref": "#/components/schemas/"
                 }
               }
             }
@@ -3268,87 +3219,29 @@
       }
     },
     "schemas": {
-      "Comment": {
+      "": {
         "type": "object",
         "required": [
-          "id",
-          "body"
+          "user",
+          "world"
         ],
         "properties": {
-          "id": {
-            "type": "string"
+          "user": {
+            "$ref": "#/components/schemas/User"
           },
-          "body": {
-            "type": [
-              "string",
-              "null"
-            ]
-          }
-        }
-      },
-      "CommentTestingBasicSerializerRef": {
-        "type": "object",
-        "required": [
-          "howyadoin"
-        ],
-        "properties": {
-          "howyadoin": {
-            "$ref": "#/components/schemas/CommentTestingDoubleShorthand"
-          }
-        }
-      },
-      "CommentTestingDoubleShorthand": {
-        "type": "object",
-        "required": [
-          "howyadoin"
-        ],
-        "properties": {
-          "howyadoin": {
-            "type": "number",
-            "format": "double"
-          }
-        }
-      },
-      "CustomSchema": {
-        "type": "string"
-      },
-      "Hello": {
-        "type": "object",
-        "required": [
-          "world",
-          "id",
-          "email",
-          "name"
-        ],
-        "properties": {
           "world": {
-            "$ref": "#/components/schemas/World"
-          },
-          "id": {
-            "type": "integer"
-          },
-          "email": {
-            "type": "string"
-          },
-          "name": {
-            "type": [
-              "string",
-              "null"
-            ]
+            "$ref": "#/components/schemas/"
           }
         }
       },
-      "Latex": {
+      "BalloonLatex": {
         "type": "object",
         "required": [
-          "id",
           "color",
+          "id",
           "latexOnlyAttr"
         ],
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "color": {
             "type": [
               "string",
@@ -3359,38 +3252,23 @@
               "green",
               "red"
             ]
+          },
+          "id": {
+            "type": "string"
           },
           "latexOnlyAttr": {
             "type": "string"
           }
         }
       },
-      "MyViewModel": {
+      "BalloonMylar": {
         "type": "object",
         "required": [
-          "name",
-          "favoriteNumber"
-        ],
-        "properties": {
-          "name": {
-            "type": "string"
-          },
-          "favoriteNumber": {
-            "type": "number"
-          }
-        }
-      },
-      "Mylar": {
-        "type": "object",
-        "required": [
-          "id",
           "color",
+          "id",
           "mylarOnlyAttr"
         ],
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "color": {
             "type": [
               "string",
@@ -3402,10 +3280,34 @@
               "red"
             ]
           },
+          "id": {
+            "type": "string"
+          },
           "mylarOnlyAttr": {
             "type": "string"
           }
         }
+      },
+      "Comment": {
+        "type": "object",
+        "required": [
+          "body",
+          "id"
+        ],
+        "properties": {
+          "body": {
+            "type": [
+              "string",
+              "null"
+            ]
+          },
+          "id": {
+            "type": "string"
+          }
+        }
+      },
+      "CustomSchema": {
+        "type": "string"
       },
       "Pet": {
         "type": "object",
@@ -3428,20 +3330,23 @@
       "Post": {
         "type": "object",
         "required": [
-          "id",
           "body",
+          "comments",
           "explicitlyOmittedFromParamSafeColumns",
-          "comments"
+          "id"
         ],
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "body": {
             "type": [
               "string",
               "null"
             ]
+          },
+          "comments": {
+            "type": "array",
+            "items": {
+              "$ref": "#/components/schemas/Comment"
+            }
           },
           "explicitlyOmittedFromParamSafeColumns": {
             "type": [
@@ -3449,25 +3354,19 @@
               "null"
             ]
           },
-          "comments": {
-            "type": "array",
-            "items": {
-              "$ref": "#/components/schemas/Comment"
-            }
+          "id": {
+            "type": "string"
           }
         }
       },
       "PostWithComments": {
         "type": "object",
         "required": [
-          "id",
           "body",
-          "comments"
+          "comments",
+          "id"
         ],
         "properties": {
-          "id": {
-            "type": "string"
-          },
           "body": {
             "type": [
               "string",
@@ -3479,22 +3378,25 @@
             "items": {
               "$ref": "#/components/schemas/Comment"
             }
+          },
+          "id": {
+            "type": "string"
           }
         }
       },
       "User": {
         "type": "object",
         "required": [
-          "id",
           "email",
+          "id",
           "name"
         ],
         "properties": {
-          "id": {
-            "type": "integer"
-          },
           "email": {
             "type": "string"
+          },
+          "id": {
+            "type": "integer"
           },
           "name": {
             "type": [
@@ -3507,14 +3409,11 @@
       "UserExtra": {
         "type": "object",
         "required": [
-          "id",
           "howyadoin",
+          "id",
           "nicknames"
         ],
         "properties": {
-          "id": {
-            "type": "integer"
-          },
           "howyadoin": {
             "type": "object",
             "properties": {
@@ -3543,6 +3442,9 @@
                 }
               }
             }
+          },
+          "id": {
+            "type": "integer"
           },
           "nicknames": {
             "type": [
@@ -3598,14 +3500,24 @@
           }
         }
       },
-      "World": {
+      "ViewModelsMyViewModel": {
         "type": "object",
         "required": [
-          "hello"
+          "favoriteNumber",
+          "name"
         ],
         "properties": {
-          "hello": {
-            "$ref": "#/components/schemas/Hello"
+          "favoriteNumber": {
+            "type": [
+              "number",
+              "null"
+            ]
+          },
+          "name": {
+            "type": [
+              "string",
+              "null"
+            ]
           }
         }
       }

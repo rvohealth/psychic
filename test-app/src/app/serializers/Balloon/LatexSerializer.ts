@@ -1,23 +1,14 @@
-import { Attribute } from '@rvoh/dream'
 import BalloonLatex from '../../models/Balloon/Latex.js'
 import BalloonSerializer, { BalloonSummarySerializer } from '../BalloonSerializer.js'
 
-export class LatexSummarySerializer<
-  DataType extends BalloonLatex,
-  Passthrough extends object,
-> extends BalloonSummarySerializer<DataType, Passthrough> {
-  @Attribute('string')
-  public latexOnlySummaryAttr(): string {
-    return 'latex-only-summary'
-  }
-}
+export const LatexSummarySerializer = (data: BalloonLatex, passthrough: object) =>
+  BalloonSummarySerializer(data, passthrough).customAttribute(
+    'latexOnlySummaryAttr',
+    () => 'latex-only-summary',
+    { openapi: 'string' },
+  )
 
-export default class LatexSerializer<
-  DataType extends BalloonLatex,
-  Passthrough extends object,
-> extends BalloonSerializer<DataType, Passthrough> {
-  @Attribute('string')
-  public latexOnlyAttr(): string {
-    return 'latex-only-detailed'
-  }
-}
+export default (data: BalloonLatex, passthrough: object) =>
+  BalloonSerializer(data, passthrough).customAttribute('latexOnlyAttr', () => 'latex-only-detailed', {
+    openapi: 'string',
+  })

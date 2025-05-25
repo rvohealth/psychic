@@ -1,7 +1,7 @@
 import { Encrypt } from '@rvoh/dream'
 import { BeforeAction, OpenAPI } from '../../../../src/index.js'
 import User from '../models/User.js'
-import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer.js'
+import { CommentWithAllOfArraySerializer } from '../serializers/CommentSerializer.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class UsersController extends ApplicationController {
@@ -137,7 +137,7 @@ export default class UsersController extends ApplicationController {
     status: 200,
     responses: {
       200: {
-        $serializer: CommentTestingBasicSerializerRefSerializer,
+        $serializer: CommentWithAllOfArraySerializer,
       },
     },
   })

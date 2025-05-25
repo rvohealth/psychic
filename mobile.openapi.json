@@ -51,10 +51,10 @@
                   "type": "object",
                   "properties": {
                     "field1": {
-                      "$ref": "#/components/schemas/Comment1OnlyUsedInOneController"
+                      "$ref": "#/components/schemas/"
                     },
                     "field2": {
-                      "$ref": "#/components/schemas/Comment2OnlyUsedInOneController"
+                      "$ref": "#/components/schemas/"
                     }
                   }
                 }
@@ -88,33 +88,6 @@
   },
   "components": {
     "schemas": {
-      "Comment1OnlyUsedInOneController": {
-        "type": "object",
-        "required": [
-          "howyadoin"
-        ],
-        "properties": {
-          "howyadoin": {
-            "type": "string",
-            "format": "date"
-          }
-        }
-      },
-      "Comment2OnlyUsedInOneController": {
-        "type": "object",
-        "required": [
-          "howyadoins"
-        ],
-        "properties": {
-          "howyadoins": {
-            "type": "array",
-            "items": {
-              "type": "string",
-              "format": "date"
-            }
-          }
-        }
-      },
       "ValidationErrors": {
         "type": "object",
         "properties": {

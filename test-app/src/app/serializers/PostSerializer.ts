@@ -1,51 +1,25 @@
-import { Attribute, DreamColumn, DreamSerializer, RendersMany, RendersOne } from '@rvoh/dream'
-import Comment from '../models/Comment.js'
+import { DreamSerializer } from '@rvoh/dream'
 import Post from '../models/Post.js'
 import CommentSerializer from './CommentSerializer.js'
 
-export class PostSummarySerializer<DataType extends Post, Passthrough extends object> extends DreamSerializer<
-  DataType,
-  Passthrough
-> {
-  @Attribute(Post)
-  public id: DreamColumn<Post, 'id'>
-}
+// Summary serializer: only id
+export const PostSummarySerializer = (data: Post) => DreamSerializer(Post, data).attribute('id')
 
-export default class PostSerializer<
-  DataType extends Post,
-  Passthrough extends object,
-> extends PostSummarySerializer<DataType, Passthrough> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @RendersMany(() => CommentSerializer<any, any>)
-  public comments: Comment[]
+// Full post serializer: id, body, explicitlyOmittedFromParamSafeColumns, comments
+export default (data: Post) =>
+  PostSummarySerializer(data)
+    .attribute('body')
+    .attribute('explicitlyOmittedFromParamSafeColumns')
+    .rendersMany('comments', { serializerCallback: () => CommentSerializer })
 
-  @Attribute(Post)
-  public body: DreamColumn<Post, 'body'>
+// Post with recent comment: id, body, recentComment
+export const PostWithRecentCommentSerializer = (data: Post) =>
+  PostSummarySerializer(data)
+    .attribute('body')
+    .rendersOne('recentComment', { serializerCallback: () => CommentSerializer })
 
-  @Attribute(Post)
-  public explicitlyOmittedFromParamSafeColumns: DreamColumn<Post, 'explicitlyOmittedFromParamSafeColumns'>
-}
-
-export class PostWithRecentCommentSerializer<
-  DataType extends Post,
-  Passthrough extends object,
-> extends PostSummarySerializer<DataType, Passthrough> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @RendersOne(() => CommentSerializer<any, any>)
-  public recentComment: Comment | null
-
-  @Attribute(Post)
-  public body: DreamColumn<Post, 'body'>
-}
-
-export class PostWithCommentsSerializer<
-  DataType extends Post,
-  Passthrough extends object,
-> extends PostSummarySerializer<DataType, Passthrough> {
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  @RendersMany(() => CommentSerializer<any, any>)
-  public comments: Comment[]
-
-  @Attribute(Post)
-  public body: DreamColumn<Post, 'body'>
-}
+// Post with comments: id, body, comments
+export const PostWithCommentsSerializer = (data: Post) =>
+  PostSummarySerializer(data)
+    .attribute('body')
+    .rendersMany('comments', { serializerCallback: () => CommentSerializer })

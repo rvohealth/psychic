@@ -1,9 +1,10 @@
 import {
   DecoratorContext,
+  Dream,
   DreamSerializable,
   DreamSerializableArray,
-  ViewModel,
-  ViewModelClass,
+  inferSerializersFromDreamClassOrViewModelClass,
+  isDreamSerializer,
 } from '@rvoh/dream'
 import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint.js'
 import { ControllerHook } from './hooks.js'
@@ -125,18 +126,10 @@ export function OpenAPI(
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
-function isSerializable(dreamOrSerializerClass: any) {
+function isSerializable(serializableOrSerializerClass: any) {
   return (
-    Array.isArray(dreamOrSerializerClass) ||
-    hasSerializersGetter(dreamOrSerializerClass as ViewModelClass) ||
-    !!(dreamOrSerializerClass as SerializerType<any>)?.isDreamSerializer
+    isDreamSerializer(serializableOrSerializerClass) ||
+    Array.isArray(serializableOrSerializerClass) ||
+    inferSerializersFromDreamClassOrViewModelClass(serializableOrSerializerClass as typeof Dream).length > 0
   )
-}
-
-function hasSerializersGetter(dreamOrSerializerClass: ViewModelClass): boolean {
-  try {
-    return !!(dreamOrSerializerClass?.prototype as ViewModel)?.serializers
-  } catch {
-    return false
-  }
 }

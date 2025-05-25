@@ -1,23 +1,14 @@
-import { Attribute } from '@rvoh/dream'
 import BalloonMylar from '../../models/Balloon/Mylar.js'
 import BalloonSerializer, { BalloonSummarySerializer } from '../BalloonSerializer.js'
 
-export class MylarSummarySerializer<
-  DataType extends BalloonMylar,
-  Passthrough extends object,
-> extends BalloonSummarySerializer<DataType, Passthrough> {
-  @Attribute('string')
-  public mylarOnlySummaryAttr(): string {
-    return 'mylar-only-summary'
-  }
-}
+export const MylarSummarySerializer = (data: BalloonMylar, passthrough: object) =>
+  BalloonSummarySerializer(data, passthrough).customAttribute(
+    'mylarOnlySummaryAttr',
+    () => 'mylar-only-summary',
+    { openapi: 'string' },
+  )
 
-export default class MylarSerializer<
-  DataType extends BalloonMylar,
-  Passthrough extends object,
-> extends BalloonSerializer<DataType, Passthrough> {
-  @Attribute('string')
-  public mylarOnlyAttr(): string {
-    return 'mylar-only-detailed'
-  }
-}
+export default (data: BalloonMylar, passthrough: object) =>
+  BalloonSerializer(data, passthrough).customAttribute('mylarOnlyAttr', () => 'mylar-only-detailed', {
+    openapi: 'string',
+  })

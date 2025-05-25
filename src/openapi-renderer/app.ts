@@ -1,4 +1,4 @@
-import { compact } from '@rvoh/dream'
+import { compact, SerializerCasing, sortObjectByKey } from '@rvoh/dream'
 import { groupBy } from 'lodash-es'
 import * as fs from 'node:fs/promises'
 import { debuglog } from 'node:util'
@@ -9,6 +9,8 @@ import { HttpMethod, HttpMethods } from '../router/types.js'
 import PsychicServer from '../server/index.js'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults.js'
 import { OpenapiEndpointResponsePath, OpenapiParameterResponse, OpenapiSchema } from './endpoint.js'
+import schemaDelimiter from './helpers/schemaDelimiter.js'
+import suppressResponseEnums from './helpers/suppressResponseEnums.js'
 
 const debugEnabled = debuglog('psychic').enabled
 
@@ -56,6 +58,18 @@ export default class OpenapiAppRenderer {
   }
 
   public static async _toObject(openapiName: string): Promise<OpenapiSchema> {
+    const opts: {
+      openapiName: string
+      casing: SerializerCasing
+      schemaDelimiter: string
+      suppressResponseEnums: boolean
+    } = {
+      openapiName,
+      casing: 'camel',
+      schemaDelimiter: schemaDelimiter(openapiName),
+      suppressResponseEnums: suppressResponseEnums(openapiName),
+    }
+
     const processedSchemas: Record<string, boolean> = {}
     const psychicApp = PsychicApp.getOrFail()
     const controllers = psychicApp.controllers
@@ -113,12 +127,17 @@ export default class OpenapiAppRenderer {
         const renderer = controller.openapi[key]
         if (renderer === undefined) throw new UnexpectedUndefined()
 
-        finalOutput.components.schemas = {
-          ...finalOutput.components.schemas,
-          ...renderer.toSchemaObject(openapiName, processedSchemas),
-        }
+        const schemaRenderingResults = renderer.toSchemaObject({
+          ...opts,
+          processedSchemas,
+        })
 
-        const endpointPayload = renderer.toPathObject(openapiName, processedSchemas, routes)
+        finalOutput.components.schemas = sortObjectByKey({
+          ...finalOutput.components.schemas,
+          ...schemaRenderingResults.renderedSchemas,
+        })
+
+        const endpointPayload = renderer.toPathObject(processedSchemas, routes, opts)
         if (endpointPayload === undefined) throw new UnexpectedUndefined()
         const path = Object.keys(endpointPayload)[0]
         if (path === undefined) throw new UnexpectedUndefined()

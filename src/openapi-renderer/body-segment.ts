@@ -22,26 +22,24 @@ import {
   OpenapiSchemaShorthandExpressionSerializerRef,
   OpenapiShorthandAllTypes,
   OpenapiShorthandPrimitiveTypes,
+  SerializerCasing,
   SerializerOpenapiRenderer,
-  SerializerType,
   inferSerializerFromDreamOrViewModel,
   maybeNullOpenapiShorthandToOpenapiShorthand,
   openapiShorthandPrimitiveTypes,
 } from '@rvoh/dream'
-import PsychicController from '../controller/index.js'
 import isArrayParamName from '../helpers/isArrayParamName.js'
-import PsychicApp from '../psychic-app/index.js'
 import isBlankDescription from './helpers/isBlankDescription.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import schemaToRef from './helpers/schemaToRef.js'
+import suppressResponseEnums from './helpers/suppressResponseEnums.js'
 
 export default class OpenapiBodySegmentRenderer {
-  private controllerClass: typeof PsychicController
   private bodySegment: OpenapiBodySegment
-  private serializers: { [key: string]: SerializerType<any> }
   private schemaDelimeter: string
+  private casing: SerializerCasing
+  private suppressResponseEnums: boolean
   private computedExtraComponents: { [key: string]: OpenapiSchemaObject } = {}
-  private processedSchemas: Record<string, boolean>
   private target: OpenapiBodyTarget
   private openapiName: string
 
@@ -53,27 +51,24 @@ export default class OpenapiBodySegmentRenderer {
    */
   constructor({
     openapiName,
-    controllerClass,
     bodySegment,
-    serializers,
     schemaDelimeter,
-    processedSchemas,
+    casing,
+    suppressResponseEnums,
     target,
   }: {
     openapiName: string
-    controllerClass: typeof PsychicController
     bodySegment: OpenapiBodySegment
-    serializers: { [key: string]: SerializerType<any> }
     schemaDelimeter: string
-    processedSchemas: Record<string, boolean>
+    casing: SerializerCasing
+    suppressResponseEnums: boolean
     target: OpenapiBodyTarget
   }) {
     this.openapiName = openapiName
-    this.controllerClass = controllerClass
     this.bodySegment = bodySegment
-    this.serializers = serializers
     this.schemaDelimeter = schemaDelimeter
-    this.processedSchemas = processedSchemas
+    this.casing = casing
+    this.suppressResponseEnums = suppressResponseEnums
     this.target = target
   }
 
@@ -81,12 +76,8 @@ export default class OpenapiBodySegmentRenderer {
    * returns the shorthanded body segment, rendered
    * to the appropriate openapi shape
    */
-  public render(): OpenapiEndpointParseResults {
-    const results = this.recursivelyParseBody(this.bodySegment)
-    return {
-      results,
-      extraComponents: this.computedExtraComponents,
-    }
+  public render(): OpenapiSchemaBody {
+    return this.recursivelyParseBody(this.bodySegment)
   }
 
   /**
@@ -381,14 +372,13 @@ export default class OpenapiBodySegmentRenderer {
   private applyConfigurationOptions<T>(obj: T): T {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const anyObj = obj as any
-    const psychicApp = PsychicApp.getOrFail()
 
     if (typeof anyObj === 'object') {
       if (
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         anyObj?.type === 'string' &&
         this.target === 'response' &&
-        psychicApp.openapi?.[this.openapiName]?.suppressResponseEnums
+        suppressResponseEnums(this.openapiName)
       ) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
         const enums = anyObj.enum as string[] | null
@@ -429,7 +419,11 @@ The following values will be allowed:
     bodySegment: OpenapiBodySegment,
   ): OpenapiSchemaExpressionRef | OpenapiSchemaArray | OpenapiSchemaExpressionAllOf {
     const serializerRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializerRef
-    const serializerRef = new SerializerOpenapiRenderer(serializerRefBodySegment.$serializer).serializerRef
+    const serializerRef = new SerializerOpenapiRenderer(serializerRefBodySegment.$serializer, {
+      casing: this.casing,
+      schemaDelimiter: this.schemaDelimeter,
+      suppressResponseEnums: this.suppressResponseEnums,
+    }).serializerRef
 
     if (serializerRefBodySegment.many) {
       const returnVal = {
@@ -504,11 +498,6 @@ The following values will be allowed:
 
     return returnObj
   }
-}
-
-export type OpenapiEndpointParseResults = {
-  results: OpenapiSchemaBody
-  extraComponents: { [key: string]: OpenapiSchemaObject }
 }
 
 export type OpenapiBodySegment =

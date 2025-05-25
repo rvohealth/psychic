@@ -1,11 +1,6 @@
-import { Attribute, DreamSerializer } from '@rvoh/dream'
+import { DreamSerializer } from '@rvoh/dream'
+import Pet from '../../../models/Pet.js'
 
-export class AdminV2PetSummarySerializer extends DreamSerializer {
-  @Attribute('string')
-  public id: string
-}
+export const AdminV2PetSummarySerializer = (data: Pet) => DreamSerializer(Pet, data).attribute('id')
 
-export default class AdminV2PetSerializer extends AdminV2PetSummarySerializer {
-  @Attribute()
-  public name: string
-}
+export default (data: Pet) => AdminV2PetSummarySerializer(data).attribute('name')
