@@ -5,14 +5,14 @@ __metadata:
   version: 8
   cacheKey: 10c0
 
-"@apidevtools/json-schema-ref-parser@npm:^11.7.2":
-  version: 11.9.1
-  resolution: "@apidevtools/json-schema-ref-parser@npm:11.9.1"
+"@apidevtools/json-schema-ref-parser@npm:^12.0.1":
+  version: 12.0.2
+  resolution: "@apidevtools/json-schema-ref-parser@npm:12.0.2"
   dependencies:
     "@jsdevtools/ono": "npm:^7.1.3"
     "@types/json-schema": "npm:^7.0.15"
     js-yaml: "npm:^4.1.0"
-  checksum: 10c0/584d99f9b05822a30adaf73abfcedb485d3c0da957f4de09afd485123307a216e0b6ba499a21a57e0b723f8a48e61d82dd4f1d49659ddd73c01bb4837ba446b0
+  checksum: 10c0/2e591710601176b15b5484880591aed58461cccc753401ea993180e93b1a2d92437ce9c28fbe35bb5f32033d79b3070d79802a32b16bdc392d2a06313f1cb6fe
   languageName: node
   linkType: hard
 
@@ -976,7 +976,7 @@ __metadata:
     dotenv: "npm:^16.4.5"
     eslint: "npm:^9.19.0"
     express: "npm:^5.1.0"
-    express-openapi-validator: "npm:^5.4.3"
+    express-openapi-validator: "npm:^5.5.3"
     jsdom: "npm:^26.0.0"
     kysely: "npm:^0.27.4"
     kysely-codegen: "npm:~0.17.0"
@@ -1580,9 +1580,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"ajv-formats@npm:^2.1.1":
-  version: 2.1.1
-  resolution: "ajv-formats@npm:2.1.1"
+"ajv-formats@npm:^3.0.1":
+  version: 3.0.1
+  resolution: "ajv-formats@npm:3.0.1"
   dependencies:
     ajv: "npm:^8.0.0"
   peerDependencies:
@@ -1590,7 +1590,7 @@ __metadata:
   peerDependenciesMeta:
     ajv:
       optional: true
-  checksum: 10c0/e43ba22e91b6a48d96224b83d260d3a3a561b42d391f8d3c6d2c1559f9aa5b253bfb306bc94bbeca1d967c014e15a6efe9a207309e95b3eaae07fcbcdc2af662
+  checksum: 10c0/168d6bca1ea9f163b41c8147bae537e67bd963357a5488a1eaf3abe8baa8eec806d4e45f15b10767e6020679315c7e1e5e6803088dfb84efa2b4e9353b83dd0a
   languageName: node
   linkType: hard
 
@@ -2939,26 +2939,27 @@ __metadata:
   languageName: node
   linkType: hard
 
-"express-openapi-validator@npm:^5.4.3":
-  version: 5.4.4
-  resolution: "express-openapi-validator@npm:5.4.4"
+"express-openapi-validator@npm:^5.5.3":
+  version: 5.5.3
+  resolution: "express-openapi-validator@npm:5.5.3"
   dependencies:
-    "@apidevtools/json-schema-ref-parser": "npm:^11.7.2"
+    "@apidevtools/json-schema-ref-parser": "npm:^12.0.1"
     "@types/multer": "npm:^1.4.12"
     ajv: "npm:^8.17.1"
     ajv-draft-04: "npm:^1.0.0"
-    ajv-formats: "npm:^2.1.1"
+    ajv-formats: "npm:^3.0.1"
     content-type: "npm:^1.0.5"
     json-schema-traverse: "npm:^1.0.0"
     lodash.clonedeep: "npm:^4.5.0"
     lodash.get: "npm:^4.4.2"
     media-typer: "npm:^1.1.0"
-    multer: "npm:^1.4.5-lts.1"
+    multer: "npm:^2.0.0"
     ono: "npm:^7.1.3"
     path-to-regexp: "npm:^8.2.0"
+    qs: "npm:^6.14.0"
   peerDependencies:
     express: "*"
-  checksum: 10c0/ae7da3f1d1b68a12299f3ca197f6cbbb6bdc8125d383046b409c6db0584a0b920c4b733d01662860e07efd6d0399c74df6a708d3ca3851574fec2e5de02f785f
+  checksum: 10c0/7c8ddf7fa91b25ea03bc2281a653839d1b1511b922c2a3d76e060bd17b141974af7a6b1d129396c708a0f8af438c481d9940ab7c9a7b3343339deff7cec97b4d
   languageName: node
   linkType: hard
 
@@ -4414,9 +4415,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"multer@npm:^1.4.5-lts.1":
-  version: 1.4.5-lts.1
-  resolution: "multer@npm:1.4.5-lts.1"
+"multer@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "multer@npm:2.0.0"
   dependencies:
     append-field: "npm:^1.0.0"
     busboy: "npm:^1.0.0"
@@ -4425,7 +4426,7 @@ __metadata:
     object-assign: "npm:^4.1.1"
     type-is: "npm:^1.6.4"
     xtend: "npm:^4.0.0"
-  checksum: 10c0/4c6c91e93e510c99e791b6520e3e2f4a227a57f4f509427ff7f3a6f4cc0b4b09ad77c475f629c12f7ae01dba11645b2bd6568877cab775de8bf853b0a67259b4
+  checksum: 10c0/b1bb5faead3193f2bad5dc1dd3a89c195b3b95a178253d81636efee07538df761515b59fcd508037b8c0472a087f33d13002ed76e167a00ef7d32694e3038138
   languageName: node
   linkType: hard
 
