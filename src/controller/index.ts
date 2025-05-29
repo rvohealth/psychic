@@ -5,7 +5,6 @@ import {
   DreamParamSafeAttributes,
   GlobalNameNotSet,
   isDreamSerializer,
-  SerializerRenderer,
   SimpleObjectSerializerType,
 } from '@rvoh/dream'
 import { Request, Response } from 'express'
@@ -362,12 +361,10 @@ export default class PsychicController {
     if (lookup?.length) {
       const serializer = lookup?.[1]
       if (isDreamSerializer(serializer)) {
-        return new SerializerRenderer(
-          // passthrough data going into the serializer is the argument that gets
-          // used in the custom attribute callback function
-          serializer(data, this.defaultSerializerPassthrough),
-
-          // passthrough data must be passed both into the serializer and the SerializerRenderer
+        // passthrough data going into the serializer is the argument that gets
+        // used in the custom attribute callback function
+        return serializer(data, this.defaultSerializerPassthrough).render(
+          // passthrough data must be passed both into the serializer and render
           // because, if the serializer does accept passthrough data, then passing it in is how
           // it gets into the serializer, but if it does not accept passthrough data, and therefore
           // does not pass it into the call to DreamSerializer/ObjectSerializer,
@@ -377,7 +374,7 @@ export default class PsychicController {
           {
             casing: 'camel',
           },
-        ).render()
+        )
       }
     } else {
       const serializerKey =
@@ -391,12 +388,10 @@ export default class PsychicController {
       if (serializerKey && Object.prototype.hasOwnProperty.call(dreamApp.serializers, serializerKey)) {
         const serializer = dreamApp.serializers[serializerKey]
         if (serializer && isDreamSerializer(serializer)) {
-          return new SerializerRenderer(
-            // passthrough data going into the serializer is the argument that gets
-            // used in the custom attribute callback function
-            serializer(data, this.defaultSerializerPassthrough),
-
-            // passthrough data must be passed both into the serializer and the SerializerRenderer
+          // passthrough data going into the serializer is the argument that gets
+          // used in the custom attribute callback function
+          return serializer(data, this.defaultSerializerPassthrough).render(
+            // passthrough data must be passed both into the serializer and render
             // because, if the serializer does accept passthrough data, then passing it in is how
             // it gets into the serializer, but if it does not accept passthrough data, and therefore
             // does not pass it into the call to DreamSerializer/ObjectSerializer,
@@ -406,7 +401,7 @@ export default class PsychicController {
             {
               casing: 'camel',
             },
-          ).render()
+          )
         } else {
           throw new Error(
             `
