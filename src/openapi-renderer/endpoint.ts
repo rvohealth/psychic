@@ -48,13 +48,16 @@ import openapiPageParamProperty from './helpers/pageParamOpenapiProperty.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import safelyAttachPaginationParamToRequestBodySegment from './helpers/safelyAttachPaginationParamsToBodySegment.js'
 
+interface OpenapiRenderOpts {
+  casing: SerializerCasing
+  suppressResponseEnums: boolean
+}
+
 export default class OpenapiEndpointRenderer<
   DreamsOrSerializersOrViewModels extends DreamSerializable | DreamSerializableArray,
 > {
   private openapiName: string
-  private casing: SerializerCasing
-  private schemaDelimiter: string
-  private suppressResponseEnums: boolean
+  private renderOpts: OpenapiRenderOpts
 
   private many: OpenapiEndpointRendererOpts['many']
   private paginate: OpenapiEndpointRendererOpts['paginate']
@@ -154,19 +157,18 @@ export default class OpenapiEndpointRenderer<
     {
       openapiName,
       casing,
-      schemaDelimiter,
       suppressResponseEnums,
     }: {
       openapiName: string
       casing: SerializerCasing
-      schemaDelimiter: string
       suppressResponseEnums: boolean
     },
   ): ReferencedSerializersAndOpenapiEndpointResponse {
     this.openapiName = openapiName
-    this.casing = casing
-    this.schemaDelimiter = schemaDelimiter
-    this.suppressResponseEnums = suppressResponseEnums
+    this.renderOpts = {
+      casing,
+      suppressResponseEnums,
+    }
 
     const path = this.computedPath(routes)
     const method = this.computedMethod(routes)
@@ -227,14 +229,12 @@ export default class OpenapiEndpointRenderer<
   public toSchemaObject({
     openapiName,
     casing,
-    schemaDelimiter,
     suppressResponseEnums,
     processedSchemas,
     serializersAppearingInHandWrittenOpenapi,
   }: {
     openapiName: string
     casing: SerializerCasing
-    schemaDelimiter: string
     suppressResponseEnums: boolean
     processedSchemas: Record<string, boolean>
     serializersAppearingInHandWrittenOpenapi: SerializerArray
@@ -243,9 +243,10 @@ export default class OpenapiEndpointRenderer<
     renderedSchemas: Record<string, OpenapiSchemaBody>
   } {
     this.openapiName = openapiName
-    this.casing = casing
-    this.schemaDelimiter = schemaDelimiter
-    this.suppressResponseEnums = suppressResponseEnums
+    this.renderOpts = {
+      casing,
+      suppressResponseEnums,
+    }
 
     const serializers =
       this.getSerializerClasses() ?? ([] as (DreamModelSerializerType | SimpleObjectSerializerType)[])
@@ -255,10 +256,8 @@ export default class OpenapiEndpointRenderer<
       this.action,
       [...serializers, ...serializersAppearingInHandWrittenOpenapi],
       {
+        renderOpts: this.renderOpts,
         openapiName: this.openapiName,
-        casing: this.casing,
-        schemaDelimiter: this.schemaDelimiter,
-        suppressResponseEnums: this.suppressResponseEnums,
         processedSchemas,
       },
     )
@@ -445,9 +444,7 @@ export default class OpenapiEndpointRenderer<
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             schema: new OpenapiBodySegmentRenderer(queryParam.schema, {
               openapiName: this.openapiName,
-              schemaDelimiter: this.schemaDelimiter,
-              casing: this.casing,
-              suppressResponseEnums: this.suppressResponseEnums,
+              ...this.renderOpts,
               target: 'request',
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
             }).render().openapi as any,
@@ -492,9 +489,7 @@ export default class OpenapiEndpointRenderer<
 
     let schema = new OpenapiBodySegmentRenderer(this.requestBody as OpenapiSchemaBodyShorthand, {
       openapiName: this.openapiName,
-      schemaDelimiter: this.schemaDelimiter,
-      casing: this.casing,
-      suppressResponseEnums: this.suppressResponseEnums,
+      ...this.renderOpts,
       target: 'request',
     }).render().openapi
 
@@ -697,9 +692,7 @@ export default class OpenapiEndpointRenderer<
                 ...paramsShape.properties,
                 [columnName]: new OpenapiBodySegmentRenderer(metadata.type, {
                   openapiName: this.openapiName,
-                  schemaDelimiter: this.schemaDelimiter,
-                  casing: this.casing,
-                  suppressResponseEnums: this.suppressResponseEnums,
+                  ...this.renderOpts,
                   target: 'request',
                 }).render().openapi,
               }
@@ -742,9 +735,7 @@ export default class OpenapiEndpointRenderer<
 
     let processedSchema = new OpenapiBodySegmentRenderer(paramsShape, {
       openapiName: this.openapiName,
-      schemaDelimiter: this.schemaDelimiter,
-      casing: this.casing,
-      suppressResponseEnums: this.suppressResponseEnums,
+      ...this.renderOpts,
       target: 'request',
     }).render().openapi
 
@@ -771,9 +762,7 @@ export default class OpenapiEndpointRenderer<
     let responseData: OpenapiResponses = {}
     const rendererOpts: OpenapiBodySegmentRendererOpts = {
       openapiName: this.openapiName,
-      schemaDelimiter: this.schemaDelimiter,
-      casing: this.casing,
-      suppressResponseEnums: this.suppressResponseEnums,
+      ...this.renderOpts,
       target: 'response',
     }
 
@@ -921,9 +910,7 @@ export default class OpenapiEndpointRenderer<
       throw new OpenApiSerializerForEndpointNotAFunction(this.controllerClass, this.action, serializer)
     }
 
-    const serializerOpenapiRenderer = new SerializerOpenapiRenderer(serializer, {
-      schemaDelimiter: this.schemaDelimiter,
-    })
+    const serializerOpenapiRenderer = new SerializerOpenapiRenderer(serializer, this.renderOpts)
 
     const finalOutput: OpenapiContent = {
       content: {
@@ -1011,16 +998,13 @@ export default class OpenapiEndpointRenderer<
 
     const sortedSerializerClasses = sortBy(
       serializers,
-      serializer =>
-        new SerializerOpenapiRenderer(serializer, { schemaDelimiter: this.schemaDelimiter }).openapiName,
+      serializer => new SerializerOpenapiRenderer(serializer, this.renderOpts).openapiName,
     )
 
     let referencedSerializers: (DreamModelSerializerType | SimpleObjectSerializerType)[] = []
 
     sortedSerializerClasses.forEach(serializer => {
-      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(serializer, {
-        schemaDelimiter: this.schemaDelimiter,
-      })
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(serializer, this.renderOpts)
 
       anyOf.anyOf.push(serializerOpenapiRenderer.serializerRef)
 
@@ -1726,15 +1710,11 @@ function serializersToSchemaObjects(
   actionName: string,
   serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[],
   {
-    casing,
-    schemaDelimiter,
-    suppressResponseEnums,
+    renderOpts,
     openapiName,
     processedSchemas,
   }: {
-    casing: SerializerCasing
-    schemaDelimiter: string
-    suppressResponseEnums: boolean
+    renderOpts: OpenapiRenderOpts
     openapiName: string
     processedSchemas: Record<string, boolean>
   },
@@ -1748,11 +1728,7 @@ function serializersToSchemaObjects(
   })
 
   serializers = serializers.filter(serializer => {
-    const serializerOpenapiRenderer = new SerializerOpenapiRenderer(serializer, {
-      casing,
-      schemaDelimiter,
-      suppressResponseEnums,
-    })
+    const serializerOpenapiRenderer = new SerializerOpenapiRenderer(serializer, renderOpts)
     return !processedSchemas[serializerOpenapiRenderer.globalName]
   })
 
@@ -1762,20 +1738,14 @@ function serializersToSchemaObjects(
   let dependentOnSerializers: (DreamModelSerializerType | SimpleObjectSerializerType)[] = []
 
   serializers.forEach(serializer => {
-    const renderer = new SerializerOpenapiRenderer(serializer, {
-      casing,
-      schemaDelimiter,
-      suppressResponseEnums,
-    })
+    const renderer = new SerializerOpenapiRenderer(serializer, renderOpts)
     const globalName = renderer.globalName
     processedSchemas = { ...processedSchemas, [globalName]: true }
     const results = renderer.renderedOpenapi(processedSchemas)
 
     const segmentRendererResults = new OpenapiBodySegmentRenderer(results.openapi, {
       openapiName,
-      casing,
-      schemaDelimiter,
-      suppressResponseEnums,
+      ...renderOpts,
       target: 'response',
     }).render()
     renderedSchemas[renderer.openapiName] = segmentRendererResults.openapi
@@ -1793,9 +1763,7 @@ function serializersToSchemaObjects(
     dependentOnSerializers,
 
     {
-      casing,
-      suppressResponseEnums,
-      schemaDelimiter,
+      renderOpts,
       openapiName,
       processedSchemas,
     },

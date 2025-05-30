@@ -453,7 +453,7 @@ describe('OpenapiAppRenderer', () => {
               required: ['howyadoin'],
               properties: {
                 howyadoin: {
-                  $ref: '#/components/schemas/BalloonLatexSummary',
+                  $ref: '#/components/schemas/LatexSummary',
                 },
               },
             },

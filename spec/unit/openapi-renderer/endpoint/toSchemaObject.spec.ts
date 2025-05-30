@@ -37,14 +37,12 @@ describe('OpenapiEndpointRenderer', () => {
   const defaultToSchemaObjectOpts: {
     openapiName: string
     casing: SerializerCasing
-    schemaDelimiter: string
     suppressResponseEnums: boolean
     processedSchemas: Record<string, boolean>
     serializersAppearingInHandWrittenOpenapi: SerializerArray
   } = {
     openapiName: 'default',
     casing: 'camel',
-    schemaDelimiter: '_',
     suppressResponseEnums: false,
     processedSchemas: {},
     serializersAppearingInHandWrittenOpenapi: [],
@@ -53,12 +51,10 @@ describe('OpenapiEndpointRenderer', () => {
   const defaultToPathObjectOpts: {
     openapiName: string
     casing: SerializerCasing
-    schemaDelimiter: string
     suppressResponseEnums: boolean
   } = {
     openapiName: 'default',
     casing: 'camel',
-    schemaDelimiter: '_',
     suppressResponseEnums: false,
   }
 
@@ -124,7 +120,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
       expect(response).toEqual({
-        Balloon_Latex: {
+        BalloonLatex: {
           properties: {
             color: {
               enum: ['blue', 'green', 'red'],
@@ -141,7 +137,7 @@ describe('OpenapiEndpointRenderer', () => {
           type: 'object',
         },
 
-        Balloon_Mylar: {
+        BalloonMylar: {
           properties: {
             color: {
               enum: ['blue', 'green', 'red'],
@@ -172,7 +168,7 @@ describe('OpenapiEndpointRenderer', () => {
 
       const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
       expect(response).toEqual({
-        Balloon_Latex: {
+        BalloonLatex: {
           properties: {
             color: {
               enum: ['blue', 'green', 'red'],
@@ -188,7 +184,7 @@ describe('OpenapiEndpointRenderer', () => {
           required: ['color', 'id', 'latexOnlyAttr'],
           type: 'object',
         },
-        ViewModels_MyViewModel: {
+        ViewModelsMyViewModel: {
           properties: {
             favoriteNumber: {
               type: ['number', 'null'],
@@ -200,7 +196,7 @@ describe('OpenapiEndpointRenderer', () => {
           required: ['favoriteNumber', 'name'],
           type: 'object',
         },
-        Balloon_Mylar: {
+        BalloonMylar: {
           properties: {
             color: {
               enum: ['blue', 'green', 'red'],
@@ -238,7 +234,7 @@ describe('OpenapiEndpointRenderer', () => {
       })
       const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
       expect(response).toEqual({
-        Balloon_Latex: {
+        BalloonLatex: {
           type: 'object',
           required: ['color', 'id', 'latexOnlyAttr'],
           properties: {
@@ -1134,7 +1130,7 @@ The following values will be allowed:
 
         expect(response).toEqual(
           expect.objectContaining({
-            Balloon_LatexSummary: {
+            LatexSummary: {
               type: 'object',
               required: ['id', 'latexOnlySummaryAttr'],
               properties: {
@@ -1161,7 +1157,7 @@ The following values will be allowed:
                 howyadoin: {
                   type: 'array',
                   items: {
-                    $ref: '#/components/schemas/Balloon_MylarSummary',
+                    $ref: '#/components/schemas/MylarSummary',
                   },
                 },
               },

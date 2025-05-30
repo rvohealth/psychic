@@ -7,14 +7,12 @@ import OpenapiBodySegmentRenderer, {
 describe('OpenapiBodySegmentRenderer', () => {
   const defaultBodySegmentRendererOpts: {
     openapiName: string
-    schemaDelimiter: string
     casing: SerializerCasing
     suppressResponseEnums: boolean
     target: OpenapiBodyTarget
   } = {
     openapiName: 'default',
     casing: 'camel',
-    schemaDelimiter: '_',
     suppressResponseEnums: false,
     target: 'response',
   }

@@ -3295,21 +3295,6 @@
           }
         }
       },
-      "BalloonLatexSummary": {
-        "type": "object",
-        "required": [
-          "id",
-          "latexOnlySummaryAttr"
-        ],
-        "properties": {
-          "id": {
-            "type": "string"
-          },
-          "latexOnlySummaryAttr": {
-            "type": "string"
-          }
-        }
-      },
       "BalloonMylar": {
         "type": "object",
         "required": [
@@ -3388,12 +3373,27 @@
         ],
         "properties": {
           "howyadoin": {
-            "$ref": "#/components/schemas/BalloonLatexSummary"
+            "$ref": "#/components/schemas/LatexSummary"
           }
         }
       },
       "CustomSchema": {
         "type": "string"
+      },
+      "LatexSummary": {
+        "type": "object",
+        "required": [
+          "id",
+          "latexOnlySummaryAttr"
+        ],
+        "properties": {
+          "id": {
+            "type": "string"
+          },
+          "latexOnlySummaryAttr": {
+            "type": "string"
+          }
+        }
       },
       "Pet": {
         "type": "object",

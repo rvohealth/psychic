@@ -231,7 +231,6 @@ Try setting it to something valid, like:
   private _openapi: Record<string, NamedPsychicOpenapiOptions> = {
     default: {
       outputFilename: 'openapi.json',
-      schemaDelimiter: '',
       info: {
         title: 'untitled openapi spec',
         version: 'unknown version',
@@ -694,11 +693,6 @@ interface PsychicOpenapiBaseOptions {
    * ```
    */
   servers?: OpenapiServer[]
-
-  /**
-   * DEPRECATED. TODO: remove schemaDelimiter
-   */
-  schemaDelimiter?: string
 
   /**
    * When true, all response fields utilizing openapi enums

@@ -40,7 +40,6 @@ import schemaToRef from './helpers/schemaToRef.js'
 
 export interface OpenapiBodySegmentRendererOpts {
   openapiName: string
-  schemaDelimiter: string
   casing: SerializerCasing
   suppressResponseEnums: boolean
   target: OpenapiBodyTarget
@@ -48,7 +47,6 @@ export interface OpenapiBodySegmentRendererOpts {
 
 export default class OpenapiBodySegmentRenderer {
   private bodySegment: OpenapiBodySegment
-  private schemaDelimiter: string
   private casing: SerializerCasing
   private suppressResponseEnums: boolean
   private target: OpenapiBodyTarget
@@ -62,11 +60,10 @@ export default class OpenapiBodySegmentRenderer {
    */
   constructor(
     bodySegment: OpenapiBodySegment,
-    { openapiName, schemaDelimiter, casing, suppressResponseEnums, target }: OpenapiBodySegmentRendererOpts,
+    { openapiName, casing, suppressResponseEnums, target }: OpenapiBodySegmentRendererOpts,
   ) {
     this.openapiName = openapiName
     this.bodySegment = bodySegment
-    this.schemaDelimiter = schemaDelimiter
     this.casing = casing
     this.suppressResponseEnums = suppressResponseEnums
     this.target = target
@@ -526,7 +523,6 @@ The following values will be allowed:
 
     const serializerRef = new SerializerOpenapiRenderer(serializer, {
       casing: this.casing,
-      schemaDelimiter: this.schemaDelimiter,
       suppressResponseEnums: this.suppressResponseEnums,
     }).serializerRef
 

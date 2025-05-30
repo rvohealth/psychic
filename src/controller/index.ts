@@ -7,6 +7,7 @@ import {
   GlobalNameNotSet,
   isDreamSerializer,
   ObjectSerializerBuilder,
+  SerializerRendererOpts,
   SimpleObjectSerializerType,
 } from '@rvoh/dream'
 import { Request, Response } from 'express'
@@ -239,6 +240,8 @@ export default class PsychicController {
   public session: Session
   public config: PsychicApp
   public action: string
+  public renderOpts: SerializerRendererOpts
+
   constructor(
     req: Request,
     res: Response,
@@ -255,6 +258,11 @@ export default class PsychicController {
     this.config = config
     this.session = new Session(req, res)
     this.action = action
+
+    // TODO: read casing from Dream app config
+    this.renderOpts = {
+      casing: 'camel',
+    }
   }
 
   public get headers() {
@@ -364,7 +372,7 @@ export default class PsychicController {
 
     // if we already have a serializer, let's just render it
     if (data instanceof DreamSerializerBuilder || data instanceof ObjectSerializerBuilder) {
-      return data.render(this.defaultSerializerPassthrough)
+      return data.render(this.defaultSerializerPassthrough, this.renderOpts)
     }
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
@@ -382,9 +390,7 @@ export default class PsychicController {
           // then it would be lost to serializers rendered via rendersOne/Many, and SerializerRenderer
           // handles passing its passthrough data into those
           this.defaultSerializerPassthrough,
-          {
-            casing: 'camel',
-          },
+          this.renderOpts,
         )
       }
     } else {
@@ -409,9 +415,7 @@ export default class PsychicController {
             // then it would be lost to serializers rendered via rendersOne/Many, and SerializerRenderer
             // handles passing its passthrough data into those
             this.defaultSerializerPassthrough,
-            {
-              casing: 'camel',
-            },
+            this.renderOpts,
           )
         } else {
           throw new Error(

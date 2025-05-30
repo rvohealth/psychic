@@ -26,12 +26,10 @@ describe('OpenapiEndpointRenderer', () => {
   const defaultToPathObjectOpts: {
     openapiName: string
     casing: SerializerCasing
-    schemaDelimiter: string
     suppressResponseEnums: boolean
   } = {
     openapiName: 'default',
     casing: 'camel',
-    schemaDelimiter: '_',
     suppressResponseEnums: false,
   }
 

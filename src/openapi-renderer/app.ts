@@ -10,7 +10,6 @@ import { HttpMethod, HttpMethods } from '../router/types.js'
 import PsychicServer from '../server/index.js'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults.js'
 import { OpenapiEndpointResponsePath, OpenapiParameterResponse, OpenapiSchema } from './endpoint.js'
-import schemaDelimiter from './helpers/schemaDelimiter.js'
 import suppressResponseEnums from './helpers/suppressResponseEnums.js'
 
 const debugEnabled = debuglog('psychic').enabled
@@ -62,12 +61,10 @@ export default class OpenapiAppRenderer {
     const opts: {
       openapiName: string
       casing: SerializerCasing
-      schemaDelimiter: string
       suppressResponseEnums: boolean
     } = {
       openapiName,
       casing: 'camel',
-      schemaDelimiter: schemaDelimiter(openapiName),
       suppressResponseEnums: suppressResponseEnums(openapiName),
     }
 

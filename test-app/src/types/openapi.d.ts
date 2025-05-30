@@ -1521,10 +1521,6 @@ export interface components {
             id: string;
             latexOnlyAttr: string;
         };
-        BalloonLatexSummary: {
-            id: string;
-            latexOnlySummaryAttr: string;
-        };
         BalloonMylar: {
             /** @enum {string|null} */
             color: "blue" | "green" | "red" | null;
@@ -1543,9 +1539,13 @@ export interface components {
             id: string;
         };
         CommentTestingBasicSerializerRef: {
-            howyadoin: components["schemas"]["BalloonLatexSummary"];
+            howyadoin: components["schemas"]["LatexSummary"];
         };
         CustomSchema: string;
+        LatexSummary: {
+            id: string;
+            latexOnlySummaryAttr: string;
+        };
         Pet: {
             id: string;
             name: string | null;
