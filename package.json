@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "0.36.1",
+  "version": "0.37.0",
   "author": "RVOHealth",
   "repository": {
     "type": "git",
@@ -46,7 +46,6 @@
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
-    "express-openapi-validator": "^5.4.3",
     "lodash-es": "^4.17.21",
     "pluralize-esm": "^9.0.5",
     "yoctocolors": "^2.1.1"
