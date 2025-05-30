@@ -2,12 +2,8 @@ import { closeAllDbConnections, DreamLogos } from '@rvoh/dream'
 import * as cookieParser from 'cookie-parser'
 import * as cors from 'cors'
 import * as express from 'express'
-import { Express, Request, Response } from 'express'
-import * as OpenApiValidator from 'express-openapi-validator'
+import { Express } from 'express'
 import { Server } from 'node:http'
-import * as path from 'node:path'
-import { debuglog, inspect } from 'node:util'
-import isOpenapiError, { OpenApiError } from '../helpers/isOpenapiError.js'
 import PsychicApp, { PsychicSslCredentials } from '../psychic-app/index.js'
 import PsychicRouter from '../router/index.js'
 import startPsychicServer, {
@@ -15,7 +11,7 @@ import startPsychicServer, {
   StartPsychicServerOptions,
 } from './helpers/startPsychicServer.js'
 
-const debugEnabled = debuglog('psychic').enabled
+// const debugEnabled = debuglog('psychic').enabled
 
 export default class PsychicServer {
   public static async startPsychicServer(opts: StartPsychicServerOptions): Promise<Server> {
@@ -81,8 +77,6 @@ export default class PsychicServer {
     for (const serverInitAfterMiddlewareHook of this.config.specialHooks.serverInitAfterMiddleware) {
       await serverInitAfterMiddlewareHook(this)
     }
-
-    this.initializeOpenapiValidation()
 
     await this.buildRoutes()
 
@@ -184,37 +178,6 @@ export default class PsychicServer {
 
   private initializeJSON() {
     this.expressApp.use(express.json(this.config.jsonOptions))
-  }
-
-  private initializeOpenapiValidation() {
-    const psychicApp = PsychicApp.getOrFail()
-    for (const openapiName in psychicApp.openapi) {
-      const openapiOpts = psychicApp.openapi[openapiName]
-      if (openapiOpts?.validation) {
-        const opts = openapiOpts.validation
-        opts.apiSpec ||= path.join(psychicApp.apiRoot, 'openapi.json')
-        this.expressApp.use(OpenApiValidator.middleware(opts as Required<typeof opts>))
-
-        this.expressApp.use((err: OpenApiError, req: Request, res: Response, next: () => void) => {
-          if (isOpenapiError(err)) {
-            if (debugEnabled) {
-              PsychicApp.log(inspect(err))
-              console.trace()
-            }
-
-            res.status(err.status).json({
-              message: err.message,
-              errors: err.errors,
-            })
-          } else {
-            if (debugEnabled) {
-              PsychicApp.logWithLevel('error', err)
-            }
-            next()
-          }
-        })
-      }
-    }
   }
 
   private async buildRoutes() {

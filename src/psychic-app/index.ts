@@ -12,7 +12,6 @@ import * as bodyParser from 'body-parser'
 import { Command } from 'commander'
 import { CorsOptions } from 'cors'
 import { Request, Response } from 'express'
-import * as OpenApiValidator from 'express-openapi-validator'
 import * as http from 'node:http'
 import PackageManager from '../cli/helpers/PackageManager.js'
 import PsychicAppInitMissingApiRoot from '../error/psychic-app/init-missing-api-root.js'
@@ -750,55 +749,6 @@ interface PsychicOpenapiBaseOptions {
    * ```
    */
   syncTypes?: boolean
-
-  /**
-   * provide validation for this file. If this is set, Psychic will
-   * automatically bootstrap your server upon starting using the
-   * `express-openapi-validator` package, which will create validation
-   * rules out of each endpoint in accordance with the corresponding
-   * openapi file.
-   *
-   * ```ts
-   * const ignorePaths = [
-   *   'webhooks',
-   *   'account/security-code',
-   *   'central/v1/salesforce/twilio-proxy/*',
-   *   'central/v1/salesforce/twilio-media-proxy/*',
-   * ]
-   *
-   * const datetimeValidator: OpenAPIValidatorFormat = {
-   *   type: 'string',
-   *   validate: (value: DateTime | string) => {
-   *     return value instanceof DateTime ? value?.isValid : DateTime.fromISO(value).isValid
-   *   },
-   * }
-   *
-   * psy.set('openapi', {
-   *   validation: {
-   *     validateRequests: true,
-   *     validateSecurity: false,
-   *     validateResponses: AppEnv.isTest,
-   *     ignoreUndocumented: true,
-   *     formats: {
-   *       'date-time': datetimeValidator,
-   *       decimal: {
-   *         type: 'string',
-   *         validate: (value: string) => /^-?(\d+\.?\d*|\d*\.?\d+)$/.test(value),
-   *       },
-   *     },
-   *     serDes: [
-   *       {
-   *         format: 'date-time',
-   *         deserialize: s => DateTime.fromISO(s),
-   *         serialize: (o: unknown) => (o instanceof DateTime ? o.toISO() : o)! as string,
-   *       },
-   *     ],
-   *     ignorePaths: ignorePaths.length ? new RegExp(ignorePaths.join('|')) : undefined,
-   *   }
-   * })
-   * ```
-   */
-  validation?: Partial<Parameters<(typeof OpenApiValidator)['middleware']>[0]>
 
   /**
    * an object containing default values for all endpoints,
