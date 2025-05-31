@@ -1,14 +1,15 @@
 import {
   Dream,
-  DreamApp,
   DreamModelSerializerType,
   DreamParamSafeAttributes,
   DreamSerializerBuilder,
   GlobalNameNotSet,
+  inferSerializerFromDreamOrViewModel,
   isDreamSerializer,
   ObjectSerializerBuilder,
   SerializerRendererOpts,
   SimpleObjectSerializerType,
+  ViewModel,
 } from '@rvoh/dream'
 import { Request, Response } from 'express'
 import { ControllerHook } from '../controller/hooks.js'
@@ -367,7 +368,6 @@ export default class PsychicController {
 
   private singleObjectJson<T>(data: T, opts: RenderOptions): T | SerializerResult | null {
     if (!data) return data
-    const dreamApp = DreamApp.getOrFail()
     const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
 
     // if we already have a serializer, let's just render it
@@ -394,36 +394,26 @@ export default class PsychicController {
         )
       }
     } else {
-      const serializerKey =
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        (data as any).serializers?.[
-          opts.serializerKey ||
-            psychicControllerClass['controllerActionMetadata'][this.action]?.['serializerKey'] ||
-            'default'
-        ] as string | undefined
+      const serializer = inferSerializerFromDreamOrViewModel(
+        data as unknown as Dream | ViewModel,
+        opts.serializerKey ||
+          psychicControllerClass['controllerActionMetadata'][this.action]?.['serializerKey'] ||
+          'default',
+      )
 
-      if (serializerKey && Object.prototype.hasOwnProperty.call(dreamApp.serializers, serializerKey)) {
-        const serializer = dreamApp.serializers[serializerKey]
-        if (serializer && isDreamSerializer(serializer)) {
-          // passthrough data going into the serializer is the argument that gets
-          // used in the custom attribute callback function
-          return serializer(data, this.defaultSerializerPassthrough).render(
-            // passthrough data must be passed both into the serializer and render
-            // because, if the serializer does accept passthrough data, then passing it in is how
-            // it gets into the serializer, but if it does not accept passthrough data, and therefore
-            // does not pass it into the call to DreamSerializer/ObjectSerializer,
-            // then it would be lost to serializers rendered via rendersOne/Many, and SerializerRenderer
-            // handles passing its passthrough data into those
-            this.defaultSerializerPassthrough,
-            this.renderOpts,
-          )
-        } else {
-          throw new Error(
-            `
-A serializer key was detected, but the server was unable to identify an associated serializer class matching the key.
-The key in question is: "${serializerKey}"`,
-          )
-        }
+      if (serializer && isDreamSerializer(serializer)) {
+        // passthrough data going into the serializer is the argument that gets
+        // used in the custom attribute callback function
+        return serializer(data, this.defaultSerializerPassthrough).render(
+          // passthrough data must be passed both into the serializer and render
+          // because, if the serializer does accept passthrough data, then passing it in is how
+          // it gets into the serializer, but if it does not accept passthrough data, and therefore
+          // does not pass it into the call to DreamSerializer/ObjectSerializer,
+          // then it would be lost to serializers rendered via rendersOne/Many, and SerializerRenderer
+          // handles passing its passthrough data into those
+          this.defaultSerializerPassthrough,
+          this.renderOpts,
+        )
       }
     }
 
@@ -789,15 +779,6 @@ export class ControllerSerializerIndex {
   public lookupModel(ControllerClass: typeof PsychicController, ModelClass: typeof Dream) {
     return this.associations.find(
       association => association[0] === ControllerClass && association[2] === ModelClass,
-    )
-  }
-
-  public lookupSerializer(
-    ControllerClass: typeof PsychicController,
-    SerializerClass: DreamModelSerializerType | SimpleObjectSerializerType,
-  ) {
-    return this.associations.find(
-      association => association[0] === ControllerClass && association[1] === SerializerClass,
     )
   }
 }
