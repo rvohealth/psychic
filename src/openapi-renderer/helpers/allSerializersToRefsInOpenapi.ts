@@ -2,6 +2,50 @@ import { OpenapiSchemaBodyShorthand, OpenapiShorthandPrimitiveTypes } from '@rvo
 import isObject from '../../helpers/isObject.js'
 import SerializerOpenapiRenderer from '../SerializerOpenapiRenderer.js'
 
+/**
+ * @internal
+ *
+ * Transforms OpenAPI schema definitions by replacing serializer shorthand references with proper `$ref` statements.
+ *
+ * This function is used by the SerializerOpenapiRenderer to ensure that the schemas it generates from
+ * Serializers contain `$ref` statements instead of `$serializer` or `$serializable` statements. This
+ * transformation enables consistent ordering of `anyOf` statements since `anyOf` arrays are sorted by
+ * the `$ref` value, which follows the pattern `'#/components/schemas/TheSerializerOpenapiName'`.
+ *
+ * The function recursively traverses the schema and transforms:
+ * - `{ $serializer: SomeSerializer }` → `{ $ref: '#/components/schemas/SerializerOpenapiName' }`
+ * - `{ $serializable: SomeModel, key: 'summary' }` → `{ $ref: '#/components/schemas/ModelSummarySerializer' }`
+ *
+ * @param openapi - The OpenAPI schema definition that may contain serializer shorthand references
+ * @returns The transformed schema with `$ref` statements replacing serializer shorthands
+ *
+ * @example
+ * ```typescript
+ * const input = {
+ *   type: 'object',
+ *   properties: {
+ *     user: { $serializer: UserSerializer },
+ *     posts: {
+ *       type: 'array',
+ *       items: { $serializer: PostSerializer }
+ *     }
+ *   }
+ * }
+ *
+ * const output = allSerializersToRefsInOpenapi(input)
+ * // Returns:
+ * // {
+ * //   type: 'object',
+ * //   properties: {
+ * //     user: { $ref: '#/components/schemas/UserSerializer' },
+ * //     posts: {
+ * //       type: 'array',
+ * //       items: { $ref: '#/components/schemas/PostSerializer' }
+ * //     }
+ * //   }
+ * // }
+ * ```
+ */
 export default function allSerializersToRefsInOpenapi(
   openapi: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
 ): OpenapiSchemaBodyShorthand {

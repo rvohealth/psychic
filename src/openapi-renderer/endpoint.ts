@@ -403,7 +403,6 @@ export default class OpenapiEndpointRenderer<
    * "parameters" field for a single endpoint.
    */
   private queryArray({
-    openapiName,
     renderOpts,
   }: {
     openapiName: string
@@ -436,7 +435,6 @@ export default class OpenapiEndpointRenderer<
             ...output,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
             schema: new OpenapiSegmentExpander(queryParam.schema, {
-              openapiName,
               renderOpts,
               target: 'request',
               // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -490,7 +488,6 @@ export default class OpenapiEndpointRenderer<
     }
 
     let schema = new OpenapiSegmentExpander(this.requestBody as OpenapiSchemaBodyShorthand, {
-      openapiName,
       renderOpts,
       target: 'request',
     }).render().openapi
@@ -558,7 +555,6 @@ export default class OpenapiEndpointRenderer<
    * the request body.
    */
   private generateRequestBodyForModel({
-    openapiName,
     renderOpts,
   }: {
     openapiName: string
@@ -699,7 +695,6 @@ export default class OpenapiEndpointRenderer<
               paramsShape.properties = {
                 ...paramsShape.properties,
                 [columnName]: new OpenapiSegmentExpander(metadata.type, {
-                  openapiName,
                   renderOpts,
                   target: 'request',
                 }).render().openapi,
@@ -742,7 +737,6 @@ export default class OpenapiEndpointRenderer<
     }
 
     let processedSchema = new OpenapiSegmentExpander(paramsShape, {
-      openapiName,
       renderOpts,
       target: 'request',
     }).render().openapi
@@ -775,7 +769,6 @@ export default class OpenapiEndpointRenderer<
   }): ReferencedSerializersAndOpenapiResponses {
     let responseData: OpenapiResponses = {}
     const rendererOpts: OpenapiBodySegmentRendererOpts = {
-      openapiName,
       renderOpts,
       target: 'response',
     }
@@ -1771,7 +1764,6 @@ function serializersToSchemaObjects(
     const results = renderer.renderedOpenapi(alreadyExtractedDescendantSerializers)
 
     const segmentRendererResults = new OpenapiSegmentExpander(results.openapi, {
-      openapiName,
       renderOpts,
       target: 'response',
     }).render()

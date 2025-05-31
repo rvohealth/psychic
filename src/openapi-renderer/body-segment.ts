@@ -39,7 +39,6 @@ import schemaToRef from './helpers/schemaToRef.js'
 import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 
 export interface OpenapiBodySegmentRendererOpts {
-  openapiName: string
   renderOpts: OpenapiRenderOpts
   target: OpenapiBodyTarget
 }
@@ -88,19 +87,14 @@ export default class OpenapiSegmentExpander {
   private casing: SerializerCasing
   private suppressResponseEnums: boolean
   private target: OpenapiBodyTarget
-  private openapiName: string
 
   /**
    * @internal
    *
-   * Used to recursively parse nested object structures
+   * Used to recursively expand nested object structures
    * within nested openapi objects
    */
-  constructor(
-    bodySegment: OpenapiBodySegment,
-    { openapiName, renderOpts, target }: OpenapiBodySegmentRendererOpts,
-  ) {
-    this.openapiName = openapiName
+  constructor(bodySegment: OpenapiBodySegment, { renderOpts, target }: OpenapiBodySegmentRendererOpts) {
     this.bodySegment = bodySegment
     this.casing = renderOpts.casing
     this.suppressResponseEnums = renderOpts.suppressResponseEnums
@@ -118,7 +112,7 @@ export default class OpenapiSegmentExpander {
   /**
    * @internal
    *
-   * Recursively parses nested objects and arrays,
+   * Recursively expand nested objects and arrays,
    * as well as primitive types
    */
   public recursivelyParseBody(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
@@ -255,7 +249,7 @@ export default class OpenapiSegmentExpander {
   /**
    * @internal
    *
-   * recursively parses a oneOf statement
+   * recursively expands a oneOf statement
    */
   private oneOfStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
     const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
@@ -291,7 +285,7 @@ export default class OpenapiSegmentExpander {
   /**
    * @internal
    *
-   * recursively parses an anyOf statement
+   * recursively expand an anyOf statement
    */
   private anyOfStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
     const anyOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAnyOf
@@ -327,7 +321,7 @@ export default class OpenapiSegmentExpander {
   /**
    * @internal
    *
-   * recursively parses an allOf statement
+   * recursively expand an allOf statement
    */
   private allOfStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
     const allOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAllOf
@@ -363,7 +357,7 @@ export default class OpenapiSegmentExpander {
   /**
    * @internal
    *
-   * recursively parses an array statement
+   * recursively expand an array statement
    */
   private arrayStatement(bodySegment: OpenapiSchemaArray): ReferencedSerializersAndOpenapiSchemaBody {
     const results = this.recursivelyParseBody(bodySegment.items)
@@ -385,7 +379,7 @@ export default class OpenapiSegmentExpander {
   /**
    * @internal
    *
-   * recursively parses an object statement
+   * recursively expand an object statement
    */
   private objectStatement(bodySegment: OpenapiSchemaObject): ReferencedSerializersAndOpenapiSchemaBody {
     const objectBodySegment = bodySegment as OpenapiSchemaObjectBase
@@ -431,7 +425,7 @@ export default class OpenapiSegmentExpander {
   /**
    * @internal
    *
-   * parses either the `properties` or `additionalProperties` values
+   * expand either the `properties` or `additionalProperties` values
    * on an object
    */
   private parseObjectPropertyStatement(
@@ -469,7 +463,7 @@ export default class OpenapiSegmentExpander {
   /**
    * @internal
    *
-   * recursively parses a primitive literal type (i.e. string or boolean[])
+   * recursively expand a primitive literal type (i.e. string or boolean[])
    */
   private primitiveLiteralStatement(
     bodySegment: OpenapiShorthandPrimitiveTypes,
@@ -480,7 +474,7 @@ export default class OpenapiSegmentExpander {
   /**
    * @internal
    *
-   * recursively parses a primitive object type (i.e. { type: 'string[]' })
+   * recursively expand a primitive object type (i.e. { type: 'string[]' })
    */
   private primitiveObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaPrimitiveGeneric {
     const safeBodySegment = bodySegment as Extract<OpenapiSchemaBase, { type: OpenapiPrimitiveTypes }>

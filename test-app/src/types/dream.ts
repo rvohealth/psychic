@@ -133,7 +133,7 @@ export const schema = {
         type: 'BelongsTo',
         foreignKey: 'userId',
         tables: ['users'],
-        optional: false,
+        optional: true,
         requiredOnClauses: null,
       },
     },
