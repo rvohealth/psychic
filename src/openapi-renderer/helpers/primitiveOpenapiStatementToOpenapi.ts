@@ -1,9 +1,5 @@
-import {
-  OpenapiSchemaBody,
-  OpenapiSchemaBodyShorthand,
-  OpenapiShorthandPrimitiveTypes,
-  openapiShorthandToOpenapi,
-} from '@rvoh/dream'
+import { OpenapiSchemaBody, OpenapiSchemaBodyShorthand, OpenapiShorthandPrimitiveTypes } from '@rvoh/dream'
+import openapiShorthandToOpenapi from './openapiShorthandToOpenapi.js'
 
 /**
  * @internal

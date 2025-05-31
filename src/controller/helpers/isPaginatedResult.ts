@@ -1,4 +1,4 @@
-import { isObject } from '../../helpers/typechecks.js'
+import isObject from '../../helpers/isObject.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function isPaginatedResult(result: any) {

@@ -1,7 +1,6 @@
 import {
   Dream,
   DreamModelSerializerType,
-  DreamOrViewModelClassSerializerArrayKeys,
   DreamOrViewModelClassSerializerKey,
   DreamSerializable,
   DreamSerializableArray,
@@ -17,7 +16,6 @@ import {
   OpenapiSchemaObject,
   OpenapiSchemaProperties,
   SerializerCasing,
-  SerializerOpenapiRenderer,
   SimpleObjectSerializerType,
   ViewModelClass,
   cloneDeepSafe,
@@ -32,6 +30,7 @@ import OpenApiFailedToLookupSerializerForEndpoint from '../error/openapi/FailedT
 import NonSerializerDerivedInOpenapiEndpointRenderer from '../error/openapi/NonSerializerDerivedInOpenapiEndpointRenderer.js'
 import NonSerializerDerivedInToSchemaObjects from '../error/openapi/NonSerializerDerivedInToSchemaObjects.js'
 import OpenApiSerializerForEndpointNotAFunction from '../error/openapi/SerializerForEndpointNotAFunction.js'
+import { DreamOrViewModelClassSerializerArrayKeys } from '../helpers/typeHelpers.js'
 import { RouteConfig } from '../router/route-manager.js'
 import { HttpMethod } from '../router/types.js'
 import OpenapiBodySegmentRenderer, {
@@ -47,6 +46,7 @@ import openapiRoute from './helpers/openapiRoute.js'
 import openapiPageParamProperty from './helpers/pageParamOpenapiProperty.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import safelyAttachPaginationParamToRequestBodySegment from './helpers/safelyAttachPaginationParamsToBodySegment.js'
+import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 
 export interface OpenapiRenderOpts {
   casing: SerializerCasing

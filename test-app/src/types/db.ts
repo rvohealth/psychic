@@ -121,6 +121,7 @@ export interface Balloons {
   createdAt: Timestamp;
   id: Generated<Int8>;
   updatedAt: Timestamp;
+  userId: Generated<Int8>;
 }
 
 export interface Comments {
@@ -172,8 +173,12 @@ export interface Posts {
 }
 
 export interface Users {
+  aDatetime: Timestamp | null;
   bio: Generated<string>;
   birthdate: Timestamp | null;
+  collarCount: Int8 | null;
+  collarCountInt: number | null;
+  collarCountNumeric: Numeric | null;
   createdAt: Generated<Timestamp>;
   createdOn: Generated<Timestamp>;
   email: string;
@@ -189,15 +194,20 @@ export interface Users {
   favoriteJsons: ArrayType<Json> | null;
   favoriteNumerics: ArrayType<Numeric> | null;
   favoriteTexts: string[] | null;
+  favoriteTreats: ArrayType<PetTreatsEnum> | null;
   favoriteUuids: string[] | null;
   id: Generated<number>;
   jsonData: Json | null;
   jsonbData: Json | null;
+  likesTreats: Generated<boolean>;
+  likesWalks: boolean | null;
   name: string | null;
   nicknames: string[] | null;
   notes: string | null;
   optionalUuid: Generated<string | null>;
   passwordDigest: string;
+  requiredCollarCount: Generated<Int8>;
+  requiredCollarCountInt: Generated<number>;
   requiredFavoriteBigint: Generated<Int8>;
   requiredFavoriteBigints: Generated<ArrayType<Int8>>;
   requiredFavoriteBooleans: Generated<boolean[]>;
@@ -214,8 +224,10 @@ export interface Users {
   requiredJsonData: Generated<Json>;
   requiredJsonbData: Generated<Json>;
   requiredNicknames: Generated<string[]>;
+  species: SpeciesTypesEnum | null;
   updatedAt: Generated<Timestamp>;
   uuid: Generated<string>;
+  volume: Numeric | null;
 }
 
 export interface DB {

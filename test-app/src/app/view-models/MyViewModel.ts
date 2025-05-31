@@ -1,5 +1,6 @@
 import { DreamSerializers } from '@rvoh/dream'
 import ApplicationModel from '../models/ApplicationModel.js'
+import Balloon from '../models/Balloon.js'
 
 export default class MyViewModel {
   public name: string | undefined
@@ -11,4 +12,8 @@ export default class MyViewModel {
       somethingElse: 'ViewModels/MyViewModelSummarySerializer',
     }
   }
+
+  public myHasOne: MyViewModel
+  public myHasMany: MyViewModel[]
+  public balloons: Balloon[]
 }

@@ -126,9 +126,14 @@ export interface openapiPaths {
             requestBody?: {
                 content: {
                     "application/json": {
+                        /** Format: date-time */
+                        aDatetime?: string | null;
                         bio?: string;
                         /** Format: date */
                         birthdate?: string | null;
+                        collarCount?: string | null;
+                        collarCountInt?: number | null;
+                        collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
                         email?: string;
@@ -144,14 +149,19 @@ export interface openapiPaths {
                         favoriteJsons?: Record<string, never>[] | null;
                         favoriteNumerics?: number[] | null;
                         favoriteTexts?: string[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
                         favoriteUuids?: string[] | null;
                         jsonData?: Record<string, never> | null;
                         jsonbData?: Record<string, never> | null;
+                        likesTreats?: boolean;
+                        likesWalks?: boolean | null;
                         name?: string | null;
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
                         passwordDigest?: string;
+                        requiredCollarCount?: string;
+                        requiredCollarCountInt?: number;
                         requiredFavoriteBigint?: string;
                         requiredFavoriteBigints?: string[];
                         requiredFavoriteBooleans?: boolean[];
@@ -168,7 +178,10 @@ export interface openapiPaths {
                         requiredJsonData?: Record<string, never>;
                         requiredJsonbData?: Record<string, never>;
                         requiredNicknames?: string[];
+                        /** @enum {string|null} */
+                        species?: "cat" | "noncat" | null;
                         uuid?: string;
+                        volume?: number | null;
                         password?: (string | null) | (number | null) | (Record<string, never> | null);
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
@@ -228,9 +241,14 @@ export interface openapiPaths {
             requestBody?: {
                 content: {
                     "application/json": {
+                        /** Format: date-time */
+                        aDatetime?: string | null;
                         bio?: string;
                         /** Format: date */
                         birthdate?: string | null;
+                        collarCount?: string | null;
+                        collarCountInt?: number | null;
+                        collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
                         email?: string;
@@ -246,14 +264,19 @@ export interface openapiPaths {
                         favoriteJsons?: Record<string, never>[] | null;
                         favoriteNumerics?: number[] | null;
                         favoriteTexts?: string[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
                         favoriteUuids?: string[] | null;
                         jsonData?: Record<string, never> | null;
                         jsonbData?: Record<string, never> | null;
+                        likesTreats?: boolean;
+                        likesWalks?: boolean | null;
                         name?: string | null;
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
                         passwordDigest?: string;
+                        requiredCollarCount?: string;
+                        requiredCollarCountInt?: number;
                         requiredFavoriteBigint?: string;
                         requiredFavoriteBigints?: string[];
                         requiredFavoriteBooleans?: boolean[];
@@ -270,7 +293,10 @@ export interface openapiPaths {
                         requiredJsonData?: Record<string, never>;
                         requiredJsonbData?: Record<string, never>;
                         requiredNicknames?: string[];
+                        /** @enum {string|null} */
+                        species?: "cat" | "noncat" | null;
                         uuid?: string;
+                        volume?: number | null;
                         password?: (string | null) | (number | null) | (Record<string, never> | null);
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
@@ -1046,9 +1072,14 @@ export interface openapiPaths {
             requestBody?: {
                 content: {
                     "application/json": {
+                        /** Format: date-time */
+                        aDatetime?: string | null;
                         bio?: string;
                         /** Format: date */
                         birthdate?: string | null;
+                        collarCount?: string | null;
+                        collarCountInt?: number | null;
+                        collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
                         email?: string;
@@ -1064,14 +1095,19 @@ export interface openapiPaths {
                         favoriteJsons?: Record<string, never>[] | null;
                         favoriteNumerics?: number[] | null;
                         favoriteTexts?: string[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
                         favoriteUuids?: string[] | null;
                         jsonData?: Record<string, never> | null;
                         jsonbData?: Record<string, never> | null;
+                        likesTreats?: boolean;
+                        likesWalks?: boolean | null;
                         name?: string | null;
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
                         passwordDigest?: string;
+                        requiredCollarCount?: string;
+                        requiredCollarCountInt?: number;
                         requiredFavoriteBigint?: string;
                         requiredFavoriteBigints?: string[];
                         requiredFavoriteBooleans?: boolean[];
@@ -1088,7 +1124,10 @@ export interface openapiPaths {
                         requiredJsonData?: Record<string, never>;
                         requiredJsonbData?: Record<string, never>;
                         requiredNicknames?: string[];
+                        /** @enum {string|null} */
+                        species?: "cat" | "noncat" | null;
                         uuid?: string;
+                        volume?: number | null;
                         password?: (string | null) | (number | null) | (Record<string, never> | null);
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
@@ -1223,9 +1262,14 @@ export interface openapiPaths {
             requestBody?: {
                 content: {
                     "application/json": {
+                        /** Format: date-time */
+                        aDatetime?: string | null;
                         bio?: string;
                         /** Format: date */
                         birthdate?: string | null;
+                        collarCount?: string | null;
+                        collarCountInt?: number | null;
+                        collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
                         email?: string;
@@ -1241,14 +1285,19 @@ export interface openapiPaths {
                         favoriteJsons?: Record<string, never>[] | null;
                         favoriteNumerics?: number[] | null;
                         favoriteTexts?: string[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
                         favoriteUuids?: string[] | null;
                         jsonData?: Record<string, never> | null;
                         jsonbData?: Record<string, never> | null;
+                        likesTreats?: boolean;
+                        likesWalks?: boolean | null;
                         name?: string | null;
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
                         passwordDigest?: string;
+                        requiredCollarCount?: string;
+                        requiredCollarCountInt?: number;
                         requiredFavoriteBigint?: string;
                         requiredFavoriteBigints?: string[];
                         requiredFavoriteBooleans?: boolean[];
@@ -1265,7 +1314,10 @@ export interface openapiPaths {
                         requiredJsonData?: Record<string, never>;
                         requiredJsonbData?: Record<string, never>;
                         requiredNicknames?: string[];
+                        /** @enum {string|null} */
+                        species?: "cat" | "noncat" | null;
                         uuid?: string;
+                        volume?: number | null;
                         password?: (string | null) | (number | null) | (Record<string, never> | null);
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
@@ -1428,9 +1480,14 @@ export interface openapiPaths {
             requestBody?: {
                 content: {
                     "application/json": {
+                        /** Format: date-time */
+                        aDatetime?: string | null;
                         bio?: string;
                         /** Format: date */
                         birthdate?: string | null;
+                        collarCount?: string | null;
+                        collarCountInt?: number | null;
+                        collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
                         email?: string;
@@ -1446,14 +1503,19 @@ export interface openapiPaths {
                         favoriteJsons?: Record<string, never>[] | null;
                         favoriteNumerics?: number[] | null;
                         favoriteTexts?: string[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
                         favoriteUuids?: string[] | null;
                         jsonData?: Record<string, never> | null;
                         jsonbData?: Record<string, never> | null;
+                        likesTreats?: boolean;
+                        likesWalks?: boolean | null;
                         name?: string | null;
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
                         passwordDigest?: string;
+                        requiredCollarCount?: string;
+                        requiredCollarCountInt?: number;
                         requiredFavoriteBigint?: string;
                         requiredFavoriteBigints?: string[];
                         requiredFavoriteBooleans?: boolean[];
@@ -1470,7 +1532,10 @@ export interface openapiPaths {
                         requiredJsonData?: Record<string, never>;
                         requiredJsonbData?: Record<string, never>;
                         requiredNicknames?: string[];
+                        /** @enum {string|null} */
+                        species?: "cat" | "noncat" | null;
                         uuid?: string;
+                        volume?: number | null;
                         password?: (string | null) | (number | null) | (Record<string, never> | null);
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];

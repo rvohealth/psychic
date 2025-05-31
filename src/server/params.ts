@@ -16,10 +16,10 @@ import {
 } from '../controller/index.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
-import isUuid from '../helpers/isUuid.js'
-import { isObject } from '../helpers/typechecks.js'
-import isArrayParamName from '../helpers/isArrayParamName.js'
 import alternateParamName from '../helpers/alternateParamName.js'
+import isArrayParamName from '../helpers/isArrayParamName.js'
+import isObject from '../helpers/isObject.js'
+import isUuid from '../helpers/isUuid.js'
 
 export default class Params {
   /**

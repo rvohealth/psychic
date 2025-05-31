@@ -7,6 +7,7 @@ export async function up(db: Kysely<any>): Promise<void> {
   await db.schema
     .createTable('balloons')
     .addColumn('id', 'bigserial', col => col.primaryKey())
+    .addColumn('user_id', 'bigserial', col => col.references('users.id').onDelete('cascade'))
     .addColumn('color', sql`balloon_colors_enum`)
     .addColumn('created_at', 'timestamp', col => col.notNull())
     .addColumn('updated_at', 'timestamp', col => col.notNull())

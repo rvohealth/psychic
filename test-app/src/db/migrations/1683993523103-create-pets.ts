@@ -2,9 +2,6 @@ import { Kysely, sql } from 'kysely'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export async function up(db: Kysely<any>): Promise<void> {
-  await db.schema.createType('species_types_enum').asEnum(['cat', 'noncat']).execute()
-  await db.schema.createType('pet_treats_enum').asEnum(['snick snowcks', 'efishy feesh']).execute()
-
   await db.schema
     .createTable('pets')
     .addColumn('id', 'bigserial', col => col.primaryKey())

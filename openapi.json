@@ -138,6 +138,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "aDatetime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
                   "bio": {
                     "type": "string"
                   },
@@ -147,6 +154,24 @@
                       "null"
                     ],
                     "format": "date"
+                  },
+                  "collarCount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "collarCountInt": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "collarCountNumeric": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "createdOn": {
                     "type": "string",
@@ -259,6 +284,20 @@
                       "type": "string"
                     }
                   },
+                  "favoriteTreats": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "efishy feesh",
+                        "snick snowcks",
+                        null
+                      ]
+                    }
+                  },
                   "favoriteUuids": {
                     "type": [
                       "array",
@@ -277,6 +316,15 @@
                   "jsonbData": {
                     "type": [
                       "object",
+                      "null"
+                    ]
+                  },
+                  "likesTreats": {
+                    "type": "boolean"
+                  },
+                  "likesWalks": {
+                    "type": [
+                      "boolean",
                       "null"
                     ]
                   },
@@ -309,6 +357,12 @@
                   },
                   "passwordDigest": {
                     "type": "string"
+                  },
+                  "requiredCollarCount": {
+                    "type": "string"
+                  },
+                  "requiredCollarCountInt": {
+                    "type": "integer"
                   },
                   "requiredFavoriteBigint": {
                     "type": "string"
@@ -396,8 +450,25 @@
                       "type": "string"
                     }
                   },
+                  "species": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "cat",
+                      "noncat",
+                      null
+                    ]
+                  },
                   "uuid": {
                     "type": "string"
+                  },
+                  "volume": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "password": {
                     "anyOf": [
@@ -501,6 +572,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "aDatetime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
                   "bio": {
                     "type": "string"
                   },
@@ -510,6 +588,24 @@
                       "null"
                     ],
                     "format": "date"
+                  },
+                  "collarCount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "collarCountInt": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "collarCountNumeric": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "createdOn": {
                     "type": "string",
@@ -622,6 +718,20 @@
                       "type": "string"
                     }
                   },
+                  "favoriteTreats": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "efishy feesh",
+                        "snick snowcks",
+                        null
+                      ]
+                    }
+                  },
                   "favoriteUuids": {
                     "type": [
                       "array",
@@ -640,6 +750,15 @@
                   "jsonbData": {
                     "type": [
                       "object",
+                      "null"
+                    ]
+                  },
+                  "likesTreats": {
+                    "type": "boolean"
+                  },
+                  "likesWalks": {
+                    "type": [
+                      "boolean",
                       "null"
                     ]
                   },
@@ -672,6 +791,12 @@
                   },
                   "passwordDigest": {
                     "type": "string"
+                  },
+                  "requiredCollarCount": {
+                    "type": "string"
+                  },
+                  "requiredCollarCountInt": {
+                    "type": "integer"
                   },
                   "requiredFavoriteBigint": {
                     "type": "string"
@@ -759,8 +884,25 @@
                       "type": "string"
                     }
                   },
+                  "species": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "cat",
+                      "noncat",
+                      null
+                    ]
+                  },
                   "uuid": {
                     "type": "string"
+                  },
+                  "volume": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "password": {
                     "anyOf": [
@@ -1842,6 +1984,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "aDatetime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
                   "bio": {
                     "type": "string"
                   },
@@ -1851,6 +2000,24 @@
                       "null"
                     ],
                     "format": "date"
+                  },
+                  "collarCount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "collarCountInt": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "collarCountNumeric": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "createdOn": {
                     "type": "string",
@@ -1963,6 +2130,20 @@
                       "type": "string"
                     }
                   },
+                  "favoriteTreats": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "efishy feesh",
+                        "snick snowcks",
+                        null
+                      ]
+                    }
+                  },
                   "favoriteUuids": {
                     "type": [
                       "array",
@@ -1981,6 +2162,15 @@
                   "jsonbData": {
                     "type": [
                       "object",
+                      "null"
+                    ]
+                  },
+                  "likesTreats": {
+                    "type": "boolean"
+                  },
+                  "likesWalks": {
+                    "type": [
+                      "boolean",
                       "null"
                     ]
                   },
@@ -2013,6 +2203,12 @@
                   },
                   "passwordDigest": {
                     "type": "string"
+                  },
+                  "requiredCollarCount": {
+                    "type": "string"
+                  },
+                  "requiredCollarCountInt": {
+                    "type": "integer"
                   },
                   "requiredFavoriteBigint": {
                     "type": "string"
@@ -2100,8 +2296,25 @@
                       "type": "string"
                     }
                   },
+                  "species": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "cat",
+                      "noncat",
+                      null
+                    ]
+                  },
                   "uuid": {
                     "type": "string"
+                  },
+                  "volume": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "password": {
                     "anyOf": [
@@ -2299,6 +2512,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "aDatetime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
                   "bio": {
                     "type": "string"
                   },
@@ -2308,6 +2528,24 @@
                       "null"
                     ],
                     "format": "date"
+                  },
+                  "collarCount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "collarCountInt": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "collarCountNumeric": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "createdOn": {
                     "type": "string",
@@ -2420,6 +2658,20 @@
                       "type": "string"
                     }
                   },
+                  "favoriteTreats": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "efishy feesh",
+                        "snick snowcks",
+                        null
+                      ]
+                    }
+                  },
                   "favoriteUuids": {
                     "type": [
                       "array",
@@ -2438,6 +2690,15 @@
                   "jsonbData": {
                     "type": [
                       "object",
+                      "null"
+                    ]
+                  },
+                  "likesTreats": {
+                    "type": "boolean"
+                  },
+                  "likesWalks": {
+                    "type": [
+                      "boolean",
                       "null"
                     ]
                   },
@@ -2470,6 +2731,12 @@
                   },
                   "passwordDigest": {
                     "type": "string"
+                  },
+                  "requiredCollarCount": {
+                    "type": "string"
+                  },
+                  "requiredCollarCountInt": {
+                    "type": "integer"
                   },
                   "requiredFavoriteBigint": {
                     "type": "string"
@@ -2557,8 +2824,25 @@
                       "type": "string"
                     }
                   },
+                  "species": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "cat",
+                      "noncat",
+                      null
+                    ]
+                  },
                   "uuid": {
                     "type": "string"
+                  },
+                  "volume": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "password": {
                     "anyOf": [
@@ -2840,6 +3124,13 @@
               "schema": {
                 "type": "object",
                 "properties": {
+                  "aDatetime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
                   "bio": {
                     "type": "string"
                   },
@@ -2849,6 +3140,24 @@
                       "null"
                     ],
                     "format": "date"
+                  },
+                  "collarCount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "collarCountInt": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "collarCountNumeric": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "createdOn": {
                     "type": "string",
@@ -2961,6 +3270,20 @@
                       "type": "string"
                     }
                   },
+                  "favoriteTreats": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "efishy feesh",
+                        "snick snowcks",
+                        null
+                      ]
+                    }
+                  },
                   "favoriteUuids": {
                     "type": [
                       "array",
@@ -2979,6 +3302,15 @@
                   "jsonbData": {
                     "type": [
                       "object",
+                      "null"
+                    ]
+                  },
+                  "likesTreats": {
+                    "type": "boolean"
+                  },
+                  "likesWalks": {
+                    "type": [
+                      "boolean",
                       "null"
                     ]
                   },
@@ -3011,6 +3343,12 @@
                   },
                   "passwordDigest": {
                     "type": "string"
+                  },
+                  "requiredCollarCount": {
+                    "type": "string"
+                  },
+                  "requiredCollarCountInt": {
+                    "type": "integer"
                   },
                   "requiredFavoriteBigint": {
                     "type": "string"
@@ -3098,8 +3436,25 @@
                       "type": "string"
                     }
                   },
+                  "species": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "cat",
+                      "noncat",
+                      null
+                    ]
+                  },
                   "uuid": {
                     "type": "string"
+                  },
+                  "volume": {
+                    "type": [
+                      "number",
+                      "null"
+                    ]
                   },
                   "password": {
                     "anyOf": [

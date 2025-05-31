@@ -1,6 +1,7 @@
 import { Decorators, DreamColumn, DreamSerializers } from '@rvoh/dream'
 import { randomBytes, scrypt, timingSafeEqual } from 'crypto'
 import ApplicationModel from './ApplicationModel.js'
+import Balloon from './Balloon.js'
 import Pet from './Pet.js'
 import Post from './Post.js'
 
@@ -28,6 +29,8 @@ export default class User extends ApplicationModel {
   public nicknames: DreamColumn<User, 'nicknames'>
   public requiredNicknames: DreamColumn<User, 'requiredNicknames'>
   public birthdate: DreamColumn<User, 'birthdate'>
+  public aDatetime: DreamColumn<User, 'aDatetime'>
+  public volume: DreamColumn<User, 'volume'>
 
   // begin: favorite records (used for checking type validation in Params.for)
   public favoriteCitext: DreamColumn<User, 'favoriteCitext'>
@@ -66,6 +69,17 @@ export default class User extends ApplicationModel {
   public requiredJsonbData: DreamColumn<User, 'requiredJsonbData'>
   public uuid: DreamColumn<User, 'uuid'>
   public optionalUuid: DreamColumn<User, 'optionalUuid'>
+
+  public species: DreamColumn<User, 'species'>
+  public favoriteTreats: DreamColumn<User, 'favoriteTreats'>
+  public collarCount: DreamColumn<User, 'collarCount'>
+  public collarCountInt: DreamColumn<User, 'collarCountInt'>
+  public collarCountNumeric: DreamColumn<User, 'collarCountNumeric'>
+  public requiredCollarCount: DreamColumn<User, 'requiredCollarCount'>
+  public requiredCollarCountInt: DreamColumn<User, 'requiredCollarCountInt'>
+  public likesWalks: DreamColumn<User, 'likesWalks'>
+  public likesTreats: DreamColumn<User, 'likesTreats'>
+
   public createdOn: DreamColumn<User, 'createdOn'>
   public createdAt: DreamColumn<User, 'createdAt'>
   public updatedAt: DreamColumn<User, 'updatedAt'>
@@ -83,6 +97,9 @@ export default class User extends ApplicationModel {
 
   @deco.Virtual('string[]')
   public openapiVirtualSpecTest2: string | null | undefined
+
+  @deco.HasMany('Balloon')
+  public balloons: Balloon[]
 
   @deco.HasMany('Pet')
   public pets: Pet[]

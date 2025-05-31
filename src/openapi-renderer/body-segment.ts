@@ -24,19 +24,19 @@ import {
   OpenapiShorthandAllTypes,
   OpenapiShorthandPrimitiveTypes,
   SerializerCasing,
-  SerializerOpenapiRenderer,
   SimpleObjectSerializerType,
   inferSerializerFromDreamOrViewModel,
   isDreamSerializer,
-  maybeNullOpenapiShorthandToOpenapiShorthand,
   openapiShorthandPrimitiveTypes,
 } from '@rvoh/dream'
 import NonSerializerSuppliedToSerializerBodySegment from '../error/openapi/NonSerializerSuppliedToSerializerBodySegment.js'
 import isArrayParamName from '../helpers/isArrayParamName.js'
 import { OpenapiEndpointResponse, OpenapiRenderOpts, OpenapiResponses } from './endpoint.js'
 import isBlankDescription from './helpers/isBlankDescription.js'
+import maybeNullOpenapiShorthandToOpenapiShorthand from './helpers/maybeNullOpenapiShorthandToOpenapiShorthand.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import schemaToRef from './helpers/schemaToRef.js'
+import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 
 export interface OpenapiBodySegmentRendererOpts {
   openapiName: string
