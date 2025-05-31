@@ -1,4 +1,12 @@
-import { OpenapiSchemaBodyShorthand, OpenapiShorthandPrimitiveTypes } from '@rvoh/dream'
+/* eslint-disable @typescript-eslint/no-unsafe-return */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+import {
+  inferSerializersFromDreamClassOrViewModelClass,
+  OpenapiSchemaBodyShorthand,
+  OpenapiShorthandPrimitiveTypes,
+} from '@rvoh/dream'
 import isObject from '../../helpers/isObject.js'
 import SerializerOpenapiRenderer from '../SerializerOpenapiRenderer.js'
 
@@ -59,23 +67,43 @@ function transformValue(value: any): any {
   if (!value) return value
 
   // If this is an object with a $serializer property, replace it with $ref
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (value.$serializer) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     const { $serializer, ...rest } = value
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     const openapiRenderer = new SerializerOpenapiRenderer($serializer).serializerRef
     return {
       ...rest,
       ...openapiRenderer,
     }
+    //
+  } else if (value.$serializable) {
+    const { $serializable, $serializableSerializerKey, ...rest } = value
+
+    const foundSerializers = inferSerializersFromDreamClassOrViewModelClass(
+      $serializable,
+      $serializableSerializerKey,
+    )
+
+    const refs = foundSerializers.map(serializer => new SerializerOpenapiRenderer(serializer).serializerRef)
+
+    if (refs.length === 0) return rest
+    if (refs.length === 1) {
+      return {
+        ...rest,
+        ...refs[0],
+      }
+    }
+
+    return {
+      ...rest,
+      anyOf: refs,
+    }
+
+    //
   } else if (isObject(value)) {
     // Recurse into objects
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const transformed: any = {}
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     for (const [key, val] of Object.entries(value)) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
       transformed[key] = transformValue(val)
     }
 
@@ -83,7 +111,6 @@ function transformValue(value: any): any {
     //
   } else if (Array.isArray(value)) {
     // Recurse into arrays
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return value.map(val => transformValue(val))
     //
   } else {

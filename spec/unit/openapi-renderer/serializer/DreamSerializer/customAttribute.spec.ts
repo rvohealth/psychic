@@ -88,6 +88,23 @@ describe('DreamSerializer customAttributes', () => {
     })
   })
 
+  context('when the OpenAPI shape is specified via $serializable', () => {
+    it('renders the serializable model’s default serializer and includes the referenced serializer in the returned referencedSerializers array', () => {
+      const MySerializer = (data: Pet) =>
+        DreamSerializer(Pet, data).customAttribute('user', () => null, { openapi: { $serializable: User } })
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      const results = serializerOpenapiRenderer['renderedOpenapiAttributes']()
+      expect(results.attributes).toEqual({
+        user: {
+          $ref: '#/components/schemas/User',
+        },
+      })
+
+      expect(results.referencedSerializers).toEqual([UserSerializer])
+    })
+  })
+
   context('flatten', () => {
     it('renders the serialized data into this model and adjusts the OpenAPI spec accordingly', () => {
       const MySerializer = (data: Pet) =>
@@ -119,6 +136,75 @@ describe('DreamSerializer customAttributes', () => {
       expect(results.referencedSerializers).toHaveLength(1)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       expect((results.referencedSerializers[0] as any).globalName).toEqual('UserSerializer')
+    })
+
+    context('when a $serializable is specified', () => {
+      it('first determines the serializer, then renders the serialized data into this model and adjusts the OpenAPI spec accordingly', () => {
+        const MySerializer = (data: Pet) =>
+          DreamSerializer(Pet, data)
+            .attribute('species')
+            .customAttribute('user', () => null, {
+              flatten: true,
+              openapi: {
+                $serializable: User,
+              },
+            })
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+        const results = serializerOpenapiRenderer.renderedOpenapi()
+        expect(results.openapi).toEqual({
+          allOf: [
+            {
+              type: 'object',
+              required: ['species'],
+              properties: {
+                species: { type: ['string', 'null'], enum: SpeciesTypesEnumValues },
+              },
+            },
+            {
+              $ref: '#/components/schemas/User',
+            },
+          ],
+        })
+
+        expect(results.referencedSerializers).toHaveLength(1)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        expect((results.referencedSerializers[0] as any).globalName).toEqual('UserSerializer')
+      })
+
+      context('when a $serializableSerializerKey is specified', () => {
+        it('uses the serializer corresponding to the serializer key', () => {
+          const MySerializer = (data: Pet) =>
+            DreamSerializer(Pet, data)
+              .attribute('species')
+              .customAttribute('user', () => null, {
+                flatten: true,
+                openapi: {
+                  $serializable: User,
+                  $serializableSerializerKey: 'summary',
+                },
+              })
+          const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+          const results = serializerOpenapiRenderer.renderedOpenapi()
+          expect(results.openapi).toEqual({
+            allOf: [
+              {
+                type: 'object',
+                required: ['species'],
+                properties: {
+                  species: { type: ['string', 'null'], enum: SpeciesTypesEnumValues },
+                },
+              },
+              {
+                $ref: '#/components/schemas/UserSummary',
+              },
+            ],
+          })
+
+          expect(results.referencedSerializers).toHaveLength(1)
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+          expect((results.referencedSerializers[0] as any).globalName).toEqual('UserSummarySerializer')
+        })
+      })
     })
 
     context('when optional and flatten', () => {

@@ -425,13 +425,13 @@ function associationOpenapi(
     }
   }
 
-  const serializersOpenapi = associatedClasses.flatMap(associatedClass =>
+  const serializers = associatedClasses.flatMap(associatedClass =>
     inferSerializersFromDreamClassOrViewModelClass(associatedClass, attribute.options.serializerKey),
   )
 
-  if (serializersOpenapi.length === 0) throw new NoSerializerFoundForRendersOneAndMany(attribute.name)
-  if (serializersOpenapi.length === 1) {
-    const serializer = serializersOpenapi[0]!
+  if (serializers.length === 0) throw new NoSerializerFoundForRendersOneAndMany(attribute.name)
+  if (serializers.length === 1) {
+    const serializer = serializers[0]!
     return {
       associationOpts: { optional },
       referencedSerializersAndOpenapiSchemaBodyShorthand: {
@@ -448,15 +448,15 @@ function associationOpenapi(
     associationOpts: { optional },
     referencedSerializersAndOpenapiSchemaBodyShorthand: {
       referencedSerializers: [
-        ...serializersOpenapi,
-        ...serializersOpenapi.flatMap(serializer =>
+        ...serializers,
+        ...serializers.flatMap(serializer =>
           descendantSerializers(serializer, alreadyExtractedDescendantSerializers),
         ),
       ],
       openapi: {
         anyOf: sortBy(
           uniq(
-            serializersOpenapi.map(serializer => new SerializerOpenapiRenderer(serializer).serializerRef),
+            serializers.map(serializer => new SerializerOpenapiRenderer(serializer).serializerRef),
             ref => ref['$ref'],
           ),
           ref => (ref['$ref'] ? ref['$ref'] : inspect(ref, { depth: 2 })),

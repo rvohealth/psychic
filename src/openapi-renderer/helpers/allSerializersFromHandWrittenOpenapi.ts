@@ -1,5 +1,8 @@
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
 import {
   DreamModelSerializerType,
+  inferSerializersFromDreamClassOrViewModelClass,
   OpenapiSchemaBodyShorthand,
   OpenapiShorthandPrimitiveTypes,
   SimpleObjectSerializerType,
@@ -62,14 +65,20 @@ function extractSerializers(
 ) {
   if (!value) return
 
-  // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
   if (value.$serializer) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
     serializers.add(value.$serializer)
+    //
+  } else if (value.$serializable) {
+    const foundSerializers = inferSerializersFromDreamClassOrViewModelClass(
+      value.$serializable,
+      value.$serializableSerializerKey,
+    )
+
+    foundSerializers.forEach(serializer => serializers.add(serializer))
+
     //
   } else if (isObject(value)) {
     // Recurse into objects
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
     Object.values(value).forEach(val => extractSerializers(val, serializers))
     //
   } else if (Array.isArray(value)) {

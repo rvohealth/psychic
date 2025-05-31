@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { DreamSerializer } from '@rvoh/dream'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
+import Balloon from '../../../../../test-app/src/app/models/Balloon.js'
 import Pet from '../../../../../test-app/src/app/models/Pet.js'
 import User from '../../../../../test-app/src/app/models/User.js'
 
@@ -48,6 +49,34 @@ describe('DreamSerializer rendersMany', () => {
     expect(results.referencedSerializers).toHaveLength(2)
     expect((results.referencedSerializers[0] as any).globalName).toEqual('Balloon/LatexSerializer')
     expect((results.referencedSerializers[1] as any).globalName).toEqual('Balloon/MylarSerializer')
+  })
+
+  context('STI $serializable', () => {
+    it('expands STI base model into OpenAPI for all of the child types', () => {
+      const MySerializer = (data: User) =>
+        DreamSerializer(User, data).customAttribute('balloons', () => null, {
+          openapi: { $serializable: Balloon },
+        })
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      const results = serializerOpenapiRenderer['renderedOpenapiAttributes']()
+      expect(results.attributes).toEqual({
+        balloons: {
+          anyOf: [
+            {
+              $ref: '#/components/schemas/BalloonLatex',
+            },
+            {
+              $ref: '#/components/schemas/BalloonMylar',
+            },
+          ],
+        },
+      })
+
+      expect(results.referencedSerializers).toHaveLength(2)
+      expect((results.referencedSerializers[0] as any).globalName).toEqual('Balloon/LatexSerializer')
+      expect((results.referencedSerializers[1] as any).globalName).toEqual('Balloon/MylarSerializer')
+    })
   })
 
   it('supports specifying the serializerKey', () => {
