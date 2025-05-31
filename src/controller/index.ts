@@ -393,7 +393,7 @@ export default class PsychicController {
           this.renderOpts,
         )
       }
-    } else {
+    } else if (data instanceof Dream || (data as unknown as ViewModel).serializers) {
       const serializer = inferSerializerFromDreamOrViewModel(
         data as unknown as Dream | ViewModel,
         opts.serializerKey ||
