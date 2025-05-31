@@ -33,7 +33,7 @@ import OpenApiSerializerForEndpointNotAFunction from '../error/openapi/Serialize
 import { DreamOrViewModelClassSerializerArrayKeys } from '../helpers/typeHelpers.js'
 import { RouteConfig } from '../router/route-manager.js'
 import { HttpMethod } from '../router/types.js'
-import OpenapiBodySegmentRenderer, {
+import OpenapiSegmentExpander, {
   OpenapiBodySegment,
   OpenapiBodySegmentRendererOpts,
   ReferencedSerializersAndOpenapiEndpointResponse,
@@ -435,7 +435,7 @@ export default class OpenapiEndpointRenderer<
           output = {
             ...output,
             // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-            schema: new OpenapiBodySegmentRenderer(queryParam.schema, {
+            schema: new OpenapiSegmentExpander(queryParam.schema, {
               openapiName,
               renderOpts,
               target: 'request',
@@ -489,7 +489,7 @@ export default class OpenapiEndpointRenderer<
       return this.generateRequestBodyForModel({ openapiName, renderOpts })
     }
 
-    let schema = new OpenapiBodySegmentRenderer(this.requestBody as OpenapiSchemaBodyShorthand, {
+    let schema = new OpenapiSegmentExpander(this.requestBody as OpenapiSchemaBodyShorthand, {
       openapiName,
       renderOpts,
       target: 'request',
@@ -698,7 +698,7 @@ export default class OpenapiEndpointRenderer<
             if (metadata?.type) {
               paramsShape.properties = {
                 ...paramsShape.properties,
-                [columnName]: new OpenapiBodySegmentRenderer(metadata.type, {
+                [columnName]: new OpenapiSegmentExpander(metadata.type, {
                   openapiName,
                   renderOpts,
                   target: 'request',
@@ -741,7 +741,7 @@ export default class OpenapiEndpointRenderer<
       }
     }
 
-    let processedSchema = new OpenapiBodySegmentRenderer(paramsShape, {
+    let processedSchema = new OpenapiSegmentExpander(paramsShape, {
       openapiName,
       renderOpts,
       target: 'request',
@@ -819,7 +819,7 @@ export default class OpenapiEndpointRenderer<
       )
       responseData[statusCodeInt] ||= { description: statusDescription(statusCodeInt) } as OpenapiContent
       const statusResponse: OpenapiContent = responseData[statusCodeInt] as OpenapiContent
-      const results = new OpenapiBodySegmentRenderer(response, rendererOpts).render()
+      const results = new OpenapiSegmentExpander(response, rendererOpts).render()
 
       serializersAppearingInHandWrittenOpenapi = [
         ...serializersAppearingInHandWrittenOpenapi,
@@ -1770,7 +1770,7 @@ function serializersToSchemaObjects(
     const renderer = new SerializerOpenapiRenderer(serializer, renderOpts)
     const results = renderer.renderedOpenapi(alreadyExtractedDescendantSerializers)
 
-    const segmentRendererResults = new OpenapiBodySegmentRenderer(results.openapi, {
+    const segmentRendererResults = new OpenapiSegmentExpander(results.openapi, {
       openapiName,
       renderOpts,
       target: 'response',

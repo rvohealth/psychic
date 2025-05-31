@@ -1,4 +1,4 @@
-import OpenapiBodySegmentRenderer, {
+import OpenapiSegmentExpander, {
   OpenapiBodySegment,
   OpenapiBodyTarget,
 } from '../../../../src/openapi-renderer/body-segment.js'
@@ -20,7 +20,7 @@ describe('OpenapiBodySegmentRenderer', () => {
 
   describe('#parse', () => {
     const subject = (bodySegment: OpenapiBodySegment) =>
-      new OpenapiBodySegmentRenderer(bodySegment, defaultBodySegmentRendererOpts).render().openapi
+      new OpenapiSegmentExpander(bodySegment, defaultBodySegmentRendererOpts).render().openapi
 
     it('can handle primitive types', () => {
       expect(subject('string')).toEqual({ type: 'string' })

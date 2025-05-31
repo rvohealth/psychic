@@ -44,7 +44,46 @@ export interface OpenapiBodySegmentRendererOpts {
   target: OpenapiBodyTarget
 }
 
-export default class OpenapiBodySegmentRenderer {
+/**
+ * @internal
+ *
+ * Internal class used to recursively expand OpenAPI shorthand notation into full OpenAPI schema objects.
+ *
+ * This class handles the transformation of various shorthand formats:
+ * - Primitive shorthands like `'string'` → `{ type: 'string' }`
+ * - Nullable shorthands like `['string', 'null']` → `{ type: ['string', 'null'] }`
+ * - Array shorthands like `'string[]'` → `{ type: 'array', items: { type: 'string' } }`
+ * - Nullable array shorthands like `['string[]', 'null']` → `{ type: ['array', 'null'], items: { type: 'string' } }`
+ * - Serializer references like `{ $serializer: SomeSerializer }` → `{ $ref: '#/components/schemas/SerializerOpenapiName' }`
+ * - Serializable references like `{ $serializable: SomeModel, key: 'summary' }` → resolved serializer reference
+ *
+ * The class recursively processes nested structures (objects, arrays, unions) and maintains
+ * a collection of referenced serializers that need to be included in the final OpenAPI document.
+ *
+ * @example
+ * ```typescript
+ * // Input shorthand
+ * {
+ *   type: 'object',
+ *   properties: {
+ *     name: 'string',
+ *     tags: 'string[]',
+ *     user: { $serializer: UserSerializer }
+ *   }
+ * }
+ *
+ * // Output expanded
+ * {
+ *   type: 'object',
+ *   properties: {
+ *     name: { type: 'string' },
+ *     tags: { type: 'array', items: { type: 'string' } },
+ *     user: { $ref: '#/components/schemas/UserSerializer' }
+ *   }
+ * }
+ * ```
+ */
+export default class OpenapiSegmentExpander {
   private bodySegment: OpenapiBodySegment
   private casing: SerializerCasing
   private suppressResponseEnums: boolean
