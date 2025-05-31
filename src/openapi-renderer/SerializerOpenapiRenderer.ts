@@ -4,9 +4,12 @@
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  BelongsToStatement,
   Dream,
   DreamModelSerializerType,
   DreamSerializerBuilder,
+  HasManyStatement,
+  HasOneStatement,
   InternalAnyTypedSerializerRendersMany,
   InternalAnyTypedSerializerRendersOne,
   OpenapiSchemaBody,
@@ -161,11 +164,6 @@ export default class SerializerOpenapiRenderer {
     let referencedSerializers: (DreamModelSerializerType | SimpleObjectSerializerType)[] = []
     let renderedOpenapi: Record<string, OpenapiSchemaBodyShorthand> = {}
 
-    const openapiRenderingOpts = {
-      casing: this.casing,
-      suppressResponseEnums: this.suppressResponseEnums,
-    }
-
     renderedOpenapi = this.serializerBuilder['attributes'].reduce((accumulator, attribute) => {
       const attributeType = attribute.type
       let newlyReferencedSerializers: (DreamModelSerializerType | SimpleObjectSerializerType)[] = []
@@ -242,17 +240,14 @@ export default class SerializerOpenapiRenderer {
           case 'rendersOne': {
             try {
               const outputAttributeName = this.setCase(attribute.options.as ?? attribute.name)
-              const referencedSerializersAndOpenapiSchemaBodyShorthand = associationOpenapi(
-                attribute,
-                DataTypeForOpenapi,
-                alreadyExtractedDescendantSerializers,
-                openapiRenderingOpts,
-              )
+              const { associationOpts, referencedSerializersAndOpenapiSchemaBodyShorthand } =
+                associationOpenapi(attribute, DataTypeForOpenapi, alreadyExtractedDescendantSerializers)
+              const optional = attribute.options.optional ?? associationOpts.optional
 
               newlyReferencedSerializers =
                 referencedSerializersAndOpenapiSchemaBodyShorthand.referencedSerializers
 
-              if (attribute.options.flatten && attribute.options.optional) {
+              if (attribute.options.flatten && optional) {
                 this.allOfSiblings.push({
                   anyOf: [referencedSerializersAndOpenapiSchemaBodyShorthand.openapi, NULL_OBJECT_OPENAPI],
                 })
@@ -260,7 +255,7 @@ export default class SerializerOpenapiRenderer {
               } else if (attribute.options.flatten) {
                 this.allOfSiblings.push(referencedSerializersAndOpenapiSchemaBodyShorthand.openapi)
                 //
-              } else if (attribute.options.optional) {
+              } else if (optional) {
                 accumulator[outputAttributeName] = {
                   anyOf: [referencedSerializersAndOpenapiSchemaBodyShorthand.openapi, NULL_OBJECT_OPENAPI],
                 }
@@ -290,11 +285,10 @@ export default class SerializerOpenapiRenderer {
           case 'rendersMany': {
             try {
               const outputAttributeName = this.setCase(attribute.options.as ?? attribute.name)
-              const referencedSerializersAndOpenapiSchemaBodyShorthand = associationOpenapi(
+              const { referencedSerializersAndOpenapiSchemaBodyShorthand } = associationOpenapi(
                 attribute,
                 DataTypeForOpenapi,
                 alreadyExtractedDescendantSerializers,
-                openapiRenderingOpts,
               )
 
               newlyReferencedSerializers =
@@ -330,7 +324,7 @@ export default class SerializerOpenapiRenderer {
       })()
 
       const recursiveNewlyReferencedSerializers = newlyReferencedSerializers.flatMap(serializer =>
-        descendantSerializers(serializer, alreadyExtractedDescendantSerializers, openapiRenderingOpts),
+        descendantSerializers(serializer, alreadyExtractedDescendantSerializers),
       )
 
       referencedSerializers = [
@@ -369,20 +363,22 @@ function associationOpenapi(
     | InternalAnyTypedSerializerRendersMany<any, string>,
   DataTypeForOpenapi: typeof Dream | ViewModelClass | undefined,
   alreadyExtractedDescendantSerializers: Record<string, boolean>,
-  opts: {
-    casing: SerializerCasing
-    suppressResponseEnums: boolean
-  },
-): ReferencedSerializersAndOpenapiSchemaBodyShorthand {
+): {
+  associationOpts: { optional: boolean }
+  referencedSerializersAndOpenapiSchemaBodyShorthand: ReferencedSerializersAndOpenapiSchemaBodyShorthand
+} {
   const serializerOverride = attribute.options.serializer
   if (serializerOverride) {
     try {
       return {
-        referencedSerializers: [
-          serializerOverride,
-          ...descendantSerializers(serializerOverride, alreadyExtractedDescendantSerializers, opts),
-        ],
-        openapi: new SerializerOpenapiRenderer(serializerOverride, opts).serializerRef,
+        associationOpts: { optional: false },
+        referencedSerializersAndOpenapiSchemaBodyShorthand: {
+          referencedSerializers: [
+            serializerOverride,
+            ...descendantSerializers(serializerOverride, alreadyExtractedDescendantSerializers),
+          ],
+          openapi: new SerializerOpenapiRenderer(serializerOverride).serializerRef,
+        },
       }
     } catch (error) {
       if (error instanceof NonSerializerPassedToSerializerOpenapiRenderer)
@@ -392,13 +388,17 @@ function associationOpenapi(
   }
 
   let associatedClasses: (typeof Dream | ViewModelClass)[]
-  const association =
+  const association:
+    | BelongsToStatement<any, any, any, any>
+    | HasManyStatement<any, any, any, any>
+    | HasOneStatement<any, any, any, any>
+    | undefined =
     (DataTypeForOpenapi as typeof Dream)?.isDream &&
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     (DataTypeForOpenapi as typeof Dream)['getAssociationMetadata'](attribute.name)
+  const optional: boolean = !!(association as BelongsToStatement<any, any, any, any>)?.optional
 
   if (association) {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     associatedClasses = expandStiClasses(association.modelCB())
     //
   } else {
@@ -418,44 +418,45 @@ function associationOpenapi(
       throw new ObjectSerializerRendersOneAndManyRequireClassType(attribute.name)
     }
 
-    if ((associatedClass as typeof Dream)?.isDream) {
-      associatedClasses = expandStiClasses(associatedClass)
-    } else {
-      associatedClasses = [associatedClass]
-    }
+    associatedClasses = [associatedClass]
   }
 
-  const serializersOpenapi = associatedClasses.flatMap(associatedClass =>
-    inferSerializersFromDreamClassOrViewModelClass(associatedClass, attribute.options.serializerKey),
+  const serializers = uniq(
+    associatedClasses.flatMap(associatedClass =>
+      inferSerializersFromDreamClassOrViewModelClass(associatedClass, attribute.options.serializerKey),
+    ),
   )
 
-  if (serializersOpenapi.length === 0) throw new NoSerializerFoundForRendersOneAndMany(attribute.name)
-  if (serializersOpenapi.length === 1) {
-    const serializer = serializersOpenapi[0]!
+  if (serializers.length === 0) throw new NoSerializerFoundForRendersOneAndMany(attribute.name)
+  if (serializers.length === 1) {
+    const serializer = serializers[0]!
     return {
-      referencedSerializers: [
-        serializer,
-        ...descendantSerializers(serializer, alreadyExtractedDescendantSerializers, opts),
-      ],
-      openapi: new SerializerOpenapiRenderer(serializer, opts).serializerRef,
+      associationOpts: { optional },
+      referencedSerializersAndOpenapiSchemaBodyShorthand: {
+        referencedSerializers: [
+          serializer,
+          ...descendantSerializers(serializer, alreadyExtractedDescendantSerializers),
+        ],
+        openapi: new SerializerOpenapiRenderer(serializer).serializerRef,
+      },
     }
   }
 
   return {
-    referencedSerializers: [
-      ...serializersOpenapi,
-      ...serializersOpenapi.flatMap(serializer =>
-        descendantSerializers(serializer, alreadyExtractedDescendantSerializers, opts),
-      ),
-    ],
-    openapi: {
-      anyOf: sortBy(
-        uniq(
-          serializersOpenapi.map(serializer => new SerializerOpenapiRenderer(serializer, opts).serializerRef),
-          ref => ref['$ref'],
+    associationOpts: { optional },
+    referencedSerializersAndOpenapiSchemaBodyShorthand: {
+      referencedSerializers: [
+        ...serializers,
+        ...serializers.flatMap(serializer =>
+          descendantSerializers(serializer, alreadyExtractedDescendantSerializers),
         ),
-        ref => (ref['$ref'] ? ref['$ref'] : inspect(ref, { depth: 2 })),
-      ),
+      ],
+      openapi: {
+        anyOf: sortBy(
+          serializers.map(serializer => new SerializerOpenapiRenderer(serializer).serializerRef),
+          ref => (ref['$ref'] ? ref['$ref'] : inspect(ref, { depth: 2 })),
+        ),
+      },
     },
   }
 }
@@ -463,10 +464,6 @@ function associationOpenapi(
 function descendantSerializers(
   serializer: DreamModelSerializerType | SimpleObjectSerializerType,
   alreadyExtractedDescendantSerializers: Record<string, boolean>,
-  opts: {
-    casing: SerializerCasing
-    suppressResponseEnums: boolean
-  },
 ): (DreamModelSerializerType | SimpleObjectSerializerType)[] {
   // alreadyExtractedDescendantSerializers is used not only to avoid duplicate
   // work (and thereby speed up OpenAPI spec generation), but also to avoid
@@ -476,14 +473,14 @@ function descendantSerializers(
   if (!isDreamSerializer(serializer))
     throw new AttemptedToDeriveDescendentSerializersFromNonSerializer(serializer)
 
-  const immediateDescendantSerializers = new SerializerOpenapiRenderer(serializer, opts).renderedOpenapi(
+  const immediateDescendantSerializers = new SerializerOpenapiRenderer(serializer).renderedOpenapi(
     alreadyExtractedDescendantSerializers,
   ).referencedSerializers
 
   return [
     ...immediateDescendantSerializers,
     ...immediateDescendantSerializers.flatMap(descendantSerializer =>
-      descendantSerializers(descendantSerializer, alreadyExtractedDescendantSerializers, opts),
+      descendantSerializers(descendantSerializer, alreadyExtractedDescendantSerializers),
     ),
   ]
 }

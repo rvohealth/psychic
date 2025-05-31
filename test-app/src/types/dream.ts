@@ -75,7 +75,7 @@ export const schema = {
     createdAtField: 'createdAt',
     updatedAtField: 'updatedAt',
     deletedAtField: 'deletedAt',
-    serializerKeys: ['default'],
+    serializerKeys: ['default', 'sameForAllSti', 'summary'],
     scopes: {
       default: ['dream:STI'],
       named: [],
@@ -133,7 +133,7 @@ export const schema = {
         type: 'BelongsTo',
         foreignKey: 'userId',
         tables: ['users'],
-        optional: false,
+        optional: true,
         requiredOnClauses: null,
       },
     },

@@ -2,6 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 import { DreamSerializer } from '@rvoh/dream'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
+import Balloon from '../../../../../test-app/src/app/models/Balloon.js'
 import Pet from '../../../../../test-app/src/app/models/Pet.js'
 import User from '../../../../../test-app/src/app/models/User.js'
 import UserSerializer from '../../../../../test-app/src/app/serializers/UserSerializer.js'
@@ -38,6 +39,24 @@ describe('DreamSerializer rendersOne', () => {
   context('when optional', () => {
     it('the association is anyOf the ref or null', () => {
       const MySerializer = (data: Pet) => DreamSerializer(Pet, data).rendersOne('user', { optional: true })
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+        user: {
+          anyOf: [
+            {
+              $ref: '#/components/schemas/User',
+            },
+            { type: 'null' },
+          ],
+        },
+      })
+    })
+  })
+
+  context('optional inferred from the association', () => {
+    it('the association is anyOf the ref or null', () => {
+      const MySerializer = (data: Balloon) => DreamSerializer(Balloon, data).rendersOne('user')
 
       const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
       expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({

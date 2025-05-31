@@ -39,29 +39,62 @@ import schemaToRef from './helpers/schemaToRef.js'
 import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 
 export interface OpenapiBodySegmentRendererOpts {
-  openapiName: string
   renderOpts: OpenapiRenderOpts
   target: OpenapiBodyTarget
 }
 
-export default class OpenapiBodySegmentRenderer {
+/**
+ * @internal
+ *
+ * Internal class used to recursively expand OpenAPI shorthand notation into full OpenAPI schema objects.
+ *
+ * This class handles the transformation of various shorthand formats:
+ * - Primitive shorthands like `'string'` → `{ type: 'string' }`
+ * - Nullable shorthands like `['string', 'null']` → `{ type: ['string', 'null'] }`
+ * - Array shorthands like `'string[]'` → `{ type: 'array', items: { type: 'string' } }`
+ * - Nullable array shorthands like `['string[]', 'null']` → `{ type: ['array', 'null'], items: { type: 'string' } }`
+ * - Serializer references like `{ $serializer: SomeSerializer }` → `{ $ref: '#/components/schemas/SerializerOpenapiName' }`
+ * - Serializable references like `{ $serializable: SomeModel, key: 'summary' }` → resolved serializer reference
+ *
+ * The class recursively processes nested structures (objects, arrays, unions) and maintains
+ * a collection of referenced serializers that need to be included in the final OpenAPI document.
+ *
+ * @example
+ * ```typescript
+ * // Input shorthand
+ * {
+ *   type: 'object',
+ *   properties: {
+ *     name: 'string',
+ *     tags: 'string[]',
+ *     user: { $serializer: UserSerializer }
+ *   }
+ * }
+ *
+ * // Output expanded
+ * {
+ *   type: 'object',
+ *   properties: {
+ *     name: { type: 'string' },
+ *     tags: { type: 'array', items: { type: 'string' } },
+ *     user: { $ref: '#/components/schemas/UserSerializer' }
+ *   }
+ * }
+ * ```
+ */
+export default class OpenapiSegmentExpander {
   private bodySegment: OpenapiBodySegment
   private casing: SerializerCasing
   private suppressResponseEnums: boolean
   private target: OpenapiBodyTarget
-  private openapiName: string
 
   /**
    * @internal
    *
-   * Used to recursively parse nested object structures
+   * Used to recursively expand nested object structures
    * within nested openapi objects
    */
-  constructor(
-    bodySegment: OpenapiBodySegment,
-    { openapiName, renderOpts, target }: OpenapiBodySegmentRendererOpts,
-  ) {
-    this.openapiName = openapiName
+  constructor(bodySegment: OpenapiBodySegment, { renderOpts, target }: OpenapiBodySegmentRendererOpts) {
     this.bodySegment = bodySegment
     this.casing = renderOpts.casing
     this.suppressResponseEnums = renderOpts.suppressResponseEnums
@@ -79,7 +112,7 @@ export default class OpenapiBodySegmentRenderer {
   /**
    * @internal
    *
-   * Recursively parses nested objects and arrays,
+   * Recursively expand nested objects and arrays,
    * as well as primitive types
    */
   public recursivelyParseBody(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
@@ -216,7 +249,7 @@ export default class OpenapiBodySegmentRenderer {
   /**
    * @internal
    *
-   * recursively parses a oneOf statement
+   * recursively expands a oneOf statement
    */
   private oneOfStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
     const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
@@ -252,7 +285,7 @@ export default class OpenapiBodySegmentRenderer {
   /**
    * @internal
    *
-   * recursively parses an anyOf statement
+   * recursively expand an anyOf statement
    */
   private anyOfStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
     const anyOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAnyOf
@@ -288,7 +321,7 @@ export default class OpenapiBodySegmentRenderer {
   /**
    * @internal
    *
-   * recursively parses an allOf statement
+   * recursively expand an allOf statement
    */
   private allOfStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
     const allOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAllOf
@@ -324,7 +357,7 @@ export default class OpenapiBodySegmentRenderer {
   /**
    * @internal
    *
-   * recursively parses an array statement
+   * recursively expand an array statement
    */
   private arrayStatement(bodySegment: OpenapiSchemaArray): ReferencedSerializersAndOpenapiSchemaBody {
     const results = this.recursivelyParseBody(bodySegment.items)
@@ -346,7 +379,7 @@ export default class OpenapiBodySegmentRenderer {
   /**
    * @internal
    *
-   * recursively parses an object statement
+   * recursively expand an object statement
    */
   private objectStatement(bodySegment: OpenapiSchemaObject): ReferencedSerializersAndOpenapiSchemaBody {
     const objectBodySegment = bodySegment as OpenapiSchemaObjectBase
@@ -392,7 +425,7 @@ export default class OpenapiBodySegmentRenderer {
   /**
    * @internal
    *
-   * parses either the `properties` or `additionalProperties` values
+   * expand either the `properties` or `additionalProperties` values
    * on an object
    */
   private parseObjectPropertyStatement(
@@ -430,7 +463,7 @@ export default class OpenapiBodySegmentRenderer {
   /**
    * @internal
    *
-   * recursively parses a primitive literal type (i.e. string or boolean[])
+   * recursively expand a primitive literal type (i.e. string or boolean[])
    */
   private primitiveLiteralStatement(
     bodySegment: OpenapiShorthandPrimitiveTypes,
@@ -441,7 +474,7 @@ export default class OpenapiBodySegmentRenderer {
   /**
    * @internal
    *
-   * recursively parses a primitive object type (i.e. { type: 'string[]' })
+   * recursively expand a primitive object type (i.e. { type: 'string[]' })
    */
   private primitiveObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaPrimitiveGeneric {
     const safeBodySegment = bodySegment as Extract<OpenapiSchemaBase, { type: OpenapiPrimitiveTypes }>
