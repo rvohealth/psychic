@@ -1,7 +1,8 @@
-import { SerializerCasing } from '@rvoh/dream'
 import { PsychicServer } from '../../../../src/index.js'
-import { SerializerArray } from '../../../../src/openapi-renderer/body-segment.js'
-import OpenapiEndpointRenderer from '../../../../src/openapi-renderer/endpoint.js'
+import OpenapiEndpointRenderer, {
+  ToPathObjectOpts,
+  ToSchemaObjectOpts,
+} from '../../../../src/openapi-renderer/endpoint.js'
 import BalloonsController from '../../../../test-app/src/app/controllers/BalloonsController.js'
 import OpenapiDecoratorTestController from '../../../../test-app/src/app/controllers/OpenapiDecoratorTestsController.js'
 import UsersController from '../../../../test-app/src/app/controllers/UsersController.js'
@@ -34,28 +35,28 @@ import {
 import MyViewModel from '../../../../test-app/src/app/view-models/MyViewModel.js'
 
 describe('OpenapiEndpointRenderer', () => {
-  const defaultToSchemaObjectOpts: {
-    openapiName: string
-    casing: SerializerCasing
-    suppressResponseEnums: boolean
-    processedSchemas: Record<string, boolean>
-    serializersAppearingInHandWrittenOpenapi: SerializerArray
-  } = {
-    openapiName: 'default',
-    casing: 'camel',
-    suppressResponseEnums: false,
-    processedSchemas: {},
-    serializersAppearingInHandWrittenOpenapi: [],
+  function defaultToPathObjectOpts(): ToPathObjectOpts {
+    return {
+      openapiName: 'default',
+      renderOpts: {
+        casing: 'camel',
+        suppressResponseEnums: false,
+      },
+    }
   }
 
-  const defaultToPathObjectOpts: {
-    openapiName: string
-    casing: SerializerCasing
-    suppressResponseEnums: boolean
-  } = {
-    openapiName: 'default',
-    casing: 'camel',
-    suppressResponseEnums: false,
+  function defaultToSchemaObjectOpts(opts: Partial<ToSchemaObjectOpts> = {}): ToSchemaObjectOpts {
+    return {
+      openapiName: 'default',
+      renderOpts: {
+        casing: 'camel',
+        suppressResponseEnums: false,
+      },
+      alreadyExtractedDescendantSerializers: {},
+      renderedSchemasOpenapi: {},
+      serializersAppearingInHandWrittenOpenapi: [],
+      ...opts,
+    }
   }
 
   describe('#toSchemaObject', () => {
@@ -64,8 +65,10 @@ describe('OpenapiEndpointRenderer', () => {
         serializerKey: 'extra',
       })
 
-      const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-      expect(response).toEqual({
+      const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+      renderer.toSchemaObject(toSchemaObjectOpts)
+
+      expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual({
         UserExtra: {
           type: 'object',
           required: ['howyadoin', 'id', 'nicknames'],
@@ -118,8 +121,10 @@ describe('OpenapiEndpointRenderer', () => {
         serializerKey: 'default',
       })
 
-      const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-      expect(response).toEqual({
+      const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+      renderer.toSchemaObject(toSchemaObjectOpts)
+
+      expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual({
         BalloonLatex: {
           properties: {
             color: {
@@ -166,8 +171,10 @@ describe('OpenapiEndpointRenderer', () => {
         },
       )
 
-      const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-      expect(response).toEqual({
+      const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+      renderer.toSchemaObject(toSchemaObjectOpts)
+
+      expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual({
         BalloonLatex: {
           properties: {
             color: {
@@ -232,8 +239,10 @@ describe('OpenapiEndpointRenderer', () => {
       const renderer = new OpenapiEndpointRenderer(BalloonLatex, BalloonsController, 'howyadoin', {
         serializerKey: 'default',
       })
-      const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-      expect(response).toEqual({
+      const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+      renderer.toSchemaObject(toSchemaObjectOpts)
+
+      expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual({
         BalloonLatex: {
           type: 'object',
           required: ['color', 'id', 'latexOnlyAttr'],
@@ -255,8 +264,10 @@ describe('OpenapiEndpointRenderer', () => {
           {},
         )
 
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentTestingString: {
               type: 'object',
@@ -285,12 +296,12 @@ describe('OpenapiEndpointRenderer', () => {
             {},
           )
 
-          const response = renderer.toSchemaObject({
-            ...defaultToSchemaObjectOpts,
-            suppressResponseEnums: true,
-          }).renderedSchemas
+          const toSchemaObjectOpts = defaultToSchemaObjectOpts({
+            renderOpts: { casing: 'camel', suppressResponseEnums: true },
+          })
+          renderer.toSchemaObject(toSchemaObjectOpts)
 
-          expect(response).toEqual(
+          expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
             expect.objectContaining({
               CommentTestingString: {
                 type: 'object',
@@ -324,8 +335,10 @@ The following values will be allowed:
           {},
         )
 
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentTestingInteger: {
               type: 'object',
@@ -351,8 +364,10 @@ The following values will be allowed:
             {},
           )
 
-          const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-          expect(response).toEqual(
+          const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+          renderer.toSchemaObject(toSchemaObjectOpts)
+
+          expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
             expect.objectContaining({
               CommentTestingIntegerShorthand: {
                 type: 'object',
@@ -378,8 +393,10 @@ The following values will be allowed:
           {},
         )
 
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentTestingDecimal: {
               type: 'object',
@@ -406,8 +423,10 @@ The following values will be allowed:
             {},
           )
 
-          const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-          expect(response).toEqual(
+          const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+          renderer.toSchemaObject(toSchemaObjectOpts)
+
+          expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
             expect.objectContaining({
               CommentTestingDecimalShorthand: {
                 type: 'object',
@@ -434,8 +453,10 @@ The following values will be allowed:
           {},
         )
 
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentTestingDate: {
               type: 'object',
@@ -468,8 +489,10 @@ The following values will be allowed:
           {},
         )
 
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentTestingDateTime: {
               type: 'object',
@@ -506,14 +529,14 @@ The following values will be allowed:
         await server.boot()
         const routes = await server.routes()
 
-        const pathObjectResponse = renderer.toPathObject(routes, defaultToPathObjectOpts)
-
-        const response = renderer.toSchemaObject({
-          ...defaultToSchemaObjectOpts,
+        const pathObjectResponse = renderer.toPathObject(routes, defaultToPathObjectOpts())
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts({
+          ...pathObjectResponse,
           serializersAppearingInHandWrittenOpenapi: pathObjectResponse.referencedSerializers,
-        }).renderedSchemas
+        })
+        renderer.toSchemaObject(toSchemaObjectOpts)
 
-        expect(response).toEqual(
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentTestingRootSerializerRef: {
               type: 'object',
@@ -563,8 +586,10 @@ The following values will be allowed:
           {},
         )
 
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentTestingDefaultNullFields: {
               type: 'object',
@@ -588,8 +613,10 @@ The following values will be allowed:
           'howyadoin',
         )
 
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentTestingDefaultObjectFields: {
               type: 'object',
@@ -615,8 +642,10 @@ The following values will be allowed:
           UsersController,
           'howyadoin',
         )
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentWithAnyOfObject: {
               type: 'object',
@@ -637,8 +666,10 @@ The following values will be allowed:
           UsersController,
           'howyadoin',
         )
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentWithAllOfObject: {
               type: 'object',
@@ -659,8 +690,10 @@ The following values will be allowed:
           UsersController,
           'howyadoin',
         )
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentWithOneOfObject: {
               type: 'object',
@@ -681,8 +714,10 @@ The following values will be allowed:
           UsersController,
           'howyadoin',
         )
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             CommentTestingObjectWithSerializerRef: {
               type: 'object',
@@ -732,8 +767,10 @@ The following values will be allowed:
               UsersController,
               'howyadoin',
             )
-            const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-            expect(response).toEqual(
+            const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+            renderer.toSchemaObject(toSchemaObjectOpts)
+
+            expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
               expect.objectContaining({
                 CommentWithAnyOfArray: {
                   type: 'object',
@@ -759,8 +796,10 @@ The following values will be allowed:
               UsersController,
               'howyadoin',
             )
-            const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-            expect(response).toEqual(
+            const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+            renderer.toSchemaObject(toSchemaObjectOpts)
+
+            expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
               expect.objectContaining({
                 CommentWithAllOfArray: {
                   type: 'object',
@@ -786,8 +825,10 @@ The following values will be allowed:
               UsersController,
               'howyadoin',
             )
-            const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-            expect(response).toEqual(
+            const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+            renderer.toSchemaObject(toSchemaObjectOpts)
+
+            expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
               expect.objectContaining({
                 CommentWithOneOfArray: {
                   type: 'object',
@@ -817,13 +858,14 @@ The following values will be allowed:
           await server.boot()
           const routes = await server.routes()
 
-          const pathObjectResponse = renderer.toPathObject(routes, defaultToPathObjectOpts)
-          const response = renderer.toSchemaObject({
-            ...defaultToSchemaObjectOpts,
+          const pathObjectResponse = renderer.toPathObject(routes, defaultToPathObjectOpts())
+          const toSchemaObjectOpts = defaultToSchemaObjectOpts({
+            ...pathObjectResponse,
             serializersAppearingInHandWrittenOpenapi: pathObjectResponse.referencedSerializers,
-          }).renderedSchemas
+          })
+          renderer.toSchemaObject(toSchemaObjectOpts)
 
-          expect(response).toEqual({
+          expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual({
             CommentTestingDecimalShorthand: {
               properties: {
                 howyadoin: {
@@ -880,8 +922,10 @@ The following values will be allowed:
           serializerKey: 'default',
         })
 
-        const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-        expect(response).toEqual(
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             Pet: {
               type: 'object',
@@ -911,8 +955,10 @@ The following values will be allowed:
           const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'howyadoin', {
             serializerKey: 'withAssociation',
           })
-          const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-          expect(response).toEqual(
+          const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+          renderer.toSchemaObject(toSchemaObjectOpts)
+
+          expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
             expect.objectContaining({
               PetWithAssociation: {
                 type: 'object',
@@ -939,16 +985,18 @@ The following values will be allowed:
             const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'howyadoin', {
               serializerKey: 'withFlattenedAssociation',
             })
-            const response = renderer.toSchemaObject(defaultToSchemaObjectOpts)
 
-            expect(response.processedSchemas).toEqual({
+            const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+            renderer.toSchemaObject(toSchemaObjectOpts)
+
+            expect(toSchemaObjectOpts.alreadyExtractedDescendantSerializers).toEqual({
               CommentSerializer: true,
               PetWithFlattenedAssociationSerializer: true,
               PostWithCommentsSerializer: true,
               UserWithFlattenedPostSerializer: true,
             })
 
-            expect(response.renderedSchemas).toEqual({
+            expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual({
               PetWithFlattenedAssociation: {
                 type: 'object',
                 required: ['user'],
@@ -998,8 +1046,10 @@ The following values will be allowed:
               serializerKey: 'withRecentPost',
             })
 
-            const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-            expect(response).toEqual(
+            const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+            renderer.toSchemaObject(toSchemaObjectOpts)
+
+            expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
               expect.objectContaining({
                 UserWithRecentPost: {
                   type: 'object',
@@ -1022,8 +1072,10 @@ The following values will be allowed:
               serializerKey: 'withRecentPost',
             })
 
-            const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-            expect(response).toEqual(
+            const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+            renderer.toSchemaObject(toSchemaObjectOpts)
+
+            expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
               expect.objectContaining({
                 Comment: {
                   type: 'object',
@@ -1045,8 +1097,10 @@ The following values will be allowed:
             serializerKey: 'withComments',
           })
 
-          const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
-          expect(response).toEqual(
+          const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+          renderer.toSchemaObject(toSchemaObjectOpts)
+
+          expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
             expect.objectContaining({
               PostWithComments: {
                 type: 'object',
@@ -1075,9 +1129,10 @@ The following values will be allowed:
               serializerKey: 'withPosts',
             })
 
-            const response = renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas
+            const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+            renderer.toSchemaObject(toSchemaObjectOpts)
 
-            expect(response).toEqual(
+            expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
               expect.objectContaining({
                 Comment: {
                   type: 'object',
@@ -1121,14 +1176,14 @@ The following values will be allowed:
         await server.boot()
         const routes = await server.routes()
 
-        const pathObjectResponse = renderer.toPathObject(routes, defaultToPathObjectOpts)
-
-        const response = renderer.toSchemaObject({
-          ...defaultToSchemaObjectOpts,
+        const pathObjectResponse = renderer.toPathObject(routes, defaultToPathObjectOpts())
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts({
+          ...pathObjectResponse,
           serializersAppearingInHandWrittenOpenapi: pathObjectResponse.referencedSerializers,
-        }).renderedSchemas
+        })
+        renderer.toSchemaObject(toSchemaObjectOpts)
 
-        expect(response).toEqual(
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
           expect.objectContaining({
             LatexSummary: {
               type: 'object',
@@ -1181,10 +1236,12 @@ The following values will be allowed:
           } as any,
         )
 
-        expect(
-          renderer.toSchemaObject({ ...defaultToSchemaObjectOpts, suppressResponseEnums: true })
-            .renderedSchemas,
-        ).toEqual({
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts({
+          renderOpts: { casing: 'camel', suppressResponseEnums: true },
+        })
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual({
           CommentTestingString: {
             type: 'object',
             required: ['howyadoin'],
@@ -1213,18 +1270,20 @@ The following values will be allowed:
           } as any,
         )
 
-        expect(renderer.toSchemaObject(defaultToSchemaObjectOpts).renderedSchemas).toEqual({
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual({
           CommentTestingString: {
             type: 'object',
             required: ['howyadoin'],
             properties: {
               howyadoin: {
                 type: 'string',
-                enum: ['hello', 'world'],
                 format: 'date',
                 pattern: '/^helloworld$/',
                 minLength: 2,
                 maxLength: 4,
+                description: '\nThe following values will be allowed:\n  hello,\n  world',
               },
             },
           },

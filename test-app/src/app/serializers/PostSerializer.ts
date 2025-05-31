@@ -10,16 +10,12 @@ export default (data: Post) =>
   PostSummarySerializer(data)
     .attribute('body')
     .attribute('explicitlyOmittedFromParamSafeColumns')
-    .rendersMany('comments', { serializerCallback: () => CommentSerializer })
+    .rendersMany('comments', { serializer: CommentSerializer })
 
 // Post with recent comment: id, body, recentComment
 export const PostWithRecentCommentSerializer = (data: Post) =>
-  PostSummarySerializer(data)
-    .attribute('body')
-    .rendersOne('recentComment', { serializerCallback: () => CommentSerializer })
+  PostSummarySerializer(data).attribute('body').rendersOne('recentComment', { serializer: CommentSerializer })
 
 // Post with comments: id, body, comments
 export const PostWithCommentsSerializer = (data: Post) =>
-  PostSummarySerializer(data)
-    .attribute('body')
-    .rendersMany('comments', { serializerCallback: () => CommentSerializer })
+  PostSummarySerializer(data).attribute('body').rendersMany('comments', { serializer: CommentSerializer })

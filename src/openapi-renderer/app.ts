@@ -1,5 +1,4 @@
-import { compact, SerializerCasing, sortObjectByKey } from '@rvoh/dream'
-import { groupBy } from 'lodash-es'
+import { compact, groupBy, OpenapiSchemaBody, sortObjectByKey } from '@rvoh/dream'
 import * as fs from 'node:fs/promises'
 import { debuglog } from 'node:util'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
@@ -9,8 +8,13 @@ import { RouteConfig } from '../router/route-manager.js'
 import { HttpMethod, HttpMethods } from '../router/types.js'
 import PsychicServer from '../server/index.js'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults.js'
-import { OpenapiEndpointResponsePath, OpenapiParameterResponse, OpenapiSchema } from './endpoint.js'
-import suppressResponseEnums from './helpers/suppressResponseEnums.js'
+import {
+  OpenapiEndpointResponsePath,
+  OpenapiParameterResponse,
+  OpenapiRenderOpts,
+  OpenapiSchema,
+} from './endpoint.js'
+import suppressResponseEnumsConfig from './helpers/suppressResponseEnumsConfig.js'
 
 const debugEnabled = debuglog('psychic').enabled
 
@@ -58,17 +62,13 @@ export default class OpenapiAppRenderer {
   }
 
   public static _toObject(routes: RouteConfig[], openapiName: string): OpenapiSchema {
-    const opts: {
-      openapiName: string
-      casing: SerializerCasing
-      suppressResponseEnums: boolean
-    } = {
-      openapiName,
+    const renderOpts: OpenapiRenderOpts = {
       casing: 'camel',
-      suppressResponseEnums: suppressResponseEnums(openapiName),
+      suppressResponseEnums: suppressResponseEnumsConfig(openapiName),
     }
 
-    let processedSchemas: Record<string, boolean> = {}
+    const alreadyExtractedDescendantSerializers: Record<string, boolean> = {}
+    const renderedSchemasOpenapi: Record<string, OpenapiSchemaBody> = {}
     const psychicApp = PsychicApp.getOrFail()
     const controllers = psychicApp.controllers
 
@@ -121,7 +121,10 @@ export default class OpenapiAppRenderer {
         const renderer = controller.openapi[key]
         if (renderer === undefined) throw new UnexpectedUndefined()
 
-        const endpointPayloadAndReferencedSerializers = renderer.toPathObject(routes, opts)
+        const endpointPayloadAndReferencedSerializers = renderer.toPathObject(routes, {
+          openapiName,
+          renderOpts,
+        })
         const serializersAppearingInHandWrittenOpenapi =
           endpointPayloadAndReferencedSerializers.referencedSerializers
         const endpointPayload = endpointPayloadAndReferencedSerializers.openapi
@@ -148,17 +151,17 @@ export default class OpenapiAppRenderer {
           ...endpointPayloadPath.parameters,
         ])
 
-        const schemaRenderingResults = renderer.toSchemaObject({
-          ...opts,
-          processedSchemas,
+        renderer.toSchemaObject({
+          openapiName,
+          renderOpts,
+          renderedSchemasOpenapi,
+          alreadyExtractedDescendantSerializers,
           serializersAppearingInHandWrittenOpenapi,
         })
 
-        processedSchemas = { ...processedSchemas, ...schemaRenderingResults.processedSchemas }
-
         finalOutput.components.schemas = {
           ...finalOutput.components.schemas,
-          ...schemaRenderingResults.renderedSchemas,
+          ...renderedSchemasOpenapi,
         }
       }
     }
@@ -174,7 +177,7 @@ export default class OpenapiAppRenderer {
   }
 
   private static combineParameters(parameters: OpenapiParameterResponse[]): OpenapiParameterResponse[] {
-    const groupedParams = groupBy(parameters, 'name')
+    const groupedParams = groupBy(parameters, obj => obj.name)
 
     return compact(
       Object.keys(groupedParams).map(paramName => {

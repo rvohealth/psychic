@@ -900,9 +900,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvoh/dream@npm:^0.43.0-beta.2":
-  version: 0.43.0-beta.2
-  resolution: "@rvoh/dream@npm:0.43.0-beta.2"
+"@rvoh/dream@npm:^0.43.0-beta.4":
+  version: 0.43.0-beta.5
+  resolution: "@rvoh/dream@npm:0.43.0-beta.5"
   dependencies:
     colorette: "npm:^2.0.20"
     commander: "npm:^12.1.0"
@@ -917,7 +917,7 @@ __metadata:
     kysely: ^0.27.4
     kysely-codegen: ~0.17.0
     pg: "*"
-  checksum: 10c0/8ad659c4d64974055f8143f85546293a6eb97e20ba46c6b341ab565c3f055e3f8b9f20cac47955fd7c0766e07eb7246827c24474bd6f776545d47087ce229224
+  checksum: 10c0/f433420def9807e79b8295c21869c64b1addefd2ca7d97f1e20759a05c6068a45a90432a0429928fc68d70acd79c69f36fed0b4b88a0944c5f510d2a320e85ba
   languageName: node
   linkType: hard
 
@@ -942,13 +942,12 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.19.0"
     "@jest-mock/express": "npm:^3.0.0"
-    "@rvoh/dream": "npm:^0.43.0-beta.2"
+    "@rvoh/dream": "npm:^0.43.0-beta.4"
     "@rvoh/dream-spec-helpers": "npm:^0.2.4"
     "@rvoh/psychic-spec-helpers": "npm:^0.6.0"
     "@types/cookie-parser": "npm:^1.4.8"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^5.0.1"
-    "@types/lodash-es": "npm:^4"
     "@types/node": "npm:^22.5.1"
     "@types/pg": "npm:^8.11.8"
     "@types/supertest": "npm:^6.0.3"
@@ -961,7 +960,6 @@ __metadata:
     jsdom: "npm:^26.0.0"
     kysely: "npm:^0.27.4"
     kysely-codegen: "npm:~0.17.0"
-    lodash-es: "npm:^4.17.21"
     luxon-jest-matchers: "npm:^0.1.14"
     openapi-typescript: "npm:^7.8.0"
     pg: "npm:^8.12.0"
@@ -1114,22 +1112,6 @@ __metadata:
   version: 7.0.15
   resolution: "@types/json-schema@npm:7.0.15"
   checksum: 10c0/a996a745e6c5d60292f36731dd41341339d4eeed8180bb09226e5c8d23759067692b1d88e5d91d72ee83dfc00d3aca8e7bd43ea120516c17922cbcb7c3e252db
-  languageName: node
-  linkType: hard
-
-"@types/lodash-es@npm:^4":
-  version: 4.17.12
-  resolution: "@types/lodash-es@npm:4.17.12"
-  dependencies:
-    "@types/lodash": "npm:*"
-  checksum: 10c0/5d12d2cede07f07ab067541371ed1b838a33edb3c35cb81b73284e93c6fd0c4bbeaefee984e69294bffb53f62d7272c5d679fdba8e595ff71e11d00f2601dde0
-  languageName: node
-  linkType: hard
-
-"@types/lodash@npm:*":
-  version: 4.17.7
-  resolution: "@types/lodash@npm:4.17.7"
-  checksum: 10c0/40c965b5ffdcf7ff5c9105307ee08b782da228c01b5c0529122c554c64f6b7168fc8f11dc79aa7bae4e67e17efafaba685dc3a47e294dbf52a65ed2b67100561
   languageName: node
   linkType: hard
 
@@ -3840,13 +3822,6 @@ __metadata:
   dependencies:
     p-locate: "npm:^5.0.0"
   checksum: 10c0/d3972ab70dfe58ce620e64265f90162d247e87159b6126b01314dd67be43d50e96a50b517bce2d9452a79409c7614054c277b5232377de50416564a77ac7aad3
-  languageName: node
-  linkType: hard
-
-"lodash-es@npm:^4.17.21":
-  version: 4.17.21
-  resolution: "lodash-es@npm:4.17.21"
-  checksum: 10c0/fb407355f7e6cd523a9383e76e6b455321f0f153a6c9625e21a8827d10c54c2a2341bd2ae8d034358b60e07325e1330c14c224ff582d04612a46a4f0479ff2f2
   languageName: node
   linkType: hard
 

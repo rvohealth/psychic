@@ -7,4 +7,4 @@ export const AdminUserSummarySerializer = (data: User) => DreamSerializer(User, 
 export default (data: User) =>
   AdminUserSummarySerializer(data)
     .attribute('name')
-    .rendersMany('pets', { serializerCallback: () => AdminPetSummarySerializer })
+    .rendersMany('pets', { serializer: AdminPetSummarySerializer })

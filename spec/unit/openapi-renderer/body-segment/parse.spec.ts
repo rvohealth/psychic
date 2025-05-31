@@ -1,19 +1,20 @@
-import { SerializerCasing } from '@rvoh/dream'
 import OpenapiBodySegmentRenderer, {
   OpenapiBodySegment,
   OpenapiBodyTarget,
 } from '../../../../src/openapi-renderer/body-segment.js'
+import { OpenapiRenderOpts } from '../../../../src/openapi-renderer/endpoint.js'
 
 describe('OpenapiBodySegmentRenderer', () => {
   const defaultBodySegmentRendererOpts: {
     openapiName: string
-    casing: SerializerCasing
-    suppressResponseEnums: boolean
+    renderOpts: OpenapiRenderOpts
     target: OpenapiBodyTarget
   } = {
     openapiName: 'default',
-    casing: 'camel',
-    suppressResponseEnums: false,
+    renderOpts: {
+      casing: 'camel',
+      suppressResponseEnums: false,
+    },
     target: 'response',
   }
 

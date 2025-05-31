@@ -33,15 +33,14 @@ import {
 } from '@rvoh/dream'
 import NonSerializerSuppliedToSerializerBodySegment from '../error/openapi/NonSerializerSuppliedToSerializerBodySegment.js'
 import isArrayParamName from '../helpers/isArrayParamName.js'
-import { OpenapiEndpointResponse, OpenapiResponses } from './endpoint.js'
+import { OpenapiEndpointResponse, OpenapiRenderOpts, OpenapiResponses } from './endpoint.js'
 import isBlankDescription from './helpers/isBlankDescription.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import schemaToRef from './helpers/schemaToRef.js'
 
 export interface OpenapiBodySegmentRendererOpts {
   openapiName: string
-  casing: SerializerCasing
-  suppressResponseEnums: boolean
+  renderOpts: OpenapiRenderOpts
   target: OpenapiBodyTarget
 }
 
@@ -60,12 +59,12 @@ export default class OpenapiBodySegmentRenderer {
    */
   constructor(
     bodySegment: OpenapiBodySegment,
-    { openapiName, casing, suppressResponseEnums, target }: OpenapiBodySegmentRendererOpts,
+    { openapiName, renderOpts, target }: OpenapiBodySegmentRendererOpts,
   ) {
     this.openapiName = openapiName
     this.bodySegment = bodySegment
-    this.casing = casing
-    this.suppressResponseEnums = suppressResponseEnums
+    this.casing = renderOpts.casing
+    this.suppressResponseEnums = renderOpts.suppressResponseEnums
     this.target = target
   }
 
