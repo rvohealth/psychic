@@ -418,15 +418,13 @@ function associationOpenapi(
       throw new ObjectSerializerRendersOneAndManyRequireClassType(attribute.name)
     }
 
-    if ((associatedClass as typeof Dream)?.isDream) {
-      associatedClasses = expandStiClasses(associatedClass)
-    } else {
-      associatedClasses = [associatedClass]
-    }
+    associatedClasses = [associatedClass]
   }
 
-  const serializers = associatedClasses.flatMap(associatedClass =>
-    inferSerializersFromDreamClassOrViewModelClass(associatedClass, attribute.options.serializerKey),
+  const serializers = uniq(
+    associatedClasses.flatMap(associatedClass =>
+      inferSerializersFromDreamClassOrViewModelClass(associatedClass, attribute.options.serializerKey),
+    ),
   )
 
   if (serializers.length === 0) throw new NoSerializerFoundForRendersOneAndMany(attribute.name)
@@ -455,10 +453,7 @@ function associationOpenapi(
       ],
       openapi: {
         anyOf: sortBy(
-          uniq(
-            serializers.map(serializer => new SerializerOpenapiRenderer(serializer).serializerRef),
-            ref => ref['$ref'],
-          ),
+          serializers.map(serializer => new SerializerOpenapiRenderer(serializer).serializerRef),
           ref => (ref['$ref'] ? ref['$ref'] : inspect(ref, { depth: 2 })),
         ),
       },

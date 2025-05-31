@@ -51,6 +51,27 @@ describe('DreamSerializer rendersMany', () => {
     expect((results.referencedSerializers[1] as any).globalName).toEqual('Balloon/MylarSerializer')
   })
 
+  context('with a serializerKey that renders the same serializer for all children', () => {
+    it('expands STI base model into OpenAPI for all of the child types', () => {
+      const MySerializer = (data: User) =>
+        DreamSerializer(User, data).rendersMany('balloons', { serializerKey: 'sameForAllSti' })
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      const results = serializerOpenapiRenderer['renderedOpenapiAttributes']()
+      expect(results.attributes).toEqual({
+        balloons: {
+          type: 'array',
+          items: {
+            $ref: '#/components/schemas/BalloonSummary',
+          },
+        },
+      })
+
+      expect(results.referencedSerializers).toHaveLength(1)
+      expect((results.referencedSerializers[0] as any).globalName).toEqual('BalloonSummarySerializer')
+    })
+  })
+
   context('STI $serializable', () => {
     it('expands STI base model into OpenAPI for all of the child types', () => {
       const MySerializer = (data: User) =>
@@ -76,6 +97,26 @@ describe('DreamSerializer rendersMany', () => {
       expect(results.referencedSerializers).toHaveLength(2)
       expect((results.referencedSerializers[0] as any).globalName).toEqual('Balloon/LatexSerializer')
       expect((results.referencedSerializers[1] as any).globalName).toEqual('Balloon/MylarSerializer')
+    })
+
+    context('with a serializerKey that renders the same serializer for all children', () => {
+      it('expands STI base model into OpenAPI for all of the child types', () => {
+        const MySerializer = (data: User) =>
+          DreamSerializer(User, data).customAttribute('balloons', () => null, {
+            openapi: { $serializable: Balloon, $serializableSerializerKey: 'sameForAllSti' },
+          })
+
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+        const results = serializerOpenapiRenderer['renderedOpenapiAttributes']()
+        expect(results.attributes).toEqual({
+          balloons: {
+            $ref: '#/components/schemas/BalloonSummary',
+          },
+        })
+
+        expect(results.referencedSerializers).toHaveLength(1)
+        expect((results.referencedSerializers[0] as any).globalName).toEqual('BalloonSummarySerializer')
+      })
     })
   })
 

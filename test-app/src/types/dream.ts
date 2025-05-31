@@ -75,7 +75,7 @@ export const schema = {
     createdAtField: 'createdAt',
     updatedAtField: 'updatedAt',
     deletedAtField: 'deletedAt',
-    serializerKeys: ['default', 'summary'],
+    serializerKeys: ['default', 'sameForAllSti', 'summary'],
     scopes: {
       default: ['dream:STI'],
       named: [],
