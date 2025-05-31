@@ -14,6 +14,6 @@ export default class Balloon extends ApplicationModel {
   public createdAt: DreamColumn<Balloon, 'createdAt'>
   public updatedAt: DreamColumn<Balloon, 'updatedAt'>
 
-  @deco.BelongsTo('User')
+  @deco.BelongsTo('User', { optional: true })
   public user: User
 }
