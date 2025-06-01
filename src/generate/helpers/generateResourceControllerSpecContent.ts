@@ -12,30 +12,42 @@ export default function generateResourceControllerSpecContent({
   route,
   fullyQualifiedModelName,
   columnsWithTypes,
-  userModel,
+  resourceAttachedTo,
 }: {
   fullyQualifiedControllerName: string
   route: string
   fullyQualifiedModelName: string
   columnsWithTypes: string[]
-  userModel?: string | undefined
+  resourceAttachedTo?: string | undefined
 }) {
   fullyQualifiedModelName = standardizeFullyQualifiedModelName(fullyQualifiedModelName)
   const modelClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
   const modelVariableName = camelize(modelClassName)
 
-  // Determine user model settings
-  const actualUserModel = userModel || 'User'
-  const userModelClassName = globalClassNameFromFullyQualifiedModelName(actualUserModel)
-  const userVariableName = camelize(userModelClassName)
-  const currentUserProperty = `current${userModelClassName}`
+  // Always use User for authentication
+  const userModelClassName = 'User'
+  const userVariableName = 'user'
+
+  // Determine attached model settings if provided
+  const attachedModelClassName = resourceAttachedTo
+    ? globalClassNameFromFullyQualifiedModelName(resourceAttachedTo)
+    : null
+  const attachedModelVariableName = attachedModelClassName ? camelize(attachedModelClassName) : null
 
   const importStatements: string[] = [
     importStatementForModel(fullyQualifiedControllerName, fullyQualifiedModelName),
-    importStatementForModel(fullyQualifiedControllerName, actualUserModel),
+    importStatementForModel(fullyQualifiedControllerName, 'User'),
     importStatementForModelFactory(fullyQualifiedControllerName, fullyQualifiedModelName),
-    importStatementForModelFactory(fullyQualifiedControllerName, actualUserModel),
+    importStatementForModelFactory(fullyQualifiedControllerName, 'User'),
   ]
+
+  // Add attached model imports if specified
+  if (resourceAttachedTo) {
+    importStatements.push(
+      importStatementForModel(fullyQualifiedControllerName, resourceAttachedTo),
+      importStatementForModelFactory(fullyQualifiedControllerName, resourceAttachedTo),
+    )
+  }
 
   const specUnitUpdirs = updirsFromPath(fullyQualifiedControllerName)
   const originalStringKeyValues: string[] = []
@@ -74,11 +86,11 @@ import { specRequest as request } from '@rvoh/psychic-spec-helpers'${uniq(import
 import addEndUserAuthHeader from '${specUnitUpdirs}helpers/authentication.js'
 
 describe('${fullyQualifiedControllerName}', () => {
-  let ${userVariableName}: ${userModelClassName}
+  let ${userVariableName}: ${userModelClassName}${attachedModelVariableName ? `\n  let ${attachedModelVariableName}: ${attachedModelClassName}` : ''}
 
   beforeEach(async () => {
     await request.init(PsychicServer)
-    ${userVariableName} = await create${userModelClassName}()
+    ${userVariableName} = await createUser()${attachedModelVariableName ? `\n    ${attachedModelVariableName} = await create${attachedModelClassName}({ ${userVariableName} })` : ''}
   })
 
   describe('GET index', () => {
@@ -90,7 +102,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('returns the index of ${fullyQualifiedModelName}s', async () => {
       const ${modelVariableName} = await create${modelClassName}({
-        ${userVariableName}${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
+        ${attachedModelVariableName || userVariableName}${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
       })
       const results = (await subject()).body
 
@@ -120,7 +132,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('returns the specified ${fullyQualifiedModelName}', async () => {
       const ${modelVariableName} = await create${modelClassName}({
-        ${userVariableName}${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
+        ${attachedModelVariableName || userVariableName}${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
       })
       const results = (await subject(${modelVariableName})).body
 
@@ -171,7 +183,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('updates the ${fullyQualifiedModelName}', async () => {
       const ${modelVariableName} = await create${modelClassName}({
-        ${userVariableName}${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
+        ${attachedModelVariableName || userVariableName}${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
       })
       await subject(${modelVariableName}, {
         ${updatedStringKeyValues.length ? updatedStringKeyValues.join('\n        ') : ''}
@@ -183,9 +195,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
     context('a ${fullyQualifiedModelName} created by another ${userModelClassName}', () => {
       it('is not updated', async () => {
-        const ${modelVariableName} = await create${modelClassName}({
-          ${originalStringKeyValues.length ? originalStringKeyValues.join('\n          ') : ''}
-        })
+        const ${modelVariableName} = await create${modelClassName}()
         await subject(${modelVariableName}, {
           ${updatedStringKeyValues.length ? updatedStringKeyValues.join('\n          ') : ''}
         }, 404)
@@ -204,7 +214,7 @@ describe('${fullyQualifiedControllerName}', () => {
     }
 
     it('deletes the ${fullyQualifiedModelName}', async () => {
-      const ${modelVariableName} = await create${modelClassName}({ ${userVariableName} })
+      const ${modelVariableName} = await create${modelClassName}({ ${attachedModelVariableName || userVariableName} })
       await subject(${modelVariableName})
 
       expect(await ${modelClassName}.find(${modelVariableName}.id)).toBeNull()

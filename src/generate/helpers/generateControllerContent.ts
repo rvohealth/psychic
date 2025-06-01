@@ -14,7 +14,7 @@ export default function generateControllerContent({
   fullyQualifiedModelName,
   actions = [],
   omitOpenApi = false,
-  userModel,
+  resourceAttachedTo,
 }: {
   ancestorName: string
   ancestorImportStatement: string
@@ -22,7 +22,7 @@ export default function generateControllerContent({
   fullyQualifiedModelName?: string | undefined
   actions?: string[] | undefined
   omitOpenApi?: boolean | undefined
-  userModel?: string | undefined
+  resourceAttachedTo?: string | undefined
 }) {
   fullyQualifiedControllerName = standardizeFullyQualifiedModelName(fullyQualifiedControllerName)
 
@@ -30,9 +30,8 @@ export default function generateControllerContent({
   const controllerClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedControllerName)
 
   // Determine user model variables
-  const actualUserModel = userModel || 'User'
+  const actualUserModel = resourceAttachedTo || 'User'
   const userModelClassName = globalClassNameFromFullyQualifiedModelName(actualUserModel)
-  const userVariableName = camelize(userModelClassName)
   const currentUserProperty = `current${userModelClassName}`
 
   let modelClassName: string | undefined
