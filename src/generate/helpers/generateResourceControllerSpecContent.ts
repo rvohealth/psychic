@@ -12,26 +12,24 @@ export default function generateResourceControllerSpecContent({
   route,
   fullyQualifiedModelName,
   columnsWithTypes,
-  resourceAttachedTo,
+  owningModel,
 }: {
   fullyQualifiedControllerName: string
   route: string
   fullyQualifiedModelName: string
   columnsWithTypes: string[]
-  resourceAttachedTo?: string | undefined
+  owningModel?: string | undefined
 }) {
   fullyQualifiedModelName = standardizeFullyQualifiedModelName(fullyQualifiedModelName)
   const modelClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
   const modelVariableName = camelize(modelClassName)
 
   // Always use User for authentication
-  const userModelClassName = 'User'
+  const owningModelClassName = 'User'
   const userVariableName = 'user'
 
   // Determine attached model settings if provided
-  const attachedModelClassName = resourceAttachedTo
-    ? globalClassNameFromFullyQualifiedModelName(resourceAttachedTo)
-    : null
+  const attachedModelClassName = owningModel ? globalClassNameFromFullyQualifiedModelName(owningModel) : null
   const attachedModelVariableName = attachedModelClassName ? camelize(attachedModelClassName) : null
 
   const importStatements: string[] = [
@@ -42,10 +40,10 @@ export default function generateResourceControllerSpecContent({
   ]
 
   // Add attached model imports if specified
-  if (resourceAttachedTo) {
+  if (owningModel) {
     importStatements.push(
-      importStatementForModel(fullyQualifiedControllerName, resourceAttachedTo),
-      importStatementForModelFactory(fullyQualifiedControllerName, resourceAttachedTo),
+      importStatementForModel(fullyQualifiedControllerName, owningModel),
+      importStatementForModelFactory(fullyQualifiedControllerName, owningModel),
     )
   }
 
@@ -86,7 +84,7 @@ import { specRequest as request } from '@rvoh/psychic-spec-helpers'${uniq(import
 import addEndUserAuthHeader from '${specUnitUpdirs}helpers/authentication.js'
 
 describe('${fullyQualifiedControllerName}', () => {
-  let ${userVariableName}: ${userModelClassName}${attachedModelVariableName ? `\n  let ${attachedModelVariableName}: ${attachedModelClassName}` : ''}
+  let ${userVariableName}: ${owningModelClassName}${attachedModelVariableName ? `\n  let ${attachedModelVariableName}: ${attachedModelClassName}` : ''}
 
   beforeEach(async () => {
     await request.init(PsychicServer)
@@ -113,7 +111,7 @@ describe('${fullyQualifiedControllerName}', () => {
       ])
     })
 
-    context('${modelClassName}s created by another ${userModelClassName}', () => {
+    context('${modelClassName}s created by another ${owningModelClassName}', () => {
       it('are omitted', async () => {
         await create${modelClassName}()
         const results = (await subject()).body
@@ -143,10 +141,10 @@ describe('${fullyQualifiedControllerName}', () => {
       )
     })
 
-    context('${fullyQualifiedModelName} created by another ${userModelClassName}', () => {
+    context('${fullyQualifiedModelName} created by another ${owningModelClassName}', () => {
       it('is not found', async () => {
-        const other${userModelClassName}${modelClassName} = await create${modelClassName}()
-        await subject(other${userModelClassName}${modelClassName}, 404)
+        const other${owningModelClassName}${modelClassName} = await create${modelClassName}()
+        await subject(other${owningModelClassName}${modelClassName}, 404)
       })
     })
   })
@@ -159,7 +157,7 @@ describe('${fullyQualifiedControllerName}', () => {
       })
     }
 
-    it('creates a ${fullyQualifiedModelName} for this ${userModelClassName}', async () => {
+    it('creates a ${fullyQualifiedModelName} for this ${owningModelClassName}', async () => {
       const results = (await subject({
         ${originalStringKeyValues.length ? originalStringKeyValues.join('\n        ') : ''}
       })).body
@@ -193,7 +191,7 @@ describe('${fullyQualifiedControllerName}', () => {
       ${updatedStringAttributeChecks.join('\n      ')}
     })
 
-    context('a ${fullyQualifiedModelName} created by another ${userModelClassName}', () => {
+    context('a ${fullyQualifiedModelName} created by another ${owningModelClassName}', () => {
       it('is not updated', async () => {
         const ${modelVariableName} = await create${modelClassName}()
         await subject(${modelVariableName}, {
@@ -220,7 +218,7 @@ describe('${fullyQualifiedControllerName}', () => {
       expect(await ${modelClassName}.find(${modelVariableName}.id)).toBeNull()
     })
 
-    context('a ${fullyQualifiedModelName} created by another ${userModelClassName}', () => {
+    context('a ${fullyQualifiedModelName} created by another ${owningModelClassName}', () => {
       it('is not deleted', async () => {
         const ${modelVariableName} = await create${modelClassName}()
         await subject(${modelVariableName}, 404)

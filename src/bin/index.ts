@@ -22,7 +22,7 @@ export default class PsychicBin {
     route: string,
     fullyQualifiedModelName: string,
     columnsWithTypes: string[],
-    options: { stiBaseSerializer: boolean; resourceAttachedTo?: string },
+    options: { stiBaseSerializer: boolean; owningModel?: string },
   ) {
     await generateResource({ route, fullyQualifiedModelName, columnsWithTypes, options })
   }

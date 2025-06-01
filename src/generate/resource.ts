@@ -11,7 +11,7 @@ export default async function generateResource({
 }: {
   route: string
   fullyQualifiedModelName: string
-  options: { stiBaseSerializer: boolean; resourceAttachedTo?: string }
+  options: { stiBaseSerializer: boolean; owningModel?: string }
   columnsWithTypes: string[]
 }) {
   await generateDream({
@@ -28,7 +28,7 @@ export default async function generateResource({
     actions: ['create', 'index', 'show', 'update', 'destroy'],
     columnsWithTypes,
     resourceSpecs: true,
-    resourceAttachedTo: options.resourceAttachedTo,
+    owningModel: options.owningModel,
   })
 
   await addResourceToRoutes(route)

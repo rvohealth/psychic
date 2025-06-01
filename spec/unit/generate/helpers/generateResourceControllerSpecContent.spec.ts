@@ -362,14 +362,14 @@ describe('V1/Host/LocalizedTextsController', () => {
     })
   })
 
-  context('when resourceAttachedTo is specified', () => {
+  context('when owningModel is specified', () => {
     it('generates specs with both user and attached model', () => {
       const res = generateResourceControllerSpecContent({
         fullyQualifiedControllerName: 'V1/Host/ReviewsController',
         route: 'v1/host/reviews',
         fullyQualifiedModelName: 'Review',
         columnsWithTypes: ['content:text', 'rating:integer'],
-        resourceAttachedTo: 'Host',
+        owningModel: 'Host',
       })
       expect(res).toContain('let user: User')
       expect(res).toContain('let host: Host')
