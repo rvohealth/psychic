@@ -14,6 +14,7 @@ export default function generateControllerContent({
   fullyQualifiedModelName,
   actions = [],
   omitOpenApi = false,
+  userModel,
 }: {
   ancestorName: string
   ancestorImportStatement: string
@@ -21,11 +22,18 @@ export default function generateControllerContent({
   fullyQualifiedModelName?: string | undefined
   actions?: string[] | undefined
   omitOpenApi?: boolean | undefined
+  userModel?: string | undefined
 }) {
   fullyQualifiedControllerName = standardizeFullyQualifiedModelName(fullyQualifiedControllerName)
 
   const additionalImports: string[] = []
   const controllerClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedControllerName)
+
+  // Determine user model variables
+  const actualUserModel = userModel || 'User'
+  const userModelClassName = globalClassNameFromFullyQualifiedModelName(actualUserModel)
+  const userVariableName = camelize(userModelClassName)
+  const currentUserProperty = `current${userModelClassName}`
 
   let modelClassName: string | undefined
   let modelAttributeName: string | undefined
@@ -50,7 +58,7 @@ export default function generateControllerContent({
     description: 'Create ${aOrAnDreamModelName(modelClassName!)}',
   })
   public async create() {
-    //    const ${modelAttributeName} = await this.currentUser.createAssociation('${pluralizedModelAttributeName}', this.paramsFor(${modelClassName}))
+    //    const ${modelAttributeName} = await this.${currentUserProperty}.createAssociation('${pluralizedModelAttributeName}', this.paramsFor(${modelClassName}))
     //    this.created(${modelAttributeName})
   }`
         else
@@ -74,7 +82,7 @@ export default function generateControllerContent({
     serializerKey: 'summary',
   })
   public async index() {
-    //    const ${pluralizedModelAttributeName} = await this.currentUser.associationQuery('${pluralizedModelAttributeName}').all()
+    //    const ${pluralizedModelAttributeName} = await this.${currentUserProperty}.associationQuery('${pluralizedModelAttributeName}').all()
     //    this.ok(${pluralizedModelAttributeName})
   }`
         else
@@ -189,23 +197,23 @@ export default function generateControllerContent({
 ${omitOpenApi ? '' : openApiImport + '\n'}${ancestorImportStatement}${additionalImports.length ? '\n' + additionalImports.join('\n') : ''}${omitOpenApi ? '' : '\n\n' + openApiTags}
 
 export default class ${controllerClassName} extends ${ancestorName} {
-${methodDefs.join('\n\n')}${modelClassName ? privateMethods(modelClassName, actions) : ''}
+${methodDefs.join('\n\n')}${modelClassName ? privateMethods(modelClassName, actions, currentUserProperty) : ''}
 }
 `
 }
 
-function privateMethods(modelClassName: string, methods: string[]) {
+function privateMethods(modelClassName: string, methods: string[], currentUserProperty: string) {
   const privateMethods: string[] = []
   if (methods.find(methodName => ['show', 'update', 'destroy'].includes(methodName)))
-    privateMethods.push(loadModelStatement(modelClassName))
+    privateMethods.push(loadModelStatement(modelClassName, currentUserProperty))
 
   if (!privateMethods.length) return ''
   return `\n\n${privateMethods.join('\n\n')}`
 }
 
-function loadModelStatement(modelClassName: string) {
+function loadModelStatement(modelClassName: string, currentUserProperty: string) {
   return `  private async ${camelize(modelClassName)}() {
-    // return await this.currentUser.associationQuery('${pluralize(camelize(modelClassName))}').findOrFail(
+    // return await this.${currentUserProperty}.associationQuery('${pluralize(camelize(modelClassName))}').findOrFail(
     //   this.castParam('id', 'string')
     // )
   }`

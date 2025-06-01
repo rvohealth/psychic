@@ -33,6 +33,10 @@ export default class PsychicCLI {
         '--sti-base-serializer',
         'Omits the serializer from the dream model, but does create the serializer so it can be extended by STI children',
       )
+      .option(
+        '--user-model <modelName>',
+        'Specify a custom user model name to use instead of "User" (e.g., "Host", "Guest")',
+      )
       .argument('<path>', 'URL path from root domain')
       .argument(
         '<modelName>',
@@ -47,7 +51,7 @@ export default class PsychicCLI {
           route: string,
           modelName: string,
           columnsWithTypes: string[],
-          options: { stiBaseSerializer: boolean },
+          options: { stiBaseSerializer: boolean; userModel?: string },
         ) => {
           await initializePsychicApp()
           await PsychicBin.generateResource(route, modelName, columnsWithTypes, options)
