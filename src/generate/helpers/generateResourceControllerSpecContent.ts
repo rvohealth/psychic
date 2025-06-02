@@ -12,15 +12,25 @@ export default function generateResourceControllerSpecContent({
   route,
   fullyQualifiedModelName,
   columnsWithTypes,
+  owningModel,
 }: {
   fullyQualifiedControllerName: string
   route: string
   fullyQualifiedModelName: string
   columnsWithTypes: string[]
+  owningModel?: string | undefined
 }) {
   fullyQualifiedModelName = standardizeFullyQualifiedModelName(fullyQualifiedModelName)
   const modelClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
   const modelVariableName = camelize(modelClassName)
+
+  // Always use User for authentication
+  const owningModelClassName = 'User'
+  const userVariableName = 'user'
+
+  // Determine attached model settings if provided
+  const attachedModelClassName = owningModel ? globalClassNameFromFullyQualifiedModelName(owningModel) : null
+  const attachedModelVariableName = attachedModelClassName ? camelize(attachedModelClassName) : null
 
   const importStatements: string[] = [
     importStatementForModel(fullyQualifiedControllerName, fullyQualifiedModelName),
@@ -28,6 +38,14 @@ export default function generateResourceControllerSpecContent({
     importStatementForModelFactory(fullyQualifiedControllerName, fullyQualifiedModelName),
     importStatementForModelFactory(fullyQualifiedControllerName, 'User'),
   ]
+
+  // Add attached model imports if specified
+  if (owningModel) {
+    importStatements.push(
+      importStatementForModel(fullyQualifiedControllerName, owningModel),
+      importStatementForModelFactory(fullyQualifiedControllerName, owningModel),
+    )
+  }
 
   const specUnitUpdirs = updirsFromPath(fullyQualifiedControllerName)
   const originalStringKeyValues: string[] = []
@@ -66,23 +84,23 @@ import { specRequest as request } from '@rvoh/psychic-spec-helpers'${uniq(import
 import addEndUserAuthHeader from '${specUnitUpdirs}helpers/authentication.js'
 
 describe('${fullyQualifiedControllerName}', () => {
-  let user: User
+  let ${userVariableName}: ${owningModelClassName}${attachedModelVariableName ? `\n  let ${attachedModelVariableName}: ${attachedModelClassName}` : ''}
 
   beforeEach(async () => {
     await request.init(PsychicServer)
-    user = await createUser()
+    ${userVariableName} = await createUser()${attachedModelVariableName ? `\n    ${attachedModelVariableName} = await create${attachedModelClassName}({ ${userVariableName} })` : ''}
   })
 
   describe('GET index', () => {
     const subject = async (expectedStatus: number = 200) => {
       return request.get('/${route}', expectedStatus, {
-        headers: await addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, ${userVariableName}, {}),
       })
     }
 
     it('returns the index of ${fullyQualifiedModelName}s', async () => {
       const ${modelVariableName} = await create${modelClassName}({
-        user${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
+        ${attachedModelVariableName || userVariableName}${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
       })
       const results = (await subject()).body
 
@@ -93,7 +111,7 @@ describe('${fullyQualifiedControllerName}', () => {
       ])
     })
 
-    context('${modelClassName}s created by another User', () => {
+    context('${modelClassName}s created by another ${owningModelClassName}', () => {
       it('are omitted', async () => {
         await create${modelClassName}()
         const results = (await subject()).body
@@ -106,13 +124,13 @@ describe('${fullyQualifiedControllerName}', () => {
   describe('GET show', () => {
     const subject = async (${modelVariableName}: ${modelClassName}, expectedStatus: number = 200) => {
       return request.get(\`/${route}/\${${modelVariableName}.id}\`, expectedStatus, {
-        headers: await addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, ${userVariableName}, {}),
       })
     }
 
     it('returns the specified ${fullyQualifiedModelName}', async () => {
       const ${modelVariableName} = await create${modelClassName}({
-        user${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
+        ${attachedModelVariableName || userVariableName}${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
       })
       const results = (await subject(${modelVariableName})).body
 
@@ -123,10 +141,10 @@ describe('${fullyQualifiedControllerName}', () => {
       )
     })
 
-    context('${fullyQualifiedModelName} created by another User', () => {
+    context('${fullyQualifiedModelName} created by another ${owningModelClassName}', () => {
       it('is not found', async () => {
-        const otherUser${modelClassName} = await create${modelClassName}()
-        await subject(otherUser${modelClassName}, 404)
+        const other${owningModelClassName}${modelClassName} = await create${modelClassName}()
+        await subject(other${owningModelClassName}${modelClassName}, 404)
       })
     })
   })
@@ -135,15 +153,15 @@ describe('${fullyQualifiedControllerName}', () => {
     const subject = async (data: UpdateableProperties<${modelClassName}>, expectedStatus: number = 201) => {
       return request.post('/${route}', expectedStatus, {
         data,
-        headers: await addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, ${userVariableName}, {}),
       })
     }
 
-    it('creates a ${fullyQualifiedModelName} for this User', async () => {
+    it('creates a ${fullyQualifiedModelName} for this ${owningModelClassName}', async () => {
       const results = (await subject({
         ${originalStringKeyValues.length ? originalStringKeyValues.join('\n        ') : ''}
       })).body
-      const ${modelVariableName} = await ${modelClassName}.findOrFailBy({ userId: user.id })
+      const ${modelVariableName} = await ${modelClassName}.findOrFailBy({ ${userVariableName}Id: ${userVariableName}.id })
 
       expect(results).toEqual(
         expect.objectContaining({
@@ -157,13 +175,13 @@ describe('${fullyQualifiedControllerName}', () => {
     const subject = async (${modelVariableName}: ${modelClassName}, data: UpdateableProperties<${modelClassName}>, expectedStatus: number = 204) => {
       return request.patch(\`/${route}/\${${modelVariableName}.id}\`, expectedStatus, {
         data,
-        headers: await addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, ${userVariableName}, {}),
       })
     }
 
     it('updates the ${fullyQualifiedModelName}', async () => {
       const ${modelVariableName} = await create${modelClassName}({
-        user${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
+        ${attachedModelVariableName || userVariableName}${originalStringKeyValues.length ? ',\n        ' + originalStringKeyValues.join('\n        ') : ''}
       })
       await subject(${modelVariableName}, {
         ${updatedStringKeyValues.length ? updatedStringKeyValues.join('\n        ') : ''}
@@ -173,11 +191,9 @@ describe('${fullyQualifiedControllerName}', () => {
       ${updatedStringAttributeChecks.join('\n      ')}
     })
 
-    context('a ${fullyQualifiedModelName} created by another User', () => {
+    context('a ${fullyQualifiedModelName} created by another ${owningModelClassName}', () => {
       it('is not updated', async () => {
-        const ${modelVariableName} = await create${modelClassName}({
-          ${originalStringKeyValues.length ? originalStringKeyValues.join('\n          ') : ''}
-        })
+        const ${modelVariableName} = await create${modelClassName}()
         await subject(${modelVariableName}, {
           ${updatedStringKeyValues.length ? updatedStringKeyValues.join('\n          ') : ''}
         }, 404)
@@ -191,18 +207,18 @@ describe('${fullyQualifiedControllerName}', () => {
   describe('DELETE destroy', () => {
     const subject = async (${modelVariableName}: ${modelClassName}, expectedStatus: number = 204) => {
       return request.delete(\`/${route}/\${${modelVariableName}.id}\`, expectedStatus, {
-        headers: await addEndUserAuthHeader(request, user, {}),
+        headers: await addEndUserAuthHeader(request, ${userVariableName}, {}),
       })
     }
 
     it('deletes the ${fullyQualifiedModelName}', async () => {
-      const ${modelVariableName} = await create${modelClassName}({ user })
+      const ${modelVariableName} = await create${modelClassName}({ ${attachedModelVariableName || userVariableName} })
       await subject(${modelVariableName})
 
       expect(await ${modelClassName}.find(${modelVariableName}.id)).toBeNull()
     })
 
-    context('a ${fullyQualifiedModelName} created by another User', () => {
+    context('a ${fullyQualifiedModelName} created by another ${owningModelClassName}', () => {
       it('is not deleted', async () => {
         const ${modelVariableName} = await create${modelClassName}()
         await subject(${modelVariableName}, 404)

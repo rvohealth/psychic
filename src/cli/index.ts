@@ -31,7 +31,11 @@ export default class PsychicCLI {
       .description('create a Dream model, migration, controller, serializer, and spec placeholders')
       .option(
         '--sti-base-serializer',
-        'Omits the serializer from the dream model, but does create the serializer so it can be extended by STI children',
+        'omits the serializer from the dream model, but does create the serializer so it can be extended by STI children',
+      )
+      .option(
+        '--owning-model <modelName>',
+        'The model class of the object that `associationQuery`/`createAssociation` will be performed on in the created controller and spec (e.g., "Host", "Guest") (simply to save time making changes to the generated code). Defaults to User',
       )
       .argument('<path>', 'URL path from root domain')
       .argument(
@@ -47,7 +51,7 @@ export default class PsychicCLI {
           route: string,
           modelName: string,
           columnsWithTypes: string[],
-          options: { stiBaseSerializer: boolean },
+          options: { stiBaseSerializer: boolean; owningModel?: string },
         ) => {
           await initializePsychicApp()
           await PsychicBin.generateResource(route, modelName, columnsWithTypes, options)

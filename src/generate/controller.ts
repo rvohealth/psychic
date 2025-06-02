@@ -15,12 +15,14 @@ export default async function generateController({
   actions,
   columnsWithTypes = [],
   resourceSpecs = false,
+  owningModel,
 }: {
   fullyQualifiedControllerName: string
   fullyQualifiedModelName?: string
   actions: string[]
   columnsWithTypes?: string[]
   resourceSpecs?: boolean
+  owningModel?: string | undefined
 }) {
   fullyQualifiedModelName = fullyQualifiedModelName
     ? standardizeFullyQualifiedModelName(fullyQualifiedModelName)
@@ -97,6 +99,7 @@ export default async function generateController({
         fullyQualifiedControllerName,
         fullyQualifiedModelName,
         actions,
+        owningModel,
       }),
     )
   } catch (error) {
@@ -115,6 +118,7 @@ export default async function generateController({
     fullyQualifiedModelName,
     columnsWithTypes,
     resourceSpecs,
+    owningModel,
   })
 }
 
@@ -138,12 +142,14 @@ async function generateControllerSpec({
   fullyQualifiedModelName,
   columnsWithTypes,
   resourceSpecs,
+  owningModel,
 }: {
   fullyQualifiedControllerName: string
   route: string
   fullyQualifiedModelName: string | undefined
   columnsWithTypes: string[]
   resourceSpecs: boolean
+  owningModel: string | undefined
 }) {
   const { relFilePath, absDirPath, absFilePath } = psychicFileAndDirPaths(
     psychicPath('controllerSpecs'),
@@ -161,6 +167,7 @@ async function generateControllerSpec({
             route,
             fullyQualifiedModelName,
             columnsWithTypes,
+            owningModel,
           })
         : generateControllerSpecContent(fullyQualifiedControllerName), //, route, fullyQualifiedModelName, actions),
     )

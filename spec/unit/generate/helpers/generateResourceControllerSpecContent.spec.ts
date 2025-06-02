@@ -134,9 +134,7 @@ describe('V1/PostsController', () => {
 
     context('a Post created by another User', () => {
       it('is not updated', async () => {
-        const post = await createPost({
-          body: 'The Post body',
-        })
+        const post = await createPost()
         await subject(post, {
           body: 'Updated Post body',
         }, 404)
@@ -323,10 +321,7 @@ describe('V1/Host/LocalizedTextsController', () => {
 
     context('a LocalizedText created by another User', () => {
       it('is not updated', async () => {
-        const localizedText = await createLocalizedText({
-          title: 'The LocalizedText title',
-          markdown: 'The LocalizedText markdown',
-        })
+        const localizedText = await createLocalizedText()
         await subject(localizedText, {
           title: 'Updated LocalizedText title',
           markdown: 'Updated LocalizedText markdown',
@@ -364,6 +359,25 @@ describe('V1/Host/LocalizedTextsController', () => {
   })
 })
 `)
+    })
+  })
+
+  context('when owningModel is specified', () => {
+    it('generates specs with both user and attached model', () => {
+      const res = generateResourceControllerSpecContent({
+        fullyQualifiedControllerName: 'V1/Host/ReviewsController',
+        route: 'v1/host/reviews',
+        fullyQualifiedModelName: 'Review',
+        columnsWithTypes: ['content:text', 'rating:integer'],
+        owningModel: 'Host',
+      })
+      expect(res).toContain('let user: User')
+      expect(res).toContain('let host: Host')
+      expect(res).toContain('user = await createUser()')
+      expect(res).toContain('host = await createHost({ user })')
+      expect(res).toContain('await createReview({')
+      expect(res).toContain('host,')
+      expect(res).toContain('headers: await addEndUserAuthHeader(request, user, {})')
     })
   })
 })
