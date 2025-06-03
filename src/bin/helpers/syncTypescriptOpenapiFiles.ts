@@ -1,4 +1,4 @@
-import { camelize, DreamCLI } from '@rvoh/dream'
+import { camelize, capitalize, DreamCLI } from '@rvoh/dream'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import PsychicApp from '../../psychic-app/index.js'
@@ -16,15 +16,24 @@ export default async function syncTypescriptOpenapiFiles() {
       return DreamCLI.spawn(`npx openapi-typescript ${jsonPath} -o ${outpath}`).then(async () => {
         const file = (await fs.readFile(outpath)).toString()
         const exportName =
-          camelize(
-            jsonPath
-              .split('/')
-              .at(-1)
-              ?.replace(/\.json/, ''),
+          dotToCamelCase(
+            camelize(
+              jsonPath
+                .split('/')
+                .at(-1)
+                ?.replace(/\.json/, ''),
+            )!,
           ) + 'Paths'
 
         await fs.writeFile(outpath, file.replace(/export interface paths/, `export interface ${exportName}`))
       })
     }),
   )
+}
+
+function dotToCamelCase(inputString: string) {
+  return inputString
+    .split('.')
+    .map((word, index) => (index === 0 ? word : capitalize(word)))
+    .join('')
 }
