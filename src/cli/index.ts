@@ -5,6 +5,7 @@ import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/syncOpenapiTypescript.js'
 import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
+import Watcher from '../watcher/Watcher.js'
 
 export default class PsychicCLI {
   public static provide(
@@ -202,6 +203,15 @@ export default class PsychicCLI {
         await initializePsychicApp()
         await PsychicBin.sync()
         process.exit()
+      })
+
+    program
+      .command('watch')
+      .description('watches your app for changes, and re-syncs any time they happen')
+      .argument('[dir]', 'the folder you want to watch, defaults to ./src')
+      .action(async (dir?: string) => {
+        await initializePsychicApp()
+        Watcher.watch(dir)
       })
 
     program
