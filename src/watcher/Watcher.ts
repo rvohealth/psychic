@@ -29,16 +29,22 @@ export default class Watcher {
           clearTimeout(timer)
 
           const seconds = TIMEOUT_INTERVAL / 1000
-          DreamCLI.logger.log(`${filename} changed, douncing sync for ${seconds} seconds...`)
+          DreamCLI.logger.log(`${filename} changed`)
+          DreamCLI.logger.log(`next sync in ${seconds} seconds...`, { logPrefixColor: 'cyan' })
 
           // eslint-disable-next-line @typescript-eslint/no-misused-promises
           timer = setTimeout(async () => {
-            DreamCLI.logger.log(`executing sync...`)
+            DreamCLI.logger.log(`executing sync...`, { logPrefixColor: 'cyan' })
 
             const psy = PsychicApp.getOrFail()
 
             this.syncing = true
-            await DreamCLI.spawn(psy.psyCmd('sync'))
+            try {
+              await DreamCLI.spawn(psy.psyCmd('sync'))
+            } catch (err) {
+              DreamCLI.logger.log(`ERROR!`, { logPrefixColor: 'red' })
+              console.error(err)
+            }
 
             // pause for an additional second, so that any file changes
             // still being regestered from the end of the sync
