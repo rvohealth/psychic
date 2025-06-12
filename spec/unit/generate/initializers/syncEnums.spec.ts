@@ -38,7 +38,7 @@ import { PsychicApp, PsychicBin } from "@rvoh/psychic"
 import AppEnv from '../AppEnv.js'
 
 export default function syncCustomEnums(psy: PsychicApp) {
-  psy.on('sync', async () => {
+  psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       DreamCLI.logger.logStartProgress(\`[syncCustomEnums] syncing enums to ./client/howyadoin/enums.ts...\`)
       await PsychicBin.syncClientEnums('./client/howyadoin/enums.ts')

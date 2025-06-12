@@ -32,7 +32,7 @@ import { PsychicApp, PsychicBin } from "@rvoh/psychic"
 import AppEnv from '../AppEnv.js'
 
 export default function ${camelized}(psy: PsychicApp) {
-  psy.on('sync', async () => {
+  psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       DreamCLI.logger.logStartProgress(\`[${camelized}] syncing enums to ${outfile}...\`)
       await PsychicBin.syncClientEnums('${outfile}')
