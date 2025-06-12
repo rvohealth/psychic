@@ -9,15 +9,17 @@ describe('generateResourceControllerSpecContent', () => {
       columnsWithTypes: ['body:text', 'rating:decimal:3,2', 'User:belongs_to'],
     })
     expect(res).toEqual(`\
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { UpdateableProperties } from '@rvoh/dream'
 import { PsychicServer } from '@rvoh/psychic'
-import { specRequest as request } from '@rvoh/psychic-spec-helpers'
+import { OpenapiSpecRequest } from '@rvoh/psychic-spec-helpers'
 import Post from '../../../../src/app/models/Post.js'
 import User from '../../../../src/app/models/User.js'
+import { validationOpenapiPaths } from '../../../../src/types/openapi/validation.openapi.js'
 import createPost from '../../../factories/PostFactory.js'
 import createUser from '../../../factories/UserFactory.js'
 import addEndUserAuthHeader from '../../helpers/authentication.js'
+
+const request = new OpenapiSpecRequest<validationOpenapiPaths>()
 
 describe('V1/PostsController', () => {
   let user: User
@@ -28,7 +30,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET index', () => {
-    const subject = async (expectedStatus: number = 200) => {
+    const subject = async <StatusCode extends 200 | 400>(expectedStatus: StatusCode) => {
       return request.get('/posts', expectedStatus, {
         headers: await addEndUserAuthHeader(request, user, {}),
       })
@@ -39,9 +41,9 @@ describe('V1/PostsController', () => {
         user,
         body: 'The Post body',
       })
-      const results = (await subject()).body
+      const { body } = await subject(200)
 
-      expect(results).toEqual([
+      expect(body).toEqual([
         expect.objectContaining({
           id: post.id,
         }),
@@ -51,16 +53,17 @@ describe('V1/PostsController', () => {
     context('Posts created by another User', () => {
       it('are omitted', async () => {
         await createPost()
-        const results = (await subject()).body
+        const { body } = await subject(200)
 
-        expect(results).toEqual([])
+        expect(body).toEqual([])
       })
     })
   })
 
   describe('GET show', () => {
-    const subject = async (post: Post, expectedStatus: number = 200) => {
-      return request.get(\`/posts/\${post.id}\`, expectedStatus, {
+    const subject = async <StatusCode extends 200 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+      return request.get('/posts/{id}', expectedStatus, {
+        id: post.id,
         headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
@@ -70,9 +73,9 @@ describe('V1/PostsController', () => {
         user,
         body: 'The Post body',
       })
-      const results = (await subject(post)).body
+      const { body } = await subject(post, 200)
 
-      expect(results).toEqual(
+      expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
           body: 'The Post body',
@@ -89,7 +92,10 @@ describe('V1/PostsController', () => {
   })
 
   describe('POST create', () => {
-    const subject = async (data: UpdateableProperties<Post>, expectedStatus: number = 201) => {
+    const subject = async <StatusCode extends 201 | 400>(
+      data: UpdateableProperties<Post>,
+      expectedStatus: StatusCode
+    ) => {
       return request.post('/posts', expectedStatus, {
         data,
         headers: await addEndUserAuthHeader(request, user, {}),
@@ -97,12 +103,12 @@ describe('V1/PostsController', () => {
     }
 
     it('creates a Post for this User', async () => {
-      const results = (await subject({
+      const { body } = await subject({
         body: 'The Post body',
-      })).body
+      }, 201)
       const post = await Post.findOrFailBy({ userId: user.id })
 
-      expect(results).toEqual(
+      expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
           body: 'The Post body',
@@ -112,8 +118,13 @@ describe('V1/PostsController', () => {
   })
 
   describe('PATCH update', () => {
-    const subject = async (post: Post, data: UpdateableProperties<Post>, expectedStatus: number = 204) => {
-      return request.patch(\`/posts/\${post.id}\`, expectedStatus, {
+    const subject = async <StatusCode extends 204 | 400 | 404>(
+      post: Post,
+      data: UpdateableProperties<Post>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.patch('/posts/{id}', expectedStatus, {
+        id: post.id,
         data,
         headers: await addEndUserAuthHeader(request, user, {}),
       })
@@ -126,7 +137,7 @@ describe('V1/PostsController', () => {
       })
       await subject(post, {
         body: 'Updated Post body',
-      })
+      }, 204)
 
       await post.reload()
       expect(post.body).toEqual('Updated Post body')
@@ -146,15 +157,16 @@ describe('V1/PostsController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const subject = async (post: Post, expectedStatus: number = 204) => {
-      return request.delete(\`/posts/\${post.id}\`, expectedStatus, {
+    const subject = async <StatusCode extends 204 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+      return request.delete('/posts/{id}', expectedStatus, {
+        id: post.id,
         headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
     it('deletes the Post', async () => {
       const post = await createPost({ user })
-      await subject(post)
+      await subject(post, 204)
 
       expect(await Post.find(post.id)).toBeNull()
     })
@@ -188,15 +200,17 @@ describe('V1/PostsController', () => {
         ],
       })
       expect(res).toEqual(`\
-/* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import { UpdateableProperties } from '@rvoh/dream'
 import { PsychicServer } from '@rvoh/psychic'
-import { specRequest as request } from '@rvoh/psychic-spec-helpers'
+import { OpenapiSpecRequest } from '@rvoh/psychic-spec-helpers'
 import LocalizedText from '../../../../../src/app/models/LocalizedText.js'
 import User from '../../../../../src/app/models/User.js'
+import { validationOpenapiPaths } from '../../../../src/types/openapi/validation.openapi.js'
 import createLocalizedText from '../../../../factories/LocalizedTextFactory.js'
 import createUser from '../../../../factories/UserFactory.js'
 import addEndUserAuthHeader from '../../../helpers/authentication.js'
+
+const request = new OpenapiSpecRequest<validationOpenapiPaths>()
 
 describe('V1/Host/LocalizedTextsController', () => {
   let user: User
@@ -207,7 +221,7 @@ describe('V1/Host/LocalizedTextsController', () => {
   })
 
   describe('GET index', () => {
-    const subject = async (expectedStatus: number = 200) => {
+    const subject = async <StatusCode extends 200 | 400>(expectedStatus: StatusCode) => {
       return request.get('/v1/host/localized-texts', expectedStatus, {
         headers: await addEndUserAuthHeader(request, user, {}),
       })
@@ -219,9 +233,9 @@ describe('V1/Host/LocalizedTextsController', () => {
         title: 'The LocalizedText title',
         markdown: 'The LocalizedText markdown',
       })
-      const results = (await subject()).body
+      const { body } = await subject(200)
 
-      expect(results).toEqual([
+      expect(body).toEqual([
         expect.objectContaining({
           id: localizedText.id,
         }),
@@ -231,16 +245,17 @@ describe('V1/Host/LocalizedTextsController', () => {
     context('LocalizedTexts created by another User', () => {
       it('are omitted', async () => {
         await createLocalizedText()
-        const results = (await subject()).body
+        const { body } = await subject(200)
 
-        expect(results).toEqual([])
+        expect(body).toEqual([])
       })
     })
   })
 
   describe('GET show', () => {
-    const subject = async (localizedText: LocalizedText, expectedStatus: number = 200) => {
-      return request.get(\`/v1/host/localized-texts/\${localizedText.id}\`, expectedStatus, {
+    const subject = async <StatusCode extends 200 | 400 | 404>(localizedText: LocalizedText, expectedStatus: StatusCode) => {
+      return request.get('/v1/host/localized-texts/{id}', expectedStatus, {
+        id: localizedText.id,
         headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
@@ -251,9 +266,9 @@ describe('V1/Host/LocalizedTextsController', () => {
         title: 'The LocalizedText title',
         markdown: 'The LocalizedText markdown',
       })
-      const results = (await subject(localizedText)).body
+      const { body } = await subject(localizedText, 200)
 
-      expect(results).toEqual(
+      expect(body).toEqual(
         expect.objectContaining({
           id: localizedText.id,
           title: 'The LocalizedText title',
@@ -271,7 +286,10 @@ describe('V1/Host/LocalizedTextsController', () => {
   })
 
   describe('POST create', () => {
-    const subject = async (data: UpdateableProperties<LocalizedText>, expectedStatus: number = 201) => {
+    const subject = async <StatusCode extends 201 | 400>(
+      data: UpdateableProperties<LocalizedText>,
+      expectedStatus: StatusCode
+    ) => {
       return request.post('/v1/host/localized-texts', expectedStatus, {
         data,
         headers: await addEndUserAuthHeader(request, user, {}),
@@ -279,13 +297,13 @@ describe('V1/Host/LocalizedTextsController', () => {
     }
 
     it('creates a LocalizedText for this User', async () => {
-      const results = (await subject({
+      const { body } = await subject({
         title: 'The LocalizedText title',
         markdown: 'The LocalizedText markdown',
-      })).body
+      }, 201)
       const localizedText = await LocalizedText.findOrFailBy({ userId: user.id })
 
-      expect(results).toEqual(
+      expect(body).toEqual(
         expect.objectContaining({
           id: localizedText.id,
           title: 'The LocalizedText title',
@@ -296,8 +314,13 @@ describe('V1/Host/LocalizedTextsController', () => {
   })
 
   describe('PATCH update', () => {
-    const subject = async (localizedText: LocalizedText, data: UpdateableProperties<LocalizedText>, expectedStatus: number = 204) => {
-      return request.patch(\`/v1/host/localized-texts/\${localizedText.id}\`, expectedStatus, {
+    const subject = async <StatusCode extends 204 | 400 | 404>(
+      localizedText: LocalizedText,
+      data: UpdateableProperties<LocalizedText>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.patch('/v1/host/localized-texts/{id}', expectedStatus, {
+        id: localizedText.id,
         data,
         headers: await addEndUserAuthHeader(request, user, {}),
       })
@@ -312,7 +335,7 @@ describe('V1/Host/LocalizedTextsController', () => {
       await subject(localizedText, {
         title: 'Updated LocalizedText title',
         markdown: 'Updated LocalizedText markdown',
-      })
+      }, 204)
 
       await localizedText.reload()
       expect(localizedText.title).toEqual('Updated LocalizedText title')
@@ -335,15 +358,16 @@ describe('V1/Host/LocalizedTextsController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const subject = async (localizedText: LocalizedText, expectedStatus: number = 204) => {
-      return request.delete(\`/v1/host/localized-texts/\${localizedText.id}\`, expectedStatus, {
+    const subject = async <StatusCode extends 204 | 400 | 404>(localizedText: LocalizedText, expectedStatus: StatusCode) => {
+      return request.delete('/v1/host/localized-texts/{id}', expectedStatus, {
+        id: localizedText.id,
         headers: await addEndUserAuthHeader(request, user, {}),
       })
     }
 
     it('deletes the LocalizedText', async () => {
       const localizedText = await createLocalizedText({ user })
-      await subject(localizedText)
+      await subject(localizedText, 204)
 
       expect(await LocalizedText.find(localizedText.id)).toBeNull()
     })
