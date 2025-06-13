@@ -663,6 +663,167 @@ describe('OpenapiEndpointRenderer', () => {
         })
       })
 
+      context('for option is provided to requestBody', () => {
+        it('renders params for that dream class', () => {
+          const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'create', {
+            requestBody: { for: User },
+          })
+
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          expect(response['/users']!.post.requestBody).toEqual({
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: expect.objectContaining({
+                    bio: {
+                      type: 'string',
+                    },
+                    birthdate: {
+                      format: 'date',
+                      type: ['string', 'null'],
+                    },
+                    collarCount: {
+                      type: ['string', 'null'],
+                    },
+                  }),
+                },
+              },
+            },
+          })
+        })
+
+        context('with only provided', () => {
+          it('excludes params to the list provided', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: { only: ['email'] },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response['/users']!.post.requestBody).toEqual({
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      email: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                },
+              },
+            })
+          })
+        })
+
+        context('with including provided', () => {
+          it('includes params provided by the list', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: { only: ['email'], including: ['id'] },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response['/users']!.post.requestBody).toEqual({
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      email: {
+                        type: 'string',
+                      },
+                      id: {
+                        type: 'integer',
+                      },
+                    },
+                  },
+                },
+              },
+            })
+          })
+        })
+      })
+
+      context('requestBody leverages only opt', () => {
+        it('only renders attributes specified in only array', () => {
+          const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
+            requestBody: { only: ['species', 'name'] },
+          })
+
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          expect(response['/api/pets']!.post.requestBody).toEqual({
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    name: { type: ['string', 'null'] },
+                    species: {
+                      type: ['string', 'null'],
+                      enum: ['cat', 'noncat', null],
+                    },
+                  },
+                },
+              },
+            },
+          })
+        })
+
+        context('requestBody is generated using shorthand options', () => {
+          context('requestBody leverages required opt', () => {
+            it('renders the required options in the required field', () => {
+              const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
+                requestBody: { only: ['species', 'name'], required: ['species'] },
+              })
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response['/api/pets']!.post.requestBody).toEqual({
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      required: ['species'],
+                      properties: {
+                        name: { type: ['string', 'null'] },
+                        species: {
+                          type: ['string', 'null'],
+                          enum: ['cat', 'noncat', null],
+                        },
+                      },
+                    },
+                  },
+                },
+              })
+            })
+          })
+
+          context('requestBody leverages for opt', () => {
+            it('uses the model provided in the for option to determine request body shape', () => {
+              const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
+                requestBody: { for: User, only: ['email'], required: ['id'], including: ['id'] },
+              })
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response['/api/pets']!.post.requestBody).toEqual({
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      required: ['id'],
+                      properties: {
+                        email: { type: 'string' },
+                        id: { type: 'integer' },
+                      },
+                    },
+                  },
+                },
+              })
+            })
+          })
+        })
+      })
+
       context('requestBody is not specified', () => {
         it('does not provide request body', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show')
@@ -1081,82 +1242,6 @@ describe('OpenapiEndpointRenderer', () => {
 
                 const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
                 expect(response['/api/pets']!.post.requestBody).toBeUndefined()
-              })
-            })
-
-            context('requestBody leverages only opt', () => {
-              it('only renders attributes specified in only array', () => {
-                const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
-                  requestBody: { only: ['species', 'name'] },
-                })
-
-                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
-                expect(response['/api/pets']!.post.requestBody).toEqual({
-                  content: {
-                    'application/json': {
-                      schema: {
-                        type: 'object',
-                        properties: {
-                          name: { type: ['string', 'null'] },
-                          species: {
-                            type: ['string', 'null'],
-                            enum: ['cat', 'noncat', null],
-                          },
-                        },
-                      },
-                    },
-                  },
-                })
-              })
-
-              context('requestBody leverages required opt', () => {
-                it('renders the required options in the required field', () => {
-                  const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
-                    requestBody: { only: ['species', 'name'], required: ['species'] },
-                  })
-
-                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
-                  expect(response['/api/pets']!.post.requestBody).toEqual({
-                    content: {
-                      'application/json': {
-                        schema: {
-                          type: 'object',
-                          required: ['species'],
-                          properties: {
-                            name: { type: ['string', 'null'] },
-                            species: {
-                              type: ['string', 'null'],
-                              enum: ['cat', 'noncat', null],
-                            },
-                          },
-                        },
-                      },
-                    },
-                  })
-                })
-              })
-
-              context('requestBody leverages for opt', () => {
-                it('uses the model provided in the for option to determine request body shape', () => {
-                  const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
-                    requestBody: { for: User, only: ['email'], required: ['email'] },
-                  })
-
-                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
-                  expect(response['/api/pets']!.post.requestBody).toEqual({
-                    content: {
-                      'application/json': {
-                        schema: {
-                          type: 'object',
-                          required: ['email'],
-                          properties: {
-                            email: { type: 'string' },
-                          },
-                        },
-                      },
-                    },
-                  })
-                })
               })
             })
           })

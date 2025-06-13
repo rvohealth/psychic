@@ -1,5 +1,6 @@
 import {
   Dream,
+  DreamAttributes,
   DreamModelSerializerType,
   DreamParamSafeAttributes,
   DreamSerializerBuilder,
@@ -49,6 +50,7 @@ import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
 import PsychicApp from '../psychic-app/index.js'
 import Params, {
   ParamsCastOptions,
+  ParamsForDreamClass,
   ParamsForOpts,
   ValidatedAllowsNull,
   ValidatedReturnType,
@@ -145,7 +147,7 @@ export default class PsychicController {
    * by using the `@Openapi` decorator on your controller methods
    */
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static openapi: Record<string, OpenapiEndpointRenderer<any>>
+  public static openapi: Record<string, OpenapiEndpointRenderer<any, any>>
 
   /**
    * Enables you to specify specific serializers to use
@@ -331,12 +333,16 @@ export default class PsychicController {
   }
 
   public paramsFor<
-    DreamClass extends typeof Dream,
-    const OnlyArray extends readonly (keyof DreamParamSafeAttributes<InstanceType<DreamClass>>)[],
-    ForOpts extends ParamsForOpts<OnlyArray> & {
-      key?: string
-    },
-  >(this: PsychicController, dreamClass: DreamClass, opts?: ForOpts) {
+    T extends typeof Dream,
+    I extends InstanceType<T>,
+    const OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
+    const IncludingArray extends Exclude<keyof DreamAttributes<I>, OnlyArray[number]>[],
+    ReturnPayload = ParamsForDreamClass<T, OnlyArray, IncludingArray>,
+    ForOpts extends ParamsForOpts<OnlyArray, IncludingArray> & { key?: string } = ParamsForOpts<
+      OnlyArray,
+      IncludingArray
+    > & { key?: string },
+  >(this: PsychicController, dreamClass: T, opts?: ForOpts): ReturnPayload {
     return Params.for(
       opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params,
       dreamClass,
