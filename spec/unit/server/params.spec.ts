@@ -100,6 +100,18 @@ describe('Params', () => {
       })
     })
 
+    context('with including option passed', () => {
+      it('allows unsafe attributes when explicitly provided through the "including" option', () => {
+        const params = Params.for({ species: 'cat', userId: '1', id: '123' }, Pet, {
+          including: ['userId'],
+        })
+
+        // userId is of type integer at the db level, so we should
+        // expect integer coercion here.
+        expect(params).toEqual({ species: 'cat', userId: 1 })
+      })
+    })
+
     context('enum', () => {
       it('permits values inside the enum', () => {
         expect(Params.for({ species: 'cat' }, Pet)).toEqual({ species: 'cat' })

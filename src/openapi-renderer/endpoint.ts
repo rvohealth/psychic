@@ -1,7 +1,9 @@
 import {
   Dream,
+  DreamAttributes,
   DreamModelSerializerType,
   DreamOrViewModelClassSerializerKey,
+  DreamParamSafeAttributes,
   DreamSerializable,
   DreamSerializableArray,
   OpenapiAllTypes,
@@ -41,12 +43,13 @@ import OpenapiSegmentExpander, {
   SerializerArray,
 } from './body-segment.js'
 import { DEFAULT_OPENAPI_RESPONSES } from './defaults.js'
+import dreamColumnToOpenapiType from './helpers/dreamColumnToOpenapiType.js'
 import openapiOpts from './helpers/openapiOpts.js'
 import openapiRoute from './helpers/openapiRoute.js'
 import openapiPageParamProperty from './helpers/pageParamOpenapiProperty.js'
-import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import safelyAttachPaginationParamToRequestBodySegment from './helpers/safelyAttachPaginationParamsToBodySegment.js'
 import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
+import paramNamesForDreamClass from '../server/helpers/paramNamesForDreamClass.js'
 
 export interface OpenapiRenderOpts {
   casing: SerializerCasing
@@ -69,13 +72,14 @@ export interface ToSchemaObjectOpts {
 
 export default class OpenapiEndpointRenderer<
   DreamsOrSerializersOrViewModels extends DreamSerializable | DreamSerializableArray,
+  const ForOption extends typeof Dream,
 > {
   private many: OpenapiEndpointRendererOpts['many']
   private paginate: OpenapiEndpointRendererOpts['paginate']
   private responses: OpenapiEndpointRendererOpts['responses']
   private serializerKey: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['serializerKey']
   private pathParams: OpenapiEndpointRendererOpts['pathParams']
-  private requestBody: OpenapiEndpointRendererOpts['requestBody']
+  private requestBody: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['requestBody']
   private headers: OpenapiEndpointRendererOpts['headers']
   private query: OpenapiEndpointRendererOpts['query']
   private status: OpenapiEndpointRendererOpts['status']
@@ -123,7 +127,7 @@ export default class OpenapiEndpointRenderer<
       omitDefaultHeaders,
       omitDefaultResponses,
       defaultResponse,
-    }: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels> = {},
+    }: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels, ForOption> = {},
   ) {
     this.requestBody = requestBody
     this.headers = headers
@@ -538,7 +542,7 @@ export default class OpenapiEndpointRenderer<
    * This method returns true if it detects that this is the case.
    */
   private shouldAutogenerateBody() {
-    const body = this.requestBody as OpenapiSchemaRequestBodyOnlyOption
+    const body = this.requestBody as OpenapiSchemaRequestBodyForOption<typeof Dream>
     if (!body) return true
     if (body.only) return true
     if (body.for) return true
@@ -560,179 +564,30 @@ export default class OpenapiEndpointRenderer<
     openapiName: string
     renderOpts: OpenapiRenderOpts
   }): OpenapiContent | undefined {
-    const forDreamClass = (this.requestBody as OpenapiSchemaRequestBodyOnlyOption)?.for
+    const forDreamClass = (this.requestBody as OpenapiSchemaRequestBodyForOption<typeof Dream>)
+      ?.for as typeof Dream
     const dreamClass = forDreamClass || this.getSingleDreamModelClass()
     if (!dreamClass) return this.defaultRequestBody()
 
-    let paramSafeColumns = dreamClass.paramSafeColumnsOrFallback()
-    const only = (this.requestBody as OpenapiSchemaRequestBodyOnlyOption)?.only
-    if (only) {
-      paramSafeColumns = paramSafeColumns.filter(column => only.includes(column))
-    }
+    const { only, including } = (this.requestBody || {}) as OpenapiSchemaRequestBodyForOption<typeof Dream>
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const schema = dreamClass.prototype.schema
-
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-    const columns = schema[dreamClass.prototype.table]?.columns as object
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const paramSafeColumns = paramNamesForDreamClass(dreamClass, { only, including } as any)
 
     const paramsShape: OpenapiSchemaObject = {
       type: 'object',
       properties: {},
     }
 
-    const required = (this.requestBody as OpenapiSchemaRequestBodyOnlyOption)?.required
+    const required = (this.requestBody as OpenapiSchemaRequestBodyForOption<typeof Dream>)?.required
     if (required) {
-      paramsShape.required = required
+      paramsShape.required = required as string[]
     }
 
     for (const columnName of paramSafeColumns) {
-      const columnMetadata = columns[columnName] as {
-        dbType: string
-        allowNull: boolean
-        isArray: boolean
-        enumValues: unknown[] | null
-      }
-
-      const nullableColumn = columnMetadata?.allowNull
-
-      switch (columnMetadata?.dbType) {
-        case 'boolean':
-        case 'boolean[]':
-        case 'date':
-        case 'date[]':
-        case 'integer':
-        case 'integer[]':
-          paramsShape.properties = {
-            ...paramsShape.properties,
-            [columnName]: primitiveOpenapiStatementToOpenapi(columnMetadata.dbType, nullableColumn),
-          }
-          break
-
-        case 'character varying':
-        case 'citext':
-        case 'text':
-        case 'uuid':
-        case 'bigint':
-          paramsShape.properties = {
-            ...paramsShape.properties,
-            [columnName]: primitiveOpenapiStatementToOpenapi('string', nullableColumn),
-          }
-          break
-
-        case 'character varying[]':
-        case 'citext[]':
-        case 'text[]':
-        case 'uuid[]':
-        case 'bigint[]':
-          paramsShape.properties = {
-            ...paramsShape.properties,
-            [columnName]: primitiveOpenapiStatementToOpenapi('string[]', nullableColumn),
-          }
-          break
-
-        case 'timestamp':
-        case 'timestamp with time zone':
-        case 'timestamp without time zone':
-          paramsShape.properties = {
-            ...paramsShape.properties,
-            [columnName]: primitiveOpenapiStatementToOpenapi('date-time', nullableColumn),
-          }
-          break
-
-        case 'timestamp[]':
-        case 'timestamp with time zone[]':
-        case 'timestamp without time zone[]':
-          paramsShape.properties = {
-            ...paramsShape.properties,
-            [columnName]: primitiveOpenapiStatementToOpenapi('date-time[]', nullableColumn),
-          }
-          break
-
-        case 'json':
-        case 'jsonb':
-          paramsShape.properties = {
-            ...paramsShape.properties,
-            [columnName]: {
-              type: nullableColumn ? ['object', 'null'] : 'object',
-            },
-          }
-          break
-
-        case 'json[]':
-        case 'jsonb[]':
-          paramsShape.properties = {
-            ...paramsShape.properties,
-            [columnName]: {
-              type: nullableColumn ? ['array', 'null'] : 'array',
-              items: {
-                type: 'object',
-              },
-            },
-          }
-          break
-
-        case 'numeric':
-          paramsShape.properties = {
-            ...paramsShape.properties,
-            [columnName]: primitiveOpenapiStatementToOpenapi('number', nullableColumn),
-          }
-          break
-
-        case 'numeric[]':
-          paramsShape.properties = {
-            ...paramsShape.properties,
-            [columnName]: primitiveOpenapiStatementToOpenapi('number[]', nullableColumn),
-          }
-          break
-
-        default:
-          if (dreamClass.isVirtualColumn(columnName as string)) {
-            const metadata = dreamClass['virtualAttributes'].find(
-              statement => statement.property === columnName,
-            )
-            if (metadata?.type) {
-              paramsShape.properties = {
-                ...paramsShape.properties,
-                [columnName]: new OpenapiSegmentExpander(metadata.type, {
-                  renderOpts,
-                  target: 'request',
-                }).render().openapi,
-              }
-            } else {
-              paramsShape.properties = {
-                ...paramsShape.properties,
-                [columnName]: {
-                  anyOf: [
-                    { type: ['string', 'null'] },
-                    { type: ['number', 'null'] },
-                    { type: ['object', 'null'] },
-                  ],
-                },
-              }
-            }
-          } else if (columnMetadata?.enumValues) {
-            if (columnMetadata.isArray) {
-              paramsShape.properties = {
-                ...paramsShape.properties,
-                [columnName]: {
-                  type: nullableColumn ? ['array', 'null'] : 'array',
-                  items: {
-                    type: 'string',
-                    enum: [...columnMetadata.enumValues, ...(nullableColumn ? [null] : [])],
-                  },
-                },
-              }
-            } else {
-              paramsShape.properties = {
-                ...paramsShape.properties,
-                [columnName]: {
-                  type: nullableColumn ? ['string', 'null'] : 'string',
-                  enum: [...columnMetadata.enumValues, ...(nullableColumn ? [null] : [])],
-                },
-              }
-            }
-          }
+      paramsShape.properties = {
+        ...paramsShape.properties,
+        ...dreamColumnToOpenapiType(dreamClass, columnName),
       }
     }
 
@@ -1146,6 +1001,7 @@ routes file which will direct to this controller class and method.`
 
 export interface OpenapiEndpointRendererOpts<
   I extends DreamSerializable | DreamSerializableArray | undefined = undefined,
+  ForOption extends typeof Dream = typeof Dream,
 > {
   /**
    * when true, it will render an openapi document which produces an array of serializables,
@@ -1246,7 +1102,7 @@ export interface OpenapiEndpointRendererOpts<
    *  })
    * ```
    */
-  requestBody?: OpenapiSchemaBodyShorthand | OpenapiSchemaRequestBodyOnlyOption | null
+  requestBody?: OpenapiSchemaBodyShorthand | OpenapiSchemaRequestBodyForOption<I, ForOption> | null
 
   /**
    * an array of tag names you wish to apply to this endpoint.
@@ -1451,10 +1307,184 @@ export interface OpenapiEndpointRendererDefaultResponseOption {
   maybeNull?: boolean
 }
 
-export interface OpenapiSchemaRequestBodyOnlyOption {
-  for?: typeof Dream
-  only?: string[]
-  required?: string[]
+export type OpenapiSchemaRequestBodyForOption<
+  Serializable extends DreamSerializable | DreamSerializableArray | undefined,
+  ForOption extends typeof Dream = typeof Dream,
+> = OpenapiSchemaRequestBodyForDreamClass<ForOption> | OpenapiSchemaRequestBodyForBaseDreamClass<Serializable>
+
+export interface OpenapiSchemaRequestBodyForDreamClass<ForOption extends typeof Dream> {
+  /**
+   * provide an explicit dream class here, and the request body
+   * shape will conform to the "Param-safe" attributes of the
+   * provided model.
+   *
+   * ```ts
+   * @OpenAPI({
+   *   requestBody: { for: Pet }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   */
+  for: ForOption
+
+  /**
+   * Narrow down which fields on the model you would like
+   * to include. If a `for` option is provided, the fields
+   * will be derived from that model class. Otherwise, it
+   * will be derrived from the first argument passed to
+   * the OpenAPI decorator, provided it is a dream model.
+   *
+   * ```ts
+   * @OpenAPI({
+   *   requestBody: { for: Pet, only: ['species', 'name'] }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   *
+   * leveraging a base model class would look like this:
+   *
+   * ```ts
+   * @OpenAPI(Pet, {
+   *   requestBody: { only: ['species', 'name'] }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   */
+  only?: (keyof DreamParamSafeAttributes<InstanceType<ForOption>>)[]
+
+  /**
+   * expand the included fields to allow fields that
+   * dream does not consider safe by default, like foreign
+   * keys to associated models.
+   *
+   * ```ts
+   * @OpenAPI({
+   *   requestBody: { for: Pet, including: ['userId'] }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   *
+   * leveraging a base model class would look like this:
+   *
+   * ```ts
+   * @OpenAPI(Pet, {
+   *   requestBody: { including: ['userId'] }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   */
+  including?: Exclude<
+    keyof DreamAttributes<InstanceType<ForOption>>,
+    keyof DreamParamSafeAttributes<InstanceType<ForOption>>
+  >[]
+
+  /**
+   * Specify which fields are required for your openapi
+   * request body.
+   *
+   * ```ts
+   * @OpenAPI({
+   *   requestBody: { for: Pet, required: ['species'] }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   *
+   * leveraging a base model class would look like this:
+   *
+   * ```ts
+   * @OpenAPI(Pet, {
+   *   requestBody: { required: ['species'] }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   */
+  required?: (keyof DreamAttributes<InstanceType<ForOption>>)[]
+}
+
+export interface OpenapiSchemaRequestBodyForBaseDreamClass<
+  Serializable extends DreamSerializable | DreamSerializableArray | undefined,
+  T extends Serializable extends typeof Dream ? Serializable : undefined = Serializable extends typeof Dream
+    ? Serializable
+    : undefined,
+  I extends T extends typeof Dream ? InstanceType<T> : undefined = T extends typeof Dream
+    ? InstanceType<T>
+    : undefined,
+  Only extends I extends Dream ? readonly (keyof DreamParamSafeAttributes<I>)[] : string[] = I extends Dream
+    ? readonly (keyof DreamParamSafeAttributes<I>)[]
+    : string[],
+  Including extends I extends Dream
+    ? Exclude<keyof DreamAttributes<I>, keyof DreamParamSafeAttributes<I>>[]
+    : string[] = I extends Dream
+    ? Exclude<keyof DreamAttributes<I>, keyof DreamParamSafeAttributes<I>>[]
+    : string[],
+  RequiredFields extends I extends Dream ? readonly (keyof DreamAttributes<I>)[] : string[] = I extends Dream
+    ? readonly (keyof DreamAttributes<I>)[]
+    : string[],
+> {
+  for?: never
+
+  /**
+   * Narrow down which fields on the model you would like
+   * to include. If a `for` option is provided, the fields
+   * will be derived from that model class. Otherwise, it
+   * will be derrived from the first argument passed to
+   * the OpenAPI decorator, provided it is a dream model.
+   *
+   * ```ts
+   * @OpenAPI(Pet, {
+   *   requestBody: { only: ['species', 'name'] }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   */
+  only?: Only
+
+  /**
+   * expand the included fields to allow fields that
+   * dream does not consider safe by default, like foreign
+   * keys to associated models.
+   *
+   * ```ts
+   * @OpenAPI(Pet, {
+   *   requestBody: { including: ['userId'] }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   */
+  including?: Including
+
+  /**
+   * Specify which fields are required for your openapi
+   * request body.
+   *
+   * ```ts
+   * @OpenAPI(Pet, {
+   *   requestBody: { required: ['species'] }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   */
+  required?: RequiredFields
 }
 
 export interface OpenapiHeaderOption {
