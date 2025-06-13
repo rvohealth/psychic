@@ -663,6 +663,88 @@ describe('OpenapiEndpointRenderer', () => {
         })
       })
 
+      context('for option is provided to requestBody', () => {
+        it('renders params for that dream class', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+            requestBody: { for: User },
+          })
+
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          expect(response['/users']!.post.requestBody).toEqual({
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: expect.objectContaining({
+                    bio: {
+                      type: 'string',
+                    },
+                    birthdate: {
+                      format: 'date',
+                      type: ['string', 'null'],
+                    },
+                    collarCount: {
+                      type: ['string', 'null'],
+                    },
+                  }),
+                },
+              },
+            },
+          })
+        })
+
+        context('with only provided', () => {
+          it('excludes params to the list provided', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: { only: ['email'] },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response['/users']!.post.requestBody).toEqual({
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      email: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                },
+              },
+            })
+          })
+        })
+
+        context('with including provided', () => {
+          it('includes params provided by the list', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: { only: ['email'], including: ['id'] },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response['/users']!.post.requestBody).toEqual({
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      email: {
+                        type: 'string',
+                      },
+                      id: {
+                        type: 'integer',
+                      },
+                    },
+                  },
+                },
+              },
+            })
+          })
+        })
+      })
+
       context('requestBody is not specified', () => {
         it('does not provide request body', () => {
           const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show')
@@ -1139,7 +1221,7 @@ describe('OpenapiEndpointRenderer', () => {
               context('requestBody leverages for opt', () => {
                 it('uses the model provided in the for option to determine request body shape', () => {
                   const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
-                    requestBody: { for: User, only: ['email'], required: ['email'] },
+                    requestBody: { for: User, only: ['email'], required: ['id'], including: ['id'] },
                   })
 
                   const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
@@ -1148,9 +1230,10 @@ describe('OpenapiEndpointRenderer', () => {
                       'application/json': {
                         schema: {
                           type: 'object',
-                          required: ['email'],
+                          required: ['id'],
                           properties: {
                             email: { type: 'string' },
+                            id: { type: 'integer' },
                           },
                         },
                       },

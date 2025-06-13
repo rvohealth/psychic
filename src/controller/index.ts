@@ -1,5 +1,6 @@
 import {
   Dream,
+  DreamAttributes,
   DreamModelSerializerType,
   DreamParamSafeAttributes,
   DreamSerializerBuilder,
@@ -333,7 +334,11 @@ export default class PsychicController {
   public paramsFor<
     DreamClass extends typeof Dream,
     const OnlyArray extends readonly (keyof DreamParamSafeAttributes<InstanceType<DreamClass>>)[],
-    ForOpts extends ParamsForOpts<OnlyArray> & {
+    const IncludingArray extends Exclude<
+      keyof DreamAttributes<InstanceType<DreamClass>>,
+      OnlyArray[number]
+    >[],
+    ForOpts extends ParamsForOpts<OnlyArray, IncludingArray> & {
       key?: string
     },
   >(this: PsychicController, dreamClass: DreamClass, opts?: ForOpts) {
