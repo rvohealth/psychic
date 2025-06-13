@@ -20,6 +20,7 @@ import alternateParamName from '../helpers/alternateParamName.js'
 import isArrayParamName from '../helpers/isArrayParamName.js'
 import isObject from '../helpers/isObject.js'
 import isUuid from '../helpers/isUuid.js'
+import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
 
 export default class Params {
   /**
@@ -40,7 +41,8 @@ export default class Params {
     T extends typeof Dream,
     I extends InstanceType<T>,
     const OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
-    ForOpts extends ParamsForOpts<OnlyArray>,
+    const IncludingArray extends Exclude<keyof DreamAttributes<I>, OnlyArray[number]>[],
+    ForOpts extends ParamsForOpts<OnlyArray, IncludingArray>,
     ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
       ? undefined
       : I['paramSafeColumns' & keyof I] & string[],
@@ -64,9 +66,22 @@ export default class Params {
             InstanceType<T>
           >[K & keyof DreamParamSafeAttributes<InstanceType<T>>]
         }>,
-    ReturnPayload extends ForOpts['array'] extends true ? ReturnPartialType[] : ReturnPartialType,
+    ReturnPartialTypeWithIncluding extends ForOpts['including'] extends readonly (keyof DreamAttributes<
+      InstanceType<T>
+    >)[]
+      ? ReturnPartialType &
+          Partial<{
+            [K in Extract<
+              keyof DreamAttributes<InstanceType<T>>,
+              ForOpts['including'][number & keyof ForOpts['including']]
+            >]: DreamAttributes<InstanceType<T>>[K]
+          }>
+      : ReturnPartialType,
+    ReturnPayload extends ForOpts['array'] extends true
+      ? ReturnPartialTypeWithIncluding[]
+      : ReturnPartialTypeWithIncluding,
   >(params: object, dreamClass: T, forOpts: ForOpts = {} as ForOpts): ReturnPayload {
-    const { array = false, only } = forOpts
+    const { array = false } = forOpts
 
     if (!dreamClass?.isDream) throw new Error(`Params.for must receive a dream class as it's second argument`)
     if (array) {
@@ -74,7 +89,8 @@ export default class Params {
         throw new Error(`Params.for was expecting a top-level array. got ${typeof params}`)
 
       return params.map(param =>
-        this.for(param as object, dreamClass, { ...forOpts, array: undefined }),
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        this.for(param as object, dreamClass, { ...forOpts, array: undefined } as any),
       ) as unknown as ReturnPayload
     }
 
@@ -86,11 +102,7 @@ export default class Params {
 
     const returnObj: Partial<DreamAttributes<InstanceType<T>>> = {}
     const errors: { [key: string]: string[] } = {}
-    const paramSafeColumns: (keyof ReturnPartialType)[] = only
-      ? ((dreamClass.paramSafeColumnsOrFallback() as string[]).filter(column =>
-          only.includes(column as (typeof only)[number]),
-        ) as unknown as (keyof ReturnPartialType)[])
-      : (dreamClass.paramSafeColumnsOrFallback() as string[] as (keyof ReturnPartialType)[])
+    const paramSafeColumns = paramNamesForDreamClass(dreamClass, forOpts)
 
     for (const columnName of paramSafeColumns) {
       if (params[columnName as keyof typeof params] === undefined) continue
@@ -584,9 +596,14 @@ export type ParamsCastOptions<EnumType> = {
   enum?: EnumType
 }
 
-export interface ParamsForOpts<OnlyArray> {
+export interface ParamsForOpts<OnlyArray, IncludingArray>
+  extends ParamExclusionOptions<OnlyArray, IncludingArray> {
   array?: boolean
+}
+
+export interface ParamExclusionOptions<OnlyArray, IncludingArray> {
   only?: OnlyArray
+  including?: IncludingArray
 }
 
 const typeToErrorMap: Record<(typeof PsychicParamsPrimitiveLiterals)[number], string> = {
