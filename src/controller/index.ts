@@ -11,6 +11,7 @@ import {
   SimpleObjectSerializerType,
   UpdateableProperties,
   ViewModel,
+  DreamParamSafeColumnNames,
 } from '@rvoh/dream'
 import { Request, Response } from 'express'
 import { ControllerHook } from '../controller/hooks.js'
@@ -50,7 +51,6 @@ import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
 import PsychicApp from '../psychic-app/index.js'
 import Params, {
   ParamsCastOptions,
-  ParamsForDreamClass,
   ParamsForOpts,
   ValidatedAllowsNull,
   ValidatedReturnType,
@@ -337,11 +337,42 @@ export default class PsychicController {
     I extends InstanceType<T>,
     const OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
     const IncludingArray extends Exclude<keyof UpdateableProperties<I>, OnlyArray[number]>[],
-    ReturnPayload = ParamsForDreamClass<T, OnlyArray, IncludingArray>,
-    ForOpts extends ParamsForOpts<OnlyArray, IncludingArray> & { key?: string } = ParamsForOpts<
-      OnlyArray,
-      IncludingArray
-    > & { key?: string },
+    ForOpts extends ParamsForOpts<OnlyArray, IncludingArray> & { key?: string },
+    ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
+      ? undefined
+      : I['paramSafeColumns' & keyof I] & string[],
+    ParamSafeColumns extends ParamSafeColumnsOverride extends string[] | Readonly<string[]>
+      ? Extract<
+          DreamParamSafeColumnNames<I>,
+          ParamSafeColumnsOverride[number] & DreamParamSafeColumnNames<I>
+        >[]
+      : DreamParamSafeColumnNames<I>[],
+    ParamSafeAttrs extends DreamParamSafeAttributes<InstanceType<T>>,
+    ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
+      InstanceType<T>
+    >)[]
+      ? Partial<{
+          [K in ForOpts['only'][number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
+        }>
+      : Partial<{
+          [K in ParamSafeColumns[number & keyof ParamSafeColumns] & string]: DreamParamSafeAttributes<
+            InstanceType<T>
+          >[K & keyof DreamParamSafeAttributes<InstanceType<T>>]
+        }>,
+    ReturnPartialTypeWithIncluding extends ForOpts['including'] extends readonly (keyof UpdateableProperties<
+      InstanceType<T>
+    >)[]
+      ? ReturnPartialType &
+          Partial<{
+            [K in Extract<
+              keyof UpdateableProperties<InstanceType<T>>,
+              ForOpts['including'][number & keyof ForOpts['including']]
+            >]: UpdateableProperties<InstanceType<T>>[K]
+          }>
+      : ReturnPartialType,
+    ReturnPayload extends ForOpts['array'] extends true
+      ? ReturnPartialTypeWithIncluding[]
+      : ReturnPartialTypeWithIncluding,
   >(this: PsychicController, dreamClass: T, opts?: ForOpts): ReturnPayload {
     return Params.for(
       opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params,

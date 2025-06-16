@@ -824,7 +824,7 @@ describe('OpenapiEndpointRenderer', () => {
             context('requestBody leverages for opt with virtual attributes', () => {
               it('includes virtual attributes in the request body', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
-                  requestBody: { for: User, including: ['openapiVirtualSpecTest'] },
+                  requestBody: { for: User, only: ['openapiVirtualSpecTest'] },
                 })
 
                 const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
@@ -833,9 +833,9 @@ describe('OpenapiEndpointRenderer', () => {
                     'application/json': {
                       schema: {
                         type: 'object',
-                        properties: expect.objectContaining({
+                        properties: {
                           openapiVirtualSpecTest: { type: ['string', 'null'] },
-                        }),
+                        },
                       },
                     },
                   },

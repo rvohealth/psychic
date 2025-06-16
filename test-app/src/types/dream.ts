@@ -80,6 +80,7 @@ export const schema = {
       default: ['dream:STI'],
       named: [],
     },
+    nonJsonColumnNames: ['color', 'createdAt', 'id', 'updatedAt', 'userId'],
     columns: {
       color: {
         coercedType: {} as BalloonColorsEnum | null,
@@ -148,6 +149,7 @@ export const schema = {
       default: [],
       named: [],
     },
+    nonJsonColumnNames: ['body', 'createdAt', 'id', 'postId', 'updatedAt'],
     columns: {
       body: {
         coercedType: {} as string | null,
@@ -216,6 +218,7 @@ export const schema = {
       default: [],
       named: [],
     },
+    nonJsonColumnNames: ['createdAt', 'email', 'id', 'name', 'passwordDigest', 'updatedAt'],
     columns: {
       createdAt: {
         coercedType: {} as DateTime,
@@ -287,6 +290,7 @@ export const schema = {
       default: [],
       named: [],
     },
+    nonJsonColumnNames: ['collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'favoriteTreats', 'id', 'lastHeardAt', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nonNullFavoriteTreats', 'nonNullSpecies', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredCollarCountNumeric', 'species', 'updatedAt', 'userId'],
     columns: {
       collarCount: {
         coercedType: {} as IdType | null,
@@ -481,6 +485,7 @@ export const schema = {
       default: [],
       named: [],
     },
+    nonJsonColumnNames: ['body', 'createdAt', 'explicitlyOmittedFromParamSafeColumns', 'id', 'updatedAt', 'userId'],
     columns: {
       body: {
         coercedType: {} as string | null,
@@ -572,6 +577,7 @@ export const schema = {
       default: [],
       named: [],
     },
+    nonJsonColumnNames: ['aDatetime', 'bio', 'birthdate', 'collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'createdOn', 'email', 'favoriteBigint', 'favoriteBigints', 'favoriteBooleans', 'favoriteCitext', 'favoriteCitexts', 'favoriteDates', 'favoriteDatetimes', 'favoriteIntegers', 'favoriteNumerics', 'favoriteTexts', 'favoriteTreats', 'favoriteUuids', 'id', 'likesTreats', 'likesWalks', 'name', 'nicknames', 'notes', 'optionalUuid', 'passwordDigest', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredFavoriteBigint', 'requiredFavoriteBigints', 'requiredFavoriteBooleans', 'requiredFavoriteCitext', 'requiredFavoriteCitexts', 'requiredFavoriteDates', 'requiredFavoriteDatetimes', 'requiredFavoriteIntegers', 'requiredFavoriteNumerics', 'requiredFavoriteTexts', 'requiredFavoriteUuids', 'requiredNicknames', 'species', 'updatedAt', 'uuid', 'volume'],
     columns: {
       aDatetime: {
         coercedType: {} as DateTime | null,
