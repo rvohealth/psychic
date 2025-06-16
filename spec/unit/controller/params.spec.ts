@@ -164,6 +164,23 @@ describe('PsychicController', () => {
       expect(controller.paramsFor(User)).toEqual({ name: 'howyadoin' })
     })
 
+    context('with virtual attributes', () => {
+      it('returns filtered params', () => {
+        const req = getMockReq({
+          body: {
+            password: 'howyadoin',
+          },
+        }) as unknown as Request
+        const res = getMockRes().res as unknown as Response
+        const controller = new PsychicController(req, res, {
+          config: new PsychicApp(),
+          action: 'hello',
+        })
+
+        expect(controller.paramsFor(User, { including: ['password'] })).toEqual({ password: 'howyadoin' })
+      })
+    })
+
     context('leading and trailing whitespace is filtered from strings', () => {
       it('returns filtered params', () => {
         const req = getMockReq({

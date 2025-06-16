@@ -1,6 +1,5 @@
 import {
   Dream,
-  DreamAttributes,
   DreamModelSerializerType,
   DreamParamSafeAttributes,
   DreamSerializerBuilder,
@@ -10,6 +9,7 @@ import {
   ObjectSerializerBuilder,
   SerializerRendererOpts,
   SimpleObjectSerializerType,
+  UpdateableProperties,
   ViewModel,
 } from '@rvoh/dream'
 import { Request, Response } from 'express'
@@ -336,7 +336,7 @@ export default class PsychicController {
     T extends typeof Dream,
     I extends InstanceType<T>,
     const OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
-    const IncludingArray extends Exclude<keyof DreamAttributes<I>, OnlyArray[number]>[],
+    const IncludingArray extends Exclude<keyof UpdateableProperties<I>, OnlyArray[number]>[],
     ReturnPayload = ParamsForDreamClass<T, OnlyArray, IncludingArray>,
     ForOpts extends ParamsForOpts<OnlyArray, IncludingArray> & { key?: string } = ParamsForOpts<
       OnlyArray,

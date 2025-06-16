@@ -88,6 +88,7 @@ export default class User extends ApplicationModel {
   @deco.Validates('presence')
   public email: DreamColumn<User, 'email'>
 
+  // intentionally not using type: 'string' here
   @deco.Virtual()
   public password: string | null | undefined
   public passwordDigest: string

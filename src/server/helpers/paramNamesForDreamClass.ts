@@ -49,8 +49,14 @@ export default function paramNamesForDreamClass<
   if (Array.isArray(including)) {
     paramSafeColumns = [
       ...(paramSafeColumns as string[]),
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-      ...[...dreamClass.columns()].filter(columnName => including.includes(columnName as any)),
+
+      // TODO: add a method to dream which can extrapolate
+      // all of these fields from the model
+      ...[
+        ...dreamClass.columns(),
+        ...dreamClass['virtualAttributes'].map(statement => statement.property),
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+      ].filter(columnName => including.includes(columnName as any)),
     ] as RetArray
   }
 
