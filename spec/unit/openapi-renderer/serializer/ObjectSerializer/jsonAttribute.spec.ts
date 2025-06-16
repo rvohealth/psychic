@@ -16,36 +16,36 @@ describe('ObjectSerializer json attributes', () => {
   context('all Dream column types', () => {
     const MySerializer = (data: User) =>
       ObjectSerializer(data)
-        .jsonAttribute('favoriteJsons', {
+        .attribute('favoriteJsons', {
           openapi: {
             type: ['array', 'null'],
             items: { type: 'object', properties: { hello: 'string' } },
           },
         })
-        .jsonAttribute('requiredFavoriteJsons', {
+        .attribute('requiredFavoriteJsons', {
           openapi: {
             type: 'array',
             items: { type: 'object', properties: { hello: 'string' } },
           },
         })
-        .jsonAttribute('favoriteJsonbs', {
+        .attribute('favoriteJsonbs', {
           openapi: {
             type: ['array', 'null'],
             items: { type: 'object', properties: { hello: 'string' } },
           },
         })
-        .jsonAttribute('requiredFavoriteJsonbs', {
+        .attribute('requiredFavoriteJsonbs', {
           openapi: {
             type: 'array',
             items: { type: 'object', properties: { hello: 'string' } },
           },
         })
-        .jsonAttribute('jsonData', { openapi: { type: ['object', 'null'], properties: { hello: 'string' } } })
-        .jsonAttribute('requiredJsonData', { openapi: { type: 'object', properties: { hello: 'string' } } })
-        .jsonAttribute('jsonbData', {
+        .attribute('jsonData', { openapi: { type: ['object', 'null'], properties: { hello: 'string' } } })
+        .attribute('requiredJsonData', { openapi: { type: 'object', properties: { hello: 'string' } } })
+        .attribute('jsonbData', {
           openapi: { type: ['object', 'null'], properties: { hello: 'string' } },
         })
-        .jsonAttribute('requiredJsonbData', { openapi: { type: 'object', properties: { hello: 'string' } } })
+        .attribute('requiredJsonbData', { openapi: { type: 'object', properties: { hello: 'string' } } })
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     let serializer: ObjectSerializerBuilder<any, any>
 

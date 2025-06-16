@@ -15,6 +15,7 @@ spec/tmp/controllers/*
 !spec/tmp/controllers/.keep
 .vim/*
 dist
+typetrace/*
 
 .pnp.*
 .yarn/*

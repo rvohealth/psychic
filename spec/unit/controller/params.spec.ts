@@ -165,7 +165,7 @@ describe('PsychicController', () => {
     })
 
     context('with virtual attributes', () => {
-      it('returns filtered params', () => {
+      it('permits virtual attributes in only option', () => {
         const req = getMockReq({
           body: {
             password: 'howyadoin',
@@ -177,7 +177,7 @@ describe('PsychicController', () => {
           action: 'hello',
         })
 
-        expect(controller.paramsFor(User, { including: ['password'] })).toEqual({ password: 'howyadoin' })
+        expect(controller.paramsFor(User, { only: ['password'] })).toEqual({ password: 'howyadoin' })
       })
     })
 

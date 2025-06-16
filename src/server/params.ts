@@ -8,6 +8,7 @@ import {
   DreamParamSafeAttributes,
   DreamParamSafeColumnNames,
   snakeify,
+  UpdateableProperties,
 } from '@rvoh/dream'
 import {
   PsychicParamsDictionary,
@@ -43,7 +44,41 @@ export default class Params {
     const OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
     const IncludingArray extends Exclude<keyof DreamAttributes<I>, OnlyArray[number]>[],
     ForOpts extends ParamsForOpts<OnlyArray, IncludingArray>,
-    ReturnPayload extends ParamsForDreamClass<T, OnlyArray, IncludingArray, I>,
+    ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
+      ? undefined
+      : I['paramSafeColumns' & keyof I] & string[],
+    ParamSafeColumns extends ParamSafeColumnsOverride extends string[] | Readonly<string[]>
+      ? Extract<
+          DreamParamSafeColumnNames<I>,
+          ParamSafeColumnsOverride[number] & DreamParamSafeColumnNames<I>
+        >[]
+      : DreamParamSafeColumnNames<I>[],
+    ParamSafeAttrs extends DreamParamSafeAttributes<InstanceType<T>>,
+    ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
+      InstanceType<T>
+    >)[]
+      ? Partial<{
+          [K in ForOpts['only'][number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
+        }>
+      : Partial<{
+          [K in ParamSafeColumns[number & keyof ParamSafeColumns] &
+            string &
+            keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
+        }>,
+    ReturnPartialTypeWithIncluding extends ForOpts['including'] extends readonly (keyof UpdateableProperties<
+      InstanceType<T>
+    >)[]
+      ? ReturnPartialType &
+          Partial<{
+            [K in Extract<
+              keyof UpdateableProperties<InstanceType<T>>,
+              ForOpts['including'][number & keyof ForOpts['including']]
+            >]: UpdateableProperties<InstanceType<T>>[K]
+          }>
+      : ReturnPartialType,
+    ReturnPayload extends ForOpts['array'] extends true
+      ? ReturnPartialTypeWithIncluding[]
+      : ReturnPartialTypeWithIncluding,
   >(params: object, dreamClass: T, forOpts: ForOpts = {} as ForOpts): ReturnPayload {
     const { array = false } = forOpts
 
@@ -569,73 +604,6 @@ export interface ParamExclusionOptions<OnlyArray, IncludingArray> {
   only?: OnlyArray
   including?: IncludingArray
 }
-
-export type ParamsForDreamClass<
-  T extends typeof Dream,
-  OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
-  IncludingArray extends Exclude<keyof DreamAttributes<I>, OnlyArray[number]>[],
-  I extends InstanceType<T> = InstanceType<T>,
-  ForOpts extends ParamsForOpts<OnlyArray, IncludingArray> = ParamsForOpts<OnlyArray, IncludingArray>,
-  ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
-    ? undefined
-    : I['paramSafeColumns' & keyof I] & string[] = I['paramSafeColumns' & keyof I] extends never
-    ? undefined
-    : I['paramSafeColumns' & keyof I] & string[],
-  ParamSafeColumns extends ParamSafeColumnsOverride extends string[] | Readonly<string[]>
-    ? Extract<DreamParamSafeColumnNames<I>, ParamSafeColumnsOverride[number] & DreamParamSafeColumnNames<I>>[]
-    : DreamParamSafeColumnNames<I>[] = ParamSafeColumnsOverride extends string[] | Readonly<string[]>
-    ? Extract<DreamParamSafeColumnNames<I>, ParamSafeColumnsOverride[number] & DreamParamSafeColumnNames<I>>[]
-    : DreamParamSafeColumnNames<I>[],
-  ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
-    InstanceType<T>
-  >)[]
-    ? Partial<{
-        [K in Extract<
-          ParamSafeColumns[number],
-          ForOpts['only'][number & keyof ForOpts['only']]
-        >]: DreamParamSafeAttributes<InstanceType<T>>[K]
-      }>
-    : Partial<{
-        [K in ParamSafeColumns[number & keyof ParamSafeColumns] & string]: DreamParamSafeAttributes<
-          InstanceType<T>
-        >[K & keyof DreamParamSafeAttributes<InstanceType<T>>]
-      }> = ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<InstanceType<T>>)[]
-    ? Partial<{
-        [K in Extract<
-          ParamSafeColumns[number],
-          ForOpts['only'][number & keyof ForOpts['only']]
-        >]: DreamParamSafeAttributes<InstanceType<T>>[K]
-      }>
-    : Partial<{
-        [K in ParamSafeColumns[number & keyof ParamSafeColumns] & string]: DreamParamSafeAttributes<
-          InstanceType<T>
-        >[K & keyof DreamParamSafeAttributes<InstanceType<T>>]
-      }>,
-  ReturnPartialTypeWithIncluding extends ForOpts['including'] extends readonly (keyof DreamAttributes<
-    InstanceType<T>
-  >)[]
-    ? ReturnPartialType &
-        Partial<{
-          [K in Extract<
-            keyof DreamAttributes<InstanceType<T>>,
-            ForOpts['including'][number & keyof ForOpts['including']]
-          >]: DreamAttributes<InstanceType<T>>[K]
-        }>
-    : ReturnPartialType = ForOpts['including'] extends readonly (keyof DreamAttributes<InstanceType<T>>)[]
-    ? ReturnPartialType &
-        Partial<{
-          [K in Extract<
-            keyof DreamAttributes<InstanceType<T>>,
-            ForOpts['including'][number & keyof ForOpts['including']]
-          >]: DreamAttributes<InstanceType<T>>[K]
-        }>
-    : ReturnPartialType,
-  ReturnPayload extends ForOpts['array'] extends true
-    ? ReturnPartialTypeWithIncluding[]
-    : ReturnPartialTypeWithIncluding = ForOpts['array'] extends true
-    ? ReturnPartialTypeWithIncluding[]
-    : ReturnPartialTypeWithIncluding,
-> = ReturnPayload
 
 const typeToErrorMap: Record<(typeof PsychicParamsPrimitiveLiterals)[number], string> = {
   bigint: 'expected bigint',
