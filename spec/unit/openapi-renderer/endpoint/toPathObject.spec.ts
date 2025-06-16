@@ -820,6 +820,28 @@ describe('OpenapiEndpointRenderer', () => {
                 },
               })
             })
+
+            context('requestBody leverages for opt with virtual attributes', () => {
+              it('includes virtual attributes in the request body', () => {
+                const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
+                  requestBody: { for: User, including: ['openapiVirtualSpecTest'] },
+                })
+
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                expect(response['/api/pets']!.post.requestBody).toEqual({
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: expect.objectContaining({
+                          openapiVirtualSpecTest: { type: ['string', 'null'] },
+                        }),
+                      },
+                    },
+                  },
+                })
+              })
+            })
           })
         })
       })

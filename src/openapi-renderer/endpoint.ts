@@ -19,6 +19,7 @@ import {
   OpenapiSchemaProperties,
   SerializerCasing,
   SimpleObjectSerializerType,
+  UpdateableProperties,
   ViewModelClass,
   cloneDeepSafe,
   compact,
@@ -1384,7 +1385,7 @@ export interface OpenapiSchemaRequestBodyForDreamClass<ForOption extends typeof 
    * ```
    */
   including?: Exclude<
-    keyof DreamAttributes<InstanceType<ForOption>>,
+    keyof UpdateableProperties<InstanceType<ForOption>>,
     keyof DreamParamSafeAttributes<InstanceType<ForOption>>
   >[]
 
@@ -1412,7 +1413,7 @@ export interface OpenapiSchemaRequestBodyForDreamClass<ForOption extends typeof 
    * }
    * ```
    */
-  required?: (keyof DreamAttributes<InstanceType<ForOption>>)[]
+  required?: (keyof UpdateableProperties<InstanceType<ForOption>>)[]
 }
 
 export interface OpenapiSchemaRequestBodyForBaseDreamClass<
