@@ -1,5 +1,6 @@
 import { PsychicOpenapiNames } from '../../../../src/controller/index.js'
 import { OpenAPI } from '../../../../src/index.js'
+import Pet from '../models/Pet.js'
 import {
   Comment1OnlyUsedInOneControllerSerializer,
   Comment2OnlyUsedInOneControllerSerializer,
@@ -9,6 +10,17 @@ import ApplicationController from './ApplicationController.js'
 export default class OpenapiDecoratorTestController extends ApplicationController {
   public static override get openapiNames(): PsychicOpenapiNames<ApplicationController> {
     return ['mobile', 'admin']
+  }
+
+  @OpenAPI({
+    status: 200,
+    requestBody: {
+      for: Pet,
+      only: ['collarCount'],
+    },
+  })
+  public testRequestBodyForType() {
+    this.ok()
   }
 
   @OpenAPI({

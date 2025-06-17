@@ -155,6 +155,51 @@
           }
         }
       }
+    },
+    "/openapi/request-body-for-type": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-admin-header",
+          "required": true,
+          "description": "custom admin header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomAdminResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {

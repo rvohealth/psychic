@@ -1,4 +1,4 @@
-import { DecoratorContext, DreamSerializable, DreamSerializableArray } from '@rvoh/dream'
+import { DecoratorContext, Dream, DreamSerializable, DreamSerializableArray } from '@rvoh/dream'
 import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint.js'
 import isSerializable from './helpers/isSerializable.js'
 import { ControllerHook } from './hooks.js'
@@ -31,13 +31,19 @@ export function BeforeAction(
   }
 }
 
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+export function OpenAPI(): any
+
+export function OpenAPI<const ForOption extends typeof Dream>(
+  opts: OpenapiEndpointRendererOpts<undefined, ForOption>,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+): any
+
 export function OpenAPI<
   const I extends DreamSerializable | DreamSerializableArray,
+  const ForOption extends typeof Dream,
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
->(modelOrSerializer: I, opts?: OpenapiEndpointRendererOpts<I>): any
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function OpenAPI(modelOrSerializer?: OpenapiEndpointRendererOpts): any
+>(modelOrSerializer: I, opts?: OpenapiEndpointRendererOpts<I, ForOption>): any
 
 /**
  * Used to annotate your controller method in a way that enables

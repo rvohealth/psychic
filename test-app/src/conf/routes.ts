@@ -41,6 +41,7 @@ export default (r: PsychicRouter) => {
   r.get('users/howyadoin', UsersController, 'howyadoin')
   r.post('users/post-howyadoin', UsersController, 'postHowyadoin')
   r.get('openapi/multiple-openapi-names', OpenapiDecoratorTestController, 'testMultipleOpenapiNames')
+  r.get('openapi/request-body-for-type', OpenapiDecoratorTestController, 'testRequestBodyForType')
   r.get('openapi/multiple-serializer-statements', OpenapiDecoratorTestController, 'testMultipleSerializers')
   r.get('openapi/openapi-overrides', OpenapiOverridesTestController, 'testOpenapiConfigOverrides')
 

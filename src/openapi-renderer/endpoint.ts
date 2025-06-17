@@ -78,9 +78,12 @@ export default class OpenapiEndpointRenderer<
   private many: OpenapiEndpointRendererOpts['many']
   private paginate: OpenapiEndpointRendererOpts['paginate']
   private responses: OpenapiEndpointRendererOpts['responses']
-  private serializerKey: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['serializerKey']
+  private serializerKey: OpenapiEndpointRendererOpts<
+    DreamsOrSerializersOrViewModels,
+    ForOption
+  >['serializerKey']
   private pathParams: OpenapiEndpointRendererOpts['pathParams']
-  private requestBody: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels>['requestBody']
+  private requestBody: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels, ForOption>['requestBody']
   private headers: OpenapiEndpointRendererOpts['headers']
   private query: OpenapiEndpointRendererOpts['query']
   private status: OpenapiEndpointRendererOpts['status']
@@ -1310,8 +1313,10 @@ export interface OpenapiEndpointRendererDefaultResponseOption {
 
 export type OpenapiSchemaRequestBodyForOption<
   Serializable extends DreamSerializable | DreamSerializableArray | undefined,
-  ForOption extends typeof Dream = typeof Dream,
-> = OpenapiSchemaRequestBodyForDreamClass<ForOption> | OpenapiSchemaRequestBodyForBaseDreamClass<Serializable>
+  ForOption extends typeof Dream | undefined = undefined,
+> =
+  | OpenapiSchemaRequestBodyForDreamClass<ForOption extends typeof Dream ? ForOption : typeof Dream>
+  | OpenapiSchemaRequestBodyForBaseDreamClass<Serializable>
 
 export interface OpenapiSchemaRequestBodyForDreamClass<ForOption extends typeof Dream> {
   /**
