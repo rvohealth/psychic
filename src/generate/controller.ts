@@ -35,6 +35,7 @@ export default async function generateController({
 
   const allControllerNameParts = fullyQualifiedControllerName.split('/')
   const isAdmin = allControllerNameParts[0] === 'Admin'
+
   const controllerNameParts: string[] = isAdmin ? [allControllerNameParts.shift()!] : []
 
   for (let index = 0; index < allControllerNameParts.length; index++) {

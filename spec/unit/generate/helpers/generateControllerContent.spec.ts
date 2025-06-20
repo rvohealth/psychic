@@ -233,5 +233,103 @@ export default class ApiV1UsersController extends AuthedController {
         )
       })
     })
+
+    context('specifying an owning model', () => {
+      it('loads/creates/updates/deletes resources from the owning model', () => {
+        const res = generateControllerContent({
+          ancestorImportStatement: "import AuthedController from './AuthedController.js'",
+          ancestorName: 'AuthedController',
+          fullyQualifiedControllerName: 'PostsController',
+          fullyQualifiedModelName: 'Post',
+          actions: ['create', 'index', 'show', 'update', 'destroy', 'preview'],
+          owningModel: 'AdminUser',
+        })
+
+        expect(res).toEqual(
+          `\
+import { OpenAPI } from '@rvoh/psychic'
+import AuthedController from './AuthedController.js'
+import Post from '../models/Post.js'
+
+const openApiTags = ['posts']
+
+export default class PostsController extends AuthedController {
+  @OpenAPI(Post, {
+    status: 201,
+    tags: openApiTags,
+    description: 'Create a Post',
+  })
+  public async create() {
+    // let post = await this.currentAdminUser.createAssociation('posts', this.paramsFor(Post))
+    // if (post.isPersisted) post = post.loadForSerialization()
+    // this.created(post)
+  }
+
+  @OpenAPI(Post, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch multiple Posts',
+    many: true,
+    serializerKey: 'summary',
+  })
+  public async index() {
+    // const posts = await this.currentAdminUser.associationQuery('posts')
+    //   .preloadForSerialization({ serializerKey: 'summary' })
+    //   .all()
+    // this.ok(posts)
+  }
+
+  @OpenAPI(Post, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a Post',
+  })
+  public async show() {
+    // const post = await this.post()
+    // this.ok(post)
+  }
+
+  @OpenAPI(Post, {
+    status: 204,
+    tags: openApiTags,
+    description: 'Update a Post',
+  })
+  public async update() {
+    // const post = await this.post()
+    // await post.update(this.paramsFor(Post))
+    // this.noContent()
+  }
+
+  @OpenAPI({
+    status: 204,
+    tags: openApiTags,
+    description: 'Destroy a Post',
+  })
+  public async destroy() {
+    // const post = await this.post()
+    // await post.destroy()
+    // this.noContent()
+  }
+
+  @OpenAPI(Post, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a Post',
+  })
+  public async preview() {
+    // const post = await this.post()
+    // this.ok(post)
+  }
+
+  private async post() {
+    // return await this.currentAdminUser.associationQuery('posts')
+    //   .preloadForSerialization()
+    //   .findOrFail(this.castParam('id', 'string'))
+  }
+}
+`,
+        )
+      })
+    })
   })
 })
