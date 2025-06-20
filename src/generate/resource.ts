@@ -14,16 +14,24 @@ export default async function generateResource({
   options: { stiBaseSerializer: boolean; owningModel?: string }
   columnsWithTypes: string[]
 }) {
+  const fullyQualifiedControllerName = standardizeFullyQualifiedModelName(route)
+
+  const forAdmin = /^Admin\//.test(fullyQualifiedControllerName)
+
   await generateDream({
     fullyQualifiedModelName,
     columnsWithTypes,
-    options: { serializer: true, stiBaseSerializer: options.stiBaseSerializer },
+    options: {
+      serializer: true,
+      stiBaseSerializer: options.stiBaseSerializer,
+      includeAdminSerializers: forAdmin,
+    },
   })
 
   route = pluralize(route)
 
   await generateController({
-    fullyQualifiedControllerName: standardizeFullyQualifiedModelName(route),
+    fullyQualifiedControllerName,
     fullyQualifiedModelName,
     actions: ['create', 'index', 'show', 'update', 'destroy'],
     columnsWithTypes,

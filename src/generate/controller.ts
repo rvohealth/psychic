@@ -2,7 +2,6 @@ import { hyphenize, standardizeFullyQualifiedModelName } from '@rvoh/dream'
 import { existsSync } from 'node:fs'
 import * as fs from 'node:fs/promises'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
-import EnvInternal from '../helpers/EnvInternal.js'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths.js'
 import psychicPath from '../helpers/path/psychicPath.js'
 import generateControllerContent from './helpers/generateControllerContent.js'
@@ -31,18 +30,20 @@ export default async function generateController({
   fullyQualifiedControllerName = standardizeFullyQualifiedModelName(
     `${fullyQualifiedControllerName.replace(/Controller$/, '')}Controller`,
   )
+
   const route = hyphenize(fullyQualifiedControllerName.replace(/Controller$/, ''))
 
   const allControllerNameParts = fullyQualifiedControllerName.split('/')
-  const isAdmin = allControllerNameParts[0] === 'Admin'
-  const controllerNameParts: string[] = isAdmin ? [allControllerNameParts.shift()!] : []
+  const forAdmin = allControllerNameParts[0] === 'Admin'
+
+  const controllerNameParts: string[] = forAdmin ? [allControllerNameParts.shift()!] : []
 
   for (let index = 0; index < allControllerNameParts.length; index++) {
-    if (controllerNameParts.length > (isAdmin ? 1 : 0)) {
+    if (controllerNameParts.length > (forAdmin ? 1 : 0)) {
       // Write the ancestor controller
       const [baseAncestorName, baseAncestorImportStatement] = baseAncestorNameAndImport(
         controllerNameParts,
-        isAdmin,
+        forAdmin,
         { forBaseController: true },
       )
 
@@ -65,6 +66,7 @@ export default async function generateController({
             ancestorName: baseAncestorName,
             fullyQualifiedControllerName: baseControllerName,
             omitOpenApi: true,
+            forAdmin,
           }),
         )
       }
@@ -75,7 +77,7 @@ export default async function generateController({
   }
 
   // Write the controller
-  const [ancestorName, ancestorImportStatement] = baseAncestorNameAndImport(controllerNameParts, isAdmin, {
+  const [ancestorName, ancestorImportStatement] = baseAncestorNameAndImport(controllerNameParts, forAdmin, {
     forBaseController: false,
   })
 
@@ -89,7 +91,7 @@ export default async function generateController({
   await fs.mkdir(absDirPath, { recursive: true })
 
   try {
-    if (!EnvInternal.isTest) console.log(`generating controller: ${relFilePath}`)
+    console.log(`generating controller: ${relFilePath}`)
 
     await fs.writeFile(
       absFilePath,
@@ -100,6 +102,7 @@ export default async function generateController({
         fullyQualifiedModelName,
         actions,
         owningModel,
+        forAdmin,
       }),
     )
   } catch (error) {
@@ -119,18 +122,19 @@ export default async function generateController({
     columnsWithTypes,
     resourceSpecs,
     owningModel,
+    forAdmin,
   })
 }
 
 function baseAncestorNameAndImport(
   controllerNameParts: string[],
-  isAdmin: boolean,
+  forAdmin: boolean,
   { forBaseController }: { forBaseController: boolean },
 ) {
   const maybeAncestorNameForBase = `${controllerNameParts.slice(0, controllerNameParts.length - 1).join('')}BaseController`
   const dotFiles = forBaseController ? '..' : '.'
-  return controllerNameParts.length === (isAdmin ? 2 : 1)
-    ? isAdmin
+  return controllerNameParts.length === (forAdmin ? 2 : 1)
+    ? forAdmin
       ? [`AdminAuthedController`, `import AdminAuthedController from '${dotFiles}/AuthedController.js'`]
       : [`AuthedController`, `import AuthedController from '${dotFiles}/AuthedController.js'`]
     : [maybeAncestorNameForBase, `import ${maybeAncestorNameForBase} from '${dotFiles}/BaseController.js'`]
@@ -143,6 +147,7 @@ async function generateControllerSpec({
   columnsWithTypes,
   resourceSpecs,
   owningModel,
+  forAdmin,
 }: {
   fullyQualifiedControllerName: string
   route: string
@@ -150,6 +155,7 @@ async function generateControllerSpec({
   columnsWithTypes: string[]
   resourceSpecs: boolean
   owningModel: string | undefined
+  forAdmin: boolean
 }) {
   const { relFilePath, absDirPath, absFilePath } = psychicFileAndDirPaths(
     psychicPath('controllerSpecs'),
@@ -157,7 +163,7 @@ async function generateControllerSpec({
   )
 
   try {
-    if (!EnvInternal.isTest) console.log(`generating controller: ${relFilePath}`)
+    console.log(`generating controller spec: ${relFilePath}`)
     await fs.mkdir(absDirPath, { recursive: true })
     await fs.writeFile(
       absFilePath,
@@ -168,6 +174,7 @@ async function generateControllerSpec({
             fullyQualifiedModelName,
             columnsWithTypes,
             owningModel,
+            forAdmin,
           })
         : generateControllerSpecContent(fullyQualifiedControllerName), //, route, fullyQualifiedModelName, actions),
     )

@@ -15,6 +15,7 @@ export default function generateControllerContent({
   actions = [],
   omitOpenApi = false,
   owningModel,
+  forAdmin,
 }: {
   ancestorName: string
   ancestorImportStatement: string
@@ -23,6 +24,7 @@ export default function generateControllerContent({
   actions?: string[] | undefined
   omitOpenApi?: boolean | undefined
   owningModel?: string | undefined
+  forAdmin: boolean
 }) {
   fullyQualifiedControllerName = standardizeFullyQualifiedModelName(fullyQualifiedControllerName)
 
@@ -46,6 +48,15 @@ export default function generateControllerContent({
     additionalImports.push(importStatementForModel(fullyQualifiedControllerName, fullyQualifiedModelName))
   }
 
+  const defaultOpenapiSerializerKeyProperty = forAdmin
+    ? `
+    serializerKey: 'admin',`
+    : ''
+
+  const loadQueryBase: string = forAdmin
+    ? (modelClassName ?? 'no-class-name')
+    : `this.${owningModelProperty}.associationQuery('${pluralizedModelAttributeName}')`
+
   const methodDefs = actions.map(methodName => {
     switch (methodName) {
       case 'create':
@@ -54,11 +65,12 @@ export default function generateControllerContent({
   @OpenAPI(${modelClassName}, {
     status: 201,
     tags: openApiTags,
-    description: 'Create ${aOrAnDreamModelName(modelClassName!)}',
+    description: 'Create ${aOrAnDreamModelName(modelClassName!)}',${defaultOpenapiSerializerKeyProperty}
   })
   public async create() {
-    //    const ${modelAttributeName} = await this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', this.paramsFor(${modelClassName}))
-    //    this.created(${modelAttributeName})
+    // let ${modelAttributeName} = await ${forAdmin ? `${modelClassName}.create(` : `this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', `}this.paramsFor(${modelClassName}))
+    // if (${modelAttributeName}.isPersisted) ${modelAttributeName} = await ${modelAttributeName}.loadFor('${forAdmin ? 'admin' : 'default'}').execute()
+    // this.created(${modelAttributeName})
   }`
         else
           return `\
@@ -78,11 +90,13 @@ export default function generateControllerContent({
     tags: openApiTags,
     description: 'Fetch multiple ${pluralize(modelClassName!)}',
     many: true,
-    serializerKey: 'summary',
+    serializerKey: '${forAdmin ? 'adminSummary' : 'summary'}',
   })
   public async index() {
-    //    const ${pluralizedModelAttributeName} = await this.${owningModelProperty}.associationQuery('${pluralizedModelAttributeName}').all()
-    //    this.ok(${pluralizedModelAttributeName})
+    // const ${pluralizedModelAttributeName} = await ${loadQueryBase}
+    //   .preloadFor('${forAdmin ? 'adminSummary' : 'summary'}')
+    //   .all()
+    // this.ok(${pluralizedModelAttributeName})
   }`
         else
           return `\
@@ -91,7 +105,7 @@ export default function generateControllerContent({
   //   tags: openApiTags,
   //   description: '<tbd>',
   //   many: true,
-  //   serializerKey: 'summary',
+  //   serializerKey: '${forAdmin ? 'adminSummary' : 'summary'}',
   // })
   public async index() {
   }`
@@ -102,11 +116,11 @@ export default function generateControllerContent({
   @OpenAPI(${modelClassName}, {
     status: 200,
     tags: openApiTags,
-    description: 'Fetch ${aOrAnDreamModelName(modelClassName!)}',
+    description: 'Fetch ${aOrAnDreamModelName(modelClassName!)}',${defaultOpenapiSerializerKeyProperty}
   })
   public async show() {
-    //    const ${modelAttributeName} = await this.${modelAttributeName}()
-    //    this.ok(${modelAttributeName})
+    // const ${modelAttributeName} = await this.${modelAttributeName}()
+    // this.ok(${modelAttributeName})
   }`
         else
           return `\
@@ -127,9 +141,9 @@ export default function generateControllerContent({
     description: 'Update ${aOrAnDreamModelName(modelClassName!)}',
   })
   public async update() {
-    //    const ${modelAttributeName} = await this.${modelAttributeName}()
-    //    await ${modelAttributeName}.update(this.paramsFor(${modelClassName}))
-    //    this.noContent()
+    // const ${modelAttributeName} = await this.${modelAttributeName}()
+    // await ${modelAttributeName}.update(this.paramsFor(${modelClassName}))
+    // this.noContent()
   }`
         else
           return `\
@@ -150,9 +164,9 @@ export default function generateControllerContent({
     description: 'Destroy ${aOrAnDreamModelName(modelClassName!)}',
   })
   public async destroy() {
-    //    const ${modelAttributeName} = await this.${modelAttributeName}()
-    //    await ${modelAttributeName}.destroy()
-    //    this.noContent()
+    // const ${modelAttributeName} = await this.${modelAttributeName}()
+    // await ${modelAttributeName}.destroy()
+    // this.noContent()
   }`
         else
           return `\
@@ -173,8 +187,8 @@ export default function generateControllerContent({
     description: 'Fetch ${aOrAnDreamModelName(modelClassName!)}',
   })
   public async ${methodName}() {
-    //    const ${modelAttributeName} = await this.${modelAttributeName}()
-    //    this.ok(${modelAttributeName})
+    // const ${modelAttributeName} = await this.${modelAttributeName}()
+    // this.ok(${modelAttributeName})
   }`
         else
           return `\
@@ -196,25 +210,25 @@ export default function generateControllerContent({
 ${omitOpenApi ? '' : openApiImport + '\n'}${ancestorImportStatement}${additionalImports.length ? '\n' + additionalImports.join('\n') : ''}${omitOpenApi ? '' : '\n\n' + openApiTags}
 
 export default class ${controllerClassName} extends ${ancestorName} {
-${methodDefs.join('\n\n')}${modelClassName ? privateMethods(modelClassName, actions, owningModelProperty) : ''}
+${methodDefs.join('\n\n')}${modelClassName ? privateMethods(forAdmin, modelClassName, actions, loadQueryBase) : ''}
 }
 `
 }
 
-function privateMethods(modelClassName: string, methods: string[], owningModelProperty: string) {
+function privateMethods(forAdmin: boolean, modelClassName: string, methods: string[], loadQueryBase: string) {
   const privateMethods: string[] = []
   if (methods.find(methodName => ['show', 'update', 'destroy'].includes(methodName)))
-    privateMethods.push(loadModelStatement(modelClassName, owningModelProperty))
+    privateMethods.push(loadModelStatement(forAdmin, modelClassName, loadQueryBase))
 
   if (!privateMethods.length) return ''
   return `\n\n${privateMethods.join('\n\n')}`
 }
 
-function loadModelStatement(modelClassName: string, owningModelProperty: string) {
+function loadModelStatement(forAdmin: boolean, modelClassName: string, loadQueryBase: string) {
   return `  private async ${camelize(modelClassName)}() {
-    // return await this.${owningModelProperty}.associationQuery('${pluralize(camelize(modelClassName))}').findOrFail(
-    //   this.castParam('id', 'string')
-    // )
+    // return await ${loadQueryBase}
+    //   .preloadFor('${forAdmin ? 'admin' : 'default'}')
+    //   .findOrFail(this.castParam('id', 'string'))
   }`
 }
 

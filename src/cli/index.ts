@@ -7,6 +7,42 @@ import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import Watcher from '../watcher/Watcher.js'
 
+const INDENT = '                  '
+
+const columnsWithTypesDescription = `space separated snake-case (except for belongs_to model name) properties like this:
+${INDENT}    title:citext subtitle:string body_markdown:text style:enum:post_styles:formal,informal User:belongs_to
+${INDENT}
+${INDENT}all properties default to not nullable; null can be allowed by appending ':optional':
+${INDENT}    subtitle:string:optional
+${INDENT}
+${INDENT}supported types:
+${INDENT}    - citext:
+${INDENT}        case insensitive text (indexes and queries are automatically case insensitive)
+${INDENT}
+${INDENT}    - string:
+${INDENT}        varchar; allowed length defaults to 255, but may be customized, e.g.: subtitle:string:128 or subtitle:string:128:optional
+${INDENT}
+${INDENT}    - text
+${INDENT}
+${INDENT}    - integer
+${INDENT}
+${INDENT}    - decimal:
+${INDENT}        scale,precision is required, e.g.: volume:decimal:3,2 or volume:decimal:3,2:optional
+${INDENT}
+${INDENT}    - enum:
+${INDENT}        include the enum name to automatically create the enum:
+${INDENT}          type:enum:room_types:bathroom,kitchen,bedroom or type:enum:room_types:bathroom,kitchen,bedroom:optional
+${INDENT}
+${INDENT}        omit the enum values to leverage an existing enum (omits the enum type creation):
+${INDENT}          type:enum:room_types or type:enum:room_types:optional
+${INDENT}
+${INDENT}    - belongs_to:
+${INDENT}        Not only updates the migration but also adds a BelongsTo association to the generated model:
+${INDENT}          Place:belongs_to
+${INDENT}        
+${INDENT}        Include the full Path to the model. E.g., if the Coach model is in src/app/models/Health/Coach:
+${INDENT}          Health/Coach:belongs_to`
+
 export default class PsychicCLI {
   public static provide(
     program: Command,
@@ -36,17 +72,14 @@ export default class PsychicCLI {
       )
       .option(
         '--owning-model <modelName>',
-        'The model class of the object that `associationQuery`/`createAssociation` will be performed on in the created controller and spec (e.g., "Host", "Guest") (simply to save time making changes to the generated code). Defaults to User',
+        'the model class of the object that `associationQuery`/`createAssociation` will be performed on in the created controller and spec (e.g., "Host", "Guest") (simply to save time making changes to the generated code). Defaults to User',
       )
       .argument('<path>', 'URL path from root domain')
       .argument(
         '<modelName>',
         'the name of the model to create, e.g. Post or Settings/CommunicationPreferences',
       )
-      .argument(
-        '[columnsWithTypes...]',
-        'properties of the model property1:text/string/enum/etc. property2:text/string/enum/etc. ... propertyN:text/string/enum/etc.',
-      )
+      .argument('[columnsWithTypes...]', columnsWithTypesDescription)
       .action(
         async (
           route: string,

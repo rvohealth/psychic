@@ -887,22 +887,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvoh/dream-spec-helpers@npm:^0.2.4":
-  version: 0.2.4
-  resolution: "@rvoh/dream-spec-helpers@npm:0.2.4"
+"@rvoh/dream-spec-helpers@npm:^0.3.1":
+  version: 0.3.1
+  resolution: "@rvoh/dream-spec-helpers@npm:0.3.1"
   dependencies:
     lodash.sortby: "npm:^4.7.0"
   peerDependencies:
     "@types/node": "*"
     "@types/pg": "*"
     pg: "*"
-  checksum: 10c0/4e3e91f9a1c6a641d3b726afa48911d1825fac8b7548631e270096a88d44097237f3f2aca45b2f54a97dcb483c755449ef4a6ca88b781b876bc4e39774f2e264
+  checksum: 10c0/4fe731d0ca7c30a2b95c00c15c32228ae421302108709802cb636fef74fca6a18717b9300257fd2a477f887ea3e9a9b7a6b10c8aae164d75dd8b10676631ff8f
   languageName: node
   linkType: hard
 
-"@rvoh/dream@npm:^0.44.5":
-  version: 0.44.5
-  resolution: "@rvoh/dream@npm:0.44.5"
+"@rvoh/dream@npm:^0.45.2":
+  version: 0.45.2
+  resolution: "@rvoh/dream@npm:0.45.2"
   dependencies:
     colorette: "npm:^2.0.20"
     commander: "npm:^12.1.0"
@@ -917,13 +917,13 @@ __metadata:
     kysely: ^0.27.4
     kysely-codegen: ~0.17.0
     pg: "*"
-  checksum: 10c0/eaf1d7e3b6ccde9d39edb4cb4fcf3d55c1ba1ce4c25a373cafd67a8db72f8a3d90bf7f87b3e78712e4b4cb488e24350f12106379c16dc64a95e7e518649de3dd
+  checksum: 10c0/5dbe7523659b080c545d3bf689420cb6dbe454b2decfcac0b5fb65a7906daaf619ad017761ff19b644904668e2cba4c0ad5174f544525fa480a331aa76626df2
   languageName: node
   linkType: hard
 
-"@rvoh/psychic-spec-helpers@npm:^0.6.0":
-  version: 0.6.0
-  resolution: "@rvoh/psychic-spec-helpers@npm:0.6.0"
+"@rvoh/psychic-spec-helpers@npm:^0.7.5":
+  version: 0.7.5
+  resolution: "@rvoh/psychic-spec-helpers@npm:0.7.5"
   dependencies:
     cookiejar: "npm:^2.1.4"
   peerDependencies:
@@ -932,7 +932,7 @@ __metadata:
     puppeteer: "*"
     supertest: "*"
     typescript: "*"
-  checksum: 10c0/4b4b0901d3e5505404a967b93f2b7bb17b82eacb999aefae1578bdaceef5c45c847de04757ecee792b68dae033fe6a47324f1c7b377bd9b3b1965e5e06151488
+  checksum: 10c0/060469f61e4229f62d9e0a9130c8725457b26aaa975144d1cc823be6c116e92586d09a98fea2402e281f53cf644223b45b5e9a7c4d92c3fca25ecf48e5eb7a56
   languageName: node
   linkType: hard
 
@@ -942,9 +942,9 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.19.0"
     "@jest-mock/express": "npm:^3.0.0"
-    "@rvoh/dream": "npm:^0.44.5"
-    "@rvoh/dream-spec-helpers": "npm:^0.2.4"
-    "@rvoh/psychic-spec-helpers": "npm:^0.6.0"
+    "@rvoh/dream": "npm:^0.45.2"
+    "@rvoh/dream-spec-helpers": "npm:^0.3.1"
+    "@rvoh/psychic-spec-helpers": "npm:^0.7.5"
     "@types/cookie-parser": "npm:^1.4.8"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^5.0.1"
