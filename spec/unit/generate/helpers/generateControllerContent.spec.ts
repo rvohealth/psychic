@@ -28,7 +28,7 @@ export default class PostsController extends AuthedController {
   })
   public async create() {
     // let post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
-    // if (post.isPersisted) post = post.loadForSerialization()
+    // if (post.isPersisted) post = post.loadFor('default')
     // this.created(post)
   }
 
@@ -41,7 +41,7 @@ export default class PostsController extends AuthedController {
   })
   public async index() {
     // const posts = await this.currentUser.associationQuery('posts')
-    //   .preloadForSerialization({ serializerKey: 'summary' })
+    //   .preloadFor('summary')
     //   .all()
     // this.ok(posts)
   }
@@ -90,7 +90,7 @@ export default class PostsController extends AuthedController {
 
   private async post() {
     // return await this.currentUser.associationQuery('posts')
-    //   .preloadForSerialization()
+    //   .preloadFor('default')
     //   .findOrFail(this.castParam('id', 'string'))
   }
 }
@@ -125,7 +125,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
   })
   public async create() {
     // let healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
-    // if (healthPost.isPersisted) healthPost = healthPost.loadForSerialization()
+    // if (healthPost.isPersisted) healthPost = healthPost.loadFor('default')
     // this.created(healthPost)
   }
 
@@ -138,7 +138,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
   })
   public async index() {
     // const healthPosts = await this.currentUser.associationQuery('healthPosts')
-    //   .preloadForSerialization({ serializerKey: 'summary' })
+    //   .preloadFor('summary')
     //   .all()
     // this.ok(healthPosts)
   }
@@ -187,7 +187,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
 
   private async healthPost() {
     // return await this.currentUser.associationQuery('healthPosts')
-    //   .preloadForSerialization()
+    //   .preloadFor('default')
     //   .findOrFail(this.castParam('id', 'string'))
   }
 }
@@ -242,7 +242,7 @@ export default class ApiV1UsersController extends AuthedController {
           fullyQualifiedControllerName: 'PostsController',
           fullyQualifiedModelName: 'Post',
           actions: ['create', 'index', 'show', 'update', 'destroy', 'preview'],
-          owningModel: 'AdminUser',
+          owningModel: 'Host',
         })
 
         expect(res).toEqual(
@@ -260,8 +260,8 @@ export default class PostsController extends AuthedController {
     description: 'Create a Post',
   })
   public async create() {
-    // let post = await this.currentAdminUser.createAssociation('posts', this.paramsFor(Post))
-    // if (post.isPersisted) post = post.loadForSerialization()
+    // let post = await this.currentHost.createAssociation('posts', this.paramsFor(Post))
+    // if (post.isPersisted) post = post.loadFor('default')
     // this.created(post)
   }
 
@@ -273,8 +273,8 @@ export default class PostsController extends AuthedController {
     serializerKey: 'summary',
   })
   public async index() {
-    // const posts = await this.currentAdminUser.associationQuery('posts')
-    //   .preloadForSerialization({ serializerKey: 'summary' })
+    // const posts = await this.currentHost.associationQuery('posts')
+    //   .preloadFor('summary')
     //   .all()
     // this.ok(posts)
   }
@@ -322,14 +322,117 @@ export default class PostsController extends AuthedController {
   }
 
   private async post() {
-    // return await this.currentAdminUser.associationQuery('posts')
-    //   .preloadForSerialization()
+    // return await this.currentHost.associationQuery('posts')
+    //   .preloadFor('default')
     //   .findOrFail(this.castParam('id', 'string'))
   }
 }
 `,
         )
       })
+    })
+
+    context('in the Admin namespace', () => {
+      it(
+        'loads/creates/updates/deletes resources without an owning model ' +
+          'and sets the serializerKey to admin serializers',
+        () => {
+          const res = generateControllerContent({
+            ancestorImportStatement: "import AdminAuthedController from './AdminAuthedController.js'",
+            ancestorName: 'AdminAuthedController',
+            fullyQualifiedControllerName: 'Admin/ArticlesController',
+            fullyQualifiedModelName: 'Article',
+            actions: ['create', 'index', 'show', 'update', 'destroy', 'preview'],
+          })
+
+          expect(res).toEqual(
+            `\
+import { OpenAPI } from '@rvoh/psychic'
+import AdminAuthedController from './AdminAuthedController.js'
+import Article from '../../models/Article.js'
+
+const openApiTags = ['articles']
+
+export default class AdminArticlesController extends AdminAuthedController {
+  @OpenAPI(Article, {
+    status: 201,
+    tags: openApiTags,
+    description: 'Create a Article',
+    serializerKey: 'admin',
+  })
+  public async create() {
+    // let article = await Article.create(this.paramsFor(Article))
+    // if (article.isPersisted) article = article.loadFor('admin')
+    // this.created(article)
+  }
+
+  @OpenAPI(Article, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch multiple Articles',
+    many: true,
+    serializerKey: 'adminSummary',
+  })
+  public async index() {
+    // const articles = await Article
+    //   .preloadFor('adminSummary')
+    //   .all()
+    // this.ok(articles)
+  }
+
+  @OpenAPI(Article, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a Article',
+    serializerKey: 'admin',
+  })
+  public async show() {
+    // const article = await this.article()
+    // this.ok(article)
+  }
+
+  @OpenAPI(Article, {
+    status: 204,
+    tags: openApiTags,
+    description: 'Update a Article',
+  })
+  public async update() {
+    // const article = await this.article()
+    // await article.update(this.paramsFor(Article))
+    // this.noContent()
+  }
+
+  @OpenAPI({
+    status: 204,
+    tags: openApiTags,
+    description: 'Destroy a Article',
+  })
+  public async destroy() {
+    // const article = await this.article()
+    // await article.destroy()
+    // this.noContent()
+  }
+
+  @OpenAPI(Article, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a Article',
+  })
+  public async preview() {
+    // const article = await this.article()
+    // this.ok(article)
+  }
+
+  private async article() {
+    // return await Article
+    //   .preloadFor('admin')
+    //   .findOrFail(this.castParam('id', 'string'))
+  }
+}
+`,
+          )
+        },
+      )
     })
   })
 })
