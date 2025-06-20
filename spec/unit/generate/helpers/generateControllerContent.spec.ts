@@ -27,8 +27,8 @@ export default class PostsController extends AuthedController {
     description: 'Create a Post',
   })
   public async create() {
-    //    const post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
-    //    this.created(post)
+    // const post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
+    // this.created(post)
   }
 
   @OpenAPI(Post, {
@@ -39,8 +39,10 @@ export default class PostsController extends AuthedController {
     serializerKey: 'summary',
   })
   public async index() {
-    //    const posts = await this.currentUser.associationQuery('posts').all()
-    //    this.ok(posts)
+    // const posts = await this.currentUser.associationQuery('posts')
+    //   .preloadForSerialization({ serializerKey: 'summary' })
+    //   .all()
+    // this.ok(posts)
   }
 
   @OpenAPI(Post, {
@@ -49,8 +51,8 @@ export default class PostsController extends AuthedController {
     description: 'Fetch a Post',
   })
   public async show() {
-    //    const post = await this.post()
-    //    this.ok(post)
+    // const post = await this.post()
+    // this.ok(post)
   }
 
   @OpenAPI(Post, {
@@ -59,9 +61,9 @@ export default class PostsController extends AuthedController {
     description: 'Update a Post',
   })
   public async update() {
-    //    const post = await this.post()
-    //    await post.update(this.paramsFor(Post))
-    //    this.noContent()
+    // const post = await this.post()
+    // await post.update(this.paramsFor(Post))
+    // this.noContent()
   }
 
   @OpenAPI({
@@ -70,9 +72,9 @@ export default class PostsController extends AuthedController {
     description: 'Destroy a Post',
   })
   public async destroy() {
-    //    const post = await this.post()
-    //    await post.destroy()
-    //    this.noContent()
+    // const post = await this.post()
+    // await post.destroy()
+    // this.noContent()
   }
 
   @OpenAPI(Post, {
@@ -81,14 +83,14 @@ export default class PostsController extends AuthedController {
     description: 'Fetch a Post',
   })
   public async preview() {
-    //    const post = await this.post()
-    //    this.ok(post)
+    // const post = await this.post()
+    // this.ok(post)
   }
 
   private async post() {
-    // return await this.currentUser.associationQuery('posts').findOrFail(
-    //   this.castParam('id', 'string')
-    // )
+    // return await this.currentUser.associationQuery('posts')
+    //   .preloadForSerialization()
+    //   .findOrFail(this.castParam('id', 'string'))
   }
 }
 `,
@@ -121,8 +123,8 @@ export default class ApiV1HealthPostsController extends AuthedController {
     description: 'Create a HealthPost',
   })
   public async create() {
-    //    const healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
-    //    this.created(healthPost)
+    // const healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
+    // this.created(healthPost)
   }
 
   @OpenAPI(HealthPost, {
@@ -133,8 +135,10 @@ export default class ApiV1HealthPostsController extends AuthedController {
     serializerKey: 'summary',
   })
   public async index() {
-    //    const healthPosts = await this.currentUser.associationQuery('healthPosts').all()
-    //    this.ok(healthPosts)
+    // const healthPosts = await this.currentUser.associationQuery('healthPosts')
+    //   .preloadForSerialization({ serializerKey: 'summary' })
+    //   .all()
+    // this.ok(healthPosts)
   }
 
   @OpenAPI(HealthPost, {
@@ -143,8 +147,8 @@ export default class ApiV1HealthPostsController extends AuthedController {
     description: 'Fetch a HealthPost',
   })
   public async show() {
-    //    const healthPost = await this.healthPost()
-    //    this.ok(healthPost)
+    // const healthPost = await this.healthPost()
+    // this.ok(healthPost)
   }
 
   @OpenAPI(HealthPost, {
@@ -153,9 +157,9 @@ export default class ApiV1HealthPostsController extends AuthedController {
     description: 'Update a HealthPost',
   })
   public async update() {
-    //    const healthPost = await this.healthPost()
-    //    await healthPost.update(this.paramsFor(HealthPost))
-    //    this.noContent()
+    // const healthPost = await this.healthPost()
+    // await healthPost.update(this.paramsFor(HealthPost))
+    // this.noContent()
   }
 
   @OpenAPI({
@@ -164,9 +168,9 @@ export default class ApiV1HealthPostsController extends AuthedController {
     description: 'Destroy a HealthPost',
   })
   public async destroy() {
-    //    const healthPost = await this.healthPost()
-    //    await healthPost.destroy()
-    //    this.noContent()
+    // const healthPost = await this.healthPost()
+    // await healthPost.destroy()
+    // this.noContent()
   }
 
   @OpenAPI(HealthPost, {
@@ -175,14 +179,14 @@ export default class ApiV1HealthPostsController extends AuthedController {
     description: 'Fetch a HealthPost',
   })
   public async preview() {
-    //    const healthPost = await this.healthPost()
-    //    this.ok(healthPost)
+    // const healthPost = await this.healthPost()
+    // this.ok(healthPost)
   }
 
   private async healthPost() {
-    // return await this.currentUser.associationQuery('healthPosts').findOrFail(
-    //   this.castParam('id', 'string')
-    // )
+    // return await this.currentUser.associationQuery('healthPosts')
+    //   .preloadForSerialization()
+    //   .findOrFail(this.castParam('id', 'string'))
   }
 }
 `,

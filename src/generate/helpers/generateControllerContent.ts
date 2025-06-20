@@ -57,8 +57,8 @@ export default function generateControllerContent({
     description: 'Create ${aOrAnDreamModelName(modelClassName!)}',
   })
   public async create() {
-    //    const ${modelAttributeName} = await this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', this.paramsFor(${modelClassName}))
-    //    this.created(${modelAttributeName})
+    // const ${modelAttributeName} = await this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', this.paramsFor(${modelClassName}))
+    // this.created(${modelAttributeName})
   }`
         else
           return `\
@@ -81,8 +81,10 @@ export default function generateControllerContent({
     serializerKey: 'summary',
   })
   public async index() {
-    //    const ${pluralizedModelAttributeName} = await this.${owningModelProperty}.associationQuery('${pluralizedModelAttributeName}').all()
-    //    this.ok(${pluralizedModelAttributeName})
+    // const ${pluralizedModelAttributeName} = await this.${owningModelProperty}.associationQuery('${pluralizedModelAttributeName}')
+    //   .preloadForSerialization({ serializerKey: 'summary' })
+    //   .all()
+    // this.ok(${pluralizedModelAttributeName})
   }`
         else
           return `\
@@ -105,8 +107,8 @@ export default function generateControllerContent({
     description: 'Fetch ${aOrAnDreamModelName(modelClassName!)}',
   })
   public async show() {
-    //    const ${modelAttributeName} = await this.${modelAttributeName}()
-    //    this.ok(${modelAttributeName})
+    // const ${modelAttributeName} = await this.${modelAttributeName}()
+    // this.ok(${modelAttributeName})
   }`
         else
           return `\
@@ -127,9 +129,9 @@ export default function generateControllerContent({
     description: 'Update ${aOrAnDreamModelName(modelClassName!)}',
   })
   public async update() {
-    //    const ${modelAttributeName} = await this.${modelAttributeName}()
-    //    await ${modelAttributeName}.update(this.paramsFor(${modelClassName}))
-    //    this.noContent()
+    // const ${modelAttributeName} = await this.${modelAttributeName}()
+    // await ${modelAttributeName}.update(this.paramsFor(${modelClassName}))
+    // this.noContent()
   }`
         else
           return `\
@@ -150,9 +152,9 @@ export default function generateControllerContent({
     description: 'Destroy ${aOrAnDreamModelName(modelClassName!)}',
   })
   public async destroy() {
-    //    const ${modelAttributeName} = await this.${modelAttributeName}()
-    //    await ${modelAttributeName}.destroy()
-    //    this.noContent()
+    // const ${modelAttributeName} = await this.${modelAttributeName}()
+    // await ${modelAttributeName}.destroy()
+    // this.noContent()
   }`
         else
           return `\
@@ -173,8 +175,8 @@ export default function generateControllerContent({
     description: 'Fetch ${aOrAnDreamModelName(modelClassName!)}',
   })
   public async ${methodName}() {
-    //    const ${modelAttributeName} = await this.${modelAttributeName}()
-    //    this.ok(${modelAttributeName})
+    // const ${modelAttributeName} = await this.${modelAttributeName}()
+    // this.ok(${modelAttributeName})
   }`
         else
           return `\
@@ -212,9 +214,9 @@ function privateMethods(modelClassName: string, methods: string[], owningModelPr
 
 function loadModelStatement(modelClassName: string, owningModelProperty: string) {
   return `  private async ${camelize(modelClassName)}() {
-    // return await this.${owningModelProperty}.associationQuery('${pluralize(camelize(modelClassName))}').findOrFail(
-    //   this.castParam('id', 'string')
-    // )
+    // return await this.${owningModelProperty}.associationQuery('${pluralize(camelize(modelClassName))}')
+    //   .preloadForSerialization()
+    //   .findOrFail(this.castParam('id', 'string'))
   }`
 }
 
