@@ -27,7 +27,8 @@ export default class PostsController extends AuthedController {
     description: 'Create a Post',
   })
   public async create() {
-    // const post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
+    // let post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
+    // if (post.isPersisted) post = post.loadForSerialization()
     // this.created(post)
   }
 
@@ -123,7 +124,8 @@ export default class ApiV1HealthPostsController extends AuthedController {
     description: 'Create a HealthPost',
   })
   public async create() {
-    // const healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
+    // let healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
+    // if (healthPost.isPersisted) healthPost = healthPost.loadForSerialization()
     // this.created(healthPost)
   }
 

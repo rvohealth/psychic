@@ -57,7 +57,8 @@ export default function generateControllerContent({
     description: 'Create ${aOrAnDreamModelName(modelClassName!)}',
   })
   public async create() {
-    // const ${modelAttributeName} = await this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', this.paramsFor(${modelClassName}))
+    // let ${modelAttributeName} = await this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', this.paramsFor(${modelClassName}))
+    // if (${modelAttributeName}.isPersisted) ${modelAttributeName} = ${modelAttributeName}.loadForSerialization()
     // this.created(${modelAttributeName})
   }`
         else
