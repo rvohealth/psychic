@@ -10,15 +10,14 @@ describe('generateResourceControllerSpecContent', () => {
     })
     expect(res).toEqual(`\
 import { UpdateableProperties } from '@rvoh/dream'
-import { OpenapiSpecRequest, OpenapiSpecSession } from '@rvoh/psychic-spec-helpers'
 import Post from '../../../../src/app/models/Post.js'
 import User from '../../../../src/app/models/User.js'
 import createPost from '../../../factories/PostFactory.js'
 import createUser from '../../../factories/UserFactory.js'
-import { session } from '../../helpers/authentication.js'
+import { session, SpecRequestType } from '../../helpers/authentication.js'
 
 describe('V1/PostsController', () => {
-  let request: OpenapiSpecRequest | OpenapiSpecSession
+  let request: SpecRequestType
   let user: User
 
   beforeEach(async () => {
@@ -190,15 +189,14 @@ describe('V1/PostsController', () => {
       })
       expect(res).toEqual(`\
 import { UpdateableProperties } from '@rvoh/dream'
-import { OpenapiSpecRequest, OpenapiSpecSession } from '@rvoh/psychic-spec-helpers'
 import LocalizedText from '../../../../../src/app/models/LocalizedText.js'
 import User from '../../../../../src/app/models/User.js'
 import createLocalizedText from '../../../../factories/LocalizedTextFactory.js'
 import createUser from '../../../../factories/UserFactory.js'
-import { session } from '../../../helpers/authentication.js'
+import { session, SpecRequestType } from '../../../helpers/authentication.js'
 
 describe('V1/Host/LocalizedTextsController', () => {
-  let request: OpenapiSpecRequest | OpenapiSpecSession
+  let request: SpecRequestType
   let user: User
 
   beforeEach(async () => {
@@ -375,17 +373,16 @@ describe('V1/Host/LocalizedTextsController', () => {
       })
       expect(res).toEqual(`\
 import { UpdateableProperties } from '@rvoh/dream'
-import { OpenapiSpecRequest, OpenapiSpecSession } from '@rvoh/psychic-spec-helpers'
 import Post from '../../../../src/app/models/Post.js'
 import User from '../../../../src/app/models/User.js'
 import Host from '../../../../src/app/models/Host.js'
 import createPost from '../../../factories/PostFactory.js'
 import createUser from '../../../factories/UserFactory.js'
 import createHost from '../../../factories/HostFactory.js'
-import { session } from '../../helpers/authentication.js'
+import { session, SpecRequestType } from '../../helpers/authentication.js'
 
 describe('V1/PostsController', () => {
-  let request: OpenapiSpecRequest | OpenapiSpecSession
+  let request: SpecRequestType
   let user: User
   let host: Host
 
@@ -553,15 +550,14 @@ describe('V1/PostsController', () => {
       })
       expect(res).toEqual(`\
 import { UpdateableProperties } from '@rvoh/dream'
-import { OpenapiSpecRequest, OpenapiSpecSession } from '@rvoh/psychic-spec-helpers'
 import Article from '../../../../src/app/models/Article.js'
 import AdminUser from '../../../../src/app/models/AdminUser.js'
 import createArticle from '../../../factories/ArticleFactory.js'
 import createAdminUser from '../../../factories/AdminUserFactory.js'
-import { session } from '../../helpers/authentication.js'
+import { session, SpecRequestType } from '../../helpers/authentication.js'
 
 describe('Admin/ArticlesController', () => {
-  let request: OpenapiSpecRequest | OpenapiSpecSession
+  let request: SpecRequestType
   let adminUser: AdminUser
 
   beforeEach(async () => {

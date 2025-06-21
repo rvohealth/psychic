@@ -75,12 +75,11 @@ export default function generateResourceControllerSpecContent({
   }
 
   return `\
-import { UpdateableProperties } from '@rvoh/dream'
-import { OpenapiSpecRequest, OpenapiSpecSession } from '@rvoh/psychic-spec-helpers'${uniq(importStatements).join('')}
-import { session } from '${specUnitUpdirs}helpers/authentication.js'
+import { UpdateableProperties } from '@rvoh/dream'${uniq(importStatements).join('')}
+import { session, SpecRequestType } from '${specUnitUpdirs}helpers/authentication.js'
 
 describe('${fullyQualifiedControllerName}', () => {
-  let request: OpenapiSpecRequest | OpenapiSpecSession
+  let request: SpecRequestType
   let ${userVariableName}: ${userModelClassName}${owningModel ? `\n  let ${owningModelVariableName}: ${owningModelClassName}` : ''}
 
   beforeEach(async () => {
