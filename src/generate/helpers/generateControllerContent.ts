@@ -69,7 +69,7 @@ export default function generateControllerContent({
   })
   public async create() {
     // let ${modelAttributeName} = await ${forAdmin ? `${modelClassName}.create(` : `this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', `}this.paramsFor(${modelClassName}))
-    // if (${modelAttributeName}.isPersisted) ${modelAttributeName} = ${modelAttributeName}.loadFor('${forAdmin ? 'admin' : 'default'}')
+    // if (${modelAttributeName}.isPersisted) ${modelAttributeName} = await ${modelAttributeName}.loadFor('${forAdmin ? 'admin' : 'default'}').execute()
     // this.created(${modelAttributeName})
   }`
         else

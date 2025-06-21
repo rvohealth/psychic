@@ -28,7 +28,7 @@ export default class PostsController extends AuthedController {
   })
   public async create() {
     // let post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
-    // if (post.isPersisted) post = post.loadFor('default')
+    // if (post.isPersisted) post = await post.loadFor('default').execute()
     // this.created(post)
   }
 
@@ -125,7 +125,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
   })
   public async create() {
     // let healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
-    // if (healthPost.isPersisted) healthPost = healthPost.loadFor('default')
+    // if (healthPost.isPersisted) healthPost = await healthPost.loadFor('default').execute()
     // this.created(healthPost)
   }
 
@@ -261,7 +261,7 @@ export default class PostsController extends AuthedController {
   })
   public async create() {
     // let post = await this.currentHost.createAssociation('posts', this.paramsFor(Post))
-    // if (post.isPersisted) post = post.loadFor('default')
+    // if (post.isPersisted) post = await post.loadFor('default').execute()
     // this.created(post)
   }
 
@@ -362,7 +362,7 @@ export default class AdminArticlesController extends AdminAuthedController {
   })
   public async create() {
     // let article = await Article.create(this.paramsFor(Article))
-    // if (article.isPersisted) article = article.loadFor('admin')
+    // if (article.isPersisted) article = await article.loadFor('admin').execute()
     // this.created(article)
   }
 

@@ -6,7 +6,12 @@ describe('generateResourceControllerSpecContent', () => {
       fullyQualifiedControllerName: 'V1/PostsController',
       route: 'v1/posts',
       fullyQualifiedModelName: 'Post',
-      columnsWithTypes: ['body:text', 'rating:decimal:3,2', 'User:belongs_to'],
+      columnsWithTypes: [
+        'body:text',
+        'rating:decimal:3,2',
+        'style:enum:building_style:cottage,cabin',
+        'User:belongs_to',
+      ],
     })
     expect(res).toEqual(`\
 import { UpdateableProperties } from '@rvoh/dream'
@@ -31,10 +36,7 @@ describe('V1/PostsController', () => {
     }
 
     it('returns the index of Posts', async () => {
-      const post = await createPost({
-        user,
-        body: 'The Post body',
-      })
+      const post = await createPost({ user })
       const { body } = await subject(200)
 
       expect(body).toEqual([
@@ -62,16 +64,15 @@ describe('V1/PostsController', () => {
     }
 
     it('returns the specified Post', async () => {
-      const post = await createPost({
-        user,
-        body: 'The Post body',
-      })
+      const post = await createPost({ user })
       const { body } = await subject(post, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
-          body: 'The Post body',
+          body: post.body,
+          rating: post.rating,
+          style: post.style,
         }),
       )
     })
@@ -95,13 +96,17 @@ describe('V1/PostsController', () => {
     it('creates a Post for this User', async () => {
       const { body } = await subject({
         body: 'The Post body',
+        rating: 1.1,
+        style: 'cottage',
       }, 201)
-      const post = await Post.findOrFailBy({ userId: user.id })
+      const post = await user.associationQuery('posts').firstOrFail()
 
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
           body: 'The Post body',
+          rating: 1.1,
+          style: 'cottage',
         }),
       )
     })
@@ -120,27 +125,36 @@ describe('V1/PostsController', () => {
     }
 
     it('updates the Post', async () => {
-      const post = await createPost({
-        user,
-        body: 'The Post body',
-      })
+      const post = await createPost({ user })
       await subject(post, {
         body: 'Updated Post body',
+        rating: 2.2,
+        style: 'cabin',
       }, 204)
 
       await post.reload()
       expect(post.body).toEqual('Updated Post body')
+      expect(post.rating).toEqual(2.2)
+      expect(post.style).toEqual('cabin')
     })
 
     context('a Post created by another User', () => {
       it('is not updated', async () => {
         const post = await createPost()
+        const originalBody = post.body
+        const originalRating = post.rating
+        const originalStyle = post.style
+
         await subject(post, {
           body: 'Updated Post body',
+          rating: 2.2,
+          style: 'cabin',
         }, 404)
 
         await post.reload()
-        expect(post.body).toEqual('The Post body')
+        expect(post.body).toEqual(originalBody)
+        expect(post.rating).toEqual(originalRating)
+        expect(post.style).toEqual(originalStyle)
       })
     })
   })
@@ -183,7 +197,7 @@ describe('V1/PostsController', () => {
           'localizable_id:bigint',
           'locale:enum:locales:en-US,es-ES',
           'title:string',
-          'markdown:text',
+          'body_markdown:text',
           'deleted_at:datetime',
         ],
       })
@@ -210,11 +224,7 @@ describe('V1/Host/LocalizedTextsController', () => {
     }
 
     it('returns the index of LocalizedTexts', async () => {
-      const localizedText = await createLocalizedText({
-        user,
-        title: 'The LocalizedText title',
-        markdown: 'The LocalizedText markdown',
-      })
+      const localizedText = await createLocalizedText({ user })
       const { body } = await subject(200)
 
       expect(body).toEqual([
@@ -242,18 +252,15 @@ describe('V1/Host/LocalizedTextsController', () => {
     }
 
     it('returns the specified LocalizedText', async () => {
-      const localizedText = await createLocalizedText({
-        user,
-        title: 'The LocalizedText title',
-        markdown: 'The LocalizedText markdown',
-      })
+      const localizedText = await createLocalizedText({ user })
       const { body } = await subject(localizedText, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
           id: localizedText.id,
-          title: 'The LocalizedText title',
-          markdown: 'The LocalizedText markdown',
+          locale: localizedText.locale,
+          title: localizedText.title,
+          bodyMarkdown: localizedText.bodyMarkdown,
         }),
       )
     })
@@ -276,16 +283,18 @@ describe('V1/Host/LocalizedTextsController', () => {
 
     it('creates a LocalizedText for this User', async () => {
       const { body } = await subject({
+        locale: 'en-US',
         title: 'The LocalizedText title',
-        markdown: 'The LocalizedText markdown',
+        bodyMarkdown: 'The LocalizedText bodyMarkdown',
       }, 201)
-      const localizedText = await LocalizedText.findOrFailBy({ userId: user.id })
+      const localizedText = await user.associationQuery('localizedTexts').firstOrFail()
 
       expect(body).toEqual(
         expect.objectContaining({
           id: localizedText.id,
+          locale: 'en-US',
           title: 'The LocalizedText title',
-          markdown: 'The LocalizedText markdown',
+          bodyMarkdown: 'The LocalizedText bodyMarkdown',
         }),
       )
     })
@@ -304,32 +313,36 @@ describe('V1/Host/LocalizedTextsController', () => {
     }
 
     it('updates the LocalizedText', async () => {
-      const localizedText = await createLocalizedText({
-        user,
-        title: 'The LocalizedText title',
-        markdown: 'The LocalizedText markdown',
-      })
+      const localizedText = await createLocalizedText({ user })
       await subject(localizedText, {
+        locale: 'es-ES',
         title: 'Updated LocalizedText title',
-        markdown: 'Updated LocalizedText markdown',
+        bodyMarkdown: 'Updated LocalizedText bodyMarkdown',
       }, 204)
 
       await localizedText.reload()
+      expect(localizedText.locale).toEqual('es-ES')
       expect(localizedText.title).toEqual('Updated LocalizedText title')
-      expect(localizedText.markdown).toEqual('Updated LocalizedText markdown')
+      expect(localizedText.bodyMarkdown).toEqual('Updated LocalizedText bodyMarkdown')
     })
 
     context('a LocalizedText created by another User', () => {
       it('is not updated', async () => {
         const localizedText = await createLocalizedText()
+        const originalLocale = localizedText.locale
+        const originalTitle = localizedText.title
+        const originalBodyMarkdown = localizedText.bodyMarkdown
+
         await subject(localizedText, {
+          locale: 'es-ES',
           title: 'Updated LocalizedText title',
-          markdown: 'Updated LocalizedText markdown',
+          bodyMarkdown: 'Updated LocalizedText bodyMarkdown',
         }, 404)
 
         await localizedText.reload()
-        expect(localizedText.title).toEqual('The LocalizedText title')
-        expect(localizedText.markdown).toEqual('The LocalizedText markdown')
+        expect(localizedText.locale).toEqual(originalLocale)
+        expect(localizedText.title).toEqual(originalTitle)
+        expect(localizedText.bodyMarkdown).toEqual(originalBodyMarkdown)
       })
     })
   })
@@ -398,10 +411,7 @@ describe('V1/PostsController', () => {
     }
 
     it('returns the index of Posts', async () => {
-      const post = await createPost({
-        host,
-        body: 'The Post body',
-      })
+      const post = await createPost({ host })
       const { body } = await subject(200)
 
       expect(body).toEqual([
@@ -429,16 +439,14 @@ describe('V1/PostsController', () => {
     }
 
     it('returns the specified Post', async () => {
-      const post = await createPost({
-        host,
-        body: 'The Post body',
-      })
+      const post = await createPost({ host })
       const { body } = await subject(post, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
-          body: 'The Post body',
+          body: post.body,
+          rating: post.rating,
         }),
       )
     })
@@ -462,13 +470,15 @@ describe('V1/PostsController', () => {
     it('creates a Post for this Host', async () => {
       const { body } = await subject({
         body: 'The Post body',
+        rating: 1.1,
       }, 201)
-      const post = await Post.findOrFailBy({ hostId: host.id })
+      const post = await host.associationQuery('posts').firstOrFail()
 
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
           body: 'The Post body',
+          rating: 1.1,
         }),
       )
     })
@@ -487,27 +497,31 @@ describe('V1/PostsController', () => {
     }
 
     it('updates the Post', async () => {
-      const post = await createPost({
-        host,
-        body: 'The Post body',
-      })
+      const post = await createPost({ host })
       await subject(post, {
         body: 'Updated Post body',
+        rating: 2.2,
       }, 204)
 
       await post.reload()
       expect(post.body).toEqual('Updated Post body')
+      expect(post.rating).toEqual(2.2)
     })
 
     context('a Post created by another Host', () => {
       it('is not updated', async () => {
         const post = await createPost()
+        const originalBody = post.body
+        const originalRating = post.rating
+
         await subject(post, {
           body: 'Updated Post body',
+          rating: 2.2,
         }, 404)
 
         await post.reload()
-        expect(post.body).toEqual('The Post body')
+        expect(post.body).toEqual(originalBody)
+        expect(post.rating).toEqual(originalRating)
       })
     })
   })
@@ -571,9 +585,7 @@ describe('Admin/ArticlesController', () => {
     }
 
     it('returns the index of Articles', async () => {
-      const article = await createArticle({
-        body: 'The Article body',
-      })
+      const article = await createArticle()
       const { body } = await subject(200)
 
       expect(body).toEqual([
@@ -592,15 +604,14 @@ describe('Admin/ArticlesController', () => {
     }
 
     it('returns the specified Article', async () => {
-      const article = await createArticle({
-        body: 'The Article body',
-      })
+      const article = await createArticle()
       const { body } = await subject(article, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
           id: article.id,
-          body: 'The Article body',
+          body: article.body,
+          rating: article.rating,
         }),
       )
     })
@@ -617,6 +628,7 @@ describe('Admin/ArticlesController', () => {
     it('creates a Article', async () => {
       const { body } = await subject({
         body: 'The Article body',
+        rating: 1.1,
       }, 201)
       const article = await Article.firstOrFail()
 
@@ -624,6 +636,7 @@ describe('Admin/ArticlesController', () => {
         expect.objectContaining({
           id: article.id,
           body: 'The Article body',
+          rating: 1.1,
         }),
       )
     })
@@ -642,15 +655,15 @@ describe('Admin/ArticlesController', () => {
     }
 
     it('updates the Article', async () => {
-      const article = await createArticle({
-        body: 'The Article body',
-      })
+      const article = await createArticle()
       await subject(article, {
         body: 'Updated Article body',
+        rating: 2.2,
       }, 204)
 
       await article.reload()
       expect(article.body).toEqual('Updated Article body')
+      expect(article.rating).toEqual(2.2)
     })
   })
 

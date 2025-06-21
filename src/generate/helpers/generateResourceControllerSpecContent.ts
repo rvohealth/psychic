@@ -1,5 +1,6 @@
 import {
   camelize,
+  capitalize,
   compact,
   globalClassNameFromFullyQualifiedModelName,
   standardizeFullyQualifiedModelName,
@@ -7,6 +8,7 @@ import {
 } from '@rvoh/dream'
 import relativePsychicPath from '../../helpers/path/relativePsychicPath.js'
 import updirsFromPath from '../../helpers/path/updirsFromPath.js'
+import { pluralize } from '../../index.js'
 
 export default function generateResourceControllerSpecContent({
   fullyQualifiedControllerName,
@@ -46,33 +48,80 @@ export default function generateResourceControllerSpecContent({
   ])
 
   const specUnitUpdirs = updirsFromPath(fullyQualifiedControllerName)
-  const originalStringKeyValues: string[] = []
-  const updatedStringKeyValues: string[] = []
-  const originalStringAttributeChecks: string[] = []
-  const updatedStringAttributeChecks: string[] = []
+  const attributeCreationKeyValues: string[] = []
+  const attributeUpdateKeyValues: string[] = []
+  const originalValueAttributeChecks: string[] = []
+  const updatedValueAttributeChecks: string[] = []
+  const nonUpdatedValueAttributeChecks: string[] = []
+  const originalValueVariableAssignments: string[] = []
+  const keyWithDotValue: string[] = []
 
   for (const attribute of columnsWithTypes) {
-    const [attributeName, attributeType] = attribute.split(':')
+    const [rawAttributeName, attributeType, , enumValues] = attribute.split(':')
+    if (/_type$/.test(rawAttributeName ?? '')) continue
+    const attributeName = camelize(rawAttributeName ?? '')
     const originalName = `The ${fullyQualifiedModelName} ${attributeName}`
     const updatedName = `Updated ${fullyQualifiedModelName} ${attributeName}`
+    const dotNotationVariable = `${modelVariableName}.${attributeName}`
 
     switch (attributeType) {
+      case 'enum': {
+        if (attribute === 'type') continue
+
+        const originalEnumValue = (enumValues ?? '').split(',').at(0)!
+        const updatedEnumValue = (enumValues ?? '').split(',').at(-1)!
+
+        attributeCreationKeyValues.push(`${attributeName}: '${originalEnumValue}',`)
+        attributeUpdateKeyValues.push(`${attributeName}: '${updatedEnumValue}',`)
+
+        originalValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual('${originalEnumValue}')`)
+        updatedValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual('${updatedEnumValue}')`)
+
+        break
+      }
+
       case 'string':
       case 'text':
-        originalStringKeyValues.push(`${attributeName}: '${originalName}',`)
-        updatedStringKeyValues.push(`${attributeName}: '${updatedName}',`)
-        originalStringAttributeChecks.push(
-          `expect(${modelVariableName}.${attributeName}).toEqual('${originalName}')`,
-        )
-        updatedStringAttributeChecks.push(
-          `expect(${modelVariableName}.${attributeName}).toEqual('${updatedName}')`,
-        )
+        attributeCreationKeyValues.push(`${attributeName}: '${originalName}',`)
+        attributeUpdateKeyValues.push(`${attributeName}: '${updatedName}',`)
+
+        originalValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual('${originalName}')`)
+        updatedValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual('${updatedName}')`)
+        break
+
+      case 'integer':
+        attributeCreationKeyValues.push(`${attributeName}: 1,`)
+        attributeUpdateKeyValues.push(`${attributeName}: 2,`)
+
+        originalValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual(1)`)
+        updatedValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual(2)`)
+
+        break
+
+      case 'decimal':
+        attributeCreationKeyValues.push(`${attributeName}: 1.1,`)
+        attributeUpdateKeyValues.push(`${attributeName}: 2.2,`)
+
+        originalValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual(1.1)`)
+        updatedValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual(2.2)`)
         break
 
       default:
-      // noop
+        continue
     }
+
+    keyWithDotValue.push(`${attributeName}: ${dotNotationVariable},`)
+    const originalAttributeVariableName = 'original' + capitalize(attributeName)
+    originalValueVariableAssignments.push(`const ${originalAttributeVariableName} = ${dotNotationVariable}`)
+    nonUpdatedValueAttributeChecks.push(
+      `expect(${dotNotationVariable}).toEqual(${originalAttributeVariableName})`,
+    )
   }
+
+  const simpleCreationCommand = `const ${modelVariableName} = await create${modelClassName}(${forAdmin ? '' : `{ ${owningModelVariableName} }`})`
+  const dotValueAttributes = keyWithDotValue.length
+    ? '\n          ' + keyWithDotValue.join('\n          ')
+    : ''
 
   return `\
 import { UpdateableProperties } from '@rvoh/dream'${uniq(importStatements).join('')}
@@ -93,11 +142,7 @@ describe('${fullyQualifiedControllerName}', () => {
     }
 
     it('returns the index of ${fullyQualifiedModelName}s', async () => {
-      const ${modelVariableName} = await create${modelClassName}({${
-        forAdmin ? '' : `\n        ${owningModelVariableName},`
-      }
-        ${originalStringKeyValues.join('\n        ')}
-      })
+      ${simpleCreationCommand}
       const { body } = await subject(200)
 
       expect(body).toEqual([
@@ -129,16 +174,12 @@ describe('${fullyQualifiedControllerName}', () => {
     }
 
     it('returns the specified ${fullyQualifiedModelName}', async () => {
-      const ${modelVariableName} = await create${modelClassName}({${
-        forAdmin ? '' : `\n        ${owningModelVariableName},`
-      }
-        ${originalStringKeyValues.join('\n        ')}
-      })
+      ${simpleCreationCommand}
       const { body } = await subject(${modelVariableName}, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
-          id: ${modelVariableName}.id,${originalStringKeyValues.length ? '\n          ' + originalStringKeyValues.join('\n          ') : ''}
+          id: ${modelVariableName}.id,${dotValueAttributes}
         }),
       )
     })${
@@ -165,13 +206,17 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('creates a ${fullyQualifiedModelName}${forAdmin ? '' : ` for this ${owningModelClassName}`}', async () => {
       const { body } = await subject({
-        ${originalStringKeyValues.length ? originalStringKeyValues.join('\n        ') : ''}
+        ${attributeCreationKeyValues.join('\n        ')}
       }, 201)
-      const ${modelVariableName} = await ${modelClassName}.${forAdmin ? 'firstOrFail()' : `findOrFailBy({ ${owningModelVariableName}Id: ${owningModelVariableName}.id })`}
+      const ${modelVariableName} = await ${
+        forAdmin
+          ? `${modelClassName}.firstOrFail()`
+          : `${owningModelVariableName}.associationQuery('${pluralize(modelVariableName)}').firstOrFail()`
+      }
 
       expect(body).toEqual(
         expect.objectContaining({
-          id: ${modelVariableName}.id,${originalStringKeyValues.length ? '\n          ' + originalStringKeyValues.join('\n          ') : ''}
+          id: ${modelVariableName}.id,${attributeCreationKeyValues.length ? '\n          ' + attributeCreationKeyValues.join('\n          ') : ''}
         }),
       )
     })
@@ -190,17 +235,13 @@ describe('${fullyQualifiedControllerName}', () => {
     }
 
     it('updates the ${fullyQualifiedModelName}', async () => {
-      const ${modelVariableName} = await create${modelClassName}({${
-        forAdmin ? '' : `\n        ${owningModelVariableName},`
-      }
-        ${originalStringKeyValues.join('\n        ')}
-      })
+      ${simpleCreationCommand}
       await subject(${modelVariableName}, {
-        ${updatedStringKeyValues.length ? updatedStringKeyValues.join('\n        ') : ''}
+        ${attributeUpdateKeyValues.length ? attributeUpdateKeyValues.join('\n        ') : ''}
       }, 204)
 
       await ${modelVariableName}.reload()
-      ${updatedStringAttributeChecks.join('\n      ')}
+      ${updatedValueAttributeChecks.join('\n      ')}
     })${
       forAdmin
         ? ''
@@ -209,12 +250,14 @@ describe('${fullyQualifiedControllerName}', () => {
     context('a ${fullyQualifiedModelName} created by another ${owningModelClassName}', () => {
       it('is not updated', async () => {
         const ${modelVariableName} = await create${modelClassName}()
+        ${originalValueVariableAssignments.length ? originalValueVariableAssignments.join('\n        ') : ''}
+
         await subject(${modelVariableName}, {
-          ${updatedStringKeyValues.length ? updatedStringKeyValues.join('\n          ') : ''}
+          ${attributeUpdateKeyValues.length ? attributeUpdateKeyValues.join('\n          ') : ''}
         }, 404)
 
         await ${modelVariableName}.reload()
-        ${originalStringAttributeChecks.join('\n        ')}
+        ${nonUpdatedValueAttributeChecks.join('\n        ')}
       })
     })`
     }
@@ -228,7 +271,7 @@ describe('${fullyQualifiedControllerName}', () => {
     }
 
     it('deletes the ${fullyQualifiedModelName}', async () => {
-      const ${modelVariableName} = await create${modelClassName}(${forAdmin ? '' : `{ ${owningModelVariableName} }`})
+      ${simpleCreationCommand}
       await subject(${modelVariableName}, 204)
 
       expect(await ${modelClassName}.find(${modelVariableName}.id)).toBeNull()
