@@ -82,6 +82,7 @@ export default function generateResourceControllerSpecContent({
 
       case 'string':
       case 'text':
+      case 'citext':
         attributeCreationKeyValues.push(`${attributeName}: '${originalName}',`)
         attributeUpdateKeyValues.push(`${attributeName}: '${updatedName}',`)
 

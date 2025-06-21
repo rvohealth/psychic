@@ -7,6 +7,7 @@ describe('generateResourceControllerSpecContent', () => {
       route: 'v1/posts',
       fullyQualifiedModelName: 'Post',
       columnsWithTypes: [
+        'title:citext',
         'body:text',
         'rating:decimal:3,2',
         'style:enum:building_style:cottage,cabin',
@@ -70,6 +71,7 @@ describe('V1/PostsController', () => {
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
+          title: post.title,
           body: post.body,
           rating: post.rating,
           style: post.style,
@@ -95,6 +97,7 @@ describe('V1/PostsController', () => {
 
     it('creates a Post for this User', async () => {
       const { body } = await subject({
+        title: 'The Post title',
         body: 'The Post body',
         rating: 1.1,
         style: 'cottage',
@@ -104,6 +107,7 @@ describe('V1/PostsController', () => {
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
+          title: 'The Post title',
           body: 'The Post body',
           rating: 1.1,
           style: 'cottage',
@@ -127,12 +131,14 @@ describe('V1/PostsController', () => {
     it('updates the Post', async () => {
       const post = await createPost({ user })
       await subject(post, {
+        title: 'Updated Post title',
         body: 'Updated Post body',
         rating: 2.2,
         style: 'cabin',
       }, 204)
 
       await post.reload()
+      expect(post.title).toEqual('Updated Post title')
       expect(post.body).toEqual('Updated Post body')
       expect(post.rating).toEqual(2.2)
       expect(post.style).toEqual('cabin')
@@ -141,17 +147,20 @@ describe('V1/PostsController', () => {
     context('a Post created by another User', () => {
       it('is not updated', async () => {
         const post = await createPost()
+        const originalTitle = post.title
         const originalBody = post.body
         const originalRating = post.rating
         const originalStyle = post.style
 
         await subject(post, {
+          title: 'Updated Post title',
           body: 'Updated Post body',
           rating: 2.2,
           style: 'cabin',
         }, 404)
 
         await post.reload()
+        expect(post.title).toEqual(originalTitle)
         expect(post.body).toEqual(originalBody)
         expect(post.rating).toEqual(originalRating)
         expect(post.style).toEqual(originalStyle)
