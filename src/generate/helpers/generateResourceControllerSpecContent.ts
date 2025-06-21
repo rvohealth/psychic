@@ -154,6 +154,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('returns the index of ${fullyQualifiedModelName}s', async () => {
       ${simpleCreationCommand}
+
       const { body } = await subject(200)
 
       expect(body).toEqual([
@@ -169,6 +170,7 @@ describe('${fullyQualifiedControllerName}', () => {
     context('${modelClassName}s created by another ${owningModelClassName}', () => {
       it('are omitted', async () => {
         await create${modelClassName}()
+
         const { body } = await subject(200)
 
         expect(body).toEqual([])
@@ -186,6 +188,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('returns the specified ${fullyQualifiedModelName}', async () => {
       ${simpleCreationCommand}
+
       const { body } = await subject(${modelVariableName}, 200)
 
       expect(body).toEqual(
@@ -201,6 +204,7 @@ describe('${fullyQualifiedControllerName}', () => {
     context('${fullyQualifiedModelName} created by another ${owningModelClassName}', () => {
       it('is not found', async () => {
         const other${owningModelClassName}${modelClassName} = await create${modelClassName}()
+
         await subject(other${owningModelClassName}${modelClassName}, 404)
       })
     })`
@@ -219,6 +223,7 @@ describe('${fullyQualifiedControllerName}', () => {
       const { body } = await subject({
         ${attributeCreationKeyValues.join('\n        ')}
       }, 201)
+
       const ${modelVariableName} = await ${
         forAdmin
           ? `${modelClassName}.firstOrFail()`
@@ -247,6 +252,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('updates the ${fullyQualifiedModelName}', async () => {
       ${simpleCreationCommand}
+
       await subject(${modelVariableName}, {
         ${attributeUpdateKeyValues.length ? attributeUpdateKeyValues.join('\n        ') : ''}
       }, 204)
@@ -283,6 +289,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
     it('deletes the ${fullyQualifiedModelName}', async () => {
       ${simpleCreationCommand}
+
       await subject(${modelVariableName}, 204)
 
       expect(await ${modelClassName}.find(${modelVariableName}.id)).toBeNull()
@@ -294,6 +301,7 @@ describe('${fullyQualifiedControllerName}', () => {
     context('a ${fullyQualifiedModelName} created by another ${owningModelClassName}', () => {
       it('is not deleted', async () => {
         const ${modelVariableName} = await create${modelClassName}()
+
         await subject(${modelVariableName}, 404)
 
         expect(await ${modelClassName}.find(${modelVariableName}.id)).toMatchDreamModel(${modelVariableName})

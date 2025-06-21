@@ -44,6 +44,7 @@ describe('V1/PostsController', () => {
 
     it('returns the index of Posts', async () => {
       const post = await createPost({ user })
+
       const { body } = await subject(200)
 
       expect(body).toEqual([
@@ -56,6 +57,7 @@ describe('V1/PostsController', () => {
     context('Posts created by another User', () => {
       it('are omitted', async () => {
         await createPost()
+
         const { body } = await subject(200)
 
         expect(body).toEqual([])
@@ -72,6 +74,7 @@ describe('V1/PostsController', () => {
 
     it('returns the specified Post', async () => {
       const post = await createPost({ user })
+
       const { body } = await subject(post, 200)
 
       expect(body).toEqual(
@@ -91,6 +94,7 @@ describe('V1/PostsController', () => {
     context('Post created by another User', () => {
       it('is not found', async () => {
         const otherUserPost = await createPost()
+
         await subject(otherUserPost, 404)
       })
     })
@@ -114,6 +118,7 @@ describe('V1/PostsController', () => {
         ratings: 1,
         bigRating: '11111111111111111',
       }, 201)
+
       const post = await user.associationQuery('posts').firstOrFail()
 
       expect(body).toEqual(
@@ -145,6 +150,7 @@ describe('V1/PostsController', () => {
 
     it('updates the Post', async () => {
       const post = await createPost({ user })
+
       await subject(post, {
         style: 'informal',
         title: 'Updated Post title',
@@ -207,6 +213,7 @@ describe('V1/PostsController', () => {
 
     it('deletes the Post', async () => {
       const post = await createPost({ user })
+
       await subject(post, 204)
 
       expect(await Post.find(post.id)).toBeNull()
@@ -215,6 +222,7 @@ describe('V1/PostsController', () => {
     context('a Post created by another User', () => {
       it('is not deleted', async () => {
         const post = await createPost()
+
         await subject(post, 404)
 
         expect(await Post.find(post.id)).toMatchDreamModel(post)
@@ -262,6 +270,7 @@ describe('V1/PostsController', () => {
 
     it('returns the index of Posts', async () => {
       const post = await createPost({ host })
+
       const { body } = await subject(200)
 
       expect(body).toEqual([
@@ -274,6 +283,7 @@ describe('V1/PostsController', () => {
     context('Posts created by another Host', () => {
       it('are omitted', async () => {
         await createPost()
+
         const { body } = await subject(200)
 
         expect(body).toEqual([])
@@ -290,6 +300,7 @@ describe('V1/PostsController', () => {
 
     it('returns the specified Post', async () => {
       const post = await createPost({ host })
+
       const { body } = await subject(post, 200)
 
       expect(body).toEqual(
@@ -303,6 +314,7 @@ describe('V1/PostsController', () => {
     context('Post created by another Host', () => {
       it('is not found', async () => {
         const otherHostPost = await createPost()
+
         await subject(otherHostPost, 404)
       })
     })
@@ -320,6 +332,7 @@ describe('V1/PostsController', () => {
       const { body } = await subject({
         body: 'The Post body',
       }, 201)
+
       const post = await host.associationQuery('posts').firstOrFail()
 
       expect(body).toEqual(
@@ -345,6 +358,7 @@ describe('V1/PostsController', () => {
 
     it('updates the Post', async () => {
       const post = await createPost({ host })
+
       await subject(post, {
         body: 'Updated Post body',
       }, 204)
@@ -377,6 +391,7 @@ describe('V1/PostsController', () => {
 
     it('deletes the Post', async () => {
       const post = await createPost({ host })
+
       await subject(post, 204)
 
       expect(await Post.find(post.id)).toBeNull()
@@ -385,6 +400,7 @@ describe('V1/PostsController', () => {
     context('a Post created by another Host', () => {
       it('is not deleted', async () => {
         const post = await createPost()
+
         await subject(post, 404)
 
         expect(await Post.find(post.id)).toMatchDreamModel(post)
@@ -428,6 +444,7 @@ describe('Admin/ArticlesController', () => {
 
     it('returns the index of Articles', async () => {
       const article = await createArticle()
+
       const { body } = await subject(200)
 
       expect(body).toEqual([
@@ -447,6 +464,7 @@ describe('Admin/ArticlesController', () => {
 
     it('returns the specified Article', async () => {
       const article = await createArticle()
+
       const { body } = await subject(article, 200)
 
       expect(body).toEqual(
@@ -470,6 +488,7 @@ describe('Admin/ArticlesController', () => {
       const { body } = await subject({
         body: 'The Article body',
       }, 201)
+
       const article = await Article.firstOrFail()
 
       expect(body).toEqual(
@@ -495,6 +514,7 @@ describe('Admin/ArticlesController', () => {
 
     it('updates the Article', async () => {
       const article = await createArticle()
+
       await subject(article, {
         body: 'Updated Article body',
       }, 204)
@@ -513,6 +533,7 @@ describe('Admin/ArticlesController', () => {
 
     it('deletes the Article', async () => {
       const article = await createArticle()
+
       await subject(article, 204)
 
       expect(await Article.find(article.id)).toBeNull()
