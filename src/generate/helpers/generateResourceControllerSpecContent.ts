@@ -58,7 +58,8 @@ export default function generateResourceControllerSpecContent({
 
   for (const attribute of columnsWithTypes) {
     const [rawAttributeName, attributeType, , enumValues] = attribute.split(':')
-    if (/_type$/.test(rawAttributeName ?? '')) continue
+    if (rawAttributeName === 'type') continue
+    if (/(_type|_id)$/.test(rawAttributeName ?? '')) continue
     const attributeName = camelize(rawAttributeName ?? '')
     const originalName = `The ${fullyQualifiedModelName} ${attributeName}`
     const updatedName = `Updated ${fullyQualifiedModelName} ${attributeName}`
@@ -96,6 +97,15 @@ export default function generateResourceControllerSpecContent({
 
         originalValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual(1)`)
         updatedValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual(2)`)
+
+        break
+
+      case 'bigint':
+        attributeCreationKeyValues.push(`${attributeName}: '11111111111111111',`)
+        attributeUpdateKeyValues.push(`${attributeName}: '22222222222222222',`)
+
+        originalValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual('11111111111111111')`)
+        updatedValueAttributeChecks.push(`expect(${dotNotationVariable}).toEqual('22222222222222222')`)
 
         break
 
