@@ -2,7 +2,6 @@ import { hyphenize, standardizeFullyQualifiedModelName } from '@rvoh/dream'
 import { existsSync } from 'node:fs'
 import * as fs from 'node:fs/promises'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
-import EnvInternal from '../helpers/EnvInternal.js'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths.js'
 import psychicPath from '../helpers/path/psychicPath.js'
 import generateControllerContent from './helpers/generateControllerContent.js'
@@ -90,7 +89,7 @@ export default async function generateController({
   await fs.mkdir(absDirPath, { recursive: true })
 
   try {
-    if (!EnvInternal.isTest) console.log(`generating controller: ${relFilePath}`)
+    console.log(`generating controller: ${relFilePath}`)
 
     await fs.writeFile(
       absFilePath,
@@ -158,7 +157,7 @@ async function generateControllerSpec({
   )
 
   try {
-    if (!EnvInternal.isTest) console.log(`generating controller: ${relFilePath}`)
+    console.log(`generating controller spec: ${relFilePath}`)
     await fs.mkdir(absDirPath, { recursive: true })
     await fs.writeFile(
       absFilePath,
