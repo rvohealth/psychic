@@ -11,7 +11,7 @@ import {
 import * as bodyParser from 'body-parser'
 import { Command } from 'commander'
 import { CorsOptions } from 'cors'
-import { Request, Response } from 'express'
+import { Application, Request, Response, Express, RequestHandler } from 'express'
 import * as http from 'node:http'
 import PackageManager from '../cli/helpers/PackageManager.js'
 import PsychicAppInitMissingApiRoot from '../error/psychic-app/init-missing-api-root.js'
@@ -36,7 +36,7 @@ import importControllers, { getControllersOrFail } from './helpers/import/import
 import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
 import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
-import { PsychicHookEventType } from './types.js'
+import { PsychicHookEventType, PsychicUseEventType, PsychicUseEventTypeValues } from './types.js'
 
 export default class PsychicApp {
   public static async init(
@@ -349,6 +349,41 @@ Try setting it to something valid, like:
     await this.inflections?.()
 
     this.booted = true
+  }
+
+  public use(on: PsychicUseEventType, handler: RequestHandler<any, any, any, any, any>): void
+  public use(handler: RequestHandler<any, any, any, any, any>): void
+  public use(handler: () => void): void
+  public use(pathOrOnOrHandler: unknown, maybeHandler?: unknown): void {
+    if (maybeHandler) {
+      const eventType = pathOrOnOrHandler as PsychicUseEventType
+      const handler = maybeHandler as () => void
+      const wrappedHandler = (server: PsychicServer) => {
+        server.expressApp.use(handler)
+      }
+
+      switch (eventType) {
+        case 'before-middleware':
+          this.on('server:init:before-middleware', wrappedHandler)
+          break
+
+        case 'after-middleware':
+          this.on('server:init:after-middleware', wrappedHandler)
+          break
+
+        case 'after-routes':
+          this.on('server:init:after-routes', wrappedHandler)
+          break
+        default:
+          throw new Error(`missing required case handler for PsychicApp#use: "${eventType}"`)
+      }
+      return
+    } else {
+      const wrappedHandler = (server: PsychicServer) => {
+        server.expressApp.use(pathOrOnOrHandler as RequestHandler<any, any, any, any, any>)
+      }
+      this.on('server:init:after-middleware', wrappedHandler)
+    }
   }
 
   public plugin(cb: (app: PsychicApp) => void | Promise<void>) {

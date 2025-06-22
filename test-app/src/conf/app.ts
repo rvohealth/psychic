@@ -198,6 +198,20 @@ export default async (psy: PsychicApp) => {
   // ******
   // HOOKS:
   // ******
+  psy.use((_, __, next) => {
+    __forTestingOnly('use')
+    next()
+  })
+
+  psy.use('before-middleware', (_, __, next) => {
+    __forTestingOnly('use:before-middleware')
+    next()
+  })
+
+  psy.use('after-middleware', (_, __, next) => {
+    __forTestingOnly('use:after-middleware')
+    next()
+  })
 
   // run a callback on server boot (but before routes are processed)
   psy.on('server:init:before-middleware', () => {
