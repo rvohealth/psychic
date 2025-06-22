@@ -3,7 +3,7 @@
  * Do not make direct changes to the file.
  */
 
-export interface openapiPaths {
+export interface paths {
     "/api/pets": {
         parameters: {
             query?: never;
