@@ -25,7 +25,27 @@ describe('addResourceToRoutes', () => {
       it('renders the resource into the file', async () => {
         await fs.writeFile(tmpRoutesFilepath, await fs.readFile(path.join(supportDir, 'boilerplate.ts')))
         const expected = await fs.readFile(path.join(supportDir, 'resource.ts'))
-        await addResourceToRoutes('posts')
+        await addResourceToRoutes('posts', { singular: false, onlyActions: undefined })
+        const actual = await fs.readFile(tmpRoutesFilepath)
+        expect(actual.toString()).toEqual(expected.toString())
+      })
+    })
+
+    context('with singular:true', () => {
+      it('renders the resource into the file', async () => {
+        await fs.writeFile(tmpRoutesFilepath, await fs.readFile(path.join(supportDir, 'boilerplate.ts')))
+        const expected = await fs.readFile(path.join(supportDir, 'singularResource.ts'))
+        await addResourceToRoutes('post', { singular: true, onlyActions: undefined })
+        const actual = await fs.readFile(tmpRoutesFilepath)
+        expect(actual.toString()).toEqual(expected.toString())
+      })
+    })
+
+    context('with onlyActions: "create,show"', () => {
+      it('renders the resource into the file', async () => {
+        await fs.writeFile(tmpRoutesFilepath, await fs.readFile(path.join(supportDir, 'boilerplate.ts')))
+        const expected = await fs.readFile(path.join(supportDir, 'onlyResource.ts'))
+        await addResourceToRoutes('posts', { singular: false, onlyActions: ['create', 'show'] })
         const actual = await fs.readFile(tmpRoutesFilepath)
         expect(actual.toString()).toEqual(expected.toString())
       })
@@ -35,7 +55,7 @@ describe('addResourceToRoutes', () => {
       it('renders the resource into the file', async () => {
         await fs.writeFile(tmpRoutesFilepath, await fs.readFile(path.join(supportDir, 'boilerplate.ts')))
         const expected = await fs.readFile(path.join(supportDir, 'namespacedResource.ts'))
-        await addResourceToRoutes('api/posts')
+        await addResourceToRoutes('api/posts', { singular: false, onlyActions: undefined })
         const actual = await fs.readFile(tmpRoutesFilepath)
         expect(actual.toString()).toEqual(expected.toString())
       })
@@ -45,7 +65,7 @@ describe('addResourceToRoutes', () => {
       it('renders the resource into the file', async () => {
         await fs.writeFile(tmpRoutesFilepath, await fs.readFile(path.join(supportDir, 'boilerplate.ts')))
         const expected = await fs.readFile(path.join(supportDir, 'nestedNamespacedResource.ts'))
-        await addResourceToRoutes('api/v1/posts')
+        await addResourceToRoutes('api/v1/posts', { singular: false, onlyActions: undefined })
         const actual = await fs.readFile(tmpRoutesFilepath)
         expect(actual.toString()).toEqual(expected.toString())
       })
@@ -57,7 +77,7 @@ describe('addResourceToRoutes', () => {
       it('renders the resource into the file', async () => {
         await fs.writeFile(tmpRoutesFilepath, await fs.readFile(path.join(supportDir, 'resource.ts')))
         const expected = await fs.readFile(path.join(supportDir, 'resourceAddedToResource.ts'))
-        await addResourceToRoutes('comments')
+        await addResourceToRoutes('comments', { singular: false, onlyActions: undefined })
         const actual = await fs.readFile(tmpRoutesFilepath)
         expect(actual.toString()).toEqual(expected.toString())
       })
@@ -72,7 +92,7 @@ describe('addResourceToRoutes', () => {
           await fs.readFile(path.join(supportDir, 'namespacedResource.ts')),
         )
         const expected = await fs.readFile(path.join(supportDir, 'namespacedResourceAddedToNamespace.ts'))
-        await addResourceToRoutes('api/comments')
+        await addResourceToRoutes('api/comments', { singular: false, onlyActions: undefined })
         const actual = await fs.readFile(tmpRoutesFilepath)
         expect(actual.toString()).toEqual(expected.toString())
       })
@@ -87,7 +107,7 @@ describe('addResourceToRoutes', () => {
         const expected = await fs.readFile(
           path.join(supportDir, 'nestedNamespacedResourceAddedToNamespace.ts'),
         )
-        await addResourceToRoutes('api/v1/comments')
+        await addResourceToRoutes('api/v1/comments', { singular: false, onlyActions: undefined })
         const actual = await fs.readFile(tmpRoutesFilepath)
         expect(actual.toString()).toEqual(expected.toString())
       })
@@ -104,7 +124,7 @@ describe('addResourceToRoutes', () => {
         const expected = await fs.readFile(
           path.join(supportDir, 'nestedNamespacedResourceAddedToNestedNamespace.ts'),
         )
-        await addResourceToRoutes('api/v1/comments')
+        await addResourceToRoutes('api/v1/comments', { singular: false, onlyActions: undefined })
         const actual = await fs.readFile(tmpRoutesFilepath)
         expect(actual.toString()).toEqual(expected.toString())
       })
@@ -114,7 +134,10 @@ describe('addResourceToRoutes', () => {
 
 describe('addResourceToRoutes_routeToRegexAndReplacements', () => {
   it('"posts"', () => {
-    const results = addResourceToRoutes_routeToRegexAndReplacements('posts')
+    const results = addResourceToRoutes_routeToRegexAndReplacements('posts', {
+      singular: false,
+      onlyActions: undefined,
+    })
     expect(results[0]!.regex).toEqual(/^export default \(r: PsychicRouter\) => \{\n/m)
     expect(results[0]!.replacement).toEqual(
       `export default (r: PsychicRouter) => {\n  r.resources('posts')\n`,
@@ -122,7 +145,10 @@ describe('addResourceToRoutes_routeToRegexAndReplacements', () => {
   })
 
   it('"api/posts"', () => {
-    const results = addResourceToRoutes_routeToRegexAndReplacements('api/posts')
+    const results = addResourceToRoutes_routeToRegexAndReplacements('api/posts', {
+      singular: false,
+      onlyActions: undefined,
+    })
 
     const sharedExpectedReplacement = `  r.namespace('api', r => {\n    r.resources('posts')\n`
 
@@ -136,7 +162,10 @@ describe('addResourceToRoutes_routeToRegexAndReplacements', () => {
   })
 
   it('"api/v1/posts"', () => {
-    const results = addResourceToRoutes_routeToRegexAndReplacements('api/v1/posts')
+    const results = addResourceToRoutes_routeToRegexAndReplacements('api/v1/posts', {
+      singular: false,
+      onlyActions: undefined,
+    })
 
     const sharedExpectedReplacement = `  r.namespace('api', r => {\n    r.namespace('v1', r => {\n      r.resources('posts')\n`
 

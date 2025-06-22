@@ -4,12 +4,18 @@ import UnexpectedUndefined from '../../error/UnexpectedUndefined.js'
 import psychicPath from '../../helpers/path/psychicPath.js'
 import PsychicApp from '../../psychic-app/index.js'
 
-export default async function addResourceToRoutes(route: string) {
+export default async function addResourceToRoutes(
+  route: string,
+  options: {
+    singular: boolean
+    onlyActions: string[] | undefined
+  },
+) {
   const psychicApp = PsychicApp.getOrFail()
   const routesFilePath = path.join(psychicApp.apiRoot, psychicPath('apiRoutes'))
   let routes = (await fs.readFile(routesFilePath)).toString()
 
-  const matchesAndReplacements = addResourceToRoutes_routeToRegexAndReplacements(route)
+  const matchesAndReplacements = addResourceToRoutes_routeToRegexAndReplacements(route, options)
   for (let index = 0; index < matchesAndReplacements.length; index++) {
     const matchAndReplacement = matchesAndReplacements[index]
     if (matchAndReplacement === undefined) throw new UnexpectedUndefined()
@@ -29,10 +35,24 @@ export default async function addResourceToRoutes(route: string) {
   await fs.writeFile(routesFilePath, routes)
 }
 
-export function addResourceToRoutes_routeToRegexAndReplacements(route: string): RegexAndReplacement[] {
+export function addResourceToRoutes_routeToRegexAndReplacements(
+  route: string,
+  {
+    singular,
+    onlyActions,
+  }: {
+    singular: boolean
+    onlyActions: string[] | undefined
+  },
+): RegexAndReplacement[] {
   const regexAndReplacements: RegexAndReplacement[] = []
   const namespaces = route.split('/')
-  const resources = `  ${indent(namespaces.length - 1)}r.resources('${namespaces.pop()}')`
+  const resourceMethod = singular ? 'resource' : 'resources'
+  const resourceName = namespaces.pop()
+  const resourceOptions = onlyActions
+    ? `, { only: ${JSON.stringify(onlyActions).replace(/"/g, "'").replace(/','/g, "', '")} }`
+    : ''
+  const resources = `  ${indent(namespaces.length)}r.${resourceMethod}('${resourceName}'${resourceOptions})`
   const replacement =
     namespaces.map((namespace, index) => `${indent(index + 1)}${namespaceCode(namespace)}\n`).join('') +
     resources +

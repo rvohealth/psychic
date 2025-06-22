@@ -15,14 +15,23 @@ import syncTypescriptOpenapiFiles from './helpers/syncTypescriptOpenapiFiles.js'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
-    await generateController({ fullyQualifiedControllerName: controllerName, actions })
+    await generateController({
+      fullyQualifiedControllerName: controllerName,
+      actions,
+      singular: false,
+    })
   }
 
   public static async generateResource(
     route: string,
     fullyQualifiedModelName: string,
     columnsWithTypes: string[],
-    options: { stiBaseSerializer: boolean; owningModel?: string },
+    options: {
+      singular: boolean
+      onlyActions?: string
+      stiBaseSerializer: boolean
+      owningModel?: string
+    },
   ) {
     await generateResource({ route, fullyQualifiedModelName, columnsWithTypes, options })
   }

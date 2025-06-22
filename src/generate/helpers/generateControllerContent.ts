@@ -16,6 +16,7 @@ export default function generateControllerContent({
   omitOpenApi = false,
   owningModel,
   forAdmin,
+  singular,
 }: {
   ancestorName: string
   ancestorImportStatement: string
@@ -25,6 +26,7 @@ export default function generateControllerContent({
   omitOpenApi?: boolean | undefined
   owningModel?: string | undefined
   forAdmin: boolean
+  singular: boolean
 }) {
   fullyQualifiedControllerName = standardizeFullyQualifiedModelName(fullyQualifiedControllerName)
 
@@ -44,7 +46,7 @@ export default function generateControllerContent({
     fullyQualifiedModelName = standardizeFullyQualifiedModelName(fullyQualifiedModelName)
     modelClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
     modelAttributeName = camelize(modelClassName)
-    pluralizedModelAttributeName = pluralize(modelAttributeName)
+    pluralizedModelAttributeName = singular ? modelAttributeName : pluralize(modelAttributeName)
     additionalImports.push(importStatementForModel(fullyQualifiedControllerName, fullyQualifiedModelName))
   }
 

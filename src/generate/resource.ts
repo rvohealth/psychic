@@ -3,6 +3,9 @@ import pluralize from 'pluralize-esm'
 import generateController from './controller.js'
 import addResourceToRoutes from './helpers/addResourceToRoutes.js'
 
+export const RESOURCE_ACTIONS = ['index', 'show', 'create', 'update', 'destroy'] as const
+export const SINGULAR_RESOURCE_ACTIONS = ['show', 'create', 'update', 'destroy'] as const
+
 export default async function generateResource({
   route,
   fullyQualifiedModelName,
@@ -11,10 +14,17 @@ export default async function generateResource({
 }: {
   route: string
   fullyQualifiedModelName: string
-  options: { stiBaseSerializer: boolean; owningModel?: string }
+  options: {
+    singular: boolean
+    only?: string
+    stiBaseSerializer: boolean
+    owningModel?: string
+  }
   columnsWithTypes: string[]
 }) {
   const fullyQualifiedControllerName = standardizeFullyQualifiedModelName(route)
+  const resourcefulActions = options.singular ? [...SINGULAR_RESOURCE_ACTIONS] : [...RESOURCE_ACTIONS]
+  const onlyActions = options.only?.split(',')
 
   const forAdmin = /^Admin\//.test(fullyQualifiedControllerName)
 
@@ -33,11 +43,17 @@ export default async function generateResource({
   await generateController({
     fullyQualifiedControllerName,
     fullyQualifiedModelName,
-    actions: ['create', 'index', 'show', 'update', 'destroy'],
+    actions: onlyActions
+      ? resourcefulActions.filter(action => onlyActions.includes(action))
+      : resourcefulActions,
     columnsWithTypes,
     resourceSpecs: true,
+    singular: options.singular,
     owningModel: options.owningModel,
   })
 
-  await addResourceToRoutes(route)
+  await addResourceToRoutes(route, {
+    singular: options.singular,
+    onlyActions,
+  })
 }

@@ -1,4 +1,5 @@
 import generateResourceControllerSpecContent from '../../../../src/generate/helpers/generateResourceControllerSpecContent.js'
+import { RESOURCE_ACTIONS } from '../../../../src/generate/resource.js'
 
 describe('generateResourceControllerSpecContent', () => {
   it('generates a useful resource controller spec', () => {
@@ -20,6 +21,8 @@ describe('generateResourceControllerSpecContent', () => {
         'postable_type:enum:postable_types:article,column',
       ],
       forAdmin: false,
+      singular: false,
+      actions: [...RESOURCE_ACTIONS],
     })
     expect(res).toEqual(`\
 import { UpdateableProperties } from '@rvoh/dream'
@@ -121,17 +124,24 @@ describe('V1/PostsController', () => {
       }, 201)
 
       const post = await user.associationQuery('posts').firstOrFail()
+      expect(post.style).toEqual('formal')
+      expect(post.title).toEqual('The Post title')
+      expect(post.subtitle).toEqual('The Post subtitle')
+      expect(post.bodyMarkdown).toEqual('The Post bodyMarkdown')
+      expect(post.rating).toEqual(1.1)
+      expect(post.ratings).toEqual(1)
+      expect(post.bigRating).toEqual('11111111111111111')
 
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
-          style: 'formal',
-          title: 'The Post title',
-          subtitle: 'The Post subtitle',
-          bodyMarkdown: 'The Post bodyMarkdown',
-          rating: 1.1,
-          ratings: 1,
-          bigRating: '11111111111111111',
+          style: post.style,
+          title: post.title,
+          subtitle: post.subtitle,
+          bodyMarkdown: post.bodyMarkdown,
+          rating: post.rating,
+          ratings: post.ratings,
+          bigRating: post.bigRating,
         }),
       )
     })
@@ -234,6 +244,252 @@ describe('V1/PostsController', () => {
 `)
   })
 
+  context('only', () => {
+    it('omits actions left out of the list', () => {
+      const res = generateResourceControllerSpecContent({
+        fullyQualifiedControllerName: 'V1/PostsController',
+        route: 'v1/posts',
+        fullyQualifiedModelName: 'Post',
+        columnsWithTypes: [
+          'type:enum:post_type:WeeklyPost,GuestPost',
+          'style:enum:building_style:formal,informal',
+          'title:citext',
+          'subtitle:string',
+          'body_markdown:text',
+          'rating:decimal:3,2',
+          'ratings:integer',
+          'big_rating:bigint',
+          'User:belongs_to',
+          'postable_id:bigint',
+          'postable_type:enum:postable_types:article,column',
+        ],
+        forAdmin: false,
+        singular: false,
+        actions: ['create', 'show'],
+      })
+      expect(res).toEqual(`\
+import { UpdateableProperties } from '@rvoh/dream'
+import Post from '../../../../src/app/models/Post.js'
+import User from '../../../../src/app/models/User.js'
+import createPost from '../../../factories/PostFactory.js'
+import createUser from '../../../factories/UserFactory.js'
+import { session, SpecRequestType } from '../../helpers/authentication.js'
+
+describe('V1/PostsController', () => {
+  let request: SpecRequestType
+  let user: User
+
+  beforeEach(async () => {
+    user = await createUser()
+    request = await session(user)
+  })
+
+  describe('GET show', () => {
+    const subject = async <StatusCode extends 200 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+      return request.get('/v1/posts/{id}', expectedStatus, {
+        id: post.id,
+      })
+    }
+
+    it('returns the specified Post', async () => {
+      const post = await createPost({ user })
+
+      const { body } = await subject(post, 200)
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: post.id,
+          style: post.style,
+          title: post.title,
+          subtitle: post.subtitle,
+          bodyMarkdown: post.bodyMarkdown,
+          rating: post.rating,
+          ratings: post.ratings,
+          bigRating: post.bigRating,
+        }),
+      )
+    })
+
+    context('Post created by another User', () => {
+      it('is not found', async () => {
+        const otherUserPost = await createPost()
+
+        await subject(otherUserPost, 404)
+      })
+    })
+  })
+
+  describe('POST create', () => {
+    const subject = async <StatusCode extends 201 | 400>(
+      data: UpdateableProperties<Post>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.post('/v1/posts', expectedStatus, { data })
+    }
+
+    it('creates a Post for this User', async () => {
+      const { body } = await subject({
+        style: 'formal',
+        title: 'The Post title',
+        subtitle: 'The Post subtitle',
+        bodyMarkdown: 'The Post bodyMarkdown',
+        rating: 1.1,
+        ratings: 1,
+        bigRating: '11111111111111111',
+      }, 201)
+
+      const post = await user.associationQuery('posts').firstOrFail()
+      expect(post.style).toEqual('formal')
+      expect(post.title).toEqual('The Post title')
+      expect(post.subtitle).toEqual('The Post subtitle')
+      expect(post.bodyMarkdown).toEqual('The Post bodyMarkdown')
+      expect(post.rating).toEqual(1.1)
+      expect(post.ratings).toEqual(1)
+      expect(post.bigRating).toEqual('11111111111111111')
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: post.id,
+          style: post.style,
+          title: post.title,
+          subtitle: post.subtitle,
+          bodyMarkdown: post.bodyMarkdown,
+          rating: post.rating,
+          ratings: post.ratings,
+          bigRating: post.bigRating,
+        }),
+      )
+    })
+  })
+})
+`)
+    })
+  })
+
+  context('singular', () => {
+    it('updates does not pass id and omits index', () => {
+      const res = generateResourceControllerSpecContent({
+        fullyQualifiedControllerName: 'V1/HostingAgreementController',
+        route: 'v1/hosting-agreement',
+        fullyQualifiedModelName: 'HostingAgreement',
+        columnsWithTypes: ['signed_on:date', 'signed_at:datetime'],
+        forAdmin: false,
+        singular: true,
+        actions: [...RESOURCE_ACTIONS],
+      })
+      expect(res).toEqual(`\
+import { UpdateableProperties, CalendarDate, DateTime } from '@rvoh/dream'
+import HostingAgreement from '../../../../src/app/models/HostingAgreement.js'
+import User from '../../../../src/app/models/User.js'
+import createHostingAgreement from '../../../factories/HostingAgreementFactory.js'
+import createUser from '../../../factories/UserFactory.js'
+import { session, SpecRequestType } from '../../helpers/authentication.js'
+
+describe('V1/HostingAgreementController', () => {
+  let request: SpecRequestType
+  let user: User
+
+  beforeEach(async () => {
+    user = await createUser()
+    request = await session(user)
+  })
+
+  describe('GET show', () => {
+    const subject = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+      return request.get('/v1/hosting-agreement', expectedStatus)
+    }
+
+    it('returns the HostingAgreement belonging to the User', async () => {
+      const hostingAgreement = await createHostingAgreement({ user })
+
+      const { body } = await subject(200)
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: hostingAgreement.id,
+          signedOn: hostingAgreement.signedOn.toISO(),
+          signedAt: hostingAgreement.signedAt.toISO(),
+        }),
+      )
+    })
+  })
+
+  describe('POST create', () => {
+    const subject = async <StatusCode extends 201 | 400>(
+      data: UpdateableProperties<HostingAgreement>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.post('/v1/hosting-agreement', expectedStatus, { data })
+    }
+
+    it('creates a HostingAgreement for this User', async () => {
+      const today = CalendarDate.today()
+      const now = DateTime.now()
+
+      const { body } = await subject({
+        signedOn: today,
+        signedAt: now,
+      }, 201)
+
+      const hostingAgreement = await user.associationQuery('hostingAgreement').firstOrFail()
+      expect(hostingAgreement.signedOn).toEqualCalendarDate(today)
+      expect(hostingAgreement.signedAt).toEqualDateTime(now)
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: hostingAgreement.id,
+          signedOn: hostingAgreement.signedOn.toISO(),
+          signedAt: hostingAgreement.signedAt.toISO(),
+        }),
+      )
+    })
+  })
+
+  describe('PATCH update', () => {
+    const subject = async <StatusCode extends 204 | 400 | 404>(
+      data: UpdateableProperties<HostingAgreement>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.patch('/v1/hosting-agreement', expectedStatus, {
+        data,
+      })
+    }
+
+    it('updates the HostingAgreement', async () => {
+      const yesterday = CalendarDate.yesterday()
+      const lastHour = DateTime.now().minus({ hour: 1 })
+
+      const hostingAgreement = await createHostingAgreement({ user })
+
+      await subject({
+        signedOn: yesterday,
+        signedAt: lastHour,
+      }, 204)
+
+      await hostingAgreement.reload()
+      expect(hostingAgreement.signedOn).toEqualCalendarDate(yesterday)
+      expect(hostingAgreement.signedAt).toEqualDateTime(lastHour)
+    })
+  })
+
+  describe('DELETE destroy', () => {
+    const subject = async <StatusCode extends 204 | 400 | 404>(expectedStatus: StatusCode) => {
+      return request.delete('/v1/hosting-agreement', expectedStatus)
+    }
+
+    it('deletes the HostingAgreement', async () => {
+      const hostingAgreement = await createHostingAgreement({ user })
+
+      await subject(204)
+
+      expect(await HostingAgreement.find(hostingAgreement.id)).toBeNull()
+    })
+  })
+})
+`)
+    })
+  })
+
   context('when owningModel is specified', () => {
     it('generates a useful resource controller spec', () => {
       const res = generateResourceControllerSpecContent({
@@ -243,6 +499,8 @@ describe('V1/PostsController', () => {
         columnsWithTypes: ['body:text', 'Host:belongs_to'],
         owningModel: 'Host',
         forAdmin: false,
+        singular: false,
+        actions: [...RESOURCE_ACTIONS],
       })
       expect(res).toEqual(`\
 import { UpdateableProperties } from '@rvoh/dream'
@@ -336,11 +594,12 @@ describe('V1/PostsController', () => {
       }, 201)
 
       const post = await host.associationQuery('posts').firstOrFail()
+      expect(post.body).toEqual('The Post body')
 
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
-          body: 'The Post body',
+          body: post.body,
         }),
       )
     })
@@ -422,6 +681,8 @@ describe('V1/PostsController', () => {
         fullyQualifiedModelName: 'Article',
         columnsWithTypes: ['body:text'],
         forAdmin: true,
+        singular: false,
+        actions: [...RESOURCE_ACTIONS],
       })
       expect(res).toEqual(`\
 import { UpdateableProperties } from '@rvoh/dream'
@@ -493,11 +754,12 @@ describe('Admin/ArticlesController', () => {
       }, 201)
 
       const article = await Article.firstOrFail()
+      expect(article.body).toEqual('The Article body')
 
       expect(body).toEqual(
         expect.objectContaining({
           id: article.id,
-          body: 'The Article body',
+          body: article.body,
         }),
       )
     })

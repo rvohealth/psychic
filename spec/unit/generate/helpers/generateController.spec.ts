@@ -28,7 +28,11 @@ describe('generateController', () => {
     const controllerPath = path.join(tmpControllersFilepath, controllerFilename)
     if (existsSync(controllerPath)) await fs.rm(controllerPath)
 
-    await generateController({ fullyQualifiedControllerName: 'Posts', actions: [] })
+    await generateController({
+      fullyQualifiedControllerName: 'Posts',
+      actions: [],
+      singular: false,
+    })
     const actual = await fs.readFile(controllerPath)
     expect(actual.toString()).toEqual(expected.toString())
   })
@@ -43,7 +47,11 @@ describe('generateController', () => {
       const controllerPath = path.join(tmpControllersFilepath, 'Api', controllerFilename)
       if (existsSync(controllerPath)) await fs.rm(controllerPath)
 
-      await generateController({ fullyQualifiedControllerName: 'Api/Posts', actions: [] })
+      await generateController({
+        fullyQualifiedControllerName: 'Api/Posts',
+        actions: [],
+        singular: false,
+      })
       const actualBase = await fs.readFile(basePath)
       const actual = await fs.readFile(controllerPath)
       expect(actualBase.toString()).toEqual(expectedBase.toString())
@@ -66,7 +74,11 @@ describe('generateController', () => {
       const controllerPath = path.join(tmpControllersFilepath, 'Api', 'V1', controllerFilename)
       if (existsSync(controllerPath)) await fs.rm(controllerPath)
 
-      await generateController({ fullyQualifiedControllerName: 'Api/V1/Posts', actions: [] })
+      await generateController({
+        fullyQualifiedControllerName: 'Api/V1/Posts',
+        actions: [],
+        singular: false,
+      })
       const actualBase = await fs.readFile(basePath)
       const actualNestedBase = await fs.readFile(nestedBasePath)
       const actual = await fs.readFile(controllerPath)
@@ -83,7 +95,11 @@ describe('generateController', () => {
       const controllerPath = path.join(adminTmpControllersFilepath, controllerFilename)
       if (existsSync(controllerPath)) await fs.rm(controllerPath)
 
-      await generateController({ fullyQualifiedControllerName: 'Admin/Posts', actions: [] })
+      await generateController({
+        fullyQualifiedControllerName: 'Admin/Posts',
+        actions: [],
+        singular: false,
+      })
       const actual = await fs.readFile(controllerPath)
       expect(actual.toString()).toEqual(expected.toString())
     })
@@ -98,7 +114,11 @@ describe('generateController', () => {
         const controllerPath = path.join(adminTmpControllersFilepath, 'Api', controllerFilename)
         if (existsSync(controllerPath)) await fs.rm(controllerPath)
 
-        await generateController({ fullyQualifiedControllerName: 'Admin/Api/Posts', actions: [] })
+        await generateController({
+          fullyQualifiedControllerName: 'Admin/Api/Posts',
+          actions: [],
+          singular: false,
+        })
         const actualBase = await fs.readFile(basePath)
         const actual = await fs.readFile(controllerPath)
         expect(actualBase.toString()).toEqual(expectedBase.toString())
@@ -123,7 +143,11 @@ describe('generateController', () => {
         const controllerPath = path.join(adminTmpControllersFilepath, 'Api', 'V1', controllerFilename)
         if (existsSync(controllerPath)) await fs.rm(controllerPath)
 
-        await generateController({ fullyQualifiedControllerName: 'Admin/Api/V1/Posts', actions: [] })
+        await generateController({
+          fullyQualifiedControllerName: 'Admin/Api/V1/Posts',
+          actions: [],
+          singular: false,
+        })
         const actualBase = await fs.readFile(basePath)
         const actualNestedBase = await fs.readFile(nestedBasePath)
         const actual = await fs.readFile(controllerPath)
