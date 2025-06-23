@@ -82,8 +82,6 @@ export default function generateResourceControllerSpecContent({
 
     switch (attributeType) {
       case 'enum': {
-        if (attribute === 'type') continue
-
         const originalEnumValue = (enumValues ?? '').split(',').at(0)!
         const updatedEnumValue = (enumValues ?? '').split(',').at(-1)!
 
