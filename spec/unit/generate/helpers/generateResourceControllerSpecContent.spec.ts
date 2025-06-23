@@ -84,6 +84,7 @@ describe('V1/PostsController', () => {
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
+          type: post.type,
           style: post.style,
           title: post.title,
           subtitle: post.subtitle,
@@ -114,6 +115,7 @@ describe('V1/PostsController', () => {
 
     it('creates a Post for this User', async () => {
       const { body } = await subject({
+        type: 'WeeklyPost',
         style: 'formal',
         title: 'The Post title',
         subtitle: 'The Post subtitle',
@@ -124,6 +126,7 @@ describe('V1/PostsController', () => {
       }, 201)
 
       const post = await user.associationQuery('posts').firstOrFail()
+      expect(post.type).toEqual('WeeklyPost')
       expect(post.style).toEqual('formal')
       expect(post.title).toEqual('The Post title')
       expect(post.subtitle).toEqual('The Post subtitle')
@@ -135,6 +138,7 @@ describe('V1/PostsController', () => {
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
+          type: post.type,
           style: post.style,
           title: post.title,
           subtitle: post.subtitle,
@@ -163,6 +167,7 @@ describe('V1/PostsController', () => {
       const post = await createPost({ user })
 
       await subject(post, {
+        type: 'GuestPost',
         style: 'informal',
         title: 'Updated Post title',
         subtitle: 'Updated Post subtitle',
@@ -173,6 +178,7 @@ describe('V1/PostsController', () => {
       }, 204)
 
       await post.reload()
+      expect(post.type).toEqual('GuestPost')
       expect(post.style).toEqual('informal')
       expect(post.title).toEqual('Updated Post title')
       expect(post.subtitle).toEqual('Updated Post subtitle')
@@ -185,6 +191,7 @@ describe('V1/PostsController', () => {
     context('a Post created by another User', () => {
       it('is not updated', async () => {
         const post = await createPost()
+        const originalType = post.type
         const originalStyle = post.style
         const originalTitle = post.title
         const originalSubtitle = post.subtitle
@@ -194,6 +201,7 @@ describe('V1/PostsController', () => {
         const originalBigRating = post.bigRating
 
         await subject(post, {
+          type: 'GuestPost',
           style: 'informal',
           title: 'Updated Post title',
           subtitle: 'Updated Post subtitle',
@@ -204,6 +212,7 @@ describe('V1/PostsController', () => {
         }, 404)
 
         await post.reload()
+        expect(post.type).toEqual(originalType)
         expect(post.style).toEqual(originalStyle)
         expect(post.title).toEqual(originalTitle)
         expect(post.subtitle).toEqual(originalSubtitle)
@@ -299,6 +308,7 @@ describe('V1/PostsController', () => {
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
+          type: post.type,
           style: post.style,
           title: post.title,
           subtitle: post.subtitle,
@@ -329,6 +339,7 @@ describe('V1/PostsController', () => {
 
     it('creates a Post for this User', async () => {
       const { body } = await subject({
+        type: 'WeeklyPost',
         style: 'formal',
         title: 'The Post title',
         subtitle: 'The Post subtitle',
@@ -339,6 +350,7 @@ describe('V1/PostsController', () => {
       }, 201)
 
       const post = await user.associationQuery('posts').firstOrFail()
+      expect(post.type).toEqual('WeeklyPost')
       expect(post.style).toEqual('formal')
       expect(post.title).toEqual('The Post title')
       expect(post.subtitle).toEqual('The Post subtitle')
@@ -350,6 +362,7 @@ describe('V1/PostsController', () => {
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
+          type: post.type,
           style: post.style,
           title: post.title,
           subtitle: post.subtitle,

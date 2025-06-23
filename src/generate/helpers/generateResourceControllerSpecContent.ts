@@ -75,7 +75,6 @@ export default function generateResourceControllerSpecContent({
 
   for (const attribute of columnsWithTypes) {
     const [rawAttributeName, attributeType, , enumValues] = attribute.split(':')
-    if (rawAttributeName === 'type') continue
     if (/(_type|_id)$/.test(rawAttributeName ?? '')) continue
     const attributeName = camelize(rawAttributeName ?? '')
     const dotNotationVariable = `${modelVariableName}.${attributeName}`
