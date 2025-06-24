@@ -20,7 +20,7 @@ export default async function writeApiFile({ apiFile, apiImport }: { apiFile: st
   const contents = `\
 // Or from '@reduxjs/toolkit/query' if not using the auto-generated hooks
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
-import { RootState } from '../store' // update this to the correct path to your app's store
+// import { RootState } from '../store' // update this to the correct path to your app's store
 
 function baseUrl() {
   // add custom code here for determining your application's baseUrl
