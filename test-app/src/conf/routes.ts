@@ -27,6 +27,8 @@ export default (r: PsychicRouter) => {
   r.get('auth-ping', AuthedUsersController, 'ping')
   r.get('api-ping', ApiUsersController, 'ping')
   r.post('cast-param-test', ParamsTestController, 'testCastParam')
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+  r.get('non-existent-action', ParamsTestController, 'thisActionDoesntExistIntentionally' as any)
   r.post('openapi-validation-test', ParamsTestController, 'testOpenapiValidation')
   r.get(
     'openapi-validation-on-explicit-query-arrays',
