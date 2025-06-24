@@ -54,6 +54,7 @@ describe('generateOpenapiReduxBindings', () => {
           outputFile: '../../../../client/app/api/testappApi.ts',
           apiImport: 'emptyTestappApi',
           exportName: 'testappApi',
+          hooks: true,
         })
       })
     })
@@ -78,6 +79,7 @@ describe('generateOpenapiReduxBindings', () => {
           outputFile: '../../../test-client/app/api/wellos-central.ts',
           apiImport: 'emptySplitApi',
           exportName: 'myApi',
+          hooks: true,
         })
       })
     })
