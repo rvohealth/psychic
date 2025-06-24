@@ -11,7 +11,7 @@ import {
 import * as bodyParser from 'body-parser'
 import { Command } from 'commander'
 import { CorsOptions } from 'cors'
-import { Application, Request, Response, Express, RequestHandler } from 'express'
+import { Request, RequestHandler, Response } from 'express'
 import * as http from 'node:http'
 import PackageManager from '../cli/helpers/PackageManager.js'
 import PsychicAppInitMissingApiRoot from '../error/psychic-app/init-missing-api-root.js'
@@ -36,7 +36,7 @@ import importControllers, { getControllersOrFail } from './helpers/import/import
 import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
 import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
-import { PsychicHookEventType, PsychicUseEventType, PsychicUseEventTypeValues } from './types.js'
+import { PsychicHookEventType, PsychicUseEventType } from './types.js'
 
 export default class PsychicApp {
   public static async init(
@@ -351,8 +351,8 @@ Try setting it to something valid, like:
     this.booted = true
   }
 
-  public use(on: PsychicUseEventType, handler: RequestHandler<any, any, any, any, any>): void
-  public use(handler: RequestHandler<any, any, any, any, any>): void
+  public use(on: PsychicUseEventType, handler: RequestHandler): void
+  public use(handler: RequestHandler): void
   public use(handler: () => void): void
   public use(pathOrOnOrHandler: unknown, maybeHandler?: unknown): void {
     if (maybeHandler) {
@@ -375,12 +375,12 @@ Try setting it to something valid, like:
           this.on('server:init:after-routes', wrappedHandler)
           break
         default:
-          throw new Error(`missing required case handler for PsychicApp#use: "${eventType}"`)
+          throw new Error(`missing required case handler for PsychicApp#use: "${eventType as string}"`)
       }
       return
     } else {
       const wrappedHandler = (server: PsychicServer) => {
-        server.expressApp.use(pathOrOnOrHandler as RequestHandler<any, any, any, any, any>)
+        server.expressApp.use(pathOrOnOrHandler as RequestHandler)
       }
       this.on('server:init:after-middleware', wrappedHandler)
     }

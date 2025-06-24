@@ -228,7 +228,7 @@ export default async (psy: PsychicApp) => {
   })
 
   // run a callback after the config is loaded, but only if NODE_ENV=prod
-  psy.on('server:error', (err, req, res) => {
+  psy.on('server:error', (err, _, res) => {
     __forTestingOnly('server:error')
 
     if (debugEnabled) {
