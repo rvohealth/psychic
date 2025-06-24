@@ -173,10 +173,10 @@ export const chalupasDujour = createApi({
       expect(contents).toEqual(`\
 import { DreamCLI } from '@rvoh/dream'
 import { PsychicApp } from '@rvoh/psychic'
-import AppEnv from '../AppEnv.js'
+import AppEnv from '../../AppEnv.js'
 
 export default function initializeMyApi(psy: PsychicApp) {
-  psy.on('sync', async () => {
+  psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       DreamCLI.logger.logStartProgress(\`[myApi] syncing...\`)
       await DreamCLI.spawn('npx @rtk-query/codegen-openapi src/conf/openapi/myApi.openapi-codegen.json', {

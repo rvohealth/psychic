@@ -29,10 +29,10 @@ export default async function writeInitializer({ exportName }: { exportName: str
   const contents = `\
 import { DreamCLI } from '@rvoh/dream'
 import { PsychicApp } from '@rvoh/psychic'
-import AppEnv from '../AppEnv.js'
+import AppEnv from '../../AppEnv.js'
 
 export default function initialize${pascalized}(psy: PsychicApp) {
-  psy.on('sync', async () => {
+  psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       DreamCLI.logger.logStartProgress(\`[${camelized}] syncing...\`)
       await DreamCLI.spawn('npx @rtk-query/codegen-openapi ${filePath}', {

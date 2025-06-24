@@ -56,10 +56,10 @@ export function lookupControllerOrFail(
 ): typeof PsychicController {
   const namespaces = opts.resourceName
     ? routingMechanism.currentNamespaces.concat({
-      namespace: opts.resourceName,
-      resourceful: false,
-      isScope: false,
-    })
+        namespace: opts.resourceName,
+        resourceful: false,
+        isScope: false,
+      })
     : routingMechanism.currentNamespaces
 
   const filteredNamespaces = namespaces.filter(n => !n.isScope)
@@ -197,7 +197,6 @@ export function convertRouteParams(path: string): string {
   // Only match valid parameter names (alphanumeric + underscore, 1-50 chars)
   return path.replace(/\{([a-zA-Z_][a-zA-Z0-9_]{0,49})\}/g, ':$1')
 }
-
 
 function httpMethodFromResourcefulAction(action: ResourcesMethodType): HttpMethod {
   switch (action) {
