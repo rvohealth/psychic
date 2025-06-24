@@ -39,3 +39,12 @@ r.get('helloworld', (req, res, next) => {
 ## 1.1.1
 
 Fix route printing regression causing route printouts to show the path instead of the action
+
+## 1.1.2
+
+- Fix various issues with openapi redux bindings
+- raise hard exception if accidentally using openapi route params in an expressjs route path
+
+## 1.1.3
+
+- fix more minor issues with redux openapi bindings
