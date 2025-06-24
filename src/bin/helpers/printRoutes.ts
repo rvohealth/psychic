@@ -1,5 +1,5 @@
 import colors from 'yoctocolors'
-import { RouteConfig } from '../../router/route-manager.js'
+import { ControllerActionRouteConfig, RouteConfig } from '../../router/route-manager.js'
 import PsychicServer from '../../server/index.js'
 
 export default async function printRoutes() {
@@ -25,13 +25,18 @@ export default async function printRoutes() {
 
 function buildExpressions(routes: RouteConfig[]): [string, string][] {
   return routes.map(route => {
+    const formattedPath = '/' + route.path.replace(/^\//, '')
     const method = route.httpMethod.toUpperCase()
     const numMethodSpaces = 8 - method.length
 
     const beginningOfExpression = `${route.httpMethod.toUpperCase()}${' '.repeat(numMethodSpaces)}${
-      route.path
+      formattedPath
     }`
-    const endOfExpression = route.controller.disaplayName + '#' + route.action
+
+    const controllerRouteConf = route as ControllerActionRouteConfig
+    const endOfExpression = controllerRouteConf.controller
+      ? controllerRouteConf.controller.controllerActionPath(formattedPath)
+      : 'middleware'
 
     return [beginningOfExpression, endOfExpression]
   })
@@ -61,5 +66,5 @@ function calculateNumSpacesInLastGap(expressions: [string, string][]) {
     if (expression.length > desiredSpaceCount) desiredSpaceCount = expression.length
   })
 
-  return desiredSpaceCount + 3
+  return desiredSpaceCount
 }

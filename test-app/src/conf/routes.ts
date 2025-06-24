@@ -152,4 +152,33 @@ export default (r: PsychicRouter) => {
   })
 
   r.get('/admin/test', AdminTestController, 'test')
+
+  // ensure that random middleware can still be provided top-level,
+  // same as with an express application
+  r.get('middleware-test', (_, res) => {
+    res.json('get middleware test')
+  })
+  r.post('middleware-test', (_, res) => {
+    res.json('post middleware test')
+  })
+  r.patch('middleware-test', (_, res) => {
+    res.json('patch middleware test')
+  })
+  r.put('middleware-test', (_, res) => {
+    res.json('put middleware test')
+  })
+  r.delete('middleware-test', (_, res) => {
+    res.json('delete middleware test')
+  })
+  r.options('middleware-test', (_, res) => {
+    res.json('options middleware test')
+  })
+
+  r.namespace('nested-middleware', r => {
+    // ensure that nested middleware can apply nested route
+    // paths correctly
+    r.get('middleware-test', (_, res) => {
+      res.json('nested middleware test')
+    })
+  })
 }

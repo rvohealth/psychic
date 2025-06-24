@@ -1,3 +1,4 @@
+import { RequestHandler } from 'express'
 import PsychicController from '../controller/index.js'
 import { HttpMethod } from './types.js'
 
@@ -22,11 +23,36 @@ export default class RouteManager {
       action,
     })
   }
+
+  public addMiddleware({
+    httpMethod,
+    path,
+    middleware,
+  }: {
+    httpMethod: HttpMethod
+    path: string
+    middleware: RequestHandler
+  }) {
+    this.routes.push({
+      httpMethod,
+      path,
+      middleware,
+    })
+  }
 }
 
-export interface RouteConfig {
+export type RouteConfig = ControllerActionRouteConfig | MiddlewareRouteConfig
+
+interface BaseRouteConfig {
+  httpMethod: HttpMethod
+  path: string
+}
+
+export type ControllerActionRouteConfig = BaseRouteConfig & {
   controller: typeof PsychicController
   action: string
-  path: string
-  httpMethod: HttpMethod
+}
+
+export type MiddlewareRouteConfig = BaseRouteConfig & {
+  middleware: RequestHandler
 }

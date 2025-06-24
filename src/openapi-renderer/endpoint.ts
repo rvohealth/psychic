@@ -34,7 +34,7 @@ import NonSerializerDerivedInOpenapiEndpointRenderer from '../error/openapi/NonS
 import NonSerializerDerivedInToSchemaObjects from '../error/openapi/NonSerializerDerivedInToSchemaObjects.js'
 import OpenApiSerializerForEndpointNotAFunction from '../error/openapi/SerializerForEndpointNotAFunction.js'
 import { DreamOrViewModelClassSerializerArrayKeys } from '../helpers/typeHelpers.js'
-import { RouteConfig } from '../router/route-manager.js'
+import { ControllerActionRouteConfig, RouteConfig } from '../router/route-manager.js'
 import { HttpMethod } from '../router/types.js'
 import OpenapiSegmentExpander, {
   OpenapiBodySegment,
@@ -355,9 +355,12 @@ export default class OpenapiEndpointRenderer<
   private getCurrentRouteConfig(routes: RouteConfig[]) {
     // if the action is update, we want to specifically find the 'patch' route,
     // otherwise we find any route that matches
-    const filteredRoutes = routes.filter(
-      routeConfig => routeConfig.controller === this.controllerClass && routeConfig.action === this.action,
-    )
+    const filteredRoutes = routes.filter(routeConfig => {
+      const controllerRouteConf = routeConfig as ControllerActionRouteConfig
+      return (
+        controllerRouteConf.controller === this.controllerClass && controllerRouteConf.action === this.action
+      )
+    })
 
     const route =
       this.action === 'update'

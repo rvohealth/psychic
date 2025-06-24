@@ -3,6 +3,7 @@ import PsychicRouter from '../../../src/router/index.js'
 import PsychicServer from '../../../src/server/index.js'
 import PetsController from '../../../test-app/src/app/controllers/PetsController.js'
 import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
+import { ControllerActionRouteConfig } from '../../../src/router/route-manager.js'
 
 describe('PsychicRouter', () => {
   describe('resources', () => {
@@ -69,8 +70,9 @@ describe('PsychicRouter', () => {
         it('uses the passed controller instead of assuming', () => {
           router.resources('users', { only: ['create'], controller: PetsController })
           router.commit()
-          expect(router.routes[0]!.controller).toEqual(PetsController)
-          expect(router.routes[0]!.action).toEqual('create')
+          const route = router.routes[0]! as ControllerActionRouteConfig
+          expect(route.controller).toEqual(PetsController)
+          expect(route.action).toEqual('create')
         })
       })
 

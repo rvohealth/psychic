@@ -1,5 +1,5 @@
 import { RecordNotFound, ValidationError, camelize } from '@rvoh/dream'
-import { Express, Request, Response, Router } from 'express'
+import { Express, NextFunction, Request, RequestHandler, Response, Router } from 'express'
 import pluralize from 'pluralize-esm'
 import PsychicController from '../controller/index.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
@@ -16,7 +16,7 @@ import {
   lookupControllerOrFail,
   routePath,
 } from '../router/helpers.js'
-import RouteManager from './route-manager.js'
+import RouteManager, { ControllerActionRouteConfig, MiddlewareRouteConfig } from './route-manager.js'
 import {
   HttpMethod,
   ResourceMethods,
@@ -50,27 +50,33 @@ export default class PsychicRouter {
   // this is called after all routes have been processed.
   public commit() {
     this.routes.forEach(route => {
-      this.app[route.httpMethod](routePath(route.path), (req, res) => {
-        this.handle(route.controller, route.action, { req, res }).catch(() => {})
-      })
+      if ((route as MiddlewareRouteConfig).middleware) {
+        const routeConf = route as MiddlewareRouteConfig
+        this.app[routeConf.httpMethod](routePath(routeConf.path), (req, res, next) => {
+          this.handleMiddleware(routeConf.middleware, { req, res, next }).catch(() => {})
+        })
+      } else {
+        const routeConf = route as ControllerActionRouteConfig
+        this.app[routeConf.httpMethod](routePath(routeConf.path), (req, res) => {
+          this.handle(routeConf.controller, routeConf.action, { req, res }).catch(() => {})
+        })
+      }
     })
   }
 
   get(path: string): void
+  get(path: string, middleware: RequestHandler): void
   get<T extends typeof PsychicController>(
     path: string,
     controller: T,
     action: PsychicControllerActions<T>,
   ): void
-  get<T extends typeof PsychicController>(
-    path: string,
-    controller?: T,
-    action?: PsychicControllerActions<T>,
-  ) {
+  get(path: string, controller?: unknown, action?: unknown) {
     this.crud('get', path, controller as typeof PsychicController, action as string)
   }
 
   post(path: string): void
+  post(path: string, middleware: RequestHandler): void
   post<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -85,6 +91,7 @@ export default class PsychicRouter {
   }
 
   put(path: string): void
+  put(path: string, middleware: RequestHandler): void
   put<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -99,6 +106,7 @@ export default class PsychicRouter {
   }
 
   patch(path: string): void
+  patch(path: string, middleware: RequestHandler): void
   patch<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -113,6 +121,7 @@ export default class PsychicRouter {
   }
 
   delete(path: string): void
+  delete(path: string, middleware: RequestHandler): void
   delete<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -127,6 +136,7 @@ export default class PsychicRouter {
   }
 
   options(path: string): void
+  options(path: string, middleware: RequestHandler): void
   options<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -146,23 +156,39 @@ export default class PsychicRouter {
   }
 
   public crud(httpMethod: HttpMethod, path: string): void
+  public crud(httpMethod: HttpMethod, path: string, middleware: RequestHandler): void
   public crud(
     httpMethod: HttpMethod,
     path: string,
     controller: typeof PsychicController,
     action: string,
   ): void
-  public crud(httpMethod: HttpMethod, path: string, controller?: typeof PsychicController, action?: string) {
-    controller ||= lookupControllerOrFail(this, { path, httpMethod })
-    action ||= path.replace(/^\//, '')
-    if (action.match(/\//)) throw new Error('action cant have a slash in it - action was inferred from path')
+  public crud(httpMethod: HttpMethod, path: string, controllerOrMiddleware?: unknown, action?: string) {
+    const isMiddleware =
+      typeof controllerOrMiddleware === 'function' &&
+      !(controllerOrMiddleware as typeof PsychicController)?.isPsychicController
 
-    this.routeManager.addRoute({
-      httpMethod,
-      path: this.prefixPathWithNamespaces(path),
-      controller,
-      action,
-    })
+    // devs can provide custom express middleware which bypasses
+    // the normal Controller#action paradigm.
+    if (isMiddleware) {
+      this.routeManager.addMiddleware({
+        httpMethod,
+        path: this.prefixPathWithNamespaces(path),
+        middleware: controllerOrMiddleware as RequestHandler,
+      })
+    } else {
+      controllerOrMiddleware ||= lookupControllerOrFail(this, { path, httpMethod })
+      action ||= path.replace(/^\//, '')
+      if (action.match(/\//))
+        throw new Error('action cant have a slash in it - action was inferred from path')
+
+      this.routeManager.addRoute({
+        httpMethod,
+        path: this.prefixPathWithNamespaces(path),
+        controller: controllerOrMiddleware as typeof PsychicController,
+        action,
+      })
+    }
   }
 
   public namespace(namespace: string, cb: (router: PsychicNestedRouter) => void) {
@@ -325,6 +351,21 @@ export default class PsychicRouter {
       }),
     ]
     if (nestedRouter) nestedRouter.currentNamespaces = this.currentNamespaces
+  }
+
+  public async handleMiddleware(
+    middleware: RequestHandler,
+    {
+      req,
+      res,
+      next,
+    }: {
+      req: Request
+      res: Response
+      next: NextFunction
+    },
+  ) {
+    await middleware(req, res, next)
   }
 
   public async handle(
