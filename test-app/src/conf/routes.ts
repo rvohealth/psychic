@@ -180,5 +180,6 @@ export default (r: PsychicRouter) => {
     r.get('middleware-test', (_, res) => {
       res.json('nested middleware test')
     })
+    r.get('users/{id}/ham/{otherId}')
   })
 }

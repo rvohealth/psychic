@@ -56,10 +56,10 @@ export function lookupControllerOrFail(
 ): typeof PsychicController {
   const namespaces = opts.resourceName
     ? routingMechanism.currentNamespaces.concat({
-        namespace: opts.resourceName,
-        resourceful: false,
-        isScope: false,
-      })
+      namespace: opts.resourceName,
+      resourceful: false,
+      isScope: false,
+    })
     : routingMechanism.currentNamespaces
 
   const filteredNamespaces = namespaces.filter(n => !n.isScope)
@@ -187,6 +187,17 @@ export function applyResourceAction(
       throw new Error(`unsupported resource method type: ${action}`)
   }
 }
+
+/**
+ * Converts OpenAPI-style route parameters to Express.js-style parameters
+ * Example: users/{userId}/abc/{id} -> users/:userId/abc/:id
+ */
+export function convertRouteParams(path: string): string {
+  // Use a more specific regex to avoid polynomial time complexity
+  // Only match valid parameter names (alphanumeric + underscore, 1-50 chars)
+  return path.replace(/\{([a-zA-Z_][a-zA-Z0-9_]{0,49})\}/g, ':$1')
+}
+
 
 function httpMethodFromResourcefulAction(action: ResourcesMethodType): HttpMethod {
   switch (action) {

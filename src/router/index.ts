@@ -13,6 +13,7 @@ import {
   PsychicControllerActions,
   applyResourceAction,
   applyResourcesAction,
+  convertRouteParams,
   lookupControllerOrFail,
   routePath,
 } from '../router/helpers.js'
@@ -53,12 +54,12 @@ export default class PsychicRouter {
       if ((route as MiddlewareRouteConfig).middleware) {
         const routeConf = route as MiddlewareRouteConfig
         this.app[routeConf.httpMethod](routePath(routeConf.path), (req, res, next) => {
-          this.handleMiddleware(routeConf.middleware, { req, res, next }).catch(() => {})
+          this.handleMiddleware(routeConf.middleware, { req, res, next }).catch(() => { })
         })
       } else {
         const routeConf = route as ControllerActionRouteConfig
         this.app[routeConf.httpMethod](routePath(routeConf.path), (req, res) => {
-          this.handle(routeConf.controller, routeConf.action, { req, res }).catch(() => {})
+          this.handle(routeConf.controller, routeConf.action, { req, res }).catch(() => { })
         })
       }
     })
@@ -164,6 +165,8 @@ export default class PsychicRouter {
     action: string,
   ): void
   public crud(httpMethod: HttpMethod, path: string, controllerOrMiddleware?: unknown, action?: string) {
+    this.checkPathForInvalidChars(path)
+
     const isMiddleware =
       typeof controllerOrMiddleware === 'function' &&
       !(controllerOrMiddleware as typeof PsychicController)?.isPsychicController
@@ -189,6 +192,19 @@ export default class PsychicRouter {
         action,
       })
     }
+  }
+
+  private checkPathForInvalidChars(path: string) {
+    if (path.includes('{'))
+      throw new Error(`
+The provided route "${path}" contains characters that are not supported.
+If you are trying to write a uri param, you will need to use expressjs
+param syntax, which is a prefixing colon, rather than using brackets
+to surround the param.
+
+provided route: "${path}"
+suggested fix:  "${convertRouteParams(path)}"
+`)
   }
 
   public namespace(namespace: string, cb: (router: PsychicNestedRouter) => void) {
