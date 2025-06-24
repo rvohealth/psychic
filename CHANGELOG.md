@@ -35,3 +35,7 @@ r.get('helloworld', (req, res, next) => {
   res.json({ hello: 'world' })
 })
 ```
+
+## 1.1.1
+
+Fix route printing regression causing route printouts to show the path instead of the action
