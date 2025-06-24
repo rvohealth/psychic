@@ -24,9 +24,11 @@ export function BeforeAction(
       if (!Object.getOwnPropertyDescriptor(psychicControllerClass, 'controllerHooks'))
         psychicControllerClass.controllerHooks = [...psychicControllerClass.controllerHooks]
 
-      psychicControllerClass.controllerHooks.push(
-        new ControllerHook(psychicControllerClass.name, methodName.toString(), opts),
-      )
+      if (!psychicControllerClass.controllerHooks.find(hook => hook.methodName === methodName)) {
+        psychicControllerClass.controllerHooks.push(
+          new ControllerHook(psychicControllerClass.name, methodName.toString(), opts),
+        )
+      }
     })
   }
 }
