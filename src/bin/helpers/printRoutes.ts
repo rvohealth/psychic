@@ -35,7 +35,7 @@ function buildExpressions(routes: RouteConfig[]): [string, string][] {
 
     const controllerRouteConf = route as ControllerActionRouteConfig
     const endOfExpression = controllerRouteConf.controller
-      ? controllerRouteConf.controller.controllerActionPath(formattedPath)
+      ? controllerRouteConf.controller.controllerActionPath(controllerRouteConf.action)
       : 'middleware'
 
     return [beginningOfExpression, endOfExpression]
