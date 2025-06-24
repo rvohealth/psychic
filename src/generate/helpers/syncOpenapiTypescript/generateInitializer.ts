@@ -28,7 +28,7 @@ import { PsychicApp } from "@rvoh/psychic"
 import AppEnv from '../AppEnv.js'
 
 export default (psy: PsychicApp) => {
-  psy.on('sync', async () => {
+  psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       DreamCLI.logger.logStartProgress(\`[${hyphenized}] extracting types from ${openapiFilepath} to ${outfile}...\`)
       await DreamCLI.spawn('npx openapi-typescript ${openapiFilepath} -o ${outfile}')

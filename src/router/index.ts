@@ -54,12 +54,12 @@ export default class PsychicRouter {
       if ((route as MiddlewareRouteConfig).middleware) {
         const routeConf = route as MiddlewareRouteConfig
         this.app[routeConf.httpMethod](routePath(routeConf.path), (req, res, next) => {
-          this.handleMiddleware(routeConf.middleware, { req, res, next }).catch(() => { })
+          this.handleMiddleware(routeConf.middleware, { req, res, next }).catch(() => {})
         })
       } else {
         const routeConf = route as ControllerActionRouteConfig
         this.app[routeConf.httpMethod](routePath(routeConf.path), (req, res) => {
-          this.handle(routeConf.controller, routeConf.action, { req, res }).catch(() => { })
+          this.handle(routeConf.controller, routeConf.action, { req, res }).catch(() => {})
         })
       }
     })

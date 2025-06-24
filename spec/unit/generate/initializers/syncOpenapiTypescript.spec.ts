@@ -36,7 +36,7 @@ import { PsychicApp } from "@rvoh/psychic"
 import AppEnv from '../AppEnv.js'
 
 export default (psy: PsychicApp) => {
-  psy.on('sync', async () => {
+  psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       DreamCLI.logger.logStartProgress(\`[sync-openapi-typescript] extracting types from ./openapi.json to ./sync-custom-openapi-typescript.d.ts...\`)
       await DreamCLI.spawn('npx openapi-typescript ./openapi.json -o ./sync-custom-openapi-typescript.d.ts')
