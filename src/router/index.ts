@@ -396,6 +396,10 @@ suggested fix:  "${convertRouteParams(path)}"
     },
   ) {
     const controllerInstance = this._initializeController(controller, req, res, action)
+    if (typeof controllerInstance[action as keyof typeof controllerInstance] !== 'function') {
+      res.sendStatus(404)
+      return
+    }
 
     try {
       await controllerInstance.runAction(action)
