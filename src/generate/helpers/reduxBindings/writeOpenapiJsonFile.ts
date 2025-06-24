@@ -26,6 +26,7 @@ export default async function writeOpenapiJsonFile({
     outputFile: `../../../${outputFile.replace(/^\.\//, '')}`,
     apiImport,
     exportName,
+    hooks: true,
   }
 
   try {
