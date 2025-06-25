@@ -1,5 +1,7 @@
 import {
   DreamApp,
+  DreamAppAllowedPackageManagersEnum,
+  DreamAppAllowedPackageManagersEnumValues,
   DreamAppInitOptions,
   DreamLogLevel,
   DreamLogger,
@@ -56,7 +58,7 @@ export default class PsychicApp {
         if (!psychicApp.loadedControllers) throw new PsychicAppInitMissingCallToLoadControllers()
         if (!psychicApp.apiRoot) throw new PsychicAppInitMissingApiRoot()
         if (!psychicApp.routesCb) throw new PsychicAppInitMissingRoutesCallback()
-        if (!PsychicAppAllowedPackageManagersEnumValues.includes(psychicApp.packageManager))
+        if (!DreamAppAllowedPackageManagersEnumValues.includes(psychicApp.packageManager))
           throw new PsychicAppInitMissingPackageManager()
 
         if (psychicApp.encryption?.cookies?.current)
@@ -70,6 +72,7 @@ export default class PsychicApp {
 
         dreamApp.set('projectRoot', psychicApp.apiRoot)
         dreamApp.set('logger', psychicApp.logger)
+        dreamApp.set('packageManager', psychicApp.packageManager)
 
         dreamApp.on('repl:start', context => {
           const psychicApp = PsychicApp.getOrFail()
@@ -218,7 +221,7 @@ Try setting it to something valid, like:
     return this._saltRounds
   }
 
-  private _packageManager: PsychicAppAllowedPackageManagersEnum
+  private _packageManager: DreamAppAllowedPackageManagersEnum
   public get packageManager() {
     return this._packageManager
   }
@@ -488,7 +491,7 @@ Try setting it to something valid, like:
                                     : Opt extends 'saltRounds'
                                       ? number
                                       : Opt extends 'packageManager'
-                                        ? PsychicAppAllowedPackageManagersEnum
+                                        ? DreamAppAllowedPackageManagersEnum
                                         : Opt extends 'inflections'
                                           ? () => void | Promise<void>
                                           : Opt extends 'routes'
@@ -570,7 +573,7 @@ Try setting it to something valid, like:
         break
 
       case 'packageManager':
-        this._packageManager = value as PsychicAppAllowedPackageManagersEnum
+        this._packageManager = value as DreamAppAllowedPackageManagersEnum
         break
 
       case 'saltRounds':
@@ -635,9 +638,6 @@ export type PsychicAppOption =
   | 'routes'
   | 'saltRounds'
   | 'ssl'
-
-export const PsychicAppAllowedPackageManagersEnumValues = ['yarn', 'npm', 'pnpm'] as const
-export type PsychicAppAllowedPackageManagersEnum = (typeof PsychicAppAllowedPackageManagersEnumValues)[number]
 
 export interface PsychicAppSpecialHooks {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
