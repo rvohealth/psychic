@@ -163,7 +163,7 @@ export default class PsychicCLI {
       )
       .option(
         '--schema-file',
-        'the path from your api root to the openapi file you wish to use to generate your schema, i.e. ./openapi/openapi.json',
+        'the path from your api root to the openapi file you wish to use to generate your schema, i.e. ./src/openapi/openapi.json',
       )
       .option(
         '--api-file',
@@ -208,7 +208,7 @@ export default class PsychicCLI {
       )
       .argument(
         '<openapiFilepath>',
-        'the path from your backend directory to the openapi file you wish to scan, i.e. "./openapi/openapi.json"',
+        'the path from your backend directory to the openapi file you wish to scan, i.e. "./src/openapi/openapi.json"',
       )
       .argument(
         '<outfile>',

@@ -7,7 +7,7 @@ export default async function promptForOptions(
   options: OpenapiReduxBindingsOptions,
 ): Promise<Required<OpenapiReduxBindingsOptions>> {
   if (!options.schemaFile) {
-    const defaultVal = './openapi/openapi.json'
+    const defaultVal = './src/openapi/openapi.json'
     const answer = await cliPrompt(`\
 What would you like the schemaFile to be?
 

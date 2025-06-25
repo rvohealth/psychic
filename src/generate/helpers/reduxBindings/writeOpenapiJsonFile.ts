@@ -21,9 +21,9 @@ export default async function writeOpenapiJsonFile({
   const destPath = path.join(destDir, destFilename)
 
   const jsonData = {
-    schemaFile: `../../../${schemaFile.replace(/^\.\//, '')}`,
-    apiFile: `../../../${apiFile.replace(/^\.\//, '')}`,
-    outputFile: `../../../${outputFile.replace(/^\.\//, '')}`,
+    schemaFile: path.join('..', '..', '..', replacePrefixingPathSegment(schemaFile)),
+    apiFile: path.join('..', '..', '..', replacePrefixingPathSegment(apiFile)),
+    outputFile: path.join('..', '..', '..', replacePrefixingPathSegment(outputFile)),
     apiImport,
     exportName,
     hooks: true,
@@ -36,4 +36,8 @@ export default async function writeOpenapiJsonFile({
   }
 
   await fs.writeFile(destPath, JSON.stringify(jsonData, null, 2))
+}
+
+function replacePrefixingPathSegment(path: string) {
+  return path.replace(/^\.[/\\]/, '')
 }
