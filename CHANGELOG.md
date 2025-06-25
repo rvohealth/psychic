@@ -53,3 +53,8 @@ Fix route printing regression causing route printouts to show the path instead o
 
 - fix regressions to redux bindings caused by default openapi path location changes
 - resource generator can handle prefixing slashes
+
+## 1.1.5
+
+- pass packageManager through to dream, now that it accepts a packageManager setting.
+- update dream shadowing within psychic application initialization to take place after initializers and plugins are processed, so that those initializers and plugins have an opportunity to adjust the settings.
