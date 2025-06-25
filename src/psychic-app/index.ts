@@ -70,10 +70,6 @@ export default class PsychicApp {
 
         await psychicApp.inflections?.()
 
-        dreamApp.set('projectRoot', psychicApp.apiRoot)
-        dreamApp.set('logger', psychicApp.logger)
-        dreamApp.set('packageManager', psychicApp.packageManager)
-
         dreamApp.on('repl:start', context => {
           const psychicApp = PsychicApp.getOrFail()
 
@@ -93,6 +89,10 @@ export default class PsychicApp {
         for (const plugin of psychicApp.plugins) {
           await plugin(psychicApp)
         }
+
+        dreamApp.set('projectRoot', psychicApp.apiRoot)
+        dreamApp.set('logger', psychicApp.logger)
+        dreamApp.set('packageManager', psychicApp.packageManager)
 
         cachePsychicApp(psychicApp)
       },
