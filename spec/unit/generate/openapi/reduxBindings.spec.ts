@@ -49,7 +49,7 @@ describe('generateOpenapiReduxBindings', () => {
         ) as object
 
         expect(openapiJson).toEqual({
-          schemaFile: '../../../openapi/openapi.json',
+          schemaFile: '../../../src/openapi/openapi.json',
           apiFile: '../../../../client/app/api/api.ts',
           outputFile: '../../../../client/app/api/testappApi.ts',
           apiImport: 'emptyTestappApi',
@@ -63,7 +63,7 @@ describe('generateOpenapiReduxBindings', () => {
       it('creates a conf/openapi-codegen.json file to configure the codegen tool, padding the file paths with the appropriate amount of updirs', async () => {
         await generateOpenapiReduxBindings({
           exportName: 'myApi',
-          schemaFile: './openapi/admin.openapi.json',
+          schemaFile: './src/openapi/admin.openapi.json',
           apiFile: './test-client/app/api/api.ts',
           apiImport: 'emptySplitApi',
           outputFile: './test-client/app/api/wellos-central.ts',
@@ -74,7 +74,7 @@ describe('generateOpenapiReduxBindings', () => {
         ) as object
 
         expect(openapiJson).toEqual({
-          schemaFile: '../../../openapi/admin.openapi.json',
+          schemaFile: '../../../src/openapi/admin.openapi.json',
           apiFile: '../../../test-client/app/api/api.ts',
           outputFile: '../../../test-client/app/api/wellos-central.ts',
           apiImport: 'emptySplitApi',

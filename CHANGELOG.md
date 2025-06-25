@@ -48,3 +48,7 @@ Fix route printing regression causing route printouts to show the path instead o
 ## 1.1.3
 
 - fix more minor issues with redux openapi bindings
+
+## 1.1.4
+
+- fix regressions to redux bindings caused by default openapi path location changes
