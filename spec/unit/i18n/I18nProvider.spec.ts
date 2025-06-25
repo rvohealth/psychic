@@ -21,6 +21,19 @@ describe('I18nProvider.provide', () => {
         },
       },
     },
+
+    es: {
+      chalupas: {
+        on: {
+          ice: {
+            the: {
+              musical: 'O estás ahí, o eres un cuadrado',
+              tickets: 'Vas a comprar %{count} boletos para chalupas on ice, el musical',
+            },
+          },
+        },
+      },
+    },
   } as const
   const i18n = I18nProvider.provide(defaultAllLocales, 'en')
 
@@ -31,6 +44,12 @@ describe('I18nProvider.provide', () => {
   context('with en-US', () => {
     it('returns the English translation', () => {
       expect(i18n(locale, 'chalupas.on.ice.the.musical')).toEqual('You are either there, or you are a square')
+    })
+  })
+
+  context('with es-ES', () => {
+    it('returns the Spanish translation', () => {
+      expect(i18n('es-ES', 'chalupas.on.ice.the.musical')).toEqual('O estás ahí, o eres un cuadrado')
     })
   })
 
