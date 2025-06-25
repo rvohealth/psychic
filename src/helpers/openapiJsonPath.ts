@@ -6,5 +6,5 @@ export default function openapiJsonPath(openapiName: string = 'default') {
   const psychicApp = PsychicApp.getOrFail()
   const namedOpenapi = psychicApp.openapi[openapiName]
   if (namedOpenapi === undefined) throw new UnexpectedUndefined()
-  return path.join(psychicApp.apiRoot, namedOpenapi.outputFilename)
+  return path.join(psychicApp.apiRoot, namedOpenapi.outputFilepath)
 }

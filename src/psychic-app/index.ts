@@ -230,7 +230,7 @@ Try setting it to something valid, like:
 
   private _openapi: Record<string, NamedPsychicOpenapiOptions> = {
     default: {
-      outputFilename: 'openapi.json',
+      outputFilepath: 'openapi.json',
       info: {
         title: 'untitled openapi spec',
         version: 'unknown version',
@@ -581,7 +581,7 @@ Try setting it to something valid, like:
         this._openapi = {
           ...this.openapi,
           [unknown2 ? (unknown1 as string) : 'default']: {
-            outputFilename: 'openapi.json',
+            outputFilepath: 'openapi.json',
             ...(value as DefaultPsychicOpenapiOptions | NamedPsychicOpenapiOptions),
           },
         }
@@ -685,11 +685,11 @@ export interface PsychicSslCredentials {
 }
 
 export interface DefaultPsychicOpenapiOptions extends PsychicOpenapiBaseOptions {
-  outputFilename?: `${string}.json`
+  outputFilepath?: string
 }
 
 export interface NamedPsychicOpenapiOptions extends PsychicOpenapiBaseOptions {
-  outputFilename: `${string}.json`
+  outputFilepath: string
 }
 
 interface PsychicOpenapiBaseOptions {
