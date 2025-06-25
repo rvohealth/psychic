@@ -4,7 +4,7 @@ import OpenapiAppRenderer from '../../../../src/openapi-renderer/app.js'
 describe('OpenapiAppRenderer', () => {
   describe('.sync', () => {
     it('syncs default openapi data to the default file', async () => {
-      const filename = './openapi.json'
+      const filename = './test-app/src/openapi/openapi.json'
 
       try {
         await fs.rm(filename)
@@ -25,7 +25,7 @@ describe('OpenapiAppRenderer', () => {
     })
 
     it('syncs named openapi data to the specified file', async () => {
-      const filename = './admin.openapi.json'
+      const filename = './test-app/src/openapi/admin.openapi.json'
 
       try {
         await fs.rm(filename)

@@ -1,4 +1,5 @@
 import { DreamCLI } from '@rvoh/dream'
+import * as path from 'node:path'
 import { debuglog } from 'node:util'
 import * as winston from 'winston'
 import EnvInternal from '../../../src/helpers/EnvInternal.js'
@@ -68,6 +69,7 @@ export default async (psy: PsychicApp) => {
 
   // set options to configure openapi integration
   psy.set('openapi', {
+    outputFilepath: path.join('test-app', 'src', 'openapi', 'openapi.json'),
     servers: [{ url: 'howyadoin.com', variables: { region: { default: 'a', enum: ['a', 'b'] } } }],
     syncTypes: true,
     defaults: {
@@ -120,7 +122,7 @@ export default async (psy: PsychicApp) => {
   })
 
   psy.set('openapi', 'mobile', {
-    outputFilename: 'mobile.openapi.json',
+    outputFilepath: path.join('test-app', 'src', 'openapi', 'mobile.openapi.json'),
     suppressResponseEnums: true,
   })
 
@@ -130,7 +132,7 @@ export default async (psy: PsychicApp) => {
       description: 'admin desc',
       version: '1.1.1',
     },
-    outputFilename: 'admin.openapi.json',
+    outputFilepath: path.join('test-app', 'src', 'openapi', 'admin.openapi.json'),
     defaults: {
       headers: {
         ['custom-admin-header']: {
