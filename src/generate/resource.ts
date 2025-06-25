@@ -22,6 +22,12 @@ export default async function generateResource({
   }
   columnsWithTypes: string[]
 }) {
+  // sanitize route here, making sure that the leading
+  // slash is not passed through to subsequent helpers,
+  // which will exhibit bad behavior when provided with
+  // a prefixing slash.
+  route = route.replace(/^\/+/, '')
+
   const fullyQualifiedControllerName = standardizeFullyQualifiedModelName(route)
   const resourcefulActions = options.singular ? [...SINGULAR_RESOURCE_ACTIONS] : [...RESOURCE_ACTIONS]
   const onlyActions = options.only?.split(',')
