@@ -31,7 +31,7 @@ export default class RouteManager {
   }: {
     httpMethod: HttpMethod
     path: string
-    middleware: RequestHandler
+    middleware: RequestHandler | RequestHandler[]
   }) {
     this.routes.push({
       httpMethod,
@@ -54,5 +54,5 @@ export type ControllerActionRouteConfig = BaseRouteConfig & {
 }
 
 export type MiddlewareRouteConfig = BaseRouteConfig & {
-  middleware: RequestHandler
+  middleware: RequestHandler | RequestHandler[]
 }

@@ -1,15 +1,20 @@
 import { DreamCLI } from '@rvoh/dream'
+import session from 'express-session'
 import * as path from 'node:path'
 import { debuglog } from 'node:util'
+import passport from 'passport'
+import { Strategy as LocalStrategy } from 'passport-local'
 import * as winston from 'winston'
 import EnvInternal from '../../../src/helpers/EnvInternal.js'
 import { PsychicDevtools } from '../../../src/index.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
 import importDefault from '../app/helpers/importDefault.js'
 import srcPath from '../app/helpers/srcPath.js'
+import User from '../app/models/User.js'
 import AppEnv from './AppEnv.js'
 import inflections from './inflections.js'
 import routesCb from './routes.js'
+import { RequestHandler } from 'express'
 
 const debugEnabled = debuglog('psychic').enabled
 
@@ -268,6 +273,44 @@ export default async (psy: PsychicApp) => {
   psy.on('cli:sync', () => {
     return { customField: { customNestedField: 'custom value' } }
   })
+
+  // begin: passport test setup
+  psy.use(
+    session({
+      secret: AppEnv.string('APP_ENCRYPTION_KEY'),
+      resave: false,
+      saveUninitialized: false,
+      cookie: {
+        secure: AppEnv.isProduction, // Only use secure cookies in production
+        httpOnly: true,
+        maxAge: 24 * 60 * 60 * 1000, // 24 hours
+      },
+    }),
+  )
+  psy.use(passport.initialize())
+  psy.use(passport.session() as RequestHandler)
+  passport.serializeUser((user: User, done) => {
+    done(null, user.id)
+  })
+  // eslint-disable-next-line @typescript-eslint/no-misused-promises
+  passport.deserializeUser(async (id: number, done) => {
+    try {
+      const user = await User.findOrFail(id)
+      done(null, user)
+    } catch (error) {
+      done(error)
+    }
+  })
+  passport.use(
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    new LocalStrategy(async (email, password, cb) => {
+      const user = await User.findBy({ email })
+      if (!user) return cb(false)
+      if (!(await user.checkPassword(password))) return cb(false)
+      return cb(null, user)
+    }),
+  )
+  // end: passport test setup
 }
 
 export function __forTestingOnly(message: string) {
