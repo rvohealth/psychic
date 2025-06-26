@@ -1,3 +1,4 @@
+import passport from 'passport'
 import PsychicRouter from '../../../src/router/index.js'
 import AdminTestController from '../app/controllers/Admin/TestController.js'
 import ApiUsersController from '../app/controllers/Api/UsersController.js'
@@ -14,6 +15,8 @@ import ResponseStatusesController from '../app/controllers/ResponseStatusesContr
 import ScopeTestController from '../app/controllers/ScopeTestController.js'
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
+import User from '../app/models/User.js'
+import PassportAuthedController from '../app/controllers/PassportAuthedController.js'
 
 export default (r: PsychicRouter) => {
   r.get('circular', CircularController, 'hello')
@@ -183,4 +186,15 @@ export default (r: PsychicRouter) => {
       res.json('nested middleware test')
     })
   })
+
+  r.post('passport-test', [
+    passport.authenticate('local'),
+    (req, res) => {
+      res.json({ id: (req.user as User)?.id })
+    },
+  ])
+  r.get('passport-test-persistence', (req, res) => {
+    res.json({ id: (req.user as User)?.id })
+  })
+  r.get('controller-passport-test-persistence', PassportAuthedController, 'testPassportAuth')
 }

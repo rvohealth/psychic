@@ -1,5 +1,5 @@
 import { RecordNotFound, ValidationError, camelize } from '@rvoh/dream'
-import { Express, NextFunction, Request, RequestHandler, Response, Router } from 'express'
+import { Express, Request, RequestHandler, Response, Router } from 'express'
 import pluralize from 'pluralize-esm'
 import PsychicController from '../controller/index.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
@@ -53,9 +53,10 @@ export default class PsychicRouter {
     this.routes.forEach(route => {
       if ((route as MiddlewareRouteConfig).middleware) {
         const routeConf = route as MiddlewareRouteConfig
-        this.app[routeConf.httpMethod](routePath(routeConf.path), (req, res, next) => {
-          this.handleMiddleware(routeConf.middleware, { req, res, next }).catch(() => {})
-        })
+        this.app[routeConf.httpMethod](
+          routePath(routeConf.path),
+          ...(Array.isArray(routeConf.middleware) ? routeConf.middleware : [routeConf.middleware]),
+        )
       } else {
         const routeConf = route as ControllerActionRouteConfig
         this.app[routeConf.httpMethod](routePath(routeConf.path), (req, res) => {
@@ -66,7 +67,7 @@ export default class PsychicRouter {
   }
 
   get(path: string): void
-  get(path: string, middleware: RequestHandler): void
+  get(path: string, middleware: RequestHandler | RequestHandler[]): void
   get<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -77,7 +78,7 @@ export default class PsychicRouter {
   }
 
   post(path: string): void
-  post(path: string, middleware: RequestHandler): void
+  post(path: string, middleware: RequestHandler | RequestHandler[]): void
   post<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -92,7 +93,7 @@ export default class PsychicRouter {
   }
 
   put(path: string): void
-  put(path: string, middleware: RequestHandler): void
+  put(path: string, middleware: RequestHandler | RequestHandler[]): void
   put<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -107,7 +108,7 @@ export default class PsychicRouter {
   }
 
   patch(path: string): void
-  patch(path: string, middleware: RequestHandler): void
+  patch(path: string, middleware: RequestHandler | RequestHandler[]): void
   patch<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -122,7 +123,7 @@ export default class PsychicRouter {
   }
 
   delete(path: string): void
-  delete(path: string, middleware: RequestHandler): void
+  delete(path: string, middleware: RequestHandler | RequestHandler[]): void
   delete<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -137,7 +138,7 @@ export default class PsychicRouter {
   }
 
   options(path: string): void
-  options(path: string, middleware: RequestHandler): void
+  options(path: string, middleware: RequestHandler | RequestHandler[]): void
   options<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -157,7 +158,7 @@ export default class PsychicRouter {
   }
 
   public crud(httpMethod: HttpMethod, path: string): void
-  public crud(httpMethod: HttpMethod, path: string, middleware: RequestHandler): void
+  public crud(httpMethod: HttpMethod, path: string, middleware: RequestHandler | RequestHandler[]): void
   public crud(
     httpMethod: HttpMethod,
     path: string,
@@ -168,7 +169,7 @@ export default class PsychicRouter {
     this.checkPathForInvalidChars(path)
 
     const isMiddleware =
-      typeof controllerOrMiddleware === 'function' &&
+      (typeof controllerOrMiddleware === 'function' || Array.isArray(controllerOrMiddleware)) &&
       !(controllerOrMiddleware as typeof PsychicController)?.isPsychicController
 
     // devs can provide custom express middleware which bypasses
@@ -177,7 +178,7 @@ export default class PsychicRouter {
       this.routeManager.addMiddleware({
         httpMethod,
         path: this.prefixPathWithNamespaces(path),
-        middleware: controllerOrMiddleware as RequestHandler,
+        middleware: controllerOrMiddleware as RequestHandler | RequestHandler[],
       })
     } else {
       controllerOrMiddleware ||= lookupControllerOrFail(this, { path, httpMethod })
@@ -367,21 +368,6 @@ suggested fix:  "${convertRouteParams(path)}"
       }),
     ]
     if (nestedRouter) nestedRouter.currentNamespaces = this.currentNamespaces
-  }
-
-  public async handleMiddleware(
-    middleware: RequestHandler,
-    {
-      req,
-      res,
-      next,
-    }: {
-      req: Request
-      res: Response
-      next: NextFunction
-    },
-  ) {
-    await middleware(req, res, next)
   }
 
   public async handle(

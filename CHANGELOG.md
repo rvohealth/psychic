@@ -62,3 +62,7 @@ Fix route printing regression causing route printouts to show the path instead o
 ## 1.1.6
 
 - fix regression caused by missing --schema-only option in psychic cli
+
+## 1.1.7
+
+- Add support for middleware arrays, enabling express plugins like passport
