@@ -40,8 +40,13 @@ export default class PsychicBin {
     await printRoutes()
   }
 
-  public static async sync({ bypassDreamSync = false }: { bypassDreamSync?: boolean } = {}) {
-    if (!bypassDreamSync) await DreamBin.sync(() => {})
+  public static async sync({
+    bypassDreamSync = false,
+    schemaOnly = false,
+  }: { bypassDreamSync?: boolean; schemaOnly?: boolean } = {}) {
+    if (!bypassDreamSync) await DreamBin.sync(() => {}, { schemaOnly })
+
+    if (schemaOnly) return
 
     await PsychicBin.syncTypes()
 
