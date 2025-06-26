@@ -254,9 +254,10 @@ export default class PsychicCLI {
       .description(
         'sync introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration',
       )
-      .action(async () => {
+      .option('--schema-only')
+      .action(async (options: { schemaOnly?: boolean } = {}) => {
         await initializePsychicApp()
-        await PsychicBin.sync()
+        await PsychicBin.sync(options)
         process.exit()
       })
 

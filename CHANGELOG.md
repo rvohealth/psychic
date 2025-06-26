@@ -58,3 +58,7 @@ Fix route printing regression causing route printouts to show the path instead o
 
 - pass packageManager through to dream, now that it accepts a packageManager setting.
 - update dream shadowing within psychic application initialization to take place after initializers and plugins are processed, so that those initializers and plugins have an opportunity to adjust the settings.
+
+## 1.1.6
+
+- fix regression caused by missing --schema-only option in psychic cli
