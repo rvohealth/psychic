@@ -1,5 +1,4 @@
-import { compact, groupBy, OpenapiSchemaBody, sortObjectByKey } from '@rvoh/dream'
-import * as fs from 'node:fs/promises'
+import { CliFileWriter, compact, groupBy, OpenapiSchemaBody, sortObjectByKey } from '@rvoh/dream'
 import { debuglog } from 'node:util'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import openapiJsonPath from '../helpers/openapiJsonPath.js'
@@ -31,9 +30,7 @@ export default class OpenapiAppRenderer {
     const psychicApp = PsychicApp.getOrFail()
     const asyncWriteOpenapiFile = async (key: string) => {
       const jsonPath = openapiJsonPath(key)
-      await fs.writeFile(jsonPath, JSON.stringify(openapiContents[key], null, 2), {
-        flag: 'w+',
-      })
+      await CliFileWriter.write(jsonPath, JSON.stringify(openapiContents[key], null, 2), { flag: 'w+' })
     }
 
     await Promise.all(Object.keys(psychicApp.openapi).map(key => asyncWriteOpenapiFile(key)))
