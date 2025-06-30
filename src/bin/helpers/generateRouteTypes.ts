@@ -1,5 +1,4 @@
-import { uniq } from '@rvoh/dream'
-import * as fs from 'node:fs/promises'
+import { CliFileWriter, uniq } from '@rvoh/dream'
 import * as path from 'node:path'
 import PsychicApp from '../../psychic-app/index.js'
 import { RouteConfig } from '../../router/route-manager.js'
@@ -12,5 +11,5 @@ export default async function generateRouteTypes(routes: RouteConfig[]) {
 
   const psychicApp = PsychicApp.getOrFail()
   const routeTypesPath = path.join(psychicApp.apiRoot, 'src', 'conf', 'routeTypes.ts')
-  await fs.writeFile(routeTypesPath, fileStr)
+  await CliFileWriter.write(routeTypesPath, fileStr)
 }

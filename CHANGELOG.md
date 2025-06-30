@@ -66,3 +66,7 @@ Fix route printing regression causing route printouts to show the path instead o
 ## 1.1.7
 
 - Add support for middleware arrays, enabling express plugins like passport
+
+## 1.1.8
+
+- Tap into CliFileWriter provided by dream to tap into file reversion for sync files, since the auto-sync function in psychic can fail and leave your file tree in a bad state.

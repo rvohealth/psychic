@@ -1,5 +1,4 @@
-import { DreamApp } from '@rvoh/dream'
-import * as fs from 'node:fs/promises'
+import { CliFileWriter, DreamApp } from '@rvoh/dream'
 import * as path from 'node:path'
 import PsychicApp from '../../psychic-app/index.js'
 
@@ -9,7 +8,7 @@ export default class TypesBuilder {
     const dreamApp = DreamApp.getOrFail()
     const schemaPath = path.join(dreamApp.projectRoot, dreamApp.paths.types, 'psychic.ts')
 
-    await fs.writeFile(schemaPath, this.build(customTypes))
+    await CliFileWriter.write(schemaPath, this.build(customTypes))
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
