@@ -19,10 +19,16 @@ describe('a visitor attempts to save a record', () => {
     expect(await User.where({ email: 'how@yadoin' }).count()).toEqual(1)
   })
 
-  context('with a record that is invalid at DB level', () => {
+  context('with a record that is invalid at Dream validation level', () => {
     it('does not save, throws 422', async () => {
       const res = await request.post('/failed-to-save-test', 422)
       expect(res.body).toEqual({ errors: { email: ['contains'] } })
+    })
+  })
+
+  context('with a record that is invalid at DB level', () => {
+    it('does not save, throws 422', async () => {
+      await request.post('/failed-to-save-db-test', 422)
     })
   })
 

@@ -1,4 +1,4 @@
-import { RecordNotFound, ValidationError, camelize } from '@rvoh/dream'
+import { DataTypeColumnTypeMismatch, RecordNotFound, ValidationError, camelize } from '@rvoh/dream'
 import { Express, Request, RequestHandler, Response, Router } from 'express'
 import pluralize from 'pluralize-esm'
 import PsychicController from '../controller/index.js'
@@ -402,6 +402,8 @@ suggested fix:  "${convertRouteParams(path)}"
         }
       } else if (err instanceof RecordNotFound) {
         res.sendStatus(404)
+      } else if (err instanceof DataTypeColumnTypeMismatch) {
+        res.status(422).json()
       } else if (err instanceof ValidationError) {
         res.status(422).json({ errors: err.errors || {} })
       } else if (err instanceof ParamValidationError) {

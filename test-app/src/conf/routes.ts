@@ -67,6 +67,7 @@ export default (r: PsychicRouter) => {
   r.get('users-before-all-test', UsersController, 'beforeAllTest')
   r.get('users-before-action-sequence', UsersController, 'beforeActionSequence')
   r.post('failed-to-save-test', UsersController, 'failedToSaveTest')
+  r.post('failed-to-save-db-test', UsersController, 'failedToSaveDbTest')
   r.post('force-throw', UsersController, 'forceThrow')
 
   // response status tests

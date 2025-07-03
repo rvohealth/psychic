@@ -1,4 +1,4 @@
-import { Encrypt } from '@rvoh/dream'
+import { DateTime, Encrypt } from '@rvoh/dream'
 import { BeforeAction, OpenAPI } from '../../../../src/index.js'
 import User from '../models/User.js'
 import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer.js'
@@ -34,6 +34,14 @@ export default class UsersController extends ApplicationController {
 
   public async failedToSaveTest() {
     await User.create({ email: 'invalidemail', password: 'howyadoin' })
+  }
+
+  public async failedToSaveDbTest() {
+    await User.create({
+      email: 'how@yadoin',
+      password: 'howyadoin',
+      aDatetime: 'invalid' as unknown as DateTime,
+    })
   }
 
   public forceThrow() {
