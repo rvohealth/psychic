@@ -7,6 +7,10 @@ export default class ParamsTestController extends ApplicationController {
     this.noContent()
   }
 
+  public displayParams() {
+    this.ok(this.castParam('howyadoin', 'string[]'))
+  }
+
   @OpenAPI({
     security: [],
     requestBody: {

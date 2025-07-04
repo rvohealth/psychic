@@ -455,7 +455,9 @@ export default class Params {
       case 'number[]':
       case 'string[]':
       case 'uuid[]':
-        if (!Array.isArray(paramValue)) throw new ParamValidationError(paramName, [typeToError(expectedType)])
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        if (!Array.isArray(paramValue)) paramValue = [paramValue as any]
+
         return compact(
           paramValue.map(param =>
             this.cast(paramName, param, arrayTypeToNonArrayType(expectedType), { ...opts, allowNull: true }),

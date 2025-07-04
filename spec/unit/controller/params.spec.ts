@@ -43,6 +43,8 @@ describe('PsychicController', () => {
           hello: 'hello',
           goodbye: 'goodbye',
           helloWorldArray: ['hello', 'world'],
+          helloArray: 'hello',
+          'helloBracketedArray[]': 'hello',
           'helloWorldBracketedArray[]': ['hello', 'world'],
           helloGoodbyeArray: ['hello', 'goodbye'],
         },
@@ -63,10 +65,6 @@ describe('PsychicController', () => {
           expect(results).toEqual(['hello', 'world'])
         })
 
-        it('disallows values that aren’t valid string[]', () => {
-          expect(() => controller.castParam('goodbye', 'string[]')).toThrow(ParamValidationError)
-        })
-
         it('can correctly find a param with array brackets', () => {
           const results = controller.castParam('helloWorldBracketedArray[]', 'string[]')
           expect(results).toEqual(['hello', 'world'])
@@ -75,6 +73,16 @@ describe('PsychicController', () => {
         it('can correctly find a param with array brackets, even when the brackets are left off', () => {
           const results = controller.castParam('helloWorldBracketedArray', 'string[]')
           expect(results).toEqual(['hello', 'world'])
+        })
+
+        context('with a single array value', () => {
+          it('correctly casts to an array', () => {
+            const results1 = controller.castParam('helloArray', 'string[]')
+            expect(results1).toEqual(['hello'])
+
+            const results2 = controller.castParam('helloBracketedArray[]', 'string[]')
+            expect(results2).toEqual(['hello'])
+          })
         })
       })
     })
