@@ -19,4 +19,46 @@ describe('hitting an endpoint that calls castParam', () => {
       await request.post('/cast-param-test', 400)
     })
   })
+
+  context('array params', () => {
+    context('when those query params are array query params', () => {
+      it('parses the query array with single param', async () => {
+        const res = await request.get('/display-params', 200, {
+          query: {
+            howyadoin: ['cool'],
+          },
+        })
+        expect(res.body).toEqual(['cool'])
+      })
+
+      it('parses the query array with multiple params', async () => {
+        const res = await request.get('/display-params', 200, {
+          query: {
+            howyadoin: ['cool', 'boy', 'jones'],
+          },
+        })
+        expect(res.body).toEqual(['cool', 'boy', 'jones'])
+      })
+
+      context('with explicit array brackets', () => {
+        it('parses the query array with single param', async () => {
+          const res = await request.get('/display-params', 200, {
+            query: {
+              'howyadoin[]': ['cool'],
+            },
+          })
+          expect(res.body).toEqual(['cool'])
+        })
+
+        it('parses the query array with multiple params', async () => {
+          const res = await request.get('/display-params', 200, {
+            query: {
+              'howyadoin[]': ['cool', 'boy', 'jones'],
+            },
+          })
+          expect(res.body).toEqual(['cool', 'boy', 'jones'])
+        })
+      })
+    })
+  })
 })
