@@ -2,29 +2,33 @@ import generateResourceControllerSpecContent from '../../../../src/generate/help
 import { RESOURCE_ACTIONS } from '../../../../src/generate/resource.js'
 
 describe('generateResourceControllerSpecContent', () => {
-  it('generates a useful resource controller spec', () => {
-    const res = generateResourceControllerSpecContent({
-      fullyQualifiedControllerName: 'V1/PostsController',
-      route: 'v1/posts',
-      fullyQualifiedModelName: 'Post',
-      columnsWithTypes: [
-        'type:enum:post_type:WeeklyPost,GuestPost',
-        'style:enum:building_style:formal,informal',
-        'title:citext',
-        'subtitle:string',
-        'body_markdown:text',
-        'rating:decimal:3,2',
-        'ratings:integer',
-        'big_rating:bigint',
-        'User:belongs_to',
-        'postable_id:bigint',
-        'postable_type:enum:postable_types:article,column',
-      ],
-      forAdmin: false,
-      singular: false,
-      actions: [...RESOURCE_ACTIONS],
-    })
-    expect(res).toEqual(`\
+  it(
+    'generates a useful resource controller spec (omitting deletedAt from create and update action specs ' +
+      'since deletedAt is for deleting)',
+    () => {
+      const res = generateResourceControllerSpecContent({
+        fullyQualifiedControllerName: 'V1/PostsController',
+        route: 'v1/posts',
+        fullyQualifiedModelName: 'Post',
+        columnsWithTypes: [
+          'type:enum:post_type:WeeklyPost,GuestPost',
+          'style:enum:building_style:formal,informal',
+          'title:citext',
+          'subtitle:string',
+          'body_markdown:text',
+          'rating:decimal:3,2',
+          'ratings:integer',
+          'big_rating:bigint',
+          'User:belongs_to',
+          'postable_id:bigint',
+          'postable_type:enum:postable_types:article,column',
+          'deleted_at:datetime:optional',
+        ],
+        forAdmin: false,
+        singular: false,
+        actions: [...RESOURCE_ACTIONS],
+      })
+      expect(res).toEqual(`\
 import { UpdateableProperties } from '@rvoh/dream'
 import Post from '../../../../src/app/models/Post.js'
 import User from '../../../../src/app/models/User.js'
@@ -251,7 +255,8 @@ describe('V1/PostsController', () => {
   })
 })
 `)
-  })
+    },
+  )
 
   context('only', () => {
     it('omits actions left out of the list', () => {

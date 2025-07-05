@@ -1,3 +1,7 @@
+## 1.1.10
+
+- Don't include deletedAt in generated create/update actions in resource specs since deletedAt is for deleting
+
 ## 1.1.9
 
 - Throw a 422 if dream raises the `DataTypeColumnTypeMismatch` exception, which happens when a dream is saved to the database with data that cannot be inserted into the respective columns, usually because of a type mismatch.

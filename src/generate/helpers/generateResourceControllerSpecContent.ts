@@ -79,6 +79,8 @@ export default function generateResourceControllerSpecContent({
     const attributeName = camelize(rawAttributeName ?? '')
     const dotNotationVariable = `${modelVariableName}.${attributeName}`
 
+    if (attributeName === 'deletedAt') continue
+
     switch (attributeType) {
       case 'enum': {
         const originalEnumValue = (enumValues ?? '').split(',').at(0)!
