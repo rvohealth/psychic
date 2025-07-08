@@ -1,4 +1,5 @@
 import { Dream, DreamParamSafeAttributes, DreamParamSafeColumnNames, UpdateableProperties } from '@rvoh/dream'
+import { VirtualAttributeStatement } from '../../openapi-renderer/helpers/dreamColumnToOpenapiType.js'
 import { ParamsForOpts } from '../params.js'
 
 export default function paramNamesForDreamClass<
@@ -52,7 +53,9 @@ export default function paramNamesForDreamClass<
       // all of these fields from the model
       ...[
         ...dreamClass.columns(),
-        ...dreamClass['virtualAttributes'].map(statement => statement.property),
+        ...(dreamClass['virtualAttributes'] as VirtualAttributeStatement[]).map(
+          statement => statement.property,
+        ),
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
       ].filter(columnName => including.includes(columnName as any)),
     ] as RetArray

@@ -1,6 +1,16 @@
-import { Dream, OpenapiSchemaBody } from '@rvoh/dream'
-import primitiveOpenapiStatementToOpenapi from './primitiveOpenapiStatementToOpenapi.js'
+import {
+  Dream,
+  OpenapiSchemaBody,
+  OpenapiSchemaBodyShorthand,
+  OpenapiShorthandPrimitiveTypes,
+} from '@rvoh/dream'
 import OpenapiSegmentExpander from '../body-segment.js'
+import primitiveOpenapiStatementToOpenapi from './primitiveOpenapiStatementToOpenapi.js'
+
+export interface VirtualAttributeStatement {
+  property: string
+  type: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined
+}
 
 export default function dreamColumnToOpenapiType(
   dreamClass: typeof Dream,
@@ -95,7 +105,9 @@ export default function dreamColumnToOpenapiType(
 
     default:
       if (dreamClass.isVirtualColumn(columnName)) {
-        const metadata = dreamClass['virtualAttributes'].find(statement => statement.property === columnName)
+        const metadata = (dreamClass['virtualAttributes'] as VirtualAttributeStatement[]).find(
+          statement => statement.property === columnName,
+        )
         if (metadata?.type) {
           return {
             [columnName]: new OpenapiSegmentExpander(metadata.type, {

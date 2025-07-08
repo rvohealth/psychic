@@ -2,9 +2,12 @@
 
 - Don't include deletedAt in generated create/update actions in resource specs since deletedAt is for deleting
 
+- return 422 if Dream throws `NotNullViolation` or `CheckConstraintViolation`
+
 ## 1.1.9
 
-- Throw a 422 if dream raises the `DataTypeColumnTypeMismatch` exception, which happens when a dream is saved to the database with data that cannot be inserted into the respective columns, usually because of a type mismatch.
+- return 422 if dream throws `DataTypeColumnTypeMismatch`, which happens when a dream is saved to the database with data that cannot be inserted into the respective columns, usually because of a type mismatch.
+
 - castParam will now encase params in an array when being explicitly casted as an array type, bypassing a known bug in express from causing arrays with single items in them to be treated as non-arrays.
 
 ## 1.1.8
