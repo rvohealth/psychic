@@ -36,7 +36,7 @@ export default class UsersController extends ApplicationController {
     await User.create({ email: 'invalidemail', password: 'howyadoin' })
   }
 
-  public async failedToSaveDbTest() {
+  public async failSavingIncompatibleDataTest() {
     await User.create({
       email: 'how@yadoin',
       password: 'howyadoin',

@@ -20,15 +20,15 @@ describe('a visitor attempts to save a record', () => {
   })
 
   context('with a record that is invalid at Dream validation level', () => {
-    it('does not save, throws 422', async () => {
+    it('does not save, returns 422', async () => {
       const res = await request.post('/failed-to-save-test', 422)
       expect(res.body).toEqual({ errors: { email: ['contains'] } })
     })
   })
 
-  context('with a record that is invalid at DB level', () => {
-    it('does not save, throws 422', async () => {
-      await request.post('/failed-to-save-db-test', 422)
+  context('saving data that is incompatible with the column type', () => {
+    it('does not save, returns 400', async () => {
+      await request.post('/fail-saving-incompatible-data-test', 400)
     })
   })
 
@@ -41,7 +41,7 @@ describe('a visitor attempts to save a record', () => {
       process.env.PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR = undefined
     })
 
-    it('throws 500', async () => {
+    it('returns 500', async () => {
       await request.post('/force-throw', 500)
       expect(await User.count()).toEqual(0)
     })
@@ -50,7 +50,7 @@ describe('a visitor attempts to save a record', () => {
   context(
     'with a request that has invalid params, and controller is leveraging Params.for for validation',
     () => {
-      it('throws 400', async () => {
+      it('returns 400', async () => {
         const response = await request.post('/users', 400, {
           data: { user: { email: 123, password: 'howyadoin', name: 456 } },
         })

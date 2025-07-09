@@ -409,12 +409,10 @@ suggested fix:  "${convertRouteParams(path)}"
         }
       } else if (err instanceof RecordNotFound) {
         res.sendStatus(404)
-      } else if (
-        err instanceof DataTypeColumnTypeMismatch ||
-        err instanceof NotNullViolation ||
-        err instanceof CheckConstraintViolation
-      ) {
+      } else if (err instanceof NotNullViolation || err instanceof CheckConstraintViolation) {
         res.status(422).json()
+      } else if (err instanceof DataTypeColumnTypeMismatch) {
+        res.status(400).json()
       } else if (err instanceof ValidationError) {
         res.status(422).json({ errors: err.errors || {} })
       } else if (err instanceof ParamValidationError) {

@@ -1,3 +1,7 @@
+## 1.1.11
+
+- 400 is more appropriate than 422 for `DataTypeColumnTypeMismatch`
+
 ## 1.1.10
 
 - Don't include deletedAt in generated create/update actions in resource specs since deletedAt is for deleting

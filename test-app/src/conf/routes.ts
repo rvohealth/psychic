@@ -10,13 +10,13 @@ import GreeterController from '../app/controllers/GreeterController.js'
 import OpenapiDecoratorTestController from '../app/controllers/OpenapiDecoratorTestsController.js'
 import OpenapiOverridesTestController from '../app/controllers/OpenapiOverridesTestsController.js'
 import ParamsTestController from '../app/controllers/ParamsTestController.js'
+import PassportAuthedController from '../app/controllers/PassportAuthedController.js'
 import PetsController from '../app/controllers/PetsController.js'
 import ResponseStatusesController from '../app/controllers/ResponseStatusesController.js'
 import ScopeTestController from '../app/controllers/ScopeTestController.js'
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
 import User from '../app/models/User.js'
-import PassportAuthedController from '../app/controllers/PassportAuthedController.js'
 
 export default (r: PsychicRouter) => {
   r.get('circular', CircularController, 'hello')
@@ -68,7 +68,7 @@ export default (r: PsychicRouter) => {
   r.get('users-before-all-test', UsersController, 'beforeAllTest')
   r.get('users-before-action-sequence', UsersController, 'beforeActionSequence')
   r.post('failed-to-save-test', UsersController, 'failedToSaveTest')
-  r.post('failed-to-save-db-test', UsersController, 'failedToSaveDbTest')
+  r.post('fail-saving-incompatible-data-test', UsersController, 'failSavingIncompatibleDataTest')
   r.post('force-throw', UsersController, 'forceThrow')
 
   // response status tests
