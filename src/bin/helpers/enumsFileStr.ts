@@ -13,7 +13,10 @@ export default async function enumsFileStr() {
 
     enumsFileStr += `\
 export const ${exportedTypeName} = [
-  ${values.map(val => `'${val}'`).join(',\n  ')}
+  ${values
+    .sort()
+    .map(val => `'${val}'`)
+    .join(',\n  ')}
 ] as const
 
 `
