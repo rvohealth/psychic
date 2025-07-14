@@ -1,3 +1,7 @@
+## 1.2.0
+
+- update for Dream 1.4.0
+
 ## 1.1.11
 
 - 400 is more appropriate than 422 for `DataTypeColumnTypeMismatch`

@@ -1,4 +1,4 @@
-import { Decorators, DreamColumn, DreamSerializers, IdType } from '@rvoh/dream'
+import { Decorators, DreamColumn, DreamSerializers } from '@rvoh/dream'
 import ApplicationModel from './ApplicationModel.js'
 import User from './User.js'
 
@@ -40,5 +40,5 @@ export default class Pet extends ApplicationModel {
 
   @deco.BelongsTo('User')
   public user: User
-  public userId: IdType
+  public userId: DreamColumn<Pet, 'userId'>
 }

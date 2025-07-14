@@ -887,22 +887,22 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvoh/dream-spec-helpers@npm:^1.0.0":
-  version: 1.0.0
-  resolution: "@rvoh/dream-spec-helpers@npm:1.0.0"
+"@rvoh/dream-spec-helpers@npm:^1.1.0":
+  version: 1.1.0
+  resolution: "@rvoh/dream-spec-helpers@npm:1.1.0"
   dependencies:
     lodash.sortby: "npm:^4.7.0"
   peerDependencies:
     "@types/node": "*"
     "@types/pg": "*"
     pg: "*"
-  checksum: 10c0/b2c8e13fcd3d466e58fdce0b7f4f07442cc2b71f50f1dbb25c674cece269d0e762b6f8ed787127ada7170fd73ced22b623c18078ce54899d4f00986f1c46a0d4
+  checksum: 10c0/8bb829c9e568f58e20ab55480183bbf616d0a79ea55ae8f54caa2729eff84279321317af9cc0ecc4f8b8929b116376a69c97b624ed8a58ff9307fb91fd2228ef
   languageName: node
   linkType: hard
 
-"@rvoh/dream@npm:^1.3.1":
-  version: 1.3.1
-  resolution: "@rvoh/dream@npm:1.3.1"
+"@rvoh/dream@npm:^1.4.0":
+  version: 1.4.0
+  resolution: "@rvoh/dream@npm:1.4.0"
   dependencies:
     colorette: "npm:^2.0.20"
     commander: "npm:^12.1.0"
@@ -917,7 +917,7 @@ __metadata:
     kysely: ^0.27.4
     kysely-codegen: ~0.17.0
     pg: "*"
-  checksum: 10c0/9f2db6b446f42361cc078bc7003aa034b114611469d4c37d65ba8a8c74ab92375643774afefb2069a4a847b95ed5002041a27d55a772e64db1ba495f9c4a1b18
+  checksum: 10c0/08c8c388cac6cf2549942d8d9c1223fa80106658392d95f28dc95634239b13df9acb502f16f4e8c75744e2dcd1e48f9241222b408d75dc5f760c5dfd9c05f43d
   languageName: node
   linkType: hard
 
@@ -942,8 +942,8 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.19.0"
     "@jest-mock/express": "npm:^3.0.0"
-    "@rvoh/dream": "npm:^1.3.1"
-    "@rvoh/dream-spec-helpers": "npm:^1.0.0"
+    "@rvoh/dream": "npm:^1.4.0"
+    "@rvoh/dream-spec-helpers": "npm:^1.1.0"
     "@rvoh/psychic-spec-helpers": "npm:^1.0.0"
     "@types/cookie-parser": "npm:^1.4.8"
     "@types/cors": "npm:^2.8.17"
