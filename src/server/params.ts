@@ -101,7 +101,9 @@ export default class Params {
 
     const returnObj: Partial<DreamAttributes<InstanceType<T>>> = {}
     const errors: { [key: string]: string[] } = {}
-    const paramSafeColumns = paramNamesForDreamClass(dreamClass, forOpts)
+
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    const paramSafeColumns: string[] = paramNamesForDreamClass(dreamClass, forOpts as any)
 
     for (const columnName of paramSafeColumns) {
       if (params[columnName as keyof typeof params] === undefined) continue
@@ -218,7 +220,7 @@ export default class Params {
             break
 
           default:
-            if (dreamClass.isVirtualColumn(columnName as string))
+            if (dreamClass.isVirtualColumn(columnName))
               returnObj[columnName as keyof typeof returnObj] = params[columnName as keyof typeof params]
 
             if (columnMetadata?.enumValues) {

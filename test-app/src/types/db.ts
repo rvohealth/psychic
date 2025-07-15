@@ -113,7 +113,6 @@ export const SpeciesTypesEnumValues = [
   "noncat"
 ] as const
 
-export type IdType = string | number | bigint
 export type Timestamp = ColumnType<DateTime | CalendarDate>
 
 export interface Balloons {
