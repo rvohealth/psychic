@@ -61,7 +61,6 @@ import { type CalendarDate, type DateTime } from '@rvoh/dream'
 import {
   BalloonColorsEnum,
   BalloonColorsEnumValues,
-  IdType,
   Json,
   PetTreatsEnum,
   PetTreatsEnumValues,
@@ -71,10 +70,6 @@ import {
 
 export const schema = {
   balloons: {
-    primaryKey: 'id',
-    createdAtField: 'createdAt',
-    updatedAtField: 'updatedAt',
-    deletedAtField: 'deletedAt',
     serializerKeys: ['default', 'sameForAllSti', 'summary'],
     scopes: {
       default: ['dream:STI'],
@@ -101,7 +96,7 @@ export const schema = {
         isArray: false,
       },
       id: {
-        coercedType: {} as IdType,
+        coercedType: {} as string,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -119,7 +114,7 @@ export const schema = {
         isArray: false,
       },
       userId: {
-        coercedType: {} as IdType,
+        coercedType: {} as string,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -140,10 +135,6 @@ export const schema = {
     },
   },
   comments: {
-    primaryKey: 'id',
-    createdAtField: 'createdAt',
-    updatedAtField: 'updatedAt',
-    deletedAtField: 'deletedAt',
     serializerKeys: ['default', 'summary'],
     scopes: {
       default: [],
@@ -170,7 +161,7 @@ export const schema = {
         isArray: false,
       },
       id: {
-        coercedType: {} as IdType,
+        coercedType: {} as string,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -179,7 +170,7 @@ export const schema = {
         isArray: false,
       },
       postId: {
-        coercedType: {} as IdType,
+        coercedType: {} as string,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -209,10 +200,6 @@ export const schema = {
     },
   },
   health_users: {
-    primaryKey: 'id',
-    createdAtField: 'createdAt',
-    updatedAtField: 'updatedAt',
-    deletedAtField: 'deletedAt',
     serializerKeys: [],
     scopes: {
       default: [],
@@ -281,10 +268,6 @@ export const schema = {
     },
   },
   pets: {
-    primaryKey: 'id',
-    createdAtField: 'createdAt',
-    updatedAtField: 'updatedAt',
-    deletedAtField: 'deletedAt',
     serializerKeys: ['additional', 'default', 'summary', 'withAssociation', 'withFlattenedAssociation'],
     scopes: {
       default: [],
@@ -293,7 +276,7 @@ export const schema = {
     nonJsonColumnNames: ['collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'favoriteTreats', 'id', 'lastHeardAt', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nonNullFavoriteTreats', 'nonNullSpecies', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredCollarCountNumeric', 'species', 'updatedAt', 'userId'],
     columns: {
       collarCount: {
-        coercedType: {} as IdType | null,
+        coercedType: {} as string | null,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -338,7 +321,7 @@ export const schema = {
         isArray: true,
       },
       id: {
-        coercedType: {} as IdType,
+        coercedType: {} as string,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -410,7 +393,7 @@ export const schema = {
         isArray: false,
       },
       requiredCollarCount: {
-        coercedType: {} as IdType,
+        coercedType: {} as string,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -476,10 +459,6 @@ export const schema = {
     },
   },
   posts: {
-    primaryKey: 'id',
-    createdAtField: 'createdAt',
-    updatedAtField: 'updatedAt',
-    deletedAtField: 'deletedAt',
     serializerKeys: ['default', 'summary', 'withComments', 'withRecentComment'],
     scopes: {
       default: [],
@@ -515,7 +494,7 @@ export const schema = {
         isArray: false,
       },
       id: {
-        coercedType: {} as IdType,
+        coercedType: {} as string,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -533,7 +512,7 @@ export const schema = {
         isArray: false,
       },
       userId: {
-        coercedType: {} as IdType,
+        coercedType: {} as string,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -568,10 +547,6 @@ export const schema = {
     },
   },
   users: {
-    primaryKey: 'id',
-    createdAtField: 'createdAt',
-    updatedAtField: 'updatedAt',
-    deletedAtField: 'deletedAt',
     serializerKeys: ['default', 'extra', 'summary', 'withFlattenedPost', 'withOptionalFlattenedPost', 'withPosts', 'withRecentPost'],
     scopes: {
       default: [],
@@ -607,7 +582,7 @@ export const schema = {
         isArray: false,
       },
       collarCount: {
-        coercedType: {} as IdType | null,
+        coercedType: {} as string | null,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -661,7 +636,7 @@ export const schema = {
         isArray: false,
       },
       favoriteBigint: {
-        coercedType: {} as IdType | null,
+        coercedType: {} as string | null,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -670,7 +645,7 @@ export const schema = {
         isArray: false,
       },
       favoriteBigints: {
-        coercedType: {} as IdType[] | null,
+        coercedType: {} as string[] | null,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -877,7 +852,7 @@ export const schema = {
         isArray: false,
       },
       requiredCollarCount: {
-        coercedType: {} as IdType,
+        coercedType: {} as string,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -895,7 +870,7 @@ export const schema = {
         isArray: false,
       },
       requiredFavoriteBigint: {
-        coercedType: {} as IdType,
+        coercedType: {} as string,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -904,7 +879,7 @@ export const schema = {
         isArray: false,
       },
       requiredFavoriteBigints: {
-        coercedType: {} as IdType[],
+        coercedType: {} as string[],
         enumType: null,
         enumArrayType: null,
         enumValues: null,

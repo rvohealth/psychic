@@ -377,7 +377,8 @@ export default class PsychicController {
     return Params.for(
       opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params,
       dreamClass,
-      opts,
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      opts as any,
     )
   }
 
@@ -393,7 +394,7 @@ export default class PsychicController {
     return this.setCookie(
       this.config.sessionCookieName,
       JSON.stringify({
-        id: user.primaryKeyValue,
+        id: (user.primaryKeyValue() as string).toString(),
         modelKey: (user.constructor as typeof Dream).globalName,
       }),
     )
