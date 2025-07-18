@@ -157,4 +157,66 @@ describe('generateController', () => {
       })
     })
   })
+
+  context('importStyle is set on PsychicApp', () => {
+    context('importStyle=.js', () => {
+      beforeEach(() => {
+        vi.spyOn(PsychicApp.prototype, 'importStyle', 'get').mockReturnValue('.js')
+      })
+
+      it('styles all imports to have .js suffix', async () => {
+        const controllerFilename = 'PostsController.ts'
+        const controllerPath = path.join(tmpControllersFilepath, controllerFilename)
+        if (existsSync(controllerPath)) await fs.rm(controllerPath)
+
+        await generateController({
+          fullyQualifiedControllerName: 'Posts',
+          actions: [],
+          singular: false,
+        })
+        const actual = await fs.readFile(controllerPath)
+        expect(actual.toString()).toContain("import AuthedController from './AuthedController.js'")
+      })
+    })
+
+    context('importStyle=.ts', () => {
+      beforeEach(() => {
+        vi.spyOn(PsychicApp.prototype, 'importStyle', 'get').mockReturnValue('.ts')
+      })
+
+      it('styles all imports to have .ts suffix', async () => {
+        const controllerFilename = 'PostsController.ts'
+        const controllerPath = path.join(tmpControllersFilepath, controllerFilename)
+        if (existsSync(controllerPath)) await fs.rm(controllerPath)
+
+        await generateController({
+          fullyQualifiedControllerName: 'Posts',
+          actions: [],
+          singular: false,
+        })
+        const actual = await fs.readFile(controllerPath)
+        expect(actual.toString()).toContain("import AuthedController from './AuthedController.ts'")
+      })
+    })
+
+    context('importStyle=none', () => {
+      beforeEach(() => {
+        vi.spyOn(PsychicApp.prototype, 'importStyle', 'get').mockReturnValue('none')
+      })
+
+      it('styles all imports to have no suffix', async () => {
+        const controllerFilename = 'PostsController.ts'
+        const controllerPath = path.join(tmpControllersFilepath, controllerFilename)
+        if (existsSync(controllerPath)) await fs.rm(controllerPath)
+
+        await generateController({
+          fullyQualifiedControllerName: 'Posts',
+          actions: [],
+          singular: false,
+        })
+        const actual = await fs.readFile(controllerPath)
+        expect(actual.toString()).toContain("import AuthedController from './AuthedController'")
+      })
+    })
+  })
 })

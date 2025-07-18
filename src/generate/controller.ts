@@ -2,6 +2,7 @@ import { hyphenize, standardizeFullyQualifiedModelName } from '@rvoh/dream'
 import { existsSync } from 'node:fs'
 import * as fs from 'node:fs/promises'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
+import addImportSuffix from '../helpers/path/addImportSuffix.js'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths.js'
 import psychicPath from '../helpers/path/psychicPath.js'
 import generateControllerContent from './helpers/generateControllerContent.js'
@@ -141,9 +142,18 @@ function baseAncestorNameAndImport(
   const dotFiles = forBaseController ? '..' : '.'
   return controllerNameParts.length === (forAdmin ? 2 : 1)
     ? forAdmin
-      ? [`AdminAuthedController`, `import AdminAuthedController from '${dotFiles}/AuthedController.js'`]
-      : [`AuthedController`, `import AuthedController from '${dotFiles}/AuthedController.js'`]
-    : [maybeAncestorNameForBase, `import ${maybeAncestorNameForBase} from '${dotFiles}/BaseController.js'`]
+      ? [
+          `AdminAuthedController`,
+          `import AdminAuthedController from '${dotFiles}/${addImportSuffix('AuthedController.js')}'`,
+        ]
+      : [
+          `AuthedController`,
+          `import AuthedController from '${dotFiles}/${addImportSuffix('AuthedController.js')}'`,
+        ]
+    : [
+        maybeAncestorNameForBase,
+        `import ${maybeAncestorNameForBase} from '${dotFiles}/${addImportSuffix('BaseController.js')}'`,
+      ]
 }
 
 async function generateControllerSpec({

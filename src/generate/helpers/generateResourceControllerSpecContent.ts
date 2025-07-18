@@ -9,6 +9,7 @@ import {
 import relativePsychicPath from '../../helpers/path/relativePsychicPath.js'
 import updirsFromPath from '../../helpers/path/updirsFromPath.js'
 import { pluralize } from '../../index.js'
+import addImportSuffix from '../../helpers/path/addImportSuffix.js'
 
 export default function generateResourceControllerSpecContent({
   fullyQualifiedControllerName,
@@ -197,7 +198,7 @@ export default function generateResourceControllerSpecContent({
 
   return `\
 import { ${uniq(dreamImports).join(', ')} } from '@rvoh/dream'${uniq(importStatements).join('')}
-import { session, SpecRequestType } from '${specUnitUpdirs}helpers/authentication.js'
+import { session, SpecRequestType } from '${specUnitUpdirs}helpers/${addImportSuffix('authentication.js')}'
 
 describe('${fullyQualifiedControllerName}', () => {
   let request: SpecRequestType

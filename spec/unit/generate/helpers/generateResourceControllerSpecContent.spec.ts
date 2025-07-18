@@ -1,5 +1,6 @@
 import generateResourceControllerSpecContent from '../../../../src/generate/helpers/generateResourceControllerSpecContent.js'
 import { RESOURCE_ACTIONS } from '../../../../src/generate/resource.js'
+import { PsychicApp } from '../../../../src/index.js'
 
 describe('generateResourceControllerSpecContent', () => {
   it(
@@ -824,6 +825,92 @@ describe('Admin/ArticlesController', () => {
   })
 })
 `)
+    })
+  })
+
+  context('importStyle is set on PsychicApp', () => {
+    context('importStyle=.js', () => {
+      beforeEach(() => {
+        vi.spyOn(PsychicApp.prototype, 'importStyle', 'get').mockReturnValue('.js')
+      })
+
+      it('styles all imports to have .js suffix', () => {
+        const res = generateResourceControllerSpecContent({
+          fullyQualifiedControllerName: 'V1/PostsController',
+          route: 'v1/posts',
+          fullyQualifiedModelName: 'Post',
+          columnsWithTypes: [],
+          forAdmin: false,
+          singular: false,
+          actions: [...RESOURCE_ACTIONS],
+        })
+        expect(res).toContain(
+          `\
+import { UpdateableProperties } from '@rvoh/dream'
+import Post from '../../../../src/app/models/Post.js'
+import User from '../../../../src/app/models/User.js'
+import createPost from '../../../factories/PostFactory.js'
+import createUser from '../../../factories/UserFactory.js'
+import { session, SpecRequestType } from '../../helpers/authentication.js'\
+`,
+        )
+      })
+    })
+
+    context('importStyle=.ts', () => {
+      beforeEach(() => {
+        vi.spyOn(PsychicApp.prototype, 'importStyle', 'get').mockReturnValue('.ts')
+      })
+
+      it('styles all imports to have .ts suffix', () => {
+        const res = generateResourceControllerSpecContent({
+          fullyQualifiedControllerName: 'V1/PostsController',
+          route: 'v1/posts',
+          fullyQualifiedModelName: 'Post',
+          columnsWithTypes: [],
+          forAdmin: false,
+          singular: false,
+          actions: [...RESOURCE_ACTIONS],
+        })
+        expect(res).toContain(
+          `\
+import { UpdateableProperties } from '@rvoh/dream'
+import Post from '../../../../src/app/models/Post.ts'
+import User from '../../../../src/app/models/User.ts'
+import createPost from '../../../factories/PostFactory.ts'
+import createUser from '../../../factories/UserFactory.ts'
+import { session, SpecRequestType } from '../../helpers/authentication.ts'\
+`,
+        )
+      })
+    })
+
+    context('importStyle=none', () => {
+      beforeEach(() => {
+        vi.spyOn(PsychicApp.prototype, 'importStyle', 'get').mockReturnValue('none')
+      })
+
+      it('styles all imports to have no suffix', () => {
+        const res = generateResourceControllerSpecContent({
+          fullyQualifiedControllerName: 'V1/PostsController',
+          route: 'v1/posts',
+          fullyQualifiedModelName: 'Post',
+          columnsWithTypes: [],
+          forAdmin: false,
+          singular: false,
+          actions: [...RESOURCE_ACTIONS],
+        })
+        expect(res).toContain(
+          `\
+import { UpdateableProperties } from '@rvoh/dream'
+import Post from '../../../../src/app/models/Post'
+import User from '../../../../src/app/models/User'
+import createPost from '../../../factories/PostFactory'
+import createUser from '../../../factories/UserFactory'
+import { session, SpecRequestType } from '../../helpers/authentication'\
+`,
+        )
+      })
     })
   })
 })
