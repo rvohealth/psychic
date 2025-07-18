@@ -226,6 +226,11 @@ Try setting it to something valid, like:
     return this._packageManager
   }
 
+  private _importExtension: GeneratorImportStyle = '.js'
+  public get importExtension() {
+    return this._importExtension
+  }
+
   private _routesCb: (r: PsychicRouter) => void | Promise<void>
   public get routesCb() {
     return this._routesCb
@@ -470,33 +475,35 @@ Try setting it to something valid, like:
                 ? CustomCookieOptions
                 : Opt extends 'apiRoot'
                   ? string
-                  : Opt extends 'sessionCookieName'
-                    ? string
-                    : Opt extends 'clientRoot'
+                  : Opt extends 'importExtension'
+                    ? GeneratorImportStyle
+                    : Opt extends 'sessionCookieName'
                       ? string
-                      : Opt extends 'json'
-                        ? bodyParser.Options
-                        : Opt extends 'logger'
-                          ? PsychicLogger
-                          : Opt extends 'client'
-                            ? PsychicClientOptions
-                            : Opt extends 'ssl'
-                              ? PsychicSslCredentials
-                              : Opt extends 'openapi'
-                                ? DefaultPsychicOpenapiOptions
-                                : Opt extends 'paths'
-                                  ? PsychicPathOptions
-                                  : Opt extends 'port'
-                                    ? number
-                                    : Opt extends 'saltRounds'
+                      : Opt extends 'clientRoot'
+                        ? string
+                        : Opt extends 'json'
+                          ? bodyParser.Options
+                          : Opt extends 'logger'
+                            ? PsychicLogger
+                            : Opt extends 'client'
+                              ? PsychicClientOptions
+                              : Opt extends 'ssl'
+                                ? PsychicSslCredentials
+                                : Opt extends 'openapi'
+                                  ? DefaultPsychicOpenapiOptions
+                                  : Opt extends 'paths'
+                                    ? PsychicPathOptions
+                                    : Opt extends 'port'
                                       ? number
-                                      : Opt extends 'packageManager'
-                                        ? DreamAppAllowedPackageManagersEnum
-                                        : Opt extends 'inflections'
-                                          ? () => void | Promise<void>
-                                          : Opt extends 'routes'
-                                            ? (r: PsychicRouter) => void | Promise<void>
-                                            : never,
+                                      : Opt extends 'saltRounds'
+                                        ? number
+                                        : Opt extends 'packageManager'
+                                          ? DreamAppAllowedPackageManagersEnum
+                                          : Opt extends 'inflections'
+                                            ? () => void | Promise<void>
+                                            : Opt extends 'routes'
+                                              ? (r: PsychicRouter) => void | Promise<void>
+                                              : never,
   ): void
   public set<Opt extends PsychicAppOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -512,6 +519,10 @@ Try setting it to something valid, like:
 
       case 'apiRoot':
         this._apiRoot = value as string
+        break
+
+      case 'importExtension':
+        this._importExtension = value as GeneratorImportStyle
         break
 
       case 'clientRoot':
@@ -621,6 +632,7 @@ export type PsychicAppOption =
   | 'appName'
   | 'apiOnly'
   | 'apiRoot'
+  | 'importExtension'
   | 'encryption'
   | 'sessionCookieName'
   | 'client'
@@ -931,3 +943,9 @@ interface SegmentedEncryptionOptions {
   current: EncryptOptions
   legacy?: EncryptOptions
 }
+
+// GeneratorImportStyles are used by CLI generators to determine how
+// to style import suffixes. When integrating with other apps, this
+// suffix style can change, and may need to be configured.
+export const GeneratorImportStyles = ['.js', '.ts', 'none'] as const
+export type GeneratorImportStyle = (typeof GeneratorImportStyles)[number]

@@ -1,3 +1,7 @@
+## 1.2.1
+
+- add ability to set custom import extension, which will be used when generating new files for your application
+
 ## 1.2.0
 
 - update for Dream 1.4.0
