@@ -25,6 +25,7 @@ export default async (psy: PsychicApp) => {
 
   psy.set('appName', 'testapp')
   psy.set('packageManager', 'yarn')
+  psy.set('importExtension', '.js') // this is the default, but just making sure we can set it
   psy.set('apiOnly', false)
   psy.set('apiRoot', srcPath('..', '..'))
   psy.set('clientRoot', srcPath('..', 'client'))
