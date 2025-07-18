@@ -1,6 +1,7 @@
 import { pascalize, sharedPathPrefix, standardizeFullyQualifiedModelName } from '@rvoh/dream'
 import psychicPath, { PsychicPaths } from './psychicPath.js'
 import updirsFromPath from './updirsFromPath.js'
+import addImportSuffix from './addImportSuffix.js'
 
 export default function (
   originDreamPathType: PsychicPaths,
@@ -39,13 +40,13 @@ export default function (
       return destinationPath
 
     case 'factories':
-      return `${destinationPath}${fullyQualifiedDestinationModelName}Factory.js`
+      return addImportSuffix(`${destinationPath}${fullyQualifiedDestinationModelName}Factory.js`)
 
     case 'serializers':
-      return `${destinationPath}${fullyQualifiedDestinationModelName}Serializer.js`
+      return addImportSuffix(`${destinationPath}${fullyQualifiedDestinationModelName}Serializer.js`)
 
     default:
-      return `${destinationPath}${fullyQualifiedDestinationModelName}.js`
+      return addImportSuffix(`${destinationPath}${fullyQualifiedDestinationModelName}.js`)
   }
 }
 
