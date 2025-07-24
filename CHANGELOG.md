@@ -18,6 +18,8 @@ class MyController extends ApplicationController {
 
 - simplify the needlessly-robust new psychic router patterns by making expressApp optional, essentially reverting us back to the same psychic router we had prior to the recent openapi validation changes.
 
+- fallback to serializer specified in openapi decorator before falling back to dream serializer when rendering dreams
+
 ## 1.6.2
 
 fix OpenAPI spec generation by DRYing up generation of request and response body

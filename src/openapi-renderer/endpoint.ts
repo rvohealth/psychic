@@ -113,7 +113,7 @@ export default class OpenapiEndpointRenderer<
    * ```
    */
   constructor(
-    private dreamsOrSerializers: DreamsOrSerializersOrViewModels | null,
+    public dreamsOrSerializers: DreamsOrSerializersOrViewModels | null,
     private controllerClass: typeof PsychicController,
     private action: string,
 

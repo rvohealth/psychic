@@ -515,22 +515,26 @@ export default class PsychicController {
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
     const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
+    const openapiDef = (this.constructor as typeof PsychicController)?.openapi?.[this.action]
+
+    // passthrough data must be passed both into the serializer and render
+    // because, if the serializer does accept passthrough data, then passing it in is how
+    // it gets into the serializer, but if it does not accept passthrough data, and therefore
+    // does not pass it into the call to DreamSerializer/ObjectSerializer,
+    // then it would be lost to serializers rendered via rendersOne/Many, and SerializerRenderer
+    // handles passing its passthrough data into those
+    const passthrough = this.defaultSerializerPassthrough
+
     if (lookup?.length) {
       const serializer = lookup?.[1]
       if (isDreamSerializer(serializer)) {
         // passthrough data going into the serializer is the argument that gets
         // used in the custom attribute callback function
-        return serializer(data, this.defaultSerializerPassthrough).render(
-          // passthrough data must be passed both into the serializer and render
-          // because, if the serializer does accept passthrough data, then passing it in is how
-          // it gets into the serializer, but if it does not accept passthrough data, and therefore
-          // does not pass it into the call to DreamSerializer/ObjectSerializer,
-          // then it would be lost to serializers rendered via rendersOne/Many, and SerializerRenderer
-          // handles passing its passthrough data into those
-          this.defaultSerializerPassthrough,
-          this.renderOpts,
-        )
+        return serializer(data, passthrough).render(passthrough, this.renderOpts)
       }
+    } else if (isDreamSerializer(openapiDef?.dreamsOrSerializers)) {
+      const serializer = openapiDef!.dreamsOrSerializers as DreamModelSerializerType
+      return serializer(data, passthrough).render(passthrough, this.renderOpts)
     } else if (data instanceof Dream || (data as unknown as ViewModel).serializers) {
       const serializer = inferSerializerFromDreamOrViewModel(
         data as unknown as Dream | ViewModel,
@@ -542,14 +546,14 @@ export default class PsychicController {
       if (serializer && isDreamSerializer(serializer)) {
         // passthrough data going into the serializer is the argument that gets
         // used in the custom attribute callback function
-        return serializer(data, this.defaultSerializerPassthrough).render(
+        return serializer(data, passthrough).render(
           // passthrough data must be passed both into the serializer and render
           // because, if the serializer does accept passthrough data, then passing it in is how
           // it gets into the serializer, but if it does not accept passthrough data, and therefore
           // does not pass it into the call to DreamSerializer/ObjectSerializer,
           // then it would be lost to serializers rendered via rendersOne/Many, and SerializerRenderer
           // handles passing its passthrough data into those
-          this.defaultSerializerPassthrough,
+          passthrough,
           this.renderOpts,
         )
       }

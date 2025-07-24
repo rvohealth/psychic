@@ -59,6 +59,7 @@ export default (r: PsychicRouter) => {
     })
     r.resources('pets', { only: [] })
     r.get('ping', UsersController, 'ping')
+    r.get('with-posts', UsersController, 'showWithPosts')
   })
   r.resources('pets', { only: ['create', 'update'] }, r => {
     r.put('update2', PetsController, 'update2')
