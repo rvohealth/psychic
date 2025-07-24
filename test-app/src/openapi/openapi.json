@@ -3764,6 +3764,69 @@
         }
       }
     },
+    "/users/{id}/with-posts": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": true,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserWithPosts"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/users/paginated": {
       "parameters": [
         {

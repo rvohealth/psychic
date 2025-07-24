@@ -3,6 +3,7 @@ import { BeforeAction, OpenAPI } from '../../../../src/index.js'
 import User from '../models/User.js'
 import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer.js'
 import ApplicationController from './ApplicationController.js'
+import { UserWithPostsSerializer } from '../serializers/UserSerializer.js'
 
 export default class UsersController extends ApplicationController {
   public ping() {
@@ -101,6 +102,14 @@ export default class UsersController extends ApplicationController {
   })
   public async show() {
     const user = await User.findOrFail(this.castParam('id', 'bigint'))
+    this.ok(user)
+  }
+
+  @OpenAPI(UserWithPostsSerializer, {
+    status: 200,
+  })
+  public async showWithPosts() {
+    const user = await User.preload('posts', 'comments').findOrFail(this.castParam('id', 'bigint'))
     this.ok(user)
   }
 
