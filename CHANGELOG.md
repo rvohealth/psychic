@@ -1,3 +1,7 @@
+## 1.2.2
+
+- fallback to serializer specified in openapi decorator before falling back to dream serializer when rendering dreams
+
 ## 1.2.1
 
 - add ability to set custom import extension, which will be used when generating new files for your application
