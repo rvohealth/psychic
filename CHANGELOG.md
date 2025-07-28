@@ -1,3 +1,7 @@
+## 1.2.3
+
+- add support for the connectionName argument when generating a resource
+
 ## 1.2.2
 
 - bump supertest and express-session to close dependabot issues [53](https://github.com/rvohealth/psychic/security/dependabot/53), [56](https://github.com/rvohealth/psychic/security/dependabot/56), and [57](https://github.com/rvohealth/psychic/security/dependabot/57)

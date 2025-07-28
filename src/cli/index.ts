@@ -91,6 +91,11 @@ export default class PsychicCLI {
         '--owning-model <modelName>',
         'the model class of the object that `associationQuery`/`createAssociation` will be performed on in the created controller and spec (e.g., "Host", "Guest") (simply to save time making changes to the generated code). Defaults to User',
       )
+      .option(
+        '--connection-name <connectionName>',
+        'the name of the db connection you would like to use for your model. Defaults to "default"',
+        'default',
+      )
       .argument('<path>', 'URL path from root domain')
       .argument(
         '<modelName>',
@@ -107,6 +112,7 @@ export default class PsychicCLI {
             onlyActions?: string
             stiBaseSerializer: boolean
             owningModel?: string
+            connectionName: string
           },
         ) => {
           await initializePsychicApp()
