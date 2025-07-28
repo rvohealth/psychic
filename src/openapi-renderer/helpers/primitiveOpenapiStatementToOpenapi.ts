@@ -1,5 +1,5 @@
 import { OpenapiSchemaBody, OpenapiSchemaBodyShorthand, OpenapiShorthandPrimitiveTypes } from '@rvoh/dream'
-import openapiShorthandToOpenapi from './openapiShorthandToOpenapi.js'
+import openapiShorthandToOpenapi, { OpenapiShorthandToOpenapiOptions } from './openapiShorthandToOpenapi.js'
 
 /**
  * @internal
@@ -8,7 +8,7 @@ import openapiShorthandToOpenapi from './openapiShorthandToOpenapi.js'
  */
 export default function primitiveOpenapiStatementToOpenapi(
   data: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined,
-  maybeNull: boolean = false,
+  options: OpenapiShorthandToOpenapiOptions = {},
 ): OpenapiSchemaBody {
-  return openapiShorthandToOpenapi(data, { maybeNull })
+  return openapiShorthandToOpenapi(data, options)
 }

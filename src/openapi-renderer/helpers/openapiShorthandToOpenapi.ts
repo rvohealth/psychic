@@ -8,13 +8,14 @@ import isObject from '../../helpers/isObject.js'
 import isOpenapiShorthand from './isOpenapiShorthand.js'
 import maybeNullOpenapiShorthandToOpenapiShorthand from './maybeNullOpenapiShorthandToOpenapiShorthand.js'
 
-interface Options {
+export interface OpenapiShorthandToOpenapiOptions {
   maybeNull?: boolean
+  format?: string | undefined
 }
 
 export default function openapiShorthandToOpenapi(
   openapi: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined,
-  options: Options = {},
+  options: OpenapiShorthandToOpenapiOptions = {},
 ): OpenapiSchemaBody {
   if (isOpenapiShorthand(openapi)) {
     return _openapiShorthandToOpenapi(openapi as OpenapiShorthandPrimitiveTypes, options)
@@ -27,20 +28,26 @@ export default function openapiShorthandToOpenapi(
 
 function _openapiShorthandToOpenapi(
   shorthand: OpenapiShorthandPrimitiveTypes,
-  options: Options,
+  options: OpenapiShorthandToOpenapiOptions,
 ): OpenapiSchemaBody {
   const shorthandString = maybeNullOpenapiShorthandToOpenapiShorthand(shorthand)
   if (!shorthandString) return { type: 'null' }
-  const openapi = simpleOpenapiShorthandToOpenapi(shorthandString)
-  if (options.maybeNull || openapiShorthandIncludesNull(shorthand))
+  const openapi = simpleOpenapiShorthandToOpenapi(shorthandString, options)
+
+  if (options.maybeNull || openapiShorthandIncludesNull(shorthand)) {
     return { ...openapi, type: [openapi.type, 'null'] } as OpenapiSchemaBody
+  }
+
   return openapi as OpenapiSchemaBody
 }
 
-function simpleOpenapiShorthandToOpenapi(shorthand: OpenapiShorthandPrimitiveBaseTypes) {
+function simpleOpenapiShorthandToOpenapi(
+  shorthand: OpenapiShorthandPrimitiveBaseTypes,
+  options: OpenapiShorthandToOpenapiOptions,
+) {
   switch (shorthand) {
     case 'string':
-      return { type: 'string' }
+      return options.format ? { type: 'string', format: options.format } : { type: 'string' }
     case 'boolean':
       return { type: 'boolean' }
     case 'number':
@@ -56,7 +63,10 @@ function simpleOpenapiShorthandToOpenapi(shorthand: OpenapiShorthandPrimitiveBas
     case 'null':
       return { type: 'null' }
     case 'string[]':
-      return { type: 'array', items: { type: 'string' } }
+      return {
+        type: 'array',
+        items: options.format ? { type: 'string', format: options.format } : { type: 'string' },
+      }
     case 'boolean[]':
       return { type: 'array', items: { type: 'boolean' } }
     case 'number[]':

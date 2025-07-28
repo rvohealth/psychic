@@ -685,11 +685,72 @@ describe('OpenapiEndpointRenderer', () => {
                     },
                     collarCount: {
                       type: ['string', 'null'],
+                      format: 'bigint',
                     },
                   }),
                 },
               },
             },
+          })
+        })
+
+        context('special data types', () => {
+          // the bigint format is rendered so that our openapi-typescript
+          // integration can successfully convert all bigint formats to "string | number"
+          // when building typescript types out of the generared openapi.json files.
+          context('bigint', () => {
+            context('when a bigint is rendered', () => {
+              it('renders with format: "bigint"', () => {
+                const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'create', {
+                  requestBody: { for: User },
+                })
+
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                expect(response['/users']!.post.requestBody).toEqual({
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: expect.objectContaining({
+                          favoriteBigint: {
+                            type: ['string', 'null'],
+                            format: 'bigint',
+                          },
+                        }),
+                      },
+                    },
+                  },
+                })
+              })
+            })
+
+            context('when a bigint[] is rendered', () => {
+              it('renders with format: "bigint"', () => {
+                const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'create', {
+                  requestBody: { for: User },
+                })
+
+                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                expect(response['/users']!.post.requestBody).toEqual({
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: expect.objectContaining({
+                          favoriteBigints: {
+                            type: ['array', 'null'],
+                            items: {
+                              type: 'string',
+                              format: 'bigint',
+                            },
+                          },
+                        }),
+                      },
+                    },
+                  },
+                })
+              })
+            })
           })
         })
 
@@ -936,7 +997,7 @@ describe('OpenapiEndpointRenderer', () => {
                         schema: {
                           type: 'object',
                           properties: expect.objectContaining({
-                            requiredFavoriteBigint: { type: 'string' },
+                            requiredFavoriteBigint: { type: 'string', format: 'bigint' },
                           }),
                         },
                       },
@@ -957,7 +1018,10 @@ describe('OpenapiEndpointRenderer', () => {
                           schema: {
                             type: 'object',
                             properties: expect.objectContaining({
-                              requiredFavoriteBigints: { type: 'array', items: { type: 'string' } },
+                              requiredFavoriteBigints: {
+                                type: 'array',
+                                items: { type: 'string', format: 'bigint' },
+                              },
                             }),
                           },
                         },
@@ -1305,6 +1369,7 @@ describe('OpenapiEndpointRenderer', () => {
                       properties: expect.objectContaining({
                         collarCount: {
                           type: ['string', 'null'],
+                          format: 'bigint',
                         },
                       }),
                     },

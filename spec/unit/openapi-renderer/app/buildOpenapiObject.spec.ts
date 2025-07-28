@@ -127,10 +127,10 @@ describe('OpenapiAppRenderer', () => {
                         birthdate: { type: ['string', 'null'], format: 'date' },
                         createdOn: { type: 'string', format: 'date' },
                         email: { type: 'string' },
-                        favoriteBigint: { type: ['string', 'null'] },
+                        favoriteBigint: { type: ['string', 'null'], format: 'bigint' },
                         favoriteBigints: {
                           type: ['array', 'null'],
-                          items: { type: 'string' },
+                          items: { type: 'string', format: 'bigint' },
                         },
                       }),
                     },
