@@ -1,3 +1,7 @@
+## 1.2.2
+
+- bump supertest and express-session to close dependabot issues [53](https://github.com/rvohealth/psychic/security/dependabot/53), [56](https://github.com/rvohealth/psychic/security/dependabot/56), and [57](https://github.com/rvohealth/psychic/security/dependabot/57)
+
 ## 1.2.1
 
 - add ability to set custom import extension, which will be used when generating new files for your application
