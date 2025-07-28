@@ -159,7 +159,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "collarCountInt": {
                     "type": [
@@ -184,7 +185,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "favoriteBigints": {
                     "type": [
@@ -192,7 +194,8 @@
                       "null"
                     ],
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "format": "bigint"
                     }
                   },
                   "favoriteBooleans": {
@@ -359,18 +362,21 @@
                     "type": "string"
                   },
                   "requiredCollarCount": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredCollarCountInt": {
                     "type": "integer"
                   },
                   "requiredFavoriteBigint": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredFavoriteBigints": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "format": "bigint"
                     }
                   },
                   "requiredFavoriteBooleans": {
@@ -593,7 +599,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "collarCountInt": {
                     "type": [
@@ -618,7 +625,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "favoriteBigints": {
                     "type": [
@@ -626,7 +634,8 @@
                       "null"
                     ],
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "format": "bigint"
                     }
                   },
                   "favoriteBooleans": {
@@ -793,18 +802,21 @@
                     "type": "string"
                   },
                   "requiredCollarCount": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredCollarCountInt": {
                     "type": "integer"
                   },
                   "requiredFavoriteBigint": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredFavoriteBigints": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "format": "bigint"
                     }
                   },
                   "requiredFavoriteBooleans": {
@@ -1590,7 +1602,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "collarCountInt": {
                     "type": [
@@ -1662,7 +1675,8 @@
                     ]
                   },
                   "requiredCollarCount": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredCollarCountInt": {
                     "type": "integer"
@@ -1759,7 +1773,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "collarCountInt": {
                     "type": [
@@ -1831,7 +1846,8 @@
                     ]
                   },
                   "requiredCollarCount": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredCollarCountInt": {
                     "type": "integer"
@@ -2005,7 +2021,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "collarCountInt": {
                     "type": [
@@ -2030,7 +2047,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "favoriteBigints": {
                     "type": [
@@ -2038,7 +2056,8 @@
                       "null"
                     ],
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "format": "bigint"
                     }
                   },
                   "favoriteBooleans": {
@@ -2205,18 +2224,21 @@
                     "type": "string"
                   },
                   "requiredCollarCount": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredCollarCountInt": {
                     "type": "integer"
                   },
                   "requiredFavoriteBigint": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredFavoriteBigints": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "format": "bigint"
                     }
                   },
                   "requiredFavoriteBooleans": {
@@ -2533,7 +2555,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "collarCountInt": {
                     "type": [
@@ -2558,7 +2581,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "favoriteBigints": {
                     "type": [
@@ -2566,7 +2590,8 @@
                       "null"
                     ],
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "format": "bigint"
                     }
                   },
                   "favoriteBooleans": {
@@ -2733,18 +2758,21 @@
                     "type": "string"
                   },
                   "requiredCollarCount": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredCollarCountInt": {
                     "type": "integer"
                   },
                   "requiredFavoriteBigint": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredFavoriteBigints": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "format": "bigint"
                     }
                   },
                   "requiredFavoriteBooleans": {
@@ -3145,7 +3173,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "collarCountInt": {
                     "type": [
@@ -3170,7 +3199,8 @@
                     "type": [
                       "string",
                       "null"
-                    ]
+                    ],
+                    "format": "bigint"
                   },
                   "favoriteBigints": {
                     "type": [
@@ -3178,7 +3208,8 @@
                       "null"
                     ],
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "format": "bigint"
                     }
                   },
                   "favoriteBooleans": {
@@ -3345,18 +3376,21 @@
                     "type": "string"
                   },
                   "requiredCollarCount": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredCollarCountInt": {
                     "type": "integer"
                   },
                   "requiredFavoriteBigint": {
-                    "type": "string"
+                    "type": "string",
+                    "format": "bigint"
                   },
                   "requiredFavoriteBigints": {
                     "type": "array",
                     "items": {
-                      "type": "string"
+                      "type": "string",
+                      "format": "bigint"
                     }
                   },
                   "requiredFavoriteBooleans": {
