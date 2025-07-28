@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "1.2.2",
+  "version": "1.5.0",
   "author": "RVOHealth",
   "repository": {
     "type": "git",
@@ -59,8 +59,8 @@
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@jest-mock/express": "^3.0.0",
-    "@rvoh/dream": "^1.4.0",
-    "@rvoh/dream-spec-helpers": "^1.1.0",
+    "@rvoh/dream": "^1.5.0",
+    "@rvoh/dream-spec-helpers": "^1.1.1",
     "@rvoh/psychic-spec-helpers": "^1.0.0",
     "@types/express": "^5.0.1",
     "@types/express-session": "^1.18.2",

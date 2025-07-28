@@ -19,6 +19,7 @@ export default async function generateResource({
     only?: string
     stiBaseSerializer: boolean
     owningModel?: string
+    connectionName: string
   }
   columnsWithTypes: string[]
 }) {
@@ -41,6 +42,7 @@ export default async function generateResource({
       serializer: true,
       stiBaseSerializer: options.stiBaseSerializer,
       includeAdminSerializers: forAdmin,
+      connectionName: options.connectionName,
     },
   })
 
