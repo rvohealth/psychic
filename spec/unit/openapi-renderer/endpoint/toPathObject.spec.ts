@@ -1,5 +1,5 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { PsychicServer } from '../../../../src/index.js'
+import { PsychicApp } from '../../../../src/index.js'
 import OpenapiEndpointRenderer, { ToPathObjectOpts } from '../../../../src/openapi-renderer/endpoint.js'
 import { RouteConfig } from '../../../../src/router/route-manager.js'
 import ApiPetsController from '../../../../test-app/src/app/controllers/Api/PetsController.js'
@@ -17,7 +17,6 @@ import PostSerializer from '../../../../test-app/src/app/serializers/PostSeriali
 import UserSerializer, {
   UserWithPostsSerializer,
 } from '../../../../test-app/src/app/serializers/UserSerializer.js'
-import initializePsychicApp from '../../../../test-app/src/cli/helpers/initializePsychicApp.js'
 
 describe('OpenapiEndpointRenderer', () => {
   let routes: RouteConfig[]
@@ -33,11 +32,8 @@ describe('OpenapiEndpointRenderer', () => {
     }
   }
 
-  beforeAll(async () => {
-    await initializePsychicApp()
-    const server = new PsychicServer()
-    await server.boot()
-    routes = await server.routes()
+  beforeEach(() => {
+    routes = PsychicApp.getOrFail().routesCache
   })
 
   describe('#toPathObject', () => {
@@ -554,7 +550,7 @@ describe('OpenapiEndpointRenderer', () => {
                   {
                     in: 'header',
                     name: 'custom-header',
-                    required: true,
+                    required: false,
                     description: 'custom header',
                     schema: {
                       type: 'string',

@@ -251,7 +251,7 @@ export default class PsychicCLI {
       )
       .action(async () => {
         await initializePsychicApp()
-        await PsychicBin.routes()
+        PsychicBin.printRoutes()
         process.exit()
       })
 

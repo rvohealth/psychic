@@ -2,9 +2,9 @@ export interface paths {
     "/api/pets": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -14,9 +14,9 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -52,9 +52,9 @@ export interface paths {
     "/api/pets/{id}": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path: {
                 id: string;
@@ -70,9 +70,9 @@ export interface paths {
         patch: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path: {
                     id: string;
@@ -99,9 +99,9 @@ export interface paths {
     "/api/users": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -111,9 +111,9 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -210,9 +210,9 @@ export interface paths {
     "/api/users/{id}": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path: {
                 id: string;
@@ -228,9 +228,9 @@ export interface paths {
         patch: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path: {
                     id: string;
@@ -325,9 +325,9 @@ export interface paths {
     "/balloons": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -335,9 +335,9 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -375,9 +375,9 @@ export interface paths {
     "/balloons/{id}": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path: {
                 id: string;
@@ -387,9 +387,9 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path: {
                     id: string;
@@ -429,9 +429,9 @@ export interface paths {
     "/balloons/index-different-dreams": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -439,9 +439,9 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -479,9 +479,9 @@ export interface paths {
     "/balloons/index-dreams-and-view-model": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -489,9 +489,9 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -529,9 +529,9 @@ export interface paths {
     "/circular": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -539,9 +539,9 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -579,9 +579,9 @@ export interface paths {
     "/greeter/justforspecs": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -589,9 +589,9 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -626,15 +626,129 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/headersOpenapiTest": {
+        parameters: {
+            query?: never;
+            header: {
+                /** @description custom header */
+                "custom-header"?: string;
+                /** @description myDate */
+                myDate: string;
+                /** @description myOptionalDate */
+                myOptionalDate?: string;
+                /** @description myOptionalInt */
+                myOptionalInt?: number;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                    /** @description myDate */
+                    myDate: string;
+                    /** @description myOptionalDate */
+                    myOptionalDate?: string;
+                    /** @description myOptionalInt */
+                    myOptionalInt?: number;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/invalidRequestBody": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        numericParam?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/openapi-validation-on-explicit-query-arrays": {
         parameters: {
             query?: {
                 /** @description myArray[] */
                 "myArray[]"?: string[];
             };
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -645,9 +759,9 @@ export interface paths {
                     /** @description myArray[] */
                     "myArray[]"?: string[];
                 };
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -686,9 +800,9 @@ export interface paths {
                 /** @description myArray */
                 myArray?: string[];
             };
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -699,9 +813,9 @@ export interface paths {
                     /** @description myArray */
                     myArray?: string[];
                 };
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -737,9 +851,9 @@ export interface paths {
     "/openapi-validation-test": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -749,9 +863,9 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -824,9 +938,9 @@ export interface paths {
     "/pets": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -836,9 +950,9 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -900,9 +1014,9 @@ export interface paths {
     "/pets/{id}": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path: {
                 id: string;
@@ -918,9 +1032,9 @@ export interface paths {
         patch: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path: {
                     id: string;
@@ -973,9 +1087,9 @@ export interface paths {
     "/pets/{id}/my-posts": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path: {
                 id: string;
@@ -987,9 +1101,9 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path: {
                     id: string;
@@ -1023,12 +1137,241 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
-    "/users": {
+    "/queryOpenapiTest": {
+        parameters: {
+            query?: {
+                /** @description stringParam */
+                stringParam?: string;
+                /** @description numericParam */
+                numericParam?: number;
+                /** @description stringArray */
+                stringArray?: string[];
+            };
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    /** @description stringParam */
+                    stringParam?: string;
+                    /** @description numericParam */
+                    numericParam?: number;
+                    /** @description stringArray */
+                    stringArray?: string[];
+                };
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/queryRequiredOpenapiTest": {
+        parameters: {
+            query: {
+                /** @description requiredStringParam */
+                requiredStringParam: string;
+                /** @description nonRequiredStringParam */
+                nonRequiredStringParam?: string;
+            };
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    /** @description requiredStringParam */
+                    requiredStringParam: string;
+                    /** @description nonRequiredStringParam */
+                    nonRequiredStringParam?: string;
+                };
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/requestBodyNestedObjectOpenapiTest": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        nested: {
+                            object: {
+                                requiredInt: number;
+                                optionalInt?: number;
+                            };
+                        };
+                    };
+                };
+            };
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/requestBodyOpenapiTest": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        requiredInt: number;
+                        optionalInt?: number;
+                    };
+                };
+            };
+            responses: {
+                /** @description Success, no content */
+                204: components["responses"]["NoContent"];
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/responseAlternateStatusTest": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -1036,9 +1379,227 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": number;
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                /** @description Unauthorized */
+                401: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": number;
+                    };
+                };
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/responseBodyNestedObjectOpenapiTest": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            nested: {
+                                object: {
+                                    requiredInt: number;
+                                    optionalInt?: number;
+                                };
+                            };
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/responseBodyObjectOpenapiTest": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            requiredInt: number;
+                            optionalInt?: number;
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/responseBodyOpenapiTest": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": number;
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -1069,9 +1630,9 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -1175,9 +1736,9 @@ export interface paths {
     "/users/{id}": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path: {
                 /** @description The ID of the User */
@@ -1188,9 +1749,9 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path: {
                     /** @description The ID of the User */
@@ -1225,9 +1786,9 @@ export interface paths {
         delete: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path: {
                     /** @description The ID of the User */
@@ -1260,9 +1821,9 @@ export interface paths {
         patch: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path: {
                     /** @description The ID of the User */
@@ -1358,9 +1919,9 @@ export interface paths {
     "/users/{id}/justforspecs": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path: {
                 id: string;
@@ -1370,9 +1931,9 @@ export interface paths {
         get: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path: {
                     id: string;
@@ -1415,9 +1976,9 @@ export interface paths {
                 /** @description Page number */
                 page?: string;
             };
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -1428,9 +1989,9 @@ export interface paths {
                     /** @description Page number */
                     page?: string;
                 };
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -1473,9 +2034,9 @@ export interface paths {
     "/users/paginated-post": {
         parameters: {
             query?: never;
-            header: {
+            header?: {
                 /** @description custom header */
-                "custom-header": string;
+                "custom-header"?: string;
             };
             path?: never;
             cookie?: never;
@@ -1485,9 +2046,9 @@ export interface paths {
         post: {
             parameters: {
                 query?: never;
-                header: {
+                header?: {
                     /** @description custom header */
-                    "custom-header": string;
+                    "custom-header"?: string;
                 };
                 path?: never;
                 cookie?: never;
@@ -1630,6 +2191,19 @@ export interface components {
             id: string;
             latexOnlySummaryAttr: string;
         };
+        OpenapiValidationErrors: {
+            /** @enum {string} */
+            type: "openapi";
+            /** @enum {string} */
+            target: "requestBody" | "query" | "headers" | "responseBody";
+            errors: {
+                instancePath: string;
+                schemaPath: string;
+                keyword: string;
+                message: string;
+                params: Record<string, never>;
+            }[];
+        };
         Pet: {
             id: string;
             name: string | null;
@@ -1670,7 +2244,9 @@ export interface components {
             posts: components["schemas"]["PostWithComments"][];
         };
         ValidationErrors: {
-            errors?: {
+            /** @enum {string} */
+            type: "validation";
+            errors: {
                 [key: string]: string[];
             };
         };
@@ -1687,13 +2263,13 @@ export interface components {
             };
             content?: never;
         };
-        /** @description The server would not process the request due to something the server considered to be a client error */
+        /** @description The server would not process the request due to something the server considered to be a client error, such as a model validation failure or an openapi validation failure */
         BadRequest: {
             headers: {
                 [name: string]: unknown;
             };
             content: {
-                "application/json": components["schemas"]["ValidationErrors"];
+                "application/json": components["schemas"]["ValidationErrors"] | components["schemas"]["OpenapiValidationErrors"];
             };
         };
         /** @description The request was not successful because it lacks valid authentication credentials for the requested resource */

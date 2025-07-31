@@ -215,11 +215,18 @@
         "description": "The request has succeeded, but there is no content to render"
       },
       "BadRequest": {
-        "description": "The server would not process the request due to something the server considered to be a client error",
+        "description": "The server would not process the request due to something the server considered to be a client error, such as a model validation failure or an openapi validation failure",
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/ValidationErrors"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ValidationErrors"
+                },
+                {
+                  "$ref": "#/components/schemas/OpenapiValidationErrors"
+                }
+              ]
             }
           }
         }
@@ -291,9 +298,74 @@
       "CustomAdminSchema": {
         "type": "string"
       },
+      "OpenapiValidationErrors": {
+        "type": "object",
+        "required": [
+          "type",
+          "target",
+          "errors"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "openapi"
+            ]
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "requestBody",
+              "query",
+              "headers",
+              "responseBody"
+            ]
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "instancePath",
+                "schemaPath",
+                "keyword",
+                "message",
+                "params"
+              ],
+              "properties": {
+                "instancePath": {
+                  "type": "string"
+                },
+                "schemaPath": {
+                  "type": "string"
+                },
+                "keyword": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object"
+                }
+              }
+            }
+          }
+        }
+      },
       "ValidationErrors": {
         "type": "object",
+        "required": [
+          "type",
+          "errors"
+        ],
         "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "validation"
+            ]
+          },
           "errors": {
             "type": "object",
             "additionalProperties": {

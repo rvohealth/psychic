@@ -22,7 +22,7 @@ describe('a visitor attempts to save a record', () => {
   context('with a record that is invalid at Dream validation level', () => {
     it('does not save, returns 422', async () => {
       const res = await request.post('/failed-to-save-test', 422)
-      expect(res.body).toEqual({ errors: { email: ['contains'] } })
+      expect(res.body).toEqual({ type: 'validator', errors: { email: ['contains'] } })
     })
   })
 
@@ -54,7 +54,10 @@ describe('a visitor attempts to save a record', () => {
         const response = await request.post('/users', 400, {
           data: { user: { email: 123, password: 'howyadoin', name: 456 } },
         })
-        expect(response.body).toEqual({ errors: { email: ['expected string'], name: ['expected string'] } })
+        expect(response.body).toEqual({
+          type: 'validator',
+          errors: { email: ['expected string'], name: ['expected string'] },
+        })
         expect(await User.count()).toEqual(0)
       })
     },

@@ -11,7 +11,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -66,7 +66,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -123,7 +123,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -555,7 +555,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -995,7 +995,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1060,7 +1060,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1130,7 +1130,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1198,7 +1198,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1269,7 +1269,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1324,7 +1324,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1374,12 +1374,151 @@
         }
       }
     },
+    "/headersOpenapiTest": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "header",
+          "name": "myDate",
+          "required": true,
+          "description": "myDate",
+          "schema": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        {
+          "in": "header",
+          "name": "myOptionalDate",
+          "required": false,
+          "description": "myOptionalDate",
+          "schema": {
+            "type": "string",
+            "format": "date"
+          }
+        },
+        {
+          "in": "header",
+          "name": "myOptionalInt",
+          "required": false,
+          "description": "myOptionalInt",
+          "schema": {
+            "type": "integer"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/invalidRequestBody": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "numericParam": {
+                    "type": "number"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/openapi-validation-on-explicit-query-arrays": {
       "parameters": [
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1441,7 +1580,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1503,7 +1642,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1583,7 +1722,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1746,7 +1885,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1911,7 +2050,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -1980,12 +2119,579 @@
         }
       }
     },
+    "/queryOpenapiTest": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "stringParam",
+          "description": "stringParam",
+          "allowReserved": true,
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "numericParam",
+          "description": "numericParam",
+          "allowReserved": true,
+          "required": false,
+          "schema": {
+            "type": "number"
+          }
+        },
+        {
+          "in": "query",
+          "name": "stringArray",
+          "description": "stringArray",
+          "allowReserved": true,
+          "required": false,
+          "schema": {
+            "type": "array",
+            "items": {
+              "type": "string"
+            }
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/queryRequiredOpenapiTest": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "requiredStringParam",
+          "description": "requiredStringParam",
+          "allowReserved": true,
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "name": "nonRequiredStringParam",
+          "description": "nonRequiredStringParam",
+          "allowReserved": true,
+          "required": false,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/requestBodyNestedObjectOpenapiTest": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "nested"
+                ],
+                "properties": {
+                  "nested": {
+                    "type": "object",
+                    "required": [
+                      "object"
+                    ],
+                    "properties": {
+                      "object": {
+                        "type": "object",
+                        "required": [
+                          "requiredInt"
+                        ],
+                        "properties": {
+                          "requiredInt": {
+                            "type": "integer"
+                          },
+                          "optionalInt": {
+                            "type": "integer"
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/requestBodyOpenapiTest": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "requiredInt"
+                ],
+                "properties": {
+                  "requiredInt": {
+                    "type": "integer"
+                  },
+                  "optionalInt": {
+                    "type": "integer"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "204": {
+            "description": "Success, no content",
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/responseAlternateStatusTest": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "description": "Unauthorized",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/responseBodyNestedObjectOpenapiTest": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "nested"
+                  ],
+                  "properties": {
+                    "nested": {
+                      "type": "object",
+                      "required": [
+                        "object"
+                      ],
+                      "properties": {
+                        "object": {
+                          "type": "object",
+                          "required": [
+                            "requiredInt"
+                          ],
+                          "properties": {
+                            "requiredInt": {
+                              "type": "integer"
+                            },
+                            "optionalInt": {
+                              "type": "integer"
+                            }
+                          }
+                        }
+                      }
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/responseBodyObjectOpenapiTest": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "requiredInt"
+                  ],
+                  "properties": {
+                    "requiredInt": {
+                      "type": "integer"
+                    },
+                    "optionalInt": {
+                      "type": "integer"
+                    }
+                  }
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/responseBodyOpenapiTest": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "number"
+                }
+              }
+            }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/users": {
       "parameters": [
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -2468,7 +3174,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -2986,7 +3692,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -3049,7 +3755,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -3137,7 +3843,7 @@
         {
           "in": "header",
           "name": "custom-header",
-          "required": true,
+          "required": false,
           "description": "custom header",
           "schema": {
             "type": "string"
@@ -3611,11 +4317,18 @@
         "description": "The request has succeeded, but there is no content to render"
       },
       "BadRequest": {
-        "description": "The server would not process the request due to something the server considered to be a client error",
+        "description": "The server would not process the request due to something the server considered to be a client error, such as a model validation failure or an openapi validation failure",
         "content": {
           "application/json": {
             "schema": {
-              "$ref": "#/components/schemas/ValidationErrors"
+              "oneOf": [
+                {
+                  "$ref": "#/components/schemas/ValidationErrors"
+                },
+                {
+                  "$ref": "#/components/schemas/OpenapiValidationErrors"
+                }
+              ]
             }
           }
         }
@@ -3781,6 +4494,61 @@
           },
           "latexOnlySummaryAttr": {
             "type": "string"
+          }
+        }
+      },
+      "OpenapiValidationErrors": {
+        "type": "object",
+        "required": [
+          "type",
+          "target",
+          "errors"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "openapi"
+            ]
+          },
+          "target": {
+            "type": "string",
+            "enum": [
+              "requestBody",
+              "query",
+              "headers",
+              "responseBody"
+            ]
+          },
+          "errors": {
+            "type": "array",
+            "items": {
+              "type": "object",
+              "required": [
+                "instancePath",
+                "schemaPath",
+                "keyword",
+                "message",
+                "params"
+              ],
+              "properties": {
+                "instancePath": {
+                  "type": "string"
+                },
+                "schemaPath": {
+                  "type": "string"
+                },
+                "keyword": {
+                  "type": "string"
+                },
+                "message": {
+                  "type": "string"
+                },
+                "params": {
+                  "type": "object"
+                }
+              }
+            }
           }
         }
       },
@@ -3963,7 +4731,17 @@
       },
       "ValidationErrors": {
         "type": "object",
+        "required": [
+          "type",
+          "errors"
+        ],
         "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "validation"
+            ]
+          },
           "errors": {
             "type": "object",
             "additionalProperties": {

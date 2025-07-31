@@ -2,6 +2,7 @@ import {
   Dream,
   DreamModelSerializerType,
   DreamParamSafeAttributes,
+  DreamParamSafeColumnNames,
   DreamSerializerBuilder,
   GlobalNameNotSet,
   inferSerializerFromDreamOrViewModel,
@@ -11,7 +12,6 @@ import {
   SimpleObjectSerializerType,
   UpdateableProperties,
   ViewModel,
-  DreamParamSafeColumnNames,
 } from '@rvoh/dream'
 import { Request, Response } from 'express'
 import { ControllerHook } from '../controller/hooks.js'
@@ -48,6 +48,7 @@ import HttpStatusUnavailableForLegalReasons from '../error/http/UnavailableForLe
 import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent.js'
 import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType.js'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
+import OpenapiPayloadValidator from '../openapi-renderer/helpers/OpenapiPayloadValidator.js'
 import PsychicApp from '../psychic-app/index.js'
 import Params, {
   ParamsCastOptions,
@@ -268,10 +269,34 @@ export default class PsychicController {
     }
   }
 
+  /**
+   * @returns the request headers
+   *
+   * @example
+   * ```ts
+   * class MyController extends ApplicationController {
+   *   public index() {
+   *     console.log(this.headers)
+   *   }
+   * }
+   * ```
+   */
   public get headers() {
     return this.req.headers
   }
 
+  /**
+   * @returns the combination of the request uri params, request body, and query
+   *
+   * @example
+   * ```ts
+   * class MyController extends ApplicationController {
+   *   public index() {
+   *     console.log(this.params)
+   *   }
+   * }
+   * ```
+   */
   public get params(): PsychicParamsDictionary {
     const params: PsychicParamsDictionary = {
       ...this.req.params,
@@ -282,10 +307,50 @@ export default class PsychicController {
     return params
   }
 
+  /**
+   * @returns the value found for a particular param
+   *
+   * @example
+   * ```ts
+   * class MyController extends ApplicationController {
+   *   public index() {
+   *     console.log(this.param('myParam'))
+   *   }
+   * }
+   * ```
+   */
   public param<ReturnType = string>(key: string): ReturnType {
     return this.params[key] as ReturnType
   }
 
+  /**
+   * finds the specified param, and validates it against
+   * the provided type. If the param does not match the specified
+   * validation arguments, ParamValidationError is raised, which
+   * Psychic will catch and convert into a 400 response.
+   *
+   * @returns the value found for a particular param
+   *
+   * @example
+   * ```ts
+   * class MyController extends ApplicationController {
+   *   public index() {
+   *     const id = this.castParam('id', 'bigint')
+   *   }
+   * }
+   * ```
+   *
+   * You can provide additional restrictions using the options arg:
+   *
+   * @example
+   * ```ts
+   * class MyController extends ApplicationController {
+   *   public index() {
+   *     const type = this.castParam('type', 'string', { enum: ['Type1', 'Type2'], allowNull: true })
+   *   }
+   * }
+   * ```
+   */
   public castParam<
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
@@ -332,6 +397,28 @@ export default class PsychicController {
     return this._castParam(keys, nestedParams as PsychicParamsDictionary, expectedType, opts)
   }
 
+  /**
+   * Captures params for the provided model. Will exclude params that are not
+   * considered "safe" by default. It will use `castParam` for each of the
+   * params, and will raise an exception if any of those params does not
+   * pass validation.
+   *
+   * @param dreamClass - the dream class you wish to retreive params for
+   * @param opts - optional configuration object
+   * @param opts.only - optional: restrict the list of allowed params
+   * @param opts.including - optional: include params that would normally be excluded.
+   *
+   * @returns a typed object, containing the casted params for this dream class
+   *
+   * @example
+   * ```ts
+   * class MyController extends ApplicationController {
+   *   public index() {
+   *     const params = this.paramsFor(User, { only: ['email'], including: ['createdAt'] })
+   *   }
+   * }
+   * ```
+   */
   public paramsFor<
     T extends typeof Dream,
     I extends InstanceType<T>,
@@ -464,7 +551,7 @@ export default class PsychicController {
   ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any {
     if (Array.isArray(data))
-      return this.res.json(
+      return this.validateAndRenderJsonResponse(
         data.map(d =>
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           this.singleObjectJson(d, opts),
@@ -472,12 +559,26 @@ export default class PsychicController {
       )
 
     if (isPaginatedResult(data))
-      return this.res.json({
+      return this.validateAndRenderJsonResponse({
         ...data,
         results: (data as { results: unknown[] }).results.map(result => this.singleObjectJson(result, opts)),
       })
 
-    return this.res.json(this.singleObjectJson(data, opts))
+    return this.validateAndRenderJsonResponse(this.singleObjectJson(data, opts))
+  }
+
+  /**
+   * Runs the data through openapi response validation, and then renders
+   * the data if no errors were found.
+   *
+   * @param data - the data to validate and render
+   */
+  private validateAndRenderJsonResponse(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
+  ) {
+    this.validateOpenapiResponseBody(data)
+    this.res.json(data)
   }
 
   protected defaultSerializerPassthrough: SerializerResult = {}
@@ -508,7 +609,8 @@ export default class PsychicController {
         : HttpStatusCodeMap[status as HttpStatusSymbol]
     ) as number
 
-    this.res.status(realStatus).json(body)
+    this.res.status(realStatus)
+    this.json(body)
   }
 
   public redirect(path: string) {
@@ -551,13 +653,15 @@ export default class PsychicController {
   // 205
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public resetContent(message: any = undefined) {
-    this.res.status(205).send(message)
+    this.res.status(205)
+    this.json(message)
   }
 
   // 208
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public alreadyReported(message: any = undefined) {
-    this.res.status(208).send(message)
+    this.res.status(208)
+    this.json(message)
   }
 
   // 301
@@ -771,15 +875,120 @@ export default class PsychicController {
   }
   // end: http status codes
 
+  /**
+   * @internal
+   *
+   * Called by the psychic router when the endpoint for
+   * this controller was hit.
+   *
+   * @param action - the action to use when validating the query params.
+   */
   public async runAction(action: string) {
     await this.runBeforeActionsFor(action)
 
     if (this.res.headersSent) return
 
+    this.validateOpenapiHeadersForAction(action)
+    this.validateOpenapiQueryForAction(action)
+    this.validateOpenapiRequestBodyForAction(action)
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
     await (this as any)[action]()
   }
 
+  /**
+   * Validates the request body.
+   * If an OpenAPI decorator was attached to this endpoint,
+   * the computed headers for that decorator will
+   * be used to validate this endpoint.
+   *
+   * @param action - the action to use when validating the query params.
+   */
+  private validateOpenapiRequestBodyForAction(action: string): void {
+    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[action]
+    if (!openapiEndpointRenderer) return
+
+    this.computedOpenapiNames.forEach(openapiName => {
+      new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiRequestBody(
+        this.req.body,
+      )
+    })
+  }
+
+  /**
+   * Validates the request headers.
+   * If an OpenAPI decorator was attached to this endpoint,
+   * the computed headers for that decorator will
+   * be used to validate this endpoint.
+   *
+   * @param action - the action to use when validating the query params.
+   */
+  private validateOpenapiHeadersForAction(action: string): void {
+    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[action]
+    if (!openapiEndpointRenderer) return
+
+    this.computedOpenapiNames.forEach(openapiName => {
+      new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiHeaders(
+        this.req.headers,
+      )
+    })
+  }
+
+  /**
+   * Validates the request query params.
+   * If an OpenAPI decorator was attached to this endpoint,
+   * the computed query params for that decorator will
+   * be used to validate this endpoint.
+   *
+   * @param action - the action to use when validating the query params.
+   */
+  private validateOpenapiQueryForAction(action: string): void {
+    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[action]
+    if (!openapiEndpointRenderer) return
+
+    this.computedOpenapiNames.forEach(openapiName => {
+      new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiQuery(this.req.query)
+    })
+  }
+
+  /**
+   * Validates the data in the context of a response body.
+   * If an OpenAPI decorator was attached to this endpoint,
+   * the computed response schema for that decorator will
+   * be used to validate this endpoint based on the status code
+   * set.
+   *
+   * @param data - the response body data to render
+   */
+  private validateOpenapiResponseBody(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
+  ): void {
+    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[this.action]
+    if (!openapiEndpointRenderer) return
+
+    this.computedOpenapiNames.forEach(openapiName => {
+      new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiResponseBody(
+        data,
+        this.res.statusCode,
+      )
+    })
+  }
+
+  /**
+   * @internal
+   *
+   * @returns the openapiNames set on the constructor, or else ['default']
+   */
+  private get computedOpenapiNames(): string[] {
+    return ((this.constructor as typeof PsychicController).openapiNames as string[]) || ['default']
+  }
+
+  /**
+   * @internal
+   *
+   * Runs the before actions for a particular action on a controller
+   */
   public async runBeforeActionsFor(action: string) {
     const beforeActions = (this.constructor as typeof PsychicController).controllerHooks.filter(hook =>
       hook.shouldFireForAction(action),

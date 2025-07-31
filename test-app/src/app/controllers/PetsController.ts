@@ -30,7 +30,7 @@ export default class PetsController extends ApplicationController {
   }
 
   private get petParams() {
-    return this.paramsFor(Pet)
+    return this.paramsFor(Pet, { including: ['userId'] })
   }
 
   @OpenAPI(Post, {

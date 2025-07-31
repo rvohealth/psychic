@@ -1,4 +1,4 @@
-import { PsychicServer } from '../../../../src/index.js'
+import { PsychicApp } from '../../../../src/index.js'
 import OpenapiEndpointRenderer, {
   ToPathObjectOpts,
   ToSchemaObjectOpts,
@@ -517,7 +517,7 @@ The following values will be allowed:
     })
 
     context('with a $serializer expression passed', () => {
-      it('supports an attribute with the $serializer expression', async () => {
+      it('supports an attribute with the $serializer expression', () => {
         const renderer = new OpenapiEndpointRenderer(
           CommentTestingRootSerializerRefSerializer,
           UsersController,
@@ -525,10 +525,7 @@ The following values will be allowed:
           {},
         )
 
-        const server = new PsychicServer()
-        await server.boot()
-        const routes = await server.routes()
-
+        const routes = PsychicApp.getOrFail().routesCache
         const pathObjectResponse = renderer.toPathObject(routes, defaultToPathObjectOpts())
         const toSchemaObjectOpts = defaultToSchemaObjectOpts({
           ...pathObjectResponse,
@@ -847,17 +844,14 @@ The following values will be allowed:
           })
         })
 
-        it('supports $serializer expression', async () => {
+        it('supports $serializer expression', () => {
           const renderer = new OpenapiEndpointRenderer(
             CommentTestingObjectWithSerializerRefSerializer,
             UsersController,
             'howyadoin',
           )
 
-          const server = new PsychicServer()
-          await server.boot()
-          const routes = await server.routes()
-
+          const routes = PsychicApp.getOrFail().routesCache
           const pathObjectResponse = renderer.toPathObject(routes, defaultToPathObjectOpts())
           const toSchemaObjectOpts = defaultToSchemaObjectOpts({
             ...pathObjectResponse,
@@ -1150,7 +1144,7 @@ The following values will be allowed:
     })
 
     context('when responses includes $serializer refs', () => {
-      it('extracts serializers and renders them in components.schemas', async () => {
+      it('extracts serializers and renders them in components.schemas', () => {
         const renderer = new OpenapiEndpointRenderer(
           CommentTestingBasicSerializerRefSerializer,
           UsersController,
@@ -1172,9 +1166,7 @@ The following values will be allowed:
           },
         )
 
-        const server = new PsychicServer()
-        await server.boot()
-        const routes = await server.routes()
+        const routes = PsychicApp.getOrFail().routesCache
 
         const pathObjectResponse = renderer.toPathObject(routes, defaultToPathObjectOpts())
         const toSchemaObjectOpts = defaultToSchemaObjectOpts({

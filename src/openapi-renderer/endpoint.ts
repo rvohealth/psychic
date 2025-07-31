@@ -51,6 +51,8 @@ import openapiPageParamProperty from './helpers/pageParamOpenapiProperty.js'
 import safelyAttachPaginationParamToRequestBodySegment from './helpers/safelyAttachPaginationParamsToBodySegment.js'
 import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 import paramNamesForDreamClass from '../server/helpers/paramNamesForDreamClass.js'
+import PsychicApp from '../psychic-app/index.js'
+import { ValidateOpenapiSchemaOptions } from '../helpers/validateOpenApiSchema.js'
 
 export interface OpenapiRenderOpts {
   casing: SerializerCasing
@@ -94,6 +96,7 @@ export default class OpenapiEndpointRenderer<
   private omitDefaultHeaders: OpenapiEndpointRendererOpts['omitDefaultHeaders']
   private omitDefaultResponses: OpenapiEndpointRendererOpts['omitDefaultResponses']
   private defaultResponse: OpenapiEndpointRendererOpts['defaultResponse']
+  private validate: OpenapiValidateOption | undefined = undefined
 
   /**
    * instantiates a new OpenapiEndpointRenderer.
@@ -131,6 +134,7 @@ export default class OpenapiEndpointRenderer<
       omitDefaultHeaders,
       omitDefaultResponses,
       defaultResponse,
+      validate,
     }: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels, ForOption> = {},
   ) {
     this.requestBody = requestBody
@@ -155,6 +159,77 @@ export default class OpenapiEndpointRenderer<
         ? controllerClass.openapiConfig?.omitDefaultResponses || false
         : omitDefaultResponses
     this.defaultResponse = defaultResponse
+    this.validate = validate
+  }
+
+  /**
+   * @internal
+   *
+   * reads the validation options for this particular endpoint. If they
+   * explicitly permit or don't permit validation on requestBody, then it
+   * will return true or false. If validation is not set on this endpoint,
+   * it will fall back to PsychicApp to see if validation is turned on
+   * globally for the request body for the given openapiName.
+   */
+  public shouldValidateRequestBody(openapiName: string) {
+    return this.shouldValidateOpenapiPayload(openapiName, 'requestBody')
+  }
+
+  /**
+   * @internal
+   *
+   * reads the validation options for this particular endpoint. If they
+   * explicitly permit or don't permit validation on requestBody, then it
+   * will return true or false. If validation is not set on this endpoint,
+   * it will fall back to PsychicApp to see if validation is turned on
+   * globally for the request body for the given openapiName.
+   */
+  public shouldValidateHeaders(openapiName: string) {
+    return this.shouldValidateOpenapiPayload(openapiName, 'headers')
+  }
+
+  /**
+   * @internal
+   *
+   * reads the validation options for this particular endpoint. If they
+   * explicitly permit or don't permit validation on query, then it
+   * will return true or false. If validation is not set on this endpoint,
+   * it will fall back to PsychicApp to see if validation is turned on
+   * globally for the query for the given openapiName.
+   */
+  public shouldValidateQuery(openapiName: string) {
+    return this.shouldValidateOpenapiPayload(openapiName, 'query')
+  }
+
+  /**
+   * @internal
+   *
+   * reads the validation options for this particular endpoint. If they
+   * explicitly permit or don't permit validation on responseBody, then it
+   * will return true or false. If validation is not set on this endpoint,
+   * it will fall back to PsychicApp to see if validation is turned on
+   * globally for the response body for the given openapiName.
+   */
+  public shouldValidateResponseBody(openapiName: string) {
+    return this.shouldValidateOpenapiPayload(openapiName, 'responseBody')
+  }
+
+  /**
+   * @internal
+   *
+   * reads the validation options for this particular endpoint. If they
+   * explicitly permit or don't permit validation on the provided type, then it
+   * will return true or false. If validation is not set on this endpoint,
+   * it will fall back to PsychicApp to see if validation is turned on
+   * globally for the provided type for the given openapiName.
+   */
+  private shouldValidateOpenapiPayload(openapiName: string, target: OpenapiValidateTarget): boolean {
+    const psychicApp = PsychicApp.getOrFail()
+    return (
+      this.validate?.all ||
+      this.validate?.[target] ||
+      psychicApp.openapiValidationIsActive(openapiName, target)
+    )
   }
 
   /**
@@ -397,8 +472,12 @@ export default class OpenapiEndpointRenderer<
             },
           } as OpenapiParameterResponse
 
+          if (header.schema) {
+            data.schema = header.schema
+          }
+
           if (header.format) {
-            data.schema.format = header.format
+            ;(data.schema as { format: unknown }).format = header.format
           }
 
           return data
@@ -1258,7 +1337,71 @@ export interface OpenapiEndpointRendererOpts<
    * ```
    */
   omitDefaultResponses?: boolean
+
+  /**
+   * add validation to this openapi document. This
+   * will inform psychic whether or not to automatically
+   * validate the various segments of a request or response
+   * based on what has been provided in this document.
+   *
+   * ```ts
+   * {
+   *   ...
+   *   validate: {
+   *     requestBody: true,
+   *     query: true,
+   *     headers: true,
+   *     responseBody: AppEnv.isTest,
+   *     ajvOptions: {
+   *        ... // custom options to provide to the underlying ajv instance
+   *     }
+   *   }
+   * ```
+   */
+  validate?: OpenapiValidateOption
 }
+
+export type OpenapiValidateOption = {
+  /**
+   * set to true if you want the request body
+   * to be validated against the openapi schema
+   */
+  requestBody?: boolean
+
+  /**
+   * set to true if you want the response body
+   * to be validated against the openapi schema
+   */
+  responseBody?: boolean
+
+  /**
+   * set to true if you want the request headers
+   * to be validated against the openapi schema
+   */
+  headers?: boolean
+
+  /**
+   * set to true if you want the request query
+   * to be validated against the openapi schema
+   */
+  query?: boolean
+
+  /**
+   * set to true if you want everything to be
+   * validated against the openapi schema
+   */
+  all?: boolean
+
+  /**
+   * custom options to provide to the Ajv instance
+   * used under the hood to validate the openapi
+   * schema.
+   */
+  ajvOptions?: ValidateOpenapiSchemaOptions
+}
+
+export const OpenapiValidateTargets = ['requestBody', 'query', 'headers', 'responseBody'] as const
+export type OpenapiValidateTarget = (typeof OpenapiValidateTargets)[number]
 
 export type CustomPaginationOpts =
   | {
@@ -1500,7 +1643,8 @@ export interface OpenapiSchemaRequestBodyForBaseDreamClass<
 export interface OpenapiHeaderOption {
   required: boolean
   description?: string
-  format?: 'date' | 'date-time'
+  format?: string
+  schema?: OpenapiBodySegment
 }
 
 export type OpenapiHeaders = Record<string, OpenapiHeaderOption>
@@ -1563,10 +1707,7 @@ export interface OpenapiParameterResponse {
   name: string
   required: boolean
   description: string
-  schema: {
-    type: 'string' | { type: 'object'; properties: OpenapiSchemaProperties }
-    format?: 'date' | 'date-time'
-  }
+  schema: OpenapiBodySegment
   allowReserved?: boolean
   allowEmptyValue?: boolean
 }

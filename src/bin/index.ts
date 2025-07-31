@@ -7,7 +7,6 @@ import generateResource from '../generate/resource.js'
 import isObject from '../helpers/isObject.js'
 import OpenapiAppRenderer from '../openapi-renderer/app.js'
 import PsychicApp from '../psychic-app/index.js'
-import PsychicServer from '../server/index.js'
 import enumsFileStr from './helpers/enumsFileStr.js'
 import generateRouteTypes from './helpers/generateRouteTypes.js'
 import printRoutes from './helpers/printRoutes.js'
@@ -36,8 +35,8 @@ export default class PsychicBin {
     await generateResource({ route, fullyQualifiedModelName, columnsWithTypes, options })
   }
 
-  public static async routes() {
-    await printRoutes()
+  public static printRoutes() {
+    printRoutes()
   }
 
   public static async sync({
@@ -108,11 +107,7 @@ export default class PsychicBin {
   public static async syncRoutes() {
     DreamCLI.logger.logStartProgress(`syncing routes...`)
 
-    const server = new PsychicServer()
-    await server.boot()
-
-    const routes = await server.routes()
-    await generateRouteTypes(routes)
+    await generateRouteTypes(PsychicApp.getOrFail().routesCache)
 
     DreamCLI.logger.logEndProgress()
   }

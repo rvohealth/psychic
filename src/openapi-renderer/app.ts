@@ -5,7 +5,6 @@ import openapiJsonPath from '../helpers/openapiJsonPath.js'
 import PsychicApp from '../psychic-app/index.js'
 import { RouteConfig } from '../router/route-manager.js'
 import { HttpMethod, HttpMethods } from '../router/types.js'
-import PsychicServer from '../server/index.js'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults.js'
 import {
   OpenapiEndpointResponsePath,
@@ -25,12 +24,14 @@ export default class OpenapiAppRenderer {
    * the contents to the openapi.json file at the project root.
    */
   public static async sync() {
-    const openapiContents = await OpenapiAppRenderer.toObject()
+    const openapiContents = OpenapiAppRenderer.toObject()
 
     const psychicApp = PsychicApp.getOrFail()
-    const asyncWriteOpenapiFile = async (key: string) => {
-      const jsonPath = openapiJsonPath(key)
-      await CliFileWriter.write(jsonPath, JSON.stringify(openapiContents[key], null, 2), { flag: 'w+' })
+    const asyncWriteOpenapiFile = async (openapiName: string) => {
+      const jsonPath = openapiJsonPath(openapiName)
+      await CliFileWriter.write(jsonPath, JSON.stringify(openapiContents[openapiName], null, 2), {
+        flag: 'w+',
+      })
     }
 
     await Promise.all(Object.keys(psychicApp.openapi).map(key => asyncWriteOpenapiFile(key)))
@@ -43,13 +44,11 @@ export default class OpenapiAppRenderer {
    * payloads of all `@Openapi` decorator calls used throughout
    * the controller layer.
    */
-  public static async toObject(): Promise<Record<string, OpenapiSchema>> {
+  public static toObject(): Record<string, OpenapiSchema> {
     const psychicApp = PsychicApp.getOrFail()
     const output: Record<string, OpenapiSchema> = {}
 
-    const server = new PsychicServer()
-    await server.boot()
-    const routes = await server.routes()
+    const routes = psychicApp.routesCache
 
     Object.keys(psychicApp.openapi).forEach(key => {
       output[key] = this._toObject(routes, key)

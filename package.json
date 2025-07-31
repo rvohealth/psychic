@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "1.5.6",
+  "version": "1.6.0",
   "author": "RVOHealth",
   "repository": {
     "type": "git",
@@ -43,6 +43,8 @@
   "dependencies": {
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
+    "ajv": "^8.17.1",
+    "ajv-formats": "^3.0.1",
     "commander": "^12.1.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",

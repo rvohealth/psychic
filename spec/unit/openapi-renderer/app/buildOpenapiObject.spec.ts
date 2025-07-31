@@ -3,8 +3,8 @@ import OpenapiAppRenderer from '../../../../src/openapi-renderer/app.js'
 describe('OpenapiAppRenderer', () => {
   describe('.toObject', () => {
     context('default', () => {
-      it('reads all default controllers and consolidates endpoints, also providing boilerplate openapi headers', async () => {
-        const response = await OpenapiAppRenderer.toObject()
+      it('reads all default controllers and consolidates endpoints, also providing boilerplate openapi headers', () => {
+        const response = OpenapiAppRenderer.toObject()
         expect(response.default).toEqual(
           expect.objectContaining({
             openapi: '3.1.0',
@@ -35,7 +35,7 @@ describe('OpenapiAppRenderer', () => {
                 description: 'custom header',
                 in: 'header',
                 name: 'custom-header',
-                required: true,
+                required: false,
                 schema: {
                   type: 'string',
                 },
@@ -69,7 +69,7 @@ describe('OpenapiAppRenderer', () => {
                 description: 'custom header',
                 in: 'header',
                 name: 'custom-header',
-                required: true,
+                required: false,
                 schema: {
                   type: 'string',
                 },
@@ -103,7 +103,7 @@ describe('OpenapiAppRenderer', () => {
                 description: 'custom header',
                 in: 'header',
                 name: 'custom-header',
-                required: true,
+                required: false,
                 schema: {
                   type: 'string',
                 },
@@ -484,18 +484,23 @@ describe('OpenapiAppRenderer', () => {
         expect(response.default!.components.schemas).toEqual(
           expect.objectContaining({
             ValidationErrors: {
-              type: 'object',
               properties: {
                 errors: {
-                  type: 'object',
                   additionalProperties: {
-                    type: 'array',
                     items: {
                       type: 'string',
                     },
+                    type: 'array',
                   },
+                  type: 'object',
+                },
+                type: {
+                  enum: ['validation'],
+                  type: 'string',
                 },
               },
+              required: ['type', 'errors'],
+              type: 'object',
             },
           }),
         )
@@ -524,13 +529,21 @@ describe('OpenapiAppRenderer', () => {
               },
 
               // 400
+
               BadRequest: {
                 description:
-                  'The server would not process the request due to something the server considered to be a client error',
+                  'The server would not process the request due to something the server considered to be a client error, such as a model validation failure or an openapi validation failure',
                 content: {
                   'application/json': {
                     schema: {
-                      $ref: '#/components/schemas/ValidationErrors',
+                      oneOf: [
+                        {
+                          $ref: '#/components/schemas/ValidationErrors',
+                        },
+                        {
+                          $ref: '#/components/schemas/OpenapiValidationErrors',
+                        },
+                      ],
                     },
                   },
                 },
@@ -583,8 +596,8 @@ describe('OpenapiAppRenderer', () => {
     })
 
     context('multiple openapi schemas', () => {
-      it('correctly renders all schemas in all secondary openapi files', async () => {
-        const response = await OpenapiAppRenderer.toObject()
+      it('correctly renders all schemas in all secondary openapi files', () => {
+        const response = OpenapiAppRenderer.toObject()
         const comment1Content = {
           type: 'object',
           required: ['howyadoin'],
@@ -597,8 +610,8 @@ describe('OpenapiAppRenderer', () => {
     })
 
     context('admin', () => {
-      it('reads all admin controllers and consolidates endpoints, also providing boilerplate admin openapi headers', async () => {
-        const response = await OpenapiAppRenderer.toObject()
+      it('reads all admin controllers and consolidates endpoints, also providing boilerplate admin openapi headers', () => {
+        const response = OpenapiAppRenderer.toObject()
 
         expect(response.admin).toEqual(
           expect.objectContaining({

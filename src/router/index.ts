@@ -4,43 +4,30 @@ import {
   NotNullViolation,
   RecordNotFound,
   ValidationError,
-  camelize,
 } from '@rvoh/dream'
 import { Express, Request, RequestHandler, Response, Router } from 'express'
-import pluralize from 'pluralize-esm'
 import PsychicController from '../controller/index.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
 import HttpError from '../error/http/index.js'
+import OpenapiRequestValidationFailure from '../error/openapi/OpenapiRequestValidationFailure.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
 import PsychicApp from '../psychic-app/index.js'
-import {
-  NamespaceConfig,
-  PsychicControllerActions,
-  applyResourceAction,
-  applyResourcesAction,
-  convertRouteParams,
-  lookupControllerOrFail,
-  routePath,
-} from '../router/helpers.js'
-import RouteManager, { ControllerActionRouteConfig, MiddlewareRouteConfig } from './route-manager.js'
-import {
-  HttpMethod,
-  ResourceMethods,
-  ResourcesMethodType,
-  ResourcesMethods,
-  ResourcesOptions,
-} from './types.js'
+import { NamespaceConfig, PsychicControllerActions, routePath } from '../router/helpers.js'
+import PsychicRouteComputer, { PsychicNestedRouteComputer } from './route-computer.js'
+import { ControllerActionRouteConfig, MiddlewareRouteConfig } from './route-manager.js'
+import { HttpMethod, ResourcesOptions } from './types.js'
 
 export default class PsychicRouter {
   public app: Express
   public config: PsychicApp
   public currentNamespaces: NamespaceConfig[] = []
-  public routeManager: RouteManager = new RouteManager()
+  private routeComputer: PsychicRouteComputer
   constructor(app: Express, config: PsychicApp) {
     this.app = app
     this.config = config
+    this.routeComputer = new PsychicRouteComputer(config)
   }
 
   public get routingMechanism(): Express | Router {
@@ -48,7 +35,7 @@ export default class PsychicRouter {
   }
 
   public get routes() {
-    return this.routeManager.routes
+    return this.routeComputer.routes
   }
 
   private get currentNamespacePaths() {
@@ -81,7 +68,8 @@ export default class PsychicRouter {
     action: PsychicControllerActions<T>,
   ): void
   get(path: string, controller?: unknown, action?: unknown) {
-    this.crud('get', path, controller as typeof PsychicController, action as string)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.routeComputer.get(path, controller as any, action as string)
   }
 
   post(path: string): void
@@ -96,7 +84,8 @@ export default class PsychicRouter {
     controller?: T,
     action?: PsychicControllerActions<T>,
   ) {
-    this.crud('post', path, controller as typeof PsychicController, action as string)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.routeComputer.post(path, controller as any, action as string)
   }
 
   put(path: string): void
@@ -111,7 +100,8 @@ export default class PsychicRouter {
     controller?: T,
     action?: PsychicControllerActions<T>,
   ) {
-    this.crud('put', path, controller as typeof PsychicController, action as string)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.routeComputer.put(path, controller as any, action as string)
   }
 
   patch(path: string): void
@@ -126,7 +116,8 @@ export default class PsychicRouter {
     controller?: T,
     action?: PsychicControllerActions<T>,
   ) {
-    this.crud('patch', path, controller as typeof PsychicController, action as string)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.routeComputer.patch(path, controller as any, action as string)
   }
 
   delete(path: string): void
@@ -141,7 +132,8 @@ export default class PsychicRouter {
     controller?: T,
     action?: PsychicControllerActions<T>,
   ) {
-    this.crud('delete', path, controller as typeof PsychicController, action as string)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.routeComputer.delete(path, controller as any, action as string)
   }
 
   options(path: string): void
@@ -156,7 +148,8 @@ export default class PsychicRouter {
     controller?: T,
     action?: PsychicControllerActions<T>,
   ) {
-    this.crud('options', path, controller as typeof PsychicController, action as string)
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    this.routeComputer.options(path, controller as any, action as string)
   }
 
   private prefixPathWithNamespaces(str: string) {
@@ -173,208 +166,36 @@ export default class PsychicRouter {
     action: string,
   ): void
   public crud(httpMethod: HttpMethod, path: string, controllerOrMiddleware?: unknown, action?: string) {
-    this.checkPathForInvalidChars(path)
-
-    const isMiddleware =
-      (typeof controllerOrMiddleware === 'function' || Array.isArray(controllerOrMiddleware)) &&
-      !(controllerOrMiddleware as typeof PsychicController)?.isPsychicController
-
-    // devs can provide custom express middleware which bypasses
-    // the normal Controller#action paradigm.
-    if (isMiddleware) {
-      this.routeManager.addMiddleware({
-        httpMethod,
-        path: this.prefixPathWithNamespaces(path),
-        middleware: controllerOrMiddleware as RequestHandler | RequestHandler[],
-      })
-    } else {
-      controllerOrMiddleware ||= lookupControllerOrFail(this, { path, httpMethod })
-      action ||= path.replace(/^\//, '')
-      if (action.match(/\//))
-        throw new Error('action cant have a slash in it - action was inferred from path')
-
-      this.routeManager.addRoute({
-        httpMethod,
-        path: this.prefixPathWithNamespaces(path),
-        controller: controllerOrMiddleware as typeof PsychicController,
-        action,
-      })
-    }
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+    this.routeComputer.crud(httpMethod, path, controllerOrMiddleware as any, action as string)
   }
 
-  private checkPathForInvalidChars(path: string) {
-    if (path.includes('{'))
-      throw new Error(`
-The provided route "${path}" contains characters that are not supported.
-If you are trying to write a uri param, you will need to use expressjs
-param syntax, which is a prefixing colon, rather than using brackets
-to surround the param.
-
-provided route: "${path}"
-suggested fix:  "${convertRouteParams(path)}"
-`)
+  public namespace(namespace: string, cb: (router: PsychicNestedRouteComputer) => void) {
+    this.routeComputer.namespace(namespace, cb)
   }
 
-  public namespace(namespace: string, cb: (router: PsychicNestedRouter) => void) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
-      namespaces: this.currentNamespaces,
-    })
-
-    this.runNestedCallbacks(namespace, nestedRouter, cb)
-  }
-
-  public scope(scope: string, cb: (router: PsychicNestedRouter) => void) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
-      namespaces: this.currentNamespaces,
-    })
-
-    this.runNestedCallbacks(scope, nestedRouter, cb, { treatNamespaceAsScope: true })
+  public scope(scope: string, cb: (router: PsychicNestedRouteComputer) => void) {
+    this.routeComputer.scope(scope, cb)
   }
 
   public resources(
     path: string,
-    optionsOrCb?: ResourcesOptions | ((router: PsychicNestedRouter) => void),
-    cb?: (router: PsychicNestedRouter) => void,
+    optionsOrCb?: ResourcesOptions | ((router: PsychicNestedRouteComputer) => void),
+    cb?: (router: PsychicNestedRouteComputer) => void,
   ) {
-    return this.makeResource(path, optionsOrCb, cb, true)
+    this.routeComputer['makeResource'](path, optionsOrCb, cb, true)
   }
 
   public resource(
     path: string,
-    optionsOrCb?: ResourcesOptions | ((router: PsychicNestedRouter) => void),
-    cb?: (router: PsychicNestedRouter) => void,
+    optionsOrCb?: ResourcesOptions | ((router: PsychicNestedRouteComputer) => void),
+    cb?: (router: PsychicNestedRouteComputer) => void,
   ) {
-    return this.makeResource(path, optionsOrCb, cb, false)
+    this.routeComputer['makeResource'](path, optionsOrCb, cb, false)
   }
 
-  public collection(cb: (router: PsychicNestedRouter) => void) {
-    const replacedNamespaces = this.currentNamespaces.slice(0, this.currentNamespaces.length - 1)
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
-      namespaces: replacedNamespaces,
-    })
-    const currentNamespace = replacedNamespaces[replacedNamespaces.length - 1]
-    if (!currentNamespace)
-      throw new Error('Must be within a `resources` declaration to call the collection method')
-
-    cb(nestedRouter)
-  }
-
-  private makeResource(
-    path: string,
-    optionsOrCb: ResourcesOptions | ((router: PsychicNestedRouter) => void) | undefined,
-    cb: ((router: PsychicNestedRouter) => void) | undefined,
-    plural: boolean,
-  ) {
-    if (cb) {
-      if (typeof optionsOrCb === 'function')
-        throw new Error('cannot pass a function as a second arg when passing 3 args')
-      this._makeResource(path, optionsOrCb as ResourcesOptions, cb, plural)
-    } else {
-      if (typeof optionsOrCb === 'function') this._makeResource(path, undefined, optionsOrCb, plural)
-      else this._makeResource(path, optionsOrCb, undefined, plural)
-    }
-  }
-
-  private _makeResource(
-    path: string,
-    options: ResourcesOptions | undefined,
-    cb: ((router: PsychicNestedRouter) => void) | undefined,
-    plural: boolean,
-  ) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
-      namespaces: this.currentNamespaces,
-    })
-
-    const { only, except } = options || {}
-    let resourceMethods: ResourcesMethodType[] = plural ? ResourcesMethods : ResourceMethods
-
-    if (only) {
-      resourceMethods = only
-    } else if (except) {
-      resourceMethods = resourceMethods.filter(m => !except.includes(m))
-    }
-
-    const originalCurrentNamespaces = this.currentNamespaces
-    this.makeRoomForNewIdParam(nestedRouter)
-    this.runNestedCallbacks(path, nestedRouter, cb, { asMember: plural, resourceful: true })
-    this.currentNamespaces = originalCurrentNamespaces
-
-    resourceMethods.forEach(action => {
-      if (plural) {
-        applyResourcesAction(path, action, nestedRouter, options)
-      } else {
-        applyResourceAction(path, action, nestedRouter, options)
-      }
-    })
-  }
-
-  private runNestedCallbacks(
-    namespace: string,
-    nestedRouter: PsychicNestedRouter,
-    cb?: (router: PsychicNestedRouter) => void,
-    {
-      asMember = false,
-      resourceful = false,
-      treatNamespaceAsScope = false,
-    }: {
-      asMember?: boolean
-      resourceful?: boolean
-      treatNamespaceAsScope?: boolean
-    } = {},
-  ) {
-    this.addNamespace(namespace, resourceful, { nestedRouter, treatNamespaceAsScope })
-
-    if (asMember) {
-      this.addNamespace(':id', resourceful, { nestedRouter, treatNamespaceAsScope: true })
-    }
-
-    if (cb) cb(nestedRouter)
-
-    this.removeLastNamespace(nestedRouter)
-    if (asMember) this.removeLastNamespace(nestedRouter)
-  }
-
-  private addNamespace(
-    namespace: string,
-    resourceful: boolean,
-    {
-      nestedRouter,
-      treatNamespaceAsScope,
-    }: {
-      nestedRouter?: PsychicNestedRouter
-      treatNamespaceAsScope?: boolean
-    } = {},
-  ) {
-    this.currentNamespaces = [
-      ...this.currentNamespaces,
-      {
-        namespace,
-        resourceful,
-        isScope: treatNamespaceAsScope || false,
-      },
-    ]
-
-    if (nestedRouter) nestedRouter.currentNamespaces = this.currentNamespaces
-  }
-
-  private removeLastNamespace(nestedRouter?: PsychicNestedRouter) {
-    this.currentNamespaces.pop()
-    if (nestedRouter) nestedRouter.currentNamespaces = this.currentNamespaces
-  }
-
-  private makeRoomForNewIdParam(nestedRouter?: PsychicNestedRouter) {
-    this.currentNamespaces = [
-      ...this.currentNamespaces.map((namespace, index) => {
-        const previousNamespace = this.currentNamespaces[index - 1]
-        if (namespace.namespace === ':id' && previousNamespace) {
-          return {
-            ...namespace,
-            namespace: `:${camelize(pluralize.singular(previousNamespace.namespace))}Id`,
-          }
-        } else return namespace
-      }),
-    ]
-    if (nestedRouter) nestedRouter.currentNamespaces = this.currentNamespaces
+  public collection(cb: (router: PsychicNestedRouteComputer) => void) {
+    this.routeComputer.collection(cb)
   }
 
   public async handle(
@@ -414,15 +235,23 @@ suggested fix:  "${convertRouteParams(path)}"
       } else if (err instanceof DataTypeColumnTypeMismatch) {
         res.status(400).json()
       } else if (err instanceof ValidationError) {
-        res.status(422).json({ errors: err.errors || {} })
+        res.status(422).json({ type: 'validator', errors: err.errors || {} })
+      } else if (err instanceof OpenapiRequestValidationFailure) {
+        res.status(400).json({
+          type: 'openapi',
+          target: err.target,
+          errors: err.errors,
+        })
       } else if (err instanceof ParamValidationError) {
         res.status(400).json({
+          type: 'validator',
           errors: {
             [err.paramName]: err.errorMessages,
           },
         })
       } else if (err instanceof ParamValidationErrors) {
         res.status(400).json({
+          type: 'validator',
           errors: err.errors,
         })
       } else {
@@ -475,28 +304,5 @@ suggested fix:  "${convertRouteParams(path)}"
       config: this.config,
       action,
     })
-  }
-}
-
-export class PsychicNestedRouter extends PsychicRouter {
-  public router: Router
-  constructor(
-    app: Express,
-    config: PsychicApp,
-    routeManager: RouteManager,
-    {
-      namespaces = [],
-    }: {
-      namespaces?: NamespaceConfig[]
-    } = {},
-  ) {
-    super(app, config)
-    this.router = Router()
-    this.currentNamespaces = namespaces
-    this.routeManager = routeManager
-  }
-
-  public override get routingMechanism() {
-    return this.router
   }
 }

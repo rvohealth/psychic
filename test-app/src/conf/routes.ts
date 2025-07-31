@@ -17,6 +17,7 @@ import ScopeTestController from '../app/controllers/ScopeTestController.js'
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
 import User from '../app/models/User.js'
+import OpenapiValidationTestsController from '../app/controllers/OpenapiValidationTestsController.js'
 
 export default (r: PsychicRouter) => {
   r.get('circular', CircularController, 'hello')
@@ -64,6 +65,25 @@ export default (r: PsychicRouter) => {
     r.post('my-posts', PetsController, 'myPosts')
   })
 
+  r.get('queryOpenapiTest', OpenapiValidationTestsController, 'queryOpenapiTest')
+  r.get('queryRequiredOpenapiTest', OpenapiValidationTestsController, 'queryRequiredOpenapiTest')
+  r.get('responseBodyOpenapiTest', OpenapiValidationTestsController, 'responseBodyOpenapiTest')
+  r.get('responseBodyObjectOpenapiTest', OpenapiValidationTestsController, 'responseBodyObjectOpenapiTest')
+  r.get(
+    'responseBodyNestedObjectOpenapiTest',
+    OpenapiValidationTestsController,
+    'responseBodyNestedObjectOpenapiTest',
+  )
+  r.get('responseAlternateStatusTest', OpenapiValidationTestsController, 'responseAlternateStatusTest')
+  r.get('headersOpenapiTest', OpenapiValidationTestsController, 'headersOpenapiTest')
+  r.post('requestBodyOpenapiTest', OpenapiValidationTestsController, 'requestBodyOpenapiTest')
+  r.post(
+    'requestBodyNestedObjectOpenapiTest',
+    OpenapiValidationTestsController,
+    'requestBodyNestedObjectOpenapiTest',
+  )
+  r.post('invalidRequestBody', OpenapiValidationTestsController, 'invalidRequestBody')
+
   // hooks tests
   r.get('users-before-all-test', UsersController, 'beforeAllTest')
   r.get('users-before-action-sequence', UsersController, 'beforeActionSequence')
@@ -74,6 +94,8 @@ export default (r: PsychicRouter) => {
   // response status tests
   // 2xx series
   r.get('ok', ResponseStatusesController, 'sendOk') // 200
+  r.get('ok-null', ResponseStatusesController, 'sendOkNull') // 200
+  r.get('ok-undefined', ResponseStatusesController, 'sendOkUndefined') // 200
   r.get('created', ResponseStatusesController, 'sendCreated') // 201
   r.get('accepted', ResponseStatusesController, 'sendAccepted') // 202
   r.get('non-authoritative-information', ResponseStatusesController, 'sendNonAuthoritativeInformation') // 203
