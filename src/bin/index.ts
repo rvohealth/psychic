@@ -11,7 +11,7 @@ import PsychicServer from '../server/index.js'
 import enumsFileStr from './helpers/enumsFileStr.js'
 import generateRouteTypes from './helpers/generateRouteTypes.js'
 import printRoutes from './helpers/printRoutes.js'
-import syncTypescriptOpenapiFiles from './helpers/syncTypescriptOpenapiFiles.js'
+import syncOpenapiTypescriptFiles from './helpers/syncOpenapiTypescriptFiles.js'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
@@ -87,7 +87,7 @@ export default class PsychicBin {
 
   public static async syncTypescriptOpenapiFiles() {
     DreamCLI.logger.logStartProgress(`syncing openapi types...`)
-    await syncTypescriptOpenapiFiles()
+    await syncOpenapiTypescriptFiles()
     DreamCLI.logger.logEndProgress()
   }
 

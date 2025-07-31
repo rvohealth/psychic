@@ -1,6 +1,6 @@
 ## 1.5.3
 
-- add missing peer dependency for openapi-typescript
+- add missing peer dependency for openapi-typescript, allow BIGINT type when generating openapi-typescript bigints
 
 ## 1.5.2
 

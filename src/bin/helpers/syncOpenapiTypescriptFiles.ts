@@ -5,7 +5,9 @@ import ts from 'typescript'
 import psychicPath from '../../helpers/path/psychicPath.js'
 import PsychicApp from '../../psychic-app/index.js'
 
-export default async function syncTypescriptOpenapiFiles() {
+const BIGINT = ts.factory.createKeywordTypeNode(ts.SyntaxKind.BigIntKeyword)
+
+export default async function syncOpenapiTypescriptFiles() {
   const psychicApp = PsychicApp.getOrFail()
   const syncableKeys = Object.keys(psychicApp.openapi).filter(key => psychicApp.openapi[key]?.syncTypes)
 
@@ -26,8 +28,8 @@ export default async function syncTypescriptOpenapiFiles() {
               (Array.isArray(schemaObject.type) && schemaObject.type.includes('null'))
 
             return isNullable
-              ? ts.factory.createUnionTypeNode([STRING, NUMBER, NULL])
-              : ts.factory.createUnionTypeNode([STRING, NUMBER])
+              ? ts.factory.createUnionTypeNode([STRING, NUMBER, BIGINT, NULL])
+              : ts.factory.createUnionTypeNode([STRING, NUMBER, BIGINT])
           }
         },
       })
