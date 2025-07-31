@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "1.5.2",
+  "version": "1.5.3",
   "author": "RVOHealth",
   "repository": {
     "type": "git",
@@ -54,7 +54,8 @@
     "@rvoh/dream": "*",
     "@types/express": "*",
     "commander": "*",
-    "express": "*"
+    "express": "*",
+    "openapi-typescript": "*"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
