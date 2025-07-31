@@ -1,3 +1,4 @@
+import { debuglog } from 'node:util'
 import { DreamApp } from '@rvoh/dream'
 import importAll from '../app/helpers/importAll.js'
 import importDefault from '../app/helpers/importDefault.js'
@@ -33,5 +34,24 @@ export default async function configureDream(app: DreamApp) {
       port: parseInt(process.env.DB_PORT!),
       useSsl: process.env.DB_USE_SSL === '1',
     },
+  })
+
+  app.on('db:log', event => {
+    if (!debuglog('sql').enabled) return
+
+    if (event.level === 'error') {
+      console.error('the following db query encountered an unexpected error: ', {
+        durationMs: event.queryDurationMillis,
+        error: event.error,
+        sql: event.query.sql,
+        params: event.query.parameters,
+      })
+    } else {
+      console.log('db query completed:', {
+        durationMs: event.queryDurationMillis,
+        sql: event.query.sql,
+        params: event.query.parameters,
+      })
+    }
   })
 }

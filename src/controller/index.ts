@@ -57,6 +57,10 @@ import Params, {
 } from '../server/params.js'
 import Session, { CustomSessionCookieOptions } from '../session/index.js'
 import isPaginatedResult from './helpers/isPaginatedResult.js'
+import PsychicServer from '../server/index.js'
+import { RouteConfig } from '../router/route-manager.js'
+import { validateOpenApiSchema } from '../helpers/ajvValidator.js'
+import OpenapiValidationFailure from '../error/openapi/OpenapiValidationFailure.js'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -464,7 +468,7 @@ export default class PsychicController {
   ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any {
     if (Array.isArray(data))
-      return this.res.json(
+      return this._render(
         data.map(d =>
           // eslint-disable-next-line @typescript-eslint/no-unsafe-return
           this.singleObjectJson(d, opts),
@@ -472,12 +476,18 @@ export default class PsychicController {
       )
 
     if (isPaginatedResult(data))
-      return this.res.json({
+      return this._render({
         ...data,
         results: (data as { results: unknown[] }).results.map(result => this.singleObjectJson(result, opts)),
       })
 
-    return this.res.json(this.singleObjectJson(data, opts))
+    return this._render(this.singleObjectJson(data, opts))
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private _render(data: any) {
+    this.validateOpenapiResponseBody(data)
+    this.res.json(data)
   }
 
   protected defaultSerializerPassthrough: SerializerResult = {}
@@ -508,7 +518,8 @@ export default class PsychicController {
         : HttpStatusCodeMap[status as HttpStatusSymbol]
     ) as number
 
-    this.res.status(realStatus).json(body)
+    this.res.status(realStatus)
+    this.json(body)
   }
 
   public redirect(path: string) {
@@ -551,13 +562,15 @@ export default class PsychicController {
   // 205
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public resetContent(message: any = undefined) {
-    this.res.status(205).send(message)
+    this.res.status(205)
+    this.json(message)
   }
 
   // 208
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public alreadyReported(message: any = undefined) {
-    this.res.status(208).send(message)
+    this.res.status(208)
+    this.json(message)
   }
 
   // 301
@@ -776,9 +789,98 @@ export default class PsychicController {
 
     if (this.res.headersSent) return
 
+    await this.validateOpenapiRequestBodyForAction(action)
+    this.validateOpenapiQueryForAction(action)
+
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
     await (this as any)[action]()
   }
+
+  private async validateOpenapiRequestBodyForAction(action: string) {
+    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[action]
+    if (!openapiEndpointRenderer) return
+
+    const openapiName = (this.constructor as typeof PsychicController).openapiNames?.[0] as string
+
+    if (openapiEndpointRenderer.shouldValidateRequestBody(openapiName)) {
+      const openapiPathObject = openapiEndpointRenderer['computedRequestBody'](await this.getRoutes(), {
+        openapiName: 'default',
+        renderOpts: {
+          casing: 'camel',
+          suppressResponseEnums: false,
+        },
+      })
+
+      const requestBodySchema = openapiPathObject?.['content']?.['application/json']?.['schema']
+      if (requestBodySchema) {
+        const validationResults = validateOpenApiSchema(this.req.body, requestBodySchema)
+
+        if (!validationResults.isValid) {
+          throw new OpenapiValidationFailure(validationResults.errors || [])
+        }
+      }
+    }
+  }
+
+  private validateOpenapiQueryForAction(action: string) {
+    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[action]
+    if (!openapiEndpointRenderer) return
+
+    const openapiName = (this.constructor as typeof PsychicController).openapiNames?.[0] as string
+    if (openapiEndpointRenderer.shouldValidateQuery(openapiName)) {
+      const openapiQueryParams = openapiEndpointRenderer['queryArray']({
+        openapiName: 'default',
+        renderOpts: {
+          casing: 'camel',
+          suppressResponseEnums: false,
+        },
+      })
+
+      openapiQueryParams.forEach(openapiQueryParam => {
+        const queryParamValue = this.req.query[openapiQueryParam.name]
+        if (queryParamValue === undefined && !openapiQueryParam.required) return
+
+        const validationResults = validateOpenApiSchema(
+          this.req.query[openapiQueryParam.name],
+          openapiQueryParam.schema,
+        )
+
+        if (!validationResults.isValid) {
+          throw new OpenapiValidationFailure(validationResults.errors || [])
+        }
+      })
+    }
+  }
+
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private validateOpenapiResponseBody(data: any) {
+    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[this.action]
+    if (!openapiEndpointRenderer) return
+
+    const openapiName = (this.constructor as typeof PsychicController).openapiNames?.[0] as string
+
+    if (openapiEndpointRenderer.shouldValidateResponseBody(openapiName)) {
+      const openapiResponseBody =
+        openapiEndpointRenderer['responses']?.[this.res.statusCode.toString() as '200']
+
+      if (openapiResponseBody) {
+        const validationResults = validateOpenApiSchema(data, openapiResponseBody)
+        if (!validationResults.isValid) {
+          throw new OpenapiValidationFailure(validationResults.errors || [])
+        }
+      }
+    }
+  }
+
+  private async getRoutes() {
+    if (this._routes) return this._routes
+    const server = new PsychicServer()
+    await server.boot()
+    this._routes = await server.routes()
+
+    return this._routes
+  }
+  private _routes: RouteConfig[]
 
   public async runBeforeActionsFor(action: string) {
     const beforeActions = (this.constructor as typeof PsychicController).controllerHooks.filter(hook =>

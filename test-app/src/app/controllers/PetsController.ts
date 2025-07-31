@@ -21,6 +21,78 @@ export default class PetsController extends ApplicationController {
     this.noContent()
   }
 
+  @OpenAPI({
+    status: 200,
+    requestBody: {
+      type: 'object',
+      properties: {
+        numericParam: 'number',
+      },
+    },
+    responses: {
+      200: {
+        type: 'string',
+      },
+    },
+  })
+  public invalidRequestBody() {
+    this.ok('hi')
+  }
+
+  @OpenAPI(Pet, {
+    status: 200,
+    query: {
+      stringParam: {
+        required: false,
+        schema: {
+          type: 'string',
+        },
+      },
+      numericParam: {
+        required: false,
+        schema: {
+          type: 'number',
+        },
+      },
+      stringArray: {
+        required: false,
+        schema: {
+          type: 'string[]',
+        },
+      },
+    },
+  })
+  public queryOpenapiTest() {
+    this.ok()
+  }
+
+  @OpenAPI({
+    status: 200,
+    responses: {
+      200: {
+        type: 'number',
+      },
+    },
+  })
+  public responseBodyOpenapiTest() {
+    this.ok(this.params.renderMe)
+  }
+
+  @OpenAPI({
+    status: 200,
+    responses: {
+      200: {
+        type: 'number',
+      },
+      401: {
+        type: 'number',
+      },
+    },
+  })
+  public responseAlternateStatusTest() {
+    this.unauthorized(12345)
+  }
+
   public update2() {
     this.noContent()
   }
@@ -30,7 +102,7 @@ export default class PetsController extends ApplicationController {
   }
 
   private get petParams() {
-    return this.paramsFor(Pet)
+    return this.paramsFor(Pet, { including: ['userId'] })
   }
 
   @OpenAPI(Post, {
