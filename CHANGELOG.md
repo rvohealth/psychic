@@ -1,3 +1,11 @@
+## 1.5.1
+
+- fix issue with enum syncing related to multi-db engine support regression
+
+## 1.5.0
+
+- add support for multiple database engines in dream
+
 ## 1.2.3
 
 - add support for the connectionName argument when generating a resource
