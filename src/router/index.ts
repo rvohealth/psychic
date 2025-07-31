@@ -32,6 +32,7 @@ import {
   ResourcesMethods,
   ResourcesOptions,
 } from './types.js'
+import OpenapiValidationFailure from '../error/openapi/OpenapiValidationFailure.js'
 
 export default class PsychicRouter {
   public app: Express
@@ -415,6 +416,10 @@ suggested fix:  "${convertRouteParams(path)}"
         res.status(400).json()
       } else if (err instanceof ValidationError) {
         res.status(422).json({ errors: err.errors || {} })
+      } else if (err instanceof OpenapiValidationFailure) {
+        res.status(400).json({
+          errors: err.errorsJson,
+        })
       } else if (err instanceof ParamValidationError) {
         res.status(400).json({
           errors: {

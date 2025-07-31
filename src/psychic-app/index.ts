@@ -24,12 +24,14 @@ import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js
 import EnvInternal from '../helpers/EnvInternal.js'
 import pascalizeFileName from '../helpers/pascalizeFileName.js'
 import {
+  GruanularOpenapiValidateOption,
   OpenapiContent,
   OpenapiHeaders,
   OpenapiResponses,
   OpenapiSecurity,
   OpenapiSecuritySchemes,
   OpenapiServer,
+  OpenapiValidateOption,
 } from '../openapi-renderer/endpoint.js'
 import PsychicRouter from '../router/index.js'
 import PsychicServer from '../server/index.js'
@@ -248,6 +250,13 @@ Try setting it to something valid, like:
   }
   public get openapi() {
     return this._openapi
+  }
+
+  public openapiValidationIsActive(openapiName: string, openapiRequestType: GruanularOpenapiValidateOption) {
+    const openapiConf = this.openapi[openapiName]
+    if (openapiConf?.validate === true) return true
+    if (Array.isArray(openapiConf?.validate) && openapiConf.validate.includes(openapiRequestType)) return true
+    return false
   }
 
   private _client: Required<PsychicClientOptions> = {
@@ -912,6 +921,8 @@ interface PsychicOpenapiBaseOptions {
       }
     }
   }
+
+  validate?: OpenapiValidateOption
 }
 
 interface PsychicOpenapiInfo {

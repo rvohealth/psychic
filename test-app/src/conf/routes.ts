@@ -60,6 +60,13 @@ export default (r: PsychicRouter) => {
     r.get('ping', UsersController, 'ping')
   })
   r.resources('pets', { only: ['create', 'update'] }, r => {
+    r.collection(r => {
+      r.get('queryOpenapiTest', PetsController, 'queryOpenapiTest')
+      r.get('responseBodyOpenapiTest', PetsController, 'responseBodyOpenapiTest')
+      r.get('responseAlternateStatusTest', PetsController, 'responseAlternateStatusTest')
+      r.post('invalidRequestBody', PetsController, 'invalidRequestBody')
+    })
+
     r.put('update2', PetsController, 'update2')
     r.post('my-posts', PetsController, 'myPosts')
   })

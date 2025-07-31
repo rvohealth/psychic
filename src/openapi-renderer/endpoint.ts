@@ -51,6 +51,7 @@ import openapiPageParamProperty from './helpers/pageParamOpenapiProperty.js'
 import safelyAttachPaginationParamToRequestBodySegment from './helpers/safelyAttachPaginationParamsToBodySegment.js'
 import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 import paramNamesForDreamClass from '../server/helpers/paramNamesForDreamClass.js'
+import PsychicApp from '../psychic-app/index.js'
 
 export interface OpenapiRenderOpts {
   casing: SerializerCasing
@@ -94,6 +95,7 @@ export default class OpenapiEndpointRenderer<
   private omitDefaultHeaders: OpenapiEndpointRendererOpts['omitDefaultHeaders']
   private omitDefaultResponses: OpenapiEndpointRendererOpts['omitDefaultResponses']
   private defaultResponse: OpenapiEndpointRendererOpts['defaultResponse']
+  private _validate: OpenapiValidateOption | undefined = undefined
 
   /**
    * instantiates a new OpenapiEndpointRenderer.
@@ -131,6 +133,7 @@ export default class OpenapiEndpointRenderer<
       omitDefaultHeaders,
       omitDefaultResponses,
       defaultResponse,
+      validate,
     }: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels, ForOption> = {},
   ) {
     this.requestBody = requestBody
@@ -155,6 +158,34 @@ export default class OpenapiEndpointRenderer<
         ? controllerClass.openapiConfig?.omitDefaultResponses || false
         : omitDefaultResponses
     this.defaultResponse = defaultResponse
+    this._validate = validate
+  }
+
+  public shouldValidateRequestBody(openapiName: string) {
+    if (this._validate === true) return true
+    if (this._validate === false) return false
+    if (Array.isArray(this._validate) && this._validate.includes('requestBody')) return true
+
+    const psychicApp = PsychicApp.getOrFail()
+    return psychicApp.openapiValidationIsActive(openapiName, 'requestBody')
+  }
+
+  public shouldValidateQuery(openapiName: string) {
+    if (this._validate === true) return true
+    if (this._validate === false) return false
+    if (Array.isArray(this._validate) && this._validate.includes('query')) return true
+
+    const psychicApp = PsychicApp.getOrFail()
+    return psychicApp.openapiValidationIsActive(openapiName, 'query')
+  }
+
+  public shouldValidateResponseBody(openapiName: string) {
+    if (this._validate === true) return true
+    if (this._validate === false) return false
+    if (Array.isArray(this._validate) && this._validate.includes('responseBody')) return true
+
+    const psychicApp = PsychicApp.getOrFail()
+    return psychicApp.openapiValidationIsActive(openapiName, 'responseBody')
   }
 
   /**
@@ -1257,7 +1288,29 @@ export interface OpenapiEndpointRendererOpts<
    * ```
    */
   omitDefaultResponses?: boolean
+
+  /**
+   * whether or not to validate this endpoint.
+   *
+   * If `true` is provided, then the request body, query params,
+   * and response payload will all be validated against the openapi
+   * spec.
+   *
+   * If you only wish to activate validation for some of the request,
+   * you can do so by providing an array, like so:
+   *
+   * ```ts
+   * {
+   *   ...
+   *   validate: ['requestBody', 'query', 'responseBody'],
+   * }
+   * ```
+   */
+  validate?: OpenapiValidateOption
 }
+
+export type OpenapiValidateOption = boolean | GruanularOpenapiValidateOption[]
+export type GruanularOpenapiValidateOption = 'requestBody' | 'query' | 'responseBody'
 
 export type CustomPaginationOpts =
   | {
