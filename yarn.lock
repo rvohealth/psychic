@@ -987,6 +987,7 @@ __metadata:
     "@types/express": "*"
     commander: "*"
     express: "*"
+    openapi-typescript: "*"
   languageName: unknown
   linkType: soft
 

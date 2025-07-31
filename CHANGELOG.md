@@ -1,3 +1,11 @@
+## 1.5.3
+
+- add missing peer dependency for openapi-typescript
+
+## 1.5.2
+
+- ensure that bigints are converted to number | string when generating openapi-typescript type files
+
 ## 1.5.1
 
 - fix issue with enum syncing related to multi-db engine support regression
