@@ -30,22 +30,43 @@ import {
   OpenapiSecurity,
   OpenapiSecuritySchemes,
   OpenapiServer,
+  OpenapiValidateOption,
+  OpenapiValidateTarget,
 } from '../openapi-renderer/endpoint.js'
 import PsychicRouter from '../router/index.js'
+import PsychicRouteComputer from '../router/route-computer.js'
+import { RouteConfig } from '../router/route-manager.js'
 import PsychicServer from '../server/index.js'
 import { cachePsychicApp, getCachedPsychicAppOrFail } from './cache.js'
 import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
 import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
 import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
-import { PsychicHookEventType, PsychicUseEventType } from './types.js'
+import { getOpenapiFileOrFail, readAndCacheOpenapiFile } from './openapi-cache.js'
+import { PsychicAppInitializerCb, PsychicHookEventType, PsychicUseEventType } from './types.js'
 
 export default class PsychicApp {
+  /**
+   * Called by the initializePsychicApp function, which is built
+   * into the boilerplate of a psychic application. It provides a
+   * cb, which is the default export of the conf/app.ts file,
+   * as well as a dreamCb, which is the default export of the conf/dream.ts
+   * file, and provides additional options, which it uses to initialize
+   * your psychic application.
+   *
+   * This function _must_ be called before you are to interact with your
+   * psychic application in any way.
+   *
+   * @param cb - the default export of the conf/app.ts file
+   * @param dreamCb - the default export of the conf/dream.ts file
+   * @param opts - additional opts
+   * @returns a newly-configured psychic application. You do not usually need to capture this, but it is returned if you need it.
+   */
   public static async init(
     cb: (app: PsychicApp) => void | Promise<void>,
     dreamCb: (app: DreamApp) => void | Promise<void>,
     opts: PsychicAppInitOptions = {},
-  ) {
+  ): Promise<PsychicApp> {
     let psychicApp: PsychicApp
 
     await DreamApp.init(
@@ -62,7 +83,7 @@ export default class PsychicApp {
           throw new PsychicAppInitMissingPackageManager()
 
         if (psychicApp.encryption?.cookies?.current)
-          this.checkKey(
+          this.checkEncryptionKey(
             'cookies',
             psychicApp.encryption.cookies.current.key,
             psychicApp.encryption.cookies.current.algorithm,
@@ -95,12 +116,72 @@ export default class PsychicApp {
         dreamApp.set('packageManager', psychicApp.packageManager)
 
         cachePsychicApp(psychicApp)
+
+        await Promise.all([psychicApp.buildOpenapiCache(), psychicApp.buildRoutesCache()])
       },
     )
 
     return psychicApp!
   }
 
+  /**
+   * Builds the routes cache if it does not already
+   * exist. This is called during PsychicApp.init,
+   * so that validation functionality can look to
+   * the cached routes, rather than having to build
+   * them over and over again from scratch.
+   */
+  private async buildRoutesCache(): Promise<void> {
+    if (this._routesCache) return
+
+    const r = new PsychicRouteComputer(this)
+    await this.routesCb(r)
+    this._routesCache = r.routes
+  }
+  private _routesCache: RouteConfig[]
+
+  /**
+   * @returns the cached route configurations for your application
+   */
+  public get routesCache() {
+    return this._routesCache
+  }
+
+  /**
+   * Builds the openapi cache for the application.
+   * This is done during PsychicApp.init, so that
+   * request validation can look to the route cache
+   * instead of having to build it from scratch.
+   */
+  private async buildOpenapiCache(): Promise<void> {
+    await Promise.all(
+      Object.keys(this.openapi).map(async openapiName => {
+        await this.cacheOpenapiFile(openapiName)
+      }),
+    )
+  }
+
+  /**
+   * Since javascript is inherently vulnerable to circular dependencies,
+   * this function provides a workaround by enabling you to dynamically
+   * bring in classes that, if imported directly, would result in circular
+   * dependency issues.
+   *
+   * NOTE: You should only use this as a last resort, since it can create quite
+   * a headache for you when leaning into your editor to apply renames, etc...
+   *
+   * @param name - the global name you are trying to look up, i.e. 'User', or 'UserSerializer'.
+   *
+   * @example
+   * ```ts
+   * // this pattern is safe from circular imports, since _UserSerializer
+   * // is only being used to type something else, which will not result
+   * // in the circular dependency issue.
+   *
+   * import _UserSerializer from '../serializers/UserSerializer.js'
+   * const UserSerializer = PsychicApp.lookupClassByGlobalName('UserSerializer') as _UserSerializer
+   * ```
+   */
   public static lookupClassByGlobalName(name: string) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return lookupClassByGlobalName(name)
@@ -116,7 +197,19 @@ export default class PsychicApp {
     return PackageManager.run(`psy ${cmd}`)
   }
 
-  private static checkKey(encryptionIdentifier: 'cookies', key: string, algorithm: EncryptAlgorithm) {
+  /**
+   * prints a warning in the console if the encryption key
+   * is not valid for the provided algorithm.
+   *
+   * @param encryptionIdentifier - currently must be 'cookies', though this may change in the future
+   * @param key - the encryption key you want to check
+   * @param algorithm - the encryption algorithm you want to check
+   */
+  private static checkEncryptionKey(
+    encryptionIdentifier: 'cookies',
+    key: string,
+    algorithm: EncryptAlgorithm,
+  ): void {
     if (!Encrypt.validateKey(key, algorithm))
       console.warn(
         `
@@ -133,14 +226,18 @@ Try setting it to something valid, like:
   /**
    * Returns the cached psychic application if it has been set.
    * If it has not been set, an exception is raised.
+   * The psychic application can be set by calling PsychicApp.init
    *
-   * The psychic application can be set by calling PsychicApp#init
+   * @returns the psychic application that was established by calling PsychicApp.init
    */
-  public static getOrFail() {
+  public static getOrFail(): PsychicApp {
     return getCachedPsychicAppOrFail()
   }
 
-  public static getInitializersOrBlank() {
+  /**
+   * @returns the initializers that were established during PsychicApp.init, or a blank object otherwise if none were registered
+   */
+  public static getInitializersOrBlank(): Record<string, PsychicAppInitializerCb> {
     return getInitializersOrBlank()
   }
 
@@ -231,11 +328,58 @@ Try setting it to something valid, like:
     return this._importExtension
   }
 
-  private _routesCb: (r: PsychicRouter) => void | Promise<void>
+  private _routesCb: (r: PsychicRouter | PsychicRouteComputer) => void | Promise<void>
   public get routesCb() {
     return this._routesCb
   }
 
+  /**
+   * @internal
+   *
+   * When PsychicApp.init is called, a cache is built for each openapiName
+   * registered within your app config. For each openapiName, Psychic will
+   * read the openapi file (unless it has not been written yet) and cache the
+   * contents. It does this to enable the validation engine to read component
+   * schemas accross the entire document to perform individual endpoint validation.
+   *
+   * This function is used to cache the contents of this file during initialization,
+   * so that the validation engine can call down to the complementing method,
+   * `getOpenapiFileOrFail`, which will return the contents of the document, or undefined
+   * if it was not found.
+   *
+   * @param openapiName - the openapiName you want to look up the openapi cache for
+   */
+  public async cacheOpenapiFile(openapiName: string) {
+    await readAndCacheOpenapiFile(openapiName)
+  }
+
+  /**
+   * @internal
+   *
+   * When PsychicApp.init is called, a cache is built for each openapiName
+   * registered within your app config. For each openapiName, Psychic will
+   * read the openapi file (unless it has not been written yet) and cache the
+   * contents. It does this to enable the validation engine to read component
+   * schemas accross the entire document to perform individual endpoint validation.
+   *
+   * This function is used to read back the cached contents. It should never fail,
+   * since even in the context where the openapi file is not present, as long
+   * as it was at least scanned, this function will never fail. If no openapi
+   * document was able to be scanned, it will simply return undefined.
+   *
+   * @param openapiName - the openapiName you want to look up the openapi cache for
+   * @returns the scanned openapi document, or undefined if it could not be found.
+   */
+  public getOpenapiFileOrFail(openapiName: string) {
+    return getOpenapiFileOrFail(openapiName)
+  }
+
+  /**
+   * @returns the entire openapi config, which includes configurations for each endpoint, indexed by their openapiNames
+   */
+  public get openapi() {
+    return this._openapi
+  }
   private _openapi: Record<string, NamedPsychicOpenapiOptions> = {
     default: {
       outputFilepath: 'openapi.json',
@@ -246,15 +390,17 @@ Try setting it to something valid, like:
       },
     },
   }
-  public get openapi() {
-    return this._openapi
-  }
 
-  private _client: Required<PsychicClientOptions> = {
-    apiPath: 'src/api',
-  }
-  public get client() {
-    return this._client
+  /**
+   * @internal
+   *
+   * @param openapiName - the openapiName you are looking to check validation for
+   * @param target - the target for the validation, either 'requestBody', 'headers', 'query', or 'responseBody'
+   * @returns true if the validation for this particular openapiName is active
+   */
+  public openapiValidationIsActive(openapiName: string, target: OpenapiValidateTarget): boolean {
+    const openapiConf = this.openapi[openapiName]
+    return openapiConf?.validate?.all || openapiConf?.validate?.[target] || false
   }
 
   private _paths: Required<PsychicPathOptions> = {
@@ -485,25 +631,23 @@ Try setting it to something valid, like:
                           ? bodyParser.Options
                           : Opt extends 'logger'
                             ? PsychicLogger
-                            : Opt extends 'client'
-                              ? PsychicClientOptions
-                              : Opt extends 'ssl'
-                                ? PsychicSslCredentials
-                                : Opt extends 'openapi'
-                                  ? DefaultPsychicOpenapiOptions
-                                  : Opt extends 'paths'
-                                    ? PsychicPathOptions
-                                    : Opt extends 'port'
+                            : Opt extends 'ssl'
+                              ? PsychicSslCredentials
+                              : Opt extends 'openapi'
+                                ? DefaultPsychicOpenapiOptions
+                                : Opt extends 'paths'
+                                  ? PsychicPathOptions
+                                  : Opt extends 'port'
+                                    ? number
+                                    : Opt extends 'saltRounds'
                                       ? number
-                                      : Opt extends 'saltRounds'
-                                        ? number
-                                        : Opt extends 'packageManager'
-                                          ? DreamAppAllowedPackageManagersEnum
-                                          : Opt extends 'inflections'
-                                            ? () => void | Promise<void>
-                                            : Opt extends 'routes'
-                                              ? (r: PsychicRouter) => void | Promise<void>
-                                              : never,
+                                      : Opt extends 'packageManager'
+                                        ? DreamAppAllowedPackageManagersEnum
+                                        : Opt extends 'inflections'
+                                          ? () => void | Promise<void>
+                                          : Opt extends 'routes'
+                                            ? (r: PsychicRouter) => void | Promise<void>
+                                            : never,
   ): void
   public set<Opt extends PsychicAppOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -559,12 +703,8 @@ Try setting it to something valid, like:
         }
         break
 
-      case 'client':
-        this._client = { ...this.client, ...(value as PsychicClientOptions) }
-        break
-
       case 'routes':
-        this._routesCb = value as (r: PsychicRouter) => void | Promise<void>
+        this._routesCb = value as (r: PsychicRouter | PsychicRouteComputer) => void | Promise<void>
         break
 
       case 'json':
@@ -635,7 +775,6 @@ export type PsychicAppOption =
   | 'importExtension'
   | 'encryption'
   | 'sessionCookieName'
-  | 'client'
   | 'clientRoot'
   | 'cookie'
   | 'cors'
@@ -912,6 +1051,37 @@ interface PsychicOpenapiBaseOptions {
       }
     }
   }
+
+  /**
+   * an object containing the validation rules for this openapi
+   * configuration. Any OpenAPI decorator call on a controller
+   * that is tied to this openapi config will result in these
+   * validation rules, unless explicitly overridden within the
+   * OpenAPI decorator call
+   *
+   * ```ts
+   * psy.set('openapi', {
+   *   validate: {
+   *     requestBody: true,
+   *     responseBody: true,
+   *     headers: true,
+   *     query: true,
+   *   }
+   * })
+   * ```
+   *
+   * If one desires all validation to be set, one can also leverage
+   * the shorthand `all` property for this, like so:
+   *
+   * ```ts
+   * psy.set('openapi', {
+   *   validate: {
+   *     all: true,
+   *   }
+   * })
+   * ```
+   */
+  validate?: OpenapiValidateOption
 }
 
 interface PsychicOpenapiInfo {
@@ -925,10 +1095,6 @@ interface PsychicPathOptions {
   services?: string
   controllers?: string
   controllerSpecs?: string
-}
-
-export interface PsychicClientOptions {
-  apiPath?: string
 }
 
 export type PsychicLogger = DreamLogger

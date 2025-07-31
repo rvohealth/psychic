@@ -1,13 +1,9 @@
 import colors from 'yoctocolors'
 import { ControllerActionRouteConfig, RouteConfig } from '../../router/route-manager.js'
-import PsychicServer from '../../server/index.js'
+import PsychicApp from '../../psychic-app/index.js'
 
-export default async function printRoutes() {
-  const server = new PsychicServer()
-  await server.boot()
-
-  const routes = await server.routes()
-  const expressions = buildExpressions(routes)
+export default function printRoutes() {
+  const expressions = buildExpressions(PsychicApp.getOrFail().routesCache)
 
   // NOTE: intentionally doing this outside of the expression loop below
   // to avoid N+1

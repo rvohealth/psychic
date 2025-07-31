@@ -1,3 +1,81 @@
+## 1.6.0
+
+enables validation to be added to both openapi configurations, as well as to `OpenAPI` decorator calls, enabling the developer to granularly control validation logic for their endpoints.
+
+To leverage global config:
+
+```ts
+// conf/app.ts
+export default async (psy: PsychicApp) => {
+  ...
+
+  psy.set('openapi', {
+    // ...
+    validate: {
+      headers: true,
+      requestBody: true,
+      query: true,
+      responseBody: AppEnv.isTest,
+    },
+  })
+}
+```
+
+To leverage endpoint config:
+
+```ts
+// controllers/PetsController
+export default class PetsController {
+  @OpenAPI(Pet, {
+    ...
+    validate: {
+      headers: true,
+      requestBody: true,
+      query: true,
+      responseBody: AppEnv.isTest,
+    }
+  })
+  public async index() {
+    ...
+  }
+}
+```
+
+This PR additionally formally introduces a new possible error type for 400 status codes, and to help distinguish, it also introduces a `type` field, which can be either `openapi` or `dream` to aid the developer in easily handling the various cases.
+
+We have made a conscious decision to render openapi errors in the exact format that ajv returns, since it empowers the developer to utilize tools which can already respond to ajv errors.
+
+For added flexibility, this PR includes the ability to provide configuration overrides for the ajv instance, as well as the ability to provide an initialization function to override ajv behavior, since much of the configuration for ajv is driven by method calls, rather than simple config.
+
+```ts
+// controllers/PetsController
+export default class PetsController {
+  @OpenAPI(Pet, {
+    ...
+    validate: {
+      ajvOptions: {
+        // this is off by default, but you will
+        // always want to keep this off in prod
+        // to avoid DoS vulnerabilities
+        allErrors: AppEnv.isTest,
+
+        // provide a custom init function to further
+        // configure your ajv instance before validating
+        init: ajv => {
+          ajv.addFormat('myFormat', {
+            type: 'string',
+            validate: data => MY_FORMAT_REGEX.test(data),
+          })
+        }
+      }
+    }
+  })
+  public async index() {
+    ...
+  }
+}
+```
+
 ## 1.5.5
 
 - ensure that openapi-typescript and typescript are not required dependencies when running migrations with --skip-sync flag

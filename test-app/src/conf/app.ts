@@ -81,7 +81,7 @@ export default async (psy: PsychicApp) => {
     defaults: {
       headers: {
         ['custom-header']: {
-          required: true,
+          required: false,
           description: 'custom header',
         },
       },

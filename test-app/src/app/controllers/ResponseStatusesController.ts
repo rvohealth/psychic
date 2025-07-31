@@ -7,6 +7,16 @@ export default class ResponseStatusesController extends ApplicationController {
     this.ok('custom content')
   }
 
+  // 200
+  public sendOkNull() {
+    this.ok(null)
+  }
+
+  // 200
+  public sendOkUndefined() {
+    this.ok(undefined)
+  }
+
   // 201
   public sendCreated() {
     this.created('custom content')

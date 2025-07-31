@@ -5,8 +5,9 @@ import CannotInferControllerFromTopLevelRouteError from '../error/router/cannot-
 import pascalizeFileName from '../helpers/pascalizeFileName.js'
 import { FunctionPropertyNames } from '../helpers/typeHelpers.js'
 import PsychicApp from '../psychic-app/index.js'
-import PsychicRouter, { PsychicNestedRouter } from '../router/index.js'
+import PsychicRouter from '../router/index.js'
 import { HttpMethod, ResourcesMethodType, ResourcesOptions } from './types.js'
+import PsychicRouteComputer from './route-computer.js'
 
 export function routePath(routePath: string) {
   return `/${routePath.replace(/^\//, '')}`
@@ -42,7 +43,7 @@ export function namespacedControllerActionString(namespace: string, controllerAc
     .replace(/^\//, '')
 }
 
-type RoutingMechanism = PsychicRouter | PsychicNestedRouter
+type RoutingMechanism = PsychicRouter | PsychicRouteComputer
 
 type LookupOpts = {
   resourceName?: string
@@ -154,7 +155,7 @@ export function applyResourcesAction(
 export function applyResourceAction(
   path: string,
   action: ResourcesMethodType,
-  routingMechanism: PsychicRouter | PsychicNestedRouter,
+  routingMechanism: RoutingMechanism,
   options?: ResourcesOptions,
 ) {
   const controller =

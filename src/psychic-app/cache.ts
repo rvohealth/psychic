@@ -1,3 +1,4 @@
+import MustCallPsychicAppInitFirst from '../error/psychic-app/must-call-psychic-app-init-first.js'
 import PsychicApp from './index.js'
 
 let _psychicApp: PsychicApp | undefined = undefined
@@ -11,6 +12,6 @@ export function getCachedPsychicApp() {
 }
 
 export function getCachedPsychicAppOrFail() {
-  if (!_psychicApp) throw new Error('must call `cachePsychicApp` before loading cached psychic app')
+  if (!_psychicApp) throw new MustCallPsychicAppInitFirst()
   return _psychicApp
 }

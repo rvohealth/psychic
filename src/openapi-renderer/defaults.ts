@@ -1,5 +1,5 @@
 import { OpenapiSchemaBody } from '@rvoh/dream'
-import { OpenapiContent, OpenapiResponses } from './endpoint.js'
+import { OpenapiContent, OpenapiResponses, OpenapiValidateTargets } from './endpoint.js'
 
 export const DEFAULT_OPENAPI_RESPONSES = {
   400: {
@@ -26,9 +26,43 @@ export const DEFAULT_OPENAPI_RESPONSES = {
 } as OpenapiResponses
 
 export const DEFAULT_OPENAPI_COMPONENT_SCHEMAS = {
+  OpenapiValidationErrors: {
+    type: 'object',
+    required: ['type', 'target', 'errors'],
+    properties: {
+      type: {
+        type: 'string',
+        enum: ['openapi'],
+      },
+      target: {
+        type: 'string',
+        enum: OpenapiValidateTargets,
+      },
+      errors: {
+        type: 'array',
+        items: {
+          type: 'object',
+          required: ['instancePath', 'schemaPath', 'keyword', 'message', 'params'],
+          properties: {
+            instancePath: { type: 'string' },
+            schemaPath: { type: 'string' },
+            keyword: { type: 'string' },
+            message: { type: 'string' },
+            params: { type: 'object' },
+          },
+        },
+      },
+    },
+  },
+
   ValidationErrors: {
     type: 'object',
+    required: ['type', 'errors'],
     properties: {
+      type: {
+        type: 'string',
+        enum: ['validation'],
+      },
       errors: {
         // this is how you specify a {[key: string]: string[] } pattern in openapi
         type: 'object',
@@ -52,11 +86,18 @@ export const DEFAULT_OPENAPI_COMPONENT_RESPONSES = {
   // 400
   BadRequest: {
     description:
-      'The server would not process the request due to something the server considered to be a client error',
+      'The server would not process the request due to something the server considered to be a client error, such as a model validation failure or an openapi validation failure',
     content: {
       'application/json': {
         schema: {
-          $ref: '#/components/schemas/ValidationErrors',
+          oneOf: [
+            {
+              $ref: '#/components/schemas/ValidationErrors',
+            },
+            {
+              $ref: '#/components/schemas/OpenapiValidationErrors',
+            },
+          ],
         },
       },
     },
