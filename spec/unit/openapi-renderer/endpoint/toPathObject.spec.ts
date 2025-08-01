@@ -803,6 +803,57 @@ describe('OpenapiEndpointRenderer', () => {
               },
             })
           })
+
+          context('with including exclusively provided', () => {
+            it('includes params provided by the including list, in addition to all other paramSafe columns', () => {
+              const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+                requestBody: { including: ['id'] },
+              })
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response['/users']!.post.requestBody).toEqual({
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: expect.objectContaining({
+                        id: {
+                          type: 'integer',
+                        },
+                        email: {
+                          type: 'string',
+                        },
+                      }),
+                    },
+                  },
+                },
+              })
+            })
+          })
+
+          context('with including provided with blank only', () => {
+            it('includes params provided by the including list exclusively', () => {
+              const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+                requestBody: { including: ['id'], only: [] },
+              })
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response['/users']!.post.requestBody).toEqual({
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        id: {
+                          type: 'integer',
+                        },
+                      },
+                    },
+                  },
+                },
+              })
+            })
+          })
         })
       })
 

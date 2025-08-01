@@ -552,6 +552,7 @@ export default class OpenapiEndpointRenderer<
     const body = this.requestBody as OpenapiSchemaRequestBodyForOption<typeof Dream>
     if (!body) return true
     if (body.only) return true
+    if (body.including) return true
     if (body.for) return true
     if (body.required && (body as OpenapiSchemaObject).type !== 'object') return true
     return false

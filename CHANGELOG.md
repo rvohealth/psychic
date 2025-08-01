@@ -1,3 +1,7 @@
+## 1.5.4
+
+- fix issue when providing the `including` argument exclusively to an OpenAPI decorator's `requestBody`
+
 ## 1.5.3
 
 - add missing peer dependency for openapi-typescript, allow BIGINT type when generating openapi-typescript bigints
