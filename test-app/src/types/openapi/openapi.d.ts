@@ -127,15 +127,15 @@ export interface paths {
                         /** Format: date */
                         birthdate?: string | null;
                         /** Format: bigint */
-                        collarCount?: string | number | null;
+                        collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
                         collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
                         email?: string;
                         /** Format: bigint */
-                        favoriteBigint?: string | number | null;
-                        favoriteBigints?: string[] | null;
+                        favoriteBigint?: string | number | bigint | null;
+                        favoriteBigints?: (string | number | bigint)[] | null;
                         favoriteBooleans?: boolean[] | null;
                         favoriteCitext?: string | null;
                         favoriteCitexts?: string[] | null;
@@ -158,11 +158,11 @@ export interface paths {
                         optionalUuid?: string | null;
                         passwordDigest?: string;
                         /** Format: bigint */
-                        requiredCollarCount?: string | number;
+                        requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
                         /** Format: bigint */
-                        requiredFavoriteBigint?: string | number;
-                        requiredFavoriteBigints?: string[];
+                        requiredFavoriteBigint?: string | number | bigint;
+                        requiredFavoriteBigints?: (string | number | bigint)[];
                         requiredFavoriteBooleans?: boolean[];
                         requiredFavoriteCitext?: string;
                         requiredFavoriteCitexts?: string[];
@@ -246,15 +246,15 @@ export interface paths {
                         /** Format: date */
                         birthdate?: string | null;
                         /** Format: bigint */
-                        collarCount?: string | number | null;
+                        collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
                         collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
                         email?: string;
                         /** Format: bigint */
-                        favoriteBigint?: string | number | null;
-                        favoriteBigints?: string[] | null;
+                        favoriteBigint?: string | number | bigint | null;
+                        favoriteBigints?: (string | number | bigint)[] | null;
                         favoriteBooleans?: boolean[] | null;
                         favoriteCitext?: string | null;
                         favoriteCitexts?: string[] | null;
@@ -277,11 +277,11 @@ export interface paths {
                         optionalUuid?: string | null;
                         passwordDigest?: string;
                         /** Format: bigint */
-                        requiredCollarCount?: string | number;
+                        requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
                         /** Format: bigint */
-                        requiredFavoriteBigint?: string | number;
-                        requiredFavoriteBigints?: string[];
+                        requiredFavoriteBigint?: string | number | bigint;
+                        requiredFavoriteBigints?: (string | number | bigint)[];
                         requiredFavoriteBooleans?: boolean[];
                         requiredFavoriteCitext?: string;
                         requiredFavoriteCitexts?: string[];
@@ -847,7 +847,7 @@ export interface paths {
                 content: {
                     "application/json": {
                         /** Format: bigint */
-                        collarCount?: string | number | null;
+                        collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
                         collarCountNumeric?: number | null;
                         favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
@@ -862,7 +862,7 @@ export interface paths {
                         /** @enum {string} */
                         nonNullSpecies?: "cat" | "noncat";
                         /** Format: bigint */
-                        requiredCollarCount?: string | number;
+                        requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
                         requiredCollarCountNumeric?: number;
                         /** @enum {string|null} */
@@ -931,7 +931,7 @@ export interface paths {
                 content: {
                     "application/json": {
                         /** Format: bigint */
-                        collarCount?: string | number | null;
+                        collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
                         collarCountNumeric?: number | null;
                         favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
@@ -946,7 +946,7 @@ export interface paths {
                         /** @enum {string} */
                         nonNullSpecies?: "cat" | "noncat";
                         /** Format: bigint */
-                        requiredCollarCount?: string | number;
+                        requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
                         requiredCollarCountNumeric?: number;
                         /** @enum {string|null} */
@@ -1085,15 +1085,15 @@ export interface paths {
                         /** Format: date */
                         birthdate?: string | null;
                         /** Format: bigint */
-                        collarCount?: string | number | null;
+                        collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
                         collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
                         email?: string;
                         /** Format: bigint */
-                        favoriteBigint?: string | number | null;
-                        favoriteBigints?: string[] | null;
+                        favoriteBigint?: string | number | bigint | null;
+                        favoriteBigints?: (string | number | bigint)[] | null;
                         favoriteBooleans?: boolean[] | null;
                         favoriteCitext?: string | null;
                         favoriteCitexts?: string[] | null;
@@ -1116,11 +1116,11 @@ export interface paths {
                         optionalUuid?: string | null;
                         passwordDigest?: string;
                         /** Format: bigint */
-                        requiredCollarCount?: string | number;
+                        requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
                         /** Format: bigint */
-                        requiredFavoriteBigint?: string | number;
-                        requiredFavoriteBigints?: string[];
+                        requiredFavoriteBigint?: string | number | bigint;
+                        requiredFavoriteBigints?: (string | number | bigint)[];
                         requiredFavoriteBooleans?: boolean[];
                         requiredFavoriteCitext?: string;
                         requiredFavoriteCitexts?: string[];
@@ -1279,15 +1279,15 @@ export interface paths {
                         /** Format: date */
                         birthdate?: string | null;
                         /** Format: bigint */
-                        collarCount?: string | number | null;
+                        collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
                         collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
                         email?: string;
                         /** Format: bigint */
-                        favoriteBigint?: string | number | null;
-                        favoriteBigints?: string[] | null;
+                        favoriteBigint?: string | number | bigint | null;
+                        favoriteBigints?: (string | number | bigint)[] | null;
                         favoriteBooleans?: boolean[] | null;
                         favoriteCitext?: string | null;
                         favoriteCitexts?: string[] | null;
@@ -1310,11 +1310,11 @@ export interface paths {
                         optionalUuid?: string | null;
                         passwordDigest?: string;
                         /** Format: bigint */
-                        requiredCollarCount?: string | number;
+                        requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
                         /** Format: bigint */
-                        requiredFavoriteBigint?: string | number;
-                        requiredFavoriteBigints?: string[];
+                        requiredFavoriteBigint?: string | number | bigint;
+                        requiredFavoriteBigints?: (string | number | bigint)[];
                         requiredFavoriteBooleans?: boolean[];
                         requiredFavoriteCitext?: string;
                         requiredFavoriteCitexts?: string[];
@@ -1501,15 +1501,15 @@ export interface paths {
                         /** Format: date */
                         birthdate?: string | null;
                         /** Format: bigint */
-                        collarCount?: string | number | null;
+                        collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
                         collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
                         email?: string;
                         /** Format: bigint */
-                        favoriteBigint?: string | number | null;
-                        favoriteBigints?: string[] | null;
+                        favoriteBigint?: string | number | bigint | null;
+                        favoriteBigints?: (string | number | bigint)[] | null;
                         favoriteBooleans?: boolean[] | null;
                         favoriteCitext?: string | null;
                         favoriteCitexts?: string[] | null;
@@ -1532,11 +1532,11 @@ export interface paths {
                         optionalUuid?: string | null;
                         passwordDigest?: string;
                         /** Format: bigint */
-                        requiredCollarCount?: string | number;
+                        requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
                         /** Format: bigint */
-                        requiredFavoriteBigint?: string | number;
-                        requiredFavoriteBigints?: string[];
+                        requiredFavoriteBigint?: string | number | bigint;
+                        requiredFavoriteBigints?: (string | number | bigint)[];
                         requiredFavoriteBooleans?: boolean[];
                         requiredFavoriteCitext?: string;
                         requiredFavoriteCitexts?: string[];

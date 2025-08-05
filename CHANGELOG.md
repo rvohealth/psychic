@@ -1,3 +1,7 @@
+## 1.5.5
+
+- ensure that openapi-typescript and typescript are not required dependencies when running migrations with --skip-sync flag
+
 ## 1.5.4
 
 - fix issue when providing the `including` argument exclusively to an OpenAPI decorator's `requestBody`

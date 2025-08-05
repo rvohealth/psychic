@@ -11,7 +11,6 @@ import PsychicServer from '../server/index.js'
 import enumsFileStr from './helpers/enumsFileStr.js'
 import generateRouteTypes from './helpers/generateRouteTypes.js'
 import printRoutes from './helpers/printRoutes.js'
-import syncOpenapiTypescriptFiles from './helpers/syncOpenapiTypescriptFiles.js'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
@@ -71,7 +70,7 @@ export default class PsychicBin {
     try {
       await this.syncOpenapiJson()
       await this.runCliHooksAndUpdatePsychicTypesFileWithOutput()
-      await this.syncTypescriptOpenapiFiles()
+      await this.syncOpenapiTypescriptFiles()
     } catch (error) {
       console.error(error)
       await CliFileWriter.revert()
@@ -85,8 +84,17 @@ export default class PsychicBin {
     DreamCLI.logger.logEndProgress()
   }
 
-  public static async syncTypescriptOpenapiFiles() {
+  public static async syncOpenapiTypescriptFiles() {
     DreamCLI.logger.logStartProgress(`syncing openapi types...`)
+
+    // https://rvohealth.atlassian.net/browse/PDTC-8359
+    // by dynamically importing this file, we prevent both openapi-typescript
+    // and typescript from being required as dependencies, since in production
+    // environments these won't be installed. By running migrations with
+    // --skip-sync, this function will never run, preventing the file which
+    // requires the dev dependencies from ever being imported.
+    const syncOpenapiTypescriptFiles = (await import('./helpers/syncOpenapiTypescriptFiles.js')).default
+
     await syncOpenapiTypescriptFiles()
     DreamCLI.logger.logEndProgress()
   }
