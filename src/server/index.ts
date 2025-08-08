@@ -10,6 +10,7 @@ import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
 } from './helpers/startPsychicServer.js'
+import EnvInternal from '../helpers/EnvInternal.js'
 
 // const debugEnabled = debuglog('psychic').enabled
 
@@ -49,6 +50,8 @@ export default class PsychicServer {
 
     const psychicApp = PsychicApp.getOrFail()
 
+    this.setSecureDefaultHeaders()
+
     this.expressApp.use((_, res, next) => {
       Object.keys(psychicApp.defaultResponseHeaders).forEach(key => {
         res.setHeader(key, psychicApp.defaultResponseHeaders[key]!)
@@ -86,6 +89,19 @@ export default class PsychicServer {
 
     this.booted = true
     return true
+  }
+
+  private setSecureDefaultHeaders() {
+    this.expressApp.disable('x-powered-by')
+
+    this.expressApp.use((_, res, next) => {
+      res.setHeader('X-Content-Type-Options', 'nosniff')
+
+      if (EnvInternal.isProduction) {
+        res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+      }
+      next()
+    })
   }
 
   // TODO: use config helper for fetching default port
