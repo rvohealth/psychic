@@ -225,11 +225,10 @@ export default class OpenapiEndpointRenderer<
    */
   private shouldValidateOpenapiPayload(openapiName: string, target: OpenapiValidateTarget): boolean {
     const psychicApp = PsychicApp.getOrFail()
-    return (
-      this.validate?.all ||
-      this.validate?.[target] ||
-      psychicApp.openapiValidationIsActive(openapiName, target)
-    )
+
+    if (this.validate?.all !== undefined) return this.validate?.all
+    if (this.validate?.[target] !== undefined) return this.validate?.[target]
+    return psychicApp.openapiValidationIsActive(openapiName, target)
   }
 
   /**
@@ -1358,7 +1357,7 @@ export interface OpenapiEndpointRendererOpts<
    *   }
    * ```
    */
-  validate?: OpenapiValidateOption
+  validate?: OpenapiValidateOption | undefined
 }
 
 export type OpenapiValidateOption = {
