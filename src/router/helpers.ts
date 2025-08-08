@@ -7,7 +7,6 @@ import { FunctionPropertyNames } from '../helpers/typeHelpers.js'
 import PsychicApp from '../psychic-app/index.js'
 import PsychicRouter from '../router/index.js'
 import { HttpMethod, ResourcesMethodType, ResourcesOptions } from './types.js'
-import PsychicRouteComputer from './route-computer.js'
 
 export function routePath(routePath: string) {
   return `/${routePath.replace(/^\//, '')}`
@@ -43,7 +42,7 @@ export function namespacedControllerActionString(namespace: string, controllerAc
     .replace(/^\//, '')
 }
 
-type RoutingMechanism = PsychicRouter | PsychicRouteComputer
+type RoutingMechanism = PsychicRouter
 
 type LookupOpts = {
   resourceName?: string
