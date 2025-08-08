@@ -1,3 +1,7 @@
+## 1.6.1
+
+- fix issue preventing validation fallbacks from properly overriding on OpenAPI decorator calls when explicitly opting out of validation
+
 ## 1.6.0
 
 enables validation to be added to both openapi configurations, as well as to `OpenAPI` decorator calls, enabling the developer to granularly control validation logic for their endpoints.
