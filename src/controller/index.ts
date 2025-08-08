@@ -8,6 +8,7 @@ import {
   inferSerializerFromDreamOrViewModel,
   isDreamSerializer,
   ObjectSerializerBuilder,
+  OpenapiSchemaBody,
   SerializerRendererOpts,
   SimpleObjectSerializerType,
   UpdateableProperties,
@@ -95,6 +96,7 @@ export const PsychicParamsPrimitiveLiterals = [
   'uuid',
   'uuid[]',
 ] as const
+export type PsychicParamsPrimitiveLiteral = (typeof PsychicParamsPrimitiveLiterals)[number]
 
 export interface PsychicParamsDictionary {
   [key: string]: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[]
@@ -350,11 +352,22 @@ export default class PsychicController {
    *   }
    * }
    * ```
+   *
+   * You can provide hard-coded openapi shapes as well:
+   *
+   * @example
+   * ```ts
+   * class MyController extends ApplicationController {
+   *   public index() {
+   *     const type = this.castParam('type', { type: ['string', 'null'], enum: ['Type1', 'Type2', null] })
+   *   }
+   * }
+   * ```
    */
   public castParam<
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
-    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
+    const ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
   >(key: string, expectedType: ExpectedType, opts?: OptsType) {
     try {
       return this._castParam(key.split('.'), this.params, expectedType, opts)
@@ -368,7 +381,7 @@ export default class PsychicController {
   private _castParam<
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
-    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
+    ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
     ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
     FinalReturnType extends AllowNullOrUndefined extends true

@@ -34,7 +34,6 @@ import {
   OpenapiValidateTarget,
 } from '../openapi-renderer/endpoint.js'
 import PsychicRouter from '../router/index.js'
-import PsychicRouteComputer from '../router/route-computer.js'
 import { RouteConfig } from '../router/route-manager.js'
 import PsychicServer from '../server/index.js'
 import { cachePsychicApp, getCachedPsychicAppOrFail } from './cache.js'
@@ -134,7 +133,7 @@ export default class PsychicApp {
   private async buildRoutesCache(): Promise<void> {
     if (this._routesCache) return
 
-    const r = new PsychicRouteComputer(this)
+    const r = new PsychicRouter(null, this)
     await this.routesCb(r)
     this._routesCache = r.routes
   }
@@ -328,7 +327,7 @@ Try setting it to something valid, like:
     return this._importExtension
   }
 
-  private _routesCb: (r: PsychicRouter | PsychicRouteComputer) => void | Promise<void>
+  private _routesCb: (r: PsychicRouter) => void | Promise<void>
   public get routesCb() {
     return this._routesCb
   }
@@ -704,7 +703,7 @@ Try setting it to something valid, like:
         break
 
       case 'routes':
-        this._routesCb = value as (r: PsychicRouter | PsychicRouteComputer) => void | Promise<void>
+        this._routesCb = value as (r: PsychicRouter) => void | Promise<void>
         break
 
       case 'json':

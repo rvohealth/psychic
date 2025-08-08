@@ -7,13 +7,20 @@ import {
   DreamAttributes,
   DreamParamSafeAttributes,
   DreamParamSafeColumnNames,
+  OpenapiSchemaArray,
+  OpenapiSchemaBody,
+  OpenapiSchemaInteger,
+  OpenapiSchemaNumber,
+  OpenapiSchemaObjectBase,
+  OpenapiSchemaPrimitiveGeneric,
+  OpenapiSchemaString,
   snakeify,
   UpdateableProperties,
 } from '@rvoh/dream'
 import {
   PsychicParamsDictionary,
   PsychicParamsPrimitive,
-  PsychicParamsPrimitiveLiterals,
+  PsychicParamsPrimitiveLiteral,
 } from '../controller/index.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
@@ -21,7 +28,9 @@ import alternateParamName from '../helpers/alternateParamName.js'
 import isArrayParamName from '../helpers/isArrayParamName.js'
 import isObject from '../helpers/isObject.js'
 import isUuid from '../helpers/isUuid.js'
+import { validateObject } from '../helpers/validateOpenApiSchema.js'
 import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
+import { Inc } from '../i18n/conf/types.js'
 
 export default class Params {
   /**
@@ -251,7 +260,6 @@ export default class Params {
 
                   // casting to allow enum handling at lower level
                   'string',
-                  // columnMetadata.dbType as (typeof PsychicParamsPrimitiveLiterals)[number],
 
                   {
                     allowNull: columnMetadata.allowNull,
@@ -315,7 +323,7 @@ export default class Params {
   public static cast<
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
-    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
+    ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
     ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
     FinalReturnType extends AllowNullOrUndefined extends true
@@ -351,7 +359,7 @@ export default class Params {
   public cast<
     EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
-    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
+    ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
     ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
     ReturnType extends AllowNullOrUndefined extends true ? ValidatedType | null | undefined : ValidatedType,
@@ -367,7 +375,15 @@ export default class Params {
 
     if (paramValue === null || paramValue === undefined) {
       if (expectedType === 'null') return null as ReturnType
-      this.throwUnlessAllowNull(paramName, paramValue, typeToError(expectedType), opts)
+      if (!this.shouldUseOpenapiValidation(expectedType)) {
+        this.throwUnlessAllowNull(
+          paramName,
+          paramValue,
+          typeToError(expectedType as PsychicParamsPrimitiveLiteral),
+          opts,
+        )
+      }
+
       return paramValue as ReturnType
     }
 
@@ -473,11 +489,29 @@ export default class Params {
         ) as ReturnType
 
       default:
+        if (this.shouldUseOpenapiValidation(expectedType)) {
+          const res = validateObject(paramValue, expectedType)
+          if (res.isValid) {
+            return res.data as ReturnType
+          } else {
+            throw new ParamValidationError(
+              paramName,
+              res.errors?.map(err => err.message) || ['openapi validation failed'],
+            )
+          }
+        }
+
         // TODO: serialize/sanitize before printing, handle array types
         throw new Error(
           `Unexpected point reached in code. need to handle type for ${expectedType as unknown as string}`,
         )
     }
+  }
+
+  private shouldUseOpenapiValidation<
+    ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
+  >(expectedType: ExpectedType): boolean {
+    return isObject(expectedType)
   }
 
   public restrict(allowed: string[]) {
@@ -577,7 +611,67 @@ export type ValidatedReturnType<ExpectedType, OptsType> = ExpectedType extends R
                                       ? null[]
                                       : ExpectedType extends 'uuid[]'
                                         ? string[]
-                                        : never
+                                        : OpenapiShapeToInterface<ExpectedType, 0>
+
+type OpenapiShapeToInterface<T, Depth extends number> = Depth extends 30
+  ? never
+  : T extends OpenapiSchemaObjectBase
+    ? {
+        -readonly [K in keyof T['properties']]: OpenapiShapeToInterface<T['properties'][K], Inc<Depth>>
+      }
+    : T extends OpenapiSchemaArray
+      ? T['items'] extends { oneOf: infer R extends readonly [unknown, ...unknown[]] }
+        ? TransformOneOfToArrayUnion<R, Inc<Depth>>
+        : OpenapiShapeToInterface<T['items'], Inc<Depth>>[]
+      : T extends { anyOf: infer R extends unknown[] }
+        ? OpenapiShapeToInterface<R[number], Inc<Depth>>
+        : T extends { oneOf: infer R extends [unknown, ...unknown[]] }
+          ? OpenapiShapeToInterface<R[number], Inc<Depth>>
+          : T extends { allOf: infer R extends readonly unknown[] }
+            ? MergeAllOfSchemas<R, Inc<Depth>>
+            : T extends OpenapiSchemaString
+              ? string
+              : T extends OpenapiSchemaNumber
+                ? number
+                : T extends OpenapiSchemaInteger
+                  ? number
+                  : T extends OpenapiSchemaPrimitiveGeneric
+                    ? OpenapiGenericToType<T['type']>
+                    : never
+
+type TransformOneOfToArrayUnion<T extends readonly unknown[], Depth extends number> = T extends readonly [
+  infer First,
+  ...infer Rest,
+]
+  ? OpenapiShapeToInterface<First, Depth>[] | TransformOneOfToArrayUnion<Rest, Depth>
+  : never
+
+type MergeAllOfSchemas<T extends readonly unknown[], Depth extends number> = T extends readonly [
+  infer First,
+  ...infer Rest,
+]
+  ? Rest extends readonly unknown[]
+    ? Rest['length'] extends 0
+      ? OpenapiShapeToInterface<First, Depth>
+      : OpenapiShapeToInterface<First, Depth> & MergeAllOfSchemas<Rest, Depth>
+    : OpenapiShapeToInterface<First, Depth>
+  : never
+
+type OpenapiGenericToType<T> = T extends 'string'
+  ? string
+  : T extends 'boolean'
+    ? boolean
+    : T extends 'number'
+      ? number
+      : T extends 'integer'
+        ? number
+        : T extends 'date-time'
+          ? DateTime
+          : T extends 'date'
+            ? CalendarDate
+            : T extends 'null'
+              ? null
+              : never
 
 export type ValidatedAllowsNull<ExpectedType, OptsValue> = ExpectedType extends { allowNull: infer R }
   ? R extends true
@@ -609,7 +703,7 @@ export interface ParamExclusionOptions<OnlyArray, IncludingArray> {
   including?: IncludingArray
 }
 
-const typeToErrorMap: Record<(typeof PsychicParamsPrimitiveLiterals)[number], string> = {
+const typeToErrorMap: Record<PsychicParamsPrimitiveLiteral, string> = {
   bigint: 'expected bigint',
   boolean: 'expected boolean',
   date: 'expecting ISO date string',
@@ -633,7 +727,7 @@ const typeToErrorMap: Record<(typeof PsychicParamsPrimitiveLiterals)[number], st
   'uuid[]': 'expected uuid array',
 } as const
 
-function typeToError(param: (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp) {
+function typeToError(param: PsychicParamsPrimitiveLiteral | RegExp) {
   if (param instanceof RegExp) return 'did not match expected pattern'
   const message = typeToErrorMap[param]
   return message ?? `expected ${param}`
@@ -654,6 +748,6 @@ const arrayTypeToNonArrayTypeMap = {
 
 function arrayTypeToNonArrayType(
   param: keyof typeof arrayTypeToNonArrayTypeMap,
-): (typeof PsychicParamsPrimitiveLiterals)[number] {
+): PsychicParamsPrimitiveLiteral {
   return arrayTypeToNonArrayTypeMap[param]
 }
