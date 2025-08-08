@@ -998,7 +998,7 @@ describe('OpenapiEndpointRenderer', () => {
                         },
                         favoriteNumerics: {
                           type: ['array', 'null'],
-                          items: { type: 'number' },
+                          items: { type: 'number', format: 'decimal' },
                         },
                         favoriteTexts: {
                           type: ['array', 'null'],
@@ -1020,7 +1020,10 @@ describe('OpenapiEndpointRenderer', () => {
                           items: { type: 'string', format: 'date-time' },
                         },
                         requiredFavoriteIntegers: { type: 'array', items: { type: 'integer' } },
-                        requiredFavoriteNumerics: { type: 'array', items: { type: 'number' } },
+                        requiredFavoriteNumerics: {
+                          type: 'array',
+                          items: { type: 'number', format: 'decimal' },
+                        },
                         requiredFavoriteTexts: { type: 'array', items: { type: 'string' } },
                         requiredNicknames: { type: 'array', items: { type: 'string' } },
                       }),
@@ -1315,7 +1318,7 @@ describe('OpenapiEndpointRenderer', () => {
                               type: ['array', 'null'],
                               items: {
                                 type: 'string',
-                                enum: ['efishy feesh', 'snick snowcks', null],
+                                enum: ['efishy feesh', 'snick snowcks'],
                               },
                             },
 
@@ -1355,7 +1358,7 @@ describe('OpenapiEndpointRenderer', () => {
                               type: ['array', 'null'],
                               items: {
                                 type: 'string',
-                                enum: ['efishy feesh', 'snick snowcks', null],
+                                enum: ['efishy feesh', 'snick snowcks'],
                               },
                             },
                           }),

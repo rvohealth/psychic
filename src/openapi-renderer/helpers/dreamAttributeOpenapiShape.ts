@@ -2,10 +2,17 @@ import {
   DbTypes,
   Dream,
   OpenapiDescription,
+  OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
   OpenapiShorthandPrimitiveTypes,
 } from '@rvoh/dream'
+import OpenapiSegmentExpander from '../body-segment.js'
 import openapiShorthandToOpenapi from './openapiShorthandToOpenapi.js'
+
+export interface VirtualAttributeStatement {
+  property: string
+  type: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined
+}
 
 interface DreamColumnInfo {
   enumValues: string[] | null
@@ -30,8 +37,42 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
     | OpenapiSchemaBodyShorthand
     | OpenapiShorthandPrimitiveTypes
     | undefined = undefined,
-  { suppressResponseEnums = false }: { suppressResponseEnums?: boolean } = {},
-) {
+  {
+    suppressResponseEnums = false,
+    allowGenericJson = false,
+  }: {
+    suppressResponseEnums?: boolean
+    allowGenericJson?: boolean
+  } = {},
+): OpenapiSchemaBody {
+  if (dreamClass.isVirtualColumn(column)) {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+    const openapiObject = openapiShorthandToOpenapi((openapi ?? {}) as any)
+
+    const metadata = (dreamClass['virtualAttributes'] as VirtualAttributeStatement[]).find(
+      statement => statement.property === column,
+    )
+
+    if (metadata?.type) {
+      return {
+        ...new OpenapiSegmentExpander(metadata.type, {
+          renderOpts: {
+            casing: 'camel',
+            suppressResponseEnums: false,
+          },
+          target: 'request',
+        }).render().openapi,
+        ...openapiObject,
+      }
+    } else if (openapi) {
+      return openapiObject
+    } else {
+      return {
+        anyOf: [{ type: ['string', 'null'] }, { type: ['number', 'null'] }, { type: ['object', 'null'] }],
+      } as const
+    }
+  }
+
   const dream = dreamClass.prototype
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-assignment
@@ -42,12 +83,14 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
     throw new UseCustomOpenapiForVirtualAttributes(dreamClass, column)
   }
 
-  switch (baseDbType(dreamColumnInfo)) {
-    case 'json':
-    case 'jsonb':
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-      if (openapi) return openapiShorthandToOpenapi(openapi as any)
-      throw new UseCustomOpenapiForJson(dreamClass, column)
+  if (!allowGenericJson) {
+    switch (baseDbType(dreamColumnInfo)) {
+      case 'json':
+      case 'jsonb':
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+        if (openapi) return openapiShorthandToOpenapi(openapi as any)
+        throw new UseCustomOpenapiForJson(dreamClass, column)
+    }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
@@ -59,13 +102,15 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
       type: dreamColumnInfo.allowNull ? ['array', 'null'] : 'array',
       items: singleType,
       ...openapiObject,
-    }
+    } as OpenapiSchemaBody
   } else {
-    const existingType = singleType.type
+    const existingType = dreamColumnInfo.allowNull
+      ? ([singleType.type, 'null'] as ['string', 'null'])
+      : (singleType.type as 'string')
 
     return {
       ...singleType,
-      type: dreamColumnInfo.allowNull && !Array.isArray(existingType) ? [existingType, 'null'] : existingType,
+      type: existingType,
       ...openapiObject,
     }
   }
@@ -83,7 +128,13 @@ function singularAttributeOpenapiShape(dreamColumnInfo: DreamColumnInfo, suppres
         description: `The following values will be allowed:\n  ${dreamColumnInfo.enumValues.join(',\n  ')}`,
       } as const
     } else {
-      return { type: 'string', enum: dreamColumnInfo.enumValues } as const
+      return {
+        type: 'string',
+        enum: [
+          ...dreamColumnInfo.enumValues,
+          ...(dreamColumnInfo.allowNull && !dreamColumnInfo.isArray ? [null] : []),
+        ],
+      } as const
     }
   }
 
@@ -91,7 +142,6 @@ function singularAttributeOpenapiShape(dreamColumnInfo: DreamColumnInfo, suppres
     case 'boolean':
       return { type: 'boolean' } as const
 
-    case 'bigint':
     case 'bigserial':
     case 'bytea':
     case 'char':
@@ -116,6 +166,9 @@ function singularAttributeOpenapiShape(dreamColumnInfo: DreamColumnInfo, suppres
     case 'smallserial':
       return { type: 'integer' } as const
 
+    case 'bigint':
+      return { type: 'string', format: 'bigint' } as const
+
     case 'numeric':
     case 'decimal':
       return { type: 'number', format: 'decimal' } as const
@@ -134,6 +187,10 @@ function singularAttributeOpenapiShape(dreamColumnInfo: DreamColumnInfo, suppres
 
     case 'date':
       return { type: 'string', format: 'date' } as const
+
+    case 'json':
+    case 'jsonb':
+      return { type: 'object' } as const
 
     default:
       throw new Error(

@@ -1,6 +1,10 @@
+## 1.6.2
+
+fix OpenAPI spec generation by DRYing up generation of request and response body
+
 ## 1.6.1
 
-- fix issue preventing validation fallbacks from properly overriding on OpenAPI decorator calls when explicitly opting out of validation
+fix issue preventing validation fallbacks from properly overriding on OpenAPI decorator calls when explicitly opting out of validation
 
 ## 1.6.0
 

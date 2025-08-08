@@ -129,6 +129,7 @@ export interface paths {
                         /** Format: bigint */
                         collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
+                        /** Format: decimal */
                         collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
@@ -146,7 +147,7 @@ export interface paths {
                         favoriteJsons?: Record<string, never>[] | null;
                         favoriteNumerics?: number[] | null;
                         favoriteTexts?: string[] | null;
-                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks")[] | null;
                         favoriteUuids?: string[] | null;
                         jsonData?: Record<string, never> | null;
                         jsonbData?: Record<string, never> | null;
@@ -180,6 +181,7 @@ export interface paths {
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
                         uuid?: string;
+                        /** Format: decimal */
                         volume?: number | null;
                         password?: (string | null) | (number | null) | (Record<string, never> | null);
                         openapiVirtualSpecTest?: string | null;
@@ -248,6 +250,7 @@ export interface paths {
                         /** Format: bigint */
                         collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
+                        /** Format: decimal */
                         collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
@@ -265,7 +268,7 @@ export interface paths {
                         favoriteJsons?: Record<string, never>[] | null;
                         favoriteNumerics?: number[] | null;
                         favoriteTexts?: string[] | null;
-                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks")[] | null;
                         favoriteUuids?: string[] | null;
                         jsonData?: Record<string, never> | null;
                         jsonbData?: Record<string, never> | null;
@@ -299,6 +302,7 @@ export interface paths {
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
                         uuid?: string;
+                        /** Format: decimal */
                         volume?: number | null;
                         password?: (string | null) | (number | null) | (Record<string, never> | null);
                         openapiVirtualSpecTest?: string | null;
@@ -963,8 +967,9 @@ export interface paths {
                         /** Format: bigint */
                         collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
+                        /** Format: decimal */
                         collarCountNumeric?: number | null;
-                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks")[] | null;
                         /** Format: date-time */
                         lastHeardAt?: string;
                         /** Format: date-time */
@@ -978,6 +983,7 @@ export interface paths {
                         /** Format: bigint */
                         requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
+                        /** Format: decimal */
                         requiredCollarCountNumeric?: number;
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
@@ -1047,8 +1053,9 @@ export interface paths {
                         /** Format: bigint */
                         collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
+                        /** Format: decimal */
                         collarCountNumeric?: number | null;
-                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks")[] | null;
                         /** Format: date-time */
                         lastHeardAt?: string;
                         /** Format: date-time */
@@ -1062,6 +1069,7 @@ export interface paths {
                         /** Format: bigint */
                         requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
+                        /** Format: decimal */
                         requiredCollarCountNumeric?: number;
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
@@ -1648,6 +1656,7 @@ export interface paths {
                         /** Format: bigint */
                         collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
+                        /** Format: decimal */
                         collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
@@ -1665,7 +1674,7 @@ export interface paths {
                         favoriteJsons?: Record<string, never>[] | null;
                         favoriteNumerics?: number[] | null;
                         favoriteTexts?: string[] | null;
-                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks")[] | null;
                         favoriteUuids?: string[] | null;
                         jsonData?: Record<string, never> | null;
                         jsonbData?: Record<string, never> | null;
@@ -1699,6 +1708,7 @@ export interface paths {
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
                         uuid?: string;
+                        /** Format: decimal */
                         volume?: number | null;
                         password?: (string | null) | (number | null) | (Record<string, never> | null);
                         openapiVirtualSpecTest?: string | null;
@@ -1842,6 +1852,7 @@ export interface paths {
                         /** Format: bigint */
                         collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
+                        /** Format: decimal */
                         collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
@@ -1859,7 +1870,7 @@ export interface paths {
                         favoriteJsons?: Record<string, never>[] | null;
                         favoriteNumerics?: number[] | null;
                         favoriteTexts?: string[] | null;
-                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks")[] | null;
                         favoriteUuids?: string[] | null;
                         jsonData?: Record<string, never> | null;
                         jsonbData?: Record<string, never> | null;
@@ -1893,6 +1904,7 @@ export interface paths {
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
                         uuid?: string;
+                        /** Format: decimal */
                         volume?: number | null;
                         password?: (string | null) | (number | null) | (Record<string, never> | null);
                         openapiVirtualSpecTest?: string | null;
@@ -2064,6 +2076,7 @@ export interface paths {
                         /** Format: bigint */
                         collarCount?: string | number | bigint | null;
                         collarCountInt?: number | null;
+                        /** Format: decimal */
                         collarCountNumeric?: number | null;
                         /** Format: date */
                         createdOn?: string;
@@ -2081,7 +2094,7 @@ export interface paths {
                         favoriteJsons?: Record<string, never>[] | null;
                         favoriteNumerics?: number[] | null;
                         favoriteTexts?: string[] | null;
-                        favoriteTreats?: ("efishy feesh" | "snick snowcks" | null)[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks")[] | null;
                         favoriteUuids?: string[] | null;
                         jsonData?: Record<string, never> | null;
                         jsonbData?: Record<string, never> | null;
@@ -2115,6 +2128,7 @@ export interface paths {
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
                         uuid?: string;
+                        /** Format: decimal */
                         volume?: number | null;
                         password?: (string | null) | (number | null) | (Record<string, never> | null);
                         openapiVirtualSpecTest?: string | null;
@@ -2163,13 +2177,15 @@ export interface components {
         BalloonLatex: {
             /** @enum {string|null} */
             color: "blue" | "green" | "red" | null;
-            id: string;
+            /** Format: bigint */
+            id: string | number | bigint;
             latexOnlyAttr: string;
         };
         BalloonMylar: {
             /** @enum {string|null} */
             color: "blue" | "green" | "red" | null;
-            id: string;
+            /** Format: bigint */
+            id: string | number | bigint;
             mylarOnlyAttr: string;
         };
         CircularHello: {
@@ -2181,14 +2197,16 @@ export interface components {
         };
         Comment: {
             body: string | null;
-            id: string;
+            /** Format: bigint */
+            id: string | number | bigint;
         };
         CommentTestingBasicSerializerRef: {
             howyadoin: components["schemas"]["LatexSummary"];
         };
         CustomSchema: string;
         LatexSummary: {
-            id: string;
+            /** Format: bigint */
+            id: string | number | bigint;
             latexOnlySummaryAttr: string;
         };
         OpenapiValidationErrors: {
@@ -2205,19 +2223,22 @@ export interface components {
             }[];
         };
         Pet: {
-            id: string;
+            /** Format: bigint */
+            id: string | number | bigint;
             name: string | null;
         };
         Post: {
             body: string | null;
             comments: components["schemas"]["Comment"][];
             explicitlyOmittedFromParamSafeColumns: string | null;
-            id: string;
+            /** Format: bigint */
+            id: string | number | bigint;
         };
         PostWithComments: {
             body: string | null;
             comments: components["schemas"]["Comment"][];
-            id: string;
+            /** Format: bigint */
+            id: string | number | bigint;
         };
         User: {
             email: string;

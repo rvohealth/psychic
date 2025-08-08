@@ -422,7 +422,7 @@ describe('OpenapiAppRenderer', () => {
               type: 'object',
               required: ['body', 'comments', 'id'],
               properties: {
-                id: { type: 'string' },
+                id: { type: 'string', format: 'bigint' },
                 body: { type: ['string', 'null'] },
                 comments: {
                   type: 'array',
@@ -439,7 +439,7 @@ describe('OpenapiAppRenderer', () => {
               type: 'object',
               required: ['body', 'id'],
               properties: {
-                id: { type: 'string' },
+                id: { type: 'string', format: 'bigint' },
                 body: { type: ['string', 'null'] },
               },
             },
@@ -465,11 +465,12 @@ describe('OpenapiAppRenderer', () => {
             BalloonLatex: {
               properties: {
                 color: {
-                  enum: ['blue', 'green', 'red'],
+                  enum: ['blue', 'green', 'red', null],
                   type: ['string', 'null'],
                 },
                 id: {
                   type: 'string',
+                  format: 'bigint',
                 },
                 latexOnlyAttr: {
                   type: 'string',

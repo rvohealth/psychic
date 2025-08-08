@@ -16,6 +16,37 @@ describe('DreamSerializer attributes', () => {
 
   it('can render virtual Dream attributes', () => {
     const MySerializer = (data: User) =>
+      // TODO: remove any cast when attribute stops requiring an openapi attribute for virtual columns
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      DreamSerializer(User, data).attribute('openapiVirtualSpecTest' as any)
+
+    const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+    expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+      openapiVirtualSpecTest: {
+        type: ['string', 'null'],
+      },
+    })
+  })
+
+  it('can provide a description for a virtual Dream attribute', () => {
+    const MySerializer = (data: User) =>
+      // TODO: remove any cast when attribute stops requiring an openapi attribute for virtual columns
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      DreamSerializer(User, data).attribute('openapiVirtualSpecTest' as any, {
+        openapi: { description: 'Hello world' },
+      })
+
+    const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+    expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+      openapiVirtualSpecTest: {
+        type: ['string', 'null'],
+        description: 'Hello world',
+      },
+    })
+  })
+
+  it('can override virtual Dream attributes', () => {
+    const MySerializer = (data: User) =>
       DreamSerializer(User, data).attribute('openapiVirtualSpecTest', { openapi: 'decimal' })
 
     const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
@@ -188,10 +219,10 @@ describe('DreamSerializer attributes', () => {
         requiredFavoriteNumerics: { type: 'array', items: { type: 'number', format: 'decimal' } },
         favoriteBooleans: { type: ['array', 'null'], items: { type: 'boolean' } },
         requiredFavoriteBooleans: { type: 'array', items: { type: 'boolean' } },
-        favoriteBigint: { type: ['string', 'null'] },
-        requiredFavoriteBigint: { type: 'string' },
-        favoriteBigints: { type: ['array', 'null'], items: { type: 'string' } },
-        requiredFavoriteBigints: { type: 'array', items: { type: 'string' } },
+        favoriteBigint: { type: ['string', 'null'], format: 'bigint' },
+        requiredFavoriteBigint: { type: 'string', format: 'bigint' },
+        favoriteBigints: { type: ['array', 'null'], items: { type: 'string', format: 'bigint' } },
+        requiredFavoriteBigints: { type: 'array', items: { type: 'string', format: 'bigint' } },
         favoriteIntegers: { type: ['array', 'null'], items: { type: 'integer' } },
         requiredFavoriteIntegers: { type: 'array', items: { type: 'integer' } },
         // end: favorite records
@@ -205,15 +236,15 @@ describe('DreamSerializer attributes', () => {
         uuid: { type: 'string' },
         optionalUuid: { type: ['string', 'null'] },
 
-        species: { type: ['string', 'null'], enum: SpeciesTypesEnumValues },
+        species: { type: ['string', 'null'], enum: [...SpeciesTypesEnumValues, null] },
         favoriteTreats: {
           type: ['array', 'null'],
           items: { type: 'string', enum: PetTreatsEnumValues },
         },
-        collarCount: { type: ['string', 'null'] },
+        collarCount: { type: ['string', 'null'], format: 'bigint' },
         collarCountInt: { type: ['integer', 'null'] },
         collarCountNumeric: { type: ['number', 'null'], format: 'decimal' },
-        requiredCollarCount: { type: 'string' },
+        requiredCollarCount: { type: 'string', format: 'bigint' },
         requiredCollarCountInt: { type: 'integer' },
         likesWalks: { type: ['boolean', 'null'] },
         likesTreats: { type: 'boolean' },

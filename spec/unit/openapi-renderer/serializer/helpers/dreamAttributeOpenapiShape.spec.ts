@@ -425,6 +425,7 @@ describe('dreamAttributeOpenapiShape', () => {
       const openApiShape = dreamColumnOpenapiShape(User, 'favoriteBigint')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['string', 'null'],
+        format: 'bigint',
       }
 
       expect(openApiShape).toEqual(expectedOpenapiShape)
@@ -435,6 +436,7 @@ describe('dreamAttributeOpenapiShape', () => {
         const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteBigint')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: 'string',
+          format: 'bigint',
         }
 
         expect(openApiShape).toEqual(expectedOpenapiShape)
@@ -448,6 +450,7 @@ describe('dreamAttributeOpenapiShape', () => {
           type: ['array', 'null'],
           items: {
             type: 'string',
+            format: 'bigint',
           },
         }
 
@@ -461,6 +464,7 @@ describe('dreamAttributeOpenapiShape', () => {
             type: 'array',
             items: {
               type: 'string',
+              format: 'bigint',
             },
           }
 
@@ -525,7 +529,7 @@ describe('dreamAttributeOpenapiShape', () => {
       const openApiShape = dreamColumnOpenapiShape(User, 'species')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['string', 'null'],
-        enum: [...SpeciesTypesEnumValues],
+        enum: [...SpeciesTypesEnumValues, null],
       }
 
       expect(openApiShape).toEqual(expectedOpenapiShape)

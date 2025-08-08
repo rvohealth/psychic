@@ -80,7 +80,7 @@ function simpleOpenapiShorthandToOpenapi(
     case 'integer[]':
       return { type: 'array', items: { type: 'integer' } }
     case 'json':
-      return { type: 'json' }
+      return { type: 'object' }
 
     default: {
       // protection so that if a new OpenapiShorthandPrimitiveBaseTypes is ever added, this will throw a type error at build time

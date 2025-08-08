@@ -34,8 +34,11 @@ import NonSerializerDerivedInOpenapiEndpointRenderer from '../error/openapi/NonS
 import NonSerializerDerivedInToSchemaObjects from '../error/openapi/NonSerializerDerivedInToSchemaObjects.js'
 import OpenApiSerializerForEndpointNotAFunction from '../error/openapi/SerializerForEndpointNotAFunction.js'
 import { DreamOrViewModelClassSerializerArrayKeys } from '../helpers/typeHelpers.js'
+import { ValidateOpenapiSchemaOptions } from '../helpers/validateOpenApiSchema.js'
+import PsychicApp from '../psychic-app/index.js'
 import { ControllerActionRouteConfig, RouteConfig } from '../router/route-manager.js'
 import { HttpMethod } from '../router/types.js'
+import paramNamesForDreamClass from '../server/helpers/paramNamesForDreamClass.js'
 import OpenapiSegmentExpander, {
   OpenapiBodySegment,
   OpenapiBodySegmentRendererOpts,
@@ -44,15 +47,12 @@ import OpenapiSegmentExpander, {
   SerializerArray,
 } from './body-segment.js'
 import { DEFAULT_OPENAPI_RESPONSES } from './defaults.js'
-import dreamColumnToOpenapiType from './helpers/dreamColumnToOpenapiType.js'
+import { dreamColumnOpenapiShape } from './helpers/dreamAttributeOpenapiShape.js'
 import openapiOpts from './helpers/openapiOpts.js'
 import openapiRoute from './helpers/openapiRoute.js'
 import openapiPageParamProperty from './helpers/pageParamOpenapiProperty.js'
 import safelyAttachPaginationParamToRequestBodySegment from './helpers/safelyAttachPaginationParamsToBodySegment.js'
 import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
-import paramNamesForDreamClass from '../server/helpers/paramNamesForDreamClass.js'
-import PsychicApp from '../psychic-app/index.js'
-import { ValidateOpenapiSchemaOptions } from '../helpers/validateOpenApiSchema.js'
 
 export interface OpenapiRenderOpts {
   casing: SerializerCasing
@@ -670,12 +670,15 @@ export default class OpenapiEndpointRenderer<
       paramsShape.required = required as string[]
     }
 
-    for (const columnName of paramSafeColumns) {
-      paramsShape.properties = {
-        ...paramsShape.properties,
-        ...dreamColumnToOpenapiType(dreamClass, columnName),
-      }
-    }
+    paramsShape.properties = paramSafeColumns.reduce(
+      (acc, columnName) => {
+        acc[columnName] = dreamColumnOpenapiShape(dreamClass, columnName, undefined, {
+          allowGenericJson: true,
+        })
+        return acc
+      },
+      paramsShape.properties as Record<string, OpenapiSchemaBody>,
+    )
 
     let processedSchema = new OpenapiSegmentExpander(paramsShape, {
       renderOpts,

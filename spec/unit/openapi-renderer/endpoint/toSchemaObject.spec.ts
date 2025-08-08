@@ -128,11 +128,12 @@ describe('OpenapiEndpointRenderer', () => {
         BalloonLatex: {
           properties: {
             color: {
-              enum: ['blue', 'green', 'red'],
+              enum: ['blue', 'green', 'red', null],
               type: ['string', 'null'],
             },
             id: {
               type: 'string',
+              format: 'bigint',
             },
             latexOnlyAttr: {
               type: 'string',
@@ -145,11 +146,12 @@ describe('OpenapiEndpointRenderer', () => {
         BalloonMylar: {
           properties: {
             color: {
-              enum: ['blue', 'green', 'red'],
+              enum: ['blue', 'green', 'red', null],
               type: ['string', 'null'],
             },
             id: {
               type: 'string',
+              format: 'bigint',
             },
             mylarOnlyAttr: {
               type: 'string',
@@ -178,11 +180,12 @@ describe('OpenapiEndpointRenderer', () => {
         BalloonLatex: {
           properties: {
             color: {
-              enum: ['blue', 'green', 'red'],
+              enum: ['blue', 'green', 'red', null],
               type: ['string', 'null'],
             },
             id: {
               type: 'string',
+              format: 'bigint',
             },
             latexOnlyAttr: {
               type: 'string',
@@ -206,11 +209,12 @@ describe('OpenapiEndpointRenderer', () => {
         BalloonMylar: {
           properties: {
             color: {
-              enum: ['blue', 'green', 'red'],
+              enum: ['blue', 'green', 'red', null],
               type: ['string', 'null'],
             },
             id: {
               type: 'string',
+              format: 'bigint',
             },
             mylarOnlyAttr: {
               type: 'string',
@@ -224,6 +228,7 @@ describe('OpenapiEndpointRenderer', () => {
           properties: {
             id: {
               type: 'string',
+              format: 'bigint',
             },
             name: {
               type: ['string', 'null'],
@@ -247,8 +252,8 @@ describe('OpenapiEndpointRenderer', () => {
           type: 'object',
           required: ['color', 'id', 'latexOnlyAttr'],
           properties: {
-            color: { type: ['string', 'null'], enum: ['blue', 'green', 'red'] },
-            id: { type: 'string' },
+            color: { type: ['string', 'null'], enum: ['blue', 'green', 'red', null] },
+            id: { type: 'string', format: 'bigint' },
             latexOnlyAttr: { type: 'string' },
           },
         },
@@ -925,7 +930,7 @@ The following values will be allowed:
               type: 'object',
               required: ['id', 'name'],
               properties: {
-                id: { type: 'string' },
+                id: { type: 'string', format: 'bigint' },
                 name: { type: ['string', 'null'] },
               },
             },
@@ -1019,7 +1024,7 @@ The following values will be allowed:
                     type: 'array',
                     items: { $ref: '#/components/schemas/Comment' },
                   },
-                  id: { type: 'string' },
+                  id: { type: 'string', format: 'bigint' },
                 },
               },
               Comment: {
@@ -1027,7 +1032,7 @@ The following values will be allowed:
                 required: ['body', 'id'],
                 properties: {
                   body: { type: ['string', 'null'] },
-                  id: { type: 'string' },
+                  id: { type: 'string', format: 'bigint' },
                 },
               },
             })
@@ -1076,7 +1081,7 @@ The following values will be allowed:
                   required: ['body', 'id'],
                   properties: {
                     body: { type: ['string', 'null'] },
-                    id: { type: 'string' },
+                    id: { type: 'string', format: 'bigint' },
                   },
                 },
               }),
@@ -1102,7 +1107,7 @@ The following values will be allowed:
                 properties: {
                   body: { type: ['string', 'null'] },
                   comments: { type: 'array', items: { $ref: '#/components/schemas/Comment' } },
-                  id: { type: 'string' },
+                  id: { type: 'string', format: 'bigint' },
                 },
               },
               Comment: {
@@ -1110,7 +1115,7 @@ The following values will be allowed:
                 required: ['body', 'id'],
                 properties: {
                   body: { type: ['string', 'null'] },
-                  id: { type: 'string' },
+                  id: { type: 'string', format: 'bigint' },
                 },
               },
             }),
@@ -1133,7 +1138,7 @@ The following values will be allowed:
                   required: ['body', 'id'],
                   properties: {
                     body: { type: ['string', 'null'] },
-                    id: { type: 'string' },
+                    id: { type: 'string', format: 'bigint' },
                   },
                 },
               }),
@@ -1181,7 +1186,7 @@ The following values will be allowed:
               type: 'object',
               required: ['id', 'latexOnlySummaryAttr'],
               properties: {
-                id: { type: 'string' },
+                id: { type: 'string', format: 'bigint' },
                 latexOnlySummaryAttr: {
                   type: 'string',
                 },

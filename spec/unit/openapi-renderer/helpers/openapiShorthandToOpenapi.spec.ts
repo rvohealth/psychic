@@ -117,7 +117,7 @@ describe('openapiShorthandToOpenapi', () => {
 
   context('json', () => {
     it('becomes OpenAPI', () => {
-      expect(openapiShorthandToOpenapi('json')).toEqual({ type: 'json' })
+      expect(openapiShorthandToOpenapi('json')).toEqual({ type: 'object' })
     })
   })
 })

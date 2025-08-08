@@ -172,7 +172,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "createdOn": {
                     "type": "string",
@@ -275,7 +276,8 @@
                       "null"
                     ],
                     "items": {
-                      "type": "number"
+                      "type": "number",
+                      "format": "decimal"
                     }
                   },
                   "favoriteTexts": {
@@ -296,8 +298,7 @@
                       "type": "string",
                       "enum": [
                         "efishy feesh",
-                        "snick snowcks",
-                        null
+                        "snick snowcks"
                       ]
                     }
                   },
@@ -429,7 +430,8 @@
                   "requiredFavoriteNumerics": {
                     "type": "array",
                     "items": {
-                      "type": "number"
+                      "type": "number",
+                      "format": "decimal"
                     }
                   },
                   "requiredFavoriteTexts": {
@@ -474,7 +476,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "password": {
                     "anyOf": [
@@ -612,7 +615,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "createdOn": {
                     "type": "string",
@@ -715,7 +719,8 @@
                       "null"
                     ],
                     "items": {
-                      "type": "number"
+                      "type": "number",
+                      "format": "decimal"
                     }
                   },
                   "favoriteTexts": {
@@ -736,8 +741,7 @@
                       "type": "string",
                       "enum": [
                         "efishy feesh",
-                        "snick snowcks",
-                        null
+                        "snick snowcks"
                       ]
                     }
                   },
@@ -869,7 +873,8 @@
                   "requiredFavoriteNumerics": {
                     "type": "array",
                     "items": {
-                      "type": "number"
+                      "type": "number",
+                      "format": "decimal"
                     }
                   },
                   "requiredFavoriteTexts": {
@@ -914,7 +919,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "password": {
                     "anyOf": [
@@ -1754,7 +1760,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "favoriteTreats": {
                     "type": [
@@ -1765,8 +1772,7 @@
                       "type": "string",
                       "enum": [
                         "efishy feesh",
-                        "snick snowcks",
-                        null
+                        "snick snowcks"
                       ]
                     }
                   },
@@ -1821,7 +1827,8 @@
                     "type": "integer"
                   },
                   "requiredCollarCountNumeric": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "decimal"
                   },
                   "species": {
                     "type": [
@@ -1925,7 +1932,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "favoriteTreats": {
                     "type": [
@@ -1936,8 +1944,7 @@
                       "type": "string",
                       "enum": [
                         "efishy feesh",
-                        "snick snowcks",
-                        null
+                        "snick snowcks"
                       ]
                     }
                   },
@@ -1992,7 +1999,8 @@
                     "type": "integer"
                   },
                   "requiredCollarCountNumeric": {
-                    "type": "number"
+                    "type": "number",
+                    "format": "decimal"
                   },
                   "species": {
                     "type": [
@@ -2740,7 +2748,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "createdOn": {
                     "type": "string",
@@ -2843,7 +2852,8 @@
                       "null"
                     ],
                     "items": {
-                      "type": "number"
+                      "type": "number",
+                      "format": "decimal"
                     }
                   },
                   "favoriteTexts": {
@@ -2864,8 +2874,7 @@
                       "type": "string",
                       "enum": [
                         "efishy feesh",
-                        "snick snowcks",
-                        null
+                        "snick snowcks"
                       ]
                     }
                   },
@@ -2997,7 +3006,8 @@
                   "requiredFavoriteNumerics": {
                     "type": "array",
                     "items": {
-                      "type": "number"
+                      "type": "number",
+                      "format": "decimal"
                     }
                   },
                   "requiredFavoriteTexts": {
@@ -3042,7 +3052,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "password": {
                     "anyOf": [
@@ -3274,7 +3285,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "createdOn": {
                     "type": "string",
@@ -3377,7 +3389,8 @@
                       "null"
                     ],
                     "items": {
-                      "type": "number"
+                      "type": "number",
+                      "format": "decimal"
                     }
                   },
                   "favoriteTexts": {
@@ -3398,8 +3411,7 @@
                       "type": "string",
                       "enum": [
                         "efishy feesh",
-                        "snick snowcks",
-                        null
+                        "snick snowcks"
                       ]
                     }
                   },
@@ -3531,7 +3543,8 @@
                   "requiredFavoriteNumerics": {
                     "type": "array",
                     "items": {
-                      "type": "number"
+                      "type": "number",
+                      "format": "decimal"
                     }
                   },
                   "requiredFavoriteTexts": {
@@ -3576,7 +3589,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "password": {
                     "anyOf": [
@@ -3892,7 +3906,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "createdOn": {
                     "type": "string",
@@ -3995,7 +4010,8 @@
                       "null"
                     ],
                     "items": {
-                      "type": "number"
+                      "type": "number",
+                      "format": "decimal"
                     }
                   },
                   "favoriteTexts": {
@@ -4016,8 +4032,7 @@
                       "type": "string",
                       "enum": [
                         "efishy feesh",
-                        "snick snowcks",
-                        null
+                        "snick snowcks"
                       ]
                     }
                   },
@@ -4149,7 +4164,8 @@
                   "requiredFavoriteNumerics": {
                     "type": "array",
                     "items": {
-                      "type": "number"
+                      "type": "number",
+                      "format": "decimal"
                     }
                   },
                   "requiredFavoriteTexts": {
@@ -4194,7 +4210,8 @@
                     "type": [
                       "number",
                       "null"
-                    ]
+                    ],
+                    "format": "decimal"
                   },
                   "password": {
                     "anyOf": [
@@ -4386,11 +4403,13 @@
             "enum": [
               "blue",
               "green",
-              "red"
+              "red",
+              null
             ]
           },
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "latexOnlyAttr": {
             "type": "string"
@@ -4413,11 +4432,13 @@
             "enum": [
               "blue",
               "green",
-              "red"
+              "red",
+              null
             ]
           },
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "mylarOnlyAttr": {
             "type": "string"
@@ -4464,7 +4485,8 @@
             ]
           },
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           }
         }
       },
@@ -4490,7 +4512,8 @@
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "latexOnlySummaryAttr": {
             "type": "string"
@@ -4560,7 +4583,8 @@
         ],
         "properties": {
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           },
           "name": {
             "type": [
@@ -4598,7 +4622,8 @@
             ]
           },
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           }
         }
       },
@@ -4623,7 +4648,8 @@
             }
           },
           "id": {
-            "type": "string"
+            "type": "string",
+            "format": "bigint"
           }
         }
       },
