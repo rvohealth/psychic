@@ -8,6 +8,7 @@ import {
   inferSerializerFromDreamOrViewModel,
   isDreamSerializer,
   ObjectSerializerBuilder,
+  OpenapiSchemaBody,
   SerializerRendererOpts,
   SimpleObjectSerializerType,
   UpdateableProperties,
@@ -354,7 +355,7 @@ export default class PsychicController {
   public castParam<
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
-    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
+    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp | OpenapiSchemaBody,
   >(key: string, expectedType: ExpectedType, opts?: OptsType) {
     try {
       return this._castParam(key.split('.'), this.params, expectedType, opts)
@@ -368,7 +369,7 @@ export default class PsychicController {
   private _castParam<
     const EnumType extends readonly string[],
     OptsType extends ParamsCastOptions<EnumType>,
-    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp,
+    ExpectedType extends (typeof PsychicParamsPrimitiveLiterals)[number] | RegExp | OpenapiSchemaBody,
     ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
     FinalReturnType extends AllowNullOrUndefined extends true
