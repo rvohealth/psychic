@@ -611,13 +611,13 @@ type OpenapiShapeToInterface<T, Depth extends number> = Depth extends 30
       ? OpenapiShapeToInterface<T['items'], Inc<Depth>>[]
       : T extends { anyOf: infer R extends unknown[] }
         ? OpenapiShapeToInterface<R[number], Inc<Depth>>
-        : T extends { oneOf: infer R extends [...unknown[]] }
+        : T extends { oneOf: infer R extends [unknown, ...unknown[]] }
           ? TransformTuple<R>
           : T extends { allOf: infer R extends unknown[] }
             ? {
                 [K in keyof OpenapiShapeToInterface<R[number], Inc<Depth>>]: OpenapiShapeToInterface<
                   R[number],
-                  Inc<Depth> & number
+                  Inc<Depth>
                 >[K]
               }
             : T extends OpenapiSchemaString
@@ -636,7 +636,7 @@ type TransformTuple<Tuple, Results = []> = (Tuple & unknown[])['length'] extends
     ? TransformTuple<R, [...(Results & unknown[]), I]>
     : Tuple extends [infer I]
       ? [...(Results & unknown[]), I]
-      : never
+      : Tuple
 
 type OpenapiGenericToType<T> = T extends 'string'
   ? string
