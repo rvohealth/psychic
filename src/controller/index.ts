@@ -351,6 +351,17 @@ export default class PsychicController {
    *   }
    * }
    * ```
+   *
+   * You can provide hard-coded openapi shapes as well:
+   *
+   * @example
+   * ```ts
+   * class MyController extends ApplicationController {
+   *   public index() {
+   *     const type = this.castParam('type', { type: ['string', 'null'], enum: ['Type1', 'Type2', null] })
+   *   }
+   * }
+   * ```
    */
   public castParam<
     const EnumType extends readonly string[],

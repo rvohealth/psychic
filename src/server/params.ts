@@ -11,10 +11,7 @@ import {
   OpenapiSchemaBody,
   OpenapiSchemaInteger,
   OpenapiSchemaNumber,
-  OpenapiSchemaObjectAllOf,
-  OpenapiSchemaObjectAnyOf,
   OpenapiSchemaObjectBase,
-  OpenapiSchemaObjectOneOf,
   OpenapiSchemaPrimitiveGeneric,
   OpenapiSchemaString,
   snakeify,
@@ -492,9 +489,11 @@ export default class Params {
           const res = validateObject(paramValue, expectedType)
           if (res.isValid) {
             return res.data as ReturnType
+          } else {
+            throw new ParamValidationError(paramName, ['failed openapi validation'])
           }
-          // console.dir({ res }, { depth: null })
         }
+
         // TODO: serialize/sanitize before printing, handle array types
         throw new Error(
           `Unexpected point reached in code. need to handle type for ${expectedType as unknown as string}`,
@@ -608,18 +607,15 @@ type OpenapiShapeToInterface<T, Depth extends number> = Depth extends 30
         [K in keyof T['properties']]: OpenapiShapeToInterface<T['properties'][K], Inc<Depth>>
       }
     : T extends OpenapiSchemaArray
-      ? OpenapiShapeToInterface<T['items'], Inc<Depth>>[]
+      ? T['items'] extends { oneOf: infer R extends readonly [unknown, ...unknown[]] }
+        ? TransformOneOfToArrayUnion<R, Inc<Depth>>
+        : OpenapiShapeToInterface<T['items'], Inc<Depth>>[]
       : T extends { anyOf: infer R extends unknown[] }
         ? OpenapiShapeToInterface<R[number], Inc<Depth>>
         : T extends { oneOf: infer R extends [unknown, ...unknown[]] }
-          ? TransformTuple<R>
-          : T extends { allOf: infer R extends unknown[] }
-            ? {
-                [K in keyof OpenapiShapeToInterface<R[number], Inc<Depth>>]: OpenapiShapeToInterface<
-                  R[number],
-                  Inc<Depth>
-                >[K]
-              }
+          ? OpenapiShapeToInterface<R[number], Inc<Depth>>
+          : T extends { allOf: infer R extends readonly unknown[] }
+            ? MergeAllOfSchemas<R, Inc<Depth>>
             : T extends OpenapiSchemaString
               ? string
               : T extends OpenapiSchemaNumber
@@ -630,13 +626,23 @@ type OpenapiShapeToInterface<T, Depth extends number> = Depth extends 30
                     ? OpenapiGenericToType<T['type']>
                     : never
 
-type TransformTuple<Tuple, Results = []> = (Tuple & unknown[])['length'] extends 0
-  ? Results
-  : Tuple extends [infer I, ...infer R extends unknown[]]
-    ? TransformTuple<R, [...(Results & unknown[]), I]>
-    : Tuple extends [infer I]
-      ? [...(Results & unknown[]), I]
-      : Tuple
+type TransformOneOfToArrayUnion<T extends readonly unknown[], Depth extends number> = T extends readonly [
+  infer First,
+  ...infer Rest,
+]
+  ? OpenapiShapeToInterface<First, Depth>[] | TransformOneOfToArrayUnion<Rest, Depth>
+  : never
+
+type MergeAllOfSchemas<T extends readonly unknown[], Depth extends number> = T extends readonly [
+  infer First,
+  ...infer Rest,
+]
+  ? Rest extends readonly unknown[]
+    ? Rest['length'] extends 0
+      ? OpenapiShapeToInterface<First, Depth>
+      : OpenapiShapeToInterface<First, Depth> & MergeAllOfSchemas<Rest, Depth>
+    : OpenapiShapeToInterface<First, Depth>
+  : never
 
 type OpenapiGenericToType<T> = T extends 'string'
   ? string

@@ -145,31 +145,6 @@ describe('PsychicController#castParam', () => {
   context('with openapi shape provided', () => {
     context('openapi shape is valid', () => {
       it('casts the param to the shape, coercing types where pertinent', () => {
-        const p = controller.castParam('openapiTest', {
-          type: 'object',
-          properties: {
-            nested: {
-              type: 'object',
-              properties: {
-                ham: {
-                  type: 'array',
-                  items: {
-                    oneOf: [{ type: 'string' }, { type: 'number' }],
-                  },
-                },
-                intTest: { type: 'integer' },
-                stringTest: { type: 'string' },
-                allOfTest: {
-                  allOf: [
-                    { type: 'object', properties: { a: { type: 'string' } } },
-                    { type: 'object', properties: { b: { type: 'string' } } },
-                    { type: 'object', properties: { c: { type: 'string' } } },
-                  ],
-                },
-              },
-            },
-          },
-        })
         expect(
           controller.castParam('openapiTest', {
             type: 'object',
@@ -189,6 +164,85 @@ describe('PsychicController#castParam', () => {
             dateTest: '2025-01-01',
           },
         })
+      })
+
+      it('type test - ensure that types are correctly delivered for complex openapi shapes', () => {
+        const res = controller.castParam('openapiTest', {
+          type: 'object',
+          properties: {
+            nested: {
+              type: 'object',
+              properties: {
+                intTest: { type: 'integer' },
+                stringTest: { type: 'string' },
+                oneOfTest: { oneOf: [{ type: 'string' }, { type: 'number' }] },
+                oneOfArrayTest: {
+                  type: 'array',
+                  items: {
+                    oneOf: [{ type: 'string' }, { type: 'number' }],
+                  },
+                },
+                anyOfTest: { anyOf: [{ type: 'string' }, { type: 'number' }] },
+                anyOfArrayTest: {
+                  type: 'array',
+                  items: {
+                    anyOf: [{ type: 'string' }, { type: 'number' }],
+                  },
+                },
+                allOfTest: {
+                  allOf: [
+                    { type: 'object', properties: { a: { type: 'string' } } },
+                    { type: 'object', properties: { b: { type: 'string' } } },
+                    { type: 'object', properties: { c: { type: 'string' } } },
+                  ],
+                },
+                allOfArrayTest: {
+                  type: 'array',
+                  items: {
+                    allOf: [
+                      { type: 'object', properties: { a: { type: 'string' } } },
+                      { type: 'object', properties: { b: { type: 'boolean' } } },
+                      { type: 'object', properties: { c: { type: 'integer' } } },
+                    ],
+                  },
+                },
+              },
+            },
+          },
+        })
+
+        // manually check each of these types to ensure
+        // they are the expected types
+        res?.nested?.intTest // number
+        res?.nested?.stringTest // string
+        res?.nested?.oneOfTest // string | number
+        res?.nested?.oneOfArrayTest // string[] | number[]
+        res?.nested?.anyOfArrayTest // (string | number)[]
+        res?.nested?.allOfTest?.a // string
+        res?.nested?.allOfTest?.b // boolean
+        res?.nested?.allOfTest?.c // number
+        res?.nested?.allOfArrayTest?.[0]?.a // string | undefined
+        res?.nested?.allOfArrayTest?.[0]?.b // boolean | undefined
+        res?.nested?.allOfArrayTest?.[0]?.c // number | undefined
+      })
+    })
+
+    context('openapi shape is invalid', () => {
+      it('raises an exception', () => {
+        expect(() =>
+          controller.castParam('openapiTest', {
+            type: 'object',
+            properties: {
+              nested: {
+                type: 'object',
+                properties: {
+                  intTest: { type: 'boolean' },
+                  stringTest: { type: 'string' },
+                },
+              },
+            },
+          }),
+        ).toThrow(ParamValidationError)
       })
     })
   })

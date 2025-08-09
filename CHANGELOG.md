@@ -1,3 +1,21 @@
+## 1.6.3
+
+castParam accepts raw openapi shapes as type arguments, correctly casting the result to an interface representing the provided openapi shape.
+
+```ts
+class MyController extends ApplicationController {
+  public index() {
+    const myParam = this.castParam('myParam', {
+      type: 'array',
+      items: {
+        anyOf: [{ type: 'string' }, { type: 'number' }],
+      },
+    })
+    myParam[0] // string | number
+  }
+}
+```
+
 ## 1.6.2
 
 fix OpenAPI spec generation by DRYing up generation of request and response body
