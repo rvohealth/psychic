@@ -10,7 +10,7 @@ describe('PsychicRouter', () => {
 
     beforeEach(() => {
       server = new PsychicServer()
-      router = new PsychicRouter(server.expressApp, server.config)
+      router = new PsychicRouter(server.expressApp)
     })
 
     describe('end-to-end specs', () => {

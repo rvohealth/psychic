@@ -1,3 +1,7 @@
+## 1.7.0
+
+`sanitizeResponseJson` config to automatically escape `<`, `>`, `&`, `/`, `\`, `'`, and `"` unicode representations when rendering json to satisfy security reviews (e.g., a pentest report recently called this out on one of our applications). For all practical purposes, this doesn't protect against anything (now that we have the `nosniff` header) since `JSON.parse` on the other end restores the original, dangerous string. Modern front end web frameworks already handle safely displaying arbitrary content, so further sanitization generally isn't needed. This version does provide the `sanitizeString` function that could be used to sanitize individual strings, replacing the above characters with string representations of the unicode characters that will survive Psychic converting to json and then parsing that json (i.e.: `<` will end up as the string "\u003c")
+
 ## 1.6.4
 
 Raise an exception if attempting to import an openapi file during PsychicApp.init when in production. We will still swallow the exception in non-prod environments so that one can create a new openapi configuration and run sync without getting an error.

@@ -1,7 +1,6 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller/index.js'
-import PsychicApp from '../../../src/psychic-app/index.js'
 
 describe('PsychicController', () => {
   describe('get #params', () => {
@@ -11,10 +10,7 @@ describe('PsychicController', () => {
         query: { cool: 'boyjohnson' },
       }) as unknown as Request
       const res = getMockRes().res as unknown as Response
-      const controller = new PsychicController(req, res, {
-        config: new PsychicApp(),
-        action: 'hello',
-      })
+      const controller = new PsychicController(req, res, { action: 'hello' })
 
       expect(controller.params.search).toEqual('abc')
       expect(controller.params.cool).toEqual('boyjohnson')

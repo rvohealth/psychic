@@ -37,12 +37,10 @@ import {
 
 export default class PsychicRouter {
   public app: Application | null
-  public config: PsychicApp
   public currentNamespaces: NamespaceConfig[] = []
   public routeManager: RouteManager = new RouteManager()
-  constructor(app: Application | null, config: PsychicApp) {
+  constructor(app: Application | null) {
     this.app = app
-    this.config = config
   }
 
   public get routingMechanism(): Application | Router | null {
@@ -221,7 +219,7 @@ suggested fix:  "${convertRouteParams(path)}"
   }
 
   public namespace(namespace: string, cb: (router: PsychicNestedRouter) => void) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
+    const nestedRouter = new PsychicNestedRouter(this.app, this.routeManager, {
       namespaces: this.currentNamespaces,
     })
 
@@ -229,7 +227,7 @@ suggested fix:  "${convertRouteParams(path)}"
   }
 
   public scope(scope: string, cb: (router: PsychicNestedRouter) => void) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
+    const nestedRouter = new PsychicNestedRouter(this.app, this.routeManager, {
       namespaces: this.currentNamespaces,
     })
 
@@ -254,7 +252,7 @@ suggested fix:  "${convertRouteParams(path)}"
 
   public collection(cb: (router: PsychicNestedRouter) => void) {
     const replacedNamespaces = this.currentNamespaces.slice(0, this.currentNamespaces.length - 1)
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
+    const nestedRouter = new PsychicNestedRouter(this.app, this.routeManager, {
       namespaces: replacedNamespaces,
     })
     const currentNamespace = replacedNamespaces[replacedNamespaces.length - 1]
@@ -286,7 +284,7 @@ suggested fix:  "${convertRouteParams(path)}"
     cb: ((router: PsychicNestedRouter) => void) | undefined,
     plural: boolean,
   ) {
-    const nestedRouter = new PsychicNestedRouter(this.app, this.config, this.routeManager, {
+    const nestedRouter = new PsychicNestedRouter(this.app, this.routeManager, {
       namespaces: this.currentNamespaces,
     })
 
@@ -448,9 +446,9 @@ suggested fix:  "${convertRouteParams(path)}"
           PsychicApp.logWithLevel('error', err)
         }
 
-        if (this.config.specialHooks.serverError.length) {
+        if (PsychicApp.getOrFail().specialHooks.serverError.length) {
           try {
-            for (const hook of this.config.specialHooks.serverError) {
+            for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {
               await hook(err, req, res)
             }
           } catch (error) {
@@ -485,7 +483,6 @@ suggested fix:  "${convertRouteParams(path)}"
     action: string,
   ) {
     return new ControllerClass(req, res, {
-      config: this.config,
       action,
     })
   }
@@ -495,7 +492,6 @@ export class PsychicNestedRouter extends PsychicRouter {
   public router: Router
   constructor(
     expressApp: Application | null,
-    config: PsychicApp,
     routeManager: RouteManager,
     {
       namespaces = [],
@@ -503,7 +499,7 @@ export class PsychicNestedRouter extends PsychicRouter {
       namespaces?: NamespaceConfig[]
     } = {},
   ) {
-    super(expressApp, config)
+    super(expressApp)
     this.router = Router()
     this.currentNamespaces = namespaces
     this.routeManager = routeManager

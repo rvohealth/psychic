@@ -2,7 +2,6 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller/index.js'
 import { Params, ParamValidationError } from '../../../src/index.js'
-import PsychicApp from '../../../src/psychic-app/index.js'
 
 const TestEnumValues = ['hello', 'world'] as const
 type TestEnum = (typeof TestEnumValues)[number]
@@ -37,7 +36,7 @@ describe('PsychicController#castParam', () => {
       },
     }) as unknown as Request
     const res = getMockRes().res as unknown as Response
-    controller = new PsychicController(req, res, { config: new PsychicApp(), action: 'hello' })
+    controller = new PsychicController(req, res, { action: 'hello' })
   })
 
   it('returns the result of Params.cast', () => {

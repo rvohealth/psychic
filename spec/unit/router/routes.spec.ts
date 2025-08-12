@@ -10,7 +10,7 @@ describe('PsychicRouter', () => {
     let router: PsychicRouter
     beforeEach(() => {
       server = new PsychicServer()
-      router = new PsychicRouter(server.expressApp, server.config)
+      router = new PsychicRouter(server.expressApp)
     })
 
     it('correctly namespaces nested routes as members of the resource', () => {

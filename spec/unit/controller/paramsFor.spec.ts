@@ -1,7 +1,6 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import PsychicController from '../../../src/controller/index.js'
-import PsychicApp from '../../../src/psychic-app/index.js'
 import User from '../../../test-app/src/app/models/User.js'
 
 describe('PsychicController', () => {
@@ -11,10 +10,7 @@ describe('PsychicController', () => {
         body: { id: 1, name: 'howyadoin', createdAt: 'hello', updatedAt: 'birld', deletedAt: 'sometimeago' },
       }) as unknown as Request
       const res = getMockRes().res as unknown as Response
-      const controller = new PsychicController(req, res, {
-        config: new PsychicApp(),
-        action: 'hello',
-      })
+      const controller = new PsychicController(req, res, { action: 'hello' })
 
       expect(controller.paramsFor(User)).toEqual({ name: 'howyadoin' })
     })
@@ -27,10 +23,7 @@ describe('PsychicController', () => {
           },
         }) as unknown as Request
         const res = getMockRes().res as unknown as Response
-        const controller = new PsychicController(req, res, {
-          config: new PsychicApp(),
-          action: 'hello',
-        })
+        const controller = new PsychicController(req, res, { action: 'hello' })
 
         expect(controller.paramsFor(User, { only: ['password'] })).toEqual({ password: 'howyadoin' })
       })
@@ -48,10 +41,7 @@ describe('PsychicController', () => {
           },
         }) as unknown as Request
         const res = getMockRes().res as unknown as Response
-        const controller = new PsychicController(req, res, {
-          config: new PsychicApp(),
-          action: 'hello',
-        })
+        const controller = new PsychicController(req, res, { action: 'hello' })
 
         expect(controller.paramsFor(User)).toEqual({ name: 'howyadoin' })
       })
@@ -71,10 +61,7 @@ describe('PsychicController', () => {
           },
         }) as unknown as Request
         const res = getMockRes().res as unknown as Response
-        const controller = new PsychicController(req, res, {
-          config: new PsychicApp(),
-          action: 'hello',
-        })
+        const controller = new PsychicController(req, res, { action: 'hello' })
 
         expect(controller.paramsFor(User, { key: 'user' })).toEqual({ name: 'howyadoin' })
       })
@@ -86,10 +73,7 @@ describe('PsychicController', () => {
           }) as unknown as Request
 
           const res = getMockRes().res as unknown as Response
-          const controller = new PsychicController(req, res, {
-            config: new PsychicApp(),
-            action: 'hello',
-          })
+          const controller = new PsychicController(req, res, { action: 'hello' })
 
           expect(controller.paramsFor(User, { key: 'user' })).toEqual({})
         })
@@ -109,10 +93,7 @@ describe('PsychicController', () => {
           },
         }) as unknown as Request
         const res = getMockRes().res as unknown as Response
-        const controller = new PsychicController(req, res, {
-          config: new PsychicApp(),
-          action: 'hello',
-        })
+        const controller = new PsychicController(req, res, { action: 'hello' })
 
         expect(controller.paramsFor(User, { only: ['name'] })).toEqual({ name: 'howyadoin' })
       })

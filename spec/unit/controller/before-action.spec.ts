@@ -2,18 +2,15 @@ import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
 import { BeforeAction } from '../../../src/controller/decorators.js'
 import PsychicController from '../../../src/controller/index.js'
-import PsychicApp from '../../../src/psychic-app/index.js'
 import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers.js'
 
 describe('PsychicController BeforeAction', () => {
   let req: Request
   let res: Response
-  let config: PsychicApp
 
   beforeEach(() => {
     req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
     res = getMockRes().res as unknown as Response
-    config = new PsychicApp()
   })
 
   class MyController extends PsychicController {
@@ -38,7 +35,7 @@ describe('PsychicController BeforeAction', () => {
   processDynamicallyDefinedControllers(MyController)
 
   it('is called before the action', async () => {
-    const controller = new MyController(req, res, { config, action: 'show' })
+    const controller = new MyController(req, res, { action: 'show' })
     await controller.runAction('show')
     expect(controller.customValue).toEqual('hello')
   })
@@ -61,7 +58,7 @@ describe('PsychicController BeforeAction', () => {
     processDynamicallyDefinedControllers(MyOtherController)
 
     it('only calls a beforeAction once', async () => {
-      const controller = new MyOtherController(req, res, { config, action: 'show' })
+      const controller = new MyOtherController(req, res, { action: 'show' })
       await controller.runAction('show')
       expect(controller.counter).toEqual(1)
     })
@@ -87,13 +84,13 @@ describe('PsychicController BeforeAction', () => {
       processDynamicallyDefinedControllers(MyOtherController)
 
       it('still calls the before action in the ancestor', async () => {
-        const controller = new MyOtherController(req, res, { config, action: 'show' })
+        const controller = new MyOtherController(req, res, { action: 'show' })
         await controller.runAction('show')
         expect(controller.customValue).toEqual('hello')
       })
 
       it('is called before the action in the child', async () => {
-        const controller = new MyOtherController(req, res, { config, action: 'show' })
+        const controller = new MyOtherController(req, res, { action: 'show' })
         await controller.runAction('show')
         expect(controller.customValue2).toEqual('hello2')
       })

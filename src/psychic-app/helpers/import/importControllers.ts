@@ -46,10 +46,7 @@ export default async function importControllers(
        * at decoration time such that the class of a property being decorated is only avilable during instance instantiation. In order
        * to only apply static values once, on boot, `globallyInitializingDecorators` is set to true on Dream, and all Dream models are instantiated.
        */
-      new controllerClass({} as Request, {} as Response, {
-        action: 'a',
-        config: psychicApp,
-      })
+      new controllerClass({} as Request, {} as Response, { action: 'a' })
     }
   }
 

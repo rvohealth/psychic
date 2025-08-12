@@ -48,6 +48,10 @@ export { default as generateController } from './generate/controller.js'
 export { default as generateResource } from './generate/resource.js'
 export { default as cookieMaxAgeFromCookieOpts } from './helpers/cookieMaxAgeFromCookieOpts.js'
 export { default as pathifyNestedObject } from './helpers/pathifyNestedObject.js'
+export { default as sanitizeString } from './helpers/sanitizeString.js'
+
+export { default as ParamValidationError } from './error/controller/ParamValidationError.js'
+export { default as ParamValidationErrors } from './error/controller/ParamValidationErrors.js'
 export {
   MissingControllerActionPairingInRoutes,
   type OpenapiContent,
@@ -77,6 +81,4 @@ export { type HttpMethod } from './router/types.js'
 export { createPsychicHttpInstance as getPsychicHttpInstance } from './server/helpers/startPsychicServer.js'
 export { default as PsychicServer } from './server/index.js'
 export { default as Params } from './server/params.js'
-export { default as ParamValidationError } from './error/controller/ParamValidationError.js'
-export { default as ParamValidationErrors } from './error/controller/ParamValidationErrors.js'
 export { default as PsychicSession } from './session/index.js'

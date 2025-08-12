@@ -52,6 +52,8 @@ export const globalTypeConfig = {
       'PostSummarySerializer',
       'PostWithCommentsSerializer',
       'PostWithRecentCommentSerializer',
+      'SimpleSerializerModelSerializer',
+      'SimpleSerializerModelSummarySerializer',
       'UserExtraSerializer',
       'UserSerializer',
       'UserSummarySerializer',

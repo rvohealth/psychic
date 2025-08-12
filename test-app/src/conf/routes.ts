@@ -15,6 +15,7 @@ import PassportAuthedController from '../app/controllers/PassportAuthedControlle
 import PetsController from '../app/controllers/PetsController.js'
 import ResponseStatusesController from '../app/controllers/ResponseStatusesController.js'
 import ScopeTestController from '../app/controllers/ScopeTestController.js'
+import SerializerTestsController from '../app/controllers/SerializerTestsController.js'
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
 import User from '../app/models/User.js'
@@ -68,6 +69,9 @@ export default (r: PsychicRouter) => {
       r.get('hello', PetsController, 'hello')
     })
   })
+
+  r.get('serializer-tests/naked-dream', SerializerTestsController, 'nakedDream')
+  r.get('serializer-tests/sanitized', SerializerTestsController, 'sanitized')
 
   r.get('queryOpenapiTest', OpenapiValidationTestsController, 'queryOpenapiTest')
   r.get('queryRequiredOpenapiTest', OpenapiValidationTestsController, 'queryRequiredOpenapiTest')

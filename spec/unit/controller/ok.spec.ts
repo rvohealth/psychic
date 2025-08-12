@@ -1,16 +1,17 @@
 import { getMockReq, getMockRes } from '@jest-mock/express'
 import { Request, Response } from 'express'
+import { MockInstance } from 'vitest'
 import PsychicController from '../../../src/controller/index.js'
-import PsychicApp from '../../../src/psychic-app/index.js'
+import * as toJsonModule from '../../../src/helpers/toJson.js'
 import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
-import User from '../../../test-app/src/app/models/User.js'
 import Post from '../../../test-app/src/app/models/Post.js'
+import User from '../../../test-app/src/app/models/User.js'
 
 describe('PsychicController', () => {
   describe('#ok', () => {
     let req: Request
     let res: Response
-    let config: PsychicApp
+    let toJsonSpy: MockInstance
 
     class MyController extends PsychicController {
       public howyadoin() {
@@ -21,14 +22,13 @@ describe('PsychicController', () => {
     beforeEach(() => {
       req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
       res = getMockRes().res as unknown as Response
-      config = new PsychicApp()
-      vi.spyOn(res, 'json')
+      toJsonSpy = vi.spyOn(toJsonModule, 'default')
     })
 
     it('renders the data as json', () => {
-      const controller = new MyController(req, res, { config, action: 'howyadoin' })
+      const controller = new MyController(req, res, { action: 'howyadoin' })
       controller.howyadoin()
-      expect(res.json).toHaveBeenCalledWith({ chalupas: 'dujour' })
+      expect(toJsonSpy).toHaveBeenCalledWith({ chalupas: 'dujour' }, false)
     })
 
     context('when passed null', () => {
@@ -39,9 +39,9 @@ describe('PsychicController', () => {
       }
 
       it('passes "null" to json without raising exception', () => {
-        const controller = new MyController(req, res, { config, action: 'howyadoin' })
+        const controller = new MyController(req, res, { action: 'howyadoin' })
         controller.howyadoin()
-        expect(res.json).toHaveBeenCalledWith(null)
+        expect(toJsonSpy).toHaveBeenCalledWith(null, false)
       })
     })
 
@@ -52,9 +52,9 @@ describe('PsychicController', () => {
           const post = await Post.create({ user })
           req.params.id = user.id.toString()
 
-          const controller = new UsersController(req, res, { config, action: 'showWithPosts' })
+          const controller = new UsersController(req, res, { action: 'showWithPosts' })
           await controller.showWithPosts()
-          expect(res.json).toHaveBeenCalledWith(
+          expect(toJsonSpy).toHaveBeenCalledWith(
             expect.objectContaining({
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               posts: expect.arrayContaining([
@@ -63,6 +63,7 @@ describe('PsychicController', () => {
                 }),
               ]),
             }),
+            false,
           )
         })
       })

@@ -140,6 +140,13 @@ export interface HealthUsers {
   updatedAt: Timestamp;
 }
 
+export interface ModelWithoutSerializers {
+  createdAt: Timestamp;
+  id: Generated<Int8>;
+  name: string;
+  updatedAt: Timestamp;
+}
+
 export interface Pets {
   collarCount: Int8 | null;
   collarCountInt: number | null;
@@ -169,6 +176,13 @@ export interface Posts {
   id: Generated<Int8>;
   updatedAt: Timestamp;
   userId: Int8;
+}
+
+export interface SimpleSerializerModels {
+  createdAt: Timestamp;
+  id: Generated<Int8>;
+  name: string;
+  updatedAt: Timestamp;
 }
 
 export interface Users {
@@ -233,8 +247,10 @@ export interface DB {
   balloons: Balloons;
   comments: Comments;
   health_users: HealthUsers;
+  model_without_serializers: ModelWithoutSerializers;
   pets: Pets;
   posts: Posts;
+  simple_serializer_models: SimpleSerializerModels;
   users: Users;
 }
 
@@ -243,7 +259,9 @@ export class DBClass {
   balloons: Balloons
   comments: Comments
   health_users: HealthUsers
+  model_without_serializers: ModelWithoutSerializers
   pets: Pets
   posts: Posts
+  simple_serializer_models: SimpleSerializerModels
   users: Users
 }

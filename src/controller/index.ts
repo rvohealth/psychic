@@ -5,12 +5,10 @@ import {
   DreamParamSafeColumnNames,
   DreamSerializerBuilder,
   GlobalNameNotSet,
-  inferSerializerFromDreamOrViewModel,
   isDreamSerializer,
   ObjectSerializerBuilder,
   OpenapiSchemaBody,
   SerializerRendererOpts,
-  SimpleObjectSerializerType,
   UpdateableProperties,
   ViewModel,
 } from '@rvoh/dream'
@@ -48,6 +46,7 @@ import HttpStatusUnauthorized from '../error/http/Unauthorized.js'
 import HttpStatusUnavailableForLegalReasons from '../error/http/UnavailableForLegalReasons.js'
 import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent.js'
 import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType.js'
+import toJson from '../helpers/toJson.js'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
 import OpenapiPayloadValidator from '../openapi-renderer/helpers/OpenapiPayloadValidator.js'
 import PsychicApp from '../psychic-app/index.js'
@@ -59,6 +58,7 @@ import Params, {
 } from '../server/params.js'
 import Session, { CustomSessionCookieOptions } from '../session/index.js'
 import isPaginatedResult from './helpers/isPaginatedResult.js'
+import renderDreamOrVewModel from './helpers/renderDreamOrViewModel.js'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -153,27 +153,6 @@ export default class PsychicController {
   public static openapi: Record<string, OpenapiEndpointRenderer<any, any>>
 
   /**
-   * Enables you to specify specific serializers to use
-   * when encountering specific models, i.e.
-   *
-   * ```ts
-   * class MyController extends AuthedController {
-   *   static {
-   *     this.serializes(User).with(UserCustomSerializer)
-   *   }
-   * }
-   * ````
-   */
-  public static serializes(ModelClass: typeof Dream) {
-    return {
-      with: (SerializerClass: DreamModelSerializerType | SimpleObjectSerializerType) => {
-        controllerSerializerIndex.add(this, SerializerClass, ModelClass)
-        return this
-      },
-    }
-  }
-
-  /**
    * @internal
    *
    * Returns the global identifier for this particular controller.
@@ -244,7 +223,6 @@ export default class PsychicController {
   public req: Request
   public res: Response
   public session: Session
-  public config: PsychicApp
   public action: string
   public renderOpts: SerializerRendererOpts
 
@@ -252,16 +230,13 @@ export default class PsychicController {
     req: Request,
     res: Response,
     {
-      config,
       action,
     }: {
-      config: PsychicApp
       action: string
     },
   ) {
     this.req = req
     this.res = res
-    this.config = config
     this.session = new Session(req, res)
     this.action = action
 
@@ -492,7 +467,7 @@ export default class PsychicController {
 
   public startSession(user: Dream) {
     return this.setCookie(
-      this.config.sessionCookieName,
+      PsychicApp.getOrFail().sessionCookieName,
       JSON.stringify({
         id: (user.primaryKeyValue() as string).toString(),
         modelKey: (user.constructor as typeof Dream).globalName,
@@ -501,7 +476,7 @@ export default class PsychicController {
   }
 
   public endSession() {
-    return this.session.clearCookie(this.config.sessionCookieName)
+    return this.session.clearCookie(PsychicApp.getOrFail().sessionCookieName)
   }
 
   private singleObjectJson<T>(data: T, opts: RenderOptions): T | SerializerResult | null {
@@ -513,8 +488,6 @@ export default class PsychicController {
       return data.render(this.defaultSerializerPassthrough, this.renderOpts)
     }
 
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-    const lookup = controllerSerializerIndex.lookupModel(this.constructor as any, (data as any).constructor)
     const openapiDef = (this.constructor as typeof PsychicController)?.openapi?.[this.action]
 
     // passthrough data must be passed both into the serializer and render
@@ -525,41 +498,23 @@ export default class PsychicController {
     // handles passing its passthrough data into those
     const passthrough = this.defaultSerializerPassthrough
 
-    if (lookup?.length) {
-      const serializer = lookup?.[1]
-      if (isDreamSerializer(serializer)) {
-        // passthrough data going into the serializer is the argument that gets
-        // used in the custom attribute callback function
-        return serializer(data, passthrough).render(passthrough, this.renderOpts)
-      }
-    } else if (isDreamSerializer(openapiDef?.dreamsOrSerializers)) {
+    if (isDreamSerializer(openapiDef?.dreamsOrSerializers)) {
       const serializer = openapiDef!.dreamsOrSerializers as DreamModelSerializerType
       return serializer(data, passthrough).render(passthrough, this.renderOpts)
+      //
     } else if (data instanceof Dream || (data as unknown as ViewModel).serializers) {
-      const serializer = inferSerializerFromDreamOrViewModel(
+      return renderDreamOrVewModel(
         data as unknown as Dream | ViewModel,
         opts.serializerKey ||
           psychicControllerClass['controllerActionMetadata'][this.action]?.['serializerKey'] ||
           'default',
+        passthrough,
+        this.renderOpts,
       )
-
-      if (serializer && isDreamSerializer(serializer)) {
-        // passthrough data going into the serializer is the argument that gets
-        // used in the custom attribute callback function
-        return serializer(data, passthrough).render(
-          // passthrough data must be passed both into the serializer and render
-          // because, if the serializer does accept passthrough data, then passing it in is how
-          // it gets into the serializer, but if it does not accept passthrough data, and therefore
-          // does not pass it into the call to DreamSerializer/ObjectSerializer,
-          // then it would be lost to serializers rendered via rendersOne/Many, and SerializerRenderer
-          // handles passing its passthrough data into those
-          passthrough,
-          this.renderOpts,
-        )
-      }
+      //
+    } else {
+      return data
     }
-
-    return data
   }
 
   public json<T>(
@@ -567,21 +522,27 @@ export default class PsychicController {
     opts: RenderOptions = {},
   ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any {
-    if (Array.isArray(data))
-      return this.validateAndRenderJsonResponse(
-        data.map(d =>
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-return
-          this.singleObjectJson(d, opts),
-        ),
-      )
+    return this.validateAndRenderJsonResponse(this._json(data, opts))
+  }
 
-    if (isPaginatedResult(data))
-      return this.validateAndRenderJsonResponse({
+  private _json<T>(
+    data: T,
+    opts: RenderOptions = {},
+  ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  any {
+    if (Array.isArray(data)) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
+      return data.map(d => this.singleObjectJson(d, opts))
+      //
+    } else if (isPaginatedResult(data)) {
+      return {
         ...data,
         results: (data as { results: unknown[] }).results.map(result => this.singleObjectJson(result, opts)),
-      })
-
-    return this.validateAndRenderJsonResponse(this.singleObjectJson(data, opts))
+      }
+      //
+    } else {
+      return this.singleObjectJson(data, opts)
+    }
   }
 
   /**
@@ -595,7 +556,7 @@ export default class PsychicController {
     data: any,
   ) {
     this.validateOpenapiResponseBody(data)
-    this.res.json(data)
+    this.res.type('json').send(toJson(data, PsychicApp.getOrFail().sanitizeResponseJson))
   }
 
   protected defaultSerializerPassthrough: SerializerResult = {}
@@ -1024,30 +985,6 @@ export default class PsychicController {
     }
   }
 }
-
-export class ControllerSerializerIndex {
-  public associations: [
-    typeof PsychicController,
-    DreamModelSerializerType | SimpleObjectSerializerType,
-    typeof Dream,
-  ][] = []
-
-  public add(
-    ControllerClass: typeof PsychicController,
-    SerializerClass: DreamModelSerializerType | SimpleObjectSerializerType,
-    ModelClass: typeof Dream,
-  ) {
-    this.associations.push([ControllerClass, SerializerClass, ModelClass])
-  }
-
-  public lookupModel(ControllerClass: typeof PsychicController, ModelClass: typeof Dream) {
-    return this.associations.find(
-      association => association[0] === ControllerClass && association[2] === ModelClass,
-    )
-  }
-}
-
-export const controllerSerializerIndex = new ControllerSerializerIndex()
 
 // Since Dream explicitly types the return type of
 // the serializers getter as, e.g., DreamSerializers<User>,

@@ -1,4 +1,4 @@
-import { PsychicApp, PsychicController } from '../../src/index.js'
+import { PsychicController } from '../../src/index.js'
 
 export default function processDynamicallyDefinedControllers(
   ...controllerClasses: (typeof PsychicController)[]
@@ -6,7 +6,7 @@ export default function processDynamicallyDefinedControllers(
   PsychicController['globallyInitializingDecorators'] = true
   controllerClasses.forEach(controllerClass => {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-    new controllerClass({} as any, {} as any, { config: new PsychicApp(), action: 'a' })
+    new controllerClass({} as any, {} as any, { action: 'a' })
   })
   PsychicController['globallyInitializingDecorators'] = false
 }

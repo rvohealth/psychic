@@ -1,9 +1,9 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import PsychicRouter from '../../../src/router/index.js'
+import { ControllerActionRouteConfig } from '../../../src/router/route-manager.js'
 import PsychicServer from '../../../src/server/index.js'
 import PetsController from '../../../test-app/src/app/controllers/PetsController.js'
 import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
-import { ControllerActionRouteConfig } from '../../../src/router/route-manager.js'
 
 describe('PsychicRouter', () => {
   beforeEach(async () => {
@@ -25,7 +25,7 @@ describe('PsychicRouter', () => {
       let router: PsychicRouter
       beforeEach(() => {
         server = new PsychicServer()
-        router = new PsychicRouter(server.expressApp, server.config)
+        router = new PsychicRouter(server.expressApp)
         vi.spyOn(server.expressApp, 'get')
         vi.spyOn(server.expressApp, 'post')
         vi.spyOn(server.expressApp, 'put')

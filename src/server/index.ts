@@ -4,13 +4,13 @@ import * as cors from 'cors'
 import * as express from 'express'
 import { Express } from 'express'
 import { Server } from 'node:http'
+import EnvInternal from '../helpers/EnvInternal.js'
 import PsychicApp, { PsychicSslCredentials } from '../psychic-app/index.js'
 import PsychicRouter from '../router/index.js'
 import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
 } from './helpers/startPsychicServer.js'
-import EnvInternal from '../helpers/EnvInternal.js'
 
 // const debugEnabled = debuglog('psychic').enabled
 
@@ -34,14 +34,9 @@ export default class PsychicServer {
     this.buildApp()
   }
 
-  public get config() {
-    return PsychicApp.getOrFail()
-  }
-
   public async routes() {
-    const r = new PsychicRouter(this.expressApp, this.config)
-    const psychicApp = PsychicApp.getOrFail()
-    await psychicApp.routesCb(r)
+    const r = new PsychicRouter(this.expressApp)
+    await PsychicApp.getOrFail().routesCb(r)
     return r.routes
   }
 
@@ -59,7 +54,8 @@ export default class PsychicServer {
       next()
     })
 
-    for (const serverInitBeforeMiddlewareHook of this.config.specialHooks.serverInitBeforeMiddleware) {
+    for (const serverInitBeforeMiddlewareHook of PsychicApp.getOrFail().specialHooks
+      .serverInitBeforeMiddleware) {
       await serverInitBeforeMiddlewareHook(this)
     }
 
@@ -67,7 +63,7 @@ export default class PsychicServer {
     this.initializeJSON()
 
     try {
-      await this.config.boot()
+      await PsychicApp.getOrFail().boot()
     } catch (err) {
       const error = err as Error
       PsychicApp.logWithLevel('error', error)
@@ -77,13 +73,14 @@ export default class PsychicServer {
       `)
     }
 
-    for (const serverInitAfterMiddlewareHook of this.config.specialHooks.serverInitAfterMiddleware) {
+    for (const serverInitAfterMiddlewareHook of PsychicApp.getOrFail().specialHooks
+      .serverInitAfterMiddleware) {
       await serverInitAfterMiddlewareHook(this)
     }
 
     await this.buildRoutes()
 
-    for (const afterRoutesHook of this.config.specialHooks.serverInitAfterRoutes) {
+    for (const afterRoutesHook of PsychicApp.getOrFail().specialHooks.serverInitAfterRoutes) {
       await afterRoutesHook(this)
     }
 
@@ -117,7 +114,7 @@ export default class PsychicServer {
       const httpServer = await startPsychicServer({
         app: this.expressApp,
         port: port || psychicApp.port,
-        sslCredentials: this.config.sslCredentials,
+        sslCredentials: PsychicApp.getOrFail().sslCredentials,
       })
       this.httpServer = httpServer
     }
@@ -151,8 +148,7 @@ export default class PsychicServer {
   }
 
   public async stop({ bypassClosingDbConnections = false }: { bypassClosingDbConnections?: boolean } = {}) {
-    const psychicApp = PsychicApp.getOrFail()
-    for (const hook of psychicApp.specialHooks.serverShutdown) {
+    for (const hook of PsychicApp.getOrFail().specialHooks.serverShutdown) {
       await hook(this)
     }
 
@@ -164,8 +160,7 @@ export default class PsychicServer {
   }
 
   public async serveForRequestSpecs(block: () => void | Promise<void>) {
-    const psychicApp = PsychicApp.getOrFail()
-    const port = psychicApp.port
+    const port = PsychicApp.getOrFail().port
 
     await this.boot()
 
@@ -188,18 +183,19 @@ export default class PsychicServer {
   }
 
   private initializeCors() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    this.expressApp.use((cors as unknown as { default: (opts: any) => any }).default(this.config.corsOptions))
+    this.expressApp.use(
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (cors as unknown as { default: (opts: any) => any }).default(PsychicApp.getOrFail().corsOptions),
+    )
   }
 
   private initializeJSON() {
-    this.expressApp.use(express.json(this.config.jsonOptions))
+    this.expressApp.use(express.json(PsychicApp.getOrFail().jsonOptions))
   }
 
   private async buildRoutes() {
-    const r = new PsychicRouter(this.expressApp, this.config)
-    const psychicApp = PsychicApp.getOrFail()
-    await psychicApp.routesCb(r)
+    const r = new PsychicRouter(this.expressApp)
+    await PsychicApp.getOrFail().routesCb(r)
     r.commit()
   }
 }

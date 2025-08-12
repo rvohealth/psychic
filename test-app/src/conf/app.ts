@@ -1,4 +1,5 @@
 import { DreamCLI } from '@rvoh/dream'
+import { RequestHandler } from 'express'
 import session from 'express-session'
 import * as path from 'node:path'
 import { debuglog } from 'node:util'
@@ -14,7 +15,6 @@ import User from '../app/models/User.js'
 import AppEnv from './AppEnv.js'
 import inflections from './inflections.js'
 import routesCb from './routes.js'
-import { RequestHandler } from 'express'
 
 const debugEnabled = debuglog('psychic').enabled
 

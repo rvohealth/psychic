@@ -267,6 +267,56 @@ export const schema = {
       
     },
   },
+  model_without_serializers: {
+    serializerKeys: [],
+    scopes: {
+      default: [],
+      named: [],
+    },
+    nonJsonColumnNames: ['createdAt', 'id', 'name', 'updatedAt'],
+    columns: {
+      createdAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+      id: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+      name: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'character varying',
+        allowNull: false,
+        isArray: false,
+      },
+      updatedAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+    },
+    virtualColumns: [],
+    associations: {
+      
+    },
+  },
   pets: {
     serializerKeys: ['additional', 'default', 'summary', 'withAssociation', 'withFlattenedAssociation'],
     scopes: {
@@ -544,6 +594,56 @@ export const schema = {
         optional: false,
         requiredOnClauses: null,
       },
+    },
+  },
+  simple_serializer_models: {
+    serializerKeys: ['default', 'summary'],
+    scopes: {
+      default: [],
+      named: [],
+    },
+    nonJsonColumnNames: ['createdAt', 'id', 'name', 'updatedAt'],
+    columns: {
+      createdAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+      id: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+      name: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'character varying',
+        allowNull: false,
+        isArray: false,
+      },
+      updatedAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+    },
+    virtualColumns: [],
+    associations: {
+      
     },
   },
   users: {
@@ -1094,8 +1194,10 @@ export const connectionTypeConfig = {
       'Balloon': 'balloons',
       'Comment': 'comments',
       'Health/User': 'health_users',
+      'ModelWithoutSerializer': 'model_without_serializers',
       'Pet': 'pets',
       'Post': 'posts',
+      'SimpleSerializerModel': 'simple_serializer_models',
       'User': 'users'
     },
   },

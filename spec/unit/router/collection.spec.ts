@@ -8,7 +8,7 @@ describe('PsychicRouter', () => {
     let router: PsychicRouter
     beforeEach(() => {
       server = new PsychicServer()
-      router = new PsychicRouter(server.expressApp, server.config)
+      router = new PsychicRouter(server.expressApp)
       vi.spyOn(server.expressApp, 'get')
       vi.spyOn(server.expressApp, 'post')
       vi.spyOn(server.expressApp, 'put')
