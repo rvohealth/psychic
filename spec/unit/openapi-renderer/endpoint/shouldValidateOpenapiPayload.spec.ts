@@ -12,6 +12,8 @@ describe('OpenapiEndpointRenderer#shouldValidateOpenapiPayload', () => {
     target: OpenapiValidateTarget,
     validate: OpenapiValidateOption | undefined,
   ) {
+    vi.spyOn(PsychicApp.prototype, 'openapiValidationIsActive').mockReturnValue(false)
+
     const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
       description: 'hello',
       summary: 'world',

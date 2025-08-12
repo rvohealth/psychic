@@ -35,6 +35,17 @@ describe('openapi validation', () => {
         })
       })
 
+      context('with custom schema being rendered', () => {
+        it('validates the request', async () => {
+          await request.post('/requestBodyboilerplateSchemaTest', 204, {
+            data: { myField: 'hi' },
+          })
+          await request.post('/requestBodyboilerplateSchemaTest', 400, {
+            data: { myField: [true] },
+          })
+        })
+      })
+
       context('with an invalid requestBody', () => {
         it('denies the request', async () => {
           const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })

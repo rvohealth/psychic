@@ -1265,6 +1265,53 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/requestBodyboilerplateSchemaTest": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": components["schemas"]["CustomSchemaObject"];
+                };
+            };
+            responses: {
+                /** @description Success, no content */
+                204: components["responses"]["NoContent"];
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/requestBodyNestedObjectOpenapiTest": {
         parameters: {
             query?: never;
@@ -1415,6 +1462,56 @@ export interface paths {
                         "application/json": number;
                     };
                 };
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/responseBodyboilerplateSchemaTest": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["CustomSchemaObject"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
                 403: components["responses"]["Forbidden"];
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
@@ -1982,6 +2079,60 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/{id}/with-posts": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserWithPosts"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/paginated": {
         parameters: {
             query?: {
@@ -2204,6 +2355,9 @@ export interface components {
             howyadoin: components["schemas"]["LatexSummary"];
         };
         CustomSchema: string;
+        CustomSchemaObject: {
+            myField?: string;
+        };
         LatexSummary: {
             /** Format: bigint */
             id: string | number | bigint;

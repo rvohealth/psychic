@@ -27,6 +27,13 @@ describe('openapi validation', () => {
         })
       })
 
+      context('with custom schema being rendered', () => {
+        it('permits the request', async () => {
+          const res = await request.get('/responseBodyboilerplateSchemaTest', 200)
+          expect(res.body).toEqual({ myField: 'hello world' })
+        })
+      })
+
       context('with an invalid response body', () => {
         it('rejects the request', async () => {
           await request.get('/responseBodyOpenapiTest', 500, {

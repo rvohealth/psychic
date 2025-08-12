@@ -9,6 +9,7 @@ import CircularController from '../app/controllers/CircularController.js'
 import GreeterController from '../app/controllers/GreeterController.js'
 import OpenapiDecoratorTestController from '../app/controllers/OpenapiDecoratorTestsController.js'
 import OpenapiOverridesTestController from '../app/controllers/OpenapiOverridesTestsController.js'
+import OpenapiValidationTestsController from '../app/controllers/OpenapiValidationTestsController.js'
 import ParamsTestController from '../app/controllers/ParamsTestController.js'
 import PassportAuthedController from '../app/controllers/PassportAuthedController.js'
 import PetsController from '../app/controllers/PetsController.js'
@@ -17,7 +18,6 @@ import ScopeTestController from '../app/controllers/ScopeTestController.js'
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
 import User from '../app/models/User.js'
-import OpenapiValidationTestsController from '../app/controllers/OpenapiValidationTestsController.js'
 
 export default (r: PsychicRouter) => {
   r.get('circular', CircularController, 'hello')
@@ -64,6 +64,9 @@ export default (r: PsychicRouter) => {
   r.resources('pets', { only: ['create', 'update'] }, r => {
     r.put('update2', PetsController, 'update2')
     r.post('my-posts', PetsController, 'myPosts')
+    r.collection(r => {
+      r.get('hello', PetsController, 'hello')
+    })
   })
 
   r.get('queryOpenapiTest', OpenapiValidationTestsController, 'queryOpenapiTest')
@@ -75,6 +78,11 @@ export default (r: PsychicRouter) => {
     OpenapiValidationTestsController,
     'responseBodyNestedObjectOpenapiTest',
   )
+  r.get(
+    'responseBodyboilerplateSchemaTest',
+    OpenapiValidationTestsController,
+    'responseBodyboilerplateSchemaTest',
+  )
   r.get('responseAlternateStatusTest', OpenapiValidationTestsController, 'responseAlternateStatusTest')
   r.get('headersOpenapiTest', OpenapiValidationTestsController, 'headersOpenapiTest')
   r.post('requestBodyOpenapiTest', OpenapiValidationTestsController, 'requestBodyOpenapiTest')
@@ -82,6 +90,11 @@ export default (r: PsychicRouter) => {
     'requestBodyNestedObjectOpenapiTest',
     OpenapiValidationTestsController,
     'requestBodyNestedObjectOpenapiTest',
+  )
+  r.post(
+    'requestBodyboilerplateSchemaTest',
+    OpenapiValidationTestsController,
+    'requestBodyboilerplateSchemaTest',
   )
   r.post('invalidRequestBody', OpenapiValidationTestsController, 'invalidRequestBody')
 

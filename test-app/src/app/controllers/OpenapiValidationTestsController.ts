@@ -59,6 +59,16 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    status: 204,
+    requestBody: {
+      $ref: '#/components/schemas/CustomSchemaObject',
+    },
+  })
+  public requestBodyboilerplateSchemaTest() {
+    this.noContent()
+  }
+
+  @OpenAPI({
     status: 200,
     query: {
       stringParam: {
@@ -181,6 +191,18 @@ export default class OpenapiValidationTestsController extends ApplicationControl
       requiredInt: this.params.requiredInt,
       optionalInt: this.params.optionalInt,
     })
+  }
+
+  @OpenAPI({
+    status: 200,
+    responses: {
+      200: {
+        $schema: 'CustomSchemaObject',
+      },
+    },
+  })
+  public responseBodyboilerplateSchemaTest() {
+    this.ok({ myField: 'hello world' })
   }
 
   @OpenAPI({
