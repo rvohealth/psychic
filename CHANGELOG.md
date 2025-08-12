@@ -1,3 +1,7 @@
+## 1.6.4
+
+Raise an exception if attempting to import an openapi file during PsychicApp.init when in production. We will still swallow the exception in non-prod environments so that one can create a new openapi configuration and run sync without getting an error.
+
 ## 1.6.3
 
 - castParam accepts raw openapi shapes as type arguments, correctly casting the result to an interface representing the provided openapi shape.

@@ -78,6 +78,7 @@ export default async (psy: PsychicApp) => {
     outputFilepath: path.join('test-app', 'src', 'openapi', 'openapi.json'),
     servers: [{ url: 'howyadoin.com', variables: { region: { default: 'a', enum: ['a', 'b'] } } }],
     syncTypes: true,
+    validate: { all: true },
     defaults: {
       headers: {
         ['custom-header']: {
@@ -121,6 +122,16 @@ export default async (psy: PsychicApp) => {
         schemas: {
           CustomSchema: {
             type: 'string',
+          },
+
+          // this is used by openapi validation tests
+          // to ensure that validating against default
+          // schema objects is still permitted.
+          CustomSchemaObject: {
+            type: 'object',
+            properties: {
+              myField: { type: 'string' },
+            },
           },
         },
       },

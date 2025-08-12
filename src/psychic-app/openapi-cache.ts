@@ -1,7 +1,9 @@
 import * as fs from 'node:fs/promises'
 import openapiJsonPath from '../helpers/openapiJsonPath.js'
 import MustCallPsychicAppInitFirst from '../error/psychic-app/must-call-psychic-app-init-first.js'
-const _openapiData: Record<string, OpenapiShell | typeof FILE_DOES_NOT_EXIST> = {}
+import EnvInternal from '../helpers/EnvInternal.js'
+import OpenapiFileNotFound from '../error/openapi/OpenapiFileNotFound.js'
+const _openapiData: Record<string, OpenapiShell | typeof FILE_DOES_NOT_EXIST | typeof FILE_WAS_IGNORED> = {}
 
 /**
  * we only cache the components from the openapi files,
@@ -24,7 +26,7 @@ export interface OpenapiShell {
 export function getOpenapiFileOrFail(openapiName: string) {
   const val = _openapiData[openapiName]
   if (!val) throw new MustCallPsychicAppInitFirst()
-  if (val === FILE_DOES_NOT_EXIST) return undefined
+  if (val === FILE_DOES_NOT_EXIST || val === FILE_WAS_IGNORED) return undefined
   return val
 }
 
@@ -40,10 +42,9 @@ export function getOpenapiFileOrFail(openapiName: string) {
 export async function readAndCacheOpenapiFile(openapiName: string): Promise<void> {
   if (_openapiData[openapiName]) return
 
-  // if the openapi file is not generated yet, we don't want to raise an
-  // exception, so we will simply consider this file as undefined.
+  const openapiPath = openapiJsonPath(openapiName)
   try {
-    const buffer = await fs.readFile(openapiJsonPath(openapiName))
+    const buffer = await fs.readFile(openapiPath)
 
     const openapiDoc = JSON.parse(buffer.toString()) as OpenapiShell
 
@@ -54,9 +55,29 @@ export async function readAndCacheOpenapiFile(openapiName: string): Promise<void
       ? { components: openapiDoc.components }
       : FILE_DOES_NOT_EXIST
   } catch {
+    if (EnvInternal.isProduction) {
+      throw new OpenapiFileNotFound(openapiName, openapiPath)
+    }
+
+    // if the openapi file is not generated yet and we are in our local
+    // environment, we don't want to raise an exception, since it could
+    // prevent someone from ever defining a new openapi configuration.
     _openapiData[openapiName] = FILE_DOES_NOT_EXIST
-    // noop
   }
 }
 
+/**
+ * Reads the openapi file corresponding to the openapiName,
+ * and caches its contents, enabling them to be read back
+ * at a later time, such as during endpoint validation.
+ *
+ * This function is called during PsychicApp.init sequence automatically.
+ *
+ * @param openapiName - the openapiName you wish to look up
+ */
+export function ignoreOpenapiFile(openapiName: string): void {
+  _openapiData[openapiName] = FILE_WAS_IGNORED
+}
+
 const FILE_DOES_NOT_EXIST = 'FILE_DOES_NOT_EXIST'
+const FILE_WAS_IGNORED = 'FILE_WAS_IGNORED'

@@ -1,10 +1,12 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import PsychicServer from '../../../src/server/index.js'
 import User from '../../../test-app/src/app/models/User.js'
+import { PsychicApp } from '../../../src/index.js'
 
 describe('a visitor attempts to save a record', () => {
   beforeEach(async () => {
     await request.init(PsychicServer)
+    vi.spyOn(PsychicApp.prototype, 'openapiValidationIsActive').mockReturnValue(false)
   })
 
   it('returns 201', async () => {

@@ -52,7 +52,7 @@ export default class OpenapiPayloadValidator {
 
     if (openapiEndpointRenderer.shouldValidateRequestBody(openapiName)) {
       const openapiPathObject = openapiEndpointRenderer['computedRequestBody'](routes, {
-        openapiName: 'default',
+        openapiName,
         renderOpts: this.renderOpts,
       })
 
@@ -115,7 +115,7 @@ export default class OpenapiPayloadValidator {
 
     if (openapiEndpointRenderer.shouldValidateQuery(openapiName)) {
       const openapiQueryParams = openapiEndpointRenderer['queryArray']({
-        openapiName: 'default',
+        openapiName,
         renderOpts: this.renderOpts,
       })
 
@@ -145,7 +145,7 @@ export default class OpenapiPayloadValidator {
 
     if (openapiEndpointRenderer.shouldValidateResponseBody(openapiName)) {
       const openapiResponseBody = openapiEndpointRenderer['parseResponses']({
-        openapiName: this.openapiName,
+        openapiName,
         renderOpts: this.renderOpts,
       }).openapi?.[statusCode.toString() as '200'] as OpenapiContent
       const schema = openapiResponseBody?.['content']?.['application/json']?.['schema']

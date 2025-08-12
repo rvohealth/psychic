@@ -41,7 +41,7 @@ import importControllers, { getControllersOrFail } from './helpers/import/import
 import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
 import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
-import { getOpenapiFileOrFail, readAndCacheOpenapiFile } from './openapi-cache.js'
+import { getOpenapiFileOrFail, ignoreOpenapiFile, readAndCacheOpenapiFile } from './openapi-cache.js'
 import { PsychicAppInitializerCb, PsychicHookEventType, PsychicUseEventType } from './types.js'
 
 export default class PsychicApp {
@@ -153,11 +153,21 @@ export default class PsychicApp {
    * instead of having to build it from scratch.
    */
   private async buildOpenapiCache(): Promise<void> {
+    // build caches for all files that are registered for validation
     await Promise.all(
-      Object.keys(this.openapi).map(async openapiName => {
-        await this.cacheOpenapiFile(openapiName)
-      }),
+      Object.keys(this.openapi)
+        .filter(key => this.openapi[key]?.validate)
+        .map(async openapiName => {
+          await this.cacheOpenapiFile(openapiName)
+        }),
     )
+
+    // ignore all files that are not registered for validation
+    Object.keys(this.openapi)
+      .filter(key => !this.openapi[key]?.validate)
+      .forEach(openapiName => {
+        this.ignoreOpenapiFile(openapiName)
+      })
   }
 
   /**
@@ -348,8 +358,19 @@ Try setting it to something valid, like:
    *
    * @param openapiName - the openapiName you want to look up the openapi cache for
    */
-  public async cacheOpenapiFile(openapiName: string) {
+  private async cacheOpenapiFile(openapiName: string) {
     await readAndCacheOpenapiFile(openapiName)
+  }
+
+  /**
+   * indicates to the underlying cache that this openapi file is intentionally
+   * being ignored, so that future lookups for the file cache do not raise
+   * an exception
+   *
+   * @param openapiName - the openapiName to ignore
+   */
+  private ignoreOpenapiFile(openapiName: string) {
+    ignoreOpenapiFile(openapiName)
   }
 
   /**
