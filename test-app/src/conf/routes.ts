@@ -19,6 +19,7 @@ import SerializerTestsController from '../app/controllers/SerializerTestsControl
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
 import User from '../app/models/User.js'
+import SerializerFallbackTestsController from '../app/controllers/SerializerFallbackTestsController.js'
 
 export default (r: PsychicRouter) => {
   r.get('circular', CircularController, 'hello')
@@ -101,6 +102,26 @@ export default (r: PsychicRouter) => {
     'requestBodyboilerplateSchemaTest',
   )
   r.post('invalidRequestBody', OpenapiValidationTestsController, 'invalidRequestBody')
+  r.get(
+    'serializer-fallbacks/uses-openapi-serializer',
+    SerializerFallbackTestsController,
+    'usesOpenapiSerializer',
+  )
+  r.get(
+    'serializer-fallbacks/doesnt-use-openapi-serializer',
+    SerializerFallbackTestsController,
+    'doesntUseOpenapiSerializer',
+  )
+  r.get(
+    'serializer-fallbacks/overrides-openapi-serializer',
+    SerializerFallbackTestsController,
+    'overridesOpenapiSerializer',
+  )
+  r.get(
+    'serializer-fallbacks/uses-openapi-serializer-with-serializer-key',
+    SerializerFallbackTestsController,
+    'usesOpenapiSerializerWithSerializerKey',
+  )
 
   // hooks tests
   r.get('users-before-all-test', UsersController, 'beforeAllTest')

@@ -41,4 +41,10 @@ export default class Pet extends ApplicationModel {
   @deco.BelongsTo('User')
   public user: User
   public userId: DreamColumn<Pet, 'userId'>
+
+  // this will fail if we mistakenly decide to double-serialize
+  // something that has already been serialized.
+  public customAttributeTest() {
+    return 'hello world'
+  }
 }

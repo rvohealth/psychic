@@ -498,11 +498,12 @@ export default class PsychicController {
     // handles passing its passthrough data into those
     const passthrough = this.defaultSerializerPassthrough
 
-    if (isDreamSerializer(openapiDef?.dreamsOrSerializers)) {
-      const serializer = openapiDef!.dreamsOrSerializers as DreamModelSerializerType
-      return serializer(data, passthrough).render(passthrough, this.renderOpts)
-      //
-    } else if (data instanceof Dream || (data as unknown as ViewModel).serializers) {
+    if (data instanceof Dream || (data as unknown as ViewModel).serializers) {
+      if (!opts.serializerKey && isDreamSerializer(openapiDef?.dreamsOrSerializers)) {
+        const serializer = openapiDef!.dreamsOrSerializers as DreamModelSerializerType
+        return serializer(data, passthrough).render(passthrough, this.renderOpts)
+      }
+
       return renderDreamOrVewModel(
         data as unknown as Dream | ViewModel,
         opts.serializerKey ||
@@ -511,7 +512,6 @@ export default class PsychicController {
         passthrough,
         this.renderOpts,
       )
-      //
     } else {
       return data
     }
