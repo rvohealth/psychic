@@ -226,6 +226,9 @@ describe('OpenapiEndpointRenderer', () => {
 
         Pet: {
           properties: {
+            customAttributeTest: {
+              type: 'string',
+            },
             id: {
               type: 'string',
               format: 'bigint',
@@ -234,7 +237,7 @@ describe('OpenapiEndpointRenderer', () => {
               type: ['string', 'null'],
             },
           },
-          required: ['id', 'name'],
+          required: ['customAttributeTest', 'id', 'name'],
           type: 'object',
         },
       })
@@ -928,8 +931,9 @@ The following values will be allowed:
           expect.objectContaining({
             Pet: {
               type: 'object',
-              required: ['id', 'name'],
+              required: ['customAttributeTest', 'id', 'name'],
               properties: {
+                customAttributeTest: { type: 'string' },
                 id: { type: 'string', format: 'bigint' },
                 name: { type: ['string', 'null'] },
               },

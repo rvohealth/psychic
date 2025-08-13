@@ -43,10 +43,6 @@ export default class PsychicRouter {
     this.app = app
   }
 
-  public get routingMechanism(): Application | Router | null {
-    return this.app
-  }
-
   public get routes() {
     return this.routeManager.routes
   }
