@@ -41,7 +41,7 @@ import importControllers, { getControllersOrFail } from './helpers/import/import
 import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
 import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
-import { getOpenapiFileOrFail, ignoreOpenapiFile, readAndCacheOpenapiFile } from './openapi-cache.js'
+import { getCachedOpenapiDocOrFail, ignoreOpenapiDoc, cacheOpenapiDoc } from './openapi-cache.js'
 import { PsychicAppInitializerCb, PsychicHookEventType, PsychicUseEventType } from './types.js'
 
 export default class PsychicApp {
@@ -116,7 +116,11 @@ export default class PsychicApp {
 
         cachePsychicApp(psychicApp)
 
-        await Promise.all([psychicApp.buildOpenapiCache(), psychicApp.buildRoutesCache()])
+        // routes _must_ be built before openapi
+        // cache can be processed
+        await psychicApp.buildRoutesCache()
+
+        psychicApp.buildOpenapiCache()
       },
     )
 
@@ -152,22 +156,40 @@ export default class PsychicApp {
    * request validation can look to the route cache
    * instead of having to build it from scratch.
    */
-  private async buildOpenapiCache(): Promise<void> {
-    // build caches for all files that are registered for validation
-    await Promise.all(
-      Object.keys(this.openapi)
-        .filter(key => this.openapi[key]?.validate)
-        .map(async openapiName => {
-          await this.cacheOpenapiFile(openapiName)
-        }),
-    )
+  private buildOpenapiCache(): void {
+    Object.keys(this.openapi).forEach(openapiName => {
+      if (this.openapi[openapiName]?.validate) {
+        this.cacheOpenapiDoc(openapiName)
+      } else {
+        this.ignoreOpenapiDoc(openapiName)
+      }
+    })
+  }
 
-    // ignore all files that are not registered for validation
-    Object.keys(this.openapi)
-      .filter(key => !this.openapi[key]?.validate)
-      .forEach(openapiName => {
-        this.ignoreOpenapiFile(openapiName)
-      })
+  /**
+   * @internal
+   *
+   * When PsychicApp.init is called, a cache is built for each openapiName
+   * registered within your app config. For each openapiName, Psychic will
+   * read compute and cache the openapi document contents for that openapiName.
+   * It does this to enable the validation engine to read component
+   * schemas accross the entire document to perform individual endpoint validation.
+   *
+   * @param openapiName - the openapiName you want to look up the openapi cache for
+   */
+  private cacheOpenapiDoc(openapiName: string) {
+    cacheOpenapiDoc(openapiName, this.routesCache)
+  }
+
+  /**
+   * indicates to the underlying cache that this openapi file is intentionally
+   * being ignored, so that future lookups for the file cache do not raise
+   * an exception
+   *
+   * @param openapiName - the openapiName to ignore
+   */
+  private ignoreOpenapiDoc(openapiName: string) {
+    ignoreOpenapiDoc(openapiName)
   }
 
   /**
@@ -356,37 +378,6 @@ Try setting it to something valid, like:
    * contents. It does this to enable the validation engine to read component
    * schemas accross the entire document to perform individual endpoint validation.
    *
-   * This function is used to cache the contents of this file during initialization,
-   * so that the validation engine can call down to the complementing method,
-   * `getOpenapiFileOrFail`, which will return the contents of the document, or undefined
-   * if it was not found.
-   *
-   * @param openapiName - the openapiName you want to look up the openapi cache for
-   */
-  private async cacheOpenapiFile(openapiName: string) {
-    await readAndCacheOpenapiFile(openapiName)
-  }
-
-  /**
-   * indicates to the underlying cache that this openapi file is intentionally
-   * being ignored, so that future lookups for the file cache do not raise
-   * an exception
-   *
-   * @param openapiName - the openapiName to ignore
-   */
-  private ignoreOpenapiFile(openapiName: string) {
-    ignoreOpenapiFile(openapiName)
-  }
-
-  /**
-   * @internal
-   *
-   * When PsychicApp.init is called, a cache is built for each openapiName
-   * registered within your app config. For each openapiName, Psychic will
-   * read the openapi file (unless it has not been written yet) and cache the
-   * contents. It does this to enable the validation engine to read component
-   * schemas accross the entire document to perform individual endpoint validation.
-   *
    * This function is used to read back the cached contents. It should never fail,
    * since even in the context where the openapi file is not present, as long
    * as it was at least scanned, this function will never fail. If no openapi
@@ -396,7 +387,7 @@ Try setting it to something valid, like:
    * @returns the scanned openapi document, or undefined if it could not be found.
    */
   public getOpenapiFileOrFail(openapiName: string) {
-    return getOpenapiFileOrFail(openapiName)
+    return getCachedOpenapiDocOrFail(openapiName)
   }
 
   /**
