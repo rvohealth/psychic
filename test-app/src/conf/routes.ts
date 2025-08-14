@@ -76,6 +76,7 @@ export default function routes(r: PsychicRouter) {
 
   r.get('queryOpenapiTest', OpenapiValidationTestsController, 'queryOpenapiTest')
   r.get('queryRequiredOpenapiTest', OpenapiValidationTestsController, 'queryRequiredOpenapiTest')
+  r.get('queryRequiredValueTest', OpenapiValidationTestsController, 'queryRequiredValueTest')
   r.get('responseBodyOpenapiTest', OpenapiValidationTestsController, 'responseBodyOpenapiTest')
   r.get('responseBodyObjectOpenapiTest', OpenapiValidationTestsController, 'responseBodyObjectOpenapiTest')
   r.get(
