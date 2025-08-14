@@ -43,8 +43,6 @@ export default function validateOpenApiSchema<T = unknown>(
 ): ValidationResult<T> {
   return validateObject<T>(data, openapiSchema, {
     removeAdditional: 'failing', // Remove properties that fail validation
-    useDefaults: true,
-    coerceTypes: true,
     ...options,
   })
 }
@@ -118,9 +116,10 @@ export function createValidator<T = unknown>(
   const ajv = new Ajv({
     removeAdditional: false,
     useDefaults: true,
-    coerceTypes: true,
-    strict: false, // Allow unknown keywords for OpenAPI compatibility
-    allErrors: options.allErrors || false, // Collect all errors, not just the first one
+    strict: false,
+    coerceTypes: false,
+    strictTypes: true,
+    allErrors: false,
     validateFormats: true, // Enable format validation for date-time, email, etc.
     ...ajvOptions,
   })

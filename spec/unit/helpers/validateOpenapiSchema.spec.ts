@@ -16,16 +16,13 @@ describe('validateOpenApiSchema', () => {
     const validData = {
       id: '123e4567-e89b-12d3-a456-426614174000',
       name: 'John Doe',
-      age: '30', // use string to verify implicit coercion
+      age: 30,
       email: 'john@example.com',
     }
 
     const result = validateOpenApiSchema<typeof validData>(validData, openapiSchema)
     expect(result.isValid).toBe(true)
     expect(result.data!.age).toBe(30)
-
-    // ensure that original data is not mutated
-    expect(validData.age).toBe('30')
   })
 
   it('removes failing additional properties in OpenAPI mode without mutating original', () => {

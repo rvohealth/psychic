@@ -134,7 +134,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
     },
   })
   public responseBodyOpenapiTest() {
-    this.ok(this.params.renderMe)
+    this.ok(this.params.renderMe && Number(this.params.renderMe))
   }
 
   @OpenAPI({
@@ -188,7 +188,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   })
   public responseBodyObjectOpenapiTest() {
     this.ok({
-      requiredInt: this.params.requiredInt,
+      requiredInt: this.params.requiredInt && parseInt(this.params.requiredInt as string),
       optionalInt: this.params.optionalInt,
     })
   }

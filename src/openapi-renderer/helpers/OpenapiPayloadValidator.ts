@@ -256,7 +256,7 @@ export default class OpenapiPayloadValidator {
     const validationResults = validateOpenApiSchema(
       data || {},
       this.addComponentsToSchema(openapiSchema),
-      this.getAjvOptions(),
+      this.getAjvOptions(target),
     )
 
     if (!validationResults.isValid) {
@@ -295,12 +295,19 @@ export default class OpenapiPayloadValidator {
    * which is automatically handled by psychic and turned into a 400
    * with the respective errors attached.
    */
-  private getAjvOptions(): ValidateOpenapiSchemaOptions {
+  private getAjvOptions(target: OpenapiValidateTarget): ValidateOpenapiSchemaOptions {
     const rendererOpts = this.openapiEndpointRenderer['validate']?.['ajvOptions']
     const openapiConf = PsychicApp.getOrFail().openapi?.[this.openapiName]
+
     return {
       ...openapiConf?.validate?.ajvOptions,
       ...rendererOpts,
+
+      // if headers or query, we want to levarage ajv type coercion,
+      // so that a query or header parameter can have a type of i.e. number
+      // or boolean without failing to coerce, since by default our
+      // ajv instance will be instantiated with coerceTypes=false
+      coerceTypes: target === 'headers' || target === 'query',
     }
   }
 }
