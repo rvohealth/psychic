@@ -1,3 +1,7 @@
+## 1.8.1
+
+- Adds nuance to underlying openapi validation engine, so that it will error when receiving i.e. null for an integer, but will permit other coercions, such as '123' -> 123.
+
 ## 1.8.0
 
 - remove unused `clientRoot` config

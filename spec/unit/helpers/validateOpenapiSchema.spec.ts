@@ -28,6 +28,230 @@ describe('validateOpenApiSchema', () => {
     expect(validData.age).toBe('30')
   })
 
+  context('data types', () => {
+    context('integer', () => {
+      it('accepts string number for integer', () => {
+        const result = validateOpenApiSchema(
+          { age: '123' },
+          {
+            type: 'object',
+            properties: {
+              age: { type: 'integer' },
+            },
+            required: ['age'],
+          },
+        )
+        expect(result.isValid).toBe(true)
+      })
+
+      it('rejects string non-integer for integer', () => {
+        const result = validateOpenApiSchema(
+          { age: '123.01' },
+          {
+            type: 'object',
+            properties: {
+              age: { type: 'integer' },
+            },
+            required: ['age'],
+          },
+        )
+        expect(result.isValid).toBe(false)
+      })
+
+      it('rejects null for integer', () => {
+        const result = validateOpenApiSchema(
+          { age: null },
+          {
+            type: 'object',
+            properties: {
+              age: { type: 'integer' },
+            },
+            required: ['age'],
+          },
+        )
+        expect(result.isValid).toBe(false)
+      })
+    })
+
+    context('number', () => {
+      it('accepts string number for integer', () => {
+        const result = validateOpenApiSchema(
+          { age: '123' },
+          {
+            type: 'object',
+            properties: {
+              age: { type: 'number' },
+            },
+            required: ['age'],
+          },
+        )
+        expect(result.isValid).toBe(true)
+      })
+
+      it('rejects string non-number for number', () => {
+        const result = validateOpenApiSchema(
+          { age: 'abc123' },
+          {
+            type: 'object',
+            properties: {
+              age: { type: 'integer' },
+            },
+            required: ['age'],
+          },
+        )
+        expect(result.isValid).toBe(false)
+      })
+
+      it('rejects null for number', () => {
+        const result = validateOpenApiSchema(
+          { age: null },
+          {
+            type: 'object',
+            properties: {
+              age: { type: 'integer' },
+            },
+            required: ['age'],
+          },
+        )
+        expect(result.isValid).toBe(false)
+      })
+    })
+
+    context('string', () => {
+      it('accepts string for string types', () => {
+        const result = validateOpenApiSchema(
+          { name: 'chalupa joe' },
+          {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+            },
+            required: ['name'],
+          },
+        )
+        expect(result.isValid).toBe(true)
+      })
+
+      it('rejects null for string types', () => {
+        const result = validateOpenApiSchema(
+          { name: null },
+          {
+            type: 'object',
+            properties: {
+              name: { type: 'string' },
+            },
+            required: ['name'],
+          },
+        )
+        expect(result.isValid).toBe(false)
+
+        const nullError = result.errors!.find(err => err.instancePath === '/name')!
+        expect(nullError.keyword).toBe('type')
+      })
+    })
+
+    context('boolean', () => {
+      it('accepts boolean for boolean types', () => {
+        const result = validateOpenApiSchema(
+          { tired: true },
+          {
+            type: 'object',
+            properties: {
+              tired: { type: 'boolean' },
+            },
+            required: ['tired'],
+          },
+        )
+        expect(result.isValid).toBe(true)
+      })
+
+      it('rejects null for boolean types', () => {
+        const result = validateOpenApiSchema(
+          { tired: null },
+          {
+            type: 'object',
+            properties: {
+              tired: { type: 'boolean' },
+            },
+            required: ['tired'],
+          },
+        )
+        expect(result.isValid).toBe(false)
+
+        const nullError = result.errors!.find(err => err.instancePath === '/tired')!
+        expect(nullError.keyword).toBe('type')
+      })
+    })
+
+    context('object', () => {
+      it('accepts object for object types', () => {
+        const result = validateOpenApiSchema(
+          { tired: true },
+          {
+            type: 'object',
+            properties: {
+              tired: { type: 'boolean' },
+            },
+            required: ['tired'],
+          },
+        )
+        expect(result.isValid).toBe(true)
+      })
+
+      it('rejects null for object types', () => {
+        const result = validateOpenApiSchema(null, {
+          type: 'object',
+          properties: {
+            tired: { type: 'boolean' },
+          },
+          required: ['tired'],
+        })
+        expect(result.isValid).toBe(false)
+
+        const nullError = result.errors!.find(err => err.instancePath === '')!
+        expect(nullError.keyword).toBe('type')
+      })
+    })
+
+    context('array', () => {
+      it('accepts array for array types', () => {
+        const result = validateOpenApiSchema(['howyadoin'], {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        })
+        expect(result.isValid).toBe(true)
+      })
+
+      it('rejects null for object types', () => {
+        const result = validateOpenApiSchema(null, {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        })
+        expect(result.isValid).toBe(false)
+
+        const nullError = result.errors!.find(err => err.instancePath === '')!
+        expect(nullError.keyword).toBe('type')
+      })
+
+      it('rejects null for array items', () => {
+        const result = validateOpenApiSchema([null, 'hello world'], {
+          type: 'array',
+          items: {
+            type: 'string',
+          },
+        })
+        expect(result.isValid).toBe(false)
+
+        const nullError = result.errors!.find(err => err.instancePath === '/0')!
+        expect(nullError.keyword).toBe('type')
+      })
+    })
+  })
+
   it('removes failing additional properties in OpenAPI mode without mutating original', () => {
     const openapiSchema = {
       type: 'object',
