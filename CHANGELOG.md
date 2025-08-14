@@ -1,3 +1,7 @@
+## 1.8.1
+
+- do not coerce types in ajv when processing request or response bodies during validation. Type coercion will still happen for headers and query params, since they will need to respect the schema type specified in the openapi docuement.
+
 ## 1.8.0
 
 - remove unused `clientRoot` config

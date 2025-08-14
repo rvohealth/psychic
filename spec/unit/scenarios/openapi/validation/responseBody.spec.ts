@@ -23,7 +23,7 @@ describe('openapi validation', () => {
               renderMe: '123',
             },
           })
-          expect(res.body).toEqual('123')
+          expect(res.body).toEqual(123)
         })
       })
 

@@ -490,7 +490,7 @@ export default class Params {
 
       default:
         if (this.shouldUseOpenapiValidation(expectedType)) {
-          const res = validateObject(paramValue, expectedType)
+          const res = validateObject(paramValue, expectedType, { coerceTypes: true })
           if (res.isValid) {
             return res.data as ReturnType
           } else {
