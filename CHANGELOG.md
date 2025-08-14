@@ -1,3 +1,7 @@
+## 1.8.0
+
+- remove unused `clientRoot` config
+
 ## 1.7.2
 
 - generate admin routes in routes.admin.ts (requires `routes.admin.ts` next to `routes.ts`)

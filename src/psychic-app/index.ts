@@ -41,7 +41,7 @@ import importControllers, { getControllersOrFail } from './helpers/import/import
 import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
 import importServices, { getServicesOrFail } from './helpers/import/importServices.js'
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
-import { getCachedOpenapiDocOrFail, ignoreOpenapiDoc, cacheOpenapiDoc } from './openapi-cache.js'
+import { cacheOpenapiDoc, getCachedOpenapiDocOrFail, ignoreOpenapiDoc } from './openapi-cache.js'
 import { PsychicAppInitializerCb, PsychicHookEventType, PsychicUseEventType } from './types.js'
 
 export default class PsychicApp {
@@ -297,11 +297,6 @@ Try setting it to something valid, like:
   private _sessionCookieName: string = 'session'
   public get sessionCookieName() {
     return this._sessionCookieName
-  }
-
-  private _clientRoot: string
-  public get clientRoot() {
-    return this._clientRoot
   }
 
   private _encryption: PsychicAppEncryptionOptions | undefined
@@ -641,31 +636,29 @@ Try setting it to something valid, like:
                     ? GeneratorImportStyle
                     : Opt extends 'sessionCookieName'
                       ? string
-                      : Opt extends 'clientRoot'
-                        ? string
-                        : Opt extends 'json'
-                          ? bodyParser.Options
-                          : Opt extends 'logger'
-                            ? PsychicLogger
-                            : Opt extends 'ssl'
-                              ? PsychicSslCredentials
-                              : Opt extends 'openapi'
-                                ? DefaultPsychicOpenapiOptions
-                                : Opt extends 'paths'
-                                  ? PsychicPathOptions
-                                  : Opt extends 'port'
+                      : Opt extends 'json'
+                        ? bodyParser.Options
+                        : Opt extends 'logger'
+                          ? PsychicLogger
+                          : Opt extends 'ssl'
+                            ? PsychicSslCredentials
+                            : Opt extends 'openapi'
+                              ? DefaultPsychicOpenapiOptions
+                              : Opt extends 'paths'
+                                ? PsychicPathOptions
+                                : Opt extends 'port'
+                                  ? number
+                                  : Opt extends 'saltRounds'
                                     ? number
-                                    : Opt extends 'saltRounds'
-                                      ? number
-                                      : Opt extends 'sanitizeResponseJson'
-                                        ? boolean
-                                        : Opt extends 'packageManager'
-                                          ? DreamAppAllowedPackageManagersEnum
-                                          : Opt extends 'inflections'
-                                            ? () => void | Promise<void>
-                                            : Opt extends 'routes'
-                                              ? (r: PsychicRouter) => void | Promise<void>
-                                              : never,
+                                    : Opt extends 'sanitizeResponseJson'
+                                      ? boolean
+                                      : Opt extends 'packageManager'
+                                        ? DreamAppAllowedPackageManagersEnum
+                                        : Opt extends 'inflections'
+                                          ? () => void | Promise<void>
+                                          : Opt extends 'routes'
+                                            ? (r: PsychicRouter) => void | Promise<void>
+                                            : never,
   ): void
   public set<Opt extends PsychicAppOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -685,10 +678,6 @@ Try setting it to something valid, like:
 
       case 'importExtension':
         this._importExtension = value as GeneratorImportStyle
-        break
-
-      case 'clientRoot':
-        this._clientRoot = value as string
         break
 
       case 'defaultResponseHeaders':
@@ -797,7 +786,6 @@ export type PsychicAppOption =
   | 'importExtension'
   | 'encryption'
   | 'sessionCookieName'
-  | 'clientRoot'
   | 'cookie'
   | 'cors'
   | 'defaultResponseHeaders'
