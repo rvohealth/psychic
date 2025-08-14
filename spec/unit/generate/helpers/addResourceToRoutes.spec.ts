@@ -138,10 +138,8 @@ describe('addResourceToRoutes_routeToRegexAndReplacements', () => {
       singular: false,
       onlyActions: undefined,
     })
-    expect(results[0]!.regex).toEqual(/^export default \(r: PsychicRouter\) => \{\n/m)
-    expect(results[0]!.replacement).toEqual(
-      `export default (r: PsychicRouter) => {\n  r.resources('posts')\n`,
-    )
+    expect(results[0]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
+    expect(results[0]!.replacement).toEqual(`export $1(r: PsychicRouter)$2{\n  r.resources('posts')\n`)
   })
 
   it('"api/posts"', () => {
@@ -155,10 +153,8 @@ describe('addResourceToRoutes_routeToRegexAndReplacements', () => {
     expect(results[0]!.regex).toEqual(/^ {2}r\.namespace\('api', r => \{\n/m)
     expect(results[0]!.replacement).toEqual(sharedExpectedReplacement)
 
-    expect(results[1]!.regex).toEqual(/^export default \(r: PsychicRouter\) => \{\n/m)
-    expect(results[1]!.replacement).toEqual(
-      `export default (r: PsychicRouter) => {\n${sharedExpectedReplacement}`,
-    )
+    expect(results[1]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
+    expect(results[1]!.replacement).toEqual(`export $1(r: PsychicRouter)$2{\n${sharedExpectedReplacement}`)
   })
 
   it('"api/v1/posts"', () => {
@@ -175,9 +171,7 @@ describe('addResourceToRoutes_routeToRegexAndReplacements', () => {
     expect(results[1]!.regex).toEqual(/^ {2}r\.namespace\('api', r => \{\n/m)
     expect(results[1]!.replacement).toEqual(sharedExpectedReplacement)
 
-    expect(results[2]!.regex).toEqual(/^export default \(r: PsychicRouter\) => \{\n/m)
-    expect(results[2]!.replacement).toEqual(
-      `export default (r: PsychicRouter) => {\n${sharedExpectedReplacement}`,
-    )
+    expect(results[2]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
+    expect(results[2]!.replacement).toEqual(`export $1(r: PsychicRouter)$2{\n${sharedExpectedReplacement}`)
   })
 })

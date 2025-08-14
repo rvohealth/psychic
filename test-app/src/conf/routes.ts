@@ -15,13 +15,13 @@ import PassportAuthedController from '../app/controllers/PassportAuthedControlle
 import PetsController from '../app/controllers/PetsController.js'
 import ResponseStatusesController from '../app/controllers/ResponseStatusesController.js'
 import ScopeTestController from '../app/controllers/ScopeTestController.js'
+import SerializerFallbackTestsController from '../app/controllers/SerializerFallbackTestsController.js'
 import SerializerTestsController from '../app/controllers/SerializerTestsController.js'
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
 import User from '../app/models/User.js'
-import SerializerFallbackTestsController from '../app/controllers/SerializerFallbackTestsController.js'
 
-export default (r: PsychicRouter) => {
+export default function routes(r: PsychicRouter) {
   r.get('circular', CircularController, 'hello')
   r.get('ping', UsersController, 'ping')
   r.post('ping', UsersController, 'ping')

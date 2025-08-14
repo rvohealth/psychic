@@ -1,3 +1,7 @@
+## 1.7.2
+
+- generate admin routes in routes.admin.ts (requires `routes.admin.ts` next to `routes.ts`)
+
 ## 1.7.1
 
 - compute openapi doc during intiialization, rather than problematically reading from a file cache

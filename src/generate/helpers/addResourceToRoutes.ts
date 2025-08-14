@@ -1,3 +1,4 @@
+import * as fsSync from 'node:fs'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import UnexpectedUndefined from '../../error/UnexpectedUndefined.js'
@@ -12,7 +13,14 @@ export default async function addResourceToRoutes(
   },
 ) {
   const psychicApp = PsychicApp.getOrFail()
-  const routesFilePath = path.join(psychicApp.apiRoot, psychicPath('apiRoutes'))
+  let routesFilePath = path.join(psychicApp.apiRoot, psychicPath('apiRoutes'))
+
+  const adminRouteRegexp = /^\/?admin/
+  if (adminRouteRegexp.test(route)) {
+    const adminRoutesFilePath = routesFilePath.replace(/\.ts$/, '.admin.ts')
+    if (fsSync.existsSync(adminRoutesFilePath)) routesFilePath = adminRoutesFilePath
+  }
+
   let routes = (await fs.readFile(routesFilePath)).toString()
 
   const matchesAndReplacements = addResourceToRoutes_routeToRegexAndReplacements(route, options)
@@ -74,8 +82,8 @@ export function addResourceToRoutes_routeToRegexAndReplacements(
   }
 
   regexAndReplacements.push({
-    regex: /^export default \(r: PsychicRouter\) => \{\n/m,
-    replacement: `export default (r: PsychicRouter) => {\n${replacement}`,
+    regex: /^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m,
+    replacement: `export $1(r: PsychicRouter)$2{\n${replacement}`,
   })
 
   return regexAndReplacements
