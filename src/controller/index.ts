@@ -275,14 +275,36 @@ export default class PsychicController {
    * ```
    */
   public get params(): PsychicParamsDictionary {
+    const query = this.getCachedQuery()
+
     const params: PsychicParamsDictionary = {
-      ...this.req.params,
+      ...query,
       ...this.req.body,
-      ...this.req.query,
+      ...this.req.params,
     } as PsychicParamsDictionary
 
     return params
   }
+
+  private getCachedQuery(): object {
+    if (this._cachedQuery) return this._cachedQuery
+
+    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[this.action]
+    const query = this.req.query
+
+    if (openapiEndpointRenderer) {
+      // validateOpenapiQuery will modify the query passed into it to conform
+      // to the openapi shape with regards to arrays, since these are notoriously
+      // problematic within the query layer
+      this.computedOpenapiNames.forEach(openapiName => {
+        new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiQuery(query)
+      })
+    }
+
+    this._cachedQuery = query
+    return this._cachedQuery
+  }
+  private _cachedQuery: object
 
   /**
    * @returns the value found for a particular param

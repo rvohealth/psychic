@@ -89,6 +89,15 @@ export default class OpenapiValidationTestsController extends ApplicationControl
           type: 'string[]',
         },
       },
+      'otherStringArray[]': {
+        required: false,
+        schema: {
+          type: ['array', 'null'],
+          items: {
+            type: 'string',
+          },
+        },
+      },
     },
   })
   public queryOpenapiTest() {
@@ -96,7 +105,26 @@ export default class OpenapiValidationTestsController extends ApplicationControl
       stringParam: this.params.stringParam,
       numericParam: this.params.numericParam,
       stringArray: this.params.stringArray,
+      'otherStringArray[]': this.params['otherStringArray[]'],
     })
+  }
+
+  @OpenAPI({
+    status: 200,
+    query: {
+      stringArray: {
+        required: true,
+        schema: {
+          type: ['array', 'null'],
+          items: {
+            type: 'string',
+          },
+        },
+      },
+    },
+  })
+  public queryRequiredValueTest() {
+    this.ok({ stringArray: this.params.stringArray })
   }
 
   @OpenAPI({

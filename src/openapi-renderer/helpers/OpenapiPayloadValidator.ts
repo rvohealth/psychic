@@ -1,3 +1,4 @@
+import { OpenapiSchemaArray } from '@rvoh/dream'
 import OpenapiRequestValidationFailure from '../../error/openapi/OpenapiRequestValidationFailure.js'
 import OpenapiResponseValidationFailure from '../../error/openapi/OpenapResponseValidationFailure.js'
 import validateOpenApiSchema, { ValidateOpenapiSchemaOptions } from '../../helpers/validateOpenApiSchema.js'
@@ -106,10 +107,7 @@ export default class OpenapiPayloadValidator {
    *
    * @param query - the request query params
    */
-  public validateOpenapiQuery(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    query: any,
-  ): void {
+  public validateOpenapiQuery<T>(query: T): void {
     const openapiEndpointRenderer = this.openapiEndpointRenderer
     const openapiName = this.openapiName
 
@@ -119,8 +117,53 @@ export default class OpenapiPayloadValidator {
         renderOpts: this.renderOpts,
       })
 
+      this.conformQueryArrayParamsToOpenapiShape(query, openapiQueryParams)
+
       this.validateOrFail(query, this.openapiParameterResponsesToSchemaObject(openapiQueryParams), 'query')
     }
+  }
+
+  /**
+   * transforms the provided query when it detects an openapi
+   * schema that desires an array, but is receiving
+   * only a single query parameter. i.e. calling the following:
+   *
+   * ```ts
+   * conformQueryArrayParamsToOpenapiShape(
+   *   { int: 123, arr: 456 },
+   *   {
+   *     type: 'object',
+   *     properties: {
+   *       int: { type: 'integer' },
+   *       arr: { type: 'array', items: { type: 'string' }}
+   *     }
+   *   }
+   * )
+   * // { int: 123, arr: ['456'] }
+   * ```
+   *
+   * @param query - the provided query payload
+   * @param queryOpenapiParameterResponses - the computed openapi parameter responses for this endpoint
+   * @returns void
+   */
+  private conformQueryArrayParamsToOpenapiShape<T>(
+    query: T,
+    queryOpenapiParameterResponses: OpenapiParameterResponse[],
+  ): void {
+    queryOpenapiParameterResponses.forEach(parameterResponse => {
+      const schemaType = (parameterResponse.schema as OpenapiSchemaArray).type
+      const isArray = schemaType === 'array' || (Array.isArray(schemaType) && schemaType.includes('array'))
+
+      if (isArray) {
+        const val = query[parameterResponse.name as keyof typeof query]
+
+        if (val === '') {
+          query[parameterResponse.name as keyof typeof query] = [] as T[keyof T]
+        } else if (val !== undefined && !Array.isArray(val)) {
+          query[parameterResponse.name as keyof typeof query] = [val] as T[keyof T]
+        }
+      }
+    })
   }
 
   /**

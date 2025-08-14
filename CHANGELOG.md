@@ -1,3 +1,7 @@
+## 1.8.2
+
+- openapi validation properly coerces non-array query params to arrays when validating, since both express and ajv fail to do this under the hood properly. This solves issues where sending up array params with only a single item in them are not treated as arrays.
+
 ## 1.8.1
 
 - do not coerce types in ajv when processing request or response bodies during validation. Type coercion will still happen for headers and query params, since they will need to respect the schema type specified in the openapi docuement.

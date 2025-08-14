@@ -88,6 +88,114 @@ describe('openapi validation', () => {
           })
         })
       })
+
+      context('array handling', () => {
+        context('no array brackets', () => {
+          it('can parse single-value array', async () => {
+            const res = await request.get('/queryOpenapiTest', 200, {
+              query: {
+                stringArray: ['hello'],
+              },
+            })
+            expect(res.body).toEqual({
+              stringArray: ['hello'],
+            })
+          })
+
+          it('can parse multi-value array', async () => {
+            const res = await request.get('/queryOpenapiTest', 200, {
+              query: {
+                stringArray: ['hello', 'world'],
+              },
+            })
+            expect(res.body).toEqual({
+              stringArray: ['hello', 'world'],
+            })
+          })
+
+          it('will reject blank values when prompted to', async () => {
+            await request.get('/queryRequiredValueTest', 400)
+            await request.get('/queryRequiredValueTest', 400, {
+              query: {
+                stringArray: [],
+              },
+            })
+          })
+
+          it('coerces blank string to a blank array', async () => {
+            const res = await request.get('/queryOpenapiTest?stringArray=', 200)
+            expect(res.body).toEqual({ stringArray: [] })
+          })
+
+          it('missing query params are allowed unless required', async () => {
+            const res = await request.get('/queryOpenapiTest', 200)
+            expect(res.body).toEqual({})
+          })
+
+          it('coerces blank string to a blank array', async () => {
+            const res = await request.get('/queryRequiredValueTest', 200, {
+              query: {
+                stringArray: '',
+              },
+            })
+            expect(res.body).toEqual({ stringArray: [] })
+          })
+
+          it('coerces null to a blank array', async () => {
+            const res = await request.get('/queryRequiredValueTest', 200, {
+              query: {
+                stringArray: null,
+              },
+            })
+            expect(res.body).toEqual({ stringArray: [] })
+          })
+        })
+
+        context('array brackets', () => {
+          it('can parse single-value array', async () => {
+            const res = await request.get('/queryOpenapiTest', 200, {
+              query: {
+                'otherStringArray[]': 'hello',
+              },
+            })
+            expect(res.body).toEqual({
+              'otherStringArray[]': ['hello'],
+            })
+          })
+
+          it('rejects unexpected null', async () => {
+            await request.get('/queryRequiredValueTest', 400, {
+              query: {
+                'otherStringArray[]': null,
+              },
+            })
+          })
+
+          it('can parse multi-value array', async () => {
+            const res = await request.get('/queryOpenapiTest', 200, {
+              query: {
+                'otherStringArray[]': ['hello', 'world'],
+              },
+            })
+            expect(res.body).toEqual({
+              'otherStringArray[]': ['hello', 'world'],
+            })
+          })
+
+          it('will reject blank values when prompted to', async () => {
+            await request.get('/queryRequiredValueTest', 400, {
+              query: {
+                'otherStringArray[]': '',
+              },
+            })
+            await request.get('/queryRequiredValueTest', 400, {
+              query: {
+                'otherStringArray[]': null,
+              },
+            })
+          })
+        })
+      })
     })
 
     context('without validation active on this openapi endpoint', () => {
