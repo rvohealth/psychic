@@ -1,3 +1,7 @@
+## 1.8.3
+
+- don't build openapi when `bypassModelIntegrityCheck: true`
+
 ## 1.8.2
 
 - openapi validation properly coerces non-array query params to arrays when validating, since both express and ajv fail to do this under the hood properly. This solves issues where sending up array params with only a single item in them are not treated as arrays.

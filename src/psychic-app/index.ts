@@ -116,11 +116,13 @@ export default class PsychicApp {
 
         cachePsychicApp(psychicApp)
 
-        // routes _must_ be built before openapi
-        // cache can be processed
-        await psychicApp.buildRoutesCache()
+        if (!opts.bypassModelIntegrityCheck) {
+          // routes _must_ be built before openapi
+          // cache can be processed
+          await psychicApp.buildRoutesCache()
 
-        psychicApp.buildOpenapiCache()
+          psychicApp.buildOpenapiCache()
+        }
       },
     )
 
