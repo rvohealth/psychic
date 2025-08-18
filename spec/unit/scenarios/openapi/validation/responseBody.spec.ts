@@ -191,7 +191,15 @@ describe('openapi validation', () => {
 
     context('when the model does not have a serializers getter, but the status is 204', () => {
       it('does not throw an eror', async () => {
-        await request.post('/dontThrowMissingSerializersDefinition', 204)
+        await request.post('/dontThrowMissingSerializersDefinition204', 204)
+      })
+    })
+
+    context('when the model does not have a serializers getter, but the status is 204', () => {
+      it('does not throw an eror', async () => {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+        const body = (await request.post('/dontThrowMissingSerializersDefinition201', 201)).body
+        expect(body).toEqual('12345')
       })
     })
   })

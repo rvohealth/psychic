@@ -1,6 +1,7 @@
 ## 1.8.4
 
-- OpenAPI decorator with 204 status does not throw an exception when passed a Dream model without a `serializers` getter
+- OpenAPI decorator with default 204 status does not throw an exception when passed a Dream model without a `serializers` getter
+- OpenAPI decorator that defines an explicit OpenAPI shape for the default status code does not throw an exception when passed a Dream model without a `serializers` getter
 
 ## 1.8.3
 

@@ -319,7 +319,8 @@ export default class OpenapiEndpointRenderer<
     serializersAppearingInHandWrittenOpenapi,
   }: ToSchemaObjectOpts): void {
     const serializers =
-      this.getSerializerClasses() ?? ([] as (DreamModelSerializerType | SimpleObjectSerializerType)[])
+      this.extractSerializerFromSerializableArgument() ??
+      ([] as (DreamModelSerializerType | SimpleObjectSerializerType)[])
 
     serializersToSchemaObjects(
       this.controllerClass,
@@ -834,7 +835,7 @@ export default class OpenapiEndpointRenderer<
   }: {
     renderOpts: OpenapiRenderOpts
   }): ReferencedSerializersAndOpenapiContent {
-    const serializerClasses = this.getSerializerClasses()
+    const serializerClasses = this.extractSerializerFromSerializableArgument()
     if (!serializerClasses)
       return {
         referencedSerializers: [],
@@ -1012,8 +1013,11 @@ export default class OpenapiEndpointRenderer<
    * match.
    */
 
-  private getSerializerClasses(): (DreamModelSerializerType | SimpleObjectSerializerType)[] | null {
+  private extractSerializerFromSerializableArgument():
+    | (DreamModelSerializerType | SimpleObjectSerializerType)[]
+    | null {
     if (this.status === 204) return null
+    if (this.openapiResponseProvidedForStatus(this.status)) return null
     if (!this.dreamsOrSerializers) return null
 
     const serializers = compact(
@@ -1029,6 +1033,11 @@ export default class OpenapiEndpointRenderer<
     })
 
     return serializers
+  }
+
+  private openapiResponseProvidedForStatus(status: HttpStatusCodeNumber | undefined): boolean {
+    if (status === undefined) return false
+    return !!this.responses?.[status]
   }
 
   /**

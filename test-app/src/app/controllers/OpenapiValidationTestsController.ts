@@ -284,7 +284,19 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   @OpenAPI(ModelWithoutSerializer, {
     status: 204,
   })
-  public dontThrowMissingSerializersDefinition() {
+  public dontThrowMissingSerializersDefinition204() {
     this.noContent()
+  }
+
+  @OpenAPI(ModelWithoutSerializer, {
+    status: 201,
+    responses: {
+      201: {
+        type: 'string',
+      },
+    },
+  })
+  public dontThrowMissingSerializersDefinition201() {
+    this.created('12345')
   }
 }

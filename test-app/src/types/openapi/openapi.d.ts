@@ -580,6 +580,111 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/dontThrowMissingSerializersDefinition201": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        name?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Created */
+                201: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": string;
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/dontThrowMissingSerializersDefinition204": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        name?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Success, no content */
+                204: components["responses"]["NoContent"];
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/greeter/justforspecs": {
         parameters: {
             query?: never;
@@ -772,8 +877,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Success, no content */
-                204: {
+                /** @description Success */
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -826,8 +931,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Success, no content */
-                204: {
+                /** @description Success */
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -882,8 +987,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Success, no content */
-                204: {
+                /** @description Success */
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -1154,6 +1259,8 @@ export interface paths {
                 numericParam?: number;
                 /** @description stringArray */
                 stringArray?: string[];
+                /** @description otherStringArray[] */
+                "otherStringArray[]"?: string[] | null;
             };
             header?: {
                 /** @description custom header */
@@ -1171,6 +1278,8 @@ export interface paths {
                     numericParam?: number;
                     /** @description stringArray */
                     stringArray?: string[];
+                    /** @description otherStringArray[] */
+                    "otherStringArray[]"?: string[] | null;
                 };
                 header?: {
                     /** @description custom header */
@@ -2159,8 +2268,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Success, no content */
-                204: {
+                /** @description Success */
+                200: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2641,13 +2750,6 @@ export interface components {
             /** Format: bigint */
             id: string | number | bigint;
             nickname: string;
-        };
-        Post: {
-            body: string | null;
-            comments: components["schemas"]["Comment"][];
-            explicitlyOmittedFromParamSafeColumns: string | null;
-            /** Format: bigint */
-            id: string | number | bigint;
         };
         PostWithComments: {
             body: string | null;
