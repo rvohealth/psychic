@@ -188,5 +188,11 @@ describe('openapi validation', () => {
         })
       })
     })
+
+    context('when the model does not have a serializers getter, but the status is 204', () => {
+      it('does not throw an eror', async () => {
+        await request.post('/dontThrowMissingSerializersDefinition', 204)
+      })
+    })
   })
 })

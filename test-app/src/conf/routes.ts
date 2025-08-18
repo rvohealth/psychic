@@ -103,6 +103,11 @@ export default function routes(r: PsychicRouter) {
     'requestBodyboilerplateSchemaTest',
   )
   r.post('invalidRequestBody', OpenapiValidationTestsController, 'invalidRequestBody')
+  r.post(
+    'dontThrowMissingSerializersDefinition',
+    OpenapiValidationTestsController,
+    'dontThrowMissingSerializersDefinition',
+  )
   r.get(
     'serializer-fallbacks/uses-openapi-serializer',
     SerializerFallbackTestsController,

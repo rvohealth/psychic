@@ -818,8 +818,8 @@ export default class OpenapiEndpointRenderer<
    * Returns the default status code that should be used
    * if it was not passed.
    */
-  private get defaultStatus() {
-    if (!this.getSerializerClasses()) return 204
+  private get defaultStatus(): HttpStatusCodeNumber {
+    if (!this.dreamsOrSerializers) return 204
     return 200
   }
 
@@ -1013,6 +1013,7 @@ export default class OpenapiEndpointRenderer<
    */
 
   private getSerializerClasses(): (DreamModelSerializerType | SimpleObjectSerializerType)[] | null {
+    if (this.status === 204) return null
     if (!this.dreamsOrSerializers) return null
 
     const serializers = compact(

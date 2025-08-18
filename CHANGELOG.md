@@ -1,3 +1,7 @@
+## 1.8.4
+
+- OpenAPI decorator with 204 status does not throw an exception when passed a Dream model without a `serializers` getter
+
 ## 1.8.3
 
 - don't build openapi when `bypassModelIntegrityCheck: true`

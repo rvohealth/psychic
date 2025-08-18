@@ -1,5 +1,6 @@
 import EnvInternal from '../../../../src/helpers/EnvInternal.js'
 import { OpenAPI } from '../../../../src/index.js'
+import ModelWithoutSerializer from '../models/ModelWithoutSerializer.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class OpenapiValidationTestsController extends ApplicationController {
@@ -278,5 +279,12 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   })
   public responseAlternateStatusTest() {
     this.unauthorized(12345)
+  }
+
+  @OpenAPI(ModelWithoutSerializer, {
+    status: 204,
+  })
+  public dontThrowMissingSerializersDefinition() {
+    this.noContent()
   }
 }
