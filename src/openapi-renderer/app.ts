@@ -7,6 +7,7 @@ import { RouteConfig } from '../router/route-manager.js'
 import { HttpMethod, HttpMethods } from '../router/types.js'
 import { DEFAULT_OPENAPI_COMPONENT_RESPONSES, DEFAULT_OPENAPI_COMPONENT_SCHEMAS } from './defaults.js'
 import {
+  MissingControllerActionPairingInRoutes,
   OpenapiEndpointResponsePath,
   OpenapiParameterResponse,
   OpenapiRenderOpts,
@@ -57,7 +58,11 @@ export default class OpenapiAppRenderer {
     return output
   }
 
-  public static _toObject(routes: RouteConfig[], openapiName: string): OpenapiSchema {
+  public static _toObject(
+    routes: RouteConfig[],
+    openapiName: string,
+    { bypassMissingRoutes = false }: { bypassMissingRoutes?: boolean } = {},
+  ): OpenapiSchema {
     const renderOpts: OpenapiRenderOpts = {
       casing: 'camel',
       suppressResponseEnums: suppressResponseEnumsConfig(openapiName),
@@ -117,47 +122,54 @@ export default class OpenapiAppRenderer {
         const renderer = controller.openapi[key]
         if (renderer === undefined) throw new UnexpectedUndefined()
 
-        const endpointPayloadAndReferencedSerializers = renderer.toPathObject(routes, {
-          openapiName,
-          renderOpts,
-        })
-        const serializersAppearingInHandWrittenOpenapi =
-          endpointPayloadAndReferencedSerializers.referencedSerializers
-        const endpointPayload = endpointPayloadAndReferencedSerializers.openapi
+        try {
+          const endpointPayloadAndReferencedSerializers = renderer.toPathObject(routes, {
+            openapiName,
+            renderOpts,
+          })
+          const serializersAppearingInHandWrittenOpenapi =
+            endpointPayloadAndReferencedSerializers.referencedSerializers
+          const endpointPayload = endpointPayloadAndReferencedSerializers.openapi
 
-        if (endpointPayload === undefined) throw new UnexpectedUndefined()
-        const path = Object.keys(endpointPayload)[0]
-        if (path === undefined) throw new UnexpectedUndefined()
-        const endpointPayloadPath = endpointPayload[path]
-        if (endpointPayloadPath === undefined) throw new UnexpectedUndefined()
+          if (endpointPayload === undefined) throw new UnexpectedUndefined()
+          const path = Object.keys(endpointPayload)[0]
+          if (path === undefined) throw new UnexpectedUndefined()
+          const endpointPayloadPath = endpointPayload[path]
+          if (endpointPayloadPath === undefined) throw new UnexpectedUndefined()
 
-        const method = (Object.keys(endpointPayloadPath) as HttpMethod[]).find(key =>
-          HttpMethods.includes(key),
-        )!
+          const method = (Object.keys(endpointPayloadPath) as HttpMethod[]).find(key =>
+            HttpMethods.includes(key),
+          )!
 
-        if (!finalOutput.paths[path]) {
-          finalOutput.paths[path] = { parameters: [] } as unknown as OpenapiEndpointResponsePath
-        }
+          if (!finalOutput.paths[path]) {
+            finalOutput.paths[path] = { parameters: [] } as unknown as OpenapiEndpointResponsePath
+          }
 
-        const finalPathObject = finalOutput.paths[path]
-        finalPathObject[method] = endpointPayloadPath[method]
+          const finalPathObject = finalOutput.paths[path]
+          finalPathObject[method] = endpointPayloadPath[method]
 
-        finalPathObject.parameters = this.combineParameters([
-          ...finalPathObject.parameters,
-          ...endpointPayloadPath.parameters,
-        ])
+          finalPathObject.parameters = this.combineParameters([
+            ...finalPathObject.parameters,
+            ...endpointPayloadPath.parameters,
+          ])
 
-        renderer.toSchemaObject({
-          openapiName,
-          renderOpts,
-          renderedSchemasOpenapi,
-          alreadyExtractedDescendantSerializers,
-          serializersAppearingInHandWrittenOpenapi,
-        })
+          renderer.toSchemaObject({
+            openapiName,
+            renderOpts,
+            renderedSchemasOpenapi,
+            alreadyExtractedDescendantSerializers,
+            serializersAppearingInHandWrittenOpenapi,
+          })
 
-        finalOutput.components.schemas = {
-          ...finalOutput.components.schemas,
-          ...renderedSchemasOpenapi,
+          finalOutput.components.schemas = {
+            ...finalOutput.components.schemas,
+            ...renderedSchemasOpenapi,
+          }
+        } catch (err) {
+          if (err instanceof MissingControllerActionPairingInRoutes && bypassMissingRoutes) {
+            continue
+          }
+          throw err
         }
       }
     }
