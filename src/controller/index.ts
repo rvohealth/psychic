@@ -288,10 +288,15 @@ export default class PsychicController {
     return params
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private get currentOpenapiRenderer(): OpenapiEndpointRenderer<any, any> | undefined {
+    return (this.constructor as typeof PsychicController).openapi?.[this.action]
+  }
+
   private getCachedQuery(): object {
     if (this._cachedQuery) return this._cachedQuery
 
-    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[this.action]
+    const openapiEndpointRenderer = this.currentOpenapiRenderer
     const query = this.req.query
 
     if (openapiEndpointRenderer) {
@@ -914,7 +919,7 @@ export default class PsychicController {
    * @param action - the action to use when validating the query params.
    */
   private validateOpenapiRequestBodyForAction(): void {
-    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[this.action]
+    const openapiEndpointRenderer = this.currentOpenapiRenderer
     if (!openapiEndpointRenderer) return
 
     this.computedOpenapiNames.forEach(openapiName => {
@@ -933,7 +938,7 @@ export default class PsychicController {
    * @param action - the action to use when validating the query params.
    */
   private validateOpenapiHeadersForAction(): void {
-    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[this.action]
+    const openapiEndpointRenderer = this.currentOpenapiRenderer
     if (!openapiEndpointRenderer) return
 
     this.computedOpenapiNames.forEach(openapiName => {
@@ -952,7 +957,7 @@ export default class PsychicController {
    * @param action - the action to use when validating the query params.
    */
   private validateOpenapiQueryForAction(): void {
-    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[this.action]
+    const openapiEndpointRenderer = this.currentOpenapiRenderer
     if (!openapiEndpointRenderer) return
 
     this.computedOpenapiNames.forEach(openapiName => {
@@ -973,7 +978,7 @@ export default class PsychicController {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
   ): void {
-    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[this.action]
+    const openapiEndpointRenderer = this.currentOpenapiRenderer
     if (!openapiEndpointRenderer) return
 
     this.computedOpenapiNames.forEach(openapiName => {

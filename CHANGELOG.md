@@ -5,6 +5,8 @@
    b. when about to render the action
    This ensures that we return the proper 401/403 response instead of 400 for authenticated endpoints that fail authentication and prevents unauthenticated requests from gaining information about the API
 
+2. Ability to configure whether or not OpenAPI validation errors include detailed information
+
 ## 1.8.6
 
 remove dead env variable, now that we are open sourced

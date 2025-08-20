@@ -39,6 +39,8 @@ describe('openapi validation', () => {
 
       context('with an invalid query', () => {
         it('rejects the request', async () => {
+          vi.spyOn(PsychicApp.prototype, 'includeDetailedOpenapiValidationErrors').mockReturnValue(true)
+
           const res = await request.get('/queryOpenapiTest', 400, {
             query: {
               numericParam: ['hello'],
@@ -62,6 +64,8 @@ describe('openapi validation', () => {
 
       context('with missing required query params', () => {
         it('denies the request', async () => {
+          vi.spyOn(PsychicApp.prototype, 'includeDetailedOpenapiValidationErrors').mockReturnValue(true)
+
           const res = await request.get('/queryRequiredOpenapiTest', 400)
           expect(res.body).toEqual({
             type: 'openapi',

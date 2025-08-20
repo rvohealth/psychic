@@ -408,6 +408,17 @@ Try setting it to something valid, like:
    * @internal
    *
    * @param openapiName - the openapiName you are looking to check validation for
+   * @returns true if configured to return detailed OpenAPI validation errors
+   */
+  public includeDetailedOpenapiValidationErrors(openapiName: string): boolean {
+    const openapiConf = this.openapi[openapiName]
+    return openapiConf?.validate?.detailedErrors || false
+  }
+
+  /**
+   * @internal
+   *
+   * @param openapiName - the openapiName you are looking to check validation for
    * @param target - the target for the validation, either 'requestBody', 'headers', 'query', or 'responseBody'
    * @returns true if the validation for this particular openapiName is active
    */

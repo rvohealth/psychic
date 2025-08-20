@@ -305,7 +305,11 @@ export default class OpenapiPayloadValidator {
     if (!validationResults.isValid) {
       const errorClass =
         target === 'responseBody' ? OpenapiResponseValidationFailure : OpenapiRequestValidationFailure
-      throw new errorClass(validationResults.errors || [], target)
+      throw new errorClass(
+        validationResults.errors || [],
+        target,
+        this.openapiEndpointRenderer.includeDetailedOpenapiValidationErrors(this.openapiName),
+      )
     }
   }
 

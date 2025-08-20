@@ -161,6 +161,19 @@ export default class OpenapiEndpointRenderer<
     this.defaultResponse = defaultResponse
     this.validate = validate
   }
+  /**
+   * @internal
+   *
+   * reads the validation options for this particular endpoint. If they
+   * explicitly permit or don't permit detailed validation errors, then it
+   * will return true or false. If detailed validation errors are not set on this endpoint,
+   * it will fall back to PsychicApp to see if detailed validation errors are turned on
+   * globally for the given openapiName.
+   */
+  public includeDetailedOpenapiValidationErrors(openapiName: string) {
+    if (this.validate?.detailedErrors !== undefined) return this.validate.detailedErrors
+    return PsychicApp.getOrFail().includeDetailedOpenapiValidationErrors(openapiName)
+  }
 
   /**
    * @internal
@@ -224,11 +237,9 @@ export default class OpenapiEndpointRenderer<
    * globally for the provided type for the given openapiName.
    */
   private shouldValidateOpenapiPayload(openapiName: string, target: OpenapiValidateTarget): boolean {
-    const psychicApp = PsychicApp.getOrFail()
-
-    if (this.validate?.all !== undefined) return this.validate?.all
-    if (this.validate?.[target] !== undefined) return this.validate?.[target]
-    return psychicApp.openapiValidationIsActive(openapiName, target)
+    if (this.validate?.all !== undefined) return this.validate.all
+    if (this.validate?.[target] !== undefined) return this.validate[target]
+    return PsychicApp.getOrFail().openapiValidationIsActive(openapiName, target)
   }
 
   /**
@@ -1375,26 +1386,28 @@ export interface OpenapiEndpointRendererOpts<
 
 export type OpenapiValidateOption = {
   /**
-   * set to true if you want the request body
-   * to be validated against the openapi schema
+   * set to true to include detailed errors when openapi validation fails
+   * (false or undefined result in only a 400 status code with no details)
+   */
+  detailedErrors?: boolean
+
+  /**
+   * set to true to validate the request body against the openapi schema
    */
   requestBody?: boolean
 
   /**
-   * set to true if you want the response body
-   * to be validated against the openapi schema
+   * set to true to validate the response body against the openapi schema
    */
   responseBody?: boolean
 
   /**
-   * set to true if you want the request headers
-   * to be validated against the openapi schema
+   * set to true to validate the request headers against the openapi schema
    */
   headers?: boolean
 
   /**
-   * set to true if you want the request query
-   * to be validated against the openapi schema
+   * set to true to validate the request query against the openapi schema
    */
   query?: boolean
 

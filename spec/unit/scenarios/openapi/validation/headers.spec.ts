@@ -35,6 +35,8 @@ describe('openapi validation', () => {
 
       context('with invalid headers', () => {
         it('denies the request', async () => {
+          vi.spyOn(PsychicApp.prototype, 'includeDetailedOpenapiValidationErrors').mockReturnValue(true)
+
           const res = await request.get('/headersOpenapiTest', 400, {
             headers: {
               myDate: '2020-01-ABC',
@@ -74,6 +76,8 @@ describe('openapi validation', () => {
 
       context('with missing required headers', () => {
         it('denies the request', async () => {
+          vi.spyOn(PsychicApp.prototype, 'includeDetailedOpenapiValidationErrors').mockReturnValue(true)
+
           const res = await request.get('/headersOpenapiTest', 400)
           expect(res.body).toEqual({
             type: 'openapi',

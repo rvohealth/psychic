@@ -415,11 +415,15 @@ suggested fix:  "${convertRouteParams(path)}"
       } else if (err instanceof ValidationError) {
         res.status(422).json({ type: 'validator', errors: err.errors || {} })
       } else if (err instanceof OpenapiRequestValidationFailure) {
-        res.status(400).json({
-          type: 'openapi',
-          target: err.target,
-          errors: err.errors,
-        })
+        if (err.includeDetailedOpenapiValidationErrors) {
+          res.status(400).json({
+            type: 'openapi',
+            target: err.target,
+            errors: err.errors,
+          })
+        } else {
+          res.sendStatus(400)
+        }
       } else if (err instanceof ParamValidationError) {
         res.status(400).json({
           type: 'validator',
