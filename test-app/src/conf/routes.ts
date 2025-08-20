@@ -20,6 +20,7 @@ import SerializerTestsController from '../app/controllers/SerializerTestsControl
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
 import User from '../app/models/User.js'
+import OpenapiMissingRouteTestController from '../app/controllers/OpenapiMissingRouteTestController.js'
 
 export default function routes(r: PsychicRouter) {
   r.get('circular', CircularController, 'hello')
@@ -273,4 +274,8 @@ export default function routes(r: PsychicRouter) {
     res.json({ id: (req.user as User)?.id })
   })
   r.get('controller-passport-test-persistence', PassportAuthedController, 'testPassportAuth')
+
+  if (process.env.SKIP_TEST_ROUTE !== '1') {
+    r.get('openapi-missing-route-test', OpenapiMissingRouteTestController, 'missingRoute')
+  }
 }

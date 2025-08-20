@@ -40,7 +40,7 @@ export function getCachedOpenapiDocOrFail(openapiName: string) {
 export function cacheOpenapiDoc(openapiName: string, routes: RouteConfig[]): void {
   if (_openapiData[openapiName]) return
 
-  const openapiDoc = OpenapiAppRenderer._toObject(routes, openapiName)
+  const openapiDoc = OpenapiAppRenderer._toObject(routes, openapiName, { bypassMissingRoutes: true })
   _openapiData[openapiName] = openapiDoc?.components
     ? ({ components: openapiDoc.components } as OpenapiShell)
     : FILE_DOES_NOT_EXIST
@@ -57,6 +57,10 @@ export function cacheOpenapiDoc(openapiName: string, routes: RouteConfig[]): voi
  */
 export function ignoreOpenapiDoc(openapiName: string): void {
   _openapiData[openapiName] = FILE_WAS_IGNORED
+}
+
+export function _testOnlyClearOpenapiCache(openapiName: string) {
+  _openapiData[openapiName] = undefined as unknown as typeof FILE_WAS_IGNORED
 }
 
 const FILE_DOES_NOT_EXIST = 'FILE_DOES_NOT_EXIST'

@@ -4,7 +4,9 @@ import PsychicAppInitMissingPackageManager from '../../../src/error/psychic-app/
 import PsychicAppInitMissingRoutesCallback from '../../../src/error/psychic-app/init-missing-routes-callback.js'
 import { PsychicApp } from '../../../src/index.js'
 import * as LoadControllersModule from '../../../src/psychic-app/helpers/import/importControllers.js'
+import { _testOnlyClearOpenapiCache } from '../../../src/psychic-app/openapi-cache.js'
 import importDefault from '../../../test-app/src/app/helpers/importDefault.js'
+import initializePsychicApp from '../../../test-app/src/cli/helpers/initializePsychicApp.js'
 import dreamCb from '../../../test-app/src/conf/dream.js'
 
 describe('PsychicApp#init', () => {
@@ -23,6 +25,23 @@ describe('PsychicApp#init', () => {
       }
 
       await expect(PsychicApp.init(cb, dreamCb)).resolves.not.toThrow()
+    })
+
+    context('when an openapi-decorated route is missing', () => {
+      // this came up as an actual bug in some of our projects,
+      // since we will intentionally only allow some routes in
+      // our dev/stage environments.
+      it('does not fail to initialize the psychic app', async () => {
+        process.env.SKIP_TEST_ROUTE = '1'
+
+        // blow away the openapi cache, so that re-running
+        // initializePsychicApp will force the cache to be
+        // rebuilt.
+        _testOnlyClearOpenapiCache('default')
+
+        await initializePsychicApp()
+        process.env.SKIP_TEST_ROUTE = undefined
+      })
     })
   })
 
@@ -51,7 +70,7 @@ describe('PsychicApp#init', () => {
       })
     })
 
-    context('routes not set', () => {
+    context('routes callback not provided', () => {
       it('throws targeted exception', async () => {
         const cb = async (app: PsychicApp) => {
           app.set('apiRoot', 'how/yadoin')
