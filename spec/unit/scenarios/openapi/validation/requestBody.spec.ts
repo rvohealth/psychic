@@ -1,7 +1,7 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import { PsychicApp, PsychicServer } from '../../../../../src/index.js'
-import User from '../../../../../test-app/src/app/models/User.js'
 import OpenapiEndpointRenderer from '../../../../../src/openapi-renderer/endpoint.js'
+import User from '../../../../../test-app/src/app/models/User.js'
 
 describe('openapi validation', () => {
   beforeEach(async () => {
@@ -98,6 +98,26 @@ describe('openapi validation', () => {
           await request.post('/requestBodyOpenapiTest', 204, {
             data: {
               requiredInt: 123,
+            },
+          })
+        })
+      })
+
+      context('status response in BeforeAction', () => {
+        it('does not validate params against OpenAPI spec', async () => {
+          await request.post('/beforeAction403', 403, {
+            data: {
+              stringParam: 7,
+            },
+          })
+        })
+      })
+
+      context('accesses params in BeforeAction', () => {
+        it('validates params against OpenAPI spec', async () => {
+          await request.post('/beforeActionParamsAccessed', 400, {
+            data: {
+              stringParam: 7,
             },
           })
         })

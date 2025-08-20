@@ -8,6 +8,7 @@ import BalloonsController from '../app/controllers/BalloonsController.js'
 import CircularController from '../app/controllers/CircularController.js'
 import GreeterController from '../app/controllers/GreeterController.js'
 import OpenapiDecoratorTestController from '../app/controllers/OpenapiDecoratorTestsController.js'
+import OpenapiMissingRouteTestController from '../app/controllers/OpenapiMissingRouteTestController.js'
 import OpenapiOverridesTestController from '../app/controllers/OpenapiOverridesTestsController.js'
 import OpenapiValidationTestsController from '../app/controllers/OpenapiValidationTestsController.js'
 import ParamsTestController from '../app/controllers/ParamsTestController.js'
@@ -20,7 +21,6 @@ import SerializerTestsController from '../app/controllers/SerializerTestsControl
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
 import User from '../app/models/User.js'
-import OpenapiMissingRouteTestController from '../app/controllers/OpenapiMissingRouteTestController.js'
 
 export default function routes(r: PsychicRouter) {
   r.get('circular', CircularController, 'hello')
@@ -103,6 +103,10 @@ export default function routes(r: PsychicRouter) {
     OpenapiValidationTestsController,
     'requestBodyboilerplateSchemaTest',
   )
+
+  r.post('beforeAction403', OpenapiValidationTestsController, 'beforeAction403')
+  r.post('beforeActionParamsAccessed', OpenapiValidationTestsController, 'beforeActionParamsAccessed')
+
   r.post('invalidRequestBody', OpenapiValidationTestsController, 'invalidRequestBody')
 
   r.post(

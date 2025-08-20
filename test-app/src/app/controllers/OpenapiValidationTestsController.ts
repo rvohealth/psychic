@@ -1,9 +1,46 @@
 import EnvInternal from '../../../../src/helpers/EnvInternal.js'
-import { OpenAPI } from '../../../../src/index.js'
+import { BeforeAction, OpenAPI } from '../../../../src/index.js'
 import ModelWithoutSerializer from '../models/ModelWithoutSerializer.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class OpenapiValidationTestsController extends ApplicationController {
+  @BeforeAction({ only: ['beforeAction403'] })
+  public respondWith403() {
+    this.forbidden()
+  }
+
+  @BeforeAction({ only: ['beforeActionParamsAccessed'] })
+  public accessParams() {
+    if (typeof this.params.stringParam === 'number')
+      throw new Error('OpenAPI validation didn’t kick in during this.params')
+  }
+
+  @OpenAPI({
+    status: 200,
+    requestBody: {
+      type: 'object',
+      properties: {
+        stringParam: 'string',
+      },
+    },
+  })
+  public beforeAction403() {
+    this.ok()
+  }
+
+  @OpenAPI({
+    status: 200,
+    requestBody: {
+      type: 'object',
+      properties: {
+        stringParam: 'string',
+      },
+    },
+  })
+  public beforeActionParamsAccessed() {
+    this.ok()
+  }
+
   @OpenAPI({
     status: 200,
     requestBody: {

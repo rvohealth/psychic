@@ -1,3 +1,10 @@
+## 1.9.0
+
+1. Validate params against OpenAPI at the latest possible of:
+   a. when the params are accessed
+   b. when about to render the action
+   This ensures that we return the proper 401/403 response instead of 400 for authenticated endpoints that fail authentication and prevents unauthenticated requests from gaining information about the API
+
 ## 1.8.6
 
 remove dead env variable, now that we are open sourced

@@ -394,7 +394,7 @@ suggested fix:  "${convertRouteParams(path)}"
     }
 
     try {
-      await controllerInstance.runAction(action)
+      await controllerInstance.runAction()
     } catch (error) {
       const err = error as Error
       if (!EnvInternal.isTest) PsychicApp.logWithLevel('error', err.message)

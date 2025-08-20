@@ -275,6 +275,8 @@ export default class PsychicController {
    * ```
    */
   public get params(): PsychicParamsDictionary {
+    this.validateParams()
+
     const query = this.getCachedQuery()
 
     const params: PsychicParamsDictionary = {
@@ -883,17 +885,24 @@ export default class PsychicController {
    *
    * @param action - the action to use when validating the query params.
    */
-  public async runAction(action: string) {
-    await this.runBeforeActionsFor(action)
+  public async runAction() {
+    await this.runBeforeActions()
 
     if (this.res.headersSent) return
 
-    this.validateOpenapiHeadersForAction(action)
-    this.validateOpenapiQueryForAction(action)
-    this.validateOpenapiRequestBodyForAction(action)
+    this.validateParams()
 
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-    await (this as any)[action]()
+    await (this as any)[this.action]()
+  }
+
+  private paramsValidated: boolean = false
+  private validateParams() {
+    if (this.paramsValidated) return
+    this.paramsValidated = true
+    this.validateOpenapiHeadersForAction()
+    this.validateOpenapiQueryForAction()
+    this.validateOpenapiRequestBodyForAction()
   }
 
   /**
@@ -904,8 +913,8 @@ export default class PsychicController {
    *
    * @param action - the action to use when validating the query params.
    */
-  private validateOpenapiRequestBodyForAction(action: string): void {
-    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[action]
+  private validateOpenapiRequestBodyForAction(): void {
+    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[this.action]
     if (!openapiEndpointRenderer) return
 
     this.computedOpenapiNames.forEach(openapiName => {
@@ -923,8 +932,8 @@ export default class PsychicController {
    *
    * @param action - the action to use when validating the query params.
    */
-  private validateOpenapiHeadersForAction(action: string): void {
-    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[action]
+  private validateOpenapiHeadersForAction(): void {
+    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[this.action]
     if (!openapiEndpointRenderer) return
 
     this.computedOpenapiNames.forEach(openapiName => {
@@ -942,8 +951,8 @@ export default class PsychicController {
    *
    * @param action - the action to use when validating the query params.
    */
-  private validateOpenapiQueryForAction(action: string): void {
-    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[action]
+  private validateOpenapiQueryForAction(): void {
+    const openapiEndpointRenderer = (this.constructor as typeof PsychicController).openapi?.[this.action]
     if (!openapiEndpointRenderer) return
 
     this.computedOpenapiNames.forEach(openapiName => {
@@ -989,9 +998,9 @@ export default class PsychicController {
    *
    * Runs the before actions for a particular action on a controller
    */
-  public async runBeforeActionsFor(action: string) {
+  public async runBeforeActions() {
     const beforeActions = (this.constructor as typeof PsychicController).controllerHooks.filter(hook =>
-      hook.shouldFireForAction(action),
+      hook.shouldFireForAction(this.action),
     )
 
     for (const hook of beforeActions) {

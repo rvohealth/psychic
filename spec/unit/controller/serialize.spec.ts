@@ -237,7 +237,7 @@ describe('PsychicController', () => {
       it('passes the passthrough data through to the child serializers', async () => {
         const controller = new MyController(req, res, { action: 'show' })
 
-        await controller.runAction('show')
+        await controller.runAction()
         expect(toJsonSpy).toHaveBeenCalledWith(
           {
             id: user2.id,
