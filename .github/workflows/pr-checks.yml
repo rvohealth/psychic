@@ -54,7 +54,6 @@ jobs:
       DB_PASSWORD: postgres
       DB_PORT: 5432
       TZ: UTC
-      GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
       LEGACY_APP_ENCRYPTION_KEY: ${{ secrets.LEGACY_APP_ENCRYPTION_KEY }}
       DREAM_PARALLEL_TESTS: 4
@@ -66,12 +65,6 @@ jobs:
 
       - run: npm install -g corepack
       - run: corepack enable
-
-      - run: "echo \"nodeLinker: node-modules\" > ./.yarnrc.yml"
-      - run: "echo -e \"npmScopes:\" >> ./.yarnrc.yml"
-      - run: "echo -e \"  rvohealth:\" >> ./.yarnrc.yml"
-      - run: "echo -e \"    npmAuthToken: '${{ secrets.GITHUB_TOKEN }}'\" >> ./.yarnrc.yml"
-      - run: "echo -e \"    npmRegistryServer: 'https://npm.pkg.github.com'\" >> ./.yarnrc.yml"
 
       - name: Cache node_modules
         id: cache-node-modules
@@ -123,7 +116,6 @@ jobs:
       DB_PASSWORD: postgres
       DB_PORT: 5432
       TZ: UTC
-      GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
       APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
     steps:
       - uses: actions/checkout@v4
@@ -140,12 +132,6 @@ jobs:
 
       - run: npm install -g corepack
       - run: corepack enable
-
-      - run: "echo \"nodeLinker: node-modules\" > ./.yarnrc.yml"
-      - run: "echo -e \"npmScopes:\" >> ./.yarnrc.yml"
-      - run: "echo -e \"  rvohealth:\" >> ./.yarnrc.yml"
-      - run: "echo -e \"    npmAuthToken: '${{ secrets.GITHUB_TOKEN }}'\" >> ./.yarnrc.yml"
-      - run: "echo -e \"    npmRegistryServer: 'https://npm.pkg.github.com'\" >> ./.yarnrc.yml"
 
       - name: Cache node_modules
         id: cache-node-modules
@@ -188,7 +174,6 @@ jobs:
     env:
       NODE_ENV: development
       YARN_CACHE_FOLDER: ~/.yarn-cache
-      GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -197,12 +182,6 @@ jobs:
 
       - run: npm install -g corepack
       - run: corepack enable
-
-      - run: "echo \"nodeLinker: node-modules\" > ./.yarnrc.yml"
-      - run: "echo -e \"npmScopes:\" >> ./.yarnrc.yml"
-      - run: "echo -e \"  rvohealth:\" >> ./.yarnrc.yml"
-      - run: "echo -e \"    npmAuthToken: '${{ secrets.GITHUB_TOKEN }}'\" >> ./.yarnrc.yml"
-      - run: "echo -e \"    npmRegistryServer: 'https://npm.pkg.github.com'\" >> ./.yarnrc.yml"
 
       - name: Cache node_modules
         id: cache-node-modules
@@ -225,7 +204,6 @@ jobs:
     env:
       NODE_ENV: development
       YARN_CACHE_FOLDER: ~/.yarn-cache
-      GITHUB_OAUTH_TOKEN: ${{ secrets.GITHUB_TOKEN }}
 
     steps:
       - uses: actions/checkout@v4
@@ -235,12 +213,6 @@ jobs:
 
       - run: npm install -g corepack
       - run: corepack enable
-
-      - run: "echo \"nodeLinker: node-modules\" > ./.yarnrc.yml"
-      - run: "echo -e \"npmScopes:\" >> ./.yarnrc.yml"
-      - run: "echo -e \"  rvohealth:\" >> ./.yarnrc.yml"
-      - run: "echo -e \"    npmAuthToken: '${{ secrets.GITHUB_TOKEN }}'\" >> ./.yarnrc.yml"
-      - run: "echo -e \"    npmRegistryServer: 'https://npm.pkg.github.com'\" >> ./.yarnrc.yml"
 
       - name: Cache node_modules
         id: cache-node-modules

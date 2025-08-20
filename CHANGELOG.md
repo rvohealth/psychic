@@ -1,3 +1,7 @@
+## 1.8.6
+
+remove dead env variable, now that we are open sourced
+
 ## 1.8.5
 
 Do not hard crash when initializing a psychic application when one of the openapi routes is not found for an openapi-decorated controller endpoint. We will continue to raise this exception when building openapi specs, but not when booting up the psychic application, since one can define routes that are i.e. not available in certain environments, and we don't want this to cause hard crashes when our app boots in those environments.
