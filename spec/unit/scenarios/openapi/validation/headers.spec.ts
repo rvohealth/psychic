@@ -35,8 +35,6 @@ describe('openapi validation', () => {
 
       context('with invalid headers', () => {
         it('denies the request', async () => {
-          vi.spyOn(PsychicApp.prototype, 'includeDetailedOpenapiValidationErrors').mockReturnValue(true)
-
           const res = await request.get('/headersOpenapiTest', 400, {
             headers: {
               myDate: '2020-01-ABC',
@@ -44,54 +42,14 @@ describe('openapi validation', () => {
               myOptionalInt: '123.01',
             },
           })
-          expect(res.body).toEqual({
-            type: 'openapi',
-            target: 'headers',
-            errors: [
-              {
-                instancePath: '/myDate',
-                schemaPath: '#/properties/myDate/format',
-                keyword: 'format',
-                message: 'must match format "date"',
-                params: { format: 'date' },
-              },
-              {
-                instancePath: '/myOptionalDate',
-                schemaPath: '#/properties/myOptionalDate/format',
-                keyword: 'format',
-                message: 'must match format "date"',
-                params: { format: 'date' },
-              },
-              {
-                instancePath: '/myOptionalInt',
-                schemaPath: '#/properties/myOptionalInt/type',
-                keyword: 'type',
-                message: 'must be integer',
-                params: { type: 'integer' },
-              },
-            ],
-          })
+          expect(res.body).toEqual({})
         })
       })
 
       context('with missing required headers', () => {
         it('denies the request', async () => {
-          vi.spyOn(PsychicApp.prototype, 'includeDetailedOpenapiValidationErrors').mockReturnValue(true)
-
           const res = await request.get('/headersOpenapiTest', 400)
-          expect(res.body).toEqual({
-            type: 'openapi',
-            target: 'headers',
-            errors: [
-              {
-                instancePath: '',
-                schemaPath: '#/required',
-                keyword: 'required',
-                message: "must have required property 'myDate'",
-                params: { missingProperty: 'myDate' },
-              },
-            ],
-          })
+          expect(res.body).toEqual({})
         })
       })
 

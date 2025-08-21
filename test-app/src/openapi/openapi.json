@@ -5115,21 +5115,7 @@
         "description": "The request has succeeded, but there is no content to render"
       },
       "BadRequest": {
-        "description": "The server would not process the request due to something the server considered to be a client error, such as a model validation failure or an openapi validation failure",
-        "content": {
-          "application/json": {
-            "schema": {
-              "oneOf": [
-                {
-                  "$ref": "#/components/schemas/ValidationErrors"
-                },
-                {
-                  "$ref": "#/components/schemas/OpenapiValidationErrors"
-                }
-              ]
-            }
-          }
-        }
+        "description": "The server would not process the request due to something the server considered to be a client error"
       },
       "Unauthorized": {
         "description": "The request was not successful because it lacks valid authentication credentials for the requested resource"

@@ -161,19 +161,6 @@ export default class OpenapiEndpointRenderer<
     this.defaultResponse = defaultResponse
     this.validate = validate
   }
-  /**
-   * @internal
-   *
-   * reads the validation options for this particular endpoint. If they
-   * explicitly permit or don't permit detailed validation errors, then it
-   * will return true or false. If detailed validation errors are not set on this endpoint,
-   * it will fall back to PsychicApp to see if detailed validation errors are turned on
-   * globally for the given openapiName.
-   */
-  public includeDetailedOpenapiValidationErrors(openapiName: string) {
-    if (this.validate?.detailedErrors !== undefined) return this.validate.detailedErrors
-    return PsychicApp.getOrFail().includeDetailedOpenapiValidationErrors(openapiName)
-  }
 
   /**
    * @internal
@@ -1385,12 +1372,6 @@ export interface OpenapiEndpointRendererOpts<
 }
 
 export type OpenapiValidateOption = {
-  /**
-   * set to true to include detailed errors when openapi validation fails
-   * (false or undefined result in only a 400 status code with no details)
-   */
-  detailedErrors?: boolean
-
   /**
    * set to true to validate the request body against the openapi schema
    */

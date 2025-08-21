@@ -1,3 +1,9 @@
+## 1.10.0
+
+- remove OpenAPI and Dream validation error response configuration and do not respond with errors (don't introduce such a difference between development and production environments)
+- log validation errors in test and dev (not prod to avoid DOS)
+- remove distinction between 400 and 422 to block ability of attacker to get feedback on how far into the system their request made it
+
 ## 1.9.0
 
 1. Validate params against OpenAPI at the latest possible of:

@@ -4,7 +4,6 @@ export default class OpenapiValidationFailure extends Error {
   constructor(
     public errors: OpenapiValidationError[],
     public target: OpenapiValidateTarget,
-    public includeDetailedOpenapiValidationErrors: boolean,
   ) {
     super()
   }

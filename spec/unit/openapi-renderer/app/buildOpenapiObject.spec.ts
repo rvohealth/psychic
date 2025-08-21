@@ -533,21 +533,7 @@ describe('OpenapiAppRenderer', () => {
 
               BadRequest: {
                 description:
-                  'The server would not process the request due to something the server considered to be a client error, such as a model validation failure or an openapi validation failure',
-                content: {
-                  'application/json': {
-                    schema: {
-                      oneOf: [
-                        {
-                          $ref: '#/components/schemas/ValidationErrors',
-                        },
-                        {
-                          $ref: '#/components/schemas/OpenapiValidationErrors',
-                        },
-                      ],
-                    },
-                  },
-                },
+                  'The server would not process the request due to something the server considered to be a client error',
               },
 
               // 401

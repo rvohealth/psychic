@@ -7,6 +7,7 @@ import {
   ValidationError,
 } from '@rvoh/dream'
 import { Application, Request, RequestHandler, Response, Router } from 'express'
+import util from 'node:util'
 import pluralize from 'pluralize-esm'
 import PsychicController from '../controller/index.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
@@ -376,6 +377,26 @@ suggested fix:  "${convertRouteParams(path)}"
     if (nestedRouter) nestedRouter.currentNamespaces = this.currentNamespaces
   }
 
+  private get validationErrorLoggingEnabled(): boolean {
+    return EnvInternal.isDevelopment
+  }
+
+  /**
+   * Automatically rescue certain errors and convert them into status codes.
+   * Validation errors (OpenAPI or otherwise) are by default converted to
+   * 400. 422 MUST ONLY be returned when accompanied by a ValidationErrors
+   * payload (even if the errors object is empty) that is intended to be displayed
+   * to the end user to indicate fields that must be corrected to be
+   * accepted.
+   *
+   * Philosophy: do not return information (even difference between 400 & 422)
+   * unless it is explicitly intended for that information to be used to enable
+   * a front end interface to display information to support user-visible
+   * validation (e.g. an email must be formatted correctly).
+   *
+   * By default, do not provide an attacker with any visibility into which layer
+   * of the application rejected their request.
+   */
   public async handle(
     controller: typeof PsychicController,
     action: string,
@@ -409,33 +430,74 @@ suggested fix:  "${convertRouteParams(path)}"
       } else if (err instanceof RecordNotFound) {
         res.sendStatus(404)
       } else if (err instanceof NotNullViolation || err instanceof CheckConstraintViolation) {
-        res.status(422).json()
+        /**
+         * See comment at top of this method for philosophy of 400
+         */
+        res.sendStatus(400)
       } else if (err instanceof DataTypeColumnTypeMismatch) {
-        res.status(400).json()
+        /**
+         * See comment at top of this method for philosophy of 400
+         */
+        res.sendStatus(400)
       } else if (err instanceof ValidationError) {
-        res.status(422).json({ type: 'validator', errors: err.errors || {} })
-      } else if (err instanceof OpenapiRequestValidationFailure) {
-        if (err.includeDetailedOpenapiValidationErrors) {
-          res.status(400).json({
-            type: 'openapi',
-            target: err.target,
-            errors: err.errors,
-          })
-        } else {
-          res.sendStatus(400)
+        if (this.validationErrorLoggingEnabled) {
+          PsychicApp.log(
+            util.inspect({
+              type: 'validator',
+              errors: err.errors || {},
+            }),
+          )
         }
+
+        /**
+         * See comment at top of this method for philosophy of 400
+         */
+        res.sendStatus(400)
+      } else if (err instanceof OpenapiRequestValidationFailure) {
+        if (this.validationErrorLoggingEnabled) {
+          PsychicApp.log(
+            util.inspect({
+              type: 'openapi',
+              errors: err.errors,
+              target: err.target,
+            }),
+          )
+        }
+
+        /**
+         * See comment at top of this method for philosophy of 400
+         */
+        res.sendStatus(400)
       } else if (err instanceof ParamValidationError) {
-        res.status(400).json({
-          type: 'validator',
-          errors: {
-            [err.paramName]: err.errorMessages,
-          },
-        })
+        if (this.validationErrorLoggingEnabled) {
+          PsychicApp.log(
+            util.inspect({
+              type: 'validator',
+              errors: {
+                [err.paramName]: err.errorMessages,
+              },
+            }),
+          )
+        }
+
+        /**
+         * See comment at top of this method for philosophy of 400
+         */
+        res.sendStatus(400)
       } else if (err instanceof ParamValidationErrors) {
-        res.status(400).json({
-          type: 'validator',
-          errors: err.errors,
-        })
+        if (this.validationErrorLoggingEnabled) {
+          PsychicApp.log(
+            util.inspect({
+              type: 'validator',
+              errors: err.errors,
+            }),
+          )
+        }
+
+        /**
+         * See comment at top of this method for philosophy of 400
+         */
+        res.sendStatus(400)
       } else {
         // by default, ts-node will mask these errors for no good reason, causing us
         // to have to apply an ugly and annoying try-catch pattern to our controllers

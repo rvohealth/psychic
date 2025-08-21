@@ -46,71 +46,8 @@ describe('openapi validation', () => {
         })
       })
 
-      context('detailedErrors: true', () => {
-        beforeEach(() => {
-          vi.spyOn(
-            OpenapiEndpointRenderer.prototype,
-            'includeDetailedOpenapiValidationErrors',
-          ).mockReturnValue(true)
-        })
-
-        context('with an invalid requestBody', () => {
-          it('denies the request with errors', async () => {
-            const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
-            const res = await request.post('/pets', 400, {
-              data: {
-                name: ['abc'],
-                species: 'cat',
-                nonNullSpecies: 'cat',
-                nonNullFavoriteTreats: [],
-                userId: user.id,
-              },
-            })
-            expect(res.body).toEqual({
-              type: 'openapi',
-              target: 'requestBody',
-              errors: [
-                {
-                  instancePath: '/name',
-                  schemaPath: '#/properties/name/type',
-                  keyword: 'type',
-                  message: 'must be string,null',
-                  params: { type: ['string', 'null'] },
-                },
-              ],
-            })
-          })
-        })
-
-        context('with missing required fields', () => {
-          it('denies the request with errors', async () => {
-            const res = await request.post('/requestBodyOpenapiTest', 400)
-            expect(res.body).toEqual({
-              type: 'openapi',
-              target: 'requestBody',
-              errors: [
-                {
-                  instancePath: '',
-                  schemaPath: '#/required',
-                  keyword: 'required',
-                  message: "must have required property 'requiredInt'",
-                  params: { missingProperty: 'requiredInt' },
-                },
-              ],
-            })
-          })
-        })
-      })
-
-      context('detailedErrors: false', () => {
-        beforeEach(() => {
-          vi.spyOn(
-            OpenapiEndpointRenderer.prototype,
-            'includeDetailedOpenapiValidationErrors',
-          ).mockReturnValue(false)
-        })
-
-        it('invalid requests do not include error messages', async () => {
+      context('with an invalid requestBody', () => {
+        it('denies the request', async () => {
           const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
           const res = await request.post('/pets', 400, {
             data: {
@@ -125,18 +62,9 @@ describe('openapi validation', () => {
         })
       })
 
-      context('detailedErrors is not set', () => {
-        it('invalid requests do not include error messages', async () => {
-          const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
-          const res = await request.post('/pets', 400, {
-            data: {
-              name: ['abc'],
-              species: 'cat',
-              nonNullSpecies: 'cat',
-              nonNullFavoriteTreats: [],
-              userId: user.id,
-            },
-          })
+      context('with missing required fields', () => {
+        it('denies the request', async () => {
+          const res = await request.post('/requestBodyOpenapiTest', 400)
           expect(res.body).toEqual({})
         })
       })
@@ -208,74 +136,6 @@ describe('openapi validation', () => {
                 userId: user.id,
               },
             })
-          })
-        })
-
-        context('detailedErrors: true', () => {
-          beforeEach(() => {
-            vi.spyOn(PsychicApp.prototype, 'includeDetailedOpenapiValidationErrors').mockReturnValue(true)
-          })
-
-          it('invalid requests include error messages', async () => {
-            const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
-            const res = await request.post('/pets', 400, {
-              data: {
-                name: ['abc'],
-                species: 'cat',
-                nonNullSpecies: 'cat',
-                nonNullFavoriteTreats: [],
-                userId: user.id,
-              },
-            })
-            expect(res.body).toEqual({
-              type: 'openapi',
-              target: 'requestBody',
-              errors: [
-                {
-                  instancePath: '/name',
-                  schemaPath: '#/properties/name/type',
-                  keyword: 'type',
-                  message: 'must be string,null',
-                  params: { type: ['string', 'null'] },
-                },
-              ],
-            })
-          })
-        })
-
-        context('detailedErrors: false', () => {
-          beforeEach(() => {
-            vi.spyOn(PsychicApp.prototype, 'includeDetailedOpenapiValidationErrors').mockReturnValue(false)
-          })
-
-          it('invalid requests do not include error messages', async () => {
-            const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
-            const res = await request.post('/pets', 400, {
-              data: {
-                name: ['abc'],
-                species: 'cat',
-                nonNullSpecies: 'cat',
-                nonNullFavoriteTreats: [],
-                userId: user.id,
-              },
-            })
-            expect(res.body).toEqual({})
-          })
-        })
-
-        context('detailedErrors is not set', () => {
-          it('invalid requests do not include error messages', async () => {
-            const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
-            const res = await request.post('/pets', 400, {
-              data: {
-                name: ['abc'],
-                species: 'cat',
-                nonNullSpecies: 'cat',
-                nonNullFavoriteTreats: [],
-                userId: user.id,
-              },
-            })
-            expect(res.body).toEqual({})
           })
         })
 

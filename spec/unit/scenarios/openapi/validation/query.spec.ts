@@ -39,47 +39,19 @@ describe('openapi validation', () => {
 
       context('with an invalid query', () => {
         it('rejects the request', async () => {
-          vi.spyOn(PsychicApp.prototype, 'includeDetailedOpenapiValidationErrors').mockReturnValue(true)
-
           const res = await request.get('/queryOpenapiTest', 400, {
             query: {
               numericParam: ['hello'],
             },
           })
-          expect(res.body).toEqual({
-            type: 'openapi',
-            target: 'query',
-            errors: [
-              {
-                instancePath: '/numericParam',
-                schemaPath: '#/properties/numericParam/type',
-                keyword: 'type',
-                message: 'must be number',
-                params: { type: 'number' },
-              },
-            ],
-          })
+          expect(res.body).toEqual({})
         })
       })
 
       context('with missing required query params', () => {
         it('denies the request', async () => {
-          vi.spyOn(PsychicApp.prototype, 'includeDetailedOpenapiValidationErrors').mockReturnValue(true)
-
           const res = await request.get('/queryRequiredOpenapiTest', 400)
-          expect(res.body).toEqual({
-            type: 'openapi',
-            target: 'query',
-            errors: [
-              {
-                instancePath: '',
-                schemaPath: '#/required',
-                keyword: 'required',
-                message: "must have required property 'requiredStringParam'",
-                params: { missingProperty: 'requiredStringParam' },
-              },
-            ],
-          })
+          expect(res.body).toEqual({})
         })
       })
 

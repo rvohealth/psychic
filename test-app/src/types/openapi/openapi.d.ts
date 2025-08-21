@@ -530,6 +530,114 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/beforeAction403": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        stringParam?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/beforeActionParamsAccessed": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        stringParam?: string;
+                    };
+                };
+            };
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/circular": {
         parameters: {
             query?: never;
@@ -849,6 +957,49 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/openapi-missing-route-test": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success, no content */
+                204: components["responses"]["NoContent"];
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/openapi-validation-on-explicit-query-arrays": {
         parameters: {
             query?: {
@@ -877,8 +1028,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Success */
-                200: {
+                /** @description Success, no content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -931,8 +1082,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Success */
-                200: {
+                /** @description Success, no content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -987,8 +1138,8 @@ export interface paths {
                 };
             };
             responses: {
-                /** @description Success */
-                200: {
+                /** @description Success, no content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2268,8 +2419,8 @@ export interface paths {
             };
             requestBody?: never;
             responses: {
-                /** @description Success */
-                200: {
+                /** @description Success, no content */
+                204: {
                     headers: {
                         [name: string]: unknown;
                     };
@@ -2801,14 +2952,12 @@ export interface components {
             };
             content?: never;
         };
-        /** @description The server would not process the request due to something the server considered to be a client error, such as a model validation failure or an openapi validation failure */
+        /** @description The server would not process the request due to something the server considered to be a client error */
         BadRequest: {
             headers: {
                 [name: string]: unknown;
             };
-            content: {
-                "application/json": components["schemas"]["ValidationErrors"] | components["schemas"]["OpenapiValidationErrors"];
-            };
+            content?: never;
         };
         /** @description The request was not successful because it lacks valid authentication credentials for the requested resource */
         Unauthorized: {
