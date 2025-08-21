@@ -7,7 +7,7 @@ import {
   ValidationError,
 } from '@rvoh/dream'
 import { Application, Request, RequestHandler, Response, Router } from 'express'
-import util from 'node:util'
+import util, { debuglog } from 'node:util'
 import pluralize from 'pluralize-esm'
 import PsychicController from '../controller/index.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
@@ -378,7 +378,7 @@ suggested fix:  "${convertRouteParams(path)}"
   }
 
   private get validationErrorLoggingEnabled(): boolean {
-    return EnvInternal.isDevelopment
+    return debuglog('psychic').enabled
   }
 
   /**

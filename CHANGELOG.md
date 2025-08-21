@@ -1,5 +1,9 @@
 ## 1.10.0
 
+- OpenAPI and castParam validation errors are logged only when `NODE_DEBUG=psychic`
+
+## 1.10.0
+
 - remove OpenAPI and Dream validation error response configuration and do not respond with errors (don't introduce such a difference between development and production environments)
 - log validation errors in test and dev (not prod to avoid DOS)
 - remove distinction between 400 and 422 to block ability of attacker to get feedback on how far into the system their request made it
