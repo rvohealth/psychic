@@ -45,6 +45,14 @@ export default class UsersController extends ApplicationController {
     })
   }
 
+  public async failSavingTooLongData() {
+    await User.create({
+      email: 'how@yadoin',
+      password: 'howyadoin',
+      volume: 99999999,
+    })
+  }
+
   public forceThrow() {
     throw new Error('this should force a 500')
   }

@@ -1,11 +1,4 @@
-import {
-  camelize,
-  CheckConstraintViolation,
-  DataTypeColumnTypeMismatch,
-  NotNullViolation,
-  RecordNotFound,
-  ValidationError,
-} from '@rvoh/dream'
+import { camelize, DataIncompatibleWithDatabaseField, RecordNotFound, ValidationError } from '@rvoh/dream'
 import { Application, Request, RequestHandler, Response, Router } from 'express'
 import util, { debuglog } from 'node:util'
 import pluralize from 'pluralize-esm'
@@ -429,12 +422,7 @@ suggested fix:  "${convertRouteParams(path)}"
         }
       } else if (err instanceof RecordNotFound) {
         res.sendStatus(404)
-      } else if (err instanceof NotNullViolation || err instanceof CheckConstraintViolation) {
-        /**
-         * See comment at top of this method for philosophy of 400
-         */
-        res.sendStatus(400)
-      } else if (err instanceof DataTypeColumnTypeMismatch) {
+      } else if (err instanceof DataIncompatibleWithDatabaseField) {
         /**
          * See comment at top of this method for philosophy of 400
          */

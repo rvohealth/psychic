@@ -29,8 +29,14 @@ describe('a visitor attempts to save a record', () => {
   })
 
   context('saving data that is incompatible with the column type', () => {
-    it('does not save, returns 400', async () => {
+    it('returns 400', async () => {
       await request.post('/fail-saving-incompatible-data-test', 400)
+    })
+  })
+
+  context('saving data that is too long for a column', () => {
+    it('returns 400', async () => {
+      await request.post('/fail-saving-too-long-data', 400)
     })
   })
 

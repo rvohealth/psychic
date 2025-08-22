@@ -146,6 +146,7 @@ export default function routes(r: PsychicRouter) {
   r.get('users-before-action-sequence', UsersController, 'beforeActionSequence')
   r.post('failed-to-save-test', UsersController, 'failedToSaveTest')
   r.post('fail-saving-incompatible-data-test', UsersController, 'failSavingIncompatibleDataTest')
+  r.post('fail-saving-too-long-data', UsersController, 'failSavingTooLongData')
   r.post('force-throw', UsersController, 'forceThrow')
 
   // response status tests

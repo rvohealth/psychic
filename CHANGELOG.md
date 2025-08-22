@@ -1,4 +1,8 @@
-## 1.10.0
+## 1.10.2
+
+- return 400 instead of throwing error and 500 when there is a column overflow at the database level (let database validation suffice for enforcing data length validation rather than requiring model level validation)
+
+## 1.10.1
 
 - OpenAPI and castParam validation errors are logged only when `NODE_DEBUG=psychic`
 
