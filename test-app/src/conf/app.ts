@@ -6,7 +6,6 @@ import { debuglog } from 'node:util'
 import passport from 'passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import * as winston from 'winston'
-import EnvInternal from '../../../src/helpers/EnvInternal.js'
 import { PsychicDevtools } from '../../../src/index.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
 import importDefault from '../app/helpers/importDefault.js'
@@ -253,8 +252,12 @@ export default async (psy: PsychicApp) => {
       console.error(err)
     }
 
-    if (!res.headersSent) res.sendStatus(500)
-    else if (EnvInternal.isDevelopmentOrTest) throw err
+    if (process.env.FORCE_THROW_DURING_SERVER_ERROR === '1') {
+      res.sendStatus(418)
+    }
+
+    // if (!res.headersSent) res.sendStatus(500)
+    else throw err
   })
 
   psy.on('server:start', async () => {
@@ -323,6 +326,8 @@ export default async (psy: PsychicApp) => {
   )
   // end: passport test setup
 }
+
+export class IntentionalServerErrorToTestHookExecution extends Error {}
 
 export function __forTestingOnly(message: string) {
   process.env.__PSYCHIC_HOOKS_TEST_CACHE ||= ''

@@ -8,7 +8,6 @@ import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
 import HttpError from '../error/http/index.js'
 import OpenapiRequestValidationFailure from '../error/openapi/OpenapiRequestValidationFailure.js'
 import CannotCommitRoutesWithoutExpressApp from '../error/router/cannot-commit-routes-without-express-app.js'
-import EnvInternal from '../helpers/EnvInternal.js'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
 import PsychicApp from '../psychic-app/index.js'
 import {
@@ -411,7 +410,6 @@ suggested fix:  "${convertRouteParams(path)}"
       await controllerInstance.runAction()
     } catch (error) {
       const err = error as Error
-      if (!EnvInternal.isTest) PsychicApp.logWithLevel('error', err.message)
 
       if (errorIsRescuableHttpError(err)) {
         const httpErr = err as HttpError
@@ -427,102 +425,91 @@ suggested fix:  "${convertRouteParams(path)}"
          * See comment at top of this method for philosophy of 400
          */
         res.sendStatus(400)
-      } else if (err instanceof ValidationError) {
-        if (this.validationErrorLoggingEnabled) {
-          PsychicApp.log(
-            util.inspect({
-              type: 'validator',
-              errors: err.errors || {},
-            }),
-          )
-        }
-
-        /**
-         * See comment at top of this method for philosophy of 400
-         */
-        res.sendStatus(400)
-      } else if (err instanceof OpenapiRequestValidationFailure) {
-        if (this.validationErrorLoggingEnabled) {
-          PsychicApp.log(
-            util.inspect({
-              type: 'openapi',
-              errors: err.errors,
-              target: err.target,
-            }),
-          )
-        }
-
-        /**
-         * See comment at top of this method for philosophy of 400
-         */
-        res.sendStatus(400)
-      } else if (err instanceof ParamValidationError) {
-        if (this.validationErrorLoggingEnabled) {
-          PsychicApp.log(
-            util.inspect({
-              type: 'validator',
-              errors: {
-                [err.paramName]: err.errorMessages,
-              },
-            }),
-          )
-        }
-
-        /**
-         * See comment at top of this method for philosophy of 400
-         */
-        res.sendStatus(400)
-      } else if (err instanceof ParamValidationErrors) {
-        if (this.validationErrorLoggingEnabled) {
-          PsychicApp.log(
-            util.inspect({
-              type: 'validator',
-              errors: err.errors,
-            }),
-          )
-        }
-
-        /**
-         * See comment at top of this method for philosophy of 400
-         */
-        res.sendStatus(400)
-      } else {
-        // by default, ts-node will mask these errors for no good reason, causing us
-        // to have to apply an ugly and annoying try-catch pattern to our controllers
-        // and manually console log the error to determine what the actual error was.
-        // this block enables us to not have to do that anymore.
-        if (EnvInternal.isTest && !EnvInternal.boolean('PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR')) {
-          PsychicApp.log('ATTENTION: a server error was detected:')
-          PsychicApp.logWithLevel('error', err)
-        }
-
-        if (PsychicApp.getOrFail().specialHooks.serverError.length) {
-          try {
-            for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {
-              await hook(err, req, res)
-            }
-          } catch (error) {
-            if (EnvInternal.isDevelopmentOrTest) {
-              // In development and test, we want to throw so that, for example, double-setting of
-              // status headers throws an error in specs. We couldn't figure out how to write
-              // a spec for ensuring that such errors made it through because Supertest would
-              // respond with the first header sent, which was successful, and the exception only
-              // happened when Jest ended the spec.
-              throw error
-            } else {
-              PsychicApp.logWithLevel(
-                'error',
-                `
-                  Something went wrong while attempting to call your custom server:error hooks.
-                  Psychic will rescue errors thrown here to prevent the server from crashing.
-                  The error thrown is:
-                `,
-              )
-              PsychicApp.logWithLevel('error', error)
-            }
-          }
-        } else throw err
       }
+
+      if (PsychicApp.getOrFail().specialHooks.serverError.length) {
+        try {
+          for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {
+            await hook(err, req, res)
+          }
+        } catch (error) {
+          this.handleRescuableServerError(error as Error, res)
+        }
+      } else {
+        this.handleRescuableServerError(err, res)
+      }
+    }
+  }
+
+  /**
+   * continues handling errors only after allowing the user-defined
+   * serverError handler(s) to interviene
+   *
+   * @param err - the error being thrown
+   * @param res - the express response instance
+   */
+  private handleRescuableServerError(err: Error, res: Response) {
+    if (err instanceof ValidationError) {
+      if (this.validationErrorLoggingEnabled) {
+        PsychicApp.log(
+          util.inspect({
+            type: 'validator',
+            errors: err.errors || {},
+          }),
+        )
+      }
+
+      /**
+       * See comment at top of this method for philosophy of 400
+       */
+      res.sendStatus(400)
+    } else if (err instanceof OpenapiRequestValidationFailure) {
+      if (this.validationErrorLoggingEnabled) {
+        PsychicApp.log(
+          util.inspect({
+            type: 'openapi',
+            errors: err.errors,
+            target: err.target,
+          }),
+        )
+      }
+
+      /**
+       * See comment at top of this method for philosophy of 400
+       */
+      res.sendStatus(400)
+    } else if (err instanceof ParamValidationError) {
+      if (this.validationErrorLoggingEnabled) {
+        PsychicApp.log(
+          util.inspect({
+            type: 'validator',
+            errors: {
+              [err.paramName]: err.errorMessages,
+            },
+          }),
+        )
+      }
+
+      /**
+       * See comment at top of this method for philosophy of 400
+       */
+      res.sendStatus(400)
+    } else if (err instanceof ParamValidationErrors) {
+      if (this.validationErrorLoggingEnabled) {
+        PsychicApp.log(
+          util.inspect({
+            type: 'validator',
+            errors: err.errors,
+          }),
+        )
+      }
+
+      /**
+       * See comment at top of this method for philosophy of 400
+       */
+      res.sendStatus(400)
+    } else {
+      res.sendStatus(500)
     }
   }
 
