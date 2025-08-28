@@ -32,6 +32,10 @@ import {
   CommentWithOneOfArraySerializer,
   CommentWithOneOfObjectSerializer,
 } from '../../../../test-app/src/app/serializers/CommentSerializer.js'
+import {
+  PetWithFavoriteTreatsOverrideSerializer,
+  PetWithFavoriteTreatsSerializer,
+} from '../../../../test-app/src/app/serializers/PetSerializer.js'
 import MyViewModel from '../../../../test-app/src/app/view-models/MyViewModel.js'
 
 describe('OpenapiEndpointRenderer', () => {
@@ -296,40 +300,127 @@ describe('OpenapiEndpointRenderer', () => {
       })
 
       context('suppressResponseEnums=true', () => {
-        it('suppresses enums, instead using description to clarify enum options', () => {
-          const renderer = new OpenapiEndpointRenderer(
-            CommentTestingStringSerializer,
-            UsersController,
-            'howyadoin',
-            {},
-          )
+        context('with an object serializer', () => {
+          it('suppresses enums, instead using description to clarify enum options', () => {
+            const renderer = new OpenapiEndpointRenderer(
+              CommentTestingStringSerializer,
+              UsersController,
+              'howyadoin',
+              {},
+            )
 
-          const toSchemaObjectOpts = defaultToSchemaObjectOpts({
-            renderOpts: { casing: 'camel', suppressResponseEnums: true },
-          })
-          renderer.toSchemaObject(toSchemaObjectOpts)
+            const toSchemaObjectOpts = defaultToSchemaObjectOpts({
+              renderOpts: { casing: 'camel', suppressResponseEnums: true },
+            })
+            renderer.toSchemaObject(toSchemaObjectOpts)
 
-          expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
-            expect.objectContaining({
-              CommentTestingString: {
-                type: 'object',
-                required: ['howyadoin'],
-                properties: {
-                  howyadoin: {
-                    type: 'string',
-                    format: 'date',
-                    description: `
+            expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
+              expect.objectContaining({
+                CommentTestingString: {
+                  type: 'object',
+                  required: ['howyadoin'],
+                  properties: {
+                    howyadoin: {
+                      type: 'string',
+                      format: 'date',
+                      description: `
 The following values will be allowed:
   hello,
   world`,
-                    pattern: '/^helloworld$/',
-                    minLength: 2,
-                    maxLength: 4,
+                      pattern: '/^helloworld$/',
+                      minLength: 2,
+                      maxLength: 4,
+                    },
                   },
                 },
-              },
-            }),
-          )
+              }),
+            )
+          })
+        })
+
+        context('with a dream serializer', () => {
+          it('provides the enum values set in the attribute definition', () => {
+            const renderer = new OpenapiEndpointRenderer(
+              PetWithFavoriteTreatsSerializer,
+              UsersController,
+              'howyadoin',
+              {},
+            )
+
+            const toSchemaObjectOpts = defaultToSchemaObjectOpts({
+              renderOpts: { casing: 'camel', suppressResponseEnums: true },
+            })
+            renderer.toSchemaObject(toSchemaObjectOpts)
+
+            expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
+              expect.objectContaining({
+                PetWithFavoriteTreats: {
+                  type: 'object',
+                  required: ['favoriteTreat', 'favoriteTreats'],
+                  properties: {
+                    favoriteTreats: {
+                      type: ['array', 'null'],
+                      items: {
+                        type: 'string',
+                        description:
+                          'The following values will be allowed:\n' + '  efishy feesh,\n' + '  snick snowcks',
+                      },
+                    },
+                    favoriteTreat: {
+                      type: ['string', 'null'],
+                      description:
+                        'The following values will be allowed:\n' + '  efishy feesh,\n' + '  snick snowcks',
+                    },
+                  },
+                },
+              }),
+            )
+          })
+
+          context('the enum values are explicitly overridden', () => {
+            it('provides the overridden values instead', () => {
+              const renderer = new OpenapiEndpointRenderer(
+                PetWithFavoriteTreatsOverrideSerializer,
+                UsersController,
+                'howyadoin',
+                {},
+              )
+
+              const toSchemaObjectOpts = defaultToSchemaObjectOpts({
+                renderOpts: { casing: 'camel', suppressResponseEnums: true },
+              })
+              renderer.toSchemaObject(toSchemaObjectOpts)
+
+              expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
+                expect.objectContaining({
+                  PetWithFavoriteTreatsOverride: {
+                    type: 'object',
+                    required: ['favoriteTreat', 'favoriteTreats'],
+                    properties: {
+                      favoriteTreat: {
+                        type: ['string', 'null'],
+                        description:
+                          'The following values will be allowed:\n' +
+                          '  overridden field 1,\n' +
+                          '  overridden field 2',
+                      },
+                      favoriteTreats: {
+                        type: ['array', 'null'],
+                        items: {
+                          type: 'string',
+                          description:
+                            '\n' +
+                            'The following values will be allowed:\n' +
+                            '  overridden field 1,\n' +
+                            '  overridden field 2',
+                        },
+                      },
+                    },
+                  },
+                }),
+              )
+            })
+          })
         })
       })
     })

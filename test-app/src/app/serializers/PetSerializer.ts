@@ -15,3 +15,24 @@ export const PetWithAssociationSerializer = (data: Pet) => DreamSerializer(Pet, 
 
 export const PetWithFlattenedAssociationSerializer = (data: Pet) =>
   DreamSerializer(Pet, data).rendersOne('user', { serializerKey: 'withFlattenedPost' })
+
+export const PetWithFavoriteTreatsSerializer = (pet: Pet) =>
+  DreamSerializer(Pet, pet).attribute('favoriteTreats').attribute('favoriteTreat')
+
+export const PetWithFavoriteTreatsOverrideSerializer = (pet: Pet) =>
+  DreamSerializer(Pet, pet)
+    .attribute('favoriteTreats', {
+      openapi: {
+        type: ['array', 'null'],
+        items: {
+          type: 'string',
+          enum: ['overridden field 1', 'overridden field 2'],
+        },
+      },
+    })
+    .attribute('favoriteTreat', {
+      openapi: {
+        type: ['string', 'null'],
+        enum: ['overridden field 1', 'overridden field 2'],
+      },
+    })

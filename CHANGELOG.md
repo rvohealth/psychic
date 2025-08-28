@@ -1,3 +1,7 @@
+## 1.10.4
+
+Fix issue with rendering incorrect enum descriptions when suppressResponseEnums is set to true and enums are explicitly overridden in the openapi option.
+
 ## 1.10.3
 
 - respect `required: false` when generating OpenAPI spec

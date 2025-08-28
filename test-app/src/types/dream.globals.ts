@@ -47,6 +47,8 @@ export const globalTypeConfig = {
       'PetSerializer',
       'PetSummarySerializer',
       'PetWithAssociationSerializer',
+      'PetWithFavoriteTreatsOverrideSerializer',
+      'PetWithFavoriteTreatsSerializer',
       'PetWithFlattenedAssociationSerializer',
       'PostSerializer',
       'PostSummarySerializer',

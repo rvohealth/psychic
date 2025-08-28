@@ -323,7 +323,7 @@ export const schema = {
       default: [],
       named: [],
     },
-    nonJsonColumnNames: ['collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'favoriteTreats', 'id', 'lastHeardAt', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nonNullFavoriteTreats', 'nonNullSpecies', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredCollarCountNumeric', 'species', 'updatedAt', 'userId'],
+    nonJsonColumnNames: ['collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'favoriteTreat', 'favoriteTreats', 'id', 'lastHeardAt', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nonNullFavoriteTreats', 'nonNullSpecies', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredCollarCountNumeric', 'species', 'updatedAt', 'userId'],
     columns: {
       collarCount: {
         coercedType: {} as string | null,
@@ -359,6 +359,15 @@ export const schema = {
         enumValues: null,
         dbType: 'timestamp without time zone',
         allowNull: false,
+        isArray: false,
+      },
+      favoriteTreat: {
+        coercedType: {} as PetTreatsEnum | null,
+        enumType: {} as PetTreatsEnum,
+        enumArrayType: [] as PetTreatsEnum[],
+        enumValues: PetTreatsEnumValues,
+        dbType: 'pet_treats_enum',
+        allowNull: true,
         isArray: false,
       },
       favoriteTreats: {

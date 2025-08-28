@@ -1225,6 +1225,8 @@ export interface paths {
                         collarCountInt?: number | null;
                         /** Format: decimal */
                         collarCountNumeric?: number | null;
+                        /** @enum {string|null} */
+                        favoriteTreat?: "efishy feesh" | "snick snowcks" | null;
                         favoriteTreats?: ("efishy feesh" | "snick snowcks")[] | null;
                         /** Format: date-time */
                         lastHeardAt?: string;
@@ -1311,6 +1313,8 @@ export interface paths {
                         collarCountInt?: number | null;
                         /** Format: decimal */
                         collarCountNumeric?: number | null;
+                        /** @enum {string|null} */
+                        favoriteTreat?: "efishy feesh" | "snick snowcks" | null;
                         favoriteTreats?: ("efishy feesh" | "snick snowcks")[] | null;
                         /** Format: date-time */
                         lastHeardAt?: string;
