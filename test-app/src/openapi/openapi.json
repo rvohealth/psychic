@@ -2068,6 +2068,17 @@
                     ],
                     "format": "decimal"
                   },
+                  "favoriteTreat": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "efishy feesh",
+                      "snick snowcks",
+                      null
+                    ]
+                  },
                   "favoriteTreats": {
                     "type": [
                       "array",
@@ -2239,6 +2250,17 @@
                       "null"
                     ],
                     "format": "decimal"
+                  },
+                  "favoriteTreat": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "efishy feesh",
+                      "snick snowcks",
+                      null
+                    ]
                   },
                   "favoriteTreats": {
                     "type": [

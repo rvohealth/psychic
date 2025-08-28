@@ -4,6 +4,7 @@ import {
   OpenapiDescription,
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
+  OpenapiSchemaString,
   OpenapiShorthandPrimitiveTypes,
 } from '@rvoh/dream'
 import OpenapiSegmentExpander from '../body-segment.js'
@@ -95,7 +96,7 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
   const openapiObject = openapiShorthandToOpenapi((openapi ?? {}) as any)
-  const singleType = singularAttributeOpenapiShape(dreamColumnInfo, suppressResponseEnums)
+  const singleType = singularAttributeOpenapiShape(dreamColumnInfo, suppressResponseEnums, openapiObject)
 
   if (dreamColumnInfo.isArray) {
     return {
@@ -108,11 +109,14 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
       ? ([singleType.type, 'null'] as ['string', 'null'])
       : (singleType.type as 'string')
 
-    return {
+    const returnObj = {
       ...singleType,
       type: existingType,
       ...openapiObject,
-    }
+    } as OpenapiSchemaString
+
+    if (suppressResponseEnums) delete returnObj['enum']
+    return returnObj
   }
 }
 
@@ -120,20 +124,23 @@ function baseDbType(dreamColumnInfo: DreamColumnInfo) {
   return dreamColumnInfo.dbType.replace('[]', '')
 }
 
-function singularAttributeOpenapiShape(dreamColumnInfo: DreamColumnInfo, suppressResponseEnums: boolean) {
+function singularAttributeOpenapiShape(
+  dreamColumnInfo: DreamColumnInfo,
+  suppressResponseEnums: boolean,
+  openapiSchema: OpenapiSchemaBody,
+) {
   if (dreamColumnInfo.enumValues) {
+    const enumOverrides = (openapiSchema as OpenapiSchemaString).enum || dreamColumnInfo.enumValues
+
     if (suppressResponseEnums) {
       return {
         type: 'string',
-        description: `The following values will be allowed:\n  ${dreamColumnInfo.enumValues.join(',\n  ')}`,
+        description: `The following values will be allowed:\n  ${enumOverrides.join(',\n  ')}`,
       } as const
     } else {
       return {
         type: 'string',
-        enum: [
-          ...dreamColumnInfo.enumValues,
-          ...(dreamColumnInfo.allowNull && !dreamColumnInfo.isArray ? [null] : []),
-        ],
+        enum: [...enumOverrides, ...(dreamColumnInfo.allowNull && !dreamColumnInfo.isArray ? [null] : [])],
       } as const
     }
   }

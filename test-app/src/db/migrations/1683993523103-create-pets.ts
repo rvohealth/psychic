@@ -16,6 +16,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('likes_walks', 'boolean')
     .addColumn('likes_treats', 'boolean', col => col.notNull().defaultTo(true))
     .addColumn('species', sql`species_types_enum`)
+    .addColumn('favorite_treat', sql`pet_treats_enum`)
     .addColumn('favorite_treats', sql`pet_treats_enum[]`)
     .addColumn('non_null_species', sql`species_types_enum`, col => col.notNull())
     .addColumn('non_null_favorite_treats', sql`pet_treats_enum[]`, col => col.notNull())

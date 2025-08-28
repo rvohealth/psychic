@@ -152,6 +152,7 @@ export interface Pets {
   collarCountInt: number | null;
   collarCountNumeric: Numeric | null;
   createdAt: Timestamp;
+  favoriteTreat: PetTreatsEnum | null;
   favoriteTreats: ArrayType<PetTreatsEnum> | null;
   id: Generated<Int8>;
   lastHeardAt: Generated<Timestamp>;
