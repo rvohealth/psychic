@@ -1,0 +1,16 @@
+{
+  "verbose": false,
+  "quiet": true,
+  "ignore": ["node_modules/*", "dist/*", "logs/*", "*.log", "coverage/*", ".git", "client/*"],
+  "exec": "tsx ./test-app/main.ts",
+  "ext": "ts,js,json",
+  "env": {
+    "NODE_ENV": "development"
+  },
+  "events": {
+    "start": "",
+    "crash": "",
+    "exit": "",
+    "restart": ""
+  }
+}

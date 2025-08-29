@@ -4,9 +4,10 @@ import * as fs from 'node:fs'
 import * as http from 'node:http'
 import { Server } from 'node:http'
 import * as https from 'node:https'
+import colorize from '../../cli/helpers/colorize.js'
 import EnvInternal from '../../helpers/EnvInternal.js'
-import { PsychicSslCredentials } from '../../psychic-app/index.js'
-import PsychicServer from '../../server/index.js'
+import PsychicApp, { PsychicSslCredentials } from '../../psychic-app/index.js'
+import PsychicLogos from '../../cli/helpers/PsychicLogos.js'
 
 export interface StartPsychicServerOptions {
   app: Express
@@ -45,9 +46,19 @@ export function createPsychicHttpInstance(app: Express, sslCredentials: PsychicS
 }
 
 function welcomeMessage({ port }: { port: number }) {
-  if (!EnvInternal.isTest) {
-    DreamCLI.logger.log('starting psychic server...')
-    DreamCLI.logger.log(PsychicServer.asciiLogo(), { logPrefix: '' })
+  if (EnvInternal.isDevelopment) {
+    DreamCLI.logger.log(colorize(PsychicLogos.babyAster(), { color: 'greenBright' }), {
+      logPrefix: '',
+    })
+    DreamCLI.logger.log('', { logPrefix: '' })
+    DreamCLI.logger.log(colorize('✺ ' + PsychicApp.getOrFail().appName, { color: 'greenBright' }), {
+      logPrefix: '',
+    })
+    DreamCLI.logger.log(colorize(`└─ http://localhost:${port.toString()}`, { color: 'greenBright' }), {
+      logPrefix: '',
+    })
+    DreamCLI.logger.log('', { logPrefix: '' })
+  } else {
     DreamCLI.logger.log(`psychic dev server started at port ${port}`)
   }
 }

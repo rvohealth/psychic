@@ -7,7 +7,12 @@ describe('a visitor attempts to hit a route that will respond with a 304', () =>
   })
 
   it('returns 304', async () => {
-    const res = await request.get('/not-modified', 304)
-    expect(res.header.location).toEqual('/chalupas')
+    const res = await request.get('/ok', 200)
+
+    await request.get('/ok', 304, {
+      headers: {
+        ['if-none-match']: res.headers.etag!,
+      },
+    })
   })
 })

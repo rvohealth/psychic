@@ -403,7 +403,7 @@ suggested fix:  "${convertRouteParams(path)}"
   ) {
     const controllerInstance = this._initializeController(controller, req, res, action)
     if (typeof controllerInstance[action as keyof typeof controllerInstance] !== 'function') {
-      res.sendStatus(404)
+      controllerInstance['expressSendStatus'](404)
       return
     }
 
@@ -411,22 +411,20 @@ suggested fix:  "${convertRouteParams(path)}"
       await controllerInstance.runAction()
     } catch (error) {
       const err = error as Error
-      if (!EnvInternal.isTest) PsychicApp.logWithLevel('error', err.message)
-
       if (errorIsRescuableHttpError(err)) {
         const httpErr = err as HttpError
         if (httpErr.data) {
-          res.status(httpErr.status).json(httpErr.data)
+          controllerInstance['expressSendJson'](httpErr.data, httpErr.status)
         } else {
-          res.sendStatus(httpErr.status)
+          controllerInstance['expressSendStatus'](httpErr.status)
         }
       } else if (err instanceof RecordNotFound) {
-        res.sendStatus(404)
+        controllerInstance['expressSendStatus'](404)
       } else if (err instanceof DataIncompatibleWithDatabaseField) {
         /**
          * See comment at top of this method for philosophy of 400
          */
-        res.sendStatus(400)
+        controllerInstance['expressSendStatus'](400)
       } else if (err instanceof ValidationError) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
@@ -440,7 +438,7 @@ suggested fix:  "${convertRouteParams(path)}"
         /**
          * See comment at top of this method for philosophy of 400
          */
-        res.sendStatus(400)
+        controllerInstance['expressSendStatus'](400)
       } else if (err instanceof OpenapiRequestValidationFailure) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
@@ -455,7 +453,7 @@ suggested fix:  "${convertRouteParams(path)}"
         /**
          * See comment at top of this method for philosophy of 400
          */
-        res.sendStatus(400)
+        controllerInstance['expressSendStatus'](400)
       } else if (err instanceof ParamValidationError) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
@@ -471,7 +469,7 @@ suggested fix:  "${convertRouteParams(path)}"
         /**
          * See comment at top of this method for philosophy of 400
          */
-        res.sendStatus(400)
+        controllerInstance['expressSendStatus'](400)
       } else if (err instanceof ParamValidationErrors) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
@@ -485,16 +483,9 @@ suggested fix:  "${convertRouteParams(path)}"
         /**
          * See comment at top of this method for philosophy of 400
          */
-        res.sendStatus(400)
+        controllerInstance['expressSendStatus'](400)
       } else {
-        // by default, ts-node will mask these errors for no good reason, causing us
-        // to have to apply an ugly and annoying try-catch pattern to our controllers
-        // and manually console log the error to determine what the actual error was.
-        // this block enables us to not have to do that anymore.
-        if (EnvInternal.isTest && !EnvInternal.boolean('PSYCHIC_EXPECTING_INTERNAL_SERVER_ERROR')) {
-          PsychicApp.log('ATTENTION: a server error was detected:')
-          PsychicApp.logWithLevel('error', err)
-        }
+        PsychicApp.logWithLevel('error', err)
 
         if (PsychicApp.getOrFail().specialHooks.serverError.length) {
           try {

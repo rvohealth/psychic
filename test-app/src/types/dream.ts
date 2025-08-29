@@ -128,6 +128,7 @@ export const schema = {
       user: {
         type: 'BelongsTo',
         foreignKey: 'userId',
+        foreignKeyTypeColumn: null,
         tables: ['users'],
         optional: true,
         requiredOnClauses: null,
@@ -193,6 +194,7 @@ export const schema = {
       post: {
         type: 'BelongsTo',
         foreignKey: 'postId',
+        foreignKeyTypeColumn: null,
         tables: ['posts'],
         optional: false,
         requiredOnClauses: null,
@@ -511,6 +513,7 @@ export const schema = {
       user: {
         type: 'BelongsTo',
         foreignKey: 'userId',
+        foreignKeyTypeColumn: null,
         tables: ['users'],
         optional: false,
         requiredOnClauses: null,
@@ -585,6 +588,7 @@ export const schema = {
       comments: {
         type: 'HasMany',
         foreignKey: 'postId',
+        foreignKeyTypeColumn: null,
         tables: ['comments'],
         optional: null,
         requiredOnClauses: null,
@@ -592,6 +596,7 @@ export const schema = {
       recentComment: {
         type: 'HasOne',
         foreignKey: 'postId',
+        foreignKeyTypeColumn: null,
         tables: ['comments'],
         optional: null,
         requiredOnClauses: null,
@@ -599,6 +604,7 @@ export const schema = {
       user: {
         type: 'BelongsTo',
         foreignKey: 'userId',
+        foreignKeyTypeColumn: null,
         tables: ['users'],
         optional: false,
         requiredOnClauses: null,
@@ -1164,6 +1170,7 @@ export const schema = {
       balloons: {
         type: 'HasMany',
         foreignKey: 'userId',
+        foreignKeyTypeColumn: null,
         tables: ['balloons'],
         optional: null,
         requiredOnClauses: null,
@@ -1171,6 +1178,7 @@ export const schema = {
       pets: {
         type: 'HasMany',
         foreignKey: 'userId',
+        foreignKeyTypeColumn: null,
         tables: ['pets'],
         optional: null,
         requiredOnClauses: null,
@@ -1178,6 +1186,7 @@ export const schema = {
       posts: {
         type: 'HasMany',
         foreignKey: 'userId',
+        foreignKeyTypeColumn: null,
         tables: ['posts'],
         optional: null,
         requiredOnClauses: null,
@@ -1185,6 +1194,7 @@ export const schema = {
       recentPost: {
         type: 'HasOne',
         foreignKey: 'userId',
+        foreignKeyTypeColumn: null,
         tables: ['posts'],
         optional: null,
         requiredOnClauses: null,

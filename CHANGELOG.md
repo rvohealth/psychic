@@ -1,3 +1,9 @@
+## 1.10.5
+
+- add "combining" option to requestBody for OpenAPI decorator, enabling you to combine additional openapi fields to the request body, while still leveraging the powerful automatically-generated request body.
+- syncing client enums now sync types along with values
+- better dev logging
+
 ## 1.10.4
 
 Fix issue with rendering incorrect enum descriptions when suppressResponseEnums is set to true and enums are explicitly overridden in the openapi option.

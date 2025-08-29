@@ -164,7 +164,6 @@ export default function routes(r: PsychicRouter) {
   r.get('moved-permanently', ResponseStatusesController, 'sendMovedPermanently') // 301
   r.get('found', ResponseStatusesController, 'sendFound') // 302
   r.get('see-other', ResponseStatusesController, 'sendSeeOther') // 303
-  r.get('not-modified', ResponseStatusesController, 'sendNotModified') // 304
   r.get('temporary-redirect', ResponseStatusesController, 'sendTemporaryRedirect') // 307
   r.get('permanent-redirect', ResponseStatusesController, 'sendPermanentRedirect') // 308
 
