@@ -58,7 +58,9 @@ import Params, {
 } from '../server/params.js'
 import Session, { CustomSessionCookieOptions } from '../session/index.js'
 import isPaginatedResult from './helpers/isPaginatedResult.js'
+import logIfDevelopment from './helpers/logIfDevelopment.js'
 import renderDreamOrVewModel from './helpers/renderDreamOrViewModel.js'
+import EnvInternal from '../helpers/EnvInternal.js'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -225,6 +227,7 @@ export default class PsychicController {
   public session: Session
   public action: string
   public renderOpts: SerializerRendererOpts
+  private startTime: number
 
   constructor(
     req: Request,
@@ -235,6 +238,7 @@ export default class PsychicController {
       action: string
     },
   ) {
+    this.startTime = Date.now()
     this.req = req
     this.res = res
     this.session = new Session(req, res)
@@ -585,7 +589,31 @@ export default class PsychicController {
     data: any,
   ) {
     this.validateOpenapiResponseBody(data)
-    this.res.type('json').send(toJson(data, PsychicApp.getOrFail().sanitizeResponseJson))
+    this.expressSendJson(data)
+  }
+
+  private expressSendJson(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
+    statusCode: number = this.res.statusCode,
+  ) {
+    this.res.type('json').status(statusCode).send(toJson(data, PsychicApp.getOrFail().sanitizeResponseJson))
+    this.logIfDevelopment()
+  }
+
+  private expressSendStatus(statusCode: number) {
+    this.res.sendStatus(statusCode)
+    this.logIfDevelopment()
+  }
+
+  private expressRedirect(statusCode: number, newLocation: string) {
+    this.res.redirect(statusCode, newLocation)
+    this.logIfDevelopment()
+  }
+
+  private logIfDevelopment() {
+    if (!EnvInternal.isDevelopment) return
+    logIfDevelopment({ req: this.req, res: this.res, startTime: this.startTime })
   }
 
   protected defaultSerializerPassthrough: SerializerResult = {}
@@ -646,15 +674,15 @@ export default class PsychicController {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public nonAuthoritativeInformation(message: any = undefined) {
     if (message) {
-      this.res.status(203).json(message)
+      this.expressSendJson(message, 203)
     } else {
-      this.res.sendStatus(203)
+      this.expressSendStatus(203)
     }
   }
 
   // 204
   public noContent() {
-    this.res.sendStatus(204)
+    this.expressSendStatus(204)
   }
 
   // 205
@@ -673,32 +701,27 @@ export default class PsychicController {
 
   // 301
   public movedPermanently(newLocation: string) {
-    this.res.redirect(301, newLocation)
+    this.expressRedirect(301, newLocation)
   }
 
   // 302
   public found(newLocation: string) {
-    this.res.redirect(302, newLocation)
+    this.expressRedirect(302, newLocation)
   }
 
   // 303
   public seeOther(newLocation: string) {
-    this.res.redirect(303, newLocation)
-  }
-
-  // 304
-  public notModified(newLocation: string) {
-    this.res.redirect(304, newLocation)
+    this.expressRedirect(303, newLocation)
   }
 
   // 307
   public temporaryRedirect(newLocation: string) {
-    this.res.redirect(307, newLocation)
+    this.expressRedirect(307, newLocation)
   }
 
   // 308
   public permanentRedirect(newLocation: string) {
-    this.res.redirect(308, newLocation)
+    this.expressRedirect(308, newLocation)
   }
 
   // 400

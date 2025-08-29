@@ -1,4 +1,4 @@
-import { closeAllDbConnections, DreamLogos } from '@rvoh/dream'
+import { closeAllDbConnections } from '@rvoh/dream'
 import * as cookieParser from 'cookie-parser'
 import * as cors from 'cors'
 import * as express from 'express'
@@ -11,6 +11,7 @@ import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
 } from './helpers/startPsychicServer.js'
+import logIfDevelopment from '../controller/helpers/logIfDevelopment.js'
 
 // const debugEnabled = debuglog('psychic').enabled
 
@@ -21,10 +22,6 @@ export default class PsychicServer {
 
   public static createPsychicHttpInstance(app: Express, sslCredentials: PsychicSslCredentials | undefined) {
     return createPsychicHttpInstance(app, sslCredentials)
-  }
-
-  public static asciiLogo() {
-    return DreamLogos.colorful()
   }
 
   public expressApp: Express
@@ -84,8 +81,30 @@ export default class PsychicServer {
       await afterRoutesHook(this)
     }
 
+    this.applyNotFoundMiddleware()
+
     this.booted = true
     return true
+  }
+
+  private applyNotFoundMiddleware() {
+    if (!EnvInternal.isDevelopment) return
+
+    this.expressApp.use((req, res, next) => {
+      // express by default will set the 200 status code. If a user explicitly
+      // provides anything other than 200, we should assume that a prior middleware
+      // would have have sent headers, which would prevent any of this from happening.
+      // this means that if we are here, we should not be sending a 200. Future middleware
+      // by express will automatically pick this up and turn it into a 404, so we are
+      // going to automatically set the status to 404 now, so that our logger can
+      // pick up the correct status code.
+      if (res.statusCode === 200) res.status(404)
+
+      logIfDevelopment({ req, res, startTime: Date.now(), fallbackStatusCode: 404 })
+
+      // call next to let express handle sending the 404
+      next()
+    })
   }
 
   private setSecureDefaultHeaders() {

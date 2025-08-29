@@ -57,11 +57,6 @@ export default class ResponseStatusesController extends ApplicationController {
     this.seeOther('/chalupas')
   }
 
-  // 304
-  public sendNotModified() {
-    this.notModified('/chalupas')
-  }
-
   // 307
   public sendTemporaryRedirect() {
     this.temporaryRedirect('/chalupas')
