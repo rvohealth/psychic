@@ -851,6 +851,75 @@ describe('OpenapiEndpointRenderer', () => {
             })
           })
         })
+
+        context('with combining provided', () => {
+          context('with no other surrounding options provided', () => {
+            it('combines whatever is provided to combining along with all existing param-safe openapi fields', () => {
+              const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+                requestBody: {
+                  combining: {
+                    randomField: 'string',
+                  },
+                },
+              })
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response['/users']!.post.requestBody).toEqual({
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: expect.objectContaining({
+                        email: {
+                          type: 'string',
+                        },
+                        randomField: {
+                          type: 'string',
+                        },
+                      }),
+                    },
+                  },
+                },
+              })
+            })
+          })
+
+          context('with only/including', () => {
+            it('combines whatever is provided to combining along with the only/including args', () => {
+              const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+                requestBody: {
+                  only: ['email'],
+                  including: ['id'],
+                  combining: {
+                    name: 'string',
+                  },
+                },
+              })
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response['/users']!.post.requestBody).toEqual({
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: {
+                        email: {
+                          type: 'string',
+                        },
+                        id: {
+                          type: 'integer',
+                        },
+                        name: {
+                          type: 'string',
+                        },
+                      },
+                    },
+                  },
+                },
+              })
+            })
+          })
+        })
       })
 
       context('requestBody leverages only opt', () => {
