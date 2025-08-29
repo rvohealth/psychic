@@ -13,6 +13,7 @@ import {
   OpenapiSchemaNumber,
   OpenapiSchemaObjectBase,
   OpenapiSchemaPrimitiveGeneric,
+  OpenapiSchemaPropertiesShorthand,
   OpenapiSchemaString,
   snakeify,
   UpdateableProperties,
@@ -701,6 +702,7 @@ export interface ParamsForOpts<OnlyArray, IncludingArray>
 export interface ParamExclusionOptions<OnlyArray, IncludingArray> {
   only?: OnlyArray
   including?: IncludingArray
+  combining?: OpenapiSchemaPropertiesShorthand
 }
 
 const typeToErrorMap: Record<PsychicParamsPrimitiveLiteral, string> = {

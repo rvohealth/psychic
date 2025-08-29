@@ -17,6 +17,7 @@ import {
   OpenapiSchemaExpressionRef,
   OpenapiSchemaObject,
   OpenapiSchemaProperties,
+  OpenapiSchemaPropertiesShorthand,
   SerializerCasing,
   SimpleObjectSerializerType,
   UpdateableProperties,
@@ -630,6 +631,7 @@ export default class OpenapiEndpointRenderer<
     if (!body) return true
     if (body.only) return true
     if (body.including) return true
+    if (body.combining) return true
     if (body.for) return true
     if (body.required && (body as OpenapiSchemaObject).type !== 'object') return true
     return false
@@ -654,14 +656,20 @@ export default class OpenapiEndpointRenderer<
     const dreamClass = forDreamClass || this.getSingleDreamModelClass()
     if (!dreamClass) return this.defaultRequestBody()
 
-    const { only, including } = (this.requestBody || {}) as OpenapiSchemaRequestBodyForOption<typeof Dream>
+    const { only, including, combining } = (this.requestBody || {}) as OpenapiSchemaRequestBodyForOption<
+      typeof Dream
+    >
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const paramSafeColumns = paramNamesForDreamClass(dreamClass, { only, including } as any)
 
     const paramsShape: OpenapiSchemaObject = {
       type: 'object',
-      properties: {},
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+      properties: {
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        ...((combining || {}) as any),
+      },
     }
 
     const required = (this.requestBody as OpenapiSchemaRequestBodyForOption<typeof Dream>)?.required
@@ -1548,6 +1556,26 @@ export interface OpenapiSchemaRequestBodyForDreamClass<ForOption extends typeof 
   >[]
 
   /**
+   * expand the included fields to allow additional fields
+   * that are unrelated to the model's params
+   *
+   * ```ts
+   * @OpenAPI({
+   *   requestBody: {
+   *     for: Pet,
+   *     combining: {
+   *       otherField: { type: 'boolean' }
+   *     }
+   *   }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   */
+  combining?: OpenapiSchemaPropertiesShorthand
+
+  /**
    * Specify which fields are required for your openapi
    * request body.
    *
@@ -1629,6 +1657,26 @@ export interface OpenapiSchemaRequestBodyForBaseDreamClass<
    * ```
    */
   including?: Including
+
+  /**
+   * expand the included fields to allow additional fields
+   * that are unrelated to the model's params
+   *
+   * ```ts
+   * @OpenAPI({
+   *   requestBody: {
+   *     for: Pet,
+   *     combining: {
+   *       otherField: { type: 'boolean' }
+   *     }
+   *   }
+   * })
+   * public create() {
+   *   ...
+   * }
+   * ```
+   */
+  combining?: OpenapiSchemaPropertiesShorthand
 
   /**
    * Specify which fields are required for your openapi
