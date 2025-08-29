@@ -18,6 +18,7 @@ export const ${exportedTypeName} = [
     .map(val => `'${val}'`)
     .join(',\n  ')}
 ] as const
+export type ${exportedTypeName.replace(/Values^/, '')} = (typeof ${exportedTypeName})[number]
 
 `
   })
