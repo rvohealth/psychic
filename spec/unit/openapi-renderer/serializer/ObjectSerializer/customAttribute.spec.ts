@@ -59,6 +59,20 @@ describe('ObjectSerializer customAttributes', () => {
     })
   })
 
+  context('with `required: false`', () => {
+    it('omits the property from the required fields in the rendered OpenAPI', () => {
+      const MySerializer = (user: User) =>
+        ObjectSerializer(user).customAttribute('email', () => `${user.email}@peanuts.com`, {
+          openapi: { type: 'string' },
+          required: false,
+        })
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      expect((serializerOpenapiRenderer.renderedOpenapi().openapi as any).required).toEqual([])
+    })
+  })
+
   context('with passthrough data', () => {
     it('can access the passthrough data in the function', () => {
       const MySerializer = (user: User, passthroughData: { locale: string }) =>

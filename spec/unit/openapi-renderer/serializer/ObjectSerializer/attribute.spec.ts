@@ -82,6 +82,17 @@ describe('ObjectSerializer attributes', () => {
     })
   })
 
+  context('with `required: false`', () => {
+    it('omits the property from the required fields in the rendered OpenAPI', () => {
+      const MySerializer = (data: User | null) =>
+        ObjectSerializer(data).attribute('email', { openapi: 'string', required: false })
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      expect((serializerOpenapiRenderer.renderedOpenapi().openapi as any).required).toEqual([])
+    })
+  })
+
   context('with casing specified', () => {
     const MySerializer = (data: ModelForOpenapiTypeSpecs) =>
       ObjectSerializer(data).attribute('requiredNicknames', { openapi: 'string[]' })

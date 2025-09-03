@@ -29,4 +29,15 @@ describe('ObjectSerializer delegated attributes', () => {
       },
     })
   })
+
+  context('with `required: false`', () => {
+    it('omits the property from the required fields in the rendered OpenAPI', () => {
+      const MySerializer = (data: Pet) =>
+        ObjectSerializer(data).delegatedAttribute('user', 'name', { openapi: 'string', required: false })
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      expect((serializerOpenapiRenderer.renderedOpenapi().openapi as any).required).toEqual([])
+    })
+  })
 })

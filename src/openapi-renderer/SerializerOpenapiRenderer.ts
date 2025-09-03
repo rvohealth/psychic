@@ -123,12 +123,15 @@ export default class SerializerOpenapiRenderer {
         const attributeType = attribute.type
         switch (attributeType) {
           case 'attribute': {
+            if (attribute.options?.required === false) return null
             return attribute.options?.as ?? attribute.name
           }
           case 'delegatedAttribute': {
+            if (attribute.options?.required === false) return null
             return attribute.options?.as ?? attribute.name
           }
           case 'customAttribute': {
+            if (attribute.options?.required === false) return null
             return attribute.options.flatten ? null : attribute.name
           }
           case 'rendersOne': {
