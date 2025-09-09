@@ -21,6 +21,7 @@ import SerializerTestsController from '../app/controllers/SerializerTestsControl
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
 import User from '../app/models/User.js'
+import ServerErrorTestsController from '../app/controllers/ServerErrorTestsController.js'
 
 export default function routes(r: PsychicRouter) {
   r.get('circular', CircularController, 'hello')
@@ -54,6 +55,25 @@ export default function routes(r: PsychicRouter) {
   r.get('openapi/request-body-for-type', OpenapiDecoratorTestController, 'testRequestBodyForType')
   r.get('openapi/multiple-serializer-statements', OpenapiDecoratorTestController, 'testMultipleSerializers')
   r.get('openapi/openapi-overrides', OpenapiOverridesTestController, 'testOpenapiConfigOverrides')
+  r.get(
+    'server-errors/unexpected-error',
+    ServerErrorTestsController,
+    'testServerErrorHandlerWithUnexpectedError',
+  )
+  r.get('server-errors/bad-request', ServerErrorTestsController, 'testServerErrorHandlerWithBadRequest')
+  r.get('server-errors/openapi-error', ServerErrorTestsController, 'testServerErrorHandlerWithOpenapiFailure')
+  r.get('server-errors/forbidden-error', ServerErrorTestsController, 'testServerErrorHandlerWithForbidden')
+  r.get(
+    'server-errors/unauthorized-error',
+    ServerErrorTestsController,
+    'testServerErrorHandlerWithUnauthorized',
+  )
+  r.get('server-errors/not-found-error', ServerErrorTestsController, 'testServerErrorHandlerWithNotFound')
+  r.get(
+    'server-errors/record-not-found-error',
+    ServerErrorTestsController,
+    'testServerErrorHandlerWithRecordNotFound',
+  )
 
   r.resources('users', r => {
     r.collection(r => {
