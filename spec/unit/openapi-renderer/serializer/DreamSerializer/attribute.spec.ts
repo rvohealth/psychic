@@ -15,10 +15,7 @@ describe('DreamSerializer attributes', () => {
   })
 
   it('can render virtual Dream attributes', () => {
-    const MySerializer = (data: User) =>
-      // TODO: remove any cast when attribute stops requiring an openapi attribute for virtual columns
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      DreamSerializer(User, data).attribute('openapiVirtualSpecTest' as any)
+    const MySerializer = (data: User) => DreamSerializer(User, data).attribute('openapiVirtualSpecTest')
 
     const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
     expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
@@ -30,9 +27,7 @@ describe('DreamSerializer attributes', () => {
 
   it('can provide a description for a virtual Dream attribute', () => {
     const MySerializer = (data: User) =>
-      // TODO: remove any cast when attribute stops requiring an openapi attribute for virtual columns
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      DreamSerializer(User, data).attribute('openapiVirtualSpecTest' as any, {
+      DreamSerializer(User, data).attribute('openapiVirtualSpecTest', {
         openapi: { description: 'Hello world' },
       })
 
