@@ -39,7 +39,8 @@ describe('generateResourceControllerSpecContent', () => {
         actions: [...RESOURCE_ACTIONS],
       })
       expect(res).toEqual(`\
-import { UpdateableProperties, CalendarDate, DateTime } from '@rvoh/dream'
+import { DreamRequestAttributes } from '@rvoh/psychic-spec-helpers'
+import { CalendarDate, DateTime } from '@rvoh/dream'
 import Post from '../../../../src/app/models/Post.js'
 import User from '../../../../src/app/models/User.js'
 import createPost from '../../../factories/PostFactory.js'
@@ -130,7 +131,7 @@ describe('V1/PostsController', () => {
 
   describe('POST create', () => {
     const subject = async <StatusCode extends 201 | 400>(
-      data: UpdateableProperties<Post>,
+      data: DreamRequestAttributes<Post>,
       expectedStatus: StatusCode
     ) => {
       return request.post('/v1/posts', expectedStatus, { data })
@@ -207,7 +208,7 @@ describe('V1/PostsController', () => {
   describe('PATCH update', () => {
     const subject = async <StatusCode extends 204 | 400 | 404>(
       post: Post,
-      data: UpdateableProperties<Post>,
+      data: DreamRequestAttributes<Post>,
       expectedStatus: StatusCode
     ) => {
       return request.patch('/v1/posts/{id}', expectedStatus, {
@@ -378,7 +379,7 @@ describe('V1/PostsController', () => {
         actions: ['create', 'show'],
       })
       expect(res).toEqual(`\
-import { UpdateableProperties } from '@rvoh/dream'
+import { DreamRequestAttributes } from '@rvoh/psychic-spec-helpers'
 import Post from '../../../../src/app/models/Post.js'
 import User from '../../../../src/app/models/User.js'
 import createPost from '../../../factories/PostFactory.js'
@@ -432,7 +433,7 @@ describe('V1/PostsController', () => {
 
   describe('POST create', () => {
     const subject = async <StatusCode extends 201 | 400>(
-      data: UpdateableProperties<Post>,
+      data: DreamRequestAttributes<Post>,
       expectedStatus: StatusCode
     ) => {
       return request.post('/v1/posts', expectedStatus, { data })
@@ -492,7 +493,8 @@ describe('V1/PostsController', () => {
         actions: [...RESOURCE_ACTIONS],
       })
       expect(res).toEqual(`\
-import { UpdateableProperties, CalendarDate, DateTime } from '@rvoh/dream'
+import { DreamRequestAttributes } from '@rvoh/psychic-spec-helpers'
+import { CalendarDate, DateTime } from '@rvoh/dream'
 import HostingAgreement from '../../../../src/app/models/HostingAgreement.js'
 import User from '../../../../src/app/models/User.js'
 import createHostingAgreement from '../../../factories/HostingAgreementFactory.js'
@@ -530,7 +532,7 @@ describe('V1/HostingAgreementController', () => {
 
   describe('POST create', () => {
     const subject = async <StatusCode extends 201 | 400>(
-      data: UpdateableProperties<HostingAgreement>,
+      data: DreamRequestAttributes<HostingAgreement>,
       expectedStatus: StatusCode
     ) => {
       return request.post('/v1/hosting-agreement', expectedStatus, { data })
@@ -561,7 +563,7 @@ describe('V1/HostingAgreementController', () => {
 
   describe('PATCH update', () => {
     const subject = async <StatusCode extends 204 | 400 | 404>(
-      data: UpdateableProperties<HostingAgreement>,
+      data: DreamRequestAttributes<HostingAgreement>,
       expectedStatus: StatusCode
     ) => {
       return request.patch('/v1/hosting-agreement', expectedStatus, {
@@ -617,7 +619,7 @@ describe('V1/HostingAgreementController', () => {
         actions: [...RESOURCE_ACTIONS],
       })
       expect(res).toEqual(`\
-import { UpdateableProperties } from '@rvoh/dream'
+import { DreamRequestAttributes } from '@rvoh/psychic-spec-helpers'
 import Post from '../../../../src/app/models/Post.js'
 import User from '../../../../src/app/models/User.js'
 import Host from '../../../../src/app/models/Host.js'
@@ -696,7 +698,7 @@ describe('V1/PostsController', () => {
 
   describe('POST create', () => {
     const subject = async <StatusCode extends 201 | 400>(
-      data: UpdateableProperties<Post>,
+      data: DreamRequestAttributes<Post>,
       expectedStatus: StatusCode
     ) => {
       return request.post('/v1/posts', expectedStatus, { data })
@@ -722,7 +724,7 @@ describe('V1/PostsController', () => {
   describe('PATCH update', () => {
     const subject = async <StatusCode extends 204 | 400 | 404>(
       post: Post,
-      data: UpdateableProperties<Post>,
+      data: DreamRequestAttributes<Post>,
       expectedStatus: StatusCode
     ) => {
       return request.patch('/v1/posts/{id}', expectedStatus, {
@@ -799,7 +801,7 @@ describe('V1/PostsController', () => {
         actions: [...RESOURCE_ACTIONS],
       })
       expect(res).toEqual(`\
-import { UpdateableProperties } from '@rvoh/dream'
+import { DreamRequestAttributes } from '@rvoh/psychic-spec-helpers'
 import Article from '../../../../src/app/models/Article.js'
 import AdminUser from '../../../../src/app/models/AdminUser.js'
 import createArticle from '../../../factories/ArticleFactory.js'
@@ -856,7 +858,7 @@ describe('Admin/ArticlesController', () => {
 
   describe('POST create', () => {
     const subject = async <StatusCode extends 201 | 400>(
-      data: UpdateableProperties<Article>,
+      data: DreamRequestAttributes<Article>,
       expectedStatus: StatusCode
     ) => {
       return request.post('/admin/articles', expectedStatus, { data })
@@ -882,7 +884,7 @@ describe('Admin/ArticlesController', () => {
   describe('PATCH update', () => {
     const subject = async <StatusCode extends 204 | 400 | 404>(
       article: Article,
-      data: UpdateableProperties<Article>,
+      data: DreamRequestAttributes<Article>,
       expectedStatus: StatusCode
     ) => {
       return request.patch('/admin/articles/{id}', expectedStatus, {
@@ -941,7 +943,7 @@ describe('Admin/ArticlesController', () => {
         })
         expect(res).toContain(
           `\
-import { UpdateableProperties } from '@rvoh/dream'
+import { DreamRequestAttributes } from '@rvoh/psychic-spec-helpers'
 import Post from '../../../../src/app/models/Post.js'
 import User from '../../../../src/app/models/User.js'
 import createPost from '../../../factories/PostFactory.js'
@@ -969,7 +971,7 @@ import { session, SpecRequestType } from '../../helpers/authentication.js'\
         })
         expect(res).toContain(
           `\
-import { UpdateableProperties } from '@rvoh/dream'
+import { DreamRequestAttributes } from '@rvoh/psychic-spec-helpers'
 import Post from '../../../../src/app/models/Post.ts'
 import User from '../../../../src/app/models/User.ts'
 import createPost from '../../../factories/PostFactory.ts'
@@ -997,7 +999,7 @@ import { session, SpecRequestType } from '../../helpers/authentication.ts'\
         })
         expect(res).toContain(
           `\
-import { UpdateableProperties } from '@rvoh/dream'
+import { DreamRequestAttributes } from '@rvoh/psychic-spec-helpers'
 import Post from '../../../../src/app/models/Post'
 import User from '../../../../src/app/models/User'
 import createPost from '../../../factories/PostFactory'

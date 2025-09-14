@@ -44,7 +44,7 @@ export default function generateResourceControllerSpecContent({
     : userModelName
   const owningModelVariableName = owningModelName ? camelize(owningModelName) : userVariableName
 
-  const dreamImports: string[] = ['UpdateableProperties']
+  const dreamImports: string[] = []
 
   const importStatements: string[] = compact([
     importStatementForModel(fullyQualifiedControllerName, fullyQualifiedModelName),
@@ -215,7 +215,12 @@ export default function generateResourceControllerSpecContent({
   const omitDestroy = !actions.includes('destroy')
 
   return `\
-import { ${uniq(dreamImports).join(', ')} } from '@rvoh/dream'${uniq(importStatements).join('')}
+import { DreamRequestAttributes } from '@rvoh/psychic-spec-helpers'${
+    dreamImports.length
+      ? `
+import { ${uniq(dreamImports).join(', ')} } from '@rvoh/dream'`
+      : ''
+  }${uniq(importStatements).join('')}
 import { session, SpecRequestType } from '${specUnitUpdirs}helpers/${addImportSuffix('authentication.js')}'
 
 describe('${fullyQualifiedControllerName}', () => {
@@ -311,7 +316,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
   describe('POST create', () => {
     const subject = async <StatusCode extends 201 | 400>(
-      data: UpdateableProperties<${modelClassName}>,
+      data: DreamRequestAttributes<${modelClassName}>,
       expectedStatus: StatusCode
     ) => {
       return request.post('/${route}', expectedStatus, { data })
@@ -354,7 +359,7 @@ describe('${fullyQualifiedControllerName}', () => {
     singular
       ? `
     const subject = async <StatusCode extends 204 | 400 | 404>(
-      data: UpdateableProperties<${modelClassName}>,
+      data: DreamRequestAttributes<${modelClassName}>,
       expectedStatus: StatusCode
     ) => {
       return request.patch('/${route}', expectedStatus, {
@@ -364,7 +369,7 @@ describe('${fullyQualifiedControllerName}', () => {
       : `
     const subject = async <StatusCode extends 204 | 400 | 404>(
       ${modelVariableName}: ${modelClassName},
-      data: UpdateableProperties<${modelClassName}>,
+      data: DreamRequestAttributes<${modelClassName}>,
       expectedStatus: StatusCode
     ) => {
       return request.patch('/${route}/{id}', expectedStatus, {
