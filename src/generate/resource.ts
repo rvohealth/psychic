@@ -28,6 +28,7 @@ export default async function generateResource({
   // which will exhibit bad behavior when provided with
   // a prefixing slash.
   route = route.replace(/^\/+/, '')
+  if (!options.singular) route = pluralize(route)
 
   const fullyQualifiedControllerName = standardizeFullyQualifiedModelName(route)
   const resourcefulActions = options.singular ? [...SINGULAR_RESOURCE_ACTIONS] : [...RESOURCE_ACTIONS]
@@ -45,8 +46,6 @@ export default async function generateResource({
       connectionName: options.connectionName,
     },
   })
-
-  route = pluralize(route)
 
   await generateController({
     fullyQualifiedControllerName,
