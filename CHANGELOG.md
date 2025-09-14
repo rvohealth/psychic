@@ -1,6 +1,7 @@
 ## 1.11.1
 
 - export PsychicLogos
+- export colorize
 
 ## 1.11.0
 
