@@ -122,10 +122,7 @@ export default class SerializerOpenapiRenderer {
       this.serializerBuilder['attributes'].map(attribute => {
         const attributeType = attribute.type
         switch (attributeType) {
-          case 'attribute': {
-            if (attribute.options?.required === false) return null
-            return attribute.options?.as ?? attribute.name
-          }
+          case 'attribute':
           case 'delegatedAttribute': {
             if (attribute.options?.required === false) return null
             return attribute.options?.as ?? attribute.name
@@ -173,27 +170,6 @@ export default class SerializerOpenapiRenderer {
 
       accumulator = (() => {
         switch (attributeType) {
-          ////////////////
-          // attributes //
-          ////////////////
-          case 'attribute': {
-            const outputAttributeName = this.setCase(attribute.options?.as ?? attribute.name)
-            const openapi = attribute.options.openapi
-
-            newlyReferencedSerializers = allSerializersFromHandWrittenOpenapi(openapi)
-
-            accumulator[outputAttributeName] = (DataTypeForOpenapi as typeof Dream)?.isDream
-              ? dreamColumnOpenapiShape(DataTypeForOpenapi as typeof Dream, attribute.name, openapi, {
-                  suppressResponseEnums: this.suppressResponseEnums,
-                })
-              : allSerializersToRefsInOpenapi(openapiShorthandToOpenapi(openapi as any))
-
-            return accumulator
-          }
-          /////////////////////
-          // end: attributes //
-          /////////////////////
-
           ///////////////////////
           // custom attributes //
           ///////////////////////
@@ -219,23 +195,46 @@ export default class SerializerOpenapiRenderer {
           // end: custom attributes //
           ////////////////////////////
 
-          //////////////////////////
-          // delegated attributes //
-          //////////////////////////
+          //////////////////////////////////////////
+          // attributes and delegated attributes //
+          //////////////////////////////////////////
+          case 'attribute':
           case 'delegatedAttribute': {
             const outputAttributeName = this.setCase(attribute.options?.as ?? attribute.name)
             const openapi = attribute.options.openapi
 
             newlyReferencedSerializers = allSerializersFromHandWrittenOpenapi(openapi)
 
+            let target: any
+
+            if (attributeType === 'delegatedAttribute' && (DataTypeForOpenapi as typeof Dream)?.isDream) {
+              const source = DataTypeForOpenapi as typeof Dream
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+              const associatedModelOrModels = source['getAssociationMetadata'](
+                attribute.targetName,
+              )?.modelCB()
+              target = Array.isArray(associatedModelOrModels)
+                ? associatedModelOrModels[0]
+                : associatedModelOrModels
+            } else if (attributeType === 'delegatedAttribute') {
+              target = undefined
+            } else {
+              target = DataTypeForOpenapi
+            }
+
             accumulator[outputAttributeName] = allSerializersToRefsInOpenapi(
-              openapiShorthandToOpenapi(openapi as any),
+              (target as typeof Dream)?.isDream
+                ? dreamColumnOpenapiShape(target as typeof Dream, attribute.name, openapi, {
+                    suppressResponseEnums: this.suppressResponseEnums,
+                  })
+                : openapiShorthandToOpenapi(openapi as any),
             )
+
             return accumulator
           }
-          ///////////////////////////////
-          // end: delegated attributes //
-          ///////////////////////////////
+          /////////////////////////////////////////////
+          // end:attributes and delegated attributes //
+          /////////////////////////////////////////////
 
           //////////////////
           // rendersOnes  //

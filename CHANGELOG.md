@@ -1,6 +1,7 @@
 ## 1.11.0
 
 - match Dream change from `bypassModelIntegrityCheck` to `bypassDreamIntegrityChecks`
+- match Dream change to allow automatic OpenAPI generation from `delegatedAttribute` serialization of associated models
 
 ## 1.10.5
 
