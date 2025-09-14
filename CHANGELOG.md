@@ -1,3 +1,7 @@
+## 1.11.1
+
+- export PsychicLogos
+
 ## 1.11.0
 
 - match Dream change from `bypassModelIntegrityCheck` to `bypassDreamIntegrityChecks`

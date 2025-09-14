@@ -1,7 +1,7 @@
 import colorize from './colorize.js'
 
 export default class PsychicLogos {
-  public static babyAster() {
+  public static asciiLogo() {
     const g = (str: string) => colorize(str, { color: 'green' })
 
     return `

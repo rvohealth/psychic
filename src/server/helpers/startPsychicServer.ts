@@ -5,9 +5,9 @@ import * as http from 'node:http'
 import { Server } from 'node:http'
 import * as https from 'node:https'
 import colorize from '../../cli/helpers/colorize.js'
+import PsychicLogos from '../../cli/helpers/PsychicLogos.js'
 import EnvInternal from '../../helpers/EnvInternal.js'
 import PsychicApp, { PsychicSslCredentials } from '../../psychic-app/index.js'
-import PsychicLogos from '../../cli/helpers/PsychicLogos.js'
 
 export interface StartPsychicServerOptions {
   app: Express
@@ -47,7 +47,7 @@ export function createPsychicHttpInstance(app: Express, sslCredentials: PsychicS
 
 function welcomeMessage({ port }: { port: number }) {
   if (EnvInternal.isDevelopment) {
-    DreamCLI.logger.log(colorize(PsychicLogos.babyAster(), { color: 'greenBright' }), {
+    DreamCLI.logger.log(colorize(PsychicLogos.asciiLogo(), { color: 'greenBright' }), {
       logPrefix: '',
     })
     DreamCLI.logger.log('', { logPrefix: '' })

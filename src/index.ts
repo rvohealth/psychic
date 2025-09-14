@@ -50,6 +50,7 @@ export { default as cookieMaxAgeFromCookieOpts } from './helpers/cookieMaxAgeFro
 export { default as pathifyNestedObject } from './helpers/pathifyNestedObject.js'
 export { default as sanitizeString } from './helpers/sanitizeString.js'
 
+export { default as PsychicLogos } from './cli/helpers/PsychicLogos.js'
 export { default as ParamValidationError } from './error/controller/ParamValidationError.js'
 export { default as ParamValidationErrors } from './error/controller/ParamValidationErrors.js'
 export {

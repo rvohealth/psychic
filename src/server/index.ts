@@ -4,6 +4,7 @@ import * as cors from 'cors'
 import * as express from 'express'
 import { Express } from 'express'
 import { Server } from 'node:http'
+import logIfDevelopment from '../controller/helpers/logIfDevelopment.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import PsychicApp, { PsychicSslCredentials } from '../psychic-app/index.js'
 import PsychicRouter from '../router/index.js'
@@ -11,7 +12,6 @@ import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
 } from './helpers/startPsychicServer.js'
-import logIfDevelopment from '../controller/helpers/logIfDevelopment.js'
 
 // const debugEnabled = debuglog('psychic').enabled
 
