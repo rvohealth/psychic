@@ -115,7 +115,7 @@ export default class PsychicCLI {
             connectionName: string
           },
         ) => {
-          await initializePsychicApp()
+          await initializePsychicApp({ bypassDreamIntegrityChecks: true })
           await PsychicBin.generateResource(route, modelName, columnsWithTypes, options)
           process.exit()
         },
@@ -131,7 +131,7 @@ export default class PsychicCLI {
       )
       .argument('[actions...]', 'the names of controller actions to create')
       .action(async (controllerName: string, actions: string[]) => {
-        await initializePsychicApp()
+        await initializePsychicApp({ bypassDreamIntegrityChecks: true })
         await PsychicBin.generateController(controllerName, actions)
         process.exit()
       })
@@ -262,7 +262,7 @@ export default class PsychicCLI {
       )
       .option('--schema-only')
       .action(async (options: { schemaOnly?: boolean } = {}) => {
-        await initializePsychicApp()
+        await initializePsychicApp({ bypassDreamIntegrityChecks: !!options.schemaOnly })
         await PsychicBin.sync(options)
         process.exit()
       })
@@ -272,7 +272,7 @@ export default class PsychicCLI {
       .description('watches your app for changes, and re-syncs any time they happen')
       .argument('[dir]', 'the folder you want to watch, defaults to ./src')
       .action(async (dir?: string) => {
-        await initializePsychicApp()
+        await initializePsychicApp({ bypassDreamIntegrityChecks: true })
         Watcher.watch(dir)
       })
 
