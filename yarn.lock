@@ -965,7 +965,7 @@ __metadata:
     express: "npm:^5.1.0"
     express-session: "npm:^1.18.2"
     jsdom: "npm:^26.1.0"
-    kysely: "npm:^0.27.4"
+    kysely: "npm:^0.28.5"
     kysely-codegen: "npm:~0.17.0"
     luxon-jest-matchers: "npm:^0.1.14"
     nodemon: "npm:^3.1.7"
@@ -3966,10 +3966,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"kysely@npm:^0.27.4":
-  version: 0.27.4
-  resolution: "kysely@npm:0.27.4"
-  checksum: 10c0/05d223dca3f69778e28511d30cfff485e8e035a43fb01b24f1624b87f850cd6f87e33dcc04e752f7454ac8aed2743d982dabe3be6bc402c63568d020d5b0dd1d
+"kysely@npm:^0.28.5":
+  version: 0.28.7
+  resolution: "kysely@npm:0.28.7"
+  checksum: 10c0/c4ed25228a2b45eecf1db2c9d89c82eb008005f27509d22a7ac0edb9dbc68dbc12abc1e2a692a81a2c2d75cae108e540d22c7c66af42576a85064fe4c11ad0bc
   languageName: node
   linkType: hard
 
