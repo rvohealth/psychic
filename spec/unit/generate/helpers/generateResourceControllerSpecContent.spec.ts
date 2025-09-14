@@ -150,15 +150,15 @@ describe('V1/PostsController', () => {
         rating: 1.1,
         ratings: 1,
         bigRating: '11111111111111111',
-        signedOn: today,
-        signedAt: now,
+        signedOn: today.toISO(),
+        signedAt: now.toISO(),
         integerArray: [1],
         decimalArray: [1.1],
         bigintArray: ['11111111111111111'],
         stringArray: ['The Post stringArray'],
         enumArray: ['enum_1'],
-        dateArray: [today],
-        datetimeArray: [now],
+        dateArray: [today.toISO()],
+        datetimeArray: [now.toISO()],
       }, 201)
 
       const post = await user.associationQuery('posts').firstOrFail()
@@ -232,15 +232,15 @@ describe('V1/PostsController', () => {
         rating: 2.2,
         ratings: 2,
         bigRating: '22222222222222222',
-        signedOn: yesterday,
-        signedAt: lastHour,
+        signedOn: yesterday.toISO(),
+        signedAt: lastHour.toISO(),
         integerArray: [2],
         decimalArray: [2.2],
         bigintArray: ['22222222222222222'],
         stringArray: ['Updated Post stringArray'],
         enumArray: ['enum_2'],
-        dateArray: [yesterday],
-        datetimeArray: [lastHour],
+        dateArray: [yesterday.toISO()],
+        datetimeArray: [lastHour.toISO()],
       }, 204)
 
       await post.reload()
@@ -294,15 +294,15 @@ describe('V1/PostsController', () => {
           rating: 2.2,
           ratings: 2,
           bigRating: '22222222222222222',
-          signedOn: yesterday,
-          signedAt: lastHour,
+          signedOn: yesterday.toISO(),
+          signedAt: lastHour.toISO(),
           integerArray: [2],
           decimalArray: [2.2],
           bigintArray: ['22222222222222222'],
           stringArray: ['Updated Post stringArray'],
           enumArray: ['enum_2'],
-          dateArray: [yesterday],
-          datetimeArray: [lastHour],
+          dateArray: [yesterday.toISO()],
+          datetimeArray: [lastHour.toISO()],
         }, 404)
 
         await post.reload()
@@ -543,8 +543,8 @@ describe('V1/HostingAgreementController', () => {
       const now = DateTime.now()
 
       const { body } = await subject({
-        signedOn: today,
-        signedAt: now,
+        signedOn: today.toISO(),
+        signedAt: now.toISO(),
       }, 201)
 
       const hostingAgreement = await user.associationQuery('hostingAgreement').firstOrFail()
@@ -578,8 +578,8 @@ describe('V1/HostingAgreementController', () => {
       const hostingAgreement = await createHostingAgreement({ user })
 
       await subject({
-        signedOn: yesterday,
-        signedAt: lastHour,
+        signedOn: yesterday.toISO(),
+        signedAt: lastHour.toISO(),
       }, 204)
 
       await hostingAgreement.reload()

@@ -5,6 +5,7 @@
 - fix resource controller spec generator missing date and datetime in spec ensuring model owned by another user is not updated
 - resource controller spec generator supports array attributes
 - generated resource controller spec data type `DreamRequestAttributes`, not `UpdateableProperties`
+- call `.toISO()` on all DateTime and CalendarDate properties going into request to conform to types
 
 ## 1.10.5
 

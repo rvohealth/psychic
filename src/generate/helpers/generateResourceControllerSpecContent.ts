@@ -150,11 +150,10 @@ export default function generateResourceControllerSpecContent({
         dreamImports.push('CalendarDate')
         dateAttributeIncluded = true
 
-        const originalDateValue = isArray ? '[today]' : 'today'
-        const updatedDateValue = isArray ? '[yesterday]' : 'yesterday'
-
-        attributeCreationKeyValues.push(`${attributeName}: ${originalDateValue},`)
-        attributeUpdateKeyValues.push(`${attributeName}: ${updatedDateValue},`)
+        attributeCreationKeyValues.push(`${attributeName}: ${isArray ? '[today.toISO()]' : 'today.toISO()'},`)
+        attributeUpdateKeyValues.push(
+          `${attributeName}: ${isArray ? '[yesterday.toISO()]' : 'yesterday.toISO()'},`,
+        )
 
         comparableOriginalAttributeKeyValues.push(
           `${attributeName}: ${dotNotationVariable}${isArray ? '.map(date => date.toISO())' : '.toISO()'},`,
@@ -173,11 +172,10 @@ export default function generateResourceControllerSpecContent({
         dreamImports.push('DateTime')
         datetimeAttributeIncluded = true
 
-        const originalDatetimeValue = isArray ? '[now]' : 'now'
-        const updatedDatetimeValue = isArray ? '[lastHour]' : 'lastHour'
-
-        attributeCreationKeyValues.push(`${attributeName}: ${originalDatetimeValue},`)
-        attributeUpdateKeyValues.push(`${attributeName}: ${updatedDatetimeValue},`)
+        attributeCreationKeyValues.push(`${attributeName}: ${isArray ? '[now.toISO()]' : 'now.toISO()'},`)
+        attributeUpdateKeyValues.push(
+          `${attributeName}: ${isArray ? '[lastHour.toISO()]' : 'lastHour.toISO()'},`,
+        )
 
         comparableOriginalAttributeKeyValues.push(
           `${attributeName}: ${dotNotationVariable}${isArray ? '.map(datetime => datetime.toISO())' : '.toISO()'},`,
