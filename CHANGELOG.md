@@ -1,3 +1,7 @@
+## 1.11.0
+
+- match Dream change from `bypassModelIntegrityCheck` to `bypassDreamIntegrityChecks`
+
 ## 1.10.5
 
 - add "combining" option to requestBody for OpenAPI decorator, enabling you to combine additional openapi fields to the request body, while still leveraging the powerful automatically-generated request body.

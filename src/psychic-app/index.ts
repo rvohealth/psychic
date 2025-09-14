@@ -68,63 +68,59 @@ export default class PsychicApp {
   ): Promise<PsychicApp> {
     let psychicApp: PsychicApp
 
-    await DreamApp.init(
-      dreamCb,
-      { bypassModelIntegrityCheck: opts.bypassModelIntegrityCheck! },
-      async dreamApp => {
-        psychicApp = new PsychicApp()
-        await cb(psychicApp)
+    await DreamApp.init(dreamCb, opts, async dreamApp => {
+      psychicApp = new PsychicApp()
+      await cb(psychicApp)
 
-        if (!psychicApp.loadedControllers) throw new PsychicAppInitMissingCallToLoadControllers()
-        if (!psychicApp.apiRoot) throw new PsychicAppInitMissingApiRoot()
-        if (!psychicApp.routesCb) throw new PsychicAppInitMissingRoutesCallback()
-        if (!DreamAppAllowedPackageManagersEnumValues.includes(psychicApp.packageManager))
-          throw new PsychicAppInitMissingPackageManager()
+      if (!psychicApp.loadedControllers) throw new PsychicAppInitMissingCallToLoadControllers()
+      if (!psychicApp.apiRoot) throw new PsychicAppInitMissingApiRoot()
+      if (!psychicApp.routesCb) throw new PsychicAppInitMissingRoutesCallback()
+      if (!DreamAppAllowedPackageManagersEnumValues.includes(psychicApp.packageManager))
+        throw new PsychicAppInitMissingPackageManager()
 
-        if (psychicApp.encryption?.cookies?.current)
-          this.checkEncryptionKey(
-            'cookies',
-            psychicApp.encryption.cookies.current.key,
-            psychicApp.encryption.cookies.current.algorithm,
-          )
+      if (psychicApp.encryption?.cookies?.current)
+        this.checkEncryptionKey(
+          'cookies',
+          psychicApp.encryption.cookies.current.key,
+          psychicApp.encryption.cookies.current.algorithm,
+        )
 
-        await psychicApp.inflections?.()
+      await psychicApp.inflections?.()
 
-        dreamApp.on('repl:start', context => {
-          const psychicApp = PsychicApp.getOrFail()
+      dreamApp.on('repl:start', context => {
+        const psychicApp = PsychicApp.getOrFail()
 
-          for (const globalName of Object.keys(psychicApp.services)) {
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-            if (!(context as any)[globalName]) {
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
-              ;(context as any)[pascalizeFileName(globalName)] = psychicApp.services[globalName]
-            }
+        for (const globalName of Object.keys(psychicApp.services)) {
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+          if (!(context as any)[globalName]) {
+            // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-explicit-any
+            ;(context as any)[pascalizeFileName(globalName)] = psychicApp.services[globalName]
           }
-        })
-
-        for (const initializerCb of Object.values(PsychicApp.getInitializersOrBlank())) {
-          await initializerCb(psychicApp)
         }
+      })
 
-        for (const plugin of psychicApp.plugins) {
-          await plugin(psychicApp)
-        }
+      for (const initializerCb of Object.values(PsychicApp.getInitializersOrBlank())) {
+        await initializerCb(psychicApp)
+      }
 
-        dreamApp.set('projectRoot', psychicApp.apiRoot)
-        dreamApp.set('logger', psychicApp.logger)
-        dreamApp.set('packageManager', psychicApp.packageManager)
+      for (const plugin of psychicApp.plugins) {
+        await plugin(psychicApp)
+      }
 
-        cachePsychicApp(psychicApp)
+      dreamApp.set('projectRoot', psychicApp.apiRoot)
+      dreamApp.set('logger', psychicApp.logger)
+      dreamApp.set('packageManager', psychicApp.packageManager)
 
-        if (!opts.bypassModelIntegrityCheck) {
-          // routes _must_ be built before openapi
-          // cache can be processed
-          await psychicApp.buildRoutesCache()
+      cachePsychicApp(psychicApp)
 
-          psychicApp.buildOpenapiCache()
-        }
-      },
-    )
+      if (!opts.bypassDreamIntegrityChecks) {
+        // routes _must_ be built before openapi
+        // cache can be processed
+        await psychicApp.buildRoutesCache()
+
+        psychicApp.buildOpenapiCache()
+      }
+    })
 
     return psychicApp!
   }
