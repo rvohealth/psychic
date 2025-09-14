@@ -6,10 +6,10 @@ import {
   standardizeFullyQualifiedModelName,
   uniq,
 } from '@rvoh/dream'
+import addImportSuffix from '../../helpers/path/addImportSuffix.js'
 import relativePsychicPath from '../../helpers/path/relativePsychicPath.js'
 import updirsFromPath from '../../helpers/path/updirsFromPath.js'
 import { pluralize } from '../../index.js'
-import addImportSuffix from '../../helpers/path/addImportSuffix.js'
 
 export default function generateResourceControllerSpecContent({
   fullyQualifiedControllerName,
@@ -61,7 +61,6 @@ export default function generateResourceControllerSpecContent({
   const attributeUpdateKeyValues: string[] = []
 
   const comparableOriginalAttributeKeyValues: string[] = []
-  const comparableUpdatedAttributeKeyValues: string[] = []
 
   const expectEqualOriginalValue: string[] = []
   const expectEqualUpdatedValue: string[] = []
@@ -75,26 +74,32 @@ export default function generateResourceControllerSpecContent({
   let datetimeAttributeIncluded: boolean = false
 
   for (const attribute of columnsWithTypes) {
-    const [rawAttributeName, attributeType, , enumValues] = attribute.split(':')
+    const [rawAttributeName, rawAttributeType, , enumValues] = attribute.split(':')
     if (/(_type|_id)$/.test(rawAttributeName ?? '')) continue
     const attributeName = camelize(rawAttributeName ?? '')
     const dotNotationVariable = `${modelVariableName}.${attributeName}`
+
+    if (!rawAttributeType) continue
+    const arrayBracketRegexp = /\[\]$/
+    const isArray = arrayBracketRegexp.test(rawAttributeType)
+    const attributeType = rawAttributeType.replace(arrayBracketRegexp, '')
 
     if (attributeName === 'deletedAt') continue
 
     switch (attributeType) {
       case 'enum': {
-        const originalEnumValue = (enumValues ?? '').split(',').at(0)!
-        const updatedEnumValue = (enumValues ?? '').split(',').at(-1)!
+        const rawOriginalEnumValue = (enumValues ?? '').split(',').at(0)!
+        const rawUpdatedEnumValue = (enumValues ?? '').split(',').at(-1)!
+        const originalEnumValue = isArray ? [rawOriginalEnumValue] : rawOriginalEnumValue
+        const updatedEnumValue = isArray ? [rawUpdatedEnumValue] : rawUpdatedEnumValue
 
-        attributeCreationKeyValues.push(`${attributeName}: '${originalEnumValue}',`)
-        attributeUpdateKeyValues.push(`${attributeName}: '${updatedEnumValue}',`)
+        attributeCreationKeyValues.push(`${attributeName}: ${jsonify(originalEnumValue)},`)
+        attributeUpdateKeyValues.push(`${attributeName}: ${jsonify(updatedEnumValue)},`)
 
         comparableOriginalAttributeKeyValues.push(`${attributeName}: ${dotNotationVariable},`)
-        comparableUpdatedAttributeKeyValues.push(`${attributeName}: '${updatedEnumValue}',`)
 
-        expectEqualOriginalValue.push(`expect(${dotNotationVariable}).toEqual('${originalEnumValue}')`)
-        expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqual('${updatedEnumValue}')`)
+        expectEqualOriginalValue.push(`expect(${dotNotationVariable}).toEqual(${jsonify(originalEnumValue)})`)
+        expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqual(${jsonify(updatedEnumValue)})`)
 
         break
       }
@@ -102,91 +107,104 @@ export default function generateResourceControllerSpecContent({
       case 'string':
       case 'text':
       case 'citext': {
-        const originalStringValue = `The ${fullyQualifiedModelName} ${attributeName}`
-        const updatedStringValue = `Updated ${fullyQualifiedModelName} ${attributeName}`
+        const rawOriginalStringValue = `The ${fullyQualifiedModelName} ${attributeName}`
+        const rawUpdatedStringValue = `Updated ${fullyQualifiedModelName} ${attributeName}`
+        const originalStringValue = isArray ? [rawOriginalStringValue] : rawOriginalStringValue
+        const updatedStringValue = isArray ? [rawUpdatedStringValue] : rawUpdatedStringValue
 
-        attributeCreationKeyValues.push(`${attributeName}: '${originalStringValue}',`)
-        attributeUpdateKeyValues.push(`${attributeName}: '${updatedStringValue}',`)
+        attributeCreationKeyValues.push(`${attributeName}: ${jsonify(originalStringValue)},`)
+        attributeUpdateKeyValues.push(`${attributeName}: ${jsonify(updatedStringValue)},`)
 
         comparableOriginalAttributeKeyValues.push(`${attributeName}: ${dotNotationVariable},`)
-        comparableUpdatedAttributeKeyValues.push(`${attributeName}: '${updatedStringValue}',`)
 
-        expectEqualOriginalValue.push(`expect(${dotNotationVariable}).toEqual('${originalStringValue}')`)
-        expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqual('${updatedStringValue}')`)
+        expectEqualOriginalValue.push(
+          `expect(${dotNotationVariable}).toEqual(${jsonify(originalStringValue)})`,
+        )
+        expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqual(${jsonify(updatedStringValue)})`)
         break
       }
 
       case 'integer':
-        attributeCreationKeyValues.push(`${attributeName}: 1,`)
-        attributeUpdateKeyValues.push(`${attributeName}: 2,`)
-
-        comparableOriginalAttributeKeyValues.push(`${attributeName}: ${dotNotationVariable},`)
-        comparableUpdatedAttributeKeyValues.push(`${attributeName}: 2,`)
-
-        expectEqualOriginalValue.push(`expect(${dotNotationVariable}).toEqual(1)`)
-        expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqual(2)`)
-
-        break
-
-      case 'bigint':
-        attributeCreationKeyValues.push(`${attributeName}: '11111111111111111',`)
-        attributeUpdateKeyValues.push(`${attributeName}: '22222222222222222',`)
-
-        comparableOriginalAttributeKeyValues.push(`${attributeName}: ${dotNotationVariable},`)
-        comparableUpdatedAttributeKeyValues.push(`${attributeName}: '22222222222222222',`)
-
-        expectEqualOriginalValue.push(`expect(${dotNotationVariable}).toEqual('11111111111111111')`)
-        expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqual('22222222222222222')`)
-
-        break
-
       case 'decimal':
-        attributeCreationKeyValues.push(`${attributeName}: 1.1,`)
-        attributeUpdateKeyValues.push(`${attributeName}: 2.2,`)
+      case 'bigint': {
+        const rawOriginalValue =
+          attributeType === 'integer' ? 1 : attributeType === 'decimal' ? 1.1 : '11111111111111111'
+        const rawUpdatedValue =
+          attributeType === 'integer' ? 2 : attributeType === 'decimal' ? 2.2 : '22222222222222222'
+
+        const originalValue = isArray ? [rawOriginalValue] : rawOriginalValue
+        const updatedValue = isArray ? [rawUpdatedValue] : rawUpdatedValue
+
+        attributeCreationKeyValues.push(`${attributeName}: ${jsonify(originalValue)},`)
+        attributeUpdateKeyValues.push(`${attributeName}: ${jsonify(updatedValue)},`)
 
         comparableOriginalAttributeKeyValues.push(`${attributeName}: ${dotNotationVariable},`)
-        comparableUpdatedAttributeKeyValues.push(`${attributeName}: 2.2,`)
 
-        expectEqualOriginalValue.push(`expect(${dotNotationVariable}).toEqual(1.1)`)
-        expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqual(2.2)`)
+        expectEqualOriginalValue.push(`expect(${dotNotationVariable}).toEqual(${jsonify(originalValue)})`)
+        expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqual(${jsonify(updatedValue)})`)
+
         break
+      }
 
-      case 'date':
+      case 'date': {
         dreamImports.push('CalendarDate')
         dateAttributeIncluded = true
-        attributeCreationKeyValues.push(`${attributeName}: today,`)
-        attributeUpdateKeyValues.push(`${attributeName}: yesterday,`)
 
-        comparableOriginalAttributeKeyValues.push(`${attributeName}: ${dotNotationVariable}.toISO(),`)
-        comparableUpdatedAttributeKeyValues.push(`${attributeName}: yesterday.toISO(),`)
+        const originalDateValue = isArray ? '[today]' : 'today'
+        const updatedDateValue = isArray ? '[yesterday]' : 'yesterday'
 
-        expectEqualOriginalValue.push(`expect(${dotNotationVariable}).toEqualCalendarDate(today)`)
-        expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqualCalendarDate(yesterday)`)
+        attributeCreationKeyValues.push(`${attributeName}: ${originalDateValue},`)
+        attributeUpdateKeyValues.push(`${attributeName}: ${updatedDateValue},`)
+
+        comparableOriginalAttributeKeyValues.push(
+          `${attributeName}: ${dotNotationVariable}${isArray ? '.map(date => date.toISO())' : '.toISO()'},`,
+        )
+
+        expectEqualOriginalValue.push(
+          `expect(${dotNotationVariable}${isArray ? '[0]' : ''}).toEqualCalendarDate(today)`,
+        )
+        expectEqualUpdatedValue.push(
+          `expect(${dotNotationVariable}${isArray ? '[0]' : ''}).toEqualCalendarDate(yesterday)`,
+        )
         break
+      }
 
-      case 'datetime':
+      case 'datetime': {
         dreamImports.push('DateTime')
         datetimeAttributeIncluded = true
-        attributeCreationKeyValues.push(`${attributeName}: now,`)
-        attributeUpdateKeyValues.push(`${attributeName}: lastHour,`)
 
-        comparableOriginalAttributeKeyValues.push(`${attributeName}: ${dotNotationVariable}.toISO(),`)
-        comparableUpdatedAttributeKeyValues.push(`${attributeName}: lastHour.toISO(),`)
+        const originalDatetimeValue = isArray ? '[now]' : 'now'
+        const updatedDatetimeValue = isArray ? '[lastHour]' : 'lastHour'
 
-        expectEqualOriginalValue.push(`expect(${dotNotationVariable}).toEqualDateTime(now)`)
-        expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqualDateTime(lastHour)`)
+        attributeCreationKeyValues.push(`${attributeName}: ${originalDatetimeValue},`)
+        attributeUpdateKeyValues.push(`${attributeName}: ${updatedDatetimeValue},`)
+
+        comparableOriginalAttributeKeyValues.push(
+          `${attributeName}: ${dotNotationVariable}${isArray ? '.map(datetime => datetime.toISO())' : '.toISO()'},`,
+        )
+
+        expectEqualOriginalValue.push(
+          `expect(${dotNotationVariable}${isArray ? '[0]' : ''}).toEqualDateTime(now)`,
+        )
+        expectEqualUpdatedValue.push(
+          `expect(${dotNotationVariable}${isArray ? '[0]' : ''}).toEqualDateTime(lastHour)`,
+        )
         break
+      }
 
       default:
         continue
     }
 
     keyWithDotValue.push(`${attributeName}: ${dotNotationVariable},`)
-    const originalAttributeVariableName = 'original' + capitalize(attributeName)
-    originalValueVariableAssignments.push(`const ${originalAttributeVariableName} = ${dotNotationVariable}`)
-    expectEqualOriginalNamedVariable.push(
-      `expect(${dotNotationVariable}).toEqual(${originalAttributeVariableName})`,
-    )
+
+    if (!((attributeType === 'date' || attributeType === 'datetime') && isArray)) {
+      const originalAttributeVariableName = 'original' + capitalize(attributeName)
+      originalValueVariableAssignments.push(`const ${originalAttributeVariableName} = ${dotNotationVariable}`)
+      expectEqualOriginalNamedVariable.push(
+        `expect(${dotNotationVariable}).toEqual(${originalAttributeVariableName})`,
+      )
+    }
   }
 
   const simpleCreationCommand = `const ${modelVariableName} = await create${modelClassName}(${forAdmin ? '' : `{ ${owningModelVariableName} }`})`
@@ -381,7 +399,17 @@ describe('${fullyQualifiedControllerName}', () => {
         : `
 
     context('a ${fullyQualifiedModelName} created by another ${owningModelName}', () => {
-      it('is not updated', async () => {
+      it('is not updated', async () => {${
+        dateAttributeIncluded
+          ? `
+        const yesterday = CalendarDate.yesterday()`
+          : ''
+      }${
+        datetimeAttributeIncluded
+          ? `
+        const lastHour = DateTime.now().minus({ hour: 1 })`
+          : ''
+      }${dateAttributeIncluded || datetimeAttributeIncluded ? '\n' : ''}
         const ${modelVariableName} = await create${modelClassName}()
         ${originalValueVariableAssignments.length ? originalValueVariableAssignments.join('\n        ') : ''}
 
@@ -450,4 +478,9 @@ function importStatementForModelFactory(
   destinationModelName: string = originModelName,
 ) {
   return `\nimport create${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${relativePsychicPath('controllerSpecs', 'factories', originModelName, destinationModelName)}'`
+}
+
+// eslint-disable-next-line @typescript-eslint/no-explicit-any
+function jsonify(val: any) {
+  return JSON.stringify(val).replace(/"/g, "'")
 }

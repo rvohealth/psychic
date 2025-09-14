@@ -24,13 +24,22 @@ describe('generateResourceControllerSpecContent', () => {
           'postable_id:bigint',
           'postable_type:enum:postable_types:article,column',
           'deleted_at:datetime:optional',
+          'signed_on:date',
+          'signed_at:datetime',
+          'integer_array:integer[]',
+          'decimal_array:decimal[]:3,2',
+          'bigint_array:bigint[]',
+          'string_array:string[]',
+          'enum_array:enum[]:my_enum:enum_1,enum_2',
+          'date_array:date[]',
+          'datetime_array:datetime[]',
         ],
         forAdmin: false,
         singular: false,
         actions: [...RESOURCE_ACTIONS],
       })
       expect(res).toEqual(`\
-import { UpdateableProperties } from '@rvoh/dream'
+import { UpdateableProperties, CalendarDate, DateTime } from '@rvoh/dream'
 import Post from '../../../../src/app/models/Post.js'
 import User from '../../../../src/app/models/User.js'
 import createPost from '../../../factories/PostFactory.js'
@@ -97,6 +106,15 @@ describe('V1/PostsController', () => {
           rating: post.rating,
           ratings: post.ratings,
           bigRating: post.bigRating,
+          signedOn: post.signedOn.toISO(),
+          signedAt: post.signedAt.toISO(),
+          integerArray: post.integerArray,
+          decimalArray: post.decimalArray,
+          bigintArray: post.bigintArray,
+          stringArray: post.stringArray,
+          enumArray: post.enumArray,
+          dateArray: post.dateArray.map(date => date.toISO()),
+          datetimeArray: post.datetimeArray.map(datetime => datetime.toISO()),
         }),
       )
     })
@@ -119,6 +137,9 @@ describe('V1/PostsController', () => {
     }
 
     it('creates a Post for this User', async () => {
+      const today = CalendarDate.today()
+      const now = DateTime.now()
+
       const { body } = await subject({
         type: 'WeeklyPost',
         style: 'formal',
@@ -128,6 +149,15 @@ describe('V1/PostsController', () => {
         rating: 1.1,
         ratings: 1,
         bigRating: '11111111111111111',
+        signedOn: today,
+        signedAt: now,
+        integerArray: [1],
+        decimalArray: [1.1],
+        bigintArray: ['11111111111111111'],
+        stringArray: ['The Post stringArray'],
+        enumArray: ['enum_1'],
+        dateArray: [today],
+        datetimeArray: [now],
       }, 201)
 
       const post = await user.associationQuery('posts').firstOrFail()
@@ -139,6 +169,15 @@ describe('V1/PostsController', () => {
       expect(post.rating).toEqual(1.1)
       expect(post.ratings).toEqual(1)
       expect(post.bigRating).toEqual('11111111111111111')
+      expect(post.signedOn).toEqualCalendarDate(today)
+      expect(post.signedAt).toEqualDateTime(now)
+      expect(post.integerArray).toEqual([1])
+      expect(post.decimalArray).toEqual([1.1])
+      expect(post.bigintArray).toEqual(['11111111111111111'])
+      expect(post.stringArray).toEqual(['The Post stringArray'])
+      expect(post.enumArray).toEqual(['enum_1'])
+      expect(post.dateArray[0]).toEqualCalendarDate(today)
+      expect(post.datetimeArray[0]).toEqualDateTime(now)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -151,6 +190,15 @@ describe('V1/PostsController', () => {
           rating: post.rating,
           ratings: post.ratings,
           bigRating: post.bigRating,
+          signedOn: post.signedOn.toISO(),
+          signedAt: post.signedAt.toISO(),
+          integerArray: post.integerArray,
+          decimalArray: post.decimalArray,
+          bigintArray: post.bigintArray,
+          stringArray: post.stringArray,
+          enumArray: post.enumArray,
+          dateArray: post.dateArray.map(date => date.toISO()),
+          datetimeArray: post.datetimeArray.map(datetime => datetime.toISO()),
         }),
       )
     })
@@ -169,6 +217,9 @@ describe('V1/PostsController', () => {
     }
 
     it('updates the Post', async () => {
+      const yesterday = CalendarDate.yesterday()
+      const lastHour = DateTime.now().minus({ hour: 1 })
+
       const post = await createPost({ user })
 
       await subject(post, {
@@ -180,6 +231,15 @@ describe('V1/PostsController', () => {
         rating: 2.2,
         ratings: 2,
         bigRating: '22222222222222222',
+        signedOn: yesterday,
+        signedAt: lastHour,
+        integerArray: [2],
+        decimalArray: [2.2],
+        bigintArray: ['22222222222222222'],
+        stringArray: ['Updated Post stringArray'],
+        enumArray: ['enum_2'],
+        dateArray: [yesterday],
+        datetimeArray: [lastHour],
       }, 204)
 
       await post.reload()
@@ -191,10 +251,22 @@ describe('V1/PostsController', () => {
       expect(post.rating).toEqual(2.2)
       expect(post.ratings).toEqual(2)
       expect(post.bigRating).toEqual('22222222222222222')
+      expect(post.signedOn).toEqualCalendarDate(yesterday)
+      expect(post.signedAt).toEqualDateTime(lastHour)
+      expect(post.integerArray).toEqual([2])
+      expect(post.decimalArray).toEqual([2.2])
+      expect(post.bigintArray).toEqual(['22222222222222222'])
+      expect(post.stringArray).toEqual(['Updated Post stringArray'])
+      expect(post.enumArray).toEqual(['enum_2'])
+      expect(post.dateArray[0]).toEqualCalendarDate(yesterday)
+      expect(post.datetimeArray[0]).toEqualDateTime(lastHour)
     })
 
     context('a Post created by another User', () => {
       it('is not updated', async () => {
+        const yesterday = CalendarDate.yesterday()
+        const lastHour = DateTime.now().minus({ hour: 1 })
+
         const post = await createPost()
         const originalType = post.type
         const originalStyle = post.style
@@ -204,6 +276,13 @@ describe('V1/PostsController', () => {
         const originalRating = post.rating
         const originalRatings = post.ratings
         const originalBigRating = post.bigRating
+        const originalSignedOn = post.signedOn
+        const originalSignedAt = post.signedAt
+        const originalIntegerArray = post.integerArray
+        const originalDecimalArray = post.decimalArray
+        const originalBigintArray = post.bigintArray
+        const originalStringArray = post.stringArray
+        const originalEnumArray = post.enumArray
 
         await subject(post, {
           type: 'GuestPost',
@@ -214,6 +293,15 @@ describe('V1/PostsController', () => {
           rating: 2.2,
           ratings: 2,
           bigRating: '22222222222222222',
+          signedOn: yesterday,
+          signedAt: lastHour,
+          integerArray: [2],
+          decimalArray: [2.2],
+          bigintArray: ['22222222222222222'],
+          stringArray: ['Updated Post stringArray'],
+          enumArray: ['enum_2'],
+          dateArray: [yesterday],
+          datetimeArray: [lastHour],
         }, 404)
 
         await post.reload()
@@ -225,6 +313,13 @@ describe('V1/PostsController', () => {
         expect(post.rating).toEqual(originalRating)
         expect(post.ratings).toEqual(originalRatings)
         expect(post.bigRating).toEqual(originalBigRating)
+        expect(post.signedOn).toEqual(originalSignedOn)
+        expect(post.signedAt).toEqual(originalSignedAt)
+        expect(post.integerArray).toEqual(originalIntegerArray)
+        expect(post.decimalArray).toEqual(originalDecimalArray)
+        expect(post.bigintArray).toEqual(originalBigintArray)
+        expect(post.stringArray).toEqual(originalStringArray)
+        expect(post.enumArray).toEqual(originalEnumArray)
       })
     })
   })
