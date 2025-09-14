@@ -29,6 +29,8 @@ import {
   ResourcesOptions,
 } from './types.js'
 
+const ERROR_LOGGING_DEPTH = 6
+
 export default class PsychicRouter {
   public app: Application | null
   public currentNamespaces: NamespaceConfig[] = []
@@ -428,10 +430,13 @@ suggested fix:  "${convertRouteParams(path)}"
       } else if (err instanceof ValidationError) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
-            util.inspect({
-              type: 'validator',
-              errors: err.errors || {},
-            }),
+            util.inspect(
+              {
+                type: 'validator',
+                errors: err.errors || {},
+              },
+              { depth: ERROR_LOGGING_DEPTH },
+            ),
           )
         }
 
@@ -442,11 +447,14 @@ suggested fix:  "${convertRouteParams(path)}"
       } else if (err instanceof OpenapiRequestValidationFailure) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
-            util.inspect({
-              type: 'openapi',
-              errors: err.errors,
-              target: err.target,
-            }),
+            util.inspect(
+              {
+                type: 'openapi',
+                errors: err.errors,
+                target: err.target,
+              },
+              { depth: ERROR_LOGGING_DEPTH },
+            ),
           )
         }
 
@@ -457,12 +465,15 @@ suggested fix:  "${convertRouteParams(path)}"
       } else if (err instanceof ParamValidationError) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
-            util.inspect({
-              type: 'validator',
-              errors: {
-                [err.paramName]: err.errorMessages,
+            util.inspect(
+              {
+                type: 'validator',
+                errors: {
+                  [err.paramName]: err.errorMessages,
+                },
               },
-            }),
+              { depth: ERROR_LOGGING_DEPTH },
+            ),
           )
         }
 
@@ -473,10 +484,13 @@ suggested fix:  "${convertRouteParams(path)}"
       } else if (err instanceof ParamValidationErrors) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
-            util.inspect({
-              type: 'validator',
-              errors: err.errors,
-            }),
+            util.inspect(
+              {
+                type: 'validator',
+                errors: err.errors,
+              },
+              { depth: ERROR_LOGGING_DEPTH },
+            ),
           )
         }
 

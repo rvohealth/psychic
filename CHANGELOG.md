@@ -7,6 +7,7 @@
 - generated resource controller spec data type `DreamRequestAttributes`, not `UpdateableProperties`
 - call `.toISO()` on all DateTime and CalendarDate properties going into request to conform to types
 - only pluralize the route if not designated as `singular`; pluralize before generating controller name so the controller name matches the route in the routes file
+- increase depth of inspection during error logging
 
 ## 1.10.5
 
