@@ -46,6 +46,7 @@ import HttpStatusUnauthorized from '../error/http/Unauthorized.js'
 import HttpStatusUnavailableForLegalReasons from '../error/http/UnavailableForLegalReasons.js'
 import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent.js'
 import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType.js'
+import EnvInternal from '../helpers/EnvInternal.js'
 import toJson from '../helpers/toJson.js'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
 import OpenapiPayloadValidator from '../openapi-renderer/helpers/OpenapiPayloadValidator.js'
@@ -57,10 +58,8 @@ import Params, {
   ValidatedReturnType,
 } from '../server/params.js'
 import Session, { CustomSessionCookieOptions } from '../session/index.js'
-import isPaginatedResult from './helpers/isPaginatedResult.js'
 import logIfDevelopment from './helpers/logIfDevelopment.js'
 import renderDreamOrVewModel from './helpers/renderDreamOrViewModel.js'
-import EnvInternal from '../helpers/EnvInternal.js'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -563,14 +562,22 @@ export default class PsychicController {
     opts: RenderOptions = {},
   ): // eslint-disable-next-line @typescript-eslint/no-explicit-any
   any {
+    const paginatedResults = (data as { results: unknown[] })?.results
+
     if (Array.isArray(data)) {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return data.map(d => this.singleObjectJson(d, opts))
       //
-    } else if (isPaginatedResult(data)) {
+    } else if (this.currentOpenapiRenderer?.['paginate'] && Array.isArray(paginatedResults)) {
       return {
         ...data,
-        results: (data as { results: unknown[] }).results.map(result => this.singleObjectJson(result, opts)),
+        results: paginatedResults.map(result => this.singleObjectJson(result, opts)),
+      }
+      //
+    } else if (this.currentOpenapiRenderer?.['scrollPaginate'] && Array.isArray(paginatedResults)) {
+      return {
+        ...data,
+        results: paginatedResults.map(result => this.singleObjectJson(result, opts)),
       }
       //
     } else {

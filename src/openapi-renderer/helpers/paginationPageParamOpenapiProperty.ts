@@ -1,4 +1,4 @@
-export default function openapiPageParamProperty() {
+export default function paginationPageParamOpenapiProperty() {
   return {
     type: 'integer',
     description: 'Page number',

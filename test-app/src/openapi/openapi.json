@@ -5122,6 +5122,558 @@
           }
         }
       }
+    },
+    "/users/scroll-paginated": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "query",
+          "required": false,
+          "name": "cursor",
+          "description": "Fast pagination cursor",
+          "allowReserved": true,
+          "schema": {
+            "type": [
+              "string",
+              "null"
+            ]
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "cursor",
+                    "results"
+                  ],
+                  "properties": {
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/users/scroll-paginated-post": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "properties": {
+                  "aDatetime": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date-time"
+                  },
+                  "bio": {
+                    "type": "string"
+                  },
+                  "birthdate": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "date"
+                  },
+                  "collarCount": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "bigint"
+                  },
+                  "collarCountInt": {
+                    "type": [
+                      "integer",
+                      "null"
+                    ]
+                  },
+                  "collarCountNumeric": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "format": "decimal"
+                  },
+                  "createdOn": {
+                    "type": "string",
+                    "format": "date"
+                  },
+                  "email": {
+                    "type": "string"
+                  },
+                  "favoriteBigint": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "format": "bigint"
+                  },
+                  "favoriteBigints": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "format": "bigint"
+                    }
+                  },
+                  "favoriteBooleans": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "boolean"
+                    }
+                  },
+                  "favoriteCitext": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "favoriteCitexts": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "favoriteDates": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  },
+                  "favoriteDatetimes": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "favoriteIntegers": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "favoriteJsonbs": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "favoriteJsons": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "favoriteNumerics": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "number",
+                      "format": "decimal"
+                    }
+                  },
+                  "favoriteTexts": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "favoriteTreats": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string",
+                      "enum": [
+                        "efishy feesh",
+                        "snick snowcks"
+                      ]
+                    }
+                  },
+                  "favoriteUuids": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "jsonData": {
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  },
+                  "jsonbData": {
+                    "type": [
+                      "object",
+                      "null"
+                    ]
+                  },
+                  "likesTreats": {
+                    "type": "boolean"
+                  },
+                  "likesWalks": {
+                    "type": [
+                      "boolean",
+                      "null"
+                    ]
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "nicknames": {
+                    "type": [
+                      "array",
+                      "null"
+                    ],
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "notes": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "optionalUuid": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "passwordDigest": {
+                    "type": "string"
+                  },
+                  "requiredCollarCount": {
+                    "type": "string",
+                    "format": "bigint"
+                  },
+                  "requiredCollarCountInt": {
+                    "type": "integer"
+                  },
+                  "requiredFavoriteBigint": {
+                    "type": "string",
+                    "format": "bigint"
+                  },
+                  "requiredFavoriteBigints": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "bigint"
+                    }
+                  },
+                  "requiredFavoriteBooleans": {
+                    "type": "array",
+                    "items": {
+                      "type": "boolean"
+                    }
+                  },
+                  "requiredFavoriteCitext": {
+                    "type": "string"
+                  },
+                  "requiredFavoriteCitexts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requiredFavoriteDates": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "date"
+                    }
+                  },
+                  "requiredFavoriteDatetimes": {
+                    "type": "array",
+                    "items": {
+                      "type": "string",
+                      "format": "date-time"
+                    }
+                  },
+                  "requiredFavoriteIntegers": {
+                    "type": "array",
+                    "items": {
+                      "type": "integer"
+                    }
+                  },
+                  "requiredFavoriteJsonbs": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "requiredFavoriteJsons": {
+                    "type": "array",
+                    "items": {
+                      "type": "object"
+                    }
+                  },
+                  "requiredFavoriteNumerics": {
+                    "type": "array",
+                    "items": {
+                      "type": "number",
+                      "format": "decimal"
+                    }
+                  },
+                  "requiredFavoriteTexts": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requiredFavoriteUuids": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "requiredJsonData": {
+                    "type": "object"
+                  },
+                  "requiredJsonbData": {
+                    "type": "object"
+                  },
+                  "requiredNicknames": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "species": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "enum": [
+                      "cat",
+                      "noncat",
+                      null
+                    ]
+                  },
+                  "uuid": {
+                    "type": "string"
+                  },
+                  "volume": {
+                    "type": [
+                      "number",
+                      "null"
+                    ],
+                    "format": "decimal"
+                  },
+                  "password": {
+                    "anyOf": [
+                      {
+                        "type": [
+                          "string",
+                          "null"
+                        ]
+                      },
+                      {
+                        "type": [
+                          "number",
+                          "null"
+                        ]
+                      },
+                      {
+                        "type": [
+                          "object",
+                          "null"
+                        ]
+                      }
+                    ]
+                  },
+                  "openapiVirtualSpecTest": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  },
+                  "openapiVirtualSpecTest2": {
+                    "type": "array",
+                    "items": {
+                      "type": "string"
+                    }
+                  },
+                  "cursor": {
+                    "type": [
+                      "string",
+                      "null"
+                    ],
+                    "description": "Fast pagination cursor"
+                  }
+                }
+              }
+            }
+          }
+        },
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "object",
+                  "required": [
+                    "cursor",
+                    "results"
+                  ],
+                  "properties": {
+                    "cursor": {
+                      "type": [
+                        "string",
+                        "null"
+                      ]
+                    },
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "$ref": "#/components/schemas/UserSummary"
+                      }
+                    }
+                  }
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {

@@ -1,3 +1,7 @@
+## 1.12.0
+
+- `scrollPagination` support
+
 ## 1.11.1
 
 - export PsychicLogos

@@ -243,7 +243,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
       const { body } = await subject(200)
 
-      expect(body).toEqual([
+      expect(body.results).toEqual([
         expect.objectContaining({
           id: ${modelVariableName}.id,
         }),

@@ -90,14 +90,15 @@ export default function generateControllerContent({
   @OpenAPI(${modelClassName}, {
     status: 200,
     tags: openApiTags,
-    description: 'Fetch multiple ${pluralize(modelClassName!)}',
-    many: true,
+    description: 'Paginated index of ${pluralize(modelClassName!)}',
+    scrollPaginate: true,
     serializerKey: '${forAdmin ? 'adminSummary' : 'summary'}',
   })
   public async index() {
     // const ${pluralizedModelAttributeName} = await ${loadQueryBase}
     //   .preloadFor('${forAdmin ? 'adminSummary' : 'summary'}')
-    //   .all()
+    //   .order({ createdAt: 'desc' })
+    //   .scrollPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(${pluralizedModelAttributeName})
   }`
         else

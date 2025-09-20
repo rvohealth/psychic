@@ -78,9 +78,7 @@ export default class UsersController extends ApplicationController {
 
   @OpenAPI(User, {
     status: 200,
-    paginate: {
-      query: 'page',
-    },
+    paginate: true,
     serializerKey: 'summary',
   })
   public async paginated() {
@@ -100,6 +98,32 @@ export default class UsersController extends ApplicationController {
   public async paginatedPost() {
     const users = await User.order('createdAt').paginate({
       page: this.castParam('page', 'integer', { allowNull: true }),
+    })
+    this.ok(users)
+  }
+
+  @OpenAPI(User, {
+    status: 200,
+    scrollPaginate: true,
+    serializerKey: 'summary',
+  })
+  public async scrollPaginated() {
+    const users = await User.order('createdAt').scrollPaginate({
+      cursor: this.castParam('cursor', 'string', { allowNull: true }),
+    })
+    this.ok(users)
+  }
+
+  @OpenAPI(User, {
+    status: 200,
+    scrollPaginate: {
+      body: 'cursor',
+    },
+    serializerKey: 'summary',
+  })
+  public async scrollPaginatedPost() {
+    const users = await User.order('createdAt').scrollPaginate({
+      cursor: this.castParam('cursor', 'string', { allowNull: true }),
     })
     this.ok(users)
   }

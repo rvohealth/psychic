@@ -26,14 +26,15 @@ export default class PostsController extends AuthedController {
   @OpenAPI(Post, {
     status: 200,
     tags: openApiTags,
-    description: 'Fetch multiple Posts',
-    many: true,
+    description: 'Paginated index of Posts',
+    scrollPaginate: true,
     serializerKey: 'summary',
   })
   public async index() {
     // const posts = await this.currentUser.associationQuery('posts')
     //   .preloadFor('summary')
-    //   .all()
+    //   .order({ createdAt: 'desc' })
+    //   .scrollPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(posts)
   }
 
@@ -200,14 +201,15 @@ export default class ApiV1HealthPostsController extends AuthedController {
   @OpenAPI(HealthPost, {
     status: 200,
     tags: openApiTags,
-    description: 'Fetch multiple HealthPosts',
-    many: true,
+    description: 'Paginated index of HealthPosts',
+    scrollPaginate: true,
     serializerKey: 'summary',
   })
   public async index() {
     // const healthPosts = await this.currentUser.associationQuery('healthPosts')
     //   .preloadFor('summary')
-    //   .all()
+    //   .order({ createdAt: 'desc' })
+    //   .scrollPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(healthPosts)
   }
 
@@ -340,14 +342,15 @@ export default class PostsController extends AuthedController {
   @OpenAPI(Post, {
     status: 200,
     tags: openApiTags,
-    description: 'Fetch multiple Posts',
-    many: true,
+    description: 'Paginated index of Posts',
+    scrollPaginate: true,
     serializerKey: 'summary',
   })
   public async index() {
     // const posts = await this.currentHost.associationQuery('posts')
     //   .preloadFor('summary')
-    //   .all()
+    //   .order({ createdAt: 'desc' })
+    //   .scrollPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(posts)
   }
 
@@ -442,14 +445,15 @@ export default class AdminArticlesController extends AdminAuthedController {
   @OpenAPI(Article, {
     status: 200,
     tags: openApiTags,
-    description: 'Fetch multiple Articles',
-    many: true,
+    description: 'Paginated index of Articles',
+    scrollPaginate: true,
     serializerKey: 'adminSummary',
   })
   public async index() {
     // const articles = await Article
     //   .preloadFor('adminSummary')
-    //   .all()
+    //   .order({ createdAt: 'desc' })
+    //   .scrollPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(articles)
   }
 

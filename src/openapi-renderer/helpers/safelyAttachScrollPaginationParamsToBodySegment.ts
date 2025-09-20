@@ -1,5 +1,5 @@
 import { OpenapiSchemaObjectBase } from '@rvoh/dream'
-import paginationPageParamOpenapiProperty from './paginationPageParamOpenapiProperty.js'
+import scrollPaginationCursorParamOpenapiProperty from './scrollPaginationCursorParamOpenapiProperty.js'
 
 /**
  * @internal
@@ -15,7 +15,7 @@ import paginationPageParamOpenapiProperty from './paginationPageParamOpenapiProp
  * If neither of these apply, it will simply return
  * what was given to it, without any modifications
  */
-export default function safelyAttachPaginationParamToRequestBodySegment<T>(
+export default function safelyAttachScrollPaginationParamToRequestBodySegment<T>(
   paramName: string,
   bodySegment: T,
 ): T {
@@ -25,10 +25,12 @@ export default function safelyAttachPaginationParamToRequestBodySegment<T>(
   } as T
 
   if ((bodySegment as OpenapiSchemaObjectBase).type === 'object') {
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     ;(bodySegment as OpenapiSchemaObjectBase).properties = {
       ...(bodySegment as OpenapiSchemaObjectBase).properties,
-      [paramName]: paginationPageParamOpenapiProperty(),
-    }
+      [paramName]: scrollPaginationCursorParamOpenapiProperty(),
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    } as any
   }
 
   return bodySegment

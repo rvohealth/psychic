@@ -66,7 +66,7 @@ describe('V1/PostsController', () => {
 
       const { body } = await subject(200)
 
-      expect(body).toEqual([
+      expect(body.results).toEqual([
         expect.objectContaining({
           id: post.id,
         }),
@@ -649,7 +649,7 @@ describe('V1/PostsController', () => {
 
       const { body } = await subject(200)
 
-      expect(body).toEqual([
+      expect(body.results).toEqual([
         expect.objectContaining({
           id: post.id,
         }),
@@ -827,7 +827,7 @@ describe('Admin/ArticlesController', () => {
 
       const { body } = await subject(200)
 
-      expect(body).toEqual([
+      expect(body.results).toEqual([
         expect.objectContaining({
           id: article.id,
         }),

@@ -2839,6 +2839,190 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/users/scroll-paginated": {
+        parameters: {
+            query?: {
+                /** @description Fast pagination cursor */
+                cursor?: string | null;
+            };
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: {
+                    /** @description Fast pagination cursor */
+                    cursor?: string | null;
+                };
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            cursor: string | null;
+                            results: components["schemas"]["UserSummary"][];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/scroll-paginated-post": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody?: {
+                content: {
+                    "application/json": {
+                        /** Format: date-time */
+                        aDatetime?: string | null;
+                        bio?: string;
+                        /** Format: date */
+                        birthdate?: string | null;
+                        /** Format: bigint */
+                        collarCount?: string | number | bigint | null;
+                        collarCountInt?: number | null;
+                        /** Format: decimal */
+                        collarCountNumeric?: number | null;
+                        /** Format: date */
+                        createdOn?: string;
+                        email?: string;
+                        /** Format: bigint */
+                        favoriteBigint?: string | number | bigint | null;
+                        favoriteBigints?: (string | number | bigint)[] | null;
+                        favoriteBooleans?: boolean[] | null;
+                        favoriteCitext?: string | null;
+                        favoriteCitexts?: string[] | null;
+                        favoriteDates?: string[] | null;
+                        favoriteDatetimes?: string[] | null;
+                        favoriteIntegers?: number[] | null;
+                        favoriteJsonbs?: Record<string, never>[] | null;
+                        favoriteJsons?: Record<string, never>[] | null;
+                        favoriteNumerics?: number[] | null;
+                        favoriteTexts?: string[] | null;
+                        favoriteTreats?: ("efishy feesh" | "snick snowcks")[] | null;
+                        favoriteUuids?: string[] | null;
+                        jsonData?: Record<string, never> | null;
+                        jsonbData?: Record<string, never> | null;
+                        likesTreats?: boolean;
+                        likesWalks?: boolean | null;
+                        name?: string | null;
+                        nicknames?: string[] | null;
+                        notes?: string | null;
+                        optionalUuid?: string | null;
+                        passwordDigest?: string;
+                        /** Format: bigint */
+                        requiredCollarCount?: string | number | bigint;
+                        requiredCollarCountInt?: number;
+                        /** Format: bigint */
+                        requiredFavoriteBigint?: string | number | bigint;
+                        requiredFavoriteBigints?: (string | number | bigint)[];
+                        requiredFavoriteBooleans?: boolean[];
+                        requiredFavoriteCitext?: string;
+                        requiredFavoriteCitexts?: string[];
+                        requiredFavoriteDates?: string[];
+                        requiredFavoriteDatetimes?: string[];
+                        requiredFavoriteIntegers?: number[];
+                        requiredFavoriteJsonbs?: Record<string, never>[];
+                        requiredFavoriteJsons?: Record<string, never>[];
+                        requiredFavoriteNumerics?: number[];
+                        requiredFavoriteTexts?: string[];
+                        requiredFavoriteUuids?: string[];
+                        requiredJsonData?: Record<string, never>;
+                        requiredJsonbData?: Record<string, never>;
+                        requiredNicknames?: string[];
+                        /** @enum {string|null} */
+                        species?: "cat" | "noncat" | null;
+                        uuid?: string;
+                        /** Format: decimal */
+                        volume?: number | null;
+                        password?: (string | null) | (number | null) | (Record<string, never> | null);
+                        openapiVirtualSpecTest?: string | null;
+                        openapiVirtualSpecTest2?: string[];
+                        /** @description Fast pagination cursor */
+                        cursor?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": {
+                            cursor: string | null;
+                            results: components["schemas"]["UserSummary"][];
+                        };
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                422: components["responses"]["ValidationErrors"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
 }
 export type webhooks = Record<string, never>;
 export interface components {

@@ -59,6 +59,8 @@ export default function routes(r: PsychicRouter) {
     r.collection(r => {
       r.get('paginated', UsersController, 'paginated')
       r.post('paginated-post', UsersController, 'paginatedPost')
+      r.get('scroll-paginated', UsersController, 'scrollPaginated')
+      r.post('scroll-paginated-post', UsersController, 'scrollPaginatedPost')
     })
     r.resources('pets', { only: [] })
     r.get('ping', UsersController, 'ping')
