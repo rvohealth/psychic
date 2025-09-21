@@ -250,12 +250,17 @@ export default class PsychicController {
   }
 
   /**
-   * @returns the request headers
+   * Gets the HTTP request headers from the Express request object.
+   *
+   * @returns The request headers as a key-value object where header names are lowercase strings
+   * and values can be strings, string arrays, or undefined.
    *
    * @example
    * ```ts
    * class MyController extends ApplicationController {
    *   public index() {
+   *     const contentType = this.headers['content-type']
+   *     const authorization = this.headers.authorization
    *     console.log(this.headers)
    *   }
    * }
@@ -266,12 +271,21 @@ export default class PsychicController {
   }
 
   /**
-   * @returns the combination of the request uri params, request body, and query
+   * Gets the combined parameters from the HTTP request. This includes URL parameters,
+   * request body, and query string parameters merged together. The merge order is:
+   * query params first, then body params, then URL params (with later values overriding earlier ones).
+   *
+   * Also performs OpenAPI validation on query parameters if an OpenAPI decorator is present.
+   *
+   * @returns A dictionary containing all request parameters merged together
    *
    * @example
    * ```ts
    * class MyController extends ApplicationController {
    *   public index() {
+   *     // Access merged params from URL, body, and query
+   *     const userId = this.params.id // from URL params
+   *     const filters = this.params.filters // from query or body
    *     console.log(this.params)
    *   }
    * }
@@ -317,13 +331,27 @@ export default class PsychicController {
   private _cachedQuery: object
 
   /**
-   * @returns the value found for a particular param
+   * Gets the value of a specific parameter from the merged params object.
+   *
+   * **Note:** Consider using {@link castParam} instead for type validation and safety.
+   * The {@link castParam} method provides runtime validation and proper type casting,
+   * while this method only performs unsafe type assertion.
+   *
+   * @param key - The parameter name to retrieve
+   * @returns The value found for the specified parameter, cast to the ReturnType generic.
+   *          Returns undefined if the parameter doesn't exist.
    *
    * @example
    * ```ts
    * class MyController extends ApplicationController {
    *   public index() {
-   *     console.log(this.param('myParam'))
+   *     // Basic usage (unsafe type assertion)
+   *     const id = this.param<string>('id')
+   *     const count = this.param<number>('count')
+   *
+   *     // Preferred: Use castParam for validation
+   *     const validatedId = this.castParam('id', 'string')
+   *     const validatedCount = this.castParam('count', 'integer')
    *   }
    * }
    * ```
@@ -333,18 +361,36 @@ export default class PsychicController {
   }
 
   /**
-   * finds the specified param, and validates it against
-   * the provided type. If the param does not match the specified
-   * validation arguments, ParamValidationError is raised, which
-   * Psychic will catch and convert into a 400 response.
+   * Finds the specified parameter and validates it against the provided type.
+   * Supports dot notation for nested object access (e.g., 'user.profile.name').
+   * If the param does not match the specified validation arguments, ParamValidationError
+   * is raised, which Psychic will catch and convert into a 400 Bad Request response.
    *
-   * @returns the value found for a particular param
+   * @param key - The parameter name to retrieve (supports dot notation for nested access)
+   * @param expectedType - The expected type or validation rule (primitive type, regex, or OpenAPI schema)
+   * @param opts - Optional validation options with the following supported properties:
+   *   - `enum`: Array of allowed string values to restrict the parameter to specific choices
+   *   - `allowNull`: Boolean indicating whether null values are permitted (default: false)
+   * @returns The validated and type-cast parameter value
+   * @throws {ParamValidationError} When validation fails (converted to 400 response by Psychic)
    *
    * @example
    * ```ts
    * class MyController extends ApplicationController {
    *   public index() {
+   *     // Basic type validation
    *     const id = this.castParam('id', 'bigint')
+   *     const nested = this.castParam('user.profile.age', 'integer')
+   *
+   *     // With enum restriction
+   *     const status = this.castParam('status', 'string', {
+   *       enum: ['active', 'inactive', 'pending']
+   *     })
+   *
+   *     // Allow null values
+   *     const optionalName = this.castParam('name', 'string', {
+   *       allowNull: true
+   *     })
    *   }
    * }
    * ```
@@ -418,23 +464,35 @@ export default class PsychicController {
   }
 
   /**
-   * Captures params for the provided model. Will exclude params that are not
-   * considered "safe" by default. It will use `castParam` for each of the
-   * params, and will raise an exception if any of those params does not
-   * pass validation.
+   * Captures and validates parameters for the provided Dream model. Will exclude
+   * parameters that are not considered "safe" by default (based on the model's paramSafeColumns).
+   * Uses `castParam` for each parameter and will raise an exception if any parameter
+   * fails validation.
    *
-   * @param dreamClass - the dream class you wish to retreive params for
-   * @param opts - optional configuration object
-   * @param opts.only - optional: restrict the list of allowed params
-   * @param opts.including - optional: include params that would normally be excluded.
-   *
-   * @returns a typed object, containing the casted params for this dream class
+   * @param dreamClass - The Dream model class to retrieve params for
+   * @param opts - Optional configuration object
+   * @param opts.only - Restrict the list of allowed params to only these attributes
+   * @param opts.including - Include params that would normally be excluded from safe params
+   * @param opts.key - Extract params from a nested key in the params object instead of root level
+   * @param opts.array - If true, expects and returns an array of param objects (specifically for query params, which, due to the way query params are processed, are often collapsed to a non-array value)
+   * @returns A typed object containing the validated and casted params for this Dream model
+   * @throws {ParamValidationError} When any parameter validation fails
    *
    * @example
    * ```ts
    * class MyController extends ApplicationController {
-   *   public index() {
-   *     const params = this.paramsFor(User, { only: ['email'], including: ['createdAt'] })
+   *   public create() {
+   *     // Get safe params for User model (excludes sensitive fields like createdAt)
+   *     const userParams = this.paramsFor(User)
+   *
+   *     // Restrict to only specific fields
+   *     const restrictedParams = this.paramsFor(User, { only: ['email', 'name'] })
+   *
+   *     // Include normally excluded fields
+   *     const extendedParams = this.paramsFor(User, { including: ['createdAt'] })
+   *
+   *     // Extract from nested key
+   *     const nestedParams = this.paramsFor(User, { key: 'user' })
    *   }
    * }
    * ```
@@ -489,14 +547,71 @@ export default class PsychicController {
     )
   }
 
+  /**
+   * Gets a cookie value from the request and casts it to the specified type.
+   *
+   * @param name - The name of the cookie to retrieve
+   * @returns The cookie value cast to RetType, or null if the cookie doesn't exist
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public index() {
+   *     const theme = this.getCookie<string>('theme')
+   *     const userId = this.getCookie<number>('user_id')
+   *   }
+   * }
+   * ```
+   */
   public getCookie<RetType>(name: string): RetType | null {
     return (this.session.getCookie(name) ?? null) as RetType | null
   }
 
+  /**
+   * Sets a cookie in the response with the specified name, data, and options.
+   *
+   * @param name - The name of the cookie to set
+   * @param data - The string data to store in the cookie
+   * @param opts - Optional cookie configuration (expires, httpOnly, secure, etc.)
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public setPreferences() {
+   *     this.setCookie('theme', 'dark', { expires: new Date('2025-12-31') })
+   *     this.setCookie('lang', 'en', { httpOnly: false })
+   *   }
+   * }
+   * ```
+   */
   public setCookie(name: string, data: string, opts: CustomSessionCookieOptions = {}) {
     return this.session.setCookie(name, data, opts)
   }
 
+  /**
+   * Starts a user session by setting the session cookie with the user's information.
+   * The session cookie contains the user's primary key and model type.
+   *
+   * @param user - The Dream model instance representing the authenticated user
+   *
+   * @example
+   * ```ts
+   * class AuthController extends ApplicationController {
+   *   public login() {
+   *     const email = this.castParam('email', 'string')
+   *     const password = this.castParam('password', 'string')
+   *     const user = User.authenticate(email, password)
+   *
+   *     if (user) {
+   *       this.startSession(user)
+   *       this.ok({ message: 'Login successful' })
+   *     } else {
+   *       this.unauthorized('Invalid credentials')
+   *     }
+   *   }
+   * }
+   * ```
+   */
   public startSession(user: Dream) {
     return this.setCookie(
       PsychicApp.getOrFail().sessionCookieName,
@@ -507,6 +622,19 @@ export default class PsychicController {
     )
   }
 
+  /**
+   * Ends the current user session by clearing the session cookie.
+   *
+   * @example
+   * ```ts
+   * class AuthController extends ApplicationController {
+   *   public logout() {
+   *     this.endSession()
+   *     this.ok({ message: 'Logged out successfully' })
+   *   }
+   * }
+   * ```
+   */
   public endSession() {
     return this.session.clearCookie(PsychicApp.getOrFail().sessionCookieName)
   }
@@ -549,6 +677,28 @@ export default class PsychicController {
     }
   }
 
+  /**
+   * Serializes data to JSON and sends it as the HTTP response with proper
+   * OpenAPI validation. Handles Dream models, serializers, arrays, and paginated results.
+   *
+   * @param data - The data to serialize and send as JSON
+   * @param opts - Optional rendering options for serialization
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public index() {
+   *     const users = User.all()
+   *     this.json(users) // Automatically serializes with default serializer
+   *   }
+   *
+   *   public show() {
+   *     const user = User.find(this.param('id'))
+   *     this.json(user, { serializerKey: 'detailed' })
+   *   }
+   * }
+   * ```
+   */
   public json<T>(
     data: T,
     opts: RenderOptions = {},
@@ -624,6 +774,37 @@ export default class PsychicController {
   }
 
   protected defaultSerializerPassthrough: SerializerResult = {}
+
+  /**
+   * Sets additional data to be passed through to serializers during rendering.
+   * This data is merged with any existing passthrough data and made available
+   * to all serializers used in subsequent render operations.
+   *
+   * @param passthrough - Object containing data to pass to serializers
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public index() {
+   *     // Pass current user context to serializers
+   *     this.serializerPassthrough({ currentUser: this.currentUser })
+   *
+   *     const users = User.all()
+   *     this.json(users) // Serializers will have access to currentUser
+   *   }
+   *
+   *   public show() {
+   *     this.serializerPassthrough({
+   *       includePrivateData: this.currentUser.isAdmin(),
+   *       requestedAt: new Date()
+   *     })
+   *
+   *     const user = User.find(this.param('id'))
+   *     this.json(user)
+   *   }
+   * }
+   * ```
+   */
   public serializerPassthrough(passthrough: SerializerResult) {
     this.defaultSerializerPassthrough = {
       ...this.defaultSerializerPassthrough,
@@ -631,6 +812,23 @@ export default class PsychicController {
     }
   }
 
+  /**
+   * Sets the response status and data for serialization. Uses the status code
+   * defined in the OpenAPI decorator if present, otherwise defaults to 200.
+   *
+   * @param data - The data to send in the response
+   * @param opts - Optional rendering options for serialization
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public index() {
+   *     const users = User.all()
+   *     this.respond(users) // Uses OpenAPI-defined status or 200
+   *   }
+   * }
+   * ```
+   */
   public respond<T>(data: T = {} as T, opts: RenderOptions = {}) {
     const openapiData = (this.constructor as typeof PsychicController).openapi[this.action]
     this.res.status(openapiData?.['status'] || 200)
@@ -638,6 +836,28 @@ export default class PsychicController {
     this.json(data, opts)
   }
 
+  /**
+   * Sends a response with a specific HTTP status code and optional body data.
+   * Accepts both numeric status codes and symbolic names.
+   *
+   * @param options - Configuration object
+   * @param options.status - HTTP status code (number) or status symbol (string)
+   * @param options.body - Optional response body data
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public create() {
+   *     const user = User.create(this.paramsFor(User))
+   *     this.send({ status: 201, body: user })
+   *   }
+   *
+   *   public customStatus() {
+   *     this.send({ status: 'teapot', body: { message: 'I am a teapot' } })
+   *   }
+   * }
+   * ```
+   */
   public send({
     status = 200,
     body = undefined,
@@ -655,22 +875,88 @@ export default class PsychicController {
     this.json(body)
   }
 
+  /**
+   * Redirects the client to a different URL using HTTP 302 Found status.
+   *
+   * @param path - The URL path to redirect to
+   *
+   * @example
+   * ```ts
+   * class MyController extends ApplicationController {
+   *   public login() {
+   *     // Redirect to dashboard after successful login
+   *     this.redirect('/dashboard')
+   *   }
+   * }
+   * ```
+   */
   public redirect(path: string) {
     this.res.redirect(path)
   }
 
   // begin: http status codes
+
+  /**
+   * Responds with HTTP 200 OK status and the provided data.
+   *
+   * @param data - The data to return in the response body
+   * @param opts - Optional rendering options for serialization
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public index() {
+   *     const users = User.all()
+   *     this.ok(users)
+   *   }
+   * }
+   * ```
+   */
   // 200
   public ok<T>(data: T = {} as T, opts: RenderOptions = {}) {
     this.json(data, opts)
   }
 
+  /**
+   * Responds with HTTP 201 Created status and the provided data.
+   * Typically used when a new resource has been successfully created.
+   *
+   * @param data - The data to return in the response body (usually the created resource)
+   * @param opts - Optional rendering options for serialization
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public create() {
+   *     const user = User.create(this.paramsFor(User))
+   *     this.created(user)
+   *   }
+   * }
+   * ```
+   */
   // 201
   public created<T>(data: T = {} as T, opts: RenderOptions = {}) {
     this.res.status(201)
     this.json(data, opts)
   }
 
+  /**
+   * Responds with HTTP 202 Accepted status and the provided data.
+   * Indicates that the request has been accepted for processing but processing is not complete.
+   *
+   * @param data - The data to return in the response body
+   * @param opts - Optional rendering options for serialization
+   *
+   * @example
+   * ```ts
+   * class JobsController extends ApplicationController {
+   *   public create() {
+   *     const job = Job.createAsync(this.paramsFor(Job))
+   *     this.accepted({ job_id: job.id, status: 'processing' })
+   *   }
+   * }
+   * ```
+   */
   // 202
   public accepted<T>(data: T = {} as T, opts: RenderOptions = {}) {
     this.res.status(202)
@@ -687,6 +973,21 @@ export default class PsychicController {
     }
   }
 
+  /**
+   * Responds with HTTP 204 No Content status. This indicates that the request
+   * was successful but there is no content to return. No response body is sent.
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public destroy() {
+   *     const user = User.find(this.param('id'))
+   *     user.destroy()
+   *     this.noContent() // Successfully deleted, no content to return
+   *   }
+   * }
+   * ```
+   */
   // 204
   public noContent() {
     this.expressSendStatus(204)
@@ -731,12 +1032,48 @@ export default class PsychicController {
     this.expressRedirect(308, newLocation)
   }
 
+  /**
+   * Throws an HTTP 400 Bad Request error. Use this when the client request
+   * is malformed or contains invalid data.
+   *
+   * @param data - Optional error data to include in the response
+   * @throws {HttpStatusBadRequest} Always throws this error
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public create() {
+   *     if (!this.param('email')) {
+   *       this.badRequest({ error: 'Email is required' })
+   *     }
+   *   }
+   * }
+   * ```
+   */
   // 400
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public badRequest(data: any = undefined) {
     throw new HttpStatusBadRequest(data)
   }
 
+  /**
+   * Throws an HTTP 401 Unauthorized error. Use this when authentication
+   * is required but not provided or invalid.
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusUnauthorized} Always throws this error
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public show() {
+   *     if (!this.currentUser) {
+   *       this.unauthorized('Authentication required')
+   *     }
+   *   }
+   * }
+   * ```
+   */
   // 401
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public unauthorized(message: any = undefined) {
@@ -749,12 +1086,50 @@ export default class PsychicController {
     throw new HttpStatusPaymentRequired(message)
   }
 
+  /**
+   * Throws an HTTP 403 Forbidden error. Use this when the client is authenticated
+   * but does not have permission to access the requested resource.
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusForbidden} Always throws this error
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public destroy() {
+   *     const user = User.find(this.param('id'))
+   *     if (!this.currentUser.canDelete(user)) {
+   *       this.forbidden('You do not have permission to delete this user')
+   *     }
+   *   }
+   * }
+   * ```
+   */
   // 403
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public forbidden(message: any = undefined) {
     throw new HttpStatusForbidden(message)
   }
 
+  /**
+   * Throws an HTTP 404 Not Found error. Use this when the requested resource
+   * does not exist.
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusNotFound} Always throws this error
+   *
+   * @example
+   * ```ts
+   * class UsersController extends ApplicationController {
+   *   public show() {
+   *     const user = User.find(this.param('id'))
+   *     if (!user) {
+   *       this.notFound('User not found')
+   *     }
+   *   }
+   * }
+   * ```
+   */
   // 404
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public notFound(message: any = undefined) {
