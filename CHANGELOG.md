@@ -1,6 +1,7 @@
 ## 1.12.0
 
 - `scrollPagination` support
+- sort client enums when syncing to reduce needless diff churn
 
 ## 1.11.1
 
