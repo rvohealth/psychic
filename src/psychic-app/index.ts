@@ -1092,6 +1092,12 @@ interface PsychicOpenapiBaseOptions {
    * ```
    */
   validate?: OpenapiValidateOption
+
+  /**
+   * When true, psychic will check for diffs and breaking changes
+   * between the current branch open api specs and the main open api spec.
+   */
+  checkDiffs?: boolean
 }
 
 interface PsychicOpenapiInfo {

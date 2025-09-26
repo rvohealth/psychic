@@ -9,6 +9,7 @@ import OpenapiAppRenderer from '../openapi-renderer/app.js'
 import PsychicApp from '../psychic-app/index.js'
 import enumsFileStr from './helpers/enumsFileStr.js'
 import generateRouteTypes from './helpers/generateRouteTypes.js'
+import OpenAPISpecDiffTool, { PsychicOpenapiConfig } from './helpers/openapiSpecDiffTool.js'
 import printRoutes from './helpers/printRoutes.js'
 
 export default class PsychicBin {
@@ -70,6 +71,14 @@ export default class PsychicBin {
       await this.syncOpenapiJson()
       await this.runCliHooksAndUpdatePsychicTypesFileWithOutput()
       await this.syncOpenapiTypescriptFiles()
+      const psychicApp = PsychicApp.getOrFail()
+
+      const openapiConfigsWithCheckDiffs = Object.entries(psychicApp.openapi).filter(
+        ([, config]: [string, PsychicOpenapiConfig]) => config.checkDiffs === true,
+      )
+      if (openapiConfigsWithCheckDiffs.length > 0) {
+        await OpenAPISpecDiffTool.compare(openapiConfigsWithCheckDiffs)
+      }
     } catch (error) {
       console.error(error)
       await CliFileWriter.revert()
