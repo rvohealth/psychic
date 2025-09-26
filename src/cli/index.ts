@@ -1,6 +1,6 @@
 import { DreamCLI } from '@rvoh/dream/system'
 import { Command } from 'commander'
-import PsychicBin from '../bin/index.js'
+import PsychicBin, { BreakingChangesDetectedInOpenApiSpecError } from '../bin/index.js'
 import generateController from '../generate/controller.js'
 import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/syncOpenapiTypescript.js'
@@ -343,6 +343,29 @@ export default class PsychicCLI {
         await initializePsychicApp()
         await PsychicBin.syncOpenapiJson()
         process.exit()
+      })
+
+    program
+      .command('diff:openapi')
+      .description(
+        'compares the current branch open api spec file(s) with the main/master/head branch open api spec file(s)',
+      )
+      .option('-f', '--fail-on-breaking', 'fail on spec changes that are breaking')
+      .action(async (options: { failOnBreaking: boolean }) => {
+        await initializePsychicApp()
+
+        try {
+          PsychicBin.openapiDiff()
+        } catch (error) {
+          if (error instanceof BreakingChangesDetectedInOpenApiSpecError) {
+            if (options.failOnBreaking) {
+              console.error(error.message)
+              process.exit(1)
+            }
+          } else {
+            throw error
+          }
+        }
       })
   }
 

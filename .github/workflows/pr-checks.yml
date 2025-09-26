@@ -57,18 +57,22 @@ jobs:
       APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
       LEGACY_APP_ENCRYPTION_KEY: ${{ secrets.LEGACY_APP_ENCRYPTION_KEY }}
       DREAM_PARALLEL_TESTS: 4
+      CI: "1"
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
       - uses: actions/setup-node@v4
         with:
           node-version: "24"
+      - uses: actions/setup-go@v5
+        with:
+          go-version: "1.24"
 
       - run: corepack enable
+      - run: go install github.com/oasdiff/oasdiff@latest
+      - run: oasdiff --version
 
-      - if: ${{ steps.cache-node-modules.outputs.cache-hit != 'true' }}
-        name: List the state of node modules
-        continue-on-error: true
-        run: pnpm list
       - run: pnpm install --frozen-lockfile
       - run: pnpm psy db:migrate --skip-sync
       - run: pnpm uspec
@@ -147,7 +151,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: development
-      YARN_CACHE_FOLDER: ~/.yarn-cache
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
@@ -164,7 +167,6 @@ jobs:
     runs-on: ubuntu-latest
     env:
       NODE_ENV: development
-      YARN_CACHE_FOLDER: ~/.yarn-cache
 
     steps:
       - uses: actions/checkout@v4
