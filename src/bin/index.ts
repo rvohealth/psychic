@@ -9,7 +9,10 @@ import OpenapiAppRenderer from '../openapi-renderer/app.js'
 import PsychicApp from '../psychic-app/index.js'
 import enumsFileStr from './helpers/enumsFileStr.js'
 import generateRouteTypes from './helpers/generateRouteTypes.js'
+import { OpenApiSpecDiff, PsychicOpenapiConfig } from './helpers/OpenApiSpecDiff.js'
 import printRoutes from './helpers/printRoutes.js'
+
+export { BreakingChangesDetectedInOpenApiSpecError } from './helpers/OpenApiSpecDiff.js'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
@@ -80,6 +83,15 @@ export default class PsychicBin {
     await DreamCLI.logger.logProgress(`syncing types/psychic.ts...`, async () => {
       await new ASTPsychicTypesBuilder().build()
     })
+  }
+
+  public static openapiDiff() {
+    const psychicApp = PsychicApp.getOrFail()
+    const openapiConfigsWithCheckDiffs = Object.entries(psychicApp.openapi).filter(
+      ([, config]: [string, PsychicOpenapiConfig]) => config.checkDiffs,
+    )
+
+    OpenApiSpecDiff.compare(openapiConfigsWithCheckDiffs)
   }
 
   public static async syncOpenapiTypescriptFiles() {
