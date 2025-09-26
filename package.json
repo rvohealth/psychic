@@ -50,6 +50,7 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "pluralize-esm": "^9.0.5",
+    "vite": "^7.1.7",
     "yoctocolors": "^2.1.1"
   },
   "peerDependencies": {
