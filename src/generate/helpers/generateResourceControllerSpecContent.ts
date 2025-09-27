@@ -212,14 +212,10 @@ export default function generateResourceControllerSpecContent({
   const omitUpdate = !actions.includes('update')
   const omitDestroy = !actions.includes('destroy')
 
-  return `\
-import { DreamRequestAttributes } from '@rvoh/psychic-spec-helpers'${
-    dreamImports.length
-      ? `
-import { ${uniq(dreamImports).join(', ')} } from '@rvoh/dream'`
-      : ''
-  }${uniq(importStatements).join('')}
-import { session, SpecRequestType } from '${specUnitUpdirs}helpers/${addImportSuffix('authentication.js')}'
+  return `${
+    dreamImports.length ? `import { ${uniq(dreamImports).join(', ')} } from '@rvoh/dream'\n` : ''
+  }${uniq(importStatements).join('\n')}
+import { RequestBody, session, SpecRequestType } from '${specUnitUpdirs}helpers/${addImportSuffix('authentication.js')}'
 
 describe('${fullyQualifiedControllerName}', () => {
   let request: SpecRequestType
@@ -314,7 +310,7 @@ describe('${fullyQualifiedControllerName}', () => {
 
   describe('POST create', () => {
     const subject = async <StatusCode extends 201 | 400>(
-      data: DreamRequestAttributes<${modelClassName}>,
+      data: RequestBody<'post', '/${route}'>,
       expectedStatus: StatusCode
     ) => {
       return request.post('/${route}', expectedStatus, { data })
@@ -357,7 +353,7 @@ describe('${fullyQualifiedControllerName}', () => {
     singular
       ? `
     const subject = async <StatusCode extends 204 | 400 | 404>(
-      data: DreamRequestAttributes<${modelClassName}>,
+      data: RequestBody<'patch', '/${route}'>,
       expectedStatus: StatusCode
     ) => {
       return request.patch('/${route}', expectedStatus, {
@@ -367,7 +363,7 @@ describe('${fullyQualifiedControllerName}', () => {
       : `
     const subject = async <StatusCode extends 204 | 400 | 404>(
       ${modelVariableName}: ${modelClassName},
-      data: DreamRequestAttributes<${modelClassName}>,
+      data: RequestBody<'patch', '/${route}/{id}'>,
       expectedStatus: StatusCode
     ) => {
       return request.patch('/${route}/{id}', expectedStatus, {
@@ -473,14 +469,14 @@ describe('${fullyQualifiedControllerName}', () => {
 }
 
 function importStatementForModel(originModelName: string, destinationModelName: string = originModelName) {
-  return `\nimport ${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${relativePsychicPath('controllerSpecs', 'models', originModelName, destinationModelName)}'`
+  return `import ${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${relativePsychicPath('controllerSpecs', 'models', originModelName, destinationModelName)}'`
 }
 
 function importStatementForModelFactory(
   originModelName: string,
   destinationModelName: string = originModelName,
 ) {
-  return `\nimport create${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${relativePsychicPath('controllerSpecs', 'factories', originModelName, destinationModelName)}'`
+  return `import create${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${relativePsychicPath('controllerSpecs', 'factories', originModelName, destinationModelName)}'`
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
