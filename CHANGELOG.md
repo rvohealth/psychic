@@ -2,6 +2,7 @@
 
 - `scrollPagination` support
 - sort client enums when syncing to reduce needless diff churn
+- leverage RequestBody in generated resource controller specs
 
 ## 1.11.1
 
