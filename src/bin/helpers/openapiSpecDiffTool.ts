@@ -1,6 +1,6 @@
 import { DreamCLI } from '@rvoh/dream'
 import cp from 'child_process'
-import { existsSync, unlinkSync, writeFileSync } from 'fs'
+import fs from 'fs'
 import * as path from 'node:path'
 import type { DefaultPsychicOpenapiOptions } from '../../psychic-app/index.js'
 
@@ -23,11 +23,11 @@ export interface ComparisonResult {
 export interface OasDiffConfig {
   command: string
   isDocker: boolean
+  headBranch: string
 }
 
-/**
- * Colors for console output
- */
+export type PsychicOpenapiConfig = DefaultPsychicOpenapiOptions
+
 const colors = {
   reset: '\x1b[0m',
   bright: '\x1b[1m',
@@ -39,15 +39,14 @@ const colors = {
   cyan: '\x1b[36m',
   white: '\x1b[37m',
   gray: '\x1b[90m',
-  dim: '\x1b[2m',
-  italic: '\x1b[3m',
-  underline: '\x1b[4m',
-  inverse: '\x1b[7m',
-  hidden: '\x1b[8m',
-  strikethrough: '\x1b[9m',
+  redBright: '\x1b[91m',
+  greenBright: '\x1b[92m',
+  yellowBright: '\x1b[93m',
+  blueBright: '\x1b[94m',
+  magentaBright: '\x1b[95m',
+  cyanBright: '\x1b[96m',
+  whiteBright: '\x1b[97m',
 }
-
-export type PsychicOpenapiConfig = DefaultPsychicOpenapiOptions
 
 /**
  * Checks if oasdiff is installed locally
@@ -75,14 +74,34 @@ function handleDockerInstall(): boolean {
 }
 
 /**
+ * Fetch the head branch of a remote using git remote show origin or default to main
+ */
+function getHeadBranch(): string {
+  let head = ''
+  const output = cp.execSync('git remote show origin', { encoding: 'utf-8' })
+  const lines = output.split('\n')
+  for (const line of lines) {
+    const trimmed = line.trim()
+    if (trimmed.startsWith('HEAD branch:')) {
+      head = trimmed.replace('HEAD branch:', '').trim() || 'main'
+    }
+  }
+
+  return head
+}
+
+/**
  * Determines the best way to run oasdiff
  */
 function getOasDiffConfig(): OasDiffConfig {
+  const headBranch = getHeadBranch()
+
   if (hasOasDiffInstalled()) {
     DreamCLI.logger.logContinueProgress('Using local oasdiff installation...')
     return {
       command: 'oasdiff',
       isDocker: false,
+      headBranch,
     }
   }
   if (handleDockerInstall()) {
@@ -91,15 +110,16 @@ function getOasDiffConfig(): OasDiffConfig {
     return {
       command: `docker run --rm -v "${openApiDir}:/openapi" -w /openapi tufin/oasdiff`,
       isDocker: true,
+      headBranch,
     }
   }
 
   throw new Error(
-    `⚠️ ${colors.red}${colors.bright}oasdiff not found.
+    `⚠️ oasdiff not found.
     
-    ${colors.reset}\n\n${colors.yellow}${colors.bright}Install it via the instructions here:
+    Install it via the instructions here:
         https://github.com/tufin/oasdiff or 
-        install Docker and we'll handle the rest.${colors.reset}\n\n`,
+        install Docker and we'll handle the rest.`,
   )
 }
 
@@ -128,36 +148,17 @@ function runOasDiffCommand(
   currentPath: string,
   flag?: string,
 ): string {
-  try {
-    const output = cp.execSync(
-      `${command} ${subcommand} "${mainPath}" "${currentPath}" ${flag ? `--${flag}` : ''}`,
-      {
-        encoding: 'utf8',
-        cwd: process.cwd(),
-        stdio: ['pipe', 'pipe', 'pipe'],
-      },
-    )
-    return output.trim()
-  } catch (error) {
-    // oasdiff returns non-zero exit code when breaking changes are found
-    // The actual output is in the error message
-    const errorOutput = error instanceof Error ? error.message : String(error)
-
-    if (errorOutput.includes('Command failed')) {
-      const lines = errorOutput.split('\n')
-      return lines
-        .filter(
-          line =>
-            line.trim() &&
-            !line.includes('Command failed') &&
-            !line.includes('Error:') &&
-            !line.includes('at '),
-        )
-        .join('\n')
-    }
-
-    return errorOutput
+  let builtCommand = `${command} ${subcommand} "${mainPath}" "${currentPath}"`
+  if (flag) {
+    builtCommand += ` --${flag}`
   }
+
+  const output = cp.execSync(builtCommand, {
+    encoding: 'utf8',
+    cwd: process.cwd(),
+    stdio: ['pipe', 'pipe', 'pipe'],
+  })
+  return output.trim()
 }
 
 /**
@@ -198,8 +199,8 @@ function createTempFilePath(fileName: string, isDocker: boolean): string {
 /**
  * Retrieves main branch content for a file
  */
-function getMainBranchContent(fileName: string): string {
-  const branchRef = process.env.CI === '1' ? 'origin/main' : 'main'
+function getHeadBranchContent(fileName: string, headBranchName: string): string {
+  const branchRef = process.env.CI === '1' ? `origin/${headBranchName}` : headBranchName
 
   return cp.execSync(`git show ${branchRef}:api/openapi/${fileName}`, {
     encoding: 'utf8',
@@ -210,11 +211,11 @@ function getMainBranchContent(fileName: string): string {
 /**
  * Compares a single OpenAPI file against main branch
  */
-async function compareOpenApiFile(
+export function compareOpenApiFile(
   openapiName: string,
   config: PsychicOpenapiConfig,
   oasdiffConfig: OasDiffConfig,
-): Promise<ComparisonResult> {
+): ComparisonResult {
   const result: ComparisonResult = {
     file: openapiName,
     hasChanges: false,
@@ -225,8 +226,7 @@ async function compareOpenApiFile(
   try {
     const currentFilePath = path.join(process.cwd(), config.outputFilepath!)
 
-    // Check if file exists in current branch
-    if (!existsSync(currentFilePath)) {
+    if (!fs.existsSync(currentFilePath)) {
       result.error = `File ${config.outputFilepath!} does not exist in current branch`
       return result
     }
@@ -234,22 +234,24 @@ async function compareOpenApiFile(
     const tempMainFile = createTempFilePath(path.basename(config.outputFilepath!), oasdiffConfig.isDocker)
 
     try {
-      // Get main branch content and write to temp file
-      const mainContent = getMainBranchContent(path.basename(config.outputFilepath!))
-      writeFileSync(tempMainFile, mainContent)
+      const mainContent = getHeadBranchContent(
+        path.basename(config.outputFilepath!),
+        oasdiffConfig.headBranch,
+      )
 
-      // Compare using oasdiff
+      fs.writeFileSync(tempMainFile, mainContent)
+
       const oasDiffResult = compareSpecs(tempMainFile, currentFilePath, oasdiffConfig)
 
       result.breaking = oasDiffResult.breaking
       result.changelog = oasDiffResult.changelog
       result.hasChanges = oasDiffResult.breaking.length > 0 || oasDiffResult.changelog.length > 0
     } catch (gitError) {
-      result.error = `Could not retrieve ${config.outputFilepath!} from main branch: ${String(gitError)}`
+      result.error = `Could not retrieve ${config.outputFilepath!} from ${oasdiffConfig.headBranch} branch: ${String(gitError)}`
     } finally {
       // Clean up temporary file
-      if (existsSync(tempMainFile)) {
-        unlinkSync(tempMainFile)
+      if (fs.existsSync(tempMainFile)) {
+        fs.unlinkSync(tempMainFile)
       }
     }
   } catch (error) {
@@ -260,74 +262,108 @@ async function compareOpenApiFile(
 }
 
 /**
- * Check diffs for a single OpenAPI configuration
+ * Check for OpenAPI diffs if checkDiffs is enabled for any OpenAPI configuration
  */
-async function checkSingleOpenapiDiff(openapiName: string, config: PsychicOpenapiConfig) {
-  DreamCLI.logger.logContinueProgress(`[${openapiName}] checking diffs...`)
+export function compare(openapiConfigs: [string, PsychicOpenapiConfig][]): void {
+  const results: ComparisonResult[] = []
 
-  try {
-    const config_oasdiff = getOasDiffConfig()
-    const result = await compareOpenApiFile(openapiName, config, config_oasdiff)
+  DreamCLI.logger.logStartProgress(
+    `${colors.cyanBright}🔍 Comparing current OpenAPI Specs against main...${colors.reset}\n`,
+    { logPrefixColor: 'cyanBright' },
+  )
+  const oasdiffConfig = getOasDiffConfig()
 
+  for (const [openapiName, config] of openapiConfigs) {
+    const result = compareOpenApiFile(openapiName, config, oasdiffConfig)
+    results.push(result)
+  }
+
+  let hasAnyChanges = false
+  let hasBreakingChanges = false
+
+  for (const result of results) {
     if (result.error) {
-      DreamCLI.logger.logContinueProgress(`[${openapiName}] Error: ${result.error}`)
-      return
-    }
-
-    if (result.hasChanges) {
-      DreamCLI.logger.logContinueProgress(`[${openapiName}] HAS CHANGES`)
+      DreamCLI.logger.logContinueProgress(
+        `${colors.redBright}❌ ${colors.bright}${result.file}${colors.reset}${colors.redBright}: ${result.error}${colors.reset}`,
+        { logPrefixColor: 'redBright' },
+      )
+    } else if (result.hasChanges) {
+      DreamCLI.logger.logContinueProgress(
+        `${colors.yellowBright}${colors.bright}${result.file}: HAS CHANGES${colors.reset}`,
+        { logPrefixColor: 'yellowBright' },
+      )
+      hasAnyChanges = true
 
       if (result.breaking.length > 0) {
-        DreamCLI.logger.logContinueProgress(`[${openapiName}] 🚨 BREAKING CHANGES:`)
-
+        DreamCLI.logger.logContinueProgress(
+          `   ${colors.redBright}${colors.bright}🚨 BREAKING CHANGES:${colors.reset}`,
+          { logPrefixColor: 'redBright' },
+        )
         result.breaking.forEach(change => {
-          DreamCLI.logger.logContinueProgress(`[${openapiName}]   • ${change}`)
+          DreamCLI.logger.logContinueProgress(
+            `      ${colors.redBright}• ${colors.bright}${change}${colors.reset}`,
+            { logPrefixColor: 'redBright' },
+          )
         })
+        hasBreakingChanges = true
       }
 
       if (result.changelog) {
-        DreamCLI.logger.logContinueProgress(`[${openapiName}] 📋 CHANGELOG:`)
-
+        DreamCLI.logger.logContinueProgress(
+          `   ${colors.blueBright}${colors.bright}📋 CHANGELOG:${colors.reset}`,
+          { logPrefixColor: 'blueBright' },
+        )
         const changelogLines = result.changelog.split('\n').filter(line => line.trim())
         changelogLines.forEach(line => {
-          DreamCLI.logger.logContinueProgress(`[${openapiName}]   ${line}`)
+          DreamCLI.logger.logContinueProgress(`      ${colors.bright}${line}${colors.reset}`, {
+            logPrefixBgColor: 'bgWhite',
+            logPrefixColor: 'white',
+          })
         })
       }
     } else {
-      DreamCLI.logger.logContinueProgress(`[${openapiName}] ✅ No changes`)
-    }
-  } catch (error) {
-    DreamCLI.logger.logContinueProgress(`[${openapiName}] Error: ${String(error)}`)
-  }
-}
-
-/**
- * Check for OpenAPI diffs if checkDiffs is enabled for any OpenAPI configuration
- */
-async function compare(openapiConfigsWithCheckDiffs: [string, PsychicOpenapiConfig][]) {
-  DreamCLI.logger.logStartProgress('checking OpenAPI diffs...')
-
-  for (const [openapiName, config] of openapiConfigsWithCheckDiffs) {
-    try {
-      await checkSingleOpenapiDiff(openapiName, config)
-    } catch (error) {
-      DreamCLI.logger.logEndProgress(`Failed to check diffs for ${openapiName}: ${error}`)
-      // Continue with other OpenAPI configs even if one fails
+      DreamCLI.logger.logContinueProgress(
+        `${colors.greenBright}✅ ${colors.bright}${result.file}${colors.reset}${colors.greenBright}: No changes${colors.reset}`,
+        { logPrefixColor: 'greenBright' },
+      )
     }
   }
 
-  DreamCLI.logger.logEndProgress()
+  DreamCLI.logger.logContinueProgress(`\n${colors.gray}${'='.repeat(60)}${colors.reset}`, {
+    logPrefixColor: 'gray',
+  })
+
+  if (hasBreakingChanges) {
+    DreamCLI.logger.logContinueProgress(
+      `${colors.redBright}${colors.bright}🚨 CRITICAL: ${colors.reset} ${colors.bright} Breaking changes detected in current branch compared to main! Review before merging.${colors.reset}`,
+      { logPrefixColor: 'redBright' },
+    )
+    DreamCLI.logger.logContinueProgress(`${colors.gray}${'='.repeat(60)}${colors.reset}`, {
+      logPrefixColor: 'gray',
+    })
+    DreamCLI.logger.logContinueProgress(`${colors.gray}${'\n'.repeat(5)}${colors.reset}`, {
+      logPrefixColor: 'gray',
+    })
+
+    process.exit(1)
+  } else if (hasAnyChanges) {
+    DreamCLI.logger.logContinueProgress(
+      `${colors.yellow}📊 Summary: Some OpenAPI files have non-breaking changes in current branch compared to main${colors.reset}`,
+      { logPrefixColor: 'yellow' },
+    )
+  } else {
+    DreamCLI.logger.logContinueProgress(
+      `${colors.green}📊 Summary: All OpenAPI files in current branch are identical to main branch${colors.reset}`,
+      { logPrefixColor: 'green' },
+    )
+  }
+
+  DreamCLI.logger.logContinueProgress(`${colors.gray}${'='.repeat(60)}${colors.reset}`, {
+    logPrefixColor: 'gray',
+  })
+  DreamCLI.logger.logEndProgress(`${colors.gray}${'\n'.repeat(5)}${colors.reset}`, { logPrefixColor: 'gray' })
 }
 
 export default {
-  checkSingleOpenapiDiff,
   compare,
-  compareOpenApiFile,
-  compareSpecs,
-  convertPathsForDocker,
-  createTempFilePath,
-  getMainBranchContent,
-  getOasDiffConfig,
-  hasOasDiffInstalled,
-  runOasDiffCommand,
 }

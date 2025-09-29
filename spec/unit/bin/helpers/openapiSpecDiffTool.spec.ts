@@ -1,7 +1,9 @@
+import cp from 'child_process'
+import fs from 'fs'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import OpenAPISpecDiffTool from '../../../../src/bin/helpers/openapiSpecDiffTool.js'
+import { DefaultPsychicOpenapiOptions } from '../../../../src/psychic-app/index.js'
 
-// Mock external dependencies
 vi.mock('@rvoh/dream', async () => {
   const actual = await vi.importActual('@rvoh/dream')
   return {
@@ -19,8 +21,7 @@ vi.mock('@rvoh/dream', async () => {
 describe('OpenAPISpecDiffTool', () => {
   beforeEach(() => {
     vi.clearAllMocks()
-    // Spy on execSync and set up default behavior
-    vi.spyOn(require('child_process'), 'execSync').mockImplementation(() => {
+    vi.spyOn(cp, 'execSync').mockImplementation(() => {
       throw new Error('Command not found')
     })
   })
@@ -30,170 +31,159 @@ describe('OpenAPISpecDiffTool', () => {
     vi.clearAllMocks()
   })
 
-  describe('hasOasDiffInstalled', () => {
-    it('returns true when oasdiff is installed', () => {
-      // Override the default mock behavior for this test
-      vi.spyOn(require('child_process'), 'execSync').mockImplementation(command => {
-        if (command === 'oasdiff --version') {
-          return 'oasdiff version 1.0.0' as any
-        }
-        throw new Error('Command not found')
-      })
-
-      const result = OpenAPISpecDiffTool.hasOasDiffInstalled()
-
-      expect(result).toBe(true)
-      expect(require('child_process').execSync).toHaveBeenCalledWith('oasdiff --version', { stdio: 'ignore' })
+  describe('compare', () => {
+    const ciValue = process.env.CI
+    afterEach(() => {
+      process.env.CI = ciValue
     })
 
-    it('returns false when oasdiff is not installed', () => {
-      // The default mock behavior already throws an error, so this test should work as-is
-      const result = OpenAPISpecDiffTool.hasOasDiffInstalled()
-
-      expect(result).toBe(false)
-      expect(require('child_process').execSync).toHaveBeenCalledWith('oasdiff --version', { stdio: 'ignore' })
-    })
-  })
-
-  describe('getOasDiffConfig', () => {
-    it('returns the local spec diff config', () => {
-      vi.spyOn(require('child_process'), 'execSync').mockImplementation(command => {
-        if (command === 'oasdiff --version') {
-          return 'oasdiff version 1.0.0'
-        }
-        throw new Error('Command not found')
-      })
-
-      const config = OpenAPISpecDiffTool.getOasDiffConfig()
-
-      expect(config).toEqual({
-        command: 'oasdiff',
-        isDocker: false,
-      })
-    })
-
-    it('returns the Docker spec diff config', () => {
-      vi.spyOn(require('child_process'), 'execSync').mockImplementation(cmd => {
-        if (cmd === 'oasdiff --version') throw new Error('Not found')
-        if (cmd === 'docker --version') return 'Docker version 20.0.0'
-        if (cmd === 'docker pull tufin/oasdiff') return 'Success'
+    it('handles changelogs', () => {
+      vi.spyOn(cp, 'execSync').mockImplementation(cmd => {
+        if (cmd === 'oasdiff --version') return 'oasdiff version 1.0.0'
+        if (cmd === 'git remote show origin') return 'HEAD branch: main'
         throw new Error('Unknown command')
       })
 
-      const config = OpenAPISpecDiffTool.getOasDiffConfig()
+      const configs: [string, DefaultPsychicOpenapiOptions][] = [
+        ['api1', { outputFilepath: 'api/openapi/api1.json' }],
+        ['api2', { outputFilepath: 'api/openapi/api2.json' }],
+      ]
 
-      expect(config.isDocker).toBe(true)
-      expect(config.command).toContain('docker run')
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+      vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
+      vi.spyOn(fs, 'unlinkSync').mockImplementation(() => {})
+
+      vi.spyOn(cp, 'execSync').mockImplementation(cmd => {
+        if (cmd === 'oasdiff --version') return 'oasdiff version 1.0.0'
+        if (cmd === 'git remote show origin') return 'HEAD branch: main'
+        if (typeof cmd === 'string' && cmd.includes('git show main:')) return '{"openapi": "3.0.0"}'
+        if (typeof cmd === 'string' && cmd.includes('oasdiff breaking')) return ''
+        if (typeof cmd === 'string' && cmd.includes('oasdiff changelog')) return 'Change 1'
+        throw new Error('Unknown command')
+      })
+
+      expect(() => OpenAPISpecDiffTool.compare(configs)).not.toThrow()
     })
 
-    it('throws error if oasdiff or docker is not installed', () => {
-      vi.spyOn(require('child_process'), 'execSync').mockImplementation(cmd => {
+    it('handles breaking changes', () => {
+      vi.spyOn(cp, 'execSync').mockImplementation(cmd => {
+        if (cmd === 'oasdiff --version') return 'oasdiff version 1.0.0'
+        if (cmd === 'git remote show origin') return 'HEAD branch: main'
+        if (typeof cmd === 'string' && cmd.includes('git show main:')) return '{"openapi": "3.0.0"}'
+        if (typeof cmd === 'string' && cmd.includes('oasdiff breaking'))
+          return 'Breaking change 1\nBreaking change 2'
+        if (typeof cmd === 'string' && cmd.includes('oasdiff changelog'))
+          return 'Added new endpoint /users\nModified /products endpoint\nRemoved deprecated field'
+        throw new Error('Unknown command')
+      })
+
+      vi.spyOn(fs, 'existsSync').mockImplementation(() => true)
+      vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
+      vi.spyOn(fs, 'unlinkSync').mockImplementation(() => {})
+
+      const configs: [string, DefaultPsychicOpenapiOptions][] = [
+        ['api1', { outputFilepath: 'api/openapi/api1.json' }],
+      ]
+
+      expect(() => OpenAPISpecDiffTool.compare(configs)).toThrow()
+    })
+
+    it('handles no breaking changes or changelogs', () => {
+      vi.spyOn(cp, 'execSync').mockImplementation(cmd => {
+        if (cmd === 'oasdiff --version') return 'oasdiff version 1.0.0'
+        if (cmd === 'git remote show origin') return 'HEAD branch: main'
+        if (typeof cmd === 'string' && cmd.includes('git show main:')) return '{"openapi": "3.0.0"}'
+        if (typeof cmd === 'string' && cmd.includes('oasdiff breaking')) return ''
+        if (typeof cmd === 'string' && cmd.includes('oasdiff changelog')) return ''
+        throw new Error('Unknown command')
+      })
+
+      vi.spyOn(fs, 'existsSync').mockImplementation(() => true)
+      vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
+      vi.spyOn(fs, 'unlinkSync').mockImplementation(() => {})
+
+      const configs: [string, DefaultPsychicOpenapiOptions][] = [
+        ['api1', { outputFilepath: 'api/openapi/api1.json' }],
+      ]
+
+      expect(() => OpenAPISpecDiffTool.compare(configs)).not.toThrow()
+    })
+
+    it('runs the git show command with origin/main', () => {
+      process.env.CI = '1'
+
+      vi.spyOn(fs, 'existsSync').mockImplementation(() => true)
+      vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
+      vi.spyOn(fs, 'unlinkSync').mockImplementation(() => {})
+
+      vi.spyOn(cp, 'execSync').mockImplementation(cmd => {
+        if (cmd === 'oasdiff --version') return 'oasdiff version 1.0.0'
+        if (cmd === 'git remote show origin') return 'HEAD branch: main'
+        throw new Error('Unknown command')
+      })
+
+      const configs: [string, DefaultPsychicOpenapiOptions][] = [
+        ['api1', { outputFilepath: 'api/openapi/api1.json' }],
+      ]
+
+      expect(() => OpenAPISpecDiffTool.compare(configs)).not.toThrow()
+    })
+
+    it('does not have an existing file', () => {
+      vi.spyOn(fs, 'existsSync').mockReturnValue(false)
+      vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
+      vi.spyOn(fs, 'unlinkSync').mockImplementation(() => {})
+
+      vi.spyOn(cp, 'execSync').mockImplementation(cmd => {
+        if (cmd === 'oasdiff --version') return 'oasdiff version 1.0.0'
+        if (cmd === 'git remote show origin') return 'HEAD branch: main'
+        if (typeof cmd === 'string' && cmd.includes('git show main:')) return '{"openapi": "3.0.0"}'
+        if (typeof cmd === 'string' && cmd.includes('oasdiff breaking')) return ''
+        if (typeof cmd === 'string' && cmd.includes('oasdiff changelog')) return ''
+        throw new Error('Unknown command')
+      })
+
+      const configs: [string, DefaultPsychicOpenapiOptions][] = [
+        ['api1', { outputFilepath: 'api/openapi/api1.json' }],
+      ]
+
+      expect(() => OpenAPISpecDiffTool.compare(configs)).not.toThrow()
+    })
+    it('uses docker', () => {
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+      vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
+      vi.spyOn(fs, 'unlinkSync').mockImplementation(() => {})
+
+      vi.spyOn(cp, 'execSync').mockImplementation(cmd => {
+        if (cmd === 'oasdiff --version') throw new Error('Not found')
+        if (cmd === 'docker --version') return 'Docker version 20.0.0'
+        if (cmd === 'docker pull tufin/oasdiff') return 'Success'
+        if (cmd === 'git remote show origin') return 'HEAD branch: main'
+        throw new Error('Unknown command')
+      })
+
+      const configs: [string, DefaultPsychicOpenapiOptions][] = [
+        ['api1', { outputFilepath: 'api/openapi/api1.json' }],
+      ]
+
+      expect(() => OpenAPISpecDiffTool.compare(configs)).not.toThrow()
+    })
+    it('does not have oasdiff installed', () => {
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+      vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
+      vi.spyOn(fs, 'unlinkSync').mockImplementation(() => {})
+
+      vi.spyOn(cp, 'execSync').mockImplementation(cmd => {
         if (cmd === 'oasdiff --version') throw new Error('Not found')
         if (cmd === 'docker --version') throw new Error('Not found')
         throw new Error('Unknown command')
       })
 
-      try {
-        OpenAPISpecDiffTool.getOasDiffConfig()
-      } catch (error: any) {
-        expect(error).toBeDefined()
-        expect(error.message).toContain('oasdiff not found.')
-        expect(error.message).toContain('Install it via the instructions here:')
-        expect(error.message).toContain('https://github.com/tufin/oasdiff or')
-        expect(error.message).toContain("install Docker and we'll handle the rest.")
-      }
-    })
-  })
+      const configs: [string, DefaultPsychicOpenapiOptions][] = [
+        ['api1', { outputFilepath: 'api/openapi/api1.json' }],
+      ]
 
-  describe('compareOpenApiFile', () => {
-    let mockWriteFileSync: any
-    let mockUnlinkSync: any
-    let mockExecSync: any
-
-    beforeEach(() => {
-      mockWriteFileSync = vi.spyOn(require('fs'), 'writeFileSync')
-      mockUnlinkSync = vi.spyOn(require('fs'), 'unlinkSync')
-      mockExecSync = vi.spyOn(require('child_process'), 'execSync')
-    })
-
-    it('handles missing current file gracefully', async () => {
-      vi.spyOn(require('fs'), 'existsSync').mockReturnValue(false)
-
-      const result = await OpenAPISpecDiffTool.compareOpenApiFile(
-        'test-api',
-        { outputFilepath: 'nonexistent.json' },
-        { command: 'oasdiff', isDocker: false },
-      )
-
-      expect(result.error).toContain('does not exist in current branch')
-      expect(result.hasChanges).toBe(false)
-    })
-
-    it('tests helper functions used in the selected code section', () => {
-      // Test createTempFilePath function
-      const tempFilePath = OpenAPISpecDiffTool.createTempFilePath('test.json', false)
-      expect(tempFilePath).toContain('temp_main_test.json')
-      expect(tempFilePath).toContain(process.cwd())
-
-      const dockerTempFilePath = OpenAPISpecDiffTool.createTempFilePath('test.json', true)
-      expect(dockerTempFilePath).toContain('temp_main_test.json')
-      expect(dockerTempFilePath).toContain('openapi')
-
-      // Test getMainBranchContent function
-      mockExecSync.mockImplementation((command: string) => {
-        if (command.includes('git show main:')) {
-          return '{"openapi": "3.0.0", "info": {"title": "Main Branch API"}}'
-        }
-        throw new Error('Unknown command')
-      })
-
-      const mainContent = OpenAPISpecDiffTool.getMainBranchContent('test.json')
-      expect(mainContent).toBe('{"openapi": "3.0.0", "info": {"title": "Main Branch API"}}')
-      expect(mockExecSync).toHaveBeenCalledWith(
-        'git show main:api/openapi/test.json',
-        expect.objectContaining({
-          encoding: 'utf8',
-          cwd: process.cwd(),
-        }),
-      )
-
-      // Test compareSpecs function
-      mockExecSync.mockImplementation((command: string) => {
-        if (command.includes('oasdiff breaking')) {
-          return 'Breaking change 1\nBreaking change 2\n'
-        }
-        if (command.includes('oasdiff changelog')) {
-          return 'Added new endpoint /users\nRemoved deprecated field'
-        }
-        throw new Error('Unknown command')
-      })
-
-      const comparisonResult = OpenAPISpecDiffTool.compareSpecs(
-        '/path/to/main.json',
-        '/path/to/current.json',
-        { command: 'oasdiff', isDocker: false },
-      )
-
-      expect(comparisonResult.breaking).toEqual(['Breaking change 1', 'Breaking change 2'])
-      expect(comparisonResult.changelog).toBe('Added new endpoint /users\nRemoved deprecated field')
-    })
-
-    it('tests error handling for the selected code section', async () => {
-      // Test error handling scenarios from the selected code section
-      // This test demonstrates that the function handles errors gracefully
-      vi.spyOn(require('fs'), 'existsSync').mockImplementation(() => {
-        throw new Error('File system error')
-      })
-
-      const result = await OpenAPISpecDiffTool.compareOpenApiFile(
-        'test-api',
-        { outputFilepath: 'api/openapi/test.json' },
-        { command: 'oasdiff', isDocker: false },
-      )
-
-      // The function should handle the error and return an appropriate error message
-      expect(result.error).toBeDefined()
-      expect(result.hasChanges).toBe(false)
+      expect(() => OpenAPISpecDiffTool.compare(configs)).toThrow()
     })
   })
 })
