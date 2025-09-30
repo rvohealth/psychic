@@ -22,6 +22,7 @@ export interface ComparisonResult {
  */
 export interface OasDiffConfig {
   command: string
+  baseArgs: string[]
   isDocker: boolean
   headBranch: string
 }
@@ -100,6 +101,7 @@ function getOasDiffConfig(): OasDiffConfig {
     DreamCLI.logger.logContinueProgress('Using local oasdiff installation...')
     return {
       command: 'oasdiff',
+      baseArgs: [],
       isDocker: false,
       headBranch,
     }
@@ -108,7 +110,8 @@ function getOasDiffConfig(): OasDiffConfig {
     DreamCLI.logger.logContinueProgress('Using Docker oasdiff installation...')
     const openApiDir = path.join(process.cwd(), 'openapi')
     return {
-      command: `docker run --rm -v "${openApiDir}:/openapi" -w /openapi tufin/oasdiff`,
+      command: 'docker',
+      baseArgs: ['run', '--rm', '-v', `${openApiDir}:/openapi`, '-w', '/openapi', 'tufin/oasdiff'],
       isDocker: true,
       headBranch,
     }
@@ -126,11 +129,7 @@ function getOasDiffConfig(): OasDiffConfig {
 /**
  * Converts file paths for Docker container
  */
-function convertPathsForDocker(mainPath: string, currentPath: string, isDocker: boolean): [string, string] {
-  if (!isDocker) {
-    return [mainPath, currentPath]
-  }
-
+function convertPathsForDocker(mainPath: string, currentPath: string): [string, string] {
   const openApiDir = path.join(process.cwd(), 'openapi')
   const dockerMainPath = mainPath.replace(openApiDir, '/openapi')
   const dockerCurrentPath = currentPath.replace(openApiDir, '/openapi')
@@ -142,18 +141,24 @@ function convertPathsForDocker(mainPath: string, currentPath: string, isDocker: 
  * Runs oasdiff command and returns the output
  */
 function runOasDiffCommand(
-  command: string,
+  config: OasDiffConfig,
   subcommand: string,
   mainPath: string,
   currentPath: string,
   flag?: string,
 ): string {
-  let builtCommand = `${command} ${subcommand} "${mainPath}" "${currentPath}"`
+  const args = [...config.baseArgs, subcommand, mainPath, currentPath]
   if (flag) {
-    builtCommand += ` --${flag}`
+    args.push(`--${flag}`)
   }
 
-  const output = cp.execSync(builtCommand, {
+  // const output = cp.execSync(builtCommand, {
+  //   encoding: 'utf8',
+  //   cwd: process.cwd(),
+  //   stdio: ['pipe', 'pipe', 'pipe'],
+  // })
+  const output = cp.execFileSync(config.command, args, {
+    shell: true,
     encoding: 'utf8',
     cwd: process.cwd(),
     stdio: ['pipe', 'pipe', 'pipe'],
@@ -165,26 +170,27 @@ function runOasDiffCommand(
  * Compares two OpenAPI files using oasdiff
  */
 function compareSpecs(
+  config: OasDiffConfig,
   mainFilePath: string,
   currentFilePath: string,
-  config: OasDiffConfig,
 ): Pick<ComparisonResult, 'breaking' | 'changelog'> {
-  const [mainPath, currentPath] = convertPathsForDocker(mainFilePath, currentFilePath, config.isDocker)
+  if (config.isDocker) {
+    ;[mainFilePath, currentFilePath] = convertPathsForDocker(mainFilePath, currentFilePath)
+  }
 
-  const breakingOutput = runOasDiffCommand(config.command, 'breaking', mainPath, currentPath, 'flatten-allof')
-  const changelogOutput = runOasDiffCommand(
-    config.command,
-    'changelog',
-    mainPath,
-    currentPath,
+  const breakingChanges = runOasDiffCommand(
+    config,
+    'breaking',
+    mainFilePath,
+    currentFilePath,
     'flatten-allof',
   )
-
-  const breakingChanges = breakingOutput ? breakingOutput.split('\n').filter(line => line.trim()) : []
+  const changelog = runOasDiffCommand(config, 'changelog', mainFilePath, currentFilePath, 'flatten-allof')
+  const breaking = breakingChanges ? breakingChanges.split('\n').filter(line => line.trim()) : []
 
   return {
-    breaking: breakingChanges,
-    changelog: changelogOutput,
+    breaking,
+    changelog,
   }
 }
 
@@ -211,7 +217,7 @@ function getHeadBranchContent(fileName: string, headBranchName: string): string 
 /**
  * Compares a single OpenAPI file against main branch
  */
-export function compareOpenApiFile(
+function compareConfig(
   openapiName: string,
   config: PsychicOpenapiConfig,
   oasdiffConfig: OasDiffConfig,
@@ -241,7 +247,7 @@ export function compareOpenApiFile(
 
       fs.writeFileSync(tempMainFile, mainContent)
 
-      const oasDiffResult = compareSpecs(tempMainFile, currentFilePath, oasdiffConfig)
+      const oasDiffResult = compareSpecs(oasdiffConfig, tempMainFile, currentFilePath)
 
       result.breaking = oasDiffResult.breaking
       result.changelog = oasDiffResult.changelog
@@ -264,7 +270,7 @@ export function compareOpenApiFile(
 /**
  * Check for OpenAPI diffs if checkDiffs is enabled for any OpenAPI configuration
  */
-export function compare(openapiConfigs: [string, PsychicOpenapiConfig][]): void {
+function compare(openapiConfigs: [string, PsychicOpenapiConfig][]): void {
   const results: ComparisonResult[] = []
 
   DreamCLI.logger.logStartProgress(
@@ -274,7 +280,7 @@ export function compare(openapiConfigs: [string, PsychicOpenapiConfig][]): void 
   const oasdiffConfig = getOasDiffConfig()
 
   for (const [openapiName, config] of openapiConfigs) {
-    const result = compareOpenApiFile(openapiName, config, oasdiffConfig)
+    const result = compareConfig(openapiName, config, oasdiffConfig)
     results.push(result)
   }
 

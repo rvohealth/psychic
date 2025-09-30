@@ -77,7 +77,7 @@ export default class PsychicBin {
         ([, config]: [string, PsychicOpenapiConfig]) => config.checkDiffs === true,
       )
       if (openapiConfigsWithCheckDiffs.length > 0) {
-        await OpenAPISpecDiffTool.compare(openapiConfigsWithCheckDiffs)
+        OpenAPISpecDiffTool.compare(openapiConfigsWithCheckDiffs)
       }
     } catch (error) {
       console.error(error)

@@ -1,5 +1,6 @@
 import cp from 'child_process'
 import fs from 'fs'
+import * as path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import OpenAPISpecDiffTool from '../../../../src/bin/helpers/openapiSpecDiffTool.js'
 import { DefaultPsychicOpenapiOptions } from '../../../../src/psychic-app/index.js'
@@ -57,12 +58,32 @@ describe('OpenAPISpecDiffTool', () => {
         if (cmd === 'oasdiff --version') return 'oasdiff version 1.0.0'
         if (cmd === 'git remote show origin') return 'HEAD branch: main'
         if (typeof cmd === 'string' && cmd.includes('git show main:')) return '{"openapi": "3.0.0"}'
-        if (typeof cmd === 'string' && cmd.includes('oasdiff breaking')) return ''
-        if (typeof cmd === 'string' && cmd.includes('oasdiff changelog')) return 'Change 1'
+        throw new Error('Unknown command')
+      })
+      vi.spyOn(cp, 'execFileSync').mockImplementation((command, args) => {
+        if (command === 'oasdiff' && args?.includes('breaking')) return ''
+        if (command === 'oasdiff' && args?.includes('changelog'))
+          return 'Added new endpoint /users\nModified /products endpoint\nRemoved deprecated field'
         throw new Error('Unknown command')
       })
 
       expect(() => OpenAPISpecDiffTool.compare(configs)).not.toThrow()
+      expect(vi.mocked(cp.execFileSync)).toHaveBeenCalledTimes(4)
+      expect(vi.mocked(cp.execFileSync)).toHaveBeenLastCalledWith(
+        'oasdiff',
+        [
+          'changelog',
+          path.join(process.cwd(), 'temp_main_api2.json'),
+          path.join(process.cwd(), 'api/openapi/api2.json'),
+          '--flatten-allof',
+        ],
+        {
+          shell: true,
+          encoding: 'utf8',
+          cwd: process.cwd(),
+          stdio: ['pipe', 'pipe', 'pipe'],
+        },
+      )
     })
 
     it('handles breaking changes', () => {
@@ -70,9 +91,15 @@ describe('OpenAPISpecDiffTool', () => {
         if (cmd === 'oasdiff --version') return 'oasdiff version 1.0.0'
         if (cmd === 'git remote show origin') return 'HEAD branch: main'
         if (typeof cmd === 'string' && cmd.includes('git show main:')) return '{"openapi": "3.0.0"}'
-        if (typeof cmd === 'string' && cmd.includes('oasdiff breaking'))
-          return 'Breaking change 1\nBreaking change 2'
-        if (typeof cmd === 'string' && cmd.includes('oasdiff changelog'))
+        // if (typeof cmd === 'string' && cmd.includes('oasdiff breaking'))
+        // return 'Breaking change 1\nBreaking change 2'
+        // if (typeof cmd === 'string' && cmd.includes('oasdiff changelog'))
+        // return 'Added new endpoint /users\nModified /products endpoint\nRemoved deprecated field'
+        throw new Error('Unknown command')
+      })
+      vi.spyOn(cp, 'execFileSync').mockImplementation((command, args) => {
+        if (command === 'oasdiff' && args?.includes('breaking')) return 'Breaking change 1\nBreaking change 2'
+        if (command === 'oasdiff' && args?.includes('changelog'))
           return 'Added new endpoint /users\nModified /products endpoint\nRemoved deprecated field'
         throw new Error('Unknown command')
       })
@@ -86,6 +113,23 @@ describe('OpenAPISpecDiffTool', () => {
       ]
 
       expect(() => OpenAPISpecDiffTool.compare(configs)).toThrow()
+      expect(vi.mocked(cp.execFileSync)).toHaveBeenCalledTimes(2)
+      expect(vi.mocked(cp.execFileSync)).toHaveBeenNthCalledWith(
+        1,
+        'oasdiff',
+        [
+          'breaking',
+          path.join(process.cwd(), 'temp_main_api1.json'),
+          path.join(process.cwd(), 'api/openapi/api1.json'),
+          '--flatten-allof',
+        ],
+        {
+          shell: true,
+          encoding: 'utf8',
+          cwd: process.cwd(),
+          stdio: ['pipe', 'pipe', 'pipe'],
+        },
+      )
     })
 
     it('handles no breaking changes or changelogs', () => {
@@ -102,11 +146,49 @@ describe('OpenAPISpecDiffTool', () => {
       vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
       vi.spyOn(fs, 'unlinkSync').mockImplementation(() => {})
 
+      vi.spyOn(cp, 'execFileSync').mockImplementation((command, args) => {
+        if (command === 'oasdiff' && args?.includes('breaking')) return ''
+        if (command === 'oasdiff' && args?.includes('changelog')) return ''
+        throw new Error('Unknown command')
+      })
+
       const configs: [string, DefaultPsychicOpenapiOptions][] = [
         ['api1', { outputFilepath: 'api/openapi/api1.json' }],
       ]
 
       expect(() => OpenAPISpecDiffTool.compare(configs)).not.toThrow()
+      expect(vi.mocked(cp.execFileSync)).toHaveBeenCalledTimes(2)
+      expect(vi.mocked(cp.execFileSync)).toHaveBeenNthCalledWith(
+        1,
+        'oasdiff',
+        [
+          'breaking',
+          path.join(process.cwd(), 'temp_main_api1.json'),
+          path.join(process.cwd(), 'api/openapi/api1.json'),
+          '--flatten-allof',
+        ],
+        {
+          shell: true,
+          encoding: 'utf8',
+          cwd: process.cwd(),
+          stdio: ['pipe', 'pipe', 'pipe'],
+        },
+      )
+      expect(vi.mocked(cp.execFileSync)).toHaveBeenLastCalledWith(
+        'oasdiff',
+        [
+          'changelog',
+          path.join(process.cwd(), 'temp_main_api1.json'),
+          path.join(process.cwd(), 'api/openapi/api1.json'),
+          '--flatten-allof',
+        ],
+        {
+          shell: true,
+          encoding: 'utf8',
+          cwd: process.cwd(),
+          stdio: ['pipe', 'pipe', 'pipe'],
+        },
+      )
     })
 
     it('runs the git show command with origin/main', () => {
@@ -127,6 +209,11 @@ describe('OpenAPISpecDiffTool', () => {
       ]
 
       expect(() => OpenAPISpecDiffTool.compare(configs)).not.toThrow()
+      expect(vi.mocked(cp.execSync)).toHaveBeenCalledTimes(3)
+      expect(vi.mocked(cp.execSync)).toHaveBeenLastCalledWith('git show origin/main:api/openapi/api1.json', {
+        encoding: 'utf8',
+        cwd: process.cwd(),
+      })
     })
 
     it('does not have an existing file', () => {
@@ -148,7 +235,9 @@ describe('OpenAPISpecDiffTool', () => {
       ]
 
       expect(() => OpenAPISpecDiffTool.compare(configs)).not.toThrow()
+      expect(vi.mocked(fs.existsSync)).toHaveBeenCalledWith(path.join(process.cwd(), 'api/openapi/api1.json'))
     })
+
     it('uses docker', () => {
       vi.spyOn(fs, 'existsSync').mockReturnValue(true)
       vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
@@ -159,6 +248,15 @@ describe('OpenAPISpecDiffTool', () => {
         if (cmd === 'docker --version') return 'Docker version 20.0.0'
         if (cmd === 'docker pull tufin/oasdiff') return 'Success'
         if (cmd === 'git remote show origin') return 'HEAD branch: main'
+        if (typeof cmd === 'string' && cmd.includes('git show main:')) return '{"openapi": "3.0.0"}'
+        throw new Error('Unknown command')
+      })
+
+      // Fix: Mock execFileSync for Docker commands
+      vi.spyOn(cp, 'execFileSync').mockImplementation((command, args) => {
+        if (command === 'docker' && args?.includes('breaking')) return ''
+        if (command === 'docker' && args?.includes('changelog'))
+          return 'Added new endpoint /users\nModified /products endpoint\nRemoved deprecated field'
         throw new Error('Unknown command')
       })
 
@@ -176,6 +274,7 @@ describe('OpenAPISpecDiffTool', () => {
       vi.spyOn(cp, 'execSync').mockImplementation(cmd => {
         if (cmd === 'oasdiff --version') throw new Error('Not found')
         if (cmd === 'docker --version') throw new Error('Not found')
+        if (cmd === 'git remote show origin') return 'HEAD branch: main'
         throw new Error('Unknown command')
       })
 
@@ -184,6 +283,26 @@ describe('OpenAPISpecDiffTool', () => {
       ]
 
       expect(() => OpenAPISpecDiffTool.compare(configs)).toThrow()
+    })
+
+    it('head branch not set, default to main', () => {
+      vi.spyOn(fs, 'existsSync').mockReturnValue(true)
+      vi.spyOn(fs, 'writeFileSync').mockImplementation(() => {})
+      vi.spyOn(fs, 'unlinkSync').mockImplementation(() => {})
+
+      vi.spyOn(cp, 'execSync').mockImplementation(cmd => {
+        if (cmd === 'oasdiff --version') throw new Error('Not found')
+        if (cmd === 'docker --version') return 'Docker version 20.0.0'
+        if (cmd === 'docker pull tufin/oasdiff') return 'Success'
+        if (cmd === 'git remote show origin') return 'HEAD branch:'
+        throw new Error('Unknown command')
+      })
+
+      const configs: [string, DefaultPsychicOpenapiOptions][] = [
+        ['api1', { outputFilepath: 'api/openapi/api1.json' }],
+      ]
+
+      expect(() => OpenAPISpecDiffTool.compare(configs)).not.toThrow()
     })
   })
 })
