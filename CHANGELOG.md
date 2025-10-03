@@ -1,3 +1,7 @@
+## 1.12.1
+
+- increase depth of OpenAPI validation error logs
+
 ## 1.12.0
 
 - `scrollPagination` support

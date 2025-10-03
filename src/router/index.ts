@@ -499,7 +499,7 @@ suggested fix:  "${convertRouteParams(path)}"
          */
         controllerInstance['expressSendStatus'](400)
       } else {
-        PsychicApp.logWithLevel('error', err)
+        PsychicApp.logWithLevel('error', util.inspect(err, { depth: ERROR_LOGGING_DEPTH }))
 
         if (PsychicApp.getOrFail().specialHooks.serverError.length) {
           try {
