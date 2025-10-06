@@ -1094,9 +1094,33 @@ interface PsychicOpenapiBaseOptions {
   validate?: OpenapiValidateOption
 
   /**
-   * When true, psychic will check for diffs and breaking changes
-   * between the current branch open api specs and the main open api spec.
+   * Enables automatic comparison of OpenAPI specifications between the current
+   * working branch and the main/master/head branch.
+   *
+   * When set to `true`, Psychic will perform a diff check between the OpenAPI spec
+   * in the current branch and the one in the main/master/head branch. This is done using the
+   * `OpenApiSpecDiff` tool, which analyzes structural and semantic differences
+   * between the two specs.
+   *
+   * This feature is useful for catching unintended changes to your API contract
+   * before they are merged, especially breaking changes that could affect downstream
+   * consumers or integrations.
+   *
+   * Typical use cases include CI/CD validation, pull request checks, or local
+   * development sanity checks.
+   *
+   * Example usage:
+   * ```ts
+   * psy.set('openapi', {
+   *   checkDiffs: true,
+   * });
+   * ```
+   *
+   * When enabled, the following types of changes will be detected:
+   * - Additions, deletions, or modifications to endpoints, parameters, or schemas
+   * - Breaking changes that could impact compatibility
    */
+
   checkDiffs?: boolean
 }
 
