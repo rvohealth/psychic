@@ -9,8 +9,10 @@ import OpenapiAppRenderer from '../openapi-renderer/app.js'
 import PsychicApp from '../psychic-app/index.js'
 import enumsFileStr from './helpers/enumsFileStr.js'
 import generateRouteTypes from './helpers/generateRouteTypes.js'
-import OpenAPISpecDiffTool, { PsychicOpenapiConfig } from './helpers/openapiSpecDiffTool.js'
+import { OpenApiSpecDiff, PsychicOpenapiConfig } from './helpers/OpenApiSpecDiff.js'
 import printRoutes from './helpers/printRoutes.js'
+
+export { BreakingChangesDetectedInOpenApiSpecError } from './helpers/OpenApiSpecDiff.js'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {
@@ -43,7 +45,11 @@ export default class PsychicBin {
   public static async sync({
     bypassDreamSync = false,
     schemaOnly = false,
-  }: { bypassDreamSync?: boolean; schemaOnly?: boolean } = {}) {
+  }: {
+    bypassDreamSync?: boolean
+    schemaOnly?: boolean
+    failOnBreaking?: boolean
+  }) {
     if (!bypassDreamSync) await DreamBin.sync(() => {}, { schemaOnly })
 
     if (schemaOnly) return
@@ -53,8 +59,6 @@ export default class PsychicBin {
     const psychicApp = PsychicApp.getOrFail()
     DreamCLI.logger.logStartProgress('running post-sync operations...')
 
-    // call post-sync command in a separate process, so that newly-generated
-    // types can be reloaded and brought into all classes.
     await DreamCLI.spawn(psychicApp.psyCmd('post-sync'), {
       onStdout: message => {
         DreamCLI.logger.logContinueProgress(`[post-sync]` + ' ' + message, {
@@ -66,23 +70,53 @@ export default class PsychicBin {
     DreamCLI.logger.logEndProgress()
   }
 
-  public static async postSync() {
+  public static async postSync(failOnBreaking: boolean = false) {
     try {
       await this.syncOpenapiJson()
       await this.runCliHooksAndUpdatePsychicTypesFileWithOutput()
       await this.syncOpenapiTypescriptFiles()
-      const psychicApp = PsychicApp.getOrFail()
 
+      // Run OpenAPI diff check if there are configs with checkDiffs enabled
+      const psychicApp = PsychicApp.getOrFail()
       const openapiConfigsWithCheckDiffs = Object.entries(psychicApp.openapi).filter(
         ([, config]: [string, PsychicOpenapiConfig]) => config.checkDiffs === true,
       )
+
       if (openapiConfigsWithCheckDiffs.length > 0) {
-        OpenAPISpecDiffTool.compare(openapiConfigsWithCheckDiffs)
+        const diffCmd = failOnBreaking
+          ? psychicApp.psyCmd('diff:openapi --fail-on-breaking')
+          : psychicApp.psyCmd('diff:openapi')
+
+        await DreamCLI.spawn(diffCmd, {
+          onStdout: message => {
+            DreamCLI.logger.logContinueProgress(`[diff:openapi] ${message}`, {
+              logPrefixColor: 'magenta',
+            })
+          },
+        })
+      } else {
+        DreamCLI.logger.logContinueProgress(
+          'no openapi configs with checkDiffs enabled, skipping diff check',
+          {
+            logPrefixColor: 'gray',
+          },
+        )
+        DreamCLI.logger.logEndProgress()
       }
     } catch (error) {
       console.error(error)
       await CliFileWriter.revert()
+      throw error // Re-throw to ensure proper exit code
     }
+  }
+
+  public static openapiDiff() {
+    const psychicApp = PsychicApp.getOrFail()
+    const openapiConfigsWithCheckDiffs = Object.entries(psychicApp.openapi).filter(
+      ([, config]: [string, PsychicOpenapiConfig]) => config.checkDiffs,
+    )
+
+    OpenApiSpecDiff.compare(openapiConfigsWithCheckDiffs)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any

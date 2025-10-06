@@ -1,6 +1,6 @@
 import { DreamCLI } from '@rvoh/dream'
 import { Command } from 'commander'
-import PsychicBin from '../bin/index.js'
+import PsychicBin, { BreakingChangesDetectedInOpenApiSpecError } from '../bin/index.js'
 import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/syncOpenapiTypescript.js'
 import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
@@ -267,7 +267,8 @@ export default class PsychicCLI {
         'sync introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration',
       )
       .option('--schema-only')
-      .action(async (options: { schemaOnly?: boolean } = {}) => {
+      .option('-f', '--fail-on-breaking', 'fail on OpenAPI spec changes that are breaking during post-sync')
+      .action(async (options: { schemaOnly?: boolean; failOnBreaking?: boolean } = {}) => {
         await initializePsychicApp({ bypassDreamIntegrityChecks: !!options.schemaOnly })
         await PsychicBin.sync(options)
         process.exit()
@@ -287,9 +288,10 @@ export default class PsychicCLI {
       .description(
         'an internal command that runs as the second stage of the `sync` command, since after types are rebuit, the application needs to be reloaded before autogenerating certain files, since those files will need to leverage the updated types',
       )
-      .action(async () => {
+      .option('--fail-on-breaking', 'fail on OpenAPI spec changes that are breaking')
+      .action(async (options: { failOnBreaking?: boolean } = {}) => {
         await initializePsychicApp()
-        await PsychicBin.postSync()
+        await PsychicBin.postSync(options.failOnBreaking)
         process.exit()
       })
 
@@ -310,5 +312,26 @@ export default class PsychicCLI {
         await PsychicBin.syncOpenapiJson()
         process.exit()
       })
+
+    program
+      .command('diff:openapi')
+      .description(
+        'compares the current branch open api spec file(s) with the main/master/head branch open api spec file(s)',
+      )
+      .option('-f', '--fail-on-breaking', 'fail on spec changes that are breaking')
+      .action(async (options: { failOnBreaking?: boolean } = {}) => {
+        await initializePsychicApp()
+
+        try {
+          PsychicBin.openapiDiff()
+        } catch (error) {
+          if (options.failOnBreaking && error instanceof BreakingChangesDetectedInOpenApiSpecError) {
+            console.error(error.message)
+            process.exit(1)
+          }
+          throw error
+        }
+      })
+    program
   }
 }
