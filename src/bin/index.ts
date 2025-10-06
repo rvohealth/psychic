@@ -45,11 +45,7 @@ export default class PsychicBin {
   public static async sync({
     bypassDreamSync = false,
     schemaOnly = false,
-  }: {
-    bypassDreamSync?: boolean
-    schemaOnly?: boolean
-    failOnBreaking?: boolean
-  }) {
+  }: { bypassDreamSync?: boolean; schemaOnly?: boolean } = {}) {
     if (!bypassDreamSync) await DreamBin.sync(() => {}, { schemaOnly })
 
     if (schemaOnly) return
@@ -59,6 +55,8 @@ export default class PsychicBin {
     const psychicApp = PsychicApp.getOrFail()
     DreamCLI.logger.logStartProgress('running post-sync operations...')
 
+    // call post-sync command in a separate process, so that newly-generated
+    // types can be reloaded and brought into all classes.
     await DreamCLI.spawn(psychicApp.psyCmd('post-sync'), {
       onStdout: message => {
         DreamCLI.logger.logContinueProgress(`[post-sync]` + ' ' + message, {

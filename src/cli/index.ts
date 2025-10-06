@@ -288,7 +288,7 @@ export default class PsychicCLI {
       .description(
         'an internal command that runs as the second stage of the `sync` command, since after types are rebuit, the application needs to be reloaded before autogenerating certain files, since those files will need to leverage the updated types',
       )
-      .option('--fail-on-breaking', 'fail on OpenAPI spec changes that are breaking')
+      .option('f', '--fail-on-breaking', 'fail on OpenAPI spec changes that are breaking')
       .action(async (options: { failOnBreaking?: boolean } = {}) => {
         await initializePsychicApp()
         await PsychicBin.postSync(options.failOnBreaking)
