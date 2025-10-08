@@ -78,7 +78,7 @@ describe('V1/PostsController', () => {
 
         const { body } = await subject(200)
 
-        expect(body).toEqual([])
+        expect(body.results).toEqual([])
       })
     })
   })
@@ -658,7 +658,7 @@ describe('V1/PostsController', () => {
 
         const { body } = await subject(200)
 
-        expect(body).toEqual([])
+        expect(body.results).toEqual([])
       })
     })
   })

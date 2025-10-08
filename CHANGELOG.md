@@ -1,6 +1,7 @@
 ## 1.12.1
 
 - increase depth of OpenAPI validation error logs
+- fix generated resource controller spec
 
 ## 1.12.0
 
