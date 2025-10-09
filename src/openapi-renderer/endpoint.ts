@@ -709,11 +709,7 @@ export default class OpenapiEndpointRenderer<
 
     const paramsShape: OpenapiSchemaObject = {
       type: 'object',
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      properties: {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        ...((combining || {}) as any),
-      },
+      properties: {},
     }
 
     const required = (this.requestBody as OpenapiSchemaRequestBodyForOption<typeof Dream>)?.required
@@ -730,6 +726,11 @@ export default class OpenapiEndpointRenderer<
       },
       paramsShape.properties as Record<string, OpenapiSchemaBody>,
     )
+
+    paramsShape.properties = {
+      ...paramsShape.properties,
+      ...((combining || {}) as OpenapiSchemaProperties),
+    }
 
     let processedSchema = new OpenapiSegmentExpander(paramsShape, {
       renderOpts,

@@ -1064,6 +1064,7 @@ describe('OpenapiEndpointRenderer', () => {
                   including: ['id'],
                   combining: {
                     name: 'string',
+                    email: ['string', 'null'],
                   },
                 },
               })
@@ -1076,7 +1077,7 @@ describe('OpenapiEndpointRenderer', () => {
                       type: 'object',
                       properties: {
                         email: {
-                          type: 'string',
+                          type: ['string', 'null'],
                         },
                         id: {
                           type: 'integer',
