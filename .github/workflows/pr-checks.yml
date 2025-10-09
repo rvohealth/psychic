@@ -68,7 +68,7 @@ jobs:
 
       - run: npm install -g corepack
       - run: corepack enable
-      - run: go install github.com/tufin/oasdiff@latest
+      - run: go install github.com/oasdiff/oasdiff@latest
       - run: oasdiff --version
 
       - name: Cache node_modules
