@@ -219,15 +219,15 @@ export class OpenApiSpecDiff {
   /**
    * Creates a temporary file path for the head branch content
    */
-  private createTempFilePath(fileName: string): string {
-    const tempFileName = `temp_main_${fileName}`
-    return path.join(process.cwd(), tempFileName)
+  private createTempFilePath(filePath: string): string {
+    const tempFileName = `temp_main_${path.basename(filePath)}`
+    return path.join(path.dirname(filePath), tempFileName)
   }
 
   /**
    * Retrieves head branch content for a file
    */
-  private getHeadBranchContent(fileName: string): string {
+  private getHeadBranchContent(filePath: string): string {
     if (!this.oasdiffConfig) {
       throw new Error('OasDiff config not initialized')
     }
@@ -235,7 +235,7 @@ export class OpenApiSpecDiff {
     const branchRef =
       process.env.CI === '1' ? `origin/${this.oasdiffConfig.headBranch}` : this.oasdiffConfig.headBranch
 
-    return cp.execSync(`git show ${branchRef}:${fileName}`, {
+    return cp.execSync(`git show ${branchRef}:${filePath}`, {
       encoding: 'utf8',
       cwd: process.cwd(),
     })
@@ -253,14 +253,14 @@ export class OpenApiSpecDiff {
     }
 
     try {
-      const currentFilePath = path.join(process.cwd(), config.outputFilepath!)
+      const currentFilePath = config.outputFilepath!
 
       if (!fs.existsSync(currentFilePath)) {
         result.error = `File ${config.outputFilepath!} does not exist in current branch`
         return result
       }
 
-      const tempMainFilePath = this.createTempFilePath(path.basename(config.outputFilepath!))
+      const tempMainFilePath = this.createTempFilePath(config.outputFilepath!)
 
       try {
         const mainContent = this.getHeadBranchContent(config.outputFilepath!)

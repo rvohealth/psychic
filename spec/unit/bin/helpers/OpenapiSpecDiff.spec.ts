@@ -1,5 +1,4 @@
 import * as fs from 'node:fs'
-import * as path from 'node:path'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   BreakingChangesDetectedInOpenApiSpecError,
@@ -26,14 +25,11 @@ describe('OpenApiSpecDiff', () => {
   let originalFileContent: string
 
   beforeEach(() => {
-    originalFileContent = fs.readFileSync(
-      path.join(process.cwd(), 'test-app/src/openapi/openapi.json'),
-      'utf8',
-    )
+    originalFileContent = fs.readFileSync('./test-app/src/openapi/openapi.json', 'utf8')
   })
 
   afterEach(() => {
-    fs.writeFileSync(path.join(process.cwd(), 'test-app/src/openapi/openapi.json'), originalFileContent)
+    fs.writeFileSync('./test-app/src/openapi/openapi.json', originalFileContent)
   })
 
   describe('compare', () => {
@@ -46,14 +42,11 @@ describe('OpenApiSpecDiff', () => {
     context('when removing a required field', () => {
       it('throws a breaking change', () => {
         const doc: OpenapiFile = JSON.parse(
-          fs.readFileSync(path.join(process.cwd(), 'test-app/src/openapi/openapi.json'), 'utf8').toString(),
+          fs.readFileSync('./test-app/src/openapi/openapi.json', 'utf8').toString(),
         ) as OpenapiFile
 
         doc.components.schemas.Pet.required = []
-        fs.writeFileSync(
-          path.join(process.cwd(), 'test-app/src/openapi/openapi.json'),
-          JSON.stringify(doc, null, 2),
-        )
+        fs.writeFileSync('./test-app/src/openapi/openapi.json', JSON.stringify(doc, null, 2))
 
         expect(() => {
           OpenApiSpecDiff.compare(mockConfigs)
