@@ -170,15 +170,15 @@ export class OpenApiSpecDiff {
     subcommand: string,
     mainPath: string,
     currentPath: string,
-    flag?: string,
+    flags?: string[],
   ): string {
     if (!this.oasdiffConfig) {
       throw new Error('OasDiff config not initialized')
     }
 
     const args = [...this.oasdiffConfig.baseArgs, subcommand, mainPath, currentPath]
-    if (flag) {
-      args.push(`--${flag}`)
+    if (flags && flags.length > 0) {
+      args.push(...flags.map(flag => `--${flag}`))
     }
 
     const output = cp.execFileSync(this.oasdiffConfig.command, args, {
@@ -201,13 +201,12 @@ export class OpenApiSpecDiff {
       throw new Error('OasDiff config not initialized')
     }
 
-    const breakingChanges = this.runOasDiffCommand('breaking', mainFilePath, currentFilePath, 'flatten-allof')
-    const changelogChanges = this.runOasDiffCommand(
-      'changelog',
-      mainFilePath,
-      currentFilePath,
+    const breakingChanges = this.runOasDiffCommand('breaking', mainFilePath, currentFilePath, [
       'flatten-allof',
-    )
+    ])
+    const changelogChanges = this.runOasDiffCommand('changelog', mainFilePath, currentFilePath, [
+      'flatten-allof',
+    ])
     const breaking = breakingChanges ? breakingChanges.split('\n').filter(line => line.trim()) : []
     const changelog = changelogChanges ? changelogChanges.split('\n').filter(line => line.trim()) : []
 
