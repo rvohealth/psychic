@@ -1,3 +1,7 @@
+## 1.12.2
+
+- when using `combining` in requestBody for an OpenAPI decorator, it will now override any params brought in through serializable introspection.
+
 ## 1.12.1
 
 - increase depth of OpenAPI validation error logs
