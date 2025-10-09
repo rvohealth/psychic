@@ -57,6 +57,7 @@ jobs:
       APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
       LEGACY_APP_ENCRYPTION_KEY: ${{ secrets.LEGACY_APP_ENCRYPTION_KEY }}
       DREAM_PARALLEL_TESTS: 4
+      CI: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
