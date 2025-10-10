@@ -181,13 +181,18 @@ export class OpenApiSpecDiff {
       args.push(...flags.map(flag => `--${flag}`))
     }
 
-    const output = cp.execFileSync(this.oasdiffConfig.command, args, {
-      shell: true,
-      encoding: 'utf8',
-      cwd: process.cwd(),
-      stdio: ['pipe', 'pipe', 'pipe'],
-    })
-    return output.trim()
+    try {
+      const output = cp.execFileSync(this.oasdiffConfig.command, args, {
+        shell: true,
+        encoding: 'utf8',
+        cwd: process.cwd(),
+        stdio: ['pipe', 'pipe', 'pipe'],
+      })
+      return output.trim()
+    } catch (error) {
+      const errorOutput = error instanceof Error ? error.message : String(error)
+      return errorOutput
+    }
   }
 
   /**
@@ -196,23 +201,32 @@ export class OpenApiSpecDiff {
   private compareSpecs(
     mainFilePath: string,
     currentFilePath: string,
-  ): Pick<ComparisonResult, 'breaking' | 'changelog'> {
+  ): Pick<ComparisonResult, 'breaking' | 'changelog' | 'error'> {
     if (!this.oasdiffConfig) {
       throw new Error('OasDiff config not initialized')
     }
 
-    const breakingChanges = this.runOasDiffCommand('breaking', mainFilePath, currentFilePath, [
-      'flatten-allof',
-    ])
-    const changelogChanges = this.runOasDiffCommand('changelog', mainFilePath, currentFilePath, [
-      'flatten-allof',
-    ])
-    const breaking = breakingChanges ? breakingChanges.split('\n').filter(line => line.trim()) : []
-    const changelog = changelogChanges ? changelogChanges.split('\n').filter(line => line.trim()) : []
+    const breakingChanges = this.runOasDiffCommand('breaking', mainFilePath, currentFilePath)
+    const changelogChanges = this.runOasDiffCommand('changelog', mainFilePath, currentFilePath)
+    const breaking =
+      breakingChanges && !breakingChanges.includes('Command failed')
+        ? breakingChanges.split('\n').filter(line => line.trim())
+        : []
+    const changelog =
+      changelogChanges && changelogChanges.includes('Command failed')
+        ? changelogChanges.split('\n').filter(line => line.trim())
+        : []
+
+    const failedToCompare = breakingChanges.includes('Command failed')
+      ? breakingChanges
+      : changelogChanges.includes('Command failed')
+        ? changelogChanges
+        : ''
 
     return {
       breaking,
       changelog,
+      error: failedToCompare,
     }
   }
 
@@ -268,11 +282,12 @@ export class OpenApiSpecDiff {
         fs.mkdirSync(path.dirname(tempMainFilePath), { recursive: true })
         fs.writeFileSync(tempMainFilePath, mainContent)
 
-        const { breaking, changelog } = this.compareSpecs(tempMainFilePath, currentFilePath)
+        const { breaking, changelog, error } = this.compareSpecs(tempMainFilePath, currentFilePath)
 
         result.breaking = breaking
         result.changelog = changelog
         result.hasChanges = breaking.length > 0 || changelog.length > 0
+        result.error = error ?? ''
       } catch (gitError) {
         result.error = `Could not retrieve ${config.outputFilepath!} from ${this.oasdiffConfig?.headBranch} branch: ${String(gitError)}`
       } finally {
