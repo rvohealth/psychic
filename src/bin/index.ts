@@ -68,43 +68,14 @@ export default class PsychicBin {
     DreamCLI.logger.logEndProgress()
   }
 
-  public static async postSync(failOnBreaking: boolean = false) {
+  public static async postSync() {
     try {
       await this.syncOpenapiJson()
       await this.runCliHooksAndUpdatePsychicTypesFileWithOutput()
       await this.syncOpenapiTypescriptFiles()
-
-      // Run OpenAPI diff check if there are configs with checkDiffs enabled
-      const psychicApp = PsychicApp.getOrFail()
-      const openapiConfigsWithCheckDiffs = Object.entries(psychicApp.openapi).filter(
-        ([, config]: [string, PsychicOpenapiConfig]) => config.checkDiffs === true,
-      )
-
-      if (openapiConfigsWithCheckDiffs.length > 0) {
-        const diffCmd = failOnBreaking
-          ? psychicApp.psyCmd('diff:openapi --fail-on-breaking')
-          : psychicApp.psyCmd('diff:openapi')
-
-        await DreamCLI.spawn(diffCmd, {
-          onStdout: message => {
-            DreamCLI.logger.logContinueProgress(`[diff:openapi] ${message}`, {
-              logPrefixColor: 'magenta',
-            })
-          },
-        })
-      } else {
-        DreamCLI.logger.logContinueProgress(
-          'no openapi configs with checkDiffs enabled, skipping diff check',
-          {
-            logPrefixColor: 'gray',
-          },
-        )
-        DreamCLI.logger.logEndProgress()
-      }
     } catch (error) {
       console.error(error)
       await CliFileWriter.revert()
-      throw error // Re-throw to ensure proper exit code
     }
   }
 

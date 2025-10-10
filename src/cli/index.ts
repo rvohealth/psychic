@@ -267,8 +267,7 @@ export default class PsychicCLI {
         'sync introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration',
       )
       .option('--schema-only')
-      .option('-f', '--fail-on-breaking', 'fail on OpenAPI spec changes that are breaking during post-sync')
-      .action(async (options: { schemaOnly?: boolean; failOnBreaking?: boolean } = {}) => {
+      .action(async (options: { schemaOnly?: boolean } = {}) => {
         await initializePsychicApp({ bypassDreamIntegrityChecks: !!options.schemaOnly })
         await PsychicBin.sync(options)
         process.exit()
@@ -288,10 +287,9 @@ export default class PsychicCLI {
       .description(
         'an internal command that runs as the second stage of the `sync` command, since after types are rebuit, the application needs to be reloaded before autogenerating certain files, since those files will need to leverage the updated types',
       )
-      .option('f', '--fail-on-breaking', 'fail on OpenAPI spec changes that are breaking')
-      .action(async (options: { failOnBreaking?: boolean } = {}) => {
+      .action(async () => {
         await initializePsychicApp()
-        await PsychicBin.postSync(options.failOnBreaking)
+        await PsychicBin.postSync()
         process.exit()
       })
 
@@ -325,11 +323,14 @@ export default class PsychicCLI {
         try {
           PsychicBin.openapiDiff()
         } catch (error) {
-          if (options.failOnBreaking && error instanceof BreakingChangesDetectedInOpenApiSpecError) {
-            console.error(error.message)
-            process.exit(1)
+          if (error instanceof BreakingChangesDetectedInOpenApiSpecError) {
+            if (options.failOnBreaking) {
+              console.error(error.message)
+              process.exit(1)
+            }
+          } else {
+            throw error
           }
-          throw error
         }
       })
     program
