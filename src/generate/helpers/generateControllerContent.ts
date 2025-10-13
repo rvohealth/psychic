@@ -213,25 +213,36 @@ export default function generateControllerContent({
 ${omitOpenApi ? '' : openApiImport + '\n'}${ancestorImportStatement}${additionalImports.length ? '\n' + additionalImports.join('\n') : ''}${omitOpenApi ? '' : '\n\n' + openApiTags}
 
 export default class ${controllerClassName} extends ${ancestorName} {
-${methodDefs.join('\n\n')}${modelClassName ? privateMethods(forAdmin, modelClassName, actions, loadQueryBase) : ''}
+${methodDefs.join('\n\n')}${modelClassName ? privateMethods(forAdmin, modelClassName, actions, loadQueryBase, singular) : ''}
 }
 `
 }
 
-function privateMethods(forAdmin: boolean, modelClassName: string, methods: string[], loadQueryBase: string) {
+function privateMethods(
+  forAdmin: boolean,
+  modelClassName: string,
+  methods: string[],
+  loadQueryBase: string,
+  singular: boolean,
+) {
   const privateMethods: string[] = []
   if (methods.find(methodName => ['show', 'update', 'destroy'].includes(methodName)))
-    privateMethods.push(loadModelStatement(forAdmin, modelClassName, loadQueryBase))
+    privateMethods.push(loadModelStatement(forAdmin, modelClassName, loadQueryBase, singular))
 
   if (!privateMethods.length) return ''
   return `\n\n${privateMethods.join('\n\n')}`
 }
 
-function loadModelStatement(forAdmin: boolean, modelClassName: string, loadQueryBase: string) {
+function loadModelStatement(
+  forAdmin: boolean,
+  modelClassName: string,
+  loadQueryBase: string,
+  singular: boolean,
+) {
   return `  private async ${camelize(modelClassName)}() {
     // return await ${loadQueryBase}
     //   .preloadFor('${forAdmin ? 'admin' : 'default'}')
-    //   .findOrFail(this.castParam('id', 'string'))
+    //   ${singular ? '.firstOrFail()' : ".findOrFail(this.castParam('id', 'string'))"}
   }`
 }
 

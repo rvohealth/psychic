@@ -3,6 +3,7 @@
 - fix setup:sync:openapi-redux and setup:sync:openapi-typescript cli
 - include 404 in resource controller spec status code types
 - default SameSite header to 'Strict'
+- resource controllers generated with the `singular` flag load the resource with `firstOrFail()`, not `.findOrFail(this.castParam('id', 'string'))`
 
 ## 1.12.2
 

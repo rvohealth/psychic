@@ -168,7 +168,7 @@ export default class HostingAgreementController extends AuthedController {
   private async hostingAgreement() {
     // return await this.currentUser.associationQuery('hostingAgreement')
     //   .preloadFor('default')
-    //   .findOrFail(this.castParam('id', 'string'))
+    //   .firstOrFail()
   }
 }
 `,
