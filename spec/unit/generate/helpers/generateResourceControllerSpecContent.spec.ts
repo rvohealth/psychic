@@ -56,7 +56,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET index', () => {
-    const subject = async <StatusCode extends 200 | 400>(expectedStatus: StatusCode) => {
+    const subject = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/v1/posts', expectedStatus)
     }
 
@@ -129,7 +129,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('POST create', () => {
-    const subject = async <StatusCode extends 201 | 400>(
+    const subject = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/v1/posts'>,
       expectedStatus: StatusCode
     ) => {
@@ -430,7 +430,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('POST create', () => {
-    const subject = async <StatusCode extends 201 | 400>(
+    const subject = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/v1/posts'>,
       expectedStatus: StatusCode
     ) => {
@@ -528,7 +528,7 @@ describe('V1/HostingAgreementController', () => {
   })
 
   describe('POST create', () => {
-    const subject = async <StatusCode extends 201 | 400>(
+    const subject = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/v1/hosting-agreement'>,
       expectedStatus: StatusCode
     ) => {
@@ -636,7 +636,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET index', () => {
-    const subject = async <StatusCode extends 200 | 400>(expectedStatus: StatusCode) => {
+    const subject = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/v1/posts', expectedStatus)
     }
 
@@ -693,7 +693,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('POST create', () => {
-    const subject = async <StatusCode extends 201 | 400>(
+    const subject = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/v1/posts'>,
       expectedStatus: StatusCode
     ) => {
@@ -813,7 +813,7 @@ describe('Admin/ArticlesController', () => {
   })
 
   describe('GET index', () => {
-    const subject = async <StatusCode extends 200 | 400>(expectedStatus: StatusCode) => {
+    const subject = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/admin/articles', expectedStatus)
     }
 
@@ -852,7 +852,7 @@ describe('Admin/ArticlesController', () => {
   })
 
   describe('POST create', () => {
-    const subject = async <StatusCode extends 201 | 400>(
+    const subject = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/admin/articles'>,
       expectedStatus: StatusCode
     ) => {

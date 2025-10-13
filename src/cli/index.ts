@@ -144,7 +144,7 @@ export default class PsychicCLI {
         'the path from your backend directory to the location which you want the enums copied. Should end with .ts, i.e. "../client/src/api/enums.ts"',
       )
       .option(
-        '--initializer-filename',
+        '--initializer-filename <initializerFilename>',
         'the name you want the file to be in your initializers folder. defaults to `sync-enums.ts`',
       )
       .action(
@@ -168,19 +168,25 @@ export default class PsychicCLI {
         'generates openapi redux bindings to connect one of your openapi files to one of your clients',
       )
       .option(
-        '--schema-file',
+        '--schema-file <schemaFile>',
         'the path from your api root to the openapi file you wish to use to generate your schema, i.e. ./src/openapi/openapi.json',
       )
       .option(
-        '--api-file',
+        '--api-file <apiFile>',
         'the path to the boilerplate api file that will be used to scaffold your backend endpoints together with, i.e. ../client/app/api.ts',
       )
-      .option('--api-import', 'the camelCased name of the export from your api module, i.e. emptyBackendApi')
       .option(
-        '--output-file',
+        '--api-import <apiImport>',
+        'the camelCased name of the export from your api module, i.e. emptyBackendApi',
+      )
+      .option(
+        '--output-file <outputFile>',
         'the path to the file that will contain your typescript openapi redux bindings, i.e. ../client/app/myBackendApi.ts',
       )
-      .option('--export-name', 'the camelCased name to use for your exported api, i.e. myBackendApi')
+      .option(
+        '--export-name <exportName>',
+        'the camelCased name to use for your exported api, i.e. myBackendApi',
+      )
       .action(
         async ({
           schemaFile,
@@ -221,7 +227,7 @@ export default class PsychicCLI {
         'the path from your backend directory to the location which you want the openapi types written to. Must end with .d.ts, i.e. "./src/conf/openapi/openapi.types.d.ts"',
       )
       .option(
-        '--initializer-filename',
+        '--initializer-filename <initializerFilename>',
         'the name you want the file to be in your initializers folder. defaults to `sync-openapi-typescript.ts`',
       )
       .action(

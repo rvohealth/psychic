@@ -459,6 +459,7 @@ Try setting it to something valid, like:
 
   private _baseDefaultResponseHeaders: Record<string, string | null> = {
     ['cache-control']: 'max-age=0, private, must-revalidate',
+    ['SameSite']: 'Strict',
   }
   private _defaultResponseHeaders: Record<string, string | null> = {}
   public get defaultResponseHeaders() {

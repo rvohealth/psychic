@@ -230,7 +230,7 @@ describe('${fullyQualifiedControllerName}', () => {
       : `
 
   describe('GET index', () => {
-    const subject = async <StatusCode extends 200 | 400>(expectedStatus: StatusCode) => {
+    const subject = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/${route}', expectedStatus)
     }
 
@@ -309,7 +309,7 @@ describe('${fullyQualifiedControllerName}', () => {
       : `
 
   describe('POST create', () => {
-    const subject = async <StatusCode extends 201 | 400>(
+    const subject = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/${route}'>,
       expectedStatus: StatusCode
     ) => {

@@ -1,3 +1,9 @@
+## 1.12.3
+
+- fix setup:sync:openapi-redux and setup:sync:openapi-typescript cli
+- include 404 in resource controller spec status code types
+- default SameSite header to 'Strict'
+
 ## 1.12.2
 
 - when using `combining` in requestBody for an OpenAPI decorator, it will now override any params brought in through serializable introspection.
