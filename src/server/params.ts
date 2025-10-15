@@ -30,8 +30,8 @@ import isArrayParamName from '../helpers/isArrayParamName.js'
 import isObject from '../helpers/isObject.js'
 import isUuid from '../helpers/isUuid.js'
 import { validateObject } from '../helpers/validateOpenApiSchema.js'
-import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
 import { Inc } from '../i18n/conf/types.js'
+import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
 
 export default class Params {
   /**
@@ -426,12 +426,15 @@ export default class Params {
             else throw Error(`expectedType is not a string`)
         }
 
-        if ((paramValue instanceof DateTime || paramValue instanceof CalendarDate) && paramValue.isValid)
+        if (paramValue instanceof DateTime || paramValue instanceof CalendarDate)
           return paramValue as ReturnType
 
         if (typeof paramValue === 'string') {
-          const dateTime = dateClass.fromISO(paramValue, { zone: 'UTC' })
-          if (dateTime.isValid) return dateTime as ReturnType
+          try {
+            return dateClass.fromISO(paramValue, { zone: 'UTC' }) as ReturnType
+          } catch {
+            throw new ParamValidationError(paramName, [typeToError(expectedType)])
+          }
         }
 
         throw new ParamValidationError(paramName, [typeToError(expectedType)])

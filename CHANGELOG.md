@@ -1,3 +1,7 @@
+## 1.13.0
+
+- bump to Dream 1.12.0, which changes DateTime and CalendarDate to throw an exception rather than allowing invalid datetimes/dates
+
 ## 1.12.3
 
 - fix setup:sync:openapi-redux and setup:sync:openapi-typescript cli

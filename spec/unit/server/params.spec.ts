@@ -596,10 +596,23 @@ describe('Params', () => {
         })
       })
 
+      it('permits a valid string representation of a date', () => {
+        expect(Params.for({ lastSeenAt: CalendarDate.fromDateTime(now).toISO() }, Pet)).toEqual({
+          lastSeenAt: CalendarDate.fromDateTime(now).toDateTime(),
+        })
+      })
+
       it('rejects a string non-datetime', () => {
         expect(() => Params.for({ lastSeenAt: '1.2' }, Pet)).toThrow(ParamValidationErrors)
         expect(() => Params.for({ lastSeenAt: '' }, Pet)).toThrow(ParamValidationErrors)
         expect(() => Params.for({ lastSeenAt: 'abc' }, Pet)).toThrow(ParamValidationErrors)
+      })
+
+      it('rejects strings that represent invalid datetimes', () => {
+        expect(() => Params.for({ lastSeenAt: '2025-10-15T24:11:56.846Z' }, Pet)).toThrow(
+          ParamValidationErrors,
+        )
+        expect(() => Params.for({ lastSeenAt: '2023-02-29' }, Pet)).toThrow(ParamValidationErrors)
       })
 
       it('rejects null', () => {
@@ -630,10 +643,23 @@ describe('Params', () => {
         })
       })
 
+      it('permits a valid string representation of a datetime', () => {
+        expect(Params.for({ birthdate: today.toDateTime().toISO() }, User)).toEqual({
+          birthdate: expect.toEqualCalendarDate(today),
+        })
+      })
+
       it('rejects a string non-datetime', () => {
         expect(() => Params.for({ birthdate: '1.2' }, User)).toThrow(ParamValidationErrors)
         expect(() => Params.for({ birthdate: '' }, User)).toThrow(ParamValidationErrors)
         expect(() => Params.for({ birthdate: 'abc' }, User)).toThrow(ParamValidationErrors)
+      })
+
+      it('rejects strings that represent invalid dates', () => {
+        expect(() => Params.for({ birthdate: '2023-02-29T23:11:56.846Z' }, User)).toThrow(
+          ParamValidationErrors,
+        )
+        expect(() => Params.for({ birthdate: '2023-02-29' }, User)).toThrow(ParamValidationErrors)
       })
 
       it('rejects null', () => {
@@ -827,6 +853,102 @@ describe('Params', () => {
           })
         })
 
+        context('datetime', () => {
+          const now = DateTime.now()
+
+          it('permits a datetime', () => {
+            expect(Params.cast({ lastSeenAt: now }, 'lastSeenAt', 'datetime')).toEqualDateTime(now)
+          })
+
+          it('permits a valid string representation of a datetime', () => {
+            expect(Params.cast({ lastSeenAt: now.toISO() }, 'lastSeenAt', 'datetime')).toEqualDateTime(now)
+          })
+
+          it('permits a valid string representation of a date', () => {
+            expect(
+              Params.cast({ lastSeenAt: CalendarDate.fromDateTime(now).toISO() }, 'lastSeenAt', 'datetime'),
+            ).toEqualDateTime(CalendarDate.fromDateTime(now).toDateTime())
+          })
+
+          it('rejects a string non-datetime', () => {
+            expect(() => Params.cast({ lastSeenAt: '1.2' }, 'lastSeenAt', 'datetime')).toThrow(
+              ParamValidationError,
+            )
+            expect(() => Params.cast({ lastSeenAt: '' }, 'lastSeenAt', 'datetime')).toThrow(
+              ParamValidationError,
+            )
+            expect(() => Params.cast({ lastSeenAt: 'abc' }, 'lastSeenAt', 'datetime')).toThrow(
+              ParamValidationError,
+            )
+          })
+
+          it('rejects strings that represent invalid datetimes', () => {
+            expect(() =>
+              Params.cast({ lastSeenAt: '2025-10-15T24:11:56.846Z' }, 'lastSeenAt', 'datetime'),
+            ).toThrow(ParamValidationError)
+            expect(() => Params.cast({ lastSeenAt: '2023-02-29' }, 'lastSeenAt', 'datetime')).toThrow(
+              ParamValidationError,
+            )
+          })
+
+          it('rejects null', () => {
+            expect(() => Params.cast({ lastHeardAt: null }, 'lastHeardAt', 'datetime')).toThrow(
+              ParamValidationError,
+            )
+          })
+
+          context('the field allows null', () => {
+            it('returns null for the specified field', () => {
+              expect(
+                Params.cast({ lastSeenAt: null }, 'lastSeenAt', 'datetime', { allowNull: true }),
+              ).toBeNull()
+            })
+          })
+        })
+
+        context('date', () => {
+          const today = CalendarDate.today()
+
+          it('permits a datetime', () => {
+            expect(Params.cast({ birthdate: today }, 'birthdate', 'date')).toEqualCalendarDate(today)
+          })
+
+          it('permits a valid string representation of a date', () => {
+            expect(Params.cast({ birthdate: today.toISO() }, 'birthdate', 'date')).toEqualCalendarDate(today)
+          })
+
+          it('permits a valid string representation of a datetime', () => {
+            expect(
+              Params.cast({ birthdate: today.toDateTime().toISO() }, 'birthdate', 'date'),
+            ).toEqualCalendarDate(today)
+          })
+
+          it('rejects a string non-datetime', () => {
+            expect(() => Params.cast({ birthdate: '1.2' }, 'birthdate', 'date')).toThrow(ParamValidationError)
+            expect(() => Params.cast({ birthdate: '' }, 'birthdate', 'date')).toThrow(ParamValidationError)
+            expect(() => Params.cast({ birthdate: 'abc' }, 'birthdate', 'date')).toThrow(ParamValidationError)
+          })
+
+          it('rejects strings that represent invalid dates', () => {
+            expect(() => Params.cast({ birthdate: '2025-10-15T24:11:56.846Z' }, 'birthdate', 'date')).toThrow(
+              ParamValidationError,
+            )
+            expect(() => Params.cast({ birthdate: '2023-02-29' }, 'birthdate', 'date')).toThrow(
+              ParamValidationError,
+            )
+          })
+
+          it('rejects null', () => {
+            expect(() => Params.cast({ createdOn: null }, 'createdOn', 'date')).toThrow(ParamValidationError)
+          })
+
+          context('the field allows null', () => {
+            it('returns null for the specified field', () => {
+              expect(Params.cast({ birthdate: null }, 'birthdate', 'date', { allowNull: true })).toBeNull()
+            })
+          })
+        })
+
         context('regex', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
@@ -944,7 +1066,7 @@ describe('Params', () => {
         context('null', () => {
           context('with a valid value', () => {
             it('returns the requsted value', () => {
-              expect(Params.cast({ howyadoin: null }, 'howyadoin', 'null')).toEqual(null)
+              expect(Params.cast({ howyadoin: null }, 'howyadoin', 'null')).toBeNull()
             })
           })
 
@@ -1010,7 +1132,7 @@ describe('Params', () => {
               it('does not reject null or undefined as outer values', () => {
                 expect(
                   Params.cast({ howyadoin: null }, 'howyadoin', 'string[]', { allowNull: true }),
-                ).toEqual(null)
+                ).toBeNull()
                 expect(
                   Params.cast({ howyadoin: undefined }, 'howyadoin', 'string[]', { allowNull: true }),
                 ).toEqual(undefined)
@@ -1089,7 +1211,7 @@ describe('Params', () => {
               it('does not reject null or undefined as outer values', () => {
                 expect(
                   Params.cast({ howyadoin: null }, 'howyadoin', 'number[]', { allowNull: true }),
-                ).toEqual(null)
+                ).toBeNull()
                 expect(
                   Params.cast({ howyadoin: undefined }, 'howyadoin', 'number[]', { allowNull: true }),
                 ).toEqual(undefined)
@@ -1142,7 +1264,7 @@ describe('Params', () => {
               it('does not reject null or undefined as outer values', () => {
                 expect(
                   Params.cast({ howyadoin: null }, 'howyadoin', 'integer[]', { allowNull: true }),
-                ).toEqual(null)
+                ).toBeNull()
                 expect(
                   Params.cast({ howyadoin: undefined }, 'howyadoin', 'integer[]', { allowNull: true }),
                 ).toEqual(undefined)
@@ -1197,7 +1319,7 @@ describe('Params', () => {
               it('does not reject null or undefined as outer values', () => {
                 expect(
                   Params.cast({ howyadoin: null }, 'howyadoin', 'bigint[]', { allowNull: true }),
-                ).toEqual(null)
+                ).toBeNull()
                 expect(
                   Params.cast({ howyadoin: undefined }, 'howyadoin', 'bigint[]', { allowNull: true }),
                 ).toEqual(undefined)
@@ -1258,7 +1380,7 @@ describe('Params', () => {
               it('does not reject null or undefined as outer values', () => {
                 expect(
                   Params.cast({ howyadoin: null }, 'howyadoin', 'boolean[]', { allowNull: true }),
-                ).toEqual(null)
+                ).toBeNull()
                 expect(
                   Params.cast({ howyadoin: undefined }, 'howyadoin', 'boolean[]', { allowNull: true }),
                 ).toEqual(undefined)
