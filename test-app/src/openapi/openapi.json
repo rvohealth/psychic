@@ -480,25 +480,9 @@
                     "format": "decimal"
                   },
                   "password": {
-                    "anyOf": [
-                      {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "number",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "object",
-                          "null"
-                        ]
-                      }
+                    "type": [
+                      "string",
+                      "null"
                     ]
                   },
                   "openapiVirtualSpecTest": {
@@ -923,25 +907,9 @@
                     "format": "decimal"
                   },
                   "password": {
-                    "anyOf": [
-                      {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "number",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "object",
-                          "null"
-                        ]
-                      }
+                    "type": [
+                      "string",
+                      "null"
                     ]
                   },
                   "openapiVirtualSpecTest": {
@@ -3796,25 +3764,9 @@
                     "format": "decimal"
                   },
                   "password": {
-                    "anyOf": [
-                      {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "number",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "object",
-                          "null"
-                        ]
-                      }
+                    "type": [
+                      "string",
+                      "null"
                     ]
                   },
                   "openapiVirtualSpecTest": {
@@ -4333,25 +4285,9 @@
                     "format": "decimal"
                   },
                   "password": {
-                    "anyOf": [
-                      {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "number",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "object",
-                          "null"
-                        ]
-                      }
+                    "type": [
+                      "string",
+                      "null"
                     ]
                   },
                   "openapiVirtualSpecTest": {
@@ -5017,25 +4953,9 @@
                     "format": "decimal"
                   },
                   "password": {
-                    "anyOf": [
-                      {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "number",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "object",
-                          "null"
-                        ]
-                      }
+                    "type": [
+                      "string",
+                      "null"
                     ]
                   },
                   "openapiVirtualSpecTest": {
@@ -5571,25 +5491,9 @@
                     "format": "decimal"
                   },
                   "password": {
-                    "anyOf": [
-                      {
-                        "type": [
-                          "string",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "number",
-                          "null"
-                        ]
-                      },
-                      {
-                        "type": [
-                          "object",
-                          "null"
-                        ]
-                      }
+                    "type": [
+                      "string",
+                      "null"
                     ]
                   },
                   "openapiVirtualSpecTest": {

@@ -1477,13 +1477,7 @@ describe('OpenapiEndpointRenderer', () => {
                         schema: {
                           type: 'object',
                           properties: expect.objectContaining({
-                            password: {
-                              anyOf: [
-                                { type: ['string', 'null'] },
-                                { type: ['number', 'null'] },
-                                { type: ['object', 'null'] },
-                              ],
-                            },
+                            password: { type: ['string', 'null'] },
                           }),
                         },
                       },

@@ -183,7 +183,7 @@ export interface paths {
                         uuid?: string;
                         /** Format: decimal */
                         volume?: number | null;
-                        password?: (string | null) | (number | null) | (Record<string, never> | null);
+                        password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
                     };
@@ -304,7 +304,7 @@ export interface paths {
                         uuid?: string;
                         /** Format: decimal */
                         volume?: number | null;
-                        password?: (string | null) | (number | null) | (Record<string, never> | null);
+                        password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
                     };
@@ -2325,7 +2325,7 @@ export interface paths {
                         uuid?: string;
                         /** Format: decimal */
                         volume?: number | null;
-                        password?: (string | null) | (number | null) | (Record<string, never> | null);
+                        password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
                     };
@@ -2521,7 +2521,7 @@ export interface paths {
                         uuid?: string;
                         /** Format: decimal */
                         volume?: number | null;
-                        password?: (string | null) | (number | null) | (Record<string, never> | null);
+                        password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
                     };
@@ -2799,7 +2799,7 @@ export interface paths {
                         uuid?: string;
                         /** Format: decimal */
                         volume?: number | null;
-                        password?: (string | null) | (number | null) | (Record<string, never> | null);
+                        password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
                         /** @description Page number */
@@ -2985,7 +2985,7 @@ export interface paths {
                         uuid?: string;
                         /** Format: decimal */
                         volume?: number | null;
-                        password?: (string | null) | (number | null) | (Record<string, never> | null);
+                        password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
                         /** @description Fast pagination cursor */

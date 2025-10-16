@@ -1,4 +1,5 @@
 import { DreamSerializer } from '@rvoh/dream'
+import { SerializingPlainPropertyWithoutOpenapiShape } from '../../../../../src/error/openapi/SerializingPlainPropertyWithoutOpenapiShape.js'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 import User from '../../../../../test-app/src/app/models/User.js'
 import UserSerializer from '../../../../../test-app/src/app/serializers/UserSerializer.js'
@@ -14,42 +15,75 @@ describe('DreamSerializer attributes', () => {
     })
   })
 
-  it('can render virtual Dream attributes', () => {
-    const MySerializer = (data: User) => DreamSerializer(User, data).attribute('openapiVirtualSpecTest')
+  context('virtual Dream attribute', () => {
+    context('openapi object passed to the Virtual decorator', () => {
+      it('is rendered', () => {
+        const MySerializer = (data: User) => DreamSerializer(User, data).attribute('openapiVirtualSpecTest')
 
-    const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
-    expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
-      openapiVirtualSpecTest: {
-        type: ['string', 'null'],
-      },
-    })
-  })
-
-  it('can provide a description for a virtual Dream attribute', () => {
-    const MySerializer = (data: User) =>
-      DreamSerializer(User, data).attribute('openapiVirtualSpecTest', {
-        openapi: { description: 'Hello world' },
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+        expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+          openapiVirtualSpecTest: {
+            type: ['string', 'null'],
+          },
+        })
       })
 
-    const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
-    expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
-      openapiVirtualSpecTest: {
-        type: ['string', 'null'],
-        description: 'Hello world',
-      },
+      it('is not changed by passing an openapi description in the attribute openapi', () => {
+        const MySerializer = (data: User) =>
+          DreamSerializer(User, data).attribute('openapiVirtualSpecTest', {
+            openapi: { description: 'Hello world' },
+          })
+
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+        expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+          openapiVirtualSpecTest: {
+            type: ['string', 'null'],
+            description: 'Hello world',
+          },
+        })
+      })
+
+      it('can override virtual Dream attributes', () => {
+        const MySerializer = (data: User) =>
+          DreamSerializer(User, data).attribute('openapiVirtualSpecTest', { openapi: 'decimal' })
+
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+        expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+          openapiVirtualSpecTest: {
+            type: 'number',
+            format: 'decimal',
+          },
+        })
+      })
     })
-  })
 
-  it('can override virtual Dream attributes', () => {
-    const MySerializer = (data: User) =>
-      DreamSerializer(User, data).attribute('openapiVirtualSpecTest', { openapi: 'decimal' })
+    context('openapi shorthand passed to the Virtual decorator', () => {
+      it('is rendered', () => {
+        const MySerializer = (data: User) => DreamSerializer(User, data).attribute('openapiVirtualSpecTest2')
 
-    const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
-    expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
-      openapiVirtualSpecTest: {
-        type: 'number',
-        format: 'decimal',
-      },
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+        expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+          openapiVirtualSpecTest2: {
+            type: 'array',
+            items: {
+              type: 'string',
+            },
+          },
+        })
+      })
+    })
+
+    context('no explicit Virtual decorator', () => {
+      it('throws NeedOpenapiShapeForVirtualAttribute', () => {
+        const MySerializer = (data: User) =>
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+          DreamSerializer(User, data).attribute('openapiVirtualSpecTest4' as any)
+
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+        expect(() => serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toThrow(
+          SerializingPlainPropertyWithoutOpenapiShape,
+        )
+      })
     })
   })
 
