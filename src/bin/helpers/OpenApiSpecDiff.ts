@@ -213,7 +213,7 @@ export class OpenApiSpecDiff {
         ? breakingChanges.split('\n').filter(line => line.trim())
         : []
     const changelog =
-      changelogChanges && changelogChanges.includes('Command failed')
+      changelogChanges && !changelogChanges.includes('Command failed')
         ? changelogChanges.split('\n').filter(line => line.trim())
         : []
 

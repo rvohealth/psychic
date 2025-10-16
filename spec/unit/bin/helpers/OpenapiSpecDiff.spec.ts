@@ -7,11 +7,30 @@ import {
 import type { DefaultPsychicOpenapiOptions } from '../../../../src/psychic-app/index.js'
 
 interface OpenapiFile {
+  paths: {
+    '/api/pets/{id}': {
+      parameters: {
+        in: string
+        name: string
+        required: boolean
+        description: string
+        schema: { type: string }
+      }[]
+    }
+  }
   components: {
     schemas: {
       Pet: {
         type: 'object'
         required: string[]
+        properties: {
+          name: {
+            type: string[]
+          }
+          newProperty: {
+            type: string[]
+          }
+        }
       }
     }
   }
@@ -41,9 +60,7 @@ describe('OpenApiSpecDiff', () => {
 
     context('when removing a required field', () => {
       it('throws a breaking change', () => {
-        const doc: OpenapiFile = JSON.parse(
-          fs.readFileSync('./test-app/src/openapi/openapi.json', 'utf8').toString(),
-        ) as OpenapiFile
+        const doc: OpenapiFile = JSON.parse(originalFileContent) as OpenapiFile
 
         doc.components.schemas.Pet.required = []
         fs.writeFileSync('./test-app/src/openapi/openapi.json', JSON.stringify(doc, null, 2))
@@ -51,6 +68,24 @@ describe('OpenApiSpecDiff', () => {
         expect(() => {
           OpenApiSpecDiff.compare(mockConfigs)
         }).toThrow(BreakingChangesDetectedInOpenApiSpecError)
+      })
+    })
+    context('when making a non-breaking change', () => {
+      it('logs the change but does not throw an error', () => {
+        const doc: OpenapiFile = JSON.parse(originalFileContent) as OpenapiFile
+
+        doc.paths['/api/pets/{id}'].parameters.push({
+          in: 'query',
+          name: 'newQueryParam',
+          required: false,
+          description: 'new query param',
+          schema: { type: 'string' },
+        })
+        fs.writeFileSync('./test-app/src/openapi/openapi.json', JSON.stringify(doc, null, 2))
+
+        expect(() => {
+          OpenApiSpecDiff.compare(mockConfigs)
+        }).not.toThrow(BreakingChangesDetectedInOpenApiSpecError)
       })
     })
   })

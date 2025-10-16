@@ -1112,13 +1112,13 @@ interface PsychicOpenapiBaseOptions {
    * Example usage:
    * ```ts
    * psy.set('openapi', {
+   *   ...
    *   checkDiffs: true,
+   *   ...
    * });
    * ```
    *
-   * When enabled, the following types of changes will be detected:
-   * - Additions, deletions, or modifications to endpoints, parameters, or schemas
-   * - Breaking changes that could impact compatibility
+
    */
 
   checkDiffs?: boolean
