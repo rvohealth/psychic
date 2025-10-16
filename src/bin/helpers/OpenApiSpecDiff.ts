@@ -2,6 +2,7 @@ import { DreamCLI } from '@rvoh/dream'
 import * as cp from 'node:child_process'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
+import colorize from '../../cli/helpers/colorize.js'
 import type { DefaultPsychicOpenapiOptions } from '../../psychic-app/index.js'
 
 /**
@@ -47,32 +48,10 @@ export type PsychicOpenapiConfig = DefaultPsychicOpenapiOptions
  *    OpenApiSpecDiff.compare(openapiConfigs)
  */
 export class OpenApiSpecDiff {
-  private readonly colors = {
-    reset: '\x1b[0m',
-    bright: '\x1b[1m',
-    red: '\x1b[31m',
-    green: '\x1b[32m',
-    yellow: '\x1b[33m',
-    blue: '\x1b[34m',
-    magenta: '\x1b[35m',
-    cyan: '\x1b[36m',
-    white: '\x1b[37m',
-    gray: '\x1b[90m',
-    redBright: '\x1b[91m',
-    greenBright: '\x1b[92m',
-    yellowBright: '\x1b[93m',
-    blueBright: '\x1b[94m',
-    magentaBright: '\x1b[95m',
-    cyanBright: '\x1b[96m',
-    whiteBright: '\x1b[97m',
-  }
-
-  private oasdiffConfig?: OasDiffConfig
-
   /**
-   * Initialize the OpenAPI spec diff tool
+   * The configuration for the oasdiff command
    */
-  constructor() {}
+  private oasdiffConfig?: OasDiffConfig
 
   /**
    * Compares a list of OpenAPI specifications between the current branch and the head branch.
@@ -95,11 +74,12 @@ export class OpenApiSpecDiff {
     const results: ComparisonResult[] = []
 
     this.oasdiffConfig = this.getOasDiffConfig()
-
-    DreamCLI.logger.logStartProgress(
-      `${this.colors.cyanBright}🔍 Comparing current OpenAPI Specs against ${this.oasdiffConfig.headBranch}...${this.colors.reset}\n`,
-      { logPrefixColor: 'cyanBright' },
+    const comparing = colorize(
+      `🔍 Comparing current OpenAPI Specs against ${this.oasdiffConfig.headBranch}...`,
+      { color: 'cyanBright' },
     )
+    DreamCLI.logger.logStartProgress(comparing, { logPrefixColor: 'cyanBright' })
+    DreamCLI.logger.logContinueProgress(`\n`, { logPrefixColor: 'cyanBright' })
 
     for (const [openapiName, config] of openapiConfigs) {
       const result = this.compareConfig(openapiName, config)
@@ -186,7 +166,7 @@ export class OpenApiSpecDiff {
         shell: true,
         encoding: 'utf8',
         cwd: process.cwd(),
-        stdio: ['pipe', 'pipe', 'pipe'],
+        stdio: 'pipe',
       })
       return output.trim()
     } catch (error) {
@@ -266,38 +246,33 @@ export class OpenApiSpecDiff {
       changelog: [],
     }
 
+    const currentFilePath = config.outputFilepath!
+
+    if (!fs.existsSync(currentFilePath)) {
+      result.error = `File ${config.outputFilepath!} does not exist in current branch`
+      return result
+    }
+
+    const tempMainFilePath = this.createTempFilePath(config.outputFilepath!)
+
+    const mainContent = this.getHeadBranchContent(config.outputFilepath!)
+
+    fs.mkdirSync(path.dirname(tempMainFilePath), { recursive: true })
+    fs.writeFileSync(tempMainFilePath, mainContent)
+
     try {
-      const currentFilePath = config.outputFilepath!
+      const { breaking, changelog, error } = this.compareSpecs(tempMainFilePath, currentFilePath)
 
-      if (!fs.existsSync(currentFilePath)) {
-        result.error = `File ${config.outputFilepath!} does not exist in current branch`
-        return result
-      }
-
-      const tempMainFilePath = this.createTempFilePath(config.outputFilepath!)
-
-      try {
-        const mainContent = this.getHeadBranchContent(config.outputFilepath!)
-
-        fs.mkdirSync(path.dirname(tempMainFilePath), { recursive: true })
-        fs.writeFileSync(tempMainFilePath, mainContent)
-
-        const { breaking, changelog, error } = this.compareSpecs(tempMainFilePath, currentFilePath)
-
-        result.breaking = breaking
-        result.changelog = changelog
-        result.hasChanges = breaking.length > 0 || changelog.length > 0
-        result.error = error ?? ''
-      } catch (gitError) {
-        result.error = `Could not retrieve ${config.outputFilepath!} from ${this.oasdiffConfig?.headBranch} branch: ${String(gitError)}`
-      } finally {
-        // Clean up temporary file
-        if (fs.existsSync(tempMainFilePath)) {
-          fs.unlinkSync(tempMainFilePath)
-        }
-      }
+      result.breaking = breaking
+      result.changelog = changelog
+      result.hasChanges = breaking.length > 0 || changelog.length > 0
+      result.error = error ?? ''
     } catch (error) {
-      result.error = `Error processing ${openapiName}: ${String(error)}`
+      result.error = `Could not retrieve ${config.outputFilepath!} from ${this.oasdiffConfig?.headBranch} branch: ${String(error)}`
+    } finally {
+      if (fs.existsSync(tempMainFilePath)) {
+        fs.unlinkSync(tempMainFilePath)
+      }
     }
 
     return result
@@ -337,35 +312,32 @@ export class OpenApiSpecDiff {
    * Log error for a comparison result
    */
   private logError(result: ComparisonResult): void {
-    DreamCLI.logger.logContinueProgress(
-      `${this.colors.redBright}❌ ${this.colors.bright}${result.file}${this.colors.reset}${this.colors.redBright}: ${result.error}${this.colors.reset}`,
-      { logPrefixColor: 'redBright' },
-    )
+    const file = colorize(`❌ ${result.file}`, { color: 'whiteBright' })
+    const error = colorize(`${result.error}`, { color: 'redBright' })
+
+    DreamCLI.logger.logContinueProgress(`${file}: ${error}`, { logPrefixColor: 'redBright' })
   }
 
   /**
    * Log changes for a comparison result
    */
   private logChanges(result: ComparisonResult): void {
-    DreamCLI.logger.logContinueProgress(
-      `${this.colors.yellowBright}${this.colors.bright}${result.file}: HAS CHANGES${this.colors.reset}`,
-      { logPrefixColor: 'yellowBright' },
-    )
+    const file = colorize(`${result.file}`, { color: 'whiteBright' })
+    const changes = colorize('HAS CHANGES', { color: 'yellowBright' })
+    DreamCLI.logger.logContinueProgress(`${file}: ${changes}`, { logPrefixColor: 'yellowBright' })
   }
 
   /**
    * Log breaking changes for a comparison result
    */
   private logBreakingChanges(result: ComparisonResult): void {
-    DreamCLI.logger.logContinueProgress(
-      `   ${this.colors.redBright}${this.colors.bright}🚨 BREAKING CHANGES:${this.colors.reset}`,
-      { logPrefixColor: 'redBright' },
-    )
+    DreamCLI.logger.logContinueProgress(`   ${colorize(`🚨 BREAKING CHANGES:`, { color: 'redBright' })}`, {
+      logPrefixColor: 'redBright',
+    })
     result.breaking.forEach(change => {
-      DreamCLI.logger.logContinueProgress(
-        `      ${this.colors.redBright}• ${this.colors.bright}${change}${this.colors.reset}`,
-        { logPrefixColor: 'redBright' },
-      )
+      DreamCLI.logger.logContinueProgress(`      ${colorize(`• ${change}`, { color: 'redBright' })}`, {
+        logPrefixColor: 'redBright',
+      })
     })
   }
 
@@ -373,13 +345,12 @@ export class OpenApiSpecDiff {
    * Log changelog for a comparison result
    */
   private logChangelog(result: ComparisonResult): void {
-    DreamCLI.logger.logContinueProgress(
-      `   ${this.colors.blueBright}${this.colors.bright}📋 CHANGELOG:${this.colors.reset}`,
-      { logPrefixColor: 'blueBright' },
-    )
+    DreamCLI.logger.logContinueProgress(`   ${colorize(`📋 CHANGELOG:`, { color: 'blueBright' })}`, {
+      logPrefixColor: 'blueBright',
+    })
     const changelogLines = result.changelog
     changelogLines.forEach(line => {
-      DreamCLI.logger.logContinueProgress(`      ${this.colors.bright}${line}${this.colors.reset}`, {
+      DreamCLI.logger.logContinueProgress(`      ${colorize(line, { color: 'whiteBright' })}`, {
         logPrefixBgColor: 'bgWhite',
         logPrefixColor: 'white',
       })
@@ -390,51 +361,45 @@ export class OpenApiSpecDiff {
    * Log no changes for a comparison result
    */
   private logNoChanges(result: ComparisonResult): void {
-    DreamCLI.logger.logContinueProgress(
-      `${this.colors.greenBright}✅ ${this.colors.bright}${result.file}${this.colors.reset}${this.colors.greenBright}: No changes${this.colors.reset}`,
-      { logPrefixColor: 'greenBright' },
-    )
+    const file = colorize(`${result.file}`, { color: 'whiteBright' })
+    const changes = colorize('No changes', { color: 'greenBright' })
+    DreamCLI.logger.logContinueProgress(`${file}: ${changes}`, { logPrefixColor: 'greenBright' })
   }
 
   /**
    * Log final summary and handle exit conditions
    */
   private logSummary(hasAnyChanges: boolean, hasBreakingChanges: boolean): void {
-    DreamCLI.logger.logContinueProgress(`\n${this.colors.gray}${'='.repeat(60)}${this.colors.reset}`, {
+    DreamCLI.logger.logContinueProgress(`\n${colorize(`${'='.repeat(60)}`, { color: 'gray' })}`, {
       logPrefixColor: 'gray',
     })
 
     if (hasBreakingChanges) {
       DreamCLI.logger.logContinueProgress(
-        `${this.colors.redBright}${this.colors.bright}🚨 CRITICAL: ${this.colors.reset} ${this.colors.bright} Breaking changes detected in current branch compared to ${this.oasdiffConfig?.headBranch}! Review before merging.${this.colors.reset}`,
+        `${colorize(`🚨 CRITICAL:`, { color: 'redBright' })} ${colorize(`Breaking changes detected in current branch compared to ${this.oasdiffConfig?.headBranch}! Review before merging.`, { color: 'whiteBright' })}`,
         { logPrefixColor: 'redBright' },
       )
-      DreamCLI.logger.logContinueProgress(`${this.colors.gray}${'='.repeat(60)}${this.colors.reset}`, {
+      DreamCLI.logger.logContinueProgress(`${colorize(`${'='.repeat(60)}`, { color: 'gray' })}`, {
         logPrefixColor: 'gray',
       })
-      DreamCLI.logger.logContinueProgress(`${this.colors.gray}${'\n'.repeat(5)}${this.colors.reset}`, {
+      DreamCLI.logger.logContinueProgress('\n'.repeat(5), {
         logPrefixColor: 'gray',
       })
 
       throw new BreakingChangesDetectedInOpenApiSpecError(this.oasdiffConfig!)
     } else if (hasAnyChanges) {
-      DreamCLI.logger.logContinueProgress(
-        `${this.colors.yellow}📊 Summary: Some OpenAPI files have non-breaking changes in current branch compared to ${this.oasdiffConfig?.headBranch}${this.colors.reset}`,
-        { logPrefixColor: 'yellow' },
+      const summary = colorize(
+        `📊 Summary: Some OpenAPI files have non-breaking changes in current branch compared to ${this.oasdiffConfig?.headBranch}`,
+        { color: 'yellow' },
       )
+      DreamCLI.logger.logContinueProgress(summary, { logPrefixColor: 'yellow' })
     } else {
-      DreamCLI.logger.logContinueProgress(
-        `${this.colors.green}📊 Summary: All OpenAPI files in current branch are identical to ${this.oasdiffConfig?.headBranch} branch${this.colors.reset}`,
-        { logPrefixColor: 'green' },
+      const summary = colorize(
+        `📊 Summary: All OpenAPI files in current branch are identical to ${this.oasdiffConfig?.headBranch} branch`,
+        { color: 'green' },
       )
+      DreamCLI.logger.logContinueProgress(summary, { logPrefixColor: 'green' })
     }
-
-    DreamCLI.logger.logContinueProgress(`${this.colors.gray}${'='.repeat(60)}${this.colors.reset}`, {
-      logPrefixColor: 'gray',
-    })
-    DreamCLI.logger.logEndProgress(`${this.colors.gray}${'\n'.repeat(5)}${this.colors.reset}`, {
-      logPrefixColor: 'gray',
-    })
   }
 
   /**
