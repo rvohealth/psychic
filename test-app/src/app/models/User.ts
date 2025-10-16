@@ -88,8 +88,7 @@ export default class User extends ApplicationModel {
   @deco.Validates('presence')
   public email: DreamColumn<User, 'email'>
 
-  // intentionally not using type: 'string' here
-  @deco.Virtual()
+  @deco.Virtual(['string', 'null'])
   public password: string | null | undefined
   public passwordDigest: string
 
@@ -98,6 +97,8 @@ export default class User extends ApplicationModel {
 
   @deco.Virtual('string[]')
   public openapiVirtualSpecTest2: string | null | undefined
+
+  public openapiVirtualSpecTest3: string | null | undefined
 
   @deco.HasMany('Balloon')
   public balloons: Balloon[]
