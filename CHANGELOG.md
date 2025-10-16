@@ -1,3 +1,7 @@
+## 1.14.0
+
+- generated code uses absolute imports
+
 ## 1.13.0
 
 - bump to Dream 1.12.0, which changes DateTime and CalendarDate to throw an exception rather than allowing invalid datetimes/dates

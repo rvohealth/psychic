@@ -1,11 +1,11 @@
 import {
+  absoluteDreamPath,
   camelize,
   globalClassNameFromFullyQualifiedModelName,
   hyphenize,
   standardizeFullyQualifiedModelName,
 } from '@rvoh/dream'
 import pluralize from 'pluralize-esm'
-import relativePsychicPath from '../../helpers/path/relativePsychicPath.js'
 
 export default function generateControllerContent({
   ancestorName,
@@ -47,7 +47,7 @@ export default function generateControllerContent({
     modelClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
     modelAttributeName = camelize(modelClassName)
     pluralizedModelAttributeName = singular ? modelAttributeName : pluralize(modelAttributeName)
-    additionalImports.push(importStatementForModel(fullyQualifiedControllerName, fullyQualifiedModelName))
+    additionalImports.push(importStatementForModel(fullyQualifiedModelName))
   }
 
   const defaultOpenapiSerializerKeyProperty = forAdmin
@@ -246,8 +246,8 @@ function loadModelStatement(
   }`
 }
 
-function importStatementForModel(originControllerName: string, destinationModelName: string) {
-  return `import ${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${relativePsychicPath('controllers', 'models', originControllerName, destinationModelName)}'`
+function importStatementForModel(destinationModelName: string) {
+  return `import ${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${absoluteDreamPath('models', destinationModelName)}'`
 }
 
 function aOrAnDreamModelName(dreamName: string) {

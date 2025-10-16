@@ -1,4 +1,5 @@
 import {
+  absoluteDreamPath,
   camelize,
   capitalize,
   compact,
@@ -7,8 +8,6 @@ import {
   uniq,
 } from '@rvoh/dream'
 import addImportSuffix from '../../helpers/path/addImportSuffix.js'
-import relativePsychicPath from '../../helpers/path/relativePsychicPath.js'
-import updirsFromPath from '../../helpers/path/updirsFromPath.js'
 import { pluralize } from '../../index.js'
 
 export default function generateResourceControllerSpecContent({
@@ -47,15 +46,13 @@ export default function generateResourceControllerSpecContent({
   const dreamImports: string[] = []
 
   const importStatements: string[] = compact([
-    importStatementForModel(fullyQualifiedControllerName, fullyQualifiedModelName),
-    importStatementForModel(fullyQualifiedControllerName, userModelName),
-    owningModel ? importStatementForModel(fullyQualifiedControllerName, owningModel) : undefined,
-    importStatementForModelFactory(fullyQualifiedControllerName, fullyQualifiedModelName),
-    importStatementForModelFactory(fullyQualifiedControllerName, userModelName),
-    owningModel ? importStatementForModelFactory(fullyQualifiedControllerName, owningModel) : undefined,
+    importStatementForModel(fullyQualifiedModelName),
+    importStatementForModel(userModelName),
+    owningModel ? importStatementForModel(owningModel) : undefined,
+    importStatementForModelFactory(fullyQualifiedModelName),
+    importStatementForModelFactory(userModelName),
+    owningModel ? importStatementForModelFactory(owningModel) : undefined,
   ])
-
-  const specUnitUpdirs = updirsFromPath(fullyQualifiedControllerName)
 
   const attributeCreationKeyValues: string[] = []
   const attributeUpdateKeyValues: string[] = []
@@ -215,7 +212,7 @@ export default function generateResourceControllerSpecContent({
   return `${
     dreamImports.length ? `import { ${uniq(dreamImports).join(', ')} } from '@rvoh/dream'\n` : ''
   }${uniq(importStatements).join('\n')}
-import { RequestBody, session, SpecRequestType } from '${specUnitUpdirs}helpers/${addImportSuffix('authentication.js')}'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/${addImportSuffix('authentication.js')}'
 
 describe('${fullyQualifiedControllerName}', () => {
   let request: SpecRequestType
@@ -468,15 +465,12 @@ describe('${fullyQualifiedControllerName}', () => {
 `
 }
 
-function importStatementForModel(originModelName: string, destinationModelName: string = originModelName) {
-  return `import ${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${relativePsychicPath('controllerSpecs', 'models', originModelName, destinationModelName)}'`
+function importStatementForModel(destinationModelName: string) {
+  return `import ${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${absoluteDreamPath('models', destinationModelName)}'`
 }
 
-function importStatementForModelFactory(
-  originModelName: string,
-  destinationModelName: string = originModelName,
-) {
-  return `import create${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${relativePsychicPath('controllerSpecs', 'factories', originModelName, destinationModelName)}'`
+function importStatementForModelFactory(destinationModelName: string) {
+  return `import create${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${absoluteDreamPath('factories', destinationModelName)}'`
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
