@@ -10,8 +10,26 @@ export default class BalloonsController extends ApplicationController {
     many: true,
   })
   public async index() {
-    const balloon = await Balloon.all()
-    this.ok(balloon)
+    const balloons = await Balloon.all()
+    this.ok(balloons)
+  }
+
+  @OpenAPI(Balloon, {
+    status: 200,
+    paginate: true,
+  })
+  public async paginated() {
+    const balloons = await Balloon.paginate({ page: 1 })
+    this.ok(balloons)
+  }
+
+  @OpenAPI(Balloon, {
+    status: 200,
+    scrollPaginate: true,
+  })
+  public async scrollPaginated() {
+    const balloons = await Balloon.scrollPaginate({ cursor: null })
+    this.ok(balloons)
   }
 
   @OpenAPI([Balloon, Pet], {

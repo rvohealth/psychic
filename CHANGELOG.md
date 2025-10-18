@@ -3,6 +3,7 @@
 - generated code uses absolute imports
 - account for change in Dream in which `Virtual` decorator requires OpenAPI shape
 - throw a more detailed error when DreamSerializer.attribute used to render a non-database, non-Virtual decorated property
+- fix OpenAPI generated when paginating/scrollPaginating an STI base model
 
 ## 1.13.0
 
