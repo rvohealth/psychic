@@ -210,6 +210,84 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
+        expect(response.default!.paths['/balloons/paginated']).toEqual(
+          expect.objectContaining({
+            get: {
+              tags: [],
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        required: ['recordCount', 'pageCount', 'currentPage', 'results'],
+                        properties: {
+                          recordCount: { type: 'number' },
+                          pageCount: { type: 'number' },
+                          currentPage: { type: 'number' },
+                          results: {
+                            type: 'array',
+                            items: {
+                              anyOf: [
+                                {
+                                  $ref: '#/components/schemas/BalloonLatex',
+                                },
+                                {
+                                  $ref: '#/components/schemas/BalloonMylar',
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                  description: 'Success',
+                },
+              }),
+            },
+          }),
+        )
+
+        expect(response.default!.paths['/balloons/scroll-paginated']).toEqual(
+          expect.objectContaining({
+            get: {
+              tags: [],
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        required: ['cursor', 'results'],
+                        properties: {
+                          cursor: { type: ['string', 'null'] },
+                          results: {
+                            type: 'array',
+                            items: {
+                              anyOf: [
+                                {
+                                  $ref: '#/components/schemas/BalloonLatex',
+                                },
+                                {
+                                  $ref: '#/components/schemas/BalloonMylar',
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                  description: 'Success',
+                },
+              }),
+            },
+          }),
+        )
+
         expect(response.default!.paths['/balloons/index-different-dreams']).toEqual(
           expect.objectContaining({
             get: {

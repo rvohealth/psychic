@@ -939,23 +939,10 @@ export default class OpenapiEndpointRenderer<
 
     const serializerOpenapiRenderer = new SerializerOpenapiRenderer(serializer, renderOpts)
 
-    const finalOutput: OpenapiContent = {
-      content: {
-        'application/json': {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-          schema: this.baseSchemaForSerializerObject(
-            serializerOpenapiRenderer.serializerRef,
-            // eslint-disable-next-line @typescript-eslint/no-explicit-any
-          ) as any,
-        },
-      },
-      description: this.description || this.action,
-    }
-
     return {
       // TODO: pass in the already-rendered schemas so we can avoid duplicative processing of serializers
       referencedSerializers: serializerOpenapiRenderer.renderedOpenapi().referencedSerializers,
-      openapi: finalOutput,
+      openapi: this.applyOpenapiShapeDeclarations(serializerOpenapiRenderer.serializerRef),
     }
   }
 
@@ -1062,23 +1049,20 @@ export default class OpenapiEndpointRenderer<
       ]
     })
 
-    const baseSchema = this.many
-      ? {
-          type: 'array',
-          items: anyOf,
-        }
-      : anyOf
+    return { referencedSerializers, openapi: this.applyOpenapiShapeDeclarations(anyOf) }
+  }
 
-    const finalOutput: OpenapiContent = {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  private applyOpenapiShapeDeclarations(schema: any): OpenapiContent {
+    return {
       content: {
         'application/json': {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
-          schema: baseSchema as any,
+          // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-explicit-any
+          schema: this.baseSchemaForSerializerObject(schema) as any,
         },
       },
+      description: this.description || this.action,
     }
-
-    return { referencedSerializers, openapi: finalOutput }
   }
 
   /**

@@ -3,9 +3,11 @@ import { PsychicApp } from '../../../../src/index.js'
 import OpenapiEndpointRenderer, { ToPathObjectOpts } from '../../../../src/openapi-renderer/endpoint.js'
 import { RouteConfig } from '../../../../src/router/route-manager.js'
 import ApiPetsController from '../../../../test-app/src/app/controllers/Api/PetsController.js'
+import BalloonsController from '../../../../test-app/src/app/controllers/BalloonsController.js'
 import OpenapiOverridesTestController from '../../../../test-app/src/app/controllers/OpenapiOverridesTestsController.js'
 import PetsController from '../../../../test-app/src/app/controllers/PetsController.js'
 import UsersController from '../../../../test-app/src/app/controllers/UsersController.js'
+import Balloon from '../../../../test-app/src/app/models/Balloon.js'
 import Pet from '../../../../test-app/src/app/models/Pet.js'
 import Post from '../../../../test-app/src/app/models/Post.js'
 import User from '../../../../test-app/src/app/models/User.js'
@@ -235,6 +237,68 @@ describe('OpenapiEndpointRenderer', () => {
               }),
             )
           })
+
+          context('an STI base model', () => {
+            it('the OpenAPI shape includes the children', () => {
+              const renderer = new OpenapiEndpointRenderer(Balloon, BalloonsController, 'paginated', {
+                paginate: true,
+              })
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response).toEqual(
+                expect.objectContaining({
+                  '/balloons/paginated': expect.objectContaining({
+                    parameters: expect.arrayContaining([
+                      {
+                        in: 'query',
+                        name: 'page',
+                        required: false,
+                        allowReserved: true,
+                        description: 'Page number',
+                        schema: {
+                          type: 'string',
+                        },
+                      },
+                    ]),
+
+                    get: expect.objectContaining({
+                      responses: expect.objectContaining({
+                        200: {
+                          content: {
+                            'application/json': {
+                              schema: {
+                                type: 'object',
+                                required: ['recordCount', 'pageCount', 'currentPage', 'results'],
+                                properties: {
+                                  recordCount: { type: 'number' },
+                                  pageCount: { type: 'number' },
+                                  currentPage: { type: 'number' },
+                                  results: {
+                                    type: 'array',
+                                    items: {
+                                      anyOf: [
+                                        {
+                                          $ref: '#/components/schemas/BalloonLatex',
+                                        },
+                                        {
+                                          $ref: '#/components/schemas/BalloonMylar',
+                                        },
+                                      ],
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                          description: 'Success',
+                        },
+                      }),
+                    }),
+                  }),
+                }),
+              )
+            })
+          })
         })
 
         context('paginate={ query: "<some-string>" }', () => {
@@ -386,6 +450,66 @@ describe('OpenapiEndpointRenderer', () => {
                 }),
               }),
             )
+          })
+
+          context('an STI base model', () => {
+            it('the OpenAPI shape includes the children', () => {
+              const renderer = new OpenapiEndpointRenderer(Balloon, BalloonsController, 'scrollPaginated', {
+                scrollPaginate: true,
+              })
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response).toEqual(
+                expect.objectContaining({
+                  '/balloons/scroll-paginated': expect.objectContaining({
+                    parameters: expect.arrayContaining([
+                      {
+                        in: 'query',
+                        name: 'cursor',
+                        required: false,
+                        allowReserved: true,
+                        description: 'Fast pagination cursor',
+                        schema: {
+                          type: ['string', 'null'],
+                        },
+                      },
+                    ]),
+
+                    get: expect.objectContaining({
+                      responses: expect.objectContaining({
+                        200: {
+                          content: {
+                            'application/json': {
+                              schema: {
+                                type: 'object',
+                                required: ['cursor', 'results'],
+                                properties: {
+                                  cursor: { type: ['string', 'null'] },
+                                  results: {
+                                    type: 'array',
+                                    items: {
+                                      anyOf: [
+                                        {
+                                          $ref: '#/components/schemas/BalloonLatex',
+                                        },
+                                        {
+                                          $ref: '#/components/schemas/BalloonMylar',
+                                        },
+                                      ],
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                          description: 'Success',
+                        },
+                      }),
+                    }),
+                  }),
+                }),
+              )
+            })
           })
         })
 
