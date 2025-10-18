@@ -7,6 +7,7 @@ import {
   OpenapiSchemaString,
   OpenapiShorthandPrimitiveTypes,
 } from '@rvoh/dream'
+import { SerializingPlainPropertyWithoutOpenapiShape } from '../../error/openapi/SerializingPlainPropertyWithoutOpenapiShape.js'
 import OpenapiSegmentExpander from '../body-segment.js'
 import openapiShorthandToOpenapi from './openapiShorthandToOpenapi.js'
 
@@ -68,9 +69,7 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
     } else if (openapi) {
       return openapiObject
     } else {
-      return {
-        anyOf: [{ type: ['string', 'null'] }, { type: ['number', 'null'] }, { type: ['object', 'null'] }],
-      } as const
+      throw new SerializingPlainPropertyWithoutOpenapiShape(dreamClass, column)
     }
   }
 
@@ -81,7 +80,7 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
   if (!dreamColumnInfo) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
     if (openapi) return openapiShorthandToOpenapi(openapi as any)
-    throw new UseCustomOpenapiForVirtualAttributes(dreamClass, column)
+    throw new SerializingPlainPropertyWithoutOpenapiShape(dreamClass, column)
   }
 
   if (!allowGenericJson) {
@@ -203,21 +202,6 @@ function singularAttributeOpenapiShape(
       throw new Error(
         `Unrecognized dbType used in serializer OpenAPI type declaration: ${dreamColumnInfo.dbType}`,
       )
-  }
-}
-
-export class UseCustomOpenapiForVirtualAttributes extends Error {
-  constructor(
-    private dreamClass: typeof Dream,
-    private field: string,
-  ) {
-    super()
-  }
-
-  public override get message() {
-    return `Use custom OpenAPI declaration (OpenapiSchemaBodyShorthand) to define shape of virtual fields:
-Dream model: ${this.dreamClass.sanitizedName}
-Attribute: ${this.field}`
   }
 }
 

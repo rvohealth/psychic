@@ -19,11 +19,10 @@ describe('when using a controller that implements scrollPagination', () => {
 
   context('scrollPagination', () => {
     beforeEach(async () => {
-      await Promise.all(
-        [...Array<null>(25)].map((_, i) =>
-          User.create({ email: `how@yadoin${i}`, password: 'howyadoin', name: 'fredo' }),
-        ),
-      )
+      // user a loop, not promise.all, so that the model ids are in a deterministic order
+      for (let i = 0; i < 25; i++) {
+        await User.create({ email: `how@yadoin${i}`, password: 'howyadoin', name: 'fredo' })
+      }
     })
 
     it('includes the correct cursor', async () => {

@@ -1,3 +1,4 @@
+import { DreamApp } from '@rvoh/dream'
 import generateResourceControllerSpecContent from '../../../../src/generate/helpers/generateResourceControllerSpecContent.js'
 import { RESOURCE_ACTIONS } from '../../../../src/generate/resource.js'
 import { PsychicApp } from '../../../../src/index.js'
@@ -40,11 +41,11 @@ describe('generateResourceControllerSpecContent', () => {
       })
       expect(res).toEqual(`\
 import { CalendarDate, DateTime } from '@rvoh/dream'
-import Post from '../../../../src/app/models/Post.js'
-import User from '../../../../src/app/models/User.js'
-import createPost from '../../../factories/PostFactory.js'
-import createUser from '../../../factories/UserFactory.js'
-import { RequestBody, session, SpecRequestType } from '../../helpers/authentication.js'
+import Post from '@models/Post.js'
+import User from '@models/User.js'
+import createPost from '@spec/factories/PostFactory.js'
+import createUser from '@spec/factories/UserFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
 
 describe('V1/PostsController', () => {
   let request: SpecRequestType
@@ -378,11 +379,11 @@ describe('V1/PostsController', () => {
         actions: ['create', 'show'],
       })
       expect(res).toEqual(`\
-import Post from '../../../../src/app/models/Post.js'
-import User from '../../../../src/app/models/User.js'
-import createPost from '../../../factories/PostFactory.js'
-import createUser from '../../../factories/UserFactory.js'
-import { RequestBody, session, SpecRequestType } from '../../helpers/authentication.js'
+import Post from '@models/Post.js'
+import User from '@models/User.js'
+import createPost from '@spec/factories/PostFactory.js'
+import createUser from '@spec/factories/UserFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
 
 describe('V1/PostsController', () => {
   let request: SpecRequestType
@@ -492,11 +493,11 @@ describe('V1/PostsController', () => {
       })
       expect(res).toEqual(`\
 import { CalendarDate, DateTime } from '@rvoh/dream'
-import HostingAgreement from '../../../../src/app/models/HostingAgreement.js'
-import User from '../../../../src/app/models/User.js'
-import createHostingAgreement from '../../../factories/HostingAgreementFactory.js'
-import createUser from '../../../factories/UserFactory.js'
-import { RequestBody, session, SpecRequestType } from '../../helpers/authentication.js'
+import HostingAgreement from '@models/HostingAgreement.js'
+import User from '@models/User.js'
+import createHostingAgreement from '@spec/factories/HostingAgreementFactory.js'
+import createUser from '@spec/factories/UserFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
 
 describe('V1/HostingAgreementController', () => {
   let request: SpecRequestType
@@ -616,13 +617,13 @@ describe('V1/HostingAgreementController', () => {
         actions: [...RESOURCE_ACTIONS],
       })
       expect(res).toEqual(`\
-import Post from '../../../../src/app/models/Post.js'
-import User from '../../../../src/app/models/User.js'
-import Host from '../../../../src/app/models/Host.js'
-import createPost from '../../../factories/PostFactory.js'
-import createUser from '../../../factories/UserFactory.js'
-import createHost from '../../../factories/HostFactory.js'
-import { RequestBody, session, SpecRequestType } from '../../helpers/authentication.js'
+import Post from '@models/Post.js'
+import User from '@models/User.js'
+import Host from '@models/Host.js'
+import createPost from '@spec/factories/PostFactory.js'
+import createUser from '@spec/factories/UserFactory.js'
+import createHost from '@spec/factories/HostFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
 
 describe('V1/PostsController', () => {
   let request: SpecRequestType
@@ -797,11 +798,11 @@ describe('V1/PostsController', () => {
         actions: [...RESOURCE_ACTIONS],
       })
       expect(res).toEqual(`\
-import Article from '../../../../src/app/models/Article.js'
-import AdminUser from '../../../../src/app/models/AdminUser.js'
-import createArticle from '../../../factories/ArticleFactory.js'
-import createAdminUser from '../../../factories/AdminUserFactory.js'
-import { RequestBody, session, SpecRequestType } from '../../helpers/authentication.js'
+import Article from '@models/Article.js'
+import AdminUser from '@models/AdminUser.js'
+import createArticle from '@spec/factories/ArticleFactory.js'
+import createAdminUser from '@spec/factories/AdminUserFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
 
 describe('Admin/ArticlesController', () => {
   let request: SpecRequestType
@@ -924,6 +925,7 @@ describe('Admin/ArticlesController', () => {
     context('importExtension=.js', () => {
       beforeEach(() => {
         vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('.js')
+        vi.spyOn(DreamApp.prototype, 'importExtension', 'get').mockReturnValue('.js')
       })
 
       it('styles all imports to have .js suffix', () => {
@@ -938,11 +940,11 @@ describe('Admin/ArticlesController', () => {
         })
         expect(res).toContain(
           `\
-import Post from '../../../../src/app/models/Post.js'
-import User from '../../../../src/app/models/User.js'
-import createPost from '../../../factories/PostFactory.js'
-import createUser from '../../../factories/UserFactory.js'
-import { RequestBody, session, SpecRequestType } from '../../helpers/authentication.js'\
+import Post from '@models/Post.js'
+import User from '@models/User.js'
+import createPost from '@spec/factories/PostFactory.js'
+import createUser from '@spec/factories/UserFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'\
 `,
         )
       })
@@ -951,6 +953,7 @@ import { RequestBody, session, SpecRequestType } from '../../helpers/authenticat
     context('importExtension=.ts', () => {
       beforeEach(() => {
         vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('.ts')
+        vi.spyOn(DreamApp.prototype, 'importExtension', 'get').mockReturnValue('.ts')
       })
 
       it('styles all imports to have .ts suffix', () => {
@@ -965,11 +968,11 @@ import { RequestBody, session, SpecRequestType } from '../../helpers/authenticat
         })
         expect(res).toContain(
           `\
-import Post from '../../../../src/app/models/Post.ts'
-import User from '../../../../src/app/models/User.ts'
-import createPost from '../../../factories/PostFactory.ts'
-import createUser from '../../../factories/UserFactory.ts'
-import { RequestBody, session, SpecRequestType } from '../../helpers/authentication.ts'\
+import Post from '@models/Post.ts'
+import User from '@models/User.ts'
+import createPost from '@spec/factories/PostFactory.ts'
+import createUser from '@spec/factories/UserFactory.ts'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.ts'\
 `,
         )
       })
@@ -978,6 +981,7 @@ import { RequestBody, session, SpecRequestType } from '../../helpers/authenticat
     context('importExtension=none', () => {
       beforeEach(() => {
         vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('none')
+        vi.spyOn(DreamApp.prototype, 'importExtension', 'get').mockReturnValue('none')
       })
 
       it('styles all imports to have no suffix', () => {
@@ -992,11 +996,11 @@ import { RequestBody, session, SpecRequestType } from '../../helpers/authenticat
         })
         expect(res).toContain(
           `\
-import Post from '../../../../src/app/models/Post'
-import User from '../../../../src/app/models/User'
-import createPost from '../../../factories/PostFactory'
-import createUser from '../../../factories/UserFactory'
-import { RequestBody, session, SpecRequestType } from '../../helpers/authentication'\
+import Post from '@models/Post'
+import User from '@models/User'
+import createPost from '@spec/factories/PostFactory'
+import createUser from '@spec/factories/UserFactory'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication'\
 `,
         )
       })

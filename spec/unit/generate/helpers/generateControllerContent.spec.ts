@@ -18,7 +18,7 @@ describe('psy generate:controller <name> [...methods]', () => {
           `\
 import { OpenAPI } from '@rvoh/psychic'
 import AuthedController from './AuthedController.js'
-import Post from '../models/Post.js'
+import Post from '@models/Post.js'
 
 const openApiTags = ['posts']
 
@@ -117,7 +117,7 @@ export default class PostsController extends AuthedController {
             `\
 import { OpenAPI } from '@rvoh/psychic'
 import AuthedController from './AuthedController.js'
-import HostingAgreement from '../models/HostingAgreement.js'
+import HostingAgreement from '@models/HostingAgreement.js'
 
 const openApiTags = ['hosting-agreement']
 
@@ -193,7 +193,7 @@ export default class HostingAgreementController extends AuthedController {
           `\
 import { OpenAPI } from '@rvoh/psychic'
 import AuthedController from '../../../AuthedController.js'
-import HealthPost from '../../../../models/Health/Post.js'
+import HealthPost from '@models/Health/Post.js'
 
 const openApiTags = ['health-posts']
 
@@ -334,7 +334,7 @@ export default class ApiV1UsersController extends AuthedController {
           `\
 import { OpenAPI } from '@rvoh/psychic'
 import AuthedController from './AuthedController.js'
-import Post from '../models/Post.js'
+import Post from '@models/Post.js'
 
 const openApiTags = ['posts']
 
@@ -437,7 +437,7 @@ export default class PostsController extends AuthedController {
             `\
 import { OpenAPI } from '@rvoh/psychic'
 import AdminAuthedController from './AdminAuthedController.js'
-import Article from '../../models/Article.js'
+import Article from '@models/Article.js'
 
 const openApiTags = ['articles']
 
