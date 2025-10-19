@@ -266,9 +266,10 @@ export default class PsychicCLI {
       .description(
         'sync introspects your database, updating your schema to reflect, and then syncs the new schema with the installed dream node module, allowing it provide your schema to the underlying kysely integration',
       )
+      .option('--ignore-errors')
       .option('--schema-only')
-      .action(async (options: { schemaOnly?: boolean } = {}) => {
-        await initializePsychicApp({ bypassDreamIntegrityChecks: !!options.schemaOnly })
+      .action(async (options: { ignoreErrors: boolean; schemaOnly: boolean }) => {
+        await initializePsychicApp({ bypassDreamIntegrityChecks: options.ignoreErrors || options.schemaOnly })
         await PsychicBin.sync(options)
         process.exit()
       })

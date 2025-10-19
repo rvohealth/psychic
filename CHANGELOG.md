@@ -4,6 +4,7 @@
 - account for change in Dream in which `Virtual` decorator requires OpenAPI shape
 - throw a more detailed error when DreamSerializer.attribute used to render a non-database, non-Virtual decorated property
 - fix OpenAPI generated when paginating/scrollPaginating an STI base model
+- add `--ignore-errors` option to `yarn psy sync` so can build complicated OpenAPI shapes and serializers without needing to follow a set order
 
 ## 1.13.0
 
