@@ -9,14 +9,39 @@
     "url": "git+https://github.com/rvohealth/psychic.git"
   },
   "license": "MIT",
-  "main": "./dist/cjs/src/index.js",
-  "module": "./dist/esm/src/index.js",
-  "types": "./dist/types/src/index.d.ts",
+  "main": "./dist/cjs/src/package-exports/index.js",
+  "module": "./dist/esm/src/package-exports/index.js",
+  "types": "./dist/types/src/package-exports/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/src/index.d.ts",
-      "import": "./dist/esm/src/index.js",
-      "require": "./dist/cjs/src/index.js"
+      "types": "./dist/types/src/package-exports/index.d.ts",
+      "import": "./dist/esm/src/package-exports/index.js",
+      "require": "./dist/cjs/src/package-exports/index.js"
+    },
+    "./errors": {
+      "types": "./dist/types/src/package-exports/errors.d.ts",
+      "import": "./dist/esm/src/package-exports/errors.js",
+      "require": "./dist/cjs/src/package-exports/errors.js"
+    },
+    "./internal": {
+      "types": "./dist/types/src/package-exports/internal.d.ts",
+      "import": "./dist/esm/src/package-exports/internal.js",
+      "require": "./dist/cjs/src/package-exports/internal.js"
+    },
+    "./openapi": {
+      "types": "./dist/types/src/package-exports/openapi.d.ts",
+      "import": "./dist/esm/src/package-exports/openapi.js",
+      "require": "./dist/cjs/src/package-exports/openapi.js"
+    },
+    "./types": {
+      "types": "./dist/types/src/package-exports/types.d.ts",
+      "import": "./dist/esm/src/package-exports/types.js",
+      "require": "./dist/cjs/src/package-exports/types.js"
+    },
+    "./utils": {
+      "types": "./dist/types/src/package-exports/utils.d.ts",
+      "import": "./dist/esm/src/package-exports/utils.js",
+      "require": "./dist/cjs/src/package-exports/utils.js"
     }
   },
   "files": [
