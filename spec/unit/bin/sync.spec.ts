@@ -1,4 +1,4 @@
-import { PsychicBin } from '../../../src/index.js'
+import { PsychicBin } from '../../../src/package-exports/index.js'
 
 describe('PsychicBin#on', () => {
   describe('on("sync")', () => {

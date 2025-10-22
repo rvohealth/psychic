@@ -1,4 +1,4 @@
-import { PsychicApp } from '../../../src/index.js'
+import { PsychicApp } from '../../../src/package-exports/index.js'
 import * as LoadControllersModule from '../../../src/psychic-app/helpers/import/importControllers.js'
 import importDefault from '../../../test-app/src/app/helpers/importDefault.js'
 import dreamCb from '../../../test-app/src/conf/dream.js'

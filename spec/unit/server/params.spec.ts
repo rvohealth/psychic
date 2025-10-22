@@ -1,6 +1,7 @@
 import { CalendarDate, DateTime } from '@rvoh/dream'
 import { PsychicParamsDictionary } from '../../../src/controller/index.js'
-import { ParamValidationError, ParamValidationErrors } from '../../../src/index.js'
+import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
+import ParamValidationErrors from '../../../src/error/controller/ParamValidationErrors.js'
 import Params from '../../../src/server/params.js'
 import Pet from '../../../test-app/src/app/models/Pet.js'
 import User from '../../../test-app/src/app/models/User.js'

@@ -1,5 +1,5 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import { PsychicApp } from '../../../src/index.js'
+import { PsychicApp } from '../../../src/package-exports/index.js'
 import PsychicServer from '../../../src/server/index.js'
 import User from '../../../test-app/src/app/models/User.js'
 

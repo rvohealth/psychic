@@ -1,5 +1,5 @@
 import EnvInternal from '../../../../src/helpers/EnvInternal.js'
-import { BeforeAction, OpenAPI } from '../../../../src/index.js'
+import { BeforeAction, OpenAPI } from '../../../../src/package-exports/index.js'
 import ModelWithoutSerializer from '../models/ModelWithoutSerializer.js'
 import ApplicationController from './ApplicationController.js'
 

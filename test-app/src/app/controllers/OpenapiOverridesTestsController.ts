@@ -1,4 +1,4 @@
-import { OpenAPI, PsychicOpenapiControllerConfig } from '../../../../src/index.js'
+import { OpenAPI, PsychicOpenapiControllerConfig } from '../../../../src/package-exports/index.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class OpenapiOverridesTestController extends ApplicationController {

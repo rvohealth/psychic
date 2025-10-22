@@ -2,7 +2,7 @@ import PsychicAppInitMissingApiRoot from '../../../src/error/psychic-app/init-mi
 import PsychicAppInitMissingCallToLoadControllers from '../../../src/error/psychic-app/init-missing-call-to-load-controllers.js'
 import PsychicAppInitMissingPackageManager from '../../../src/error/psychic-app/init-missing-package-manager.js'
 import PsychicAppInitMissingRoutesCallback from '../../../src/error/psychic-app/init-missing-routes-callback.js'
-import { PsychicApp } from '../../../src/index.js'
+import { PsychicApp } from '../../../src/package-exports/index.js'
 import * as LoadControllersModule from '../../../src/psychic-app/helpers/import/importControllers.js'
 import { _testOnlyClearOpenapiCache } from '../../../src/psychic-app/openapi-cache.js'
 import importDefault from '../../../test-app/src/app/helpers/importDefault.js'

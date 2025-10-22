@@ -1,4 +1,4 @@
-import { PsychicController } from '../../src/index.js'
+import { PsychicController } from '../../src/package-exports/index.js'
 
 export default function processDynamicallyDefinedControllers(
   ...controllerClasses: (typeof PsychicController)[]

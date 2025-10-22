@@ -1,4 +1,4 @@
-import { OpenAPI } from '../../../../src/index.js'
+import { OpenAPI } from '../../../../src/package-exports/index.js'
 import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer.js'
 import ApplicationController from './ApplicationController.js'
 

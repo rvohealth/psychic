@@ -2,7 +2,7 @@ import { existsSync } from 'node:fs'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import * as psychicPathModule from '../../../../src/helpers/path/psychicPath.js'
-import { generateController, PsychicApp } from '../../../../src/index.js'
+import { generateController, PsychicApp } from '../../../../src/package-exports/index.js'
 
 describe('generateController', () => {
   let psychicApp: PsychicApp

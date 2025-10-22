@@ -1,5 +1,5 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import { PsychicServer } from '../../../../src/index.js'
+import { PsychicServer } from '../../../../src/package-exports/index.js'
 
 describe('a visitor attempts to hit a route at a nested resource', () => {
   beforeEach(async () => {
