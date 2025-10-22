@@ -5,7 +5,7 @@ import {
 } from '@rvoh/dream/internal'
 import { camelize, capitalize, compact, uniq } from '@rvoh/dream/utils'
 import addImportSuffix from '../../helpers/path/addImportSuffix.js'
-import { pluralize } from '../../package-exports/index.js'
+import { pluralize } from '../../package-exports/utils.js'
 
 export default function generateResourceControllerSpecContent({
   fullyQualifiedControllerName,

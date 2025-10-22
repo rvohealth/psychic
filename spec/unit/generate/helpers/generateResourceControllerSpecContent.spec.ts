@@ -1,7 +1,7 @@
 import { DreamApp } from '@rvoh/dream'
 import generateResourceControllerSpecContent from '../../../../src/generate/helpers/generateResourceControllerSpecContent.js'
 import { RESOURCE_ACTIONS } from '../../../../src/generate/resource.js'
-import { PsychicApp } from '../../../../src/package-exports/index.js'
+import PsychicApp from '../../../../src/psychic-app/index.js'
 
 describe('generateResourceControllerSpecContent', () => {
   it(

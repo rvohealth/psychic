@@ -4,7 +4,7 @@ import addResourceToRoutes, {
   addResourceToRoutes_routeToRegexAndReplacements,
 } from '../../../../src/generate/helpers/addResourceToRoutes.js'
 import * as psychicPathModule from '../../../../src/helpers/path/psychicPath.js'
-import { PsychicApp } from '../../../../src/package-exports/index.js'
+import PsychicApp from '../../../../src/psychic-app/index.js'
 
 describe('addResourceToRoutes', () => {
   let psychicApp: PsychicApp

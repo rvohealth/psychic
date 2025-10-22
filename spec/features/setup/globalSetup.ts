@@ -1,6 +1,6 @@
 import '../../../src/helpers/loadEnv.js'
 
-import { PsychicDevtools } from '../../../src/package-exports/index.js'
+import PsychicDevtools from '../../../src/devtools/PsychicDevtools.js'
 import initializePsychicApp from '../../../test-app/src/cli/helpers/initializePsychicApp.js'
 
 export async function setup() {

@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 import OpenapiEndpointRenderer, { ToPathObjectOpts } from '../../../../src/openapi-renderer/endpoint.js'
-import { PsychicApp } from '../../../../src/package-exports/index.js'
+import PsychicApp from '../../../../src/psychic-app/index.js'
 import { RouteConfig } from '../../../../src/router/route-manager.js'
 import ApiPetsController from '../../../../test-app/src/app/controllers/Api/PetsController.js'
 import BalloonsController from '../../../../test-app/src/app/controllers/BalloonsController.js'
