@@ -1,4 +1,4 @@
-import { DreamColumn } from '@rvoh/dream'
+import { DreamColumn } from '@rvoh/dream/types'
 import ApplicationModel from './ApplicationModel.js'
 
 // const deco = new Decorators<typeof ModelWithoutSerializer>()

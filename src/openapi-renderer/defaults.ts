@@ -1,4 +1,4 @@
-import { OpenapiSchemaBody } from '@rvoh/dream'
+import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
 import { OpenapiContent, OpenapiResponses, OpenapiValidateTargets } from './endpoint.js'
 
 export const DEFAULT_OPENAPI_RESPONSES = {

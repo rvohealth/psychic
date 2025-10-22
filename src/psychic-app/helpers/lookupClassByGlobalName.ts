@@ -1,4 +1,4 @@
-import { lookupClassByGlobalName as dreamLookupClassByGlobalName } from '@rvoh/dream'
+import { lookupClassByGlobalName as dreamLookupClassByGlobalName } from '@rvoh/dream/internal'
 import { getControllersOrFail } from './import/importControllers.js'
 import { getServicesOrFail } from './import/importServices.js'
 

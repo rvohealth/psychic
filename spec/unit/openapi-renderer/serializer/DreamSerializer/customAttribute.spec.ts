@@ -1,4 +1,5 @@
-import { DreamSerializer, round } from '@rvoh/dream'
+import { DreamSerializer } from '@rvoh/dream'
+import { round } from '@rvoh/dream/utils'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 import Pet from '../../../../../test-app/src/app/models/Pet.js'
 import User from '../../../../../test-app/src/app/models/User.js'

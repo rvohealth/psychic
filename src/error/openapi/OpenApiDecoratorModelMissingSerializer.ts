@@ -1,4 +1,4 @@
-import { ViewModelClass } from '@rvoh/dream'
+import { ViewModelClass } from '@rvoh/dream/types'
 
 export default class OpenapiDecoratorModelMissingSerializer extends Error {
   constructor(

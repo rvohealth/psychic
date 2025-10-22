@@ -2,11 +2,8 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import {
-  inferSerializersFromDreamClassOrViewModelClass,
-  OpenapiSchemaBodyShorthand,
-  OpenapiShorthandPrimitiveTypes,
-} from '@rvoh/dream'
+import { inferSerializersFromDreamClassOrViewModelClass } from '@rvoh/dream/internal'
+import { OpenapiSchemaBodyShorthand, OpenapiShorthandPrimitiveTypes } from '@rvoh/dream/openapi'
 import isObject from '../../helpers/isObject.js'
 import SerializerOpenapiRenderer from '../SerializerOpenapiRenderer.js'
 

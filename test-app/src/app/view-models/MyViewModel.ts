@@ -1,4 +1,4 @@
-import { DreamSerializers } from '@rvoh/dream'
+import { DreamSerializers } from '@rvoh/dream/types'
 import ApplicationModel from '../models/ApplicationModel.js'
 import Balloon from '../models/Balloon.js'
 

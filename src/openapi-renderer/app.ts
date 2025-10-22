@@ -1,4 +1,6 @@
-import { CliFileWriter, compact, groupBy, OpenapiSchemaBody, sortObjectByKey } from '@rvoh/dream'
+import { CliFileWriter } from '@rvoh/dream/internal'
+import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
+import { compact, groupBy, sortObjectByKey } from '@rvoh/dream/utils'
 import { debuglog } from 'node:util'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import openapiJsonPath from '../helpers/openapiJsonPath.js'

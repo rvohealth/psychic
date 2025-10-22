@@ -1,12 +1,12 @@
+import { Dream } from '@rvoh/dream'
 import {
-  DbTypes,
-  Dream,
   OpenapiDescription,
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
   OpenapiSchemaString,
   OpenapiShorthandPrimitiveTypes,
-} from '@rvoh/dream'
+} from '@rvoh/dream/openapi'
+import { DbTypes } from '@rvoh/dream/types'
 import { SerializingPlainPropertyWithoutOpenapiShape } from '../../error/openapi/SerializingPlainPropertyWithoutOpenapiShape.js'
 import OpenapiSegmentExpander from '../body-segment.js'
 import openapiShorthandToOpenapi from './openapiShorthandToOpenapi.js'

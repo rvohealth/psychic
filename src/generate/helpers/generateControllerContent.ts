@@ -1,10 +1,9 @@
 import {
   absoluteDreamPath,
-  camelize,
   globalClassNameFromFullyQualifiedModelName,
-  hyphenize,
   standardizeFullyQualifiedModelName,
-} from '@rvoh/dream'
+} from '@rvoh/dream/internal'
+import { camelize, hyphenize } from '@rvoh/dream/utils'
 import pluralize from 'pluralize-esm'
 
 export default function generateControllerContent({

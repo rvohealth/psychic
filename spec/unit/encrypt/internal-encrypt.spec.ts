@@ -1,4 +1,4 @@
-import { Encrypt } from '@rvoh/dream'
+import { Encrypt } from '@rvoh/dream/utils'
 import InternalEncrypt from '../../../src/encrypt/internal-encrypt.js'
 import initializePsychicApp from '../../../test-app/src/cli/helpers/initializePsychicApp.js'
 

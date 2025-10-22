@@ -1,4 +1,5 @@
-import { DateTime, Encrypt } from '@rvoh/dream'
+import { DateTime } from '@rvoh/dream'
+import { Encrypt } from '@rvoh/dream/utils'
 import { BeforeAction, OpenAPI } from '../../../../src/index.js'
 import User from '../models/User.js'
 import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer.js'

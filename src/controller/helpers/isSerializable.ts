@@ -1,4 +1,5 @@
-import { Dream, inferSerializersFromDreamClassOrViewModelClass, isDreamSerializer } from '@rvoh/dream'
+import { Dream } from '@rvoh/dream'
+import { inferSerializersFromDreamClassOrViewModelClass, isDreamSerializer } from '@rvoh/dream/internal'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 export default function isSerializable(serializableOrSerializerClass: any): boolean {

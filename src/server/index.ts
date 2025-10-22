@@ -1,4 +1,4 @@
-import { closeAllDbConnections } from '@rvoh/dream'
+import { closeAllDbConnections } from '@rvoh/dream/db'
 import * as cookieParser from 'cookie-parser'
 import * as cors from 'cors'
 import * as express from 'express'

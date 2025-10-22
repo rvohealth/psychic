@@ -1,12 +1,5 @@
+import { CalendarDate, DateTime, Dream } from '@rvoh/dream'
 import {
-  CalendarDate,
-  camelize,
-  compact,
-  DateTime,
-  Dream,
-  DreamAttributes,
-  DreamParamSafeAttributes,
-  DreamParamSafeColumnNames,
   OpenapiSchemaArray,
   OpenapiSchemaBody,
   OpenapiSchemaInteger,
@@ -15,9 +8,14 @@ import {
   OpenapiSchemaPrimitiveGeneric,
   OpenapiSchemaPropertiesShorthand,
   OpenapiSchemaString,
-  snakeify,
+} from '@rvoh/dream/openapi'
+import {
+  DreamAttributes,
+  DreamParamSafeAttributes,
+  DreamParamSafeColumnNames,
   UpdateableProperties,
-} from '@rvoh/dream'
+} from '@rvoh/dream/types'
+import { camelize, compact, snakeify } from '@rvoh/dream/utils'
 import {
   PsychicParamsDictionary,
   PsychicParamsPrimitive,

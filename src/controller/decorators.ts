@@ -1,4 +1,5 @@
-import { DecoratorContext, Dream, DreamSerializable, DreamSerializableArray } from '@rvoh/dream'
+import { Dream } from '@rvoh/dream'
+import { DecoratorContext, DreamSerializable, DreamSerializableArray } from '@rvoh/dream/types'
 import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint.js'
 import isSerializable from './helpers/isSerializable.js'
 import { ControllerHook } from './hooks.js'

@@ -1,11 +1,6 @@
+import { Dream } from '@rvoh/dream'
+import { inferSerializersFromDreamClassOrViewModelClass, isDreamSerializer } from '@rvoh/dream/internal'
 import {
-  Dream,
-  DreamAttributes,
-  DreamModelSerializerType,
-  DreamOrViewModelClassSerializerKey,
-  DreamParamSafeAttributes,
-  DreamSerializable,
-  DreamSerializableArray,
   OpenapiAllTypes,
   OpenapiFormats,
   OpenapiSchemaArray,
@@ -18,16 +13,20 @@ import {
   OpenapiSchemaObject,
   OpenapiSchemaProperties,
   OpenapiSchemaPropertiesShorthand,
+} from '@rvoh/dream/openapi'
+import {
+  DreamAttributes,
+  DreamModelSerializerType,
+  DreamOrViewModelClassSerializerKey,
+  DreamParamSafeAttributes,
+  DreamSerializable,
+  DreamSerializableArray,
   SerializerCasing,
   SimpleObjectSerializerType,
   UpdateableProperties,
   ViewModelClass,
-  cloneDeepSafe,
-  compact,
-  inferSerializersFromDreamClassOrViewModelClass,
-  isDreamSerializer,
-  sortBy,
-} from '@rvoh/dream'
+} from '@rvoh/dream/types'
+import { cloneDeepSafe, compact, sortBy } from '@rvoh/dream/utils'
 import PsychicController from '../controller/index.js'
 import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes.js'
 import OpenApiFailedToLookupSerializerForEndpoint from '../error/openapi/FailedToLookupSerializerForEndpoint.js'

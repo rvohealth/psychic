@@ -1,10 +1,6 @@
-import {
-  Dream,
-  inferSerializerFromDreamOrViewModel,
-  isDreamSerializer,
-  SerializerRendererOpts,
-  ViewModel,
-} from '@rvoh/dream'
+import { Dream } from '@rvoh/dream'
+import { inferSerializerFromDreamOrViewModel, isDreamSerializer } from '@rvoh/dream/internal'
+import { SerializerRendererOpts, ViewModel } from '@rvoh/dream/types'
 
 export default function renderDreamOrVewModel(
   data: Dream | ViewModel,

@@ -1,4 +1,4 @@
-import { OpenapiSchemaArray } from '@rvoh/dream'
+import { OpenapiSchemaArray } from '@rvoh/dream/openapi'
 import OpenapiRequestValidationFailure from '../../error/openapi/OpenapiRequestValidationFailure.js'
 import OpenapiResponseValidationFailure from '../../error/openapi/OpenapResponseValidationFailure.js'
 import validateOpenApiSchema, { ValidateOpenapiSchemaOptions } from '../../helpers/validateOpenApiSchema.js'

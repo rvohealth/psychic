@@ -1,4 +1,4 @@
-import { OpenapiSchemaBodyShorthand } from '@rvoh/dream'
+import { OpenapiSchemaBodyShorthand } from '@rvoh/dream/openapi'
 import allSerializersFromHandWrittenOpenapi from '../../../../src/openapi-renderer/helpers/allSerializersFromHandWrittenOpenapi.js'
 import Balloon from '../../../../test-app/src/app/models/Balloon.js'
 import BalloonLatex from '../../../../test-app/src/app/models/Balloon/Latex.js'

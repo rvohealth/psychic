@@ -3,31 +3,30 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Dream } from '@rvoh/dream'
+import {
+  DreamSerializerBuilder,
+  expandStiClasses,
+  inferSerializersFromDreamClassOrViewModelClass,
+  isDreamSerializer,
+} from '@rvoh/dream/internal'
+import {
+  OpenapiSchemaBody,
+  OpenapiSchemaBodyShorthand,
+  OpenapiSchemaExpressionRef,
+} from '@rvoh/dream/openapi'
 import {
   BelongsToStatement,
-  Dream,
   DreamModelSerializerType,
-  DreamSerializerBuilder,
   HasManyStatement,
   HasOneStatement,
   InternalAnyTypedSerializerRendersMany,
   InternalAnyTypedSerializerRendersOne,
-  OpenapiSchemaBody,
-  OpenapiSchemaBodyShorthand,
-  OpenapiSchemaExpressionRef,
   SerializerCasing,
   SimpleObjectSerializerType,
   ViewModelClass,
-  compact,
-  expandStiClasses,
-  inferSerializersFromDreamClassOrViewModelClass,
-  isDreamSerializer,
-  snakeify,
-  sort,
-  sortBy,
-  sortObjectByKey,
-  uniq,
-} from '@rvoh/dream'
+} from '@rvoh/dream/types'
+import { compact, snakeify, sort, sortBy, sortObjectByKey, uniq } from '@rvoh/dream/utils'
 import { inspect } from 'node:util'
 import AttemptedToDeriveDescendentSerializersFromNonSerializer from '../error/openapi/AttemptedToDeriveDescendentSerializersFromNonSerializer.js'
 import ExpectedSerializerForRendersOneOrManyOption from '../error/openapi/ExpectedSerializerForRendersOneOrManyOption.js'

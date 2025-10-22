@@ -1,4 +1,4 @@
-import { hyphenize } from '@rvoh/dream'
+import { hyphenize } from '@rvoh/dream/utils'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import psychicPath from '../../../helpers/path/psychicPath.js'

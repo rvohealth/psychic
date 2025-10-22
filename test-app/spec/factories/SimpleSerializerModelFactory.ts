@@ -1,4 +1,4 @@
-import { UpdateableProperties } from '@rvoh/dream'
+import { UpdateableProperties } from '@rvoh/dream/types'
 import SimpleSerializerModel from '../../src/app/models/SimpleSerializerModel.js'
 
 let counter = 0
