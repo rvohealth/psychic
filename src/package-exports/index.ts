@@ -4,16 +4,6 @@ export const pluralize = _pluralize
 export { default as colorize } from '../cli/helpers/colorize.js'
 export { default as cookieMaxAgeFromCookieOpts } from '../helpers/cookieMaxAgeFromCookieOpts.js'
 
-// types
-export { type PsychicOpenapiControllerConfig, type PsychicOpenapiNames } from '../controller/index.js'
-export {
-  type DefaultPsychicOpenapiOptions,
-  type NamedPsychicOpenapiOptions,
-  type PsychicAppInitOptions,
-} from '../psychic-app/index.js'
-export { type UUID } from '../psychic-app/types.js'
-export { type HttpMethod } from '../router/types.js'
-
 // default
 export { BeforeAction, OpenAPI } from '../controller/decorators.js'
 export { default as PsychicController } from '../controller/index.js'
