@@ -25,6 +25,7 @@ import PsychicAppInitMissingRoutesCallback from '../error/psychic-app/init-missi
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import pascalizeFileName from '../helpers/pascalizeFileName.js'
+import { OpenapiValidateTarget } from '../openapi-renderer/defaults.js'
 import {
   OpenapiContent,
   OpenapiHeaders,
@@ -33,7 +34,6 @@ import {
   OpenapiSecuritySchemes,
   OpenapiServer,
   OpenapiValidateOption,
-  OpenapiValidateTarget,
 } from '../openapi-renderer/endpoint.js'
 import PsychicRouter from '../router/index.js'
 import { RouteConfig } from '../router/route-manager.js'

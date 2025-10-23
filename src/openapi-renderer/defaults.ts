@@ -1,5 +1,8 @@
 import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
-import { OpenapiContent, OpenapiResponses, OpenapiValidateTargets } from './endpoint.js'
+import { OpenapiContent, OpenapiResponses } from './endpoint.js'
+
+export const OpenapiValidateTargets = ['requestBody', 'query', 'headers', 'responseBody'] as const
+export type OpenapiValidateTarget = (typeof OpenapiValidateTargets)[number]
 
 export const DEFAULT_OPENAPI_RESPONSES = {
   400: {

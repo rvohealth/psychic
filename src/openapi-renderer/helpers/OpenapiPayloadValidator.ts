@@ -3,11 +3,11 @@ import OpenapiRequestValidationFailure from '../../error/openapi/OpenapiRequestV
 import OpenapiResponseValidationFailure from '../../error/openapi/OpenapResponseValidationFailure.js'
 import validateOpenApiSchema, { ValidateOpenapiSchemaOptions } from '../../helpers/validateOpenApiSchema.js'
 import PsychicApp from '../../psychic-app/index.js'
+import { OpenapiValidateTarget } from '../defaults.js'
 import OpenapiEndpointRenderer, {
   OpenapiContent,
   OpenapiParameterResponse,
   OpenapiRenderOpts,
-  OpenapiValidateTarget,
 } from '../endpoint.js'
 import suppressResponseEnumsConfig from './suppressResponseEnumsConfig.js'
 

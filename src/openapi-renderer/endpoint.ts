@@ -46,7 +46,7 @@ import OpenapiSegmentExpander, {
   ReferencedSerializersAndOpenapiResponses,
   SerializerArray,
 } from './body-segment.js'
-import { DEFAULT_OPENAPI_RESPONSES } from './defaults.js'
+import { DEFAULT_OPENAPI_RESPONSES, OpenapiValidateTarget } from './defaults.js'
 import { dreamColumnOpenapiShape } from './helpers/dreamAttributeOpenapiShape.js'
 import openapiOpts from './helpers/openapiOpts.js'
 import openapiRoute from './helpers/openapiRoute.js'
@@ -1488,9 +1488,6 @@ export type OpenapiValidateOption = {
    */
   ajvOptions?: ValidateOpenapiSchemaOptions
 }
-
-export const OpenapiValidateTargets = ['requestBody', 'query', 'headers', 'responseBody'] as const
-export type OpenapiValidateTarget = (typeof OpenapiValidateTargets)[number]
 
 export type CustomPaginationOpts =
   | {
