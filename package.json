@@ -79,16 +79,16 @@
     "yoctocolors": "^2.1.1"
   },
   "peerDependencies": {
-    "@rvoh/dream": "*",
-    "@types/express": "*",
-    "commander": "*",
-    "express": "*",
-    "openapi-typescript": "*"
+    "@rvoh/dream": "^2.0.0-alpha.2",
+    "@types/express": "^5.0.1",
+    "commander": "^12.1.0",
+    "express": "^5.1.0",
+    "openapi-typescript": "^7.8.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@jest-mock/express": "^3.0.0",
-    "@rvoh/dream": "^2.0.0-alpha.1",
+    "@rvoh/dream": "^2.0.0-alpha.2",
     "@rvoh/dream-spec-helpers": "^1.2.1",
     "@rvoh/psychic-spec-helpers": "^1.1.6",
     "@types/express": "^5.0.1",
