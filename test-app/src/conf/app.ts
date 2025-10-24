@@ -203,7 +203,7 @@ export default async (psy: PsychicApp) => {
   // set options to pass to coors when middleware is booted
   psy.set('cors', {
     credentials: true,
-    origin: [process.env.CLIENT_HOST || 'http://localhost:3000'],
+    origin: [process.env.CLIENT_HOST || 'http://localhost:3000', 'http://localhost:5173'],
   })
 
   // set options for cookie usage

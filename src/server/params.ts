@@ -224,20 +224,26 @@ export default class Params {
                 if (!Array.isArray(paramValue))
                   returnObj[columnName as keyof typeof returnObj] = ['expected an array of enum values']
 
-                returnObj[columnName as keyof typeof returnObj] = (paramValue as string[]).map(p => {
-                  return new this(params).cast(
-                    columnName.toString(),
-                    p,
+                if (columnMetadata.allowNull && paramValue === null) {
+                  returnObj[columnName as keyof typeof returnObj] = null
+                } else {
+                  returnObj[columnName as keyof typeof returnObj] = ((paramValue || []) as string[]).map(
+                    p => {
+                      return new this(params).cast(
+                        columnName.toString(),
+                        p,
 
-                    // casting to allow enum handling at lower level
-                    'string',
+                        // casting to allow enum handling at lower level
+                        'string',
 
-                    {
-                      allowNull: columnMetadata.allowNull,
-                      enum: columnMetadata.enumValues as readonly string[],
+                        {
+                          allowNull: columnMetadata.allowNull,
+                          enum: columnMetadata.enumValues as readonly string[],
+                        },
+                      )
                     },
                   )
-                })
+                }
               } else {
                 returnObj[columnName as keyof typeof returnObj] = this.cast(
                   params,

@@ -1,0 +1,237 @@
+.table-container {
+  overflow: auto;
+}
+
+table {
+  width: 100vw;
+}
+
+table td {
+  line-height: 13px;
+  word-break: break-word;
+  max-height: 80px;
+  text-overflow: ellipsis;
+}
+
+table thead tr th {
+  border-right: solid 2px white;
+  height: 10px;
+  text-align: left;
+  padding-left: 10px;
+}
+
+td.primary-key {
+  color: teal;
+}
+
+.editable-column {
+  /* padding: 10px; */
+  cursor: pointer;
+}
+
+.editable-column.changed {
+  background: rgb(71, 71, 5);
+}
+
+.column-display.text .text {
+  color: green;
+}
+
+.column-display.number .text {
+  color: yellow;
+}
+
+.column-display.uuid .text {
+  color: rgb(22, 244, 244);
+}
+
+.column-display.json .text {
+  color: rgb(244, 22, 200);
+}
+
+.column-display.date .text {
+  color: rgb(218, 183, 60);
+}
+
+.column-display.datetime .text {
+  color: rgb(82, 0, 255);
+}
+
+.column-display.enum .text {
+  color: rgb(12, 12, 231);
+}
+
+.editable-column.is-null .column-display .text {
+  color: gray;
+}
+
+.editable-column.changed .column-display .text {
+  color: yellow !important;
+}
+
+.editable-column:not(.is-array) .column-display.boolean .text {
+  border-radius: 3px;
+  background: rgb(101, 36, 255);
+  color: white;
+  padding: 3px;
+  line-height: 27px;
+}
+
+.editable-column.is-array .column-display {
+  /* border: solid red thin; */
+  display: inline-block;
+  padding: 6px;
+  background: rgb(23, 23, 23);
+  border-radius: 3px;
+  margin-right: 5px;
+}
+
+.editable-column.is-array .column-display.boolean {
+  background: rgb(101, 36, 255);
+  color: white;
+  padding: 3px;
+}
+
+.editable-column.is-array .column-display .delete-btn {
+  margin-right: 5px;
+}
+
+.column-input {
+  display: inline-block;
+  position: relative;
+  background: rgb(0, 0, 0);
+  padding: 5px;
+  border: solid white 2px;
+  border-radius: 3px;
+}
+
+.column-input input {
+  background: transparent;
+}
+
+.date-input input {
+  font-size: 20px;
+  margin-bottom: 10px;
+}
+
+.app-modal,
+.side-pane {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.app-modal .backdrop,
+.side-pane .backdrop {
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.app-modal .contents,
+.side-pane .contents {
+  width: 40vw;
+  height: 50vh;
+  background: black;
+  position: absolute;
+  z-index: 3;
+  padding: 20px;
+  border-radius: 4px;
+  border: solid white 4px;
+  overflow: auto;
+  top: 0;
+}
+
+.side-pane .contents {
+  width: 95vw;
+  height: 100vh;
+  right: 0;
+  border-top: none;
+  /*margin-left: 10vw;*/
+}
+
+.filter-display-container {
+  padding: 10px 0;
+  display: flex;
+}
+
+.table-page {
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+.table-page.nested {
+  width: 100%;
+  right: 0;
+  top: auto;
+  left: auto;
+  position: absolute;
+}
+
+.filter-display {
+  display: flex;
+  border: solid 2px white;
+  /* background: gray; */
+  padding: 5px;
+  /* display: inline-block; */
+  margin-right: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filter-display > div {
+  display: flex;
+}
+
+.filter-display .delete-btn {
+  margin-left: 5px;
+  margin-right: 5px;
+  color: rgb(255, 121, 121);
+  cursor: pointer;
+}
+
+.filter-display .column-name {
+  color: rgb(32, 192, 32);
+}
+
+.filter-display .operator {
+  color: rgb(161, 161, 161);
+  padding: 0 5px;
+}
+
+.filter-display .value {
+  color: white;
+  height: 25px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  overflow: hidden;
+}
+
+.model-scopes {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.scope-display {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.scope-display.selected button {
+  color: rgb(70, 221, 91);
+  border-color: rgb(70, 221, 91);
+}
