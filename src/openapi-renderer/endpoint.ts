@@ -1,11 +1,6 @@
+import { Dream } from '@rvoh/dream'
+import { inferSerializersFromDreamClassOrViewModelClass, isDreamSerializer } from '@rvoh/dream/internal'
 import {
-  Dream,
-  DreamAttributes,
-  DreamModelSerializerType,
-  DreamOrViewModelClassSerializerKey,
-  DreamParamSafeAttributes,
-  DreamSerializable,
-  DreamSerializableArray,
   OpenapiAllTypes,
   OpenapiFormats,
   OpenapiSchemaArray,
@@ -18,16 +13,20 @@ import {
   OpenapiSchemaObject,
   OpenapiSchemaProperties,
   OpenapiSchemaPropertiesShorthand,
+} from '@rvoh/dream/openapi'
+import {
+  DreamAttributes,
+  DreamModelSerializerType,
+  DreamOrViewModelClassSerializerKey,
+  DreamParamSafeAttributes,
+  DreamSerializable,
+  DreamSerializableArray,
   SerializerCasing,
   SimpleObjectSerializerType,
   UpdateableProperties,
   ViewModelClass,
-  cloneDeepSafe,
-  compact,
-  inferSerializersFromDreamClassOrViewModelClass,
-  isDreamSerializer,
-  sortBy,
-} from '@rvoh/dream'
+} from '@rvoh/dream/types'
+import { cloneDeepSafe, compact, sortBy } from '@rvoh/dream/utils'
 import PsychicController from '../controller/index.js'
 import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes.js'
 import OpenApiFailedToLookupSerializerForEndpoint from '../error/openapi/FailedToLookupSerializerForEndpoint.js'
@@ -47,7 +46,7 @@ import OpenapiSegmentExpander, {
   ReferencedSerializersAndOpenapiResponses,
   SerializerArray,
 } from './body-segment.js'
-import { DEFAULT_OPENAPI_RESPONSES } from './defaults.js'
+import { DEFAULT_OPENAPI_RESPONSES, OpenapiValidateTarget } from './defaults.js'
 import { dreamColumnOpenapiShape } from './helpers/dreamAttributeOpenapiShape.js'
 import openapiOpts from './helpers/openapiOpts.js'
 import openapiRoute from './helpers/openapiRoute.js'
@@ -1489,9 +1488,6 @@ export type OpenapiValidateOption = {
    */
   ajvOptions?: ValidateOpenapiSchemaOptions
 }
-
-export const OpenapiValidateTargets = ['requestBody', 'query', 'headers', 'responseBody'] as const
-export type OpenapiValidateTarget = (typeof OpenapiValidateTargets)[number]
 
 export type CustomPaginationOpts =
   | {

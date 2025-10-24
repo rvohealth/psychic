@@ -1,4 +1,5 @@
-import { Decorators, DreamColumn } from '@rvoh/dream'
+import { Decorators } from '@rvoh/dream'
+import { DreamColumn } from '@rvoh/dream/types'
 import ApplicationModel from './ApplicationModel.js'
 import User from './User.js'
 

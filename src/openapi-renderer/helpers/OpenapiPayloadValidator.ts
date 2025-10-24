@@ -1,13 +1,13 @@
-import { OpenapiSchemaArray } from '@rvoh/dream'
+import { OpenapiSchemaArray } from '@rvoh/dream/openapi'
 import OpenapiRequestValidationFailure from '../../error/openapi/OpenapiRequestValidationFailure.js'
 import OpenapiResponseValidationFailure from '../../error/openapi/OpenapResponseValidationFailure.js'
 import validateOpenApiSchema, { ValidateOpenapiSchemaOptions } from '../../helpers/validateOpenApiSchema.js'
 import PsychicApp from '../../psychic-app/index.js'
+import { OpenapiValidateTarget } from '../defaults.js'
 import OpenapiEndpointRenderer, {
   OpenapiContent,
   OpenapiParameterResponse,
   OpenapiRenderOpts,
-  OpenapiValidateTarget,
 } from '../endpoint.js'
 import suppressResponseEnumsConfig from './suppressResponseEnumsConfig.js'
 

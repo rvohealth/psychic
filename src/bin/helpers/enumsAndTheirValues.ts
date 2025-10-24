@@ -1,4 +1,4 @@
-import { untypedDb } from '@rvoh/dream'
+import { untypedDb } from '@rvoh/dream/db'
 import { sql } from 'kysely'
 
 export default async function enumsAndTheirValues(connectionName: string = 'default') {

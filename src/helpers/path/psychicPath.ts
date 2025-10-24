@@ -1,5 +1,5 @@
+import { dreamPath } from '@rvoh/dream/internal'
 import * as path from 'path'
-import { dreamPath } from '@rvoh/dream'
 import PsychicApp from '../../psychic-app/index.js'
 
 export default function (dreamPathType: PsychicPaths | 'src') {

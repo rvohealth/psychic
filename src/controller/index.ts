@@ -1,17 +1,15 @@
+import { Dream } from '@rvoh/dream'
+import { GlobalNameNotSet } from '@rvoh/dream/errors'
+import { DreamSerializerBuilder, ObjectSerializerBuilder, isDreamSerializer } from '@rvoh/dream/internal'
+import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
 import {
-  Dream,
   DreamModelSerializerType,
   DreamParamSafeAttributes,
   DreamParamSafeColumnNames,
-  DreamSerializerBuilder,
-  GlobalNameNotSet,
-  isDreamSerializer,
-  ObjectSerializerBuilder,
-  OpenapiSchemaBody,
   SerializerRendererOpts,
   UpdateableProperties,
   ViewModel,
-} from '@rvoh/dream'
+} from '@rvoh/dream/types'
 import { Request, Response } from 'express'
 import { ControllerHook } from '../controller/hooks.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'

@@ -1,4 +1,5 @@
-import { CalendarDate, ObjectSerializer, round } from '@rvoh/dream'
+import { CalendarDate, ObjectSerializer } from '@rvoh/dream'
+import { round } from '@rvoh/dream/utils'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 
 interface User {

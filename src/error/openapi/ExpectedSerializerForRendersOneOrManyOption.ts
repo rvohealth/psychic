@@ -1,4 +1,7 @@
-import { InternalAnyTypedSerializerRendersMany, InternalAnyTypedSerializerRendersOne } from '@rvoh/dream'
+import {
+  InternalAnyTypedSerializerRendersMany,
+  InternalAnyTypedSerializerRendersOne,
+} from '@rvoh/dream/types'
 
 export default class ExpectedSerializerForRendersOneOrManyOption extends Error {
   constructor(

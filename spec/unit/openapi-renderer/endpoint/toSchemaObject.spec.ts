@@ -1,8 +1,8 @@
-import { PsychicApp } from '../../../../src/index.js'
 import OpenapiEndpointRenderer, {
   ToPathObjectOpts,
   ToSchemaObjectOpts,
 } from '../../../../src/openapi-renderer/endpoint.js'
+import PsychicApp from '../../../../src/psychic-app/index.js'
 import BalloonsController from '../../../../test-app/src/app/controllers/BalloonsController.js'
 import OpenapiDecoratorTestController from '../../../../test-app/src/app/controllers/OpenapiDecoratorTestsController.js'
 import UsersController from '../../../../test-app/src/app/controllers/UsersController.js'

@@ -1,14 +1,11 @@
 import {
   absoluteDreamPath,
-  camelize,
-  capitalize,
-  compact,
   globalClassNameFromFullyQualifiedModelName,
   standardizeFullyQualifiedModelName,
-  uniq,
-} from '@rvoh/dream'
+} from '@rvoh/dream/internal'
+import { camelize, capitalize, compact, uniq } from '@rvoh/dream/utils'
 import addImportSuffix from '../../helpers/path/addImportSuffix.js'
-import { pluralize } from '../../index.js'
+import { pluralize } from '../../package-exports/utils.js'
 
 export default function generateResourceControllerSpecContent({
   fullyQualifiedControllerName,

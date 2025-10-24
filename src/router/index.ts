@@ -1,4 +1,5 @@
-import { camelize, DataIncompatibleWithDatabaseField, RecordNotFound, ValidationError } from '@rvoh/dream'
+import { DataIncompatibleWithDatabaseField, RecordNotFound, ValidationError } from '@rvoh/dream/errors'
+import { camelize } from '@rvoh/dream/utils'
 import { Application, Request, RequestHandler, Response, Router } from 'express'
 import util, { debuglog } from 'node:util'
 import pluralize from 'pluralize-esm'

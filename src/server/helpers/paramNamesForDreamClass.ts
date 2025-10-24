@@ -1,4 +1,5 @@
-import { Dream, DreamParamSafeAttributes, DreamParamSafeColumnNames, UpdateableProperties } from '@rvoh/dream'
+import { Dream } from '@rvoh/dream'
+import { DreamParamSafeAttributes, DreamParamSafeColumnNames, UpdateableProperties } from '@rvoh/dream/types'
 import { VirtualAttributeStatement } from '../../openapi-renderer/helpers/dreamAttributeOpenapiShape.js'
 import { ParamsForOpts } from '../params.js'
 

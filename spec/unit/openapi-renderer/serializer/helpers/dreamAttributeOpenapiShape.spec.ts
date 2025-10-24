@@ -1,4 +1,4 @@
-import { OpenapiSchemaBody } from '@rvoh/dream'
+import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
 import {
   dreamColumnOpenapiShape,
   UseCustomOpenapiForJson,

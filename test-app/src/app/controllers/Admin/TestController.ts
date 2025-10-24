@@ -1,4 +1,4 @@
-import { OpenAPI } from '../../../../../src/index.js'
+import { OpenAPI } from '../../../../../src/package-exports/index.js'
 import AdminAuthedController from './AuthedController.js'
 
 export default class AdminTestController extends AdminAuthedController {

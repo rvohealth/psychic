@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Dream } from '@rvoh/dream'
+import { inferSerializerFromDreamOrViewModel, isDreamSerializer } from '@rvoh/dream/internal'
 import {
-  Dream,
-  DreamModelSerializerType,
   OpenapiPrimitiveTypes,
   OpenapiSchemaArray,
   OpenapiSchemaBase,
@@ -23,12 +23,9 @@ import {
   OpenapiSchemaShorthandExpressionSerializerRef,
   OpenapiShorthandAllTypes,
   OpenapiShorthandPrimitiveTypes,
-  SerializerCasing,
-  SimpleObjectSerializerType,
-  inferSerializerFromDreamOrViewModel,
-  isDreamSerializer,
   openapiShorthandPrimitiveTypes,
-} from '@rvoh/dream'
+} from '@rvoh/dream/openapi'
+import { DreamModelSerializerType, SerializerCasing, SimpleObjectSerializerType } from '@rvoh/dream/types'
 import NonSerializerSuppliedToSerializerBodySegment from '../error/openapi/NonSerializerSuppliedToSerializerBodySegment.js'
 import isArrayParamName from '../helpers/isArrayParamName.js'
 import { OpenapiEndpointResponse, OpenapiRenderOpts, OpenapiResponses } from './endpoint.js'

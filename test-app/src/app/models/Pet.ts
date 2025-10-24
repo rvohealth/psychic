@@ -1,4 +1,5 @@
-import { Decorators, DreamColumn, DreamSerializers } from '@rvoh/dream'
+import { Decorators } from '@rvoh/dream'
+import { DreamColumn, DreamSerializers } from '@rvoh/dream/types'
 import ApplicationModel from './ApplicationModel.js'
 import User from './User.js'
 

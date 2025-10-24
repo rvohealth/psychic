@@ -1,4 +1,5 @@
-import { hyphenize, standardizeFullyQualifiedModelName } from '@rvoh/dream'
+import { standardizeFullyQualifiedModelName } from '@rvoh/dream/internal'
+import { hyphenize } from '@rvoh/dream/utils'
 import { existsSync } from 'node:fs'
 import * as fs from 'node:fs/promises'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'

@@ -1,4 +1,4 @@
-import { UpdateableProperties } from '@rvoh/dream'
+import { UpdateableProperties } from '@rvoh/dream/types'
 import Post from '../../test-app/src/app/models/Post.js'
 import User from '../../test-app/src/app/models/User.js'
 

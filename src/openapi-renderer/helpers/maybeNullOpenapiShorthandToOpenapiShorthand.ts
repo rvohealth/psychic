@@ -1,4 +1,4 @@
-import { OpenapiShorthandPrimitiveBaseTypes, OpenapiShorthandPrimitiveTypes } from '@rvoh/dream'
+import { OpenapiShorthandPrimitiveBaseTypes, OpenapiShorthandPrimitiveTypes } from '@rvoh/dream/openapi'
 
 export default function maybeNullOpenapiShorthandToOpenapiShorthand(
   openapi: OpenapiShorthandPrimitiveTypes,
