@@ -1,0 +1,95 @@
+body {
+  padding: 0;
+}
+
+#root {
+  background: black;
+  height: calc(100vh - 40px);
+  padding: 20px;
+  font-family: monospace;
+  font-size: 18px;
+  overflow: hidden;
+}
+
+.table-container {
+  overflow: auto;
+}
+
+h3 {
+  text-align: right;
+}
+
+table {
+  background: rgb(11, 11, 11);
+  width: 100vw;
+}
+
+table td {
+  padding: 0 30px 0 10px;
+  line-height: 12px;
+}
+
+table thead td {
+  border-right: solid 2px white;
+  height: 10px;
+}
+
+td.primary-key {
+  color: teal;
+}
+
+.editable-column {
+  padding: 10px;
+  cursor: pointer;
+}
+
+.editable-column.changed {
+  background: rgb(71, 71, 5);
+}
+
+.column-display.text .text {
+  color: green;
+}
+
+.column-display.number .text {
+  color: yellow;
+}
+
+.column-display.enum .text {
+  color: rgb(12, 12, 231);
+}
+
+.editable-column.is-null .column-display .text {
+  color: gray;
+}
+
+.editable-column.changed .column-display .text {
+  color: yellow !important;
+}
+
+.editable-column:not(.is-array) .column-display.boolean .text {
+  border-radius: 3px;
+  background: rgb(101, 36, 255);
+  color: white;
+  padding: 3px;
+}
+
+.editable-column.is-array .column-display {
+  /* border: solid red thin; */
+  display: inline-block;
+  padding: 6px;
+  background: rgb(62, 62, 62);
+  border-radius: 3px;
+  margin-right: 5px;
+}
+
+.editable-column.is-array .column-display.boolean {
+  background: rgb(101, 36, 255);
+  color: white;
+  padding: 3px;
+}
+
+.editable-column.is-array .column-display .delete-btn {
+  /* color: red; */
+  margin-right: 5px;
+}

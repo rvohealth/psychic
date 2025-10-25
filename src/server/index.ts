@@ -12,6 +12,7 @@ import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
 } from './helpers/startPsychicServer.js'
+import PsychicStudio from '../studio/PsychicStudio.js'
 
 // const debugEnabled = debuglog('psychic').enabled
 
@@ -214,6 +215,7 @@ export default class PsychicServer {
 
   private async buildRoutes() {
     const r = new PsychicRouter(this.expressApp)
+    PsychicStudio.addStudioRoutes(r, '/studio')
     await PsychicApp.getOrFail().routesCb(r)
     r.commit()
   }
