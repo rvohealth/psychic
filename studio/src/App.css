@@ -43,23 +43,53 @@ td.primary-key {
   cursor: pointer;
 }
 
-.editable-column.is-null {
-  color: gray !important;
-}
-
 .editable-column.changed {
   background: rgb(71, 71, 5);
-  color: yellow !important;
 }
 
-.editable-column.text {
+.column-display.text .text {
   color: green;
 }
 
-.editable-column.number {
+.column-display.number .text {
   color: yellow;
 }
 
-.editable-column.enum {
+.column-display.enum .text {
   color: rgb(12, 12, 231);
+}
+
+.editable-column.is-null .column-display .text {
+  color: gray;
+}
+
+.editable-column.changed .column-display .text {
+  color: yellow !important;
+}
+
+.editable-column:not(.is-array) .column-display.boolean .text {
+  border-radius: 3px;
+  background: rgb(101, 36, 255);
+  color: white;
+  padding: 3px;
+}
+
+.editable-column.is-array .column-display {
+  /* border: solid red thin; */
+  display: inline-block;
+  padding: 6px;
+  background: rgb(62, 62, 62);
+  border-radius: 3px;
+  margin-right: 5px;
+}
+
+.editable-column.is-array .column-display.boolean {
+  background: rgb(101, 36, 255);
+  color: white;
+  padding: 3px;
+}
+
+.editable-column.is-array .column-display .delete-btn {
+  /* color: red; */
+  margin-right: 5px;
 }
