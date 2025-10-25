@@ -9,18 +9,22 @@ export default function TablePage() {
   const [rows, setRows] = useState<object[]>([])
   const [tableData, setTableData] = useState<TableData | null>(null)
   const [editColumn, setEditColumn] = useState<string | null>(null)
+  const [changes, setChanges] = useState<Record<string, unknown>>({})
+
+  const hasChanges = !!Object.keys(changes).length
 
   const tableName = params.tableName as string
 
-  useEffect(() => {
-    const fetchTableRows = async () => {
-      if (rowsFetched) return
+  const fetchTableRows = async () => {
+    const res = await Axios.get(`http://localhost:7777/studio/tables/${tableName}?page=${page}`)
+    setRows(res.data.results as object[])
+    setTableData({ schema: res.data.tableSchema as TableSchema, primaryKey: res.data.primaryKey as string })
+  }
 
-      setRowsFetched(true)
-      const res = await Axios.get(`http://localhost:7777/studio/tables/${tableName}?page=${page}`)
-      setRows(res.data.results as object[])
-      setTableData({ schema: res.data.tableSchema as TableSchema, primaryKey: res.data.primaryKey as string })
-    }
+  useEffect(() => {
+    if (rowsFetched) return
+    setRowsFetched(true)
+
     void fetchTableRows()
   }, [rowsFetched, rows, page])
 
@@ -32,7 +36,28 @@ export default function TablePage() {
 
   return (
     <>
-      <h3>{tableName}</h3>
+      <div style={{ textAlign: 'right' }}>
+        {hasChanges ? (
+          <button
+            style={{ marginRight: 10 }}
+            onClick={async () => {
+              for (const primaryKeyValue of Object.keys(changes)) {
+                await Axios.patch(`http://localhost:7777/studio/tables/${tableName}`, {
+                  ...changes[primaryKeyValue]!,
+                  [tableData.primaryKey]: primaryKeyValue,
+                })
+              }
+
+              await fetchTableRows()
+              setEditColumn(null)
+              setChanges({})
+            }}
+          >
+            save
+          </button>
+        ) : null}
+        <h3 style={{ display: 'inline-block' }}>{tableName}</h3>
+      </div>
       <div className="table-container">
         <table>
           <thead>
@@ -40,16 +65,20 @@ export default function TablePage() {
             {nonPrimaryKeys.map(columnName => (
               <td key={columnName}>{columnName}</td>
             ))}
-            <td>(for saving)</td>
           </thead>
           <tbody>
             {rows.map(row => (
               <TableRow
                 row={row}
                 tableData={tableData!}
-                tableName={tableName}
                 editColumn={editColumn}
                 onChangeEditColumn={column => setEditColumn(column)}
+                onChange={changes => {
+                  setChanges({
+                    ...changes,
+                  })
+                }}
+                changes={changes}
               />
             ))}
           </tbody>
@@ -62,24 +91,23 @@ export default function TablePage() {
 function TableRow({
   row,
   tableData,
-  tableName,
   editColumn,
   onChangeEditColumn,
+  onChange,
+  changes,
 }: {
   row: object
   tableData: TableData
-  tableName: string
   editColumn: string | null
   onChangeEditColumn: (columnName: string | null) => void
+  onChange: (val: Record<string, unknown>) => void
+  changes: Record<string, unknown>
 }) {
-  const [changes, setChanges] = useState<Record<string, unknown>>({})
-
   const nonPrimaryKeys = Object.keys(tableData.schema.columns).filter(
     columnName => columnName !== tableData.primaryKey,
   )
   const primaryKeyValue = row[tableData.primaryKey as keyof typeof row]
-
-  const hasChanges = !!Object.keys(changes).length
+  const columnChanges = changes[primaryKeyValue] || {}
 
   return (
     <tr>
@@ -87,7 +115,7 @@ function TableRow({
 
       {nonPrimaryKeys.map(columnName => {
         const originalValue = row[columnName as keyof typeof row]
-        const changedValue = changes[columnName]
+        const changedValue = columnChanges[columnName as keyof typeof columnChanges]
         const columnData = tableData.schema.columns[columnName] as TableColumnSchema
 
         return (
@@ -97,31 +125,18 @@ function TableRow({
             columnData={columnData}
             editMode={columnName === editColumn}
             onChange={val => {
-              setChanges({
+              onChange({
                 ...changes,
-                [columnName]: val,
+                [primaryKeyValue]: {
+                  ...(changes[primaryKeyValue] || {}),
+                  [columnName]: val,
+                },
               })
             }}
             onChangeEdit={() => onChangeEditColumn(columnName === editColumn ? null : columnName)}
           />
         )
       })}
-      <td>
-        {hasChanges ? (
-          <button
-            onClick={async () => {
-              await Axios.patch(`http://localhost:7777/studio/tables/${tableName}`, {
-                ...changes,
-                [tableData.primaryKey]: primaryKeyValue,
-              })
-            }}
-          >
-            save
-          </button>
-        ) : (
-          ''
-        )}
-      </td>
     </tr>
   )
 }
@@ -138,76 +153,38 @@ function TableColumn({
   columnData: TableColumnSchema
   changed: boolean
   editMode: boolean
-  onChange: (val: string) => void
+  onChange: (val: string | unknown[]) => void
   onChangeEdit: (newEdit: boolean) => void
 }) {
   if (columnData.isArray) {
     return (
       <td>
-        <ArrayColumn columnValues={columnValue as unknown[]} />
+        <ArrayColumn
+          columnValues={columnValue as unknown[]}
+          onChangeEdit={onChangeEdit}
+          onChange={onChange}
+          changed={changed}
+          editMode={editMode}
+          columnType={columnType(columnData)}
+          columnData={columnData}
+        />
       </td>
     )
   }
 
-  switch (columnData.dbType) {
-    case 'bigint':
-    case 'number':
-    case 'integer':
-    case 'decimal':
-      return (
-        <td>
-          <EditableColumn
-            columnValue={columnValue as string}
-            editMode={editMode}
-            onChangeEdit={onChangeEdit}
-            columnType="number"
-            hasChanged={changed}
-          >
-            <input type="number" value={columnValue as string} onChange={e => onChange(e.target.value)} />
-          </EditableColumn>
-        </td>
-      )
-      break
-
-    default:
-      if (columnData.enumValues?.length) {
-        // enums should always be editMode=true, so the select
-        // box can always stay visible.
-        return (
-          <td>
-            <EditableColumn
-              columnValue={columnValue as string}
-              editMode={true}
-              onChangeEdit={onChangeEdit}
-              columnType="enum"
-              hasChanged={changed}
-            >
-              <select onChange={e => onChange(e.target.value)}>
-                {columnData.enumValues.map(enumValue => (
-                  <option selected={columnValue === enumValue} key={enumValue}>
-                    {enumValue}
-                  </option>
-                ))}
-              </select>
-            </EditableColumn>
-          </td>
-        )
-      } else {
-        return (
-          <td>
-            <EditableColumn
-              columnValue={columnValue as string}
-              editMode={editMode}
-              onChangeEdit={onChangeEdit}
-              columnType="text"
-              hasChanged={changed}
-            >
-              <input type="text" value={columnValue as string} onChange={e => onChange(e.target.value)} />
-            </EditableColumn>
-          </td>
-        )
-      }
-  }
+  return (
+    <td>
+      <EditableColumn
+        columnValue={columnValue as string}
+        editMode={editMode}
+        onChangeEdit={onChangeEdit}
+        columnType={columnType(columnData)}
+        hasChanged={changed}
+      >
+        <ColumnInput columnData={columnData} columnValue={columnValue} onChange={onChange} />
+      </EditableColumn>
+    </td>
+  )
 }
 
 function EditableColumn({
@@ -246,21 +223,108 @@ function EditableColumn({
 function ArrayColumn({
   columnValues,
   onChange,
+  onChangeEdit,
+  changed,
+  editMode,
+  columnType,
+  columnData,
 }: {
-  columnValues: unknown[]
+  columnValues: unknown[] | null
   onChange: (arr: unknown[]) => void
+  onChangeEdit: (newEdit: boolean) => void
+  changed: boolean
+  editMode: boolean
+  columnType: string
+  columnData: TableColumnSchema
 }) {
+  const [currentEditIndex, setCurrentEditIndex] = useState<number | null>(null)
+  const defaultText = 'untitled'
+
   return (
-    <div className="editable-column">
-      {(columnValues || []).map(value => (
-        <div>
-          <div>&times;</div>
-          <div>{value as string}</div>
-        </div>
-      ))}
-      <button>+</button>
+    <div className={`editable-column ${columnType} ${changed ? 'changed' : ''}`}>
+      {(columnValues || []).map((value, index) =>
+        editMode && index === currentEditIndex ? (
+          <ColumnInput
+            key={index}
+            columnData={columnData}
+            columnValue={value}
+            onChange={newVal =>
+              onChange((columnValues || [])?.map((origVal, i) => (i === index ? newVal : origVal)))
+            }
+          />
+        ) : (
+          <div key={index}>
+            <span onClick={() => onChange(columnValues!.filter((_, i) => i !== index))}>&times;</span>
+            <span
+              onClick={() => {
+                onChangeEdit(true)
+                setCurrentEditIndex(index)
+              }}
+            >
+              {value as string}
+            </span>
+          </div>
+        ),
+      )}
+      <button
+        onClick={() => {
+          setCurrentEditIndex((columnValues || []).length + 1)
+          onChange([...(columnValues || []), defaultText])
+          onChangeEdit(true)
+        }}
+      >
+        +
+      </button>
     </div>
   )
+}
+
+function ColumnInput({
+  columnValue,
+  columnData,
+  onChange,
+}: {
+  columnValue: unknown
+  columnData: TableColumnSchema
+  onChange: (val: string | unknown[]) => void
+}) {
+  switch (columnData.dbType) {
+    case 'bigint':
+    case 'number':
+    case 'integer':
+    case 'decimal':
+      return <input type="number" value={columnValue as string} onChange={e => onChange(e.target.value)} />
+
+    default:
+      if (columnData.enumValues?.length) {
+        // enums should always be editMode=true, so the select
+        // box can always stay visible.
+        return (
+          <select onChange={e => onChange(e.target.value)}>
+            {columnData.enumValues.map(enumValue => (
+              <option selected={columnValue === enumValue} key={enumValue}>
+                {enumValue}
+              </option>
+            ))}
+          </select>
+        )
+      } else {
+        return <input type="text" value={columnValue as string} onChange={e => onChange(e.target.value)} />
+      }
+  }
+}
+
+function columnType(columnData: TableColumnSchema) {
+  switch (columnData.dbType) {
+    case 'bigint':
+    case 'number':
+    case 'integer':
+    case 'decimal':
+      return 'number'
+
+    default:
+      return 'text'
+  }
 }
 
 interface TableData {
