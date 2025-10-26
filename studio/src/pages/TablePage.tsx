@@ -18,6 +18,8 @@ export default function TablePage() {
   const [changes, setChanges] = useState<Record<string, unknown>>({})
   const [newRecords, setNewRecords] = useState<Record<string, unknown>[]>([])
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
+  const [orderColumn, setOrderColumn] = useState<string | null>('createdAt')
+  const [orderDir, setOrderDir] = useState<'asc' | 'desc'>('asc')
   const resizingColumn = useRef<string | null>(null)
   const startX = useRef<number>(0)
   const startWidth = useRef<number>(0)
@@ -27,7 +29,13 @@ export default function TablePage() {
   const tableName = params.tableName as string
 
   const fetchTableRows = async () => {
-    const res = await Axios.get(`http://localhost:7777/studio/tables/${tableName}?page=${page}`)
+    const res = await Axios.get(`http://localhost:7777/studio/tables/${tableName}`, {
+      params: {
+        page,
+        orderColumn,
+        orderDir,
+      },
+    })
     setRows(res.data.results as object[])
     setTableData({ schema: res.data.tableSchema as TableSchema, primaryKey: res.data.primaryKey as string })
   }
@@ -38,6 +46,10 @@ export default function TablePage() {
 
     void fetchTableRows()
   }, [rowsFetched, rows, page])
+
+  useEffect(() => {
+    void fetchTableRows()
+  }, [page, orderDir, orderColumn])
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -81,41 +93,45 @@ export default function TablePage() {
 
   return (
     <>
-      <div style={{ textAlign: 'right' }}>
-        {hasChanges ? (
+      <div>
+        <div className="left" style={{ width: 200, display: 'inline-block' }}>
+          {hasChanges ? (
+            <button
+              style={{ marginRight: 10 }}
+              onClick={async () => {
+                for (const primaryKeyValue of Object.keys(changes)) {
+                  await Axios.patch(`http://localhost:7777/studio/tables/${tableName}`, {
+                    ...changes[primaryKeyValue]!,
+                    [tableData.primaryKey]: primaryKeyValue,
+                  })
+                }
+
+                for (const newRecord of newRecords) {
+                  await Axios.post(`http://localhost:7777/studio/tables/${tableName}`, newRecord)
+                }
+
+                await fetchTableRows()
+                setEditColumn(null)
+                setChanges({})
+                setNewRecords([])
+              }}
+            >
+              save
+            </button>
+          ) : null}
+        </div>
+
+        <div style={{ textAlign: 'right', display: 'inline-block', width: 'calc(100% - 200px)' }}>
+          <h3 style={{ display: 'inline-block' }}>{tableName}</h3>
+
           <button
-            style={{ marginRight: 10 }}
-            onClick={async () => {
-              for (const primaryKeyValue of Object.keys(changes)) {
-                await Axios.patch(`http://localhost:7777/studio/tables/${tableName}`, {
-                  ...changes[primaryKeyValue]!,
-                  [tableData.primaryKey]: primaryKeyValue,
-                })
-              }
-
-              for (const newRecord of newRecords) {
-                await Axios.post(`http://localhost:7777/studio/tables/${tableName}`, newRecord)
-              }
-
-              await fetchTableRows()
-              setEditColumn(null)
-              setChanges({})
-              setNewRecords([])
+            onClick={() => {
+              setNewRecords([...newRecords, fillTableDefaultValues({ tableData })])
             }}
           >
-            save
+            +
           </button>
-        ) : null}
-
-        <h3 style={{ display: 'inline-block' }}>{tableName}</h3>
-
-        <button
-          onClick={() => {
-            setNewRecords([...newRecords, fillTableDefaultValues({ tableData })])
-          }}
-        >
-          +
-        </button>
+        </div>
       </div>
 
       <div className="table-container">
@@ -158,9 +174,21 @@ export default function TablePage() {
                     position: 'relative',
                     width: columnWidths[columnName] || columnWidth(columnName),
                     minWidth: 50,
+                    cursor: 'pointer',
                   }}
                 >
-                  {columnName}
+                  <span
+                    onClick={() => {
+                      setOrderDir(orderDir === 'asc' && orderColumn === columnName ? 'desc' : 'asc')
+                      setOrderColumn(columnName)
+                    }}
+                  >
+                    <span style={{ marginRight: 10 }}>
+                      {orderColumn === columnName ? (orderDir === 'asc' ? '↑' : '↓') : null}
+                    </span>
+                    {columnName}
+                  </span>
+
                   <div
                     style={{
                       position: 'absolute',

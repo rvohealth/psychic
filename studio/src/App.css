@@ -1,42 +1,13 @@
-body {
-  padding: 0;
-  font-size: 16px;
-}
-
-input {
-  font-size: 16px;
-  border: none;
-}
-
-input:focus {
-  outline: none;
-}
-
-#root {
-  background: black;
-  height: calc(100vh - 40px);
-  padding: 20px;
-  font-family: monospace;
-  font-size: 18px;
-  overflow: hidden;
-}
-
 .table-container {
   overflow: auto;
 }
 
-h3 {
-  text-align: right;
-}
-
 table {
-  background: rgb(11, 11, 11);
   width: 100vw;
 }
 
 table td {
-  padding: 0 30px 0 10px;
-  line-height: 12px;
+  line-height: 13px;
   word-break: break-word;
   max-height: 80px;
   text-overflow: ellipsis;
@@ -60,6 +31,17 @@ td.primary-key {
 
 .editable-column.changed {
   background: rgb(71, 71, 5);
+}
+
+.column-display {
+  max-height: 40px;
+  overflow: hidden;
+}
+
+.column-display .text {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-height: 40px;
 }
 
 .column-display.text .text {
@@ -105,7 +87,6 @@ td.primary-key {
 }
 
 .editable-column.is-array .column-display .delete-btn {
-  /* color: red; */
   margin-right: 5px;
 }
 
@@ -117,15 +98,6 @@ td.primary-key {
   border: solid white 2px;
   border-radius: 3px;
 }
-/* .column-input {
-  margin-top: -40px;
-  margin-left: -20px;
-  position: relative;
-  background: rgb(0, 0, 0);
-  padding: 20px;
-  width: 150px;
-  border: solid 2px white;
-} */
 
 .column-input input {
   background: transparent;

@@ -241,7 +241,6 @@ export default class Params {
                   returnObj[columnName as keyof typeof returnObj] = ['expected an array of enum values']
 
                 if (columnMetadata.allowNull && paramValue === null) {
-                  console.log({ columnName })
                   returnObj[columnName as keyof typeof returnObj] = null
                 } else {
                   returnObj[columnName as keyof typeof returnObj] = ((paramValue || []) as string[]).map(

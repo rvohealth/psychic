@@ -8,21 +8,24 @@ export default class PsychicStudioTablesController extends PsychicStudioControll
 
   public async show() {
     const modelClass = this.modelClass
-    if (!modelClass) return this.notFound()
 
-    const schema = this.modelSchema
+    const orderDir = this.castParam('orderDir', 'string', { enum: ['asc', 'desc'], allowNull: true }) || 'asc'
+    const orderColumn =
+      this.castParam('orderColumn', 'string', { allowNull: true }) ||
+      (modelClass.prototype['_createdAtField'] as string | undefined) ||
+      'createdAt'
 
-    const paginatedData = await modelClass
-      .order((modelClass.prototype['_createdAtField'] as string | undefined) || 'createdAt')
-      .paginate({
-        page: this.castParam('page', 'integer', { allowNull: true }) || 1,
-        pageSize: 100,
-      })
+    console.log({ orderColumn, orderDir })
+
+    const paginatedData = await modelClass.order({ [orderColumn]: orderDir }).paginate({
+      page: this.castParam('page', 'integer', { allowNull: true }) || 1,
+      pageSize: 100,
+    })
 
     this.ok({
       ...paginatedData,
       results: paginatedData.results.map(model => model.getAttributes()),
-      tableSchema: cloneDeepSafe(schema[this.tableName]),
+      tableSchema: cloneDeepSafe(this.modelSchema[this.tableName]),
       primaryKey: modelClass.primaryKey as string,
     })
   }

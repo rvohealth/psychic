@@ -38,7 +38,7 @@ export default function ColumnDisplay({
         </span>
       )}
       <span className="text" onClick={onClick}>
-        {JSON.stringify(displayValue as string)}
+        {typeof displayValue === 'object' ? JSON.stringify(displayValue) : (displayValue as string)}
       </span>
     </div>
   )
