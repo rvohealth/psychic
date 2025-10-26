@@ -69,6 +69,7 @@ td.primary-key {
   background: rgb(101, 36, 255);
   color: white;
   padding: 3px;
+  line-height: 27px;
 }
 
 .editable-column.is-array .column-display {
@@ -101,4 +102,9 @@ td.primary-key {
 
 .column-input input {
   background: transparent;
+}
+
+.date-input input {
+  font-size: 20px;
+  margin-bottom: 10px;
 }

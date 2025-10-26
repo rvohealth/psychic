@@ -45,7 +45,7 @@ export default function TablePage() {
     setRowsFetched(true)
 
     void fetchTableRows()
-  }, [rowsFetched, rows, page])
+  }, [rowsFetched, rows])
 
   useEffect(() => {
     void fetchTableRows()

@@ -67,6 +67,58 @@ function ColumnInputContents({
         />
       )
 
+    case 'date':
+      return (
+        <div className="date-input">
+          <input
+            type="text"
+            value={columnValue as string}
+            onChange={e => onChange(e.target.value)}
+            onKeyDown={e => {
+              if (!e.shiftKey && e.key === 'Enter') {
+                onSubmit()
+              }
+            }}
+          />
+          <div>
+            <button
+              onClick={() => {
+                onChange(new Date().toISOString().substring(0, 10))
+              }}
+            >
+              TODAY
+            </button>
+          </div>
+        </div>
+      )
+
+    case 'timestamp':
+    case 'timestamp with time zone':
+    case 'timestamp without time zone':
+      return (
+        <div className="date-input">
+          <input
+            type="text"
+            value={columnValue as string}
+            onChange={e => onChange(e.target.value)}
+            onKeyDown={e => {
+              if (!e.shiftKey && e.key === 'Enter') {
+                onSubmit()
+              }
+            }}
+          />
+          <div>
+            <button
+              onClick={() => {
+                onChange(new Date().toISOString())
+              }}
+            >
+              NOW
+            </button>
+          </div>
+        </div>
+      )
+
     default:
       if (columnData.enumValues?.length) {
         // enums should always be editMode=true, so the select
