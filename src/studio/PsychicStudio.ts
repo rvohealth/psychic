@@ -10,6 +10,7 @@ export default class PsychicStudio {
 
     router.get(studioRoute(namespace, 'tables'), PsychicStudioTablesController, 'index')
     router.get(studioRoute(namespace, 'tables/:tableName'), PsychicStudioTablesController, 'show')
+    router.post(studioRoute(namespace, 'tables/:tableName'), PsychicStudioTablesController, 'create')
     router.patch(studioRoute(namespace, 'tables/:tableName'), PsychicStudioTablesController, 'update')
   }
 }

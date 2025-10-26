@@ -22,7 +22,7 @@ export default function TableRow({
   const nonPrimaryKeys = Object.keys(tableData.schema.columns).filter(
     columnName => columnName !== tableData.primaryKey,
   )
-  const primaryKeyValue = row[tableData.primaryKey as keyof typeof row]
+  const primaryKeyValue = row[tableData.primaryKey as keyof typeof row] || null
   const columnChanges = changes[primaryKeyValue] || {}
 
   return (
@@ -52,13 +52,19 @@ export default function TableRow({
             columnData={columnData}
             editMode={columnName === editColumn}
             onChange={val => {
-              onChange({
-                ...changes,
-                [primaryKeyValue]: {
-                  ...(changes[primaryKeyValue] || {}),
+              if (primaryKeyValue) {
+                onChange({
+                  ...changes,
+                  [primaryKeyValue]: {
+                    ...(changes[primaryKeyValue] || {}),
+                    [columnName]: val,
+                  },
+                })
+              } else {
+                onChange({
                   [columnName]: val,
-                },
-              })
+                })
+              }
             }}
             onChangeEdit={() => onChangeEditColumn(columnName === editColumn ? null : columnName)}
             width={columnWidths[columnName] || minWidth}

@@ -4,6 +4,7 @@ import { useParams } from 'react-router'
 import TableRow from '../components/table/TableRow'
 import type { TableData, TableSchema } from '../types/table'
 import columnWidth from '../helpers/columnWidth'
+import fillTableDefaultValues from '../helpers/fillTableDefaultValues'
 
 export default function TablePage() {
   const params = useParams()
@@ -12,13 +13,16 @@ export default function TablePage() {
   const [rows, setRows] = useState<object[]>([])
   const [tableData, setTableData] = useState<TableData | null>(null)
   const [editColumn, setEditColumn] = useState<string | null>(null)
+  const [editPrimaryKey, setEditPrimaryKey] = useState<string | null>(null)
+  const [newRecordEditIndex, setNewRecordEditIndex] = useState<number | null>(null)
   const [changes, setChanges] = useState<Record<string, unknown>>({})
+  const [newRecords, setNewRecords] = useState<Record<string, unknown>[]>([])
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
   const resizingColumn = useRef<string | null>(null)
   const startX = useRef<number>(0)
   const startWidth = useRef<number>(0)
 
-  const hasChanges = !!Object.keys(changes).length
+  const hasChanges = !!Object.keys(changes).length || !!newRecords.length
 
   const tableName = params.tableName as string
 
@@ -40,7 +44,6 @@ export default function TablePage() {
       if (resizingColumn.current) {
         const diff = e.clientX - startX.current
         const newWidth = Math.max(50, startWidth.current + diff)
-        console.log('Moving:', resizingColumn.current, 'New width:', newWidth)
         setColumnWidths(prev => ({
           ...prev,
           [resizingColumn.current!]: newWidth,
@@ -49,9 +52,6 @@ export default function TablePage() {
     }
 
     const handleMouseUp = () => {
-      if (resizingColumn.current) {
-        console.log('Resize ended for column:', resizingColumn.current)
-      }
       resizingColumn.current = null
     }
 
@@ -73,12 +73,10 @@ export default function TablePage() {
   const handleResizeStart = (columnName: string, e: React.MouseEvent) => {
     e.preventDefault()
     e.stopPropagation()
-    console.log('Resize started for column:', columnName)
     resizingColumn.current = columnName
     startX.current = e.clientX
     const currentWidth = columnWidths[columnName] || 150
     startWidth.current = currentWidth
-    console.log('Start width:', currentWidth, 'Start X:', e.clientX)
   }
 
   return (
@@ -95,16 +93,31 @@ export default function TablePage() {
                 })
               }
 
+              for (const newRecord of newRecords) {
+                await Axios.post(`http://localhost:7777/studio/tables/${tableName}`, newRecord)
+              }
+
               await fetchTableRows()
               setEditColumn(null)
               setChanges({})
+              setNewRecords([])
             }}
           >
             save
           </button>
         ) : null}
+
         <h3 style={{ display: 'inline-block' }}>{tableName}</h3>
+
+        <button
+          onClick={() => {
+            setNewRecords([...newRecords, fillTableDefaultValues({ tableData })])
+          }}
+        >
+          +
+        </button>
       </div>
+
       <div className="table-container">
         <table style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
@@ -173,17 +186,44 @@ export default function TablePage() {
             </tr>
           </thead>
           <tbody>
-            {rows.map((row, index) => (
+            {rows.map((row, index) => {
+              const primaryKeyValue = row[tableData.primaryKey as keyof typeof row]
+
+              return (
+                <TableRow
+                  key={index}
+                  row={row}
+                  tableData={tableData!}
+                  editColumn={primaryKeyValue === editPrimaryKey ? editColumn : null}
+                  onChangeEditColumn={column => {
+                    setEditColumn(column)
+                    setEditPrimaryKey(primaryKeyValue)
+                    setNewRecordEditIndex(null)
+                  }}
+                  onChange={changes => {
+                    setChanges({
+                      ...changes,
+                    })
+                  }}
+                  changes={changes}
+                  columnWidths={columnWidths}
+                />
+              )
+            })}
+
+            {newRecords.map((record, index) => (
               <TableRow
-                key={index}
-                row={row}
+                key={`new-record-${index}`}
+                row={record}
                 tableData={tableData!}
-                editColumn={editColumn}
-                onChangeEditColumn={column => setEditColumn(column)}
+                editColumn={newRecordEditIndex === index ? editColumn : null}
+                onChangeEditColumn={column => {
+                  setEditColumn(column)
+                  setNewRecordEditIndex(index)
+                  setEditPrimaryKey(null)
+                }}
                 onChange={changes => {
-                  setChanges({
-                    ...changes,
-                  })
+                  setNewRecords(newRecords.map((r, i) => (i === index ? { ...r, ...changes } : r)))
                 }}
                 changes={changes}
                 columnWidths={columnWidths}

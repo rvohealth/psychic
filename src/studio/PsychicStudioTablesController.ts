@@ -1,22 +1,16 @@
-import { cloneDeepSafe, DreamApp, uniq } from '@rvoh/dream'
+import { cloneDeepSafe, Dream, DreamApp, uniq } from '@rvoh/dream'
 import PsychicStudioController from './PsychicStudioController.js'
 
 export default class PsychicStudioTablesController extends PsychicStudioController {
   public index() {
-    const models = Object.values(DreamApp.getOrFail().models)
-    const tableNames = uniq(models.map(modelClass => modelClass.table))
-    this.ok(tableNames)
+    this.ok(this.tableNames)
   }
 
   public async show() {
-    const models = Object.values(DreamApp.getOrFail().models)
-    const tableNames = uniq(models.map(modelClass => modelClass.table))
-
-    const table = this.castParam('tableName', 'string', { enum: tableNames })
-    const modelClass = models.find(modelClass => modelClass.table === table && !modelClass['isSTIChild'])
+    const modelClass = this.modelClass
     if (!modelClass) return this.notFound()
 
-    const schema = modelClass.prototype.schema as Record<typeof table, object>
+    const schema = this.modelSchema
 
     const paginatedData = await modelClass
       .order((modelClass.prototype['_createdAtField'] as string | undefined) || 'createdAt')
@@ -28,23 +22,51 @@ export default class PsychicStudioTablesController extends PsychicStudioControll
     this.ok({
       ...paginatedData,
       results: paginatedData.results.map(model => model.getAttributes()),
-      tableSchema: cloneDeepSafe(schema[table]),
+      tableSchema: cloneDeepSafe(schema[this.tableName]),
       primaryKey: modelClass.primaryKey as string,
     })
   }
 
+  public async create() {
+    const modelClass = this.modelClass
+    try {
+      await modelClass.create(this.paramsFor(modelClass))
+    } catch (err) {
+      console.log(err)
+    }
+    this.noContent()
+  }
+
   public async update() {
-    const models = Object.values(DreamApp.getOrFail().models)
-    const tableNames = uniq(models.map(modelClass => modelClass.table))
-
-    const table = this.castParam('tableName', 'string', { enum: tableNames })
-    const modelClass = models.find(modelClass => modelClass.table === table && !modelClass['isSTIChild'])
-    if (!modelClass) return this.notFound()
-
+    const modelClass = this.modelClass
     const id = this.params[modelClass.primaryKey as keyof typeof this.params]
     const model = await modelClass.findOrFail(id)
     await model.update(this.paramsFor(modelClass))
 
     this.noContent()
+  }
+
+  private get tableName() {
+    return this.castParam('tableName', 'string', { enum: this.tableNames })
+  }
+
+  private get tableNames() {
+    const models = Object.values(DreamApp.getOrFail().models)
+    return uniq(models.map(modelClass => modelClass.table))
+  }
+
+  private get modelClass(): typeof Dream {
+    const models = Object.values(DreamApp.getOrFail().models)
+    const modelClass = models.find(
+      modelClass => modelClass.table === this.tableName && !modelClass['isSTIChild'],
+    ) as typeof Dream
+
+    if (!modelClass) this.notFound()
+
+    return modelClass
+  }
+
+  private get modelSchema() {
+    return this.modelClass.prototype.schema as Record<typeof this.tableName, object>
   }
 }
