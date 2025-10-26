@@ -120,3 +120,69 @@ td.primary-key {
   overflow-y: auto;
   overflow-x: hidden;
 }
+
+.filter-modal {
+  width: 100vw;
+  height: 100vh;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: absolute;
+  top: 0;
+  left: 0;
+  z-index: 2;
+}
+
+.filter-modal .backdrop {
+  width: 100vw;
+  height: 100vh;
+  background: rgba(0, 0, 0, 0.8);
+  position: absolute;
+  top: 0;
+  left: 0;
+}
+
+.filter-modal .contents {
+  width: 40vw;
+  height: 50vh;
+  background: black;
+  position: absolute;
+  z-index: 3;
+  padding: 20px;
+  border-radius: 4px;
+  border: solid white 4px;
+  overflow: auto;
+}
+
+.filter-display-container {
+  padding: 10px 0;
+  display: flex;
+}
+
+.filter-display {
+  display: flex;
+  border: solid 2px white;
+  /* background: gray; */
+  padding: 5px;
+  /* display: inline-block; */
+  margin-right: 10px;
+  border-radius: 4px;
+  cursor: pointer;
+}
+
+.filter-display .column-name {
+  color: rgb(32, 192, 32);
+}
+
+.filter-display .operator {
+  color: rgb(161, 161, 161);
+}
+
+.filter-display .value {
+  color: white;
+  height: 25px;
+  white-space: nowrap;
+  text-overflow: ellipsis;
+  max-width: 150px;
+  overflow: hidden;
+}

@@ -6,6 +6,7 @@ body {
   min-height: 100vh;
   padding: 0;
   font-size: 16px;
+  background: black;
 }
 
 input {
@@ -23,7 +24,6 @@ h3 {
 }
 
 #root {
-  background: black;
   height: calc(100vh - 40px);
   padding: 20px;
   font-family: monospace;

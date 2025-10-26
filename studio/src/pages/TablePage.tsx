@@ -5,6 +5,7 @@ import TableRow from '../components/table/TableRow'
 import type { TableData, TableSchema } from '../types/table'
 import columnWidth from '../helpers/columnWidth'
 import fillTableDefaultValues from '../helpers/fillTableDefaultValues'
+import Filters from '../components/filter/Filters'
 
 export default function TablePage() {
   const params = useParams()
@@ -155,6 +156,8 @@ export default function TablePage() {
         </div>
       </div>
 
+      <Filters tableData={tableData!} />
+
       <div
         className="table-container"
         onClick={e => {
@@ -169,6 +172,9 @@ export default function TablePage() {
                   position: 'relative',
                   width: columnWidths[tableData.primaryKey] || 150,
                   minWidth: 50,
+                  whiteSpace: 'nowrap',
+                  overflow: 'hidden',
+                  textOverflow: 'ellipsis',
                 }}
               >
                 {tableData.primaryKey}
@@ -201,6 +207,9 @@ export default function TablePage() {
                     width: columnWidths[columnName] || columnWidth(columnName),
                     minWidth: 50,
                     cursor: 'pointer',
+                    whiteSpace: 'nowrap',
+                    overflow: 'hidden',
+                    textOverflow: 'ellipsis',
                   }}
                 >
                   <span
