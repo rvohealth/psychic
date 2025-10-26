@@ -38,7 +38,14 @@ export default function EditableColumn({
           />
         </div>
       )}
-      {editMode && <ColumnInput columnData={columnData} columnValue={columnValue} onChange={onChange} />}
+      {editMode && (
+        <ColumnInput
+          columnData={columnData}
+          columnValue={columnValue}
+          onChange={onChange}
+          onSubmit={() => onChangeEdit(false)}
+        />
+      )}
     </div>
   )
 }

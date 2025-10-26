@@ -35,6 +35,7 @@ export default function EditableArrayColumn({
             onChange={newVal =>
               onChange((columnValues || [])?.map((origVal, i) => (i === index ? newVal : origVal)))
             }
+            onSubmit={() => onChangeEdit(false)}
           />
         ) : (
           <ColumnDisplay

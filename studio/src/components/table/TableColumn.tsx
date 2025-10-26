@@ -10,6 +10,7 @@ export default function TableColumn({
   editMode,
   onChange,
   onChangeEdit,
+  width,
 }: {
   columnValue: unknown
   columnData: TableColumnSchema
@@ -17,10 +18,17 @@ export default function TableColumn({
   editMode: boolean
   onChange: (val: string | boolean | null | unknown[]) => void
   onChangeEdit: (newEdit: boolean) => void
+  width: number
 }) {
+  const cellStyle = {
+    width,
+    minWidth: 50,
+    maxWidth: width,
+  }
+
   if (columnData.isArray) {
     return (
-      <td>
+      <td style={cellStyle}>
         <EditableArrayColumn
           columnValues={columnValue as unknown[]}
           onChangeEdit={onChangeEdit}
@@ -35,7 +43,7 @@ export default function TableColumn({
   }
 
   return (
-    <td>
+    <td style={cellStyle}>
       <EditableColumn
         columnValue={columnValue as string}
         editMode={editMode}

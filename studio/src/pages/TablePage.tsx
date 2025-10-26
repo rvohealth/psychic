@@ -1,8 +1,9 @@
 import Axios from 'axios'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useParams } from 'react-router'
 import TableRow from '../components/table/TableRow'
 import type { TableData, TableSchema } from '../types/table'
+import columnWidth from '../helpers/columnWidth'
 
 export default function TablePage() {
   const params = useParams()
@@ -12,6 +13,10 @@ export default function TablePage() {
   const [tableData, setTableData] = useState<TableData | null>(null)
   const [editColumn, setEditColumn] = useState<string | null>(null)
   const [changes, setChanges] = useState<Record<string, unknown>>({})
+  const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
+  const resizingColumn = useRef<string | null>(null)
+  const startX = useRef<number>(0)
+  const startWidth = useRef<number>(0)
 
   const hasChanges = !!Object.keys(changes).length
 
@@ -30,11 +35,51 @@ export default function TablePage() {
     void fetchTableRows()
   }, [rowsFetched, rows, page])
 
+  useEffect(() => {
+    const handleMouseMove = (e: MouseEvent) => {
+      if (resizingColumn.current) {
+        const diff = e.clientX - startX.current
+        const newWidth = Math.max(50, startWidth.current + diff)
+        console.log('Moving:', resizingColumn.current, 'New width:', newWidth)
+        setColumnWidths(prev => ({
+          ...prev,
+          [resizingColumn.current!]: newWidth,
+        }))
+      }
+    }
+
+    const handleMouseUp = () => {
+      if (resizingColumn.current) {
+        console.log('Resize ended for column:', resizingColumn.current)
+      }
+      resizingColumn.current = null
+    }
+
+    document.addEventListener('mousemove', handleMouseMove)
+    document.addEventListener('mouseup', handleMouseUp)
+
+    return () => {
+      document.removeEventListener('mousemove', handleMouseMove)
+      document.removeEventListener('mouseup', handleMouseUp)
+    }
+  }, [])
+
   if (!tableData) return <div>loading...</div>
 
   const nonPrimaryKeys = Object.keys(tableData.schema.columns).filter(
     columnName => columnName !== tableData.primaryKey,
   )
+
+  const handleResizeStart = (columnName: string, e: React.MouseEvent) => {
+    e.preventDefault()
+    e.stopPropagation()
+    console.log('Resize started for column:', columnName)
+    resizingColumn.current = columnName
+    startX.current = e.clientX
+    const currentWidth = columnWidths[columnName] || 150
+    startWidth.current = currentWidth
+    console.log('Start width:', currentWidth, 'Start X:', e.clientX)
+  }
 
   return (
     <>
@@ -61,16 +106,76 @@ export default function TablePage() {
         <h3 style={{ display: 'inline-block' }}>{tableName}</h3>
       </div>
       <div className="table-container">
-        <table>
+        <table style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
-            <td>{tableData.primaryKey}</td>
-            {nonPrimaryKeys.map(columnName => (
-              <td key={columnName}>{columnName}</td>
-            ))}
+            <tr>
+              <th
+                style={{
+                  position: 'relative',
+                  width: columnWidths[tableData.primaryKey] || 150,
+                  minWidth: 50,
+                }}
+              >
+                {tableData.primaryKey}
+                <div
+                  style={{
+                    position: 'absolute',
+                    right: -2,
+                    top: 0,
+                    bottom: 0,
+                    width: '8px',
+                    cursor: 'col-resize',
+                    userSelect: 'none',
+                    background: 'transparent',
+                    zIndex: 10,
+                  }}
+                  onMouseDown={e => handleResizeStart(tableData.primaryKey, e)}
+                  onMouseEnter={e => {
+                    ;(e.target as HTMLElement).style.background = 'rgba(0, 0, 255, 0.2)'
+                  }}
+                  onMouseLeave={e => {
+                    ;(e.target as HTMLElement).style.background = 'transparent'
+                  }}
+                />
+              </th>
+              {nonPrimaryKeys.map(columnName => (
+                <th
+                  key={columnName}
+                  style={{
+                    position: 'relative',
+                    width: columnWidths[columnName] || columnWidth(columnName),
+                    minWidth: 50,
+                  }}
+                >
+                  {columnName}
+                  <div
+                    style={{
+                      position: 'absolute',
+                      right: -2,
+                      top: 0,
+                      bottom: 0,
+                      width: '8px',
+                      cursor: 'col-resize',
+                      userSelect: 'none',
+                      background: 'transparent',
+                      zIndex: 10,
+                    }}
+                    onMouseDown={e => handleResizeStart(columnName, e)}
+                    onMouseEnter={e => {
+                      ;(e.target as HTMLElement).style.background = 'rgba(0, 0, 255, 0.2)'
+                    }}
+                    onMouseLeave={e => {
+                      ;(e.target as HTMLElement).style.background = 'transparent'
+                    }}
+                  />
+                </th>
+              ))}
+            </tr>
           </thead>
           <tbody>
-            {rows.map(row => (
+            {rows.map((row, index) => (
               <TableRow
+                key={index}
                 row={row}
                 tableData={tableData!}
                 editColumn={editColumn}
@@ -81,6 +186,7 @@ export default function TablePage() {
                   })
                 }}
                 changes={changes}
+                columnWidths={columnWidths}
               />
             ))}
           </tbody>

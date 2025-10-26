@@ -1,5 +1,15 @@
 body {
   padding: 0;
+  font-size: 16px;
+}
+
+input {
+  font-size: 16px;
+  border: none;
+}
+
+input:focus {
+  outline: none;
 }
 
 #root {
@@ -27,11 +37,16 @@ table {
 table td {
   padding: 0 30px 0 10px;
   line-height: 12px;
+  word-break: break-word;
+  max-height: 80px;
+  text-overflow: ellipsis;
 }
 
-table thead td {
+table thead tr th {
   border-right: solid 2px white;
   height: 10px;
+  text-align: left;
+  padding-left: 10px;
 }
 
 td.primary-key {
@@ -92,4 +107,26 @@ td.primary-key {
 .editable-column.is-array .column-display .delete-btn {
   /* color: red; */
   margin-right: 5px;
+}
+
+.column-input {
+  display: inline-block;
+  position: relative;
+  background: rgb(0, 0, 0);
+  padding: 5px;
+  border: solid white 2px;
+  border-radius: 3px;
+}
+/* .column-input {
+  margin-top: -40px;
+  margin-left: -20px;
+  position: relative;
+  background: rgb(0, 0, 0);
+  padding: 20px;
+  width: 150px;
+  border: solid 2px white;
+} */
+
+.column-input input {
+  background: transparent;
 }
