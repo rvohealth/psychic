@@ -11,25 +11,6 @@ export default function ColumnDisplay({
   allowDelete?: boolean
   onDelete?: () => void
 }) {
-  let displayValue: unknown = columnValue
-  switch (columnValue) {
-    case null:
-      displayValue = 'NULL'
-      break
-
-    case true:
-      displayValue = 'true'
-      break
-
-    case false:
-      displayValue = 'false'
-      break
-  }
-
-  // onClick={() => {
-  //   onChangeEdit(true)
-  //   setCurrentEditIndex(index)
-  // }}
   return (
     <div className={`column-display ${columnType}`}>
       {allowDelete && (
@@ -38,8 +19,28 @@ export default function ColumnDisplay({
         </span>
       )}
       <span className="text" onClick={onClick}>
-        {typeof displayValue === 'object' ? JSON.stringify(displayValue) : (displayValue as string)}
+        {displayableValue(columnValue)}
       </span>
     </div>
   )
+}
+
+function displayableValue(columnValue: boolean | string | null): string {
+  const MAX_DISPLAY_LIMIT = 40
+  switch (columnValue) {
+    case null:
+      return 'NULL'
+
+    case true:
+      return 'true'
+
+    case false:
+      return 'false'
+
+    default: {
+      const val =
+        typeof columnValue === 'object' ? JSON.stringify(columnValue) : (columnValue as string).toString()
+      return val.length <= MAX_DISPLAY_LIMIT ? val : val.substring(0, MAX_DISPLAY_LIMIT) + '…'
+    }
+  }
 }

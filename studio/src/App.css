@@ -33,23 +33,28 @@ td.primary-key {
   background: rgb(71, 71, 5);
 }
 
-.column-display {
-  max-height: 40px;
-  overflow: hidden;
-}
-
-.column-display .text {
-  overflow: hidden;
-  text-overflow: ellipsis;
-  max-height: 40px;
-}
-
 .column-display.text .text {
   color: green;
 }
 
 .column-display.number .text {
   color: yellow;
+}
+
+.column-display.uuid .text {
+  color: rgb(22, 244, 244);
+}
+
+.column-display.json .text {
+  color: rgb(244, 22, 200);
+}
+
+.column-display.date .text {
+  color: rgb(218, 183, 60);
+}
+
+.column-display.datetime .text {
+  color: rgb(82, 0, 255);
 }
 
 .column-display.enum .text {
@@ -76,7 +81,7 @@ td.primary-key {
   /* border: solid red thin; */
   display: inline-block;
   padding: 6px;
-  background: rgb(62, 62, 62);
+  background: rgb(23, 23, 23);
   border-radius: 3px;
   margin-right: 5px;
 }
