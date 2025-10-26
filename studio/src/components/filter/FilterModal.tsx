@@ -14,11 +14,13 @@ export default function FilterModal({
   tableData,
   onSubmit,
   startFilter,
+  onClose,
 }: {
   open: boolean
   tableData: TableData
   onSubmit: (filter: TableFilter) => void
   startFilter?: TableFilter
+  onClose: () => void
 }) {
   const columns: (keyof typeof tableData.schema.columns)[] = Object.keys(tableData.schema.columns)
   const [selectedColumn, setSelectedColumn] = useState<(typeof columns)[number]>(
@@ -36,7 +38,12 @@ export default function FilterModal({
 
   return (
     <div className="filter-modal">
-      <div className="backdrop"></div>
+      <div
+        className="backdrop"
+        onClick={() => {
+          onClose()
+        }}
+      ></div>
       <div className="contents">
         <h2>Add filter</h2>
 

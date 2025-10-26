@@ -170,12 +170,24 @@ td.primary-key {
   cursor: pointer;
 }
 
+.filter-display > div {
+  display: flex;
+}
+
+.filter-display .delete-btn {
+  margin-left: 5px;
+  margin-right: 5px;
+  color: rgb(255, 121, 121);
+  cursor: pointer;
+}
+
 .filter-display .column-name {
   color: rgb(32, 192, 32);
 }
 
 .filter-display .operator {
   color: rgb(161, 161, 161);
+  padding: 0 5px;
 }
 
 .filter-display .value {

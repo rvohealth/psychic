@@ -6,6 +6,7 @@ import type { TableData, TableSchema } from '../types/table'
 import columnWidth from '../helpers/columnWidth'
 import fillTableDefaultValues from '../helpers/fillTableDefaultValues'
 import Filters from '../components/filter/Filters'
+import type { TableFilter } from '../types/filter'
 
 export default function TablePage() {
   const params = useParams()
@@ -21,6 +22,7 @@ export default function TablePage() {
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
   const [orderColumn, setOrderColumn] = useState<string | null>('createdAt')
   const [orderDir, setOrderDir] = useState<'asc' | 'desc'>('asc')
+  const [currentFilters, setCurrentFilters] = useState<TableFilter[]>([])
   const resizingColumn = useRef<string | null>(null)
   const startX = useRef<number>(0)
   const startWidth = useRef<number>(0)
@@ -30,13 +32,18 @@ export default function TablePage() {
   const tableName = params.tableName as string
 
   const fetchTableRows = async () => {
-    const res = await Axios.get(`http://localhost:7777/studio/tables/${tableName}`, {
-      params: {
-        page,
-        orderColumn,
-        orderDir,
-      },
-    })
+    const params: Record<string, unknown> = {
+      page,
+      orderColumn,
+      orderDir,
+    }
+
+    if (currentFilters.length) {
+      params.filters = currentFilters
+    }
+
+    const res = await Axios.post(`http://localhost:7777/studio/tables/${tableName}`, params)
+
     setRows(res.data.results as object[])
     console.log(res.data)
     setTableData({ schema: res.data.tableSchema as TableSchema, primaryKey: res.data.primaryKey as string })
@@ -66,7 +73,7 @@ export default function TablePage() {
 
   useEffect(() => {
     void fetchTableRows()
-  }, [page, orderDir, orderColumn])
+  }, [page, orderDir, orderColumn, currentFilters])
 
   useEffect(() => {
     const handleMouseMove = (e: MouseEvent) => {
@@ -156,7 +163,11 @@ export default function TablePage() {
         </div>
       </div>
 
-      <Filters tableData={tableData!} />
+      <Filters
+        tableData={tableData!}
+        currentFilters={currentFilters}
+        onChange={newFilters => setCurrentFilters(newFilters)}
+      />
 
       <div
         className="table-container"
