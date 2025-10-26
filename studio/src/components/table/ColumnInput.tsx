@@ -126,7 +126,7 @@ function ColumnInputContents({
         return (
           <select
             onChange={e => {
-              onChange(e.target.value)
+              onChange(e.target.value === 'NULL' ? null : e.target.value)
               onSubmit()
             }}
           >
@@ -135,6 +135,7 @@ function ColumnInputContents({
                 {enumValue}
               </option>
             ))}
+            {columnData.allowNull && <option selected={columnValue === null}>NULL</option>}
           </select>
         )
       } else {

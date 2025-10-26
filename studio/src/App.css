@@ -25,7 +25,7 @@ td.primary-key {
 }
 
 .editable-column {
-  padding: 10px;
+  /* padding: 10px; */
   cursor: pointer;
 }
 
@@ -107,4 +107,11 @@ td.primary-key {
 .date-input input {
   font-size: 20px;
   margin-bottom: 10px;
+}
+
+#table-page {
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
 }

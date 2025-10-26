@@ -37,7 +37,23 @@ export default function TablePage() {
       },
     })
     setRows(res.data.results as object[])
+    console.log(res.data)
     setTableData({ schema: res.data.tableSchema as TableSchema, primaryKey: res.data.primaryKey as string })
+  }
+
+  const resetEditMode = () => {
+    setEditColumn(null)
+    setEditPrimaryKey(null)
+    setNewRecordEditIndex(null)
+  }
+
+  const maybeResetEditMode = (target: Element) => {
+    const parent = document.querySelector('.column-input')
+    if ((parent && editPrimaryKey) || newRecordEditIndex) {
+      if (!parent?.contains(target) && parent !== target) {
+        resetEditMode()
+      }
+    }
   }
 
   useEffect(() => {
@@ -92,7 +108,12 @@ export default function TablePage() {
   }
 
   return (
-    <>
+    <div
+      id="table-page"
+      onClick={e => {
+        maybeResetEditMode(e.target as Element)
+      }}
+    >
       <div>
         <div className="left" style={{ width: 200, display: 'inline-block' }}>
           {hasChanges ? (
@@ -121,7 +142,7 @@ export default function TablePage() {
           ) : null}
         </div>
 
-        <div style={{ textAlign: 'right', display: 'inline-block', width: 'calc(100% - 200px)' }}>
+        <div style={{ textAlign: 'right', display: 'inline-block', width: 'calc(100% - 200px - 30px)' }}>
           <h3 style={{ display: 'inline-block' }}>{tableName}</h3>
 
           <button
@@ -134,7 +155,12 @@ export default function TablePage() {
         </div>
       </div>
 
-      <div className="table-container">
+      <div
+        className="table-container"
+        onClick={e => {
+          maybeResetEditMode(e.target as Element)
+        }}
+      >
         <table style={{ tableLayout: 'fixed', width: '100%' }}>
           <thead>
             <tr>
@@ -260,6 +286,6 @@ export default function TablePage() {
           </tbody>
         </table>
       </div>
-    </>
+    </div>
   )
 }
