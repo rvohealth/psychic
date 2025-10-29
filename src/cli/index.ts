@@ -1,4 +1,4 @@
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import { Command } from 'commander'
 import PsychicBin from '../bin/index.js'
 import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'

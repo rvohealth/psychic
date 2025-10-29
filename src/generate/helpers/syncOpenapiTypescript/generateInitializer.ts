@@ -23,7 +23,7 @@ export default async function generateInitializer(
   }
 
   const contents = `\
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import { PsychicApp } from "@rvoh/psychic"
 import AppEnv from '../AppEnv.js'
 

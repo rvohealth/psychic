@@ -1,4 +1,4 @@
-import { DreamImporter } from '@rvoh/dream/internal'
+import { DreamImporter } from '@rvoh/dream/system'
 import PsychicController from '../../controller/index.js'
 import { PsychicAppInitializerCb } from '../types.js'
 

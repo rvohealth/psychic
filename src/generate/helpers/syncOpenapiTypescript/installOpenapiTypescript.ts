@@ -1,4 +1,4 @@
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import PackageManager from '../../../cli/helpers/PackageManager.js'
 import EnvInternal from '../../../helpers/EnvInternal.js'
 

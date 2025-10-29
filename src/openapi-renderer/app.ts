@@ -1,5 +1,5 @@
-import { CliFileWriter } from '@rvoh/dream/internal'
 import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
+import { CliFileWriter } from '@rvoh/dream/system'
 import { compact, groupBy, sortObjectByKey } from '@rvoh/dream/utils'
 import { debuglog } from 'node:util'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'

@@ -1,4 +1,5 @@
-import { generateDream, standardizeFullyQualifiedModelName } from '@rvoh/dream/internal'
+import { DreamApp } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import pluralize from 'pluralize-esm'
 import generateController from './controller.js'
 import addResourceToRoutes from './helpers/addResourceToRoutes.js'
@@ -30,13 +31,13 @@ export default async function generateResource({
   route = route.replace(/^\/+/, '')
   if (!options.singular) route = pluralize(route)
 
-  const fullyQualifiedControllerName = standardizeFullyQualifiedModelName(route)
+  const fullyQualifiedControllerName = DreamApp.system.standardizeFullyQualifiedModelName(route)
   const resourcefulActions = options.singular ? [...SINGULAR_RESOURCE_ACTIONS] : [...RESOURCE_ACTIONS]
   const onlyActions = options.only?.split(',')
 
   const forAdmin = /^Admin\//.test(fullyQualifiedControllerName)
 
-  await generateDream({
+  await DreamCLI.generateDream({
     fullyQualifiedModelName,
     columnsWithTypes,
     options: {

@@ -1,5 +1,4 @@
-import { Dream } from '@rvoh/dream'
-import { inferSerializerFromDreamOrViewModel, isDreamSerializer } from '@rvoh/dream/internal'
+import { Dream, DreamApp } from '@rvoh/dream'
 import { SerializerRendererOpts, ViewModel } from '@rvoh/dream/types'
 
 export default function renderDreamOrVewModel(
@@ -9,9 +8,9 @@ export default function renderDreamOrVewModel(
   passthrough: any,
   renderOpts: SerializerRendererOpts,
 ) {
-  const serializer = inferSerializerFromDreamOrViewModel(data, serializerKey)
+  const serializer = DreamApp.system.inferSerializerFromDreamOrViewModel(data, serializerKey)
 
-  if (serializer && isDreamSerializer(serializer)) {
+  if (serializer && DreamApp.system.isDreamSerializer(serializer)) {
     // passthrough data going into the serializer is the argument that gets
     // used in the custom attribute callback function
     return serializer(data, passthrough).render(

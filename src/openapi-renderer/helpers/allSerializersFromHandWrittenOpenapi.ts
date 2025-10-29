@@ -1,9 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
-import { inferSerializersFromDreamClassOrViewModelClass } from '@rvoh/dream/internal'
 import { OpenapiSchemaBodyShorthand, OpenapiShorthandPrimitiveTypes } from '@rvoh/dream/openapi'
 import { DreamModelSerializerType, SimpleObjectSerializerType } from '@rvoh/dream/types'
 
+import { DreamApp } from '@rvoh/dream'
 import isObject from '../../helpers/isObject.js'
 
 /**
@@ -66,7 +66,7 @@ function extractSerializers(
     serializers.add(value.$serializer)
     //
   } else if (value.$serializable) {
-    const foundSerializers = inferSerializersFromDreamClassOrViewModelClass(
+    const foundSerializers = DreamApp.system.inferSerializersFromDreamClassOrViewModelClass(
       value.$serializable,
       value.$serializableSerializerKey,
     )

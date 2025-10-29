@@ -1,4 +1,4 @@
-import { CliFileWriter } from '@rvoh/dream/internal'
+import { CliFileWriter } from '@rvoh/dream/system'
 import { uniq } from '@rvoh/dream/utils'
 import * as path from 'node:path'
 import PsychicApp from '../../psychic-app/index.js'

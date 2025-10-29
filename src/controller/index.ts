@@ -1,7 +1,7 @@
-import { Dream } from '@rvoh/dream'
+import { Dream, DreamApp } from '@rvoh/dream'
 import { GlobalNameNotSet } from '@rvoh/dream/errors'
-import { DreamSerializerBuilder, ObjectSerializerBuilder, isDreamSerializer } from '@rvoh/dream/internal'
 import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
+import { DreamSerializerBuilder, ObjectSerializerBuilder } from '@rvoh/dream/system'
 import {
   DreamModelSerializerType,
   DreamParamSafeAttributes,
@@ -657,7 +657,7 @@ export default class PsychicController {
     const passthrough = this.defaultSerializerPassthrough
 
     if (data instanceof Dream || (data as unknown as ViewModel).serializers) {
-      if (!opts.serializerKey && isDreamSerializer(openapiDef?.dreamsOrSerializers)) {
+      if (!opts.serializerKey && DreamApp.system.isDreamSerializer(openapiDef?.dreamsOrSerializers)) {
         const serializer = openapiDef!.dreamsOrSerializers as DreamModelSerializerType
         return serializer(data, passthrough).render(passthrough, this.renderOpts)
       }

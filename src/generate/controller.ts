@@ -1,4 +1,4 @@
-import { standardizeFullyQualifiedModelName } from '@rvoh/dream/internal'
+import { DreamApp } from '@rvoh/dream'
 import { hyphenize } from '@rvoh/dream/utils'
 import { existsSync } from 'node:fs'
 import * as fs from 'node:fs/promises'
@@ -28,10 +28,10 @@ export default async function generateController({
   singular: boolean
 }) {
   fullyQualifiedModelName = fullyQualifiedModelName
-    ? standardizeFullyQualifiedModelName(fullyQualifiedModelName)
+    ? DreamApp.system.standardizeFullyQualifiedModelName(fullyQualifiedModelName)
     : fullyQualifiedModelName
 
-  fullyQualifiedControllerName = standardizeFullyQualifiedModelName(
+  fullyQualifiedControllerName = DreamApp.system.standardizeFullyQualifiedModelName(
     `${fullyQualifiedControllerName.replace(/Controller$/, '')}Controller`,
   )
 

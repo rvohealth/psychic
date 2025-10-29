@@ -1,5 +1,5 @@
 import { ObjectSerializer } from '@rvoh/dream'
-import { ObjectSerializerBuilder } from '@rvoh/dream/internal'
+import { ObjectSerializerBuilder } from '@rvoh/dream/system'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 
 interface User {

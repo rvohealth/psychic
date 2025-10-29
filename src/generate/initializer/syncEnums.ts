@@ -27,7 +27,7 @@ export default async function generateSyncEnumsInitializer(
   }
 
   const contents = `\
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import { PsychicApp, PsychicBin } from "@rvoh/psychic"
 import AppEnv from '../AppEnv.js'
 

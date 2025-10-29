@@ -1,5 +1,4 @@
-import { Dream } from '@rvoh/dream'
-import { inferSerializersFromDreamClassOrViewModelClass, isDreamSerializer } from '@rvoh/dream/internal'
+import { Dream, DreamApp } from '@rvoh/dream'
 import {
   OpenapiAllTypes,
   OpenapiFormats,
@@ -932,7 +931,7 @@ export default class OpenapiEndpointRenderer<
     if (serializer === undefined) {
       throw new OpenApiFailedToLookupSerializerForEndpoint(this.controllerClass, this.action)
     }
-    if (!isDreamSerializer(serializer)) {
+    if (!DreamApp.system.isDreamSerializer(serializer)) {
       throw new OpenApiSerializerForEndpointNotAFunction(this.controllerClass, this.action, serializer)
     }
 
@@ -1025,7 +1024,7 @@ export default class OpenapiEndpointRenderer<
     const anyOf: OpenapiSchemaExpressionAnyOf = { anyOf: [] }
 
     serializers.forEach(serializer => {
-      if (!isDreamSerializer(serializer))
+      if (!DreamApp.system.isDreamSerializer(serializer))
         throw new NonSerializerDerivedInOpenapiEndpointRenderer(this.controllerClass, this.action, serializer)
     })
 
@@ -1088,7 +1087,7 @@ export default class OpenapiEndpointRenderer<
     )
 
     serializers.forEach(serializer => {
-      if (!isDreamSerializer(serializer))
+      if (!DreamApp.system.isDreamSerializer(serializer))
         throw new NonSerializerDerivedInOpenapiEndpointRenderer(this.controllerClass, this.action, serializer)
     })
 
@@ -1130,11 +1129,11 @@ export default class OpenapiEndpointRenderer<
       | DreamModelSerializerType
       | SimpleObjectSerializerType,
   ): (DreamModelSerializerType | SimpleObjectSerializerType)[] {
-    if (isDreamSerializer(dreamOrSerializerOrViewModel)) {
+    if (DreamApp.system.isDreamSerializer(dreamOrSerializerOrViewModel)) {
       return [dreamOrSerializerOrViewModel] as (DreamModelSerializerType | SimpleObjectSerializerType)[]
     }
 
-    return inferSerializersFromDreamClassOrViewModelClass(
+    return DreamApp.system.inferSerializersFromDreamClassOrViewModelClass(
       dreamOrSerializerOrViewModel as typeof Dream | ViewModelClass,
       this.serializerKey,
     )
@@ -2104,7 +2103,7 @@ function serializersToSchemaObjects(
   },
 ): void {
   serializers.forEach(serializer => {
-    if (!isDreamSerializer(serializer))
+    if (!DreamApp.system.isDreamSerializer(serializer))
       throw new NonSerializerDerivedInToSchemaObjects(controllerClass, actionName, serializer)
   })
 

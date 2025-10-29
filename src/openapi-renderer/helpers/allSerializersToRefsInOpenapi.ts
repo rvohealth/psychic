@@ -2,7 +2,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { inferSerializersFromDreamClassOrViewModelClass } from '@rvoh/dream/internal'
+import { DreamApp } from '@rvoh/dream'
 import { OpenapiSchemaBodyShorthand, OpenapiShorthandPrimitiveTypes } from '@rvoh/dream/openapi'
 import isObject from '../../helpers/isObject.js'
 import SerializerOpenapiRenderer from '../SerializerOpenapiRenderer.js'
@@ -75,7 +75,7 @@ function transformValue(value: any): any {
   } else if (value.$serializable) {
     const { $serializable, $serializableSerializerKey, ...rest } = value
 
-    const foundSerializers = inferSerializersFromDreamClassOrViewModelClass(
+    const foundSerializers = DreamApp.system.inferSerializersFromDreamClassOrViewModelClass(
       $serializable,
       $serializableSerializerKey,
     )

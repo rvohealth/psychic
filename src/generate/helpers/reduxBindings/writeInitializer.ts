@@ -27,7 +27,7 @@ export default async function writeInitializer({ exportName }: { exportName: str
   const filePath = path.join('.', 'src', 'conf', 'openapi', `${camelized}.openapi-codegen.json`)
 
   const contents = `\
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import { PsychicApp } from '@rvoh/psychic'
 import AppEnv from '../../AppEnv.js'
 

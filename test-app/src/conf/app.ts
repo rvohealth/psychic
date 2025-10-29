@@ -1,4 +1,4 @@
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import { RequestHandler } from 'express'
 import session from 'express-session'
 import * as path from 'node:path'

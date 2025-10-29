@@ -1,6 +1,5 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Dream } from '@rvoh/dream'
-import { inferSerializerFromDreamOrViewModel, isDreamSerializer } from '@rvoh/dream/internal'
+import { Dream, DreamApp } from '@rvoh/dream'
 import {
   OpenapiPrimitiveTypes,
   OpenapiSchemaArray,
@@ -547,7 +546,7 @@ The following values will be allowed:
     const serializerRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializerRef
     const serializer = serializerRefBodySegment.$serializer
 
-    if (!isDreamSerializer(serializer))
+    if (!DreamApp.system.isDreamSerializer(serializer))
       throw new NonSerializerSuppliedToSerializerBodySegment(this.bodySegment, serializer)
 
     const serializerRef = new SerializerOpenapiRenderer(serializer, {
@@ -582,7 +581,7 @@ The following values will be allowed:
   private serializableStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
     const serializableRef = bodySegment as OpenapiSchemaShorthandExpressionSerializableRef
     const key = serializableRef.key || 'default'
-    const serializer = inferSerializerFromDreamOrViewModel(
+    const serializer = DreamApp.system.inferSerializerFromDreamOrViewModel(
       serializableRef.$serializable.prototype as Dream,
       key,
     )

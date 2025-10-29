@@ -1,9 +1,9 @@
 import { DreamApp } from '@rvoh/dream'
+import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
 import {
   DreamAppAllowedPackageManagersEnum,
   DreamAppAllowedPackageManagersEnumValues,
-} from '@rvoh/dream/internal'
-import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
+} from '@rvoh/dream/system'
 import {
   DreamAppInitOptions,
   DreamLogLevel,
