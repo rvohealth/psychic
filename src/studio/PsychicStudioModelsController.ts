@@ -1,4 +1,4 @@
-import { cloneDeepSafe, Dream, DreamApp } from '@rvoh/dream'
+import { cloneDeepSafe, Dream, DreamApp, HasManyStatement } from '@rvoh/dream'
 import PsychicStudioController from './PsychicStudioController.js'
 
 export default class PsychicStudioModelsController extends PsychicStudioController {
@@ -18,8 +18,6 @@ export default class PsychicStudioModelsController extends PsychicStudioControll
       pageSize: 100,
     })
 
-    console.log(modelClass['associationNames'])
-
     this.ok({
       ...paginatedData,
       results: paginatedData.results.map(model => model.getAttributes()),
@@ -27,7 +25,27 @@ export default class PsychicStudioModelsController extends PsychicStudioControll
       primaryKey: modelClass.primaryKey as string,
       namedScopes: this.modelScopeNames,
       associationNames: modelClass['associationNames'],
+      associationMetadata: this.summarizedAssociationMetadata,
     })
+  }
+
+  private get summarizedAssociationMetadata(): SummarizedAssociationMetadata[] {
+    const modelClass = this.modelClass
+
+    const statements = // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      (modelClass['associationMetadataMap'] as () => Record<string, HasManyStatement<any, any, any, any>>)()
+
+    return Object.keys(statements).reduce((agg, associationName) => {
+      const assoc = statements[associationName]!
+
+      const associatedModel = assoc.modelCB()
+      agg.push({
+        associationName,
+        associationGlobalName: associatedModel.globalName,
+        type: assoc.type,
+      })
+      return agg
+    }, [] as SummarizedAssociationMetadata[])
   }
 
   private get modelName() {
@@ -57,4 +75,10 @@ export default class PsychicStudioModelsController extends PsychicStudioControll
   private get scopeParam() {
     return this.castParam('scope', 'string', { enum: this.modelScopeNames, allowNull: true })
   }
+}
+
+interface SummarizedAssociationMetadata {
+  associationName: string
+  associationGlobalName: string
+  type: 'HasOne' | 'HasMany' | 'BelongsTo'
 }

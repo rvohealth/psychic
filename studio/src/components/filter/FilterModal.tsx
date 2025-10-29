@@ -37,7 +37,7 @@ export default function FilterModal({
     tableData.schema.columns[selectedColumn as keyof typeof tableData.schema.columns] || null
 
   return (
-    <div className="filter-modal">
+    <div className="filter-modal app-modal">
       <div
         className="backdrop"
         onClick={() => {

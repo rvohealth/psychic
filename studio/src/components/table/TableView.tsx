@@ -4,9 +4,16 @@ import columnWidth from '../../helpers/columnWidth'
 import fillTableDefaultValues from '../../helpers/fillTableDefaultValues'
 import type { TableFilter } from '../../types/filter'
 import type { TableData, TableSchema } from '../../types/table'
+import Associations from '../filter/Associations'
 import Filters from '../filter/Filters'
-import TableRow from './TableRow'
 import Scopes from '../filter/Scopes'
+import TableRow from './TableRow'
+
+interface SummarizedAssociationMetadata {
+  associationName: string
+  associationGlobalName: string
+  type: 'HasOne' | 'HasMany' | 'BelongsTo'
+}
 
 export default function TableView({
   mode,
@@ -30,6 +37,8 @@ export default function TableView({
   const [currentFilters, setCurrentFilters] = useState<TableFilter[]>([])
   const [scopes, setScopes] = useState<string[]>([])
   const [currentScope, setCurrentScope] = useState<string | null>(null)
+  const [associationNames, setAssociationNames] = useState<string[]>([])
+  const [associationMetadata, setAssociationMetadata] = useState<SummarizedAssociationMetadata[]>([])
   const resizingColumn = useRef<string | null>(null)
   const startX = useRef<number>(0)
   const startWidth = useRef<number>(0)
@@ -54,12 +63,15 @@ export default function TableView({
     }
 
     const res = await Axios.post(`http://localhost:7777/studio/${resource}/${tableOrModelName}`, params)
+    console.log(res.data)
 
     setRows(res.data.results as object[])
-    console.log(res.data)
     setTableData({ schema: res.data.tableSchema as TableSchema, primaryKey: res.data.primaryKey as string })
-    if (mode === 'model' && res.data.namedScopes) {
-      setScopes(res.data.namedScopes)
+
+    if (mode === 'model') {
+      setScopes(res.data.namedScopes || [])
+      setAssociationNames(res.data.associationNames || [])
+      setAssociationMetadata(res.data.associationMetadata || [])
     }
   }
 
@@ -195,6 +207,8 @@ export default function TableView({
           }}
         />
       ) : null}
+
+      {associationNames.length ? <Associations associationNames={associationNames} /> : null}
 
       <div
         className="table-container"
