@@ -7,6 +7,8 @@ export default function TablesPage() {
   const [tables, setTables] = useState<string[]>([])
 
   useEffect(() => {
+    if (tablesFetched) return
+
     const fetchTables = async () => {
       try {
         const res = await Axios.get('http://localhost:7777/studio/tables')

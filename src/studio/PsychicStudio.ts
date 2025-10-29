@@ -1,5 +1,6 @@
 import EnvInternal from '../helpers/EnvInternal.js'
 import PsychicRouter from '../router/index.js'
+import PsychicStudioModelsController from './PsychicStudioModelsController.js'
 import PsychicStudioTablesController from './PsychicStudioTablesController.js'
 
 export default class PsychicStudio {
@@ -10,8 +11,13 @@ export default class PsychicStudio {
 
     router.get(studioRoute(namespace, 'tables'), PsychicStudioTablesController, 'index')
     router.post(studioRoute(namespace, 'tables/:tableName'), PsychicStudioTablesController, 'show')
-    router.post(studioRoute(namespace, 'tables/:tableName'), PsychicStudioTablesController, 'create')
+    router.post(studioRoute(namespace, 'tables/:tableName/create'), PsychicStudioTablesController, 'create')
     router.patch(studioRoute(namespace, 'tables/:tableName'), PsychicStudioTablesController, 'update')
+
+    router.get(studioRoute(namespace, 'models'), PsychicStudioModelsController, 'index')
+    router.post(studioRoute(namespace, 'models/:modelName'), PsychicStudioModelsController, 'show')
+    router.post(studioRoute(namespace, 'models/:modelName/create'), PsychicStudioModelsController, 'create')
+    router.patch(studioRoute(namespace, 'models/:modelName'), PsychicStudioModelsController, 'update')
   }
 }
 

@@ -2,8 +2,14 @@ import { NavLink } from 'react-router'
 
 export default function HomePage() {
   return (
-    <div>
-      <NavLink to="/tables">tables</NavLink>
-    </div>
+    <ul>
+      <li>
+        <NavLink to="/tables">tables</NavLink>
+      </li>
+
+      <li>
+        <NavLink to="/models">models</NavLink>
+      </li>
+    </ul>
   )
 }

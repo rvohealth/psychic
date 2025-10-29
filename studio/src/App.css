@@ -198,3 +198,18 @@ td.primary-key {
   max-width: 150px;
   overflow: hidden;
 }
+
+.model-scopes {
+  display: flex;
+  margin-bottom: 20px;
+}
+
+.scope-display {
+  margin-left: 10px;
+  cursor: pointer;
+}
+
+.scope-display.selected button {
+  color: rgb(70, 221, 91);
+  border-color: rgb(70, 221, 91);
+}
