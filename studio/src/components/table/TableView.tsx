@@ -11,6 +11,9 @@ import TableRow from './TableRow'
 
 interface SummarizedAssociationMetadata {
   associationName: string
+  polymorphic: boolean
+  foreignKey: string
+  foreignKeyTypeField: string | null
   associationGlobalName: string
   type: 'HasOne' | 'HasMany' | 'BelongsTo'
 }
@@ -18,9 +21,11 @@ interface SummarizedAssociationMetadata {
 export default function TableView({
   mode,
   tableOrModelName,
+  defaultFilters = [],
 }: {
   mode: 'table' | 'model'
   tableOrModelName: string
+  defaultFilters?: TableFilter[]
 }) {
   const [rowsFetched, setRowsFetched] = useState<boolean>(false)
   const [page, setPage] = useState<number>(1)
@@ -34,7 +39,7 @@ export default function TableView({
   const [columnWidths, setColumnWidths] = useState<Record<string, number>>({})
   const [orderColumn, setOrderColumn] = useState<string | null>('createdAt')
   const [orderDir, setOrderDir] = useState<'asc' | 'desc'>('asc')
-  const [currentFilters, setCurrentFilters] = useState<TableFilter[]>([])
+  const [currentFilters, setCurrentFilters] = useState<TableFilter[]>(defaultFilters)
   const [scopes, setScopes] = useState<string[]>([])
   const [currentScope, setCurrentScope] = useState<string | null>(null)
   const [associationNames, setAssociationNames] = useState<string[]>([])

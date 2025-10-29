@@ -40,9 +40,12 @@ export default class PsychicStudioModelsController extends PsychicStudioControll
 
       const associatedModel = assoc.modelCB()
       agg.push({
+        polymorphic: assoc.polymorphic,
         associationName,
         associationGlobalName: associatedModel.globalName,
         type: assoc.type,
+        foreignKey: assoc.foreignKey(),
+        foreignKeyTypeField: assoc.foreignKeyTypeField(),
       })
       return agg
     }, [] as SummarizedAssociationMetadata[])
@@ -79,6 +82,9 @@ export default class PsychicStudioModelsController extends PsychicStudioControll
 
 interface SummarizedAssociationMetadata {
   associationName: string
+  polymorphic: boolean
+  foreignKey: string
+  foreignKeyTypeField: string | null
   associationGlobalName: string
   type: 'HasOne' | 'HasMany' | 'BelongsTo'
 }
