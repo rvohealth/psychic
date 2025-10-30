@@ -80,6 +80,14 @@ export const BalloonColorsEnumValues = [
 ] as const
 
 
+export type BalloonTypesEnum = "Animal" | "Latex" | "Mylar";
+export const BalloonTypesEnumValues = [
+  "Animal",
+  "Latex",
+  "Mylar"
+] as const
+
+
 export type Generated<T> = T extends ColumnType<infer S, infer I, infer U>
   ? ColumnType<S, I | undefined, U>
   : ColumnType<T, T | undefined, T>;
@@ -118,9 +126,12 @@ export type Timestamp = ColumnType<DateTime | CalendarDate>
 export interface Balloons {
   color: BalloonColorsEnum | null;
   createdAt: Timestamp;
+  deletedAt: Timestamp | null;
   id: Generated<Int8>;
+  type: BalloonTypesEnum;
   updatedAt: Timestamp;
-  userId: Generated<Int8>;
+  userId: Int8 | null;
+  volume: Numeric | null;
 }
 
 export interface Comments {
