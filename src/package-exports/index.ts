@@ -1,8 +1,5 @@
 export { BeforeAction, OpenAPI } from '../controller/decorators.js'
 export { default as PsychicController } from '../controller/index.js'
-export { default as pathifyNestedObject } from '../helpers/pathifyNestedObject.js'
-export { default as sanitizeString } from '../helpers/sanitizeString.js'
-export { default as I18nProvider } from '../i18n/provider.js'
 export { default as PsychicApp } from '../psychic-app/index.js'
 export { default as PsychicRouter } from '../router/index.js'
 export { default as PsychicServer } from '../server/index.js'

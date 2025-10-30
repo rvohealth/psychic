@@ -15,9 +15,10 @@ import { Encrypt } from '@rvoh/dream/utils'
 import * as bodyParser from 'body-parser'
 import { Command } from 'commander'
 import { CorsOptions } from 'cors'
-import { Request, RequestHandler, Response } from 'express'
+import { Express, Request, RequestHandler, Response } from 'express'
 import * as http from 'node:http'
 import PackageManager from '../cli/helpers/PackageManager.js'
+import envLoader from '../env/Loader.js'
 import PsychicAppInitMissingApiRoot from '../error/psychic-app/init-missing-api-root.js'
 import PsychicAppInitMissingCallToLoadControllers from '../error/psychic-app/init-missing-call-to-load-controllers.js'
 import PsychicAppInitMissingPackageManager from '../error/psychic-app/init-missing-package-manager.js'
@@ -37,6 +38,7 @@ import {
 } from '../openapi-renderer/endpoint.js'
 import PsychicRouter from '../router/index.js'
 import { RouteConfig } from '../router/route-manager.js'
+import { createPsychicHttpInstance } from '../server/helpers/startPsychicServer.js'
 import PsychicServer from '../server/index.js'
 import { cachePsychicApp, getCachedPsychicAppOrFail } from './cache.js'
 import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
@@ -125,6 +127,20 @@ export default class PsychicApp {
     })
 
     return psychicApp!
+  }
+
+  /**
+   * @internal
+   */
+  public static get envLoader() {
+    return envLoader
+  }
+
+  /**
+   * @internal
+   */
+  public static getPsychicHttpInstance(app: Express, sslCredentials: PsychicSslCredentials | undefined) {
+    return createPsychicHttpInstance(app, sslCredentials)
   }
 
   /**

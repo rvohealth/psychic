@@ -1,4 +1,4 @@
-import sanitizeString from './sanitizeString.js'
+import { sanitizeString } from '@rvoh/dream/utils'
 
 export default function toJson<T>(data: T, sanitize: boolean): string {
   /**

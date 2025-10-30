@@ -1,9 +1,11 @@
 import { DreamCLI } from '@rvoh/dream/system'
 import { Command } from 'commander'
 import PsychicBin from '../bin/index.js'
+import generateController from '../generate/controller.js'
 import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/syncOpenapiTypescript.js'
 import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
+import generateResource from '../generate/resource.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import Watcher from '../watcher/Watcher.js'
 
@@ -311,5 +313,38 @@ export default class PsychicCLI {
         await PsychicBin.syncOpenapiJson()
         process.exit()
       })
+  }
+
+  /**
+   * @internal
+   */
+  public static async generateController(opts: {
+    fullyQualifiedControllerName: string
+    fullyQualifiedModelName?: string
+    actions: string[]
+    columnsWithTypes?: string[]
+    resourceSpecs?: boolean
+    owningModel?: string | undefined
+    singular: boolean
+  }) {
+    await generateController(opts)
+  }
+
+  /**
+   * @internal
+   */
+  public static async generateResource(opts: {
+    route: string
+    fullyQualifiedModelName: string
+    options: {
+      singular: boolean
+      only?: string
+      stiBaseSerializer: boolean
+      owningModel?: string
+      connectionName: string
+    }
+    columnsWithTypes: string[]
+  }) {
+    await generateResource(opts)
   }
 }

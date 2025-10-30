@@ -23,10 +23,10 @@
       "import": "./dist/esm/src/package-exports/errors.js",
       "require": "./dist/cjs/src/package-exports/errors.js"
     },
-    "./internal": {
-      "types": "./dist/types/src/package-exports/internal.d.ts",
-      "import": "./dist/esm/src/package-exports/internal.js",
-      "require": "./dist/cjs/src/package-exports/internal.js"
+    "./system": {
+      "types": "./dist/types/src/package-exports/system.d.ts",
+      "import": "./dist/esm/src/package-exports/system.js",
+      "require": "./dist/cjs/src/package-exports/system.js"
     },
     "./openapi": {
       "types": "./dist/types/src/package-exports/openapi.d.ts",
