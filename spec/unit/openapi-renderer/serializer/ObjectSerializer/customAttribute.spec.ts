@@ -48,7 +48,7 @@ describe('ObjectSerializer customAttributes', () => {
   it('can override the OpenAPI shape with an OpenAPI object', () => {
     const MySerializer = (data: ModelForOpenapiTypeSpecs) =>
       ObjectSerializer(data).customAttribute('volume', () => round(data.volume ?? 0), {
-        openapi: { type: 'integer', format: undefined, description: 'Volume as an integer' },
+        openapi: { type: 'integer', description: 'Volume as an integer' },
       })
 
     const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)

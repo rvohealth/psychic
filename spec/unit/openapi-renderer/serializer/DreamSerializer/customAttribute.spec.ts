@@ -41,7 +41,6 @@ describe('DreamSerializer customAttributes', () => {
       DreamSerializer(User, data).customAttribute('volume', () => round(data.volume ?? 0), {
         openapi: {
           type: 'integer',
-          format: undefined,
           description: 'Volume as an integer',
         },
       })
