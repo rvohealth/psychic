@@ -8,10 +8,10 @@ export default class PsychicStudioModelsController extends PsychicStudioControll
 
   public async show() {
     const modelClass = this.modelClass
-
-    const query = this.showQueryWithFilters(
-      this.scopeParam ? modelClass.scope(this.scopeParam) : this.modelClass.query(),
-    )
+    const baseQuery = this.scopeParam
+      ? modelClass.scope(this.scopeParam).removeDefaultScope('dream:STI')
+      : modelClass.removeDefaultScope('dream:STI')
+    const query = this.showQueryWithFilters(baseQuery)
 
     const paginatedData = await query.paginate({
       page: this.castParam('page', 'integer', { allowNull: true }) || 1,
@@ -58,7 +58,7 @@ export default class PsychicStudioModelsController extends PsychicStudioControll
   private get modelNames() {
     const models = DreamApp.getOrFail().models
     const allModelNames = Object.keys(models)
-    return allModelNames.filter(modelName => !(models[modelName] as typeof Dream)['isSTIBase'])
+    return allModelNames
   }
 
   protected override get modelClass(): typeof Dream {

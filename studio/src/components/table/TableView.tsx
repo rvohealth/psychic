@@ -8,8 +8,9 @@ import Associations from '../filter/Associations'
 import Filters from '../filter/Filters'
 import Scopes from '../filter/Scopes'
 import TableRow from './TableRow'
+import TableRowDetailSidePane from './TableRowDetailSidePane'
 
-interface SummarizedAssociationMetadata {
+export interface SummarizedAssociationMetadata {
   associationName: string
   polymorphic: boolean
   foreignKey: string
@@ -30,6 +31,7 @@ export default function TableView({
   const [rowsFetched, setRowsFetched] = useState<boolean>(false)
   const [page, setPage] = useState<number>(1)
   const [rows, setRows] = useState<object[]>([])
+  const [selectedRow, setSelectedRow] = useState<object | null>(null)
   const [tableData, setTableData] = useState<TableData | null>(null)
   const [editColumn, setEditColumn] = useState<string | null>(null)
   const [editPrimaryKey, setEditPrimaryKey] = useState<string | null>(null)
@@ -327,6 +329,7 @@ export default function TableView({
                   }}
                   changes={changes}
                   columnWidths={columnWidths}
+                  onClick={row => setSelectedRow(row)}
                 />
               )
             })}
@@ -352,6 +355,13 @@ export default function TableView({
           </tbody>
         </table>
       </div>
+      <TableRowDetailSidePane
+        open={!!selectedRow}
+        row={selectedRow!}
+        tableData={tableData}
+        associationMetadata={associationMetadata}
+        onClose={() => setSelectedRow(null)}
+      />
     </div>
   )
 }

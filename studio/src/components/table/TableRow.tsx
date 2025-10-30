@@ -10,6 +10,7 @@ export default function TableRow({
   onChange,
   changes,
   columnWidths,
+  onClick,
 }: {
   row: object
   tableData: TableData
@@ -18,6 +19,7 @@ export default function TableRow({
   onChange: (val: Record<string, unknown>) => void
   changes: Record<string, unknown>
   columnWidths: Record<string, number>
+  onClick?: (row: object) => void
 }) {
   const nonPrimaryKeys = Object.keys(tableData.schema.columns).filter(
     columnName => columnName !== tableData.primaryKey,
@@ -35,7 +37,7 @@ export default function TableRow({
           maxWidth: columnWidths[tableData.primaryKey] || 100,
         }}
       >
-        {primaryKeyValue}
+        <button onClick={() => onClick?.(row)}>{primaryKeyValue}</button>
       </td>
 
       {nonPrimaryKeys.map(columnName => {
