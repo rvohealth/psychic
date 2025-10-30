@@ -18,7 +18,6 @@ import { CorsOptions } from 'cors'
 import { Express, Request, RequestHandler, Response } from 'express'
 import * as http from 'node:http'
 import PackageManager from '../cli/helpers/PackageManager.js'
-import envLoader from '../env/Loader.js'
 import PsychicAppInitMissingApiRoot from '../error/psychic-app/init-missing-api-root.js'
 import PsychicAppInitMissingCallToLoadControllers from '../error/psychic-app/init-missing-call-to-load-controllers.js'
 import PsychicAppInitMissingPackageManager from '../error/psychic-app/init-missing-package-manager.js'
@@ -127,13 +126,6 @@ export default class PsychicApp {
     })
 
     return psychicApp!
-  }
-
-  /**
-   * @internal
-   */
-  public static get envLoader() {
-    return envLoader
   }
 
   /**
