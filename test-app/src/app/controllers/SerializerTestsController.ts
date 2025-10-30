@@ -1,4 +1,4 @@
-import { MissingSerializersDefinition } from '@rvoh/dream'
+import { MissingSerializersDefinition } from '@rvoh/dream/errors'
 import ModelWithoutSerializer from '../models/ModelWithoutSerializer.js'
 import SimpleSerializerModel from '../models/SimpleSerializerModel.js'
 import ApplicationController from './ApplicationController.js'

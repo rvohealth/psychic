@@ -1,5 +1,5 @@
-import { PsychicApp } from '../../../src/index.js'
 import { OpenapiValidateOption } from '../../../src/openapi-renderer/endpoint.js'
+import PsychicApp from '../../../src/psychic-app/index.js'
 
 function mockValidationValue(val: OpenapiValidateOption) {
   vi.spyOn(PsychicApp.prototype, 'openapi', 'get').mockReturnValue({

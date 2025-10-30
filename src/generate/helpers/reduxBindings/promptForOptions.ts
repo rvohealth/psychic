@@ -1,4 +1,4 @@
-import { camelize, pascalize } from '@rvoh/dream'
+import { camelize, pascalize } from '@rvoh/dream/utils'
 import cliPrompt from '../../../cli/helpers/cli-prompt.js'
 import PsychicApp from '../../../psychic-app/index.js'
 import { OpenapiReduxBindingsOptions } from '../../openapi/reduxBindings.js'

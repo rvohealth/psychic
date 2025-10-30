@@ -1,4 +1,4 @@
-import { OpenAPI } from '../../../../src/index.js'
+import { OpenAPI } from '../../../../src/package-exports/index.js'
 import Balloon from '../models/Balloon.js'
 import Pet from '../models/Pet.js'
 import MyViewModel from '../view-models/MyViewModel.js'

@@ -1,4 +1,4 @@
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import colorize from '../../../cli/helpers/colorize.js'
 import { OpenapiReduxBindingsOptions } from '../../openapi/reduxBindings.js'
 

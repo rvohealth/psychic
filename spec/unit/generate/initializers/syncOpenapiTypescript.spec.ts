@@ -31,7 +31,7 @@ describe('generateSyncOpenapiTypescriptInitializer', () => {
       await fs.readFile('test-app/src/conf/initializers/sync-openapi-typescript.ts')
     ).toString()
     expect(contents).toEqual(`\
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import { PsychicApp } from "@rvoh/psychic"
 import AppEnv from '../AppEnv.js'
 

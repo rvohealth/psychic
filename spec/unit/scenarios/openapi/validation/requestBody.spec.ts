@@ -1,6 +1,6 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import { PsychicApp, PsychicServer } from '../../../../../src/index.js'
 import OpenapiEndpointRenderer from '../../../../../src/openapi-renderer/endpoint.js'
+import { PsychicApp, PsychicServer } from '../../../../../src/package-exports/index.js'
 import User from '../../../../../test-app/src/app/models/User.js'
 
 describe('openapi validation', () => {

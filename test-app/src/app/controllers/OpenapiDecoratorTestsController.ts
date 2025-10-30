@@ -1,5 +1,5 @@
 import { PsychicOpenapiNames } from '../../../../src/controller/index.js'
-import { OpenAPI } from '../../../../src/index.js'
+import { OpenAPI } from '../../../../src/package-exports/index.js'
 import Pet from '../models/Pet.js'
 import {
   Comment1OnlyUsedInOneControllerSerializer,

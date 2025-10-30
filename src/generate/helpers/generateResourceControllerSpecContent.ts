@@ -1,14 +1,7 @@
-import {
-  absoluteDreamPath,
-  camelize,
-  capitalize,
-  compact,
-  globalClassNameFromFullyQualifiedModelName,
-  standardizeFullyQualifiedModelName,
-  uniq,
-} from '@rvoh/dream'
+import { DreamApp } from '@rvoh/dream'
+import { camelize, capitalize, compact, uniq } from '@rvoh/dream/utils'
 import addImportSuffix from '../../helpers/path/addImportSuffix.js'
-import { pluralize } from '../../index.js'
+import { pluralize } from '../../package-exports/utils.js'
 
 export default function generateResourceControllerSpecContent({
   fullyQualifiedControllerName,
@@ -29,8 +22,8 @@ export default function generateResourceControllerSpecContent({
   singular: boolean
   actions: string[]
 }) {
-  fullyQualifiedModelName = standardizeFullyQualifiedModelName(fullyQualifiedModelName)
-  const modelClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
+  fullyQualifiedModelName = DreamApp.system.standardizeFullyQualifiedModelName(fullyQualifiedModelName)
+  const modelClassName = DreamApp.system.globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
   const modelVariableName = camelize(modelClassName)
 
   // Always use User for authentication
@@ -39,7 +32,7 @@ export default function generateResourceControllerSpecContent({
 
   // Determine attached model settings if provided
   const owningModelName = owningModel
-    ? globalClassNameFromFullyQualifiedModelName(owningModel)
+    ? DreamApp.system.globalClassNameFromFullyQualifiedModelName(owningModel)
     : userModelName
   const owningModelVariableName = owningModelName ? camelize(owningModelName) : userVariableName
 
@@ -466,11 +459,11 @@ describe('${fullyQualifiedControllerName}', () => {
 }
 
 function importStatementForModel(destinationModelName: string) {
-  return `import ${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${absoluteDreamPath('models', destinationModelName)}'`
+  return `import ${DreamApp.system.globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${DreamApp.system.absoluteDreamPath('models', destinationModelName)}'`
 }
 
 function importStatementForModelFactory(destinationModelName: string) {
-  return `import create${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${absoluteDreamPath('factories', destinationModelName)}'`
+  return `import create${DreamApp.system.globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${DreamApp.system.absoluteDreamPath('factories', destinationModelName)}'`
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

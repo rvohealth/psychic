@@ -1,7 +1,7 @@
+import { DreamCLI } from '@rvoh/dream/system'
 import fs from 'node:fs/promises'
-import generateOpenapiReduxBindings from '../../../../src/generate/openapi/reduxBindings.js'
 import { MockInstance } from 'vitest'
-import { DreamCLI } from '@rvoh/dream'
+import generateOpenapiReduxBindings from '../../../../src/generate/openapi/reduxBindings.js'
 
 describe('generateOpenapiReduxBindings', () => {
   let dreamCliSpy: MockInstance
@@ -173,7 +173,7 @@ export const chalupasDujour = createApi({
 
       const contents = (await fs.readFile('test-app/src/conf/initializers/openapi/myApi.ts')).toString()
       expect(contents).toEqual(`\
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import { PsychicApp } from '@rvoh/psychic'
 import AppEnv from '../../AppEnv.js'
 

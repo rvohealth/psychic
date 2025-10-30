@@ -3,31 +3,25 @@
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
 /* eslint-disable @typescript-eslint/no-unsafe-return */
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { Dream, DreamApp } from '@rvoh/dream'
+import {
+  OpenapiSchemaBody,
+  OpenapiSchemaBodyShorthand,
+  OpenapiSchemaExpressionRef,
+} from '@rvoh/dream/openapi'
+import { DreamSerializerBuilder } from '@rvoh/dream/system'
 import {
   BelongsToStatement,
-  Dream,
   DreamModelSerializerType,
-  DreamSerializerBuilder,
   HasManyStatement,
   HasOneStatement,
   InternalAnyTypedSerializerRendersMany,
   InternalAnyTypedSerializerRendersOne,
-  OpenapiSchemaBody,
-  OpenapiSchemaBodyShorthand,
-  OpenapiSchemaExpressionRef,
   SerializerCasing,
   SimpleObjectSerializerType,
   ViewModelClass,
-  compact,
-  expandStiClasses,
-  inferSerializersFromDreamClassOrViewModelClass,
-  isDreamSerializer,
-  snakeify,
-  sort,
-  sortBy,
-  sortObjectByKey,
-  uniq,
-} from '@rvoh/dream'
+} from '@rvoh/dream/types'
+import { compact, snakeify, sort, sortBy, sortObjectByKey, uniq } from '@rvoh/dream/utils'
 import { inspect } from 'node:util'
 import AttemptedToDeriveDescendentSerializersFromNonSerializer from '../error/openapi/AttemptedToDeriveDescendentSerializersFromNonSerializer.js'
 import ExpectedSerializerForRendersOneOrManyOption from '../error/openapi/ExpectedSerializerForRendersOneOrManyOption.js'
@@ -56,7 +50,7 @@ export default class SerializerOpenapiRenderer {
       suppressResponseEnums?: boolean
     } = {},
   ) {
-    if (!isDreamSerializer(this.serializer))
+    if (!DreamApp.system.isDreamSerializer(this.serializer))
       throw new NonSerializerPassedToSerializerOpenapiRenderer(this.serializer)
     this.casing = casing
     this.suppressResponseEnums = suppressResponseEnums
@@ -401,7 +395,7 @@ function associationOpenapi(
   const optional: boolean = !!(association as BelongsToStatement<any, any, any, any>)?.optional
 
   if (association) {
-    associatedClasses = expandStiClasses(association.modelCB())
+    associatedClasses = DreamApp.system.expandStiClasses(association.modelCB())
     //
   } else {
     const associatedClass: typeof Dream | ViewModelClass | undefined =
@@ -425,7 +419,10 @@ function associationOpenapi(
 
   const serializers = uniq(
     associatedClasses.flatMap(associatedClass =>
-      inferSerializersFromDreamClassOrViewModelClass(associatedClass, attribute.options.serializerKey),
+      DreamApp.system.inferSerializersFromDreamClassOrViewModelClass(
+        associatedClass,
+        attribute.options.serializerKey,
+      ),
     ),
   )
 
@@ -472,7 +469,7 @@ function descendantSerializers(
   // infinite loops (a recursive OpenAPI structure is valid)
   if (alreadyExtractedDescendantSerializers[(serializer as any).globalName]) return []
 
-  if (!isDreamSerializer(serializer))
+  if (!DreamApp.system.isDreamSerializer(serializer))
     throw new AttemptedToDeriveDescendentSerializersFromNonSerializer(serializer)
 
   const immediateDescendantSerializers = new SerializerOpenapiRenderer(serializer).renderedOpenapi(

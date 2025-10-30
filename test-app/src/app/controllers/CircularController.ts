@@ -1,4 +1,4 @@
-import { OpenAPI } from '../../../../src/index.js'
+import { OpenAPI } from '../../../../src/package-exports/index.js'
 import HelloSerializer from '../serializers/Circular/HelloSerializer.js'
 import ApplicationController from './ApplicationController.js'
 

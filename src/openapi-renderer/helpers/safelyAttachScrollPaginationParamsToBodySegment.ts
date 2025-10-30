@@ -1,4 +1,4 @@
-import { OpenapiSchemaObjectBase } from '@rvoh/dream'
+import { OpenapiSchemaObjectBase } from '@rvoh/dream/openapi'
 import scrollPaginationCursorParamOpenapiProperty from './scrollPaginationCursorParamOpenapiProperty.js'
 
 /**

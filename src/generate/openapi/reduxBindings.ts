@@ -1,4 +1,4 @@
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import PackageManager from '../../cli/helpers/PackageManager.js'
 import printFinalStepsMessage from '../helpers/reduxBindings/printFinalStepsMessage.js'
 import promptForOptions from '../helpers/reduxBindings/promptForOptions.js'

@@ -33,7 +33,7 @@ describe('generateSyncEnumsInitializer', () => {
 
     const contents = (await fs.readFile('test-app/src/conf/initializers/sync-custom-enums.ts')).toString()
     expect(contents).toEqual(`\
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import { PsychicApp, PsychicBin } from "@rvoh/psychic"
 import AppEnv from '../AppEnv.js'
 

@@ -1,19 +1,21 @@
+import { DreamApp } from '@rvoh/dream'
+import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
 import {
-  DreamApp,
   DreamAppAllowedPackageManagersEnum,
   DreamAppAllowedPackageManagersEnumValues,
+} from '@rvoh/dream/system'
+import {
   DreamAppInitOptions,
   DreamLogLevel,
   DreamLogger,
-  Encrypt,
   EncryptAlgorithm,
   EncryptOptions,
-  OpenapiSchemaBody,
-} from '@rvoh/dream'
+} from '@rvoh/dream/types'
+import { Encrypt } from '@rvoh/dream/utils'
 import * as bodyParser from 'body-parser'
 import { Command } from 'commander'
 import { CorsOptions } from 'cors'
-import { Request, RequestHandler, Response } from 'express'
+import { Express, Request, RequestHandler, Response } from 'express'
 import * as http from 'node:http'
 import PackageManager from '../cli/helpers/PackageManager.js'
 import PsychicAppInitMissingApiRoot from '../error/psychic-app/init-missing-api-root.js'
@@ -23,6 +25,7 @@ import PsychicAppInitMissingRoutesCallback from '../error/psychic-app/init-missi
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import pascalizeFileName from '../helpers/pascalizeFileName.js'
+import { OpenapiValidateTarget } from '../openapi-renderer/defaults.js'
 import {
   OpenapiContent,
   OpenapiHeaders,
@@ -31,10 +34,10 @@ import {
   OpenapiSecuritySchemes,
   OpenapiServer,
   OpenapiValidateOption,
-  OpenapiValidateTarget,
 } from '../openapi-renderer/endpoint.js'
 import PsychicRouter from '../router/index.js'
 import { RouteConfig } from '../router/route-manager.js'
+import { createPsychicHttpInstance } from '../server/helpers/startPsychicServer.js'
 import PsychicServer from '../server/index.js'
 import { cachePsychicApp, getCachedPsychicAppOrFail } from './cache.js'
 import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
@@ -123,6 +126,13 @@ export default class PsychicApp {
     })
 
     return psychicApp!
+  }
+
+  /**
+   * @internal
+   */
+  public static getPsychicHttpInstance(app: Express, sslCredentials: PsychicSslCredentials | undefined) {
+    return createPsychicHttpInstance(app, sslCredentials)
   }
 
   /**

@@ -1,4 +1,4 @@
-import { OpenapiSchemaExpressionRef, OpenapiSchemaExpressionRefSchemaShorthand } from '@rvoh/dream'
+import { OpenapiSchemaExpressionRef, OpenapiSchemaExpressionRefSchemaShorthand } from '@rvoh/dream/openapi'
 import { OpenapiBodySegment } from '../body-segment.js'
 
 export default function schemaToRef(bodySegment: OpenapiBodySegment): OpenapiSchemaExpressionRef {

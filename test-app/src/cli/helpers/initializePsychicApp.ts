@@ -1,7 +1,6 @@
 import '../../conf/global.js'
 
-import { PsychicApp } from '../../../../src/index.js'
-import { PsychicAppInitOptions } from '../../../../src/psychic-app/index.js'
+import PsychicApp, { PsychicAppInitOptions } from '../../../../src/psychic-app/index.js'
 import psychicConfCb from '../../conf/app.js'
 import dreamCb from '../../conf/dream.js'
 

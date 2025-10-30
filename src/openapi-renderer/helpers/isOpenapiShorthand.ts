@@ -1,4 +1,4 @@
-import { openapiShorthandPrimitiveTypes } from '@rvoh/dream'
+import { openapiShorthandPrimitiveTypes } from '@rvoh/dream/openapi'
 import maybeNullOpenapiShorthandToOpenapiShorthand from './maybeNullOpenapiShorthandToOpenapiShorthand.js'
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

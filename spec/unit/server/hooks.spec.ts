@@ -1,5 +1,5 @@
-import { PsychicServer } from '../../../src/index.js'
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
+import { PsychicServer } from '../../../src/package-exports/index.js'
 
 describe('PsychicServer hooks', () => {
   let server: PsychicServer
