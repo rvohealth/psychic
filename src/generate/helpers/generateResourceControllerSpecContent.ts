@@ -34,7 +34,9 @@ export default function generateResourceControllerSpecContent({
   const owningModelName = owningModel
     ? DreamApp.system.globalClassNameFromFullyQualifiedModelName(owningModel)
     : userModelName
-  const owningModelVariableName = owningModelName ? camelize(owningModelName) : userVariableName
+  const owningModelVariableName = owningModel
+    ? camelize(DreamApp.system.standardizeFullyQualifiedModelName(owningModel).split('/').pop()!)
+    : userVariableName
 
   const dreamImports: string[] = []
 
