@@ -134,7 +134,9 @@ describe('V1/PostsController', () => {
       data: RequestBody<'post', '/v1/posts'>,
       expectedStatus: StatusCode
     ) => {
-      return request.post('/v1/posts', expectedStatus, { data })
+      return request.post('/v1/posts', expectedStatus, {
+        data
+      })
     }
 
     it('creates a Post for this User', async () => {
@@ -435,7 +437,9 @@ describe('V1/PostsController', () => {
       data: RequestBody<'post', '/v1/posts'>,
       expectedStatus: StatusCode
     ) => {
-      return request.post('/v1/posts', expectedStatus, { data })
+      return request.post('/v1/posts', expectedStatus, {
+        data
+      })
     }
 
     it('creates a Post for this User', async () => {
@@ -533,7 +537,9 @@ describe('V1/HostingAgreementController', () => {
       data: RequestBody<'post', '/v1/hosting-agreement'>,
       expectedStatus: StatusCode
     ) => {
-      return request.post('/v1/hosting-agreement', expectedStatus, { data })
+      return request.post('/v1/hosting-agreement', expectedStatus, {
+        data
+      })
     }
 
     it('creates a HostingAgreement for this User', async () => {
@@ -601,6 +607,130 @@ describe('V1/HostingAgreementController', () => {
   })
 })
 `)
+    })
+
+    context('a nested resource instead of a namespace', () => {
+      it('generates a useful resource controller spec', () => {
+        const res = generateResourceControllerSpecContent({
+          fullyQualifiedControllerName: 'Ticketing/Tickets/CommentsController',
+          route: 'ticketing/tickets/{}/comments',
+          fullyQualifiedModelName: 'Ticketing/Comment',
+          columnsWithTypes: ['body:text', 'Ticketing/Ticket:belongs_to'],
+          owningModel: 'Ticketing/Ticket',
+          forAdmin: false,
+          singular: true,
+          actions: [...RESOURCE_ACTIONS],
+        })
+        expect(res).toEqual(`\
+import TicketingComment from '@models/Ticketing/Comment.js'
+import User from '@models/User.js'
+import TicketingTicket from '@models/Ticketing/Ticket.js'
+import createTicketingComment from '@spec/factories/Ticketing/CommentFactory.js'
+import createUser from '@spec/factories/UserFactory.js'
+import createTicketingTicket from '@spec/factories/Ticketing/TicketFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
+
+describe('Ticketing/Tickets/CommentsController', () => {
+  let request: SpecRequestType
+  let user: User
+  let ticket: TicketingTicket
+
+  beforeEach(async () => {
+    user = await createUser()
+    ticket = await createTicketingTicket({ user })
+    request = await session(user)
+  })
+
+  describe('GET show', () => {
+    const subject = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+      return request.get('/ticketing/tickets/{ticketId}/comments', expectedStatus, {
+        ticketId: ticket.id,
+      })
+    }
+
+    it('returns the Ticketing/Comment belonging to the TicketingTicket', async () => {
+      const ticketingComment = await createTicketingComment({ ticket })
+
+      const { body } = await subject(200)
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: ticketingComment.id,
+          body: ticketingComment.body,
+        }),
+      )
+    })
+  })
+
+  describe('POST create', () => {
+    const subject = async <StatusCode extends 201 | 400 | 404>(
+      data: RequestBody<'post', '/ticketing/tickets/{ticketId}/comments'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.post('/ticketing/tickets/{ticketId}/comments', expectedStatus, {
+        ticketId: ticket.id,
+        data
+      })
+    }
+
+    it('creates a Ticketing/Comment for this TicketingTicket', async () => {
+      const { body } = await subject({
+        body: 'The Ticketing/Comment body',
+      }, 201)
+
+      const ticketingComment = await ticket.associationQuery('ticketingComment').firstOrFail()
+      expect(ticketingComment.body).toEqual('The Ticketing/Comment body')
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: ticketingComment.id,
+          body: ticketingComment.body,
+        }),
+      )
+    })
+  })
+
+  describe('PATCH update', () => {
+    const subject = async <StatusCode extends 204 | 400 | 404>(
+      data: RequestBody<'patch', '/ticketing/tickets/{ticketId}/comments'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.patch('/ticketing/tickets/{ticketId}/comments', expectedStatus, {
+        ticketId: ticket.id,
+        data,
+      })
+    }
+
+    it('updates the Ticketing/Comment', async () => {
+      const ticketingComment = await createTicketingComment({ ticket })
+
+      await subject({
+        body: 'Updated Ticketing/Comment body',
+      }, 204)
+
+      await ticketingComment.reload()
+      expect(ticketingComment.body).toEqual('Updated Ticketing/Comment body')
+    })
+  })
+
+  describe('DELETE destroy', () => {
+    const subject = async <StatusCode extends 204 | 400 | 404>(expectedStatus: StatusCode) => {
+      return request.delete('/ticketing/tickets/{ticketId}/comments', expectedStatus, {
+        ticketId: ticket.id,
+      })
+    }
+
+    it('deletes the Ticketing/Comment', async () => {
+      const ticketingComment = await createTicketingComment({ ticket })
+
+      await subject(204)
+
+      expect(await TicketingComment.find(ticketingComment.id)).toBeNull()
+    })
+  })
+})
+`)
+      })
     })
   })
 
@@ -698,7 +828,9 @@ describe('V1/PostsController', () => {
       data: RequestBody<'post', '/v1/posts'>,
       expectedStatus: StatusCode
     ) => {
-      return request.post('/v1/posts', expectedStatus, { data })
+      return request.post('/v1/posts', expectedStatus, {
+        data
+      })
     }
 
     it('creates a Post for this Host', async () => {
@@ -785,7 +917,7 @@ describe('V1/PostsController', () => {
 `)
     })
 
-    context('when a nested owningModel is specified', () => {
+    context('when that owning model is nested', () => {
       it('generates a useful resource controller spec', () => {
         const res = generateResourceControllerSpecContent({
           fullyQualifiedControllerName: 'Ticketing/Tickets/CommentsController',
@@ -879,7 +1011,9 @@ describe('Ticketing/Tickets/CommentsController', () => {
       data: RequestBody<'post', '/ticketing/tickets/comments'>,
       expectedStatus: StatusCode
     ) => {
-      return request.post('/ticketing/tickets/comments', expectedStatus, { data })
+      return request.post('/ticketing/tickets/comments', expectedStatus, {
+        data
+      })
     }
 
     it('creates a Ticketing/Comment for this TicketingTicket', async () => {
@@ -965,6 +1099,196 @@ describe('Ticketing/Tickets/CommentsController', () => {
 })
 `)
       })
+
+      context('a nested resource instead of a namespace', () => {
+        it('generates a useful resource controller spec', () => {
+          const res = generateResourceControllerSpecContent({
+            fullyQualifiedControllerName: 'Ticketing/Tickets/CommentsController',
+            route: 'ticketing/tickets/{}/comments',
+            fullyQualifiedModelName: 'Ticketing/Comment',
+            columnsWithTypes: ['body:text', 'Ticketing/Ticket:belongs_to'],
+            owningModel: 'Ticketing/Ticket',
+            forAdmin: false,
+            singular: false,
+            actions: [...RESOURCE_ACTIONS],
+          })
+          expect(res).toEqual(`\
+import TicketingComment from '@models/Ticketing/Comment.js'
+import User from '@models/User.js'
+import TicketingTicket from '@models/Ticketing/Ticket.js'
+import createTicketingComment from '@spec/factories/Ticketing/CommentFactory.js'
+import createUser from '@spec/factories/UserFactory.js'
+import createTicketingTicket from '@spec/factories/Ticketing/TicketFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
+
+describe('Ticketing/Tickets/CommentsController', () => {
+  let request: SpecRequestType
+  let user: User
+  let ticket: TicketingTicket
+
+  beforeEach(async () => {
+    user = await createUser()
+    ticket = await createTicketingTicket({ user })
+    request = await session(user)
+  })
+
+  describe('GET index', () => {
+    const subject = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+      return request.get('/ticketing/tickets/{ticketId}/comments', expectedStatus, {
+        ticketId: ticket.id,
+      })
+    }
+
+    it('returns the index of Ticketing/Comments', async () => {
+      const ticketingComment = await createTicketingComment({ ticket })
+
+      const { body } = await subject(200)
+
+      expect(body.results).toEqual([
+        expect.objectContaining({
+          id: ticketingComment.id,
+        }),
+      ])
+    })
+
+    context('TicketingComments created by another TicketingTicket', () => {
+      it('are omitted', async () => {
+        await createTicketingComment()
+
+        const { body } = await subject(200)
+
+        expect(body.results).toEqual([])
+      })
+    })
+  })
+
+  describe('GET show', () => {
+    const subject = async <StatusCode extends 200 | 400 | 404>(ticketingComment: TicketingComment, expectedStatus: StatusCode) => {
+      return request.get('/ticketing/tickets/{ticketId}/comments/{id}', expectedStatus, {
+        ticketId: ticket.id,
+        id: ticketingComment.id,
+      })
+    }
+
+    it('returns the specified Ticketing/Comment', async () => {
+      const ticketingComment = await createTicketingComment({ ticket })
+
+      const { body } = await subject(ticketingComment, 200)
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: ticketingComment.id,
+          body: ticketingComment.body,
+        }),
+      )
+    })
+
+    context('Ticketing/Comment created by another TicketingTicket', () => {
+      it('is not found', async () => {
+        const otherTicketingTicketTicketingComment = await createTicketingComment()
+
+        await subject(otherTicketingTicketTicketingComment, 404)
+      })
+    })
+  })
+
+  describe('POST create', () => {
+    const subject = async <StatusCode extends 201 | 400 | 404>(
+      data: RequestBody<'post', '/ticketing/tickets/{ticketId}/comments'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.post('/ticketing/tickets/{ticketId}/comments', expectedStatus, {
+        ticketId: ticket.id,
+        data
+      })
+    }
+
+    it('creates a Ticketing/Comment for this TicketingTicket', async () => {
+      const { body } = await subject({
+        body: 'The Ticketing/Comment body',
+      }, 201)
+
+      const ticketingComment = await ticket.associationQuery('ticketingComments').firstOrFail()
+      expect(ticketingComment.body).toEqual('The Ticketing/Comment body')
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: ticketingComment.id,
+          body: ticketingComment.body,
+        }),
+      )
+    })
+  })
+
+  describe('PATCH update', () => {
+    const subject = async <StatusCode extends 204 | 400 | 404>(
+      ticketingComment: TicketingComment,
+      data: RequestBody<'patch', '/ticketing/tickets/{ticketId}/comments/{id}'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.patch('/ticketing/tickets/{ticketId}/comments/{id}', expectedStatus, {
+        ticketId: ticket.id,
+        id: ticketingComment.id,
+        data,
+      })
+    }
+
+    it('updates the Ticketing/Comment', async () => {
+      const ticketingComment = await createTicketingComment({ ticket })
+
+      await subject(ticketingComment, {
+        body: 'Updated Ticketing/Comment body',
+      }, 204)
+
+      await ticketingComment.reload()
+      expect(ticketingComment.body).toEqual('Updated Ticketing/Comment body')
+    })
+
+    context('a Ticketing/Comment created by another TicketingTicket', () => {
+      it('is not updated', async () => {
+        const ticketingComment = await createTicketingComment()
+        const originalBody = ticketingComment.body
+
+        await subject(ticketingComment, {
+          body: 'Updated Ticketing/Comment body',
+        }, 404)
+
+        await ticketingComment.reload()
+        expect(ticketingComment.body).toEqual(originalBody)
+      })
+    })
+  })
+
+  describe('DELETE destroy', () => {
+    const subject = async <StatusCode extends 204 | 400 | 404>(ticketingComment: TicketingComment, expectedStatus: StatusCode) => {
+      return request.delete('/ticketing/tickets/{ticketId}/comments/{id}', expectedStatus, {
+        ticketId: ticket.id,
+        id: ticketingComment.id,
+      })
+    }
+
+    it('deletes the Ticketing/Comment', async () => {
+      const ticketingComment = await createTicketingComment({ ticket })
+
+      await subject(ticketingComment, 204)
+
+      expect(await TicketingComment.find(ticketingComment.id)).toBeNull()
+    })
+
+    context('a Ticketing/Comment created by another TicketingTicket', () => {
+      it('is not deleted', async () => {
+        const ticketingComment = await createTicketingComment()
+
+        await subject(ticketingComment, 404)
+
+        expect(await TicketingComment.find(ticketingComment.id)).toMatchDreamModel(ticketingComment)
+      })
+    })
+  })
+})
+`)
+        })
+      })
     })
   })
 
@@ -1039,7 +1363,9 @@ describe('Admin/ArticlesController', () => {
       data: RequestBody<'post', '/admin/articles'>,
       expectedStatus: StatusCode
     ) => {
-      return request.post('/admin/articles', expectedStatus, { data })
+      return request.post('/admin/articles', expectedStatus, {
+        data
+      })
     }
 
     it('creates a Article', async () => {

@@ -37,6 +37,8 @@ export default async function generateController({
 
   const route = hyphenize(fullyQualifiedControllerName.replace(/Controller$/, ''))
 
+  const pathParamRegexp = /\/\{[^}]*\}\//g
+  fullyQualifiedControllerName = fullyQualifiedControllerName.replace(pathParamRegexp, '/')
   const allControllerNameParts = fullyQualifiedControllerName.split('/')
   const forAdmin = allControllerNameParts[0] === 'Admin'
 

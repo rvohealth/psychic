@@ -22,6 +22,7 @@ export default function generateResourceControllerSpecContent({
   singular: boolean
   actions: string[]
 }) {
+  const { path, pathParams } = extractPathArgsFromResourcefulPath(route)
   fullyQualifiedModelName = DreamApp.system.standardizeFullyQualifiedModelName(fullyQualifiedModelName)
   const modelClassName = DreamApp.system.globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
   const modelVariableName = camelize(modelClassName)
@@ -223,7 +224,13 @@ describe('${fullyQualifiedControllerName}', () => {
 
   describe('GET index', () => {
     const subject = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
-      return request.get('/${route}', expectedStatus)
+      return request.get('/${path}', expectedStatus${
+        pathParams.length
+          ? `, {
+        ${pathParams.join(',\n        ')},
+      }`
+          : ''
+      })
     }
 
     it('returns the index of ${fullyQualifiedModelName}s', async () => {
@@ -261,11 +268,22 @@ describe('${fullyQualifiedControllerName}', () => {
     singular
       ? `
     const subject = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
-      return request.get('/${route}', expectedStatus)
+      return request.get('/${path}', expectedStatus${
+        pathParams.length
+          ? `, {
+        ${pathParams.join(',\n        ')},
+      }`
+          : ''
+      })
     }`
       : `
     const subject = async <StatusCode extends 200 | 400 | 404>(${modelVariableName}: ${modelClassName}, expectedStatus: StatusCode) => {
-      return request.get('/${route}/{id}', expectedStatus, {
+      return request.get('/${path}/{id}', expectedStatus, {${
+        pathParams.length
+          ? `
+        ${pathParams.join(',\n        ')},`
+          : ''
+      }
         id: ${modelVariableName}.id,
       })
     }`
@@ -302,10 +320,17 @@ describe('${fullyQualifiedControllerName}', () => {
 
   describe('POST create', () => {
     const subject = async <StatusCode extends 201 | 400 | 404>(
-      data: RequestBody<'post', '/${route}'>,
+      data: RequestBody<'post', '/${path}'>,
       expectedStatus: StatusCode
     ) => {
-      return request.post('/${route}', expectedStatus, { data })
+      return request.post('/${path}', expectedStatus, {${
+        pathParams.length
+          ? `
+        ${pathParams.join(',\n        ')},`
+          : ''
+      }
+        data
+      })
     }
 
     it('creates a ${fullyQualifiedModelName}${forAdmin ? '' : ` for this ${owningModelName}`}', async () => {${
@@ -345,20 +370,30 @@ describe('${fullyQualifiedControllerName}', () => {
     singular
       ? `
     const subject = async <StatusCode extends 204 | 400 | 404>(
-      data: RequestBody<'patch', '/${route}'>,
+      data: RequestBody<'patch', '/${path}'>,
       expectedStatus: StatusCode
     ) => {
-      return request.patch('/${route}', expectedStatus, {
+      return request.patch('/${path}', expectedStatus, {${
+        pathParams.length
+          ? `
+        ${pathParams.join(',\n        ')},`
+          : ''
+      }
         data,
       })
     }`
       : `
     const subject = async <StatusCode extends 204 | 400 | 404>(
       ${modelVariableName}: ${modelClassName},
-      data: RequestBody<'patch', '/${route}/{id}'>,
+      data: RequestBody<'patch', '/${path}/{id}'>,
       expectedStatus: StatusCode
     ) => {
-      return request.patch('/${route}/{id}', expectedStatus, {
+      return request.patch('/${path}/{id}', expectedStatus, {${
+        pathParams.length
+          ? `
+        ${pathParams.join(',\n        ')},`
+          : ''
+      }
         id: ${modelVariableName}.id,
         data,
       })
@@ -423,11 +458,22 @@ describe('${fullyQualifiedControllerName}', () => {
     singular
       ? `
     const subject = async <StatusCode extends 204 | 400 | 404>(expectedStatus: StatusCode) => {
-      return request.delete('/${route}', expectedStatus)
+      return request.delete('/${path}', expectedStatus${
+        pathParams.length
+          ? `, {
+        ${pathParams.join(',\n        ')},
+      }`
+          : ''
+      })
     }`
       : `
     const subject = async <StatusCode extends 204 | 400 | 404>(${modelVariableName}: ${modelClassName}, expectedStatus: StatusCode) => {
-      return request.delete('/${route}/{id}', expectedStatus, {
+      return request.delete('/${path}/{id}', expectedStatus, {${
+        pathParams.length
+          ? `
+        ${pathParams.join(',\n        ')},`
+          : ''
+      }
         id: ${modelVariableName}.id,
       })
     }`
@@ -471,4 +517,24 @@ function importStatementForModelFactory(destinationModelName: string) {
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function jsonify(val: any) {
   return JSON.stringify(val).replace(/"/g, "'")
+}
+
+function extractPathArgsFromResourcefulPath(route: string) {
+  const pathParts = route.split('/')
+  const pathParamRegexp = /^\{[^}]*\}$/
+
+  const pathParams: string[] = []
+  const mappedPathParts = pathParts.map((pathPart, index) => {
+    const parentPart = pathParts[index - 1]
+    if (parentPart && pathParamRegexp.test(pathPart)) {
+      const parentName = pluralize.singular(camelize(parentPart))
+      const parentId = `${parentName}Id`
+      pathParams.push(`${parentId}: ${parentName}.id`)
+      return `{${parentId}}`
+    } else {
+      return pathPart
+    }
+  })
+
+  return { path: mappedPathParts.join('/'), pathParams }
 }

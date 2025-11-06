@@ -98,7 +98,10 @@ export default class PsychicCLI {
         'the name of the db connection you would like to use for your model. Defaults to "default"',
         'default',
       )
-      .argument('<path>', 'URL path from root domain')
+      .argument(
+        '<path>',
+        'URL path from root domain. Specify nesting resource with `{}`, e.g.: `tickets/{}/comments`',
+      )
       .argument(
         '<modelName>',
         'the name of the model to create, e.g. Post or Settings/CommunicationPreferences',
