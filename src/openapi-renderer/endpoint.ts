@@ -560,7 +560,7 @@ export default class OpenapiEndpointRenderer<
         in: 'query',
         required: false,
         name: scrollPaginationName,
-        description: 'Fast pagination cursor',
+        description: 'Scroll pagination cursor',
         allowReserved: true,
         schema: {
           type: ['string', 'null'],

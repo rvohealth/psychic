@@ -418,7 +418,7 @@ describe('OpenapiEndpointRenderer', () => {
                       name: 'cursor',
                       required: false,
                       allowReserved: true,
-                      description: 'Fast pagination cursor',
+                      description: 'Scroll pagination cursor',
                       schema: {
                         type: ['string', 'null'],
                       },
@@ -468,7 +468,7 @@ describe('OpenapiEndpointRenderer', () => {
                         name: 'cursor',
                         required: false,
                         allowReserved: true,
-                        description: 'Fast pagination cursor',
+                        description: 'Scroll pagination cursor',
                         schema: {
                           type: ['string', 'null'],
                         },
@@ -529,7 +529,7 @@ describe('OpenapiEndpointRenderer', () => {
                       name: 'pagref',
                       required: false,
                       allowReserved: true,
-                      description: 'Fast pagination cursor',
+                      description: 'Scroll pagination cursor',
                       schema: {
                         type: ['string', 'null'],
                       },
@@ -566,7 +566,7 @@ describe('OpenapiEndpointRenderer', () => {
                             properties: expect.objectContaining({
                               cursor: {
                                 type: ['string', 'null'],
-                                description: 'Fast pagination cursor',
+                                description: 'Scroll pagination cursor',
                               },
                             }),
                           }),
@@ -597,7 +597,7 @@ describe('OpenapiEndpointRenderer', () => {
                               properties: expect.objectContaining({
                                 cursor: {
                                   type: ['string', 'null'],
-                                  description: 'Fast pagination cursor',
+                                  description: 'Scroll pagination cursor',
                                 },
                               }),
                             }),

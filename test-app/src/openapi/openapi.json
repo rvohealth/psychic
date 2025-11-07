@@ -1348,7 +1348,7 @@
           "in": "query",
           "required": false,
           "name": "cursor",
-          "description": "Fast pagination cursor",
+          "description": "Scroll pagination cursor",
           "allowReserved": true,
           "schema": {
             "type": [
@@ -5246,7 +5246,7 @@
           "in": "query",
           "required": false,
           "name": "cursor",
-          "description": "Fast pagination cursor",
+          "description": "Scroll pagination cursor",
           "allowReserved": true,
           "schema": {
             "type": [
@@ -5701,7 +5701,7 @@
                       "string",
                       "null"
                     ],
-                    "description": "Fast pagination cursor"
+                    "description": "Scroll pagination cursor"
                   }
                 }
               }
