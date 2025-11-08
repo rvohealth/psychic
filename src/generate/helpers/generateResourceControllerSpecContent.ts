@@ -61,14 +61,15 @@ export default function generateResourceControllerSpecContent({
   const expectEqualOriginalNamedVariable: string[] = []
 
   const originalValueVariableAssignments: string[] = []
-  const keyWithDotValue: string[] = []
 
   let dateAttributeIncluded: boolean = false
   let datetimeAttributeIncluded: boolean = false
 
   for (const attribute of columnsWithTypes) {
     const [rawAttributeName, rawAttributeType, , enumValues] = attribute.split(':')
+
     if (/(_type|_id)$/.test(rawAttributeName ?? '')) continue
+
     const attributeName = camelize(rawAttributeName ?? '')
     const dotNotationVariable = `${modelVariableName}.${attributeName}`
 
@@ -86,13 +87,16 @@ export default function generateResourceControllerSpecContent({
         const originalEnumValue = isArray ? [rawOriginalEnumValue] : rawOriginalEnumValue
         const updatedEnumValue = isArray ? [rawUpdatedEnumValue] : rawUpdatedEnumValue
 
-        attributeCreationKeyValues.push(`${attributeName}: ${jsonify(originalEnumValue)},`)
-        attributeUpdateKeyValues.push(`${attributeName}: ${jsonify(updatedEnumValue)},`)
-
         comparableOriginalAttributeKeyValues.push(`${attributeName}: ${dotNotationVariable},`)
 
-        expectEqualOriginalValue.push(`expect(${dotNotationVariable}).toEqual(${jsonify(originalEnumValue)})`)
-        expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqual(${jsonify(updatedEnumValue)})`)
+        if (attributeName !== 'type') {
+          attributeCreationKeyValues.push(`${attributeName}: ${jsonify(originalEnumValue)},`)
+          attributeUpdateKeyValues.push(`${attributeName}: ${jsonify(updatedEnumValue)},`)
+          expectEqualOriginalValue.push(
+            `expect(${dotNotationVariable}).toEqual(${jsonify(originalEnumValue)})`,
+          )
+          expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqual(${jsonify(updatedEnumValue)})`)
+        }
 
         break
       }
@@ -187,10 +191,10 @@ export default function generateResourceControllerSpecContent({
         continue
     }
 
-    keyWithDotValue.push(`${attributeName}: ${dotNotationVariable},`)
+    const hardToCompareArray = (attributeType === 'date' || attributeType === 'datetime') && isArray
 
-    if (!((attributeType === 'date' || attributeType === 'datetime') && isArray)) {
-      const originalAttributeVariableName = 'original' + capitalize(attributeName)
+    if (!hardToCompareArray && attributeName !== 'type') {
+      const originalAttributeVariableName = `original${capitalize(attributeName)}`
       originalValueVariableAssignments.push(`const ${originalAttributeVariableName} = ${dotNotationVariable}`)
       expectEqualOriginalNamedVariable.push(
         `expect(${dotNotationVariable}).toEqual(${originalAttributeVariableName})`,
