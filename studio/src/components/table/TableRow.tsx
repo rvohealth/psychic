@@ -11,6 +11,7 @@ export default function TableRow({
   changes,
   columnWidths,
   onClick,
+  nested,
 }: {
   row: object
   tableData: TableData
@@ -19,12 +20,15 @@ export default function TableRow({
   onChange: (val: Record<string, unknown>) => void
   changes: Record<string, unknown>
   columnWidths: Record<string, number>
+  nested?: boolean
   onClick?: (row: object) => void
 }) {
   const nonPrimaryKeys = Object.keys(tableData.schema.columns).filter(
     columnName => columnName !== tableData.primaryKey,
   )
   const primaryKeyValue = row[tableData.primaryKey as keyof typeof row] || null
+  const isNewRecord = !primaryKeyValue
+  const isDisabled = isNewRecord || !!nested
   const columnChanges = changes[primaryKeyValue] || {}
 
   return (
@@ -37,7 +41,9 @@ export default function TableRow({
           maxWidth: columnWidths[tableData.primaryKey] || 100,
         }}
       >
-        <button onClick={() => onClick?.(row)}>{primaryKeyValue}</button>
+        <button className={isDisabled ? 'disabled' : ''} disabled={isDisabled} onClick={() => onClick?.(row)}>
+          {primaryKeyValue || 'NULL'}
+        </button>
       </td>
 
       {nonPrimaryKeys.map(columnName => {

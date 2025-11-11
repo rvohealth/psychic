@@ -67,8 +67,11 @@ button {
   transition: border-color 0.25s;
   border: white solid 2px;
 }
-button:hover {
+button:not(.disabled):hover {
   border-color: #646cff;
+}
+button.disabled:hover {
+  cursor: not-allowed;
 }
 button:focus,
 button:focus-visible {

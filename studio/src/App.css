@@ -114,13 +114,6 @@ td.primary-key {
   margin-bottom: 10px;
 }
 
-#table-page {
-  width: 100vw;
-  height: 100vh;
-  overflow-y: auto;
-  overflow-x: hidden;
-}
-
 .app-modal,
 .side-pane {
   width: 100vw;
@@ -155,17 +148,37 @@ td.primary-key {
   border-radius: 4px;
   border: solid white 4px;
   overflow: auto;
+  top: 0;
 }
 
 .side-pane .contents {
-  width: 60vw;
+  width: 95vw;
   height: 100vh;
   right: 0;
+  border-top: none;
+  /*margin-left: 10vw;*/
 }
 
 .filter-display-container {
   padding: 10px 0;
   display: flex;
+}
+
+.table-page {
+  width: 100vw;
+  height: 100vh;
+  overflow-y: auto;
+  overflow-x: hidden;
+  position: fixed;
+  top: 0;
+  left: 0;
+}
+.table-page.nested {
+  width: 100%;
+  right: 0;
+  top: auto;
+  left: auto;
+  position: absolute;
 }
 
 .filter-display {

@@ -1,4 +1,4 @@
-import { useState } from 'react'
+import { Fragment, useEffect, useState } from 'react'
 import type { TableData } from '../../types/table'
 import type { SummarizedAssociationMetadata } from './TableView'
 import TableView from './TableView'
@@ -18,11 +18,15 @@ export default function TableRowDetailSidePane({
 }) {
   const [selectedAssociationMetadata, setSelectedAssociationMetadata] =
     useState<SummarizedAssociationMetadata | null>()
+
+  useEffect(() => {
+    if (!open) setSelectedAssociationMetadata(null)
+  }, [open])
+
   if (!open) return
 
   const primaryKeyColumnName = tableData.primaryKey as keyof typeof row
 
-  console.log({ selectedAssociationMetadata })
   return (
     <div className="table-detail-side-pane side-pane">
       <div
@@ -32,6 +36,8 @@ export default function TableRowDetailSidePane({
         }}
       ></div>
       <div className="contents">
+        <button onClick={() => setSelectedAssociationMetadata(null)}>JSON</button>
+
         {associationMetadata.map(assoc => (
           <button onClick={() => setSelectedAssociationMetadata(assoc)} key={assoc.associationName}>
             {assoc.associationName}
@@ -41,6 +47,7 @@ export default function TableRowDetailSidePane({
         {selectedAssociationMetadata ? (
           <>
             <TableView
+              nested
               key={selectedAssociationMetadata.associationGlobalName}
               mode="model"
               tableOrModelName={selectedAssociationMetadata.associationGlobalName}
@@ -53,7 +60,20 @@ export default function TableRowDetailSidePane({
               ]}
             />
           </>
-        ) : null}
+        ) : (
+          <>
+            <table>
+              <tbody>
+                {Object.keys(row).map(columnName => (
+                  <tr key={columnName}>
+                    <td>{columnName}</td>
+                    <td>{JSON.stringify(row[columnName as keyof typeof row])}</td>
+                  </tr>
+                ))}
+              </tbody>
+            </table>
+          </>
+        )}
       </div>
     </div>
   )

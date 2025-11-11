@@ -3,17 +3,33 @@ import PsychicController from '../controller/index.js'
 
 export default class PsychicStudioController extends PsychicController {
   public async create() {
-    const modelClass = this.modelClass
-    await modelClass.create(this.paramsFor(modelClass))
-    this.noContent()
+    try {
+      const modelClass = this.modelClass
+      await modelClass.create(this.paramsFor(modelClass, { including: this.safeColumnsForModelClass }))
+      this.noContent()
+    } catch (err) {
+      console.error(err)
+      throw err
+    }
   }
 
   public async update() {
+    try {
+      const modelClass = this.modelClass
+      const id = this.params[modelClass.primaryKey as keyof typeof this.params]
+      const model = await modelClass.findOrFail(id)
+
+      await model.update(this.paramsFor(modelClass, { including: this.safeColumnsForModelClass }))
+      this.noContent()
+    } catch (err) {
+      console.error(err)
+      throw err
+    }
+  }
+
+  private get safeColumnsForModelClass() {
     const modelClass = this.modelClass
-    const id = this.params[modelClass.primaryKey as keyof typeof this.params]
-    const model = await modelClass.findOrFail(id)
-    await model.update(this.paramsFor(modelClass))
-    this.noContent()
+    return [...modelClass.columns()].filter(column => column !== modelClass.primaryKey)
   }
 
   private operatorStatement(operator: FilterComparisonOperator, value: unknown) {

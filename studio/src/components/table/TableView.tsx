@@ -1,10 +1,10 @@
 import Axios from 'axios'
 import { useEffect, useRef, useState } from 'react'
+import { NavLink } from 'react-router'
 import columnWidth from '../../helpers/columnWidth'
 import fillTableDefaultValues from '../../helpers/fillTableDefaultValues'
 import type { TableFilter } from '../../types/filter'
 import type { TableData, TableSchema } from '../../types/table'
-import Associations from '../filter/Associations'
 import Filters from '../filter/Filters'
 import Scopes from '../filter/Scopes'
 import TableRow from './TableRow'
@@ -22,10 +22,12 @@ export interface SummarizedAssociationMetadata {
 export default function TableView({
   mode,
   tableOrModelName,
+  nested,
   defaultFilters = [],
 }: {
   mode: 'table' | 'model'
   tableOrModelName: string
+  nested?: boolean
   defaultFilters?: TableFilter[]
 }) {
   const [rowsFetched, setRowsFetched] = useState<boolean>(false)
@@ -150,7 +152,7 @@ export default function TableView({
 
   return (
     <div
-      id="table-page"
+      className={`table-page${nested ? ' nested' : ''}`}
       onClick={e => {
         maybeResetEditMode(e.target as Element)
       }}
@@ -187,6 +189,12 @@ export default function TableView({
         </div>
 
         <div style={{ textAlign: 'right', display: 'inline-block', width: 'calc(100% - 200px - 30px)' }}>
+          {!nested && (
+            <NavLink to={`/${mode}s`} style={{ marginRight: 10 }}>
+              &lt;
+            </NavLink>
+          )}
+
           <h3 style={{ display: 'inline-block' }}>{tableOrModelName}</h3>
 
           <button
@@ -214,8 +222,6 @@ export default function TableView({
           }}
         />
       ) : null}
-
-      {associationNames.length ? <Associations associationNames={associationNames} /> : null}
 
       <div
         className="table-container"
@@ -330,6 +336,7 @@ export default function TableView({
                   changes={changes}
                   columnWidths={columnWidths}
                   onClick={row => setSelectedRow(row)}
+                  nested={nested}
                 />
               )
             })}
@@ -350,11 +357,13 @@ export default function TableView({
                 }}
                 changes={changes}
                 columnWidths={columnWidths}
+                nested={nested}
               />
             ))}
           </tbody>
         </table>
       </div>
+
       <TableRowDetailSidePane
         open={!!selectedRow}
         row={selectedRow!}
