@@ -1,4 +1,4 @@
-import { Decorators, DreamColumn, DreamSerializers } from '@rvoh/dream'
+import { Decorators, DreamColumn, DreamSerializers, ops, Query } from '@rvoh/dream'
 import { randomBytes, scrypt, timingSafeEqual } from 'crypto'
 import ApplicationModel from './ApplicationModel.js'
 import Balloon from './Balloon.js'
@@ -83,6 +83,16 @@ export default class User extends ApplicationModel {
   public createdOn: DreamColumn<User, 'createdOn'>
   public createdAt: DreamColumn<User, 'createdAt'>
   public updatedAt: DreamColumn<User, 'updatedAt'>
+
+  @deco.Scope()
+  public static hiInBio(query: Query<User>) {
+    return query.where({ bio: ops.ilike('%hi%') })
+  }
+
+  @deco.Scope()
+  public static byeInBio(query: Query<User>) {
+    return query.where({ bio: ops.ilike('%bye%') })
+  }
 
   @deco.Validates('contains', '@')
   @deco.Validates('presence')
