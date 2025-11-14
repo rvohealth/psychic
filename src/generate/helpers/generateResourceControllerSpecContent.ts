@@ -459,18 +459,19 @@ function generateIndexActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitIndex) return ''
 
   const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, forAdmin } = options
+  const subjectFunctionName = `index${pluralize(modelConfig.modelClassName)}`
 
   return `
 
   describe('GET index', () => {
-    const subject = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const ${subjectFunctionName} = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/${path}', expectedStatus${formatPathParams(pathParams)})
     }
 
     it('returns the index of ${fullyQualifiedModelName}s', async () => {
       ${modelConfig.simpleCreationCommand}
 
-      const { body } = await subject(200)
+      const { body } = await ${subjectFunctionName}(200)
 
       expect(body.results).toEqual([
         expect.objectContaining({
@@ -486,7 +487,7 @@ function generateIndexActionSpec(options: TemplateOptions): string {
       it('are omitted', async () => {
         await create${modelConfig.modelClassName}()
 
-        const { body } = await subject(200)
+        const { body } = await ${subjectFunctionName}(200)
 
         expect(body.results).toEqual([])
       })
@@ -500,14 +501,15 @@ function generateShowActionSpec(options: TemplateOptions): string {
 
   const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, forAdmin, attributeData } =
     options
+  const subjectFunctionName = `show${modelConfig.modelClassName}`
 
   const subjectFunction = singular
     ? `
-    const subject = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const ${subjectFunctionName} = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/${path}', expectedStatus${formatPathParams(pathParams)})
     }`
     : `
-    const subject = async <StatusCode extends 200 | 400 | 404>(${modelConfig.modelVariableName}: ${modelConfig.modelClassName}, expectedStatus: StatusCode) => {
+    const ${subjectFunctionName} = async <StatusCode extends 200 | 400 | 404>(${modelConfig.modelVariableName}: ${modelConfig.modelClassName}, expectedStatus: StatusCode) => {
       return request.get('/${path}/{id}', expectedStatus, ${formatPathParamsWithId(pathParams, modelConfig.modelVariableName)})
     }`
 
@@ -518,7 +520,7 @@ function generateShowActionSpec(options: TemplateOptions): string {
     it('returns the ${singular ? `${fullyQualifiedModelName} belonging to the ${modelConfig.owningModelName}` : `specified ${fullyQualifiedModelName}`}', async () => {
       ${modelConfig.simpleCreationCommand}
 
-      const { body } = await subject(${singular ? '' : `${modelConfig.modelVariableName}, `}200)
+      const { body } = await ${subjectFunctionName}(${singular ? '' : `${modelConfig.modelVariableName}, `}200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -534,7 +536,7 @@ function generateShowActionSpec(options: TemplateOptions): string {
       it('is not found', async () => {
         const other${modelConfig.owningModelName}${modelConfig.modelClassName} = await create${modelConfig.modelClassName}()
 
-        await subject(other${modelConfig.owningModelName}${modelConfig.modelClassName}, 404)
+        await ${subjectFunctionName}(other${modelConfig.owningModelName}${modelConfig.modelClassName}, 404)
       })
     })`
     }
@@ -546,6 +548,7 @@ function generateCreateActionSpec(options: TemplateOptions): string {
 
   const { path, pathParams, modelConfig, fullyQualifiedModelName, forAdmin, singular, attributeData } =
     options
+  const subjectFunctionName = `create${modelConfig.modelClassName}`
 
   const dateTimeSetup = `${
     attributeData.dateAttributeIncluded
@@ -566,7 +569,7 @@ function generateCreateActionSpec(options: TemplateOptions): string {
   return `
 
   describe('POST create', () => {
-    const subject = async <StatusCode extends 201 | 400 | 404>(
+    const ${subjectFunctionName} = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/${path}'>,
       expectedStatus: StatusCode
     ) => {
@@ -576,7 +579,7 @@ function generateCreateActionSpec(options: TemplateOptions): string {
     }
 
     it('creates a ${fullyQualifiedModelName}${forAdmin ? '' : ` for this ${modelConfig.owningModelName}`}', async () => {${dateTimeSetup}
-      const { body } = await subject({
+      const { body } = await ${subjectFunctionName}({
         ${attributeData.attributeCreationKeyValues.join('\n        ')}
       }, 201)
 
@@ -596,6 +599,7 @@ function generateUpdateActionSpec(options: TemplateOptions): string {
 
   const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, forAdmin, attributeData } =
     options
+  const subjectFunctionName = `update${modelConfig.modelClassName}`
 
   const dateTimeSetup = `${
     attributeData.dateAttributeIncluded
@@ -611,7 +615,7 @@ function generateUpdateActionSpec(options: TemplateOptions): string {
 
   const subjectFunction = singular
     ? `
-    const subject = async <StatusCode extends 204 | 400 | 404>(
+    const ${subjectFunctionName} = async <StatusCode extends 204 | 400 | 404>(
       data: RequestBody<'patch', '/${path}'>,
       expectedStatus: StatusCode
     ) => {
@@ -620,7 +624,7 @@ function generateUpdateActionSpec(options: TemplateOptions): string {
       })
     }`
     : `
-    const subject = async <StatusCode extends 204 | 400 | 404>(
+    const ${subjectFunctionName} = async <StatusCode extends 204 | 400 | 404>(
       ${modelConfig.modelVariableName}: ${modelConfig.modelClassName},
       data: RequestBody<'patch', '/${path}/{id}'>,
       expectedStatus: StatusCode
@@ -651,7 +655,7 @@ function generateUpdateActionSpec(options: TemplateOptions): string {
         const ${modelConfig.modelVariableName} = await create${modelConfig.modelClassName}()
         ${attributeData.originalValueVariableAssignments.length ? attributeData.originalValueVariableAssignments.join('\n        ') : ''}
 
-        await subject(${modelConfig.modelVariableName}, {
+        await ${subjectFunctionName}(${modelConfig.modelVariableName}, {
           ${attributeData.attributeUpdateKeyValues.length ? attributeData.attributeUpdateKeyValues.join('\n          ') : ''}
         }, 404)
 
@@ -667,7 +671,7 @@ function generateUpdateActionSpec(options: TemplateOptions): string {
     it('updates the ${fullyQualifiedModelName}', async () => {${dateTimeSetup}
       ${modelConfig.simpleCreationCommand}
 
-      await subject(${singular ? '' : `${modelConfig.modelVariableName}, `}{
+      await ${subjectFunctionName}(${singular ? '' : `${modelConfig.modelVariableName}, `}{
         ${attributeData.attributeUpdateKeyValues.length ? attributeData.attributeUpdateKeyValues.join('\n        ') : ''}
       }, 204)
 
@@ -681,14 +685,15 @@ function generateDestroyActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitDestroy) return ''
 
   const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, forAdmin } = options
+  const subjectFunctionName = `destroy${modelConfig.modelClassName}`
 
   const subjectFunction = singular
     ? `
-    const subject = async <StatusCode extends 204 | 400 | 404>(expectedStatus: StatusCode) => {
+    const ${subjectFunctionName} = async <StatusCode extends 204 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.delete('/${path}', expectedStatus${formatPathParams(pathParams)})
     }`
     : `
-    const subject = async <StatusCode extends 204 | 400 | 404>(${modelConfig.modelVariableName}: ${modelConfig.modelClassName}, expectedStatus: StatusCode) => {
+    const ${subjectFunctionName} = async <StatusCode extends 204 | 400 | 404>(${modelConfig.modelVariableName}: ${modelConfig.modelClassName}, expectedStatus: StatusCode) => {
       return request.delete('/${path}/{id}', expectedStatus, ${formatPathParamsWithId(pathParams, modelConfig.modelVariableName)})
     }`
 
@@ -701,7 +706,7 @@ function generateDestroyActionSpec(options: TemplateOptions): string {
       it('is not deleted', async () => {
         const ${modelConfig.modelVariableName} = await create${modelConfig.modelClassName}()
 
-        await subject(${modelConfig.modelVariableName}, 404)
+        await ${subjectFunctionName}(${modelConfig.modelVariableName}, 404)
 
         expect(await ${modelConfig.modelClassName}.find(${modelConfig.modelVariableName}.id)).toMatchDreamModel(${modelConfig.modelVariableName})
       })
@@ -714,7 +719,7 @@ function generateDestroyActionSpec(options: TemplateOptions): string {
     it('deletes the ${fullyQualifiedModelName}', async () => {
       ${modelConfig.simpleCreationCommand}
 
-      await subject(${singular ? '' : `${modelConfig.modelVariableName}, `}204)
+      await ${subjectFunctionName}(${singular ? '' : `${modelConfig.modelVariableName}, `}204)
 
       expect(await ${modelConfig.modelClassName}.find(${modelConfig.modelVariableName}.id)).toBeNull()
     })${destroyContextSpec}
