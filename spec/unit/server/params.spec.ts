@@ -101,6 +101,17 @@ describe('Params', () => {
       })
     })
 
+    context('including option', () => {
+      it('is not only disallowed at the type level, but has no effect at the implementation level', () => {
+        const params = Params.for({ species: 'cat', userId: '1', id: '123' }, Pet, {
+          including: ['userId'],
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any)
+
+        expect(params).toEqual({ species: 'cat' })
+      })
+    })
+
     context('enum', () => {
       it('permits values inside the enum', () => {
         expect(Params.for({ species: 'cat' }, Pet)).toEqual({ species: 'cat' })

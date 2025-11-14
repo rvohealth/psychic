@@ -6,6 +6,7 @@ import {
   OpenapiSchemaNumber,
   OpenapiSchemaObjectBase,
   OpenapiSchemaPrimitiveGeneric,
+  OpenapiSchemaPropertiesShorthand,
   OpenapiSchemaString,
 } from '@rvoh/dream/openapi'
 import { DreamAttributes, DreamParamSafeAttributes, DreamParamSafeColumnNames } from '@rvoh/dream/types'
@@ -675,12 +676,15 @@ export type ParamsCastOptions<EnumType> = {
   enum?: EnumType
 }
 
-export interface ParamsForOpts<OnlyArray> extends ParamExclusionOptions<OnlyArray> {
+export interface ParamsForOpts<OnlyArray> {
   array?: boolean
+  only?: OnlyArray
 }
 
-export interface ParamExclusionOptions<OnlyArray> {
-  only?: OnlyArray
+export interface OpenAPIDreamModelRequestBodyModifications<OnlyArray, IncludingArray>
+  extends ParamsForOpts<OnlyArray> {
+  combining?: OpenapiSchemaPropertiesShorthand
+  including?: IncludingArray
 }
 
 const typeToErrorMap: Record<PsychicParamsPrimitiveLiteral, string> = {

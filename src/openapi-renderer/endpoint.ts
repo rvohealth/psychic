@@ -37,7 +37,7 @@ import { ValidateOpenapiSchemaOptions } from '../helpers/validateOpenApiSchema.j
 import PsychicApp from '../psychic-app/index.js'
 import { ControllerActionRouteConfig, RouteConfig } from '../router/route-manager.js'
 import { HttpMethod } from '../router/types.js'
-import paramNamesForDreamClass from '../server/helpers/paramNamesForDreamClass.js'
+import openapiParamNamesForDreamClass from '../server/helpers/openapiParamNamesForDreamClass.js'
 import OpenapiSegmentExpander, {
   OpenapiBodySegment,
   OpenapiBodySegmentRendererOpts,
@@ -703,7 +703,7 @@ export default class OpenapiEndpointRenderer<
     >
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const paramSafeColumns = paramNamesForDreamClass(dreamClass, { only, including } as any)
+    const paramSafeColumns = openapiParamNamesForDreamClass(dreamClass, { only, including } as any)
 
     const paramsShape: OpenapiSchemaObject = {
       type: 'object',
