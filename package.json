@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "2.0.0-alpha.7",
+  "version": "2.0.0-alpha.8",
   "author": "RVOHealth",
   "repository": {
     "type": "git",
