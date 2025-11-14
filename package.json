@@ -79,7 +79,7 @@
     "yoctocolors": "^2.1.1"
   },
   "peerDependencies": {
-    "@rvoh/dream": "^2.0.0-alpha.10",
+    "@rvoh/dream": "^2.0.0-alpha.12",
     "@types/express": "^5.0.1",
     "commander": "^12.1.0",
     "express": "^5.1.0",
@@ -88,7 +88,7 @@
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@jest-mock/express": "^3.0.0",
-    "@rvoh/dream": "^2.0.0-alpha.11",
+    "@rvoh/dream": "^2.0.0-alpha.12",
     "@rvoh/dream-spec-helpers": "^1.2.1",
     "@rvoh/psychic-spec-helpers": "^1.1.6",
     "@types/express": "^5.0.1",
