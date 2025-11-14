@@ -1,3 +1,7 @@
+## 2.0.0
+
+- remove `including` support from `paramsFor`
+
 ## 1.14.0
 
 - generated code uses absolute imports
