@@ -7,6 +7,7 @@ import {
   DreamParamSafeAttributes,
   DreamParamSafeColumnNames,
   SerializerRendererOpts,
+  StrictInterface,
   ViewModel,
 } from '@rvoh/dream/types'
 import { Request, Response } from 'express'
@@ -416,7 +417,7 @@ export default class PsychicController {
    */
   public castParam<
     const EnumType extends readonly string[],
-    OptsType extends ParamsCastOptions<EnumType>,
+    OptsType extends StrictInterface<OptsType, ParamsCastOptions<EnumType>>,
     const ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
   >(key: string, expectedType: ExpectedType, opts?: OptsType) {
     try {
@@ -430,7 +431,7 @@ export default class PsychicController {
 
   private _castParam<
     const EnumType extends readonly string[],
-    OptsType extends ParamsCastOptions<EnumType>,
+    OptsType extends StrictInterface<OptsType, ParamsCastOptions<EnumType>>,
     ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
     ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
@@ -498,7 +499,7 @@ export default class PsychicController {
     T extends typeof Dream,
     I extends InstanceType<T>,
     const OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
-    ForOpts extends ParamsForOpts<OnlyArray> & { key?: string },
+    ForOpts extends StrictInterface<ForOpts, ParamsForOpts<OnlyArray>>,
     ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
       ? undefined
       : I['paramSafeColumns' & keyof I] & string[],

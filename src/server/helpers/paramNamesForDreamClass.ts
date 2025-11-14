@@ -1,12 +1,12 @@
 import { Dream } from '@rvoh/dream'
-import { DreamParamSafeAttributes, DreamParamSafeColumnNames } from '@rvoh/dream/types'
+import { DreamParamSafeAttributes, DreamParamSafeColumnNames, StrictInterface } from '@rvoh/dream/types'
 import { ParamsForOpts } from '../params.js'
 
 export default function paramNamesForDreamClass<
   T extends typeof Dream,
   I extends InstanceType<T>,
   const OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
-  ForOpts extends ParamsForOpts<OnlyArray> & { key?: string },
+  ForOpts extends StrictInterface<ForOpts, ParamsForOpts<OnlyArray>>,
   ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
     ? undefined
     : I['paramSafeColumns' & keyof I] & string[],

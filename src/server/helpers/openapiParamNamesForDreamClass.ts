@@ -1,5 +1,10 @@
 import { Dream } from '@rvoh/dream'
-import { DreamParamSafeAttributes, DreamParamSafeColumnNames, UpdateableProperties } from '@rvoh/dream/types'
+import {
+  DreamParamSafeAttributes,
+  DreamParamSafeColumnNames,
+  StrictInterface,
+  UpdateableProperties,
+} from '@rvoh/dream/types'
 import { VirtualAttributeStatement } from '../../openapi-renderer/helpers/dreamAttributeOpenapiShape.js'
 import { OpenAPIDreamModelRequestBodyModifications } from '../params.js'
 import paramNamesForDreamClass from './paramNamesForDreamClass.js'
@@ -9,7 +14,10 @@ export default function openapiParamNamesForDreamClass<
   I extends InstanceType<T>,
   const OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
   const IncludingArray extends Exclude<keyof UpdateableProperties<I>, OnlyArray[number]>[],
-  ForOpts extends OpenAPIDreamModelRequestBodyModifications<OnlyArray, IncludingArray> & { key?: string },
+  ForOpts extends StrictInterface<
+    ForOpts,
+    OpenAPIDreamModelRequestBodyModifications<OnlyArray, IncludingArray>
+  >,
   ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
     ? undefined
     : I['paramSafeColumns' & keyof I] & string[],

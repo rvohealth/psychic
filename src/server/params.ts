@@ -9,7 +9,12 @@ import {
   OpenapiSchemaPropertiesShorthand,
   OpenapiSchemaString,
 } from '@rvoh/dream/openapi'
-import { DreamAttributes, DreamParamSafeAttributes, DreamParamSafeColumnNames } from '@rvoh/dream/types'
+import {
+  DreamAttributes,
+  DreamParamSafeAttributes,
+  DreamParamSafeColumnNames,
+  StrictInterface,
+} from '@rvoh/dream/types'
 import { camelize, compact, snakeify } from '@rvoh/dream/utils'
 import {
   PsychicParamsDictionary,
@@ -45,7 +50,7 @@ export default class Params {
     T extends typeof Dream,
     I extends InstanceType<T>,
     const OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
-    ForOpts extends ParamsForOpts<OnlyArray>,
+    ForOpts extends StrictInterface<ForOpts, ParamsForOpts<OnlyArray>>,
     ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
       ? undefined
       : I['paramSafeColumns' & keyof I] & string[],
@@ -302,7 +307,7 @@ export default class Params {
    */
   public static cast<
     const EnumType extends readonly string[],
-    OptsType extends ParamsCastOptions<EnumType>,
+    OptsType extends StrictInterface<OptsType, ParamsCastOptions<EnumType>>,
     ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
     ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
@@ -338,7 +343,7 @@ export default class Params {
 
   public cast<
     EnumType extends readonly string[],
-    OptsType extends ParamsCastOptions<EnumType>,
+    OptsType extends StrictInterface<OptsType, ParamsCastOptions<EnumType>>,
     ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
     ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
@@ -676,13 +681,17 @@ export type ParamsCastOptions<EnumType> = {
   enum?: EnumType
 }
 
-export interface ParamsForOpts<OnlyArray> {
+interface ParamsForOptsBase<OnlyArray> {
   array?: boolean
   only?: OnlyArray
 }
 
+export interface ParamsForOpts<OnlyArray> extends ParamsForOptsBase<OnlyArray> {
+  key?: string
+}
+
 export interface OpenAPIDreamModelRequestBodyModifications<OnlyArray, IncludingArray>
-  extends ParamsForOpts<OnlyArray> {
+  extends ParamsForOptsBase<OnlyArray> {
   combining?: OpenapiSchemaPropertiesShorthand
   including?: IncludingArray
 }
