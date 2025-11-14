@@ -1003,7 +1003,7 @@ __metadata:
     winston: "npm:^3.14.2"
     yoctocolors: "npm:^2.1.1"
   peerDependencies:
-    "@rvoh/dream": ^2.0.0-alpha.10
+    "@rvoh/dream": ^2.0.0-alpha.12
     "@types/express": ^5.0.1
     commander: ^12.1.0
     express: ^5.1.0
