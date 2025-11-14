@@ -25,13 +25,14 @@ import {
   UpdateableProperties,
   ViewModelClass,
 } from '@rvoh/dream/types'
-import { cloneDeepSafe, compact, sortBy } from '@rvoh/dream/utils'
+import { cloneDeepSafe, compact, intersection, sortBy } from '@rvoh/dream/utils'
 import PsychicController from '../controller/index.js'
 import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes.js'
 import OpenApiFailedToLookupSerializerForEndpoint from '../error/openapi/FailedToLookupSerializerForEndpoint.js'
 import NonSerializerDerivedInOpenapiEndpointRenderer from '../error/openapi/NonSerializerDerivedInOpenapiEndpointRenderer.js'
 import NonSerializerDerivedInToSchemaObjects from '../error/openapi/NonSerializerDerivedInToSchemaObjects.js'
 import OpenApiSerializerForEndpointNotAFunction from '../error/openapi/SerializerForEndpointNotAFunction.js'
+import isObject from '../helpers/isObject.js'
 import { DreamOrViewModelClassSerializerArrayKeys } from '../helpers/typeHelpers.js'
 import { ValidateOpenapiSchemaOptions } from '../helpers/validateOpenApiSchema.js'
 import PsychicApp from '../psychic-app/index.js'
@@ -818,16 +819,43 @@ export default class OpenapiEndpointRenderer<
       responseData[statusCodeInt] ||= { description: statusDescription(statusCodeInt) } as OpenapiContent
       const statusResponse: OpenapiContent = responseData[statusCodeInt] as OpenapiContent
       const results = new OpenapiSegmentExpander(response, rendererOpts).render()
+      const openapi = results.openapi
 
       serializersAppearingInHandWrittenOpenapi = [
         ...serializersAppearingInHandWrittenOpenapi,
         ...results.referencedSerializers,
       ]
 
-      statusResponse.content = {
-        'application/json': {
-          schema: results.openapi,
-        },
+      const openapiKeys = isObject(openapi) ? Object.keys(openapi as object) : []
+
+      if (
+        intersection(openapiKeys, ['type', '$ref', 'allOf', 'anyOf', 'oneOf', 'contentType']).length === 0
+      ) {
+        openapiKeys.forEach(
+          key => (statusResponse[key as keyof typeof statusResponse] = openapi[key as keyof typeof openapi]),
+        )
+        //
+      } else if (openapi['contentType' as keyof typeof openapi]) {
+        const contentTypes: OpenapiFormats[] = [openapi['contentType' as keyof typeof openapi]].flat()
+        const openapiWithoutContentType = { ...openapi }
+        delete openapiWithoutContentType['contentType' as keyof typeof openapi]
+
+        statusResponse.content = contentTypes.reduce(
+          (content, contentType) => {
+            content![contentType] = {
+              schema: openapiWithoutContentType,
+            }
+            return content
+          },
+          {} as OpenapiContent['content'],
+        )!
+        //
+      } else {
+        statusResponse.content = {
+          'application/json': {
+            schema: openapi,
+          },
+        }
       }
     })
 
@@ -1351,7 +1379,12 @@ export interface OpenapiEndpointRendererOpts<
    * ```
    */
   responses?: Partial<
-    Record<HttpStatusCode, (OpenapiSchemaBodyShorthand & { description?: string }) | { description: string }>
+    Record<
+      HttpStatusCode,
+      | (OpenapiSchemaBodyShorthand & { description?: string; contentType?: string | string[] })
+      | { description?: string; contentType: string | string[] }
+      | { description: string }
+    >
   >
 
   /**
