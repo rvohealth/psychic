@@ -1,4 +1,5 @@
-import { hyphenize, standardizeFullyQualifiedModelName } from '@rvoh/dream'
+import { DreamApp } from '@rvoh/dream'
+import { hyphenize } from '@rvoh/dream/utils'
 import { existsSync } from 'node:fs'
 import * as fs from 'node:fs/promises'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
@@ -27,15 +28,17 @@ export default async function generateController({
   singular: boolean
 }) {
   fullyQualifiedModelName = fullyQualifiedModelName
-    ? standardizeFullyQualifiedModelName(fullyQualifiedModelName)
+    ? DreamApp.system.standardizeFullyQualifiedModelName(fullyQualifiedModelName)
     : fullyQualifiedModelName
 
-  fullyQualifiedControllerName = standardizeFullyQualifiedModelName(
+  fullyQualifiedControllerName = DreamApp.system.standardizeFullyQualifiedModelName(
     `${fullyQualifiedControllerName.replace(/Controller$/, '')}Controller`,
   )
 
   const route = hyphenize(fullyQualifiedControllerName.replace(/Controller$/, ''))
 
+  const pathParamRegexp = /\/\{[^}]*\}\//g
+  fullyQualifiedControllerName = fullyQualifiedControllerName.replace(pathParamRegexp, '/')
   const allControllerNameParts = fullyQualifiedControllerName.split('/')
   const forAdmin = allControllerNameParts[0] === 'Admin'
 

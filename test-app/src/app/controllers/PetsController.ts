@@ -1,6 +1,7 @@
-import { OpenAPI } from '../../../../src/index.js'
+import { OpenAPI } from '../../../../src/package-exports/index.js'
 import Pet from '../models/Pet.js'
 import Post from '../models/Post.js'
+import User from '../models/User.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class PetsController extends ApplicationController {
@@ -8,7 +9,8 @@ export default class PetsController extends ApplicationController {
     status: 201,
   })
   public async create() {
-    const pet = await Pet.create(this.petParams)
+    const user = await User.findOrFail(this.castParam('userId', 'number'))
+    const pet = await Pet.create({ user, ...this.petParams })
     this.created(pet)
   }
 
@@ -30,7 +32,7 @@ export default class PetsController extends ApplicationController {
   }
 
   private get petParams() {
-    return this.paramsFor(Pet, { including: ['userId'] })
+    return this.paramsFor(Pet)
   }
 
   @OpenAPI(Post, {

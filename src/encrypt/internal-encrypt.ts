@@ -1,4 +1,5 @@
-import { Encrypt, EncryptOptions } from '@rvoh/dream'
+import { EncryptOptions } from '@rvoh/dream/types'
+import { Encrypt } from '@rvoh/dream/utils'
 import MissingCookieEncryptionOpts from '../error/encrypt/missing-cookie-encryption-options.js'
 import PsychicApp from '../psychic-app/index.js'
 

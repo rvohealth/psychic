@@ -1,11 +1,5 @@
+import { Dream, DreamApp } from '@rvoh/dream'
 import {
-  Dream,
-  DreamAttributes,
-  DreamModelSerializerType,
-  DreamOrViewModelClassSerializerKey,
-  DreamParamSafeAttributes,
-  DreamSerializable,
-  DreamSerializableArray,
   OpenapiAllTypes,
   OpenapiFormats,
   OpenapiSchemaArray,
@@ -18,28 +12,33 @@ import {
   OpenapiSchemaObject,
   OpenapiSchemaProperties,
   OpenapiSchemaPropertiesShorthand,
+} from '@rvoh/dream/openapi'
+import {
+  DreamAttributes,
+  DreamModelSerializerType,
+  DreamOrViewModelClassSerializerKey,
+  DreamParamSafeAttributes,
+  DreamSerializable,
+  DreamSerializableArray,
   SerializerCasing,
   SimpleObjectSerializerType,
   UpdateableProperties,
   ViewModelClass,
-  cloneDeepSafe,
-  compact,
-  inferSerializersFromDreamClassOrViewModelClass,
-  isDreamSerializer,
-  sortBy,
-} from '@rvoh/dream'
+} from '@rvoh/dream/types'
+import { cloneDeepSafe, compact, intersection, sortBy } from '@rvoh/dream/utils'
 import PsychicController from '../controller/index.js'
 import { HttpStatusCode, HttpStatusCodeNumber } from '../error/http/status-codes.js'
 import OpenApiFailedToLookupSerializerForEndpoint from '../error/openapi/FailedToLookupSerializerForEndpoint.js'
 import NonSerializerDerivedInOpenapiEndpointRenderer from '../error/openapi/NonSerializerDerivedInOpenapiEndpointRenderer.js'
 import NonSerializerDerivedInToSchemaObjects from '../error/openapi/NonSerializerDerivedInToSchemaObjects.js'
 import OpenApiSerializerForEndpointNotAFunction from '../error/openapi/SerializerForEndpointNotAFunction.js'
+import isObject from '../helpers/isObject.js'
 import { DreamOrViewModelClassSerializerArrayKeys } from '../helpers/typeHelpers.js'
 import { ValidateOpenapiSchemaOptions } from '../helpers/validateOpenApiSchema.js'
 import PsychicApp from '../psychic-app/index.js'
 import { ControllerActionRouteConfig, RouteConfig } from '../router/route-manager.js'
 import { HttpMethod } from '../router/types.js'
-import paramNamesForDreamClass from '../server/helpers/paramNamesForDreamClass.js'
+import openapiParamNamesForDreamClass from '../server/helpers/openapiParamNamesForDreamClass.js'
 import OpenapiSegmentExpander, {
   OpenapiBodySegment,
   OpenapiBodySegmentRendererOpts,
@@ -47,7 +46,7 @@ import OpenapiSegmentExpander, {
   ReferencedSerializersAndOpenapiResponses,
   SerializerArray,
 } from './body-segment.js'
-import { DEFAULT_OPENAPI_RESPONSES } from './defaults.js'
+import { DEFAULT_OPENAPI_RESPONSES, OpenapiValidateTarget } from './defaults.js'
 import { dreamColumnOpenapiShape } from './helpers/dreamAttributeOpenapiShape.js'
 import openapiOpts from './helpers/openapiOpts.js'
 import openapiRoute from './helpers/openapiRoute.js'
@@ -562,7 +561,7 @@ export default class OpenapiEndpointRenderer<
         in: 'query',
         required: false,
         name: scrollPaginationName,
-        description: 'Fast pagination cursor',
+        description: 'Scroll pagination cursor',
         allowReserved: true,
         schema: {
           type: ['string', 'null'],
@@ -705,7 +704,7 @@ export default class OpenapiEndpointRenderer<
     >
 
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const paramSafeColumns = paramNamesForDreamClass(dreamClass, { only, including } as any)
+    const paramSafeColumns = openapiParamNamesForDreamClass(dreamClass, { only, including } as any)
 
     const paramsShape: OpenapiSchemaObject = {
       type: 'object',
@@ -820,16 +819,43 @@ export default class OpenapiEndpointRenderer<
       responseData[statusCodeInt] ||= { description: statusDescription(statusCodeInt) } as OpenapiContent
       const statusResponse: OpenapiContent = responseData[statusCodeInt] as OpenapiContent
       const results = new OpenapiSegmentExpander(response, rendererOpts).render()
+      const openapi = results.openapi
 
       serializersAppearingInHandWrittenOpenapi = [
         ...serializersAppearingInHandWrittenOpenapi,
         ...results.referencedSerializers,
       ]
 
-      statusResponse.content = {
-        'application/json': {
-          schema: results.openapi,
-        },
+      const openapiKeys = isObject(openapi) ? Object.keys(openapi as object) : []
+
+      if (
+        intersection(openapiKeys, ['type', '$ref', 'allOf', 'anyOf', 'oneOf', 'contentType']).length === 0
+      ) {
+        openapiKeys.forEach(
+          key => (statusResponse[key as keyof typeof statusResponse] = openapi[key as keyof typeof openapi]),
+        )
+        //
+      } else if (openapi['contentType' as keyof typeof openapi]) {
+        const contentTypes: OpenapiFormats[] = [openapi['contentType' as keyof typeof openapi]].flat()
+        const openapiWithoutContentType = { ...openapi }
+        delete openapiWithoutContentType['contentType' as keyof typeof openapi]
+
+        statusResponse.content = contentTypes.reduce(
+          (content, contentType) => {
+            content![contentType] = {
+              schema: openapiWithoutContentType,
+            }
+            return content
+          },
+          {} as OpenapiContent['content'],
+        )!
+        //
+      } else {
+        statusResponse.content = {
+          'application/json': {
+            schema: openapi,
+          },
+        }
       }
     })
 
@@ -933,7 +959,7 @@ export default class OpenapiEndpointRenderer<
     if (serializer === undefined) {
       throw new OpenApiFailedToLookupSerializerForEndpoint(this.controllerClass, this.action)
     }
-    if (!isDreamSerializer(serializer)) {
+    if (!DreamApp.system.isDreamSerializer(serializer)) {
       throw new OpenApiSerializerForEndpointNotAFunction(this.controllerClass, this.action, serializer)
     }
 
@@ -1026,7 +1052,7 @@ export default class OpenapiEndpointRenderer<
     const anyOf: OpenapiSchemaExpressionAnyOf = { anyOf: [] }
 
     serializers.forEach(serializer => {
-      if (!isDreamSerializer(serializer))
+      if (!DreamApp.system.isDreamSerializer(serializer))
         throw new NonSerializerDerivedInOpenapiEndpointRenderer(this.controllerClass, this.action, serializer)
     })
 
@@ -1089,7 +1115,7 @@ export default class OpenapiEndpointRenderer<
     )
 
     serializers.forEach(serializer => {
-      if (!isDreamSerializer(serializer))
+      if (!DreamApp.system.isDreamSerializer(serializer))
         throw new NonSerializerDerivedInOpenapiEndpointRenderer(this.controllerClass, this.action, serializer)
     })
 
@@ -1131,11 +1157,11 @@ export default class OpenapiEndpointRenderer<
       | DreamModelSerializerType
       | SimpleObjectSerializerType,
   ): (DreamModelSerializerType | SimpleObjectSerializerType)[] {
-    if (isDreamSerializer(dreamOrSerializerOrViewModel)) {
+    if (DreamApp.system.isDreamSerializer(dreamOrSerializerOrViewModel)) {
       return [dreamOrSerializerOrViewModel] as (DreamModelSerializerType | SimpleObjectSerializerType)[]
     }
 
-    return inferSerializersFromDreamClassOrViewModelClass(
+    return DreamApp.system.inferSerializersFromDreamClassOrViewModelClass(
       dreamOrSerializerOrViewModel as typeof Dream | ViewModelClass,
       this.serializerKey,
     )
@@ -1353,7 +1379,12 @@ export interface OpenapiEndpointRendererOpts<
    * ```
    */
   responses?: Partial<
-    Record<HttpStatusCode, (OpenapiSchemaBodyShorthand & { description?: string }) | { description: string }>
+    Record<
+      HttpStatusCode,
+      | (OpenapiSchemaBodyShorthand & { description?: string; contentType?: string | string[] })
+      | { description?: string; contentType: string | string[] }
+      | { description: string }
+    >
   >
 
   /**
@@ -1489,9 +1520,6 @@ export type OpenapiValidateOption = {
    */
   ajvOptions?: ValidateOpenapiSchemaOptions
 }
-
-export const OpenapiValidateTargets = ['requestBody', 'query', 'headers', 'responseBody'] as const
-export type OpenapiValidateTarget = (typeof OpenapiValidateTargets)[number]
 
 export type CustomPaginationOpts =
   | {
@@ -2108,7 +2136,7 @@ function serializersToSchemaObjects(
   },
 ): void {
   serializers.forEach(serializer => {
-    if (!isDreamSerializer(serializer))
+    if (!DreamApp.system.isDreamSerializer(serializer))
       throw new NonSerializerDerivedInToSchemaObjects(controllerClass, actionName, serializer)
   })
 

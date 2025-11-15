@@ -1,4 +1,4 @@
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import { Express } from 'express'
 import * as fs from 'node:fs'
 import * as http from 'node:http'

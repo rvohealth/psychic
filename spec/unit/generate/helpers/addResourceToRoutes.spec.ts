@@ -4,7 +4,7 @@ import addResourceToRoutes, {
   addResourceToRoutes_routeToRegexAndReplacements,
 } from '../../../../src/generate/helpers/addResourceToRoutes.js'
 import * as psychicPathModule from '../../../../src/helpers/path/psychicPath.js'
-import { PsychicApp } from '../../../../src/index.js'
+import PsychicApp from '../../../../src/psychic-app/index.js'
 
 describe('addResourceToRoutes', () => {
   let psychicApp: PsychicApp
@@ -130,48 +130,111 @@ describe('addResourceToRoutes', () => {
       })
     })
   })
+
+  context('a nested resource', () => {
+    it('renders the resource into the file', async () => {
+      await fs.writeFile(tmpRoutesFilepath, await fs.readFile(path.join(supportDir, 'boilerplate.ts')))
+      const expected = await fs.readFile(path.join(supportDir, 'nestedResource.ts'))
+      await addResourceToRoutes('tickets/{}/comments', { singular: false, onlyActions: undefined })
+      const actual = await fs.readFile(tmpRoutesFilepath)
+      expect(actual.toString()).toEqual(expected.toString())
+    })
+
+    context('within a resource already in the file', () => {
+      it('renders the resource into the file', async () => {
+        await fs.writeFile(
+          tmpRoutesFilepath,
+          await fs.readFile(path.join(supportDir, 'namespacedTicketsResource.ts')),
+        )
+        const expected = await fs.readFile(
+          path.join(supportDir, 'nestedResourceAddedToNamespacedResource.ts'),
+        )
+        await addResourceToRoutes('api/v1/tickets/{}/comments', { singular: false, onlyActions: undefined })
+        const actual = await fs.readFile(tmpRoutesFilepath)
+        expect(actual.toString()).toEqual(expected.toString())
+      })
+    })
+  })
 })
 
 describe('addResourceToRoutes_routeToRegexAndReplacements', () => {
   it('"posts"', () => {
-    const results = addResourceToRoutes_routeToRegexAndReplacements('posts', {
+    const { regexAndReplacements } = addResourceToRoutes_routeToRegexAndReplacements('', 'posts', {
       singular: false,
       onlyActions: undefined,
     })
-    expect(results[0]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
-    expect(results[0]!.replacement).toEqual(`export $1(r: PsychicRouter)$2{\n  r.resources('posts')\n`)
+    expect(regexAndReplacements[0]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
+    expect(regexAndReplacements[0]!.replacement).toEqual(
+      `export $1(r: PsychicRouter)$2{\n  r.resources('posts')\n`,
+    )
   })
 
   it('"api/posts"', () => {
-    const results = addResourceToRoutes_routeToRegexAndReplacements('api/posts', {
+    const { regexAndReplacements } = addResourceToRoutes_routeToRegexAndReplacements('', 'api/posts', {
       singular: false,
       onlyActions: undefined,
     })
 
     const sharedExpectedReplacement = `  r.namespace('api', r => {\n    r.resources('posts')\n`
 
-    expect(results[0]!.regex).toEqual(/^ {2}r\.namespace\('api', r => \{\n/m)
-    expect(results[0]!.replacement).toEqual(sharedExpectedReplacement)
+    expect(regexAndReplacements[0]!.regex).toEqual(/^ {2}r\.namespace\('api', r => \{\n/m)
+    expect(regexAndReplacements[0]!.replacement).toEqual(sharedExpectedReplacement)
 
-    expect(results[1]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
-    expect(results[1]!.replacement).toEqual(`export $1(r: PsychicRouter)$2{\n${sharedExpectedReplacement}`)
+    expect(regexAndReplacements[1]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
+    expect(regexAndReplacements[1]!.replacement).toEqual(
+      `export $1(r: PsychicRouter)$2{\n${sharedExpectedReplacement}`,
+    )
   })
 
   it('"api/v1/posts"', () => {
-    const results = addResourceToRoutes_routeToRegexAndReplacements('api/v1/posts', {
+    const { regexAndReplacements } = addResourceToRoutes_routeToRegexAndReplacements('', 'api/v1/posts', {
       singular: false,
       onlyActions: undefined,
     })
 
     const sharedExpectedReplacement = `  r.namespace('api', r => {\n    r.namespace('v1', r => {\n      r.resources('posts')\n`
 
-    expect(results[0]!.regex).toEqual(/^ {2}r\.namespace\('api', r => \{\n {4}r\.namespace\('v1', r => \{\n/m)
-    expect(results[0]!.replacement).toEqual(sharedExpectedReplacement)
+    expect(regexAndReplacements[0]!.regex).toEqual(
+      /^ {2}r\.namespace\('api', r => \{\n {4}r\.namespace\('v1', r => \{\n/m,
+    )
+    expect(regexAndReplacements[0]!.replacement).toEqual(sharedExpectedReplacement)
 
-    expect(results[1]!.regex).toEqual(/^ {2}r\.namespace\('api', r => \{\n/m)
-    expect(results[1]!.replacement).toEqual(sharedExpectedReplacement)
+    expect(regexAndReplacements[1]!.regex).toEqual(/^ {2}r\.namespace\('api', r => \{\n/m)
+    expect(regexAndReplacements[1]!.replacement).toEqual(sharedExpectedReplacement)
 
-    expect(results[2]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
-    expect(results[2]!.replacement).toEqual(`export $1(r: PsychicRouter)$2{\n${sharedExpectedReplacement}`)
+    expect(regexAndReplacements[2]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
+    expect(regexAndReplacements[2]!.replacement).toEqual(
+      `export $1(r: PsychicRouter)$2{\n${sharedExpectedReplacement}`,
+    )
+  })
+
+  it('"api/tickets/{}/comments"', () => {
+    const { routes, regexAndReplacements } = addResourceToRoutes_routeToRegexAndReplacements(
+      `    r.resources('tickets')`,
+      'api/tickets/{}/comments',
+      {
+        singular: false,
+        onlyActions: undefined,
+      },
+    )
+
+    expect(routes).toEqual(`    r.resources('tickets', r => {
+    })
+`)
+
+    const sharedExpectedReplacement = `  r.namespace('api', r => {\n    r.resources('tickets', r => {\n      r.resources('comments')\n`
+
+    expect(regexAndReplacements[0]!.regex).toEqual(
+      /^ {2}r\.namespace\('api', r => \{\n {4}r\.resources\('tickets', r => \{\n/m,
+    )
+    expect(regexAndReplacements[0]!.replacement).toEqual(sharedExpectedReplacement)
+
+    expect(regexAndReplacements[1]!.regex).toEqual(/^ {2}r\.namespace\('api', r => \{\n/m)
+    expect(regexAndReplacements[1]!.replacement).toEqual(sharedExpectedReplacement)
+
+    expect(regexAndReplacements[2]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
+    expect(regexAndReplacements[2]!.replacement).toEqual(
+      `export $1(r: PsychicRouter)$2{\n${sharedExpectedReplacement}`,
+    )
   })
 })

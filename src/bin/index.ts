@@ -1,4 +1,4 @@
-import { CliFileWriter, DreamBin, DreamCLI } from '@rvoh/dream'
+import { CliFileWriter, DreamBin, DreamCLI } from '@rvoh/dream/system'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import TypesBuilder from '../cli/helpers/TypesBuilder.js'

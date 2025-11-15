@@ -594,7 +594,7 @@ export interface paths {
     "/balloons/scroll-paginated": {
         parameters: {
             query?: {
-                /** @description Fast pagination cursor */
+                /** @description Scroll pagination cursor */
                 cursor?: string | null;
             };
             header?: {
@@ -607,7 +607,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Fast pagination cursor */
+                    /** @description Scroll pagination cursor */
                     cursor?: string | null;
                 };
                 header?: {
@@ -2962,7 +2962,7 @@ export interface paths {
     "/users/scroll-paginated": {
         parameters: {
             query?: {
-                /** @description Fast pagination cursor */
+                /** @description Scroll pagination cursor */
                 cursor?: string | null;
             };
             header?: {
@@ -2975,7 +2975,7 @@ export interface paths {
         get: {
             parameters: {
                 query?: {
-                    /** @description Fast pagination cursor */
+                    /** @description Scroll pagination cursor */
                     cursor?: string | null;
                 };
                 header?: {
@@ -3108,7 +3108,7 @@ export interface paths {
                         password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
-                        /** @description Fast pagination cursor */
+                        /** @description Scroll pagination cursor */
                         cursor?: string | null;
                     };
                 };

@@ -1,10 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import {
-  Dream,
-  DreamOrViewModelClassSerializerKey,
-  DreamSerializableArray,
-  ViewModelClass,
-} from '@rvoh/dream'
+import { Dream } from '@rvoh/dream'
+import { DreamOrViewModelClassSerializerKey, DreamSerializableArray, ViewModelClass } from '@rvoh/dream/types'
 
 export type FunctionProperties<T> = {
   [K in keyof T as T[K] extends (...args: any[]) => any ? K : never]: T[K]

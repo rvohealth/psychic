@@ -8,7 +8,7 @@
 import '../conf/loadEnv.js'
 
 import { Command } from 'commander'
-import { PsychicCLI } from '../../../src/index.js'
+import PsychicCLI from '../../../src/cli/index.js'
 import seedDb from '../db/seed.js'
 import initializePsychicApp from './helpers/initializePsychicApp.js'
 

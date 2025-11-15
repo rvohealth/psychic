@@ -1,4 +1,5 @@
-import { camelize, Dream } from '@rvoh/dream'
+import { Dream } from '@rvoh/dream'
+import { camelize } from '@rvoh/dream/utils'
 
 export class SerializingPlainPropertyWithoutOpenapiShape extends Error {
   constructor(

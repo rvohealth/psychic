@@ -1,4 +1,4 @@
-import { OpenapiValidateTarget } from '../../openapi-renderer/endpoint.js'
+import { OpenapiValidateTarget } from '../../openapi-renderer/defaults.js'
 
 export default class OpenapiValidationFailure extends Error {
   constructor(

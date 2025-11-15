@@ -1,10 +1,5 @@
-import {
-  absoluteDreamPath,
-  camelize,
-  globalClassNameFromFullyQualifiedModelName,
-  hyphenize,
-  standardizeFullyQualifiedModelName,
-} from '@rvoh/dream'
+import { DreamApp } from '@rvoh/dream'
+import { camelize, hyphenize } from '@rvoh/dream/utils'
 import pluralize from 'pluralize-esm'
 
 export default function generateControllerContent({
@@ -28,14 +23,18 @@ export default function generateControllerContent({
   forAdmin: boolean
   singular: boolean
 }) {
-  fullyQualifiedControllerName = standardizeFullyQualifiedModelName(fullyQualifiedControllerName)
+  fullyQualifiedControllerName = DreamApp.system.standardizeFullyQualifiedModelName(
+    fullyQualifiedControllerName,
+  )
 
   const additionalImports: string[] = []
-  const controllerClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedControllerName)
+  const controllerClassName = DreamApp.system.globalClassNameFromFullyQualifiedModelName(
+    fullyQualifiedControllerName,
+  )
 
   // Determine user model variables
   const actualOwningModel = owningModel || 'User'
-  const owningModelClassName = globalClassNameFromFullyQualifiedModelName(actualOwningModel)
+  const owningModelClassName = DreamApp.system.globalClassNameFromFullyQualifiedModelName(actualOwningModel)
   const owningModelProperty = `current${owningModelClassName}`
 
   let modelClassName: string | undefined
@@ -43,8 +42,8 @@ export default function generateControllerContent({
   let pluralizedModelAttributeName: string | undefined
 
   if (fullyQualifiedModelName) {
-    fullyQualifiedModelName = standardizeFullyQualifiedModelName(fullyQualifiedModelName)
-    modelClassName = globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
+    fullyQualifiedModelName = DreamApp.system.standardizeFullyQualifiedModelName(fullyQualifiedModelName)
+    modelClassName = DreamApp.system.globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
     modelAttributeName = camelize(modelClassName)
     pluralizedModelAttributeName = singular ? modelAttributeName : pluralize(modelAttributeName)
     additionalImports.push(importStatementForModel(fullyQualifiedModelName))
@@ -247,7 +246,7 @@ function loadModelStatement(
 }
 
 function importStatementForModel(destinationModelName: string) {
-  return `import ${globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${absoluteDreamPath('models', destinationModelName)}'`
+  return `import ${DreamApp.system.globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${DreamApp.system.absoluteDreamPath('models', destinationModelName)}'`
 }
 
 function aOrAnDreamModelName(dreamName: string) {

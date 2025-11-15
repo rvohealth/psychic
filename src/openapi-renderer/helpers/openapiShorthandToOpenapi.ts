@@ -3,7 +3,7 @@ import {
   OpenapiSchemaBodyShorthand,
   OpenapiShorthandPrimitiveBaseTypes,
   OpenapiShorthandPrimitiveTypes,
-} from '@rvoh/dream'
+} from '@rvoh/dream/openapi'
 import isObject from '../../helpers/isObject.js'
 import isOpenapiShorthand from './isOpenapiShorthand.js'
 import maybeNullOpenapiShorthandToOpenapiShorthand from './maybeNullOpenapiShorthandToOpenapiShorthand.js'

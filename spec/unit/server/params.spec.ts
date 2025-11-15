@@ -1,6 +1,7 @@
 import { CalendarDate, DateTime } from '@rvoh/dream'
 import { PsychicParamsDictionary } from '../../../src/controller/index.js'
-import { ParamValidationError, ParamValidationErrors } from '../../../src/index.js'
+import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
+import ParamValidationErrors from '../../../src/error/controller/ParamValidationErrors.js'
 import Params from '../../../src/server/params.js'
 import Pet from '../../../test-app/src/app/models/Pet.js'
 import User from '../../../test-app/src/app/models/User.js'
@@ -100,15 +101,14 @@ describe('Params', () => {
       })
     })
 
-    context('with including option passed', () => {
-      it('allows unsafe attributes when explicitly provided through the "including" option', () => {
+    context('including option', () => {
+      it('is not only disallowed at the type level, but has no effect at the implementation level', () => {
         const params = Params.for({ species: 'cat', userId: '1', id: '123' }, Pet, {
           including: ['userId'],
-        })
+          // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        } as any)
 
-        // userId is of type integer at the db level, so we should
-        // expect integer coercion here.
-        expect(params).toEqual({ species: 'cat', userId: 1 })
+        expect(params).toEqual({ species: 'cat' })
       })
     })
 

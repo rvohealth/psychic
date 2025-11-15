@@ -23,16 +23,19 @@ export default async function addResourceToRoutes(
 
   let routes = (await fs.readFile(routesFilePath)).toString()
 
-  const matchesAndReplacements = addResourceToRoutes_routeToRegexAndReplacements(route, options)
-  for (let index = 0; index < matchesAndReplacements.length; index++) {
-    const matchAndReplacement = matchesAndReplacements[index]
+  const results = addResourceToRoutes_routeToRegexAndReplacements(routes, route, options)
+  routes = results.routes
+  const regexAndReplacements = results.regexAndReplacements
+
+  for (let index = 0; index < regexAndReplacements.length; index++) {
+    const matchAndReplacement = regexAndReplacements[index]
     if (matchAndReplacement === undefined) throw new UnexpectedUndefined()
 
     if (matchAndReplacement.regex.test(routes)) {
       routes = routes.replace(
         matchAndReplacement.regex,
         matchAndReplacement.replacement +
-          closeBrackets(index, indent(matchesAndReplacements.length - index - 1)) +
+          closeBrackets(index, indent(regexAndReplacements.length - index - 1)) +
           '\n',
       )
 
@@ -44,6 +47,7 @@ export default async function addResourceToRoutes(
 }
 
 export function addResourceToRoutes_routeToRegexAndReplacements(
+  routes: string,
   route: string,
   {
     singular,
@@ -52,7 +56,7 @@ export function addResourceToRoutes_routeToRegexAndReplacements(
     singular: boolean
     onlyActions: string[] | undefined
   },
-): RegexAndReplacement[] {
+): { routes: string; regexAndReplacements: RegexAndReplacement[] } {
   const regexAndReplacements: RegexAndReplacement[] = []
   const namespaces = route.split('/')
   const resourceMethod = singular ? 'resource' : 'resources'
@@ -60,19 +64,54 @@ export function addResourceToRoutes_routeToRegexAndReplacements(
   const resourceOptions = onlyActions
     ? `, { only: ${JSON.stringify(onlyActions).replace(/"/g, "'").replace(/','/g, "', '")} }`
     : ''
-  const resources = `  ${indent(namespaces.length)}r.${resourceMethod}('${resourceName}'${resourceOptions})`
+
+  let namespaceCounter = 0
+  const pathParamRegexp = /^\{[^}]*\}$/
+
   const replacement =
-    namespaces.map((namespace, index) => `${indent(index + 1)}${namespaceCode(namespace)}\n`).join('') +
-    resources +
+    namespaces
+      .map((pathPart, index) => {
+        if (pathParamRegexp.test(pathPart)) return
+        const nextPathPart = namespaces[index + 1]
+        namespaceCounter++
+
+        if (nextPathPart && pathParamRegexp.test(nextPathPart)) {
+          /**
+           * If the routes file still includes the initial `r.resources('resourceName')`,
+           * then we replace it with the `r.resources('resourceName', r => {})` form
+           */
+          routes = routes.replace(
+            `${indent(namespaceCounter)}r.resources('${pathPart}')`,
+            `${indent(namespaceCounter)}${nestedResourcesCode(pathPart)}\n${indent(namespaceCounter)}})\n`,
+          )
+
+          return `${indent(namespaceCounter)}${nestedResourcesCode(pathPart)}\n`
+        } else {
+          return `${indent(namespaceCounter)}${namespaceCode(pathPart)}\n`
+        }
+      })
+      .join('') +
+    `  ${indent(namespaceCounter)}r.${resourceMethod}('${resourceName}'${resourceOptions})` +
     '\n'
 
   for (let index = namespaces.length - 1; index >= 0; index--) {
+    const pathPart = namespaces[index + 1]
+    if (pathPart && pathParamRegexp.test(pathPart)) continue
+    namespaceCounter = 0
+
     const regexpString = namespaces
       .slice(0, index + 1)
-      .map(
-        (namespace, index) =>
-          ` {${(index + 1) * 2}}${namespaceCode(namespace).replace(/([(){.])/g, '\\$1')}\n`,
-      )
+      .map((pathPart, index) => {
+        if (pathParamRegexp.test(pathPart)) return
+        const nextPathPart = namespaces[index + 1]
+        namespaceCounter++
+
+        if (nextPathPart && pathParamRegexp.test(nextPathPart)) {
+          return ` {${namespaceCounter * 2}}${nestedResourcesCode(pathPart).replace(/([(){.])/g, '\\$1')}\n`
+        } else {
+          return ` {${namespaceCounter * 2}}${namespaceCode(pathPart).replace(/([(){.])/g, '\\$1')}\n`
+        }
+      })
       .join('')
 
     regexAndReplacements.push({
@@ -86,7 +125,7 @@ export function addResourceToRoutes_routeToRegexAndReplacements(
     replacement: `export $1(r: PsychicRouter)$2{\n${replacement}`,
   })
 
-  return regexAndReplacements
+  return { routes, regexAndReplacements }
 }
 
 interface RegexAndReplacement {
@@ -96,6 +135,10 @@ interface RegexAndReplacement {
 
 function namespaceCode(namespace: string) {
   return `r.namespace('${namespace}', r => {`
+}
+
+function nestedResourcesCode(namespace: string) {
+  return `r.resources('${namespace}', r => {`
 }
 
 function closeBrackets(number: number, baseIndentation: string) {

@@ -1,4 +1,4 @@
-import { capitalize, pascalize } from '@rvoh/dream'
+import { capitalize, pascalize } from '@rvoh/dream/utils'
 
 export default function pascalizeFileName(route: string): string {
   return route

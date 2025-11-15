@@ -1,8 +1,6 @@
-import { PsychicApp } from '../../../../src/index.js'
-import OpenapiEndpointRenderer, {
-  OpenapiValidateOption,
-  OpenapiValidateTarget,
-} from '../../../../src/openapi-renderer/endpoint.js'
+import { OpenapiValidateTarget } from '../../../../src/openapi-renderer/defaults.js'
+import OpenapiEndpointRenderer, { OpenapiValidateOption } from '../../../../src/openapi-renderer/endpoint.js'
+import PsychicApp from '../../../../src/psychic-app/index.js'
 import UsersController from '../../../../test-app/src/app/controllers/UsersController.js'
 import User from '../../../../test-app/src/app/models/User.js'
 

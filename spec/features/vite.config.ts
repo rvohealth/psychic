@@ -8,7 +8,6 @@ export default defineConfig({
     fileParallelism: false,
     maxConcurrency: 1,
     maxWorkers: 1,
-    minWorkers: 1,
     mockReset: true,
     watch: false,
     printConsoleTrace: true,

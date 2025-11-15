@@ -1,4 +1,4 @@
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import * as fs from 'fs'
 import psychicPath from '../helpers/path/psychicPath.js'
 import PsychicApp from '../psychic-app/index.js'

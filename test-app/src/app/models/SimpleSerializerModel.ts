@@ -1,4 +1,4 @@
-import { DreamColumn, DreamSerializers } from '@rvoh/dream'
+import { DreamColumn, DreamSerializers } from '@rvoh/dream/types'
 import ApplicationModel from './ApplicationModel.js'
 
 // const deco = new Decorators<typeof SimpleSerializerModel>()

@@ -2,21 +2,46 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "1.14.0",
+  "version": "2.0.0",
   "author": "RVOHealth",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/rvohealth/psychic.git"
   },
   "license": "MIT",
-  "main": "./dist/cjs/src/index.js",
-  "module": "./dist/esm/src/index.js",
-  "types": "./dist/types/src/index.d.ts",
+  "main": "./dist/cjs/src/package-exports/index.js",
+  "module": "./dist/esm/src/package-exports/index.js",
+  "types": "./dist/types/src/package-exports/index.d.ts",
   "exports": {
     ".": {
-      "types": "./dist/types/src/index.d.ts",
-      "import": "./dist/esm/src/index.js",
-      "require": "./dist/cjs/src/index.js"
+      "types": "./dist/types/src/package-exports/index.d.ts",
+      "import": "./dist/esm/src/package-exports/index.js",
+      "require": "./dist/cjs/src/package-exports/index.js"
+    },
+    "./errors": {
+      "types": "./dist/types/src/package-exports/errors.d.ts",
+      "import": "./dist/esm/src/package-exports/errors.js",
+      "require": "./dist/cjs/src/package-exports/errors.js"
+    },
+    "./system": {
+      "types": "./dist/types/src/package-exports/system.d.ts",
+      "import": "./dist/esm/src/package-exports/system.js",
+      "require": "./dist/cjs/src/package-exports/system.js"
+    },
+    "./openapi": {
+      "types": "./dist/types/src/package-exports/openapi.d.ts",
+      "import": "./dist/esm/src/package-exports/openapi.js",
+      "require": "./dist/cjs/src/package-exports/openapi.js"
+    },
+    "./types": {
+      "types": "./dist/types/src/package-exports/types.d.ts",
+      "import": "./dist/esm/src/package-exports/types.js",
+      "require": "./dist/cjs/src/package-exports/types.js"
+    },
+    "./utils": {
+      "types": "./dist/types/src/package-exports/utils.d.ts",
+      "import": "./dist/esm/src/package-exports/utils.js",
+      "require": "./dist/cjs/src/package-exports/utils.js"
     }
   },
   "files": [
@@ -50,20 +75,19 @@
     "cors": "^2.8.5",
     "dotenv": "^16.4.5",
     "pluralize-esm": "^9.0.5",
-    "vite": "^7.1.7",
     "yoctocolors": "^2.1.1"
   },
   "peerDependencies": {
-    "@rvoh/dream": "*",
-    "@types/express": "*",
-    "commander": "*",
-    "express": "*",
-    "openapi-typescript": "*"
+    "@rvoh/dream": "^2.0.0",
+    "@types/express": "^5.0.1",
+    "commander": "^12.1.0",
+    "express": "^5.1.0",
+    "openapi-typescript": "^7.8.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@jest-mock/express": "^3.0.0",
-    "@rvoh/dream": "^1.13.0",
+    "@rvoh/dream": "^2.0.0",
     "@rvoh/dream-spec-helpers": "^1.2.1",
     "@rvoh/psychic-spec-helpers": "^1.1.6",
     "@types/express": "^5.0.1",
@@ -94,7 +118,7 @@
     "typedoc": "^0.26.6",
     "typescript": "^5.5.4",
     "typescript-eslint": "=7.18.0",
-    "vitest": "^3.2.4",
+    "vitest": "^4.0.9",
     "winston": "^3.14.2"
   },
   "packageManager": "yarn@4.7.0"

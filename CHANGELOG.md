@@ -1,3 +1,8 @@
+## 2.0.0
+
+- namespace package exports
+- remove `including` support from `paramsFor`
+
 ## 1.14.0
 
 - generated code uses absolute imports

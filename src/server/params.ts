@@ -1,12 +1,5 @@
+import { CalendarDate, DateTime, Dream } from '@rvoh/dream'
 import {
-  CalendarDate,
-  camelize,
-  compact,
-  DateTime,
-  Dream,
-  DreamAttributes,
-  DreamParamSafeAttributes,
-  DreamParamSafeColumnNames,
   OpenapiSchemaArray,
   OpenapiSchemaBody,
   OpenapiSchemaInteger,
@@ -15,9 +8,14 @@ import {
   OpenapiSchemaPrimitiveGeneric,
   OpenapiSchemaPropertiesShorthand,
   OpenapiSchemaString,
-  snakeify,
-  UpdateableProperties,
-} from '@rvoh/dream'
+} from '@rvoh/dream/openapi'
+import {
+  DreamAttributes,
+  DreamParamSafeAttributes,
+  DreamParamSafeColumnNames,
+  StrictInterface,
+} from '@rvoh/dream/types'
+import { camelize, compact, snakeify } from '@rvoh/dream/utils'
 import {
   PsychicParamsDictionary,
   PsychicParamsPrimitive,
@@ -52,8 +50,7 @@ export default class Params {
     T extends typeof Dream,
     I extends InstanceType<T>,
     const OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
-    const IncludingArray extends Exclude<keyof DreamAttributes<I>, OnlyArray[number]>[],
-    ForOpts extends ParamsForOpts<OnlyArray, IncludingArray>,
+    ForOpts extends StrictInterface<ForOpts, ParamsForOpts<OnlyArray>>,
     ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
       ? undefined
       : I['paramSafeColumns' & keyof I] & string[],
@@ -75,20 +72,7 @@ export default class Params {
             string &
             keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
         }>,
-    ReturnPartialTypeWithIncluding extends ForOpts['including'] extends readonly (keyof UpdateableProperties<
-      InstanceType<T>
-    >)[]
-      ? ReturnPartialType &
-          Partial<{
-            [K in Extract<
-              keyof UpdateableProperties<InstanceType<T>>,
-              ForOpts['including'][number & keyof ForOpts['including']]
-            >]: UpdateableProperties<InstanceType<T>>[K]
-          }>
-      : ReturnPartialType,
-    ReturnPayload extends ForOpts['array'] extends true
-      ? ReturnPartialTypeWithIncluding[]
-      : ReturnPartialTypeWithIncluding,
+    ReturnPayload extends ForOpts['array'] extends true ? ReturnPartialType[] : ReturnPartialType,
   >(params: object, dreamClass: T, forOpts: ForOpts = {} as ForOpts): ReturnPayload {
     const { array = false } = forOpts
 
@@ -323,7 +307,7 @@ export default class Params {
    */
   public static cast<
     const EnumType extends readonly string[],
-    OptsType extends ParamsCastOptions<EnumType>,
+    OptsType extends StrictInterface<OptsType, ParamsCastOptions<EnumType>>,
     ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
     ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
@@ -359,7 +343,7 @@ export default class Params {
 
   public cast<
     EnumType extends readonly string[],
-    OptsType extends ParamsCastOptions<EnumType>,
+    OptsType extends StrictInterface<OptsType, ParamsCastOptions<EnumType>>,
     ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
     ValidatedType extends ValidatedReturnType<ExpectedType, OptsType>,
     AllowNullOrUndefined extends ValidatedAllowsNull<ExpectedType, OptsType>,
@@ -697,15 +681,19 @@ export type ParamsCastOptions<EnumType> = {
   enum?: EnumType
 }
 
-export interface ParamsForOpts<OnlyArray, IncludingArray>
-  extends ParamExclusionOptions<OnlyArray, IncludingArray> {
+interface ParamsForOptsBase<OnlyArray> {
   array?: boolean
+  only?: OnlyArray
 }
 
-export interface ParamExclusionOptions<OnlyArray, IncludingArray> {
-  only?: OnlyArray
-  including?: IncludingArray
+export interface ParamsForOpts<OnlyArray> extends ParamsForOptsBase<OnlyArray> {
+  key?: string
+}
+
+export interface OpenAPIDreamModelRequestBodyModifications<OnlyArray, IncludingArray>
+  extends ParamsForOptsBase<OnlyArray> {
   combining?: OpenapiSchemaPropertiesShorthand
+  including?: IncludingArray
 }
 
 const typeToErrorMap: Record<PsychicParamsPrimitiveLiteral, string> = {

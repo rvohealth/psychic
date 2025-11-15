@@ -1,5 +1,5 @@
+import { DreamApp } from '@rvoh/dream'
 import * as path from 'path'
-import { dreamPath } from '@rvoh/dream'
 import PsychicApp from '../../psychic-app/index.js'
 
 export default function (dreamPathType: PsychicPaths | 'src') {
@@ -20,10 +20,10 @@ export default function (dreamPathType: PsychicPaths | 'src') {
 
     case 'src':
       // TODO: make this customizable, but maybe not.
-      return path.join(dreamPath('db'), '..')
+      return path.join(DreamApp.system.dreamPath('db'), '..')
 
     default:
-      return dreamPath(dreamPathType)
+      return DreamApp.system.dreamPath(dreamPathType)
   }
 }
 

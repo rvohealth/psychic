@@ -1,4 +1,4 @@
-import { camelize } from '@rvoh/dream'
+import { camelize } from '@rvoh/dream/utils'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import psychicPath from '../../helpers/path/psychicPath.js'
@@ -27,7 +27,7 @@ export default async function generateSyncEnumsInitializer(
   }
 
   const contents = `\
-import { DreamCLI } from '@rvoh/dream'
+import { DreamCLI } from '@rvoh/dream/system'
 import { PsychicApp, PsychicBin } from "@rvoh/psychic"
 import AppEnv from '../AppEnv.js'
 

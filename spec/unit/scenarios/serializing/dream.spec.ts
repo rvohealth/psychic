@@ -1,5 +1,5 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
-import { PsychicApp } from '../../../../src/index.js'
+import PsychicApp from '../../../../src/psychic-app/index.js'
 import PsychicServer from '../../../../src/server/index.js'
 import createModelWithoutSerializer from '../../../../test-app/spec/factories/ModelWithoutSerializerFactory.js'
 import createSimpleSerializerModel from '../../../../test-app/spec/factories/SimpleSerializerModelFactory.js'

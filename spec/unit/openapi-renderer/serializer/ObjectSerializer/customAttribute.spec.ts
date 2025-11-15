@@ -1,4 +1,5 @@
-import { CalendarDate, ObjectSerializer, round } from '@rvoh/dream'
+import { CalendarDate, ObjectSerializer } from '@rvoh/dream'
+import { round } from '@rvoh/dream/utils'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 
 interface User {
@@ -47,7 +48,7 @@ describe('ObjectSerializer customAttributes', () => {
   it('can override the OpenAPI shape with an OpenAPI object', () => {
     const MySerializer = (data: ModelForOpenapiTypeSpecs) =>
       ObjectSerializer(data).customAttribute('volume', () => round(data.volume ?? 0), {
-        openapi: { type: 'integer', format: undefined, description: 'Volume as an integer' },
+        openapi: { type: 'integer', description: 'Volume as an integer' },
       })
 
     const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)

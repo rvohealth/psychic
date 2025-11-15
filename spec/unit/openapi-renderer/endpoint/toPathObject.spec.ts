@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
-import { PsychicApp } from '../../../../src/index.js'
 import OpenapiEndpointRenderer, { ToPathObjectOpts } from '../../../../src/openapi-renderer/endpoint.js'
+import PsychicApp from '../../../../src/psychic-app/index.js'
 import { RouteConfig } from '../../../../src/router/route-manager.js'
 import ApiPetsController from '../../../../test-app/src/app/controllers/Api/PetsController.js'
 import BalloonsController from '../../../../test-app/src/app/controllers/BalloonsController.js'
@@ -418,7 +418,7 @@ describe('OpenapiEndpointRenderer', () => {
                       name: 'cursor',
                       required: false,
                       allowReserved: true,
-                      description: 'Fast pagination cursor',
+                      description: 'Scroll pagination cursor',
                       schema: {
                         type: ['string', 'null'],
                       },
@@ -468,7 +468,7 @@ describe('OpenapiEndpointRenderer', () => {
                         name: 'cursor',
                         required: false,
                         allowReserved: true,
-                        description: 'Fast pagination cursor',
+                        description: 'Scroll pagination cursor',
                         schema: {
                           type: ['string', 'null'],
                         },
@@ -529,7 +529,7 @@ describe('OpenapiEndpointRenderer', () => {
                       name: 'pagref',
                       required: false,
                       allowReserved: true,
-                      description: 'Fast pagination cursor',
+                      description: 'Scroll pagination cursor',
                       schema: {
                         type: ['string', 'null'],
                       },
@@ -566,7 +566,7 @@ describe('OpenapiEndpointRenderer', () => {
                             properties: expect.objectContaining({
                               cursor: {
                                 type: ['string', 'null'],
-                                description: 'Fast pagination cursor',
+                                description: 'Scroll pagination cursor',
                               },
                             }),
                           }),
@@ -597,7 +597,7 @@ describe('OpenapiEndpointRenderer', () => {
                               properties: expect.objectContaining({
                                 cursor: {
                                   type: ['string', 'null'],
-                                  description: 'Fast pagination cursor',
+                                  description: 'Scroll pagination cursor',
                                 },
                               }),
                             }),
@@ -1883,6 +1883,88 @@ describe('OpenapiEndpointRenderer', () => {
             description: 'Success, no content',
             $ref: '#/components/responses/NoContent',
           })
+        })
+      })
+
+      context('when the response shape does not specify response body content', () => {
+        it('does not render it in a "content" block (allows 204s with custom descriptions/summaries)', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+            responses: {
+              204: {
+                description: 'This has a custom description',
+              },
+            },
+          })
+
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          expect(response['/users/howyadoin']!.get.responses['200']).toBeUndefined()
+          expect(response['/users/howyadoin']!.get.responses['204']).toEqual({
+            description: 'This has a custom description',
+          })
+        })
+      })
+
+      context('specifying a content-type', () => {
+        it('renders that content type instead of application/json', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+            status: 200,
+            responses: {
+              200: {
+                contentType: 'image/png',
+                type: 'string',
+                format: 'binary',
+              },
+            },
+          })
+
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          expect(response['/users/howyadoin']!.get.responses['200']).toEqual(
+            expect.objectContaining({
+              content: {
+                'image/png': {
+                  schema: {
+                    type: 'string',
+                    format: 'binary',
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
+      context('specifying multiple content-types', () => {
+        it('renders that content type instead of application/json', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+            status: 200,
+            responses: {
+              200: {
+                contentType: ['image/jpeg', 'image/png'],
+                type: 'string',
+                format: 'binary',
+              },
+            },
+          })
+
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          expect(response['/users/howyadoin']!.get.responses['200']).toEqual(
+            expect.objectContaining({
+              content: {
+                'image/jpeg': {
+                  schema: {
+                    type: 'string',
+                    format: 'binary',
+                  },
+                },
+                'image/png': {
+                  schema: {
+                    type: 'string',
+                    format: 'binary',
+                  },
+                },
+              },
+            }),
+          )
         })
       })
 
