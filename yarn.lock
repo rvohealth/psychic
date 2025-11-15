@@ -914,9 +914,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvoh/dream@npm:^2.0.0-alpha.13":
-  version: 2.0.0-alpha.13
-  resolution: "@rvoh/dream@npm:2.0.0-alpha.13"
+"@rvoh/dream@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@rvoh/dream@npm:2.0.0"
   dependencies:
     colorette: "npm:^2.0.20"
     commander: "npm:^12.1.0"
@@ -931,7 +931,7 @@ __metadata:
     kysely: ^0.28.5
     kysely-codegen: ~0.19.0
     pg: "*"
-  checksum: 10c0/3b638ed926237e39727956acd5d9aae2b00a3961cd61fda4c2d424e188e0c2d04e3e6e626d13e7c2701257942fff4664c354324e0557a134802720dae1825124
+  checksum: 10c0/8c56893a11d5272761589a4e042ecd67af1e2388e1039eeb465756bacd1e974f0ba1afb6a937bf4753287bf50bc1fc5dafbf6f9b273ce6baa9fca4cb0506cd53
   languageName: node
   linkType: hard
 
@@ -958,7 +958,7 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.19.0"
     "@jest-mock/express": "npm:^3.0.0"
-    "@rvoh/dream": "npm:^2.0.0-alpha.13"
+    "@rvoh/dream": "npm:^2.0.0"
     "@rvoh/dream-spec-helpers": "npm:^1.2.1"
     "@rvoh/psychic-spec-helpers": "npm:^1.1.6"
     "@types/cookie-parser": "npm:^1.4.8"
@@ -1003,7 +1003,7 @@ __metadata:
     winston: "npm:^3.14.2"
     yoctocolors: "npm:^2.1.1"
   peerDependencies:
-    "@rvoh/dream": ^2.0.0-alpha.13
+    "@rvoh/dream": ^2.0.0
     "@types/express": ^5.0.1
     commander: ^12.1.0
     express: ^5.1.0
