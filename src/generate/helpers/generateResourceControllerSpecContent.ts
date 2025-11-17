@@ -1,7 +1,7 @@
 import { DreamApp } from '@rvoh/dream'
 import { camelize, capitalize, compact, uniq } from '@rvoh/dream/utils'
+import pluralize from 'pluralize-esm'
 import addImportSuffix from '../../helpers/path/addImportSuffix.js'
-import { pluralize } from '../../package-exports/utils.js'
 
 interface GenerateSpecOptions {
   fullyQualifiedControllerName: string

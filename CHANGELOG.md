@@ -1,3 +1,7 @@
+## 2.0.1
+
+- stop exporting `pluralize` since it's just a direct export of `pluralize-esm`
+
 ## 2.0.0
 
 - namespace package exports

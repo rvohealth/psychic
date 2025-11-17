@@ -901,22 +901,20 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@rvoh/dream-spec-helpers@npm:^1.2.1":
-  version: 1.2.1
-  resolution: "@rvoh/dream-spec-helpers@npm:1.2.1"
-  dependencies:
-    lodash.sortby: "npm:^4.7.0"
+"@rvoh/dream-spec-helpers@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@rvoh/dream-spec-helpers@npm:2.0.0"
   peerDependencies:
     "@types/node": "*"
     "@types/pg": "*"
     pg: "*"
-  checksum: 10c0/18acd47df6ba6f13df6e2b040c13a9c43ddc164e484bffab0b4ff732b9517c63008aa8238db74ca4a4af18e50a608f44caf7a1fa364f9b5a2727c5ddcd9a0ee8
+  checksum: 10c0/8aca95b20f99ae1d11a57487c9c633c818c6536825e293a43d4989874771558ee6b2e04d5dc089a6a58a7448c88076bb4323a970c47aa458124ebc52edcab538
   languageName: node
   linkType: hard
 
-"@rvoh/dream@npm:^2.0.0":
-  version: 2.0.0
-  resolution: "@rvoh/dream@npm:2.0.0"
+"@rvoh/dream@npm:^2.0.1":
+  version: 2.0.1
+  resolution: "@rvoh/dream@npm:2.0.1"
   dependencies:
     colorette: "npm:^2.0.20"
     commander: "npm:^12.1.0"
@@ -925,19 +923,18 @@ __metadata:
     pluralize-esm: "npm:^9.0.5"
     yoctocolors: "npm:^2.1.1"
   peerDependencies:
-    "@rvoh/dream-spec-helpers": "*"
     "@types/node": "*"
     "@types/pg": "*"
     kysely: ^0.28.5
     kysely-codegen: ~0.19.0
     pg: "*"
-  checksum: 10c0/8c56893a11d5272761589a4e042ecd67af1e2388e1039eeb465756bacd1e974f0ba1afb6a937bf4753287bf50bc1fc5dafbf6f9b273ce6baa9fca4cb0506cd53
+  checksum: 10c0/f7fec6749948794cebd7e590ac2099a24545b2fe44c2e81593ac7256bc53b8d7e5a99d77eb79663c01b46468a8324c4d0e23e1ae0855a648f6d7368fd8eafc28
   languageName: node
   linkType: hard
 
-"@rvoh/psychic-spec-helpers@npm:^1.1.6":
-  version: 1.1.6
-  resolution: "@rvoh/psychic-spec-helpers@npm:1.1.6"
+"@rvoh/psychic-spec-helpers@npm:^2.0.0":
+  version: 2.0.0
+  resolution: "@rvoh/psychic-spec-helpers@npm:2.0.0"
   dependencies:
     cookiejar: "npm:^2.1.4"
   peerDependencies:
@@ -948,7 +945,7 @@ __metadata:
     puppeteer: "*"
     supertest: "*"
     typescript: "*"
-  checksum: 10c0/e1b3605da8520c514d8970e8caf5e236a91d49e72a4dafede6967846410ae4860725aaf739a9d68797573618374ded3580142d7b98804770367fbc41cc72b063
+  checksum: 10c0/a84c441a393c6d4d5320593cdfbbab0719efd09ce07d943a7413735d792ab466736bbcb2b5fe244b6f1696a4ff0cb50034c53597300e3def48bff861daf2c162
   languageName: node
   linkType: hard
 
@@ -958,9 +955,9 @@ __metadata:
   dependencies:
     "@eslint/js": "npm:^9.19.0"
     "@jest-mock/express": "npm:^3.0.0"
-    "@rvoh/dream": "npm:^2.0.0"
-    "@rvoh/dream-spec-helpers": "npm:^1.2.1"
-    "@rvoh/psychic-spec-helpers": "npm:^1.1.6"
+    "@rvoh/dream": "npm:^2.0.1"
+    "@rvoh/dream-spec-helpers": "npm:^2.0.0"
+    "@rvoh/psychic-spec-helpers": "npm:^2.0.0"
     "@types/cookie-parser": "npm:^1.4.8"
     "@types/cors": "npm:^2.8.17"
     "@types/express": "npm:^5.0.1"
@@ -1002,7 +999,7 @@ __metadata:
     winston: "npm:^3.14.2"
     yoctocolors: "npm:^2.1.1"
   peerDependencies:
-    "@rvoh/dream": ^2.0.0
+    "@rvoh/dream": ^2.0.1
     "@types/express": ^5.0.1
     commander: ^12.1.0
     express: ^5.1.0
@@ -4028,13 +4025,6 @@ __metadata:
   version: 4.6.2
   resolution: "lodash.merge@npm:4.6.2"
   checksum: 10c0/402fa16a1edd7538de5b5903a90228aa48eb5533986ba7fa26606a49db2572bf414ff73a2c9f5d5fd36b31c46a5d5c7e1527749c07cbcf965ccff5fbdf32c506
-  languageName: node
-  linkType: hard
-
-"lodash.sortby@npm:^4.7.0":
-  version: 4.7.0
-  resolution: "lodash.sortby@npm:4.7.0"
-  checksum: 10c0/fc48fb54ff7669f33bb32997cab9460757ee99fafaf72400b261c3e10fde21538e47d8cfcbe6a25a31bcb5b7b727c27d52626386fc2de24eb059a6d64a89cdf5
   languageName: node
   linkType: hard
 
