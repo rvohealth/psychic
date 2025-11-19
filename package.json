@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "2.0.1",
+  "version": "2.0.2",
   "author": "RVOHealth",
   "repository": {
     "type": "git",
@@ -105,7 +105,7 @@
     "kysely": "^0.28.5",
     "kysely-codegen": "~0.17.0",
     "luxon-jest-matchers": "^0.1.14",
-    "nodemon": "^3.1.7",
+    "nodemon": "^3.1.11",
     "openapi-typescript": "^7.8.0",
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",

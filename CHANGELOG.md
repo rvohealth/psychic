@@ -1,3 +1,7 @@
+## 2.0.2
+
+bump glob to close dependabot alerts
+
 ## 2.0.1
 
 - stop exporting `pluralize` since it's just a direct export of `pluralize-esm`
