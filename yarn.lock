@@ -981,7 +981,7 @@ __metadata:
     kysely: "npm:^0.28.5"
     kysely-codegen: "npm:~0.17.0"
     luxon-jest-matchers: "npm:^0.1.14"
-    nodemon: "npm:^3.1.7"
+    nodemon: "npm:^3.1.11"
     openapi-typescript: "npm:^7.8.0"
     passport: "npm:^0.7.0"
     passport-local: "npm:^1.0.0"
@@ -3397,8 +3397,8 @@ __metadata:
   linkType: hard
 
 "glob@npm:^10.2.2, glob@npm:^10.3.10":
-  version: 10.4.5
-  resolution: "glob@npm:10.4.5"
+  version: 10.5.0
+  resolution: "glob@npm:10.5.0"
   dependencies:
     foreground-child: "npm:^3.1.0"
     jackspeak: "npm:^3.1.2"
@@ -3408,7 +3408,7 @@ __metadata:
     path-scurry: "npm:^1.11.1"
   bin:
     glob: dist/esm/bin.mjs
-  checksum: 10c0/19a9759ea77b8e3ca0a43c2f07ecddc2ad46216b786bb8f993c445aee80d345925a21e5280c7b7c6c59e860a0154b84e4b2b60321fea92cd3c56b4a7489f160e
+  checksum: 10c0/100705eddbde6323e7b35e1d1ac28bcb58322095bd8e63a7d0bef1a2cdafe0d0f7922a981b2b48369a4f8c1b077be5c171804534c3509dfe950dde15fbe6d828
   languageName: node
   linkType: hard
 
@@ -4434,9 +4434,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"nodemon@npm:^3.1.7":
-  version: 3.1.10
-  resolution: "nodemon@npm:3.1.10"
+"nodemon@npm:^3.1.11":
+  version: 3.1.11
+  resolution: "nodemon@npm:3.1.11"
   dependencies:
     chokidar: "npm:^3.5.2"
     debug: "npm:^4"
@@ -4450,7 +4450,7 @@ __metadata:
     undefsafe: "npm:^2.0.5"
   bin:
     nodemon: bin/nodemon.js
-  checksum: 10c0/95b64d647f2c22e85e375b250517b0a4b32c2d2392ad898444e331f70d6b1ab43b17f53a8a1d68d5879ab8401fc6cd6e26f0d2a8736240984f6b5a8435b407c0
+  checksum: 10c0/f3c17897146f680eaf93f5e1f53b1fd4acbd61e4f7526ec6cbcc993d1c14cee8c722c41b30aa8b101447f672d38e6d7b17c97e77540df191d724826bb16ce474
   languageName: node
   linkType: hard
 
