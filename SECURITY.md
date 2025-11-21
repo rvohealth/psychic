@@ -2,11 +2,7 @@
 
 ## Supported Versions
 
-Currently, the following versions are supported:
-
-| Version | Supported          |
-| ------- | ------------------ |
-| 1.0.x   | :white_check_mark: |
+We currently support the latest version of Psychic v2. Our goal is to avoid breaking changes within major versions, facilitating incorporating security patches by updating to the latest minor and patch version within a supported major version.
 
 ## Reporting a Vulnerability
 
