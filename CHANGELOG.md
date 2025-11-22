@@ -1,3 +1,7 @@
+## 2.0.3
+
+don't require database to exist when generating code
+
 ## 2.0.2
 
 bump glob to close dependabot alerts

@@ -132,7 +132,10 @@ export default class PsychicCLI {
             connectionName: string
           },
         ) => {
-          await initializePsychicApp({ bypassDreamIntegrityChecks: true })
+          await initializePsychicApp({
+            bypassDreamIntegrityChecks: true,
+            bypassDbConnectionsDuringInit: true,
+          })
           await PsychicBin.generateResource(route, modelName, columnsWithTypes, options)
           process.exit()
         },
@@ -148,7 +151,7 @@ export default class PsychicCLI {
       )
       .argument('[actions...]', 'the names of controller actions to create')
       .action(async (controllerName: string, actions: string[]) => {
-        await initializePsychicApp({ bypassDreamIntegrityChecks: true })
+        await initializePsychicApp({ bypassDreamIntegrityChecks: true, bypassDbConnectionsDuringInit: true })
         await PsychicBin.generateController(controllerName, actions)
         process.exit()
       })
@@ -173,7 +176,10 @@ export default class PsychicCLI {
             initializerName: string
           },
         ) => {
-          await initializePsychicApp()
+          await initializePsychicApp({
+            bypassDreamIntegrityChecks: true,
+            bypassDbConnectionsDuringInit: true,
+          })
           await generateSyncEnumsInitializer(outfile, initializerName)
           process.exit()
         },
@@ -218,7 +224,10 @@ export default class PsychicCLI {
           outputFile: string
           exportName: string
         }) => {
-          await initializePsychicApp()
+          await initializePsychicApp({
+            bypassDreamIntegrityChecks: true,
+            bypassDbConnectionsDuringInit: true,
+          })
           await generateOpenapiReduxBindings({
             exportName,
             schemaFile,
@@ -257,7 +266,10 @@ export default class PsychicCLI {
             initializerName: string
           },
         ) => {
-          await initializePsychicApp()
+          await initializePsychicApp({
+            bypassDreamIntegrityChecks: true,
+            bypassDbConnectionsDuringInit: true,
+          })
           await generateSyncOpenapiTypescriptInitializer(
             openapiFilepath,
             outfile,
