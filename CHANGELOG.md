@@ -1,3 +1,7 @@
+## 2.0.4
+
+improve CLI command descriptions
+
 ## 2.0.3
 
 don't require database to exist when generating code
