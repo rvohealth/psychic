@@ -28,7 +28,7 @@ jobs:
         env:
           POSTGRES_USER: psychic
           POSTGRES_DB: psychic_core_test
-          POSTGRES_PASSWORD: 'postgres'
+          POSTGRES_PASSWORD: "postgres"
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -61,10 +61,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "24"
 
-      - run: npm install -g corepack
       - run: corepack enable
+      - run: NODE_ENV=development yarn install --immutable
 
       - name: Cache node_modules
         id: cache-node-modules
@@ -90,7 +90,7 @@ jobs:
         env:
           POSTGRES_USER: psychic
           POSTGRES_DB: psychic_core_test
-          POSTGRES_PASSWORD: 'postgres'
+          POSTGRES_PASSWORD: "postgres"
         options: >-
           --health-cmd pg_isready
           --health-interval 10s
@@ -121,7 +121,7 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "24"
 
       - name: "Check chrome and chromedriver are installed"
         run: |
@@ -130,8 +130,8 @@ jobs:
           chromedriver --version
           which chromedriver
 
-      - run: npm install -g corepack
       - run: corepack enable
+      - run: NODE_ENV=development yarn install --immutable
 
       - name: Cache node_modules
         id: cache-node-modules
@@ -178,10 +178,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "24"
 
-      - run: npm install -g corepack
       - run: corepack enable
+      - run: NODE_ENV=development yarn install --immutable
 
       - name: Cache node_modules
         id: cache-node-modules
@@ -209,10 +209,10 @@ jobs:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: "24"
 
-      - run: npm install -g corepack
       - run: corepack enable
+      - run: NODE_ENV=development yarn install --immutable
 
       - name: Cache node_modules
         id: cache-node-modules
