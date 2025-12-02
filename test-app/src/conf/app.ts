@@ -281,10 +281,6 @@ export default async (psy: PsychicApp) => {
     }
   })
 
-  psy.on('cli:sync', () => {
-    return { customField: { customNestedField: 'custom value' } }
-  })
-
   // begin: passport test setup
   psy.use(
     session({

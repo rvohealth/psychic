@@ -1,7 +1,7 @@
 import { CliFileWriter, DreamBin, DreamCLI } from '@rvoh/dream/system'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
-import TypesBuilder from '../cli/helpers/TypesBuilder.js'
+import ASTPsychicTypesBuilder from '../cli/helpers/ASTPsychicTypesBuilder.js'
 import generateController from '../generate/controller.js'
 import generateResource from '../generate/resource.js'
 import isObject from '../helpers/isObject.js'
@@ -76,11 +76,10 @@ export default class PsychicBin {
     }
   }
 
-  // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static async syncTypes(customTypes: any = undefined) {
-    DreamCLI.logger.logStartProgress(`syncing types/psychic.ts...`)
-    await TypesBuilder.sync(customTypes)
-    DreamCLI.logger.logEndProgress()
+  public static async syncTypes() {
+    await DreamCLI.logger.logProgress(`syncing types/psychic.ts...`, async () => {
+      await new ASTPsychicTypesBuilder().build()
+    })
   }
 
   public static async syncOpenapiTypescriptFiles() {
@@ -152,10 +151,6 @@ export default class PsychicBin {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
         output = { ...output, ...(res as object) }
       }
-    }
-
-    if (Object.keys(output as object).length) {
-      await PsychicBin.syncTypes(output)
     }
   }
 }
