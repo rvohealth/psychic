@@ -1,3 +1,8 @@
+## 2.1.0
+
+- add custom AST type builder to create custom types file
+- deprecate ability to add custom types to the psychic types file
+
 ## 2.0.4
 
 improve CLI command descriptions

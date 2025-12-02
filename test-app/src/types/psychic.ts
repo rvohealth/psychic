@@ -1,12 +1,5 @@
 const psychicTypes = {
-  "openapiNames": [
-    "default",
-    "mobile",
-    "admin"
-  ],
-  "customField": {
-    "customNestedField": "custom value"
-  }
+  openapiNames: ['default', 'mobile', 'admin'],
 } as const
 
 export default psychicTypes
