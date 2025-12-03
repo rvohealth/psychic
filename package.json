@@ -81,7 +81,7 @@
     "@rvoh/dream": "^2.0.3",
     "@types/express": "^5.0.1",
     "commander": "^12.1.0",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "openapi-typescript": "^7.8.0"
   },
   "devDependencies": {
@@ -90,7 +90,7 @@
     "@rvoh/dream": "^2.0.3",
     "@rvoh/dream-spec-helpers": "^2.0.0",
     "@rvoh/psychic-spec-helpers": "^2.0.0",
-    "@types/express": "^5.0.1",
+    "@types/express": "^5.0.6",
     "@types/express-session": "^1.18.2",
     "@types/node": "^22.17.1",
     "@types/passport": "^0",
@@ -99,7 +99,7 @@
     "@types/supertest": "^6.0.3",
     "@typescript/analyze-trace": "^0.10.1",
     "eslint": "^9.19.0",
-    "express": "^5.1.0",
+    "express": "^5.2.1",
     "express-session": "^1.18.2",
     "jsdom": "^26.1.0",
     "kysely": "^0.28.5",
