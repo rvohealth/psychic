@@ -48,28 +48,29 @@
     "dist/**/*"
   ],
   "scripts": {
-    "client": "yarn --cwd=./client start",
-    "client:fspec": "VITE_PSYCHIC_ENV=test BROWSER=none yarn --cwd=./client start",
-    "psy": "NODE_ENV=${NODE_ENV:-test} yarn psyts",
+    "client": "cd client && pnpm start",
+    "client:fspec": "cd client && VITE_PSYCHIC_ENV=test BROWSER=none pnpm start",
+    "psy": "NODE_ENV=${NODE_ENV:-test} pnpm psyts",
     "psyjs": "node ./dist/test-app/src/cli/index.js",
     "psyts": "NODE_ENV=${NODE_ENV:-test} tsx ./test-app/src/cli/index.ts",
     "gpsy": "tsx ./global-cli/main.ts",
     "build": "echo \"building cjs...\" && rm -rf dist && npx tsc -p ./tsconfig.cjs.build.json && echo \"building esm...\" && npx tsc -p ./tsconfig.esm.build.json",
     "build:test-app": "rm -rf dist && echo \"building test app to esm...\" && npx tsc -p ./tsconfig.esm.build.test-app.json && echo \"building test app to cjs...\" && npx tsc -p ./tsconfig.cjs.build.test-app.json",
-    "types:esm:trace": "rm -rf dist && npx tsc -p ./tsconfig.esm.build.json --generateTrace ./typetrace --diagnostics && yarn analyze-trace ./typetrace --skipMillis 100 --forceMillis 300",
+    "types:esm:trace": "rm -rf dist && npx tsc -p ./tsconfig.esm.build.json --generateTrace ./typetrace --diagnostics && pnpm analyze-trace ./typetrace --skipMillis 100 --forceMillis 300",
     "dev": "nodemon --quiet --no-stdin",
     "console": "tsx ./test-app/src/conf/repl.ts",
     "uspec": "vitest --config ./spec/unit/vite.config.ts",
     "fspec": "vitest run --config=./spec/features/vite.config.ts",
-    "format": "yarn run prettier . --write",
-    "lint": "yarn run eslint --no-warn-ignored \"src/**/*.ts\" \"spec/**/*.ts\" \"test-app/**/*.ts\" && yarn run prettier . --check",
-    "prepack": "yarn build"
+    "format": "pnpm prettier . --write",
+    "lint": "pnpm eslint --no-warn-ignored \"src/**/*.ts\" \"spec/**/*.ts\" \"test-app/**/*.ts\" && pnpm prettier . --check",
+    "prepack": "pnpm build"
   },
   "dependencies": {
     "@types/cookie-parser": "^1.4.8",
     "@types/cors": "^2.8.17",
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
+    "body-parser": "^2.2.1",
     "commander": "^12.1.0",
     "cookie-parser": "^1.4.7",
     "cors": "^2.8.5",
@@ -90,6 +91,7 @@
     "@rvoh/dream": "^2.0.3",
     "@rvoh/dream-spec-helpers": "^2.0.0",
     "@rvoh/psychic-spec-helpers": "^2.0.0",
+    "@types/body-parser": "^1.19.6",
     "@types/express": "^5.0.6",
     "@types/express-session": "^1.18.2",
     "@types/node": "^22.17.1",
@@ -97,6 +99,7 @@
     "@types/passport-local": "^1",
     "@types/pg": "^8.11.8",
     "@types/supertest": "^6.0.3",
+    "@typescript-eslint/parser": "^8.48.1",
     "@typescript/analyze-trace": "^0.10.1",
     "eslint": "^9.19.0",
     "express": "^5.2.1",
@@ -117,9 +120,9 @@
     "tsx": "^4.19.3",
     "typedoc": "^0.26.6",
     "typescript": "^5.5.4",
-    "typescript-eslint": "=7.18.0",
+    "typescript-eslint": "^8.48.1",
     "vitest": "^4.0.9",
     "winston": "^3.14.2"
   },
-  "packageManager": "yarn@4.7.0"
+  "packageManager": "pnpm@10.24.0+sha512.01ff8ae71b4419903b65c60fb2dc9d34cf8bb6e06d03bde112ef38f7a34d6904c424ba66bea5cdcf12890230bf39f9580473140ed9c946fef328b6e5238a345a"
 }

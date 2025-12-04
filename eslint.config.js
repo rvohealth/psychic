@@ -6,7 +6,8 @@ import typescriptParser from '@typescript-eslint/parser'
 
 const config = typescriptEslint.config(
   eslint.configs.recommended,
-  ...typescriptEslint.configs.recommendedTypeChecked,
+  typescriptEslint.configs.recommendedTypeChecked,
+
   {
     ignores: [
       'docs/**/*',
@@ -18,10 +19,10 @@ const config = typescriptEslint.config(
       'spec/tmp/**/*',
       'test-app/client/apiRoutes.ts',
       'test-app/client/schema.ts',
+      'test-app/client/src/api/openapi.ts',
       'boilerplate/**/*',
       'spec-boilerplate/**/*',
-      '.yarn/**/*',
-      '.yarnrc.yml',
+      '.npmrc',
     ],
   },
 

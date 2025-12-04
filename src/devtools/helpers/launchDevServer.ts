@@ -10,7 +10,7 @@ const debugEnabled = debuglog('psychic').enabled
 
 export async function launchDevServer(
   key: string,
-  { port = 3000, cmd = 'yarn client', timeout = 5000 }: LaunchDevServerOpts = {},
+  { port = 3000, cmd = 'pnpm client', timeout = 5000 }: LaunchDevServerOpts = {},
 ) {
   if (devServerProcesses[key]) return
 

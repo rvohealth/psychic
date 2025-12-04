@@ -175,7 +175,7 @@ export default class PsychicController {
   /**
    * @internal
    *
-   * Used for displaying routes when running `yarn psy routes`
+   * Used for displaying routes when running `pnpm psy routes`
    * cli command
    */
   public static get disaplayName(): string {
