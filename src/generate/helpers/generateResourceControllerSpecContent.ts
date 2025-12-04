@@ -162,8 +162,10 @@ function parseAttribute(attribute: string): ParsedAttribute | null {
 
   if (!rawAttributeName || !rawAttributeType) return null
 
+  const sanitizedAttrType = camelize(rawAttributeType)?.toLowerCase()
+
   // Handle belongs_to relationships
-  if (rawAttributeType === 'belongs_to') {
+  if (sanitizedAttrType === 'belongsto') {
     // For belongs_to relationships, convert "Ticketing/Ticket" to "ticket"
     const attributeName = camelize(rawAttributeName.split('/').pop()!)
     return { attributeName, attributeType: 'belongs_to', isArray: false, enumValues }
@@ -199,8 +201,10 @@ function processAttributeByType({
   fullyQualifiedModelName: string
   attributeData: AttributeTestData
 }): void {
-  switch (attributeType) {
-    case 'belongs_to':
+  const sanitizedAttributeType = camelize(attributeType).toLowerCase()
+
+  switch (sanitizedAttributeType) {
+    case 'belongsto':
       // belongs_to relationships are NOT included in comparable attributes or create/update data
       // They are only tracked for original values in update contexts
       break
