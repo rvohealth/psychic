@@ -11,7 +11,7 @@ within conf/app.ts, you must have a call to "#set('packageManager', '<YOUR_CHOSE
 
   // conf/app.ts
   export default async (psy: PsychicApp) => {
-    psy.set('packageManager', 'yarn')
+    psy.set('packageManager', 'pnpm')
   }
     `
   }

@@ -405,6 +405,7 @@ function associationOpenapi(
       let serializerCheck: DreamModelSerializerType | SimpleObjectSerializerType | undefined
 
       try {
+        // eslint-disable-next-line @typescript-eslint/no-unused-expressions
         ;(DataTypeForOpenapi as ViewModelClass)?.prototype?.serializers
       } catch {
         throw new CallingSerializersThrewError()

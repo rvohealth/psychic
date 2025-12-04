@@ -11,8 +11,8 @@ spec/support/generators/**/*
 dist/
 openapi.json
 *.openapi.json
-.yarn/
-.yarnrc.yml
+.pnpm/
+pnpm-lock.yaml
 
 client/eslint.config.js
 client/tsconfig.json

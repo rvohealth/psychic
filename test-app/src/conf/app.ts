@@ -24,7 +24,7 @@ export default async (psy: PsychicApp) => {
   await psy.load('initializers', srcPath('conf', 'initializers'), path => importDefault(path))
 
   psy.set('appName', 'testapp')
-  psy.set('packageManager', 'yarn')
+  psy.set('packageManager', 'pnpm')
   psy.set('importExtension', '.js') // this is the default, but just making sure we can set it
   psy.set('apiOnly', false)
   psy.set('apiRoot', srcPath('..', '..'))
@@ -263,7 +263,7 @@ export default async (psy: PsychicApp) => {
     if (AppEnv.isDevelopment && AppEnv.boolean('CLIENT')) {
       DreamCLI.logger.logStartProgress('dev server starting...')
 
-      await PsychicDevtools.launchDevServer('devReactApp', { port: 3000, cmd: 'yarn client' })
+      await PsychicDevtools.launchDevServer('devReactApp', { port: 3000, cmd: 'pnpm client' })
 
       DreamCLI.logger.logEndProgress()
     }

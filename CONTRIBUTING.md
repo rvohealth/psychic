@@ -45,9 +45,9 @@ In each of these files, you will want to replace `WHO_AM_I` with the result of r
 Once this is done, you should be able to reset the test database and run specs:
 
 ```bash
-yarn psy db:reset
-yarn uspec
-yarn fspec
+pnpm psy db:reset
+pnpm uspec
+pnpm fspec
 ```
 
 #### **Did you find a bug?**

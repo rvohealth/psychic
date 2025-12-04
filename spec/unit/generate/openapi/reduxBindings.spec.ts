@@ -202,7 +202,7 @@ export default function initializeMyApi(psy: PsychicApp) {
         apiFile: 'test-client/app/api/api.ts',
       })
 
-      expect(dreamCliSpy).toHaveBeenCalledWith('yarn add -D @rtk-query/codegen-openapi ts-node')
+      expect(dreamCliSpy).toHaveBeenCalledWith('pnpm add -D @rtk-query/codegen-openapi ts-node')
     })
   })
 })

@@ -9,7 +9,7 @@ export default async function installOpenapiTypescript() {
 
   try {
     await DreamCLI.spawn(cmd)
-  } catch (err) {
+  } catch {
     console.log(`Failed to install openapi-typescript as a dev dependency. Please make sure the following command succeeds:
 
 "${cmd}"

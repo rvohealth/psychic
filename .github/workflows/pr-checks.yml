@@ -65,20 +65,13 @@ jobs:
 
       - run: corepack enable
 
-      - name: Cache node_modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.yarn-cache
-          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/yarn.lock') }}
-
       - if: ${{ steps.cache-node-modules.outputs.cache-hit != 'true' }}
         name: List the state of node modules
         continue-on-error: true
-        run: yarn list
-      - run: yarn install --immutable
-      - run: yarn psy db:migrate --skip-sync
-      - run: yarn uspec
+        run: pnpm list
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm psy db:migrate --skip-sync
+      - run: pnpm uspec
 
   fspec:
     name: Feature tests
@@ -122,42 +115,25 @@ jobs:
         with:
           node-version: "24"
 
-      - name: "Check chrome and chromedriver are installed"
-        run: |
-          google-chrome --version
-          which google-chrome
-          chromedriver --version
-          which chromedriver
-
       - run: corepack enable
 
-      - name: Cache node_modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.yarn-cache
-          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/yarn.lock') }}
-      - if: ${{ steps.cache-node-modules.outputs.cache-hit != 'true' }}
-        name: List the state of node modules
-        continue-on-error: true
-        run: yarn list
-      - run: yarn install --immutable
+      - run: pnpm install --frozen-lockfile
 
       - name: install client packages
-        run: yarn install --immutable
+        run: pnpm install --frozen-lockfile
         working-directory: ./client
 
       - name: install puppeteer browsers
-        run: yarn puppeteer browsers install firefox
+        run: pnpm puppeteer browsers install firefox
 
       - name: make screenshots dir
         run: mkdir -p /tmp/screenshots
 
       - name: run migrations
-        run: yarn psy db:migrate --skip-sync
+        run: pnpm psy db:migrate --skip-sync
 
       - name: run feature specs
-        run: yarn fspec
+        run: pnpm fspec
 
       - name: Archive screenshots
         uses: actions/upload-artifact@v4
@@ -180,20 +156,8 @@ jobs:
 
       - run: corepack enable
 
-      - name: Cache node_modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.yarn-cache
-          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/yarn.lock') }}
-
-      - if: ${{ steps.cache-node-modules.outputs.cache-hit != 'true' }}
-        name: List the state of node modules
-        continue-on-error: true
-        run: yarn list
-
-      - run: yarn install --immutable
-      - run: yarn lint
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm lint
 
   check-build:
     name: Check build
@@ -210,18 +174,6 @@ jobs:
 
       - run: corepack enable
 
-      - name: Cache node_modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: ~/.yarn-cache
-          key: ${{ runner.os }}-cache-node-modules-${{ hashFiles('**/yarn.lock') }}
-
-      - if: ${{ steps.cache-node-modules.outputs.cache-hit != 'true' }}
-        name: List the state of node modules
-        continue-on-error: true
-        run: yarn list
-
-      - run: yarn install --immutable
-      - run: yarn build
-      - run: yarn build:test-app
+      - run: pnpm install --frozen-lockfile
+      - run: pnpm build
+      - run: pnpm build:test-app
