@@ -350,6 +350,185 @@ describe('V1/PostsController', () => {
     },
   )
 
+  context('using alternate casings for associations', () => {
+    it('generates valid associations for alternate casings', () => {
+      const res = generateResourceControllerSpecContent({
+        fullyQualifiedControllerName: 'V1/PostsController',
+        route: 'v1/posts',
+        fullyQualifiedModelName: 'Post',
+        columnsWithTypes: ['User:belongsto', 'title:citext'],
+        forAdmin: false,
+        singular: false,
+        actions: [...RESOURCE_ACTIONS],
+      })
+      expect(res).toEqual(`\
+import Post from '@models/Post.js'
+import User from '@models/User.js'
+import createPost from '@spec/factories/PostFactory.js'
+import createUser from '@spec/factories/UserFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
+
+describe('V1/PostsController', () => {
+  let request: SpecRequestType
+  let user: User
+
+  beforeEach(async () => {
+    user = await createUser()
+    request = await session(user)
+  })
+
+  describe('GET index', () => {
+    const indexPosts = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+      return request.get('/v1/posts', expectedStatus)
+    }
+
+    it('returns the index of Posts', async () => {
+      const post = await createPost({ user })
+
+      const { body } = await indexPosts(200)
+
+      expect(body.results).toEqual([
+        expect.objectContaining({
+          id: post.id,
+        }),
+      ])
+    })
+
+    context('Posts created by another User', () => {
+      it('are omitted', async () => {
+        await createPost()
+
+        const { body } = await indexPosts(200)
+
+        expect(body.results).toEqual([])
+      })
+    })
+  })
+
+  describe('GET show', () => {
+    const showPost = async <StatusCode extends 200 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+      return request.get('/v1/posts/{id}', expectedStatus, {
+        id: post.id,
+      })
+    }
+
+    it('returns the specified Post', async () => {
+      const post = await createPost({ user })
+
+      const { body } = await showPost(post, 200)
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: post.id,
+          title: post.title,
+        }),
+      )
+    })
+
+    context('Post created by another User', () => {
+      it('is not found', async () => {
+        const otherUserPost = await createPost()
+
+        await showPost(otherUserPost, 404)
+      })
+    })
+  })
+
+  describe('POST create', () => {
+    const createPost = async <StatusCode extends 201 | 400 | 404>(
+      data: RequestBody<'post', '/v1/posts'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.post('/v1/posts', expectedStatus, {
+        data
+      })
+    }
+
+    it('creates a Post for this User', async () => {
+      const { body } = await createPost({
+        title: 'The Post title',
+      }, 201)
+
+      const post = await user.associationQuery('posts').firstOrFail()
+      expect(post.title).toEqual('The Post title')
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: post.id,
+          title: post.title,
+        }),
+      )
+    })
+  })
+
+  describe('PATCH update', () => {
+    const updatePost = async <StatusCode extends 204 | 400 | 404>(
+      post: Post,
+      data: RequestBody<'patch', '/v1/posts/{id}'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.patch('/v1/posts/{id}', expectedStatus, {
+        id: post.id,
+        data,
+      })
+    }
+
+    it('updates the Post', async () => {
+      const post = await createPost({ user })
+
+      await updatePost(post, {
+        title: 'Updated Post title',
+      }, 204)
+
+      await post.reload()
+      expect(post.title).toEqual('Updated Post title')
+    })
+
+    context('a Post created by another User', () => {
+      it('is not updated', async () => {
+        const post = await createPost()
+        const originalTitle = post.title
+
+        await updatePost(post, {
+          title: 'Updated Post title',
+        }, 404)
+
+        await post.reload()
+        expect(post.title).toEqual(originalTitle)
+      })
+    })
+  })
+
+  describe('DELETE destroy', () => {
+    const destroyPost = async <StatusCode extends 204 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+      return request.delete('/v1/posts/{id}', expectedStatus, {
+        id: post.id,
+      })
+    }
+
+    it('deletes the Post', async () => {
+      const post = await createPost({ user })
+
+      await destroyPost(post, 204)
+
+      expect(await Post.find(post.id)).toBeNull()
+    })
+
+    context('a Post created by another User', () => {
+      it('is not deleted', async () => {
+        const post = await createPost()
+
+        await destroyPost(post, 404)
+
+        expect(await Post.find(post.id)).toMatchDreamModel(post)
+      })
+    })
+  })
+})
+`)
+    })
+  })
+
   context('`only` CLI option', () => {
     it('omits actions left out of the list', () => {
       const res = generateResourceControllerSpecContent({
