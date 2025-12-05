@@ -1,3 +1,9 @@
+## 2.2.0
+
+- `psy diff:openapi` with optional `--fail-on-breaking` flag for CI checks to prevent introducing breaking OpenAPI spec changes
+- OpenAPI config in `conf/app` now supports `checkDiffs` boolean to specify an OpenAPI spec for breaking change detection
+- model and resource generators support alternate casings of `belongs_to` (e.g. `BelongsTo`, `belongsTo`)
+
 ## 2.1.0
 
 - add custom AST type builder to create custom types file
