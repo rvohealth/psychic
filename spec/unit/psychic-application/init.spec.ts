@@ -1,6 +1,5 @@
 import PsychicAppInitMissingApiRoot from '../../../src/error/psychic-app/init-missing-api-root.js'
 import PsychicAppInitMissingCallToLoadControllers from '../../../src/error/psychic-app/init-missing-call-to-load-controllers.js'
-import PsychicAppInitMissingPackageManager from '../../../src/error/psychic-app/init-missing-package-manager.js'
 import PsychicAppInitMissingRoutesCallback from '../../../src/error/psychic-app/init-missing-routes-callback.js'
 import * as LoadControllersModule from '../../../src/psychic-app/helpers/import/importControllers.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
@@ -79,31 +78,6 @@ describe('PsychicApp#init', () => {
         }
 
         await expect(PsychicApp.init(cb, dreamCb)).rejects.toThrow(PsychicAppInitMissingRoutesCallback)
-      })
-    })
-
-    context('packageManager is not set', () => {
-      it('throws targeted exception', async () => {
-        const cb = async (app: PsychicApp) => {
-          app.set('apiRoot', 'how/yadoin')
-          app.set('routes', () => {})
-          await app.load('controllers', 'how/yadoin', path => importDefault(path))
-        }
-
-        await expect(PsychicApp.init(cb, dreamCb)).rejects.toThrow(PsychicAppInitMissingPackageManager)
-      })
-    })
-
-    context('packageManager is set to an unrecognized value', () => {
-      it('throws targeted exception', async () => {
-        const cb = async (app: PsychicApp) => {
-          app.set('apiRoot', 'how/yadoin')
-          app.set('routes', () => {})
-          app.set('packageManager', 'invalid' as 'yarn')
-          await app.load('controllers', 'how/yadoin', path => importDefault(path))
-        }
-
-        await expect(PsychicApp.init(cb, dreamCb)).rejects.toThrow(PsychicAppInitMissingPackageManager)
       })
     })
   })
