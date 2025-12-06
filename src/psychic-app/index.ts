@@ -1,9 +1,6 @@
 import { DreamApp } from '@rvoh/dream'
 import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
-import {
-  DreamAppAllowedPackageManagersEnum,
-  DreamAppAllowedPackageManagersEnumValues,
-} from '@rvoh/dream/system'
+import { DreamAppAllowedPackageManagersEnum } from '@rvoh/dream/system'
 import {
   DreamAppInitOptions,
   DreamLogLevel,
@@ -20,7 +17,6 @@ import * as http from 'node:http'
 import PackageManager from '../cli/helpers/PackageManager.js'
 import PsychicAppInitMissingApiRoot from '../error/psychic-app/init-missing-api-root.js'
 import PsychicAppInitMissingCallToLoadControllers from '../error/psychic-app/init-missing-call-to-load-controllers.js'
-import PsychicAppInitMissingPackageManager from '../error/psychic-app/init-missing-package-manager.js'
 import PsychicAppInitMissingRoutesCallback from '../error/psychic-app/init-missing-routes-callback.js'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js'
 import EnvInternal from '../helpers/EnvInternal.js'
@@ -78,8 +74,6 @@ export default class PsychicApp {
       if (!psychicApp.loadedControllers) throw new PsychicAppInitMissingCallToLoadControllers()
       if (!psychicApp.apiRoot) throw new PsychicAppInitMissingApiRoot()
       if (!psychicApp.routesCb) throw new PsychicAppInitMissingRoutesCallback()
-      if (!DreamAppAllowedPackageManagersEnumValues.includes(psychicApp.packageManager))
-        throw new PsychicAppInitMissingPackageManager()
 
       if (psychicApp.encryption?.cookies?.current)
         this.checkEncryptionKey(
