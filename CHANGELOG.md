@@ -1,3 +1,7 @@
+## 2.2.1
+
+- move packageManager check to dream application
+
 ## 2.2.0
 
 - `psy diff:openapi` with optional `--fail-on-breaking` flag for CI checks to prevent introducing breaking OpenAPI spec changes
