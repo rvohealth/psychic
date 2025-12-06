@@ -1,3 +1,7 @@
+## 2.3.1
+
+- move packageManager check to dream application
+
 ## 2.3.0
 
 - deprecate `scrollPaginate` options in favor of `cursorPaginate`
