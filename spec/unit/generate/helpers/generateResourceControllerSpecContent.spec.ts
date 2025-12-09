@@ -13,6 +13,8 @@ describe('generateResourceControllerSpecContent', () => {
         route: 'v1/posts',
         fullyQualifiedModelName: 'Post',
         columnsWithTypes: [
+          'my_uuid:uuid',
+          'uuid_not_defined_as_uuid:citext',
           'type:enum:post_type:WeeklyPost,GuestPost',
           'style:enum:building_style:formal,informal',
           'title:citext',
@@ -27,6 +29,7 @@ describe('generateResourceControllerSpecContent', () => {
           'deleted_at:datetime:optional',
           'signed_on:date',
           'signed_at:datetime',
+          'uuid_array:uuid[]',
           'integer_array:integer[]',
           'decimal_array:decimal[]:3,2',
           'bigint_array:bigint[]',
@@ -40,6 +43,7 @@ describe('generateResourceControllerSpecContent', () => {
         actions: [...RESOURCE_ACTIONS],
       })
       expect(res).toEqual(`\
+import { randomUUID } from 'node:crypto'
 import { CalendarDate, DateTime } from '@rvoh/dream'
 import Post from '@models/Post.js'
 import User from '@models/User.js'
@@ -99,6 +103,8 @@ describe('V1/PostsController', () => {
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
+          myUuid: post.myUuid,
+          uuidNotDefinedAsUuid: post.uuidNotDefinedAsUuid,
           type: post.type,
           style: post.style,
           title: post.title,
@@ -109,6 +115,7 @@ describe('V1/PostsController', () => {
           bigRating: post.bigRating,
           signedOn: post.signedOn.toISO(),
           signedAt: post.signedAt.toISO(),
+          uuidArray: post.uuidArray,
           integerArray: post.integerArray,
           decimalArray: post.decimalArray,
           bigintArray: post.bigintArray,
@@ -140,10 +147,15 @@ describe('V1/PostsController', () => {
     }
 
     it('creates a Post for this User', async () => {
+      const myUuid = randomUUID()
+      const uuidNotDefinedAsUuid = randomUUID()
+      const uuidArray = [randomUUID()]
       const today = CalendarDate.today()
       const now = DateTime.now()
 
       const { body } = await createPost({
+        myUuid: myUuid,
+        uuidNotDefinedAsUuid: uuidNotDefinedAsUuid,
         style: 'formal',
         title: 'The Post title',
         subtitle: 'The Post subtitle',
@@ -153,6 +165,7 @@ describe('V1/PostsController', () => {
         bigRating: '11111111111111111',
         signedOn: today.toISO(),
         signedAt: now.toISO(),
+        uuidArray: uuidArray,
         integerArray: [1],
         decimalArray: [1.1],
         bigintArray: ['11111111111111111'],
@@ -163,6 +176,8 @@ describe('V1/PostsController', () => {
       }, 201)
 
       const post = await user.associationQuery('posts').firstOrFail()
+      expect(post.myUuid).toEqual(myUuid)
+      expect(post.uuidNotDefinedAsUuid).toEqual(uuidNotDefinedAsUuid)
       expect(post.style).toEqual('formal')
       expect(post.title).toEqual('The Post title')
       expect(post.subtitle).toEqual('The Post subtitle')
@@ -172,6 +187,7 @@ describe('V1/PostsController', () => {
       expect(post.bigRating).toEqual('11111111111111111')
       expect(post.signedOn).toEqualCalendarDate(today)
       expect(post.signedAt).toEqualDateTime(now)
+      expect(post.uuidArray).toEqual(uuidArray)
       expect(post.integerArray).toEqual([1])
       expect(post.decimalArray).toEqual([1.1])
       expect(post.bigintArray).toEqual(['11111111111111111'])
@@ -183,6 +199,8 @@ describe('V1/PostsController', () => {
       expect(body).toEqual(
         expect.objectContaining({
           id: post.id,
+          myUuid: post.myUuid,
+          uuidNotDefinedAsUuid: post.uuidNotDefinedAsUuid,
           type: post.type,
           style: post.style,
           title: post.title,
@@ -193,6 +211,7 @@ describe('V1/PostsController', () => {
           bigRating: post.bigRating,
           signedOn: post.signedOn.toISO(),
           signedAt: post.signedAt.toISO(),
+          uuidArray: post.uuidArray,
           integerArray: post.integerArray,
           decimalArray: post.decimalArray,
           bigintArray: post.bigintArray,
@@ -218,12 +237,17 @@ describe('V1/PostsController', () => {
     }
 
     it('updates the Post', async () => {
+      const newMyUuid = randomUUID()
+      const newUuidNotDefinedAsUuid = randomUUID()
+      const newUuidArray = [randomUUID()]
       const yesterday = CalendarDate.yesterday()
       const lastHour = DateTime.now().minus({ hour: 1 })
 
       const post = await createPost({ user })
 
       await updatePost(post, {
+        myUuid: newMyUuid,
+        uuidNotDefinedAsUuid: newUuidNotDefinedAsUuid,
         style: 'informal',
         title: 'Updated Post title',
         subtitle: 'Updated Post subtitle',
@@ -233,6 +257,7 @@ describe('V1/PostsController', () => {
         bigRating: '22222222222222222',
         signedOn: yesterday.toISO(),
         signedAt: lastHour.toISO(),
+        uuidArray: newUuidArray,
         integerArray: [2],
         decimalArray: [2.2],
         bigintArray: ['22222222222222222'],
@@ -243,6 +268,8 @@ describe('V1/PostsController', () => {
       }, 204)
 
       await post.reload()
+      expect(post.myUuid).toEqual(newMyUuid)
+      expect(post.uuidNotDefinedAsUuid).toEqual(newUuidNotDefinedAsUuid)
       expect(post.style).toEqual('informal')
       expect(post.title).toEqual('Updated Post title')
       expect(post.subtitle).toEqual('Updated Post subtitle')
@@ -252,6 +279,7 @@ describe('V1/PostsController', () => {
       expect(post.bigRating).toEqual('22222222222222222')
       expect(post.signedOn).toEqualCalendarDate(yesterday)
       expect(post.signedAt).toEqualDateTime(lastHour)
+      expect(post.uuidArray).toEqual(newUuidArray)
       expect(post.integerArray).toEqual([2])
       expect(post.decimalArray).toEqual([2.2])
       expect(post.bigintArray).toEqual(['22222222222222222'])
@@ -267,6 +295,8 @@ describe('V1/PostsController', () => {
         const lastHour = DateTime.now().minus({ hour: 1 })
 
         const post = await createPost()
+        const originalMyUuid = post.myUuid
+        const originalUuidNotDefinedAsUuid = post.uuidNotDefinedAsUuid
         const originalStyle = post.style
         const originalTitle = post.title
         const originalSubtitle = post.subtitle
@@ -276,6 +306,7 @@ describe('V1/PostsController', () => {
         const originalBigRating = post.bigRating
         const originalSignedOn = post.signedOn
         const originalSignedAt = post.signedAt
+        const originalUuidArray = post.uuidArray
         const originalIntegerArray = post.integerArray
         const originalDecimalArray = post.decimalArray
         const originalBigintArray = post.bigintArray
@@ -283,6 +314,8 @@ describe('V1/PostsController', () => {
         const originalEnumArray = post.enumArray
 
         await updatePost(post, {
+          myUuid: randomUUID(),
+          uuidNotDefinedAsUuid: randomUUID(),
           style: 'informal',
           title: 'Updated Post title',
           subtitle: 'Updated Post subtitle',
@@ -292,6 +325,7 @@ describe('V1/PostsController', () => {
           bigRating: '22222222222222222',
           signedOn: yesterday.toISO(),
           signedAt: lastHour.toISO(),
+          uuidArray: [randomUUID()],
           integerArray: [2],
           decimalArray: [2.2],
           bigintArray: ['22222222222222222'],
@@ -302,6 +336,8 @@ describe('V1/PostsController', () => {
         }, 404)
 
         await post.reload()
+        expect(post.myUuid).toEqual(originalMyUuid)
+        expect(post.uuidNotDefinedAsUuid).toEqual(originalUuidNotDefinedAsUuid)
         expect(post.style).toEqual(originalStyle)
         expect(post.title).toEqual(originalTitle)
         expect(post.subtitle).toEqual(originalSubtitle)
@@ -311,6 +347,7 @@ describe('V1/PostsController', () => {
         expect(post.bigRating).toEqual(originalBigRating)
         expect(post.signedOn).toEqual(originalSignedOn)
         expect(post.signedAt).toEqual(originalSignedAt)
+        expect(post.uuidArray).toEqual(originalUuidArray)
         expect(post.integerArray).toEqual(originalIntegerArray)
         expect(post.decimalArray).toEqual(originalDecimalArray)
         expect(post.bigintArray).toEqual(originalBigintArray)

@@ -18,6 +18,10 @@ ${INDENT}all properties default to not nullable; null can be allowed by appendin
 ${INDENT}    subtitle:string:optional
 ${INDENT}
 ${INDENT}supported types:
+${INDENT}    - uuid:
+${INDENT}    - uuid[]:
+${INDENT}        a column optimized for storing UUIDs
+${INDENT}
 ${INDENT}    - citext:
 ${INDENT}    - citext[]:
 ${INDENT}        case insensitive text (indexes and queries are automatically case insensitive)

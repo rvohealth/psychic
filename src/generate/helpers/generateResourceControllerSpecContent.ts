@@ -25,9 +25,14 @@ interface ModelConfiguration {
   simpleCreationCommand: string
 }
 
+interface UpdateKeyValue {
+  attributeName: string
+  value: string
+}
+
 interface AttributeTestData {
   attributeCreationKeyValues: string[]
-  attributeUpdateKeyValues: string[]
+  attributeUpdateKeyValues: UpdateKeyValue[]
   comparableOriginalAttributeKeyValues: string[]
   expectEqualOriginalValue: string[]
   expectEqualUpdatedValue: string[]
@@ -35,6 +40,9 @@ interface AttributeTestData {
   originalValueVariableAssignments: string[]
   dateAttributeIncluded: boolean
   datetimeAttributeIncluded: boolean
+  uuidAttributeIncluded: boolean
+  uuidAttributes: string[]
+  uuidArrayAttributes: string[]
   dreamImports: string[]
 }
 
@@ -55,7 +63,12 @@ export default function generateResourceControllerSpecContent(options: GenerateS
     modelConfig,
     options.fullyQualifiedModelName,
   )
-  const imports = generateImportStatements(modelConfig, attributeData.dreamImports, options.owningModel)
+  const imports = generateImportStatements(
+    modelConfig,
+    attributeData.dreamImports,
+    options.owningModel,
+    attributeData.uuidAttributeIncluded,
+  )
 
   return generateSpecTemplate({
     ...options,
@@ -124,6 +137,9 @@ function processAttributes(
     originalValueVariableAssignments: [],
     dateAttributeIncluded: false,
     datetimeAttributeIncluded: false,
+    uuidAttributeIncluded: false,
+    uuidAttributes: [],
+    uuidArrayAttributes: [],
     dreamImports: [],
   }
 
@@ -179,7 +195,8 @@ function parseAttribute(attribute: string): ParsedAttribute | null {
 
   const arrayBracketRegexp = /\[\]$/
   const isArray = arrayBracketRegexp.test(rawAttributeType)
-  const attributeType = rawAttributeType.replace(arrayBracketRegexp, '')
+  const _attributeType = rawAttributeType.replace(arrayBracketRegexp, '')
+  const attributeType = /uuid$/.test(rawAttributeName) ? 'uuid' : _attributeType
 
   return { attributeName, attributeType, isArray, enumValues }
 }
@@ -233,6 +250,9 @@ function processAttributeByType({
     case 'datetime':
       processDateTimeAttribute({ attributeName, isArray, dotNotationVariable, attributeData })
       break
+    case 'uuid':
+      processUuidAttribute({ attributeName, isArray, dotNotationVariable, attributeData })
+      break
   }
 }
 
@@ -258,7 +278,7 @@ function processEnumAttribute({
 
   if (attributeName !== 'type') {
     attributeData.attributeCreationKeyValues.push(`${attributeName}: ${jsonify(originalEnumValue)},`)
-    attributeData.attributeUpdateKeyValues.push(`${attributeName}: ${jsonify(updatedEnumValue)},`)
+    attributeData.attributeUpdateKeyValues.push({ attributeName, value: jsonify(updatedEnumValue) })
     attributeData.expectEqualOriginalValue.push(
       `expect(${dotNotationVariable}).toEqual(${jsonify(originalEnumValue)})`,
     )
@@ -287,7 +307,7 @@ function processStringAttribute({
   const updatedStringValue = isArray ? [rawUpdatedStringValue] : rawUpdatedStringValue
 
   attributeData.attributeCreationKeyValues.push(`${attributeName}: ${jsonify(originalStringValue)},`)
-  attributeData.attributeUpdateKeyValues.push(`${attributeName}: ${jsonify(updatedStringValue)},`)
+  attributeData.attributeUpdateKeyValues.push({ attributeName, value: jsonify(updatedStringValue) })
   attributeData.comparableOriginalAttributeKeyValues.push(`${attributeName}: ${dotNotationVariable},`)
   attributeData.expectEqualOriginalValue.push(
     `expect(${dotNotationVariable}).toEqual(${jsonify(originalStringValue)})`,
@@ -318,7 +338,7 @@ function processNumericAttribute({
   const updatedValue = isArray ? [rawUpdatedValue] : rawUpdatedValue
 
   attributeData.attributeCreationKeyValues.push(`${attributeName}: ${jsonify(originalValue)},`)
-  attributeData.attributeUpdateKeyValues.push(`${attributeName}: ${jsonify(updatedValue)},`)
+  attributeData.attributeUpdateKeyValues.push({ attributeName, value: jsonify(updatedValue) })
   attributeData.comparableOriginalAttributeKeyValues.push(`${attributeName}: ${dotNotationVariable},`)
   attributeData.expectEqualOriginalValue.push(
     `expect(${dotNotationVariable}).toEqual(${jsonify(originalValue)})`,
@@ -345,9 +365,10 @@ function processDateAttribute({
   attributeData.attributeCreationKeyValues.push(
     `${attributeName}: ${isArray ? '[today.toISO()]' : 'today.toISO()'},`,
   )
-  attributeData.attributeUpdateKeyValues.push(
-    `${attributeName}: ${isArray ? '[yesterday.toISO()]' : 'yesterday.toISO()'},`,
-  )
+  attributeData.attributeUpdateKeyValues.push({
+    attributeName,
+    value: `${isArray ? '[yesterday.toISO()]' : 'yesterday.toISO()'}`,
+  })
   attributeData.comparableOriginalAttributeKeyValues.push(
     `${attributeName}: ${dotNotationVariable}${isArray ? '.map(date => date.toISO())' : '.toISO()'},`,
   )
@@ -376,9 +397,10 @@ function processDateTimeAttribute({
   attributeData.attributeCreationKeyValues.push(
     `${attributeName}: ${isArray ? '[now.toISO()]' : 'now.toISO()'},`,
   )
-  attributeData.attributeUpdateKeyValues.push(
-    `${attributeName}: ${isArray ? '[lastHour.toISO()]' : 'lastHour.toISO()'},`,
-  )
+  attributeData.attributeUpdateKeyValues.push({
+    attributeName,
+    value: `${isArray ? '[lastHour.toISO()]' : 'lastHour.toISO()'}`,
+  })
   attributeData.comparableOriginalAttributeKeyValues.push(
     `${attributeName}: ${dotNotationVariable}${isArray ? '.map(datetime => datetime.toISO())' : '.toISO()'},`,
   )
@@ -388,6 +410,36 @@ function processDateTimeAttribute({
   attributeData.expectEqualUpdatedValue.push(
     `expect(${dotNotationVariable}${isArray ? '[0]' : ''}).toEqualDateTime(lastHour)`,
   )
+}
+
+function processUuidAttribute({
+  attributeName,
+  isArray,
+  dotNotationVariable,
+  attributeData,
+}: {
+  attributeName: string
+  isArray: boolean
+  dotNotationVariable: string
+  attributeData: AttributeTestData
+}): void {
+  attributeData.uuidAttributeIncluded = true
+  attributeData.uuidAttributes.push(attributeName)
+
+  if (isArray) {
+    attributeData.uuidArrayAttributes.push(attributeName)
+  }
+
+  const newUuidVariableName = `new${capitalize(attributeName)}`
+  // For arrays, the variable itself is an array, so we use it directly without brackets
+  const uuidValue = attributeName
+  const newUuidValue = newUuidVariableName
+
+  attributeData.attributeCreationKeyValues.push(`${attributeName}: ${uuidValue},`)
+  attributeData.attributeUpdateKeyValues.push({ attributeName, value: newUuidValue })
+  attributeData.comparableOriginalAttributeKeyValues.push(`${attributeName}: ${dotNotationVariable},`)
+  attributeData.expectEqualOriginalValue.push(`expect(${dotNotationVariable}).toEqual(${attributeName})`)
+  attributeData.expectEqualUpdatedValue.push(`expect(${dotNotationVariable}).toEqual(${newUuidVariableName})`)
 }
 
 function addOriginalValueTracking(
@@ -415,6 +467,7 @@ function generateImportStatements(
   modelConfig: ModelConfiguration,
   dreamImports: string[],
   owningModel?: string,
+  uuidAttributeIncluded?: boolean,
 ): string {
   const importStatements: string[] = compact([
     importStatementForModel(modelConfig.fullyQualifiedModelName),
@@ -425,11 +478,12 @@ function generateImportStatements(
     owningModel ? importStatementForModelFactory(owningModel) : undefined,
   ])
 
+  const cryptoImportLine = uuidAttributeIncluded ? `import { randomUUID } from 'node:crypto'\n` : ''
   const dreamImportLine = dreamImports.length
     ? `import { ${uniq(dreamImports).join(', ')} } from '@rvoh/dream'\n`
     : ''
 
-  return `${dreamImportLine}${uniq(importStatements).join('\n')}
+  return `${cryptoImportLine}${dreamImportLine}${uniq(importStatements).join('\n')}
 import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/${addImportSuffix('authentication.js')}'`
 }
 
@@ -554,7 +608,18 @@ function generateCreateActionSpec(options: TemplateOptions): string {
     options
   const subjectFunctionName = `create${modelConfig.modelClassName}`
 
+  const uuidSetup = attributeData.uuidAttributes
+    .map(attrName => {
+      const isArray = attributeData.uuidArrayAttributes.includes(attrName)
+      return isArray ? `const ${attrName} = [randomUUID()]` : `const ${attrName} = randomUUID()`
+    })
+    .join('\n      ')
   const dateTimeSetup = `${
+    uuidSetup
+      ? `
+      ${uuidSetup}`
+      : ''
+  }${
     attributeData.dateAttributeIncluded
       ? `
       const today = CalendarDate.today()`
@@ -564,7 +629,7 @@ function generateCreateActionSpec(options: TemplateOptions): string {
       ? `
       const now = DateTime.now()`
       : ''
-  }${attributeData.dateAttributeIncluded || attributeData.datetimeAttributeIncluded ? '\n' : ''}`
+  }${uuidSetup || attributeData.dateAttributeIncluded || attributeData.datetimeAttributeIncluded ? '\n' : ''}`
 
   const modelQuery = forAdmin
     ? `${modelConfig.modelClassName}.firstOrFail()`
@@ -605,7 +670,20 @@ function generateUpdateActionSpec(options: TemplateOptions): string {
     options
   const subjectFunctionName = `update${modelConfig.modelClassName}`
 
+  const uuidSetup = attributeData.uuidAttributes
+    .map(attrName => {
+      const isArray = attributeData.uuidArrayAttributes.includes(attrName)
+      return isArray
+        ? `const new${capitalize(attrName)} = [randomUUID()]`
+        : `const new${capitalize(attrName)} = randomUUID()`
+    })
+    .join('\n      ')
   const dateTimeSetup = `${
+    uuidSetup
+      ? `
+      ${uuidSetup}`
+      : ''
+  }${
     attributeData.dateAttributeIncluded
       ? `
       const yesterday = CalendarDate.yesterday()`
@@ -660,7 +738,21 @@ function generateUpdateActionSpec(options: TemplateOptions): string {
         ${attributeData.originalValueVariableAssignments.length ? attributeData.originalValueVariableAssignments.join('\n        ') : ''}
 
         await ${subjectFunctionName}(${modelConfig.modelVariableName}, {
-          ${attributeData.attributeUpdateKeyValues.length ? attributeData.attributeUpdateKeyValues.join('\n          ') : ''}
+          ${
+            attributeData.attributeUpdateKeyValues.length
+              ? attributeData.attributeUpdateKeyValues
+                  .map(kv => {
+                    const isUuid = attributeData.uuidAttributes.includes(kv.attributeName)
+                    const value = isUuid
+                      ? attributeData.uuidArrayAttributes.includes(kv.attributeName)
+                        ? '[randomUUID()]'
+                        : 'randomUUID()'
+                      : kv.value
+                    return `${kv.attributeName}: ${value},`
+                  })
+                  .join('\n          ')
+              : ''
+          }
         }, 404)
 
         await ${modelConfig.modelVariableName}.reload()
@@ -676,7 +768,7 @@ function generateUpdateActionSpec(options: TemplateOptions): string {
       ${modelConfig.simpleCreationCommand}
 
       await ${subjectFunctionName}(${singular ? '' : `${modelConfig.modelVariableName}, `}{
-        ${attributeData.attributeUpdateKeyValues.length ? attributeData.attributeUpdateKeyValues.join('\n        ') : ''}
+        ${attributeData.attributeUpdateKeyValues.length ? attributeData.attributeUpdateKeyValues.map(kv => `${kv.attributeName}: ${kv.value},`).join('\n        ') : ''}
       }, 204)
 
       await ${modelConfig.modelVariableName}.reload()

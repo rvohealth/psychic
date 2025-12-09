@@ -1,3 +1,7 @@
+## 2.3.0
+
+- resource spec factory for uuid columns should `import { randomUUID } from 'node:crypto'` and compare against UUIDs like datetime and date columns are compared against DateTime and CalendarDate
+
 ## 2.2.0
 
 - `psy diff:openapi` with optional `--fail-on-breaking` flag for CI checks to prevent introducing breaking OpenAPI spec changes
