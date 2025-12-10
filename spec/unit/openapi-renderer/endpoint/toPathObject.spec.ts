@@ -401,7 +401,219 @@ describe('OpenapiEndpointRenderer', () => {
         })
       })
 
-      context('scrollPagination', () => {
+      context('cursorPagination', () => {
+        context('cursorPaginate=true', () => {
+          it('adds query page param to openapi spec and a request body reflecting the Dream.cursorPaginate response shape', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'cursorPaginated', {
+              cursorPaginate: true,
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response).toEqual(
+              expect.objectContaining({
+                '/users/cursor-paginated': expect.objectContaining({
+                  parameters: expect.arrayContaining([
+                    {
+                      in: 'query',
+                      name: 'cursor',
+                      required: false,
+                      allowReserved: true,
+                      description: 'Pagination cursor',
+                      schema: {
+                        type: ['string', 'null'],
+                      },
+                    },
+                  ]),
+
+                  get: expect.objectContaining({
+                    responses: expect.objectContaining({
+                      200: {
+                        content: {
+                          'application/json': {
+                            schema: {
+                              type: 'object',
+                              required: ['cursor', 'results'],
+                              properties: {
+                                cursor: { type: ['string', 'null'] },
+                                results: {
+                                  type: 'array',
+                                  items: { $ref: '#/components/schemas/User' },
+                                },
+                              },
+                            },
+                          },
+                        },
+                        description: 'Success',
+                      },
+                    }),
+                  }),
+                }),
+              }),
+            )
+          })
+
+          context('an STI base model', () => {
+            it('the OpenAPI shape includes the children', () => {
+              const renderer = new OpenapiEndpointRenderer(Balloon, BalloonsController, 'cursorPaginated', {
+                cursorPaginate: true,
+              })
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response).toEqual(
+                expect.objectContaining({
+                  '/balloons/cursor-paginated': expect.objectContaining({
+                    parameters: expect.arrayContaining([
+                      {
+                        in: 'query',
+                        name: 'cursor',
+                        required: false,
+                        allowReserved: true,
+                        description: 'Pagination cursor',
+                        schema: {
+                          type: ['string', 'null'],
+                        },
+                      },
+                    ]),
+
+                    get: expect.objectContaining({
+                      responses: expect.objectContaining({
+                        200: {
+                          content: {
+                            'application/json': {
+                              schema: {
+                                type: 'object',
+                                required: ['cursor', 'results'],
+                                properties: {
+                                  cursor: { type: ['string', 'null'] },
+                                  results: {
+                                    type: 'array',
+                                    items: {
+                                      anyOf: [
+                                        {
+                                          $ref: '#/components/schemas/BalloonLatex',
+                                        },
+                                        {
+                                          $ref: '#/components/schemas/BalloonMylar',
+                                        },
+                                      ],
+                                    },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                          description: 'Success',
+                        },
+                      }),
+                    }),
+                  }),
+                }),
+              )
+            })
+          })
+        })
+
+        context('cursorPaginate={ query: "<some-string>" }', () => {
+          it('customizes the query cursor param', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'cursorPaginated', {
+              cursorPaginate: { query: 'pagref' },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response).toEqual(
+              expect.objectContaining({
+                '/users/cursor-paginated': expect.objectContaining({
+                  parameters: expect.arrayContaining([
+                    {
+                      in: 'query',
+                      name: 'pagref',
+                      required: false,
+                      allowReserved: true,
+                      description: 'Pagination cursor',
+                      schema: {
+                        type: ['string', 'null'],
+                      },
+                    },
+                  ]),
+                }),
+              }),
+            )
+          })
+        })
+
+        context('cursorPaginate={ body: "cursor" }', () => {
+          it('omits the query param and adds requestBody cursor param to openapi spec', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'cursorPaginatedPost', {
+              cursorPaginate: { body: 'cursor' },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response).toEqual(
+              expect.objectContaining({
+                '/users/cursor-paginated-post': expect.objectContaining({
+                  parameters: expect.arrayContaining([
+                    expect.not.objectContaining({
+                      in: 'query',
+                      name: 'cursor',
+                    }),
+                  ]),
+
+                  post: expect.objectContaining({
+                    requestBody: expect.objectContaining({
+                      content: expect.objectContaining({
+                        'application/json': expect.objectContaining({
+                          schema: expect.objectContaining({
+                            properties: expect.objectContaining({
+                              cursor: {
+                                type: ['string', 'null'],
+                                description: 'Pagination cursor',
+                              },
+                            }),
+                          }),
+                        }),
+                      }),
+                    }),
+                  }),
+                }),
+              }),
+            )
+          })
+
+          context('without a model', () => {
+            it('adds requestBody cursor param to openapi spec', () => {
+              const renderer = new OpenapiEndpointRenderer(null, UsersController, 'cursorPaginatedPost', {
+                cursorPaginate: { body: 'cursor' },
+              })
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response).toEqual(
+                expect.objectContaining({
+                  '/users/cursor-paginated-post': expect.objectContaining({
+                    post: expect.objectContaining({
+                      requestBody: expect.objectContaining({
+                        content: expect.objectContaining({
+                          'application/json': expect.objectContaining({
+                            schema: expect.objectContaining({
+                              properties: expect.objectContaining({
+                                cursor: {
+                                  type: ['string', 'null'],
+                                  description: 'Pagination cursor',
+                                },
+                              }),
+                            }),
+                          }),
+                        }),
+                      }),
+                    }),
+                  }),
+                }),
+              )
+            })
+          })
+        })
+      })
+
+      context('scrollPagination (deprecated in favor of cursorPagination)', () => {
         context('scrollPaginate=true', () => {
           it('adds query page param to openapi spec and a request body reflecting the Dream.scrollPaginate response shape', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'scrollPaginated', {
@@ -418,7 +630,7 @@ describe('OpenapiEndpointRenderer', () => {
                       name: 'cursor',
                       required: false,
                       allowReserved: true,
-                      description: 'Scroll pagination cursor',
+                      description: 'Pagination cursor',
                       schema: {
                         type: ['string', 'null'],
                       },
@@ -468,7 +680,7 @@ describe('OpenapiEndpointRenderer', () => {
                         name: 'cursor',
                         required: false,
                         allowReserved: true,
-                        description: 'Scroll pagination cursor',
+                        description: 'Pagination cursor',
                         schema: {
                           type: ['string', 'null'],
                         },
@@ -529,7 +741,7 @@ describe('OpenapiEndpointRenderer', () => {
                       name: 'pagref',
                       required: false,
                       allowReserved: true,
-                      description: 'Scroll pagination cursor',
+                      description: 'Pagination cursor',
                       schema: {
                         type: ['string', 'null'],
                       },
@@ -566,7 +778,7 @@ describe('OpenapiEndpointRenderer', () => {
                             properties: expect.objectContaining({
                               cursor: {
                                 type: ['string', 'null'],
-                                description: 'Scroll pagination cursor',
+                                description: 'Pagination cursor',
                               },
                             }),
                           }),
@@ -597,7 +809,7 @@ describe('OpenapiEndpointRenderer', () => {
                               properties: expect.objectContaining({
                                 cursor: {
                                   type: ['string', 'null'],
-                                  description: 'Scroll pagination cursor',
+                                  description: 'Pagination cursor',
                                 },
                               }),
                             }),

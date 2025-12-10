@@ -90,14 +90,13 @@ export default function generateControllerContent({
     status: 200,
     tags: openApiTags,
     description: 'Paginated index of ${pluralize(modelClassName!)}',
-    scrollPaginate: true,
+    cursorPaginate: true,
     serializerKey: '${forAdmin ? 'adminSummary' : 'summary'}',
   })
   public async index() {
     // const ${pluralizedModelAttributeName} = await ${loadQueryBase}
     //   .preloadFor('${forAdmin ? 'adminSummary' : 'summary'}')
-    //   .order({ createdAt: 'desc' })
-    //   .scrollPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
+    //   .cursorPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(${pluralizedModelAttributeName})
   }`
         else

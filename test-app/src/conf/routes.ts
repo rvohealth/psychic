@@ -59,6 +59,8 @@ export default function routes(r: PsychicRouter) {
     r.collection(r => {
       r.get('paginated', UsersController, 'paginated')
       r.post('paginated-post', UsersController, 'paginatedPost')
+      r.get('cursor-paginated', UsersController, 'cursorPaginated')
+      r.post('cursor-paginated-post', UsersController, 'cursorPaginatedPost')
       r.get('scroll-paginated', UsersController, 'scrollPaginated')
       r.post('scroll-paginated-post', UsersController, 'scrollPaginatedPost')
     })
@@ -235,6 +237,7 @@ export default function routes(r: PsychicRouter) {
   r.resources('balloons', { only: ['index', 'show'] }, r => {
     r.collection(r => {
       r.get('paginated', BalloonsController, 'paginated')
+      r.get('cursor-paginated', BalloonsController, 'cursorPaginated')
       r.get('scroll-paginated', BalloonsController, 'scrollPaginated')
       r.get('index-different-dreams', BalloonsController, 'indexDifferentDreams')
       r.get('index-dreams-and-view-model', BalloonsController, 'indexDreamsAndViewModel')

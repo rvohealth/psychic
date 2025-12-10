@@ -1,5 +1,11 @@
 ## 2.3.0
 
+- deprecate `scrollPaginate` options in favor of `cursorPaginate`
+- resource controller index actions are generated with the `cursorPaginate` pagination
+- resource controller index actions are no longer generated generated with a default ordering since `cursorPaginate` includes a default pagination and UUIDv7 is now supported
+
+## 2.2.1
+
 - resource spec factory for uuid columns should `import { randomUUID } from 'node:crypto'` and compare against UUIDs like datetime and date columns are compared against DateTime and CalendarDate
 
 ## 2.2.0

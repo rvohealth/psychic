@@ -250,6 +250,44 @@ describe('OpenapiAppRenderer', () => {
           }),
         )
 
+        expect(response.default!.paths['/balloons/cursor-paginated']).toEqual(
+          expect.objectContaining({
+            get: {
+              tags: [],
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              responses: expect.objectContaining({
+                '200': {
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        required: ['cursor', 'results'],
+                        properties: {
+                          cursor: { type: ['string', 'null'] },
+                          results: {
+                            type: 'array',
+                            items: {
+                              anyOf: [
+                                {
+                                  $ref: '#/components/schemas/BalloonLatex',
+                                },
+                                {
+                                  $ref: '#/components/schemas/BalloonMylar',
+                                },
+                              ],
+                            },
+                          },
+                        },
+                      },
+                    },
+                  },
+                  description: 'Success',
+                },
+              }),
+            },
+          }),
+        )
+
         expect(response.default!.paths['/balloons/scroll-paginated']).toEqual(
           expect.objectContaining({
             get: {

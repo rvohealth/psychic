@@ -1,5 +1,5 @@
 import { OpenapiSchemaObjectBase } from '@rvoh/dream/openapi'
-import scrollPaginationCursorParamOpenapiProperty from './scrollPaginationCursorParamOpenapiProperty.js'
+import cursorPaginationParamOpenapiProperty from './cursorPaginationParamOpenapiProperty.js'
 
 /**
  * @internal
@@ -15,7 +15,7 @@ import scrollPaginationCursorParamOpenapiProperty from './scrollPaginationCursor
  * If neither of these apply, it will simply return
  * what was given to it, without any modifications
  */
-export default function safelyAttachScrollPaginationParamToRequestBodySegment<T>(
+export default function safelyAttachCursorPaginationParamToRequestBodySegment<T>(
   paramName: string,
   bodySegment: T,
 ): T {
@@ -28,7 +28,7 @@ export default function safelyAttachScrollPaginationParamToRequestBodySegment<T>
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     ;(bodySegment as OpenapiSchemaObjectBase).properties = {
       ...(bodySegment as OpenapiSchemaObjectBase).properties,
-      [paramName]: scrollPaginationCursorParamOpenapiProperty(),
+      [paramName]: cursorPaginationParamOpenapiProperty(),
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
   }

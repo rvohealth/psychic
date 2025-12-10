@@ -1,4 +1,3 @@
-
 /*
 
                                     ,▄█▄                 
@@ -59,13 +58,13 @@ us humans, he says:
 
 import { type CalendarDate, type DateTime } from '@rvoh/dream'
 import {
-  BalloonColorsEnum,
+  type BalloonColorsEnum,
+  type Json,
+  type PetTreatsEnum,
+  type SpeciesTypesEnum,
   BalloonColorsEnumValues,
-  Json,
-  PetTreatsEnum,
   PetTreatsEnumValues,
-  SpeciesTypesEnum,
-  SpeciesTypesEnumValues
+  SpeciesTypesEnumValues,
 } from './db.js'
 
 export const schema = {
@@ -209,7 +208,14 @@ export const schema = {
       default: [],
       named: [],
     },
-    nonJsonColumnNames: ['createdAt', 'email', 'id', 'name', 'passwordDigest', 'updatedAt'],
+    nonJsonColumnNames: [
+      'createdAt',
+      'email',
+      'id',
+      'name',
+      'passwordDigest',
+      'updatedAt',
+    ],
     columns: {
       createdAt: {
         coercedType: {} as DateTime,
@@ -267,9 +273,7 @@ export const schema = {
       },
     },
     virtualColumns: [],
-    associations: {
-      
-    },
+    associations: {},
   },
   model_without_serializers: {
     serializerKeys: [],
@@ -317,17 +321,42 @@ export const schema = {
       },
     },
     virtualColumns: [],
-    associations: {
-      
-    },
+    associations: {},
   },
   pets: {
-    serializerKeys: ['additional', 'default', 'summary', 'withAssociation', 'withFlattenedAssociation'],
+    serializerKeys: [
+      'additional',
+      'default',
+      'summary',
+      'withAssociation',
+      'withFlattenedAssociation',
+    ],
     scopes: {
       default: [],
       named: [],
     },
-    nonJsonColumnNames: ['collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'favoriteTreat', 'favoriteTreats', 'id', 'lastHeardAt', 'lastSeenAt', 'likesTreats', 'likesWalks', 'name', 'nonNullFavoriteTreats', 'nonNullSpecies', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredCollarCountNumeric', 'species', 'updatedAt', 'userId'],
+    nonJsonColumnNames: [
+      'collarCount',
+      'collarCountInt',
+      'collarCountNumeric',
+      'createdAt',
+      'favoriteTreat',
+      'favoriteTreats',
+      'id',
+      'lastHeardAt',
+      'lastSeenAt',
+      'likesTreats',
+      'likesWalks',
+      'name',
+      'nonNullFavoriteTreats',
+      'nonNullSpecies',
+      'requiredCollarCount',
+      'requiredCollarCountInt',
+      'requiredCollarCountNumeric',
+      'species',
+      'updatedAt',
+      'userId',
+    ],
     columns: {
       collarCount: {
         coercedType: {} as string | null,
@@ -529,7 +558,14 @@ export const schema = {
       default: [],
       named: [],
     },
-    nonJsonColumnNames: ['body', 'createdAt', 'explicitlyOmittedFromParamSafeColumns', 'id', 'updatedAt', 'userId'],
+    nonJsonColumnNames: [
+      'body',
+      'createdAt',
+      'explicitlyOmittedFromParamSafeColumns',
+      'id',
+      'updatedAt',
+      'userId',
+    ],
     columns: {
       body: {
         coercedType: {} as string | null,
@@ -663,17 +699,71 @@ export const schema = {
       },
     },
     virtualColumns: [],
-    associations: {
-      
-    },
+    associations: {},
   },
   users: {
-    serializerKeys: ['default', 'extra', 'summary', 'withFlattenedPost', 'withOptionalFlattenedPost', 'withPosts', 'withRecentPost'],
+    serializerKeys: [
+      'default',
+      'extra',
+      'summary',
+      'withFlattenedPost',
+      'withOptionalFlattenedPost',
+      'withPosts',
+      'withRecentPost',
+    ],
     scopes: {
       default: [],
       named: [],
     },
-    nonJsonColumnNames: ['aDatetime', 'bio', 'birthdate', 'collarCount', 'collarCountInt', 'collarCountNumeric', 'createdAt', 'createdOn', 'email', 'favoriteBigint', 'favoriteBigints', 'favoriteBooleans', 'favoriteCitext', 'favoriteCitexts', 'favoriteDates', 'favoriteDatetimes', 'favoriteIntegers', 'favoriteNumerics', 'favoriteTexts', 'favoriteTreats', 'favoriteUuids', 'id', 'likesTreats', 'likesWalks', 'name', 'nicknames', 'notes', 'optionalUuid', 'passwordDigest', 'requiredCollarCount', 'requiredCollarCountInt', 'requiredFavoriteBigint', 'requiredFavoriteBigints', 'requiredFavoriteBooleans', 'requiredFavoriteCitext', 'requiredFavoriteCitexts', 'requiredFavoriteDates', 'requiredFavoriteDatetimes', 'requiredFavoriteIntegers', 'requiredFavoriteNumerics', 'requiredFavoriteTexts', 'requiredFavoriteUuids', 'requiredNicknames', 'species', 'updatedAt', 'uuid', 'volume'],
+    nonJsonColumnNames: [
+      'aDatetime',
+      'bio',
+      'birthdate',
+      'collarCount',
+      'collarCountInt',
+      'collarCountNumeric',
+      'createdAt',
+      'createdOn',
+      'email',
+      'favoriteBigint',
+      'favoriteBigints',
+      'favoriteBooleans',
+      'favoriteCitext',
+      'favoriteCitexts',
+      'favoriteDates',
+      'favoriteDatetimes',
+      'favoriteIntegers',
+      'favoriteNumerics',
+      'favoriteTexts',
+      'favoriteTreats',
+      'favoriteUuids',
+      'id',
+      'likesTreats',
+      'likesWalks',
+      'name',
+      'nicknames',
+      'notes',
+      'optionalUuid',
+      'passwordDigest',
+      'requiredCollarCount',
+      'requiredCollarCountInt',
+      'requiredFavoriteBigint',
+      'requiredFavoriteBigints',
+      'requiredFavoriteBooleans',
+      'requiredFavoriteCitext',
+      'requiredFavoriteCitexts',
+      'requiredFavoriteDates',
+      'requiredFavoriteDatetimes',
+      'requiredFavoriteIntegers',
+      'requiredFavoriteNumerics',
+      'requiredFavoriteTexts',
+      'requiredFavoriteUuids',
+      'requiredNicknames',
+      'species',
+      'updatedAt',
+      'uuid',
+      'volume',
+    ],
     columns: {
       aDatetime: {
         coercedType: {} as DateTime | null,
@@ -1171,7 +1261,11 @@ export const schema = {
         isArray: false,
       },
     },
-    virtualColumns: ['openapiVirtualSpecTest', 'openapiVirtualSpecTest2', 'password'],
+    virtualColumns: [
+      'openapiVirtualSpecTest',
+      'openapiVirtualSpecTest2',
+      'password',
+    ],
     associations: {
       balloons: {
         type: 'HasMany',
@@ -1218,16 +1312,16 @@ export const connectionTypeConfig = {
   allDefaultScopeNames: ['dream:STI'],
   globalNames: {
     models: {
+      Balloon: 'balloons',
       'Balloon/Latex': 'balloons',
       'Balloon/Mylar': 'balloons',
-      'Balloon': 'balloons',
-      'Comment': 'comments',
+      Comment: 'comments',
       'Health/User': 'health_users',
-      'ModelWithoutSerializer': 'model_without_serializers',
-      'Pet': 'pets',
-      'Post': 'posts',
-      'SimpleSerializerModel': 'simple_serializer_models',
-      'User': 'users'
+      ModelWithoutSerializer: 'model_without_serializers',
+      Pet: 'pets',
+      Post: 'posts',
+      SimpleSerializerModel: 'simple_serializer_models',
+      User: 'users',
     },
   },
 } as const

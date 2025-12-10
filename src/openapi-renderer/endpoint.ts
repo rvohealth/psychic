@@ -47,13 +47,13 @@ import OpenapiSegmentExpander, {
   SerializerArray,
 } from './body-segment.js'
 import { DEFAULT_OPENAPI_RESPONSES, OpenapiValidateTarget } from './defaults.js'
+import cursorPaginationParamOpenapiProperty from './helpers/cursorPaginationParamOpenapiProperty.js'
 import { dreamColumnOpenapiShape } from './helpers/dreamAttributeOpenapiShape.js'
 import openapiOpts from './helpers/openapiOpts.js'
 import openapiRoute from './helpers/openapiRoute.js'
 import paginationPageParamOpenapiProperty from './helpers/paginationPageParamOpenapiProperty.js'
+import safelyAttachCursorPaginationParamToRequestBodySegment from './helpers/safelyAttachCursorPaginationParamToRequestBodySegment.js'
 import safelyAttachPaginationParamToRequestBodySegment from './helpers/safelyAttachPaginationParamsToBodySegment.js'
-import safelyAttachScrollPaginationParamToRequestBodySegment from './helpers/safelyAttachScrollPaginationParamsToBodySegment.js'
-import scrollPaginationCursorParamOpenapiProperty from './helpers/scrollPaginationCursorParamOpenapiProperty.js'
 import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 
 export interface OpenapiRenderOpts {
@@ -81,6 +81,7 @@ export default class OpenapiEndpointRenderer<
 > {
   private many: OpenapiEndpointRendererOpts['many']
   private paginate: OpenapiEndpointRendererOpts['paginate']
+  private cursorPaginate: OpenapiEndpointRendererOpts['cursorPaginate']
   private scrollPaginate: OpenapiEndpointRendererOpts['scrollPaginate']
   private responses: OpenapiEndpointRendererOpts['responses']
   private serializerKey: OpenapiEndpointRendererOpts<
@@ -125,6 +126,7 @@ export default class OpenapiEndpointRenderer<
       headers,
       many,
       paginate,
+      cursorPaginate,
       scrollPaginate,
       query,
       responses,
@@ -145,6 +147,7 @@ export default class OpenapiEndpointRenderer<
     this.headers = headers
     this.many = many
     this.paginate = paginate
+    this.cursorPaginate = cursorPaginate
     this.scrollPaginate = scrollPaginate
     this.query = query
     this.responses = responses
@@ -553,15 +556,17 @@ export default class OpenapiEndpointRenderer<
       })
     }
 
+    const cursorPaginationName =
+      this.cursorPaginate === true ? 'cursor' : (this.cursorPaginate as { query?: string })?.query
     const scrollPaginationName =
       this.scrollPaginate === true ? 'cursor' : (this.scrollPaginate as { query?: string })?.query
 
-    if (scrollPaginationName) {
+    if (cursorPaginationName || scrollPaginationName) {
       queryParams.push({
         in: 'query',
         required: false,
-        name: scrollPaginationName,
-        description: 'Scroll pagination cursor',
+        name: (cursorPaginationName || scrollPaginationName)!,
+        description: 'Pagination cursor',
         allowReserved: true,
         schema: {
           type: ['string', 'null'],
@@ -607,9 +612,10 @@ export default class OpenapiEndpointRenderer<
       schema = safelyAttachPaginationParamToRequestBodySegment(bodyPaginationPageParam, schema)
     }
 
-    const bodyScrollPaginationCursorParam = (this.scrollPaginate as { body: string })?.body
-    if (bodyScrollPaginationCursorParam) {
-      schema = safelyAttachScrollPaginationParamToRequestBodySegment(bodyScrollPaginationCursorParam, schema)
+    const bodyCursorPaginationParam =
+      (this.cursorPaginate as { body: string })?.body ?? (this.scrollPaginate as { body: string })?.body
+    if (bodyCursorPaginationParam) {
+      schema = safelyAttachCursorPaginationParamToRequestBodySegment(bodyCursorPaginationParam, schema)
     }
 
     if (!schema) return undefined
@@ -625,7 +631,8 @@ export default class OpenapiEndpointRenderer<
 
   private defaultRequestBody(): OpenapiContent | undefined {
     const bodyPaginationPageParam = (this.paginate as { body: string })?.body
-    const bodyScrollPaginationCursorParam = (this.scrollPaginate as { body: string })?.body
+    const bodyCursorPaginationParam =
+      (this.cursorPaginate as { body: string })?.body ?? (this.scrollPaginate as { body: string })?.body
 
     if (bodyPaginationPageParam) {
       return {
@@ -640,7 +647,7 @@ export default class OpenapiEndpointRenderer<
           },
         },
       }
-    } else if (bodyScrollPaginationCursorParam) {
+    } else if (bodyCursorPaginationParam) {
       return {
         content: {
           'application/json': {
@@ -648,7 +655,7 @@ export default class OpenapiEndpointRenderer<
               type: 'object',
               // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
               properties: {
-                [bodyScrollPaginationCursorParam]: scrollPaginationCursorParamOpenapiProperty(),
+                [bodyCursorPaginationParam]: cursorPaginationParamOpenapiProperty(),
                 // eslint-disable-next-line @typescript-eslint/no-explicit-any
               } as any,
             },
@@ -744,10 +751,11 @@ export default class OpenapiEndpointRenderer<
       )
     }
 
-    const bodyScrollPaginationCursorParam = (this.scrollPaginate as { body: string })?.body
-    if (bodyScrollPaginationCursorParam) {
-      processedSchema = safelyAttachScrollPaginationParamToRequestBodySegment(
-        bodyScrollPaginationCursorParam,
+    const bodyCursorPaginationParam =
+      (this.cursorPaginate as { body: string })?.body ?? (this.scrollPaginate as { body: string })?.body
+    if (bodyCursorPaginationParam) {
+      processedSchema = safelyAttachCursorPaginationParamToRequestBodySegment(
+        bodyCursorPaginationParam,
         processedSchema,
       )
     }
@@ -1004,7 +1012,7 @@ export default class OpenapiEndpointRenderer<
         },
       }
 
-    if (this.scrollPaginate)
+    if (this.cursorPaginate || this.scrollPaginate)
       return {
         type: 'object',
         required: ['cursor', 'results'],
@@ -1218,6 +1226,29 @@ export interface OpenapiEndpointRendererOpts<
 
   /**
    * when true, it will render an openapi document which
+   * produces an object containing cursorPagination data. This
+   * output is formatted to match the format returned
+   * when calling the `cursorPaginate` method
+   * within Dream, i.e.
+   *
+   * ```ts
+   * \@OpenAPI(Post, {
+   *   cursorPaginate: true,
+   *   status: 200,
+   * })
+   * public async index() {
+   *   const cursor = this.castParam('cursor', 'string', { allowNull: true })
+   *   const posts = await Post.where(...).cursorPaginate({ pageSize: 100, cursor })
+   *   this.ok(posts)
+   * }
+   * ```
+   */
+  cursorPaginate?: boolean | CustomCursorPaginationOpts
+
+  /**
+   * @deprecated Use `cursorPaginate` instead. This option is deprecated in favor of the `cursorPaginate` option.
+   *
+   * when true, it will render an openapi document which
    * produces an object containing scrollPagination data. This
    * output is formatted to match the format returned
    * when calling the `scrollPaginate` method
@@ -1235,7 +1266,7 @@ export interface OpenapiEndpointRendererOpts<
    * }
    * ```
    */
-  scrollPaginate?: boolean | CustomScrollPaginationOpts
+  scrollPaginate?: boolean | CustomCursorPaginationOpts
 
   /**
    * specify path params. This is usually not necessary, since path params
@@ -1571,7 +1602,7 @@ export type CustomPaginationOpts =
       body: string
     }
 
-export type CustomScrollPaginationOpts =
+export type CustomCursorPaginationOpts =
   | {
       /**
        * if provided, a query param will be added to the
@@ -1579,7 +1610,7 @@ export type CustomScrollPaginationOpts =
        *
        * ```ts
        * @OpenAPI(Post, {
-       *   scrollPaginate: {
+       *   cursorPaginate: {
        *     query: 'cursor'
        *   },
        * })
@@ -1587,7 +1618,7 @@ export type CustomScrollPaginationOpts =
        *   this.ok(
        *     await this.currentUser
        *      .associationQuery('posts')
-       *      .scrollPaginate({
+       *      .cursorPaginate({
        *        cursor: this.castParam('page', 'string', { allowNull: true })
        *      })
        *   )
@@ -1603,7 +1634,7 @@ export type CustomScrollPaginationOpts =
        *
        * ```ts
        * @OpenAPI(Post, {
-       *   scrollPaginate: {
+       *   cursorPaginate: {
        *     body: 'page'
        *   },
        * })
@@ -1611,7 +1642,7 @@ export type CustomScrollPaginationOpts =
        *   this.ok(
        *     await this.currentUser
        *      .associationQuery('posts')
-       *      .scrollPaginate({
+       *      .cursorPaginate({
        *        cursor: this.castParam('page', 'string', { allowNull: true })
        *      })
        *   )

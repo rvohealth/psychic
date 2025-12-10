@@ -105,6 +105,32 @@ export default class UsersController extends ApplicationController {
 
   @OpenAPI(User, {
     status: 200,
+    cursorPaginate: true,
+    serializerKey: 'summary',
+  })
+  public async cursorPaginated() {
+    const users = await User.order('createdAt').cursorPaginate({
+      cursor: this.castParam('cursor', 'string', { allowNull: true }),
+    })
+    this.ok(users)
+  }
+
+  @OpenAPI(User, {
+    status: 200,
+    cursorPaginate: {
+      body: 'cursor',
+    },
+    serializerKey: 'summary',
+  })
+  public async cursorPaginatedPost() {
+    const users = await User.order('createdAt').cursorPaginate({
+      cursor: this.castParam('cursor', 'string', { allowNull: true }),
+    })
+    this.ok(users)
+  }
+
+  @OpenAPI(User, {
+    status: 200,
     scrollPaginate: true,
     serializerKey: 'summary',
   })

@@ -25,6 +25,15 @@ export default class BalloonsController extends ApplicationController {
 
   @OpenAPI(Balloon, {
     status: 200,
+    cursorPaginate: true,
+  })
+  public async cursorPaginated() {
+    const balloons = await Balloon.cursorPaginate({ cursor: null })
+    this.ok(balloons)
+  }
+
+  @OpenAPI(Balloon, {
+    status: 200,
     scrollPaginate: true,
   })
   public async scrollPaginated() {

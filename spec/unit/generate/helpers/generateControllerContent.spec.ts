@@ -27,14 +27,13 @@ export default class PostsController extends AuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Paginated index of Posts',
-    scrollPaginate: true,
+    cursorPaginate: true,
     serializerKey: 'summary',
   })
   public async index() {
     // const posts = await this.currentUser.associationQuery('posts')
     //   .preloadFor('summary')
-    //   .order({ createdAt: 'desc' })
-    //   .scrollPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
+    //   .cursorPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(posts)
   }
 
@@ -202,14 +201,13 @@ export default class ApiV1HealthPostsController extends AuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Paginated index of HealthPosts',
-    scrollPaginate: true,
+    cursorPaginate: true,
     serializerKey: 'summary',
   })
   public async index() {
     // const healthPosts = await this.currentUser.associationQuery('healthPosts')
     //   .preloadFor('summary')
-    //   .order({ createdAt: 'desc' })
-    //   .scrollPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
+    //   .cursorPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(healthPosts)
   }
 
@@ -343,14 +341,13 @@ export default class PostsController extends AuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Paginated index of Posts',
-    scrollPaginate: true,
+    cursorPaginate: true,
     serializerKey: 'summary',
   })
   public async index() {
     // const posts = await this.currentHost.associationQuery('posts')
     //   .preloadFor('summary')
-    //   .order({ createdAt: 'desc' })
-    //   .scrollPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
+    //   .cursorPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(posts)
   }
 
@@ -446,14 +443,13 @@ export default class AdminArticlesController extends AdminAuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Paginated index of Articles',
-    scrollPaginate: true,
+    cursorPaginate: true,
     serializerKey: 'adminSummary',
   })
   public async index() {
     // const articles = await Article
     //   .preloadFor('adminSummary')
-    //   .order({ createdAt: 'desc' })
-    //   .scrollPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
+    //   .cursorPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(articles)
   }
 

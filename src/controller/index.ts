@@ -702,13 +702,12 @@ export default class PsychicController {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return data.map(d => this.singleObjectJson(d, opts))
       //
-    } else if (this.currentOpenapiRenderer?.['paginate'] && Array.isArray(paginatedResults)) {
-      return {
-        ...data,
-        results: paginatedResults.map(result => this.singleObjectJson(result, opts)),
-      }
-      //
-    } else if (this.currentOpenapiRenderer?.['scrollPaginate'] && Array.isArray(paginatedResults)) {
+    } else if (
+      (this.currentOpenapiRenderer?.['paginate'] ||
+        this.currentOpenapiRenderer?.['cursorPaginate'] ||
+        this.currentOpenapiRenderer?.['scrollPaginate']) &&
+      Array.isArray(paginatedResults)
+    ) {
       return {
         ...data,
         results: paginatedResults.map(result => this.singleObjectJson(result, opts)),
