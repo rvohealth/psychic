@@ -1,3 +1,7 @@
+## 2.3.2
+
+- fix `castParam` for any valid UUID
+
 ## 2.3.1
 
 - move packageManager check to dream application

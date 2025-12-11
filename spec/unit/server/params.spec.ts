@@ -729,6 +729,12 @@ describe('Params', () => {
         })
       })
 
+      it('permits a UUIDv7', () => {
+        expect(Params.for({ uuid: '019b0b19-6fd1-706b-a0c1-58768dee1317' }, User)).toEqual({
+          uuid: '019b0b19-6fd1-706b-a0c1-58768dee1317',
+        })
+      })
+
       it('rejects non-uuid', () => {
         expect(() => Params.for({ uuid: '883b3fc3-70a8-401c-a04a-a14b196ef83' }, User)).toThrow(
           ParamValidationErrors,
