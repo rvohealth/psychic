@@ -1,3 +1,7 @@
+## 2.3.3
+
+- add missing ca and rejectUnauthorized args to ssl options
+
 ## 2.3.2
 
 - fix `castParam` for any valid UUID

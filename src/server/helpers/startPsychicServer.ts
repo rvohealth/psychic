@@ -35,6 +35,8 @@ export function createPsychicHttpInstance(app: Express, sslCredentials: PsychicS
       {
         key: fs.readFileSync(sslCredentials.key),
         cert: fs.readFileSync(sslCredentials.cert),
+        ca: sslCredentials.ca?.map(filePath => fs.readFileSync(filePath)),
+        rejectUnauthorized: sslCredentials?.rejectUnauthorized,
       },
       app as http.RequestListener<typeof http.IncomingMessage, typeof http.ServerResponse>,
     )
