@@ -34,7 +34,8 @@ describe('generateSyncEnumsInitializer', () => {
     const contents = (await fs.readFile('test-app/src/conf/initializers/sync-custom-enums.ts')).toString()
     expect(contents).toEqual(`\
 import { DreamCLI } from '@rvoh/dream/system'
-import { PsychicApp, PsychicBin } from "@rvoh/psychic"
+import { PsychicApp } from "@rvoh/psychic"
+import { PsychicBin } from "@rvoh/psychic/system"
 import AppEnv from '../AppEnv.js'
 
 export default function syncCustomEnums(psy: PsychicApp) {
