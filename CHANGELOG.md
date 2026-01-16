@@ -1,3 +1,7 @@
+## 2.3.4
+
+- make ca and rejectUnauthorized args ssl options optional
+
 ## 2.3.3
 
 - add missing ca and rejectUnauthorized args to ssl options
