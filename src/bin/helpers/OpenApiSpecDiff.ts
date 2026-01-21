@@ -3,7 +3,7 @@ import * as cp from 'node:child_process'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import colorize from '../../cli/helpers/colorize.js'
-import type { DefaultPsychicOpenapiOptions } from '../../psychic-app/index.js'
+import PsychicApp, { DefaultPsychicOpenapiOptions } from '../../psychic-app/index.js'
 
 /**
  * Interface to hold the result of a comparison
@@ -136,7 +136,7 @@ export class OpenApiSpecDiff {
 
     throw new Error(
       `⚠️ oasdiff not found.
-    
+
       Install it via the instructions here:
         https://github.com/tufin/oasdiff
       `,
@@ -220,8 +220,9 @@ export class OpenApiSpecDiff {
 
   /**
    * Retrieves head branch content for a file
+   * @param absoluteFilePath - Absolute path to the file
    */
-  private getHeadBranchContent(filePath: string): string {
+  private getHeadBranchContent(absoluteFilePath: string): string {
     if (!this.oasdiffConfig) {
       throw new Error('OasDiff config not initialized')
     }
@@ -229,9 +230,20 @@ export class OpenApiSpecDiff {
     const branchRef =
       process.env.CI === '1' ? `origin/${this.oasdiffConfig.headBranch}` : this.oasdiffConfig.headBranch
 
-    return cp.execSync(`git show ${branchRef}:${filePath}`, {
+    // Get git repo root
+    const gitRepoRoot = cp
+      .execSync('git rev-parse --show-toplevel', {
+        encoding: 'utf8',
+        cwd: process.cwd(),
+      })
+      .trim()
+
+    // Get relative path from git repo root to the file
+    const gitPath = path.relative(gitRepoRoot, absoluteFilePath).replace(/\\/g, '/')
+
+    return cp.execFileSync('git', ['show', `${branchRef}:${gitPath}`], {
       encoding: 'utf8',
-      cwd: process.cwd(),
+      cwd: gitRepoRoot,
     })
   }
 
@@ -246,7 +258,11 @@ export class OpenApiSpecDiff {
       changelog: [],
     }
 
-    const currentFilePath = config.outputFilepath!
+    // Get absolute path using apiRoot
+    const psychicApp = PsychicApp.getOrFail()
+    const currentFilePath = path.isAbsolute(config.outputFilepath!)
+      ? config.outputFilepath!
+      : path.join(psychicApp.apiRoot, config.outputFilepath!)
 
     if (!fs.existsSync(currentFilePath)) {
       result.error = `File ${config.outputFilepath!} does not exist in current branch`
@@ -255,7 +271,7 @@ export class OpenApiSpecDiff {
 
     const tempMainFilePath = this.createTempFilePath(config.outputFilepath!)
 
-    const mainContent = this.getHeadBranchContent(config.outputFilepath!)
+    const mainContent = this.getHeadBranchContent(currentFilePath)
 
     fs.mkdirSync(path.dirname(tempMainFilePath), { recursive: true })
     fs.writeFileSync(tempMainFilePath, mainContent)
