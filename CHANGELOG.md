@@ -1,3 +1,7 @@
+## 2.3.5
+
+- patch `psy diff:openapi` to consider filepaths where project root is different from the git root
+
 ## 2.3.4
 
 - make ca and rejectUnauthorized args ssl options optional
