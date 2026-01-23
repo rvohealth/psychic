@@ -370,6 +370,7 @@ export default class PsychicCLI {
             throw error
           }
         }
+        process.exit()
       })
   }
 

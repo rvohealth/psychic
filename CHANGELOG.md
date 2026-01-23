@@ -1,3 +1,7 @@
+## 2.3.6
+
+- fix `psy diff:openapi` to exit after completion
+
 ## 2.3.5
 
 - patch `psy diff:openapi` to consider filepaths where project root is different from the git root
