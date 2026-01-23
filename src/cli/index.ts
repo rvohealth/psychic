@@ -360,6 +360,7 @@ export default class PsychicCLI {
 
         try {
           PsychicBin.openapiDiff()
+          process.exit()
         } catch (error) {
           if (error instanceof BreakingChangesDetectedInOpenApiSpecError) {
             if (options.failOnBreaking) {
