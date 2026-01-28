@@ -41,6 +41,7 @@ describe('OpenapiAppRenderer', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access, @typescript-eslint/no-unsafe-argument
       expect(Object.keys(syncFile.paths)).toEqual([
         '/admin/test',
+        '/openapi/intentionally-mismatched-resourceful-method',
         '/openapi/multiple-openapi-names',
         '/openapi/multiple-serializer-statements',
         '/openapi/request-body-for-type',

@@ -1,3 +1,9 @@
+=======
+
+## 2.3.7
+
+- patch issue causing unexpected HTTP methods to fail to resolve during psy sync when they point specifically to the `update` method on a controller.
+
 ## 2.3.6
 
 - fix `psy diff:openapi` to exit after completion

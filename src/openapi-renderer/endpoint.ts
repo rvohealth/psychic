@@ -445,7 +445,7 @@ export default class OpenapiEndpointRenderer<
 
     const route =
       this.action === 'update'
-        ? filteredRoutes.find(routeConfig => routeConfig.httpMethod === 'patch')
+        ? filteredRoutes.find(routeConfig => routeConfig.httpMethod === 'patch') || filteredRoutes.at(0)
         : filteredRoutes.at(0)
 
     if (!route) throw new MissingControllerActionPairingInRoutes(this.controllerClass, this.action)
