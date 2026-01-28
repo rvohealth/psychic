@@ -1,3 +1,7 @@
+## 2.3.5
+
+- patch issue causing unexpected HTTP methods to fail to resolve during psy sync when they point specifically to the `update` method on a controller.
+
 ## 2.3.4
 
 - make ca and rejectUnauthorized args ssl options optional
