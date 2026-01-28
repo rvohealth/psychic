@@ -51,6 +51,51 @@
         }
       }
     },
+    "/openapi/intentionally-mismatched-resourceful-method": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-admin-header",
+          "required": true,
+          "description": "custom admin header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [],
+        "responses": {
+          "204": {
+            "description": "Success, no content"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "422": {
+            "$ref": "#/components/responses/ValidationErrors"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomAdminResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/openapi/multiple-openapi-names": {
       "parameters": [
         {

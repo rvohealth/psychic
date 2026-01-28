@@ -49,4 +49,12 @@ export default class OpenapiDecoratorTestController extends ApplicationControlle
   public testMultipleSerializers() {
     this.ok()
   }
+
+  // this endpoint ensures that when we have a route that points to a resourceful
+  // method name like 'update', psychic will be able to match the correct route
+  // even if a mismatched http method (i.e. POST for an update) is used in the routes file
+  @OpenAPI()
+  public update() {
+    this.ok()
+  }
 }
