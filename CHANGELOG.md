@@ -1,8 +1,7 @@
-=======
-
 ## 2.3.7
 
 - patch issue causing unexpected HTTP methods to fail to resolve during psy sync when they point specifically to the `update` method on a controller.
+- ensure http server is closed out on stop
 
 ## 2.3.6
 

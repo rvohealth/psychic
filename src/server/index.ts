@@ -171,7 +171,14 @@ export default class PsychicServer {
       await hook(this)
     }
 
-    this.httpServer?.close()
+    if (this.httpServer) {
+      await new Promise<void>((resolve, reject) => {
+        this.httpServer.close(err => {
+          if (err) reject(err)
+          else resolve()
+        })
+      })
+    }
 
     if (!bypassClosingDbConnections) {
       await closeAllDbConnections()
