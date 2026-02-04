@@ -30,6 +30,8 @@ export default async function startPsychicServer({
 }
 
 export function createPsychicHttpInstance(app: Express, sslCredentials: PsychicSslCredentials | undefined) {
+  const psychicApp = PsychicApp.getOrFail()
+
   if (sslCredentials?.key && sslCredentials?.cert) {
     return https.createServer(
       {
@@ -37,11 +39,13 @@ export function createPsychicHttpInstance(app: Express, sslCredentials: PsychicS
         cert: fs.readFileSync(sslCredentials.cert),
         ca: sslCredentials.ca?.map(filePath => fs.readFileSync(filePath)),
         rejectUnauthorized: sslCredentials?.rejectUnauthorized,
+        ...psychicApp.httpServerOptions,
       },
       app as http.RequestListener<typeof http.IncomingMessage, typeof http.ServerResponse>,
     )
   } else {
     return http.createServer(
+      psychicApp.httpServerOptions,
       app as http.RequestListener<typeof http.IncomingMessage, typeof http.ServerResponse>,
     )
   }

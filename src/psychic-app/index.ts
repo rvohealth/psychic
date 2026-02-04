@@ -14,6 +14,7 @@ import { Command } from 'commander'
 import { CorsOptions } from 'cors'
 import { Express, Request, RequestHandler, Response } from 'express'
 import * as http from 'node:http'
+import * as https from 'node:https'
 import PackageManager from '../cli/helpers/PackageManager.js'
 import PsychicAppInitMissingApiRoot from '../error/psychic-app/init-missing-api-root.js'
 import PsychicAppInitMissingCallToLoadControllers from '../error/psychic-app/init-missing-call-to-load-controllers.js'
@@ -314,6 +315,11 @@ Try setting it to something valid, like:
   private _port: number = EnvInternal.integer('PORT', { optional: true }) || 7777
   public get port() {
     return this._port
+  }
+
+  private _httpServerOptions: http.ServerOptions | https.ServerOptions = {}
+  public get httpServerOptions() {
+    return this._httpServerOptions
   }
 
   private _corsOptions: CorsOptions = {}
@@ -627,41 +633,43 @@ Try setting it to something valid, like:
         ? boolean
         : Opt extends 'defaultResponseHeaders'
           ? Record<string, string | null>
-          : Opt extends 'encryption'
-            ? PsychicAppEncryptionOptions
-            : Opt extends 'cors'
-              ? CorsOptions
-              : Opt extends 'cookie'
-                ? CustomCookieOptions
-                : Opt extends 'apiRoot'
-                  ? string
-                  : Opt extends 'importExtension'
-                    ? GeneratorImportStyle
-                    : Opt extends 'sessionCookieName'
-                      ? string
-                      : Opt extends 'json'
-                        ? bodyParser.Options
-                        : Opt extends 'logger'
-                          ? PsychicLogger
-                          : Opt extends 'ssl'
-                            ? PsychicSslCredentials
-                            : Opt extends 'openapi'
-                              ? DefaultPsychicOpenapiOptions
-                              : Opt extends 'paths'
-                                ? PsychicPathOptions
-                                : Opt extends 'port'
-                                  ? number
-                                  : Opt extends 'saltRounds'
+          : Opt extends 'httpServerOptions'
+            ? http.ServerOptions | https.ServerOptions
+            : Opt extends 'encryption'
+              ? PsychicAppEncryptionOptions
+              : Opt extends 'cors'
+                ? CorsOptions
+                : Opt extends 'cookie'
+                  ? CustomCookieOptions
+                  : Opt extends 'apiRoot'
+                    ? string
+                    : Opt extends 'importExtension'
+                      ? GeneratorImportStyle
+                      : Opt extends 'sessionCookieName'
+                        ? string
+                        : Opt extends 'json'
+                          ? bodyParser.Options
+                          : Opt extends 'logger'
+                            ? PsychicLogger
+                            : Opt extends 'ssl'
+                              ? PsychicSslCredentials
+                              : Opt extends 'openapi'
+                                ? DefaultPsychicOpenapiOptions
+                                : Opt extends 'paths'
+                                  ? PsychicPathOptions
+                                  : Opt extends 'port'
                                     ? number
-                                    : Opt extends 'sanitizeResponseJson'
-                                      ? boolean
-                                      : Opt extends 'packageManager'
-                                        ? DreamAppAllowedPackageManagersEnum
-                                        : Opt extends 'inflections'
-                                          ? () => void | Promise<void>
-                                          : Opt extends 'routes'
-                                            ? (r: PsychicRouter) => void | Promise<void>
-                                            : never,
+                                    : Opt extends 'saltRounds'
+                                      ? number
+                                      : Opt extends 'sanitizeResponseJson'
+                                        ? boolean
+                                        : Opt extends 'packageManager'
+                                          ? DreamAppAllowedPackageManagersEnum
+                                          : Opt extends 'inflections'
+                                            ? () => void | Promise<void>
+                                            : Opt extends 'routes'
+                                              ? (r: PsychicRouter) => void | Promise<void>
+                                              : never,
   ): void
   public set<Opt extends PsychicAppOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -673,6 +681,10 @@ Try setting it to something valid, like:
 
       case 'apiOnly':
         this._apiOnly = value as boolean
+        break
+
+      case 'httpServerOptions':
+        this._httpServerOptions = value as http.ServerOptions | https.ServerOptions
         break
 
       case 'apiRoot':
@@ -786,6 +798,7 @@ export type PsychicAppOption =
   | 'appName'
   | 'apiOnly'
   | 'apiRoot'
+  | 'httpServerOptions'
   | 'importExtension'
   | 'encryption'
   | 'sessionCookieName'
