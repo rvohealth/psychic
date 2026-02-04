@@ -48,7 +48,7 @@ import OpenapiSegmentExpander, {
 } from './body-segment.js'
 import { DEFAULT_OPENAPI_RESPONSES, OpenapiValidateTarget } from './defaults.js'
 import cursorPaginationParamOpenapiProperty from './helpers/cursorPaginationParamOpenapiProperty.js'
-import { dreamColumnOpenapiShape } from './helpers/dreamAttributeOpenapiShape.js'
+import { dreamColumnOpenapiShape } from './helpers/dreamColumnOpenapiShape.js'
 import openapiOpts from './helpers/openapiOpts.js'
 import openapiRoute from './helpers/openapiRoute.js'
 import paginationPageParamOpenapiProperty from './helpers/paginationPageParamOpenapiProperty.js'
@@ -725,9 +725,15 @@ export default class OpenapiEndpointRenderer<
 
     paramsShape.properties = paramSafeColumns.reduce(
       (acc, columnName) => {
-        acc[columnName] = dreamColumnOpenapiShape(dreamClass, columnName, undefined, {
-          allowGenericJson: true,
-        })
+        acc[columnName] = dreamColumnOpenapiShape(
+          this.controllerClass.controllerActionPath(this.action),
+          dreamClass,
+          columnName,
+          undefined,
+          {
+            allowGenericJson: true,
+          },
+        )
         return acc
       },
       paramsShape.properties as Record<string, OpenapiSchemaBody>,

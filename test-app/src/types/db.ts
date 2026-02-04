@@ -110,6 +110,16 @@ export const SpeciesTypesEnumValues = ['cat', 'noncat'] as const
 
 export type Timestamp = ColumnType<DateTime | CalendarDate>
 
+export interface Availabilities {
+  createdAt: Timestamp
+  end: string | null
+  id: Generated<Int8>
+  start: string
+  times: string[] | null
+  updatedAt: Timestamp
+  userId: Int8
+}
+
 export interface Balloons {
   color: BalloonColorsEnum | null
   createdAt: Timestamp
@@ -240,6 +250,7 @@ export interface Users {
 }
 
 export interface DB {
+  availabilities: Availabilities
   balloons: Balloons
   comments: Comments
   health_users: HealthUsers
@@ -251,6 +262,7 @@ export interface DB {
 }
 
 export class DBClass {
+  availabilities: Availabilities
   balloons: Balloons
   comments: Comments
   health_users: HealthUsers

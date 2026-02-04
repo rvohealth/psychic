@@ -64,6 +64,8 @@ export const globalTypeConfig = {
     'Admin/UserSummarySerializer',
     'Admin/V2/PetSerializer',
     'Admin/V2/PetSummarySerializer',
+    'AvailabilitySerializer',
+    'AvailabilitySummarySerializer',
     'Balloon/LatexSerializer',
     'Balloon/LatexSummarySerializer',
     'Balloon/MylarSerializer',

@@ -31,7 +31,7 @@ import NoSerializerFoundForRendersOneAndMany from '../error/openapi/NoSerializer
 import ObjectSerializerRendersOneAndManyRequireClassType from '../error/openapi/ObjectSerializerRendersOneAndManyRequireClassType.js'
 import allSerializersFromHandWrittenOpenapi from './helpers/allSerializersFromHandWrittenOpenapi.js'
 import allSerializersToRefsInOpenapi from './helpers/allSerializersToRefsInOpenapi.js'
-import { dreamColumnOpenapiShape } from './helpers/dreamAttributeOpenapiShape.js'
+import { dreamColumnOpenapiShape } from './helpers/dreamColumnOpenapiShape.js'
 import openapiShorthandToOpenapi from './helpers/openapiShorthandToOpenapi.js'
 const NULL_OBJECT_OPENAPI: OpenapiSchemaBody = { type: 'null' }
 
@@ -218,9 +218,15 @@ export default class SerializerOpenapiRenderer {
 
             accumulator[outputAttributeName] = allSerializersToRefsInOpenapi(
               (target as typeof Dream)?.isDream
-                ? dreamColumnOpenapiShape(target as typeof Dream, attribute.name, openapi, {
-                    suppressResponseEnums: this.suppressResponseEnums,
-                  })
+                ? dreamColumnOpenapiShape(
+                    (this.serializer as any).globalName,
+                    target as typeof Dream,
+                    attribute.name,
+                    openapi,
+                    {
+                      suppressResponseEnums: this.suppressResponseEnums,
+                    },
+                  )
                 : openapiShorthandToOpenapi(openapi as any),
             )
 

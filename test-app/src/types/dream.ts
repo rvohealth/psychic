@@ -68,6 +68,99 @@ import {
 } from './db.js'
 
 export const schema = {
+  availabilities: {
+    serializerKeys: ['default', 'summary'],
+    scopes: {
+      default: [],
+      named: [],
+    },
+    nonJsonColumnNames: [
+      'createdAt',
+      'end',
+      'id',
+      'start',
+      'times',
+      'updatedAt',
+      'userId',
+    ],
+    columns: {
+      createdAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+      end: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'time without time zone',
+        allowNull: true,
+        isArray: false,
+      },
+      id: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+      start: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'time without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+      times: {
+        coercedType: {} as string[] | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'time without time zone[]',
+        allowNull: true,
+        isArray: true,
+      },
+      updatedAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+      userId: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+    },
+    virtualColumns: [],
+    associations: {
+      user: {
+        type: 'BelongsTo',
+        foreignKey: 'userId',
+        foreignKeyTypeColumn: null,
+        tables: ['users'],
+        optional: false,
+        requiredAndClauses: null,
+        passthroughAndClauses: null,
+      },
+    },
+  },
   balloons: {
     serializerKeys: ['default', 'sameForAllSti', 'summary'],
     scopes: {
@@ -1312,6 +1405,7 @@ export const connectionTypeConfig = {
   allDefaultScopeNames: ['dream:STI'],
   globalNames: {
     models: {
+      Availability: 'availabilities',
       Balloon: 'balloons',
       'Balloon/Latex': 'balloons',
       'Balloon/Mylar': 'balloons',

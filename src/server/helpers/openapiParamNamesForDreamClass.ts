@@ -5,7 +5,7 @@ import {
   StrictInterface,
   UpdateableProperties,
 } from '@rvoh/dream/types'
-import { VirtualAttributeStatement } from '../../openapi-renderer/helpers/dreamAttributeOpenapiShape.js'
+import { VirtualAttributeStatement } from '../../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import { OpenAPIDreamModelRequestBodyModifications } from '../params.js'
 import paramNamesForDreamClass from './paramNamesForDreamClass.js'
 
