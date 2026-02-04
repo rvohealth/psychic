@@ -10,6 +10,7 @@ import { DbTypes } from '@rvoh/dream/types'
 import { SerializingPlainPropertyWithoutOpenapiShape } from '../../error/openapi/SerializingPlainPropertyWithoutOpenapiShape.js'
 import OpenapiSegmentExpander from '../body-segment.js'
 import openapiShorthandToOpenapi from './openapiShorthandToOpenapi.js'
+import UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute from '../../error/openapi/UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute.js'
 
 export interface VirtualAttributeStatement {
   property: string
@@ -32,6 +33,11 @@ type DreamClassColumnNames<
 > = keyof Table & string
 
 export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
+  // this is the global name of the serializer or controller calling down
+  // to get this information. If an unrecognized db type is provided, the
+  // source will be rendered in the exception that is returned, enabling
+  // the dev to identify the source of the issue and fix it
+  source: string,
   dreamClass: DreamClass,
   column: DreamClassColumnNames<DreamClass>,
   openapi:
@@ -95,7 +101,13 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
   const openapiObject = openapiShorthandToOpenapi((openapi ?? {}) as any)
-  const singleType = singularAttributeOpenapiShape(dreamColumnInfo, suppressResponseEnums, openapiObject)
+  const singleType = singularAttributeOpenapiShape(
+    source,
+    column,
+    dreamColumnInfo,
+    suppressResponseEnums,
+    openapiObject,
+  )
 
   if (dreamColumnInfo.isArray) {
     return {
@@ -124,6 +136,12 @@ function baseDbType(dreamColumnInfo: DreamColumnInfo) {
 }
 
 function singularAttributeOpenapiShape(
+  // this is the global name of the serializer or controller calling down
+  // to get this information. If an unrecognized db type is provided, the
+  // source will be rendered in the exception that is returned, enabling
+  // the dev to identify the source of the issue and fix it
+  source: string,
+  column: string,
   dreamColumnInfo: DreamColumnInfo,
   suppressResponseEnums: boolean,
   openapiSchema: OpenapiSchemaBody,
@@ -160,6 +178,8 @@ function singularAttributeOpenapiShape(
     case 'money':
     case 'path':
     case 'text':
+    case 'time':
+    case 'time without time zone':
     case 'uuid':
     case 'varbit':
     case 'varchar':
@@ -184,7 +204,6 @@ function singularAttributeOpenapiShape(
       return { type: 'number' } as const
 
     case 'datetime':
-    case 'time':
     case 'time with time zone':
     case 'timestamp':
     case 'timestamp with time zone':
@@ -199,9 +218,7 @@ function singularAttributeOpenapiShape(
       return { type: 'object' } as const
 
     default:
-      throw new Error(
-        `Unrecognized dbType used in serializer OpenAPI type declaration: ${dreamColumnInfo.dbType}`,
-      )
+      throw new UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute(source, column, dreamColumnInfo.dbType)
   }
 }
 

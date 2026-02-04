@@ -2,14 +2,15 @@ import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
 import {
   dreamColumnOpenapiShape,
   UseCustomOpenapiForJson,
-} from '../../../../../src/openapi-renderer/helpers/dreamAttributeOpenapiShape.js'
-import User from '../../../../../test-app/src/app/models/User.js'
-import { PetTreatsEnumValues, SpeciesTypesEnumValues } from '../../../../../test-app/src/types/db.js'
+} from '../../../../src/openapi-renderer/helpers/dreamColumnOpenapiShape.js'
+import User from '../../../../test-app/src/app/models/User.js'
+import { PetTreatsEnumValues, SpeciesTypesEnumValues } from '../../../../test-app/src/types/db.js'
+import Availability from '../../../../test-app/src/app/models/Availability.js'
 
 describe('dreamAttributeOpenapiShape', () => {
   context('bigint primaryKey', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'id')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'id')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: 'integer',
       }
@@ -20,7 +21,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
   context('varchar', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'name')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'name')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['string', 'null'],
       }
@@ -30,7 +31,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('notNull', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'email')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'email')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: 'string',
         }
@@ -41,7 +42,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('varchar[]', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'nicknames')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'nicknames')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {
@@ -54,7 +55,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
       context('notNull', () => {
         it('generates the expected Openapi shape', () => {
-          const openApiShape = dreamColumnOpenapiShape(User, 'requiredNicknames')
+          const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredNicknames')
           const expectedOpenapiShape: OpenapiSchemaBody = {
             type: 'array',
             items: {
@@ -70,7 +71,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
   context('text', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'notes')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'notes')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['string', 'null'],
       }
@@ -80,7 +81,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('notNull', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'bio')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'bio')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: 'string',
         }
@@ -91,7 +92,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('text[]', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'favoriteTexts')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteTexts')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {
@@ -104,7 +105,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
       context('notNull', () => {
         it('generates the expected Openapi shape', () => {
-          const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteTexts')
+          const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredFavoriteTexts')
           const expectedOpenapiShape: OpenapiSchemaBody = {
             type: 'array',
             items: {
@@ -120,7 +121,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
   context('citext', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'favoriteCitext')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteCitext')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['string', 'null'],
       }
@@ -130,7 +131,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('notNull', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteCitext')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredFavoriteCitext')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: 'string',
         }
@@ -141,7 +142,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('citext[]', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'favoriteCitexts')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteCitexts')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {
@@ -154,7 +155,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
       context('notNull', () => {
         it('generates the expected Openapi shape', () => {
-          const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteCitexts')
+          const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredFavoriteCitexts')
           const expectedOpenapiShape: OpenapiSchemaBody = {
             type: 'array',
             items: {
@@ -170,7 +171,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
   context('uuid', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'optionalUuid')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'optionalUuid')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['string', 'null'],
       }
@@ -180,7 +181,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('notNull', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'uuid')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'uuid')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: 'string',
         }
@@ -191,7 +192,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('uuid[]', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'favoriteUuids')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteUuids')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {
@@ -204,7 +205,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
       context('notNull', () => {
         it('generates the expected Openapi shape', () => {
-          const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteUuids')
+          const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredFavoriteUuids')
           const expectedOpenapiShape: OpenapiSchemaBody = {
             type: 'array',
             items: {
@@ -220,7 +221,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
   context('date', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'birthdate')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'birthdate')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['string', 'null'],
         format: 'date',
@@ -231,7 +232,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('notNull', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'createdOn')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'createdOn')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: 'string',
           format: 'date',
@@ -243,7 +244,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('date[]', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'favoriteDates')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteDates')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {
@@ -258,7 +259,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('notNull', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteDates')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredFavoriteDates')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: 'array',
           items: {
@@ -275,7 +276,7 @@ describe('dreamAttributeOpenapiShape', () => {
   context('timestamp', () => {
     context('notNull', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'createdAt')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'createdAt')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: 'string',
           format: 'date-time',
@@ -287,7 +288,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('timestamp[]', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'favoriteDatetimes')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteDatetimes')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {
@@ -301,7 +302,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
       context('notNull', () => {
         it('generates the expected Openapi shape', () => {
-          const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteDatetimes')
+          const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredFavoriteDatetimes')
           const expectedOpenapiShape: OpenapiSchemaBody = {
             type: 'array',
             items: {
@@ -316,9 +317,45 @@ describe('dreamAttributeOpenapiShape', () => {
     })
   })
 
+  context('time', () => {
+    it('generates the expected Openapi shape', () => {
+      const openApiShape = dreamColumnOpenapiShape('Test', Availability, 'end')
+      const expectedOpenapiShape: OpenapiSchemaBody = {
+        type: ['string', 'null'],
+      }
+
+      expect(openApiShape).toEqual(expectedOpenapiShape)
+    })
+
+    context('notNull', () => {
+      it('generates the expected Openapi shape', () => {
+        const openApiShape = dreamColumnOpenapiShape('Test', Availability, 'start')
+        const expectedOpenapiShape: OpenapiSchemaBody = {
+          type: 'string',
+        }
+
+        expect(openApiShape).toEqual(expectedOpenapiShape)
+      })
+    })
+
+    context('time[]', () => {
+      it('generates the expected Openapi shape', () => {
+        const openApiShape = dreamColumnOpenapiShape('Test', Availability, 'times')
+        const expectedOpenapiShape: OpenapiSchemaBody = {
+          type: ['array', 'null'],
+          items: {
+            type: 'string',
+          },
+        }
+
+        expect(openApiShape).toEqual(expectedOpenapiShape)
+      })
+    })
+  })
+
   context('integer', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'collarCountInt')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'collarCountInt')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['integer', 'null'],
       }
@@ -328,7 +365,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('notNull', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'requiredCollarCountInt')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredCollarCountInt')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: 'integer',
         }
@@ -339,7 +376,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('integer[]', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'favoriteIntegers')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteIntegers')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {
@@ -352,7 +389,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
       context('notNull', () => {
         it('generates the expected Openapi shape', () => {
-          const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteIntegers')
+          const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredFavoriteIntegers')
           const expectedOpenapiShape: OpenapiSchemaBody = {
             type: 'array',
             items: {
@@ -368,7 +405,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
   context('decimal(6, 3)', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'volume')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'volume')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['number', 'null'],
         format: 'decimal',
@@ -380,7 +417,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
   context('numeric', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'collarCountNumeric')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'collarCountNumeric')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['number', 'null'],
         format: 'decimal',
@@ -391,7 +428,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('numeric[]', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'favoriteNumerics')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteNumerics')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {
@@ -405,7 +442,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
       context('notNull', () => {
         it('generates the expected Openapi shape', () => {
-          const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteNumerics')
+          const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredFavoriteNumerics')
           const expectedOpenapiShape: OpenapiSchemaBody = {
             type: 'array',
             items: {
@@ -422,7 +459,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
   context('bigint', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'favoriteBigint')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteBigint')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['string', 'null'],
         format: 'bigint',
@@ -433,7 +470,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('notNull', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteBigint')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredFavoriteBigint')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: 'string',
           format: 'bigint',
@@ -445,7 +482,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('bigint[]', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'favoriteBigints')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteBigints')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {
@@ -459,7 +496,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
       context('notNull', () => {
         it('generates the expected Openapi shape', () => {
-          const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteBigints')
+          const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredFavoriteBigints')
           const expectedOpenapiShape: OpenapiSchemaBody = {
             type: 'array',
             items: {
@@ -476,7 +513,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
   context('boolean', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'likesWalks')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'likesWalks')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['boolean', 'null'],
       }
@@ -486,7 +523,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('notNull', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'likesTreats')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'likesTreats')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: 'boolean',
         }
@@ -497,7 +534,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('boolean[]', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'favoriteBooleans')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteBooleans')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {
@@ -510,7 +547,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
       context('notNull', () => {
         it('generates the expected Openapi shape', () => {
-          const openApiShape = dreamColumnOpenapiShape(User, 'requiredFavoriteBooleans')
+          const openApiShape = dreamColumnOpenapiShape('Test', User, 'requiredFavoriteBooleans')
           const expectedOpenapiShape: OpenapiSchemaBody = {
             type: 'array',
             items: {
@@ -526,7 +563,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
   context('enum', () => {
     it('generates the expected Openapi shape', () => {
-      const openApiShape = dreamColumnOpenapiShape(User, 'species')
+      const openApiShape = dreamColumnOpenapiShape('Test', User, 'species')
       const expectedOpenapiShape: OpenapiSchemaBody = {
         type: ['string', 'null'],
         enum: [...SpeciesTypesEnumValues, null],
@@ -537,7 +574,7 @@ describe('dreamAttributeOpenapiShape', () => {
 
     context('enum array', () => {
       it('generates the expected Openapi shape', () => {
-        const openApiShape = dreamColumnOpenapiShape(User, 'favoriteTreats')
+        const openApiShape = dreamColumnOpenapiShape('Test', User, 'favoriteTreats')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {
@@ -553,25 +590,25 @@ describe('dreamAttributeOpenapiShape', () => {
 
   context('json', () => {
     it('generates the expected Openapi shape', () => {
-      expect(() => dreamColumnOpenapiShape(User, 'jsonData')).toThrow(UseCustomOpenapiForJson)
+      expect(() => dreamColumnOpenapiShape('Test', User, 'jsonData')).toThrow(UseCustomOpenapiForJson)
     })
   })
 
   context('json[]', () => {
     it('generates the expected Openapi shape', () => {
-      expect(() => dreamColumnOpenapiShape(User, 'favoriteJsons')).toThrow(UseCustomOpenapiForJson)
+      expect(() => dreamColumnOpenapiShape('Test', User, 'favoriteJsons')).toThrow(UseCustomOpenapiForJson)
     })
   })
 
   context('jsonb', () => {
     it('generates the expected Openapi shape', () => {
-      expect(() => dreamColumnOpenapiShape(User, 'jsonbData')).toThrow(UseCustomOpenapiForJson)
+      expect(() => dreamColumnOpenapiShape('Test', User, 'jsonbData')).toThrow(UseCustomOpenapiForJson)
     })
   })
 
   context('jsonb[]', () => {
     it('generates the expected Openapi shape', () => {
-      expect(() => dreamColumnOpenapiShape(User, 'favoriteJsonbs')).toThrow(UseCustomOpenapiForJson)
+      expect(() => dreamColumnOpenapiShape('Test', User, 'favoriteJsonbs')).toThrow(UseCustomOpenapiForJson)
     })
   })
 })
