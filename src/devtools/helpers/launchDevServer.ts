@@ -10,7 +10,7 @@ const debugEnabled = debuglog('psychic').enabled
 
 export async function launchDevServer(
   key: string,
-  { port = 3000, cmd = 'pnpm client', timeout = 5000 }: LaunchDevServerOpts = {},
+  { port = 3000, cmd = 'pnpm client', timeout = 5000, onStdOut }: LaunchDevServerOpts = {},
 ) {
   if (devServerProcesses[key]) return
 
@@ -23,6 +23,21 @@ export async function launchDevServer(
     env: {
       ...process.env,
     },
+  })
+
+  // NOTE: adding this stdout spy so that
+  // when this cli utility runs node commands,
+  // it can properly hijack the stdout from the command
+  proc.stdout?.on('data', chunk => {
+    const txt = (chunk as number)?.toString()?.trim()
+    if (typeof txt !== 'string' || !txt) return
+
+    if (onStdOut) {
+      onStdOut(txt)
+    } else {
+      // eslint-disable-next-line no-console
+      console.log(txt)
+    }
   })
 
   devServerProcesses[key] = proc
@@ -124,4 +139,5 @@ export interface LaunchDevServerOpts {
   port?: number
   cmd?: string
   timeout?: number
+  onStdOut?: (message: string) => void
 }
