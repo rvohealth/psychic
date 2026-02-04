@@ -43,6 +43,10 @@ export default async (psy: PsychicApp) => {
     },
   })
 
+  psy.set('httpServerOptions', {
+    // provide default http or https server options to the root http/https server
+  })
+
   if (AppEnv.isProduction) {
     psy.set(
       'logger',
