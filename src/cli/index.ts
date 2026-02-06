@@ -118,7 +118,7 @@ export default class PsychicCLI {
       )
       .option(
         '--model-name <modelName>',
-        'override the generated class name (e.g. --model-name=GroupSession for path Session/Group)',
+        'override the automatically generated model name, e.g., `pnpm psy g:resource --model-name=SessionParticipant v1/health/session/participants Health/Session/Participant`',
       )
       .argument(
         '<path>',
