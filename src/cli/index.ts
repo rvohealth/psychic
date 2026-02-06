@@ -116,6 +116,10 @@ export default class PsychicCLI {
         'the name of the db connection you would like to use for your model. Defaults to "default"',
         'default',
       )
+      .option(
+        '--model-name <modelName>',
+        'override the generated class name (e.g. --model-name=GroupSession for path Session/Group)',
+      )
       .argument(
         '<path>',
         'URL path from root domain. Specify nesting resource with `{}`, e.g.: `tickets/{}/comments`',
@@ -136,6 +140,7 @@ export default class PsychicCLI {
             stiBaseSerializer: boolean
             owningModel?: string
             connectionName: string
+            modelName?: string
           },
         ) => {
           await initializePsychicApp({

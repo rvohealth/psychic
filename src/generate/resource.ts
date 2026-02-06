@@ -21,6 +21,7 @@ export default async function generateResource({
     stiBaseSerializer: boolean
     owningModel?: string
     connectionName: string
+    modelName?: string
   }
   columnsWithTypes: string[]
 }) {
@@ -46,6 +47,7 @@ export default async function generateResource({
       includeAdminSerializers: forAdmin,
       connectionName: options.connectionName,
     },
+    modelName: options.modelName,
   })
 
   await generateController({
@@ -58,6 +60,7 @@ export default async function generateResource({
     resourceSpecs: true,
     singular: options.singular,
     owningModel: options.owningModel,
+    modelName: options.modelName,
   })
 
   await addResourceToRoutes(route, {

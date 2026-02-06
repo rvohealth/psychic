@@ -4,6 +4,186 @@ import { RESOURCE_ACTIONS } from '../../../../src/generate/resource.js'
 import PsychicApp from '../../../../src/psychic-app/index.js'
 
 describe('generateResourceControllerSpecContent', () => {
+  context('when modelName is provided (e.g. --model-name=GroupSession for Session/Group)', () => {
+    it('uses the overridden class name in imports, factory, and spec content', () => {
+      const res = generateResourceControllerSpecContent({
+        fullyQualifiedControllerName: 'V1/SessionGroupsController',
+        route: 'v1/session_groups',
+        fullyQualifiedModelName: 'Session/Group',
+        columnsWithTypes: ['title:string'],
+        forAdmin: false,
+        singular: false,
+        actions: [...RESOURCE_ACTIONS],
+        modelName: 'GroupSession',
+      })
+      expect(res).toEqual(`\
+import GroupSession from '@models/Session/Group.js'
+import User from '@models/User.js'
+import createGroupSession from '@spec/factories/Session/GroupFactory.js'
+import createUser from '@spec/factories/UserFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
+
+describe('V1/SessionGroupsController', () => {
+  let request: SpecRequestType
+  let user: User
+
+  beforeEach(async () => {
+    user = await createUser()
+    request = await session(user)
+  })
+
+  describe('GET index', () => {
+    const indexGroupSessions = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+      return request.get('/v1/session_groups', expectedStatus)
+    }
+
+    it('returns the index of Session/Groups', async () => {
+      const groupSession = await createGroupSession({ user })
+
+      const { body } = await indexGroupSessions(200)
+
+      expect(body.results).toEqual([
+        expect.objectContaining({
+          id: groupSession.id,
+        }),
+      ])
+    })
+
+    context('GroupSessions created by another User', () => {
+      it('are omitted', async () => {
+        await createGroupSession()
+
+        const { body } = await indexGroupSessions(200)
+
+        expect(body.results).toEqual([])
+      })
+    })
+  })
+
+  describe('GET show', () => {
+    const showGroupSession = async <StatusCode extends 200 | 400 | 404>(groupSession: GroupSession, expectedStatus: StatusCode) => {
+      return request.get('/v1/session_groups/{id}', expectedStatus, {
+        id: groupSession.id,
+      })
+    }
+
+    it('returns the specified Session/Group', async () => {
+      const groupSession = await createGroupSession({ user })
+
+      const { body } = await showGroupSession(groupSession, 200)
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: groupSession.id,
+          title: groupSession.title,
+        }),
+      )
+    })
+
+    context('Session/Group created by another User', () => {
+      it('is not found', async () => {
+        const otherUserGroupSession = await createGroupSession()
+
+        await showGroupSession(otherUserGroupSession, 404)
+      })
+    })
+  })
+
+  describe('POST create', () => {
+    const createGroupSession = async <StatusCode extends 201 | 400 | 404>(
+      data: RequestBody<'post', '/v1/session_groups'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.post('/v1/session_groups', expectedStatus, {
+        data
+      })
+    }
+
+    it('creates a Session/Group for this User', async () => {
+      const { body } = await createGroupSession({
+        title: 'The Session/Group title',
+      }, 201)
+
+      const groupSession = await user.associationQuery('groupSessions').firstOrFail()
+      expect(groupSession.title).toEqual('The Session/Group title')
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: groupSession.id,
+          title: groupSession.title,
+        }),
+      )
+    })
+  })
+
+  describe('PATCH update', () => {
+    const updateGroupSession = async <StatusCode extends 204 | 400 | 404>(
+      groupSession: GroupSession,
+      data: RequestBody<'patch', '/v1/session_groups/{id}'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.patch('/v1/session_groups/{id}', expectedStatus, {
+        id: groupSession.id,
+        data,
+      })
+    }
+
+    it('updates the Session/Group', async () => {
+      const groupSession = await createGroupSession({ user })
+
+      await updateGroupSession(groupSession, {
+        title: 'Updated Session/Group title',
+      }, 204)
+
+      await groupSession.reload()
+      expect(groupSession.title).toEqual('Updated Session/Group title')
+    })
+
+    context('a Session/Group created by another User', () => {
+      it('is not updated', async () => {
+        const groupSession = await createGroupSession()
+        const originalTitle = groupSession.title
+
+        await updateGroupSession(groupSession, {
+          title: 'Updated Session/Group title',
+        }, 404)
+
+        await groupSession.reload()
+        expect(groupSession.title).toEqual(originalTitle)
+      })
+    })
+  })
+
+  describe('DELETE destroy', () => {
+    const destroyGroupSession = async <StatusCode extends 204 | 400 | 404>(groupSession: GroupSession, expectedStatus: StatusCode) => {
+      return request.delete('/v1/session_groups/{id}', expectedStatus, {
+        id: groupSession.id,
+      })
+    }
+
+    it('deletes the Session/Group', async () => {
+      const groupSession = await createGroupSession({ user })
+
+      await destroyGroupSession(groupSession, 204)
+
+      expect(await GroupSession.find(groupSession.id)).toBeNull()
+    })
+
+    context('a Session/Group created by another User', () => {
+      it('is not deleted', async () => {
+        const groupSession = await createGroupSession()
+
+        await destroyGroupSession(groupSession, 404)
+
+        expect(await GroupSession.find(groupSession.id)).toMatchDreamModel(groupSession)
+      })
+    })
+  })
+})
+`)
+    })
+  })
+
   it(
     'generates a useful resource controller spec (omitting type & deletedAt from create and update action specs ' +
       'since type is for STI and deletedAt is for deleting)',

@@ -12,6 +12,7 @@ export default function generateControllerContent({
   owningModel,
   forAdmin,
   singular,
+  modelName,
 }: {
   ancestorName: string
   ancestorImportStatement: string
@@ -22,6 +23,8 @@ export default function generateControllerContent({
   owningModel?: string | undefined
   forAdmin: boolean
   singular: boolean
+  /** When set, overrides the generated model class name (e.g. GroupSession for path Session/Group). */
+  modelName?: string | undefined
 }) {
   fullyQualifiedControllerName = DreamApp.system.standardizeFullyQualifiedModelName(
     fullyQualifiedControllerName,
@@ -43,10 +46,12 @@ export default function generateControllerContent({
 
   if (fullyQualifiedModelName) {
     fullyQualifiedModelName = DreamApp.system.standardizeFullyQualifiedModelName(fullyQualifiedModelName)
-    modelClassName = DreamApp.system.globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
+    modelClassName = modelName
+      ? DreamApp.system.standardizeFullyQualifiedModelName(modelName).replace(/\//g, '')
+      : DreamApp.system.globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
     modelAttributeName = camelize(modelClassName)
     pluralizedModelAttributeName = singular ? modelAttributeName : pluralize(modelAttributeName)
-    additionalImports.push(importStatementForModel(fullyQualifiedModelName))
+    additionalImports.push(importStatementForModel(fullyQualifiedModelName, modelClassName))
   }
 
   const defaultOpenapiSerializerKeyProperty = forAdmin
@@ -244,8 +249,11 @@ function loadModelStatement(
   }`
 }
 
-function importStatementForModel(destinationModelName: string) {
-  return `import ${DreamApp.system.globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${DreamApp.system.absoluteDreamPath('models', destinationModelName)}'`
+function importStatementForModel(destinationModelName: string, modelClassNameOverride?: string) {
+  const modelClassName = modelClassNameOverride
+    ? modelClassNameOverride
+    : DreamApp.system.globalClassNameFromFullyQualifiedModelName(destinationModelName)
+  return `import ${modelClassName} from '${DreamApp.system.absoluteDreamPath('models', destinationModelName)}'`
 }
 
 function aOrAnDreamModelName(dreamName: string) {
