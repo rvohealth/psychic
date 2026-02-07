@@ -4,19 +4,21 @@ import { RESOURCE_ACTIONS } from '../../../../src/generate/resource.js'
 import PsychicApp from '../../../../src/psychic-app/index.js'
 
 describe('generateResourceControllerSpecContent', () => {
-  context('when modelName is provided (e.g. --model-name=GroupSession for Session/Group)', () => {
-    it('uses the overridden class name in imports, factory, and spec content', () => {
-      const res = generateResourceControllerSpecContent({
-        fullyQualifiedControllerName: 'V1/SessionGroupsController',
-        route: 'v1/session_groups',
-        fullyQualifiedModelName: 'Session/Group',
-        columnsWithTypes: ['title:string'],
-        forAdmin: false,
-        singular: false,
-        actions: [...RESOURCE_ACTIONS],
-        modelName: 'GroupSession',
-      })
-      expect(res).toEqual(`\
+  context(
+    'when modelName is provided, e.g., `pnpm psy g:model --model-name=GroupSession Session/Group`',
+    () => {
+      it('uses the overridden class name in imports, factory, and spec content', () => {
+        const res = generateResourceControllerSpecContent({
+          fullyQualifiedControllerName: 'V1/SessionGroupsController',
+          route: 'v1/session_groups',
+          fullyQualifiedModelName: 'Session/Group',
+          columnsWithTypes: ['title:string'],
+          forAdmin: false,
+          singular: false,
+          actions: [...RESOURCE_ACTIONS],
+          modelName: 'GroupSession',
+        })
+        expect(res).toEqual(`\
 import GroupSession from '@models/Session/Group.js'
 import User from '@models/User.js'
 import createGroupSession from '@spec/factories/Session/GroupFactory.js'
@@ -181,8 +183,9 @@ describe('V1/SessionGroupsController', () => {
   })
 })
 `)
-    })
-  })
+      })
+    },
+  )
 
   it(
     'generates a useful resource controller spec (omitting type & deletedAt from create and update action specs ' +

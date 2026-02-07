@@ -27,7 +27,7 @@ export default async function generateController({
   resourceSpecs?: boolean
   owningModel?: string | undefined
   singular: boolean
-  /** When set, overrides the generated model class name (e.g. GroupSession for path Session/Group). */
+  /** When set, overrides the generated model class name e.g., `pnpm psy g:model --model-name=GroupSession Session/Group`. */
   modelName?: string | undefined
 }) {
   fullyQualifiedModelName = fullyQualifiedModelName

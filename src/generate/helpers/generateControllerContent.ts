@@ -23,7 +23,7 @@ export default function generateControllerContent({
   owningModel?: string | undefined
   forAdmin: boolean
   singular: boolean
-  /** When set, overrides the generated model class name (e.g. GroupSession for path Session/Group). */
+  /** When set, overrides the generated model class name e.g., `pnpm psy g:model --model-name=GroupSession Session/Group`. */
   modelName?: string | undefined
 }) {
   fullyQualifiedControllerName = DreamApp.system.standardizeFullyQualifiedModelName(
