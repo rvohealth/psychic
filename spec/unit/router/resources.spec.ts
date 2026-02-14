@@ -5,6 +5,12 @@ import PsychicServer from '../../../src/server/index.js'
 import PetsController from '../../../test-app/src/app/controllers/PetsController.js'
 import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
 
+function committedRoutes(router: PsychicRouter) {
+  router.commit()
+  const routes = router.routes as ControllerActionRouteConfig[]
+  return routes.map(r => ({ method: r.httpMethod, path: `/${r.path.replace(/^\//, '')}` }))
+}
+
 describe('PsychicRouter', () => {
   describe('resources', () => {
     describe('extra actions', () => {
@@ -12,7 +18,7 @@ describe('PsychicRouter', () => {
         const server = new PsychicServer()
         await server.boot()
 
-        const res = await supertest(server.expressApp).get('/users/3/hello').expect(200)
+        const res = await supertest(server.koaApp.callback()).get('/users/3/hello').expect(200)
 
         expect(res.body).toEqual('world 3')
       }, 15000)
@@ -23,46 +29,41 @@ describe('PsychicRouter', () => {
       let router: PsychicRouter
       beforeEach(() => {
         server = new PsychicServer()
-        router = new PsychicRouter(server.expressApp)
-        vi.spyOn(server.expressApp, 'get')
-        vi.spyOn(server.expressApp, 'post')
-        vi.spyOn(server.expressApp, 'put')
-        vi.spyOn(server.expressApp, 'patch')
-        vi.spyOn(server.expressApp, 'delete')
+        router = new PsychicRouter(server.koaApp)
       })
 
       it('renders create, index, show, update, and destroy routes for a resource', () => {
         router.resources('users')
-        router.commit()
-        expect(server.expressApp.get).toHaveBeenCalledWith('/users', expect.any(Function))
-        expect(server.expressApp.post).toHaveBeenCalledWith('/users', expect.any(Function))
-        expect(server.expressApp.get).toHaveBeenCalledWith('/users/:id', expect.any(Function))
-        expect(server.expressApp.patch).toHaveBeenCalledWith('/users/:id', expect.any(Function))
-        expect(server.expressApp.put).toHaveBeenCalledWith('/users/:id', expect.any(Function))
-        expect(server.expressApp.delete).toHaveBeenCalledWith('/users/:id', expect.any(Function))
+        const routeInfos = committedRoutes(router)
+        expect(routeInfos).toContainEqual({ method: 'get', path: '/users' })
+        expect(routeInfos).toContainEqual({ method: 'post', path: '/users' })
+        expect(routeInfos).toContainEqual({ method: 'get', path: '/users/:id' })
+        expect(routeInfos).toContainEqual({ method: 'patch', path: '/users/:id' })
+        expect(routeInfos).toContainEqual({ method: 'put', path: '/users/:id' })
+        expect(routeInfos).toContainEqual({ method: 'delete', path: '/users/:id' })
       })
 
       context('only is passed', () => {
         it('does not call methods that were omitted with only', () => {
           router.resources('users', { only: ['create', 'destroy'] })
-          router.commit()
-          expect(server.expressApp.post).toHaveBeenCalledWith('/users', expect.any(Function))
-          expect(server.expressApp.delete).toHaveBeenCalledWith('/users/:id', expect.any(Function))
-          expect(server.expressApp.get).not.toHaveBeenCalled()
-          expect(server.expressApp.patch).not.toHaveBeenCalled()
-          expect(server.expressApp.put).not.toHaveBeenCalled()
+          const routeInfos = committedRoutes(router)
+          expect(routeInfos).toContainEqual({ method: 'post', path: '/users' })
+          expect(routeInfos).toContainEqual({ method: 'delete', path: '/users/:id' })
+          expect(routeInfos.filter(r => r.method === 'get')).toHaveLength(0)
+          expect(routeInfos.filter(r => r.method === 'patch')).toHaveLength(0)
+          expect(routeInfos.filter(r => r.method === 'put')).toHaveLength(0)
         })
       })
 
       context('except is passed', () => {
         it('does not call methods that were omitted with except', () => {
           router.resources('users', { except: ['index', 'show', 'create', 'update', 'destroy'] })
-          router.commit()
-          expect(server.expressApp.get).not.toHaveBeenCalled()
-          expect(server.expressApp.post).not.toHaveBeenCalled()
-          expect(server.expressApp.patch).not.toHaveBeenCalled()
-          expect(server.expressApp.put).not.toHaveBeenCalled()
-          expect(server.expressApp.delete).not.toHaveBeenCalled()
+          const routeInfos = committedRoutes(router)
+          expect(routeInfos.filter(r => r.method === 'get')).toHaveLength(0)
+          expect(routeInfos.filter(r => r.method === 'post')).toHaveLength(0)
+          expect(routeInfos.filter(r => r.method === 'patch')).toHaveLength(0)
+          expect(routeInfos.filter(r => r.method === 'put')).toHaveLength(0)
+          expect(routeInfos.filter(r => r.method === 'delete')).toHaveLength(0)
         })
       })
 
@@ -81,8 +82,8 @@ describe('PsychicRouter', () => {
           router.resources('users', { except: ['index', 'show', 'create', 'update', 'destroy'] }, r => {
             r.get('hello', UsersController, 'hello')
           })
-          router.commit()
-          expect(server.expressApp.get).toHaveBeenCalledWith('/users/:id/hello', expect.any(Function))
+          const routeInfos = committedRoutes(router)
+          expect(routeInfos).toContainEqual({ method: 'get', path: '/users/:id/hello' })
         })
 
         it('successfully applies nested resources', () => {
@@ -91,12 +92,8 @@ describe('PsychicRouter', () => {
               r.get('hello', UsersController, 'hello')
             })
           })
-          router.commit()
-
-          expect(server.expressApp.get).toHaveBeenCalledWith(
-            '/users/:userId/friends/:id/hello',
-            expect.any(Function),
-          )
+          const routeInfos = committedRoutes(router)
+          expect(routeInfos).toContainEqual({ method: 'get', path: '/users/:userId/friends/:id/hello' })
         })
       })
 
@@ -107,12 +104,8 @@ describe('PsychicRouter', () => {
               r.get('count', UsersController, 'hello')
             })
           })
-          router.commit()
-
-          expect(server.expressApp.get).toHaveBeenCalledWith(
-            '/user-settings/:userSettingId/friend/count',
-            expect.any(Function),
-          )
+          const routeInfos = committedRoutes(router)
+          expect(routeInfos).toContainEqual({ method: 'get', path: '/user-settings/:userSettingId/friend/count' })
         })
       })
     })

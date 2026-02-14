@@ -1,10 +1,10 @@
-import { getMockReq, getMockRes } from '@jest-mock/express'
+import Koa from 'koa'
 import { DreamApp, ObjectSerializer } from '@rvoh/dream'
-import { Request, Response } from 'express'
 import { MockInstance } from 'vitest'
 import { BeforeAction, OpenAPI } from '../../../src/controller/decorators.js'
 import PsychicController from '../../../src/controller/index.js'
 import * as toJsonModule from '../../../src/helpers/toJson.js'
+import PsychicApp from '../../../src/psychic-app/index.js'
 import Pet from '../../../test-app/src/app/models/Pet.js'
 import User from '../../../test-app/src/app/models/User.js'
 import UserSerializer, {
@@ -12,17 +12,17 @@ import UserSerializer, {
   UserSummarySerializer,
 } from '../../../test-app/src/app/serializers/UserSerializer.js'
 import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers.js'
+import { createMockKoaContext } from './helpers/mockRequest.js'
 
 describe('PsychicController', () => {
   describe('#serialize', () => {
-    let req: Request
-    let res: Response
+    let ctx: Koa.Context
     let toJsonSpy: MockInstance
 
     beforeEach(() => {
-      req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
-      res = getMockRes().res as unknown as Response
+      ctx = createMockKoaContext({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
       toJsonSpy = vi.spyOn(toJsonModule, 'default')
+      vi.spyOn(PsychicApp.prototype, 'openapiValidationIsActive').mockReturnValue(false)
     })
 
     it('identifies serializer attached to model class and uses it to serialize', async () => {
@@ -39,14 +39,14 @@ describe('PsychicController', () => {
 
       const user1 = await User.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
       const user2 = await User.create({ email: 'zed@zed', name: 'zed', passwordDigest: 'hello' })
-      const controller1 = new MyController(req, res, { action: 'index' })
+      const controller1 = new MyController(ctx, { action: 'index' })
 
       await controller1.index()
       expect(toJsonSpy).toHaveBeenCalledWith([{ id: user1.id }, { id: user2.id }], false)
 
       toJsonSpy.mockReset()
 
-      const controller2 = new MyController(req, res, { action: 'show' })
+      const controller2 = new MyController(ctx, { action: 'show' })
       await controller2.show()
       expect(toJsonSpy).toHaveBeenCalledWith({ id: user1.id, email: 'how@yadoin', name: 'fred' }, false)
     })
@@ -65,7 +65,7 @@ describe('PsychicController', () => {
 
         const user1 = await User.create({ email: 'how@yadoin', name: 'fred', passwordDigest: 'hello' })
         const user2 = await User.create({ email: 'zed@zed', name: 'zed', passwordDigest: 'hello' })
-        const controller = new MyController(req, res, { action: 'index' })
+        const controller = new MyController(ctx, { action: 'index' })
 
         await controller.index()
         expect(toJsonSpy).toHaveBeenCalledWith([{ id: user1.id }, { id: user2.id }], false)
@@ -130,13 +130,13 @@ describe('PsychicController', () => {
       })
 
       it('identifies serializer attached to model class and uses it to serialize the object', () => {
-        const controller = new MyController(req, res, { action: 'show' })
+        const controller = new MyController(ctx, { action: 'show' })
         controller.show()
         expect(toJsonSpy).toHaveBeenCalledWith({ greeting: 'hello world' }, false)
       })
 
       it('identifies serializer attached to model class and uses it to serialize each object in an array', () => {
-        const controller = new MyController(req, res, { action: 'show' })
+        const controller = new MyController(ctx, { action: 'show' })
         controller.index()
         expect(toJsonSpy).toHaveBeenCalledWith(
           [{ greeting: 'hello world' }, { greeting: 'howdy world' }],
@@ -152,7 +152,7 @@ describe('PsychicController', () => {
         }
 
         it('allows rendering of different types in the same array', () => {
-          const controller = new MyController2(req, res, { action: 'show' })
+          const controller = new MyController2(ctx, { action: 'show' })
           controller.index()
           expect(toJsonSpy).toHaveBeenCalledWith(
             [{ greeting: 'hello world' }, { greeting: 'hello goodbye' }],
@@ -169,7 +169,7 @@ describe('PsychicController', () => {
         }
 
         it('calls render on each serializer', () => {
-          const controller = new MyController2(req, res, { action: 'show' })
+          const controller = new MyController2(ctx, { action: 'show' })
           controller.index()
           expect(toJsonSpy).toHaveBeenCalledWith(
             [{ greeting: 'hello world' }, { greeting: 'hello goodbye' }],
@@ -235,7 +235,7 @@ describe('PsychicController', () => {
       })
 
       it('passes the passthrough data through to the child serializers', async () => {
-        const controller = new MyController(req, res, { action: 'show' })
+        const controller = new MyController(ctx, { action: 'show' })
 
         await controller.runAction()
         expect(toJsonSpy).toHaveBeenCalledWith(

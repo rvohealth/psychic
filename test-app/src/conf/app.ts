@@ -1,9 +1,9 @@
 import { DreamCLI } from '@rvoh/dream/system'
-import { RequestHandler } from 'express'
-import session from 'express-session'
+import Koa from 'koa'
 import * as path from 'node:path'
 import { debuglog } from 'node:util'
-import passport from 'passport'
+import koaSession from 'koa-session'
+import passport from 'koa-passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import * as winston from 'winston'
 import PsychicDevtools from '../../../src/devtools/PsychicDevtools.js'
@@ -199,15 +199,20 @@ export default async (psy: PsychicApp) => {
     },
   })
 
-  // set options to pass to express.json when middleware is booted
+  // set options to pass to koa-bodyparser when middleware is booted
   psy.set('json', {
-    limit: '20mb',
+    jsonLimit: '20mb',
   })
 
-  // set options to pass to coors when middleware is booted
+  // set options to pass to @koa/cors when middleware is booted
   psy.set('cors', {
     credentials: true,
-    origin: [process.env.CLIENT_HOST || 'http://localhost:3000'],
+    origin: (ctx: Koa.Context) => {
+      const allowedOrigins = [process.env.CLIENT_HOST || 'http://localhost:3000']
+      const origin = ctx.get('Origin')
+      if (allowedOrigins.includes(origin)) return origin
+      return allowedOrigins[0]!
+    },
   })
 
   // set options for cookie usage
@@ -220,19 +225,19 @@ export default async (psy: PsychicApp) => {
   // ******
   // HOOKS:
   // ******
-  psy.use((_, __, next) => {
+  psy.use(async (_ctx, next) => {
     __forTestingOnly('use')
-    next()
+    await next()
   })
 
-  psy.use('before-middleware', (_, __, next) => {
+  psy.use('before-middleware', async (_ctx, next) => {
     __forTestingOnly('use:before-middleware')
-    next()
+    await next()
   })
 
-  psy.use('after-middleware', (_, __, next) => {
+  psy.use('after-middleware', async (_ctx, next) => {
     __forTestingOnly('use:after-middleware')
-    next()
+    await next()
   })
 
   // run a callback on server boot (but before routes are processed)
@@ -250,15 +255,17 @@ export default async (psy: PsychicApp) => {
   })
 
   // run a callback after the config is loaded, but only if NODE_ENV=prod
-  psy.on('server:error', (err, _, res) => {
+  psy.on('server:error', (err, ctx) => {
     __forTestingOnly('server:error')
 
     if (debugEnabled) {
       console.error(err)
     }
 
-    if (!res.headersSent) res.sendStatus(500)
-    else if (EnvInternal.isDevelopmentOrTest) throw err
+    if (!ctx.headerSent) {
+      ctx.status = 500
+      ctx.body = ''
+    } else if (EnvInternal.isDevelopmentOrTest) throw err
   })
 
   psy.on('server:start', async () => {
@@ -286,20 +293,13 @@ export default async (psy: PsychicApp) => {
   })
 
   // begin: passport test setup
-  psy.use(
-    session({
-      secret: AppEnv.string('APP_ENCRYPTION_KEY'),
-      resave: false,
-      saveUninitialized: false,
-      cookie: {
-        secure: AppEnv.isProduction, // Only use secure cookies in production
-        httpOnly: true,
-        maxAge: 24 * 60 * 60 * 1000, // 24 hours
-      },
-    }),
-  )
-  psy.use(passport.initialize())
-  psy.use(passport.session() as RequestHandler)
+  psy.on('server:init:before-middleware', server => {
+    server.koaApp.keys = ['psychic-test-secret']
+    server.koaApp.use(koaSession({}, server.koaApp))
+    server.koaApp.use(passport.initialize())
+    server.koaApp.use(passport.session())
+  })
+
   passport.serializeUser((user: User, done) => {
     done(null, user.id)
   })

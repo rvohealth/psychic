@@ -1,6 +1,7 @@
 import { DataIncompatibleWithDatabaseField, RecordNotFound, ValidationError } from '@rvoh/dream/errors'
 import { camelize } from '@rvoh/dream/utils'
-import { Application, Request, RequestHandler, Response, Router } from 'express'
+import Koa from 'koa'
+import KoaRouter from '@koa/router'
 import util, { debuglog } from 'node:util'
 import pluralize from 'pluralize-esm'
 import PsychicController from '../controller/index.js'
@@ -8,7 +9,7 @@ import ParamValidationError from '../error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
 import HttpError from '../error/http/index.js'
 import OpenapiRequestValidationFailure from '../error/openapi/OpenapiRequestValidationFailure.js'
-import CannotCommitRoutesWithoutExpressApp from '../error/router/cannot-commit-routes-without-express-app.js'
+import CannotCommitRoutesWithoutKoaApp from '../error/router/cannot-commit-routes-without-koa-app.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
 import PsychicApp from '../psychic-app/index.js'
@@ -21,7 +22,11 @@ import {
   PsychicControllerActions,
   routePath,
 } from '../router/helpers.js'
-import RouteManager, { ControllerActionRouteConfig, MiddlewareRouteConfig } from './route-manager.js'
+import RouteManager, {
+  ControllerActionRouteConfig,
+  KoaMiddleware,
+  MiddlewareRouteConfig,
+} from './route-manager.js'
 import {
   HttpMethod,
   ResourceMethods,
@@ -33,10 +38,10 @@ import {
 const ERROR_LOGGING_DEPTH = 6
 
 export default class PsychicRouter {
-  public app: Application | null
+  public app: Koa | null
   public currentNamespaces: NamespaceConfig[] = []
   public routeManager: RouteManager = new RouteManager()
-  constructor(app: Application | null) {
+  constructor(app: Koa | null) {
     this.app = app
   }
 
@@ -51,26 +56,31 @@ export default class PsychicRouter {
   // this is called after all routes have been processed.
   public commit() {
     const app = this.app
-    if (!app) throw new CannotCommitRoutesWithoutExpressApp()
+    if (!app) throw new CannotCommitRoutesWithoutKoaApp()
+
+    const router = new KoaRouter()
 
     this.routes.forEach(route => {
       if ((route as MiddlewareRouteConfig).middleware) {
         const routeConf = route as MiddlewareRouteConfig
-        app[routeConf.httpMethod](
-          routePath(routeConf.path),
-          ...(Array.isArray(routeConf.middleware) ? routeConf.middleware : [routeConf.middleware]),
-        )
+        const middlewares = Array.isArray(routeConf.middleware)
+          ? routeConf.middleware
+          : [routeConf.middleware]
+        router[routeConf.httpMethod](routePath(routeConf.path), ...middlewares)
       } else {
         const routeConf = route as ControllerActionRouteConfig
-        app[routeConf.httpMethod](routePath(routeConf.path), (req, res) => {
-          this.handle(routeConf.controller, routeConf.action, { req, res }).catch(() => {})
+        router[routeConf.httpMethod](routePath(routeConf.path), async (ctx: Koa.Context) => {
+          await this.handle(routeConf.controller, routeConf.action, { ctx })
         })
       }
     })
+
+    app.use(router.routes())
+    app.use(router.allowedMethods())
   }
 
   get(path: string): void
-  get(path: string, middleware: RequestHandler | RequestHandler[]): void
+  get(path: string, middleware: KoaMiddleware | KoaMiddleware[]): void
   get<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -81,7 +91,7 @@ export default class PsychicRouter {
   }
 
   post(path: string): void
-  post(path: string, middleware: RequestHandler | RequestHandler[]): void
+  post(path: string, middleware: KoaMiddleware | KoaMiddleware[]): void
   post<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -96,7 +106,7 @@ export default class PsychicRouter {
   }
 
   put(path: string): void
-  put(path: string, middleware: RequestHandler | RequestHandler[]): void
+  put(path: string, middleware: KoaMiddleware | KoaMiddleware[]): void
   put<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -111,7 +121,7 @@ export default class PsychicRouter {
   }
 
   patch(path: string): void
-  patch(path: string, middleware: RequestHandler | RequestHandler[]): void
+  patch(path: string, middleware: KoaMiddleware | KoaMiddleware[]): void
   patch<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -126,7 +136,7 @@ export default class PsychicRouter {
   }
 
   delete(path: string): void
-  delete(path: string, middleware: RequestHandler | RequestHandler[]): void
+  delete(path: string, middleware: KoaMiddleware | KoaMiddleware[]): void
   delete<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -141,7 +151,7 @@ export default class PsychicRouter {
   }
 
   options(path: string): void
-  options(path: string, middleware: RequestHandler | RequestHandler[]): void
+  options(path: string, middleware: KoaMiddleware | KoaMiddleware[]): void
   options<T extends typeof PsychicController>(
     path: string,
     controller: T,
@@ -161,7 +171,7 @@ export default class PsychicRouter {
   }
 
   public crud(httpMethod: HttpMethod, path: string): void
-  public crud(httpMethod: HttpMethod, path: string, middleware: RequestHandler | RequestHandler[]): void
+  public crud(httpMethod: HttpMethod, path: string, middleware: KoaMiddleware | KoaMiddleware[]): void
   public crud(
     httpMethod: HttpMethod,
     path: string,
@@ -175,13 +185,13 @@ export default class PsychicRouter {
       (typeof controllerOrMiddleware === 'function' || Array.isArray(controllerOrMiddleware)) &&
       !(controllerOrMiddleware as typeof PsychicController)?.isPsychicController
 
-    // devs can provide custom express middleware which bypasses
+    // devs can provide custom Koa middleware which bypasses
     // the normal Controller#action paradigm.
     if (isMiddleware) {
       this.routeManager.addMiddleware({
         httpMethod,
         path: this.prefixPathWithNamespaces(path),
-        middleware: controllerOrMiddleware as RequestHandler | RequestHandler[],
+        middleware: controllerOrMiddleware as KoaMiddleware | KoaMiddleware[],
       })
     } else {
       controllerOrMiddleware ||= lookupControllerOrFail(this, { path, httpMethod })
@@ -202,7 +212,7 @@ export default class PsychicRouter {
     if (path.includes('{'))
       throw new Error(`
 The provided route "${path}" contains characters that are not supported.
-If you are trying to write a uri param, you will need to use expressjs
+If you are trying to write a uri param, you will need to use the
 param syntax, which is a prefixing colon, rather than using brackets
 to surround the param.
 
@@ -397,16 +407,14 @@ suggested fix:  "${convertRouteParams(path)}"
     controller: typeof PsychicController,
     action: string,
     {
-      req,
-      res,
+      ctx,
     }: {
-      req: Request
-      res: Response
+      ctx: Koa.Context
     },
   ) {
-    const controllerInstance = this._initializeController(controller, req, res, action)
+    const controllerInstance = this._initializeController(controller, ctx, action)
     if (typeof controllerInstance[action as keyof typeof controllerInstance] !== 'function') {
-      controllerInstance['expressSendStatus'](404)
+      controllerInstance['koaSendStatus'](404)
       return
     }
 
@@ -417,17 +425,17 @@ suggested fix:  "${convertRouteParams(path)}"
       if (errorIsRescuableHttpError(err)) {
         const httpErr = err as HttpError
         if (httpErr.data) {
-          controllerInstance['expressSendJson'](httpErr.data, httpErr.status)
+          controllerInstance['koaSendJson'](httpErr.data, httpErr.status)
         } else {
-          controllerInstance['expressSendStatus'](httpErr.status)
+          controllerInstance['koaSendStatus'](httpErr.status)
         }
       } else if (err instanceof RecordNotFound) {
-        controllerInstance['expressSendStatus'](404)
+        controllerInstance['koaSendStatus'](404)
       } else if (err instanceof DataIncompatibleWithDatabaseField) {
         /**
          * See comment at top of this method for philosophy of 400
          */
-        controllerInstance['expressSendStatus'](400)
+        controllerInstance['koaSendStatus'](400)
       } else if (err instanceof ValidationError) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
@@ -444,7 +452,7 @@ suggested fix:  "${convertRouteParams(path)}"
         /**
          * See comment at top of this method for philosophy of 400
          */
-        controllerInstance['expressSendStatus'](400)
+        controllerInstance['koaSendStatus'](400)
       } else if (err instanceof OpenapiRequestValidationFailure) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
@@ -462,7 +470,7 @@ suggested fix:  "${convertRouteParams(path)}"
         /**
          * See comment at top of this method for philosophy of 400
          */
-        controllerInstance['expressSendStatus'](400)
+        controllerInstance['koaSendStatus'](400)
       } else if (err instanceof ParamValidationError) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
@@ -481,7 +489,7 @@ suggested fix:  "${convertRouteParams(path)}"
         /**
          * See comment at top of this method for philosophy of 400
          */
-        controllerInstance['expressSendStatus'](400)
+        controllerInstance['koaSendStatus'](400)
       } else if (err instanceof ParamValidationErrors) {
         if (this.validationErrorLoggingEnabled) {
           PsychicApp.log(
@@ -498,14 +506,14 @@ suggested fix:  "${convertRouteParams(path)}"
         /**
          * See comment at top of this method for philosophy of 400
          */
-        controllerInstance['expressSendStatus'](400)
+        controllerInstance['koaSendStatus'](400)
       } else {
         PsychicApp.logWithLevel('error', util.inspect(err, { depth: ERROR_LOGGING_DEPTH }))
 
         if (PsychicApp.getOrFail().specialHooks.serverError.length) {
           try {
             for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {
-              await hook(err, req, res)
+              await hook(err, ctx)
             }
           } catch (error) {
             if (EnvInternal.isDevelopmentOrTest) {
@@ -532,22 +540,17 @@ suggested fix:  "${convertRouteParams(path)}"
     }
   }
 
-  public _initializeController(
-    ControllerClass: typeof PsychicController,
-    req: Request,
-    res: Response,
-    action: string,
-  ) {
-    return new ControllerClass(req, res, {
+  public _initializeController(ControllerClass: typeof PsychicController, ctx: Koa.Context, action: string) {
+    return new ControllerClass(ctx, {
       action,
     })
   }
 }
 
 export class PsychicNestedRouter extends PsychicRouter {
-  public router: Router
+  public router: KoaRouter
   constructor(
-    expressApp: Application | null,
+    koaApp: Koa | null,
     routeManager: RouteManager,
     {
       namespaces = [],
@@ -555,8 +558,8 @@ export class PsychicNestedRouter extends PsychicRouter {
       namespaces?: NamespaceConfig[]
     } = {},
   ) {
-    super(expressApp)
-    this.router = Router()
+    super(koaApp)
+    this.router = new KoaRouter()
     this.currentNamespaces = namespaces
     this.routeManager = routeManager
   }

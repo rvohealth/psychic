@@ -6,7 +6,7 @@ export default class PassportAuthedController extends PsychicController {
 
   @BeforeAction()
   public authenticate() {
-    const user = this.req.user as User
+    const user = this.ctx.state.user as User
     if (!user) return this.unauthorized()
     this.currentUser = user!
   }

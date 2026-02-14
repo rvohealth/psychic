@@ -1,6 +1,8 @@
-import { RequestHandler } from 'express'
+import Koa from 'koa'
 import PsychicController from '../controller/index.js'
 import { HttpMethod } from './types.js'
+
+export type KoaMiddleware = Koa.Middleware
 
 export default class RouteManager {
   public routes: RouteConfig[] = []
@@ -31,7 +33,7 @@ export default class RouteManager {
   }: {
     httpMethod: HttpMethod
     path: string
-    middleware: RequestHandler | RequestHandler[]
+    middleware: KoaMiddleware | KoaMiddleware[]
   }) {
     this.routes.push({
       httpMethod,
@@ -54,5 +56,5 @@ export type ControllerActionRouteConfig = BaseRouteConfig & {
 }
 
 export type MiddlewareRouteConfig = BaseRouteConfig & {
-  middleware: RequestHandler | RequestHandler[]
+  middleware: KoaMiddleware | KoaMiddleware[]
 }

@@ -1,27 +1,31 @@
-import { getMockReq, getMockRes } from '@jest-mock/express'
-import { Request, Response } from 'express'
+import Koa from 'koa'
 import { MockInstance } from 'vitest'
 import InternalEncrypt from '../../../src/encrypt/internal-encrypt.js'
 import Session, { CustomSessionCookieOptions } from '../../../src/session/index.js'
 import User from '../../../test-app/src/app/models/User.js'
+import { createMockKoaContext } from './helpers/mockRequest.js'
 
 describe('Session', () => {
   let user: User
-  let req: Request
-  let res: Response
+  let ctx: Koa.Context
 
   beforeEach(async () => {
     user = await User.create({ email: 'how@yadoin', password: 'password' })
-    req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
-    res = getMockRes().res as unknown as Response
+    ctx = createMockKoaContext({
+      body: { search: 'abc' },
+      query: { cool: 'boyjohnson' },
+    })
   })
 
   describe('#getCookie', () => {
-    const subject = () => new Session(req, res).getCookie('auth_token')
+    const subject = () => new Session(ctx).getCookie('auth_token')
 
     it('returns the value of an existing cookie, automatically decrypted', () => {
-      req.cookies = { auth_token: InternalEncrypt.encryptCookie(user.id.toString()) }
-      expect(subject()).toEqual(user.id.toString())
+      const encrypted = InternalEncrypt.encryptCookie(user.id.toString())
+      ctx = createMockKoaContext({
+        cookies: { auth_token: encrypted },
+      })
+      expect(new Session(ctx).getCookie('auth_token')).toEqual(user.id.toString())
     })
 
     context('the cookie is not present in the request', () => {
@@ -32,20 +36,21 @@ describe('Session', () => {
   })
 
   describe('#setCookie', () => {
-    const subject = (value: string, opts: CustomSessionCookieOptions = {}) =>
-      new Session(req, res).setCookie('auth_token', value, opts)
-    let cookieSpy: MockInstance
+    let cookieSetSpy: MockInstance
     let encryptSpy: MockInstance
 
     beforeEach(() => {
-      cookieSpy = vi.spyOn(res, 'cookie')
+      cookieSetSpy = vi.spyOn(ctx.cookies, 'set')
       encryptSpy = vi.spyOn(InternalEncrypt, 'encryptCookie').mockReturnValue('abc123')
     })
+
+    const subject = (value: string, opts: CustomSessionCookieOptions = {}) =>
+      new Session(ctx).setCookie('auth_token', value, opts)
 
     it('encrypts and stores the value as an httpOnly cookie, leveraging ttl from conf/app.ts cookie options', () => {
       subject(user.id.toString())
       expect(encryptSpy).toHaveBeenCalledWith(user.id.toString())
-      expect(cookieSpy).toHaveBeenCalledWith('auth_token', 'abc123', {
+      expect(cookieSetSpy).toHaveBeenCalledWith('auth_token', 'abc123', {
         secure: false,
         httpOnly: true,
         maxAge: 4 * 60 * 60 * 24 * 1000,
@@ -63,7 +68,7 @@ describe('Session', () => {
 
       it('automatically sets secure to true', () => {
         subject(user.id.toString())
-        expect(cookieSpy).toHaveBeenCalledWith(
+        expect(cookieSetSpy).toHaveBeenCalledWith(
           'auth_token',
           'abc123',
           expect.objectContaining({
@@ -94,7 +99,7 @@ describe('Session', () => {
         const secondsMillis = 1000
         const expectedMaxAge = daysMillis + hoursMillis + minutesMillis + secondsMillis + millisecondsMillis
 
-        expect(cookieSpy).toHaveBeenCalledWith('auth_token', 'abc123', {
+        expect(cookieSetSpy).toHaveBeenCalledWith('auth_token', 'abc123', {
           secure: true,
           httpOnly: false,
           maxAge: expectedMaxAge,

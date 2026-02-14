@@ -12,7 +12,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   @BeforeAction({ only: ['beforeActionParamsAccessed'] })
   public accessParams() {
     if (typeof this.params.stringParam === 'number')
-      throw new Error('OpenAPI validation didn’t kick in during this.params')
+      throw new Error("OpenAPI validation didn't kick in during this.params")
   }
 
   @OpenAPI({
@@ -297,9 +297,9 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   })
   public headersOpenapiTest() {
     this.ok({
-      myDate: this.req.headers.mydate,
-      myOptionalDate: this.req.headers.myoptionaldate,
-      myOptionalInt: this.req.headers.myoptionalint,
+      myDate: this.headers.mydate,
+      myOptionalDate: this.headers.myoptionaldate,
+      myOptionalInt: this.headers.myoptionalint,
     })
   }
 
