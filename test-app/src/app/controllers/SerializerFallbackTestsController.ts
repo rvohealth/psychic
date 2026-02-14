@@ -5,6 +5,7 @@ import ApplicationController from './ApplicationController.js'
 
 export default class SerializerFallbackTestsController extends ApplicationController {
   @OpenAPI(PetSerializer, {
+    fastJsonStringify: true,
     status: 200,
   })
   public async usesOpenapiSerializer() {
@@ -12,6 +13,7 @@ export default class SerializerFallbackTestsController extends ApplicationContro
   }
 
   @OpenAPI(Pet, {
+    fastJsonStringify: true,
     status: 200,
     serializerKey: 'additional',
   })
@@ -20,6 +22,7 @@ export default class SerializerFallbackTestsController extends ApplicationContro
   }
 
   @OpenAPI(PetSerializer, {
+    fastJsonStringify: true,
     status: 200,
   })
   public async doesntUseOpenapiSerializer() {

@@ -154,7 +154,7 @@ const BIGINT_REGEX = /^-?\d+(\.0*)?$/
 /**
  * Formats AJV errors into a more readable format
  */
-function formatAjvErrors(ajvErrors: ErrorObject[]): ValidationError[] {
+export function formatAjvErrors(ajvErrors: ErrorObject[]): ValidationError[] {
   return ajvErrors.map(error => ({
     instancePath: error.instancePath,
     schemaPath: error.schemaPath,

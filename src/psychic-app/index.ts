@@ -1,3 +1,4 @@
+import cors from '@koa/cors'
 import { DreamApp } from '@rvoh/dream'
 import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
 import { DreamAppAllowedPackageManagersEnum } from '@rvoh/dream/system'
@@ -9,10 +10,9 @@ import {
   EncryptOptions,
 } from '@rvoh/dream/types'
 import { Encrypt } from '@rvoh/dream/utils'
-import * as bodyParser from 'body-parser'
 import { Command } from 'commander'
-import { CorsOptions } from 'cors'
-import { Express, Request, RequestHandler, Response } from 'express'
+import Koa from 'koa'
+import bodyParser from 'koa-bodyparser'
 import * as http from 'node:http'
 import * as https from 'node:https'
 import PackageManager from '../cli/helpers/PackageManager.js'
@@ -126,7 +126,7 @@ export default class PsychicApp {
   /**
    * @internal
    */
-  public static getPsychicHttpInstance(app: Express, sslCredentials: PsychicSslCredentials | undefined) {
+  public static getPsychicHttpInstance(app: Koa, sslCredentials: PsychicSslCredentials | undefined) {
     return createPsychicHttpInstance(app, sslCredentials)
   }
 
@@ -161,11 +161,7 @@ export default class PsychicApp {
    */
   private buildOpenapiCache(): void {
     Object.keys(this.openapi).forEach(openapiName => {
-      if (this.openapi[openapiName]?.validate) {
-        this.cacheOpenapiDoc(openapiName)
-      } else {
-        this.ignoreOpenapiDoc(openapiName)
-      }
+      this.cacheOpenapiDoc(openapiName)
     })
   }
 
@@ -322,7 +318,7 @@ Try setting it to something valid, like:
     return this._httpServerOptions
   }
 
-  private _corsOptions: CorsOptions = {}
+  private _corsOptions: cors.Options
   public get corsOptions() {
     return this._corsOptions
   }
@@ -350,11 +346,6 @@ Try setting it to something valid, like:
   private _saltRounds: number | undefined = undefined
   public get saltRounds() {
     return this._saltRounds
-  }
-
-  private _sanitizeResponseJson: boolean = false
-  public get sanitizeResponseJson() {
-    return this._sanitizeResponseJson
   }
 
   private _packageManager: DreamAppAllowedPackageManagersEnum
@@ -525,15 +516,14 @@ Try setting it to something valid, like:
     this.booted = true
   }
 
-  public use(on: PsychicUseEventType, handler: RequestHandler): void
-  public use(handler: RequestHandler): void
-  public use(handler: () => void): void
+  public use(on: PsychicUseEventType, handler: Koa.Middleware): void
+  public use(handler: Koa.Middleware): void
   public use(pathOrOnOrHandler: unknown, maybeHandler?: unknown): void {
     if (maybeHandler) {
       const eventType = pathOrOnOrHandler as PsychicUseEventType
-      const handler = maybeHandler as () => void
+      const handler = maybeHandler as Koa.Middleware
       const wrappedHandler = (server: PsychicServer) => {
-        server.expressApp.use(handler)
+        server.koaApp.use(handler)
       }
 
       switch (eventType) {
@@ -554,7 +544,7 @@ Try setting it to something valid, like:
       return
     } else {
       const wrappedHandler = (server: PsychicServer) => {
-        server.expressApp.use(pathOrOnOrHandler as RequestHandler)
+        server.koaApp.use(pathOrOnOrHandler as Koa.Middleware)
       }
       this.on('server:init:after-middleware', wrappedHandler)
     }
@@ -567,7 +557,7 @@ Try setting it to something valid, like:
   public on<T extends PsychicHookEventType>(
     hookEventType: T,
     cb: T extends 'server:error'
-      ? (err: Error, req: Request, res: Response) => void | Promise<void>
+      ? (err: Error, ctx: Koa.Context) => void | Promise<void>
       : T extends 'server:init:before-middleware'
         ? (psychicServer: PsychicServer) => void | Promise<void>
         : T extends 'server:init:after-middleware'
@@ -588,9 +578,7 @@ Try setting it to something valid, like:
   ) {
     switch (hookEventType) {
       case 'server:error':
-        this._specialHooks.serverError.push(
-          cb as (err: Error, req: Request, res: Response) => void | Promise<void>,
-        )
+        this._specialHooks.serverError.push(cb as (err: Error, ctx: Koa.Context) => void | Promise<void>)
         break
 
       case 'server:init:before-middleware':
@@ -638,7 +626,7 @@ Try setting it to something valid, like:
             : Opt extends 'encryption'
               ? PsychicAppEncryptionOptions
               : Opt extends 'cors'
-                ? CorsOptions
+                ? cors.Options
                 : Opt extends 'cookie'
                   ? CustomCookieOptions
                   : Opt extends 'apiRoot'
@@ -661,15 +649,13 @@ Try setting it to something valid, like:
                                     ? number
                                     : Opt extends 'saltRounds'
                                       ? number
-                                      : Opt extends 'sanitizeResponseJson'
-                                        ? boolean
-                                        : Opt extends 'packageManager'
-                                          ? DreamAppAllowedPackageManagersEnum
-                                          : Opt extends 'inflections'
-                                            ? () => void | Promise<void>
-                                            : Opt extends 'routes'
-                                              ? (r: PsychicRouter) => void | Promise<void>
-                                              : never,
+                                      : Opt extends 'packageManager'
+                                        ? DreamAppAllowedPackageManagersEnum
+                                        : Opt extends 'inflections'
+                                          ? () => void | Promise<void>
+                                          : Opt extends 'routes'
+                                            ? (r: PsychicRouter) => void | Promise<void>
+                                            : never,
   ): void
   public set<Opt extends PsychicAppOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -715,7 +701,7 @@ Try setting it to something valid, like:
         break
 
       case 'cors':
-        this._corsOptions = { ...this.corsOptions, ...(value as CorsOptions) }
+        this._corsOptions = { ...this.corsOptions, ...(value as cors.Options) }
         break
 
       case 'cookie':
@@ -751,10 +737,6 @@ Try setting it to something valid, like:
 
       case 'saltRounds':
         this._saltRounds = value as number
-        break
-
-      case 'sanitizeResponseJson':
-        this._sanitizeResponseJson = value as boolean
         break
 
       case 'openapi':
@@ -814,7 +796,6 @@ export type PsychicAppOption =
   | 'port'
   | 'routes'
   | 'saltRounds'
-  | 'sanitizeResponseJson'
   | 'ssl'
 
 export interface PsychicAppSpecialHooks {
@@ -825,7 +806,7 @@ export interface PsychicAppSpecialHooks {
   serverInitAfterRoutes: ((server: PsychicServer) => void | Promise<void>)[]
   serverStart: ((server: PsychicServer) => void | Promise<void>)[]
   serverShutdown: ((server: PsychicServer) => void | Promise<void>)[]
-  serverError: ((err: Error, req: Request, res: Response) => void | Promise<void>)[]
+  serverError: ((err: Error, ctx: Koa.Context) => void | Promise<void>)[]
 }
 
 export interface PsychicAppOverrides {

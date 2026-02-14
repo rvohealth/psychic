@@ -4,6 +4,7 @@ import ApplicationController from '../ApplicationController.js'
 
 export default class ApiPetsController extends ApplicationController {
   @OpenAPI(Pet, {
+    fastJsonStringify: true,
     status: 201,
     requestBody: null,
   })

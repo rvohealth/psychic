@@ -3,6 +3,7 @@ import AdminAuthedController from './AuthedController.js'
 
 export default class AdminTestController extends AdminAuthedController {
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
   })
   public test() {

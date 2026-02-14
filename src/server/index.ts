@@ -1,8 +1,9 @@
+import cors from '@koa/cors'
+import etag from '@koa/etag'
 import { closeAllDbConnections } from '@rvoh/dream/db'
-import * as cookieParser from 'cookie-parser'
-import * as cors from 'cors'
-import * as express from 'express'
-import { Express } from 'express'
+import Koa from 'koa'
+import koaBodyparser from 'koa-bodyparser'
+import conditional from 'koa-conditional-get'
 import { Server } from 'node:http'
 import logIfDevelopment from '../controller/helpers/logIfDevelopment.js'
 import EnvInternal from '../helpers/EnvInternal.js'
@@ -20,11 +21,11 @@ export default class PsychicServer {
     return await startPsychicServer(opts)
   }
 
-  public static createPsychicHttpInstance(app: Express, sslCredentials: PsychicSslCredentials | undefined) {
+  public static createPsychicHttpInstance(app: Koa, sslCredentials: PsychicSslCredentials | undefined) {
     return createPsychicHttpInstance(app, sslCredentials)
   }
 
-  public expressApp: Express
+  public koaApp: Koa
   public httpServer: Server
   private booted = false
   constructor() {
@@ -32,7 +33,7 @@ export default class PsychicServer {
   }
 
   public async routes() {
-    const r = new PsychicRouter(this.expressApp)
+    const r = new PsychicRouter(this.koaApp)
     await PsychicApp.getOrFail().routesCb(r)
     return r.routes
   }
@@ -44,17 +45,21 @@ export default class PsychicServer {
 
     this.setSecureDefaultHeaders()
 
-    this.expressApp.use((_, res, next) => {
+    this.koaApp.use(async (ctx, next) => {
       Object.keys(psychicApp.defaultResponseHeaders).forEach(key => {
-        res.setHeader(key, psychicApp.defaultResponseHeaders[key]!)
+        ctx.set(key, psychicApp.defaultResponseHeaders[key]!)
       })
-      next()
+      await next()
     })
 
     for (const serverInitBeforeMiddlewareHook of PsychicApp.getOrFail().specialHooks
       .serverInitBeforeMiddleware) {
       await serverInitBeforeMiddlewareHook(this)
     }
+
+    // ETag support (Express has this built-in, Koa needs middleware)
+    this.koaApp.use(conditional())
+    this.koaApp.use(etag())
 
     this.initializeCors()
     this.initializeJSON()
@@ -90,33 +95,27 @@ export default class PsychicServer {
   private applyNotFoundMiddleware() {
     if (!EnvInternal.isDevelopment) return
 
-    this.expressApp.use((req, res, next) => {
-      // express by default will set the 200 status code. If a user explicitly
-      // provides anything other than 200, we should assume that a prior middleware
-      // would have have sent headers, which would prevent any of this from happening.
-      // this means that if we are here, we should not be sending a 200. Future middleware
-      // by express will automatically pick this up and turn it into a 404, so we are
-      // going to automatically set the status to 404 now, so that our logger can
-      // pick up the correct status code.
-      if (res.statusCode === 200) res.status(404)
+    this.koaApp.use(async (ctx, next) => {
+      await next()
 
-      logIfDevelopment({ req, res, startTime: Date.now(), fallbackStatusCode: 404 })
-
-      // call next to let express handle sending the 404
-      next()
+      // Koa defaults to 404 for unmatched routes. If nothing set the body,
+      // log the 404 in development.
+      if (ctx.status === 404 && !ctx.body) {
+        logIfDevelopment({ ctx, startTime: Date.now(), fallbackStatusCode: 404 })
+      }
     })
   }
 
   private setSecureDefaultHeaders() {
-    this.expressApp.disable('x-powered-by')
+    // Koa doesn't send x-powered-by by default, no need to disable it.
 
-    this.expressApp.use((_, res, next) => {
-      res.setHeader('X-Content-Type-Options', 'nosniff')
+    this.koaApp.use(async (ctx, next) => {
+      ctx.set('X-Content-Type-Options', 'nosniff')
 
       if (EnvInternal.isProduction) {
-        res.setHeader('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
+        ctx.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
       }
-      next()
+      await next()
     })
   }
 
@@ -131,7 +130,7 @@ export default class PsychicServer {
       this.httpServer = await startOverride(this, { port })
     } else {
       const httpServer = await startPsychicServer({
-        app: this.expressApp,
+        app: this.koaApp,
         port: port || psychicApp.port,
         sslCredentials: PsychicApp.getOrFail().sslCredentials,
       })
@@ -186,7 +185,7 @@ export default class PsychicServer {
     let server: Server
 
     await new Promise(accept => {
-      server = this.expressApp.listen(port, () => accept({}))
+      server = this.koaApp.listen(port, () => accept({}))
     })
 
     await block()
@@ -197,23 +196,20 @@ export default class PsychicServer {
   }
 
   public buildApp() {
-    this.expressApp = express.default()
-    this.expressApp.use(cookieParser.default())
+    this.koaApp = new Koa()
   }
 
   private initializeCors() {
-    this.expressApp.use(
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      (cors as unknown as { default: (opts: any) => any }).default(PsychicApp.getOrFail().corsOptions),
-    )
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+    this.koaApp.use(cors(PsychicApp.getOrFail().corsOptions as any))
   }
 
   private initializeJSON() {
-    this.expressApp.use(express.json(PsychicApp.getOrFail().jsonOptions))
+    this.koaApp.use(koaBodyparser(PsychicApp.getOrFail().jsonOptions))
   }
 
   private async buildRoutes() {
-    const r = new PsychicRouter(this.expressApp)
+    const r = new PsychicRouter(this.koaApp)
     await PsychicApp.getOrFail().routesCb(r)
     r.commit()
   }

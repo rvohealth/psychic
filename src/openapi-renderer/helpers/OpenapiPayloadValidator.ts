@@ -1,7 +1,12 @@
 import { OpenapiSchemaArray } from '@rvoh/dream/openapi'
+import { ValidateFunction } from 'ajv'
 import OpenapiRequestValidationFailure from '../../error/openapi/OpenapiRequestValidationFailure.js'
 import OpenapiResponseValidationFailure from '../../error/openapi/OpenapResponseValidationFailure.js'
-import validateOpenApiSchema, { ValidateOpenapiSchemaOptions } from '../../helpers/validateOpenApiSchema.js'
+import {
+  createValidator,
+  formatAjvErrors,
+  ValidateOpenapiSchemaOptions,
+} from '../../helpers/validateOpenApiSchema.js'
 import PsychicApp from '../../psychic-app/index.js'
 import { OpenapiValidateTarget } from '../defaults.js'
 import OpenapiEndpointRenderer, {
@@ -10,6 +15,7 @@ import OpenapiEndpointRenderer, {
   OpenapiRenderOpts,
 } from '../endpoint.js'
 import suppressResponseEnumsConfig from './suppressResponseEnumsConfig.js'
+import { cacheValidator, getCachedValidator } from './validator-cache.js'
 
 /**
  * @internal
@@ -187,16 +193,50 @@ export default class OpenapiPayloadValidator {
     const openapiName = this.openapiName
 
     if (openapiEndpointRenderer.shouldValidateResponseBody(openapiName)) {
-      const openapiResponseBody = openapiEndpointRenderer['parseResponses']({
-        openapiName,
-        renderOpts: this.renderOpts,
-      }).openapi?.[statusCode.toString() as '200'] as OpenapiContent
-      const schema = openapiResponseBody?.['content']?.['application/json']?.['schema']
+      const schema = this.getResponseSchema(statusCode)
 
       if (schema) {
-        this.validateOrFail(data, schema as object, 'responseBody')
+        this.validateOrFail(data, schema, 'responseBody')
       }
     }
+  }
+
+  /**
+   * @internal
+   *
+   * Retrieves the OpenAPI response schema for a given status code.
+   * Returns undefined if no schema is defined for this endpoint/status code.
+   *
+   * @param statusCode - the HTTP status code
+   * @returns The response schema, or undefined if not found
+   */
+  public getResponseSchema(statusCode: number): object | undefined {
+    const openapiEndpointRenderer = this.openapiEndpointRenderer
+    const openapiName = this.openapiName
+
+    const openapiResponseBody = openapiEndpointRenderer['parseResponses']({
+      openapiName,
+      renderOpts: this.renderOpts,
+    }).openapi?.[statusCode.toString() as '200'] as OpenapiContent
+
+    return openapiResponseBody?.['content']?.['application/json']?.['schema']
+  }
+
+  /**
+   * @internal
+   *
+   * Retrieves the OpenAPI response schema for a given status code with
+   * all components merged in. This is the schema format needed by
+   * fast-json-stringify and AJV validators.
+   *
+   * @param statusCode - the HTTP status code
+   * @returns The response schema with components, or undefined if not found
+   */
+  public getResponseSchemaWithComponents(statusCode: number): object | undefined {
+    const schema = this.getResponseSchema(statusCode)
+    if (!schema) return undefined
+
+    return this.addComponentsToSchema(schema)
   }
 
   /**
@@ -296,17 +336,57 @@ export default class OpenapiPayloadValidator {
     openapiSchema: object,
     target: OpenapiValidateTarget,
   ) {
-    const validationResults = validateOpenApiSchema(
-      data || {},
-      this.addComponentsToSchema(openapiSchema),
-      this.getAjvOptions(target),
-    )
+    const cacheKey = this.getCacheKey(target)
+    const schemaWithComponents = this.addComponentsToSchema(openapiSchema)
+    const ajvOptions = this.getAjvOptions(target)
 
-    if (!validationResults.isValid) {
+    const validator =
+      getCachedValidator(cacheKey) ||
+      this.compileAndCacheValidator(cacheKey, schemaWithComponents, ajvOptions)
+
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const clonedData = structuredClone(data || {})
+    const isValid = validator(clonedData)
+
+    if (!isValid) {
       const errorClass =
         target === 'responseBody' ? OpenapiResponseValidationFailure : OpenapiRequestValidationFailure
-      throw new errorClass(validationResults.errors || [], target)
+      throw new errorClass(formatAjvErrors(validator.errors || []), target)
     }
+  }
+
+  /**
+   * @internal
+   *
+   * Generates a cache key for the validator based on controller, action, openapiName, and target.
+   *
+   * @param target - the validation target (one of: 'requestBody', 'query', 'headers', 'responseBody')
+   * @returns cache key string
+   */
+  private getCacheKey(target: OpenapiValidateTarget): string {
+    const controllerClass = this.openapiEndpointRenderer['controllerClass']
+    const actionName = this.openapiEndpointRenderer['action']
+    return `${controllerClass.globalName}#${actionName}|${this.openapiName}|${target}`
+  }
+
+  /**
+   * @internal
+   *
+   * Compiles a validator using AJV and caches it for future use.
+   *
+   * @param cacheKey - the cache key for this validator
+   * @param schema - the schema to compile
+   * @param options - AJV options
+   * @returns compiled validator function
+   */
+  private compileAndCacheValidator(
+    cacheKey: string,
+    schema: object,
+    options: ValidateOpenapiSchemaOptions,
+  ): ValidateFunction {
+    const validator = createValidator(schema, options)
+    cacheValidator(cacheKey, validator)
+    return validator
   }
 
   /**

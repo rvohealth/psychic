@@ -14,6 +14,7 @@ export default class OpenapiDecoratorTestController extends ApplicationControlle
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     requestBody: {
       for: Pet,
@@ -25,6 +26,7 @@ export default class OpenapiDecoratorTestController extends ApplicationControlle
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
   })
   public testMultipleOpenapiNames() {
@@ -32,6 +34,7 @@ export default class OpenapiDecoratorTestController extends ApplicationControlle
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     responses: {
       200: {
@@ -52,6 +55,7 @@ export default class OpenapiDecoratorTestController extends ApplicationControlle
   }
 
   @OpenAPI(Availability, {
+    fastJsonStringify: true,
     status: 200,
   })
   public testTimes() {

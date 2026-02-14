@@ -12,6 +12,7 @@ export default class GreeterController extends ApplicationController {
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     responses: {
       200: {

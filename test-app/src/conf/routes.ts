@@ -1,4 +1,5 @@
-import passport from 'passport'
+import Koa from 'koa'
+import passport from 'koa-passport'
 import PsychicRouter from '../../../src/router/index.js'
 import AdminTestController from '../app/controllers/Admin/TestController.js'
 import ApiUsersController from '../app/controllers/Api/UsersController.js'
@@ -69,6 +70,11 @@ export default function routes(r: PsychicRouter) {
     r.resources('pets', { only: [] })
     r.get('ping', UsersController, 'ping')
     r.get('with-posts', UsersController, 'showWithPosts')
+    r.get(
+      'fast-json-stringify-with-serializer-ref',
+      UsersController,
+      'testFastJsonStringifyWithSerializerRef',
+    )
   })
   r.resources('pets', { only: ['create', 'update'] }, r => {
     r.put('update2', PetsController, 'update2')
@@ -249,42 +255,52 @@ export default function routes(r: PsychicRouter) {
   r.get('/admin/test', AdminTestController, 'test')
 
   // ensure that random middleware can still be provided top-level,
-  // same as with an express application
-  r.get('middleware-test', (_, res) => {
-    res.json('get middleware test')
+  // same as with a koa application
+  r.get('middleware-test', (ctx: Koa.Context) => {
+    ctx.type = 'json'
+    ctx.body = JSON.stringify('get middleware test')
   })
-  r.post('middleware-test', (_, res) => {
-    res.json('post middleware test')
+  r.post('middleware-test', (ctx: Koa.Context) => {
+    ctx.type = 'json'
+    ctx.body = JSON.stringify('post middleware test')
   })
-  r.patch('middleware-test', (_, res) => {
-    res.json('patch middleware test')
+  r.patch('middleware-test', (ctx: Koa.Context) => {
+    ctx.type = 'json'
+    ctx.body = JSON.stringify('patch middleware test')
   })
-  r.put('middleware-test', (_, res) => {
-    res.json('put middleware test')
+  r.put('middleware-test', (ctx: Koa.Context) => {
+    ctx.type = 'json'
+    ctx.body = JSON.stringify('put middleware test')
   })
-  r.delete('middleware-test', (_, res) => {
-    res.json('delete middleware test')
+  r.delete('middleware-test', (ctx: Koa.Context) => {
+    ctx.type = 'json'
+    ctx.body = JSON.stringify('delete middleware test')
   })
-  r.options('middleware-test', (_, res) => {
-    res.json('options middleware test')
+  r.options('middleware-test', (ctx: Koa.Context) => {
+    ctx.type = 'json'
+    ctx.body = JSON.stringify('options middleware test')
   })
 
   r.namespace('nested-middleware', r => {
     // ensure that nested middleware can apply nested route
     // paths correctly
-    r.get('middleware-test', (_, res) => {
-      res.json('nested middleware test')
+    r.get('middleware-test', (ctx: Koa.Context) => {
+      ctx.type = 'json'
+      ctx.body = JSON.stringify('nested middleware test')
     })
   })
 
+  // NOTE: passport integration requires koa-passport for Koa compatibility
   r.post('passport-test', [
     passport.authenticate('local'),
-    (req, res) => {
-      res.json({ id: (req.user as User)?.id })
+    (ctx: Koa.Context) => {
+      ctx.type = 'json'
+      ctx.body = JSON.stringify({ id: (ctx.state.user as User)?.id })
     },
   ])
-  r.get('passport-test-persistence', (req, res) => {
-    res.json({ id: (req.user as User)?.id })
+  r.get('passport-test-persistence', (ctx: Koa.Context) => {
+    ctx.type = 'json'
+    ctx.body = JSON.stringify({ id: (ctx.state.user as User)?.id })
   })
   r.get('controller-passport-test-persistence', PassportAuthedController, 'testPassportAuth')
 

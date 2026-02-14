@@ -1,4 +1,174 @@
-=======
+## 3.0.0
+
+Replaces Express with [Koa](https://koajs.com/) as the underlying HTTP framework. This is a breaking change that affects middleware, error handling, and several dependencies. For the most part, there are no breaking changes, save small ways in which the error handling mechanisms are defined, in addition to custom middleware that you may have been utilizing. Follow this guide to help bring your app up to date.
+
+- Compiled JSON schema can be automatilly generated from the OpenAPI shape for 2x-5x faster serialization (add `fastJsonStringify: true` to the @OpenAPI decorator options for a controller action)
+- Removes the `sanitizeResponseJson` since it is truly unnecessary (see CHANGELOG note for 1.7.0 for why it was introduced)
+
+### Dependencies
+
+#### Remove
+
+Remove from `dependencies`:
+
+```
+express
+cors
+body-parser (if used separately)
+```
+
+Remove from `devDependencies`:
+
+```
+@types/express
+@types/cors
+```
+
+#### Add
+
+Add to `dependencies`:
+
+```
+koa
+@koa/cors
+koa-bodyparser
+```
+
+Add to `devDependencies`:
+
+```
+@types/koa
+@types/koa__cors
+@types/koa__router
+@types/koa-bodyparser
+```
+
+> **Note:** `@koa/router` is a dependency of `@rvoh/psychic` itself -- you do not need to install it directly unless you use it outside of Psychic's router.
+
+If you use Passport.js for authentication, also swap `passport` usage for `koa-passport` and add `koa-session`.
+
+Add to `dependencies`:
+
+```
+koa-passport
+koa-session
+```
+
+Add to `devDependencies`:
+
+```
+@types/koa-passport
+```
+
+### Middleware
+
+`psy.use()` now expects Koa middleware `(ctx, next)` instead of Express middleware `(req, res, next)`.
+
+Before (Express):
+
+```typescript
+psy.use(async (req, res, next) => {
+  res.setHeader('X-Custom', 'value')
+  next()
+})
+```
+
+After (Koa):
+
+```typescript
+psy.use(async (ctx, next) => {
+  ctx.set('X-Custom', 'value')
+  await next()
+})
+```
+
+> **Important:** Always `await next()` in Koa middleware. Forgetting to `await` can cause subtle ordering bugs.
+
+### Route-level middleware
+
+For standard routing, there are no breaking changes. However, for custom route handlers registered directly in your routes file that tapped into express middleware previously must also use Koa conventions. `ctx.body` replaces `res.json()` / `res.send()`.
+
+Before (Express):
+
+```typescript
+r.get('health', (req, res) => {
+  res.json({ status: 'ok' })
+})
+```
+
+After (Koa):
+
+```typescript
+r.get('health', async ctx => {
+  ctx.body = { status: 'ok' }
+})
+```
+
+If the consumer expects a JSON content type (e.g. supertest's `res.body` parsing), set `ctx.type` explicitly:
+
+```typescript
+r.get('health', async ctx => {
+  ctx.type = 'json'
+  ctx.body = JSON.stringify({ status: 'ok' })
+})
+```
+
+### `server:error` handler
+
+The `server:error` callback now receives a Koa `ctx` instead of Express `req`/`res`. Use `ctx.headerSent`, `ctx.status`, and `ctx.body`:
+
+```typescript
+psy.on('server:error', (err, ctx) => {
+  console.error(err)
+  if (!ctx.headerSent) {
+    ctx.status = 500
+    ctx.body = ''
+  }
+})
+```
+
+### `PsychicServer`
+
+- `server.expressApp` is now `server.koaApp` (a `Koa` instance).
+
+### Testing with `@rvoh/psychic-spec-helpers`
+
+Update `@rvoh/psychic-spec-helpers` to `>=3.0.0`, which uses Koa internally. The `specRequest` API is unchanged -- `init`, `get`, `post`, `put`, `patch`, `delete`, and `session` all work the same way.
+
+### Passport.js
+
+Replace `passport` with `koa-passport` and set up `koa-session` in a `server:init:before-middleware` hook (the server is not available during `PsychicApp.init`):
+
+```typescript
+import koaSession from 'koa-session'
+import passport from 'koa-passport'
+
+psy.on('server:init:before-middleware', server => {
+  server.koaApp.keys = ['your-session-secret']
+  server.koaApp.use(koaSession({}, server.koaApp))
+  server.koaApp.use(passport.initialize())
+  server.koaApp.use(passport.session())
+})
+```
+
+Additionally, when using Passport, in route handlers and controllers, the authenticated user is on `ctx.state.user` instead of `req.user`:
+
+```typescript
+// Before (Express)
+const user = this.req.user
+
+// After (Koa)
+const user = this.ctx.state.user
+```
+
+### Controller changes
+
+- `this.req` and `this.res` no longer exist. Use `this.ctx` (a `Koa.Context`) instead.
+- HTTP headers are now lowercased: Koa automatically lowercases all HTTP header names. When accessing request headers via `ctx.get()` or `ctx.request.header`, use lowercase header names (e.g., `ctx.get('content-type')` instead of `ctx.get('Content-Type')`). Response headers set via `ctx.set()` will also be lowercased.
+
+### CORS
+
+CORS options are now passed to `@koa/cors` instead of the `cors` Express package. The option shapes are similar but check the [`@koa/cors` docs](https://github.com/koajs/cors) for any differences. Notably, `@koa/cors` accepts functions for `origin` that receive the Koa `ctx` as the argument rather than Express `req`.
 
 ## 2.3.9
 

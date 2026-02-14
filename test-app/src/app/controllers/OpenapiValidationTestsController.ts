@@ -12,10 +12,11 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   @BeforeAction({ only: ['beforeActionParamsAccessed'] })
   public accessParams() {
     if (typeof this.params.stringParam === 'number')
-      throw new Error('OpenAPI validation didn’t kick in during this.params')
+      throw new Error("OpenAPI validation didn't kick in during this.params")
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     requestBody: {
       type: 'object',
@@ -29,6 +30,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     requestBody: {
       type: 'object',
@@ -42,6 +44,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     requestBody: {
       type: 'object',
@@ -55,6 +58,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 204,
     requestBody: {
       type: 'object',
@@ -70,6 +74,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     requestBody: {
       type: 'object',
@@ -97,6 +102,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 204,
     requestBody: {
       $ref: '#/components/schemas/CustomSchemaObject',
@@ -107,6 +113,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     query: {
       stringParam: {
@@ -148,6 +155,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     query: {
       stringArray: {
@@ -166,6 +174,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     query: {
       requiredStringParam: {
@@ -204,6 +213,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     responses: {
       200: {
@@ -261,6 +271,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
 
   @OpenAPI({
     status: 200,
+    validate: { all: false },
     responses: {
       200: {
         $schema: 'CustomSchemaObject',
@@ -272,6 +283,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     headers: {
       myDate: {
@@ -297,13 +309,14 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   })
   public headersOpenapiTest() {
     this.ok({
-      myDate: this.req.headers.mydate,
-      myOptionalDate: this.req.headers.myoptionaldate,
-      myOptionalInt: this.req.headers.myoptionalint,
+      myDate: this.headers.mydate,
+      myOptionalDate: this.headers.myoptionaldate,
+      myOptionalInt: this.headers.myoptionalint,
     })
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     responses: {
       200: {
@@ -319,6 +332,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI(ModelWithoutSerializer, {
+    fastJsonStringify: true,
     status: 204,
   })
   public dontThrowMissingSerializersDefinition204() {
@@ -326,6 +340,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI(ModelWithoutSerializer, {
+    fastJsonStringify: true,
     status: 201,
     responses: {
       201: {

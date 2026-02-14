@@ -1,5 +1,5 @@
 import { DreamCLI } from '@rvoh/dream/system'
-import { Express } from 'express'
+import Koa from 'koa'
 import * as fs from 'node:fs'
 import * as http from 'node:http'
 import { Server } from 'node:http'
@@ -10,7 +10,7 @@ import EnvInternal from '../../helpers/EnvInternal.js'
 import PsychicApp, { PsychicSslCredentials } from '../../psychic-app/index.js'
 
 export interface StartPsychicServerOptions {
-  app: Express
+  app: Koa
   port: number
   sslCredentials: PsychicSslCredentials | undefined
 }
@@ -29,8 +29,9 @@ export default async function startPsychicServer({
   })
 }
 
-export function createPsychicHttpInstance(app: Express, sslCredentials: PsychicSslCredentials | undefined) {
+export function createPsychicHttpInstance(app: Koa, sslCredentials: PsychicSslCredentials | undefined) {
   const psychicApp = PsychicApp.getOrFail()
+  const callback = app.callback()
 
   if (sslCredentials?.key && sslCredentials?.cert) {
     return https.createServer(
@@ -41,13 +42,12 @@ export function createPsychicHttpInstance(app: Express, sslCredentials: PsychicS
         rejectUnauthorized: sslCredentials?.rejectUnauthorized,
         ...psychicApp.httpServerOptions,
       },
-      app as http.RequestListener<typeof http.IncomingMessage, typeof http.ServerResponse>,
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
+      callback,
     )
   } else {
-    return http.createServer(
-      psychicApp.httpServerOptions,
-      app as http.RequestListener<typeof http.IncomingMessage, typeof http.ServerResponse>,
-    )
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
+    return http.createServer(psychicApp.httpServerOptions, callback)
   }
 }
 
