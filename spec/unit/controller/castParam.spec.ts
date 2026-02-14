@@ -1,8 +1,8 @@
-import { getMockReq, getMockRes } from '@jest-mock/express'
-import { Request, Response } from 'express'
+import Koa from 'koa'
 import PsychicController from '../../../src/controller/index.js'
 import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
 import Params from '../../../src/server/params.js'
+import { createMockKoaContext } from './helpers/mockRequest.js'
 
 const TestEnumValues = ['hello', 'world'] as const
 type TestEnum = (typeof TestEnumValues)[number]
@@ -11,7 +11,7 @@ describe('PsychicController#castParam', () => {
   let controller: PsychicController
 
   beforeEach(() => {
-    const req = getMockReq({
+    const ctx = createMockKoaContext({
       body: {
         id: 1,
         name: 'howyadoin',
@@ -35,9 +35,8 @@ describe('PsychicController#castParam', () => {
           },
         },
       },
-    }) as unknown as Request
-    const res = getMockRes().res as unknown as Response
-    controller = new PsychicController(req, res, { action: 'hello' })
+    })
+    controller = new PsychicController(ctx, { action: 'hello' })
   })
 
   it('returns the result of Params.cast', () => {
@@ -84,7 +83,7 @@ describe('PsychicController#castParam', () => {
       expect(result).toEqual('hello')
     })
 
-    it('disallows values that aren’t allowed by the enum', () => {
+    it("disallows values that aren't allowed by the enum", () => {
       expect(() => controller.castParam('goodbye', 'string', { enum: TestEnumValues })).toThrow(
         ParamValidationError,
       )
@@ -99,7 +98,7 @@ describe('PsychicController#castParam', () => {
       expect(results).toEqual(['hello', 'world'])
     })
 
-    it('disallows values that aren’t allowed by the enum', () => {
+    it("disallows values that aren't allowed by the enum", () => {
       expect(() => controller.castParam('helloGoodbyeArray', 'string[]', { enum: TestEnumValues })).toThrow(
         ParamValidationError,
       )
@@ -112,7 +111,7 @@ describe('PsychicController#castParam', () => {
     })
   })
 
-  context('when the specified sub-object doesn’t exist', () => {
+  context("when the specified sub-object doesn't exist", () => {
     it('throws ParamValidationError', () => {
       expect(() => controller.castParam('invalidSubBody.hello', 'string')).toThrow(ParamValidationError)
     })
@@ -135,7 +134,7 @@ describe('PsychicController#castParam', () => {
       expect(controller.castParam('subBody.hello', 'string', { allowNull: true })).toEqual('world')
     })
 
-    context('when the specified sub-object doesn’t exist', () => {
+    context("when the specified sub-object doesn't exist", () => {
       it('returns null', () => {
         expect(controller.castParam('invalidSubBody.hello', 'string', { allowNull: true })).toBeNull()
       })

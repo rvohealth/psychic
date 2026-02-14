@@ -2,9 +2,7 @@ import { CustomCookieMaxAgeOptions } from '../psychic-app/index.js'
 
 const DEFAULT_COOKIE_MAX_AGE_DAYS = 31
 
-export default function cookieMaxAgeFromCookieOpts(
-  cookieOpts: CustomCookieMaxAgeOptions | undefined,
-): number {
+export default function cookieMaxAgeFromCookieOpts(cookieOpts?: CustomCookieMaxAgeOptions): number {
   const defaultMaxAge = DEFAULT_COOKIE_MAX_AGE_DAYS * 60 * 60 * 24 * 1000
 
   if (!cookieOpts) return defaultMaxAge

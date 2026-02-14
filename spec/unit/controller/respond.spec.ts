@@ -1,16 +1,16 @@
-import { getMockReq, getMockRes } from '@jest-mock/express'
-import { Request, Response } from 'express'
+import Koa from 'koa'
 import { MockInstance } from 'vitest'
 import { OpenAPI } from '../../../src/controller/decorators.js'
 import PsychicController from '../../../src/controller/index.js'
 import * as toJsonModule from '../../../src/helpers/toJson.js'
+import PsychicApp from '../../../src/psychic-app/index.js'
 import User from '../../../test-app/src/app/models/User.js'
 import processDynamicallyDefinedControllers from '../../helpers/processDynamicallyDefinedControllers.js'
+import { createMockKoaContext } from './helpers/mockRequest.js'
 
 describe('PsychicController', () => {
   describe('#respond', () => {
-    let req: Request
-    let res: Response
+    let ctx: Koa.Context
     let toJsonSpy: MockInstance
 
     class MyController extends PsychicController {
@@ -28,29 +28,24 @@ describe('PsychicController', () => {
     processDynamicallyDefinedControllers(MyController)
 
     beforeEach(() => {
-      req = getMockReq({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } }) as unknown as Request
-      res = getMockRes().res as unknown as Response
+      ctx = createMockKoaContext({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
       toJsonSpy = vi.spyOn(toJsonModule, 'default')
-      vi.spyOn(res, 'status')
+      vi.spyOn(PsychicApp.prototype, 'openapiValidationIsActive').mockReturnValue(false)
     })
 
     it('sets status and sends json', () => {
-      const controller = new MyController(req, res, { action: 'create' })
+      const controller = new MyController(ctx, { action: 'create' })
       controller.create()
       expect(toJsonSpy).toHaveBeenCalledWith('created', false)
-
-      // eslint-disable-next-line @typescript-eslint/unbound-method
-      expect(res.status).toHaveBeenCalledWith(201)
+      expect(ctx.status).toEqual(201)
     })
 
     context('with no openapi decorator', () => {
       it('calls 200 status', () => {
-        const controller = new MyController(req, res, { action: 'update' })
+        const controller = new MyController(ctx, { action: 'update' })
         controller.update()
         expect(toJsonSpy).toHaveBeenCalledWith('updated', false)
-
-        // eslint-disable-next-line @typescript-eslint/unbound-method
-        expect(res.status).toHaveBeenCalledWith(200)
+        expect(ctx.status).toEqual(200)
       })
     })
   })

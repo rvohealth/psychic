@@ -10,7 +10,7 @@ import {
   StrictInterface,
   ViewModel,
 } from '@rvoh/dream/types'
-import { Request, Response } from 'express'
+import Koa from 'koa'
 import { ControllerHook } from '../controller/hooks.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
 import HttpStatusBadGateway from '../error/http/BadGateway.js'
@@ -223,16 +223,15 @@ export default class PsychicController {
     return true
   }
 
-  public req: Request
-  public res: Response
+  public ctx: Koa.Context
   public session: Session
   public action: string
   public renderOpts: SerializerRendererOpts
   private startTime: number
+  private _responseSent: boolean = false
 
   constructor(
-    req: Request,
-    res: Response,
+    ctx: Koa.Context,
     {
       action,
     }: {
@@ -240,9 +239,12 @@ export default class PsychicController {
     },
   ) {
     this.startTime = Date.now()
-    this.req = req
-    this.res = res
-    this.session = new Session(req, res)
+    this.ctx = ctx
+    // Koa defaults ctx.status to 404, but Express defaulted res.statusCode to 200.
+    // Set 200 here so controller response methods (ok, json, etc.) and OpenAPI
+    // response-body validation see the correct default status.
+    this.ctx.status = 200
+    this.session = new Session(ctx)
     this.action = action
 
     // TODO: read casing from Dream app config
@@ -269,7 +271,7 @@ export default class PsychicController {
    * ```
    */
   public get headers() {
-    return this.req.headers
+    return this.ctx.request.headers
   }
 
   /**
@@ -298,10 +300,15 @@ export default class PsychicController {
 
     const query = this.getCachedQuery()
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+    const body = (this.ctx.request as any).body ?? {}
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+    const routeParams = (this.ctx as any).params ?? {}
+
     const params: PsychicParamsDictionary = {
       ...query,
-      ...this.req.body,
-      ...this.req.params,
+      ...body,
+      ...routeParams,
     } as PsychicParamsDictionary
 
     return params
@@ -316,7 +323,7 @@ export default class PsychicController {
     if (this._cachedQuery) return this._cachedQuery
 
     const openapiEndpointRenderer = this.currentOpenapiRenderer
-    const query = this.req.query
+    const query = this.ctx.request.query
 
     if (openapiEndpointRenderer) {
       // validateOpenapiQuery will modify the query passed into it to conform
@@ -733,31 +740,48 @@ export default class PsychicController {
     data: any,
   ) {
     this.validateOpenapiResponseBody(data)
-    this.expressSendJson(data)
+    this.koaSendJson(data)
   }
 
-  private expressSendJson(
+  private koaSendJson(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
-    statusCode: number = this.res.statusCode,
+    statusCode: number = this.ctx.status || 200,
   ) {
-    this.res.type('json').status(statusCode).send(toJson(data, PsychicApp.getOrFail().sanitizeResponseJson))
+    // In Express, calling res.json() after a response was already sent was a no-op.
+    // In Koa, ctx.body/ctx.status are plain assignments, so the last write wins.
+    // Guard here to preserve Express-like semantics for user code that falls through
+    // after sending a response (e.g. this.noContent() without a return).
+    if (this._responseSent) return
+
+    this.ctx.status = statusCode
+    this.ctx.type = 'json'
+    this.ctx.body = toJson(data, PsychicApp.getOrFail().sanitizeResponseJson)
+    this._responseSent = true
     this.logIfDevelopment()
   }
 
-  private expressSendStatus(statusCode: number) {
-    this.res.sendStatus(statusCode)
+  private koaSendStatus(statusCode: number) {
+    if (this._responseSent) return
+
+    this.ctx.status = statusCode
+    this.ctx.body = ''
+    this._responseSent = true
     this.logIfDevelopment()
   }
 
-  private expressRedirect(statusCode: number, newLocation: string) {
-    this.res.redirect(statusCode, newLocation)
+  private koaRedirect(statusCode: number, newLocation: string) {
+    if (this._responseSent) return
+
+    this.ctx.status = statusCode
+    this.ctx.redirect(newLocation)
+    this._responseSent = true
     this.logIfDevelopment()
   }
 
   private logIfDevelopment() {
     if (!EnvInternal.isDevelopment) return
-    logIfDevelopment({ req: this.req, res: this.res, startTime: this.startTime })
+    logIfDevelopment({ ctx: this.ctx, startTime: this.startTime })
   }
 
   protected defaultSerializerPassthrough: SerializerResult = {}
@@ -818,7 +842,7 @@ export default class PsychicController {
    */
   public respond<T>(data: T = {} as T, opts: RenderOptions = {}) {
     const openapiData = (this.constructor as typeof PsychicController).openapi[this.action]
-    this.res.status(openapiData?.['status'] || 200)
+    this.ctx.status = openapiData?.['status'] || 200
 
     this.json(data, opts)
   }
@@ -858,7 +882,7 @@ export default class PsychicController {
         : HttpStatusCodeMap[status as HttpStatusSymbol]
     ) as number
 
-    this.res.status(realStatus)
+    this.ctx.status = realStatus
     this.json(body)
   }
 
@@ -878,7 +902,7 @@ export default class PsychicController {
    * ```
    */
   public redirect(path: string) {
-    this.res.redirect(path)
+    this.ctx.redirect(path)
   }
 
   // begin: http status codes
@@ -923,7 +947,7 @@ export default class PsychicController {
    */
   // 201
   public created<T>(data: T = {} as T, opts: RenderOptions = {}) {
-    this.res.status(201)
+    this.ctx.status = 201
     this.json(data, opts)
   }
 
@@ -946,7 +970,7 @@ export default class PsychicController {
    */
   // 202
   public accepted<T>(data: T = {} as T, opts: RenderOptions = {}) {
-    this.res.status(202)
+    this.ctx.status = 202
     this.json(data, opts)
   }
 
@@ -954,9 +978,9 @@ export default class PsychicController {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public nonAuthoritativeInformation(message: any = undefined) {
     if (message) {
-      this.expressSendJson(message, 203)
+      this.koaSendJson(message, 203)
     } else {
-      this.expressSendStatus(203)
+      this.koaSendStatus(203)
     }
   }
 
@@ -977,46 +1001,46 @@ export default class PsychicController {
    */
   // 204
   public noContent() {
-    this.expressSendStatus(204)
+    this.koaSendStatus(204)
   }
 
   // 205
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public resetContent(message: any = undefined) {
-    this.res.status(205)
+    this.ctx.status = 205
     this.json(message)
   }
 
   // 208
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public alreadyReported(message: any = undefined) {
-    this.res.status(208)
+    this.ctx.status = 208
     this.json(message)
   }
 
   // 301
   public movedPermanently(newLocation: string) {
-    this.expressRedirect(301, newLocation)
+    this.koaRedirect(301, newLocation)
   }
 
   // 302
   public found(newLocation: string) {
-    this.expressRedirect(302, newLocation)
+    this.koaRedirect(302, newLocation)
   }
 
   // 303
   public seeOther(newLocation: string) {
-    this.expressRedirect(303, newLocation)
+    this.koaRedirect(303, newLocation)
   }
 
   // 307
   public temporaryRedirect(newLocation: string) {
-    this.expressRedirect(307, newLocation)
+    this.koaRedirect(307, newLocation)
   }
 
   // 308
   public permanentRedirect(newLocation: string) {
-    this.expressRedirect(308, newLocation)
+    this.koaRedirect(308, newLocation)
   }
 
   /**
@@ -1285,7 +1309,7 @@ export default class PsychicController {
   public async runAction() {
     await this.runBeforeActions()
 
-    if (this.res.headersSent) return
+    if (this._responseSent || this.ctx.headerSent) return
 
     this.validateParams()
 
@@ -1314,10 +1338,10 @@ export default class PsychicController {
     const openapiEndpointRenderer = this.currentOpenapiRenderer
     if (!openapiEndpointRenderer) return
 
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+    const body = (this.ctx.request as any).body
     this.computedOpenapiNames.forEach(openapiName => {
-      new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiRequestBody(
-        this.req.body,
-      )
+      new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiRequestBody(body)
     })
   }
 
@@ -1335,7 +1359,7 @@ export default class PsychicController {
 
     this.computedOpenapiNames.forEach(openapiName => {
       new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiHeaders(
-        this.req.headers,
+        this.ctx.request.headers,
       )
     })
   }
@@ -1353,7 +1377,9 @@ export default class PsychicController {
     if (!openapiEndpointRenderer) return
 
     this.computedOpenapiNames.forEach(openapiName => {
-      new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiQuery(this.req.query)
+      new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiQuery(
+        this.ctx.request.query,
+      )
     })
   }
 
@@ -1376,7 +1402,7 @@ export default class PsychicController {
     this.computedOpenapiNames.forEach(openapiName => {
       new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiResponseBody(
         data,
-        this.res.statusCode,
+        this.ctx.status,
       )
     })
   }
@@ -1401,7 +1427,7 @@ export default class PsychicController {
     )
 
     for (const hook of beforeActions) {
-      if (this.res.headersSent) return
+      if (this._responseSent || this.ctx.headerSent) return
 
       if (hook.isStatic) {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-call, @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access

@@ -1,4 +1,4 @@
-import { Request, Response } from 'express'
+import Koa from 'koa'
 import PsychicController from '../../../controller/index.js'
 import PsychicApp from '../../index.js'
 import globalControllerKeyFromPath from '../globalControllerKeyFromPath.js'
@@ -46,7 +46,7 @@ export default async function importControllers(
        * at decoration time such that the class of a property being decorated is only avilable during instance instantiation. In order
        * to only apply static values once, on boot, `globallyInitializingDecorators` is set to true on Dream, and all Dream models are instantiated.
        */
-      new controllerClass({} as Request, {} as Response, { action: 'a' })
+      new controllerClass({} as Koa.Context, { action: 'a' })
     }
   }
 

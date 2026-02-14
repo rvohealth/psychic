@@ -7,7 +7,7 @@ describe('PsychicRouter', () => {
       const server = new PsychicServer()
       await server.boot()
 
-      const res = await supertest(server.expressApp).get('/api-ping').expect(200)
+      const res = await supertest(server.koaApp.callback()).get('/api-ping').expect(200)
 
       expect(res.body).toEqual('hellonestedworld')
     })
@@ -16,7 +16,7 @@ describe('PsychicRouter', () => {
       const server = new PsychicServer()
       await server.boot()
 
-      const res = await supertest(server.expressApp).get('/api/v1/ping').expect(200)
+      const res = await supertest(server.koaApp.callback()).get('/api/v1/ping').expect(200)
 
       expect(res.body).toEqual('hellodoublenestedworld')
     })

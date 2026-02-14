@@ -1,18 +1,139 @@
-import { getMockReq, getMockRes } from '@jest-mock/express'
-import { Request, Response } from 'express'
+import Koa from 'koa'
 import { HttpMethod } from '../../../../src/router/types.js'
 
 export default ({
   // method = 'get',
   params = {},
   body = {},
+  query = {},
+  headers = {},
+  cookies = {},
 }: {
   method?: HttpMethod
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   params?: { [key: string]: any }
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   body?: { [key: string]: any }
-} = {}): { req: Request; res: Response } => ({
-  req: getMockReq({ params, body }) as unknown as Request,
-  res: getMockRes().res as unknown as Response,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query?: { [key: string]: any }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  headers?: { [key: string]: any }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  cookies?: { [key: string]: any }
+} = {}): { ctx: Koa.Context } => ({
+  ctx: createMockKoaContext({ params, body, query, headers, cookies }),
 })
+
+export function createMockKoaContext({
+  params = {},
+  body = {},
+  query = {},
+  headers = {},
+  cookies = {},
+  method = 'GET',
+  url = '/',
+}: {
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  params?: { [key: string]: any }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  body?: { [key: string]: any }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  query?: { [key: string]: any }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  headers?: { [key: string]: any }
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  cookies?: { [key: string]: any }
+  method?: string
+  url?: string
+} = {}): Koa.Context {
+  let _status = 200
+  let _body: unknown = undefined
+  let _type = ''
+  const _headers: Record<string, string> = {}
+
+  const ctx = {
+    method,
+    url,
+    status: _status,
+    body: _body,
+    type: _type,
+    headerSent: false,
+    params,
+    request: {
+      body,
+      query,
+      headers,
+      method,
+      url,
+    },
+    response: {
+      get status() {
+        return _status
+      },
+      set status(val: number) {
+        _status = val
+      },
+      get body() {
+        return _body
+      },
+      set body(val: unknown) {
+        _body = val
+      },
+    },
+    cookies: {
+      get(name: string) {
+        return cookies[name] ?? undefined
+      },
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      set(name: string, value: string, _opts?: any) {
+        cookies[name] = value
+      },
+    },
+    set(key: string, value: string) {
+      _headers[key] = value
+    },
+    get(key: string) {
+      return headers[key] ?? _headers[key] ?? ''
+    },
+    redirect(_url: string) {
+      // no-op in mock
+    },
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  } as any
+
+  // Make status and body reactive on the top-level ctx object
+  Object.defineProperty(ctx, 'status', {
+    get() {
+      return _status
+    },
+    set(val: number) {
+      _status = val
+    },
+    enumerable: true,
+    configurable: true,
+  })
+
+  Object.defineProperty(ctx, 'body', {
+    get() {
+      return _body
+    },
+    set(val: unknown) {
+      _body = val
+    },
+    enumerable: true,
+    configurable: true,
+  })
+
+  Object.defineProperty(ctx, 'type', {
+    get() {
+      return _type
+    },
+    set(val: string) {
+      _type = val
+    },
+    enumerable: true,
+    configurable: true,
+  })
+
+  return ctx as Koa.Context
+}

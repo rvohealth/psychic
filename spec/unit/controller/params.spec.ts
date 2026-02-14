@@ -1,16 +1,15 @@
-import { getMockReq, getMockRes } from '@jest-mock/express'
-import { Request, Response } from 'express'
+import Koa from 'koa'
 import PsychicController from '../../../src/controller/index.js'
+import { createMockKoaContext } from './helpers/mockRequest.js'
 
 describe('PsychicController', () => {
   describe('get #params', () => {
     it('returns both body and query params', () => {
-      const req = getMockReq({
+      const ctx = createMockKoaContext({
         body: { search: 'abc' },
         query: { cool: 'boyjohnson' },
-      }) as unknown as Request
-      const res = getMockRes().res as unknown as Response
-      const controller = new PsychicController(req, res, { action: 'hello' })
+      })
+      const controller = new PsychicController(ctx, { action: 'hello' })
 
       expect(controller.params.search).toEqual('abc')
       expect(controller.params.cool).toEqual('boyjohnson')
