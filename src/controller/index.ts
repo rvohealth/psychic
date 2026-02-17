@@ -92,6 +92,10 @@ export const PsychicParamsPrimitiveLiterals = [
   'number[]',
   'string',
   'string[]',
+  'time',
+  'time[]',
+  'timetz',
+  'timetz[]',
   'uuid',
   'uuid[]',
 ] as const

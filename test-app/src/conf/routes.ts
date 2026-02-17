@@ -55,6 +55,7 @@ export default function routes(r: PsychicRouter) {
   r.get('openapi/multiple-serializer-statements', OpenapiDecoratorTestController, 'testMultipleSerializers')
   r.get('openapi/openapi-overrides', OpenapiOverridesTestController, 'testOpenapiConfigOverrides')
   r.post('openapi/intentionally-mismatched-resourceful-method', OpenapiDecoratorTestController, 'update')
+  r.post('openapi/test-times', OpenapiDecoratorTestController, 'testTimes')
 
   r.resources('users', r => {
     r.collection(r => {
