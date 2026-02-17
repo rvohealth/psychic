@@ -36,6 +36,10 @@ ${INDENT}    - date
 ${INDENT}    - date[]
 ${INDENT}    - datetime
 ${INDENT}    - datetime[]
+${INDENT}    - time
+${INDENT}    - time[]
+${INDENT}    - timetz
+${INDENT}    - timetz[]
 ${INDENT}    - integer
 ${INDENT}    - integer[]
 ${INDENT}

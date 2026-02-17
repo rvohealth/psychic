@@ -3,9 +3,9 @@ import {
   dreamColumnOpenapiShape,
   UseCustomOpenapiForJson,
 } from '../../../../src/openapi-renderer/helpers/dreamColumnOpenapiShape.js'
+import Availability from '../../../../test-app/src/app/models/Availability.js'
 import User from '../../../../test-app/src/app/models/User.js'
 import { PetTreatsEnumValues, SpeciesTypesEnumValues } from '../../../../test-app/src/types/db.js'
-import Availability from '../../../../test-app/src/app/models/Availability.js'
 
 describe('dreamAttributeOpenapiShape', () => {
   context('bigint primaryKey', () => {
@@ -341,6 +341,42 @@ describe('dreamAttributeOpenapiShape', () => {
     context('time[]', () => {
       it('generates the expected Openapi shape', () => {
         const openApiShape = dreamColumnOpenapiShape('Test', Availability, 'times')
+        const expectedOpenapiShape: OpenapiSchemaBody = {
+          type: ['array', 'null'],
+          items: {
+            type: 'string',
+          },
+        }
+
+        expect(openApiShape).toEqual(expectedOpenapiShape)
+      })
+    })
+  })
+
+  context('timetz', () => {
+    it('generates the expected Openapi shape', () => {
+      const openApiShape = dreamColumnOpenapiShape('Test', Availability, 'endtz')
+      const expectedOpenapiShape: OpenapiSchemaBody = {
+        type: ['string', 'null'],
+      }
+
+      expect(openApiShape).toEqual(expectedOpenapiShape)
+    })
+
+    context('notNull', () => {
+      it('generates the expected Openapi shape', () => {
+        const openApiShape = dreamColumnOpenapiShape('Test', Availability, 'starttz')
+        const expectedOpenapiShape: OpenapiSchemaBody = {
+          type: 'string',
+        }
+
+        expect(openApiShape).toEqual(expectedOpenapiShape)
+      })
+    })
+
+    context('timetz[]', () => {
+      it('generates the expected Openapi shape', () => {
+        const openApiShape = dreamColumnOpenapiShape('Test', Availability, 'timetzs')
         const expectedOpenapiShape: OpenapiSchemaBody = {
           type: ['array', 'null'],
           items: {

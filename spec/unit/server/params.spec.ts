@@ -1,8 +1,9 @@
-import { CalendarDate, DateTime } from '@rvoh/dream'
+import { CalendarDate, ClockTime, ClockTimeTz, DateTime } from '@rvoh/dream'
 import { PsychicParamsDictionary } from '../../../src/controller/index.js'
 import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../../../src/error/controller/ParamValidationErrors.js'
 import Params from '../../../src/server/params.js'
+import Availability from '../../../test-app/src/app/models/Availability.js'
 import Pet from '../../../test-app/src/app/models/Pet.js'
 import User from '../../../test-app/src/app/models/User.js'
 
@@ -592,7 +593,7 @@ describe('Params', () => {
 
       it('permits a valid string representation of a datetime', () => {
         expect(Params.for({ lastSeenAt: now.toISO() }, Pet)).toEqual({
-          lastSeenAt: now,
+          lastSeenAt: expect.toEqualDateTime(now),
         })
       })
 
@@ -670,6 +671,78 @@ describe('Params', () => {
         it('returns null for the specified field', () => {
           expect(Params.for({ birthdate: null }, User)).toEqual({
             birthdate: null,
+          })
+        })
+      })
+    })
+
+    context('time', () => {
+      const now = ClockTime.now()
+
+      it('permits a time', () => {
+        expect(Params.for({ start: now }, Availability)).toEqual({ start: now })
+      })
+
+      it('permits a valid string representation of a time', () => {
+        expect(Params.for({ start: now.toISO() }, Availability)).toEqual({
+          start: expect.toEqualClockTime(now),
+        })
+      })
+
+      it('rejects a string non-time', () => {
+        expect(() => Params.for({ start: '1.2' }, Availability)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ start: '' }, Availability)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ start: 'abc' }, Availability)).toThrow(ParamValidationErrors)
+      })
+
+      it('rejects strings that represent invalid times', () => {
+        expect(() => Params.for({ start: '24:11:56.846Z' }, Availability)).toThrow(ParamValidationErrors)
+      })
+
+      it('rejects null', () => {
+        expect(() => Params.for({ start: null }, Availability)).toThrow(ParamValidationErrors)
+      })
+
+      context('the field allows null', () => {
+        it('returns null for the specified field', () => {
+          expect(Params.for({ end: null }, Availability)).toEqual({
+            end: null,
+          })
+        })
+      })
+    })
+
+    context('timetz', () => {
+      const now = ClockTimeTz.now()
+
+      it('permits a time', () => {
+        expect(Params.for({ starttz: now }, Availability)).toEqual({ starttz: now })
+      })
+
+      it('permits a valid string representation of a time', () => {
+        expect(Params.for({ starttz: now.toISO() }, Availability)).toEqual({
+          starttz: expect.toEqualClockTimeTz(now),
+        })
+      })
+
+      it('rejects a string non-time', () => {
+        expect(() => Params.for({ starttz: '1.2' }, Availability)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ starttz: '' }, Availability)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ starttz: 'abc' }, Availability)).toThrow(ParamValidationErrors)
+      })
+
+      it('rejects strings that represent invalid times', () => {
+        expect(() => Params.for({ starttz: '24:11:56.846Z' }, Availability)).toThrow(ParamValidationErrors)
+      })
+
+      it('rejects null', () => {
+        expect(() => Params.for({ start: null }, Availability)).toThrow(ParamValidationErrors)
+      })
+
+      context('the field allows null', () => {
+        it('returns null for the specified field', () => {
+          expect(Params.for({ endtz: null }, Availability)).toEqual({
+            endtz: null,
           })
         })
       })
@@ -951,6 +1024,92 @@ describe('Params', () => {
           context('the field allows null', () => {
             it('returns null for the specified field', () => {
               expect(Params.cast({ birthdate: null }, 'birthdate', 'date', { allowNull: true })).toBeNull()
+            })
+          })
+        })
+
+        context('time', () => {
+          const now = ClockTime.now()
+
+          it('permits a time', () => {
+            expect(Params.cast({ alarmTime: now }, 'alarmTime', 'time')).toEqualClockTime(now)
+          })
+
+          it('permits a valid string representation of a time', () => {
+            expect(Params.cast({ alarmTime: now.toISO() }, 'alarmTime', 'time')).toEqualClockTime(now)
+          })
+
+          it('rejects a string non-time', () => {
+            expect(() => Params.cast({ alarmTime: '1.2' }, 'alarmTime', 'time')).toThrow(ParamValidationError)
+            expect(() => Params.cast({ alarmTime: '' }, 'alarmTime', 'time')).toThrow(ParamValidationError)
+            expect(() => Params.cast({ alarmTime: 'abc' }, 'alarmTime', 'time')).toThrow(ParamValidationError)
+          })
+
+          it('rejects strings that represent invalid times', () => {
+            expect(() => Params.cast({ alarmTime: '2025-10-15T24:11:56.846Z' }, 'alarmTime', 'time')).toThrow(
+              ParamValidationError,
+            )
+            expect(() => Params.cast({ alarmTime: '2023-02-29' }, 'alarmTime', 'time')).toThrow(
+              ParamValidationError,
+            )
+          })
+
+          it('rejects null', () => {
+            expect(() => Params.cast({ lastHeardAt: null }, 'lastHeardAt', 'time')).toThrow(
+              ParamValidationError,
+            )
+          })
+
+          context('the field allows null', () => {
+            it('returns null for the specified field', () => {
+              expect(Params.cast({ alarmTime: null }, 'alarmTime', 'time', { allowNull: true })).toBeNull()
+            })
+          })
+        })
+
+        context('timetz', () => {
+          const now = ClockTimeTz.now()
+
+          it('permits a time', () => {
+            expect(Params.cast({ availableAt: now }, 'availableAt', 'timetz')).toEqualClockTimeTz(now)
+          })
+
+          it('permits a valid string representation of a time', () => {
+            expect(Params.cast({ availableAt: now.toISO() }, 'availableAt', 'timetz')).toEqualClockTimeTz(now)
+          })
+
+          it('rejects a string non-time', () => {
+            expect(() => Params.cast({ availableAt: '1.2' }, 'availableAt', 'timetz')).toThrow(
+              ParamValidationError,
+            )
+            expect(() => Params.cast({ availableAt: '' }, 'availableAt', 'timetz')).toThrow(
+              ParamValidationError,
+            )
+            expect(() => Params.cast({ availableAt: 'abc' }, 'availableAt', 'timetz')).toThrow(
+              ParamValidationError,
+            )
+          })
+
+          it('rejects strings that represent invalid times', () => {
+            expect(() =>
+              Params.cast({ availableAt: '2025-10-15T24:11:56.846Z' }, 'availableAt', 'timetz'),
+            ).toThrow(ParamValidationError)
+            expect(() => Params.cast({ availableAt: '2023-02-29' }, 'availableAt', 'timetz')).toThrow(
+              ParamValidationError,
+            )
+          })
+
+          it('rejects null', () => {
+            expect(() => Params.cast({ lastHeardAt: null }, 'lastHeardAt', 'timetz')).toThrow(
+              ParamValidationError,
+            )
+          })
+
+          context('the field allows null', () => {
+            it('returns null for the specified field', () => {
+              expect(
+                Params.cast({ availableAt: null }, 'availableAt', 'timetz', { allowNull: true }),
+              ).toBeNull()
             })
           })
         })

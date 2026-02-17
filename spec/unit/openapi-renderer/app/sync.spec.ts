@@ -45,6 +45,7 @@ describe('OpenapiAppRenderer', () => {
         '/openapi/multiple-openapi-names',
         '/openapi/multiple-serializer-statements',
         '/openapi/request-body-for-type',
+        '/openapi/test-times',
       ])
     })
   })

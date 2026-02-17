@@ -19,8 +19,11 @@ export default class Availability extends ApplicationModel {
 
   public id: DreamColumn<Availability, 'id'>
   public start: DreamColumn<Availability, 'start'>
+  public starttz: DreamColumn<Availability, 'starttz'>
   public end: DreamColumn<Availability, 'end'>
-  // public times: DreamColumn<Availability, 'times'>
+  public endtz: DreamColumn<Availability, 'endtz'>
+  public times: DreamColumn<Availability, 'times'>
+  public timetzs: DreamColumn<Availability, 'timetzs'>
   public createdAt: DreamColumn<Availability, 'createdAt'>
   public updatedAt: DreamColumn<Availability, 'updatedAt'>
 

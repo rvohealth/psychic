@@ -8,9 +8,9 @@ import {
 } from '@rvoh/dream/openapi'
 import { DbTypes } from '@rvoh/dream/types'
 import { SerializingPlainPropertyWithoutOpenapiShape } from '../../error/openapi/SerializingPlainPropertyWithoutOpenapiShape.js'
+import UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute from '../../error/openapi/UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute.js'
 import OpenapiSegmentExpander from '../body-segment.js'
 import openapiShorthandToOpenapi from './openapiShorthandToOpenapi.js'
-import UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute from '../../error/openapi/UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute.js'
 
 export interface VirtualAttributeStatement {
   property: string
@@ -180,6 +180,8 @@ function singularAttributeOpenapiShape(
     case 'text':
     case 'time':
     case 'time without time zone':
+    case 'timetz':
+    case 'time with time zone':
     case 'uuid':
     case 'varbit':
     case 'varchar':
@@ -204,7 +206,6 @@ function singularAttributeOpenapiShape(
       return { type: 'number' } as const
 
     case 'datetime':
-    case 'time with time zone':
     case 'timestamp':
     case 'timestamp with time zone':
     case 'timestamp without time zone':
