@@ -47,7 +47,7 @@ export default function generateControllerContent({
   if (fullyQualifiedModelName) {
     fullyQualifiedModelName = DreamApp.system.standardizeFullyQualifiedModelName(fullyQualifiedModelName)
     modelClassName = modelName
-      ? DreamApp.system.standardizeFullyQualifiedModelName(modelName).replace(/\//g, '')
+      ? modelName
       : DreamApp.system.globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
     modelAttributeName = camelize(modelClassName)
     pluralizedModelAttributeName = singular ? modelAttributeName : pluralize(modelAttributeName)

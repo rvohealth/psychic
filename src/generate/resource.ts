@@ -12,6 +12,7 @@ export default async function generateResource({
   fullyQualifiedModelName,
   options,
   columnsWithTypes,
+  modelName,
 }: {
   route: string
   fullyQualifiedModelName: string
@@ -21,9 +22,11 @@ export default async function generateResource({
     stiBaseSerializer: boolean
     owningModel?: string
     connectionName: string
-    modelName?: string
+    adminSerializers?: boolean | undefined
   }
   columnsWithTypes: string[]
+  /** The model class name (computed by PsychicBin). */
+  modelName: string
 }) {
   // sanitize route here, making sure that the leading
   // slash is not passed through to subsequent helpers,
@@ -37,6 +40,7 @@ export default async function generateResource({
   const onlyActions = options.only?.split(',')
 
   const forAdmin = /^Admin\//.test(fullyQualifiedControllerName)
+  const includeAdminSerializers = options.adminSerializers ?? forAdmin
 
   await DreamCLI.generateDream({
     fullyQualifiedModelName,
@@ -44,10 +48,10 @@ export default async function generateResource({
     options: {
       serializer: true,
       stiBaseSerializer: options.stiBaseSerializer,
-      includeAdminSerializers: forAdmin,
+      includeAdminSerializers,
       connectionName: options.connectionName,
     },
-    modelName: options.modelName,
+    modelName,
   })
 
   await generateController({
@@ -60,7 +64,7 @@ export default async function generateResource({
     resourceSpecs: true,
     singular: options.singular,
     owningModel: options.owningModel,
-    modelName: options.modelName,
+    modelName,
   })
 
   await addResourceToRoutes(route, {

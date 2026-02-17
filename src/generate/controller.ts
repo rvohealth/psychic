@@ -193,6 +193,9 @@ async function generateControllerSpec({
   )
 
   try {
+    if (resourceSpecs && fullyQualifiedModelName && modelName === undefined) {
+      throw new Error('modelName is required for resource controller specs')
+    }
     console.log(`generating controller spec: ${relFilePath}`)
     await fs.mkdir(absDirPath, { recursive: true })
     await fs.writeFile(
@@ -207,7 +210,7 @@ async function generateControllerSpec({
             forAdmin,
             singular,
             actions,
-            modelName,
+            modelName: modelName!,
           })
         : generateControllerSpecContent(fullyQualifiedControllerName), //, route, fullyQualifiedModelName, actions),
     )

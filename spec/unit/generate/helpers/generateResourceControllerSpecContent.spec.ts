@@ -195,6 +195,7 @@ describe('V1/SessionGroupsController', () => {
         fullyQualifiedControllerName: 'V1/PostsController',
         route: 'v1/posts',
         fullyQualifiedModelName: 'Post',
+        modelName: 'Post',
         columnsWithTypes: [
           'my_uuid:uuid',
           'uuid_not_defined_as_uuid:citext',
@@ -580,6 +581,7 @@ describe('V1/PostsController', () => {
         forAdmin: false,
         singular: false,
         actions: [...RESOURCE_ACTIONS],
+        modelName: 'Post',
       })
       expect(res).toEqual(`\
 import Post from '@models/Post.js'
@@ -755,6 +757,7 @@ describe('V1/PostsController', () => {
         fullyQualifiedControllerName: 'V1/PostsController',
         route: 'v1/posts',
         fullyQualifiedModelName: 'Post',
+        modelName: 'Post',
         columnsWithTypes: [
           'style:enum:building_style:formal,informal',
           'title:citext',
@@ -881,6 +884,7 @@ describe('V1/PostsController', () => {
         forAdmin: false,
         singular: true,
         actions: [...RESOURCE_ACTIONS],
+        modelName: 'HostingAgreement',
       })
       expect(res).toEqual(`\
 import { CalendarDate, DateTime } from '@rvoh/dream'
@@ -1007,6 +1011,7 @@ describe('V1/HostingAgreementController', () => {
           forAdmin: false,
           singular: true,
           actions: [...RESOURCE_ACTIONS],
+          modelName: 'TicketingComment',
         })
         expect(res).toEqual(`\
 import TicketingComment from '@models/Ticketing/Comment.js'
@@ -1132,6 +1137,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
         forAdmin: false,
         singular: false,
         actions: [...RESOURCE_ACTIONS],
+        modelName: 'Post',
       })
       expect(res).toEqual(`\
 import Post from '@models/Post.js'
@@ -1315,6 +1321,7 @@ describe('V1/PostsController', () => {
           forAdmin: false,
           singular: false,
           actions: [...RESOURCE_ACTIONS],
+          modelName: 'TicketingComment',
         })
         expect(res).toEqual(`\
 import TicketingComment from '@models/Ticketing/Comment.js'
@@ -1498,6 +1505,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
             forAdmin: false,
             singular: false,
             actions: [...RESOURCE_ACTIONS],
+            modelName: 'TicketingComment',
           })
           expect(res).toEqual(`\
 import TicketingComment from '@models/Ticketing/Comment.js'
@@ -1689,6 +1697,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
         forAdmin: true,
         singular: false,
         actions: [...RESOURCE_ACTIONS],
+        modelName: 'Article',
       })
       expect(res).toEqual(`\
 import Article from '@models/Article.js'
@@ -1832,6 +1841,7 @@ describe('Admin/ArticlesController', () => {
           forAdmin: false,
           singular: false,
           actions: [...RESOURCE_ACTIONS],
+          modelName: 'Post',
         })
         expect(res).toContain(
           `\
@@ -1860,6 +1870,7 @@ import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authen
           forAdmin: false,
           singular: false,
           actions: [...RESOURCE_ACTIONS],
+          modelName: 'Post',
         })
         expect(res).toContain(
           `\
@@ -1888,6 +1899,7 @@ import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authen
           forAdmin: false,
           singular: false,
           actions: [...RESOURCE_ACTIONS],
+          modelName: 'Post',
         })
         expect(res).toContain(
           `\

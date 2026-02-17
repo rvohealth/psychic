@@ -12,8 +12,8 @@ interface GenerateSpecOptions {
   forAdmin: boolean
   singular: boolean
   actions: string[]
-  /** When set, overrides the generated class name e.g., `pnpm psy g:model --model-name=GroupSession Session/Group`. */
-  modelName?: string | undefined
+  /** The model class name (computed by PsychicBin). */
+  modelName: string
 }
 
 interface ModelConfiguration {
@@ -88,8 +88,6 @@ function createModelConfiguration(options: GenerateSpecOptions): ModelConfigurat
     options.fullyQualifiedModelName,
   )
   const modelClassName = options.modelName
-    ? DreamApp.system.standardizeFullyQualifiedModelName(options.modelName).replace(/\//g, '')
-    : DreamApp.system.globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
   const modelVariableName = camelize(modelClassName)
 
   const userModelName = options.forAdmin ? 'AdminUser' : 'User'

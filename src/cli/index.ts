@@ -1,4 +1,4 @@
-import { DreamCLI } from '@rvoh/dream/system'
+import { baseColumnsWithTypesDescription, CLI_INDENT, DreamCLI } from '@rvoh/dream/system'
 import { Command } from 'commander'
 import PsychicBin, { BreakingChangesDetectedInOpenApiSpecError } from '../bin/index.js'
 import generateController from '../generate/controller.js'
@@ -9,51 +9,7 @@ import generateResource from '../generate/resource.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import Watcher from '../watcher/Watcher.js'
 
-const INDENT = '                  '
-
-const baseColumnsWithTypesDescription = `space separated snake-case (except for belongs_to model name) properties like this:
-${INDENT}    title:citext subtitle:string body_markdown:text style:enum:post_styles:formal,informal User:belongs_to
-${INDENT}
-${INDENT}all properties default to not nullable; null can be allowed by appending ':optional':
-${INDENT}    subtitle:string:optional
-${INDENT}
-${INDENT}supported types:
-${INDENT}    - uuid:
-${INDENT}    - uuid[]:
-${INDENT}        a column optimized for storing UUIDs
-${INDENT}
-${INDENT}    - citext:
-${INDENT}    - citext[]:
-${INDENT}        case insensitive text (indexes and queries are automatically case insensitive)
-${INDENT}
-${INDENT}    - string:
-${INDENT}    - string[]:
-${INDENT}        varchar; allowed length defaults to 255, but may be customized, e.g.: subtitle:string:128 or subtitle:string:128:optional
-${INDENT}
-${INDENT}    - text
-${INDENT}    - text[]
-${INDENT}    - date
-${INDENT}    - date[]
-${INDENT}    - datetime
-${INDENT}    - datetime[]
-${INDENT}    - integer
-${INDENT}    - integer[]
-${INDENT}
-${INDENT}    - decimal:
-${INDENT}    - decimal[]:
-${INDENT}        scale,precision is required, e.g.: volume:decimal:3,2 or volume:decimal:3,2:optional
-${INDENT}
-${INDENT}        leveraging arrays, add the "[]" suffix, e.g.: volume:decimal[]:3,2
-${INDENT}
-${INDENT}    - enum:
-${INDENT}    - enum[]:
-${INDENT}        include the enum name to automatically create the enum:
-${INDENT}          type:enum:room_types:bathroom,kitchen,bedroom or type:enum:room_types:bathroom,kitchen,bedroom:optional
-${INDENT}
-${INDENT}        omit the enum values to leverage an existing enum (omits the enum type creation):
-${INDENT}          type:enum:room_types or type:enum:room_types:optional
-${INDENT}
-${INDENT}        leveraging arrays, add the "[]" suffix, e.g.: type:enum[]:room_types:bathroom,kitchen,bedroom`
+const INDENT = CLI_INDENT
 
 const columnsWithTypesDescription =
   baseColumnsWithTypesDescription +
@@ -120,6 +76,10 @@ export default class PsychicCLI {
         '--model-name <modelName>',
         'override the automatically generated model name, e.g., `pnpm psy g:resource --model-name=SessionParticipant v1/health/session/participants Health/Session/Participant`',
       )
+      .option(
+        '--admin-serializers',
+        'generate admin serializer variants (AdminSerializer and AdminSummarySerializer) in addition to the default serializers. Auto-detected for admin/ routes.',
+      )
       .argument(
         '<path>',
         'URL path from root domain. Specify nesting resource with `{}`, e.g.: `tickets/{}/comments`',
@@ -140,7 +100,8 @@ export default class PsychicCLI {
             stiBaseSerializer: boolean
             owningModel?: string
             connectionName: string
-            modelName?: string
+            modelName?: string | undefined
+            adminSerializers?: boolean | undefined
           },
         ) => {
           await initializePsychicApp({
@@ -406,8 +367,10 @@ export default class PsychicCLI {
       stiBaseSerializer: boolean
       owningModel?: string
       connectionName: string
+      adminSerializers?: boolean | undefined
     }
     columnsWithTypes: string[]
+    modelName: string
   }) {
     await generateResource(opts)
   }
