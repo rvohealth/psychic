@@ -12,6 +12,8 @@ interface GenerateSpecOptions {
   forAdmin: boolean
   singular: boolean
   actions: string[]
+  /** The model class name (computed by PsychicBin). */
+  modelName: string
 }
 
 interface ModelConfiguration {
@@ -85,7 +87,7 @@ function createModelConfiguration(options: GenerateSpecOptions): ModelConfigurat
   const fullyQualifiedModelName = DreamApp.system.standardizeFullyQualifiedModelName(
     options.fullyQualifiedModelName,
   )
-  const modelClassName = DreamApp.system.globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
+  const modelClassName = options.modelName
   const modelVariableName = camelize(modelClassName)
 
   const userModelName = options.forAdmin ? 'AdminUser' : 'User'
@@ -470,10 +472,10 @@ function generateImportStatements(
   uuidAttributeIncluded?: boolean,
 ): string {
   const importStatements: string[] = compact([
-    importStatementForModel(modelConfig.fullyQualifiedModelName),
+    importStatementForModel(modelConfig.fullyQualifiedModelName, modelConfig.modelClassName),
     importStatementForModel(modelConfig.userModelName),
     owningModel ? importStatementForModel(owningModel) : undefined,
-    importStatementForModelFactory(modelConfig.fullyQualifiedModelName),
+    importStatementForModelFactory(modelConfig.fullyQualifiedModelName, modelConfig.modelClassName),
     importStatementForModelFactory(modelConfig.userModelName),
     owningModel ? importStatementForModelFactory(owningModel) : undefined,
   ])
@@ -822,12 +824,18 @@ function generateDestroyActionSpec(options: TemplateOptions): string {
   })`
 }
 
-function importStatementForModel(destinationModelName: string) {
-  return `import ${DreamApp.system.globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${DreamApp.system.absoluteDreamPath('models', destinationModelName)}'`
+function importStatementForModel(destinationModelName: string, modelClassNameOverride?: string) {
+  const modelClassName = modelClassNameOverride
+    ? modelClassNameOverride
+    : DreamApp.system.globalClassNameFromFullyQualifiedModelName(destinationModelName)
+  return `import ${modelClassName} from '${DreamApp.system.absoluteDreamPath('models', destinationModelName)}'`
 }
 
-function importStatementForModelFactory(destinationModelName: string) {
-  return `import create${DreamApp.system.globalClassNameFromFullyQualifiedModelName(destinationModelName)} from '${DreamApp.system.absoluteDreamPath('factories', destinationModelName)}'`
+function importStatementForModelFactory(destinationModelName: string, modelClassNameOverride?: string) {
+  const modelClassName = modelClassNameOverride
+    ? modelClassNameOverride
+    : DreamApp.system.globalClassNameFromFullyQualifiedModelName(destinationModelName)
+  return `import create${modelClassName} from '${DreamApp.system.absoluteDreamPath('factories', destinationModelName)}'`
 }
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any

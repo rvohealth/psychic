@@ -6,11 +6,16 @@ settings:
 
 overrides:
   diff: '>=8.0.3'
+  '@rvoh/dream': link:../dream
+  kysely: 0.28.5
 
 importers:
 
   .:
     dependencies:
+      '@rvoh/dream':
+        specifier: link:../dream
+        version: link:../dream
       '@types/cookie-parser':
         specifier: ^1.4.8
         version: 1.4.8(@types/express@5.0.6)
@@ -51,15 +56,12 @@ importers:
       '@jest-mock/express':
         specifier: ^3.0.0
         version: 3.0.0
-      '@rvoh/dream':
-        specifier: ^2.2.3
-        version: 2.2.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4)
       '@rvoh/dream-spec-helpers':
         specifier: ^2.0.0
         version: 2.0.0(@types/node@22.17.1)(@types/pg@8.11.8)(pg@8.12.0)
       '@rvoh/psychic-spec-helpers':
         specifier: ^2.0.0
-        version: 2.0.0(@rvoh/dream@2.2.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@rvoh/psychic@2.1.0(@rvoh/dream@2.2.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4)))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.5.4))(supertest@7.1.4)(typescript@5.5.4)
+        version: 2.0.0(@rvoh/dream@dream)(@rvoh/psychic@2.1.0(@rvoh/dream@dream)(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4)))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.5.4))(supertest@7.1.4)(typescript@5.5.4)
       '@types/body-parser':
         specifier: ^1.19.6
         version: 1.19.6
@@ -103,11 +105,11 @@ importers:
         specifier: ^26.1.0
         version: 26.1.0
       kysely:
-        specifier: ^0.28.5
-        version: 0.28.7
+        specifier: 0.28.5
+        version: 0.28.5
       kysely-codegen:
         specifier: ~0.19.0
-        version: 0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4)
+        version: 0.19.0(kysely@0.28.5)(pg@8.12.0)(typescript@5.5.4)
       luxon-jest-matchers:
         specifier: ^0.1.14
         version: 0.1.14
@@ -558,19 +560,6 @@ packages:
       '@types/pg': '*'
       pg: '*'
 
-  '@rvoh/dream@2.2.3':
-    resolution: {integrity: sha512-jGgxQ0eGDxxr0Nh3tBtNDegdqpmHlKWI07IAMvpq3NSiuRZZKDJRq7CRJxhFUsQJw0nii7kbEyCFTFI2wtfYug==}
-    peerDependencies:
-      '@types/node': '*'
-      '@types/pg': '*'
-      commander: ^12
-      dotenv: '*'
-      kysely: ^0.28.5
-      kysely-codegen: ~0.19.0
-      pg: '*'
-      pluralize-esm: '*'
-      typescript: ^5
-
   '@rvoh/psychic-spec-helpers@2.0.0':
     resolution: {integrity: sha512-b9p0dv7yBDr2aiq0PJWwfyvX2s07sN2kBYFGn5YIKrHgABeWRO7EtZSYBCb937j7eWlCtHybDInhVxcMEwL7sg==}
     peerDependencies:
@@ -990,9 +979,6 @@ packages:
 
   colorette@1.4.0:
     resolution: {integrity: sha512-Y2oEozpomLn7Q3HFP7dpww7AtMJplbM9lGZP6RDfHqmbeRjiwRg4n6VM6j4KLmRke85uWEI7JqF17f3pqdRA0g==}
-
-  colorette@2.0.20:
-    resolution: {integrity: sha512-IfEDxwoWIjkeXL1eXcDiow4UbKjhLdq6/EuSVR9GMN7KVH3r9gQ83e73hsz1Nd1T3ijd5xv1wcWRYO+D6kCI2w==}
 
   colorspace@1.1.4:
     resolution: {integrity: sha512-BgvKJiuVu1igBUF2kEjRCZXol6wiiGbY5ipL/oVPwm0BL9sIpMIzM8IK7vwuxIIzOXMV3Ey5w+vxhm0rR/TN8w==}
@@ -1606,7 +1592,7 @@ packages:
       '@libsql/kysely-libsql': '>=0.3.0 <0.5.0'
       '@tediousjs/connection-string': '>=0.5.0 <0.6.0'
       better-sqlite3: '>=7.6.2 <13.0.0'
-      kysely: '>=0.27.0 <1.0.0'
+      kysely: 0.28.5
       kysely-bun-sqlite: '>=0.3.2 <1.0.0'
       kysely-bun-worker: '>=1.2.0 <2.0.0'
       mysql2: '>=2.3.3 <4.0.0'
@@ -1633,8 +1619,8 @@ packages:
       tedious:
         optional: true
 
-  kysely@0.28.7:
-    resolution: {integrity: sha512-u/cAuTL4DRIiO2/g4vNGRgklEKNIj5Q3CG7RoUB5DV5SfEC2hMvPxKi0GWPmnzwL2ryIeud2VTcEEmqzTzEPNw==}
+  kysely@0.28.5:
+    resolution: {integrity: sha512-rlB0I/c6FBDWPcQoDtkxi9zIvpmnV5xoIalfCMSMCa7nuA6VGA3F54TW9mEgX4DVf10sXAWCF5fDbamI/5ZpKA==}
     engines: {node: '>=20.0.0'}
 
   levn@0.4.1:
@@ -1674,10 +1660,6 @@ packages:
 
   luxon-jest-matchers@0.1.14:
     resolution: {integrity: sha512-qk7PzwitzB3MHLBta79OloGGwZ+aU9q4aCXZ/Mrij98+HQxF18fOIkEHoggrfDdUIC3PhNaOrbDRvC+veBgruw==}
-
-  luxon@3.5.0:
-    resolution: {integrity: sha512-rh+Zjr6DNfUYR3bPwJEnuwDdqMbxZW7LOQfUN4B54+Cl+0o5zaU9RJ6bcidfDtC1cWCZXQ+nvX8bf6bAji37QQ==}
-    engines: {node: '>=12'}
 
   magic-string@0.30.21:
     resolution: {integrity: sha512-vd2F4YUyEXKGcLHoq+TEyCjxueSeHnFxyyjNp80yg0XV4vUhnDer/lvvlqM/arB5bXQN5K2/3oinyCRyx8T2CQ==}
@@ -2905,25 +2887,10 @@ snapshots:
       '@types/pg': 8.11.8
       pg: 8.12.0
 
-  '@rvoh/dream@2.2.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4)':
+  '@rvoh/psychic-spec-helpers@2.0.0(@rvoh/dream@dream)(@rvoh/psychic@2.1.0(@rvoh/dream@dream)(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4)))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.5.4))(supertest@7.1.4)(typescript@5.5.4)':
     dependencies:
-      '@types/node': 22.17.1
-      '@types/pg': 8.11.8
-      colorette: 2.0.20
-      commander: 12.1.0
-      dotenv: 16.4.5
-      kysely: 0.28.7
-      kysely-codegen: 0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4)
-      luxon: 3.5.0
-      pg: 8.12.0
-      pluralize-esm: 9.0.5
-      typescript: 5.5.4
-      yoctocolors: 2.1.2
-
-  '@rvoh/psychic-spec-helpers@2.0.0(@rvoh/dream@2.2.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@rvoh/psychic@2.1.0(@rvoh/dream@2.2.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4)))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.5.4))(supertest@7.1.4)(typescript@5.5.4)':
-    dependencies:
-      '@rvoh/dream': 2.2.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4)
-      '@rvoh/psychic': 2.1.0(@rvoh/dream@2.2.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4))
+      '@rvoh/dream': link:../dream
+      '@rvoh/psychic': 2.1.0(@rvoh/dream@dream)(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4))
       '@types/node': 22.17.1
       '@types/supertest': 6.0.3
       cookiejar: 2.1.4
@@ -2931,9 +2898,9 @@ snapshots:
       supertest: 7.1.4
       typescript: 5.5.4
 
-  '@rvoh/psychic@2.1.0(@rvoh/dream@2.2.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4))':
+  '@rvoh/psychic@2.1.0(@rvoh/dream@dream)(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4))':
     dependencies:
-      '@rvoh/dream': 2.2.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4)
+      '@rvoh/dream': link:../dream
       '@types/cookie-parser': 1.4.10(@types/express@5.0.6)
       '@types/cors': 2.8.19
       '@types/express': 5.0.6
@@ -3436,8 +3403,6 @@ snapshots:
       color-string: 1.9.1
 
   colorette@1.4.0: {}
-
-  colorette@2.0.20: {}
 
   colorspace@1.1.4:
     dependencies:
@@ -4104,14 +4069,14 @@ snapshots:
 
   kuler@2.0.0: {}
 
-  kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4):
+  kysely-codegen@0.19.0(kysely@0.28.5)(pg@8.12.0)(typescript@5.5.4):
     dependencies:
       chalk: 4.1.2
       cosmiconfig: 9.0.0(typescript@5.5.4)
       dotenv: 17.2.3
       dotenv-expand: 12.0.3
       git-diff: 2.0.6
-      kysely: 0.28.7
+      kysely: 0.28.5
       micromatch: 4.0.8
       minimist: 1.2.8
       pluralize: 8.0.0
@@ -4121,7 +4086,7 @@ snapshots:
     transitivePeerDependencies:
       - typescript
 
-  kysely@0.28.7: {}
+  kysely@0.28.5: {}
 
   levn@0.4.1:
     dependencies:
@@ -4158,8 +4123,6 @@ snapshots:
   lunr@2.3.9: {}
 
   luxon-jest-matchers@0.1.14: {}
-
-  luxon@3.5.0: {}
 
   magic-string@0.30.21:
     dependencies:

@@ -1,4 +1,6 @@
-=======
+## 2.4.0
+
+- Add a `--model-name` option to the resource generator to override the automatically generated model name (e.g.: `pnpm psy g:resource --model-name GroupSession Session/Group`)
 
 ## 2.3.8
 

@@ -18,6 +18,7 @@ export default async function generateController({
   resourceSpecs = false,
   owningModel,
   singular,
+  modelName,
 }: {
   fullyQualifiedControllerName: string
   fullyQualifiedModelName?: string
@@ -26,6 +27,8 @@ export default async function generateController({
   resourceSpecs?: boolean
   owningModel?: string | undefined
   singular: boolean
+  /** When set, overrides the generated model class name e.g., `pnpm psy g:model --model-name=GroupSession Session/Group`. */
+  modelName?: string | undefined
 }) {
   fullyQualifiedModelName = fullyQualifiedModelName
     ? DreamApp.system.standardizeFullyQualifiedModelName(fullyQualifiedModelName)
@@ -111,6 +114,7 @@ export default async function generateController({
         owningModel,
         forAdmin,
         singular,
+        modelName,
       }),
     )
   } catch (error) {
@@ -133,6 +137,7 @@ export default async function generateController({
     forAdmin,
     singular,
     actions,
+    modelName,
   })
 }
 
@@ -169,6 +174,7 @@ async function generateControllerSpec({
   forAdmin,
   singular,
   actions,
+  modelName,
 }: {
   fullyQualifiedControllerName: string
   route: string
@@ -179,6 +185,7 @@ async function generateControllerSpec({
   forAdmin: boolean
   singular: boolean
   actions: string[]
+  modelName?: string | undefined
 }) {
   const { relFilePath, absDirPath, absFilePath } = psychicFileAndDirPaths(
     psychicPath('controllerSpecs'),
@@ -186,6 +193,9 @@ async function generateControllerSpec({
   )
 
   try {
+    if (resourceSpecs && fullyQualifiedModelName && modelName === undefined) {
+      throw new Error('modelName is required for resource controller specs')
+    }
     console.log(`generating controller spec: ${relFilePath}`)
     await fs.mkdir(absDirPath, { recursive: true })
     await fs.writeFile(
@@ -200,6 +210,7 @@ async function generateControllerSpec({
             forAdmin,
             singular,
             actions,
+            modelName: modelName!,
           })
         : generateControllerSpecContent(fullyQualifiedControllerName), //, route, fullyQualifiedModelName, actions),
     )

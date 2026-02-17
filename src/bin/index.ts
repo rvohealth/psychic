@@ -1,3 +1,4 @@
+import { DreamApp } from '@rvoh/dream'
 import { CliFileWriter, DreamBin, DreamCLI } from '@rvoh/dream/system'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
@@ -33,9 +34,18 @@ export default class PsychicBin {
       stiBaseSerializer: boolean
       owningModel?: string
       connectionName: string
+      modelName?: string | undefined
+      adminSerializers?: boolean | undefined
     },
   ) {
-    await generateResource({ route, fullyQualifiedModelName, columnsWithTypes, options })
+    const modelName = DreamApp.system.modelClassNameFrom(fullyQualifiedModelName, options.modelName)
+    await generateResource({
+      route,
+      fullyQualifiedModelName,
+      columnsWithTypes,
+      options,
+      modelName,
+    })
   }
 
   public static printRoutes() {
