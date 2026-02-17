@@ -1,5 +1,6 @@
 import { PsychicOpenapiNames } from '../../../../src/controller/index.js'
 import { OpenAPI } from '../../../../src/package-exports/index.js'
+import Availability from '../models/Availability.js'
 import Pet from '../models/Pet.js'
 import {
   Comment1OnlyUsedInOneControllerSerializer,
@@ -47,6 +48,13 @@ export default class OpenapiDecoratorTestController extends ApplicationControlle
     },
   })
   public testMultipleSerializers() {
+    this.ok()
+  }
+
+  @OpenAPI(Availability, {
+    status: 200,
+  })
+  public testTimes() {
     this.ok()
   }
 

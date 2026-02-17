@@ -1,5 +1,9 @@
 =======
 
+## 2.3.9
+
+- `castParam` and `paramsFor` support `time` and `timetz`
+
 ## 2.3.8
 
 - add new config option `httpServerOptions`, which enables devs to configure the options provided to the low-level http/https instance that is created and fed to express.

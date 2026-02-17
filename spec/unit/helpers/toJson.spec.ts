@@ -1,4 +1,4 @@
-import { CalendarDate, DateTime } from '@rvoh/dream'
+import { CalendarDate, ClockTime, ClockTimeTz, DateTime } from '@rvoh/dream'
 import toJson from '../../../src/helpers/toJson.js'
 
 describe('toJson', () => {
@@ -85,6 +85,22 @@ describe('toJson', () => {
     context('a CalendarDate', () => {
       it('is the ISO string version', () => {
         const original = CalendarDate.today()
+        const sanitized = toJson(original, true)
+        expect(sanitized).toEqual(`"${original.toISO()}"`)
+      })
+    })
+
+    context('a ClockTime', () => {
+      it('is the ISO string version', () => {
+        const original = ClockTime.now()
+        const sanitized = toJson(original, true)
+        expect(sanitized).toEqual(`"${original.toISO()}"`)
+      })
+    })
+
+    context('a ClockTimeTz', () => {
+      it('is the ISO string version', () => {
+        const original = ClockTimeTz.now()
         const sanitized = toJson(original, true)
         expect(sanitized).toEqual(`"${original.toISO()}"`)
       })

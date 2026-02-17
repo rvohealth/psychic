@@ -1,4 +1,4 @@
-import { CalendarDate, DateTime, Dream } from '@rvoh/dream'
+import { CalendarDate, ClockTime, ClockTimeTz, DateTime, Dream } from '@rvoh/dream'
 import {
   OpenapiSchemaArray,
   OpenapiSchemaBody,
@@ -173,6 +173,46 @@ export default class Params {
               params,
               columnName.toString(),
               'datetime[]',
+              { allowNull: columnMetadata.allowNull },
+            )
+            break
+
+          case 'time':
+          case 'time without time zone':
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
+              params,
+              columnName.toString(),
+              'time',
+              { allowNull: columnMetadata.allowNull },
+            )
+            break
+
+          case 'time[]':
+          case 'time without time zone[]':
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
+              params,
+              columnName.toString(),
+              'time[]',
+              { allowNull: columnMetadata.allowNull },
+            )
+            break
+
+          case 'timetz':
+          case 'time with time zone':
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
+              params,
+              columnName.toString(),
+              'timetz',
+              { allowNull: columnMetadata.allowNull },
+            )
+            break
+
+          case 'timetz[]':
+          case 'time with time zone[]':
+            returnObj[columnName as keyof typeof returnObj] = this.cast(
+              params,
+              columnName.toString(),
+              'timetz[]',
               { allowNull: columnMetadata.allowNull },
             )
             break
@@ -372,7 +412,6 @@ export default class Params {
       return paramValue as ReturnType
     }
 
-    let dateClass: typeof DateTime | typeof CalendarDate
     const integerRegexp = /^-?\d+$/
     switch (expectedType) {
       case 'string':
@@ -397,7 +436,9 @@ export default class Params {
         throw new ParamValidationError(paramName, [typeToError(expectedType)])
 
       case 'datetime':
-      case 'date':
+      case 'date': {
+        let dateClass: typeof DateTime | typeof CalendarDate
+
         switch (expectedType) {
           case 'datetime':
             dateClass = DateTime
@@ -422,6 +463,37 @@ export default class Params {
         }
 
         throw new ParamValidationError(paramName, [typeToError(expectedType)])
+      }
+
+      case 'time':
+      case 'timetz': {
+        let timeClass: typeof ClockTime | typeof ClockTimeTz
+
+        switch (expectedType) {
+          case 'time':
+            timeClass = ClockTime
+            break
+          case 'timetz':
+            timeClass = ClockTimeTz
+            break
+          default:
+            if (typeof expectedType === 'string') throw Error(`${expectedType} must be "time" or "timetz"`)
+            else throw Error(`expectedType is not a string`)
+        }
+
+        if (paramValue instanceof ClockTime || paramValue instanceof ClockTimeTz)
+          return paramValue as ReturnType
+
+        if (typeof paramValue === 'string') {
+          try {
+            return timeClass.fromISO(paramValue) as ReturnType
+          } catch {
+            throw new ParamValidationError(paramName, [typeToError(expectedType)])
+          }
+        }
+
+        throw new ParamValidationError(paramName, [typeToError(expectedType)])
+      }
 
       case 'integer':
         if (typeof paramValue !== 'string' && typeof paramValue !== 'number')
@@ -460,6 +532,8 @@ export default class Params {
       case 'json[]':
       case 'number[]':
       case 'string[]':
+      case 'time[]':
+      case 'timetz[]':
       case 'uuid[]':
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
         if (!Array.isArray(paramValue)) paramValue = [paramValue as any]
@@ -565,41 +639,49 @@ export type ValidatedReturnType<ExpectedType, OptsType> = ExpectedType extends R
         ? DateTime
         : ExpectedType extends 'date'
           ? CalendarDate
-          : ExpectedType extends 'bigint'
-            ? string
-            : ExpectedType extends 'integer'
-              ? number
-              : ExpectedType extends 'json'
-                ? object
-                : ExpectedType extends 'boolean'
-                  ? boolean
-                  : ExpectedType extends 'null'
-                    ? null
-                    : ExpectedType extends 'uuid'
-                      ? string
-                      : ExpectedType extends 'datetime[]'
-                        ? DateTime[]
-                        : ExpectedType extends 'date[]'
-                          ? CalendarDate[]
-                          : ExpectedType extends 'string[]'
-                            ? OptsType extends { enum: infer EnumValue }
-                              ? EnumValue extends readonly string[]
-                                ? EnumValue[number][]
-                                : never
-                              : string[]
-                            : ExpectedType extends 'bigint[]'
-                              ? string[]
-                              : ExpectedType extends 'number[]'
-                                ? number[]
-                                : ExpectedType extends 'integer[]'
-                                  ? number[]
-                                  : ExpectedType extends 'boolean[]'
-                                    ? boolean
-                                    : ExpectedType extends 'null[]'
-                                      ? null[]
-                                      : ExpectedType extends 'uuid[]'
-                                        ? string[]
-                                        : OpenapiShapeToInterface<ExpectedType, 0>
+          : ExpectedType extends 'time'
+            ? ClockTime
+            : ExpectedType extends 'timetz'
+              ? ClockTimeTz
+              : ExpectedType extends 'bigint'
+                ? string
+                : ExpectedType extends 'integer'
+                  ? number
+                  : ExpectedType extends 'json'
+                    ? object
+                    : ExpectedType extends 'boolean'
+                      ? boolean
+                      : ExpectedType extends 'null'
+                        ? null
+                        : ExpectedType extends 'uuid'
+                          ? string
+                          : ExpectedType extends 'datetime[]'
+                            ? DateTime[]
+                            : ExpectedType extends 'date[]'
+                              ? CalendarDate[]
+                              : ExpectedType extends 'time[]'
+                                ? ClockTime[]
+                                : ExpectedType extends 'timetz[]'
+                                  ? ClockTimeTz[]
+                                  : ExpectedType extends 'string[]'
+                                    ? OptsType extends { enum: infer EnumValue }
+                                      ? EnumValue extends readonly string[]
+                                        ? EnumValue[number][]
+                                        : never
+                                      : string[]
+                                    : ExpectedType extends 'bigint[]'
+                                      ? string[]
+                                      : ExpectedType extends 'number[]'
+                                        ? number[]
+                                        : ExpectedType extends 'integer[]'
+                                          ? number[]
+                                          : ExpectedType extends 'boolean[]'
+                                            ? boolean
+                                            : ExpectedType extends 'null[]'
+                                              ? null[]
+                                              : ExpectedType extends 'uuid[]'
+                                                ? string[]
+                                                : OpenapiShapeToInterface<ExpectedType, 0>
 
 type OpenapiShapeToInterface<T, Depth extends number> = Depth extends 30
   ? never
@@ -706,6 +788,8 @@ const typeToErrorMap: Record<PsychicParamsPrimitiveLiteral, string> = {
   null: 'expecting null',
   number: 'expected number or string number',
   string: 'expected string',
+  time: 'expected ISO time string',
+  timetz: 'expected ISO timetz string',
   uuid: 'expected uuid',
 
   'bigint[]': 'expected bigint array',
@@ -717,6 +801,8 @@ const typeToErrorMap: Record<PsychicParamsPrimitiveLiteral, string> = {
   'null[]': 'expecting null array',
   'number[]': 'expected number or string number array',
   'string[]': 'expected string array',
+  'time[]': 'expected ISO time string array',
+  'timetz[]': 'expected ISO timetz string array',
   'uuid[]': 'expected uuid array',
 } as const
 
@@ -736,6 +822,8 @@ const arrayTypeToNonArrayTypeMap = {
   'null[]': 'null',
   'number[]': 'number',
   'string[]': 'string',
+  'time[]': 'time',
+  'timetz[]': 'timetz',
   'uuid[]': 'uuid',
 } as const
 

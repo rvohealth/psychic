@@ -56,7 +56,12 @@ us humans, he says:
 
 */
 
-import { type CalendarDate, type DateTime } from '@rvoh/dream'
+import {
+  type CalendarDate,
+  type DateTime,
+  type ClockTime,
+  type ClockTimeTz,
+} from '@rvoh/dream'
 import {
   type BalloonColorsEnum,
   type Json,
@@ -77,9 +82,12 @@ export const schema = {
     nonJsonColumnNames: [
       'createdAt',
       'end',
+      'endtz',
       'id',
       'start',
+      'starttz',
       'times',
+      'timetzs',
       'updatedAt',
       'userId',
     ],
@@ -94,11 +102,20 @@ export const schema = {
         isArray: false,
       },
       end: {
-        coercedType: {} as string | null,
+        coercedType: {} as ClockTime | null,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
         dbType: 'time without time zone',
+        allowNull: true,
+        isArray: false,
+      },
+      endtz: {
+        coercedType: {} as ClockTimeTz | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'time with time zone',
         allowNull: true,
         isArray: false,
       },
@@ -112,7 +129,7 @@ export const schema = {
         isArray: false,
       },
       start: {
-        coercedType: {} as string,
+        coercedType: {} as ClockTime,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -120,12 +137,30 @@ export const schema = {
         allowNull: false,
         isArray: false,
       },
+      starttz: {
+        coercedType: {} as ClockTimeTz,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'time with time zone',
+        allowNull: false,
+        isArray: false,
+      },
       times: {
-        coercedType: {} as string[] | null,
+        coercedType: {} as ClockTime[] | null,
         enumType: null,
         enumArrayType: null,
         enumValues: null,
         dbType: 'time without time zone[]',
+        allowNull: true,
+        isArray: true,
+      },
+      timetzs: {
+        coercedType: {} as ClockTimeTz[] | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'time with time zone[]',
         allowNull: true,
         isArray: true,
       },
