@@ -21,8 +21,8 @@ describe('PsychicRouter', () => {
 
       const routes = router.routes as ControllerActionRouteConfig[]
       expect(routes).toHaveLength(1)
-      expect(routes[0].httpMethod).toEqual('get')
-      expect(routes[0].path).toEqual('/users/howyadoin')
+      expect(routes[0]!.httpMethod).toEqual('get')
+      expect(routes[0]!.path).toEqual('/users/howyadoin')
     })
   })
 })

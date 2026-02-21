@@ -1,4 +1,3 @@
-import Koa from 'koa'
 import PsychicController from '../../../src/controller/index.js'
 import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
 import Params from '../../../src/server/params.js'

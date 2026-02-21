@@ -35,7 +35,6 @@ export async function launchDevServer(
     if (onStdOut) {
       onStdOut(txt)
     } else {
-      // eslint-disable-next-line no-console
       console.log(txt)
     }
   })

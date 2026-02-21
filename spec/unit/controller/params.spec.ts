@@ -1,4 +1,3 @@
-import Koa from 'koa'
 import PsychicController from '../../../src/controller/index.js'
 import { createMockKoaContext } from './helpers/mockRequest.js'
 

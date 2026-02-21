@@ -42,9 +42,11 @@ export function createPsychicHttpInstance(app: Koa, sslCredentials: PsychicSslCr
         rejectUnauthorized: sslCredentials?.rejectUnauthorized,
         ...psychicApp.httpServerOptions,
       },
+      // eslint-disable-next-line @typescript-eslint/no-misused-promises
       callback,
     )
   } else {
+    // eslint-disable-next-line @typescript-eslint/no-misused-promises
     return http.createServer(psychicApp.httpServerOptions, callback)
   }
 }

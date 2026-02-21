@@ -105,7 +105,10 @@ describe('PsychicRouter', () => {
             })
           })
           const routeInfos = committedRoutes(router)
-          expect(routeInfos).toContainEqual({ method: 'get', path: '/user-settings/:userSettingId/friend/count' })
+          expect(routeInfos).toContainEqual({
+            method: 'get',
+            path: '/user-settings/:userSettingId/friend/count',
+          })
         })
       })
     })

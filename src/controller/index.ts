@@ -300,9 +300,9 @@ export default class PsychicController {
 
     const query = this.getCachedQuery()
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const body = (this.ctx.request as any).body ?? {}
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const routeParams = (this.ctx as any).params ?? {}
 
     const params: PsychicParamsDictionary = {
@@ -1338,7 +1338,7 @@ export default class PsychicController {
     const openapiEndpointRenderer = this.currentOpenapiRenderer
     if (!openapiEndpointRenderer) return
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const body = (this.ctx.request as any).body
     this.computedOpenapiNames.forEach(openapiName => {
       new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer).validateOpenapiRequestBody(body)

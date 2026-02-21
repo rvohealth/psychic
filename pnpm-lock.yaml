@@ -40,14 +40,14 @@ importers:
         specifier: ^15.3.0
         version: 15.3.0(koa@2.16.3)
       '@rvoh/dream':
-        specifier: ^2.2.3
+        specifier: ^2.3.1
         version: 2.3.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4)
       '@rvoh/dream-spec-helpers':
-        specifier: ^2.0.0
+        specifier: ^2.1.1
         version: 2.1.1(@types/node@22.17.1)(@types/pg@8.11.8)(pg@8.12.0)
       '@rvoh/psychic-spec-helpers':
-        specifier: ^2.0.0
-        version: 2.0.0(@rvoh/dream@2.3.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@rvoh/psychic@2.1.0(@rvoh/dream@2.3.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4)))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.5.4))(supertest@7.1.4)(typescript@5.5.4)
+        specifier: ^3.0.0-alpha.1
+        version: 3.0.0-alpha.1(@rvoh/dream@2.3.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@rvoh/psychic@2.1.0(@rvoh/dream@2.3.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4)))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.5.4))(supertest@7.1.4)(typescript@5.5.4)
       '@types/koa':
         specifier: ^2.15.0
         version: 2.15.0
@@ -151,7 +151,7 @@ importers:
         specifier: ^2.7.0
         version: 2.8.1
       tsx:
-        specifier: ^4.19.3
+        specifier: ^4.21.0
         version: 4.21.0
       typedoc:
         specifier: ^0.26.6
@@ -749,11 +749,11 @@ packages:
       pluralize-esm: '*'
       typescript: ^5
 
-  '@rvoh/psychic-spec-helpers@2.0.0':
-    resolution: {integrity: sha512-b9p0dv7yBDr2aiq0PJWwfyvX2s07sN2kBYFGn5YIKrHgABeWRO7EtZSYBCb937j7eWlCtHybDInhVxcMEwL7sg==}
+  '@rvoh/psychic-spec-helpers@3.0.0-alpha.1':
+    resolution: {integrity: sha512-DUt4Wc+rLiqgeJMpTu7U+iiRmJLUylBfVOJ9MURkgMb9R6oEkC0aqul9jIureOY189GkuZcyT24VX6Simq9t3g==}
     peerDependencies:
       '@rvoh/dream': '*'
-      '@rvoh/psychic': '*'
+      '@rvoh/psychic': ^3.0.0
       '@types/node': '*'
       '@types/supertest': '*'
       puppeteer: '*'
@@ -3364,13 +3364,16 @@ snapshots:
       typescript: 5.5.4
       yoctocolors: 2.1.2
 
-  '@rvoh/psychic-spec-helpers@2.0.0(@rvoh/dream@2.3.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@rvoh/psychic@2.1.0(@rvoh/dream@2.3.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4)))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.5.4))(supertest@7.1.4)(typescript@5.5.4)':
+  '@rvoh/psychic-spec-helpers@3.0.0-alpha.1(@rvoh/dream@2.3.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@rvoh/psychic@2.1.0(@rvoh/dream@2.3.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4)))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.5.4))(supertest@7.1.4)(typescript@5.5.4)':
     dependencies:
       '@rvoh/dream': 2.3.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4)
       '@rvoh/psychic': 2.1.0(@rvoh/dream@2.3.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@12.1.0)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.5.4))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.5.4))(@types/express@5.0.6)(commander@12.1.0)(express@5.2.1)(openapi-typescript@7.8.0(typescript@5.5.4))
       '@types/node': 22.17.1
       '@types/supertest': 6.0.3
+      commander: 14.0.3
       cookiejar: 2.1.4
+      dotenv: 17.2.3
+      pluralize-esm: 9.0.5
       puppeteer: 24.22.3(typescript@5.5.4)
       supertest: 7.1.4
       typescript: 5.5.4

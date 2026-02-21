@@ -1,4 +1,3 @@
-import Koa from 'koa'
 import PsychicRouter from '../../../src/router/index.js'
 import PsychicServer from '../../../src/server/index.js'
 import UsersController from '../../../test-app/src/app/controllers/UsersController.js'

@@ -1,4 +1,3 @@
-import Koa from 'koa'
 import PsychicController from '../../../src/controller/index.js'
 import InternalEncrypt from '../../../src/encrypt/internal-encrypt.js'
 import User from '../../../test-app/src/app/models/User.js'

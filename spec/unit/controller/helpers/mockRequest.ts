@@ -51,6 +51,7 @@ export function createMockKoaContext({
   let _type = ''
   const _headers: Record<string, string> = {}
 
+  // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
   const ctx = {
     method,
     url,
@@ -82,10 +83,10 @@ export function createMockKoaContext({
     },
     cookies: {
       get(name: string) {
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-return
         return cookies[name] ?? undefined
       },
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      set(name: string, value: string, _opts?: any) {
+      set(name: string, value: string) {
         cookies[name] = value
       },
     },
@@ -93,9 +94,10 @@ export function createMockKoaContext({
       _headers[key] = value
     },
     get(key: string) {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-return
       return headers[key] ?? _headers[key] ?? ''
     },
-    redirect(_url: string) {
+    redirect() {
       // no-op in mock
     },
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
