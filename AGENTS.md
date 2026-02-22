@@ -73,6 +73,8 @@ it.only('renders the data as json', () => {
 
 ## Running Feature Specs
 
+**Important:** Feature specs should only be run when explicitly instructed to do so by the user.
+
 ### All Feature Specs
 ```bash
 pnpm fspec
