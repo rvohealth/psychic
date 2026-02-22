@@ -779,16 +779,10 @@ export default class PsychicController {
    *
    * Attempts to retrieve or create a cached fast-json-stringify function
    * for the current endpoint and status code. Returns undefined if no
-   * OpenAPI schema exists, if response validation is not active, or if
-   * the controller's globalName is not set.
-   *
-   * We only use fast-json-stringify when response validation is active because
-   * fast-json-stringify enforces schema constraints at runtime (throws errors for
-   * type mismatches, missing required fields, etc.). When validation is disabled,
-   * we need to allow invalid data, so we fall back to toJson().
+   * OpenAPI schema exists or if the controller's globalName is not set.
    *
    * @param statusCode - the HTTP status code
-   * @returns A stringify function, or undefined if conditions aren't met
+   * @returns A stringify function, or undefined if no schema exists
    */
   private getFastJsonStringifyFunction(
     statusCode: number,
@@ -804,11 +798,6 @@ export default class PsychicController {
 
     // Try each openapiName until we find a schema
     for (const openapiName of this.computedOpenapiNames) {
-      // Only use fast-json-stringify when response validation is active.
-      // When validation is off, we need to allow invalid data through,
-      // but fast-json-stringify enforces schemas at runtime.
-      if (!openapiEndpointRenderer.shouldValidateResponseBody(openapiName)) continue
-
       const validator = new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer)
       const schemaWithComponents = validator.getResponseSchemaWithComponents(statusCode)
 
