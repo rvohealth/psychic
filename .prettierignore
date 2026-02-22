@@ -21,3 +21,5 @@ client/tsconfig.json
 boilerplate/
 spec-boilerplate/
 .global-cli-dist/
+
+AGENTS.md
