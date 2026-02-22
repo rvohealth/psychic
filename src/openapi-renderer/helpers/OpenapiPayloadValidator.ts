@@ -193,16 +193,50 @@ export default class OpenapiPayloadValidator {
     const openapiName = this.openapiName
 
     if (openapiEndpointRenderer.shouldValidateResponseBody(openapiName)) {
-      const openapiResponseBody = openapiEndpointRenderer['parseResponses']({
-        openapiName,
-        renderOpts: this.renderOpts,
-      }).openapi?.[statusCode.toString() as '200'] as OpenapiContent
-      const schema = openapiResponseBody?.['content']?.['application/json']?.['schema']
+      const schema = this.getResponseSchema(statusCode)
 
       if (schema) {
-        this.validateOrFail(data, schema as object, 'responseBody')
+        this.validateOrFail(data, schema, 'responseBody')
       }
     }
+  }
+
+  /**
+   * @internal
+   *
+   * Retrieves the OpenAPI response schema for a given status code.
+   * Returns undefined if no schema is defined for this endpoint/status code.
+   *
+   * @param statusCode - the HTTP status code
+   * @returns The response schema, or undefined if not found
+   */
+  public getResponseSchema(statusCode: number): object | undefined {
+    const openapiEndpointRenderer = this.openapiEndpointRenderer
+    const openapiName = this.openapiName
+
+    const openapiResponseBody = openapiEndpointRenderer['parseResponses']({
+      openapiName,
+      renderOpts: this.renderOpts,
+    }).openapi?.[statusCode.toString() as '200'] as OpenapiContent
+
+    return openapiResponseBody?.['content']?.['application/json']?.['schema']
+  }
+
+  /**
+   * @internal
+   *
+   * Retrieves the OpenAPI response schema for a given status code with
+   * all components merged in. This is the schema format needed by
+   * fast-json-stringify and AJV validators.
+   *
+   * @param statusCode - the HTTP status code
+   * @returns The response schema with components, or undefined if not found
+   */
+  public getResponseSchemaWithComponents(statusCode: number): object | undefined {
+    const schema = this.getResponseSchema(statusCode)
+    if (!schema) return undefined
+
+    return this.addComponentsToSchema(schema)
   }
 
   /**

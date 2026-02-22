@@ -180,4 +180,87 @@ describe('OpenapiPayloadValidator', () => {
       expect(() => validator2.validateOpenapiRequestBody({ field: 'text' as any })).toThrow()
     })
   })
+
+  describe('#getResponseSchema', () => {
+    it('returns the response schema for a given status code', () => {
+      const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show', {
+        responses: {
+          200: {
+            type: 'object',
+            properties: {
+              id: 'number',
+              name: 'string',
+            },
+          },
+        },
+      })
+
+      const validator = new OpenapiPayloadValidator('default', renderer)
+      const schema = validator.getResponseSchema(200)
+
+      expect(schema).toBeDefined()
+      expect(schema).toHaveProperty('type', 'object')
+      expect(schema).toHaveProperty('properties')
+    })
+
+    it('returns undefined when no schema exists for the status code', () => {
+      const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show', {
+        responses: {
+          200: {
+            type: 'object',
+            properties: {
+              id: 'number',
+            },
+          },
+        },
+      })
+
+      const validator = new OpenapiPayloadValidator('default', renderer)
+      const schema = validator.getResponseSchema(404)
+
+      expect(schema).toBeUndefined()
+    })
+  })
+
+  describe('#getResponseSchemaWithComponents', () => {
+    it('returns the response schema with components merged in', () => {
+      const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show', {
+        responses: {
+          200: {
+            type: 'object',
+            properties: {
+              id: 'number',
+              name: 'string',
+            },
+          },
+        },
+      })
+
+      const validator = new OpenapiPayloadValidator('default', renderer)
+      const schemaWithComponents = validator.getResponseSchemaWithComponents(200)
+
+      expect(schemaWithComponents).toBeDefined()
+      expect(schemaWithComponents).toHaveProperty('type', 'object')
+      expect(schemaWithComponents).toHaveProperty('properties')
+      expect(schemaWithComponents).toHaveProperty('components')
+    })
+
+    it('returns undefined when no schema exists for the status code', () => {
+      const renderer = new OpenapiEndpointRenderer(User, UsersController, 'show', {
+        responses: {
+          200: {
+            type: 'object',
+            properties: {
+              id: 'number',
+            },
+          },
+        },
+      })
+
+      const validator = new OpenapiPayloadValidator('default', renderer)
+      const schemaWithComponents = validator.getResponseSchemaWithComponents(404)
+
+      expect(schemaWithComponents).toBeUndefined()
+    })
+  })
 })

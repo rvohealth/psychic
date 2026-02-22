@@ -10,6 +10,7 @@ import {
   StrictInterface,
   ViewModel,
 } from '@rvoh/dream/types'
+import fastJsonStringify from 'fast-json-stringify'
 import Koa from 'koa'
 import { ControllerHook } from '../controller/hooks.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
@@ -48,6 +49,7 @@ import EnvInternal from '../helpers/EnvInternal.js'
 import toJson from '../helpers/toJson.js'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
 import OpenapiPayloadValidator from '../openapi-renderer/helpers/OpenapiPayloadValidator.js'
+import { cacheStringify, getCachedStringify } from '../openapi-renderer/helpers/stringify-cache.js'
 import PsychicApp from '../psychic-app/index.js'
 import Params, {
   ParamsCastOptions,
@@ -755,10 +757,79 @@ export default class PsychicController {
     if (this._responseSent) return
 
     this.ctx.status = statusCode
-    this.ctx.type = 'json'
-    this.ctx.body = toJson(data)
+
+    // Try to use fast-json-stringify if an OpenAPI schema exists for this endpoint
+    const stringifyFn = this.getFastJsonStringifyFunction(statusCode)
+
+    if (stringifyFn) {
+      this.ctx.type = 'application/json'
+      this.ctx.body = stringifyFn(data)
+    } else {
+      // Fall back to toJson() if no OpenAPI schema exists
+      this.ctx.type = 'json'
+      this.ctx.body = toJson(data)
+    }
+
     this._responseSent = true
     this.logIfDevelopment()
+  }
+
+  /**
+   * @internal
+   *
+   * Attempts to retrieve or create a cached fast-json-stringify function
+   * for the current endpoint and status code. Returns undefined if no
+   * OpenAPI schema exists, if response validation is not active, or if
+   * the controller's globalName is not set.
+   *
+   * We only use fast-json-stringify when response validation is active because
+   * fast-json-stringify enforces schema constraints at runtime (throws errors for
+   * type mismatches, missing required fields, etc.). When validation is disabled,
+   * we need to allow invalid data, so we fall back to toJson().
+   *
+   * @param statusCode - the HTTP status code
+   * @returns A stringify function, or undefined if conditions aren't met
+   */
+  private getFastJsonStringifyFunction(
+    statusCode: number,
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  ): ((data: any) => string) | undefined {
+    const openapiEndpointRenderer = this.currentOpenapiRenderer
+    if (!openapiEndpointRenderer) return undefined
+
+    const controllerClass = this.constructor as typeof PsychicController
+
+    // If globalName is not set (e.g., in some unit tests), fall back to toJson()
+    if (!controllerClass._globalName) return undefined
+
+    // Try each openapiName until we find a schema
+    for (const openapiName of this.computedOpenapiNames) {
+      // Only use fast-json-stringify when response validation is active.
+      // When validation is off, we need to allow invalid data through,
+      // but fast-json-stringify enforces schemas at runtime.
+      if (!openapiEndpointRenderer.shouldValidateResponseBody(openapiName)) continue
+
+      const validator = new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer)
+      const schemaWithComponents = validator.getResponseSchemaWithComponents(statusCode)
+
+      if (!schemaWithComponents) continue
+
+      // Generate cache key
+      const cacheKey = `${controllerClass.globalName}#${this.action}|${openapiName}|${statusCode}`
+
+      // Check cache first
+      const cachedStringify = getCachedStringify(cacheKey)
+      if (cachedStringify) return cachedStringify
+
+      // Compile and cache the stringify function
+      // If compilation fails, let the error propagate (dead programs tell no lies)
+      const stringifyFn = fastJsonStringify(schemaWithComponents)
+      cacheStringify(cacheKey, stringifyFn)
+
+      return stringifyFn
+    }
+
+    return undefined
   }
 
   private koaSendStatus(statusCode: number) {
