@@ -70,6 +70,7 @@
     "ajv-formats": "^3.0.1",
     "commander": "^12.1.0",
     "dotenv": "^16.4.5",
+    "fast-json-stringify": "^6.3.0",
     "pluralize-esm": "^9.0.5",
     "yoctocolors": "^2.1.1"
   },
