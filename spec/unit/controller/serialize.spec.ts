@@ -42,13 +42,13 @@ describe('PsychicController', () => {
       const controller1 = new MyController(ctx, { action: 'index' })
 
       await controller1.index()
-      expect(toJsonSpy).toHaveBeenCalledWith([{ id: user1.id }, { id: user2.id }], false)
+      expect(toJsonSpy).toHaveBeenCalledWith([{ id: user1.id }, { id: user2.id }])
 
       toJsonSpy.mockReset()
 
       const controller2 = new MyController(ctx, { action: 'show' })
       await controller2.show()
-      expect(toJsonSpy).toHaveBeenCalledWith({ id: user1.id, email: 'how@yadoin', name: 'fred' }, false)
+      expect(toJsonSpy).toHaveBeenCalledWith({ id: user1.id, email: 'how@yadoin', name: 'fred' })
     })
 
     context('when the serializer is specified in the OpenAPI decorator', () => {
@@ -68,7 +68,7 @@ describe('PsychicController', () => {
         const controller = new MyController(ctx, { action: 'index' })
 
         await controller.index()
-        expect(toJsonSpy).toHaveBeenCalledWith([{ id: user1.id }, { id: user2.id }], false)
+        expect(toJsonSpy).toHaveBeenCalledWith([{ id: user1.id }, { id: user2.id }])
       })
     })
 
@@ -132,16 +132,13 @@ describe('PsychicController', () => {
       it('identifies serializer attached to model class and uses it to serialize the object', () => {
         const controller = new MyController(ctx, { action: 'show' })
         controller.show()
-        expect(toJsonSpy).toHaveBeenCalledWith({ greeting: 'hello world' }, false)
+        expect(toJsonSpy).toHaveBeenCalledWith({ greeting: 'hello world' })
       })
 
       it('identifies serializer attached to model class and uses it to serialize each object in an array', () => {
         const controller = new MyController(ctx, { action: 'show' })
         controller.index()
-        expect(toJsonSpy).toHaveBeenCalledWith(
-          [{ greeting: 'hello world' }, { greeting: 'howdy world' }],
-          false,
-        )
+        expect(toJsonSpy).toHaveBeenCalledWith([{ greeting: 'hello world' }, { greeting: 'howdy world' }])
       })
 
       context('with instances of different classes', () => {
@@ -154,10 +151,7 @@ describe('PsychicController', () => {
         it('allows rendering of different types in the same array', () => {
           const controller = new MyController2(ctx, { action: 'show' })
           controller.index()
-          expect(toJsonSpy).toHaveBeenCalledWith(
-            [{ greeting: 'hello world' }, { greeting: 'hello goodbye' }],
-            false,
-          )
+          expect(toJsonSpy).toHaveBeenCalledWith([{ greeting: 'hello world' }, { greeting: 'hello goodbye' }])
         })
       })
 
@@ -171,10 +165,7 @@ describe('PsychicController', () => {
         it('calls render on each serializer', () => {
           const controller = new MyController2(ctx, { action: 'show' })
           controller.index()
-          expect(toJsonSpy).toHaveBeenCalledWith(
-            [{ greeting: 'hello world' }, { greeting: 'hello goodbye' }],
-            false,
-          )
+          expect(toJsonSpy).toHaveBeenCalledWith([{ greeting: 'hello world' }, { greeting: 'hello goodbye' }])
         })
       })
     })
@@ -238,15 +229,12 @@ describe('PsychicController', () => {
         const controller = new MyController(ctx, { action: 'show' })
 
         await controller.runAction()
-        expect(toJsonSpy).toHaveBeenCalledWith(
-          {
-            id: user2.id,
-            email: 'how@yadoin',
-            name: 'fred',
-            howyadoin: 'howyadoin',
-          },
-          false,
-        )
+        expect(toJsonSpy).toHaveBeenCalledWith({
+          id: user2.id,
+          email: 'how@yadoin',
+          name: 'fred',
+          howyadoin: 'howyadoin',
+        })
 
         await controller.show()
       })

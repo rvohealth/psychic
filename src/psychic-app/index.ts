@@ -352,11 +352,6 @@ Try setting it to something valid, like:
     return this._saltRounds
   }
 
-  private _sanitizeResponseJson: boolean = false
-  public get sanitizeResponseJson() {
-    return this._sanitizeResponseJson
-  }
-
   private _packageManager: DreamAppAllowedPackageManagersEnum
   public get packageManager() {
     return this._packageManager
@@ -658,15 +653,13 @@ Try setting it to something valid, like:
                                     ? number
                                     : Opt extends 'saltRounds'
                                       ? number
-                                      : Opt extends 'sanitizeResponseJson'
-                                        ? boolean
-                                        : Opt extends 'packageManager'
-                                          ? DreamAppAllowedPackageManagersEnum
-                                          : Opt extends 'inflections'
-                                            ? () => void | Promise<void>
-                                            : Opt extends 'routes'
-                                              ? (r: PsychicRouter) => void | Promise<void>
-                                              : never,
+                                      : Opt extends 'packageManager'
+                                        ? DreamAppAllowedPackageManagersEnum
+                                        : Opt extends 'inflections'
+                                          ? () => void | Promise<void>
+                                          : Opt extends 'routes'
+                                            ? (r: PsychicRouter) => void | Promise<void>
+                                            : never,
   ): void
   public set<Opt extends PsychicAppOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -750,10 +743,6 @@ Try setting it to something valid, like:
         this._saltRounds = value as number
         break
 
-      case 'sanitizeResponseJson':
-        this._sanitizeResponseJson = value as boolean
-        break
-
       case 'openapi':
         this._openapi = {
           ...this.openapi,
@@ -811,7 +800,6 @@ export type PsychicAppOption =
   | 'port'
   | 'routes'
   | 'saltRounds'
-  | 'sanitizeResponseJson'
   | 'ssl'
 
 export interface PsychicAppSpecialHooks {

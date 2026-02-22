@@ -36,7 +36,7 @@ describe('PsychicController', () => {
     it('sets status and sends json', () => {
       const controller = new MyController(ctx, { action: 'create' })
       controller.create()
-      expect(toJsonSpy).toHaveBeenCalledWith('created', false)
+      expect(toJsonSpy).toHaveBeenCalledWith('created')
       expect(ctx.status).toEqual(201)
     })
 
@@ -44,7 +44,7 @@ describe('PsychicController', () => {
       it('calls 200 status', () => {
         const controller = new MyController(ctx, { action: 'update' })
         controller.update()
-        expect(toJsonSpy).toHaveBeenCalledWith('updated', false)
+        expect(toJsonSpy).toHaveBeenCalledWith('updated')
         expect(ctx.status).toEqual(200)
       })
     })

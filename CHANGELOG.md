@@ -2,6 +2,8 @@
 
 Replaces Express with [Koa](https://koajs.com/) as the underlying HTTP framework. This is a breaking change that affects middleware, error handling, and several dependencies. For the most part, there are no breaking changes, save small ways in which the error handling mechanisms are defined, in addition to custom middleware that you may have been utilizing. Follow this guide to help bring your app up to date.
 
+- Removes the `sanitizeResponseJson` since it is truly unnecessary (see CHANGELOG note for 1.7.0 for why it was introduced)
+
 ### Dependencies
 
 #### Remove

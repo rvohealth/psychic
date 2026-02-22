@@ -756,7 +756,7 @@ export default class PsychicController {
 
     this.ctx.status = statusCode
     this.ctx.type = 'json'
-    this.ctx.body = toJson(data, PsychicApp.getOrFail().sanitizeResponseJson)
+    this.ctx.body = toJson(data)
     this._responseSent = true
     this.logIfDevelopment()
   }
