@@ -11,6 +11,9 @@ importers:
 
   .:
     dependencies:
+      '@koa/etag':
+        specifier: ^5.0.2
+        version: 5.0.2(koa@3.1.1)
       ajv:
         specifier: ^8.17.1
         version: 8.17.1
@@ -108,9 +111,6 @@ importers:
       koa-conditional-get:
         specifier: ^3.0.0
         version: 3.0.0
-      koa-etag:
-        specifier: ^5.0.0
-        version: 5.0.0(koa@3.1.1)
       koa-passport:
         specifier: ^6.0.0
         version: 6.0.0
@@ -596,6 +596,11 @@ packages:
   '@koa/cors@5.0.0':
     resolution: {integrity: sha512-x/iUDjcS90W69PryLDIMgFyV21YLTnG9zOpPXS7Bkt2b8AsY3zZsIpOLBkYr9fBcF3HbkKaER5hOBZLfpLgYNw==}
     engines: {node: '>= 14.0.0'}
+
+  '@koa/etag@5.0.2':
+    resolution: {integrity: sha512-V/ihQ2bjjBKHaR96fzDVZdF+s3Alsk0PZiCdT1MCahKPXo42jE63vBLZRcSjGZCrIkVIOkrEdKaJIjLU7mnenQ==}
+    peerDependencies:
+      koa: '>= 2'
 
   '@koa/router@15.3.0':
     resolution: {integrity: sha512-s87hWJjFYky2Z97u8jzah73sSHp4IZivD/2PZCuspHRvcKU69OPLoBIbKigVlBmS50yFTh9GHFfr1hDag4+wXw==}
@@ -1908,11 +1913,6 @@ packages:
   koa-conditional-get@3.0.0:
     resolution: {integrity: sha512-VKyPS7SuNH26TjTV2IRz+oh0HV/jc2lYAo51PTQTkj0XFn8ebNZW9riczmrW7ZVBFSnls1Z88DPUYKnvVymruA==}
 
-  koa-etag@5.0.0:
-    resolution: {integrity: sha512-0zzyT9tz9dgutmv9mal1zZ7lNguvAmKLN7u+N5DfODmedq+clAkxvLC2MdtfIlthvgYooMdU6L3VwCPzJ5SlGg==}
-    peerDependencies:
-      koa: '>= 2'
-
   koa-passport@6.0.0:
     resolution: {integrity: sha512-bgcrQN7Ylfgi1PVr5l6hHYkr38RHUzx+ty3m7e/xoTte8MR0zbDt6+pvP3/nuF/yXL6Ba7IzX1rSqmCy6OrrIw==}
     engines: {node: '>= 4'}
@@ -3223,6 +3223,12 @@ snapshots:
   '@koa/cors@5.0.0':
     dependencies:
       vary: 1.1.2
+
+  '@koa/etag@5.0.2(koa@3.1.1)':
+    dependencies:
+      '@types/etag': 1.8.4
+      etag: 1.8.1
+      koa: 3.1.1
 
   '@koa/router@15.3.0(koa@3.1.1)':
     dependencies:
@@ -4726,12 +4732,6 @@ snapshots:
   koa-compose@4.1.0: {}
 
   koa-conditional-get@3.0.0: {}
-
-  koa-etag@5.0.0(koa@3.1.1):
-    dependencies:
-      '@types/etag': 1.8.4
-      etag: 1.8.1
-      koa: 3.1.1
 
   koa-passport@6.0.0:
     dependencies:
