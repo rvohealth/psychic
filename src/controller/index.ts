@@ -12,6 +12,7 @@ import {
 } from '@rvoh/dream/types'
 import fastJsonStringify from 'fast-json-stringify'
 import Koa from 'koa'
+import { debuglog } from 'node:util'
 import { ControllerHook } from '../controller/hooks.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
 import HttpStatusBadGateway from '../error/http/BadGateway.js'
@@ -805,16 +806,24 @@ export default class PsychicController {
 
       if (!schemaWithComponents) continue
 
-      // Generate cache key
       const cacheKey = `${controllerClass.globalName}#${this.action}|${openapiName}|${statusCode}`
-
-      // Check cache first
       const cachedStringify = getCachedStringify(cacheKey)
       if (cachedStringify) return cachedStringify
 
-      // Compile and cache the stringify function
-      // If compilation fails, let the error propagate (dead programs tell no lies)
-      const stringifyFn = fastJsonStringify(schemaWithComponents)
+      let stringifyFn: <TDoc extends object = object>(doc: TDoc) => string
+
+      if (debuglog('json').enabled) {
+        const result = fastJsonStringify(schemaWithComponents, {
+          mode: 'debug',
+          ajv: { validateFormats: false },
+        })
+        PsychicApp.log('fast-json-stringify code:', result.code)
+        // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+        stringifyFn = fastJsonStringify.restore(result as any)
+      } else {
+        stringifyFn = fastJsonStringify(schemaWithComponents, { ajv: { validateFormats: false } })
+      }
+
       cacheStringify(cacheKey, stringifyFn)
 
       return stringifyFn

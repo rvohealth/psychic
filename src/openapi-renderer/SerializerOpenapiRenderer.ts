@@ -240,8 +240,9 @@ export default class SerializerOpenapiRenderer {
           // rendersOnes  //
           //////////////////
           case 'rendersOne': {
+            const outputAttributeName = this.setCase(attribute.options.as ?? attribute.name)
+
             try {
-              const outputAttributeName = this.setCase(attribute.options.as ?? attribute.name)
               const { associationOpts, referencedSerializersAndOpenapiSchemaBodyShorthand } =
                 associationOpenapi(attribute, DataTypeForOpenapi, alreadyExtractedDescendantSerializers)
               const optional = attribute.options.optional ?? associationOpts.optional
@@ -267,7 +268,15 @@ export default class SerializerOpenapiRenderer {
 
               return accumulator
             } catch (error) {
-              if (error instanceof CallingSerializersThrewError) return accumulator
+              if (error instanceof CallingSerializersThrewError) {
+                accumulator[outputAttributeName] = {
+                  type: 'object',
+                  additionalProperties: true as any,
+                  description: `Serializer ${(this.serializer as unknown as { globalName: string })['globalName']} includes a rendersOne "${outputAttributeName}" with an OpenAPI shape that cannot be defined. This will break fast-json-stringify. Define the OpenAPI shape or disableFastJson on the endpoint.`,
+                }
+                return accumulator
+              }
+
               if (error instanceof AttemptedToDeriveDescendentSerializersFromNonSerializer)
                 throw new ExpectedSerializerForRendersOneOrManyOption(
                   'rendersOne',
@@ -285,8 +294,9 @@ export default class SerializerOpenapiRenderer {
           // rendersManys  //
           ///////////////////
           case 'rendersMany': {
+            const outputAttributeName = this.setCase(attribute.options.as ?? attribute.name)
+
             try {
-              const outputAttributeName = this.setCase(attribute.options.as ?? attribute.name)
               const { referencedSerializersAndOpenapiSchemaBodyShorthand } = associationOpenapi(
                 attribute,
                 DataTypeForOpenapi,
@@ -303,7 +313,14 @@ export default class SerializerOpenapiRenderer {
 
               return accumulator
             } catch (error) {
-              if (error instanceof CallingSerializersThrewError) return accumulator
+              if (error instanceof CallingSerializersThrewError) {
+                accumulator[outputAttributeName] = {
+                  type: 'array',
+                  items: { type: 'object', additionalProperties: true as any },
+                  description: `Serializer ${(this.serializer as unknown as { globalName: string })['globalName']} includes a rendersMany "${outputAttributeName}" with an OpenAPI shape that cannot be defined. This will break fast-json-stringify. Define the OpenAPI shape or disableFastJson on the endpoint.`,
+                }
+                return accumulator
+              }
               if (error instanceof AttemptedToDeriveDescendentSerializersFromNonSerializer)
                 throw new ExpectedSerializerForRendersOneOrManyOption(
                   'rendersMany',
