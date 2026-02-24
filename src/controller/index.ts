@@ -759,7 +759,9 @@ export default class PsychicController {
     this.ctx.status = statusCode
 
     // Try to use fast-json-stringify if an OpenAPI schema exists for this endpoint
-    const stringifyFn = this.getFastJsonStringifyFunction(statusCode)
+    const stringifyFn = this.currentOpenapiRenderer?.['disableFastJson']
+      ? undefined
+      : this.getFastJsonStringifyFunction(statusCode)
 
     if (stringifyFn) {
       this.ctx.type = 'application/json'

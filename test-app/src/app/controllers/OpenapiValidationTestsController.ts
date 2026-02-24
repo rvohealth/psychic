@@ -193,6 +193,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
 
   @OpenAPI({
     status: 200,
+    disableFastJson: true,
     responses: {
       200: {
         type: 'number',
@@ -241,6 +242,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
 
   @OpenAPI({
     status: 200,
+    disableFastJson: true,
     responses: {
       200: {
         type: 'object',
@@ -261,6 +263,8 @@ export default class OpenapiValidationTestsController extends ApplicationControl
 
   @OpenAPI({
     status: 200,
+    disableFastJson: true,
+    validate: { all: false },
     responses: {
       200: {
         $schema: 'CustomSchemaObject',

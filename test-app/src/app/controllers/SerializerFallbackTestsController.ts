@@ -28,6 +28,7 @@ export default class SerializerFallbackTestsController extends ApplicationContro
 
   @OpenAPI(PetSerializer, {
     status: 200,
+    disableFastJson: true,
     validate: {
       // intentionally mis-matching the serializer here
       // with the provided serializerKey, to ensure that
