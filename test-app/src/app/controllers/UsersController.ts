@@ -155,13 +155,30 @@ export default class UsersController extends ApplicationController {
     this.ok(users)
   }
 
-  @OpenAPI(User, {
+  @OpenAPI({
     status: 200,
-    serializerKey: 'withPosts',
+    // serializerKey: 'withPosts',
+    responses: {
+      200: {
+        type: 'object',
+        properties: {
+          results: {
+            type: 'array',
+            items: {
+              anyOf: [
+                {
+                  $serializer: UserWithPostsSerializer,
+                },
+              ],
+            },
+          },
+        },
+      },
+    },
   })
   public async show() {
-    const user = await User.findOrFail(this.castParam('id', 'bigint'))
-    this.ok(user)
+    const user = await User.preload('posts', 'comments').findOrFail(this.castParam('id', 'bigint'))
+    this.ok({ results: [UserWithPostsSerializer(user).render()] })
   }
 
   @OpenAPI(UserWithPostsSerializer, {

@@ -60,6 +60,7 @@ import Params, {
 import Session, { CustomSessionCookieOptions } from '../session/index.js'
 import logIfDevelopment from './helpers/logIfDevelopment.js'
 import renderDreamOrVewModel from './helpers/renderDreamOrViewModel.js'
+import { Schema, SchemaObject } from 'ajv'
 
 type SerializerResult = {
   [key: string]: // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -799,7 +800,7 @@ export default class PsychicController {
     // Try each openapiName until we find a schema
     for (const openapiName of this.computedOpenapiNames) {
       const validator = new OpenapiPayloadValidator(openapiName, openapiEndpointRenderer)
-      const schemaWithComponents = validator.getResponseSchemaWithComponents(statusCode)
+      const schemaWithComponents = validator.getResponseSchemaWithComponents(statusCode) as SchemaObject
 
       if (!schemaWithComponents) continue
 
@@ -813,6 +814,10 @@ export default class PsychicController {
       // Compile and cache the stringify function
       // If compilation fails, let the error propagate (dead programs tell no lies)
       const stringifyFn = fastJsonStringify(schemaWithComponents)
+      console.dir(schemaWithComponents, { depth: null })
+      // const stringifyFn = fastJsonStringify(schemaWithComponents, {
+      //   schema: { components: (schemaWithComponents as { components: Schema }).components },
+      // })
       cacheStringify(cacheKey, stringifyFn)
 
       return stringifyFn

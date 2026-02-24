@@ -4178,14 +4178,26 @@
         "tags": [],
         "responses": {
           "200": {
+            "description": "Success",
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/UserWithPosts"
+                  "type": "object",
+                  "properties": {
+                    "results": {
+                      "type": "array",
+                      "items": {
+                        "anyOf": [
+                          {
+                            "$ref": "#/components/schemas/UserWithPosts"
+                          }
+                        ]
+                      }
+                    }
+                  }
                 }
               }
-            },
-            "description": "Success"
+            }
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
