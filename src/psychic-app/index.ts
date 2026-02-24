@@ -161,11 +161,7 @@ export default class PsychicApp {
    */
   private buildOpenapiCache(): void {
     Object.keys(this.openapi).forEach(openapiName => {
-      if (this.openapi[openapiName]?.validate) {
-        this.cacheOpenapiDoc(openapiName)
-      } else {
-        this.ignoreOpenapiDoc(openapiName)
-      }
+      this.cacheOpenapiDoc(openapiName)
     })
   }
 

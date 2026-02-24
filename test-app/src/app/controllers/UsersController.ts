@@ -164,6 +164,19 @@ export default class UsersController extends ApplicationController {
     this.ok(user)
   }
 
+  @OpenAPI({
+    status: 200,
+    responses: {
+      200: {
+        $serializer: UserWithPostsSerializer,
+      },
+    },
+  })
+  public async testFastJsonStringifyWithSerializerRef() {
+    const user = await User.preload('posts', 'comments').findOrFail(this.castParam('id', 'bigint'))
+    this.ok(UserWithPostsSerializer(user))
+  }
+
   @OpenAPI(UserWithPostsSerializer, {
     status: 200,
   })

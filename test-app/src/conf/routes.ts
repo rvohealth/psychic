@@ -70,6 +70,11 @@ export default function routes(r: PsychicRouter) {
     r.resources('pets', { only: [] })
     r.get('ping', UsersController, 'ping')
     r.get('with-posts', UsersController, 'showWithPosts')
+    r.get(
+      'fast-json-stringify-with-serializer-ref',
+      UsersController,
+      'testFastJsonStringifyWithSerializerRef',
+    )
   })
   r.resources('pets', { only: ['create', 'update'] }, r => {
     r.put('update2', PetsController, 'update2')
