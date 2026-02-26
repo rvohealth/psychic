@@ -6,6 +6,7 @@ import ApplicationController from './ApplicationController.js'
 
 export default class PetsController extends ApplicationController {
   @OpenAPI(Pet, {
+    fastJsonStringify: true,
     status: 201,
   })
   public async create() {
@@ -15,6 +16,7 @@ export default class PetsController extends ApplicationController {
   }
 
   @OpenAPI(Pet, {
+    fastJsonStringify: true,
     status: 204,
   })
   public async update() {
@@ -36,6 +38,7 @@ export default class PetsController extends ApplicationController {
   }
 
   @OpenAPI(Post, {
+    fastJsonStringify: true,
     status: 204,
   })
   public myPosts() {

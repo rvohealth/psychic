@@ -16,6 +16,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     requestBody: {
       type: 'object',
@@ -29,6 +30,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     requestBody: {
       type: 'object',
@@ -42,6 +44,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     requestBody: {
       type: 'object',
@@ -55,6 +58,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 204,
     requestBody: {
       type: 'object',
@@ -70,6 +74,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     requestBody: {
       type: 'object',
@@ -97,6 +102,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 204,
     requestBody: {
       $ref: '#/components/schemas/CustomSchemaObject',
@@ -107,6 +113,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     query: {
       stringParam: {
@@ -148,6 +155,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     query: {
       stringArray: {
@@ -166,6 +174,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     query: {
       requiredStringParam: {
@@ -193,7 +202,6 @@ export default class OpenapiValidationTestsController extends ApplicationControl
 
   @OpenAPI({
     status: 200,
-    disableFastJson: true,
     responses: {
       200: {
         type: 'number',
@@ -205,6 +213,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     responses: {
       200: {
@@ -242,7 +251,6 @@ export default class OpenapiValidationTestsController extends ApplicationControl
 
   @OpenAPI({
     status: 200,
-    disableFastJson: true,
     responses: {
       200: {
         type: 'object',
@@ -263,7 +271,6 @@ export default class OpenapiValidationTestsController extends ApplicationControl
 
   @OpenAPI({
     status: 200,
-    disableFastJson: true,
     validate: { all: false },
     responses: {
       200: {
@@ -276,6 +283,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     headers: {
       myDate: {
@@ -308,6 +316,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     responses: {
       200: {
@@ -323,6 +332,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI(ModelWithoutSerializer, {
+    fastJsonStringify: true,
     status: 204,
   })
   public dontThrowMissingSerializersDefinition204() {
@@ -330,6 +340,7 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   }
 
   @OpenAPI(ModelWithoutSerializer, {
+    fastJsonStringify: true,
     status: 201,
     responses: {
       201: {

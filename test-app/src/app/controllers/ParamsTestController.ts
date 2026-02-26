@@ -12,6 +12,7 @@ export default class ParamsTestController extends ApplicationController {
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     security: [],
     requestBody: {
       type: 'object',
@@ -27,6 +28,7 @@ export default class ParamsTestController extends ApplicationController {
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     security: [],
     query: {
       'myArray[]': {
@@ -47,6 +49,7 @@ export default class ParamsTestController extends ApplicationController {
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     security: [],
     query: {
       myArray: {

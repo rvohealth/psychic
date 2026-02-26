@@ -3,6 +3,7 @@ import ApplicationController from './ApplicationController.js'
 
 export default class OpenapiMissingRouteTestController extends ApplicationController {
   @OpenAPI({
+    fastJsonStringify: true,
     status: 204,
     requestBody: {
       type: 'object',

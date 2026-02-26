@@ -8,6 +8,7 @@ export default class OpenapiOverridesTestController extends ApplicationControlle
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
   })
   public testOpenapiConfigOverrides() {

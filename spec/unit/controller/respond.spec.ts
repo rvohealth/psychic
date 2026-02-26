@@ -15,6 +15,7 @@ describe('PsychicController', () => {
 
     class MyController extends PsychicController {
       @OpenAPI(User, {
+        fastJsonStringify: true,
         status: 201,
       })
       public create() {

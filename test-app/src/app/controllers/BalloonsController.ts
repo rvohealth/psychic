@@ -6,6 +6,7 @@ import ApplicationController from './ApplicationController.js'
 
 export default class BalloonsController extends ApplicationController {
   @OpenAPI(Balloon, {
+    fastJsonStringify: true,
     status: 200,
     many: true,
   })
@@ -15,6 +16,7 @@ export default class BalloonsController extends ApplicationController {
   }
 
   @OpenAPI(Balloon, {
+    fastJsonStringify: true,
     status: 200,
     paginate: true,
   })
@@ -24,6 +26,7 @@ export default class BalloonsController extends ApplicationController {
   }
 
   @OpenAPI(Balloon, {
+    fastJsonStringify: true,
     status: 200,
     cursorPaginate: true,
   })
@@ -33,6 +36,7 @@ export default class BalloonsController extends ApplicationController {
   }
 
   @OpenAPI(Balloon, {
+    fastJsonStringify: true,
     status: 200,
     scrollPaginate: true,
   })
@@ -42,6 +46,7 @@ export default class BalloonsController extends ApplicationController {
   }
 
   @OpenAPI([Balloon, Pet], {
+    fastJsonStringify: true,
     status: 200,
     many: true,
   })
@@ -51,6 +56,7 @@ export default class BalloonsController extends ApplicationController {
   }
 
   @OpenAPI([Balloon, Pet, MyViewModel], {
+    fastJsonStringify: true,
     status: 200,
     many: true,
     serializerKey: 'default',
@@ -61,6 +67,7 @@ export default class BalloonsController extends ApplicationController {
   }
 
   @OpenAPI(Balloon, {
+    fastJsonStringify: true,
     status: 200,
   })
   public async show() {

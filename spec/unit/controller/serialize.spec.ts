@@ -1,5 +1,5 @@
-import Koa from 'koa'
 import { DreamApp, ObjectSerializer } from '@rvoh/dream'
+import Koa from 'koa'
 import { MockInstance } from 'vitest'
 import { BeforeAction, OpenAPI } from '../../../src/controller/decorators.js'
 import PsychicController from '../../../src/controller/index.js'
@@ -55,6 +55,7 @@ describe('PsychicController', () => {
       it('identifies serializer attached to model class and uses it to serialize', async () => {
         class MyController extends PsychicController {
           @OpenAPI([User, Pet], {
+            fastJsonStringify: true,
             serializerKey: 'summary',
           })
           public async index() {

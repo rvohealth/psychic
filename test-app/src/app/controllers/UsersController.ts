@@ -59,6 +59,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI(User, {
+    fastJsonStringify: true,
     status: 201,
     serializerKey: 'extra',
   })
@@ -68,6 +69,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI(User, {
+    fastJsonStringify: true,
     status: 200,
     many: true,
     serializerKey: 'extra',
@@ -78,6 +80,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI(User, {
+    fastJsonStringify: true,
     status: 200,
     paginate: true,
     serializerKey: 'summary',
@@ -90,6 +93,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI(User, {
+    fastJsonStringify: true,
     status: 200,
     paginate: {
       body: 'page',
@@ -104,6 +108,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI(User, {
+    fastJsonStringify: true,
     status: 200,
     cursorPaginate: true,
     serializerKey: 'summary',
@@ -116,6 +121,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI(User, {
+    fastJsonStringify: true,
     status: 200,
     cursorPaginate: {
       body: 'cursor',
@@ -130,6 +136,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI(User, {
+    fastJsonStringify: true,
     status: 200,
     scrollPaginate: true,
     serializerKey: 'summary',
@@ -142,6 +149,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI(User, {
+    fastJsonStringify: true,
     status: 200,
     scrollPaginate: {
       body: 'cursor',
@@ -156,6 +164,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI(User, {
+    fastJsonStringify: true,
     status: 200,
     serializerKey: 'withPosts',
   })
@@ -165,6 +174,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     responses: {
       200: {
@@ -178,6 +188,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI(UserWithPostsSerializer, {
+    fastJsonStringify: true,
     status: 200,
   })
   public async showWithPosts() {
@@ -186,6 +197,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI(User, {
+    fastJsonStringify: true,
     status: 204,
     pathParams: { id: { description: 'The ID of the User' } },
   })
@@ -223,6 +235,7 @@ export default class UsersController extends ApplicationController {
   }
 
   @OpenAPI({
+    fastJsonStringify: true,
     status: 200,
     responses: {
       200: {
