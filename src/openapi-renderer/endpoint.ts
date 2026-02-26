@@ -101,7 +101,7 @@ export default class OpenapiEndpointRenderer<
   private omitDefaultResponses: OpenapiEndpointRendererOpts['omitDefaultResponses']
   private defaultResponse: OpenapiEndpointRendererOpts['defaultResponse']
   private validate: OpenapiValidateOption | undefined = undefined
-  private disableFastJson: boolean = false
+  private fastJsonStringify: boolean = false
 
   /**
    * instantiates a new OpenapiEndpointRenderer.
@@ -142,7 +142,7 @@ export default class OpenapiEndpointRenderer<
       omitDefaultResponses,
       defaultResponse,
       validate,
-      disableFastJson,
+      fastJsonStringify,
     }: OpenapiEndpointRendererOpts<DreamsOrSerializersOrViewModels, ForOption> = {},
   ) {
     this.requestBody = requestBody
@@ -170,7 +170,7 @@ export default class OpenapiEndpointRenderer<
         : omitDefaultResponses
     this.defaultResponse = defaultResponse
     this.validate = validate
-    this.disableFastJson = disableFastJson ?? false
+    this.fastJsonStringify = fastJsonStringify ?? false
   }
 
   /**
@@ -1527,9 +1527,9 @@ export interface OpenapiEndpointRendererOpts<
 
   /**
    * The OpenAPI response body automatically enables fast-json-stringify.
-   * If you want to render via JSON.stringify instead, set `disableFastJson` to `true`.
+   * If you want to render via JSON.stringify instead, set `fastJsonStringify` to `true`.
    */
-  disableFastJson?: boolean
+  fastJsonStringify?: boolean
 }
 
 export type OpenapiValidateOption = {

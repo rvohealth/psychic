@@ -29,6 +29,7 @@ export default class PostsController extends AuthedController {
     description: 'Paginated index of Posts',
     cursorPaginate: true,
     serializerKey: 'summary',
+    fastJsonStringify: true,
   })
   public async index() {
     // const posts = await this.currentUser.associationQuery('posts')
@@ -41,6 +42,7 @@ export default class PostsController extends AuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Fetch a Post',
+    fastJsonStringify: true,
   })
   public async show() {
     // const post = await this.post()
@@ -51,6 +53,7 @@ export default class PostsController extends AuthedController {
     status: 201,
     tags: openApiTags,
     description: 'Create a Post',
+    fastJsonStringify: true,
   })
   public async create() {
     // let post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
@@ -62,6 +65,7 @@ export default class PostsController extends AuthedController {
     status: 204,
     tags: openApiTags,
     description: 'Update a Post',
+    fastJsonStringify: true,
   })
   public async update() {
     // const post = await this.post()
@@ -73,6 +77,7 @@ export default class PostsController extends AuthedController {
     status: 204,
     tags: openApiTags,
     description: 'Destroy a Post',
+    fastJsonStringify: true,
   })
   public async destroy() {
     // const post = await this.post()
@@ -84,6 +89,7 @@ export default class PostsController extends AuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Fetch a Post',
+    fastJsonStringify: true,
   })
   public async preview() {
     // const post = await this.post()
@@ -125,6 +131,7 @@ export default class HostingAgreementController extends AuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Fetch a HostingAgreement',
+    fastJsonStringify: true,
   })
   public async show() {
     // const hostingAgreement = await this.hostingAgreement()
@@ -135,6 +142,7 @@ export default class HostingAgreementController extends AuthedController {
     status: 201,
     tags: openApiTags,
     description: 'Create a HostingAgreement',
+    fastJsonStringify: true,
   })
   public async create() {
     // let hostingAgreement = await this.currentUser.createAssociation('hostingAgreement', this.paramsFor(HostingAgreement))
@@ -146,6 +154,7 @@ export default class HostingAgreementController extends AuthedController {
     status: 204,
     tags: openApiTags,
     description: 'Update a HostingAgreement',
+    fastJsonStringify: true,
   })
   public async update() {
     // const hostingAgreement = await this.hostingAgreement()
@@ -157,6 +166,7 @@ export default class HostingAgreementController extends AuthedController {
     status: 204,
     tags: openApiTags,
     description: 'Destroy a HostingAgreement',
+    fastJsonStringify: true,
   })
   public async destroy() {
     // const hostingAgreement = await this.hostingAgreement()
@@ -203,6 +213,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
     description: 'Paginated index of HealthPosts',
     cursorPaginate: true,
     serializerKey: 'summary',
+    fastJsonStringify: true,
   })
   public async index() {
     // const healthPosts = await this.currentUser.associationQuery('healthPosts')
@@ -215,6 +226,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Fetch a HealthPost',
+    fastJsonStringify: true,
   })
   public async show() {
     // const healthPost = await this.healthPost()
@@ -225,6 +237,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
     status: 201,
     tags: openApiTags,
     description: 'Create a HealthPost',
+    fastJsonStringify: true,
   })
   public async create() {
     // let healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
@@ -236,6 +249,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
     status: 204,
     tags: openApiTags,
     description: 'Update a HealthPost',
+    fastJsonStringify: true,
   })
   public async update() {
     // const healthPost = await this.healthPost()
@@ -247,6 +261,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
     status: 204,
     tags: openApiTags,
     description: 'Destroy a HealthPost',
+    fastJsonStringify: true,
   })
   public async destroy() {
     // const healthPost = await this.healthPost()
@@ -258,6 +273,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Fetch a HealthPost',
+    fastJsonStringify: true,
   })
   public async preview() {
     // const healthPost = await this.healthPost()
@@ -298,6 +314,7 @@ export default class ApiV1UsersController extends AuthedController {
   //   status: 200,
   //   tags: openApiTags,
   //   description: '<tbd>',
+  //   fastJsonStringify: true,
   // })
   public async hello() {
   }
@@ -306,6 +323,7 @@ export default class ApiV1UsersController extends AuthedController {
   //   status: 200,
   //   tags: openApiTags,
   //   description: '<tbd>',
+  //   fastJsonStringify: true,
   // })
   public async world() {
   }
@@ -343,6 +361,7 @@ export default class PostsController extends AuthedController {
     description: 'Paginated index of Posts',
     cursorPaginate: true,
     serializerKey: 'summary',
+    fastJsonStringify: true,
   })
   public async index() {
     // const posts = await this.currentHost.associationQuery('posts')
@@ -355,6 +374,7 @@ export default class PostsController extends AuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Fetch a Post',
+    fastJsonStringify: true,
   })
   public async show() {
     // const post = await this.post()
@@ -365,6 +385,7 @@ export default class PostsController extends AuthedController {
     status: 201,
     tags: openApiTags,
     description: 'Create a Post',
+    fastJsonStringify: true,
   })
   public async create() {
     // let post = await this.currentHost.createAssociation('posts', this.paramsFor(Post))
@@ -376,6 +397,7 @@ export default class PostsController extends AuthedController {
     status: 204,
     tags: openApiTags,
     description: 'Update a Post',
+    fastJsonStringify: true,
   })
   public async update() {
     // const post = await this.post()
@@ -387,6 +409,7 @@ export default class PostsController extends AuthedController {
     status: 204,
     tags: openApiTags,
     description: 'Destroy a Post',
+    fastJsonStringify: true,
   })
   public async destroy() {
     // const post = await this.post()
@@ -398,6 +421,7 @@ export default class PostsController extends AuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Fetch a Post',
+    fastJsonStringify: true,
   })
   public async preview() {
     // const post = await this.post()
@@ -445,6 +469,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     description: 'Paginated index of Articles',
     cursorPaginate: true,
     serializerKey: 'adminSummary',
+    fastJsonStringify: true,
   })
   public async index() {
     // const articles = await Article
@@ -458,6 +483,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     tags: openApiTags,
     description: 'Fetch a Article',
     serializerKey: 'admin',
+    fastJsonStringify: true,
   })
   public async show() {
     // const article = await this.article()
@@ -469,6 +495,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     tags: openApiTags,
     description: 'Create a Article',
     serializerKey: 'admin',
+    fastJsonStringify: true,
   })
   public async create() {
     // let article = await Article.create(this.paramsFor(Article))
@@ -480,6 +507,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     status: 204,
     tags: openApiTags,
     description: 'Update a Article',
+    fastJsonStringify: true,
   })
   public async update() {
     // const article = await this.article()
@@ -491,6 +519,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     status: 204,
     tags: openApiTags,
     description: 'Destroy a Article',
+    fastJsonStringify: true,
   })
   public async destroy() {
     // const article = await this.article()
@@ -502,6 +531,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     status: 200,
     tags: openApiTags,
     description: 'Fetch a Article',
+    fastJsonStringify: true,
   })
   public async preview() {
     // const article = await this.article()

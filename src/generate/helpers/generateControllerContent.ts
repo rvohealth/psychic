@@ -67,6 +67,7 @@ export default function generateControllerContent({
     status: 201,
     tags: openApiTags,
     description: 'Create ${aOrAnDreamModelName(modelClassName!)}',${defaultOpenapiSerializerKeyProperty}
+    fastJsonStringify: true,
   })
   public async create() {
     // let ${modelAttributeName} = await ${forAdmin ? `${modelClassName}.create(` : `this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', `}this.paramsFor(${modelClassName}))
@@ -79,6 +80,7 @@ export default function generateControllerContent({
   //   status: 201,
   //   tags: openApiTags,
   //   description: '<tbd>',
+  //   fastJsonStringify: true,
   // })
   public async create() {
   }`
@@ -92,6 +94,7 @@ export default function generateControllerContent({
     description: 'Paginated index of ${pluralize(modelClassName!)}',
     cursorPaginate: true,
     serializerKey: '${forAdmin ? 'adminSummary' : 'summary'}',
+    fastJsonStringify: true,
   })
   public async index() {
     // const ${pluralizedModelAttributeName} = await ${loadQueryBase}
@@ -107,6 +110,7 @@ export default function generateControllerContent({
   //   description: '<tbd>',
   //   many: true,
   //   serializerKey: '${forAdmin ? 'adminSummary' : 'summary'}',
+  //   fastJsonStringify: true,
   // })
   public async index() {
   }`
@@ -118,6 +122,7 @@ export default function generateControllerContent({
     status: 200,
     tags: openApiTags,
     description: 'Fetch ${aOrAnDreamModelName(modelClassName!)}',${defaultOpenapiSerializerKeyProperty}
+    fastJsonStringify: true,
   })
   public async show() {
     // const ${modelAttributeName} = await this.${modelAttributeName}()
@@ -129,6 +134,7 @@ export default function generateControllerContent({
   //   status: 200,
   //   tags: openApiTags,
   //   description: '<tbd>',
+  //   fastJsonStringify: true,
   // })
   public async show() {
   }`
@@ -140,6 +146,7 @@ export default function generateControllerContent({
     status: 204,
     tags: openApiTags,
     description: 'Update ${aOrAnDreamModelName(modelClassName!)}',
+    fastJsonStringify: true,
   })
   public async update() {
     // const ${modelAttributeName} = await this.${modelAttributeName}()
@@ -152,6 +159,7 @@ export default function generateControllerContent({
   //   status: 204,
   //   tags: openApiTags,
   //   description: '<tbd>',
+  //   fastJsonStringify: true,
   // })
   public async update() {
   }`
@@ -163,6 +171,7 @@ export default function generateControllerContent({
     status: 204,
     tags: openApiTags,
     description: 'Destroy ${aOrAnDreamModelName(modelClassName!)}',
+    fastJsonStringify: true,
   })
   public async destroy() {
     // const ${modelAttributeName} = await this.${modelAttributeName}()
@@ -175,6 +184,7 @@ export default function generateControllerContent({
   //   status: 204,
   //   tags: openApiTags,
   //   description: '<tbd>',
+  //   fastJsonStringify: true,
   // })
   public async destroy() {
   }`
@@ -186,6 +196,7 @@ export default function generateControllerContent({
     status: 200,
     tags: openApiTags,
     description: 'Fetch ${aOrAnDreamModelName(modelClassName!)}',
+    fastJsonStringify: true,
   })
   public async ${methodName}() {
     // const ${modelAttributeName} = await this.${modelAttributeName}()
@@ -197,6 +208,7 @@ export default function generateControllerContent({
   //   status: 200,
   //   tags: openApiTags,
   //   description: '<tbd>',
+  //   fastJsonStringify: true,
   // })
   public async ${methodName}() {
   }`

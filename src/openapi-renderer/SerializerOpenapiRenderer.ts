@@ -272,7 +272,7 @@ export default class SerializerOpenapiRenderer {
                 accumulator[outputAttributeName] = {
                   type: 'object',
                   additionalProperties: true as any,
-                  description: `Serializer ${(this.serializer as unknown as { globalName: string })['globalName']} includes a rendersOne "${outputAttributeName}" with an OpenAPI shape that cannot be defined. This will break fast-json-stringify. Define the OpenAPI shape or disableFastJson on the endpoint.`,
+                  description: `Serializer ${(this.serializer as unknown as { globalName: string })['globalName']} includes a rendersOne "${outputAttributeName}" with an OpenAPI shape that cannot be defined. This will break fast-json-stringify. Define the OpenAPI shape or fastJsonStringify on the endpoint.`,
                 }
                 return accumulator
               }
@@ -317,7 +317,7 @@ export default class SerializerOpenapiRenderer {
                 accumulator[outputAttributeName] = {
                   type: 'array',
                   items: { type: 'object', additionalProperties: true as any },
-                  description: `Serializer ${(this.serializer as unknown as { globalName: string })['globalName']} includes a rendersMany "${outputAttributeName}" with an OpenAPI shape that cannot be defined. This will break fast-json-stringify. Define the OpenAPI shape or disableFastJson on the endpoint.`,
+                  description: `Serializer ${(this.serializer as unknown as { globalName: string })['globalName']} includes a rendersMany "${outputAttributeName}" with an OpenAPI shape that cannot be defined. This will break fast-json-stringify. Define the OpenAPI shape or fastJsonStringify on the endpoint.`,
                 }
                 return accumulator
               }
