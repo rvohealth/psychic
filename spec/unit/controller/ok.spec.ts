@@ -53,9 +53,16 @@ describe('PsychicController', () => {
           const controller = new UsersController(ctx, { action: 'showWithPosts' })
           await controller.showWithPosts()
 
-          // Verify the response body contains the serialized data
-          // (can't check toJsonSpy anymore since fast-json-stringify may be used)
-          expect(ctx.body).toContain(post.id.toString())
+          expect(JSON.parse(ctx.body as string)).toEqual(
+            expect.objectContaining({
+              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+              posts: expect.arrayContaining([
+                expect.objectContaining({
+                  id: post.id,
+                }),
+              ]),
+            }),
+          )
           expect(ctx.status).toBe(200)
         })
       })
