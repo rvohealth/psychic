@@ -164,6 +164,7 @@ const user = this.ctx.state.user
 ### Controller changes
 
 - `this.req` and `this.res` no longer exist. Use `this.ctx` (a `Koa.Context`) instead.
+- HTTP headers are now lowercased: Koa automatically lowercases all HTTP header names. When accessing request headers via `ctx.get()` or `ctx.request.header`, use lowercase header names (e.g., `ctx.get('content-type')` instead of `ctx.get('Content-Type')`). Response headers set via `ctx.set()` will also be lowercased.
 
 ### CORS
 
