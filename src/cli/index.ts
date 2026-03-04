@@ -45,7 +45,7 @@ ${INDENT}    - integer[]
 ${INDENT}
 ${INDENT}    - decimal:
 ${INDENT}    - decimal[]:
-${INDENT}        scale,precision is required, e.g.: volume:decimal:3,2 or volume:decimal:3,2:optional
+${INDENT}        precision,scale is required, e.g.: volume:decimal:3,2 or volume:decimal:3,2:optional
 ${INDENT}
 ${INDENT}        leveraging arrays, add the "[]" suffix, e.g.: volume:decimal[]:3,2
 ${INDENT}
