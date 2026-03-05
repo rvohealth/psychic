@@ -20,9 +20,6 @@ importers:
       ajv-formats:
         specifier: ^3.0.1
         version: 3.0.1(ajv@8.17.1)
-      dotenv:
-        specifier: ^16.4.5
-        version: 16.4.5
       fast-json-stringify:
         specifier: ^6.3.0
         version: 6.3.0
@@ -93,6 +90,12 @@ importers:
       '@typescript/analyze-trace':
         specifier: ^0.10.1
         version: 0.10.1
+      commander:
+        specifier: ^14.0.3
+        version: 14.0.3
+      dotenv:
+        specifier: ^16.4.5
+        version: 16.4.5
       eslint:
         specifier: ^9.39.1
         version: 9.39.1
@@ -138,6 +141,9 @@ importers:
       pg:
         specifier: ^8.12.0
         version: 8.12.0
+      pluralize-esm:
+        specifier: ^9.0.5
+        version: 9.0.5
       prettier:
         specifier: ^3.3.3
         version: 3.3.3

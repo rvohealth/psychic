@@ -68,7 +68,6 @@
   "dependencies": {
     "ajv": "^8.17.1",
     "ajv-formats": "^3.0.1",
-    "dotenv": "^16.4.5",
     "fast-json-stringify": "^6.3.0",
     "yoctocolors": "^2.1.1"
   },
@@ -104,6 +103,8 @@
     "@types/supertest": "^6.0.3",
     "@typescript-eslint/parser": "^8.48.1",
     "@typescript/analyze-trace": "^0.10.1",
+    "commander": "^14.0.3",
+    "dotenv": "^16.4.5",
     "eslint": "^9.39.1",
     "jsdom": "^26.1.0",
     "koa": "^3.1.2",
@@ -119,6 +120,7 @@
     "passport": "^0.7.0",
     "passport-local": "^1.0.0",
     "pg": "^8.12.0",
+    "pluralize-esm": "^9.0.5",
     "prettier": "^3.3.3",
     "puppeteer": "^24.22.3",
     "supertest": "^7.1.4",
