@@ -64,10 +64,12 @@ import {
 } from '@rvoh/dream'
 import {
   type BalloonColorsEnum,
+  type BalloonTypesEnum,
   type Json,
   type PetTreatsEnum,
   type SpeciesTypesEnum,
   BalloonColorsEnumValues,
+  BalloonTypesEnumValues,
   PetTreatsEnumValues,
   SpeciesTypesEnumValues,
 } from './db.js'
@@ -202,7 +204,14 @@ export const schema = {
       default: ['dream:STI'],
       named: [],
     },
-    nonJsonColumnNames: ['color', 'createdAt', 'id', 'updatedAt', 'userId'],
+    nonJsonColumnNames: [
+      'color',
+      'createdAt',
+      'id',
+      'type',
+      'updatedAt',
+      'userId',
+    ],
     columns: {
       color: {
         coercedType: {} as BalloonColorsEnum | null,
@@ -228,6 +237,15 @@ export const schema = {
         enumArrayType: null,
         enumValues: null,
         dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+      type: {
+        coercedType: {} as BalloonTypesEnum,
+        enumType: {} as BalloonTypesEnum,
+        enumArrayType: [] as BalloonTypesEnum[],
+        enumValues: BalloonTypesEnumValues,
+        dbType: 'balloon_types_enum',
         allowNull: false,
         isArray: false,
       },
