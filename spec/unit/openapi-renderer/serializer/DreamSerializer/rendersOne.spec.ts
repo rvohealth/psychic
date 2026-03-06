@@ -106,6 +106,7 @@ describe('DreamSerializer rendersOne', () => {
         allOf: [
           {
             type: 'object',
+            additionalProperties: false,
             required: ['species'],
             properties: {
               species: { type: ['string', 'null'], enum: [...SpeciesTypesEnumValues, null] },
@@ -134,6 +135,7 @@ describe('DreamSerializer rendersOne', () => {
           allOf: [
             {
               type: 'object',
+              additionalProperties: false,
               required: ['species'],
               properties: {
                 species: { type: ['string', 'null'], enum: [...SpeciesTypesEnumValues, null] },
