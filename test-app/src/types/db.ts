@@ -80,6 +80,10 @@ export type BalloonColorsEnum = 'blue' | 'green' | 'red'
 
 export const BalloonColorsEnumValues = ['blue', 'green', 'red'] as const
 
+export type BalloonTypesEnum = 'BalloonLatex' | 'BalloonMylar'
+
+export const BalloonTypesEnumValues = ['BalloonLatex', 'BalloonMylar'] as const
+
 export type Generated<T> =
   T extends ColumnType<infer S, infer I, infer U>
     ? ColumnType<S, I | undefined, U>
@@ -132,6 +136,7 @@ export interface Balloons {
   color: BalloonColorsEnum | null
   createdAt: Timestamp
   id: Generated<Int8>
+  type: BalloonTypesEnum
   updatedAt: Timestamp
   userId: Generated<Int8>
 }

@@ -47,6 +47,7 @@ describe('ObjectSerializer (on a view model) customAttribute', () => {
         allOf: [
           {
             type: 'object',
+            additionalProperties: false,
             required: ['name'],
             properties: {
               name: { type: 'string' },
