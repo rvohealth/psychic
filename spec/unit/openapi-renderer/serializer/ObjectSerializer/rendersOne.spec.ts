@@ -111,6 +111,7 @@ describe('ObjectSerializer rendersOne', () => {
           allOf: [
             {
               type: 'object',
+              additionalProperties: false,
               required: ['species'],
               properties: {
                 species: { type: ['string', 'null'], enum: SpeciesTypesEnumValues },
