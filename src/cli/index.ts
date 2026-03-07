@@ -120,6 +120,10 @@ export default class PsychicCLI {
         'the name of the db connection you would like to use for your model. Defaults to "default"',
         'default',
       )
+      .option(
+        '--model-name <modelName>',
+        'explicit model class name to use instead of the auto-generated one (e.g. --model-name=Kitchen for Room/Kitchen)',
+      )
       .argument(
         '<path>',
         'URL path from root domain. Specify nesting resource with `{}`, e.g.: `tickets/{}/comments`',
@@ -140,6 +144,7 @@ export default class PsychicCLI {
             stiBaseSerializer: boolean
             owningModel?: string
             connectionName: string
+            modelName?: string
           },
         ) => {
           await initializePsychicApp({
@@ -405,6 +410,7 @@ export default class PsychicCLI {
       stiBaseSerializer: boolean
       owningModel?: string
       connectionName: string
+      modelName?: string
     }
     columnsWithTypes: string[]
   }) {
