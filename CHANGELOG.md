@@ -4,6 +4,7 @@ Replaces Express with [Koa](https://koajs.com/) as the underlying HTTP framework
 
 - Compiled JSON schema can be automatilly generated from the OpenAPI shape for 2x-5x faster serialization (add `fastJsonStringify: true` to the @OpenAPI decorator options for a controller action)
 - Removes the `sanitizeResponseJson` since it is truly unnecessary (see CHANGELOG note for 1.7.0 for why it was introduced)
+- Adds the `--model-name` option to the resource generator
 
 ### Dependencies
 
