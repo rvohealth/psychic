@@ -37,6 +37,7 @@ export default async function generateResource({
   const onlyActions = options.only?.split(',')
 
   const forAdmin = /^Admin\//.test(fullyQualifiedControllerName)
+  const forInternal = /^Internal\//.test(fullyQualifiedControllerName)
 
   await DreamCLI.generateDream({
     fullyQualifiedModelName,
@@ -45,6 +46,7 @@ export default async function generateResource({
       serializer: true,
       stiBaseSerializer: options.stiBaseSerializer,
       includeAdminSerializers: forAdmin,
+      includeInternalSerializers: forInternal,
       connectionName: options.connectionName,
       modelName: options.modelName,
     },

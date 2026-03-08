@@ -39,6 +39,7 @@ describe('generateResourceControllerSpecContent', () => {
           'datetime_array:datetime[]',
         ],
         forAdmin: false,
+        forInternal: false,
         singular: false,
         actions: [...RESOURCE_ACTIONS],
       })
@@ -395,6 +396,7 @@ describe('V1/PostsController', () => {
         fullyQualifiedModelName: 'Post',
         columnsWithTypes: ['User:belongsto', 'title:citext'],
         forAdmin: false,
+        forInternal: false,
         singular: false,
         actions: [...RESOURCE_ACTIONS],
       })
@@ -585,6 +587,7 @@ describe('V1/PostsController', () => {
           'postable_type:enum:postable_types:article,column',
         ],
         forAdmin: false,
+        forInternal: false,
         singular: false,
         actions: ['create', 'show'],
       })
@@ -696,6 +699,7 @@ describe('V1/PostsController', () => {
         fullyQualifiedModelName: 'HostingAgreement',
         columnsWithTypes: ['signed_on:date', 'signed_at:datetime'],
         forAdmin: false,
+        forInternal: false,
         singular: true,
         actions: [...RESOURCE_ACTIONS],
       })
@@ -822,6 +826,7 @@ describe('V1/HostingAgreementController', () => {
           columnsWithTypes: ['body:text', 'Ticketing/Ticket:belongs_to'],
           owningModel: 'Ticketing/Ticket',
           forAdmin: false,
+          forInternal: false,
           singular: true,
           actions: [...RESOURCE_ACTIONS],
         })
@@ -947,6 +952,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
         columnsWithTypes: ['body:text', 'Host:belongs_to'],
         owningModel: 'Host',
         forAdmin: false,
+        forInternal: false,
         singular: false,
         actions: [...RESOURCE_ACTIONS],
       })
@@ -1130,6 +1136,7 @@ describe('V1/PostsController', () => {
           columnsWithTypes: ['body:text', 'Ticketing/Ticket:belongs_to'],
           owningModel: 'Ticketing/Ticket',
           forAdmin: false,
+          forInternal: false,
           singular: false,
           actions: [...RESOURCE_ACTIONS],
         })
@@ -1313,6 +1320,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
             columnsWithTypes: ['body:text', 'Ticketing/Ticket:belongs_to'],
             owningModel: 'Ticketing/Ticket',
             forAdmin: false,
+            forInternal: false,
             singular: false,
             actions: [...RESOURCE_ACTIONS],
           })
@@ -1504,6 +1512,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
         fullyQualifiedModelName: 'Article',
         columnsWithTypes: ['body:text'],
         forAdmin: true,
+        forInternal: false,
         singular: false,
         actions: [...RESOURCE_ACTIONS],
       })
@@ -1631,6 +1640,514 @@ describe('Admin/ArticlesController', () => {
 })
 `)
     })
+
+    context('with an owning model specified', () => {
+      it('uses the owning model for resource queries while authenticating as AdminUser', () => {
+        const res = generateResourceControllerSpecContent({
+          fullyQualifiedControllerName: 'Admin/ArticlesController',
+          route: 'admin/articles',
+          fullyQualifiedModelName: 'Article',
+          columnsWithTypes: ['body:text'],
+          owningModel: 'Organization',
+          forAdmin: true,
+          forInternal: false,
+          singular: false,
+          actions: [...RESOURCE_ACTIONS],
+        })
+        expect(res).toEqual(`\
+import Article from '@models/Article.js'
+import AdminUser from '@models/AdminUser.js'
+import Organization from '@models/Organization.js'
+import createArticle from '@spec/factories/ArticleFactory.js'
+import createAdminUser from '@spec/factories/AdminUserFactory.js'
+import createOrganization from '@spec/factories/OrganizationFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
+
+describe('Admin/ArticlesController', () => {
+  let request: SpecRequestType
+  let adminUser: AdminUser
+  let organization: Organization
+
+  beforeEach(async () => {
+    adminUser = await createAdminUser()
+    organization = await createOrganization({ adminUser })
+    request = await session(adminUser)
+  })
+
+  describe('GET index', () => {
+    const indexArticles = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+      return request.get('/admin/articles', expectedStatus)
+    }
+
+    it('returns the index of Articles', async () => {
+      const article = await createArticle({ organization })
+
+      const { body } = await indexArticles(200)
+
+      expect(body.results).toEqual([
+        expect.objectContaining({
+          id: article.id,
+        }),
+      ])
+    })
+
+    context('Articles created by another Organization', () => {
+      it('are omitted', async () => {
+        await createArticle()
+
+        const { body } = await indexArticles(200)
+
+        expect(body.results).toEqual([])
+      })
+    })
+  })
+
+  describe('GET show', () => {
+    const showArticle = async <StatusCode extends 200 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+      return request.get('/admin/articles/{id}', expectedStatus, {
+        id: article.id,
+      })
+    }
+
+    it('returns the specified Article', async () => {
+      const article = await createArticle({ organization })
+
+      const { body } = await showArticle(article, 200)
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: article.id,
+          body: article.body,
+        }),
+      )
+    })
+
+    context('Article created by another Organization', () => {
+      it('is not found', async () => {
+        const otherOrganizationArticle = await createArticle()
+
+        await showArticle(otherOrganizationArticle, 404)
+      })
+    })
+  })
+
+  describe('POST create', () => {
+    const createArticle = async <StatusCode extends 201 | 400 | 404>(
+      data: RequestBody<'post', '/admin/articles'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.post('/admin/articles', expectedStatus, {
+        data
+      })
+    }
+
+    it('creates a Article for this Organization', async () => {
+      const { body } = await createArticle({
+        body: 'The Article body',
+      }, 201)
+
+      const article = await organization.associationQuery('articles').firstOrFail()
+      expect(article.body).toEqual('The Article body')
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: article.id,
+          body: article.body,
+        }),
+      )
+    })
+  })
+
+  describe('PATCH update', () => {
+    const updateArticle = async <StatusCode extends 204 | 400 | 404>(
+      article: Article,
+      data: RequestBody<'patch', '/admin/articles/{id}'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.patch('/admin/articles/{id}', expectedStatus, {
+        id: article.id,
+        data,
+      })
+    }
+
+    it('updates the Article', async () => {
+      const article = await createArticle({ organization })
+
+      await updateArticle(article, {
+        body: 'Updated Article body',
+      }, 204)
+
+      await article.reload()
+      expect(article.body).toEqual('Updated Article body')
+    })
+
+    context('a Article created by another Organization', () => {
+      it('is not updated', async () => {
+        const article = await createArticle()
+        const originalBody = article.body
+
+        await updateArticle(article, {
+          body: 'Updated Article body',
+        }, 404)
+
+        await article.reload()
+        expect(article.body).toEqual(originalBody)
+      })
+    })
+  })
+
+  describe('DELETE destroy', () => {
+    const destroyArticle = async <StatusCode extends 204 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+      return request.delete('/admin/articles/{id}', expectedStatus, {
+        id: article.id,
+      })
+    }
+
+    it('deletes the Article', async () => {
+      const article = await createArticle({ organization })
+
+      await destroyArticle(article, 204)
+
+      expect(await Article.find(article.id)).toBeNull()
+    })
+
+    context('a Article created by another Organization', () => {
+      it('is not deleted', async () => {
+        const article = await createArticle()
+
+        await destroyArticle(article, 404)
+
+        expect(await Article.find(article.id)).toMatchDreamModel(article)
+      })
+    })
+  })
+})
+`)
+      })
+    })
+  })
+
+  context('an Internal controller', () => {
+    it('replaces authenticates with the InternalUser, but created resources don\'t belong to the InternalUser', () => {
+      const res = generateResourceControllerSpecContent({
+        fullyQualifiedControllerName: 'Internal/ArticlesController',
+        route: 'internal/articles',
+        fullyQualifiedModelName: 'Article',
+        columnsWithTypes: ['body:text'],
+        forAdmin: false,
+        forInternal: true,
+        singular: false,
+        actions: [...RESOURCE_ACTIONS],
+      })
+      expect(res).toEqual(`\
+import Article from '@models/Article.js'
+import InternalUser from '@models/InternalUser.js'
+import createArticle from '@spec/factories/ArticleFactory.js'
+import createInternalUser from '@spec/factories/InternalUserFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
+
+describe('Internal/ArticlesController', () => {
+  let request: SpecRequestType
+  let internalUser: InternalUser
+
+  beforeEach(async () => {
+    internalUser = await createInternalUser()
+    request = await session(internalUser)
+  })
+
+  describe('GET index', () => {
+    const indexArticles = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+      return request.get('/internal/articles', expectedStatus)
+    }
+
+    it('returns the index of Articles', async () => {
+      const article = await createArticle()
+
+      const { body } = await indexArticles(200)
+
+      expect(body.results).toEqual([
+        expect.objectContaining({
+          id: article.id,
+        }),
+      ])
+    })
+  })
+
+  describe('GET show', () => {
+    const showArticle = async <StatusCode extends 200 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+      return request.get('/internal/articles/{id}', expectedStatus, {
+        id: article.id,
+      })
+    }
+
+    it('returns the specified Article', async () => {
+      const article = await createArticle()
+
+      const { body } = await showArticle(article, 200)
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: article.id,
+          body: article.body,
+        }),
+      )
+    })
+  })
+
+  describe('POST create', () => {
+    const createArticle = async <StatusCode extends 201 | 400 | 404>(
+      data: RequestBody<'post', '/internal/articles'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.post('/internal/articles', expectedStatus, {
+        data
+      })
+    }
+
+    it('creates a Article', async () => {
+      const { body } = await createArticle({
+        body: 'The Article body',
+      }, 201)
+
+      const article = await Article.firstOrFail()
+      expect(article.body).toEqual('The Article body')
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: article.id,
+          body: article.body,
+        }),
+      )
+    })
+  })
+
+  describe('PATCH update', () => {
+    const updateArticle = async <StatusCode extends 204 | 400 | 404>(
+      article: Article,
+      data: RequestBody<'patch', '/internal/articles/{id}'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.patch('/internal/articles/{id}', expectedStatus, {
+        id: article.id,
+        data,
+      })
+    }
+
+    it('updates the Article', async () => {
+      const article = await createArticle()
+
+      await updateArticle(article, {
+        body: 'Updated Article body',
+      }, 204)
+
+      await article.reload()
+      expect(article.body).toEqual('Updated Article body')
+    })
+  })
+
+  describe('DELETE destroy', () => {
+    const destroyArticle = async <StatusCode extends 204 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+      return request.delete('/internal/articles/{id}', expectedStatus, {
+        id: article.id,
+      })
+    }
+
+    it('deletes the Article', async () => {
+      const article = await createArticle()
+
+      await destroyArticle(article, 204)
+
+      expect(await Article.find(article.id)).toBeNull()
+    })
+  })
+})
+`)
+    })
+
+    context('with an owning model specified', () => {
+      it('uses the owning model for resource queries while authenticating as InternalUser', () => {
+        const res = generateResourceControllerSpecContent({
+          fullyQualifiedControllerName: 'Internal/ArticlesController',
+          route: 'internal/articles',
+          fullyQualifiedModelName: 'Article',
+          columnsWithTypes: ['body:text'],
+          owningModel: 'Organization',
+          forAdmin: false,
+          forInternal: true,
+          singular: false,
+          actions: [...RESOURCE_ACTIONS],
+        })
+        expect(res).toEqual(`\
+import Article from '@models/Article.js'
+import InternalUser from '@models/InternalUser.js'
+import Organization from '@models/Organization.js'
+import createArticle from '@spec/factories/ArticleFactory.js'
+import createInternalUser from '@spec/factories/InternalUserFactory.js'
+import createOrganization from '@spec/factories/OrganizationFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'
+
+describe('Internal/ArticlesController', () => {
+  let request: SpecRequestType
+  let internalUser: InternalUser
+  let organization: Organization
+
+  beforeEach(async () => {
+    internalUser = await createInternalUser()
+    organization = await createOrganization({ internalUser })
+    request = await session(internalUser)
+  })
+
+  describe('GET index', () => {
+    const indexArticles = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+      return request.get('/internal/articles', expectedStatus)
+    }
+
+    it('returns the index of Articles', async () => {
+      const article = await createArticle({ organization })
+
+      const { body } = await indexArticles(200)
+
+      expect(body.results).toEqual([
+        expect.objectContaining({
+          id: article.id,
+        }),
+      ])
+    })
+
+    context('Articles created by another Organization', () => {
+      it('are omitted', async () => {
+        await createArticle()
+
+        const { body } = await indexArticles(200)
+
+        expect(body.results).toEqual([])
+      })
+    })
+  })
+
+  describe('GET show', () => {
+    const showArticle = async <StatusCode extends 200 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+      return request.get('/internal/articles/{id}', expectedStatus, {
+        id: article.id,
+      })
+    }
+
+    it('returns the specified Article', async () => {
+      const article = await createArticle({ organization })
+
+      const { body } = await showArticle(article, 200)
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: article.id,
+          body: article.body,
+        }),
+      )
+    })
+
+    context('Article created by another Organization', () => {
+      it('is not found', async () => {
+        const otherOrganizationArticle = await createArticle()
+
+        await showArticle(otherOrganizationArticle, 404)
+      })
+    })
+  })
+
+  describe('POST create', () => {
+    const createArticle = async <StatusCode extends 201 | 400 | 404>(
+      data: RequestBody<'post', '/internal/articles'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.post('/internal/articles', expectedStatus, {
+        data
+      })
+    }
+
+    it('creates a Article for this Organization', async () => {
+      const { body } = await createArticle({
+        body: 'The Article body',
+      }, 201)
+
+      const article = await organization.associationQuery('articles').firstOrFail()
+      expect(article.body).toEqual('The Article body')
+
+      expect(body).toEqual(
+        expect.objectContaining({
+          id: article.id,
+          body: article.body,
+        }),
+      )
+    })
+  })
+
+  describe('PATCH update', () => {
+    const updateArticle = async <StatusCode extends 204 | 400 | 404>(
+      article: Article,
+      data: RequestBody<'patch', '/internal/articles/{id}'>,
+      expectedStatus: StatusCode
+    ) => {
+      return request.patch('/internal/articles/{id}', expectedStatus, {
+        id: article.id,
+        data,
+      })
+    }
+
+    it('updates the Article', async () => {
+      const article = await createArticle({ organization })
+
+      await updateArticle(article, {
+        body: 'Updated Article body',
+      }, 204)
+
+      await article.reload()
+      expect(article.body).toEqual('Updated Article body')
+    })
+
+    context('a Article created by another Organization', () => {
+      it('is not updated', async () => {
+        const article = await createArticle()
+        const originalBody = article.body
+
+        await updateArticle(article, {
+          body: 'Updated Article body',
+        }, 404)
+
+        await article.reload()
+        expect(article.body).toEqual(originalBody)
+      })
+    })
+  })
+
+  describe('DELETE destroy', () => {
+    const destroyArticle = async <StatusCode extends 204 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+      return request.delete('/internal/articles/{id}', expectedStatus, {
+        id: article.id,
+      })
+    }
+
+    it('deletes the Article', async () => {
+      const article = await createArticle({ organization })
+
+      await destroyArticle(article, 204)
+
+      expect(await Article.find(article.id)).toBeNull()
+    })
+
+    context('a Article created by another Organization', () => {
+      it('is not deleted', async () => {
+        const article = await createArticle()
+
+        await destroyArticle(article, 404)
+
+        expect(await Article.find(article.id)).toMatchDreamModel(article)
+      })
+    })
+  })
+})
+`)
+      })
+    })
   })
 
   context('importExtension is set on PsychicApp', () => {
@@ -1647,6 +2164,7 @@ describe('Admin/ArticlesController', () => {
           fullyQualifiedModelName: 'Post',
           columnsWithTypes: [],
           forAdmin: false,
+          forInternal: false,
           singular: false,
           actions: [...RESOURCE_ACTIONS],
         })
@@ -1675,6 +2193,7 @@ import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authen
           fullyQualifiedModelName: 'Post',
           columnsWithTypes: [],
           forAdmin: false,
+          forInternal: false,
           singular: false,
           actions: [...RESOURCE_ACTIONS],
         })
@@ -1703,6 +2222,7 @@ import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authen
           fullyQualifiedModelName: 'Post',
           columnsWithTypes: [],
           forAdmin: false,
+          forInternal: false,
           singular: false,
           actions: [...RESOURCE_ACTIONS],
         })
