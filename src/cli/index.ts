@@ -26,6 +26,9 @@ ${INDENT}    - citext:
 ${INDENT}    - citext[]:
 ${INDENT}        case insensitive text (indexes and queries are automatically case insensitive)
 ${INDENT}
+${INDENT}    - encrypted:
+${INDENT}        encrypted text (used in conjunction with the @deco.Encrypted decorator)
+${INDENT}
 ${INDENT}    - string:
 ${INDENT}    - string[]:
 ${INDENT}        varchar; allowed length defaults to 255, but may be customized, e.g.: subtitle:string:128 or subtitle:string:128:optional
