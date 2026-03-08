@@ -19,6 +19,7 @@ describe('generateResourceControllerSpecContent', () => {
           'style:enum:building_style:formal,informal',
           'title:citext',
           'subtitle:string',
+          'secret:encrypted',
           'body_markdown:text',
           'rating:decimal:3,2',
           'ratings:integer',
@@ -110,6 +111,7 @@ describe('V1/PostsController', () => {
           style: post.style,
           title: post.title,
           subtitle: post.subtitle,
+          secret: post.secret,
           bodyMarkdown: post.bodyMarkdown,
           rating: post.rating,
           ratings: post.ratings,
@@ -160,6 +162,7 @@ describe('V1/PostsController', () => {
         style: 'formal',
         title: 'The Post title',
         subtitle: 'The Post subtitle',
+        secret: 'The Post secret',
         bodyMarkdown: 'The Post bodyMarkdown',
         rating: 1.1,
         ratings: 1,
@@ -182,6 +185,7 @@ describe('V1/PostsController', () => {
       expect(post.style).toEqual('formal')
       expect(post.title).toEqual('The Post title')
       expect(post.subtitle).toEqual('The Post subtitle')
+      expect(post.secret).toEqual('The Post secret')
       expect(post.bodyMarkdown).toEqual('The Post bodyMarkdown')
       expect(post.rating).toEqual(1.1)
       expect(post.ratings).toEqual(1)
@@ -206,6 +210,7 @@ describe('V1/PostsController', () => {
           style: post.style,
           title: post.title,
           subtitle: post.subtitle,
+          secret: post.secret,
           bodyMarkdown: post.bodyMarkdown,
           rating: post.rating,
           ratings: post.ratings,
@@ -252,6 +257,7 @@ describe('V1/PostsController', () => {
         style: 'informal',
         title: 'Updated Post title',
         subtitle: 'Updated Post subtitle',
+        secret: 'Updated Post secret',
         bodyMarkdown: 'Updated Post bodyMarkdown',
         rating: 2.2,
         ratings: 2,
@@ -274,6 +280,7 @@ describe('V1/PostsController', () => {
       expect(post.style).toEqual('informal')
       expect(post.title).toEqual('Updated Post title')
       expect(post.subtitle).toEqual('Updated Post subtitle')
+      expect(post.secret).toEqual('Updated Post secret')
       expect(post.bodyMarkdown).toEqual('Updated Post bodyMarkdown')
       expect(post.rating).toEqual(2.2)
       expect(post.ratings).toEqual(2)
@@ -301,6 +308,7 @@ describe('V1/PostsController', () => {
         const originalStyle = post.style
         const originalTitle = post.title
         const originalSubtitle = post.subtitle
+        const originalSecret = post.secret
         const originalBodyMarkdown = post.bodyMarkdown
         const originalRating = post.rating
         const originalRatings = post.ratings
@@ -320,6 +328,7 @@ describe('V1/PostsController', () => {
           style: 'informal',
           title: 'Updated Post title',
           subtitle: 'Updated Post subtitle',
+          secret: 'Updated Post secret',
           bodyMarkdown: 'Updated Post bodyMarkdown',
           rating: 2.2,
           ratings: 2,
@@ -342,6 +351,7 @@ describe('V1/PostsController', () => {
         expect(post.style).toEqual(originalStyle)
         expect(post.title).toEqual(originalTitle)
         expect(post.subtitle).toEqual(originalSubtitle)
+        expect(post.secret).toEqual(originalSecret)
         expect(post.bodyMarkdown).toEqual(originalBodyMarkdown)
         expect(post.rating).toEqual(originalRating)
         expect(post.ratings).toEqual(originalRatings)
