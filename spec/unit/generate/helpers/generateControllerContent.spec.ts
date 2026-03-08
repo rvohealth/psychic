@@ -548,6 +548,313 @@ export default class AdminArticlesController extends AdminAuthedController {
           )
         },
       )
+
+      context('with an owning model specified', () => {
+        it('uses the owning model for association queries while keeping admin serializer keys', () => {
+          const res = generateControllerContent({
+            ancestorImportStatement: "import AdminAuthedController from './AdminAuthedController.js'",
+            ancestorName: 'AdminAuthedController',
+            fullyQualifiedControllerName: 'Admin/ArticlesController',
+            fullyQualifiedModelName: 'Article',
+            actions: ['index', 'show', 'create', 'update', 'destroy'],
+            owningModel: 'Organization',
+            forAdmin: true,
+            singular: false,
+          })
+
+          expect(res).toEqual(
+            `\
+import { OpenAPI } from '@rvoh/psychic'
+import AdminAuthedController from './AdminAuthedController.js'
+import Article from '@models/Article.js'
+
+const openApiTags = ['articles']
+
+export default class AdminArticlesController extends AdminAuthedController {
+  @OpenAPI(Article, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Paginated index of Articles',
+    cursorPaginate: true,
+    serializerKey: 'adminSummary',
+    fastJsonStringify: true,
+  })
+  public async index() {
+    // const articles = await this.currentOrganization.associationQuery('articles')
+    //   .preloadFor('adminSummary')
+    //   .cursorPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
+    // this.ok(articles)
+  }
+
+  @OpenAPI(Article, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a Article',
+    serializerKey: 'admin',
+    fastJsonStringify: true,
+  })
+  public async show() {
+    // const article = await this.article()
+    // this.ok(article)
+  }
+
+  @OpenAPI(Article, {
+    status: 201,
+    tags: openApiTags,
+    description: 'Create a Article',
+    serializerKey: 'admin',
+    fastJsonStringify: true,
+  })
+  public async create() {
+    // let article = await this.currentOrganization.createAssociation('articles', this.paramsFor(Article))
+    // if (article.isPersisted) article = await article.loadFor('admin').execute()
+    // this.created(article)
+  }
+
+  @OpenAPI(Article, {
+    status: 204,
+    tags: openApiTags,
+    description: 'Update a Article',
+    fastJsonStringify: true,
+  })
+  public async update() {
+    // const article = await this.article()
+    // await article.update(this.paramsFor(Article))
+    // this.noContent()
+  }
+
+  @OpenAPI({
+    status: 204,
+    tags: openApiTags,
+    description: 'Destroy a Article',
+    fastJsonStringify: true,
+  })
+  public async destroy() {
+    // const article = await this.article()
+    // await article.destroy()
+    // this.noContent()
+  }
+
+  private async article() {
+    // return await this.currentOrganization.associationQuery('articles')
+    //   .preloadFor('admin')
+    //   .findOrFail(this.castParam('id', 'string'))
+  }
+}
+`,
+          )
+        })
+      })
+    })
+
+    context('in the Internal namespace', () => {
+      it(
+        'loads/creates/updates/deletes resources without an owning model ' +
+          'and sets the serializerKey to internal serializers',
+        () => {
+          const res = generateControllerContent({
+            ancestorImportStatement: "import InternalAuthedController from './InternalAuthedController.js'",
+            ancestorName: 'InternalAuthedController',
+            fullyQualifiedControllerName: 'Internal/ArticlesController',
+            fullyQualifiedModelName: 'Article',
+            actions: ['index', 'show', 'create', 'update', 'destroy', 'preview'],
+            forAdmin: false,
+            forInternal: true,
+            singular: false,
+          })
+
+          expect(res).toEqual(
+            `\
+import { OpenAPI } from '@rvoh/psychic'
+import InternalAuthedController from './InternalAuthedController.js'
+import Article from '@models/Article.js'
+
+const openApiTags = ['articles']
+
+export default class InternalArticlesController extends InternalAuthedController {
+  @OpenAPI(Article, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Paginated index of Articles',
+    cursorPaginate: true,
+    serializerKey: 'internalSummary',
+    fastJsonStringify: true,
+  })
+  public async index() {
+    // const articles = await Article
+    //   .preloadFor('internalSummary')
+    //   .cursorPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
+    // this.ok(articles)
+  }
+
+  @OpenAPI(Article, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a Article',
+    serializerKey: 'internal',
+    fastJsonStringify: true,
+  })
+  public async show() {
+    // const article = await this.article()
+    // this.ok(article)
+  }
+
+  @OpenAPI(Article, {
+    status: 201,
+    tags: openApiTags,
+    description: 'Create a Article',
+    serializerKey: 'internal',
+    fastJsonStringify: true,
+  })
+  public async create() {
+    // let article = await Article.create(this.paramsFor(Article))
+    // if (article.isPersisted) article = await article.loadFor('internal').execute()
+    // this.created(article)
+  }
+
+  @OpenAPI(Article, {
+    status: 204,
+    tags: openApiTags,
+    description: 'Update a Article',
+    fastJsonStringify: true,
+  })
+  public async update() {
+    // const article = await this.article()
+    // await article.update(this.paramsFor(Article))
+    // this.noContent()
+  }
+
+  @OpenAPI({
+    status: 204,
+    tags: openApiTags,
+    description: 'Destroy a Article',
+    fastJsonStringify: true,
+  })
+  public async destroy() {
+    // const article = await this.article()
+    // await article.destroy()
+    // this.noContent()
+  }
+
+  @OpenAPI(Article, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a Article',
+    fastJsonStringify: true,
+  })
+  public async preview() {
+    // const article = await this.article()
+    // this.ok(article)
+  }
+
+  private async article() {
+    // return await Article
+    //   .preloadFor('internal')
+    //   .findOrFail(this.castParam('id', 'string'))
+  }
+}
+`,
+          )
+        },
+      )
+
+      context('with an owning model specified', () => {
+        it('uses the owning model for association queries while keeping internal serializer keys', () => {
+          const res = generateControllerContent({
+            ancestorImportStatement: "import InternalAuthedController from './InternalAuthedController.js'",
+            ancestorName: 'InternalAuthedController',
+            fullyQualifiedControllerName: 'Internal/ArticlesController',
+            fullyQualifiedModelName: 'Article',
+            actions: ['index', 'show', 'create', 'update', 'destroy'],
+            owningModel: 'Organization',
+            forAdmin: false,
+            forInternal: true,
+            singular: false,
+          })
+
+          expect(res).toEqual(
+            `\
+import { OpenAPI } from '@rvoh/psychic'
+import InternalAuthedController from './InternalAuthedController.js'
+import Article from '@models/Article.js'
+
+const openApiTags = ['articles']
+
+export default class InternalArticlesController extends InternalAuthedController {
+  @OpenAPI(Article, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Paginated index of Articles',
+    cursorPaginate: true,
+    serializerKey: 'internalSummary',
+    fastJsonStringify: true,
+  })
+  public async index() {
+    // const articles = await this.currentOrganization.associationQuery('articles')
+    //   .preloadFor('internalSummary')
+    //   .cursorPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
+    // this.ok(articles)
+  }
+
+  @OpenAPI(Article, {
+    status: 200,
+    tags: openApiTags,
+    description: 'Fetch a Article',
+    serializerKey: 'internal',
+    fastJsonStringify: true,
+  })
+  public async show() {
+    // const article = await this.article()
+    // this.ok(article)
+  }
+
+  @OpenAPI(Article, {
+    status: 201,
+    tags: openApiTags,
+    description: 'Create a Article',
+    serializerKey: 'internal',
+    fastJsonStringify: true,
+  })
+  public async create() {
+    // let article = await this.currentOrganization.createAssociation('articles', this.paramsFor(Article))
+    // if (article.isPersisted) article = await article.loadFor('internal').execute()
+    // this.created(article)
+  }
+
+  @OpenAPI(Article, {
+    status: 204,
+    tags: openApiTags,
+    description: 'Update a Article',
+    fastJsonStringify: true,
+  })
+  public async update() {
+    // const article = await this.article()
+    // await article.update(this.paramsFor(Article))
+    // this.noContent()
+  }
+
+  @OpenAPI({
+    status: 204,
+    tags: openApiTags,
+    description: 'Destroy a Article',
+    fastJsonStringify: true,
+  })
+  public async destroy() {
+    // const article = await this.article()
+    // await article.destroy()
+    // this.noContent()
+  }
+
+  private async article() {
+    // return await this.currentOrganization.associationQuery('articles')
+    //   .preloadFor('internal')
+    //   .findOrFail(this.castParam('id', 'string'))
+  }
+}
+`,
+          )
+        })
+      })
     })
   })
 })
