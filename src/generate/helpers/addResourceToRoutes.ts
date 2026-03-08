@@ -21,6 +21,12 @@ export default async function addResourceToRoutes(
     if (fsSync.existsSync(adminRoutesFilePath)) routesFilePath = adminRoutesFilePath
   }
 
+  const internalRouteRegexp = /^\/?internal/
+  if (internalRouteRegexp.test(route)) {
+    const internalRoutesFilePath = routesFilePath.replace(/\.ts$/, '.internal.ts')
+    if (fsSync.existsSync(internalRoutesFilePath)) routesFilePath = internalRoutesFilePath
+  }
+
   let routes = (await fs.readFile(routesFilePath)).toString()
 
   const results = addResourceToRoutes_routeToRegexAndReplacements(routes, route, options)

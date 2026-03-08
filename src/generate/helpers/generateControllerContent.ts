@@ -11,6 +11,7 @@ export default function generateControllerContent({
   omitOpenApi = false,
   owningModel,
   forAdmin,
+  forInternal = false,
   singular,
 }: {
   ancestorName: string
@@ -21,6 +22,7 @@ export default function generateControllerContent({
   omitOpenApi?: boolean | undefined
   owningModel?: string | undefined
   forAdmin: boolean
+  forInternal?: boolean
   singular: boolean
 }) {
   fullyQualifiedControllerName = DreamApp.system.standardizeFullyQualifiedModelName(
@@ -52,9 +54,13 @@ export default function generateControllerContent({
   const defaultOpenapiSerializerKeyProperty = forAdmin
     ? `
     serializerKey: 'admin',`
-    : ''
+    : forInternal
+      ? `
+    serializerKey: 'internal',`
+      : ''
 
-  const loadQueryBase: string = forAdmin
+  const useDirectModelAccess = (forAdmin || forInternal) && !owningModel
+  const loadQueryBase: string = useDirectModelAccess
     ? (modelClassName ?? 'no-class-name')
     : `this.${owningModelProperty}.associationQuery('${pluralizedModelAttributeName}')`
 
@@ -70,8 +76,8 @@ export default function generateControllerContent({
     fastJsonStringify: true,
   })
   public async create() {
-    // let ${modelAttributeName} = await ${forAdmin ? `${modelClassName}.create(` : `this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', `}this.paramsFor(${modelClassName}))
-    // if (${modelAttributeName}.isPersisted) ${modelAttributeName} = await ${modelAttributeName}.loadFor('${forAdmin ? 'admin' : 'default'}').execute()
+    // let ${modelAttributeName} = await ${useDirectModelAccess ? `${modelClassName}.create(` : `this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', `}this.paramsFor(${modelClassName}))
+    // if (${modelAttributeName}.isPersisted) ${modelAttributeName} = await ${modelAttributeName}.loadFor('${forAdmin ? 'admin' : forInternal ? 'internal' : 'default'}').execute()
     // this.created(${modelAttributeName})
   }`
         else
@@ -93,12 +99,12 @@ export default function generateControllerContent({
     tags: openApiTags,
     description: 'Paginated index of ${pluralize(modelClassName!)}',
     cursorPaginate: true,
-    serializerKey: '${forAdmin ? 'adminSummary' : 'summary'}',
+    serializerKey: '${forAdmin ? 'adminSummary' : forInternal ? 'internalSummary' : 'summary'}',
     fastJsonStringify: true,
   })
   public async index() {
     // const ${pluralizedModelAttributeName} = await ${loadQueryBase}
-    //   .preloadFor('${forAdmin ? 'adminSummary' : 'summary'}')
+    //   .preloadFor('${forAdmin ? 'adminSummary' : forInternal ? 'internalSummary' : 'summary'}')
     //   .cursorPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(${pluralizedModelAttributeName})
   }`
@@ -109,7 +115,7 @@ export default function generateControllerContent({
   //   tags: openApiTags,
   //   description: '<tbd>',
   //   many: true,
-  //   serializerKey: '${forAdmin ? 'adminSummary' : 'summary'}',
+  //   serializerKey: '${forAdmin ? 'adminSummary' : forInternal ? 'internalSummary' : 'summary'}',
   //   fastJsonStringify: true,
   // })
   public async index() {
@@ -223,13 +229,14 @@ export default function generateControllerContent({
 ${omitOpenApi ? '' : openApiImport + '\n'}${ancestorImportStatement}${additionalImports.length ? '\n' + additionalImports.join('\n') : ''}${omitOpenApi ? '' : '\n\n' + openApiTags}
 
 export default class ${controllerClassName} extends ${ancestorName} {
-${methodDefs.join('\n\n')}${modelClassName ? privateMethods(forAdmin, modelClassName, actions, loadQueryBase, singular) : ''}
+${methodDefs.join('\n\n')}${modelClassName ? privateMethods(forAdmin, forInternal, modelClassName, actions, loadQueryBase, singular) : ''}
 }
 `
 }
 
 function privateMethods(
   forAdmin: boolean,
+  forInternal: boolean,
   modelClassName: string,
   methods: string[],
   loadQueryBase: string,
@@ -237,7 +244,7 @@ function privateMethods(
 ) {
   const privateMethods: string[] = []
   if (methods.find(methodName => ['show', 'update', 'destroy'].includes(methodName)))
-    privateMethods.push(loadModelStatement(forAdmin, modelClassName, loadQueryBase, singular))
+    privateMethods.push(loadModelStatement(forAdmin, forInternal, modelClassName, loadQueryBase, singular))
 
   if (!privateMethods.length) return ''
   return `\n\n${privateMethods.join('\n\n')}`
@@ -245,13 +252,14 @@ function privateMethods(
 
 function loadModelStatement(
   forAdmin: boolean,
+  forInternal: boolean,
   modelClassName: string,
   loadQueryBase: string,
   singular: boolean,
 ) {
   return `  private async ${camelize(modelClassName)}() {
     // return await ${loadQueryBase}
-    //   .preloadFor('${forAdmin ? 'admin' : 'default'}')
+    //   .preloadFor('${forAdmin ? 'admin' : forInternal ? 'internal' : 'default'}')
     //   ${singular ? '.firstOrFail()' : ".findOrFail(this.castParam('id', 'string'))"}
   }`
 }
