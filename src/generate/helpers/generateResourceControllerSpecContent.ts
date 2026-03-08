@@ -235,6 +235,7 @@ function processAttributeByType({
     case 'string':
     case 'text':
     case 'citext':
+    case 'encrypted':
       processStringAttribute({
         attributeName,
         isArray,
