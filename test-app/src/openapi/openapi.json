@@ -6514,6 +6514,7 @@
     "schemas": {
       "BalloonLatex": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "color",
           "id",
@@ -6543,6 +6544,7 @@
       },
       "BalloonMylar": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "color",
           "id",
@@ -6572,6 +6574,7 @@
       },
       "CircularHello": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "user",
           "world"
@@ -6587,6 +6590,7 @@
       },
       "CircularWorld": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "hello"
         ],
@@ -6598,6 +6602,7 @@
       },
       "Comment": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "body",
           "id"
@@ -6617,6 +6622,7 @@
       },
       "CommentTestingBasicSerializerRef": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "howyadoin"
         ],
@@ -6639,6 +6645,7 @@
       },
       "LatexSummary": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "id",
           "latexOnlySummaryAttr"
@@ -6710,6 +6717,7 @@
       },
       "Pet": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "customAttributeTest",
           "id",
@@ -6733,6 +6741,7 @@
       },
       "PetAdditional": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "customAttributeTest",
           "id",
@@ -6753,6 +6762,7 @@
       },
       "PostWithComments": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "body",
           "comments",
@@ -6779,6 +6789,7 @@
       },
       "User": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "email",
           "id",
@@ -6801,6 +6812,7 @@
       },
       "UserExtra": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "howyadoin",
           "id",
@@ -6852,6 +6864,7 @@
       },
       "UserSummary": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "id"
         ],
@@ -6863,6 +6876,7 @@
       },
       "UserWithPosts": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "id",
           "posts"
@@ -6905,6 +6919,7 @@
       },
       "ViewModelsMyViewModel": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "favoriteNumber",
           "name"

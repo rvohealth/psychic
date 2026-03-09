@@ -26,6 +26,9 @@ ${INDENT}    - citext:
 ${INDENT}    - citext[]:
 ${INDENT}        case insensitive text (indexes and queries are automatically case insensitive)
 ${INDENT}
+${INDENT}    - encrypted:
+${INDENT}        encrypted text (used in conjunction with the @deco.Encrypted decorator)
+${INDENT}
 ${INDENT}    - string:
 ${INDENT}    - string[]:
 ${INDENT}        varchar; allowed length defaults to 255, but may be customized, e.g.: subtitle:string:128 or subtitle:string:128:optional
@@ -113,12 +116,16 @@ export default class PsychicCLI {
       )
       .option(
         '--owning-model <modelName>',
-        'the model class of the object that `associationQuery`/`createAssociation` will be performed on in the created controller and spec (e.g., "Host", "Guest", "Ticketing/Ticket") (simply to save time making changes to the generated code). Defaults to User',
+        'the model class of the object that `associationQuery`/`createAssociation` will be performed on in the created controller and spec (e.g., "Host", "Guest", "Ticketing/Ticket"). Defaults to the current user for non-admin/internal namespaced controllers. For admin/internal namespaced controllers, this defaults to null, meaning every admin/internal user can access the model.',
       )
       .option(
         '--connection-name <connectionName>',
         'the name of the db connection you would like to use for your model. Defaults to "default"',
         'default',
+      )
+      .option(
+        '--model-name <modelName>',
+        'explicit model class name to use instead of the auto-generated one (e.g. --model-name=Kitchen for Room/Kitchen)',
       )
       .argument(
         '<path>',
@@ -140,6 +147,7 @@ export default class PsychicCLI {
             stiBaseSerializer: boolean
             owningModel?: string
             connectionName: string
+            modelName?: string
           },
         ) => {
           await initializePsychicApp({
@@ -405,6 +413,7 @@ export default class PsychicCLI {
       stiBaseSerializer: boolean
       owningModel?: string
       connectionName: string
+      modelName?: string
     }
     columnsWithTypes: string[]
   }) {

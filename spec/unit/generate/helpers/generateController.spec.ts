@@ -10,16 +10,20 @@ describe('generateController', () => {
   let tmpControllersFileRelativePath: string
   let tmpControllersFilepath: string
   let adminTmpControllersFilepath: string
+  let internalTmpControllersFilepath: string
   let supportDir: string
   let adminSupportDir: string
+  let internalSupportDir: string
 
   beforeEach(() => {
     psychicApp = PsychicApp.getOrFail()
     tmpControllersFileRelativePath = path.join('spec', 'tmp', 'controllers')
     tmpControllersFilepath = path.join(psychicApp.apiRoot, tmpControllersFileRelativePath)
     adminTmpControllersFilepath = path.join(tmpControllersFilepath, 'Admin')
+    internalTmpControllersFilepath = path.join(tmpControllersFilepath, 'Internal')
     supportDir = path.join(psychicApp.apiRoot, 'spec', 'support', 'generators', 'controllers')
     adminSupportDir = path.join(supportDir, 'Admin')
+    internalSupportDir = path.join(supportDir, 'Internal')
     vi.spyOn(psychicPathModule, 'default').mockReturnValue(tmpControllersFileRelativePath)
   })
 
@@ -146,6 +150,76 @@ describe('generateController', () => {
 
         await generateController({
           fullyQualifiedControllerName: 'Admin/Api/V1/Posts',
+          actions: [],
+          singular: false,
+        })
+        const actualBase = await fs.readFile(basePath)
+        const actualNestedBase = await fs.readFile(nestedBasePath)
+        const actual = await fs.readFile(controllerPath)
+        expect(actualBase.toString()).toEqual(expectedBase.toString())
+        expect(actualNestedBase.toString()).toEqual(expectedNestedBase.toString())
+        expect(actual.toString()).toEqual(expected.toString())
+      })
+    })
+  })
+
+  context('Internal', () => {
+    it('the controller extends InternalAuthedController', async () => {
+      const controllerFilename = 'PostsController.ts'
+      const expected = await fs.readFile(path.join(internalSupportDir, controllerFilename))
+      const controllerPath = path.join(internalTmpControllersFilepath, controllerFilename)
+      if (existsSync(controllerPath)) await fs.rm(controllerPath)
+
+      await generateController({
+        fullyQualifiedControllerName: 'Internal/Posts',
+        actions: [],
+        singular: false,
+      })
+      const actual = await fs.readFile(controllerPath)
+      expect(actual.toString()).toEqual(expected.toString())
+    })
+
+    context('namespaced controller', () => {
+      it('the controller extends a base controller which extends AuthedController', async () => {
+        const controllerFilename = 'PostsController.ts'
+        const expectedBase = await fs.readFile(path.join(internalSupportDir, 'Api', 'BaseController.ts'))
+        const expected = await fs.readFile(path.join(internalSupportDir, 'Api', controllerFilename))
+        const basePath = path.join(internalTmpControllersFilepath, 'Api', 'BaseController.ts')
+        if (existsSync(basePath)) await fs.rm(basePath)
+        const controllerPath = path.join(internalTmpControllersFilepath, 'Api', controllerFilename)
+        if (existsSync(controllerPath)) await fs.rm(controllerPath)
+
+        await generateController({
+          fullyQualifiedControllerName: 'Internal/Api/Posts',
+          actions: [],
+          singular: false,
+        })
+        const actualBase = await fs.readFile(basePath)
+        const actual = await fs.readFile(controllerPath)
+        expect(actualBase.toString()).toEqual(expectedBase.toString())
+        expect(actual.toString()).toEqual(expected.toString())
+      })
+    })
+
+    context('nested namespaced controller', () => {
+      it('the controller extends a base controller which extends AuthedController', async () => {
+        const controllerFilename = 'PostsController.ts'
+        const expectedBase = await fs.readFile(path.join(internalSupportDir, 'Api', 'BaseController.ts'))
+        const expectedNestedBase = await fs.readFile(
+          path.join(internalSupportDir, 'Api', 'V1', 'BaseController.ts'),
+        )
+        const expected = await fs.readFile(path.join(internalSupportDir, 'Api', 'V1', controllerFilename))
+
+        const basePath = path.join(internalTmpControllersFilepath, 'Api', 'BaseController.ts')
+        if (existsSync(basePath)) await fs.rm(basePath)
+        const nestedBasePath = path.join(internalTmpControllersFilepath, 'Api', 'V1', 'BaseController.ts')
+        if (existsSync(nestedBasePath)) await fs.rm(nestedBasePath)
+
+        const controllerPath = path.join(internalTmpControllersFilepath, 'Api', 'V1', controllerFilename)
+        if (existsSync(controllerPath)) await fs.rm(controllerPath)
+
+        await generateController({
+          fullyQualifiedControllerName: 'Internal/Api/V1/Posts',
           actions: [],
           singular: false,
         })

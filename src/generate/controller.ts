@@ -41,15 +41,17 @@ export default async function generateController({
   fullyQualifiedControllerName = fullyQualifiedControllerName.replace(pathParamRegexp, '/')
   const allControllerNameParts = fullyQualifiedControllerName.split('/')
   const forAdmin = allControllerNameParts[0] === 'Admin'
+  const forInternal = allControllerNameParts[0] === 'Internal'
 
-  const controllerNameParts: string[] = forAdmin ? [allControllerNameParts.shift()!] : []
+  const controllerNameParts: string[] = (forAdmin || forInternal) ? [allControllerNameParts.shift()!] : []
 
   for (let index = 0; index < allControllerNameParts.length; index++) {
-    if (controllerNameParts.length > (forAdmin ? 1 : 0)) {
+    if (controllerNameParts.length > ((forAdmin || forInternal) ? 1 : 0)) {
       // Write the ancestor controller
       const [baseAncestorName, baseAncestorImportStatement] = baseAncestorNameAndImport(
         controllerNameParts,
         forAdmin,
+        forInternal,
         { forBaseController: true },
       )
 
@@ -73,6 +75,7 @@ export default async function generateController({
             fullyQualifiedControllerName: baseControllerName,
             omitOpenApi: true,
             forAdmin,
+            forInternal,
             singular,
           }),
         )
@@ -84,7 +87,7 @@ export default async function generateController({
   }
 
   // Write the controller
-  const [ancestorName, ancestorImportStatement] = baseAncestorNameAndImport(controllerNameParts, forAdmin, {
+  const [ancestorName, ancestorImportStatement] = baseAncestorNameAndImport(controllerNameParts, forAdmin, forInternal, {
     forBaseController: false,
   })
 
@@ -110,6 +113,7 @@ export default async function generateController({
         actions,
         owningModel,
         forAdmin,
+        forInternal,
         singular,
       }),
     )
@@ -131,6 +135,7 @@ export default async function generateController({
     resourceSpecs,
     owningModel,
     forAdmin,
+    forInternal,
     singular,
     actions,
   })
@@ -139,20 +144,26 @@ export default async function generateController({
 function baseAncestorNameAndImport(
   controllerNameParts: string[],
   forAdmin: boolean,
+  forInternal: boolean,
   { forBaseController }: { forBaseController: boolean },
 ) {
   const maybeAncestorNameForBase = `${controllerNameParts.slice(0, controllerNameParts.length - 1).join('')}BaseController`
   const dotFiles = forBaseController ? '..' : '.'
-  return controllerNameParts.length === (forAdmin ? 2 : 1)
+  return controllerNameParts.length === ((forAdmin || forInternal) ? 2 : 1)
     ? forAdmin
       ? [
           `AdminAuthedController`,
           `import AdminAuthedController from '${dotFiles}/${addImportSuffix('AuthedController.js')}'`,
         ]
-      : [
-          `AuthedController`,
-          `import AuthedController from '${dotFiles}/${addImportSuffix('AuthedController.js')}'`,
-        ]
+      : forInternal
+        ? [
+            `InternalAuthedController`,
+            `import InternalAuthedController from '${dotFiles}/${addImportSuffix('AuthedController.js')}'`,
+          ]
+        : [
+            `AuthedController`,
+            `import AuthedController from '${dotFiles}/${addImportSuffix('AuthedController.js')}'`,
+          ]
     : [
         maybeAncestorNameForBase,
         `import ${maybeAncestorNameForBase} from '${dotFiles}/${addImportSuffix('BaseController.js')}'`,
@@ -167,6 +178,7 @@ async function generateControllerSpec({
   resourceSpecs,
   owningModel,
   forAdmin,
+  forInternal,
   singular,
   actions,
 }: {
@@ -177,6 +189,7 @@ async function generateControllerSpec({
   resourceSpecs: boolean
   owningModel: string | undefined
   forAdmin: boolean
+  forInternal: boolean
   singular: boolean
   actions: string[]
 }) {
@@ -198,6 +211,7 @@ async function generateControllerSpec({
             columnsWithTypes,
             owningModel,
             forAdmin,
+            forInternal,
             singular,
             actions,
           })

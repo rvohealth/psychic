@@ -10,6 +10,7 @@ interface GenerateSpecOptions {
   columnsWithTypes: string[]
   owningModel?: string | undefined
   forAdmin: boolean
+  forInternal: boolean
   singular: boolean
   actions: string[]
 }
@@ -23,6 +24,7 @@ interface ModelConfiguration {
   owningModelName: string
   owningModelVariableName: string
   simpleCreationCommand: string
+  useDirectModelAccess: boolean
 }
 
 interface UpdateKeyValue {
@@ -88,8 +90,8 @@ function createModelConfiguration(options: GenerateSpecOptions): ModelConfigurat
   const modelClassName = DreamApp.system.globalClassNameFromFullyQualifiedModelName(fullyQualifiedModelName)
   const modelVariableName = camelize(modelClassName)
 
-  const userModelName = options.forAdmin ? 'AdminUser' : 'User'
-  const userVariableName = options.forAdmin ? 'adminUser' : 'user'
+  const userModelName = options.forInternal ? 'InternalUser' : options.forAdmin ? 'AdminUser' : 'User'
+  const userVariableName = options.forInternal ? 'internalUser' : options.forAdmin ? 'adminUser' : 'user'
 
   const owningModelName = options.owningModel
     ? DreamApp.system.globalClassNameFromFullyQualifiedModelName(options.owningModel)
@@ -98,7 +100,8 @@ function createModelConfiguration(options: GenerateSpecOptions): ModelConfigurat
     ? camelize(DreamApp.system.standardizeFullyQualifiedModelName(options.owningModel).split('/').pop()!)
     : userVariableName
 
-  const simpleCreationCommand = `const ${modelVariableName} = await create${modelClassName}(${options.forAdmin ? '' : `{ ${owningModelVariableName} }`})`
+  const useDirectModelAccess = (options.forAdmin || options.forInternal) && !options.owningModel
+  const simpleCreationCommand = `const ${modelVariableName} = await create${modelClassName}(${useDirectModelAccess ? '' : `{ ${owningModelVariableName} }`})`
 
   return {
     fullyQualifiedModelName,
@@ -109,6 +112,7 @@ function createModelConfiguration(options: GenerateSpecOptions): ModelConfigurat
     owningModelName,
     owningModelVariableName,
     simpleCreationCommand,
+    useDirectModelAccess,
   }
 }
 
@@ -231,6 +235,7 @@ function processAttributeByType({
     case 'string':
     case 'text':
     case 'citext':
+    case 'encrypted':
       processStringAttribute({
         attributeName,
         isArray,
@@ -516,8 +521,8 @@ describe('${fullyQualifiedControllerName}', () => {
 function generateIndexActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitIndex) return ''
 
-  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, forAdmin } = options
-  const subjectFunctionName = `index${pluralize(modelConfig.modelClassName)}`
+  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular } = options
+  const subjectFunctionName = 'index'
 
   return `
 
@@ -537,7 +542,7 @@ function generateIndexActionSpec(options: TemplateOptions): string {
         }),
       ])
     })${
-      singular || forAdmin
+      singular || modelConfig.useDirectModelAccess
         ? ''
         : `
 
@@ -557,9 +562,9 @@ function generateIndexActionSpec(options: TemplateOptions): string {
 function generateShowActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitShow) return ''
 
-  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, forAdmin, attributeData } =
+  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } =
     options
-  const subjectFunctionName = `show${modelConfig.modelClassName}`
+  const subjectFunctionName = 'show'
 
   const subjectFunction = singular
     ? `
@@ -586,7 +591,7 @@ function generateShowActionSpec(options: TemplateOptions): string {
         }),
       )
     })${
-      singular || forAdmin
+      singular || modelConfig.useDirectModelAccess
         ? ''
         : `
 
@@ -604,9 +609,9 @@ function generateShowActionSpec(options: TemplateOptions): string {
 function generateCreateActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitCreate) return ''
 
-  const { path, pathParams, modelConfig, fullyQualifiedModelName, forAdmin, singular, attributeData } =
+  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } =
     options
-  const subjectFunctionName = `create${modelConfig.modelClassName}`
+  const subjectFunctionName = 'create'
 
   const uuidSetup = attributeData.uuidAttributes
     .map(attrName => {
@@ -631,7 +636,7 @@ function generateCreateActionSpec(options: TemplateOptions): string {
       : ''
   }${uuidSetup || attributeData.dateAttributeIncluded || attributeData.datetimeAttributeIncluded ? '\n' : ''}`
 
-  const modelQuery = forAdmin
+  const modelQuery = modelConfig.useDirectModelAccess
     ? `${modelConfig.modelClassName}.firstOrFail()`
     : `${modelConfig.owningModelVariableName}.associationQuery('${singular ? modelConfig.modelVariableName : pluralize(modelConfig.modelVariableName)}').firstOrFail()`
 
@@ -647,7 +652,7 @@ function generateCreateActionSpec(options: TemplateOptions): string {
       })
     }
 
-    it('creates a ${fullyQualifiedModelName}${forAdmin ? '' : ` for this ${modelConfig.owningModelName}`}', async () => {${dateTimeSetup}
+    it('creates a ${fullyQualifiedModelName}${modelConfig.useDirectModelAccess ? '' : ` for this ${modelConfig.owningModelName}`}', async () => {${dateTimeSetup}
       const { body } = await ${subjectFunctionName}({
         ${attributeData.attributeCreationKeyValues.join('\n        ')}
       }, 201)
@@ -666,9 +671,9 @@ function generateCreateActionSpec(options: TemplateOptions): string {
 function generateUpdateActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitUpdate) return ''
 
-  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, forAdmin, attributeData } =
+  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } =
     options
-  const subjectFunctionName = `update${modelConfig.modelClassName}`
+  const subjectFunctionName = 'update'
 
   const uuidSetup = attributeData.uuidAttributes
     .map(attrName => {
@@ -718,7 +723,7 @@ function generateUpdateActionSpec(options: TemplateOptions): string {
     }`
 
   const updateContextSpec =
-    singular || forAdmin
+    singular || modelConfig.useDirectModelAccess
       ? ''
       : `
 
@@ -780,8 +785,8 @@ function generateUpdateActionSpec(options: TemplateOptions): string {
 function generateDestroyActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitDestroy) return ''
 
-  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, forAdmin } = options
-  const subjectFunctionName = `destroy${modelConfig.modelClassName}`
+  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular } = options
+  const subjectFunctionName = 'destroy'
 
   const subjectFunction = singular
     ? `
@@ -794,7 +799,7 @@ function generateDestroyActionSpec(options: TemplateOptions): string {
     }`
 
   const destroyContextSpec =
-    singular || forAdmin
+    singular || modelConfig.useDirectModelAccess
       ? ''
       : `
 
