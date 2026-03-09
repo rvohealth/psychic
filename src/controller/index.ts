@@ -257,7 +257,10 @@ export default class PsychicController {
   }
 
   /**
-   * Gets the HTTP request headers from the Express request object.
+   * Gets the HTTP request headers from the Koa ctx object.
+   * We recommend using the #header method instead when looking
+   * to retreive the value for a specific header, since that method
+   * will be safe with regards to case sensitivity.
    *
    * @returns The request headers as a key-value object where header names are lowercase strings
    * and values can be strings, string arrays, or undefined.
@@ -275,6 +278,17 @@ export default class PsychicController {
    */
   public get headers() {
     return this.ctx.request.headers
+  }
+
+  /**
+   * returns the value for the requested header. This method is case insensitive.
+   * If the header requested is not found, a blank string is returned.
+   *
+   * @param headerName - the name of the header
+   * @returns string
+   */
+  public header(headerName: string) {
+    return this.ctx.request.get(headerName)
   }
 
   /**

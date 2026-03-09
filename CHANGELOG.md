@@ -1,3 +1,7 @@
+## 3.0.1
+
+add case-insensitive header method to PsychicController
+
 ## 3.0.0
 
 Replaces Express with [Koa](https://koajs.com/) as the underlying HTTP framework. This is a breaking change that affects middleware, error handling, and several dependencies. For the most part, there are no breaking changes, save small ways in which the error handling mechanisms are defined, in addition to custom middleware that you may have been utilizing. Follow this guide to help bring your app up to date.
