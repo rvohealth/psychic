@@ -971,7 +971,7 @@ export default class PsychicController {
    * ```
    */
   public redirect(path: string) {
-    this.ctx.redirect(path)
+    this.koaRedirect(302, path)
   }
 
   // begin: http status codes
