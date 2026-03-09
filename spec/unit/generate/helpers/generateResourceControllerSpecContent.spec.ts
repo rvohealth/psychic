@@ -63,14 +63,14 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET index', () => {
-    const indexPosts = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const getIndexPosts = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/v1/posts', expectedStatus)
     }
 
     it('returns the index of Posts', async () => {
       const post = await createPost({ user })
 
-      const { body } = await indexPosts(200)
+      const { body } = await getIndexPosts(200)
 
       expect(body.results).toEqual([
         expect.objectContaining({
@@ -83,7 +83,7 @@ describe('V1/PostsController', () => {
       it('are omitted', async () => {
         await createPost()
 
-        const { body } = await indexPosts(200)
+        const { body } = await getIndexPosts(200)
 
         expect(body.results).toEqual([])
       })
@@ -91,7 +91,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET show', () => {
-    const showPost = async <StatusCode extends 200 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+    const getShowPost = async <StatusCode extends 200 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
       return request.get('/v1/posts/{id}', expectedStatus, {
         id: post.id,
       })
@@ -100,7 +100,7 @@ describe('V1/PostsController', () => {
     it('returns the specified Post', async () => {
       const post = await createPost({ user })
 
-      const { body } = await showPost(post, 200)
+      const { body } = await getShowPost(post, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -134,13 +134,13 @@ describe('V1/PostsController', () => {
       it('is not found', async () => {
         const otherUserPost = await createPost()
 
-        await showPost(otherUserPost, 404)
+        await getShowPost(otherUserPost, 404)
       })
     })
   })
 
   describe('POST create', () => {
-    const createPost = async <StatusCode extends 201 | 400 | 404>(
+    const postCreatePost = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/v1/posts'>,
       expectedStatus: StatusCode
     ) => {
@@ -156,7 +156,7 @@ describe('V1/PostsController', () => {
       const today = CalendarDate.today()
       const now = DateTime.now()
 
-      const { body } = await createPost({
+      const { body } = await postCreatePost({
         myUuid: myUuid,
         uuidNotDefinedAsUuid: uuidNotDefinedAsUuid,
         style: 'formal',
@@ -231,7 +231,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('PATCH update', () => {
-    const updatePost = async <StatusCode extends 204 | 400 | 404>(
+    const patchUpdatePost = async <StatusCode extends 204 | 400 | 404>(
       post: Post,
       data: RequestBody<'patch', '/v1/posts/{id}'>,
       expectedStatus: StatusCode
@@ -251,7 +251,7 @@ describe('V1/PostsController', () => {
 
       const post = await createPost({ user })
 
-      await updatePost(post, {
+      await patchUpdatePost(post, {
         myUuid: newMyUuid,
         uuidNotDefinedAsUuid: newUuidNotDefinedAsUuid,
         style: 'informal',
@@ -322,7 +322,7 @@ describe('V1/PostsController', () => {
         const originalStringArray = post.stringArray
         const originalEnumArray = post.enumArray
 
-        await updatePost(post, {
+        await patchUpdatePost(post, {
           myUuid: randomUUID(),
           uuidNotDefinedAsUuid: randomUUID(),
           style: 'informal',
@@ -369,7 +369,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const destroyPost = async <StatusCode extends 204 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+    const deleteDestroyPost = async <StatusCode extends 204 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
       return request.delete('/v1/posts/{id}', expectedStatus, {
         id: post.id,
       })
@@ -378,7 +378,7 @@ describe('V1/PostsController', () => {
     it('deletes the Post', async () => {
       const post = await createPost({ user })
 
-      await destroyPost(post, 204)
+      await deleteDestroyPost(post, 204)
 
       expect(await Post.find(post.id)).toBeNull()
     })
@@ -387,7 +387,7 @@ describe('V1/PostsController', () => {
       it('is not deleted', async () => {
         const post = await createPost()
 
-        await destroyPost(post, 404)
+        await deleteDestroyPost(post, 404)
 
         expect(await Post.find(post.id)).toMatchDreamModel(post)
       })
@@ -427,14 +427,14 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET index', () => {
-    const indexPosts = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const getIndexPosts = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/v1/posts', expectedStatus)
     }
 
     it('returns the index of Posts', async () => {
       const post = await createPost({ user })
 
-      const { body } = await indexPosts(200)
+      const { body } = await getIndexPosts(200)
 
       expect(body.results).toEqual([
         expect.objectContaining({
@@ -447,7 +447,7 @@ describe('V1/PostsController', () => {
       it('are omitted', async () => {
         await createPost()
 
-        const { body } = await indexPosts(200)
+        const { body } = await getIndexPosts(200)
 
         expect(body.results).toEqual([])
       })
@@ -455,7 +455,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET show', () => {
-    const showPost = async <StatusCode extends 200 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+    const getShowPost = async <StatusCode extends 200 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
       return request.get('/v1/posts/{id}', expectedStatus, {
         id: post.id,
       })
@@ -464,7 +464,7 @@ describe('V1/PostsController', () => {
     it('returns the specified Post', async () => {
       const post = await createPost({ user })
 
-      const { body } = await showPost(post, 200)
+      const { body } = await getShowPost(post, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -478,13 +478,13 @@ describe('V1/PostsController', () => {
       it('is not found', async () => {
         const otherUserPost = await createPost()
 
-        await showPost(otherUserPost, 404)
+        await getShowPost(otherUserPost, 404)
       })
     })
   })
 
   describe('POST create', () => {
-    const createPost = async <StatusCode extends 201 | 400 | 404>(
+    const postCreatePost = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/v1/posts'>,
       expectedStatus: StatusCode
     ) => {
@@ -494,7 +494,7 @@ describe('V1/PostsController', () => {
     }
 
     it('creates a Post for this User', async () => {
-      const { body } = await createPost({
+      const { body } = await postCreatePost({
         title: 'The Post title',
       }, 201)
 
@@ -511,7 +511,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('PATCH update', () => {
-    const updatePost = async <StatusCode extends 204 | 400 | 404>(
+    const patchUpdatePost = async <StatusCode extends 204 | 400 | 404>(
       post: Post,
       data: RequestBody<'patch', '/v1/posts/{id}'>,
       expectedStatus: StatusCode
@@ -525,7 +525,7 @@ describe('V1/PostsController', () => {
     it('updates the Post', async () => {
       const post = await createPost({ user })
 
-      await updatePost(post, {
+      await patchUpdatePost(post, {
         title: 'Updated Post title',
       }, 204)
 
@@ -538,7 +538,7 @@ describe('V1/PostsController', () => {
         const post = await createPost()
         const originalTitle = post.title
 
-        await updatePost(post, {
+        await patchUpdatePost(post, {
           title: 'Updated Post title',
         }, 404)
 
@@ -549,7 +549,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const destroyPost = async <StatusCode extends 204 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+    const deleteDestroyPost = async <StatusCode extends 204 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
       return request.delete('/v1/posts/{id}', expectedStatus, {
         id: post.id,
       })
@@ -558,7 +558,7 @@ describe('V1/PostsController', () => {
     it('deletes the Post', async () => {
       const post = await createPost({ user })
 
-      await destroyPost(post, 204)
+      await deleteDestroyPost(post, 204)
 
       expect(await Post.find(post.id)).toBeNull()
     })
@@ -567,7 +567,7 @@ describe('V1/PostsController', () => {
       it('is not deleted', async () => {
         const post = await createPost()
 
-        await destroyPost(post, 404)
+        await deleteDestroyPost(post, 404)
 
         expect(await Post.find(post.id)).toMatchDreamModel(post)
       })
@@ -618,7 +618,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET show', () => {
-    const showPost = async <StatusCode extends 200 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+    const getShowPost = async <StatusCode extends 200 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
       return request.get('/v1/posts/{id}', expectedStatus, {
         id: post.id,
       })
@@ -627,7 +627,7 @@ describe('V1/PostsController', () => {
     it('returns the specified Post', async () => {
       const post = await createPost({ user })
 
-      const { body } = await showPost(post, 200)
+      const { body } = await getShowPost(post, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -647,13 +647,13 @@ describe('V1/PostsController', () => {
       it('is not found', async () => {
         const otherUserPost = await createPost()
 
-        await showPost(otherUserPost, 404)
+        await getShowPost(otherUserPost, 404)
       })
     })
   })
 
   describe('POST create', () => {
-    const createPost = async <StatusCode extends 201 | 400 | 404>(
+    const postCreatePost = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/v1/posts'>,
       expectedStatus: StatusCode
     ) => {
@@ -663,7 +663,7 @@ describe('V1/PostsController', () => {
     }
 
     it('creates a Post for this User', async () => {
-      const { body } = await createPost({
+      const { body } = await postCreatePost({
         style: 'formal',
         title: 'The Post title',
         subtitle: 'The Post subtitle',
@@ -731,14 +731,14 @@ describe('V1/HostingAgreementController', () => {
   })
 
   describe('GET show', () => {
-    const showHostingAgreement = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const getShowHostingAgreement = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/v1/hosting-agreement', expectedStatus)
     }
 
     it('returns the HostingAgreement belonging to the User', async () => {
       const hostingAgreement = await createHostingAgreement({ user })
 
-      const { body } = await showHostingAgreement(200)
+      const { body } = await getShowHostingAgreement(200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -751,7 +751,7 @@ describe('V1/HostingAgreementController', () => {
   })
 
   describe('POST create', () => {
-    const createHostingAgreement = async <StatusCode extends 201 | 400 | 404>(
+    const postCreateHostingAgreement = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/v1/hosting-agreement'>,
       expectedStatus: StatusCode
     ) => {
@@ -764,7 +764,7 @@ describe('V1/HostingAgreementController', () => {
       const today = CalendarDate.today()
       const now = DateTime.now()
 
-      const { body } = await createHostingAgreement({
+      const { body } = await postCreateHostingAgreement({
         signedOn: today.toISO(),
         signedAt: now.toISO(),
       }, 201)
@@ -784,7 +784,7 @@ describe('V1/HostingAgreementController', () => {
   })
 
   describe('PATCH update', () => {
-    const updateHostingAgreement = async <StatusCode extends 204 | 400 | 404>(
+    const patchUpdateHostingAgreement = async <StatusCode extends 204 | 400 | 404>(
       data: RequestBody<'patch', '/v1/hosting-agreement'>,
       expectedStatus: StatusCode
     ) => {
@@ -799,7 +799,7 @@ describe('V1/HostingAgreementController', () => {
 
       const hostingAgreement = await createHostingAgreement({ user })
 
-      await updateHostingAgreement({
+      await patchUpdateHostingAgreement({
         signedOn: yesterday.toISO(),
         signedAt: lastHour.toISO(),
       }, 204)
@@ -811,14 +811,14 @@ describe('V1/HostingAgreementController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const destroyHostingAgreement = async <StatusCode extends 204 | 400 | 404>(expectedStatus: StatusCode) => {
+    const deleteDestroyHostingAgreement = async <StatusCode extends 204 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.delete('/v1/hosting-agreement', expectedStatus)
     }
 
     it('deletes the HostingAgreement', async () => {
       const hostingAgreement = await createHostingAgreement({ user })
 
-      await destroyHostingAgreement(204)
+      await deleteDestroyHostingAgreement(204)
 
       expect(await HostingAgreement.find(hostingAgreement.id)).toBeNull()
     })
@@ -861,7 +861,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('GET show', () => {
-    const showTicketingComment = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const getShowTicketingComment = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/ticketing/tickets/{ticketId}/comments', expectedStatus, {
         ticketId: ticket.id,
       })
@@ -870,7 +870,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     it('returns the Ticketing/Comment belonging to the TicketingTicket', async () => {
       const ticketingComment = await createTicketingComment({ ticket })
 
-      const { body } = await showTicketingComment(200)
+      const { body } = await getShowTicketingComment(200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -882,7 +882,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('POST create', () => {
-    const createTicketingComment = async <StatusCode extends 201 | 400 | 404>(
+    const postCreateTicketingComment = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/ticketing/tickets/{ticketId}/comments'>,
       expectedStatus: StatusCode
     ) => {
@@ -893,7 +893,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     }
 
     it('creates a Ticketing/Comment for this TicketingTicket', async () => {
-      const { body } = await createTicketingComment({
+      const { body } = await postCreateTicketingComment({
         body: 'The Ticketing/Comment body',
       }, 201)
 
@@ -910,7 +910,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('PATCH update', () => {
-    const updateTicketingComment = async <StatusCode extends 204 | 400 | 404>(
+    const patchUpdateTicketingComment = async <StatusCode extends 204 | 400 | 404>(
       data: RequestBody<'patch', '/ticketing/tickets/{ticketId}/comments'>,
       expectedStatus: StatusCode
     ) => {
@@ -923,7 +923,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     it('updates the Ticketing/Comment', async () => {
       const ticketingComment = await createTicketingComment({ ticket })
 
-      await updateTicketingComment({
+      await patchUpdateTicketingComment({
         body: 'Updated Ticketing/Comment body',
       }, 204)
 
@@ -933,7 +933,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const destroyTicketingComment = async <StatusCode extends 204 | 400 | 404>(expectedStatus: StatusCode) => {
+    const deleteDestroyTicketingComment = async <StatusCode extends 204 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.delete('/ticketing/tickets/{ticketId}/comments', expectedStatus, {
         ticketId: ticket.id,
       })
@@ -942,7 +942,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     it('deletes the Ticketing/Comment', async () => {
       const ticketingComment = await createTicketingComment({ ticket })
 
-      await destroyTicketingComment(204)
+      await deleteDestroyTicketingComment(204)
 
       expect(await TicketingComment.find(ticketingComment.id)).toBeNull()
     })
@@ -987,14 +987,14 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET index', () => {
-    const indexPosts = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const getIndexPosts = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/v1/posts', expectedStatus)
     }
 
     it('returns the index of Posts', async () => {
       const post = await createPost({ host })
 
-      const { body } = await indexPosts(200)
+      const { body } = await getIndexPosts(200)
 
       expect(body.results).toEqual([
         expect.objectContaining({
@@ -1007,7 +1007,7 @@ describe('V1/PostsController', () => {
       it('are omitted', async () => {
         await createPost()
 
-        const { body } = await indexPosts(200)
+        const { body } = await getIndexPosts(200)
 
         expect(body.results).toEqual([])
       })
@@ -1015,7 +1015,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('GET show', () => {
-    const showPost = async <StatusCode extends 200 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+    const getShowPost = async <StatusCode extends 200 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
       return request.get('/v1/posts/{id}', expectedStatus, {
         id: post.id,
       })
@@ -1024,7 +1024,7 @@ describe('V1/PostsController', () => {
     it('returns the specified Post', async () => {
       const post = await createPost({ host })
 
-      const { body } = await showPost(post, 200)
+      const { body } = await getShowPost(post, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -1038,13 +1038,13 @@ describe('V1/PostsController', () => {
       it('is not found', async () => {
         const otherHostPost = await createPost()
 
-        await showPost(otherHostPost, 404)
+        await getShowPost(otherHostPost, 404)
       })
     })
   })
 
   describe('POST create', () => {
-    const createPost = async <StatusCode extends 201 | 400 | 404>(
+    const postCreatePost = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/v1/posts'>,
       expectedStatus: StatusCode
     ) => {
@@ -1054,7 +1054,7 @@ describe('V1/PostsController', () => {
     }
 
     it('creates a Post for this Host', async () => {
-      const { body } = await createPost({
+      const { body } = await postCreatePost({
         body: 'The Post body',
       }, 201)
 
@@ -1071,7 +1071,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('PATCH update', () => {
-    const updatePost = async <StatusCode extends 204 | 400 | 404>(
+    const patchUpdatePost = async <StatusCode extends 204 | 400 | 404>(
       post: Post,
       data: RequestBody<'patch', '/v1/posts/{id}'>,
       expectedStatus: StatusCode
@@ -1085,7 +1085,7 @@ describe('V1/PostsController', () => {
     it('updates the Post', async () => {
       const post = await createPost({ host })
 
-      await updatePost(post, {
+      await patchUpdatePost(post, {
         body: 'Updated Post body',
       }, 204)
 
@@ -1098,7 +1098,7 @@ describe('V1/PostsController', () => {
         const post = await createPost()
         const originalBody = post.body
 
-        await updatePost(post, {
+        await patchUpdatePost(post, {
           body: 'Updated Post body',
         }, 404)
 
@@ -1109,7 +1109,7 @@ describe('V1/PostsController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const destroyPost = async <StatusCode extends 204 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
+    const deleteDestroyPost = async <StatusCode extends 204 | 400 | 404>(post: Post, expectedStatus: StatusCode) => {
       return request.delete('/v1/posts/{id}', expectedStatus, {
         id: post.id,
       })
@@ -1118,7 +1118,7 @@ describe('V1/PostsController', () => {
     it('deletes the Post', async () => {
       const post = await createPost({ host })
 
-      await destroyPost(post, 204)
+      await deleteDestroyPost(post, 204)
 
       expect(await Post.find(post.id)).toBeNull()
     })
@@ -1127,7 +1127,7 @@ describe('V1/PostsController', () => {
       it('is not deleted', async () => {
         const post = await createPost()
 
-        await destroyPost(post, 404)
+        await deleteDestroyPost(post, 404)
 
         expect(await Post.find(post.id)).toMatchDreamModel(post)
       })
@@ -1171,14 +1171,14 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('GET index', () => {
-    const indexTicketingComments = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const getIndexTicketingComments = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/ticketing/tickets/comments', expectedStatus)
     }
 
     it('returns the index of Ticketing/Comments', async () => {
       const ticketingComment = await createTicketingComment({ ticket })
 
-      const { body } = await indexTicketingComments(200)
+      const { body } = await getIndexTicketingComments(200)
 
       expect(body.results).toEqual([
         expect.objectContaining({
@@ -1191,7 +1191,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
       it('are omitted', async () => {
         await createTicketingComment()
 
-        const { body } = await indexTicketingComments(200)
+        const { body } = await getIndexTicketingComments(200)
 
         expect(body.results).toEqual([])
       })
@@ -1199,7 +1199,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('GET show', () => {
-    const showTicketingComment = async <StatusCode extends 200 | 400 | 404>(ticketingComment: TicketingComment, expectedStatus: StatusCode) => {
+    const getShowTicketingComment = async <StatusCode extends 200 | 400 | 404>(ticketingComment: TicketingComment, expectedStatus: StatusCode) => {
       return request.get('/ticketing/tickets/comments/{id}', expectedStatus, {
         id: ticketingComment.id,
       })
@@ -1208,7 +1208,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     it('returns the specified Ticketing/Comment', async () => {
       const ticketingComment = await createTicketingComment({ ticket })
 
-      const { body } = await showTicketingComment(ticketingComment, 200)
+      const { body } = await getShowTicketingComment(ticketingComment, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -1222,13 +1222,13 @@ describe('Ticketing/Tickets/CommentsController', () => {
       it('is not found', async () => {
         const otherTicketingTicketTicketingComment = await createTicketingComment()
 
-        await showTicketingComment(otherTicketingTicketTicketingComment, 404)
+        await getShowTicketingComment(otherTicketingTicketTicketingComment, 404)
       })
     })
   })
 
   describe('POST create', () => {
-    const createTicketingComment = async <StatusCode extends 201 | 400 | 404>(
+    const postCreateTicketingComment = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/ticketing/tickets/comments'>,
       expectedStatus: StatusCode
     ) => {
@@ -1238,7 +1238,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     }
 
     it('creates a Ticketing/Comment for this TicketingTicket', async () => {
-      const { body } = await createTicketingComment({
+      const { body } = await postCreateTicketingComment({
         body: 'The Ticketing/Comment body',
       }, 201)
 
@@ -1255,7 +1255,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('PATCH update', () => {
-    const updateTicketingComment = async <StatusCode extends 204 | 400 | 404>(
+    const patchUpdateTicketingComment = async <StatusCode extends 204 | 400 | 404>(
       ticketingComment: TicketingComment,
       data: RequestBody<'patch', '/ticketing/tickets/comments/{id}'>,
       expectedStatus: StatusCode
@@ -1269,7 +1269,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     it('updates the Ticketing/Comment', async () => {
       const ticketingComment = await createTicketingComment({ ticket })
 
-      await updateTicketingComment(ticketingComment, {
+      await patchUpdateTicketingComment(ticketingComment, {
         body: 'Updated Ticketing/Comment body',
       }, 204)
 
@@ -1282,7 +1282,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
         const ticketingComment = await createTicketingComment()
         const originalBody = ticketingComment.body
 
-        await updateTicketingComment(ticketingComment, {
+        await patchUpdateTicketingComment(ticketingComment, {
           body: 'Updated Ticketing/Comment body',
         }, 404)
 
@@ -1293,7 +1293,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const destroyTicketingComment = async <StatusCode extends 204 | 400 | 404>(ticketingComment: TicketingComment, expectedStatus: StatusCode) => {
+    const deleteDestroyTicketingComment = async <StatusCode extends 204 | 400 | 404>(ticketingComment: TicketingComment, expectedStatus: StatusCode) => {
       return request.delete('/ticketing/tickets/comments/{id}', expectedStatus, {
         id: ticketingComment.id,
       })
@@ -1302,7 +1302,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     it('deletes the Ticketing/Comment', async () => {
       const ticketingComment = await createTicketingComment({ ticket })
 
-      await destroyTicketingComment(ticketingComment, 204)
+      await deleteDestroyTicketingComment(ticketingComment, 204)
 
       expect(await TicketingComment.find(ticketingComment.id)).toBeNull()
     })
@@ -1311,7 +1311,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
       it('is not deleted', async () => {
         const ticketingComment = await createTicketingComment()
 
-        await destroyTicketingComment(ticketingComment, 404)
+        await deleteDestroyTicketingComment(ticketingComment, 404)
 
         expect(await TicketingComment.find(ticketingComment.id)).toMatchDreamModel(ticketingComment)
       })
@@ -1355,7 +1355,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('GET index', () => {
-    const indexTicketingComments = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const getIndexTicketingComments = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/ticketing/tickets/{ticketId}/comments', expectedStatus, {
         ticketId: ticket.id,
       })
@@ -1364,7 +1364,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     it('returns the index of Ticketing/Comments', async () => {
       const ticketingComment = await createTicketingComment({ ticket })
 
-      const { body } = await indexTicketingComments(200)
+      const { body } = await getIndexTicketingComments(200)
 
       expect(body.results).toEqual([
         expect.objectContaining({
@@ -1377,7 +1377,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
       it('are omitted', async () => {
         await createTicketingComment()
 
-        const { body } = await indexTicketingComments(200)
+        const { body } = await getIndexTicketingComments(200)
 
         expect(body.results).toEqual([])
       })
@@ -1385,7 +1385,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('GET show', () => {
-    const showTicketingComment = async <StatusCode extends 200 | 400 | 404>(ticketingComment: TicketingComment, expectedStatus: StatusCode) => {
+    const getShowTicketingComment = async <StatusCode extends 200 | 400 | 404>(ticketingComment: TicketingComment, expectedStatus: StatusCode) => {
       return request.get('/ticketing/tickets/{ticketId}/comments/{id}', expectedStatus, {
         ticketId: ticket.id,
         id: ticketingComment.id,
@@ -1395,7 +1395,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     it('returns the specified Ticketing/Comment', async () => {
       const ticketingComment = await createTicketingComment({ ticket })
 
-      const { body } = await showTicketingComment(ticketingComment, 200)
+      const { body } = await getShowTicketingComment(ticketingComment, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -1409,13 +1409,13 @@ describe('Ticketing/Tickets/CommentsController', () => {
       it('is not found', async () => {
         const otherTicketingTicketTicketingComment = await createTicketingComment()
 
-        await showTicketingComment(otherTicketingTicketTicketingComment, 404)
+        await getShowTicketingComment(otherTicketingTicketTicketingComment, 404)
       })
     })
   })
 
   describe('POST create', () => {
-    const createTicketingComment = async <StatusCode extends 201 | 400 | 404>(
+    const postCreateTicketingComment = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/ticketing/tickets/{ticketId}/comments'>,
       expectedStatus: StatusCode
     ) => {
@@ -1426,7 +1426,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     }
 
     it('creates a Ticketing/Comment for this TicketingTicket', async () => {
-      const { body } = await createTicketingComment({
+      const { body } = await postCreateTicketingComment({
         body: 'The Ticketing/Comment body',
       }, 201)
 
@@ -1443,7 +1443,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('PATCH update', () => {
-    const updateTicketingComment = async <StatusCode extends 204 | 400 | 404>(
+    const patchUpdateTicketingComment = async <StatusCode extends 204 | 400 | 404>(
       ticketingComment: TicketingComment,
       data: RequestBody<'patch', '/ticketing/tickets/{ticketId}/comments/{id}'>,
       expectedStatus: StatusCode
@@ -1458,7 +1458,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     it('updates the Ticketing/Comment', async () => {
       const ticketingComment = await createTicketingComment({ ticket })
 
-      await updateTicketingComment(ticketingComment, {
+      await patchUpdateTicketingComment(ticketingComment, {
         body: 'Updated Ticketing/Comment body',
       }, 204)
 
@@ -1471,7 +1471,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
         const ticketingComment = await createTicketingComment()
         const originalBody = ticketingComment.body
 
-        await updateTicketingComment(ticketingComment, {
+        await patchUpdateTicketingComment(ticketingComment, {
           body: 'Updated Ticketing/Comment body',
         }, 404)
 
@@ -1482,7 +1482,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const destroyTicketingComment = async <StatusCode extends 204 | 400 | 404>(ticketingComment: TicketingComment, expectedStatus: StatusCode) => {
+    const deleteDestroyTicketingComment = async <StatusCode extends 204 | 400 | 404>(ticketingComment: TicketingComment, expectedStatus: StatusCode) => {
       return request.delete('/ticketing/tickets/{ticketId}/comments/{id}', expectedStatus, {
         ticketId: ticket.id,
         id: ticketingComment.id,
@@ -1492,7 +1492,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
     it('deletes the Ticketing/Comment', async () => {
       const ticketingComment = await createTicketingComment({ ticket })
 
-      await destroyTicketingComment(ticketingComment, 204)
+      await deleteDestroyTicketingComment(ticketingComment, 204)
 
       expect(await TicketingComment.find(ticketingComment.id)).toBeNull()
     })
@@ -1501,7 +1501,7 @@ describe('Ticketing/Tickets/CommentsController', () => {
       it('is not deleted', async () => {
         const ticketingComment = await createTicketingComment()
 
-        await destroyTicketingComment(ticketingComment, 404)
+        await deleteDestroyTicketingComment(ticketingComment, 404)
 
         expect(await TicketingComment.find(ticketingComment.id)).toMatchDreamModel(ticketingComment)
       })
@@ -1543,14 +1543,14 @@ describe('Admin/ArticlesController', () => {
   })
 
   describe('GET index', () => {
-    const indexArticles = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const getIndexArticles = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/admin/articles', expectedStatus)
     }
 
     it('returns the index of Articles', async () => {
       const article = await createArticle()
 
-      const { body } = await indexArticles(200)
+      const { body } = await getIndexArticles(200)
 
       expect(body.results).toEqual([
         expect.objectContaining({
@@ -1561,7 +1561,7 @@ describe('Admin/ArticlesController', () => {
   })
 
   describe('GET show', () => {
-    const showArticle = async <StatusCode extends 200 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+    const getShowArticle = async <StatusCode extends 200 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
       return request.get('/admin/articles/{id}', expectedStatus, {
         id: article.id,
       })
@@ -1570,7 +1570,7 @@ describe('Admin/ArticlesController', () => {
     it('returns the specified Article', async () => {
       const article = await createArticle()
 
-      const { body } = await showArticle(article, 200)
+      const { body } = await getShowArticle(article, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -1582,7 +1582,7 @@ describe('Admin/ArticlesController', () => {
   })
 
   describe('POST create', () => {
-    const createArticle = async <StatusCode extends 201 | 400 | 404>(
+    const postCreateArticle = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/admin/articles'>,
       expectedStatus: StatusCode
     ) => {
@@ -1592,7 +1592,7 @@ describe('Admin/ArticlesController', () => {
     }
 
     it('creates a Article', async () => {
-      const { body } = await createArticle({
+      const { body } = await postCreateArticle({
         body: 'The Article body',
       }, 201)
 
@@ -1609,7 +1609,7 @@ describe('Admin/ArticlesController', () => {
   })
 
   describe('PATCH update', () => {
-    const updateArticle = async <StatusCode extends 204 | 400 | 404>(
+    const patchUpdateArticle = async <StatusCode extends 204 | 400 | 404>(
       article: Article,
       data: RequestBody<'patch', '/admin/articles/{id}'>,
       expectedStatus: StatusCode
@@ -1623,7 +1623,7 @@ describe('Admin/ArticlesController', () => {
     it('updates the Article', async () => {
       const article = await createArticle()
 
-      await updateArticle(article, {
+      await patchUpdateArticle(article, {
         body: 'Updated Article body',
       }, 204)
 
@@ -1633,7 +1633,7 @@ describe('Admin/ArticlesController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const destroyArticle = async <StatusCode extends 204 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+    const deleteDestroyArticle = async <StatusCode extends 204 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
       return request.delete('/admin/articles/{id}', expectedStatus, {
         id: article.id,
       })
@@ -1642,7 +1642,7 @@ describe('Admin/ArticlesController', () => {
     it('deletes the Article', async () => {
       const article = await createArticle()
 
-      await destroyArticle(article, 204)
+      await deleteDestroyArticle(article, 204)
 
       expect(await Article.find(article.id)).toBeNull()
     })
@@ -1685,14 +1685,14 @@ describe('Admin/ArticlesController', () => {
   })
 
   describe('GET index', () => {
-    const indexArticles = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const getIndexArticles = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/admin/articles', expectedStatus)
     }
 
     it('returns the index of Articles', async () => {
       const article = await createArticle({ organization })
 
-      const { body } = await indexArticles(200)
+      const { body } = await getIndexArticles(200)
 
       expect(body.results).toEqual([
         expect.objectContaining({
@@ -1705,7 +1705,7 @@ describe('Admin/ArticlesController', () => {
       it('are omitted', async () => {
         await createArticle()
 
-        const { body } = await indexArticles(200)
+        const { body } = await getIndexArticles(200)
 
         expect(body.results).toEqual([])
       })
@@ -1713,7 +1713,7 @@ describe('Admin/ArticlesController', () => {
   })
 
   describe('GET show', () => {
-    const showArticle = async <StatusCode extends 200 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+    const getShowArticle = async <StatusCode extends 200 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
       return request.get('/admin/articles/{id}', expectedStatus, {
         id: article.id,
       })
@@ -1722,7 +1722,7 @@ describe('Admin/ArticlesController', () => {
     it('returns the specified Article', async () => {
       const article = await createArticle({ organization })
 
-      const { body } = await showArticle(article, 200)
+      const { body } = await getShowArticle(article, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -1736,13 +1736,13 @@ describe('Admin/ArticlesController', () => {
       it('is not found', async () => {
         const otherOrganizationArticle = await createArticle()
 
-        await showArticle(otherOrganizationArticle, 404)
+        await getShowArticle(otherOrganizationArticle, 404)
       })
     })
   })
 
   describe('POST create', () => {
-    const createArticle = async <StatusCode extends 201 | 400 | 404>(
+    const postCreateArticle = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/admin/articles'>,
       expectedStatus: StatusCode
     ) => {
@@ -1752,7 +1752,7 @@ describe('Admin/ArticlesController', () => {
     }
 
     it('creates a Article for this Organization', async () => {
-      const { body } = await createArticle({
+      const { body } = await postCreateArticle({
         body: 'The Article body',
       }, 201)
 
@@ -1769,7 +1769,7 @@ describe('Admin/ArticlesController', () => {
   })
 
   describe('PATCH update', () => {
-    const updateArticle = async <StatusCode extends 204 | 400 | 404>(
+    const patchUpdateArticle = async <StatusCode extends 204 | 400 | 404>(
       article: Article,
       data: RequestBody<'patch', '/admin/articles/{id}'>,
       expectedStatus: StatusCode
@@ -1783,7 +1783,7 @@ describe('Admin/ArticlesController', () => {
     it('updates the Article', async () => {
       const article = await createArticle({ organization })
 
-      await updateArticle(article, {
+      await patchUpdateArticle(article, {
         body: 'Updated Article body',
       }, 204)
 
@@ -1796,7 +1796,7 @@ describe('Admin/ArticlesController', () => {
         const article = await createArticle()
         const originalBody = article.body
 
-        await updateArticle(article, {
+        await patchUpdateArticle(article, {
           body: 'Updated Article body',
         }, 404)
 
@@ -1807,7 +1807,7 @@ describe('Admin/ArticlesController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const destroyArticle = async <StatusCode extends 204 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+    const deleteDestroyArticle = async <StatusCode extends 204 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
       return request.delete('/admin/articles/{id}', expectedStatus, {
         id: article.id,
       })
@@ -1816,7 +1816,7 @@ describe('Admin/ArticlesController', () => {
     it('deletes the Article', async () => {
       const article = await createArticle({ organization })
 
-      await destroyArticle(article, 204)
+      await deleteDestroyArticle(article, 204)
 
       expect(await Article.find(article.id)).toBeNull()
     })
@@ -1825,7 +1825,7 @@ describe('Admin/ArticlesController', () => {
       it('is not deleted', async () => {
         const article = await createArticle()
 
-        await destroyArticle(article, 404)
+        await deleteDestroyArticle(article, 404)
 
         expect(await Article.find(article.id)).toMatchDreamModel(article)
       })
@@ -1866,14 +1866,14 @@ describe('Internal/ArticlesController', () => {
   })
 
   describe('GET index', () => {
-    const indexArticles = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const getIndexArticles = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/internal/articles', expectedStatus)
     }
 
     it('returns the index of Articles', async () => {
       const article = await createArticle()
 
-      const { body } = await indexArticles(200)
+      const { body } = await getIndexArticles(200)
 
       expect(body.results).toEqual([
         expect.objectContaining({
@@ -1884,7 +1884,7 @@ describe('Internal/ArticlesController', () => {
   })
 
   describe('GET show', () => {
-    const showArticle = async <StatusCode extends 200 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+    const getShowArticle = async <StatusCode extends 200 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
       return request.get('/internal/articles/{id}', expectedStatus, {
         id: article.id,
       })
@@ -1893,7 +1893,7 @@ describe('Internal/ArticlesController', () => {
     it('returns the specified Article', async () => {
       const article = await createArticle()
 
-      const { body } = await showArticle(article, 200)
+      const { body } = await getShowArticle(article, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -1905,7 +1905,7 @@ describe('Internal/ArticlesController', () => {
   })
 
   describe('POST create', () => {
-    const createArticle = async <StatusCode extends 201 | 400 | 404>(
+    const postCreateArticle = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/internal/articles'>,
       expectedStatus: StatusCode
     ) => {
@@ -1915,7 +1915,7 @@ describe('Internal/ArticlesController', () => {
     }
 
     it('creates a Article', async () => {
-      const { body } = await createArticle({
+      const { body } = await postCreateArticle({
         body: 'The Article body',
       }, 201)
 
@@ -1932,7 +1932,7 @@ describe('Internal/ArticlesController', () => {
   })
 
   describe('PATCH update', () => {
-    const updateArticle = async <StatusCode extends 204 | 400 | 404>(
+    const patchUpdateArticle = async <StatusCode extends 204 | 400 | 404>(
       article: Article,
       data: RequestBody<'patch', '/internal/articles/{id}'>,
       expectedStatus: StatusCode
@@ -1946,7 +1946,7 @@ describe('Internal/ArticlesController', () => {
     it('updates the Article', async () => {
       const article = await createArticle()
 
-      await updateArticle(article, {
+      await patchUpdateArticle(article, {
         body: 'Updated Article body',
       }, 204)
 
@@ -1956,7 +1956,7 @@ describe('Internal/ArticlesController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const destroyArticle = async <StatusCode extends 204 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+    const deleteDestroyArticle = async <StatusCode extends 204 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
       return request.delete('/internal/articles/{id}', expectedStatus, {
         id: article.id,
       })
@@ -1965,7 +1965,7 @@ describe('Internal/ArticlesController', () => {
     it('deletes the Article', async () => {
       const article = await createArticle()
 
-      await destroyArticle(article, 204)
+      await deleteDestroyArticle(article, 204)
 
       expect(await Article.find(article.id)).toBeNull()
     })
@@ -2008,14 +2008,14 @@ describe('Internal/ArticlesController', () => {
   })
 
   describe('GET index', () => {
-    const indexArticles = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
+    const getIndexArticles = async <StatusCode extends 200 | 400 | 404>(expectedStatus: StatusCode) => {
       return request.get('/internal/articles', expectedStatus)
     }
 
     it('returns the index of Articles', async () => {
       const article = await createArticle({ organization })
 
-      const { body } = await indexArticles(200)
+      const { body } = await getIndexArticles(200)
 
       expect(body.results).toEqual([
         expect.objectContaining({
@@ -2028,7 +2028,7 @@ describe('Internal/ArticlesController', () => {
       it('are omitted', async () => {
         await createArticle()
 
-        const { body } = await indexArticles(200)
+        const { body } = await getIndexArticles(200)
 
         expect(body.results).toEqual([])
       })
@@ -2036,7 +2036,7 @@ describe('Internal/ArticlesController', () => {
   })
 
   describe('GET show', () => {
-    const showArticle = async <StatusCode extends 200 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+    const getShowArticle = async <StatusCode extends 200 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
       return request.get('/internal/articles/{id}', expectedStatus, {
         id: article.id,
       })
@@ -2045,7 +2045,7 @@ describe('Internal/ArticlesController', () => {
     it('returns the specified Article', async () => {
       const article = await createArticle({ organization })
 
-      const { body } = await showArticle(article, 200)
+      const { body } = await getShowArticle(article, 200)
 
       expect(body).toEqual(
         expect.objectContaining({
@@ -2059,13 +2059,13 @@ describe('Internal/ArticlesController', () => {
       it('is not found', async () => {
         const otherOrganizationArticle = await createArticle()
 
-        await showArticle(otherOrganizationArticle, 404)
+        await getShowArticle(otherOrganizationArticle, 404)
       })
     })
   })
 
   describe('POST create', () => {
-    const createArticle = async <StatusCode extends 201 | 400 | 404>(
+    const postCreateArticle = async <StatusCode extends 201 | 400 | 404>(
       data: RequestBody<'post', '/internal/articles'>,
       expectedStatus: StatusCode
     ) => {
@@ -2075,7 +2075,7 @@ describe('Internal/ArticlesController', () => {
     }
 
     it('creates a Article for this Organization', async () => {
-      const { body } = await createArticle({
+      const { body } = await postCreateArticle({
         body: 'The Article body',
       }, 201)
 
@@ -2092,7 +2092,7 @@ describe('Internal/ArticlesController', () => {
   })
 
   describe('PATCH update', () => {
-    const updateArticle = async <StatusCode extends 204 | 400 | 404>(
+    const patchUpdateArticle = async <StatusCode extends 204 | 400 | 404>(
       article: Article,
       data: RequestBody<'patch', '/internal/articles/{id}'>,
       expectedStatus: StatusCode
@@ -2106,7 +2106,7 @@ describe('Internal/ArticlesController', () => {
     it('updates the Article', async () => {
       const article = await createArticle({ organization })
 
-      await updateArticle(article, {
+      await patchUpdateArticle(article, {
         body: 'Updated Article body',
       }, 204)
 
@@ -2119,7 +2119,7 @@ describe('Internal/ArticlesController', () => {
         const article = await createArticle()
         const originalBody = article.body
 
-        await updateArticle(article, {
+        await patchUpdateArticle(article, {
           body: 'Updated Article body',
         }, 404)
 
@@ -2130,7 +2130,7 @@ describe('Internal/ArticlesController', () => {
   })
 
   describe('DELETE destroy', () => {
-    const destroyArticle = async <StatusCode extends 204 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
+    const deleteDestroyArticle = async <StatusCode extends 204 | 400 | 404>(article: Article, expectedStatus: StatusCode) => {
       return request.delete('/internal/articles/{id}', expectedStatus, {
         id: article.id,
       })
@@ -2139,7 +2139,7 @@ describe('Internal/ArticlesController', () => {
     it('deletes the Article', async () => {
       const article = await createArticle({ organization })
 
-      await destroyArticle(article, 204)
+      await deleteDestroyArticle(article, 204)
 
       expect(await Article.find(article.id)).toBeNull()
     })
@@ -2148,7 +2148,7 @@ describe('Internal/ArticlesController', () => {
       it('is not deleted', async () => {
         const article = await createArticle()
 
-        await destroyArticle(article, 404)
+        await deleteDestroyArticle(article, 404)
 
         expect(await Article.find(article.id)).toMatchDreamModel(article)
       })
