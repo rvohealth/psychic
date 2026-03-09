@@ -110,189 +110,46 @@ export default class Params {
       }
 
       try {
-        switch (columnMetadata?.dbType) {
-          case 'bigint':
-          case 'bigint[]':
-          case 'boolean':
-          case 'boolean[]':
-          case 'date':
-          case 'date[]':
-          case 'integer':
-          case 'integer[]':
-          case 'uuid':
-          case 'uuid[]':
-          case 'json':
-          case 'json[]':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              columnMetadata.dbType,
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
+        const castType = DB_TYPE_TO_CAST_TYPE[columnMetadata?.dbType]
 
-          case 'character varying':
-          case 'citext':
-          case 'text':
+        if (castType) {
+          returnObj[columnName as keyof typeof returnObj] = this.cast(
+            params,
+            columnName.toString(),
+            castType,
+            { allowNull: columnMetadata.allowNull },
+          )
+        } else if (dreamClass.isVirtualColumn(columnName)) {
+          returnObj[columnName as keyof typeof returnObj] = params[columnName as keyof typeof params]
+        } else if (columnMetadata?.enumValues) {
+          const paramValue = params[columnName as keyof typeof params]
+
+          if (columnMetadata.isArray) {
+            if (!Array.isArray(paramValue))
+              returnObj[columnName as keyof typeof returnObj] = ['expected an array of enum values']
+
+            returnObj[columnName as keyof typeof returnObj] = (paramValue as string[]).map(p => {
+              return new this(params).cast(
+                columnName.toString(),
+                p,
+                'string',
+                {
+                  allowNull: columnMetadata.allowNull,
+                  enum: columnMetadata.enumValues as readonly string[],
+                },
+              )
+            })
+          } else {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
               params,
               columnName.toString(),
               'string',
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
-
-          case 'character varying[]':
-          case 'citext[]':
-          case 'text[]':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              'string[]',
               {
                 allowNull: columnMetadata.allowNull,
+                enum: columnMetadata.enumValues as readonly string[],
               },
             )
-            break
-
-          case 'timestamp':
-          case 'timestamp with time zone':
-          case 'timestamp without time zone':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              'datetime',
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
-
-          case 'timestamp[]':
-          case 'timestamp with time zone[]':
-          case 'timestamp without time zone[]':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              'datetime[]',
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
-
-          case 'time':
-          case 'time without time zone':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              'time',
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
-
-          case 'time[]':
-          case 'time without time zone[]':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              'time[]',
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
-
-          case 'timetz':
-          case 'time with time zone':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              'timetz',
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
-
-          case 'timetz[]':
-          case 'time with time zone[]':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              'timetz[]',
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
-
-          case 'jsonb':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              'json',
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
-
-          case 'jsonb[]':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              'json[]',
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
-
-          case 'numeric':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              'number',
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
-
-          case 'numeric[]':
-            returnObj[columnName as keyof typeof returnObj] = this.cast(
-              params,
-              columnName.toString(),
-              'number[]',
-              { allowNull: columnMetadata.allowNull },
-            )
-            break
-
-          default:
-            if (dreamClass.isVirtualColumn(columnName))
-              returnObj[columnName as keyof typeof returnObj] = params[columnName as keyof typeof params]
-
-            if (columnMetadata?.enumValues) {
-              const paramValue = params[columnName as keyof typeof params]
-
-              if (columnMetadata.isArray) {
-                if (!Array.isArray(paramValue))
-                  returnObj[columnName as keyof typeof returnObj] = ['expected an array of enum values']
-
-                returnObj[columnName as keyof typeof returnObj] = (paramValue as string[]).map(p => {
-                  return new this(params).cast(
-                    columnName.toString(),
-                    p,
-
-                    // casting to allow enum handling at lower level
-                    'string',
-
-                    {
-                      allowNull: columnMetadata.allowNull,
-                      enum: columnMetadata.enumValues as readonly string[],
-                    },
-                  )
-                })
-              } else {
-                returnObj[columnName as keyof typeof returnObj] = this.cast(
-                  params,
-                  columnName.toString(),
-
-                  // casting to allow enum handling at lower level
-                  'string',
-
-                  {
-                    allowNull: columnMetadata.allowNull,
-                    enum: columnMetadata.enumValues as readonly string[],
-                  },
-                )
-              }
-            }
+          }
         }
       } catch (err) {
         if (err instanceof ParamValidationError) {
@@ -776,6 +633,60 @@ export interface OpenAPIDreamModelRequestBodyModifications<OnlyArray, IncludingA
   extends ParamsForOptsBase<OnlyArray> {
   combining?: OpenapiSchemaPropertiesShorthand
   including?: IncludingArray
+}
+
+/**
+ * Maps PostgreSQL database column types to Psychic cast types.
+ * Used by Params.for() to determine how to validate and cast each column value.
+ */
+const DB_TYPE_TO_CAST_TYPE: Record<string, string> = {
+  // identity mappings (db type matches cast type)
+  'bigint': 'bigint',
+  'bigint[]': 'bigint[]',
+  'boolean': 'boolean',
+  'boolean[]': 'boolean[]',
+  'date': 'date',
+  'date[]': 'date[]',
+  'integer': 'integer',
+  'integer[]': 'integer[]',
+  'uuid': 'uuid',
+  'uuid[]': 'uuid[]',
+  'json': 'json',
+  'json[]': 'json[]',
+
+  // text variants → string
+  'character varying': 'string',
+  'citext': 'string',
+  'text': 'string',
+  'character varying[]': 'string[]',
+  'citext[]': 'string[]',
+  'text[]': 'string[]',
+
+  // timestamp variants → datetime
+  'timestamp': 'datetime',
+  'timestamp with time zone': 'datetime',
+  'timestamp without time zone': 'datetime',
+  'timestamp[]': 'datetime[]',
+  'timestamp with time zone[]': 'datetime[]',
+  'timestamp without time zone[]': 'datetime[]',
+
+  // time variants
+  'time': 'time',
+  'time without time zone': 'time',
+  'time[]': 'time[]',
+  'time without time zone[]': 'time[]',
+  'timetz': 'timetz',
+  'time with time zone': 'timetz',
+  'timetz[]': 'timetz[]',
+  'time with time zone[]': 'timetz[]',
+
+  // jsonb → json
+  'jsonb': 'json',
+  'jsonb[]': 'json[]',
+
+  // numeric → number
+  'numeric': 'number',
+  'numeric[]': 'number[]',
 }
 
 const typeToErrorMap: Record<PsychicParamsPrimitiveLiteral, string> = {

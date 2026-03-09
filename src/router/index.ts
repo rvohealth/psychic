@@ -14,8 +14,7 @@ import EnvInternal from '../helpers/EnvInternal.js'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
 import PsychicApp from '../psychic-app/index.js'
 import {
-  applyResourceAction,
-  applyResourcesAction,
+  applyResourcefulAction,
   convertRouteParams,
   lookupControllerOrFail,
   NamespaceConfig,
@@ -306,11 +305,7 @@ suggested fix:  "${convertRouteParams(path)}"
     this.currentNamespaces = originalCurrentNamespaces
 
     resourceMethods.forEach(action => {
-      if (plural) {
-        applyResourcesAction(path, action, nestedRouter, options)
-      } else {
-        applyResourceAction(path, action, nestedRouter, options)
-      }
+      applyResourcefulAction(path, action, nestedRouter, options, plural)
     })
   }
 
