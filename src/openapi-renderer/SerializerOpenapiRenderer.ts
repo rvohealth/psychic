@@ -146,7 +146,7 @@ export default class SerializerOpenapiRenderer {
         type: 'object',
         required: sort(uniq(requiredProperties.map(property => this.setCase(property)))),
         properties: sortObjectByKey(referencedSerializersAndAttributes.attributes),
-        additionalProperties: false as any,
+        additionalProperties: false,
       },
     }
   }
