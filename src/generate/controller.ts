@@ -43,10 +43,10 @@ export default async function generateController({
   const forAdmin = allControllerNameParts[0] === 'Admin'
   const forInternal = allControllerNameParts[0] === 'Internal'
 
-  const controllerNameParts: string[] = (forAdmin || forInternal) ? [allControllerNameParts.shift()!] : []
+  const controllerNameParts: string[] = forAdmin || forInternal ? [allControllerNameParts.shift()!] : []
 
   for (let index = 0; index < allControllerNameParts.length; index++) {
-    if (controllerNameParts.length > ((forAdmin || forInternal) ? 1 : 0)) {
+    if (controllerNameParts.length > (forAdmin || forInternal ? 1 : 0)) {
       // Write the ancestor controller
       const [baseAncestorName, baseAncestorImportStatement] = baseAncestorNameAndImport(
         controllerNameParts,
@@ -87,9 +87,14 @@ export default async function generateController({
   }
 
   // Write the controller
-  const [ancestorName, ancestorImportStatement] = baseAncestorNameAndImport(controllerNameParts, forAdmin, forInternal, {
-    forBaseController: false,
-  })
+  const [ancestorName, ancestorImportStatement] = baseAncestorNameAndImport(
+    controllerNameParts,
+    forAdmin,
+    forInternal,
+    {
+      forBaseController: false,
+    },
+  )
 
   if (ancestorName === undefined) throw new UnexpectedUndefined()
   if (ancestorImportStatement === undefined) throw new UnexpectedUndefined()
@@ -149,7 +154,7 @@ function baseAncestorNameAndImport(
 ) {
   const maybeAncestorNameForBase = `${controllerNameParts.slice(0, controllerNameParts.length - 1).join('')}BaseController`
   const dotFiles = forBaseController ? '..' : '.'
-  return controllerNameParts.length === ((forAdmin || forInternal) ? 2 : 1)
+  return controllerNameParts.length === (forAdmin || forInternal ? 2 : 1)
     ? forAdmin
       ? [
           `AdminAuthedController`,

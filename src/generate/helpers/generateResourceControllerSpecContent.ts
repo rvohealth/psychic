@@ -562,8 +562,7 @@ function generateIndexActionSpec(options: TemplateOptions): string {
 function generateShowActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitShow) return ''
 
-  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } =
-    options
+  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } = options
   const subjectFunctionName = 'show'
 
   const subjectFunction = singular
@@ -609,8 +608,7 @@ function generateShowActionSpec(options: TemplateOptions): string {
 function generateCreateActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitCreate) return ''
 
-  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } =
-    options
+  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } = options
   const subjectFunctionName = 'create'
 
   const uuidSetup = attributeData.uuidAttributes
@@ -671,8 +669,7 @@ function generateCreateActionSpec(options: TemplateOptions): string {
 function generateUpdateActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitUpdate) return ''
 
-  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } =
-    options
+  const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } = options
   const subjectFunctionName = 'update'
 
   const uuidSetup = attributeData.uuidAttributes

@@ -1838,7 +1838,7 @@ describe('Admin/ArticlesController', () => {
   })
 
   context('an Internal controller', () => {
-    it('replaces authenticates with the InternalUser, but created resources don\'t belong to the InternalUser', () => {
+    it("replaces authenticates with the InternalUser, but created resources don't belong to the InternalUser", () => {
       const res = generateResourceControllerSpecContent({
         fullyQualifiedControllerName: 'Internal/ArticlesController',
         route: 'internal/articles',
