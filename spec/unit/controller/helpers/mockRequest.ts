@@ -66,6 +66,10 @@ export function createMockKoaContext({
       headers,
       method,
       url,
+      // eslint-disable-next-line @typescript-eslint/no-unused-vars
+      get(_: string) {
+        return 'dummy header value'
+      },
     },
     response: {
       get status() {

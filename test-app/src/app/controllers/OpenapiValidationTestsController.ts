@@ -309,9 +309,9 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   })
   public headersOpenapiTest() {
     this.ok({
-      myDate: this.headers.mydate,
-      myOptionalDate: this.headers.myoptionaldate,
-      myOptionalInt: this.headers.myoptionalint,
+      myDate: this.header('mydate'),
+      myOptionalDate: this.header('myoptionaldate'),
+      myOptionalInt: this.header('myoptionalint'),
     })
   }
 
