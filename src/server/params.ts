@@ -129,15 +129,10 @@ export default class Params {
               returnObj[columnName as keyof typeof returnObj] = ['expected an array of enum values']
 
             returnObj[columnName as keyof typeof returnObj] = (paramValue as string[]).map(p => {
-              return new this(params).cast(
-                columnName.toString(),
-                p,
-                'string',
-                {
-                  allowNull: columnMetadata.allowNull,
-                  enum: columnMetadata.enumValues as readonly string[],
-                },
-              )
+              return new this(params).cast(columnName.toString(), p, 'string', {
+                allowNull: columnMetadata.allowNull,
+                enum: columnMetadata.enumValues as readonly string[],
+              })
             })
           } else {
             returnObj[columnName as keyof typeof returnObj] = this.cast(
@@ -639,31 +634,31 @@ export interface OpenAPIDreamModelRequestBodyModifications<OnlyArray, IncludingA
  * Maps PostgreSQL database column types to Psychic cast types.
  * Used by Params.for() to determine how to validate and cast each column value.
  */
-const DB_TYPE_TO_CAST_TYPE: Record<string, string> = {
+const DB_TYPE_TO_CAST_TYPE: Record<string, PsychicParamsPrimitiveLiteral> = {
   // identity mappings (db type matches cast type)
-  'bigint': 'bigint',
+  bigint: 'bigint',
   'bigint[]': 'bigint[]',
-  'boolean': 'boolean',
+  boolean: 'boolean',
   'boolean[]': 'boolean[]',
-  'date': 'date',
+  date: 'date',
   'date[]': 'date[]',
-  'integer': 'integer',
+  integer: 'integer',
   'integer[]': 'integer[]',
-  'uuid': 'uuid',
+  uuid: 'uuid',
   'uuid[]': 'uuid[]',
-  'json': 'json',
+  json: 'json',
   'json[]': 'json[]',
 
   // text variants → string
   'character varying': 'string',
-  'citext': 'string',
-  'text': 'string',
+  citext: 'string',
+  text: 'string',
   'character varying[]': 'string[]',
   'citext[]': 'string[]',
   'text[]': 'string[]',
 
   // timestamp variants → datetime
-  'timestamp': 'datetime',
+  timestamp: 'datetime',
   'timestamp with time zone': 'datetime',
   'timestamp without time zone': 'datetime',
   'timestamp[]': 'datetime[]',
@@ -671,21 +666,21 @@ const DB_TYPE_TO_CAST_TYPE: Record<string, string> = {
   'timestamp without time zone[]': 'datetime[]',
 
   // time variants
-  'time': 'time',
+  time: 'time',
   'time without time zone': 'time',
   'time[]': 'time[]',
   'time without time zone[]': 'time[]',
-  'timetz': 'timetz',
+  timetz: 'timetz',
   'time with time zone': 'timetz',
   'timetz[]': 'timetz[]',
   'time with time zone[]': 'timetz[]',
 
   // jsonb → json
-  'jsonb': 'json',
+  jsonb: 'json',
   'jsonb[]': 'json[]',
 
   // numeric → number
-  'numeric': 'number',
+  numeric: 'number',
   'numeric[]': 'number[]',
 }
 

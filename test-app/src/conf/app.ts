@@ -146,6 +146,10 @@ export default async (psy: PsychicApp) => {
     suppressResponseEnums: true,
   })
 
+  psy.set('openapi', 'internal', {
+    outputFilepath: path.join('test-app', 'src', 'openapi', 'internal.openapi.json'),
+  })
+
   psy.set('openapi', 'admin', {
     info: {
       title: 'admin',

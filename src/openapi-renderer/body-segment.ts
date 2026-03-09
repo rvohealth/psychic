@@ -401,8 +401,8 @@ export default class OpenapiSegmentExpander {
 
     let referencedSerializers: SerializerArray = []
 
-    if ((objectBodySegment as any).additionalProperties === false) {
-      ;(data as any).additionalProperties = false
+    if (objectBodySegment.additionalProperties === false) {
+      data.additionalProperties = false
     } else if (objectBodySegment.additionalProperties) {
       const results = this.recursivelyParseBody(objectBodySegment.additionalProperties)
       referencedSerializers = [...referencedSerializers, ...results.referencedSerializers]

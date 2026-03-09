@@ -27,8 +27,12 @@ export default function safelyAttachPaginationParamToRequestBodySegment<T>(
  *
  * Generic version: attaches any OpenAPI property definition to a body segment.
  */
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-export function safelyAttachParamToRequestBodySegment<T>(paramName: string, property: any, bodySegment: T): T {
+export function safelyAttachParamToRequestBodySegment<T>(
+  paramName: string,
+  // eslint-disable-next-line @typescript-eslint/no-explicit-any
+  property: any,
+  bodySegment: T,
+): T {
   bodySegment ||= {
     type: 'object',
     properties: {},
@@ -38,6 +42,7 @@ export function safelyAttachParamToRequestBodySegment<T>(paramName: string, prop
     // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
     ;(bodySegment as OpenapiSchemaObjectBase).properties = {
       ...(bodySegment as OpenapiSchemaObjectBase).properties,
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
       [paramName]: property,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
     } as any
