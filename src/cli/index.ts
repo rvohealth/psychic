@@ -116,7 +116,7 @@ export default class PsychicCLI {
       )
       .option(
         '--owning-model <modelName>',
-        'the model class of the object that `associationQuery`/`createAssociation` will be performed on in the created controller and spec (e.g., "Host", "Guest", "Ticketing/Ticket") (simply to save time making changes to the generated code). Defaults to User',
+        'the model class of the object that `associationQuery`/`createAssociation` will be performed on in the created controller and spec (e.g., "Host", "Guest", "Ticketing/Ticket"). Defaults to the current user for non-admin/internal namespaced controllers. For admin/internal namespaced controllers, this defaults to null, meaning every admin/internal user can access the model.',
       )
       .option(
         '--connection-name <connectionName>',
