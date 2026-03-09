@@ -522,7 +522,7 @@ function generateIndexActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitIndex) return ''
 
   const { path, pathParams, modelConfig, fullyQualifiedModelName, singular } = options
-  const subjectFunctionName = `getIndex${pluralize(modelConfig.modelClassName)}`
+  const subjectFunctionName = 'index'
 
   return `
 
@@ -564,7 +564,7 @@ function generateShowActionSpec(options: TemplateOptions): string {
 
   const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } =
     options
-  const subjectFunctionName = `getShow${modelConfig.modelClassName}`
+  const subjectFunctionName = 'show'
 
   const subjectFunction = singular
     ? `
@@ -611,7 +611,7 @@ function generateCreateActionSpec(options: TemplateOptions): string {
 
   const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } =
     options
-  const subjectFunctionName = `postCreate${modelConfig.modelClassName}`
+  const subjectFunctionName = 'create'
 
   const uuidSetup = attributeData.uuidAttributes
     .map(attrName => {
@@ -673,7 +673,7 @@ function generateUpdateActionSpec(options: TemplateOptions): string {
 
   const { path, pathParams, modelConfig, fullyQualifiedModelName, singular, attributeData } =
     options
-  const subjectFunctionName = `patchUpdate${modelConfig.modelClassName}`
+  const subjectFunctionName = 'update'
 
   const uuidSetup = attributeData.uuidAttributes
     .map(attrName => {
@@ -786,7 +786,7 @@ function generateDestroyActionSpec(options: TemplateOptions): string {
   if (options.actionConfig.omitDestroy) return ''
 
   const { path, pathParams, modelConfig, fullyQualifiedModelName, singular } = options
-  const subjectFunctionName = `deleteDestroy${modelConfig.modelClassName}`
+  const subjectFunctionName = 'destroy'
 
   const subjectFunction = singular
     ? `
