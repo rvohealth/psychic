@@ -400,6 +400,7 @@
     "schemas": {
       "Availability": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "end",
           "endtz",
@@ -454,6 +455,7 @@
       },
       "Comment1OnlyUsedInOneController": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "howyadoin"
         ],
@@ -466,6 +468,7 @@
       },
       "Comment2OnlyUsedInOneController": {
         "type": "object",
+        "additionalProperties": false,
         "required": [
           "howyadoin"
         ],

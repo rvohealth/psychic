@@ -40,14 +40,14 @@ importers:
         specifier: ^15.3.1
         version: 15.3.1(koa@3.1.2)
       '@rvoh/dream':
-        specifier: ^2.3.3
-        version: 2.3.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@14.0.3)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.9.3))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3)
+        specifier: ^2.4.0-alpha.1
+        version: 2.4.0-alpha.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@14.0.3)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.9.3))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3)
       '@rvoh/dream-spec-helpers':
         specifier: ^2.1.1
         version: 2.1.1(@types/node@22.17.1)(@types/pg@8.11.8)(pg@8.12.0)
       '@rvoh/psychic-spec-helpers':
         specifier: 3.0.0-alpha.3
-        version: 3.0.0-alpha.3(@rvoh/dream@2.3.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@14.0.3)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.9.3))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.9.3))(supertest@7.1.4)(typescript@5.9.3)
+        version: 3.0.0-alpha.3(@rvoh/dream@2.4.0-alpha.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@14.0.3)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.9.3))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.9.3))(supertest@7.1.4)(typescript@5.9.3)
       '@types/koa':
         specifier: ^3.0.1
         version: 3.0.1
@@ -761,8 +761,8 @@ packages:
       '@types/pg': '*'
       pg: '*'
 
-  '@rvoh/dream@2.3.3':
-    resolution: {integrity: sha512-KcNYOqNyAl9oN3ucWsJRGwQEMHqM3Z7S/Yy9C1y+uhbEfgw2tX5cuZG4cAAjN7NfFOHX7UxUgscq4LKP5hPSSQ==}
+  '@rvoh/dream@2.4.0-alpha.1':
+    resolution: {integrity: sha512-vzmFo3rJBP4iOPRbzcWYEPHIgBkTvDdC5F4G5Igd/mVDuU8R1u95qM9IfoZ3rKkBfKlE6jaaqJ8Y/pMulDUdZg==}
     peerDependencies:
       '@types/node': '*'
       '@types/pg': '*'
@@ -3275,7 +3275,7 @@ snapshots:
       pg: 8.12.0
       pluralize-esm: 9.0.5
 
-  '@rvoh/dream@2.3.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@14.0.3)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.9.3))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3)':
+  '@rvoh/dream@2.4.0-alpha.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@14.0.3)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.9.3))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3)':
     dependencies:
       '@types/node': 22.17.1
       '@types/pg': 8.11.8
@@ -3290,9 +3290,9 @@ snapshots:
       typescript: 5.9.3
       yoctocolors: 2.1.1
 
-  '@rvoh/psychic-spec-helpers@3.0.0-alpha.3(@rvoh/dream@2.3.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@14.0.3)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.9.3))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.9.3))(supertest@7.1.4)(typescript@5.9.3)':
+  '@rvoh/psychic-spec-helpers@3.0.0-alpha.3(@rvoh/dream@2.4.0-alpha.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@14.0.3)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.9.3))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3))(@types/node@22.17.1)(@types/supertest@6.0.3)(puppeteer@24.22.3(typescript@5.9.3))(supertest@7.1.4)(typescript@5.9.3)':
     dependencies:
-      '@rvoh/dream': 2.3.3(@types/node@22.17.1)(@types/pg@8.11.8)(commander@14.0.3)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.9.3))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3)
+      '@rvoh/dream': 2.4.0-alpha.1(@types/node@22.17.1)(@types/pg@8.11.8)(commander@14.0.3)(dotenv@16.4.5)(kysely-codegen@0.19.0(kysely@0.28.7)(pg@8.12.0)(typescript@5.9.3))(kysely@0.28.7)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3)
       '@types/node': 22.17.1
       '@types/supertest': 6.0.3
       commander: 14.0.3
