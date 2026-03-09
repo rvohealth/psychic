@@ -105,11 +105,12 @@ export interface NamespaceConfig {
   isScope: boolean
 }
 
-export function applyResourcesAction(
+export function applyResourcefulAction(
   path: string,
   action: ResourcesMethodType,
   routingMechanism: RoutingMechanism,
   options?: ResourcesOptions,
+  plural?: boolean,
 ) {
   const controller =
     options?.controller ||
@@ -118,6 +119,8 @@ export function applyResourcesAction(
       httpMethod: httpMethodFromResourcefulAction(action),
       resourceName: path,
     })
+
+  const memberPath = plural ? `${path}/:id` : path
 
   switch (action) {
     case 'index':
@@ -129,21 +132,17 @@ export function applyResourcesAction(
       break
 
     case 'update':
-      routingMechanism.put(`${path}/:id`, controller, 'update' as PsychicControllerActions<typeof controller>)
-      routingMechanism.patch(
-        `${path}/:id`,
-        controller,
-        'update' as PsychicControllerActions<typeof controller>,
-      )
+      routingMechanism.put(memberPath, controller, 'update' as PsychicControllerActions<typeof controller>)
+      routingMechanism.patch(memberPath, controller, 'update' as PsychicControllerActions<typeof controller>)
       break
 
     case 'show':
-      routingMechanism.get(`${path}/:id`, controller, 'show' as PsychicControllerActions<typeof controller>)
+      routingMechanism.get(memberPath, controller, 'show' as PsychicControllerActions<typeof controller>)
       break
 
     case 'destroy':
       routingMechanism.delete(
-        `${path}/:id`,
+        memberPath,
         controller,
         'destroy' as PsychicControllerActions<typeof controller>,
       )
@@ -151,41 +150,24 @@ export function applyResourcesAction(
   }
 }
 
+/** @deprecated Use applyResourcefulAction with plural parameter instead */
+export function applyResourcesAction(
+  path: string,
+  action: ResourcesMethodType,
+  routingMechanism: RoutingMechanism,
+  options?: ResourcesOptions,
+) {
+  return applyResourcefulAction(path, action, routingMechanism, options, true)
+}
+
+/** @deprecated Use applyResourcefulAction with plural parameter instead */
 export function applyResourceAction(
   path: string,
   action: ResourcesMethodType,
   routingMechanism: RoutingMechanism,
   options?: ResourcesOptions,
 ) {
-  const controller =
-    options?.controller ||
-    lookupControllerOrFail(routingMechanism, {
-      path: action,
-      httpMethod: httpMethodFromResourcefulAction(action),
-      resourceName: path,
-    })
-
-  switch (action) {
-    case 'create':
-      routingMechanism.post(path, controller, 'create' as PsychicControllerActions<typeof controller>)
-      break
-
-    case 'update':
-      routingMechanism.put(path, controller, 'update' as PsychicControllerActions<typeof controller>)
-      routingMechanism.patch(path, controller, 'update' as PsychicControllerActions<typeof controller>)
-      break
-
-    case 'show':
-      routingMechanism.get(path, controller, 'show' as PsychicControllerActions<typeof controller>)
-      break
-
-    case 'destroy':
-      routingMechanism.delete(path, controller, 'destroy' as PsychicControllerActions<typeof controller>)
-      break
-
-    default:
-      throw new Error(`unsupported resource method type: ${action}`)
-  }
+  return applyResourcefulAction(path, action, routingMechanism, options, false)
 }
 
 /**

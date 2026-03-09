@@ -1,10 +1,10 @@
-import { OpenapiSchemaObjectBase } from '@rvoh/dream/openapi'
 import cursorPaginationParamOpenapiProperty from './cursorPaginationParamOpenapiProperty.js'
+import { safelyAttachParamToRequestBodySegment } from './safelyAttachPaginationParamsToBodySegment.js'
 
 /**
  * @internal
  *
- * Used to carefully bind implicit pagination params
+ * Used to carefully bind implicit cursor pagination params
  * to the requestBody properties. It will not apply
  * the pagination param unless the provided bodySegment
  * is:
@@ -19,19 +19,5 @@ export default function safelyAttachCursorPaginationParamToRequestBodySegment<T>
   paramName: string,
   bodySegment: T,
 ): T {
-  bodySegment ||= {
-    type: 'object',
-    properties: {},
-  } as T
-
-  if ((bodySegment as OpenapiSchemaObjectBase).type === 'object') {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    ;(bodySegment as OpenapiSchemaObjectBase).properties = {
-      ...(bodySegment as OpenapiSchemaObjectBase).properties,
-      [paramName]: cursorPaginationParamOpenapiProperty(),
-      // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    } as any
-  }
-
-  return bodySegment
+  return safelyAttachParamToRequestBodySegment(paramName, cursorPaginationParamOpenapiProperty(), bodySegment)
 }

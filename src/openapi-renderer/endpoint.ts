@@ -47,11 +47,9 @@ import OpenapiSegmentExpander, {
   SerializerArray,
 } from './body-segment.js'
 import { DEFAULT_OPENAPI_RESPONSES, OpenapiValidateTarget } from './defaults.js'
-import cursorPaginationParamOpenapiProperty from './helpers/cursorPaginationParamOpenapiProperty.js'
 import { dreamColumnOpenapiShape } from './helpers/dreamColumnOpenapiShape.js'
 import openapiOpts from './helpers/openapiOpts.js'
 import openapiRoute from './helpers/openapiRoute.js'
-import paginationPageParamOpenapiProperty from './helpers/paginationPageParamOpenapiProperty.js'
 import safelyAttachCursorPaginationParamToRequestBodySegment from './helpers/safelyAttachCursorPaginationParamToRequestBodySegment.js'
 import safelyAttachPaginationParamToRequestBodySegment from './helpers/safelyAttachPaginationParamsToBodySegment.js'
 import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
@@ -637,37 +635,24 @@ export default class OpenapiEndpointRenderer<
     const bodyCursorPaginationParam =
       (this.cursorPaginate as { body: string })?.body ?? (this.scrollPaginate as { body: string })?.body
 
+    const paramName = bodyPaginationPageParam || bodyCursorPaginationParam
+    if (!paramName) return undefined
+
+    let schema: OpenapiSchemaBody | undefined = undefined
+
     if (bodyPaginationPageParam) {
-      return {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              properties: {
-                [bodyPaginationPageParam]: paginationPageParamOpenapiProperty(),
-              },
-            },
-          },
-        },
-      }
+      schema = safelyAttachPaginationParamToRequestBodySegment(bodyPaginationPageParam, schema)
     } else if (bodyCursorPaginationParam) {
-      return {
-        content: {
-          'application/json': {
-            schema: {
-              type: 'object',
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-              properties: {
-                [bodyCursorPaginationParam]: cursorPaginationParamOpenapiProperty(),
-                // eslint-disable-next-line @typescript-eslint/no-explicit-any
-              } as any,
-            },
-          },
-        },
-      }
+      schema = safelyAttachCursorPaginationParamToRequestBodySegment(bodyCursorPaginationParam, schema)
     }
 
-    return undefined
+    return {
+      content: {
+        'application/json': {
+          schema: schema!,
+        },
+      },
+    }
   }
 
   /**
