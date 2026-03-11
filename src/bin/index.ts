@@ -10,6 +10,7 @@ import PsychicApp from '../psychic-app/index.js'
 import enumsFileStr from './helpers/enumsFileStr.js'
 import generateRouteTypes from './helpers/generateRouteTypes.js'
 import { OpenApiSpecDiff, PsychicOpenapiConfig } from './helpers/OpenApiSpecDiff.js'
+import printControllerHierarchy from './helpers/printControllerHierarchy.js'
 import printRoutes from './helpers/printRoutes.js'
 
 export { BreakingChangesDetectedInOpenApiSpecError } from './helpers/OpenApiSpecDiff.js'
@@ -41,6 +42,10 @@ export default class PsychicBin {
 
   public static printRoutes() {
     printRoutes()
+  }
+
+  public static printControllerHierarchy(controllersPath?: string) {
+    printControllerHierarchy(controllersPath)
   }
 
   public static async sync({
