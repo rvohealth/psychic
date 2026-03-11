@@ -1,3 +1,7 @@
+## 3.0.3
+
+Don't revert the sync'd changes to types files if post-sync operations fail. This prevents small issues like missing routes for new OpenAPI endpoints from needlessly causing your types files to revert, creating needless confusion in your codebase.
+
 ## 3.0.2
 
 - `inspect:controller-hierarchy` CLI command to display the complete controller tree based on inheritance, not directory structure
