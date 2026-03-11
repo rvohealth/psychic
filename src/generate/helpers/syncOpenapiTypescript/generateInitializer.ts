@@ -30,9 +30,9 @@ import AppEnv from '../AppEnv.js'
 export default (psy: PsychicApp) => {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
-      DreamCLI.logger.logStartProgress(\`[${hyphenized}] extracting types from ${openapiFilepath} to ${outfile}...\`)
-      await DreamCLI.spawn('npx openapi-typescript ${openapiFilepath} -o ${outfile}')
-      DreamCLI.logger.logEndProgress()
+      await DreamCLI.logger.logProgress(\`[${hyphenized}] extracting types from ${openapiFilepath} to ${outfile}...\`, async () => {
+        await DreamCLI.spawn('npx openapi-typescript ${openapiFilepath} -o ${outfile}')
+      })
     }
   })
 }\

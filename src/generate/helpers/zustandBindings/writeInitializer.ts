@@ -3,7 +3,15 @@ import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import psychicPath from '../../../helpers/path/psychicPath.js'
 
-export default async function writeInitializer({ exportName }: { exportName: string }) {
+export default async function writeInitializer({
+  exportName,
+  schemaFile,
+  outputDir,
+}: {
+  exportName: string
+  schemaFile: string
+  outputDir: string
+}) {
   const pascalized = pascalize(exportName)
   const camelized = camelize(exportName)
 
@@ -24,8 +32,6 @@ export default async function writeInitializer({ exportName }: { exportName: str
     await fs.mkdir(destDir, { recursive: true })
   }
 
-  const filePath = path.join('.', 'src', 'conf', 'openapi', `${camelized}.openapi-codegen.json`)
-
   const contents = `\
 import { DreamCLI } from '@rvoh/dream/system'
 import { PsychicApp } from '@rvoh/psychic'
@@ -35,7 +41,7 @@ export default function initialize${pascalized}(psy: PsychicApp) {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(\`[${camelized}] syncing...\`, async () => {
-        await DreamCLI.spawn('npx @rtk-query/codegen-openapi ${filePath}', {
+        await DreamCLI.spawn('npx @hey-api/openapi-ts -i ${schemaFile} -o ${outputDir}', {
           onStdout: message => {
             DreamCLI.logger.logContinueProgress(\`[${camelized}]\` + ' ' + message, {
               logPrefixColor: 'green',
