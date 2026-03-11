@@ -2,6 +2,7 @@ import colors from 'yoctocolors'
 import {
   actualDisplayColumn,
   controllerHierarchyLines,
+  controllerHierarchyViolations,
   controllerTreeLine,
   globalNameDir,
   globalPrefixFromPath,
@@ -113,7 +114,7 @@ describe('printControllerHierarchy', () => {
         controllersPath,
       )
       expect(result).toEqual(
-        '[hierarchy violation: src/app/controllers/Api/V1/UsersController.ts should extend the BaseController in its directory or be moved]',
+        '[hierarchy violation: src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]',
       )
     })
 
@@ -124,7 +125,7 @@ describe('printControllerHierarchy', () => {
         controllersPath,
       )
       expect(result).toEqual(
-        '[hierarchy violation: src/app/controllers/Internal/Candidates/CitiesController.ts should extend the BaseController in its directory or be moved]',
+        '[hierarchy violation: src/app/controllers/Internal/Candidates/CitiesController.ts should extend a BaseController at its same level]',
       )
     })
   })
@@ -240,7 +241,7 @@ describe('printControllerHierarchy', () => {
       // Api/V1/UsersController extends ApplicationController (root dir), but lives in Api/V1/
       // That skips the Api/ directory level, so it should have a violation
       const expectedViolation = colors.yellow(
-        '[hierarchy violation: test-app/src/app/controllers/Api/V1/UsersController.ts should extend the BaseController in its directory or be moved]',
+        '[hierarchy violation: test-app/src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]',
       )
       const violationLine = lines.find(l => l.includes(expectedViolation))
       expect(violationLine).toBeDefined()
@@ -262,7 +263,7 @@ describe('printControllerHierarchy', () => {
       const lines = controllerHierarchyLines()
 
       const expectedViolation = colors.yellow(
-        '[hierarchy violation: test-app/src/app/controllers/Api/V1/UsersController.ts should extend the BaseController in its directory or be moved]',
+        '[hierarchy violation: test-app/src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]',
       )
       const violationIdx = lines.findIndex(l => l.includes(expectedViolation))
       expect(violationIdx).toBeGreaterThan(-1)
@@ -272,6 +273,39 @@ describe('printControllerHierarchy', () => {
       // numDashes = max(2, 12 - 5 - 2) = 5, actualDisplayColumn = 12
       // The violation line starts with 12 spaces
       expect(violationLine).toEqual(' '.repeat(12) + expectedViolation)
+    })
+
+    it('finds controllers in a subdirectory when given a scoped path', () => {
+      const lines = controllerHierarchyLines('test-app/src/app/controllers/Pets')
+
+      // Pets/PostsController extends ApplicationController, which is outside the scoped path,
+      // so PostsController should appear as a root
+      expect(lines).toContainEqual(colors.cyan('controllers/Pets/PostsController'))
+    })
+  })
+
+  describe('controllerHierarchyViolations', () => {
+    it('returns violation messages for controllers that skip directory levels', () => {
+      const violations = controllerHierarchyViolations()
+
+      // Api/V1/UsersController extends ApplicationController but is two directories deep
+      const v1Violation = violations.find(v => v.includes('Api/V1/UsersController.ts'))
+      expect(v1Violation).toEqual(
+        '[hierarchy violation: test-app/src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]',
+      )
+    })
+
+    it('does not include controllers that extend in the same or parent directory', () => {
+      const violations = controllerHierarchyViolations()
+
+      expect(violations.find(v => v.includes('Admin/TestController.ts'))).toBeUndefined()
+      expect(violations.find(v => v.includes('Admin/AuthedController.ts'))).toBeUndefined()
+    })
+
+    it('returns an empty array when there are no violations', () => {
+      // Pets/ subdirectory only has PostsController extending ApplicationController (parent dir) — no violation
+      const violations = controllerHierarchyViolations('test-app/src/app/controllers/Pets')
+      expect(violations).toEqual([])
     })
   })
 })
