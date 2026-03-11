@@ -81,14 +81,9 @@ export default class PsychicBin {
   }
 
   public static async postSync() {
-    try {
-      await this.syncOpenapiJson()
-      await this.runCliHooksAndUpdatePsychicTypesFileWithOutput()
-      await this.syncOpenapiTypescriptFiles()
-    } catch (error) {
-      console.error(error)
-      await CliFileWriter.revert()
-    }
+    await this.syncOpenapiJson()
+    await this.runCliHooksAndUpdatePsychicTypesFileWithOutput()
+    await this.syncOpenapiTypescriptFiles()
   }
 
   public static async syncTypes() {
