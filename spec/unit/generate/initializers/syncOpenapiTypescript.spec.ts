@@ -38,9 +38,9 @@ import AppEnv from '../AppEnv.js'
 export default (psy: PsychicApp) => {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
-      DreamCLI.logger.logStartProgress(\`[sync-openapi-typescript] extracting types from ./openapi.json to ./sync-custom-openapi-typescript.d.ts...\`)
-      await DreamCLI.spawn('npx openapi-typescript ./openapi.json -o ./sync-custom-openapi-typescript.d.ts')
-      DreamCLI.logger.logEndProgress()
+      await DreamCLI.logger.logProgress(\`[sync-openapi-typescript] extracting types from ./openapi.json to ./sync-custom-openapi-typescript.d.ts...\`, async () => {
+        await DreamCLI.spawn('npx openapi-typescript ./openapi.json -o ./sync-custom-openapi-typescript.d.ts')
+      })
     }
   })
 }`)
