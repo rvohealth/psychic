@@ -1,6 +1,7 @@
 ## 3.0.2
 
-`inspect:controller-hierarchy` CLI command to display the complete controller tree based on inheritance, not directory structure
+- `inspect:controller-hierarchy` CLI command to display the complete controller tree based on inheritance, not directory structure
+- `check:controller-hierarchy` CLI command to error if there is a controller hierarchy violation (for CI checks)
 
 ## 3.0.1
 

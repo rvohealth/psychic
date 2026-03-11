@@ -12,7 +12,7 @@ export default function printControllerHierarchy(controllersPath?: string) {
   }
 }
 
-export function controllerHierarchyLines(controllersPath?: string): string[] {
+export function resolveControllerClasses(controllersPath?: string) {
   const psychicApp = PsychicApp.getOrFail()
   const resolvedPath = controllersPath ?? psychicApp.paths.controllers
   const allControllers = psychicApp.controllers
@@ -21,9 +21,17 @@ export function controllerHierarchyLines(controllersPath?: string): string[] {
     return ctrl.globalName.startsWith(globalPrefixFromPath(resolvedPath, psychicApp.paths.controllers))
   })
 
+  return { controllerClasses, resolvedPath }
+}
+
+export function controllerHierarchyLines(controllersPath?: string): string[] {
+  const { controllerClasses, resolvedPath } = resolveControllerClasses(controllersPath)
+
   const childrenMap = buildChildrenMap(controllerClasses)
 
-  const roots = controllerClasses.filter(ctrl => Object.getPrototypeOf(ctrl) === PsychicController)
+  const roots = controllerClasses.filter(
+    ctrl => !controllerClasses.some(other => other !== ctrl && ctrl.prototype instanceof other),
+  )
 
   if (roots.length === 0) {
     return ['No controllers found.']
@@ -40,6 +48,22 @@ export function controllerHierarchyLines(controllersPath?: string): string[] {
     )
   }
   return lines
+}
+
+export function controllerHierarchyViolations(controllersPath?: string): string[] {
+  const { controllerClasses, resolvedPath } = resolveControllerClasses(controllersPath)
+
+  const violations: string[] = []
+  for (const ctrl of controllerClasses) {
+    const parentClass = Object.getPrototypeOf(ctrl) as typeof PsychicController
+    if (parentClass === PsychicController) continue
+
+    const violation = hierarchyViolation(ctrl.globalName, parentClass.globalName, resolvedPath)
+    if (violation) {
+      violations.push(violation)
+    }
+  }
+  return violations
 }
 
 export function buildChildrenMap(
@@ -154,7 +178,7 @@ export function hierarchyViolation(
   }
 
   const childFilePath = controllersPath + '/' + childGlobalName.replace(/^controllers\//, '') + '.ts'
-  return `[hierarchy violation: ${childFilePath} should extend the BaseController in its directory or be moved]`
+  return `[hierarchy violation: ${childFilePath} should extend a BaseController at its same level]`
 }
 
 function collectTreeLines(
