@@ -300,6 +300,17 @@ export default class PsychicCLI {
       )
 
     program
+      .command('inspect:controller-hierarchy')
+      .alias('i:controller-hierarchy')
+      .description('Displays the inheritance hierarchy of all PsychicController classes in the project.')
+      .argument('[path]', 'the controllers directory to scan (defaults to the configured controllers path)')
+      .action(async (controllersPath?: string) => {
+        await initializePsychicApp()
+        PsychicBin.printControllerHierarchy(controllersPath)
+        process.exit()
+      })
+
+    program
       .command('routes')
       .description(
         'Prints a list of routes defined by the application, including path arguments and the controller/action reached by the route.',
