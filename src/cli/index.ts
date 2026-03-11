@@ -5,6 +5,7 @@ import generateController from '../generate/controller.js'
 import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/syncOpenapiTypescript.js'
 import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
+import generateOpenapiZustandBindings from '../generate/openapi/zustandBindings.js'
 import generateResource from '../generate/resource.js'
 import colorize from './helpers/colorize.js'
 import PsychicLogos from './helpers/PsychicLogos.js'
@@ -279,6 +280,53 @@ export default class PsychicCLI {
             apiFile,
             apiImport,
             outputFile,
+          })
+          process.exit()
+        },
+      )
+
+    program
+      .command('setup:sync:openapi-zustand')
+      .description(
+        'Generates typed API functions from an openapi file using @hey-api/openapi-ts, for use with Zustand or any other state manager.',
+      )
+      .option(
+        '--schema-file <schemaFile>',
+        'the path from your api root to the openapi file you wish to use to generate your schema, i.e. ./src/openapi/openapi.json',
+      )
+      .option(
+        '--output-dir <outputDir>',
+        'the directory where @hey-api/openapi-ts will generate typed API functions and types, i.e. ../client/app/api/myBackendApi',
+      )
+      .option(
+        '--client-config-file <clientConfigFile>',
+        'the path to the client configuration file that configures @hey-api/client-fetch with base URL and credentials, i.e. ../client/app/api/myBackendApi/client.ts',
+      )
+      .option(
+        '--export-name <exportName>',
+        'the camelCased name to use for your exported api, i.e. myBackendApi',
+      )
+      .action(
+        async ({
+          schemaFile,
+          outputDir,
+          clientConfigFile,
+          exportName,
+        }: {
+          schemaFile: string
+          outputDir: string
+          clientConfigFile: string
+          exportName: string
+        }) => {
+          await initializePsychicApp({
+            bypassDreamIntegrityChecks: true,
+            bypassDbConnectionsDuringInit: true,
+          })
+          await generateOpenapiZustandBindings({
+            exportName,
+            schemaFile,
+            outputDir,
+            clientConfigFile,
           })
           process.exit()
         },
