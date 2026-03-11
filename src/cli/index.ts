@@ -311,6 +311,24 @@ export default class PsychicCLI {
       })
 
     program
+      .command('check:controller-hierarchy')
+      .description(
+        'Checks that all controllers extend a controller in the same or parent directory. Exits with an error if any violations are found.',
+      )
+      .argument('[path]', 'the controllers directory to scan (defaults to the configured controllers path)')
+      .action(async (controllersPath?: string) => {
+        await initializePsychicApp()
+        const violations = PsychicBin.controllerHierarchyViolations(controllersPath)
+        if (violations.length > 0) {
+          for (const violation of violations) {
+            console.error(violation)
+          }
+          process.exit(1)
+        }
+        process.exit()
+      })
+
+    program
       .command('routes')
       .description(
         'Prints a list of routes defined by the application, including path arguments and the controller/action reached by the route.',
