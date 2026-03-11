@@ -1,3 +1,7 @@
+## 3.0.2
+
+`inspect:controller-hierarchy` CLI command to display the complete controller tree based on inheritance, not directory structure
+
 ## 3.0.1
 
 add case-insensitive header method to PsychicController
