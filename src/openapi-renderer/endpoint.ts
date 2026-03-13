@@ -999,6 +999,7 @@ export default class OpenapiEndpointRenderer<
           currentPage: {
             type: 'number',
           },
+          ...this.extraPaginationProperties(this.paginate),
           results: {
             type: 'array',
             items: serializerObject,
@@ -1014,6 +1015,7 @@ export default class OpenapiEndpointRenderer<
           cursor: {
             type: ['string', 'null'],
           },
+          ...this.extraPaginationProperties(this.cursorPaginate || this.scrollPaginate),
           results: {
             type: 'array',
             items: serializerObject,
@@ -1030,6 +1032,30 @@ export default class OpenapiEndpointRenderer<
     if (this.defaultResponse?.maybeNull) return { anyOf: [serializerObject, { type: 'null' }] }
 
     return serializerObject
+  }
+
+  private extraPaginationProperties(
+    paginateOpt: OpenapiEndpointRendererOpts['paginate'] | OpenapiEndpointRendererOpts['cursorPaginate'],
+  ): Record<string, OpenapiSchemaBody> {
+    let effectiveOpt = paginateOpt
+    if (effectiveOpt === true) {
+      const storedRenderer = this.controllerClass.openapi?.[this.action]
+      if (storedRenderer) {
+        effectiveOpt = storedRenderer.paginate || storedRenderer.cursorPaginate || storedRenderer.scrollPaginate
+      }
+    }
+
+    if (!effectiveOpt || typeof effectiveOpt !== 'object') return {}
+    if ('query' in effectiveOpt || 'body' in effectiveOpt) return {}
+
+    const result: Record<string, OpenapiSchemaBody> = {}
+    for (const [key, value] of Object.entries(effectiveOpt)) {
+      result[key] = new OpenapiSegmentExpander(value, {
+        renderOpts: { casing: 'camel', suppressResponseEnums: false },
+        target: 'response',
+      }).render().openapi
+    }
+    return result
   }
 
   /**
@@ -1601,6 +1627,8 @@ export type CustomPaginationOpts =
        */
       body: string
     }
+  | OpenapiSchemaProperties
+  | OpenapiSchemaPropertiesShorthand
 
 export type CustomCursorPaginationOpts =
   | {
@@ -1651,6 +1679,8 @@ export type CustomCursorPaginationOpts =
        */
       body: string
     }
+  | OpenapiSchemaProperties
+  | OpenapiSchemaPropertiesShorthand
 
 export interface OpenapiEndpointRendererDefaultResponseOption {
   description?: string

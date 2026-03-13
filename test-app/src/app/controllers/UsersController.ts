@@ -1,4 +1,4 @@
-import { DateTime } from '@rvoh/dream'
+import { DateTime, ops } from '@rvoh/dream'
 import { Encrypt } from '@rvoh/dream/utils'
 import { BeforeAction, OpenAPI } from '../../../../src/package-exports/index.js'
 import User from '../models/User.js'
@@ -90,6 +90,71 @@ export default class UsersController extends ApplicationController {
       page: this.castParam('page', 'integer', { allowNull: true }),
     })
     this.ok(users)
+  }
+
+  @OpenAPI(User, {
+    fastJsonStringify: true,
+    status: 200,
+    paginate: {
+      name: ['string', 'null'],
+      somethingElse: {
+        anyOf: [
+          {
+            type: 'object',
+            properties: {
+              hello: 'integer',
+            },
+          },
+          {
+            type: 'null',
+          },
+        ],
+      },
+    },
+    serializerKey: 'summary',
+  })
+  public async paginatedWithCustomOpenapi() {
+    const name = 'snoopy'
+    const users = await User.where({ name: ops.ilike(name) })
+      .order('createdAt')
+      .paginate({
+        page: this.castParam('page', 'integer', { allowNull: true }),
+      })
+
+    this.ok({ ...users, name })
+  }
+
+  @OpenAPI(User, {
+    fastJsonStringify: true,
+    status: 200,
+    cursorPaginate: {
+      name: ['string', 'null'],
+      somethingElse: {
+        anyOf: [
+          {
+            type: 'object',
+            properties: {
+              hello: 'integer',
+            },
+          },
+          {
+            type: 'null',
+          },
+        ],
+      },
+    },
+
+    serializerKey: 'summary',
+  })
+  public async cursorPaginatedWithCustomOpenapi() {
+    const name = 'snoopy'
+    const users = await User.where({ name: ops.ilike(name) })
+      .order('createdAt')
+      .cursorPaginate({
+        cursor: this.castParam('cursor', 'string', { allowNull: true }),
+      })
+
+    this.ok({ ...users, name })
   }
 
   @OpenAPI(User, {

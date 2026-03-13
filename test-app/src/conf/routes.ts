@@ -61,6 +61,8 @@ export default function routes(r: PsychicRouter) {
   r.resources('users', r => {
     r.collection(r => {
       r.get('paginated', UsersController, 'paginated')
+      r.get('paginated-with-custom-openapi', UsersController, 'paginatedWithCustomOpenapi')
+      r.get('cursor-paginated-with-custom-openapi', UsersController, 'cursorPaginatedWithCustomOpenapi')
       r.post('paginated-post', UsersController, 'paginatedPost')
       r.get('cursor-paginated', UsersController, 'cursorPaginated')
       r.post('cursor-paginated-post', UsersController, 'cursorPaginatedPost')

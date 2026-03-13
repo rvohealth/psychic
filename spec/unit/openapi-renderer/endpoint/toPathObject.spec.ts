@@ -238,6 +238,78 @@ describe('OpenapiEndpointRenderer', () => {
             )
           })
 
+          context('with extra openapi config', () => {
+            it('adds the extra openapi specs to the openapi shape', () => {
+              const renderer = new OpenapiEndpointRenderer(
+                User,
+                UsersController,
+                'paginatedWithCustomOpenapi',
+                {
+                  paginate: true,
+                },
+              )
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response).toEqual(
+                expect.objectContaining({
+                  '/users/paginated-with-custom-openapi': expect.objectContaining({
+                    parameters: expect.arrayContaining([
+                      {
+                        in: 'query',
+                        name: 'page',
+                        required: false,
+                        allowReserved: true,
+                        description: 'Page number',
+                        schema: {
+                          type: 'string',
+                        },
+                      },
+                    ]),
+
+                    get: expect.objectContaining({
+                      responses: expect.objectContaining({
+                        200: {
+                          content: {
+                            'application/json': {
+                              schema: {
+                                type: 'object',
+                                required: ['recordCount', 'pageCount', 'currentPage', 'results'],
+                                properties: {
+                                  recordCount: { type: 'number' },
+                                  pageCount: { type: 'number' },
+                                  currentPage: { type: 'number' },
+                                  name: { type: ['string', 'null'] },
+                                  somethingElse: {
+                                    anyOf: [
+                                      {
+                                        type: 'object',
+                                        properties: {
+                                          hello: { type: 'integer' },
+                                        },
+                                      },
+                                      {
+                                        type: 'null',
+                                      },
+                                    ],
+                                  },
+                                  results: {
+                                    type: 'array',
+                                    items: { $ref: '#/components/schemas/User' },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                          description: 'Success',
+                        },
+                      }),
+                    }),
+                  }),
+                }),
+              )
+            })
+          })
+
           context('an STI base model', () => {
             it('the OpenAPI shape includes the children', () => {
               const renderer = new OpenapiEndpointRenderer(Balloon, BalloonsController, 'paginated', {
@@ -450,6 +522,76 @@ describe('OpenapiEndpointRenderer', () => {
                 }),
               }),
             )
+          })
+
+          context('with extra openapi config', () => {
+            it('adds the extra openapi specs to the openapi shape', () => {
+              const renderer = new OpenapiEndpointRenderer(
+                User,
+                UsersController,
+                'cursorPaginatedWithCustomOpenapi',
+                {
+                  cursorPaginate: true,
+                },
+              )
+
+              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              expect(response).toEqual(
+                expect.objectContaining({
+                  '/users/cursor-paginated-with-custom-openapi': expect.objectContaining({
+                    parameters: expect.arrayContaining([
+                      {
+                        in: 'query',
+                        name: 'cursor',
+                        required: false,
+                        allowReserved: true,
+                        description: 'Pagination cursor',
+                        schema: {
+                          type: ['string', 'null'],
+                        },
+                      },
+                    ]),
+
+                    get: expect.objectContaining({
+                      responses: expect.objectContaining({
+                        200: {
+                          content: {
+                            'application/json': {
+                              schema: {
+                                type: 'object',
+                                required: ['cursor', 'results'],
+                                properties: {
+                                  cursor: { type: ['string', 'null'] },
+                                  name: { type: ['string', 'null'] },
+                                  somethingElse: {
+                                    anyOf: [
+                                      {
+                                        type: 'object',
+                                        properties: {
+                                          hello: { type: 'integer' },
+                                        },
+                                      },
+                                      {
+                                        type: 'null',
+                                      },
+                                    ],
+                                  },
+                                  results: {
+                                    type: 'array',
+                                    items: { $ref: '#/components/schemas/User' },
+                                  },
+                                },
+                              },
+                            },
+                          },
+                          description: 'Success',
+                        },
+                      }),
+                    }),
+                  }),
+                }),
+              )
+            })
           })
 
           context('an STI base model', () => {
