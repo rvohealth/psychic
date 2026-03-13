@@ -1,3 +1,7 @@
+## 3.1.0
+
+`paginate` and `cursorPaginate` accept custom OpenAPI to support custom filtering and sorting arguments to be returned without requiring the entire OpenAPI shape to be explicitly reconstructed
+
 ## 3.0.2
 
 - `inspect:controller-hierarchy` CLI command to display the complete controller tree based on inheritance, not directory structure
