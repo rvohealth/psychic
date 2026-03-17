@@ -100,6 +100,7 @@ export default class PsychicCLI {
       .option(
         '--singular',
         'generates a "resource" route instead of "resources", along with the necessary controller and spec changes',
+        false,
       )
       .option(
         '--only <onlyActions>',
@@ -112,7 +113,8 @@ export default class PsychicCLI {
       )
       .option(
         '--sti-base-serializer',
-        'omits the serializer from the dream model, but does create the serializer so it can be extended by STI children',
+        'creates a generically typed base serializer that includes the child type in the output so consuming applications can determine shape based on type',
+        false,
       )
       .option(
         '--owning-model <modelName>',
@@ -344,8 +346,8 @@ export default class PsychicCLI {
       .description(
         "Generates types from the current state of the database. Generates OpenAPI specs from @OpenAPI decorated controller actions. Additional sync actions may be customized with `on('cli:sync', async () => {})` in conf/app.ts or in an initializer in `conf/initializers/`.",
       )
-      .option('--ignore-errors')
-      .option('--schema-only')
+      .option('--ignore-errors', 'ignore integrity checks and continue sync', false)
+      .option('--schema-only', 'sync database schema types only', false)
       .action(async (options: { ignoreErrors: boolean; schemaOnly: boolean }) => {
         await initializePsychicApp({ bypassDreamIntegrityChecks: options.ignoreErrors || options.schemaOnly })
         await PsychicBin.sync(options)
@@ -395,7 +397,7 @@ export default class PsychicCLI {
       .description(
         'compares the current branch open api spec file(s) with the main/master/head branch open api spec file(s)',
       )
-      .option('-f', '--fail-on-breaking', 'fail on spec changes that are breaking')
+      .option('-f, --fail-on-breaking', 'fail on spec changes that are breaking', false)
       .action(async (options: { failOnBreaking: boolean }) => {
         await initializePsychicApp()
 
