@@ -1,3 +1,7 @@
+## 3.0.3
+
+- CLI fixes (incorrect description, missing defaults, broken flag)
+
 ## 3.0.2
 
 - `inspect:controller-hierarchy` CLI command to display the complete controller tree based on inheritance, not directory structure
