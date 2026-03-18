@@ -1,6 +1,7 @@
 ## 3.0.3
 
 - CLI fixes (incorrect description, missing defaults, broken flag)
+- Bump vulnerable packages to latest versions
 
 ## 3.0.2
 
