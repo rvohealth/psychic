@@ -6,6 +6,8 @@ import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/syncOpenapiTypescript.js'
 import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
 import generateResource from '../generate/resource.js'
+import colorize from './helpers/colorize.js'
+import PsychicLogos from './helpers/PsychicLogos.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import Watcher from '../watcher/Watcher.js'
 
@@ -83,6 +85,27 @@ export default class PsychicCLI {
       seedDb: () => Promise<void> | void
     },
   ) {
+    program.hook('preAction', (_thisCommand, actionCommand) => {
+      const cmdName = actionCommand.name()
+      switch (cmdName) {
+        case 'post-sync':
+          return
+
+        default:
+          DreamCLI.logger.log(colorize(PsychicLogos.asciiLogo(), { color: 'greenBright' }), { logPrefix: '' })
+          DreamCLI.logger.log('\n', { logPrefix: '' })
+          DreamCLI.logger.log(
+            colorize(' ', { color: 'green' }) +
+              colorize(' ' + cmdName + ' ', { color: 'black', bgColor: 'bgGreen' }) +
+              '\n',
+            {
+              logPrefix: '',
+            },
+          )
+          DreamCLI.logger.log(colorize('⭣⭣⭣', { color: 'green' }) + '\n', { logPrefix: ' ' })
+      }
+    })
+
     DreamCLI.generateDreamCli(program, {
       initializeDreamApp: initializePsychicApp,
       seedDb,
