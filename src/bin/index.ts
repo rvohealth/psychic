@@ -72,7 +72,7 @@ export default class PsychicBin {
     await DreamCLI.spawn(psychicApp.psyCmd('post-sync'), {
       onStdout: message => {
         DreamCLI.logger.logContinueProgress(`[post-sync]` + ' ' + message, {
-          logPrefixColor: 'cyan',
+          logPrefixColor: 'greenBright',
         })
       },
     })
@@ -92,9 +92,7 @@ export default class PsychicBin {
   }
 
   public static async syncTypes() {
-    await DreamCLI.logger.logProgress(`syncing types/psychic.ts...`, async () => {
-      await new ASTPsychicTypesBuilder().build()
-    })
+    await new ASTPsychicTypesBuilder().build()
   }
 
   public static openapiDiff() {
