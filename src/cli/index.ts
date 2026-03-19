@@ -7,10 +7,10 @@ import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/sy
 import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
 import generateOpenapiZustandBindings from '../generate/openapi/zustandBindings.js'
 import generateResource from '../generate/resource.js'
-import colorize from './helpers/colorize.js'
-import PsychicLogos from './helpers/PsychicLogos.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import Watcher from '../watcher/Watcher.js'
+import colorize from './helpers/colorize.js'
+import PsychicLogos from './helpers/PsychicLogos.js'
 
 const INDENT = '                  '
 
@@ -70,10 +70,13 @@ const columnsWithTypesDescription =
   `
 ${INDENT}
 ${INDENT}    - belongs_to:
-${INDENT}        not only adds a foreign key to the migration, but also adds a BelongsTo association to the generated model:
+${INDENT}        ALWAYS use this instead of adding a raw uuid column for foreign keys. It creates the FK column, adds a database index,
+${INDENT}        AND generates the @deco.BelongsTo association and typed property on the model. A raw uuid column does none of this.
 ${INDENT}
-${INDENT}        include the fully qualified model name, e.g., if the Coach model is in src/app/models/Health/Coach:
-${INDENT}          Health/Coach:belongs_to`
+${INDENT}        use the fully qualified model name (matching its path under src/app/models/):
+${INDENT}          User:belongs_to                  # creates user_id column + BelongsTo association
+${INDENT}          Health/Coach:belongs_to           # creates health_coach_id column + BelongsTo association
+${INDENT}          User:belongs_to:optional          # nullable foreign key (for optional associations)`
 
 export default class PsychicCLI {
   public static provide(
@@ -119,47 +122,109 @@ export default class PsychicCLI {
       .command('generate:resource')
       .alias('g:resource')
       .description(
-        'Generates a Dream model with corresponding spec factory, serializer, migration, and controller with the inheritance chain leading to that controller, with fleshed out specs for each resourceful action in the controller.',
+        `Generates a Dream model with corresponding spec factory, serializer, migration, and controller with the inheritance chain leading to that controller, with fleshed out specs for each resourceful action in the controller.
+${INDENT}
+${INDENT}This is the preferred generator when the model will be accessible via HTTP requests (API endpoints, admin panels, internal tools). It scaffolds everything needed for a full CRUD resource. Prefer this over g:model unless the model is purely internal with no HTTP access.
+${INDENT}
+${INDENT}Examples:
+${INDENT}  # Basic resource with CRUD endpoints
+${INDENT}  pnpm psy g:resource v1/posts Post User:belongs_to title:citext body:text
+${INDENT}
+${INDENT}  # Nested resource under a parent (use {} for nesting resource ID placeholder)
+${INDENT}  pnpm psy g:resource --owning-model=Post v1/posts/\\{\\}/comments Post/Comment Post:belongs_to body:text
+${INDENT}
+${INDENT}  # Singular resource (HasOne relationship from parent model, no index action, no :id in URL)
+${INDENT}  pnpm psy g:resource --singular v1/profile User/Profile User:belongs_to bio:text
+${INDENT}
+${INDENT}  # STI base resource
+${INDENT}  pnpm psy g:resource --sti-base-serializer v1/host/rentals Rental type:enum:place_types:Apartment,House,Condo`,
       )
       .option(
         '--singular',
-        'generates a "resource" route instead of "resources", along with the necessary controller and spec changes',
+        `Use when the parent model has-one of this resource (e.g., a User HasOne Profile, a Candidate HasOne Linkedin).
+${INDENT}Generates a singular \`r.resource\` route instead of plural \`r.resources\`, omits the \`index\` action, and removes \`:id\` from URLs since there is only one per parent.
+${INDENT}
+${INDENT}Examples:
+${INDENT}  pnpm psy g:resource --singular v1/profile User/Profile User:belongs_to bio:text
+${INDENT}  pnpm psy g:resource --singular --owning-model=Candidate internal/candidates/\\{\\}/linkedin Candidate/Linkedin Candidate:belongs_to url:string`,
         false,
       )
       .option(
         '--only <onlyActions>',
-        `comma separated list of resourceful endpionts (e.g. "--only=create,show"); any of:
-                              - index
-                              - create
-                              - show
-                              - update
-                              - delete`,
+        `comma separated list of resourceful endpoints to generate (omitted actions will not have controller methods, specs, or routes).
+${INDENT}
+${INDENT}Available actions: index, create, show, update, delete
+${INDENT}
+${INDENT}Examples:
+${INDENT}  --only=index,create,show       # create and view only (e.g., form submissions)
+${INDENT}  --only=index,show,update     # modify only (e.g., settings management)`,
       )
       .option(
         '--sti-base-serializer',
-        'creates a generically typed base serializer that includes the child type in the output so consuming applications can determine shape based on type',
+        `Creates generically typed base serializers (default and summary) that accept a \`StiChildClass\` parameter and include the \`type\` attribute with a per-child enum constraint. This allows consuming applications to determine the response shape based on the STI type discriminator.
+${INDENT}
+${INDENT}Use this when generating the parent model of an STI hierarchy. After generating the parent, use g:sti-child for each child type.
+${INDENT}
+${INDENT}Example:
+${INDENT}  # CRITICAL: the type enums must exactly match the class names of the STI children
+${INDENT}  pnpm psy g:resource --sti-base-serializer v1/host/rentals Rental type:enum:place_types:Apartment,House,Condo
+${INDENT}  # STI children subsequently generated using the g:sti-child generator (note the use of \`--model-name\` to generate class names that match the \`type\` column, e.g., "Apartment" instead of the "RentalApartment" default):
+${INDENT}  pnpm psy g:sti-child --model-name=Apartment Rental/Apartment extends Rental
+${INDENT}  pnpm psy g:sti-child --model-name=House Rental/House extends Rental
+${INDENT}  pnpm psy g:sti-child --model-name=Condo Rental/Condo extends Rental`,
         false,
       )
       .option(
         '--owning-model <modelName>',
-        'the model class of the object that `associationQuery`/`createAssociation` will be performed on in the created controller and spec (e.g., "Host", "Guest", "Ticketing/Ticket"). Defaults to the current user for non-admin/internal namespaced controllers. For admin/internal namespaced controllers, this defaults to null, meaning every admin/internal user can access the model.',
+        `The model class that owns this resource. The generated controller will use \`associationQuery\` and \`createAssociation\` on the owning model to scope queries and create records.
+${INDENT}
+${INDENT}Defaults to \`this.currentUser\` for non-admin/internal routes (e.g., \`this.currentUser.associationQuery('posts').findOrFail(this.castParam('id', 'uuid'))\`).
+${INDENT}Defaults to \`null\` for admin/internal namespaced controllers (e.g., \`Post.findOrFail(this.castParam('id', 'uuid'))\`).
+${INDENT}Supplying an owning-modle changes the the generated code in the controller to be relative to the owning model.
+${INDENT}
+${INDENT}Example:
+${INDENT}  pnpm psy g:resource --owning-model=Host v1/host/places Place
+${INDENT}  # results in \`await this.currentHost.associationQuery('places').findOrFail(this.castParam('id', 'uuid'))\``,
       )
       .option(
         '--connection-name <connectionName>',
-        'the name of the db connection you would like to use for your model. Defaults to "default"',
+        'the name of the database connection to use for the model. Only needed for multi-database setups; defaults to "default"',
         'default',
       )
       .option(
+        '--table-name <tableName>',
+        `Explicit table name to use instead of the auto-generated one. Useful when model namespaces produce long or awkward table names.
+${INDENT}
+${INDENT}Example:
+${INDENT}  pnpm psy g:resource --table-name=notif_prefs v1/notification-preferences Settings/NotificationPreferences User:belongs_to`,
+      )
+      .option(
         '--model-name <modelName>',
-        'explicit model class name to use instead of the auto-generated one (e.g. --model-name=Kitchen for Room/Kitchen)',
+        `Explicit model class name to use instead of the one auto-derived from the model path. Useful when the path segments don't match the desired class name.
+${INDENT}
+${INDENT}Example:
+${INDENT}  pnpm psy g:resource --model-name=GroupDanceLesson v1/lessons/dance/groups Lesson/Dance/Group
+${INDENT}  # model is named GroupDanceLesson instead of LessonDanceGroup`,
       )
       .argument(
         '<path>',
-        'URL path from root domain. Specify nesting resource with `{}`, e.g.: `tickets/{}/comments`',
+        `The URL path for this resource's routes, relative to the root domain. Use \`\\{\\}\` as a placeholder for a parent resource's ID parameter when nesting.
+${INDENT}
+${INDENT}The path determines the controller namespace hierarchy. Paths that begin with "admin" and "internal" remove the \`currentUser\` scoping of queries (\`--owning-model\` may be provided to apply query scoping). Each segment maps to a directory level in the controllers folder.
+${INDENT}
+${INDENT}Examples:
+${INDENT}  v1/posts                          # /v1/posts, /v1/posts/:id
+${INDENT}  v1/host/places                    # /v1/host/places, /v1/host/places/:id
+${INDENT}  v1/posts/\\{\\}/comments              # /v1/posts/:postId/comments, /v1/posts/:postId/comments/:id
+${INDENT}  internal/candidates/\\{\\}/linkedin   # /internal/candidates/:candidateId/linkedin (with --singular)`,
       )
       .argument(
         '<modelName>',
-        'the name of the model to create, e.g. Post or Settings/CommunicationPreferences',
+        `The fully qualified model name, using / for namespacing. This determines the model class name (may be overridden with \`--model-name\`), table name, and file path under src/app/models/.
+${INDENT}
+${INDENT}Examples:
+${INDENT}  Post                                # src/app/models/Post.ts, table: posts
+${INDENT}  Post/Comment                        # src/app/models/Post/Comment.ts, table: post_comments`,
       )
       .argument('[columnsWithTypes...]', columnsWithTypesDescription)
       .action(
@@ -173,6 +238,7 @@ export default class PsychicCLI {
             stiBaseSerializer: boolean
             owningModel?: string
             connectionName: string
+            tableName?: string
             modelName?: string
           },
         ) => {
@@ -189,13 +255,25 @@ export default class PsychicCLI {
       .command('generate:controller')
       .alias('g:controller')
       .description(
-        'Generates a controller and the inheritance chain leading to that controller, and a spec skeleton for the controller.',
+        `Generates a controller and the full inheritance chain leading to that controller, along with a spec skeleton. Use this for standalone controllers that are not tied to a model (e.g., auth, health checks, custom actions). For model-backed CRUD, prefer g:resource instead.
+${INDENT}
+${INDENT}Examples:
+${INDENT}  pnpm psy g:controller Auth login logout refresh
+${INDENT}  pnpm psy g:controller V1/Admin/Reports generate download
+${INDENT}  pnpm psy g:controller Api/V1/Webhooks stripe sendgrid`,
       )
       .argument(
         '<controllerName>',
-        'the name of the controller to create, including namespaces, e.g. Posts or Api/V1/Posts',
+        `The name of the controller to create, using / for namespace directories. Each segment creates a directory and a base controller in the inheritance chain.
+${INDENT}
+${INDENT}Examples:
+${INDENT}  Auth                    # src/app/controllers/AuthController.ts
+${INDENT}  V1/Admin/Reports        # src/app/controllers/V1/Admin/ReportsController.ts (extends V1/Admin/V1AdminBaseController)`,
       )
-      .argument('[actions...]', 'the names of controller actions to create')
+      .argument(
+        '[actions...]',
+        `Space-separated list of action method names to generate on the controller (e.g., login logout refresh). Each action gets a method stub in the controller and a describe block in the spec.`,
+      )
       .action(async (controllerName: string, actions: string[]) => {
         await initializePsychicApp({ bypassDreamIntegrityChecks: true, bypassDbConnectionsDuringInit: true })
         await PsychicBin.generateController(controllerName, actions)
@@ -204,14 +282,23 @@ export default class PsychicCLI {
 
     program
       .command('setup:sync:enums')
-      .description('Generates an initializer in your app for syncing enums to a particular path.')
+      .description(
+        `Generates an initializer that automatically exports all Dream enum types to a TypeScript file during sync. This is a one-time setup command — once the initializer exists, enums are synced automatically on every \`pnpm psy sync\`.
+${INDENT}
+${INDENT}Use this to share enum types between your backend and frontend without manual duplication.
+${INDENT}
+${INDENT}**WARNING**: This currently syncs **all** database enums to the specified front end, which may not be appropriate for all use cases. It's on our roadmap to base this on specified OpenAPI specs.
+${INDENT}
+${INDENT}Example:
+${INDENT}  pnpm psy setup:sync:enums ../client/src/api/enums.ts`,
+      )
       .argument(
         '<outfile>',
-        'the path from your backend directory to the location which you want the enums copied. Should end with .ts, i.e. "../client/src/api/enums.ts"',
+        'the output path (relative to backend root) where enum types will be written on each sync. Should end with .ts, e.g., "../client/src/api/enums.ts"',
       )
       .option(
         '--initializer-filename <initializerFilename>',
-        'the name you want the file to be in your initializers folder. defaults to `sync-enums.ts`',
+        'custom filename for the generated initializer in src/conf/initializers/. Defaults to `sync-enums.ts`',
       )
       .action(
         async (
@@ -234,27 +321,37 @@ export default class PsychicCLI {
     program
       .command('setup:sync:openapi-redux')
       .description(
-        'Generates openapi redux bindings to connect one of your openapi files to one of your clients.',
+        `Generates an initializer that creates typed RTK Query API bindings from your OpenAPI spec during sync. This is a one-time setup command — once configured, bindings are regenerated automatically on every \`pnpm psy sync\`.
+${INDENT}
+${INDENT}Use this for React frontends using Redux Toolkit / RTK Query. For Zustand or other state managers, use setup:sync:openapi-zustand instead.
+${INDENT}
+${INDENT}Example:
+${INDENT}  pnpm psy setup:sync:openapi-redux \\
+${INDENT}    --schema-file=./src/openapi/openapi.json \\
+${INDENT}    --api-file=../client/app/api.ts \\
+${INDENT}    --api-import=emptyBackendApi \\
+${INDENT}    --output-file=../client/app/backendApi.ts \\
+${INDENT}    --export-name=backendApi`,
       )
       .option(
         '--schema-file <schemaFile>',
-        'the path from your api root to the openapi file you wish to use to generate your schema, i.e. ./src/openapi/openapi.json',
+        'path to the OpenAPI JSON spec file generated by Psychic, e.g., ./src/openapi/openapi.json',
       )
       .option(
         '--api-file <apiFile>',
-        'the path to the boilerplate api file that will be used to scaffold your backend endpoints together with, i.e. ../client/app/api.ts',
+        'path to the RTK Query base API file that defines the empty API with createApi(), e.g., ../client/app/api.ts',
       )
       .option(
         '--api-import <apiImport>',
-        'the camelCased name of the export from your api module, i.e. emptyBackendApi',
+        'the camelCased export name from the base API file to inject endpoints into, e.g., emptyBackendApi',
       )
       .option(
         '--output-file <outputFile>',
-        'the path to the file that will contain your typescript openapi redux bindings, i.e. ../client/app/myBackendApi.ts',
+        'path where the generated typed API bindings will be written, e.g., ../client/app/backendApi.ts',
       )
       .option(
         '--export-name <exportName>',
-        'the camelCased name to use for your exported api, i.e. myBackendApi',
+        'the camelCased name for the exported enhanced API object, e.g., backendApi',
       )
       .action(
         async ({
@@ -288,23 +385,32 @@ export default class PsychicCLI {
     program
       .command('setup:sync:openapi-zustand')
       .description(
-        'Generates typed API functions from an openapi file using @hey-api/openapi-ts, for use with Zustand or any other state manager.',
+        `Generates an initializer that creates typed API functions from your OpenAPI spec using @hey-api/openapi-ts during sync. This is a one-time setup command — once configured, API functions are regenerated automatically on every \`pnpm psy sync\`.
+${INDENT}
+${INDENT}Use this for frontends using Zustand, Jotai, or any non-Redux state manager. For RTK Query / Redux Toolkit, use setup:sync:openapi-redux instead.
+${INDENT}
+${INDENT}Example:
+${INDENT}  pnpm psy setup:sync:openapi-zustand \\
+${INDENT}    --schema-file=./src/openapi/openapi.json \\
+${INDENT}    --output-dir=../client/app/api/backend \\
+${INDENT}    --client-config-file=../client/app/api/backend/client.ts \\
+${INDENT}    --export-name=backendApi`,
       )
       .option(
         '--schema-file <schemaFile>',
-        'the path from your api root to the openapi file you wish to use to generate your schema, i.e. ./src/openapi/openapi.json',
+        'path to the OpenAPI JSON spec file generated by Psychic, e.g., ./src/openapi/openapi.json',
       )
       .option(
         '--output-dir <outputDir>',
-        'the directory where @hey-api/openapi-ts will generate typed API functions and types, i.e. ../client/app/api/myBackendApi',
+        'directory where @hey-api/openapi-ts will generate typed API functions, types, and schemas, e.g., ../client/app/api/backend',
       )
       .option(
         '--client-config-file <clientConfigFile>',
-        'the path to the client configuration file that configures @hey-api/client-fetch with base URL and credentials, i.e. ../client/app/api/myBackendApi/client.ts',
+        'path to the @hey-api/client-fetch configuration file that sets the base URL and credentials, e.g., ../client/app/api/backend/client.ts',
       )
       .option(
         '--export-name <exportName>',
-        'the camelCased name to use for your exported api, i.e. myBackendApi',
+        'the camelCased name for the exported API module, e.g., backendApi',
       )
       .action(
         async ({
@@ -335,19 +441,24 @@ export default class PsychicCLI {
     program
       .command('setup:sync:openapi-typescript')
       .description(
-        'Generates an initializer in your app for converting one of your openapi files to typescript.',
+        `Generates an initializer that converts your OpenAPI spec to TypeScript type definitions during sync. This is a one-time setup command — once configured, types are regenerated automatically on every \`pnpm psy sync\`.
+${INDENT}
+${INDENT}Use this when you need raw TypeScript types from the OpenAPI spec without a full API client. For typed API functions, use setup:sync:openapi-zustand or setup:sync:openapi-redux instead.
+${INDENT}
+${INDENT}Example:
+${INDENT}  pnpm psy setup:sync:openapi-typescript ./src/openapi/openapi.json ../client/src/api/openapi.types.d.ts`,
       )
       .argument(
         '<openapiFilepath>',
-        'the path from your backend directory to the openapi file you wish to scan, i.e. "./src/openapi/openapi.json"',
+        'path to the OpenAPI JSON spec file generated by Psychic, e.g., "./src/openapi/openapi.json"',
       )
       .argument(
         '<outfile>',
-        'the path from your backend directory to the location which you want the openapi types written to. Must end with .d.ts, i.e. "./src/conf/openapi/openapi.types.d.ts"',
+        'output path for the generated TypeScript type definitions. Must end with .d.ts, e.g., "../client/src/api/openapi.types.d.ts"',
       )
       .option(
         '--initializer-filename <initializerFilename>',
-        'the name you want the file to be in your initializers folder. defaults to `sync-openapi-typescript.ts`',
+        'custom filename for the generated initializer in src/conf/initializers/. Defaults to `sync-openapi-typescript.ts`',
       )
       .action(
         async (
@@ -375,7 +486,9 @@ export default class PsychicCLI {
     program
       .command('inspect:controller-hierarchy')
       .alias('i:controller-hierarchy')
-      .description('Displays the inheritance hierarchy of all PsychicController classes in the project.')
+      .description(
+        `Displays the inheritance hierarchy of all PsychicController classes in the project as a tree. Useful for understanding how controller base classes are organized and verifying that namespace grouping is correct.`,
+      )
       .argument('[path]', 'the controllers directory to scan (defaults to the configured controllers path)')
       .action(async (controllersPath?: string) => {
         await initializePsychicApp()
@@ -386,7 +499,12 @@ export default class PsychicCLI {
     program
       .command('check:controller-hierarchy')
       .description(
-        'Checks that all controllers extend a controller in the same or parent directory. Exits with an error if any violations are found.',
+        `Checks that all controllers extend a controller in the same or parent directory. Exits with code 1 if any violations are found.
+${INDENT}
+${INDENT}This enforces the convention that controllers inherit from a base controller in their namespace (e.g., V1/Host/PlacesController should extend V1/Host/V1HostBaseController, not a controller from a sibling namespace). Useful as a CI check.
+${INDENT}
+${INDENT}Example:
+${INDENT}  pnpm psy check:controller-hierarchy`,
       )
       .argument('[path]', 'the controllers directory to scan (defaults to the configured controllers path)')
       .action(async (controllersPath?: string) => {
@@ -404,7 +522,12 @@ export default class PsychicCLI {
     program
       .command('routes')
       .description(
-        'Prints a list of routes defined by the application, including path arguments and the controller/action reached by the route.',
+        `Prints all routes defined by the application, showing the HTTP method, URL path (with parameters), and the controller#action that handles each route. Useful for verifying route configuration and discovering available endpoints.
+${INDENT}
+${INDENT}Example output:
+${INDENT}  GET    /v1/host/places                V1/Host/PlacesController#index
+${INDENT}  POST   /v1/host/places                V1/Host/PlacesController#create
+${INDENT}  GET    /v1/host/places/:id            V1/Host/PlacesController#show`,
       )
       .action(async () => {
         await initializePsychicApp()
@@ -415,10 +538,25 @@ export default class PsychicCLI {
     program
       .command('sync')
       .description(
-        "Generates types from the current state of the database. Generates OpenAPI specs from @OpenAPI decorated controller actions. Additional sync actions may be customized with `on('cli:sync', async () => {})` in conf/app.ts or in an initializer in `conf/initializers/`.",
+        `Regenerates all auto-generated types and specs from the current state of your application. This is the most commonly run command after making changes to models, serializers, controllers, or routes. It performs:
+${INDENT}
+${INDENT}  1. Database schema types (types/db.ts, types/dream.ts)
+${INDENT}  2. OpenAPI specs from @OpenAPI decorated controller actions
+${INDENT}  3. Application types (e.g. model association and serializer names)
+${INDENT}  4. Any custom sync actions registered via \`on('cli:sync', async () => \\{\\})\` in conf/app.ts or initializers
+${INDENT}
+${INDENT}Run this after changing: associations, serializers, @OpenAPI decorators, routes, or enum types.`,
       )
-      .option('--ignore-errors', 'ignore integrity checks and continue sync', false)
-      .option('--schema-only', 'sync database schema types only', false)
+      .option(
+        '--ignore-errors',
+        'skip integrity checks (e.g., missing migrations) and continue sync anyway. Useful when bootstrapping or debugging',
+        false,
+      )
+      .option(
+        '--schema-only',
+        'only regenerate database schema types (types/db.ts, types/dream.ts), skipping OpenAPI, routes, and custom sync actions. Faster when you only changed the database schema',
+        false,
+      )
       .action(async (options: { ignoreErrors: boolean; schemaOnly: boolean }) => {
         await initializePsychicApp({ bypassDreamIntegrityChecks: options.ignoreErrors || options.schemaOnly })
         await PsychicBin.sync(options)
@@ -427,8 +565,14 @@ export default class PsychicCLI {
 
     program
       .command('watch')
-      .description('watches your app for changes, and re-syncs any time they happen')
-      .argument('[dir]', 'the folder you want to watch, defaults to ./src')
+      .description(
+        `Watches your app source files for changes and automatically runs sync when modifications are detected. Useful during active development to keep types, OpenAPI specs, and route caches up to date without manually running \`pnpm psy sync\` after each change.
+${INDENT}
+${INDENT}Example:
+${INDENT}  pnpm psy watch             # watches ./src (default)
+${INDENT}  pnpm psy watch ./src/app   # watches only the app directory`,
+      )
+      .argument('[dir]', 'the directory to watch for changes. Defaults to ./src')
       .action(async (dir?: string) => {
         await initializePsychicApp({ bypassDreamIntegrityChecks: true })
         Watcher.watch(dir)
@@ -437,7 +581,7 @@ export default class PsychicCLI {
     program
       .command('post-sync')
       .description(
-        'an internal command that runs as the second stage of the `sync` command, since after types are rebuit, the application needs to be reloaded before autogenerating certain files, since those files will need to leverage the updated types',
+        'Internal command (do not run directly). Runs as the second stage of `sync` after types are rebuilt. The app must be reloaded between stages so that autogenerated files (e.g., OpenAPI specs, route caches) can leverage the updated types.',
       )
       .action(async () => {
         await initializePsychicApp()
@@ -448,7 +592,7 @@ export default class PsychicCLI {
     program
       .command('sync:routes')
       .description(
-        'Reads the routes generated by your app and generates a cache file, which is then used to give autocomplete support to the route helper and other things.',
+        'Regenerates the route cache file from your current route definitions. The cache powers autocomplete for the route helper and other route-aware tooling. This runs automatically as part of `pnpm psy sync` — only run it standalone if you need to update just the route cache.',
       )
       .action(async () => {
         await PsychicBin.syncRoutes()
@@ -456,7 +600,9 @@ export default class PsychicCLI {
 
     program
       .command('sync:openapi')
-      .description('Syncs openapi.json file to current state of all psychic controllers within the app')
+      .description(
+        'Regenerates openapi.json from the current @OpenAPI decorators on all Psychic controllers. This runs automatically as part of `pnpm psy sync` — only run it standalone if you need to update just the OpenAPI spec without regenerating types or routes.',
+      )
       .action(async () => {
         await initializePsychicApp()
         await PsychicBin.syncOpenapiJson()
@@ -466,9 +612,17 @@ export default class PsychicCLI {
     program
       .command('diff:openapi')
       .description(
-        'compares the current branch open api spec file(s) with the main/master/head branch open api spec file(s)',
+        `Compares the OpenAPI spec on the current branch against the main/master branch and displays a diff of changes. Useful for reviewing API contract changes in pull requests.
+${INDENT}
+${INDENT}Example:
+${INDENT}  pnpm psy diff:openapi                    # show diff only
+${INDENT}  pnpm psy diff:openapi --fail-on-breaking  # exit 1 if breaking changes detected (for CI)`,
       )
-      .option('-f, --fail-on-breaking', 'fail on spec changes that are breaking', false)
+      .option(
+        '-f, --fail-on-breaking',
+        'exit with code 1 if breaking API changes are detected (removed endpoints, changed required fields, etc.). Useful as a CI gate to prevent accidental breaking changes',
+        false,
+      )
       .action(async (options: { failOnBreaking: boolean }) => {
         await initializePsychicApp()
 
@@ -515,6 +669,7 @@ export default class PsychicCLI {
       stiBaseSerializer: boolean
       owningModel?: string
       connectionName: string
+      tableName?: string
       modelName?: string
     }
     columnsWithTypes: string[]
