@@ -1,3 +1,7 @@
+## 3.0.4
+
+- improve dev server startup
+
 ## 3.0.3
 
 - CLI fixes (incorrect description, missing defaults, broken flag)

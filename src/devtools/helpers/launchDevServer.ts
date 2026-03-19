@@ -1,16 +1,15 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
-import { createServer } from 'net'
 import { debuglog } from 'node:util'
-import sleep from '../../../spec/helpers/sleep.js'
 import UnexpectedUndefined from '../../error/UnexpectedUndefined.js'
 import PsychicApp from '../../psychic-app/index.js'
+import sleep from './sleep.js'
 
 const devServerProcesses: Record<string, ChildProcessWithoutNullStreams | undefined> = {}
 const debugEnabled = debuglog('psychic').enabled
 
 export async function launchDevServer(
   key: string,
-  { port = 3000, cmd = 'pnpm client', timeout = 5000, onStdOut }: LaunchDevServerOpts = {},
+  { port = 3000, cmd = 'pnpm client', timeout = 20000, onStdOut }: LaunchDevServerOpts = {},
 ) {
   if (devServerProcesses[key]) return
 
@@ -39,19 +38,7 @@ export async function launchDevServer(
     }
   })
 
-  devServerProcesses[key] = proc
-
-  await waitForPort(key, port, timeout)
-
-  proc.on('error', err => {
-    throw err
-  })
-
-  proc.stdout.on('data', data => {
-    if (debugEnabled) PsychicApp.log(`Server output: ${data}`)
-  })
-
-  proc.stderr.on('data', data => {
+  proc.stderr?.on('data', data => {
     if (debugEnabled) PsychicApp.logWithLevel('error', `Server error: ${data}`)
   })
 
@@ -62,6 +49,10 @@ export async function launchDevServer(
   proc.on('close', code => {
     if (debugEnabled) PsychicApp.log(`Server process exited with code ${code}`)
   })
+
+  devServerProcesses[key] = proc
+
+  await waitForHttpServer(proc, key, port, timeout)
 }
 
 export function stopDevServer(key: string) {
@@ -91,47 +82,32 @@ export function stopDevServers() {
   })
 }
 
-async function isPortAvailable(port: number): Promise<boolean> {
-  return new Promise(resolve => {
-    const server = createServer()
-      .once('error', err => {
-        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
-        if ((err as any).code === 'EADDRINUSE') {
-          resolve(false)
-        } else {
-          resolve(true)
-        }
-      })
-      .once('listening', () => {
-        server.close()
-        resolve(true)
-      })
-      .listen(port, '127.0.0.1')
-  })
-}
-
-async function waitForPort(key: string, port: number, timeout: number = 5000) {
-  if (await isPortAvailable(port)) {
-    return true
-  }
-
+async function waitForHttpServer(
+  proc: ChildProcessWithoutNullStreams,
+  key: string,
+  port: number,
+  timeout: number = 20000,
+) {
   const startTime = Date.now()
 
-  async function recursiveWaitForPort() {
-    if (await isPortAvailable(port)) {
-      return true
+  while (Date.now() - startTime < timeout) {
+    if (proc.exitCode != null) {
+      delete devServerProcesses[key]
+      throw new Error(`dev server exited with code ${proc.exitCode} before becoming ready on port ${port}`)
     }
 
-    if (Date.now() > startTime + timeout) {
-      stopDevServer(key)
-      throw new Error('waited too long for port: ' + port)
+    try {
+      const response = await fetch(`http://127.0.0.1:${port}`, { redirect: 'manual' })
+      if (response.status > 0) return
+    } catch {
+      // server not ready yet, keep waiting
     }
 
-    await sleep(50)
-    return await recursiveWaitForPort()
+    await sleep(100)
   }
 
-  return await recursiveWaitForPort()
+  stopDevServer(key)
+  throw new Error(`waited too long for dev server on port ${port}`)
 }
 
 export interface LaunchDevServerOpts {
