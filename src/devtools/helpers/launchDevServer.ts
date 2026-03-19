@@ -97,7 +97,7 @@ async function waitForHttpServer(
     }
 
     try {
-      const response = await fetch(`http://127.0.0.1:${port}`, { redirect: 'manual' })
+      const response = await fetch(`http://localhost:${port}`, { redirect: 'manual' })
       if (response.status > 0) return
     } catch {
       // server not ready yet, keep waiting

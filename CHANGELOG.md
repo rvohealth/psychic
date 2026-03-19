@@ -1,6 +1,8 @@
 ## 3.0.4
 
 - improve dev server startup
+- improve CLI documentation
+- add `--table-name` option to resource generator
 
 ## 3.0.3
 
