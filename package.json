@@ -118,7 +118,7 @@
     "koa-conditional-get": "^3.0.0",
     "koa-passport": "^6.0.0",
     "koa-session": "^7.0.2",
-    "kysely": "^0.28.13",
+    "kysely": "^0.28.14",
     "kysely-codegen": "~0.19.0",
     "luxon-jest-matchers": "^0.1.14",
     "nodemon": "^3.1.11",
