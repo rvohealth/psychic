@@ -35,7 +35,7 @@ describe('generateOpenapiZustandBindings', () => {
 
   context('clientConfigFile', () => {
     context('the clientConfigFile does not exist', () => {
-      it('generates a client config file that configures @hey-api/client-fetch', async () => {
+      it('generates a client config file that configures the @hey-api/openapi-ts client', async () => {
         await generateOpenapiZustandBindings({
           clientConfigFile: 'test-client/app/api/myApi/client.ts',
         })
@@ -43,7 +43,7 @@ describe('generateOpenapiZustandBindings', () => {
         const contents = (await fs.readFile('./test-client/app/api/myApi/client.ts')).toString()
 
         expect(contents).toEqual(`\
-import { client } from '@hey-api/client-fetch'
+import { client } from './client.gen'
 
 function baseUrl() {
   // add custom code here for determining your application's baseUrl
@@ -120,13 +120,13 @@ export default function initializeMyApi(psy: PsychicApp) {
   })
 
   context('@hey-api/openapi-ts package', () => {
-    it('adds the @hey-api/openapi-ts and @hey-api/client-fetch packages as dev dependencies', async () => {
+    it('adds the @hey-api/openapi-ts package as a dev dependency', async () => {
       await generateOpenapiZustandBindings({
         exportName: 'myApi',
         clientConfigFile: 'test-client/app/api/myApi/client.ts',
       })
 
-      expect(dreamCliSpy).toHaveBeenCalledWith('pnpm add -D @hey-api/openapi-ts @hey-api/client-fetch')
+      expect(dreamCliSpy).toHaveBeenCalledWith('pnpm add -D @hey-api/openapi-ts')
     })
   })
 })

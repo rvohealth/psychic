@@ -383,7 +383,7 @@ ${INDENT}    --export-name=backendApi`,
       )
       .option(
         '--client-config-file <clientConfigFile>',
-        'path to the @hey-api/client-fetch configuration file that sets the base URL and credentials, e.g., ../client/app/api/backend/client.ts',
+        'path to the @hey-api/openapi-ts client configuration file that sets the base URL and credentials, e.g., ../client/app/api/backend/client.ts',
       )
       .option(
         '--export-name <exportName>',

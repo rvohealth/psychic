@@ -1,3 +1,7 @@
+## 3.0.5
+
+- update @hey-api/openapi-ts
+
 ## 3.0.4
 
 - improve dev server startup
