@@ -53,8 +53,8 @@ If not provided, it will default to:
 What would you like the path to your clientConfigFile to be?
 
 The clientConfigFile specifies where to generate the client configuration file
-that configures @hey-api/client-fetch with your base URL, credentials, and
-other request options.
+that configures the @hey-api/openapi-ts client with your base URL, credentials,
+and other request options.
 
 We expect you to provide this path with the api root in mind, so you will need
 to consider how to travel to the desired filepath from within your psychic

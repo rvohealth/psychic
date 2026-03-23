@@ -18,7 +18,7 @@ export default async function writeClientConfigFile({ clientConfigFile }: { clie
   }
 
   const contents = `\
-import { client } from '@hey-api/client-fetch'
+import { client } from './client.gen'
 
 function baseUrl() {
   // add custom code here for determining your application's baseUrl
