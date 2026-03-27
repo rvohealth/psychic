@@ -98,6 +98,31 @@ describe('ObjectSerializer rendersMany', () => {
       })
     })
 
+    context('with casing specified', () => {
+      context('snake casing', () => {
+        it('applies snake casing to attribute and required names', () => {
+          const MySerializer = (data: UserWithDreamPets) =>
+            ObjectSerializer(data).rendersMany('pets', { dreamClass: DreamPet, as: 'favoritePets' })
+
+          const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer, { casing: 'snake' })
+          const results = serializerOpenapiRenderer.renderedOpenapi()
+          expect(results.openapi).toEqual({
+            type: 'object',
+            required: ['favorite_pets'],
+            properties: {
+              favorite_pets: {
+                type: 'array',
+                items: {
+                  $ref: '#/components/schemas/Pet',
+                },
+              },
+            },
+            additionalProperties: false,
+          })
+        })
+      })
+    })
+
     it('supports supplying a custom serializer', () => {
       const CustomSerializer = (data: SimplePet) =>
         ObjectSerializer(data).attribute('name', { openapi: ['string', 'null'] })

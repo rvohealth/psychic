@@ -99,6 +99,28 @@ describe('ObjectSerializer rendersOne', () => {
       })
     })
 
+    context('with casing specified', () => {
+      context('snake casing', () => {
+        it('applies snake casing to attribute and required names', () => {
+          const MySerializer = (data: PetWithDreamUser) =>
+            ObjectSerializer(data).rendersOne('user', { dreamClass: DreamUser, as: 'primaryUser' })
+
+          const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer, { casing: 'snake' })
+          const results = serializerOpenapiRenderer.renderedOpenapi()
+          expect(results.openapi).toEqual({
+            type: 'object',
+            required: ['primary_user'],
+            properties: {
+              primary_user: {
+                $ref: '#/components/schemas/User',
+              },
+            },
+            additionalProperties: false,
+          })
+        })
+      })
+    })
+
     context('flatten', () => {
       it('renders the serialized data into this model and adjusts the OpenAPI spec accordingly', () => {
         const MySerializer = (data: PetWithDreamUser) =>

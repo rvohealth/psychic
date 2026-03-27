@@ -157,6 +157,31 @@ describe('DreamSerializer rendersMany', () => {
     expect((results.referencedSerializers[0] as any).globalName).toEqual('PetSerializer')
   })
 
+  context('with casing specified', () => {
+    context('snake casing', () => {
+      it('applies snake casing to attribute and required names', () => {
+        const MySerializer = (data: User) =>
+          DreamSerializer(User, data).rendersMany('pets', { as: 'favoritePets' })
+
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer, { casing: 'snake' })
+        const results = serializerOpenapiRenderer.renderedOpenapi()
+        expect(results.openapi).toEqual({
+          type: 'object',
+          required: ['favorite_pets'],
+          properties: {
+            favorite_pets: {
+              type: 'array',
+              items: {
+                $ref: '#/components/schemas/Pet',
+              },
+            },
+          },
+          additionalProperties: false,
+        })
+      })
+    })
+  })
+
   it('supports supplying a custom serializer', () => {
     const CustomSerializer = (data: Pet) => DreamSerializer(Pet, data).attribute('name')
     ;(CustomSerializer as any).globalName = 'CustomPetSerializer'
