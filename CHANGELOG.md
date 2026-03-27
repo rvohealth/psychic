@@ -1,3 +1,7 @@
+## 3.1.0
+
+- fix initializers created by sync setup scripts so they don't use npx
+
 ## 3.0.5
 
 - update @hey-api/openapi-ts

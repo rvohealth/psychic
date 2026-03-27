@@ -1,6 +1,7 @@
 import { hyphenize } from '@rvoh/dream/utils'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
+import PackageManager from '../../../cli/helpers/PackageManager.js'
 import psychicPath from '../../../helpers/path/psychicPath.js'
 
 export default async function generateInitializer(
@@ -22,6 +23,8 @@ export default async function generateInitializer(
     await fs.mkdir(destDir, { recursive: true })
   }
 
+  const execCmd = PackageManager.exec(`openapi-typescript ${openapiFilepath} -o ${outfile}`)
+
   const contents = `\
 import { DreamCLI } from '@rvoh/dream/system'
 import { PsychicApp } from "@rvoh/psychic"
@@ -31,7 +34,7 @@ export default (psy: PsychicApp) => {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(\`[${hyphenized}] extracting types from ${openapiFilepath} to ${outfile}...\`, async () => {
-        await DreamCLI.spawn('npx openapi-typescript ${openapiFilepath} -o ${outfile}')
+        await DreamCLI.spawn('${execCmd}')
       })
     }
   })

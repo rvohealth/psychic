@@ -105,7 +105,7 @@ export default function initializeMyApi(psy: PsychicApp) {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(\`[myApi] syncing...\`, async () => {
-        await DreamCLI.spawn('npx @hey-api/openapi-ts -i ./src/openapi/openapi.json -o ../client/app/api/myApi', {
+        await DreamCLI.spawn('pnpm exec @hey-api/openapi-ts -i ./src/openapi/openapi.json -o ../client/app/api/myApi', {
           onStdout: message => {
             DreamCLI.logger.logContinueProgress(\`[myApi]\` + ' ' + message, {
               logPrefixColor: 'green',

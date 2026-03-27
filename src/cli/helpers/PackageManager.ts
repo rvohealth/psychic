@@ -37,4 +37,17 @@ export default class PackageManager {
         return `${this.packageManager} ${cmd}`
     }
   }
+
+  public static exec(cmd: string) {
+    switch (this.packageManager) {
+      case 'npm':
+        return `npm exec -- ${cmd}`
+
+      case 'yarn':
+        return `yarn ${cmd}`
+
+      default:
+        return `${this.packageManager} exec ${cmd}`
+    }
+  }
 }
