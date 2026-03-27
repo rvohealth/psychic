@@ -201,23 +201,29 @@ export default class SerializerOpenapiRenderer {
             newlyReferencedSerializers = allSerializersFromHandWrittenOpenapi(openapi)
 
             let target: any
+            let delegatedAssociationOptional = false
 
             if (attributeType === 'delegatedAttribute' && (DataTypeForOpenapi as typeof Dream)?.isDream) {
               const source = DataTypeForOpenapi as typeof Dream
-              // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-              const associatedModelOrModels = source['getAssociationMetadata'](
-                attribute.targetName,
-              )?.modelCB()
+              const association:
+                | BelongsToStatement<any, any, any, any>
+                | HasManyStatement<any, any, any, any>
+                | HasOneStatement<any, any, any, any>
+                // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+                | undefined = source['getAssociationMetadata'](attribute.targetName)
+              const associatedModelOrModels = association?.modelCB()
               target = Array.isArray(associatedModelOrModels)
                 ? associatedModelOrModels[0]
                 : associatedModelOrModels
+              delegatedAssociationOptional = !!(association as BelongsToStatement<any, any, any, any>)
+                ?.optional
             } else if (attributeType === 'delegatedAttribute') {
               target = undefined
             } else {
               target = DataTypeForOpenapi
             }
 
-            accumulator[outputAttributeName] = allSerializersToRefsInOpenapi(
+            const resolvedSchema = allSerializersToRefsInOpenapi(
               (target as typeof Dream)?.isDream
                 ? dreamColumnOpenapiShape(
                     (this.serializer as any).globalName,
@@ -230,6 +236,18 @@ export default class SerializerOpenapiRenderer {
                   )
                 : openapiShorthandToOpenapi(openapi as any),
             )
+
+            const optional =
+              attributeType === 'delegatedAttribute' &&
+              ((attribute.options as { optional?: boolean }).optional ?? delegatedAssociationOptional)
+
+            if (optional && !openapiSchemaIncludesNull(resolvedSchema)) {
+              accumulator[outputAttributeName] = {
+                anyOf: [resolvedSchema, NULL_OBJECT_OPENAPI],
+              }
+            } else {
+              accumulator[outputAttributeName] = resolvedSchema
+            }
 
             return accumulator
           }
@@ -525,4 +543,20 @@ interface ReferencedSerializersAndOpenapiSchemaBodyShorthand {
 interface ReferencedSerializersAndAttributes {
   referencedSerializers: (DreamModelSerializerType | SimpleObjectSerializerType)[]
   attributes: Record<string, OpenapiSchemaBodyShorthand>
+}
+
+function openapiSchemaIncludesNull(schema: OpenapiSchemaBodyShorthand): boolean {
+  if (typeof schema !== 'object' || schema === null) return false
+
+  const schemaRecord = schema as Record<string, any>
+
+  if (Array.isArray(schemaRecord.type) && schemaRecord.type.includes('null')) return true
+  if (schemaRecord.type === 'null') return true
+  if (
+    Array.isArray(schemaRecord.anyOf) &&
+    schemaRecord.anyOf.some((member: any) => openapiSchemaIncludesNull(member as OpenapiSchemaBodyShorthand))
+  )
+    return true
+
+  return false
 }

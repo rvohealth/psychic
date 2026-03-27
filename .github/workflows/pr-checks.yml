@@ -57,8 +57,9 @@ jobs:
       DB_PASSWORD: postgres
       DB_PORT: 5432
       TZ: UTC
-      APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
-      LEGACY_APP_ENCRYPTION_KEY: ${{ secrets.LEGACY_APP_ENCRYPTION_KEY }}
+      APP_ENCRYPTION_KEY: ${{ vars.APP_ENCRYPTION_KEY }}
+      LEGACY_APP_ENCRYPTION_KEY: ${{ vars.LEGACY_APP_ENCRYPTION_KEY }}
+      COLUMN_ENCRYPTION_KEY: ${{ vars.COLUMN_ENCRYPTION_KEY }}
       DREAM_PARALLEL_TESTS: 4
       CI: "1"
     steps:
@@ -115,7 +116,9 @@ jobs:
       DB_PASSWORD: postgres
       DB_PORT: 5432
       TZ: UTC
-      APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
+      APP_ENCRYPTION_KEY: ${{ vars.APP_ENCRYPTION_KEY }}
+      LEGACY_APP_ENCRYPTION_KEY: ${{ vars.LEGACY_APP_ENCRYPTION_KEY }}
+      COLUMN_ENCRYPTION_KEY: ${{ vars.COLUMN_ENCRYPTION_KEY }}
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6
@@ -219,8 +222,9 @@ jobs:
       DB_PASSWORD: postgres
       DB_PORT: 5432
       TZ: UTC
-      APP_ENCRYPTION_KEY: ${{ secrets.APP_ENCRYPTION_KEY }}
-      LEGACY_APP_ENCRYPTION_KEY: ${{ secrets.LEGACY_APP_ENCRYPTION_KEY }}
+      APP_ENCRYPTION_KEY: ${{ vars.APP_ENCRYPTION_KEY }}
+      LEGACY_APP_ENCRYPTION_KEY: ${{ vars.LEGACY_APP_ENCRYPTION_KEY }}
+      COLUMN_ENCRYPTION_KEY: ${{ vars.COLUMN_ENCRYPTION_KEY }}
       DREAM_PARALLEL_TESTS: 4
       CI: "1"
 

@@ -1,6 +1,7 @@
 ## 3.1.0
 
 - fix initializers created by sync setup scripts so they don't use npx
+- `optional` option on DreamSerializer `delegatedAttribute` customizes OpenAPI shape of automatically inferred fields to allow `null` (when the model being delegated to may be null, automatically inferred for optional belongs-to associations, but not inferrable for has-one associations)
 
 ## 3.0.5
 
