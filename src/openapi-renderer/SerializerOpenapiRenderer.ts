@@ -242,8 +242,21 @@ export default class SerializerOpenapiRenderer {
               ((attribute.options as { optional?: boolean }).optional ?? delegatedAssociationOptional)
 
             if (optional && !openapiSchemaIncludesNull(resolvedSchema)) {
-              accumulator[outputAttributeName] = {
-                anyOf: [resolvedSchema, NULL_OBJECT_OPENAPI],
+              const schemaRecord = resolvedSchema as Record<string, any>
+              if (typeof schemaRecord.type === 'string') {
+                accumulator[outputAttributeName] = {
+                  ...schemaRecord,
+                  type: [schemaRecord.type, 'null'],
+                } as OpenapiSchemaBodyShorthand
+              } else if (Array.isArray(schemaRecord.type)) {
+                accumulator[outputAttributeName] = {
+                  ...schemaRecord,
+                  type: [...(schemaRecord.type as string[]), 'null'],
+                } as OpenapiSchemaBodyShorthand
+              } else {
+                accumulator[outputAttributeName] = {
+                  anyOf: [resolvedSchema, NULL_OBJECT_OPENAPI],
+                }
               }
             } else {
               accumulator[outputAttributeName] = resolvedSchema

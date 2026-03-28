@@ -61,7 +61,7 @@ describe('DreamSerializer delegated attributes', () => {
         const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
         expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
           passwordDigest: {
-            anyOf: [{ type: 'string' }, { type: 'null' }],
+            type: ['string', 'null'],
           },
         })
       })
@@ -84,14 +84,44 @@ describe('DreamSerializer delegated attributes', () => {
     })
 
     context('when the column is non-nullable', () => {
-      it('wraps the schema in anyOf with null', () => {
+      it('adds null to the type', () => {
         const MySerializer = (data: Balloon) =>
           DreamSerializer(Balloon, data).delegatedAttribute('user', 'passwordDigest')
 
         const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
         expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
           passwordDigest: {
-            anyOf: [{ type: 'string' }, { type: 'null' }],
+            type: ['string', 'null'],
+          },
+        })
+      })
+    })
+
+    context('when the column is a non-nullable array', () => {
+      it('adds null to the type and preserves items', () => {
+        const MySerializer = (data: Balloon) =>
+          DreamSerializer(Balloon, data).delegatedAttribute('user', 'requiredNicknames')
+
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+        expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+          requiredNicknames: {
+            type: ['array', 'null'],
+            items: { type: 'string' },
+          },
+        })
+      })
+    })
+
+    context('when the column is a nullable array', () => {
+      it('does not redundantly wrap with null', () => {
+        const MySerializer = (data: Balloon) =>
+          DreamSerializer(Balloon, data).delegatedAttribute('user', 'nicknames')
+
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+        expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+          nicknames: {
+            type: ['array', 'null'],
+            items: { type: 'string' },
           },
         })
       })
