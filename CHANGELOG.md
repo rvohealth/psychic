@@ -1,3 +1,7 @@
+## 3.1.1
+
+- fix the `setup:sync:openapi-zustand` CLI command so it generates Zustand stores, not just API shapes
+
 ## 3.1.0
 
 - fix initializers created by sync setup scripts so they don't use npx

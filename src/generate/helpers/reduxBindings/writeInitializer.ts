@@ -26,7 +26,7 @@ export default async function writeInitializer({ exportName }: { exportName: str
   }
 
   const filePath = path.join('.', 'src', 'conf', 'openapi', `${camelized}.openapi-codegen.json`)
-  const execCmd = PackageManager.exec(`@rtk-query/codegen-openapi ${filePath}`)
+  const execCmd = PackageManager.exec(`rtk-query-codegen-openapi ${filePath}`)
 
   const contents = `\
 import { DreamCLI } from '@rvoh/dream/system'
