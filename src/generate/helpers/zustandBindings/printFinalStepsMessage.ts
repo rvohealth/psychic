@@ -15,22 +15,21 @@ export default function printFinalStepsMessage(opts: Required<OpenapiZustandBind
     color: 'green',
   })
 
-  const zustandLine = colorize(
-    `  const { data } = await getAdminCities()
-    set({ cities: data?.results })`,
-    { color: 'green' },
-  )
+  const storeImportLine = colorize(`+ import { useGetAdminCities } from '${opts.outputDir}/store.gen'`, {
+    color: 'green',
+  })
 
   DreamCLI.logger.log(
     `
 Finished generating @hey-api/openapi-ts bindings for your application.
 
 First, you will need to be sure to sync, so that the typed API functions
-are generated from your openapi schema:
+and Zustand store are generated from your openapi schema:
 
   pnpm psy sync
 
-This will generate typed API functions and types in ${opts.outputDir}/
+This will generate typed API functions in ${opts.outputDir}/sdk.gen.ts
+and a Zustand store in ${opts.outputDir}/store.gen.ts
 
 To use the generated API, first import the client config at your app's
 entry point to configure the base URL and credentials:
@@ -44,17 +43,12 @@ ${sdkImportLine}
 // all functions are fully typed with request params and response types
 ${usageLine}
 
-To use with a Zustand store:
+Or use the auto-generated Zustand store hooks for state management:
 
-import { create } from 'zustand'
-${sdkImportLine}
+${storeImportLine}
 
-const useCitiesStore = create((set) => ({
-  cities: [],
-  fetchCities: async () => {
-${zustandLine}
-  },
-}))
+// each hook provides { data, error, isLoading, fetch, reset }
+const { data, isLoading, fetch } = useGetAdminCities()
 `,
     { logPrefix: '' },
   )

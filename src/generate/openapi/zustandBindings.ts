@@ -15,6 +15,7 @@ import writeInitializer from '../helpers/zustandBindings/writeInitializer.js'
  * * generates the client config file if it does not exist
  * * generates an initializer, which taps into the sync hooks
  *   to automatically run the @hey-api/openapi-ts CLI util
+ *   and generate a zustand store from the SDK output
  * * prints a helpful message, instructing devs on the final
  *   steps for using the generated typed API functions
  *   within their client application.

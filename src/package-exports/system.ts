@@ -1,3 +1,4 @@
+export { default as generateZustandStoreFromSdk } from '../generate/helpers/zustandBindings/generateStoreFromSdk.js'
 export { default as PsychicBin } from '../bin/index.js'
 export { default as PsychicLogos } from '../cli/helpers/PsychicLogos.js'
 export { default as PsychicCLI } from '../cli/index.js'
