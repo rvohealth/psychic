@@ -1,3 +1,7 @@
+## 3.1.2
+
+- fix ability to specify `$serializableSerializerKey` when specifying `$serializable` in nested custom response shape for a controller action
+
 ## 3.1.1
 
 - fix the `setup:sync:openapi-zustand` CLI command so it generates Zustand stores, not just API shapes
