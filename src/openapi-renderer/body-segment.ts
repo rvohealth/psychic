@@ -582,7 +582,7 @@ The following values will be allowed:
 
   private serializableStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
     const serializableRef = bodySegment as OpenapiSchemaShorthandExpressionSerializableRef
-    const key = serializableRef.key || 'default'
+    const key = serializableRef.$serializableSerializerKey || serializableRef.key || 'default'
     const serializer = DreamApp.system.inferSerializerFromDreamOrViewModel(
       serializableRef.$serializable.prototype as Dream,
       key,
