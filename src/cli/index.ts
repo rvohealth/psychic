@@ -130,7 +130,7 @@ ${INDENT}  pnpm psy g:resource --singular --owning-model=Candidate internal/cand
         '--only <onlyActions>',
         `comma separated list of resourceful endpoints to generate (omitted actions will not have controller methods, specs, or routes).
 ${INDENT}
-${INDENT}Available actions: index, create, show, update, delete
+${INDENT}Available actions: index, create, show, update, destroy
 ${INDENT}
 ${INDENT}Examples:
 ${INDENT}  --only=index,create,show       # create and view only (e.g., form submissions)

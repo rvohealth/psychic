@@ -1,3 +1,7 @@
+## 3.1.3
+
+- fix cli `--only` documentation ('destroy', not 'delete') for resource generator
+
 ## 3.1.2
 
 - fix ability to specify `$serializableSerializerKey` when specifying `$serializable` in nested custom response shape for a controller action
