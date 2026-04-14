@@ -176,6 +176,17 @@ export class OpenApiSpecDiff {
   }
 
   /**
+   * Detects oasdiff output that indicates no reportable changes for the
+   * given subcommand. Newer oasdiff versions print informational messages
+   * like "No changes detected" or "No changes to report, but the specs are
+   * different" to stdout rather than returning empty output.
+   */
+  private isNoChangesOutput(output: string): boolean {
+    const trimmed = output.trim()
+    return trimmed === 'No changes detected' || trimmed.startsWith('No changes to report')
+  }
+
+  /**
    * Compares two OpenAPI files using oasdiff
    */
   private compareSpecs(
@@ -189,11 +200,15 @@ export class OpenApiSpecDiff {
     const breakingChanges = this.runOasDiffCommand('breaking', mainFilePath, currentFilePath)
     const changelogChanges = this.runOasDiffCommand('changelog', mainFilePath, currentFilePath)
     const breaking =
-      breakingChanges && !breakingChanges.includes('Command failed')
+      breakingChanges &&
+      !breakingChanges.includes('Command failed') &&
+      !this.isNoChangesOutput(breakingChanges)
         ? breakingChanges.split('\n').filter(line => line.trim())
         : []
     const changelog =
-      changelogChanges && !changelogChanges.includes('Command failed')
+      changelogChanges &&
+      !changelogChanges.includes('Command failed') &&
+      !this.isNoChangesOutput(changelogChanges)
         ? changelogChanges.split('\n').filter(line => line.trim())
         : []
 
