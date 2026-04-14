@@ -1,6 +1,7 @@
 ## 3.1.3
 
 - fix cli `--only` documentation ('destroy', not 'delete') for resource generator
+- resource generator supports `--no-soft-delete` flag
 
 ## 3.1.2
 

@@ -23,6 +23,7 @@ export default async function generateResource({
     connectionName: string
     tableName?: string
     modelName?: string
+    softDelete: boolean
   }
   columnsWithTypes: string[]
 }) {
@@ -51,6 +52,7 @@ export default async function generateResource({
       connectionName: options.connectionName,
       tableName: options.tableName,
       modelName: options.modelName,
+      softDelete: options.softDelete,
     },
   })
 

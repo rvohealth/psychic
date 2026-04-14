@@ -183,6 +183,10 @@ ${INDENT}Example:
 ${INDENT}  pnpm psy g:resource --model-name=GroupDanceLesson v1/lessons/dance/groups Lesson/Dance/Group
 ${INDENT}  # model is named GroupDanceLesson instead of LessonDanceGroup`,
       )
+      .option(
+        '--no-soft-delete',
+        `skip generating the @SoftDelete() decorator and the corresponding nullable \`deleted_at\` column. By default, generated models use soft-delete semantics (rows are marked deleted via \`deleted_at\` instead of being removed from the database). Pass this flag when you want records to be hard-deleted.`,
+      )
       .argument(
         '<path>',
         `The URL path for this resource's routes, relative to the root domain. Use \`\\{\\}\` as a placeholder for a parent resource's ID parameter when nesting.
@@ -217,6 +221,7 @@ ${INDENT}  Post/Comment                        # src/app/models/Post/Comment.ts,
             connectionName: string
             tableName?: string
             modelName?: string
+            softDelete: boolean
           },
         ) => {
           await initializePsychicApp({
@@ -648,6 +653,7 @@ ${INDENT}  pnpm psy diff:openapi --fail-on-breaking  # exit 1 if breaking change
       connectionName: string
       tableName?: string
       modelName?: string
+      softDelete: boolean
     }
     columnsWithTypes: string[]
   }) {

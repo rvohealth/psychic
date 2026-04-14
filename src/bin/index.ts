@@ -37,6 +37,8 @@ export default class PsychicBin {
       owningModel?: string
       connectionName: string
       modelName?: string
+      tableName?: string
+      softDelete: boolean
     },
   ) {
     await generateResource({ route, fullyQualifiedModelName, columnsWithTypes, options })
