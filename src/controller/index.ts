@@ -47,6 +47,7 @@ import HttpStatusUnavailableForLegalReasons from '../error/http/UnavailableForLe
 import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent.js'
 import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType.js'
 import EnvInternal from '../helpers/EnvInternal.js'
+import isSafeRedirectTarget from '../helpers/isSafeRedirectTarget.js'
 import toJson from '../helpers/toJson.js'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
 import OpenapiPayloadValidator from '../openapi-renderer/helpers/OpenapiPayloadValidator.js'
@@ -855,6 +856,15 @@ export default class PsychicController {
 
   private koaRedirect(statusCode: number, newLocation: string) {
     if (this._responseSent) return
+
+    const allowedHosts = PsychicApp.getOrFail().redirectAllowedHosts
+    if (!isSafeRedirectTarget(newLocation, { allowedHosts })) {
+      throw new HttpStatusInternalServerError(
+        `[psychic] refused to redirect to unsafe target: ${JSON.stringify(newLocation)}. ` +
+          `Only same-origin paths (starting with '/') or absolute URLs whose host is in ` +
+          `PsychicApp.set('redirectAllowedHosts', [...]) are permitted.`,
+      )
+    }
 
     this.ctx.status = statusCode
     this.ctx.redirect(newLocation)

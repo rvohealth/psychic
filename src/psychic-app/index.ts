@@ -323,6 +323,18 @@ Try setting it to something valid, like:
     return this._corsOptions
   }
 
+  private _redirectAllowedHosts: readonly string[] = Object.freeze([])
+  /**
+   * Hostnames allowlisted for absolute-URL redirects issued via
+   * controller `redirect()` / `found()` / `movedPermanently()` / etc.
+   * Same-origin relative paths are always permitted; absolute URLs are
+   * rejected unless their hostname appears here (case-insensitive). The
+   * default is an empty allowlist, meaning external redirects fail-closed.
+   */
+  public get redirectAllowedHosts(): readonly string[] {
+    return this._redirectAllowedHosts
+  }
+
   private _jsonOptions: bodyParser.Options
   public get jsonOptions() {
     return this._jsonOptions
@@ -655,7 +667,9 @@ Try setting it to something valid, like:
                                           ? () => void | Promise<void>
                                           : Opt extends 'routes'
                                             ? (r: PsychicRouter) => void | Promise<void>
-                                            : never,
+                                            : Opt extends 'redirectAllowedHosts'
+                                              ? readonly string[]
+                                              : never,
   ): void
   public set<Opt extends PsychicAppOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -702,6 +716,10 @@ Try setting it to something valid, like:
 
       case 'cors':
         this._corsOptions = { ...this.corsOptions, ...(value as cors.Options) }
+        break
+
+      case 'redirectAllowedHosts':
+        this._redirectAllowedHosts = Object.freeze([...(value as string[])])
         break
 
       case 'cookie':
@@ -794,6 +812,7 @@ export type PsychicAppOption =
   | 'packageManager'
   | 'paths'
   | 'port'
+  | 'redirectAllowedHosts'
   | 'routes'
   | 'saltRounds'
   | 'ssl'
