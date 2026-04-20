@@ -18,6 +18,12 @@ export default class Session {
       ...opts,
       secure: opts.secure ?? EnvInternal.isProduction,
       httpOnly: opts.httpOnly ?? true,
+      // Psychic is a pure JSON API backend — it never renders HTML, so there
+      // is no link-click-navigates-to-Psychic UX that would need Lax. Strict
+      // blocks ALL cross-site cookie sending, which is the correct default
+      // for an API: the cookie should only ride requests that originated
+      // from our own client code, never from third-party pages.
+      sameSite: opts.sameSite ?? 'strict',
       maxAge: opts.maxAge
         ? cookieMaxAgeFromCookieOpts(opts.maxAge)
         : (PsychicApp.getOrFail().cookieOptions?.maxAge ?? cookieMaxAgeFromCookieOpts()),

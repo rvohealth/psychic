@@ -53,6 +53,7 @@ describe('Session', () => {
       expect(cookieSetSpy).toHaveBeenCalledWith('auth_token', 'abc123', {
         secure: false,
         httpOnly: true,
+        sameSite: 'strict',
         maxAge: 4 * 60 * 60 * 24 * 1000,
       })
     })
@@ -102,6 +103,7 @@ describe('Session', () => {
         expect(cookieSetSpy).toHaveBeenCalledWith('auth_token', 'abc123', {
           secure: true,
           httpOnly: false,
+          sameSite: 'strict',
           maxAge: expectedMaxAge,
         })
       })
