@@ -110,7 +110,14 @@ export default class PsychicServer {
     // Koa doesn't send x-powered-by by default, no need to disable it.
 
     this.koaApp.use(async (ctx, next) => {
+      // Prevent MIME-sniffing; browsers must honor the declared Content-Type
+      // even if an endpoint accidentally serves something looking like HTML.
       ctx.set('X-Content-Type-Options', 'nosniff')
+      // Block cross-origin pages from embedding this response as a resource
+      // (<script src>, <img>, <link>, etc.), which raises the bar for
+      // speculative cross-origin reads (Spectre / XS-Leaks class). Applies
+      // to API responses regardless of Content-Type.
+      ctx.set('Cross-Origin-Resource-Policy', 'same-origin')
 
       if (EnvInternal.isProduction) {
         ctx.set('Strict-Transport-Security', 'max-age=31536000; includeSubDomains')
