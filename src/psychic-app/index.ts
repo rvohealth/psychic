@@ -336,6 +336,20 @@ Try setting it to something valid, like:
   }
 
   private _jsonOptions: bodyParser.Options
+  /**
+   * Options passed through to `koa-bodyparser`. When unset, the upstream
+   * defaults apply — notably `jsonLimit: '1mb'` and `formLimit: '56kb'`,
+   * which cap request-body size at the framework boundary and defend against
+   * unbounded-payload memory DoS even when no edge (WAF / API Gateway)
+   * enforces a cap.
+   *
+   * Configure via `psy.set('json', { jsonLimit: '256kb' })` to tighten.
+   * Values are spread-merged, so partial overrides preserve untouched limits.
+   *
+   * See https://github.com/koajs/bodyparser for the full option list
+   * (`jsonLimit`, `formLimit`, `textLimit`, `xmlLimit`, `enableTypes`,
+   * `strict`, `detectJSON`, etc.).
+   */
   public get jsonOptions() {
     return this._jsonOptions
   }
