@@ -207,8 +207,15 @@ export default class PsychicServer {
   }
 
   private initializeCors() {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
-    this.koaApp.use(cors(PsychicApp.getOrFail().corsOptions as any))
+    const corsOptions = PsychicApp.getOrFail().corsOptions
+    // When the app hasn't called psy.set('cors', ...), don't mount @koa/cors
+    // at all. @koa/cors with undefined options defaults `origin` to '*' and
+    // would emit Access-Control-Allow-Origin: * on every response — a
+    // foot-gun for an API serving user-scoped data. Not mounting leaves the
+    // response with no CORS headers, which the browser treats as same-origin
+    // only. Apps opt in to cross-origin by configuring cors explicitly.
+    if (corsOptions === undefined) return
+    this.koaApp.use(cors(corsOptions))
   }
 
   private initializeJSON() {
