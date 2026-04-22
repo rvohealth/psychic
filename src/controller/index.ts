@@ -492,10 +492,18 @@ export default class PsychicController {
   }
 
   /**
-   * Captures and validates parameters for the provided Dream model. Will exclude
-   * parameters that are not considered "safe" by default (based on the model's paramSafeColumns).
-   * Uses `castParam` for each parameter and will raise an exception if any parameter
-   * fails validation.
+   * @deprecated Prefer {@link extractParams} (explicit allowlist at the call
+   * site) or {@link extractImplicitParams} (same implicit-allowlist behavior,
+   * new name). Security-relevant: on models with permission-bearing fields,
+   * `paramsFor(Model)` without `only` extracts every column in
+   * `paramSafeColumnsOrFallback()` — which may be too broad unless the model
+   * declares `paramSafeColumns` explicitly. `extractParams` makes the
+   * allowlist visible to reviewers at the call site.
+   *
+   * Captures and validates parameters for the provided Dream model. Will
+   * exclude parameters that are not considered "safe" by default (based on
+   * the model's paramSafeColumns). Uses `castParam` for each parameter and
+   * will raise an exception if any parameter fails validation.
    *
    * @param dreamClass - The Dream model class to retrieve params for
    * @param opts - Optional configuration object
@@ -510,17 +518,11 @@ export default class PsychicController {
    * ```ts
    * class MyController extends ApplicationController {
    *   public create() {
-   *     // Get safe params for User model (excludes sensitive fields like createdAt)
-   *     const userParams = this.paramsFor(User)
+   *     // Preferred: explicit allowlist via extractParams
+   *     const safe = this.extractParams(User, ['email', 'name'])
    *
-   *     // Restrict to only specific fields
-   *     const restrictedParams = this.paramsFor(User, { only: ['email', 'name'] })
-   *
-   *     // Include normally excluded fields
-   *     const extendedParams = this.paramsFor(User, { including: ['createdAt'] })
-   *
-   *     // Extract from nested key
-   *     const nestedParams = this.paramsFor(User, { key: 'user' })
+   *     // Equivalent of the legacy `this.paramsFor(User)` under the new name:
+   *     const viaModel = this.extractImplicitParams(User)
    *   }
    * }
    * ```
