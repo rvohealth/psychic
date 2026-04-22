@@ -324,11 +324,18 @@ export default class PsychicController {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment, @typescript-eslint/no-unsafe-member-access
     const routeParams = (this.ctx as any).params ?? {}
 
-    const params: PsychicParamsDictionary = {
-      ...query,
-      ...body,
-      ...routeParams,
-    } as PsychicParamsDictionary
+    // R-012 defense-in-depth: use a prototype-less object as the merge target
+    // so any `__proto__` / `constructor` / `prototype` that arrives as an OWN
+    // key via upstream parser misconfig lands here rather than mutating
+    // Object.prototype. Node's JSON.parse and qs v6.10+ already protect against
+    // the classical prototype-pollution vector; this is belt-and-suspenders.
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
+    const params: PsychicParamsDictionary = Object.assign(
+      Object.create(null) as PsychicParamsDictionary,
+      query,
+      body,
+      routeParams,
+    )
 
     return params
   }
