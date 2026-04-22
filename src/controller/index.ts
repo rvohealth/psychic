@@ -54,6 +54,7 @@ import OpenapiPayloadValidator from '../openapi-renderer/helpers/OpenapiPayloadV
 import { cacheStringify, getCachedStringify } from '../openapi-renderer/helpers/stringify-cache.js'
 import PsychicApp from '../psychic-app/index.js'
 import Params, {
+  ExtractParamsOpts,
   ParamsCastOptions,
   ParamsForOpts,
   ValidatedAllowsNull,
@@ -558,6 +559,112 @@ export default class PsychicController {
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       opts as any,
     )
+  }
+
+  /**
+   * Captures and validates parameters for the provided Dream model using an
+   * explicit, required allowlist. This is the recommended primitive for
+   * controllers handling user-editable models — the allowlist is visible at
+   * the call site, so reviewers can see exactly which fields are accepted
+   * from the request.
+   *
+   * The `allowed` array is compile-time constrained to
+   * `DreamParamSafeColumnNames<InstanceType<T>>`, so protected columns
+   * (primary key, timestamps, belongs-to foreign keys, polymorphic type
+   * fields, STI `type` column, and any column in `explicitUnsafeParamColumns`)
+   * are TypeScript errors. At runtime, the intersection against the model's
+   * `paramSafeColumnsOrFallback()` further strips anything a caller bypasses
+   * the type system to include.
+   *
+   * Use {@link extractImplicitParams} when the model's declared
+   * `paramSafeColumns` is the canonical allowlist and duplicating it at each
+   * call site would create drift.
+   *
+   * @param dreamClass - The Dream model class to retrieve params for
+   * @param allowed - Required. The columns permitted from the request.
+   * @param opts - Optional configuration
+   * @param opts.key - Extract params from a nested key in the params object instead of root level
+   * @param opts.array - If true, expects and returns an array of param objects
+   * @returns A typed object containing the validated and casted params
+   * @throws {ParamValidationError} When any parameter validation fails
+   *
+   * @example
+   * ```ts
+   * class BalloonsController extends ApplicationController {
+   *   public create() {
+   *     const params = this.extractParams(Balloon, ['name', 'color'])
+   *     const balloon = await Balloon.create(params)
+   *   }
+   * }
+   * ```
+   */
+  public extractParams<
+    T extends typeof Dream,
+    I extends InstanceType<T>,
+    const AllowedArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
+    OptsType extends StrictInterface<OptsType, ExtractParamsOpts>,
+    ParamSafeAttrs extends DreamParamSafeAttributes<I>,
+    ReturnPartial extends Partial<{
+      [K in AllowedArray[number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
+    }>,
+    ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
+  >(this: PsychicController, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
+    const source = opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return Params.extract(source, dreamClass, allowed as any, opts as any)
+  }
+
+  /**
+   * Captures and validates parameters for the provided Dream model using the
+   * model's declared `paramSafeColumns` (or, when undeclared, the framework's
+   * default-safe fallback from `paramSafeColumnsOrFallback()`).
+   *
+   * Prefer {@link extractParams} when the caller can enumerate the allowed
+   * columns at the call site — explicit allowlists are more visible to
+   * reviewers. Reach for `extractImplicitParams` when the model-level
+   * declaration is the canonical allowlist and you want to avoid duplicating
+   * it at every call site.
+   *
+   * @param dreamClass - The Dream model class to retrieve params for
+   * @param opts - Optional configuration
+   * @param opts.key - Extract params from a nested key in the params object instead of root level
+   * @param opts.array - If true, expects and returns an array of param objects
+   * @returns A typed object containing the validated and casted params
+   * @throws {ParamValidationError} When any parameter validation fails
+   *
+   * @example
+   * ```ts
+   * class AdminBalloonsController extends ApplicationController {
+   *   public create() {
+   *     const params = this.extractImplicitParams(Balloon)
+   *     const balloon = await Balloon.create(params)
+   *   }
+   * }
+   * ```
+   */
+  public extractImplicitParams<
+    T extends typeof Dream,
+    I extends InstanceType<T>,
+    OptsType extends StrictInterface<OptsType, ExtractParamsOpts>,
+    ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
+      ? undefined
+      : I['paramSafeColumns' & keyof I] & string[],
+    ParamSafeColumns extends ParamSafeColumnsOverride extends string[] | Readonly<string[]>
+      ? Extract<
+          DreamParamSafeColumnNames<I>,
+          ParamSafeColumnsOverride[number] & DreamParamSafeColumnNames<I>
+        >[]
+      : DreamParamSafeColumnNames<I>[],
+    ParamSafeAttrs extends DreamParamSafeAttributes<I>,
+    ReturnPartial extends Partial<{
+      [K in ParamSafeColumns[number & keyof ParamSafeColumns] & string]: ParamSafeAttrs[K &
+        keyof ParamSafeAttrs]
+    }>,
+    ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
+  >(this: PsychicController, dreamClass: T, opts?: OptsType): ReturnPayload {
+    const source = opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return Params.extractImplicit(source, dreamClass, opts as any) as ReturnPayload
   }
 
   /**

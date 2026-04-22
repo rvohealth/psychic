@@ -162,6 +162,75 @@ export default class Params {
     return returnObj as ReturnPayload
   }
 
+  /**
+   * ### .extract
+   *
+   * Typed + runtime-enforced allowlist extraction. Equivalent to
+   * {@link Params.for} with `only` moved to a required positional argument.
+   * Use from a controller via {@link PsychicController.extractParams}.
+   *
+   * The `allowed` array is constrained to `DreamParamSafeColumnNames<I>` at
+   * the type level, so protected columns (primary key, timestamps, belongs-to
+   * foreign keys, polymorphic type fields, STI `type` column, and any column
+   * in `explicitUnsafeParamColumns`) are TypeScript compile errors. At
+   * runtime, the existing intersection in `paramNamesForDreamClass` strips
+   * any column not also in the model's `paramSafeColumnsOrFallback()` set,
+   * so TS-bypass attempts still fail closed.
+   */
+  public static extract<
+    T extends typeof Dream,
+    I extends InstanceType<T>,
+    const AllowedArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
+    OptsType extends StrictInterface<OptsType, ExtractParamsOpts>,
+    ParamSafeAttrs extends DreamParamSafeAttributes<I>,
+    ReturnPartial extends Partial<{
+      [K in AllowedArray[number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
+    }>,
+    ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
+  >(params: object, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return Params.for(params, dreamClass, { ...(opts ?? {}), only: allowed } as any)
+  }
+
+  /**
+   * ### .extractImplicit
+   *
+   * Implicit-allowlist extraction driven by the model's `paramSafeColumns`
+   * declaration (or, when undeclared, the framework's default-safe fallback
+   * from `paramSafeColumnsOrFallback()`). Equivalent to {@link Params.for}
+   * without `only`. Use from a controller via
+   * {@link PsychicController.extractImplicitParams}.
+   *
+   * Prefer {@link Params.extract} when the caller can enumerate the allowed
+   * columns at the call site — it makes the allowlist visible to reviewers
+   * at the point of use. Reach for this method when the model-level
+   * `paramSafeColumns` declaration is the canonical allowlist and duplicating
+   * it at each call site would create maintenance drift.
+   */
+  public static extractImplicit<
+    T extends typeof Dream,
+    I extends InstanceType<T>,
+    OptsType extends StrictInterface<OptsType, ExtractParamsOpts>,
+    ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
+      ? undefined
+      : I['paramSafeColumns' & keyof I] & string[],
+    ParamSafeColumns extends ParamSafeColumnsOverride extends string[] | Readonly<string[]>
+      ? Extract<
+          DreamParamSafeColumnNames<I>,
+          ParamSafeColumnsOverride[number] & DreamParamSafeColumnNames<I>
+        >[]
+      : DreamParamSafeColumnNames<I>[],
+    ParamSafeAttrs extends DreamParamSafeAttributes<I>,
+    ReturnPartial extends Partial<{
+      [K in ParamSafeColumns[number & keyof ParamSafeColumns] & string]: ParamSafeAttrs[K &
+        keyof ParamSafeAttrs]
+    }>,
+    ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
+  >(params: object, dreamClass: T, opts?: OptsType): ReturnPayload {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    return Params.for(params, dreamClass, (opts ?? {}) as any)
+  }
+
   public static restrict<T extends typeof Params>(
     this: T,
     params: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
@@ -621,6 +690,17 @@ interface ParamsForOptsBase<OnlyArray> {
 }
 
 export interface ParamsForOpts<OnlyArray> extends ParamsForOptsBase<OnlyArray> {
+  key?: string
+}
+
+/**
+ * Options for {@link Params.extract} / {@link Params.extractImplicit} and the
+ * corresponding controller methods. Mirrors {@link ParamsForOpts} minus
+ * `only` — the explicit allowlist moved to a required positional argument on
+ * `extractParams`, and `extractImplicitParams` has no allowlist argument.
+ */
+export interface ExtractParamsOpts {
+  array?: boolean
   key?: string
 }
 
