@@ -6,7 +6,7 @@ import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import addImportSuffix from '../helpers/path/addImportSuffix.js'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths.js'
 import psychicPath from '../helpers/path/psychicPath.js'
-import generateControllerContent from './helpers/generateControllerContent.js'
+import generateControllerContent, { ParamExtractionStrategy } from './helpers/generateControllerContent.js'
 import generateControllerSpecContent from './helpers/generateControllerSpecContent.js'
 import generateResourceControllerSpecContent from './helpers/generateResourceControllerSpecContent.js'
 
@@ -18,6 +18,7 @@ export default async function generateController({
   resourceSpecs = false,
   owningModel,
   singular,
+  paramExtractionStrategy,
 }: {
   fullyQualifiedControllerName: string
   fullyQualifiedModelName?: string
@@ -26,6 +27,7 @@ export default async function generateController({
   resourceSpecs?: boolean
   owningModel?: string | undefined
   singular: boolean
+  paramExtractionStrategy?: ParamExtractionStrategy | undefined
 }) {
   fullyQualifiedModelName = fullyQualifiedModelName
     ? DreamApp.system.standardizeFullyQualifiedModelName(fullyQualifiedModelName)
@@ -120,6 +122,8 @@ export default async function generateController({
         forAdmin,
         forInternal,
         singular,
+        columnsWithTypes,
+        paramExtractionStrategy,
       }),
     )
   } catch (error) {

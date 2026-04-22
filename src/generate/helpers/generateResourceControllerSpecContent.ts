@@ -2,6 +2,7 @@ import { DreamApp } from '@rvoh/dream'
 import { camelize, capitalize, compact, uniq } from '@rvoh/dream/utils'
 import pluralize from 'pluralize-esm'
 import addImportSuffix from '../../helpers/path/addImportSuffix.js'
+import parseAttribute from './parseAttribute.js'
 
 interface GenerateSpecOptions {
   fullyQualifiedControllerName: string
@@ -168,41 +169,6 @@ function processAttributes(
   }
 
   return attributeData
-}
-
-interface ParsedAttribute {
-  attributeName: string
-  attributeType: string
-  isArray: boolean
-  enumValues?: string | undefined
-}
-
-function parseAttribute(attribute: string): ParsedAttribute | null {
-  const [rawAttributeName, rawAttributeType, , enumValues] = attribute.split(':')
-
-  if (!rawAttributeName || !rawAttributeType) return null
-
-  const sanitizedAttrType = camelize(rawAttributeType)?.toLowerCase()
-
-  // Handle belongs_to relationships
-  if (sanitizedAttrType === 'belongsto') {
-    // For belongs_to relationships, convert "Ticketing/Ticket" to "ticket"
-    const attributeName = camelize(rawAttributeName.split('/').pop()!)
-    return { attributeName, attributeType: 'belongs_to', isArray: false, enumValues }
-  }
-
-  // Skip _type and _id columns, but not belongs_to relationships
-  if (/(_type|_id)$/.test(rawAttributeName)) return null
-
-  const attributeName = camelize(rawAttributeName)
-  if (attributeName === 'deletedAt') return null
-
-  const arrayBracketRegexp = /\[\]$/
-  const isArray = arrayBracketRegexp.test(rawAttributeType)
-  const _attributeType = rawAttributeType.replace(arrayBracketRegexp, '')
-  const attributeType = /uuid$/.test(rawAttributeName) ? 'uuid' : _attributeType
-
-  return { attributeName, attributeType, isArray, enumValues }
 }
 
 function processAttributeByType({

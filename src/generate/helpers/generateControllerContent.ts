@@ -1,6 +1,9 @@
 import { DreamApp } from '@rvoh/dream'
 import { camelize, hyphenize } from '@rvoh/dream/utils'
 import pluralize from 'pluralize-esm'
+import paramSafeColumnNamesFromCliTokens from './paramSafeColumnNamesFromCliTokens.js'
+
+export type ParamExtractionStrategy = 'explicit' | 'implicit'
 
 export default function generateControllerContent({
   ancestorName,
@@ -13,6 +16,8 @@ export default function generateControllerContent({
   forAdmin,
   forInternal = false,
   singular,
+  columnsWithTypes = [],
+  paramExtractionStrategy,
 }: {
   ancestorName: string
   ancestorImportStatement: string
@@ -24,7 +29,39 @@ export default function generateControllerContent({
   forAdmin: boolean
   forInternal?: boolean
   singular: boolean
+  columnsWithTypes?: string[]
+  paramExtractionStrategy?: ParamExtractionStrategy | undefined
 }) {
+  // Admin scaffolds lean on the model's declared paramSafeColumns (implicit);
+  // non-admin scaffolds require an explicit allowlist at the call site so the
+  // permitted columns are visible to reviewers. Either default can be overridden
+  // via the `--with-extract-params` / `--with-extract-implicit-params` CLI flags,
+  // which get materialized into `paramExtractionStrategy` by the caller.
+  const resolvedExtractionStrategy: ParamExtractionStrategy =
+    paramExtractionStrategy ?? (forAdmin ? 'implicit' : 'explicit')
+  /**
+   * Returns the `this.extract*Params(...)` expression that replaces the legacy
+   * `this.paramsFor(Model)` in the scaffold's commented hints. Does NOT include
+   * the outer closing paren that the surrounding call expects (e.g. the one
+   * closing `update(...)` or `create(...)` or `createAssociation(...)`); the
+   * caller appends that as part of its own template.
+   */
+  const extractCallExpression = (modelClass: string) => {
+    if (resolvedExtractionStrategy === 'implicit') {
+      return `this.extractImplicitParams(${modelClass})`
+    }
+    const safeColumns = paramSafeColumnNamesFromCliTokens(columnsWithTypes)
+    const serializedSafeColumns = safeColumns.length
+      ? `[${safeColumns.map(name => `'${name}'`).join(', ')}]`
+      : '[]'
+    // The emitted list contains every implicitly-allowed column. When
+    // uncommenting the action body, the developer or agent is responsible
+    // for narrowing it down to only the columns this action should actually
+    // accept.
+    return `this.extractParams(${modelClass},
+    //   ${serializedSafeColumns},
+    // )`
+  }
   fullyQualifiedControllerName = DreamApp.system.standardizeFullyQualifiedModelName(
     fullyQualifiedControllerName,
   )
@@ -76,7 +113,7 @@ export default function generateControllerContent({
     fastJsonStringify: true,
   })
   public async create() {
-    // let ${modelAttributeName} = await ${useDirectModelAccess ? `${modelClassName}.create(` : `this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', `}this.paramsFor(${modelClassName}))
+    // let ${modelAttributeName} = await ${useDirectModelAccess ? `${modelClassName}.create(` : `this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', `}${extractCallExpression(modelClassName!)})
     // if (${modelAttributeName}.isPersisted) ${modelAttributeName} = await ${modelAttributeName}.loadFor('${forAdmin ? 'admin' : forInternal ? 'internal' : 'default'}').execute()
     // this.created(${modelAttributeName})
   }`
@@ -156,7 +193,7 @@ export default function generateControllerContent({
   })
   public async update() {
     // const ${modelAttributeName} = await this.${modelAttributeName}()
-    // await ${modelAttributeName}.update(this.paramsFor(${modelClassName}))
+    // await ${modelAttributeName}.update(${extractCallExpression(modelClassName!)})
     // this.noContent()
   }`
         else

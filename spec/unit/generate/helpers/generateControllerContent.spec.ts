@@ -1,4 +1,5 @@
 import generateControllerContent from '../../../../src/generate/helpers/generateControllerContent.js'
+import paramSafeColumnNamesFromCliTokens from '../../../../src/generate/helpers/paramSafeColumnNamesFromCliTokens.js'
 
 describe('psy generate:controller <name> [...methods]', () => {
   context('when provided methods', () => {
@@ -56,7 +57,9 @@ export default class PostsController extends AuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let post = await this.currentUser.createAssociation('posts', this.paramsFor(Post))
+    // let post = await this.currentUser.createAssociation('posts', this.extractParams(Post,
+    //   [],
+    // ))
     // if (post.isPersisted) post = await post.loadFor('default').execute()
     // this.created(post)
   }
@@ -69,7 +72,9 @@ export default class PostsController extends AuthedController {
   })
   public async update() {
     // const post = await this.post()
-    // await post.update(this.paramsFor(Post))
+    // await post.update(this.extractParams(Post,
+    //   [],
+    // ))
     // this.noContent()
   }
 
@@ -145,7 +150,9 @@ export default class HostingAgreementController extends AuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let hostingAgreement = await this.currentUser.createAssociation('hostingAgreement', this.paramsFor(HostingAgreement))
+    // let hostingAgreement = await this.currentUser.createAssociation('hostingAgreement', this.extractParams(HostingAgreement,
+    //   [],
+    // ))
     // if (hostingAgreement.isPersisted) hostingAgreement = await hostingAgreement.loadFor('default').execute()
     // this.created(hostingAgreement)
   }
@@ -158,7 +165,9 @@ export default class HostingAgreementController extends AuthedController {
   })
   public async update() {
     // const hostingAgreement = await this.hostingAgreement()
-    // await hostingAgreement.update(this.paramsFor(HostingAgreement))
+    // await hostingAgreement.update(this.extractParams(HostingAgreement,
+    //   [],
+    // ))
     // this.noContent()
   }
 
@@ -240,7 +249,9 @@ export default class ApiV1HealthPostsController extends AuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let healthPost = await this.currentUser.createAssociation('healthPosts', this.paramsFor(HealthPost))
+    // let healthPost = await this.currentUser.createAssociation('healthPosts', this.extractParams(HealthPost,
+    //   [],
+    // ))
     // if (healthPost.isPersisted) healthPost = await healthPost.loadFor('default').execute()
     // this.created(healthPost)
   }
@@ -253,7 +264,9 @@ export default class ApiV1HealthPostsController extends AuthedController {
   })
   public async update() {
     // const healthPost = await this.healthPost()
-    // await healthPost.update(this.paramsFor(HealthPost))
+    // await healthPost.update(this.extractParams(HealthPost,
+    //   [],
+    // ))
     // this.noContent()
   }
 
@@ -388,7 +401,9 @@ export default class PostsController extends AuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let post = await this.currentHost.createAssociation('posts', this.paramsFor(Post))
+    // let post = await this.currentHost.createAssociation('posts', this.extractParams(Post,
+    //   [],
+    // ))
     // if (post.isPersisted) post = await post.loadFor('default').execute()
     // this.created(post)
   }
@@ -401,7 +416,9 @@ export default class PostsController extends AuthedController {
   })
   public async update() {
     // const post = await this.post()
-    // await post.update(this.paramsFor(Post))
+    // await post.update(this.extractParams(Post,
+    //   [],
+    // ))
     // this.noContent()
   }
 
@@ -498,7 +515,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let article = await Article.create(this.paramsFor(Article))
+    // let article = await Article.create(this.extractImplicitParams(Article))
     // if (article.isPersisted) article = await article.loadFor('admin').execute()
     // this.created(article)
   }
@@ -511,7 +528,7 @@ export default class AdminArticlesController extends AdminAuthedController {
   })
   public async update() {
     // const article = await this.article()
-    // await article.update(this.paramsFor(Article))
+    // await article.update(this.extractImplicitParams(Article))
     // this.noContent()
   }
 
@@ -606,7 +623,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let article = await this.currentOrganization.createAssociation('articles', this.paramsFor(Article))
+    // let article = await this.currentOrganization.createAssociation('articles', this.extractImplicitParams(Article))
     // if (article.isPersisted) article = await article.loadFor('admin').execute()
     // this.created(article)
   }
@@ -619,7 +636,7 @@ export default class AdminArticlesController extends AdminAuthedController {
   })
   public async update() {
     // const article = await this.article()
-    // await article.update(this.paramsFor(Article))
+    // await article.update(this.extractImplicitParams(Article))
     // this.noContent()
   }
 
@@ -707,7 +724,9 @@ export default class InternalArticlesController extends InternalAuthedController
     fastJsonStringify: true,
   })
   public async create() {
-    // let article = await Article.create(this.paramsFor(Article))
+    // let article = await Article.create(this.extractParams(Article,
+    //   [],
+    // ))
     // if (article.isPersisted) article = await article.loadFor('internal').execute()
     // this.created(article)
   }
@@ -720,7 +739,9 @@ export default class InternalArticlesController extends InternalAuthedController
   })
   public async update() {
     // const article = await this.article()
-    // await article.update(this.paramsFor(Article))
+    // await article.update(this.extractParams(Article,
+    //   [],
+    // ))
     // this.noContent()
   }
 
@@ -816,7 +837,9 @@ export default class InternalArticlesController extends InternalAuthedController
     fastJsonStringify: true,
   })
   public async create() {
-    // let article = await this.currentOrganization.createAssociation('articles', this.paramsFor(Article))
+    // let article = await this.currentOrganization.createAssociation('articles', this.extractParams(Article,
+    //   [],
+    // ))
     // if (article.isPersisted) article = await article.loadFor('internal').execute()
     // this.created(article)
   }
@@ -829,7 +852,9 @@ export default class InternalArticlesController extends InternalAuthedController
   })
   public async update() {
     // const article = await this.article()
-    // await article.update(this.paramsFor(Article))
+    // await article.update(this.extractParams(Article,
+    //   [],
+    // ))
     // this.noContent()
   }
 
@@ -855,6 +880,90 @@ export default class InternalArticlesController extends InternalAuthedController
           )
         })
       })
+    })
+  })
+
+  describe('paramSafeColumnNamesFromCliTokens (R-011 filter)', () => {
+    it('omits reserved names, belongs_to FKs, _type, and _id tokens; camelCases survivors', () => {
+      const safe = paramSafeColumnNamesFromCliTokens([
+        'id:integer',
+        'created_at:timestamp',
+        'updated_at:timestamp',
+        'deleted_at:timestamp',
+        'type:string',
+        'name:string',
+        'avatar_url:string',
+        'Team:belongs_to',
+        'status_type:string',
+        'something_id:bigint',
+      ])
+      expect(safe).toEqual(['name', 'avatarUrl'])
+    })
+
+    it('returns an empty array when no columns survive the filter', () => {
+      expect(paramSafeColumnNamesFromCliTokens(['id:integer', 'created_at:timestamp'])).toEqual([])
+    })
+  })
+
+  describe('paramExtractionStrategy (R-011)', () => {
+    it('emits extractParams with an introspected safe-column list for non-admin scaffolds', () => {
+      const res = generateControllerContent({
+        ancestorImportStatement: "import AuthedController from './AuthedController.js'",
+        ancestorName: 'AuthedController',
+        fullyQualifiedControllerName: 'PostsController',
+        fullyQualifiedModelName: 'Post',
+        actions: ['create'],
+        forAdmin: false,
+        singular: false,
+        columnsWithTypes: ['title:string', 'body:text', 'User:belongs_to', 'id:integer'],
+      })
+      expect(res).toContain("this.extractParams(Post,\n    //   ['title', 'body'],\n    // ))")
+    })
+
+    it('emits extractImplicitParams for admin scaffolds by default', () => {
+      const res = generateControllerContent({
+        ancestorImportStatement: "import AdminAuthedController from './AuthedController.js'",
+        ancestorName: 'AdminAuthedController',
+        fullyQualifiedControllerName: 'Admin/PostsController',
+        fullyQualifiedModelName: 'Post',
+        actions: ['create'],
+        forAdmin: true,
+        singular: false,
+        columnsWithTypes: ['title:string'],
+      })
+      expect(res).toContain('this.extractImplicitParams(Post)')
+      expect(res).not.toContain('extractParams(Post,')
+    })
+
+    it('overrides admin default with paramExtractionStrategy: explicit', () => {
+      const res = generateControllerContent({
+        ancestorImportStatement: "import AdminAuthedController from './AuthedController.js'",
+        ancestorName: 'AdminAuthedController',
+        fullyQualifiedControllerName: 'Admin/PostsController',
+        fullyQualifiedModelName: 'Post',
+        actions: ['create'],
+        forAdmin: true,
+        singular: false,
+        columnsWithTypes: ['title:string'],
+        paramExtractionStrategy: 'explicit',
+      })
+      expect(res).toContain("this.extractParams(Post,\n    //   ['title'],\n    // ))")
+    })
+
+    it('overrides non-admin default with paramExtractionStrategy: implicit', () => {
+      const res = generateControllerContent({
+        ancestorImportStatement: "import AuthedController from './AuthedController.js'",
+        ancestorName: 'AuthedController',
+        fullyQualifiedControllerName: 'PostsController',
+        fullyQualifiedModelName: 'Post',
+        actions: ['create'],
+        forAdmin: false,
+        singular: false,
+        columnsWithTypes: ['title:string'],
+        paramExtractionStrategy: 'implicit',
+      })
+      expect(res).toContain('this.extractImplicitParams(Post)')
+      expect(res).not.toContain('extractParams(Post,')
     })
   })
 })

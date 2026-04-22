@@ -3,6 +3,7 @@ import { DreamCLI } from '@rvoh/dream/system'
 import pluralize from 'pluralize-esm'
 import generateController from './controller.js'
 import addResourceToRoutes from './helpers/addResourceToRoutes.js'
+import { ParamExtractionStrategy } from './helpers/generateControllerContent.js'
 
 export const RESOURCE_ACTIONS = ['index', 'show', 'create', 'update', 'destroy'] as const
 export const SINGULAR_RESOURCE_ACTIONS = ['show', 'create', 'update', 'destroy'] as const
@@ -24,6 +25,8 @@ export default async function generateResource({
     tableName?: string
     modelName?: string
     softDelete: boolean
+    withExtractParams?: boolean
+    withExtractImplicitParams?: boolean
   }
   columnsWithTypes: string[]
 }) {
@@ -56,6 +59,17 @@ export default async function generateResource({
     },
   })
 
+  if (options.withExtractParams && options.withExtractImplicitParams) {
+    throw new Error(
+      '--with-extract-params and --with-extract-implicit-params are mutually exclusive; pass only one.',
+    )
+  }
+  const paramExtractionStrategy: ParamExtractionStrategy | undefined = options.withExtractParams
+    ? 'explicit'
+    : options.withExtractImplicitParams
+      ? 'implicit'
+      : undefined
+
   await generateController({
     fullyQualifiedControllerName,
     fullyQualifiedModelName,
@@ -66,6 +80,7 @@ export default async function generateResource({
     resourceSpecs: true,
     singular: options.singular,
     owningModel: options.owningModel,
+    paramExtractionStrategy,
   })
 
   await addResourceToRoutes(route, {

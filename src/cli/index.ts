@@ -187,6 +187,16 @@ ${INDENT}  # model is named GroupDanceLesson instead of LessonDanceGroup`,
         '--no-soft-delete',
         `skip generating the @SoftDelete() decorator and the corresponding nullable \`deleted_at\` column. By default, generated models use soft-delete semantics (rows are marked deleted via \`deleted_at\` instead of being removed from the database). Pass this flag when you want records to be hard-deleted.`,
       )
+      .option(
+        '--with-extract-params',
+        `override the default scaffold to emit \`this.extractParams(Model, [...])\` (explicit allowlist). Only valid for admin-namespaced resources, which otherwise default to \`this.extractImplicitParams(Model)\`. Mutually exclusive with --with-extract-implicit-params.`,
+        false,
+      )
+      .option(
+        '--with-extract-implicit-params',
+        `override the default scaffold to emit \`this.extractImplicitParams(Model)\` (model-declared allowlist). Only useful for non-admin-namespaced resources, which otherwise default to \`this.extractParams(Model, [...])\`. Mutually exclusive with --with-extract-params.`,
+        false,
+      )
       .argument(
         '<path>',
         `The URL path for this resource's routes, relative to the root domain. Use \`\\{\\}\` as a placeholder for a parent resource's ID parameter when nesting.
@@ -222,6 +232,8 @@ ${INDENT}  Post/Comment                        # src/app/models/Post/Comment.ts,
             tableName?: string
             modelName?: string
             softDelete: boolean
+            withExtractParams?: boolean
+            withExtractImplicitParams?: boolean
           },
         ) => {
           await initializePsychicApp({
@@ -654,6 +666,8 @@ ${INDENT}  pnpm psy diff:openapi --fail-on-breaking  # exit 1 if breaking change
       tableName?: string
       modelName?: string
       softDelete: boolean
+      withExtractParams?: boolean
+      withExtractImplicitParams?: boolean
     }
     columnsWithTypes: string[]
   }) {
