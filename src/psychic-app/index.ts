@@ -228,8 +228,17 @@ export default class PsychicApp {
   }
 
   /**
-   * prints a warning in the console if the encryption key
-   * is not valid for the provided algorithm.
+   * Throws (in production) or prints a warning (in non-production) if the
+   * encryption key is not valid for the provided algorithm.
+   *
+   * In production, a misconfigured key is a security hazard — the app would
+   * appear to boot successfully, then fail at runtime the first time a cookie
+   * is encrypted or decrypted, potentially leaving users with mysterious
+   * session errors long after the deploy. Fail-closed at boot instead.
+   *
+   * In development, continue to warn so that onboarding flows (where a
+   * placeholder key may briefly be in place while the env is being set up)
+   * are not broken by a hard failure.
    *
    * @param encryptionIdentifier - currently must be 'cookies', though this may change in the future
    * @param key - the encryption key you want to check
@@ -240,17 +249,22 @@ export default class PsychicApp {
     key: string,
     algorithm: EncryptAlgorithm,
   ): void {
-    if (!Encrypt.validateKey(key, algorithm))
-      console.warn(
-        `
+    if (Encrypt.validateKey(key, algorithm)) return
+
+    const message = `
 Your current key value for ${encryptionIdentifier} encryption is invalid.
 Try setting it to something valid, like:
   ${Encrypt.generateKey(algorithm)}
 
 (This was done by calling:
   Encrypt.generateKey('${algorithm}')
-`,
-      )
+`
+
+    if (EnvInternal.isProduction) {
+      throw new Error(message)
+    }
+
+    console.warn(message)
   }
 
   /**
