@@ -162,6 +162,11 @@ export class OpenApiSpecDiff {
     }
 
     try {
+      // shell: true is intentional — `oasdiff` may be installed as a `.cmd` shim
+      // on Windows, which `execFile` cannot invoke directly. This helper runs
+      // only via `pnpm psy openapi:spec-diff` (developer / CI invocation), never
+      // in a deployed process; `args` are literal subcommand strings plus
+      // developer-controlled file paths, not request input. See docs/SECURITY_CVE_CHECKLIST.md R-026.
       const output = cp.execFileSync(this.oasdiffConfig.command, args, {
         shell: true,
         encoding: 'utf8',
