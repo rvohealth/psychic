@@ -1,4 +1,3 @@
-import { EncryptOptions } from '@rvoh/dream/types'
 import { Encrypt } from '@rvoh/dream/utils'
 import MissingCookieEncryptionOpts from '../error/encrypt/missing-cookie-encryption-options.js'
 import PsychicApp from '../psychic-app/index.js'
@@ -12,39 +11,18 @@ export default class InternalEncrypt {
 
     if (data === null || data === undefined) return null
 
-    return this.doEncryption(data, encryptOpts.current)
+    return Encrypt.encrypt(data, encryptOpts.current)
   }
 
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
-  public static decryptCookie(data: any) {
+  public static decryptCookie<RetType>(data: any): RetType | null {
     const psychicApp = PsychicApp.getOrFail()
     const encryptOpts = psychicApp.encryption?.cookies
     if (!encryptOpts) throw new MissingCookieEncryptionOpts()
 
     if (data === null || data === undefined) return null
 
-    return this.doDecryption(data, encryptOpts.current, encryptOpts.legacy)
-  }
-
-  private static doEncryption(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any,
-    encryptionOpts: EncryptOptions,
-  ) {
-    return Encrypt.encrypt(data, encryptionOpts)
-  }
-
-  private static doDecryption<RetType>(
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    data: any,
-    encryptionOpts: EncryptOptions,
-    legacyEncryptionOpts?: EncryptOptions,
-  ): RetType | null {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-    let decrypted = Encrypt.decrypt<RetType>(data, encryptionOpts)
-    if (decrypted === null && legacyEncryptionOpts)
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument
-      decrypted = Encrypt.decrypt<RetType>(data, legacyEncryptionOpts)
-    return decrypted
+    return Encrypt.decrypt<RetType>(data, encryptOpts.current, encryptOpts.legacy)
   }
 }
