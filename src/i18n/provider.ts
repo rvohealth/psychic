@@ -16,6 +16,15 @@ export default class I18nProvider {
    *
    * @param allLocales - the list of all locales in your app. something like `{ en: { ... }, ['en-UK']: { ... }, es: { ... }, ... }`
    * @param singleLocaleKey - the key from the allLocales object that you want to use as your type base. i.e. 'en'
+   *
+   * Output-encoding note: interpolated values are substituted verbatim into the
+   * translation string. There is no HTML escaping at this layer — Psychic emits
+   * JSON, and the client renderer (React / Vue / Svelte / etc.) is responsible
+   * for context-appropriate escaping when the translated string enters a DOM.
+   * Do not pipe translated strings through `dangerouslySetInnerHTML` / `v-html` /
+   * `{@html}`. For rich-text translations, use structured dictionaries instead
+   * of HTML inside translation values. See `psychic-guides` → Security →
+   * Output Encoding & i18n.
    * */
   public static provide<
     const AllLocales,
