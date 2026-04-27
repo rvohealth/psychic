@@ -76,7 +76,7 @@ describe('isSafeRedirectTarget — absolute URLs vs allowlist', () => {
   })
 
   it('allows https://trusted.com when allowlisted', () => {
-    expect(isSafeRedirectTarget('https://trusted.com/oauth', { allowedHosts: ['trusted.com' ] })).toBe(true)
+    expect(isSafeRedirectTarget('https://trusted.com/oauth', { allowedHosts: ['trusted.com'] })).toBe(true)
   })
 
   it('allows http scheme when allowlisted', () => {
@@ -93,9 +93,9 @@ describe('isSafeRedirectTarget — absolute URLs vs allowlist', () => {
   })
 
   it('rejects userinfo trick http://trusted.com@evil.com/ — hostname parses as evil.com', () => {
-    expect(
-      isSafeRedirectTarget('http://trusted.com@evil.com/path', { allowedHosts: ['trusted.com'] }),
-    ).toBe(false)
+    expect(isSafeRedirectTarget('http://trusted.com@evil.com/path', { allowedHosts: ['trusted.com'] })).toBe(
+      false,
+    )
   })
 
   it('rejects subdomain of an allowlisted host (exact match only, no wildcards)', () => {
