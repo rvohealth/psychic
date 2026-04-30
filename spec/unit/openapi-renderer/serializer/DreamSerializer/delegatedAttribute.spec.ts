@@ -66,6 +66,44 @@ describe('DreamSerializer delegated attributes', () => {
         })
       })
     })
+
+    context('when the delegated target is a @deco.Virtual column', () => {
+      it('wraps the virtual column schema with null', () => {
+        const MySerializer = (data: Pet) =>
+          DreamSerializer(Pet, data).delegatedAttribute('user', 'password', { optional: true })
+
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+        expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+          password: {
+            type: ['string', 'null'],
+          },
+        })
+      })
+    })
+  })
+
+  context('with `required: false`', () => {
+    it('omits the delegated property from the required fields in the rendered OpenAPI', () => {
+      const MySerializer = (data: Pet) =>
+        DreamSerializer(Pet, data)
+          .delegatedAttribute('user', 'name', { required: false })
+          .delegatedAttribute('user', 'birthdate')
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      expect((serializerOpenapiRenderer.renderedOpenapi().openapi as any).required).toEqual(['birthdate'])
+    })
+
+    context('when the delegated target is a @deco.Virtual column', () => {
+      it('omits the property from the required fields in the rendered OpenAPI', () => {
+        const MySerializer = (data: Pet) =>
+          DreamSerializer(Pet, data).delegatedAttribute('user', 'password', { required: false })
+
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+        expect((serializerOpenapiRenderer.renderedOpenapi().openapi as any).required).toEqual([])
+      })
+    })
   })
 
   context('optional inferred from the association', () => {

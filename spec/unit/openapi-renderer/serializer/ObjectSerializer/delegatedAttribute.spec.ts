@@ -40,4 +40,27 @@ describe('ObjectSerializer delegated attributes', () => {
       expect((serializerOpenapiRenderer.renderedOpenapi().openapi as any).required).toEqual([])
     })
   })
+
+  context('with `optional: true`', () => {
+    it('wraps the schema in anyOf with null', () => {
+      const MySerializer = (data: Pet) =>
+        ObjectSerializer(data).delegatedAttribute('user', 'name', { openapi: 'string', optional: true })
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+        name: {
+          type: ['string', 'null'],
+        },
+      })
+    })
+
+    it('keeps the property in the required fields (optional is OpenAPI nullable, not omit)', () => {
+      const MySerializer = (data: Pet) =>
+        ObjectSerializer(data).delegatedAttribute('user', 'name', { openapi: 'string', optional: true })
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
+      expect((serializerOpenapiRenderer.renderedOpenapi().openapi as any).required).toEqual(['name'])
+    })
+  })
 })
