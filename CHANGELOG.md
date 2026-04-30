@@ -1,5 +1,6 @@
 ## 3.1.3
 
+- gate auto-generated type/schema/OpenAPI sync to `NODE_ENV=test`; `psy sync` and `psy post-sync` no longer regenerate files in development, preventing a stale dev database from clobbering types generated under tests
 - fix cli `--only` documentation ('destroy', not 'delete') for resource generator
 - resource generator supports `--no-soft-delete` flag
 

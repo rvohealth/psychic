@@ -4,6 +4,7 @@ import * as path from 'node:path'
 import ASTPsychicTypesBuilder from '../cli/helpers/ASTPsychicTypesBuilder.js'
 import generateController from '../generate/controller.js'
 import generateResource from '../generate/resource.js'
+import EnvInternal from '../helpers/EnvInternal.js'
 import isObject from '../helpers/isObject.js'
 import OpenapiAppRenderer from '../openapi-renderer/app.js'
 import PsychicApp from '../psychic-app/index.js'
@@ -62,6 +63,14 @@ export default class PsychicBin {
     bypassDreamSync = false,
     schemaOnly = false,
   }: { bypassDreamSync?: boolean; schemaOnly?: boolean } = {}) {
+    if (!EnvInternal.isTest) {
+      DreamCLI.logger.logStartProgress(
+        `skipping sync: auto-generated type/schema files are only built when NODE_ENV=test (current NODE_ENV: ${process.env.NODE_ENV ?? 'unset'}). Run with NODE_ENV=test to regenerate.`,
+      )
+      DreamCLI.logger.logEndProgress()
+      return
+    }
+
     if (!bypassDreamSync) await DreamBin.sync(() => {}, { schemaOnly })
 
     if (schemaOnly) return
@@ -85,6 +94,14 @@ export default class PsychicBin {
   }
 
   public static async postSync() {
+    if (!EnvInternal.isTest) {
+      DreamCLI.logger.logStartProgress(
+        `skipping post-sync: auto-generated type/schema files are only built when NODE_ENV=test (current NODE_ENV: ${process.env.NODE_ENV ?? 'unset'}). Run with NODE_ENV=test to regenerate.`,
+      )
+      DreamCLI.logger.logEndProgress()
+      return
+    }
+
     await this.syncOpenapiJson()
     await this.runCliHooksAndUpdatePsychicTypesFileWithOutput()
     await this.syncOpenapiTypescriptFiles()
