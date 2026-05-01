@@ -1,6 +1,16 @@
 import { Dream } from '@rvoh/dream'
-import { DecoratorContext, DreamSerializable, DreamSerializableArray } from '@rvoh/dream/types'
-import OpenapiEndpointRenderer, { OpenapiEndpointRendererOpts } from '../openapi-renderer/endpoint.js'
+import {
+  DecoratorContext,
+  DreamParamSafeAttributes,
+  DreamSerializable,
+  DreamSerializableArray,
+  UpdateableProperties,
+} from '@rvoh/dream/types'
+import OpenapiEndpointRenderer, {
+  OpenapiEndpointRendererOpts,
+  OpenapiSchemaNestedFor,
+  OpenapiSchemaRequestPropertiesShorthandWithFor,
+} from '../openapi-renderer/endpoint.js'
 import isSerializable from './helpers/isSerializable.js'
 import { ControllerHook } from './hooks.js'
 import PsychicController from './index.js'
@@ -125,5 +135,53 @@ export function OpenAPI(
         }
       }
     })
+  }
+}
+
+// eslint-disable-next-line @typescript-eslint/no-namespace
+export namespace OpenAPI {
+  /**
+   * Type-narrowed helper for nesting a Dream-model-driven shape inside a
+   * request body. Returns the same `{ for, only, including, required,
+   * combining }` shape the renderer recognizes natively, but typed via a
+   * function-level generic so `only` / `including` / `required` are
+   * constrained to columns of the model passed as the first argument.
+   *
+   * ```ts
+   * @OpenAPI(ActionPlan, {
+   *   requestBody: {
+   *     including: ['type', 'clientId'],
+   *     combining: {
+   *       planItems: {
+   *         type: 'array',
+   *         items: OpenAPI.forDream(ActionItem, {
+   *           required: ['title', 'type'],
+   *         }),
+   *       },
+   *     },
+   *   },
+   * })
+   * ```
+   *
+   * Wrong column names raise a compile-time error:
+   *
+   * ```ts
+   * OpenAPI.forDream(Pet, { including: ['notARealColumn'] })
+   * //                                  ^^^^^^^^^^^^^^^^^ type error
+   * ```
+   */
+  export function forDream<const M extends typeof Dream>(
+    model: M,
+    opts: {
+      only?: readonly (keyof DreamParamSafeAttributes<InstanceType<M>>)[]
+      including?: readonly Exclude<
+        keyof UpdateableProperties<InstanceType<M>>,
+        keyof DreamParamSafeAttributes<InstanceType<M>>
+      >[]
+      required?: readonly (keyof UpdateableProperties<InstanceType<M>>)[]
+      combining?: OpenapiSchemaRequestPropertiesShorthandWithFor
+    } = {},
+  ): OpenapiSchemaNestedFor {
+    return { for: model, ...opts } as unknown as OpenapiSchemaNestedFor
   }
 }

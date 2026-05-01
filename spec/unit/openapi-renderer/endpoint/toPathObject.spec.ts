@@ -1,4 +1,9 @@
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
+/* eslint-disable @typescript-eslint/no-explicit-any */
+/* eslint-disable @typescript-eslint/no-unsafe-member-access */
+/* eslint-disable @typescript-eslint/no-unsafe-argument */
+/* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
+import { OpenAPI } from '../../../../src/controller/decorators.js'
 import OpenapiEndpointRenderer, { ToPathObjectOpts } from '../../../../src/openapi-renderer/endpoint.js'
 import PsychicApp from '../../../../src/psychic-app/index.js'
 import { RouteConfig } from '../../../../src/router/route-manager.js'
@@ -1999,6 +2004,270 @@ describe('OpenapiEndpointRenderer', () => {
                 },
               }),
             )
+          })
+        })
+      })
+
+      context('OpenAPI.forDream nested helper', () => {
+        context('bare form, inside combining of a model-driven outer body', () => {
+          it("expands OpenAPI.forDream(Model) into an object schema using that model's param-safe columns", () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: {
+                only: ['email'],
+                combining: {
+                  pets: {
+                    type: 'array',
+                    items: OpenAPI.forDream(Pet),
+                  },
+                },
+              },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const schema = (response['/users']!.post.requestBody as any).content['application/json']
+              .schema as any
+            expect(schema.properties.email).toEqual({ type: 'string' })
+            expect(schema.properties.pets.type).toEqual('array')
+            expect(schema.properties.pets.items.type).toEqual('object')
+
+            const itemKeys = Object.keys(schema.properties.pets.items.properties)
+            expect(itemKeys).toEqual(expect.arrayContaining(['name', 'species']))
+            expect(itemKeys).not.toContain('id')
+            expect(itemKeys).not.toContain('createdAt')
+          })
+        })
+
+        context('with required', () => {
+          it('attaches required on the nested model schema, not on the outer array', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: {
+                only: ['email'],
+                combining: {
+                  pets: {
+                    type: 'array',
+                    items: OpenAPI.forDream(Pet, { required: ['name'] }),
+                  },
+                },
+              },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const schema = (response['/users']!.post.requestBody as any).content['application/json']
+              .schema as any
+            expect(schema.properties.pets.type).toEqual('array')
+            expect(schema.properties.pets.required).toBeUndefined()
+            expect(schema.properties.pets.items.type).toEqual('object')
+            expect(schema.properties.pets.items.required).toEqual(['name'])
+            expect(Object.keys(schema.properties.pets.items.properties)).toContain('name')
+          })
+        })
+
+        context('with including', () => {
+          it('adds the included column to the nested model schema', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: {
+                only: ['email'],
+                combining: {
+                  pets: {
+                    type: 'array',
+                    items: OpenAPI.forDream(Pet, { including: ['userId'] }),
+                  },
+                },
+              },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const schema = (response['/users']!.post.requestBody as any).content['application/json']
+              .schema as any
+            const itemKeys = Object.keys(schema.properties.pets.items.properties)
+            expect(itemKeys).toEqual(expect.arrayContaining(['userId', 'name']))
+          })
+        })
+
+        context('with only', () => {
+          it('narrows the nested model schema to just the listed columns', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: {
+                only: ['email'],
+                combining: {
+                  pets: {
+                    type: 'array',
+                    items: OpenAPI.forDream(Pet, { only: ['name'] }),
+                  },
+                },
+              },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const schema = (response['/users']!.post.requestBody as any).content['application/json']
+              .schema as any
+            expect(schema.properties.pets.items).toEqual({
+              type: 'object',
+              properties: {
+                name: { type: ['string', 'null'] },
+              },
+            })
+          })
+        })
+
+        context('with recursive combining', () => {
+          it('expands an OpenAPI.forDream nested inside another forDream call combining', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: {
+                only: ['email'],
+                combining: {
+                  pets: {
+                    type: 'array',
+                    items: OpenAPI.forDream(Pet, {
+                      only: ['name'],
+                      combining: {
+                        owner: OpenAPI.forDream(User, { only: ['email'] }),
+                      },
+                    }),
+                  },
+                },
+              },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const schema = (response['/users']!.post.requestBody as any).content['application/json']
+              .schema as any
+            expect(schema.properties.pets.items.properties).toEqual({
+              name: { type: ['string', 'null'] },
+              owner: {
+                type: 'object',
+                properties: {
+                  email: { type: 'string' },
+                },
+              },
+            })
+          })
+        })
+
+        context('no-model outer body, OpenAPI.forDream inside raw properties', () => {
+          it('expands the helper when the outer requestBody has no base Dream model', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: {
+                type: 'object',
+                required: ['pet'],
+                properties: {
+                  pet: OpenAPI.forDream(Pet, { only: ['name'] }),
+                },
+              },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response['/users']!.post.requestBody).toEqual({
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    required: ['pet'],
+                    properties: {
+                      pet: {
+                        type: 'object',
+                        properties: {
+                          name: { type: ['string', 'null'] },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            })
+          })
+        })
+
+        context('OpenAPI.forDream nested via raw properties.items', () => {
+          it('expands the helper as the items schema of an array property in a raw-properties body', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: {
+                type: 'object',
+                properties: {
+                  pets: {
+                    type: 'array',
+                    items: OpenAPI.forDream(Pet, { only: ['name'] }),
+                  },
+                },
+              },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const schema = (response['/users']!.post.requestBody as any).content['application/json']
+              .schema as any
+            expect(schema.properties.pets).toEqual({
+              type: 'array',
+              items: {
+                type: 'object',
+                properties: {
+                  name: { type: ['string', 'null'] },
+                },
+              },
+            })
+          })
+        })
+
+        context('backwards compatibility', () => {
+          it('hand-rolled nested object fragments continue to render identically', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: {
+                only: ['email'],
+                combining: {
+                  items: {
+                    type: 'array',
+                    items: {
+                      type: 'object',
+                      required: ['title'],
+                      properties: {
+                        title: { type: 'string' },
+                        flagged: { type: 'boolean' },
+                      },
+                    },
+                  },
+                },
+              },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const schema = (response['/users']!.post.requestBody as any).content['application/json']
+              .schema as any
+            expect(schema.properties.items).toEqual({
+              type: 'array',
+              items: {
+                type: 'object',
+                required: ['title'],
+                properties: {
+                  title: { type: 'string' },
+                  flagged: { type: 'boolean' },
+                },
+              },
+            })
+          })
+        })
+
+        it('type test - ensure OpenAPI.forDream column-name options are constrained to the model and that nested for: is rejected in response shorthand', () => {
+          // valid: param-safe column names in only/including/required
+          OpenAPI.forDream(Pet, { only: ['name'], including: ['userId'], required: ['name'] })
+
+          // @ts-expect-error — 'notARealColumn' is not a column of Pet
+          OpenAPI.forDream(Pet, { only: ['notARealColumn'] })
+
+          // @ts-expect-error — 'notARealColumn' is not a column of Pet
+          OpenAPI.forDream(Pet, { including: ['notARealColumn'] })
+
+          // @ts-expect-error — 'notARealColumn' is not a column of Pet
+          OpenAPI.forDream(Pet, { required: ['notARealColumn'] })
+
+          new OpenapiEndpointRenderer(User, UsersController, 'create', {
+            responses: {
+              200: {
+                type: 'object',
+                properties: {
+                  // @ts-expect-error — nested for: is not allowed in response shorthand
+                  pet: { for: Pet },
+                },
+              },
+            },
           })
         })
       })

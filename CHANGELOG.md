@@ -1,3 +1,8 @@
+## 3.3.0
+
+- recursive Dream-model-driven request bodies via a nested `for:` sentinel inside `requestBody.combining` / `properties` / `items` — produces an inline object schema derived from the model's param-safe columns, recurses through further `combining`, and is request-only (response shorthand still uses `$serializable` / `$serializer`)
+- `OpenAPI.forDream(Model, opts)` helper with column-level type narrowing — `only` / `including` / `required` are constrained at compile time to the columns of the model passed as the first argument; rejects unknown column names
+
 ## 3.2.1
 
 - stop injecting `additionalProperties: false` into serializer openapi shapes

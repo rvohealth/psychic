@@ -28,6 +28,7 @@ import { DreamModelSerializerType, SerializerCasing, SimpleObjectSerializerType 
 import NonSerializerSuppliedToSerializerBodySegment from '../error/openapi/NonSerializerSuppliedToSerializerBodySegment.js'
 import isArrayParamName from '../helpers/isArrayParamName.js'
 import { OpenapiEndpointResponse, OpenapiRenderOpts, OpenapiResponses } from './endpoint.js'
+import buildDreamRequestBodyShape from './helpers/buildDreamRequestBodyShape.js'
 import isBlankDescription from './helpers/isBlankDescription.js'
 import maybeNullOpenapiShorthandToOpenapiShorthand from './helpers/maybeNullOpenapiShorthandToOpenapiShorthand.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
@@ -37,6 +38,13 @@ import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 export interface OpenapiBodySegmentRendererOpts {
   renderOpts: OpenapiRenderOpts
   target: OpenapiBodyTarget
+  /**
+   * Identifier (typically a controller-action path) used to enrich error
+   * messages emitted by `dreamColumnOpenapiShape` when an unrecognized DB
+   * type is encountered while expanding a `$dream` sentinel. Optional —
+   * defaults to `'unknown'` when not supplied.
+   */
+  source?: string
 }
 
 /**
@@ -51,6 +59,7 @@ export interface OpenapiBodySegmentRendererOpts {
  * - Nullable array shorthands like `['string[]', 'null']` → `{ type: ['array', 'null'], items: { type: 'string' } }`
  * - Serializer references like `{ $serializer: SomeSerializer }` → `{ $ref: '#/components/schemas/SerializerOpenapiName' }`
  * - Serializable references like `{ $serializable: SomeModel, key: 'summary' }` → resolved serializer reference
+ * - Nested model-derived request-body references like `{ for: SomeModel, including, only, required, combining }` → an inline object schema derived from the model's param-safe columns (request-only)
  *
  * The class recursively processes nested structures (objects, arrays, unions) and maintains
  * a collection of referenced serializers that need to be included in the final OpenAPI document.
@@ -83,6 +92,7 @@ export default class OpenapiSegmentExpander {
   private casing: SerializerCasing
   private suppressResponseEnums: boolean
   private target: OpenapiBodyTarget
+  private source: string
 
   /**
    * @internal
@@ -90,11 +100,15 @@ export default class OpenapiSegmentExpander {
    * Used to recursively expand nested object structures
    * within nested openapi objects
    */
-  constructor(bodySegment: OpenapiBodySegment, { renderOpts, target }: OpenapiBodySegmentRendererOpts) {
+  constructor(
+    bodySegment: OpenapiBodySegment,
+    { renderOpts, target, source }: OpenapiBodySegmentRendererOpts,
+  ) {
     this.bodySegment = bodySegment
     this.casing = renderOpts.casing
     this.suppressResponseEnums = renderOpts.suppressResponseEnums
     this.target = target
+    this.source = source ?? 'unknown'
   }
 
   /**
@@ -164,6 +178,9 @@ export default class OpenapiSegmentExpander {
       case '$serializable':
         return this.serializableStatement(bodySegment)
 
+      case '$for':
+        return this.forStatement(bodySegment)
+
       case 'unknown_object':
         return {
           referencedSerializers: [],
@@ -199,6 +216,7 @@ export default class OpenapiSegmentExpander {
     if (isBlankDescription(bodySegment)) return 'blank_description'
     if (typeof serializerRefBodySegment.$serializer === 'function') return '$serializer'
     if (serializableRefBodySegment.$serializable) return '$serializable'
+    if (typeof (bodySegment as { for?: unknown })?.for === 'function') return '$for'
     if (refBodySegment.$ref) return '$ref'
     if (schemaRefBodySegment.$schema) return '$schema'
     if (oneOfBodySegment.oneOf) return 'oneOf'
@@ -578,6 +596,56 @@ The following values will be allowed:
     }
 
     return { referencedSerializers: [serializer], openapi: serializerRef }
+  }
+
+  /**
+   * @internal
+   *
+   * Expand a nested `for:` request-body sentinel into a fully-resolved
+   * `OpenapiSchemaObject`. The sentinel takes the same shape as the
+   * top-level model-driven `requestBody`:
+   *
+   * ```ts
+   * { for: SomeModel, including?, only?, required?, combining? }
+   * ```
+   *
+   * and produces the same shape that the top-level model-driven
+   * `requestBody` produces — param-safe columns inferred from the model,
+   * with `combining` entries (which themselves may contain further `for:`
+   * sentinels) merged into the resulting properties.
+   *
+   * The `for:` sentinel is request-only at the type level. If it is
+   * encountered while expanding a response shape, this method throws —
+   * the type system should have prevented this, so reaching here indicates
+   * a misuse that bypassed type checking (e.g., via `as any`).
+   */
+  private forStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
+    if (this.target !== 'request') {
+      throw new Error(
+        `'for:' sentinel is only valid inside request body shorthand; encountered while expanding a response.`,
+      )
+    }
+
+    const ref = bodySegment as unknown as {
+      for: typeof Dream
+      including?: readonly string[]
+      only?: readonly string[]
+      required?: readonly string[]
+      combining?: Record<string, unknown>
+    }
+
+    const paramsShape = buildDreamRequestBodyShape(
+      ref.for,
+      {
+        only: ref.only,
+        including: ref.including,
+        required: ref.required,
+        combining: ref.combining,
+      },
+      this.source,
+    )
+
+    return this.recursivelyParseBody(paramsShape)
   }
 
   private serializableStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {

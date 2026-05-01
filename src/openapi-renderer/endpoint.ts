@@ -12,6 +12,7 @@ import {
   OpenapiSchemaObject,
   OpenapiSchemaProperties,
   OpenapiSchemaPropertiesShorthand,
+  OpenapiShorthandPrimitiveTypes,
 } from '@rvoh/dream/openapi'
 import {
   DreamAttributes,
@@ -38,7 +39,6 @@ import { ValidateOpenapiSchemaOptions } from '../helpers/validateOpenApiSchema.j
 import PsychicApp from '../psychic-app/index.js'
 import { ControllerActionRouteConfig, RouteConfig } from '../router/route-manager.js'
 import { HttpMethod } from '../router/types.js'
-import openapiParamNamesForDreamClass from '../server/helpers/openapiParamNamesForDreamClass.js'
 import OpenapiSegmentExpander, {
   OpenapiBodySegment,
   OpenapiBodySegmentRendererOpts,
@@ -47,7 +47,7 @@ import OpenapiSegmentExpander, {
   SerializerArray,
 } from './body-segment.js'
 import { DEFAULT_OPENAPI_RESPONSES, OpenapiValidateTarget } from './defaults.js'
-import { dreamColumnOpenapiShape } from './helpers/dreamColumnOpenapiShape.js'
+import buildDreamRequestBodyShape from './helpers/buildDreamRequestBodyShape.js'
 import openapiOpts from './helpers/openapiOpts.js'
 import openapiRoute from './helpers/openapiRoute.js'
 import safelyAttachCursorPaginationParamToRequestBodySegment from './helpers/safelyAttachCursorPaginationParamToRequestBodySegment.js'
@@ -694,47 +694,25 @@ export default class OpenapiEndpointRenderer<
     const dreamClass = forDreamClass || this.getSingleDreamModelClass()
     if (!dreamClass) return this.defaultRequestBody()
 
-    const { only, including, combining } = (this.requestBody || {}) as OpenapiSchemaRequestBodyForOption<
-      typeof Dream
-    >
+    const { only, including, required, combining } = (this.requestBody ||
+      {}) as OpenapiSchemaRequestBodyForOption<typeof Dream>
 
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    const paramSafeColumns = openapiParamNamesForDreamClass(dreamClass, { only, including } as any)
-
-    const paramsShape: OpenapiSchemaObject = {
-      type: 'object',
-      properties: {},
-    }
-
-    const required = (this.requestBody as OpenapiSchemaRequestBodyForOption<typeof Dream>)?.required
-    if (required) {
-      paramsShape.required = required as string[]
-    }
-
-    paramsShape.properties = paramSafeColumns.reduce(
-      (acc, columnName) => {
-        acc[columnName] = dreamColumnOpenapiShape(
-          this.controllerClass.controllerActionPath(this.action),
-          dreamClass,
-          columnName,
-          undefined,
-          {
-            allowGenericJson: true,
-          },
-        )
-        return acc
+    const source = this.controllerClass.controllerActionPath(this.action)
+    const paramsShape = buildDreamRequestBodyShape(
+      dreamClass,
+      {
+        only: only as readonly string[] | undefined,
+        including: including as readonly string[] | undefined,
+        required: required as readonly string[] | undefined,
+        combining: combining as Record<string, unknown> | undefined,
       },
-      paramsShape.properties as Record<string, OpenapiSchemaBody>,
+      source,
     )
-
-    paramsShape.properties = {
-      ...paramsShape.properties,
-      ...((combining || {}) as OpenapiSchemaProperties),
-    }
 
     let processedSchema = new OpenapiSegmentExpander(paramsShape, {
       renderOpts,
       target: 'request',
+      source,
     }).render().openapi
 
     const bodyPaginationPageParam = (this.paginate as { body: string })?.body
@@ -1334,7 +1312,10 @@ export interface OpenapiEndpointRendererOpts<
    *  })
    * ```
    */
-  requestBody?: OpenapiSchemaBodyShorthand | OpenapiSchemaRequestBodyForOption<I, ForOption> | null
+  requestBody?:
+    | OpenapiSchemaRequestBodyShorthandWithFor
+    | OpenapiSchemaRequestBodyForOption<I, ForOption>
+    | null
 
   /**
    * an array of tag names you wish to apply to this endpoint.
@@ -1657,6 +1638,90 @@ export interface OpenapiEndpointRendererDefaultResponseOption {
   maybeNull?: boolean
 }
 
+/**
+ * @internal
+ *
+ * Predecessor map used to decrement a depth counter inside recursive
+ * `$dream` shorthand types. Capped at 3 levels of `$dream`-aware
+ * recursion; beyond that the shape falls back to the unconstrained
+ * Dream-side `OpenapiSchemaPropertiesShorthand` and accepts but does
+ * not narrow further nesting.
+ */
+type DreamShorthandPrev = [never, 0, 1, 2, 3]
+
+/**
+ * Nested model-derived request-body shorthand. Same shape as the
+ * top-level model-driven `requestBody` (with `for:` naming the model),
+ * but usable at any nesting site — inside `combining`, inside raw
+ * `properties` of a non-model body, and inside `items` of an array.
+ *
+ * Mirrors the response-side `$serializable` / `$serializer` keys
+ * recognized by `OpenapiSegmentExpander`, but expands via param-safe
+ * column derivation instead of serializer resolution.
+ *
+ * `for:` at this nesting position is request-only at the type level.
+ * Response shorthand types do not include it.
+ *
+ * ```ts
+ * @OpenAPI(ActionPlan, {
+ *   requestBody: {
+ *     including: ['type', 'clientId'],
+ *     combining: {
+ *       planItems: {
+ *         type: 'array',
+ *         items: { for: ActionItem, required: ['title', 'type'] },
+ *       },
+ *     },
+ *   },
+ * })
+ * ```
+ */
+export type OpenapiSchemaNestedFor<Depth extends 0 | 1 | 2 | 3 = 3> = {
+  for: typeof Dream
+  including?: readonly string[]
+  only?: readonly string[]
+  required?: readonly string[]
+  combining?: Depth extends 0
+    ? OpenapiSchemaPropertiesShorthand
+    : OpenapiSchemaRequestPropertiesShorthandWithFor<DreamShorthandPrev[Depth] & (0 | 1 | 2 | 3)>
+}
+
+/**
+ * Property-shorthand record (request-only) whose values may be any of
+ * the existing Dream-side body shorthands OR a nested `for:` sentinel.
+ * Used as the type of `combining` and as the value type of nested
+ * `properties` / `items` in request bodies.
+ *
+ * `for:`-aware recursion is depth-bounded (cap = 3); past the cap the
+ * value type falls back to the unconstrained Dream-side shorthand to
+ * avoid TypeScript "type instantiation is excessively deep" errors.
+ */
+export interface OpenapiSchemaRequestPropertiesShorthandWithFor<Depth extends 0 | 1 | 2 | 3 = 3> {
+  [key: string]: OpenapiSchemaRequestBodyShorthandWithFor<Depth> | OpenapiShorthandPrimitiveTypes
+}
+
+/**
+ * Body-shorthand value (request-only) — a Dream-side shorthand OR a
+ * nested `for:` sentinel OR an object/array shape whose nested values
+ * may themselves contain `for:`. Recurses through `items` and
+ * `properties` with a bounded depth.
+ */
+export type OpenapiSchemaRequestBodyShorthandWithFor<Depth extends 0 | 1 | 2 | 3 = 3> =
+  | OpenapiSchemaBodyShorthand
+  | OpenapiSchemaNestedFor<Depth>
+  | {
+      type: 'array' | readonly ['array', 'null'] | readonly ['null', 'array']
+      items: OpenapiSchemaRequestBodyShorthandWithFor<Depth>
+      description?: string
+    }
+  | {
+      type: 'object' | readonly ['object', 'null'] | readonly ['null', 'object']
+      properties?: OpenapiSchemaRequestPropertiesShorthandWithFor<Depth>
+      required?: readonly string[]
+      description?: string
+      additionalProperties?: boolean | OpenapiSchemaRequestBodyShorthandWithFor<Depth>
+    }
+
 export type OpenapiSchemaRequestBodyForOption<
   Serializable extends DreamSerializable | DreamSerializableArray | undefined,
   ForOption extends typeof Dream | undefined = undefined,
@@ -1742,7 +1807,7 @@ export interface OpenapiSchemaRequestBodyForDreamClass<ForOption extends typeof 
 
   /**
    * expand the included fields to allow additional fields
-   * that are unrelated to the model's params
+   * that are unrelated to the model's params.
    *
    * ```ts
    * @OpenAPI({
@@ -1757,8 +1822,35 @@ export interface OpenapiSchemaRequestBodyForDreamClass<ForOption extends typeof 
    *   ...
    * }
    * ```
+   *
+   * `combining` values may also be a nested `for:` sentinel — the same
+   * shape as the top-level model-driven `requestBody`, just nested. It
+   * derives an object schema from another Dream model's param-safe
+   * columns and accepts the same `including` / `only` / `required` /
+   * `combining` siblings.
+   *
+   * ```ts
+   * @OpenAPI(ActionPlan, {
+   *   requestBody: {
+   *     including: ['type', 'clientId'],
+   *     combining: {
+   *       planItems: {
+   *         type: 'array',
+   *         items: {
+   *           for: ActionItem,
+   *           required: ['title', 'type'],
+   *         },
+   *       },
+   *     },
+   *   },
+   * })
+   * ```
+   *
+   * The nested `for:` sentinel is request-only; it is not accepted in
+   * `responses` shorthand (use the existing `$serializable` / `$serializer`
+   * keys there).
    */
-  combining?: OpenapiSchemaPropertiesShorthand
+  combining?: OpenapiSchemaRequestPropertiesShorthandWithFor
 
   /**
    * Specify which fields are required for your openapi
@@ -1845,7 +1937,7 @@ export interface OpenapiSchemaRequestBodyForBaseDreamClass<
 
   /**
    * expand the included fields to allow additional fields
-   * that are unrelated to the model's params
+   * that are unrelated to the model's params.
    *
    * ```ts
    * @OpenAPI({
@@ -1860,8 +1952,35 @@ export interface OpenapiSchemaRequestBodyForBaseDreamClass<
    *   ...
    * }
    * ```
+   *
+   * `combining` values may also be a nested `for:` sentinel — the same
+   * shape as the top-level model-driven `requestBody`, just nested. It
+   * derives an object schema from another Dream model's param-safe
+   * columns and accepts the same `including` / `only` / `required` /
+   * `combining` siblings.
+   *
+   * ```ts
+   * @OpenAPI(ActionPlan, {
+   *   requestBody: {
+   *     including: ['type', 'clientId'],
+   *     combining: {
+   *       planItems: {
+   *         type: 'array',
+   *         items: {
+   *           for: ActionItem,
+   *           required: ['title', 'type'],
+   *         },
+   *       },
+   *     },
+   *   },
+   * })
+   * ```
+   *
+   * The nested `for:` sentinel is request-only; it is not accepted in
+   * `responses` shorthand (use the existing `$serializable` / `$serializer`
+   * keys there).
    */
-  combining?: OpenapiSchemaPropertiesShorthand
+  combining?: OpenapiSchemaRequestPropertiesShorthandWithFor
 
   /**
    * Specify which fields are required for your openapi
