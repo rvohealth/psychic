@@ -5,14 +5,14 @@ import EnvInternal from '../../../helpers/EnvInternal.js'
 export default async function installOpenapiTypescript() {
   if (EnvInternal.isTest) return
 
-  const cmd = PackageManager.add('openapi-typescript', { dev: true })
+  const { command, args } = PackageManager.add('openapi-typescript', { dev: true })
 
   try {
-    await DreamCLI.spawn(cmd)
+    await DreamCLI.spawn(command, { args })
   } catch {
     console.log(`Failed to install openapi-typescript as a dev dependency. Please make sure the following command succeeds:
 
-"${cmd}"
+"${command} ${args.join(' ')}"
 `)
   }
 }

@@ -24,7 +24,8 @@ export default async function generateOpenapiZustandBindings(options: OpenapiZus
   const opts = await promptForOptions(options)
   await writeClientConfigFile(opts)
   await writeInitializer(opts)
-  await DreamCLI.spawn(PackageManager.add(['@hey-api/openapi-ts'], { dev: true }))
+  const { command, args } = PackageManager.add(['@hey-api/openapi-ts'], { dev: true })
+  await DreamCLI.spawn(command, { args })
   printFinalStepsMessage(opts)
 }
 

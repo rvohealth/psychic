@@ -82,7 +82,9 @@ export default class PsychicBin {
 
     // call post-sync command in a separate process, so that newly-generated
     // types can be reloaded and brought into all classes.
-    await DreamCLI.spawn(psychicApp.psyCmd('post-sync'), {
+    const { command, args } = psychicApp.psyCmd('post-sync')
+    await DreamCLI.spawn(command, {
+      args,
       onStdout: message => {
         DreamCLI.logger.logContinueProgress(`[post-sync]` + ' ' + message, {
           logPrefixColor: 'greenBright',

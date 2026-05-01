@@ -1,7 +1,7 @@
 ## 3.2.0
 
 - `launchDevServer` and `OpenApiSpecDiff.compare` throw `LaunchDevServerRequiresDevelopmentOrTest` / `OpenApiSpecDiffRequiresDevelopmentOrTest` when `NODE_ENV` is anything other than `development` or `test`, turning their dev-only contracts into runtime invariants that fail closed for staging-style and unforeseen environments
-
+- `PackageManager.add` / `.run` / `.exec` and `psyCmd` now return `{ command, args }` argv tuples (instead of full shell-form strings) so callers can invoke `DreamCLI.spawn(command, { args })` without shell parsing; generated `cli:sync` initializers and direct callers (Watcher, post-sync, openapi binding generators) updated to use the argv form
 
 ## 3.1.3
 

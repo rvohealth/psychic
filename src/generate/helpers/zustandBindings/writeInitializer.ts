@@ -15,7 +15,7 @@ export default async function writeInitializer({
 }) {
   const pascalized = pascalize(exportName)
   const camelized = camelize(exportName)
-  const execCmd = PackageManager.exec(`openapi-ts -i ${schemaFile} -o ${outputDir}`)
+  const { command, args } = PackageManager.exec('openapi-ts', ['-i', schemaFile, '-o', outputDir])
 
   const destDir = path.join(psychicPath('conf'), 'initializers', 'openapi')
   const initializerFilename = `${camelized}.ts`
@@ -31,7 +31,8 @@ export default function initialize${pascalized}(psy: PsychicApp) {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(\`[${camelized}] syncing...\`, async () => {
-        await DreamCLI.spawn('${execCmd}', {
+        await DreamCLI.spawn('${command}', {
+          args: ${JSON.stringify(args)},
           onStdout: message => {
             DreamCLI.logger.logContinueProgress(\`[${camelized}]\` + ' ' + message, {
               logPrefixColor: 'green',

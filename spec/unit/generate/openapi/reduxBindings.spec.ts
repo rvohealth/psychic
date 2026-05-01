@@ -181,7 +181,8 @@ export default function initializeMyApi(psy: PsychicApp) {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(\`[myApi] syncing...\`, async () => {
-        await DreamCLI.spawn('pnpm exec rtk-query-codegen-openapi src/conf/openapi/myApi.openapi-codegen.json', {
+        await DreamCLI.spawn('pnpm', {
+          args: ["exec","rtk-query-codegen-openapi","src/conf/openapi/myApi.openapi-codegen.json"],
           onStdout: message => {
             DreamCLI.logger.logContinueProgress(\`[myApi]\` + ' ' + message, {
               logPrefixColor: 'green',
@@ -202,7 +203,9 @@ export default function initializeMyApi(psy: PsychicApp) {
         apiFile: 'test-client/app/api/api.ts',
       })
 
-      expect(dreamCliSpy).toHaveBeenCalledWith('pnpm add -D @rtk-query/codegen-openapi ts-node')
+      expect(dreamCliSpy).toHaveBeenCalledWith('pnpm', {
+        args: ['add', '-D', '@rtk-query/codegen-openapi', 'ts-node'],
+      })
     })
   })
 })

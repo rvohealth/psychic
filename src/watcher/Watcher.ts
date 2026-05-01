@@ -40,7 +40,8 @@ export default class Watcher {
 
             this.syncing = true
             try {
-              await DreamCLI.spawn(psy.psyCmd('sync'))
+              const { command, args } = psy.psyCmd('sync')
+              await DreamCLI.spawn(command, { args })
             } catch (err) {
               DreamCLI.logger.log(`ERROR!`, { logPrefixColor: 'red' })
               console.error(err)

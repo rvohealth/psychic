@@ -26,7 +26,7 @@ export default async function writeInitializer({ exportName }: { exportName: str
   }
 
   const filePath = path.join('.', 'src', 'conf', 'openapi', `${camelized}.openapi-codegen.json`)
-  const execCmd = PackageManager.exec(`rtk-query-codegen-openapi ${filePath}`)
+  const { command, args } = PackageManager.exec('rtk-query-codegen-openapi', [filePath])
 
   const contents = `\
 import { DreamCLI } from '@rvoh/dream/system'
@@ -37,7 +37,8 @@ export default function initialize${pascalized}(psy: PsychicApp) {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(\`[${camelized}] syncing...\`, async () => {
-        await DreamCLI.spawn('${execCmd}', {
+        await DreamCLI.spawn('${command}', {
+          args: ${JSON.stringify(args)},
           onStdout: message => {
             DreamCLI.logger.logContinueProgress(\`[${camelized}]\` + ' ' + message, {
               logPrefixColor: 'green',

@@ -107,7 +107,8 @@ export default function initializeMyApi(psy: PsychicApp) {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(\`[myApi] syncing...\`, async () => {
-        await DreamCLI.spawn('pnpm exec openapi-ts -i ./src/openapi/openapi.json -o ../client/app/api/myApi', {
+        await DreamCLI.spawn('pnpm', {
+          args: ["exec","openapi-ts","-i","./src/openapi/openapi.json","-o","../client/app/api/myApi"],
           onStdout: message => {
             DreamCLI.logger.logContinueProgress(\`[myApi]\` + ' ' + message, {
               logPrefixColor: 'green',
@@ -138,7 +139,8 @@ export default function initializeMyApi(psy: PsychicApp) {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(\`[myApi] syncing...\`, async () => {
-        await DreamCLI.spawn('pnpm exec openapi-ts -i ./src/openapi/openapi.json -o ../client/app/api/myApi', {
+        await DreamCLI.spawn('pnpm', {
+          args: ["exec","openapi-ts","-i","./src/openapi/openapi.json","-o","../client/app/api/myApi"],
           onStdout: message => {
             DreamCLI.logger.logContinueProgress(\`[myApi]\` + ' ' + message, {
               logPrefixColor: 'green',
@@ -203,7 +205,7 @@ export default function initializeMyApi(psy: PsychicApp) {
         clientConfigFile: 'test-client/app/api/myApi/client.ts',
       })
 
-      expect(dreamCliSpy).toHaveBeenCalledWith('pnpm add -D @hey-api/openapi-ts')
+      expect(dreamCliSpy).toHaveBeenCalledWith('pnpm', { args: ['add', '-D', '@hey-api/openapi-ts'] })
     })
   })
 })

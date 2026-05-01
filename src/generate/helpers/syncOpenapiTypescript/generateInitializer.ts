@@ -23,7 +23,7 @@ export default async function generateInitializer(
     await fs.mkdir(destDir, { recursive: true })
   }
 
-  const execCmd = PackageManager.exec(`openapi-typescript ${openapiFilepath} -o ${outfile}`)
+  const { command, args } = PackageManager.exec('openapi-typescript', [openapiFilepath, '-o', outfile])
 
   const contents = `\
 import { DreamCLI } from '@rvoh/dream/system'
@@ -34,7 +34,7 @@ export default (psy: PsychicApp) => {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(\`[${hyphenized}] extracting types from ${openapiFilepath} to ${outfile}...\`, async () => {
-        await DreamCLI.spawn('${execCmd}')
+        await DreamCLI.spawn('${command}', { args: ${JSON.stringify(args)} })
       })
     }
   })

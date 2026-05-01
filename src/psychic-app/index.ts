@@ -220,11 +220,12 @@ export default class PsychicApp {
   /**
    * @internal
    *
-   * adds the necessary package manager prefix to the psy command provided
-   * i.e. `psyCmd('sync')`
+   * Returns the argv-form invocation for a `psy` subcommand, ready to pass
+   * to `DreamCLI.spawn(command, { args })`. Example: `psyCmd('sync')` →
+   * `{ command: 'pnpm', args: ['psy', 'sync'] }` (under pnpm).
    */
-  public psyCmd(cmd: string) {
-    return PackageManager.run(`psy ${cmd}`)
+  public psyCmd(cmd: string, args: string[] = []) {
+    return PackageManager.run('psy', [cmd, ...args])
   }
 
   /**

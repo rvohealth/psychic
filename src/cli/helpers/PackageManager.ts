@@ -1,53 +1,61 @@
 import PsychicApp from '../../psychic-app/index.js'
 
+export interface PackageManagerCommand {
+  command: string
+  args: string[]
+}
+
 export default class PackageManager {
   public static get packageManager() {
     return PsychicApp.getOrFail().packageManager
   }
 
-  public static add(dependencyOrDependencies: string | string[], { dev }: { dev?: boolean } = {}) {
-    const dependency = Array.isArray(dependencyOrDependencies)
-      ? dependencyOrDependencies.join(' ')
-      : dependencyOrDependencies
+  public static add(
+    dependencyOrDependencies: string | string[],
+    { dev }: { dev?: boolean } = {},
+  ): PackageManagerCommand {
+    const list = Array.isArray(dependencyOrDependencies)
+      ? dependencyOrDependencies
+      : [dependencyOrDependencies]
 
     if (dev) {
       switch (this.packageManager) {
         case 'npm':
-          return `${this.packageManager} install --save-dev ${dependency}`
+          return { command: 'npm', args: ['install', '--save-dev', ...list] }
         default:
-          return `${this.packageManager} add -D ${dependency}`
+          return { command: this.packageManager, args: ['add', '-D', ...list] }
       }
     } else {
       switch (this.packageManager) {
         case 'npm':
-          return `${this.packageManager} install ${dependency}`
-
+          return { command: 'npm', args: ['install', ...list] }
         default:
-          return `${this.packageManager} add ${dependency}`
+          return { command: this.packageManager, args: ['add', ...list] }
       }
     }
   }
 
-  public static run(cmd: string) {
+  public static run(cmd: string, args: string[] = []): PackageManagerCommand {
     switch (this.packageManager) {
       case 'npm':
-        return `npm run ${cmd}`
-
+        // npm requires `--` to separate npm args from script args
+        return {
+          command: 'npm',
+          args: args.length ? ['run', cmd, '--', ...args] : ['run', cmd],
+        }
       default:
-        return `${this.packageManager} ${cmd}`
+        return { command: this.packageManager, args: [cmd, ...args] }
     }
   }
 
-  public static exec(cmd: string) {
+  public static exec(cmd: string, args: string[] = []): PackageManagerCommand {
     switch (this.packageManager) {
       case 'npm':
-        return `npm exec -- ${cmd}`
-
+        return { command: 'npm', args: ['exec', '--', cmd, ...args] }
       case 'yarn':
-        return `yarn ${cmd}`
-
+        return { command: 'yarn', args: [cmd, ...args] }
       default:
-        return `${this.packageManager} exec ${cmd}`
+        return { command: this.packageManager, args: ['exec', cmd, ...args] }
     }
   }
 }
