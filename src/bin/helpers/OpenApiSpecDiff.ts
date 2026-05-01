@@ -3,6 +3,8 @@ import * as cp from 'node:child_process'
 import * as fs from 'node:fs'
 import * as path from 'node:path'
 import colorize from '../../cli/helpers/colorize.js'
+import OpenApiSpecDiffRequiresDevelopmentOrTest from '../../error/openapi/OpenApiSpecDiffRequiresDevelopmentOrTest.js'
+import EnvInternal from '../../helpers/EnvInternal.js'
 import PsychicApp, { DefaultPsychicOpenapiOptions } from '../../psychic-app/index.js'
 
 /**
@@ -71,6 +73,7 @@ export class OpenApiSpecDiff {
    * ```
    */
   public compare(openapiConfigs: [string, PsychicOpenapiConfig][]): void {
+    if (!EnvInternal.isDevelopmentOrTest) throw new OpenApiSpecDiffRequiresDevelopmentOrTest()
     const results: ComparisonResult[] = []
 
     this.oasdiffConfig = this.getOasDiffConfig()

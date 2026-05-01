@@ -1,3 +1,8 @@
+## 3.2.0
+
+- `launchDevServer` and `OpenApiSpecDiff.compare` throw `LaunchDevServerRequiresDevelopmentOrTest` / `OpenApiSpecDiffRequiresDevelopmentOrTest` when `NODE_ENV` is anything other than `development` or `test`, turning their dev-only contracts into runtime invariants that fail closed for staging-style and unforeseen environments
+
+
 ## 3.1.3
 
 - gate auto-generated type/schema/OpenAPI sync to `NODE_ENV=test`; `psy sync` and `psy post-sync` no longer regenerate files in development, preventing a stale dev database from clobbering types generated under tests

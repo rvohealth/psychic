@@ -1,6 +1,8 @@
 import { ChildProcessWithoutNullStreams, spawn } from 'child_process'
 import { debuglog } from 'node:util'
+import LaunchDevServerRequiresDevelopmentOrTest from '../../error/devtools/LaunchDevServerRequiresDevelopmentOrTest.js'
 import UnexpectedUndefined from '../../error/UnexpectedUndefined.js'
+import EnvInternal from '../../helpers/EnvInternal.js'
 import PsychicApp from '../../psychic-app/index.js'
 import sleep from './sleep.js'
 
@@ -11,6 +13,7 @@ export async function launchDevServer(
   key: string,
   { port = 3000, cmd = 'pnpm client', timeout = 20000, onStdOut }: LaunchDevServerOpts = {},
 ) {
+  if (!EnvInternal.isDevelopmentOrTest) throw new LaunchDevServerRequiresDevelopmentOrTest(cmd)
   if (devServerProcesses[key]) return
 
   if (debugEnabled) PsychicApp.log('Starting server...')
