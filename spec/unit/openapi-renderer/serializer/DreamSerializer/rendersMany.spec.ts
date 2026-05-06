@@ -176,7 +176,6 @@ describe('DreamSerializer rendersMany', () => {
               },
             },
           },
-          additionalProperties: false,
         })
       })
     })

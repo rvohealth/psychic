@@ -1,4 +1,5 @@
-import { Ajv, type ErrorObject, type JSONSchemaType, type ValidateFunction } from 'ajv'
+import { type ErrorObject, type JSONSchemaType, type ValidateFunction } from 'ajv'
+import { Ajv2020 } from 'ajv/dist/2020.js'
 import addFormats from 'ajv-formats'
 
 /**
@@ -113,7 +114,7 @@ export function createValidator<T = unknown>(
     init: undefined,
   }
 
-  const ajv = new Ajv({
+  const ajv = new Ajv2020({
     removeAdditional: false,
     useDefaults: true,
     strict: false,
@@ -178,9 +179,9 @@ export interface ValidationError {
   params?: Record<string, unknown>
 }
 
-export type AjvValidationOpts = ConstructorParameters<typeof Ajv>[0]
+export type AjvValidationOpts = ConstructorParameters<typeof Ajv2020>[0]
 export type ValidateOpenapiSchemaOptions = AjvValidationOpts & CustomOpenapiValidationOptions
 
 export interface CustomOpenapiValidationOptions {
-  init?: (ajv: Ajv) => void
+  init?: (ajv: Ajv2020) => void
 }

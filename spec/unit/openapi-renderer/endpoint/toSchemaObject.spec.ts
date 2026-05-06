@@ -76,7 +76,6 @@ describe('OpenapiEndpointRenderer', () => {
         UserExtra: {
           type: 'object',
           required: ['howyadoin', 'id', 'nicknames'],
-          additionalProperties: false,
           properties: {
             id: {
               type: 'integer',
@@ -145,7 +144,6 @@ describe('OpenapiEndpointRenderer', () => {
             },
           },
           required: ['color', 'id', 'latexOnlyAttr'],
-          additionalProperties: false,
           type: 'object',
         },
 
@@ -164,7 +162,6 @@ describe('OpenapiEndpointRenderer', () => {
             },
           },
           required: ['color', 'id', 'mylarOnlyAttr'],
-          additionalProperties: false,
           type: 'object',
         },
       })
@@ -199,7 +196,6 @@ describe('OpenapiEndpointRenderer', () => {
             },
           },
           required: ['color', 'id', 'latexOnlyAttr'],
-          additionalProperties: false,
           type: 'object',
         },
         ViewModelsMyViewModel: {
@@ -212,7 +208,6 @@ describe('OpenapiEndpointRenderer', () => {
             },
           },
           required: ['favoriteNumber', 'name'],
-          additionalProperties: false,
           type: 'object',
         },
         BalloonMylar: {
@@ -230,7 +225,6 @@ describe('OpenapiEndpointRenderer', () => {
             },
           },
           required: ['color', 'id', 'mylarOnlyAttr'],
-          additionalProperties: false,
           type: 'object',
         },
 
@@ -248,7 +242,6 @@ describe('OpenapiEndpointRenderer', () => {
             },
           },
           required: ['customAttributeTest', 'id', 'name'],
-          additionalProperties: false,
           type: 'object',
         },
       })
@@ -265,7 +258,6 @@ describe('OpenapiEndpointRenderer', () => {
         BalloonLatex: {
           type: 'object',
           required: ['color', 'id', 'latexOnlyAttr'],
-          additionalProperties: false,
           properties: {
             color: { type: ['string', 'null'], enum: ['blue', 'green', 'red', null] },
             id: { type: 'string', format: 'bigint' },
@@ -292,7 +284,6 @@ describe('OpenapiEndpointRenderer', () => {
             CommentTestingString: {
               type: 'object',
               required: ['howyadoin'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   type: 'string',
@@ -328,7 +319,6 @@ describe('OpenapiEndpointRenderer', () => {
                 CommentTestingString: {
                   type: 'object',
                   required: ['howyadoin'],
-                  additionalProperties: false,
                   properties: {
                     howyadoin: {
                       type: 'string',
@@ -367,7 +357,6 @@ The following values will be allowed:
                 PetWithFavoriteTreats: {
                   type: 'object',
                   required: ['favoriteTreat', 'favoriteTreats'],
-                  additionalProperties: false,
                   properties: {
                     favoriteTreats: {
                       type: ['array', 'null'],
@@ -407,7 +396,6 @@ The following values will be allowed:
                   PetWithFavoriteTreatsOverride: {
                     type: 'object',
                     required: ['favoriteTreat', 'favoriteTreats'],
-                    additionalProperties: false,
                     properties: {
                       favoriteTreat: {
                         type: ['string', 'null'],
@@ -454,7 +442,6 @@ The following values will be allowed:
             CommentTestingInteger: {
               type: 'object',
               required: ['howyadoin'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   type: 'integer',
@@ -484,7 +471,6 @@ The following values will be allowed:
               CommentTestingIntegerShorthand: {
                 type: 'object',
                 required: ['howyadoin'],
-                additionalProperties: false,
                 properties: {
                   howyadoin: {
                     type: 'integer',
@@ -514,7 +500,6 @@ The following values will be allowed:
             CommentTestingDecimal: {
               type: 'object',
               required: ['howyadoin'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   type: 'number',
@@ -545,7 +530,6 @@ The following values will be allowed:
               CommentTestingDecimalShorthand: {
                 type: 'object',
                 required: ['howyadoin'],
-                additionalProperties: false,
                 properties: {
                   howyadoin: {
                     type: 'number',
@@ -576,7 +560,6 @@ The following values will be allowed:
             CommentTestingDate: {
               type: 'object',
               required: ['howyadoin', 'howyadoins'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   type: 'string',
@@ -613,7 +596,6 @@ The following values will be allowed:
             CommentTestingDateTime: {
               type: 'object',
               required: ['howyadoin', 'howyadoins'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   type: 'string',
@@ -660,7 +642,6 @@ The following values will be allowed:
                 'nonNullableHowyadoins',
                 'singleHowyadoin',
               ],
-              additionalProperties: false,
               properties: {
                 nonNullableHowyadoin: {
                   $ref: '#/components/schemas/CommentTestingDecimalShorthand',
@@ -709,7 +690,6 @@ The following values will be allowed:
             CommentTestingDefaultNullFields: {
               type: 'object',
               required: ['howyadoin'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   oneOf: [{ type: 'null' }, { type: 'string' }],
@@ -737,7 +717,6 @@ The following values will be allowed:
             CommentTestingDefaultObjectFields: {
               type: 'object',
               required: ['howyadoin'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   type: 'object',
@@ -767,7 +746,6 @@ The following values will be allowed:
             CommentWithAnyOfObject: {
               type: 'object',
               required: ['howyadoin'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   anyOf: [{ type: 'string' }, { type: 'boolean' }],
@@ -792,7 +770,6 @@ The following values will be allowed:
             CommentWithAllOfObject: {
               type: 'object',
               required: ['howyadoin'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   allOf: [{ type: 'string' }, { type: 'boolean' }],
@@ -817,7 +794,6 @@ The following values will be allowed:
             CommentWithOneOfObject: {
               type: 'object',
               required: ['howyadoin'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   oneOf: [{ type: 'string' }, { type: 'boolean' }],
@@ -842,7 +818,6 @@ The following values will be allowed:
             CommentTestingObjectWithSerializerRef: {
               type: 'object',
               required: ['howyadoin'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   type: 'object',
@@ -896,7 +871,6 @@ The following values will be allowed:
                 CommentWithAnyOfArray: {
                   type: 'object',
                   required: ['howyadoin'],
-                  additionalProperties: false,
                   properties: {
                     howyadoin: {
                       type: 'array',
@@ -926,7 +900,6 @@ The following values will be allowed:
                 CommentWithAllOfArray: {
                   type: 'object',
                   required: ['howyadoin'],
-                  additionalProperties: false,
                   properties: {
                     howyadoin: {
                       type: 'array',
@@ -956,7 +929,6 @@ The following values will be allowed:
                 CommentWithOneOfArray: {
                   type: 'object',
                   required: ['howyadoin'],
-                  additionalProperties: false,
                   properties: {
                     howyadoin: {
                       type: 'array',
@@ -995,14 +967,12 @@ The following values will be allowed:
                 },
               },
               required: ['howyadoin'],
-              additionalProperties: false,
               type: 'object',
             },
 
             CommentTestingObjectWithSerializerRef: {
               type: 'object',
               required: ['howyadoin'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   type: 'object',
@@ -1053,7 +1023,6 @@ The following values will be allowed:
             Pet: {
               type: 'object',
               required: ['customAttributeTest', 'id', 'name'],
-              additionalProperties: false,
               properties: {
                 customAttributeTest: { type: 'string' },
                 id: { type: 'string', format: 'bigint' },
@@ -1063,7 +1032,6 @@ The following values will be allowed:
             User: {
               type: 'object',
               required: ['email', 'id', 'name'],
-              additionalProperties: false,
               properties: {
                 id: { type: 'integer' },
                 email: { type: 'string' },
@@ -1089,7 +1057,6 @@ The following values will be allowed:
               PetWithAssociation: {
                 type: 'object',
                 required: ['user'],
-                additionalProperties: false,
                 properties: {
                   user: { $ref: '#/components/schemas/User' },
                 },
@@ -1097,7 +1064,6 @@ The following values will be allowed:
               User: {
                 type: 'object',
                 required: ['email', 'id', 'name'],
-                additionalProperties: false,
                 properties: {
                   email: { type: 'string' },
                   id: { type: 'integer' },
@@ -1128,7 +1094,6 @@ The following values will be allowed:
               PetWithFlattenedAssociation: {
                 type: 'object',
                 required: ['user'],
-                additionalProperties: false,
                 properties: { user: { $ref: '#/components/schemas/UserWithFlattenedPost' } },
               },
               UserWithFlattenedPost: {
@@ -1136,7 +1101,6 @@ The following values will be allowed:
                   {
                     type: 'object',
                     required: ['id'],
-                    additionalProperties: false,
                     properties: {
                       id: { type: 'integer' },
                     },
@@ -1149,7 +1113,6 @@ The following values will be allowed:
               PostWithComments: {
                 type: 'object',
                 required: ['body', 'comments', 'id'],
-                additionalProperties: false,
                 properties: {
                   body: { type: ['string', 'null'] },
                   comments: {
@@ -1162,7 +1125,6 @@ The following values will be allowed:
               Comment: {
                 type: 'object',
                 required: ['body', 'id'],
-                additionalProperties: false,
                 properties: {
                   body: { type: ['string', 'null'] },
                   id: { type: 'string', format: 'bigint' },
@@ -1186,7 +1148,6 @@ The following values will be allowed:
                 UserWithRecentPost: {
                   type: 'object',
                   required: ['id', 'recentPost'],
-                  additionalProperties: false,
                   properties: {
                     id: { type: 'integer' },
                     recentPost: {
@@ -1213,7 +1174,6 @@ The following values will be allowed:
                 Comment: {
                   type: 'object',
                   required: ['body', 'id'],
-                  additionalProperties: false,
                   properties: {
                     body: { type: ['string', 'null'] },
                     id: { type: 'string', format: 'bigint' },
@@ -1239,7 +1199,6 @@ The following values will be allowed:
               PostWithComments: {
                 type: 'object',
                 required: ['body', 'comments', 'id'],
-                additionalProperties: false,
                 properties: {
                   body: { type: ['string', 'null'] },
                   comments: { type: 'array', items: { $ref: '#/components/schemas/Comment' } },
@@ -1249,7 +1208,6 @@ The following values will be allowed:
               Comment: {
                 type: 'object',
                 required: ['body', 'id'],
-                additionalProperties: false,
                 properties: {
                   body: { type: ['string', 'null'] },
                   id: { type: 'string', format: 'bigint' },
@@ -1273,7 +1231,6 @@ The following values will be allowed:
                 Comment: {
                   type: 'object',
                   required: ['body', 'id'],
-                  additionalProperties: false,
                   properties: {
                     body: { type: ['string', 'null'] },
                     id: { type: 'string', format: 'bigint' },
@@ -1323,7 +1280,6 @@ The following values will be allowed:
             LatexSummary: {
               type: 'object',
               required: ['id', 'latexOnlySummaryAttr'],
-              additionalProperties: false,
               properties: {
                 id: { type: 'string', format: 'bigint' },
                 latexOnlySummaryAttr: {
@@ -1335,7 +1291,6 @@ The following values will be allowed:
             CommentTestingDate: {
               type: 'object',
               required: ['howyadoin', 'howyadoins'],
-              additionalProperties: false,
               properties: {
                 howyadoin: { type: 'string', format: 'date' },
                 howyadoins: { type: 'array', items: { type: 'string', format: 'date' } },
@@ -1345,7 +1300,6 @@ The following values will be allowed:
             CommentTestingBasicArraySerializerRef: {
               type: 'object',
               required: ['howyadoin'],
-              additionalProperties: false,
               properties: {
                 howyadoin: {
                   type: 'array',
@@ -1383,7 +1337,6 @@ The following values will be allowed:
           CommentTestingString: {
             type: 'object',
             required: ['howyadoin'],
-            additionalProperties: false,
             properties: {
               howyadoin: {
                 type: 'string',
@@ -1415,7 +1368,6 @@ The following values will be allowed:
           CommentTestingString: {
             type: 'object',
             required: ['howyadoin'],
-            additionalProperties: false,
             properties: {
               howyadoin: {
                 type: 'string',

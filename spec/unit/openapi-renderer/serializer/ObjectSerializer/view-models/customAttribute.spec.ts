@@ -44,10 +44,10 @@ describe('ObjectSerializer (on a view model) customAttribute', () => {
 
       const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
       expect(serializerOpenapiRenderer.renderedOpenapi().openapi).toEqual({
+        type: 'object',
         allOf: [
           {
             type: 'object',
-            additionalProperties: false,
             required: ['name'],
             properties: {
               name: { type: 'string' },
@@ -57,6 +57,7 @@ describe('ObjectSerializer (on a view model) customAttribute', () => {
             $ref: '#/components/schemas/ViewModelsMyViewModel',
           },
         ],
+        unevaluatedProperties: false,
       })
     })
   })
