@@ -115,7 +115,6 @@ describe('ObjectSerializer rendersOne', () => {
                 $ref: '#/components/schemas/User',
               },
             },
-            additionalProperties: false,
           })
         })
       })
@@ -130,10 +129,10 @@ describe('ObjectSerializer rendersOne', () => {
 
         const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
         expect(serializerOpenapiRenderer.renderedOpenapi().openapi).toEqual({
+          type: 'object',
           allOf: [
             {
               type: 'object',
-              additionalProperties: false,
               required: ['species'],
               properties: {
                 species: { type: ['string', 'null'], enum: SpeciesTypesEnumValues },
@@ -143,6 +142,7 @@ describe('ObjectSerializer rendersOne', () => {
               $ref: '#/components/schemas/User',
             },
           ],
+          unevaluatedProperties: false,
         })
       })
     })

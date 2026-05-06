@@ -119,10 +119,10 @@ describe('DreamSerializer customAttributes', () => {
       const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
       const results = serializerOpenapiRenderer.renderedOpenapi()
       expect(results.openapi).toEqual({
+        type: 'object',
         allOf: [
           {
             type: 'object',
-            additionalProperties: false,
             required: ['species'],
             properties: {
               species: { type: ['string', 'null'], enum: [...SpeciesTypesEnumValues, null] },
@@ -132,6 +132,7 @@ describe('DreamSerializer customAttributes', () => {
             $ref: '#/components/schemas/User',
           },
         ],
+        unevaluatedProperties: false,
       })
 
       expect(results.referencedSerializers).toHaveLength(1)
@@ -153,10 +154,10 @@ describe('DreamSerializer customAttributes', () => {
         const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
         const results = serializerOpenapiRenderer.renderedOpenapi()
         expect(results.openapi).toEqual({
+          type: 'object',
           allOf: [
             {
               type: 'object',
-              additionalProperties: false,
               required: ['species'],
               properties: {
                 species: { type: ['string', 'null'], enum: [...SpeciesTypesEnumValues, null] },
@@ -166,6 +167,7 @@ describe('DreamSerializer customAttributes', () => {
               $ref: '#/components/schemas/User',
             },
           ],
+          unevaluatedProperties: false,
         })
 
         expect(results.referencedSerializers).toHaveLength(1)
@@ -188,10 +190,10 @@ describe('DreamSerializer customAttributes', () => {
           const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
           const results = serializerOpenapiRenderer.renderedOpenapi()
           expect(results.openapi).toEqual({
+            type: 'object',
             allOf: [
               {
                 type: 'object',
-                additionalProperties: false,
                 required: ['species'],
                 properties: {
                   species: { type: ['string', 'null'], enum: [...SpeciesTypesEnumValues, null] },
@@ -201,6 +203,7 @@ describe('DreamSerializer customAttributes', () => {
                 $ref: '#/components/schemas/UserSummary',
               },
             ],
+            unevaluatedProperties: false,
           })
 
           expect(results.referencedSerializers).toHaveLength(1)
@@ -220,10 +223,10 @@ describe('DreamSerializer customAttributes', () => {
         const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
         const results = serializerOpenapiRenderer.renderedOpenapi()
         expect(results.openapi).toEqual({
+          type: 'object',
           allOf: [
             {
               type: 'object',
-              additionalProperties: false,
               required: ['species'],
               properties: {
                 species: { type: ['string', 'null'], enum: [...SpeciesTypesEnumValues, null] },
@@ -240,6 +243,7 @@ describe('DreamSerializer customAttributes', () => {
               ],
             },
           ],
+          unevaluatedProperties: false,
         })
 
         expect(results.referencedSerializers).toHaveLength(1)

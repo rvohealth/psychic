@@ -92,13 +92,16 @@ export default class SerializerOpenapiRenderer {
     )
 
     if (this.allOfSiblings.length) {
-      const openapi = referencedSerializersAndOpenapiSchemaBodyShorthand.openapi
-
+      // Property-level locks live only at the `allOf` wrapper (never on the
+      // inline branch or the `$ref`'d siblings) so that all branches'
+      // properties are visible to `unevaluatedProperties` for the union check.
       return {
         ...referencedSerializersAndOpenapiSchemaBodyShorthand,
         openapi: {
-          allOf: [openapi, ...this.allOfSiblings],
-        },
+          type: 'object',
+          allOf: [referencedSerializersAndOpenapiSchemaBodyShorthand.openapi, ...this.allOfSiblings],
+          unevaluatedProperties: false,
+        } as OpenapiSchemaBodyShorthand,
       }
     } else {
       return referencedSerializersAndOpenapiSchemaBodyShorthand
@@ -146,7 +149,13 @@ export default class SerializerOpenapiRenderer {
         type: 'object',
         required: sort(uniq(requiredProperties.map(property => this.setCase(property)))),
         properties: sortObjectByKey(referencedSerializersAndAttributes.attributes),
-        additionalProperties: false,
+        // Property-level locks (`additionalProperties` / `unevaluatedProperties`)
+        // are not emitted on leaf schemas: when a leaf is composed via `$ref`
+        // inside an `allOf`, neither keyword sees properties contributed by
+        // sibling branches, so a per-leaf lock incorrectly rejects flattened
+        // properties. Strictness is enforced at the `allOf`-wrapper level
+        // (`unevaluatedProperties: false`) when flattening occurs, and at the
+        // validation-pipeline level for top-level schemas.
       },
     }
   }

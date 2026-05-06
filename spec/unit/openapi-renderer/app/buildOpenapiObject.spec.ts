@@ -471,7 +471,6 @@ describe('OpenapiAppRenderer', () => {
           expect.objectContaining({
             UserExtra: {
               type: 'object',
-              additionalProperties: false,
               required: ['howyadoin', 'id', 'nicknames'],
               properties: {
                 id: {
@@ -521,7 +520,6 @@ describe('OpenapiAppRenderer', () => {
           expect.objectContaining({
             UserWithPosts: {
               type: 'object',
-              additionalProperties: false,
               required: ['id', 'posts'],
               properties: {
                 id: { type: 'integer' },
@@ -538,7 +536,6 @@ describe('OpenapiAppRenderer', () => {
           expect.objectContaining({
             PostWithComments: {
               type: 'object',
-              additionalProperties: false,
               required: ['body', 'comments', 'id'],
               properties: {
                 id: { type: 'string', format: 'bigint' },
@@ -556,7 +553,6 @@ describe('OpenapiAppRenderer', () => {
           expect.objectContaining({
             Comment: {
               type: 'object',
-              additionalProperties: false,
               required: ['body', 'id'],
               properties: {
                 id: { type: 'string', format: 'bigint' },
@@ -570,7 +566,6 @@ describe('OpenapiAppRenderer', () => {
           expect.objectContaining({
             CommentTestingBasicSerializerRef: {
               type: 'object',
-              additionalProperties: false,
               required: ['howyadoin'],
               properties: {
                 howyadoin: {
@@ -585,7 +580,6 @@ describe('OpenapiAppRenderer', () => {
           expect.objectContaining({
             BalloonLatex: {
               type: 'object',
-              additionalProperties: false,
               required: ['color', 'id', 'latexOnlyAttr'],
               properties: {
                 color: {
@@ -608,7 +602,6 @@ describe('OpenapiAppRenderer', () => {
           expect.objectContaining({
             BalloonMylar: {
               type: 'object',
-              additionalProperties: false,
               required: ['color', 'id', 'mylarOnlyAttr'],
               properties: {
                 color: {
@@ -732,7 +725,6 @@ describe('OpenapiAppRenderer', () => {
         const response = OpenapiAppRenderer.toObject()
         const comment1Content = {
           type: 'object',
-          additionalProperties: false,
           required: ['howyadoin'],
           properties: { howyadoin: { type: 'string', format: 'date' } },
         }

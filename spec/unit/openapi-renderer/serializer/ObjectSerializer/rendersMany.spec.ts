@@ -117,7 +117,6 @@ describe('ObjectSerializer rendersMany', () => {
                 },
               },
             },
-            additionalProperties: false,
           })
         })
       })

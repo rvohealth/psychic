@@ -103,10 +103,10 @@ describe('DreamSerializer rendersOne', () => {
       const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
       const results = serializerOpenapiRenderer.renderedOpenapi()
       expect(results.openapi).toEqual({
+        type: 'object',
         allOf: [
           {
             type: 'object',
-            additionalProperties: false,
             required: ['species'],
             properties: {
               species: { type: ['string', 'null'], enum: [...SpeciesTypesEnumValues, null] },
@@ -116,6 +116,7 @@ describe('DreamSerializer rendersOne', () => {
             $ref: '#/components/schemas/User',
           },
         ],
+        unevaluatedProperties: false,
       })
 
       expect(results.referencedSerializers).toHaveLength(1)
@@ -132,10 +133,10 @@ describe('DreamSerializer rendersOne', () => {
         const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
         const results = serializerOpenapiRenderer.renderedOpenapi()
         expect(results.openapi).toEqual({
+          type: 'object',
           allOf: [
             {
               type: 'object',
-              additionalProperties: false,
               required: ['species'],
               properties: {
                 species: { type: ['string', 'null'], enum: [...SpeciesTypesEnumValues, null] },
@@ -152,6 +153,7 @@ describe('DreamSerializer rendersOne', () => {
               ],
             },
           ],
+          unevaluatedProperties: false,
         })
 
         expect(results.referencedSerializers).toHaveLength(1)
@@ -176,7 +178,6 @@ describe('DreamSerializer rendersOne', () => {
               $ref: '#/components/schemas/User',
             },
           },
-          additionalProperties: false,
         })
       })
     })
