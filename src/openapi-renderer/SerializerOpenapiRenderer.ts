@@ -153,9 +153,19 @@ export default class SerializerOpenapiRenderer {
         // are not emitted on leaf schemas: when a leaf is composed via `$ref`
         // inside an `allOf`, neither keyword sees properties contributed by
         // sibling branches, so a per-leaf lock incorrectly rejects flattened
-        // properties. Strictness is enforced at the `allOf`-wrapper level
-        // (`unevaluatedProperties: false`) when flattening occurs, and at the
-        // validation-pipeline level for top-level schemas.
+        // properties. `unevaluatedProperties` annotations are local to the
+        // schema that declares them — they observe applicators *inside* that
+        // schema (`allOf`/`$ref`/etc.) but not sibling branches at an outer
+        // `allOf`. So the same composition problem applies to both keywords.
+        //
+        // This is why plain (non-flatten) serializers intentionally emit no
+        // unknown-property rejection here, even though flatten serializers do
+        // (at their wrapper). The asymmetry is structural, not an oversight:
+        // any leaf is potentially `$ref`'d as a sibling by some other flatten
+        // serializer, so locking the leaf would reintroduce WLOS-2752. If
+        // strictness is wanted for plain top-level responses, wrap at the
+        // validation entry point (where the schema is known to be the root
+        // for that pass), not here.
       },
     }
   }
