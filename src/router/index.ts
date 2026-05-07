@@ -166,7 +166,8 @@ export default class PsychicRouter {
 
   private prefixPathWithNamespaces(str: string) {
     if (!this.currentNamespaces.length) return str
-    return '/' + this.currentNamespacePaths.join('/') + '/' + str
+    const prefix = '/' + this.currentNamespacePaths.join('/')
+    return str ? `${prefix}/${str}` : prefix
   }
 
   public crud(httpMethod: HttpMethod, path: string): void
