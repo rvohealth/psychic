@@ -186,12 +186,17 @@ export class OpenApiSpecDiff {
   /**
    * Detects oasdiff output that indicates no reportable changes for the
    * given subcommand. Newer oasdiff versions print informational messages
-   * like "No changes detected" or "No changes to report, but the specs are
+   * like "No changes detected", "No changes to report, but the specs are
+   * different", or "No breaking changes to report, but the specs are
    * different" to stdout rather than returning empty output.
    */
   private isNoChangesOutput(output: string): boolean {
     const trimmed = output.trim()
-    return trimmed === 'No changes detected' || trimmed.startsWith('No changes to report')
+    return (
+      trimmed === 'No changes detected' ||
+      trimmed.startsWith('No changes to report') ||
+      trimmed.startsWith('No breaking changes to report')
+    )
   }
 
   /**
