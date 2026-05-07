@@ -9,7 +9,9 @@ import PsychicRouter from '../router/index.js'
 import { HttpMethod, ResourcesMethodType, ResourcesOptions } from './types.js'
 
 export function routePath(routePath: string) {
-  return `/${routePath.replace(/^\//, '')}`
+  const normalized = `/${routePath.replace(/^\//, '')}`
+  if (normalized === '/') return normalized
+  return normalized.replace(/\/+$/, '')
 }
 
 export function resourcePath(routePath: string) {

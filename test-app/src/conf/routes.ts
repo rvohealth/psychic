@@ -290,6 +290,14 @@ export default function routes(r: PsychicRouter) {
     })
   })
 
+  // routes registered with an empty path inside a namespace; used to verify
+  // that requests match regardless of trailing slash on the request URL
+  r.namespace('trailing-slash-test', r => {
+    r.get('', UsersController, 'ping')
+    r.put('', UsersController, 'ping')
+    r.post('', UsersController, 'ping')
+  })
+
   // NOTE: passport integration requires koa-passport for Koa compatibility
   r.post('passport-test', [
     passport.authenticate('local'),

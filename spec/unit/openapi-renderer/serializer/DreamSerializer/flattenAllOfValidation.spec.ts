@@ -41,8 +41,7 @@ describe('SerializerOpenapiRenderer flatten allOf payload validation', () => {
     // declares its own `unevaluatedProperties: false`. Without the renderer fix,
     // properties contributed by either branch are rejected as "additional" by the
     // other branch.
-    const SiblingSerializer = (data: User) =>
-      DreamSerializer(User, data).attribute('email').attribute('name')
+    const SiblingSerializer = (data: User) => DreamSerializer(User, data).attribute('email').attribute('name')
     ;(SiblingSerializer as unknown as { globalName: string; openapiName: string }).globalName =
       'FlattenSiblingSerializer'
     ;(SiblingSerializer as unknown as { globalName: string; openapiName: string }).openapiName =
