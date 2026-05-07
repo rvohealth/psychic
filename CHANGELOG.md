@@ -1,3 +1,10 @@
+## 3.2.1
+
+- stop injecting `additionalProperties: false` into serializer openapi shapes
+- update the router to
+- generate routes without trailing slash
+- ignore trailing slashes when doing route matching
+
 ## 3.2.0
 
 - new `extractParams` and `extractImplicitParams` primitives on `PsychicController` for narrowing untrusted request params before model writes; `paramsFor` is deprecated in favor of these — `extractParams` requires an explicit allowlist at the call site, `extractImplicitParams` reads the model's declared `paramSafeColumns`. `psy g:resource` / `psy g:controller` scaffolds emit one of these by namespace (`extractImplicitParams` for admin-namespaced resources, `extractParams` with a commented-out list of every implicitly-allowed column elsewhere), overridable via `--with-extract-params` / `--with-extract-implicit-params`
