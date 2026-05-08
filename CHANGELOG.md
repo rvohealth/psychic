@@ -1,5 +1,16 @@
 ## 3.2.0
 
+- new `extractParams` and `extractImplicitParams` primitives on `PsychicController` for narrowing untrusted request params before model writes; `paramsFor` is deprecated in favor of these — `extractParams` requires an explicit allowlist at the call site, `extractImplicitParams` reads the model's declared `paramSafeColumns`. `psy g:resource` / `psy g:controller` scaffolds emit one of these by namespace (`extractImplicitParams` for admin-namespaced resources, `extractParams` with a commented-out list of every implicitly-allowed column elsewhere), overridable via `--with-extract-params` / `--with-extract-implicit-params`
+- the param merge inside `extractParams` / `extractImplicitParams` builds its accumulator with `Object.create(null)` so user-supplied `__proto__` / `constructor` keys cannot poison the resulting object's prototype chain
+- controller `redirect` helpers reject open-redirect targets — only same-origin URLs and explicitly-listed allowed hosts pass; cross-origin attempts throw instead of silently sending a `Location` header to an attacker-controlled URL
+- session cookies default to `SameSite=Strict` (was `Lax`); opt back in to `Lax` if your app relies on cross-site link-back flows
+- default response headers include `Cross-Origin-Resource-Policy: same-origin`, blocking opaque cross-origin embedding of API responses by default
+- `@koa/cors` is no longer mounted when no `cors` options are configured, so a default Psychic app does not advertise permissive CORS unless the developer opts in
+- apps with an invalid cookie-encryption key now fail closed at boot in production (previously they booted and failed at runtime the first time a cookie was encrypted, leaving users with mysterious session errors); non-production environments still warn loudly without throwing so onboarding flows are not interrupted
+- `path-to-regexp` is pinned to `>=8.4.0` via `pnpm.overrides` to pull in the patched router-DoS fix
+- Postgres TLS configuration uses `ssl:` (the deprecated `useSsl:` option has been migrated off internally and should be replaced in app code)
+- `delegatedAttribute` covers `optional` / `required` consistently across all OpenAPI inference branches
+- OpenAPI diff tooling recognizes oasdiff 1.15's "No breaking changes to report" output
 - `launchDevServer` and `OpenApiSpecDiff.compare` throw `LaunchDevServerRequiresDevelopmentOrTest` / `OpenApiSpecDiffRequiresDevelopmentOrTest` when `NODE_ENV` is anything other than `development` or `test`, turning their dev-only contracts into runtime invariants that fail closed for staging-style and unforeseen environments
 - `PackageManager.add` / `.run` / `.exec` and `psyCmd` now return `{ command, args }` argv tuples (instead of full shell-form strings) so callers can invoke `DreamCLI.spawn(command, { args })` without shell parsing; generated `cli:sync` initializers and direct callers (Watcher, post-sync, openapi binding generators) updated to use the argv form
 
