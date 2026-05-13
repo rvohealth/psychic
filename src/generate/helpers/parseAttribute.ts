@@ -17,18 +17,48 @@ export interface ParsedAttribute {
  * paramSafe column allowlist) share one canonical interpretation of the
  * tokens — and one canonical casing (camelCase) for the resulting attribute
  * name.
+ *
+ * Supports the `Model@alias:belongs_to` shorthand for renaming the FK
+ * association. When `@alias` is present, the camelized alias becomes
+ * `attributeName`; otherwise (legacy form `Model:belongs_to`) the
+ * attribute name is derived from the model's last namespace segment.
+ *
+ * Mirrors Dream's CLI-side `parseAttribute` (kept as a parallel
+ * implementation rather than a shared import so neither package leaks an
+ * internal CLI helper through its public API surface).
  */
 export default function parseAttribute(attribute: string): ParsedAttribute | null {
-  const [rawAttributeName, rawAttributeType, , enumValues] = attribute.split(':')
+  const segments = attribute.split(':')
+  const rawSegmentOne = segments[0]
+  const rawAttributeType = segments[1]
 
-  if (!rawAttributeName || !rawAttributeType) return null
+  if (!rawSegmentOne || !rawAttributeType) return null
+
+  // Extract optional `@alias` from segment-1 (used by the belongs_to FK alias
+  // shorthand, e.g., `InternalUser@cancelled_by:belongs_to`).
+  let rawAttributeName = rawSegmentOne
+  let aliasName: string | undefined
+  const atIndex = rawSegmentOne.indexOf('@')
+  if (atIndex !== -1) {
+    rawAttributeName = rawSegmentOne.slice(0, atIndex)
+    const rawAlias = rawSegmentOne.slice(atIndex + 1)
+    if (!rawAttributeName || !rawAlias) return null
+    aliasName = rawAlias
+  }
+
+  // Pop trailing `optional` keyword from descriptors so it doesn't get
+  // mistaken for enum values or other positional descriptors.
+  const descriptors = segments.slice(2)
+  if (descriptors[descriptors.length - 1] === 'optional') descriptors.pop()
+  const enumValues = descriptors[1]
 
   const sanitizedAttrType = camelize(rawAttributeType)?.toLowerCase()
 
   // Handle belongs_to relationships
   if (sanitizedAttrType === 'belongsto') {
-    // For belongs_to relationships, convert "Ticketing/Ticket" to "ticket"
-    const attributeName = camelize(rawAttributeName.split('/').pop()!)
+    // For belongs_to relationships, prefer the explicit alias when present;
+    // otherwise convert "Ticketing/Ticket" → "ticket".
+    const attributeName = aliasName ? camelize(aliasName) : camelize(rawAttributeName.split('/').pop()!)
     return { attributeName, attributeType: 'belongs_to', isArray: false, enumValues }
   }
 
