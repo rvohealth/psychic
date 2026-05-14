@@ -272,6 +272,7 @@ export class OpenApiSpecDiff {
     return cp.execFileSync('git', ['show', `${branchRef}:${gitPath}`], {
       encoding: 'utf8',
       cwd: gitRepoRoot,
+      maxBuffer: 1024 * 1024 * 50,
     })
   }
 
