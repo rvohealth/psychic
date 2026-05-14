@@ -77,11 +77,12 @@ ${INDENT}          Health/Coach:belongs_to           # creates health_coach_id c
 ${INDENT}          User:belongs_to:optional          # nullable foreign key (for optional associations)
 ${INDENT}
 ${INDENT}        rename the association with Model@alias — the snake_case alias drives the FK column name AND the
-${INDENT}        @deco.BelongsTo association name + typed property name on the model:
-${INDENT}          InternalUser@canceled_by:belongs_to:optional       # canceled_by_id column, canceledBy property,
+${INDENT}        @deco.BelongsTo association + typed FK property on the generated model:
+${INDENT}          InternalUser@canceled_by:belongs_to:optional       # canceled_by_id column, canceledById property, canceledBy association,
 ${INDENT}                                                             #   @deco.BelongsTo('InternalUser', { on: 'canceledById', optional: true })
-${INDENT}          Messaging/Template@template:belongs_to             # template_id column, template property (strips the namespace
-${INDENT}                                                             #   from the property name while keeping the namespaced model reference)
+${INDENT}          Messaging/Template@template:belongs_to             # template_id column, templateId property, template association
+${INDENT}                                                             #   (strips the namespace from the property/association names while keeping
+${INDENT}                                                             #   the namespaced model reference intact)
 ${INDENT}        Aliasing also lets you declare multiple FKs to the same model in one generator call without column collisions.`
 
 export default class PsychicCLI {
