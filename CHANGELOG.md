@@ -1,4 +1,4 @@
-## 3.5.0
+## 3.4.0
 
 - improvements to `psy g:resource`'s `belongs_to` shorthand
 
