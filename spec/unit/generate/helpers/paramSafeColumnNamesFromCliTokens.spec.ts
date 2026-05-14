@@ -26,13 +26,13 @@ describe('paramSafeColumnNamesFromCliTokens', () => {
   })
 
   it('filters belongs_to relationships with @alias rename', () => {
-    // Important: the aliased FK property name (cancelledBy) must NOT leak into
+    // Important: the aliased FK property name (canceledBy) must NOT leak into
     // the paramSafe allowlist any more than the legacy form does. The filter
     // is by attributeType === 'belongs_to', so it catches both forms.
     expect(
       paramSafeColumnNamesFromCliTokens([
         'subject:string',
-        'InternalUser@cancelled_by:belongs_to:optional',
+        'InternalUser@canceled_by:belongs_to:optional',
         'Messaging/Message@last_inbound_message:belongs_to:optional',
       ]),
     ).toEqual(['subject'])

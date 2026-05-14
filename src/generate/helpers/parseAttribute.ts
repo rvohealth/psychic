@@ -35,7 +35,7 @@ export default function parseAttribute(attribute: string): ParsedAttribute | nul
   if (!rawSegmentOne || !rawAttributeType) return null
 
   // Extract optional `@alias` from segment-1 (used by the belongs_to FK alias
-  // shorthand, e.g., `InternalUser@cancelled_by:belongs_to`).
+  // shorthand, e.g., `InternalUser@canceled_by:belongs_to`).
   let rawAttributeName = rawSegmentOne
   let aliasName: string | undefined
   const atIndex = rawSegmentOne.indexOf('@')

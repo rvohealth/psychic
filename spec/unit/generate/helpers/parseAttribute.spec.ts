@@ -67,8 +67,8 @@ describe('parseAttribute (psychic)', () => {
 
   context('belongs_to with @alias (new form)', () => {
     it('uses the camelized alias as the attribute name', () => {
-      expect(parseAttribute('InternalUser@cancelled_by:belongs_to')).toEqual({
-        attributeName: 'cancelledBy',
+      expect(parseAttribute('InternalUser@canceled_by:belongs_to')).toEqual({
+        attributeName: 'canceledBy',
         attributeType: 'belongs_to',
         isArray: false,
         enumValues: undefined,
