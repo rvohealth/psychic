@@ -12,7 +12,7 @@ import Watcher from '../watcher/Watcher.js'
 
 const INDENT = '                  '
 
-const baseColumnsWithTypesDescription = `space separated snake-case (except for belongs_to model name) properties like this:
+const baseColumnsWithTypesDescription = `space separated snake-case (except for belongs_to model name, which may take an @alias suffix to rename the FK) properties like this:
 ${INDENT}    title:citext subtitle:string body_markdown:text style:enum:post_styles:formal,informal User:belongs_to
 ${INDENT}
 ${INDENT}all properties default to not nullable; null can be allowed by appending ':optional':
@@ -74,7 +74,12 @@ ${INDENT}
 ${INDENT}        use the fully qualified model name (matching its path under src/app/models/):
 ${INDENT}          User:belongs_to                  # creates user_id column + BelongsTo association
 ${INDENT}          Health/Coach:belongs_to           # creates health_coach_id column + BelongsTo association
-${INDENT}          User:belongs_to:optional          # nullable foreign key (for optional associations)`
+${INDENT}          User:belongs_to:optional          # nullable foreign key (for optional associations)
+${INDENT}
+${INDENT}        rename the FK with Model@alias (snake_case alias becomes the column + camelCase property):
+${INDENT}          InternalUser@cancelled_by:belongs_to:optional      # cancelled_by_id column, cancelledBy property
+${INDENT}          Messaging/Message@last_inbound:belongs_to          # last_inbound_id column, lastInbound property
+${INDENT}        Aliasing lets you declare multiple FKs to the same model in one generator call without column collisions.`
 
 export default class PsychicCLI {
   public static provide(
