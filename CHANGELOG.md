@@ -1,3 +1,7 @@
+## 3.4.0
+
+- the resource generator (`psy g:resource`) now accepts the `Model@alias:belongs_to[:optional]` shorthand that the dream generators added in 2.10.0. The aliased camelCase property name flows through `parseAttribute` into `generateResourceControllerSpecContent` and `paramSafeColumnNamesFromCliTokens` transparently, so spec scaffolds reference the alias and the controller param allowlist correctly excludes aliased FK fields. Examples: `InternalUser@canceled_by:belongs_to:optional`, `Messaging/Template@template:belongs_to` (strips the namespace from the property/association names while keeping the namespaced model reference intact). Old `Model:belongs_to` form continues to work unchanged
+
 ## 3.3.0
 
 - recursive Dream-model-driven request bodies via a nested `for:` sentinel inside `requestBody.combining` / `properties` / `items` — produces an inline object schema derived from the model's param-safe columns, recurses through further `combining`, and is request-only (response shorthand still uses `$serializable` / `$serializer`)
