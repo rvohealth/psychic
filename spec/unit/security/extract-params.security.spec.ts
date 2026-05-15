@@ -3,11 +3,9 @@ import User from '../../../test-app/src/app/models/User.js'
 import { createMockKoaContext } from '../controller/helpers/mockRequest.js'
 
 // R-011 `extractParams` is the explicit-allowlist primitive replacing
-// bare `paramsFor(Model)` as the generator default for non-admin scaffolds.
-// `extractImplicitParams` preserves the model-declared allowlist pattern for
-// admin scaffolds. Both enforce the same runtime invariants that `paramsFor`
-// did; the security-relevant delta is that the allowlist is visible at the
-// call site for `extractParams`.
+// bare `paramsFor(Model)` as the generator default. It enforces the same
+// runtime invariants that `paramsFor` did; the security-relevant delta is
+// that the allowlist is visible at the call site.
 
 describe('PsychicController extract-params primitives (R-011)', () => {
   describe('#extractParams', () => {
@@ -82,35 +80,6 @@ describe('PsychicController extract-params primitives (R-011)', () => {
 
         const result = controller.extractParams(User, ['name'], { key: 'users', array: true })
         expect(result).toEqual([{ name: 'a' }, { name: 'b' }])
-      })
-    })
-  })
-
-  describe('#extractImplicitParams', () => {
-    it('returns the model-declared param-safe columns', () => {
-      const ctx = createMockKoaContext({
-        body: {
-          id: 1,
-          name: 'howyadoin',
-          createdAt: 'hello',
-          updatedAt: 'birld',
-          deletedAt: 'sometimeago',
-        },
-      })
-      const controller = new PsychicController(ctx, { action: 'hello' })
-
-      // Matches legacy paramsFor(User) behavior — strips id, timestamps, FKs, etc.
-      expect(controller.extractImplicitParams(User)).toEqual({ name: 'howyadoin' })
-    })
-
-    context('with a key option', () => {
-      it('drills into the nested key', () => {
-        const ctx = createMockKoaContext({
-          body: { user: { id: 1, name: 'howyadoin' } },
-        })
-        const controller = new PsychicController(ctx, { action: 'hello' })
-
-        expect(controller.extractImplicitParams(User, { key: 'user' })).toEqual({ name: 'howyadoin' })
       })
     })
   })

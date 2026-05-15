@@ -1,3 +1,11 @@
+## 3.4.1
+
+Follows up on the 3.2.0 mass-assignment work by collapsing to a single canonical extractor. The `SECURITY_LEARNINGS_2026-05-12` retrospective concluded that an implicit-allowlist primitive whose safe usage depends on a documented rule is the same shape Rails removed in 2012 — and that the admin-ergonomics steelman (the only argument for keeping it) is structurally covered by the shared `paramSafeColumns` const the generator now emits. Since 3.2.0 shipped only days ago, removing outright rather than carrying a deprecation tag is safe.
+
+- `PsychicController.extractImplicitParams` and the underlying `Params.extractImplicit` static are **removed**. Migrate to `extractParams(Model, [...allowlist])` — the explicit-allowlist form keeps the permitted columns visible at the call site.
+- `psy g:resource` / `psy g:controller` scaffolds now emit `this.extractParams(Model, paramSafeColumns)` in **both** admin and non-admin namespaces. The `paramSafeColumns` is a single `DreamParamSafeColumnNames<Model>[]`-typed array declared at the top of the file (alongside `openApiTags`) and referenced from both the `create` and `update` action hints — one editable list per controller instead of duplicated inline arrays at each call site, and no admin/non-admin branch to remember. The explicit model-column type (rather than `as const`) gives autocomplete of valid columns and a compile error on anything not param-safe, directly in the array literal.
+- The `--with-extract-params` and `--with-extract-implicit-params` CLI flags on `psy g:resource` are **removed**. With one canonical path there is nothing to override; commander will reject either flag with `error: unknown option`.
+
 ## 3.4.0
 
 - improvements to `psy g:resource`'s `belongs_to` shorthand

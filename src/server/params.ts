@@ -192,45 +192,6 @@ export default class Params {
     return Params.for(params, dreamClass, { ...(opts ?? {}), only: allowed } as any)
   }
 
-  /**
-   * ### .extractImplicit
-   *
-   * Implicit-allowlist extraction driven by the model's `paramSafeColumns`
-   * declaration (or, when undeclared, the framework's default-safe fallback
-   * from `paramSafeColumnsOrFallback()`). Equivalent to {@link Params.for}
-   * without `only`. Use from a controller via
-   * {@link PsychicController.extractImplicitParams}.
-   *
-   * Prefer {@link Params.extract} when the caller can enumerate the allowed
-   * columns at the call site — it makes the allowlist visible to reviewers
-   * at the point of use. Reach for this method when the model-level
-   * `paramSafeColumns` declaration is the canonical allowlist and duplicating
-   * it at each call site would create maintenance drift.
-   */
-  public static extractImplicit<
-    T extends typeof Dream,
-    I extends InstanceType<T>,
-    OptsType extends StrictInterface<OptsType, ExtractParamsOpts>,
-    ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
-      ? undefined
-      : I['paramSafeColumns' & keyof I] & string[],
-    ParamSafeColumns extends ParamSafeColumnsOverride extends string[] | Readonly<string[]>
-      ? Extract<
-          DreamParamSafeColumnNames<I>,
-          ParamSafeColumnsOverride[number] & DreamParamSafeColumnNames<I>
-        >[]
-      : DreamParamSafeColumnNames<I>[],
-    ParamSafeAttrs extends DreamParamSafeAttributes<I>,
-    ReturnPartial extends Partial<{
-      [K in ParamSafeColumns[number & keyof ParamSafeColumns] & string]: ParamSafeAttrs[K &
-        keyof ParamSafeAttrs]
-    }>,
-    ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
-  >(params: object, dreamClass: T, opts?: OptsType): ReturnPayload {
-    // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return Params.for(params, dreamClass, (opts ?? {}) as any)
-  }
-
   public static restrict<T extends typeof Params>(
     this: T,
     params: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
@@ -694,10 +655,9 @@ export interface ParamsForOpts<OnlyArray> extends ParamsForOptsBase<OnlyArray> {
 }
 
 /**
- * Options for {@link Params.extract} / {@link Params.extractImplicit} and the
- * corresponding controller methods. Mirrors {@link ParamsForOpts} minus
- * `only` — the explicit allowlist moved to a required positional argument on
- * `extractParams`, and `extractImplicitParams` has no allowlist argument.
+ * Options for {@link Params.extract} and the corresponding controller method.
+ * Mirrors {@link ParamsForOpts} minus `only` — the explicit allowlist moved
+ * to a required positional argument on `extractParams`.
  */
 export interface ExtractParamsOpts {
   array?: boolean
