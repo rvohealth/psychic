@@ -170,11 +170,16 @@ export class OpenApiSpecDiff {
       // only via `pnpm psy openapi:spec-diff` (developer / CI invocation), never
       // in a deployed process; `args` are literal subcommand strings plus
       // developer-controlled file paths, not request input. See docs/SECURITY_CVE_CHECKLIST.md R-026.
+      const mainSize = fs.existsSync(mainPath) ? fs.statSync(mainPath).size : 0
+      const currentSize = fs.existsSync(currentPath) ? fs.statSync(currentPath).size : 0
+      const maxBuffer = Math.ceil(Math.max(mainSize, currentSize) * 2)
+
       const output = cp.execFileSync(this.oasdiffConfig.command, args, {
         shell: true,
         encoding: 'utf8',
         cwd: process.cwd(),
         stdio: 'pipe',
+        maxBuffer,
       })
       return output.trim()
     } catch (error) {
@@ -269,10 +274,13 @@ export class OpenApiSpecDiff {
     // Get relative path from git repo root to the file
     const gitPath = path.relative(gitRepoRoot, absoluteFilePath).replace(/\\/g, '/')
 
+    const fileSizeBytes = fs.statSync(absoluteFilePath).size
+    const maxBuffer = Math.ceil(fileSizeBytes * 2)
+
     return cp.execFileSync('git', ['show', `${branchRef}:${gitPath}`], {
       encoding: 'utf8',
       cwd: gitRepoRoot,
-      maxBuffer: 1024 * 1024 * 50,
+      maxBuffer,
     })
   }
 
