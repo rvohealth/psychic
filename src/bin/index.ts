@@ -40,8 +40,6 @@ export default class PsychicBin {
       modelName?: string
       tableName?: string
       softDelete: boolean
-      withExtractParams?: boolean
-      withExtractImplicitParams?: boolean
     },
   ) {
     await generateResource({ route, fullyQualifiedModelName, columnsWithTypes, options })

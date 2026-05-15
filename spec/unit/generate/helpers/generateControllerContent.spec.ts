@@ -18,10 +18,13 @@ describe('psy generate:controller <name> [...methods]', () => {
         expect(res).toEqual(
           `\
 import { OpenAPI } from '@rvoh/psychic'
+import { DreamParamSafeColumnNames } from '@rvoh/dream/types'
 import AuthedController from './AuthedController.js'
 import Post from '@models/Post.js'
 
 const openApiTags = ['posts']
+
+const paramSafeColumns: DreamParamSafeColumnNames<Post>[] = []
 
 export default class PostsController extends AuthedController {
   @OpenAPI(Post, {
@@ -57,9 +60,7 @@ export default class PostsController extends AuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let post = await this.currentUser.createAssociation('posts', this.extractParams(Post,
-    //   [],
-    // ))
+    // let post = await this.currentUser.createAssociation('posts', this.extractParams(Post, paramSafeColumns))
     // if (post.isPersisted) post = await post.loadFor('default').execute()
     // this.created(post)
   }
@@ -72,9 +73,7 @@ export default class PostsController extends AuthedController {
   })
   public async update() {
     // const post = await this.post()
-    // await post.update(this.extractParams(Post,
-    //   [],
-    // ))
+    // await post.update(this.extractParams(Post, paramSafeColumns))
     // this.noContent()
   }
 
@@ -126,10 +125,13 @@ export default class PostsController extends AuthedController {
           expect(res).toEqual(
             `\
 import { OpenAPI } from '@rvoh/psychic'
+import { DreamParamSafeColumnNames } from '@rvoh/dream/types'
 import AuthedController from './AuthedController.js'
 import HostingAgreement from '@models/HostingAgreement.js'
 
 const openApiTags = ['hosting-agreement']
+
+const paramSafeColumns: DreamParamSafeColumnNames<HostingAgreement>[] = []
 
 export default class HostingAgreementController extends AuthedController {
   @OpenAPI(HostingAgreement, {
@@ -150,9 +152,7 @@ export default class HostingAgreementController extends AuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let hostingAgreement = await this.currentUser.createAssociation('hostingAgreement', this.extractParams(HostingAgreement,
-    //   [],
-    // ))
+    // let hostingAgreement = await this.currentUser.createAssociation('hostingAgreement', this.extractParams(HostingAgreement, paramSafeColumns))
     // if (hostingAgreement.isPersisted) hostingAgreement = await hostingAgreement.loadFor('default').execute()
     // this.created(hostingAgreement)
   }
@@ -165,9 +165,7 @@ export default class HostingAgreementController extends AuthedController {
   })
   public async update() {
     // const hostingAgreement = await this.hostingAgreement()
-    // await hostingAgreement.update(this.extractParams(HostingAgreement,
-    //   [],
-    // ))
+    // await hostingAgreement.update(this.extractParams(HostingAgreement, paramSafeColumns))
     // this.noContent()
   }
 
@@ -210,10 +208,13 @@ export default class HostingAgreementController extends AuthedController {
         expect(res).toEqual(
           `\
 import { OpenAPI } from '@rvoh/psychic'
+import { DreamParamSafeColumnNames } from '@rvoh/dream/types'
 import AuthedController from '../../../AuthedController.js'
 import HealthPost from '@models/Health/Post.js'
 
 const openApiTags = ['health-posts']
+
+const paramSafeColumns: DreamParamSafeColumnNames<HealthPost>[] = []
 
 export default class ApiV1HealthPostsController extends AuthedController {
   @OpenAPI(HealthPost, {
@@ -249,9 +250,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let healthPost = await this.currentUser.createAssociation('healthPosts', this.extractParams(HealthPost,
-    //   [],
-    // ))
+    // let healthPost = await this.currentUser.createAssociation('healthPosts', this.extractParams(HealthPost, paramSafeColumns))
     // if (healthPost.isPersisted) healthPost = await healthPost.loadFor('default').execute()
     // this.created(healthPost)
   }
@@ -264,9 +263,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
   })
   public async update() {
     // const healthPost = await this.healthPost()
-    // await healthPost.update(this.extractParams(HealthPost,
-    //   [],
-    // ))
+    // await healthPost.update(this.extractParams(HealthPost, paramSafeColumns))
     // this.noContent()
   }
 
@@ -362,10 +359,13 @@ export default class ApiV1UsersController extends AuthedController {
         expect(res).toEqual(
           `\
 import { OpenAPI } from '@rvoh/psychic'
+import { DreamParamSafeColumnNames } from '@rvoh/dream/types'
 import AuthedController from './AuthedController.js'
 import Post from '@models/Post.js'
 
 const openApiTags = ['posts']
+
+const paramSafeColumns: DreamParamSafeColumnNames<Post>[] = []
 
 export default class PostsController extends AuthedController {
   @OpenAPI(Post, {
@@ -401,9 +401,7 @@ export default class PostsController extends AuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let post = await this.currentHost.createAssociation('posts', this.extractParams(Post,
-    //   [],
-    // ))
+    // let post = await this.currentHost.createAssociation('posts', this.extractParams(Post, paramSafeColumns))
     // if (post.isPersisted) post = await post.loadFor('default').execute()
     // this.created(post)
   }
@@ -416,9 +414,7 @@ export default class PostsController extends AuthedController {
   })
   public async update() {
     // const post = await this.post()
-    // await post.update(this.extractParams(Post,
-    //   [],
-    // ))
+    // await post.update(this.extractParams(Post, paramSafeColumns))
     // this.noContent()
   }
 
@@ -474,10 +470,13 @@ export default class PostsController extends AuthedController {
           expect(res).toEqual(
             `\
 import { OpenAPI } from '@rvoh/psychic'
+import { DreamParamSafeColumnNames } from '@rvoh/dream/types'
 import AdminAuthedController from './AdminAuthedController.js'
 import Article from '@models/Article.js'
 
 const openApiTags = ['articles']
+
+const paramSafeColumns: DreamParamSafeColumnNames<Article>[] = []
 
 export default class AdminArticlesController extends AdminAuthedController {
   @OpenAPI(Article, {
@@ -515,7 +514,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let article = await Article.create(this.extractImplicitParams(Article))
+    // let article = await Article.create(this.extractParams(Article, paramSafeColumns))
     // if (article.isPersisted) article = await article.loadFor('admin').execute()
     // this.created(article)
   }
@@ -528,7 +527,7 @@ export default class AdminArticlesController extends AdminAuthedController {
   })
   public async update() {
     // const article = await this.article()
-    // await article.update(this.extractImplicitParams(Article))
+    // await article.update(this.extractParams(Article, paramSafeColumns))
     // this.noContent()
   }
 
@@ -582,10 +581,13 @@ export default class AdminArticlesController extends AdminAuthedController {
           expect(res).toEqual(
             `\
 import { OpenAPI } from '@rvoh/psychic'
+import { DreamParamSafeColumnNames } from '@rvoh/dream/types'
 import AdminAuthedController from './AdminAuthedController.js'
 import Article from '@models/Article.js'
 
 const openApiTags = ['articles']
+
+const paramSafeColumns: DreamParamSafeColumnNames<Article>[] = []
 
 export default class AdminArticlesController extends AdminAuthedController {
   @OpenAPI(Article, {
@@ -623,7 +625,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     fastJsonStringify: true,
   })
   public async create() {
-    // let article = await this.currentOrganization.createAssociation('articles', this.extractImplicitParams(Article))
+    // let article = await this.currentOrganization.createAssociation('articles', this.extractParams(Article, paramSafeColumns))
     // if (article.isPersisted) article = await article.loadFor('admin').execute()
     // this.created(article)
   }
@@ -636,7 +638,7 @@ export default class AdminArticlesController extends AdminAuthedController {
   })
   public async update() {
     // const article = await this.article()
-    // await article.update(this.extractImplicitParams(Article))
+    // await article.update(this.extractParams(Article, paramSafeColumns))
     // this.noContent()
   }
 
@@ -683,10 +685,13 @@ export default class AdminArticlesController extends AdminAuthedController {
           expect(res).toEqual(
             `\
 import { OpenAPI } from '@rvoh/psychic'
+import { DreamParamSafeColumnNames } from '@rvoh/dream/types'
 import InternalAuthedController from './InternalAuthedController.js'
 import Article from '@models/Article.js'
 
 const openApiTags = ['articles']
+
+const paramSafeColumns: DreamParamSafeColumnNames<Article>[] = []
 
 export default class InternalArticlesController extends InternalAuthedController {
   @OpenAPI(Article, {
@@ -724,9 +729,7 @@ export default class InternalArticlesController extends InternalAuthedController
     fastJsonStringify: true,
   })
   public async create() {
-    // let article = await Article.create(this.extractParams(Article,
-    //   [],
-    // ))
+    // let article = await Article.create(this.extractParams(Article, paramSafeColumns))
     // if (article.isPersisted) article = await article.loadFor('internal').execute()
     // this.created(article)
   }
@@ -739,9 +742,7 @@ export default class InternalArticlesController extends InternalAuthedController
   })
   public async update() {
     // const article = await this.article()
-    // await article.update(this.extractParams(Article,
-    //   [],
-    // ))
+    // await article.update(this.extractParams(Article, paramSafeColumns))
     // this.noContent()
   }
 
@@ -796,10 +797,13 @@ export default class InternalArticlesController extends InternalAuthedController
           expect(res).toEqual(
             `\
 import { OpenAPI } from '@rvoh/psychic'
+import { DreamParamSafeColumnNames } from '@rvoh/dream/types'
 import InternalAuthedController from './InternalAuthedController.js'
 import Article from '@models/Article.js'
 
 const openApiTags = ['articles']
+
+const paramSafeColumns: DreamParamSafeColumnNames<Article>[] = []
 
 export default class InternalArticlesController extends InternalAuthedController {
   @OpenAPI(Article, {
@@ -837,9 +841,7 @@ export default class InternalArticlesController extends InternalAuthedController
     fastJsonStringify: true,
   })
   public async create() {
-    // let article = await this.currentOrganization.createAssociation('articles', this.extractParams(Article,
-    //   [],
-    // ))
+    // let article = await this.currentOrganization.createAssociation('articles', this.extractParams(Article, paramSafeColumns))
     // if (article.isPersisted) article = await article.loadFor('internal').execute()
     // this.created(article)
   }
@@ -852,9 +854,7 @@ export default class InternalArticlesController extends InternalAuthedController
   })
   public async update() {
     // const article = await this.article()
-    // await article.update(this.extractParams(Article,
-    //   [],
-    // ))
+    // await article.update(this.extractParams(Article, paramSafeColumns))
     // this.noContent()
   }
 
@@ -906,51 +906,42 @@ export default class InternalArticlesController extends InternalAuthedController
   })
 
   describe('paramExtractionStrategy (R-011)', () => {
-    it('emits extractParams with an introspected safe-column list for non-admin scaffolds', () => {
+    it('emits extractParams referencing a shared paramSafeColumns const for non-admin scaffolds', () => {
       const res = generateControllerContent({
         ancestorImportStatement: "import AuthedController from './AuthedController.js'",
         ancestorName: 'AuthedController',
         fullyQualifiedControllerName: 'PostsController',
         fullyQualifiedModelName: 'Post',
-        actions: ['create'],
+        actions: ['create', 'update'],
         forAdmin: false,
         singular: false,
         columnsWithTypes: ['title:string', 'body:text', 'User:belongs_to', 'id:integer'],
       })
-      expect(res).toContain("this.extractParams(Post,\n    //   ['title', 'body'],\n    // ))")
+      expect(res).toContain(
+        "const openApiTags = ['posts']\n\nconst paramSafeColumns: DreamParamSafeColumnNames<Post>[] = ['title', 'body']",
+      )
+      expect(res).toContain("import { DreamParamSafeColumnNames } from '@rvoh/dream/types'")
+      expect(res).toContain('this.extractParams(Post, paramSafeColumns)')
+      // Only one definition, two references
+      expect(res.match(/const paramSafeColumns\b/g)).toHaveLength(1)
+      expect(res.match(/this\.extractParams\(Post, paramSafeColumns\)/g)).toHaveLength(2)
     })
 
-    it('emits extractImplicitParams for admin scaffolds by default', () => {
+    it('omits paramSafeColumns when no create/update action is generated', () => {
       const res = generateControllerContent({
-        ancestorImportStatement: "import AdminAuthedController from './AuthedController.js'",
-        ancestorName: 'AdminAuthedController',
-        fullyQualifiedControllerName: 'Admin/PostsController',
+        ancestorImportStatement: "import AuthedController from './AuthedController.js'",
+        ancestorName: 'AuthedController',
+        fullyQualifiedControllerName: 'PostsController',
         fullyQualifiedModelName: 'Post',
-        actions: ['create'],
-        forAdmin: true,
+        actions: ['index', 'show'],
+        forAdmin: false,
         singular: false,
         columnsWithTypes: ['title:string'],
       })
-      expect(res).toContain('this.extractImplicitParams(Post)')
-      expect(res).not.toContain('extractParams(Post,')
+      expect(res).not.toContain('paramSafeColumns')
     })
 
-    it('overrides admin default with paramExtractionStrategy: explicit', () => {
-      const res = generateControllerContent({
-        ancestorImportStatement: "import AdminAuthedController from './AuthedController.js'",
-        ancestorName: 'AdminAuthedController',
-        fullyQualifiedControllerName: 'Admin/PostsController',
-        fullyQualifiedModelName: 'Post',
-        actions: ['create'],
-        forAdmin: true,
-        singular: false,
-        columnsWithTypes: ['title:string'],
-        paramExtractionStrategy: 'explicit',
-      })
-      expect(res).toContain("this.extractParams(Post,\n    //   ['title'],\n    // ))")
-    })
-
-    it('overrides non-admin default with paramExtractionStrategy: implicit', () => {
+    it('emits an empty model-typed paramSafeColumns const when no columns survive the filter', () => {
       const res = generateControllerContent({
         ancestorImportStatement: "import AuthedController from './AuthedController.js'",
         ancestorName: 'AuthedController',
@@ -959,11 +950,27 @@ export default class InternalArticlesController extends InternalAuthedController
         actions: ['create'],
         forAdmin: false,
         singular: false,
-        columnsWithTypes: ['title:string'],
-        paramExtractionStrategy: 'implicit',
+        columnsWithTypes: ['id:integer', 'created_at:timestamp'],
       })
-      expect(res).toContain('this.extractImplicitParams(Post)')
-      expect(res).not.toContain('extractParams(Post,')
+      expect(res).toContain('const paramSafeColumns: DreamParamSafeColumnNames<Post>[] = []')
+      expect(res).toContain('this.extractParams(Post, paramSafeColumns)')
+    })
+
+    it('emits the same shared-const shape for admin scaffolds', () => {
+      const res = generateControllerContent({
+        ancestorImportStatement: "import AdminAuthedController from './AuthedController.js'",
+        ancestorName: 'AdminAuthedController',
+        fullyQualifiedControllerName: 'Admin/PostsController',
+        fullyQualifiedModelName: 'Post',
+        actions: ['create', 'update'],
+        forAdmin: true,
+        singular: false,
+        columnsWithTypes: ['title:string', 'body:text', 'User:belongs_to', 'id:integer'],
+      })
+      expect(res).toContain(
+        "const openApiTags = ['posts']\n\nconst paramSafeColumns: DreamParamSafeColumnNames<Post>[] = ['title', 'body']",
+      )
+      expect(res.match(/this\.extractParams\(Post, paramSafeColumns\)/g)).toHaveLength(2)
     })
   })
 })

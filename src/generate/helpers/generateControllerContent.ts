@@ -3,8 +3,6 @@ import { camelize, hyphenize } from '@rvoh/dream/utils'
 import pluralize from 'pluralize-esm'
 import paramSafeColumnNamesFromCliTokens from './paramSafeColumnNamesFromCliTokens.js'
 
-export type ParamExtractionStrategy = 'explicit' | 'implicit'
-
 export default function generateControllerContent({
   ancestorName,
   ancestorImportStatement,
@@ -17,7 +15,6 @@ export default function generateControllerContent({
   forInternal = false,
   singular,
   columnsWithTypes = [],
-  paramExtractionStrategy,
 }: {
   ancestorName: string
   ancestorImportStatement: string
@@ -30,38 +27,14 @@ export default function generateControllerContent({
   forInternal?: boolean
   singular: boolean
   columnsWithTypes?: string[]
-  paramExtractionStrategy?: ParamExtractionStrategy | undefined
 }) {
-  // Admin scaffolds lean on the model's declared paramSafeColumns (implicit);
-  // non-admin scaffolds require an explicit allowlist at the call site so the
-  // permitted columns are visible to reviewers. Either default can be overridden
-  // via the `--with-extract-params` / `--with-extract-implicit-params` CLI flags,
-  // which get materialized into `paramExtractionStrategy` by the caller.
-  const resolvedExtractionStrategy: ParamExtractionStrategy =
-    paramExtractionStrategy ?? (forAdmin ? 'implicit' : 'explicit')
-  /**
-   * Returns the `this.extract*Params(...)` expression that replaces the legacy
-   * `this.paramsFor(Model)` in the scaffold's commented hints. Does NOT include
-   * the outer closing paren that the surrounding call expects (e.g. the one
-   * closing `update(...)` or `create(...)` or `createAssociation(...)`); the
-   * caller appends that as part of its own template.
-   */
-  const extractCallExpression = (modelClass: string) => {
-    if (resolvedExtractionStrategy === 'implicit') {
-      return `this.extractImplicitParams(${modelClass})`
-    }
-    const safeColumns = paramSafeColumnNamesFromCliTokens(columnsWithTypes)
-    const serializedSafeColumns = safeColumns.length
-      ? `[${safeColumns.map(name => `'${name}'`).join(', ')}]`
-      : '[]'
-    // The emitted list contains every implicitly-allowed column. When
-    // uncommenting the action body, the developer or agent is responsible
-    // for narrowing it down to only the columns this action should actually
-    // accept.
-    return `this.extractParams(${modelClass},
-    //   ${serializedSafeColumns},
-    // )`
-  }
+  // The scaffold emits a `paramSafeColumns` const at the top of the file
+  // (alongside `openApiTags`) and references it from both the `create` and
+  // `update` action hints. The list contains every implicitly-allowed column;
+  // when uncommenting the action body, the developer or agent is responsible
+  // for narrowing the const down to only the columns the actions should
+  // actually accept.
+  const extractCallExpression = (modelClass: string) => `this.extractParams(${modelClass}, paramSafeColumns)`
   fullyQualifiedControllerName = DreamApp.system.standardizeFullyQualifiedModelName(
     fullyQualifiedControllerName,
   )
@@ -262,8 +235,22 @@ export default function generateControllerContent({
 
   const openApiTags = `const openApiTags = ['${hyphenize(pluralizedModelAttributeName || controllerClassName.replace(/Controller$/, ''))}']`
 
+  const emitParamSafeColumns =
+    !!modelClassName && actions.some(action => action === 'create' || action === 'update')
+  const safeColumns = emitParamSafeColumns ? paramSafeColumnNamesFromCliTokens(columnsWithTypes) : []
+  // The const is typed against the model's safe-column names rather than
+  // `as const`, so editing the array literal gives the developer (or agent)
+  // autocomplete of valid columns and a compile error on anything that is
+  // not param-safe — directly in the assignment, no call-site round-trip.
+  const paramSafeColumnsDecl = !emitParamSafeColumns
+    ? ''
+    : `\n\nconst paramSafeColumns: DreamParamSafeColumnNames<${modelClassName}>[] = [${safeColumns.map(name => `'${name}'`).join(', ')}]`
+  const dreamTypesImport = emitParamSafeColumns
+    ? `import { DreamParamSafeColumnNames } from '@rvoh/dream/types'\n`
+    : ''
+
   return `\
-${omitOpenApi ? '' : openApiImport + '\n'}${ancestorImportStatement}${additionalImports.length ? '\n' + additionalImports.join('\n') : ''}${omitOpenApi ? '' : '\n\n' + openApiTags}
+${omitOpenApi ? '' : openApiImport + '\n' + dreamTypesImport}${ancestorImportStatement}${additionalImports.length ? '\n' + additionalImports.join('\n') : ''}${omitOpenApi ? '' : '\n\n' + openApiTags}${paramSafeColumnsDecl}
 
 export default class ${controllerClassName} extends ${ancestorName} {
 ${methodDefs.join('\n\n')}${modelClassName ? privateMethods(forAdmin, forInternal, modelClassName, actions, loadQueryBase, singular) : ''}
