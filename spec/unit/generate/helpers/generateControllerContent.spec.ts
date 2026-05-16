@@ -58,6 +58,9 @@ export default class PostsController extends AuthedController {
     tags: openApiTags,
     description: 'Create a Post',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async create() {
     // let post = await this.currentUser.createAssociation('posts', this.extractParams(Post, paramSafeColumns))
@@ -70,6 +73,9 @@ export default class PostsController extends AuthedController {
     tags: openApiTags,
     description: 'Update a Post',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async update() {
     // const post = await this.post()
@@ -150,6 +156,9 @@ export default class HostingAgreementController extends AuthedController {
     tags: openApiTags,
     description: 'Create a HostingAgreement',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async create() {
     // let hostingAgreement = await this.currentUser.createAssociation('hostingAgreement', this.extractParams(HostingAgreement, paramSafeColumns))
@@ -162,6 +171,9 @@ export default class HostingAgreementController extends AuthedController {
     tags: openApiTags,
     description: 'Update a HostingAgreement',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async update() {
     // const hostingAgreement = await this.hostingAgreement()
@@ -248,6 +260,9 @@ export default class ApiV1HealthPostsController extends AuthedController {
     tags: openApiTags,
     description: 'Create a HealthPost',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async create() {
     // let healthPost = await this.currentUser.createAssociation('healthPosts', this.extractParams(HealthPost, paramSafeColumns))
@@ -260,6 +275,9 @@ export default class ApiV1HealthPostsController extends AuthedController {
     tags: openApiTags,
     description: 'Update a HealthPost',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async update() {
     // const healthPost = await this.healthPost()
@@ -399,6 +417,9 @@ export default class PostsController extends AuthedController {
     tags: openApiTags,
     description: 'Create a Post',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async create() {
     // let post = await this.currentHost.createAssociation('posts', this.extractParams(Post, paramSafeColumns))
@@ -411,6 +432,9 @@ export default class PostsController extends AuthedController {
     tags: openApiTags,
     description: 'Update a Post',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async update() {
     // const post = await this.post()
@@ -512,6 +536,9 @@ export default class AdminArticlesController extends AdminAuthedController {
     description: 'Create a Article',
     serializerKey: 'admin',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async create() {
     // let article = await Article.create(this.extractParams(Article, paramSafeColumns))
@@ -524,6 +551,9 @@ export default class AdminArticlesController extends AdminAuthedController {
     tags: openApiTags,
     description: 'Update a Article',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async update() {
     // const article = await this.article()
@@ -623,6 +653,9 @@ export default class AdminArticlesController extends AdminAuthedController {
     description: 'Create a Article',
     serializerKey: 'admin',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async create() {
     // let article = await this.currentOrganization.createAssociation('articles', this.extractParams(Article, paramSafeColumns))
@@ -635,6 +668,9 @@ export default class AdminArticlesController extends AdminAuthedController {
     tags: openApiTags,
     description: 'Update a Article',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async update() {
     // const article = await this.article()
@@ -727,6 +763,9 @@ export default class InternalArticlesController extends InternalAuthedController
     description: 'Create a Article',
     serializerKey: 'internal',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async create() {
     // let article = await Article.create(this.extractParams(Article, paramSafeColumns))
@@ -739,6 +778,9 @@ export default class InternalArticlesController extends InternalAuthedController
     tags: openApiTags,
     description: 'Update a Article',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async update() {
     // const article = await this.article()
@@ -839,6 +881,9 @@ export default class InternalArticlesController extends InternalAuthedController
     description: 'Create a Article',
     serializerKey: 'internal',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async create() {
     // let article = await this.currentOrganization.createAssociation('articles', this.extractParams(Article, paramSafeColumns))
@@ -851,6 +896,9 @@ export default class InternalArticlesController extends InternalAuthedController
     tags: openApiTags,
     description: 'Update a Article',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async update() {
     // const article = await this.article()

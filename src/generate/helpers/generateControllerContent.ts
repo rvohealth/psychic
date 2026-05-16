@@ -84,6 +84,9 @@ export default function generateControllerContent({
     tags: openApiTags,
     description: 'Create ${aOrAnDreamModelName(modelClassName!)}',${defaultOpenapiSerializerKeyProperty}
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async create() {
     // let ${modelAttributeName} = await ${useDirectModelAccess ? `${modelClassName}.create(` : `this.${owningModelProperty}.createAssociation('${pluralizedModelAttributeName}', `}${extractCallExpression(modelClassName!)})
@@ -163,6 +166,9 @@ export default function generateControllerContent({
     tags: openApiTags,
     description: 'Update ${aOrAnDreamModelName(modelClassName!)}',
     fastJsonStringify: true,
+    requestBody: {
+      only: paramSafeColumns,
+    },
   })
   public async update() {
     // const ${modelAttributeName} = await this.${modelAttributeName}()
