@@ -172,28 +172,41 @@ export default class PsychicServer {
     process.exit()
   }
 
-  public async stop({ bypassClosingDbConnections = false }: { bypassClosingDbConnections?: boolean } = {}) {
+  public async stop({
+    bypassClosingDbConnections = false,
+    gracefulShutdownTimeoutMillis = 10_000,
+  }: { bypassClosingDbConnections?: boolean; gracefulShutdownTimeoutMillis?: number } = {}) {
     for (const hook of PsychicApp.getOrFail().specialHooks.serverShutdown) {
       await hook(this)
     }
 
     if (this.httpServer) {
+      const httpServer = this.httpServer
       await new Promise<void>(resolve => {
-        // `close` stops the server accepting new connections and fires its
-        // callback only once every existing connection has ended. Keep-alive
-        // sockets (browsers, fetch agents, reverse proxies) stay open
-        // indefinitely and keep their request handlers — and anything those
-        // requests leased, such as database pool clients — alive, so the
-        // callback would never fire and shutdown would hang (e.g. a SIGTERM
-        // drain that never completes, or a feature-spec `afterAll` that
-        // blocks for the full hook timeout). Forcibly destroy all open
-        // sockets so the server closes deterministically and in-flight
-        // requests release their resources before the database pool is torn
-        // down below. `closeAllConnections` is Node >= 18.2; the optional
-        // call degrades to the previous (potentially hanging) behavior on
-        // older runtimes rather than throwing.
-        this.httpServer.close(() => resolve())
-        this.httpServer.closeAllConnections?.()
+        // Bounded grace period: if still-active requests haven't finished by
+        // the timeout, force the remaining sockets so shutdown can never hang
+        // forever (the original bug). `closeIdle/AllConnections` are Node
+        // >= 18.2; on older runtimes the optional calls no-op and prior
+        // (potentially hanging) behavior is retained rather than throwing.
+        const forceTimer = setTimeout(() => httpServer.closeAllConnections?.(), gracefulShutdownTimeoutMillis)
+        forceTimer.unref?.()
+
+        // `close` stops accepting new connections and fires its callback only
+        // once every existing connection has ended.
+        httpServer.close(() => {
+          clearTimeout(forceTimer)
+          resolve()
+        })
+
+        // Immediately drop *idle* keep-alive sockets. These (browsers, fetch
+        // agents, reverse proxies sitting between requests) are what kept
+        // `close()`'s callback from ever firing — and, transitively, a leased
+        // DB pool client from being released — causing shutdown to hang (a
+        // SIGTERM drain that never completes; a feature-spec `afterAll` that
+        // blocks for the full hook timeout). Dropping only *idle* sockets
+        // does NOT abort in-flight requests, so a normal graceful shutdown
+        // still lets active handlers finish within the grace period above.
+        httpServer.closeIdleConnections?.()
       })
     }
 
