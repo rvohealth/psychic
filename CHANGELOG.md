@@ -1,3 +1,10 @@
+## 3.4.2
+
+Fixes a graceful-shutdown hang in `PsychicServer.stop()`.
+
+- `stop()` previously called `httpServer.close()` without awaiting it and without terminating open sockets, then immediately `await closeAllDbConnections()`. `http.Server.close()` only stops accepting _new_ connections; existing keep-alive sockets (browsers, `fetch` agents, reverse proxies behind a load balancer) stay open and keep their request handlers — and any resources those requests leased, such as database pool clients — alive. `closeAllDbConnections()` → `pool.end()` then blocks until those leased clients are released, which never happens while the sockets are open. In production this could stall a SIGTERM drain until the orchestrator force-kills the process; in feature specs it manifested as an `afterAll` that hangs for the full hook timeout.
+- `stop()` now awaits `httpServer.close()` and calls `httpServer.closeAllConnections()` (Node ≥ 18.2) to forcibly terminate lingering sockets, so the server is fully closed — and in-flight requests have released their pooled resources — _before_ the database connections are torn down. This also eliminates the spurious "driver has already been destroyed" errors that occurred when the DB pool was destroyed underneath still-open requests.
+
 ## 3.4.1
 
 Follows up on the 3.2.0 mass-assignment work by collapsing to a single canonical extractor. The `SECURITY_LEARNINGS_2026-05-12` retrospective concluded that an implicit-allowlist primitive whose safe usage depends on a documented rule is the same shape Rails removed in 2012 — and that the admin-ergonomics steelman (the only argument for keeping it) is structurally covered by the shared `paramSafeColumns` const the generator now emits. Since 3.2.0 shipped only days ago, removing outright rather than carrying a deprecation tag is safe.

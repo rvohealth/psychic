@@ -177,7 +177,25 @@ export default class PsychicServer {
       await hook(this)
     }
 
-    this.httpServer?.close()
+    if (this.httpServer) {
+      await new Promise<void>(resolve => {
+        // `close` stops the server accepting new connections and fires its
+        // callback only once every existing connection has ended. Keep-alive
+        // sockets (browsers, fetch agents, reverse proxies) stay open
+        // indefinitely and keep their request handlers — and anything those
+        // requests leased, such as database pool clients — alive, so the
+        // callback would never fire and shutdown would hang (e.g. a SIGTERM
+        // drain that never completes, or a feature-spec `afterAll` that
+        // blocks for the full hook timeout). Forcibly destroy all open
+        // sockets so the server closes deterministically and in-flight
+        // requests release their resources before the database pool is torn
+        // down below. `closeAllConnections` is Node >= 18.2; the optional
+        // call degrades to the previous (potentially hanging) behavior on
+        // older runtimes rather than throwing.
+        this.httpServer.close(() => resolve())
+        this.httpServer.closeAllConnections?.()
+      })
+    }
 
     if (!bypassClosingDbConnections) {
       await closeAllDbConnections()
