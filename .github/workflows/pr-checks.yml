@@ -230,6 +230,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
 
       - run: corepack enable
       - run: pnpm install --frozen-lockfile

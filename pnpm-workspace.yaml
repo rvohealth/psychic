@@ -1,6 +1,6 @@
 overrides:
-  diff: ">=8.0.3"
-  path-to-regexp: ">=8.4.0"
+  diff: '>=8.0.3'
+  path-to-regexp: '>=8.4.0'
 
 allowBuilds:
   esbuild: true
