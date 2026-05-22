@@ -23,7 +23,7 @@ jobs:
     name: Unit tests (Node ${{ matrix.node-version }})
     strategy:
       matrix:
-        node-version: ["22", "24", "25"]
+        node-version: ["24", "25", "26"]
     runs-on: ubuntu-latest
     services:
       postgres:
@@ -230,6 +230,9 @@ jobs:
 
     steps:
       - uses: actions/checkout@v4
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
 
       - run: corepack enable
       - run: pnpm install --frozen-lockfile
