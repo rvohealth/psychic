@@ -5,8 +5,16 @@ export interface PackageManagerCommand {
   args: string[]
 }
 
+// Runtimes this class knows how to drive. `@rvoh/dream`'s published
+// DreamAppAllowedPackageManagersEnum gained 'bun'/'deno' in the same effort as
+// these command shapes; widening here lets PackageManager compile against an
+// older published dream (whose enum is still pnpm/yarn/npm). It's a safe upcast
+// of a value dream validates at app init, and becomes a no-op once the consuming
+// dream lists bun/deno.
+type SupportedPackageManager = 'pnpm' | 'yarn' | 'npm' | 'bun' | 'deno'
+
 export default class PackageManager {
-  public static get packageManager() {
+  public static get packageManager(): SupportedPackageManager {
     return PsychicApp.getOrFail().packageManager
   }
 
