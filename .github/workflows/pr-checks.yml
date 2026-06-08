@@ -19,6 +19,24 @@ permissions:
   statuses: none
 
 jobs:
+  check-cooldown-excludes:
+    name: Cooldown exclude allowlist
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: minimumReleaseAgeExclude must be @rvoh/* only
+        run: |
+          # SECURITY: the minimumReleaseAge cooldown bypass list must stay @rvoh/*
+          # only (our own packages). Any third-party entry is a permanent
+          # supply-chain bypass and must be rejected — apply urgent patches via a
+          # transient, reverted override instead of a persistent exclude.
+          bad=$(grep -nE '^[[:space:]]*minimumReleaseAgeExclude' .npmrc | grep -vE '=[[:space:]]*@rvoh/' || true)
+          if [ -n "$bad" ]; then
+            echo "::error::Non-@rvoh minimumReleaseAgeExclude entries (cooldown bypass must stay @rvoh/* only):"
+            echo "$bad"
+            exit 1
+          fi
+
   uspec:
     name: Unit tests (Node ${{ matrix.node-version }})
     strategy:

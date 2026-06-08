@@ -1,3 +1,7 @@
+## 3.5.0
+
+- `PackageManager` — used by the CLI to spawn package-manager subprocesses during `sync` (run by `db:migrate`/`db:reset`), generators, and setup commands — now emits correct commands for `bun` and `deno` alongside pnpm/yarn/npm: `run` → `bun run <cmd>` / `deno task <cmd>`; `exec` → `bunx` / `deno run -A npm:<bin>`; `add` → `bun add` / `deno add` (with `npm:` specifier prefixing). The prior `<pm> <cmd>` default fit pnpm/yarn but produced e.g. `deno post-sync`, which Deno reads as a file path (→ "Module not found"), breaking `sync` under Deno. Enables `@rvoh/create-psychic` to scaffold Bun/Deno apps. Requires `@rvoh/dream` ≥ 2.12.0 in the consuming app (its package-manager enum must list bun/deno).
+
 ## 3.4.2
 
 Fixes a graceful-shutdown hang in `PsychicServer.stop()`.

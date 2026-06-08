@@ -18,3 +18,4 @@ dist
 typetrace/*
 
 .pnp.*
+plans/
