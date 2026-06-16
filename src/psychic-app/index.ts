@@ -9,10 +9,10 @@ import {
   EncryptAlgorithm,
   EncryptOptions,
 } from '@rvoh/dream/types'
+import { bodyParser } from '@koa/bodyparser'
 import { Encrypt } from '@rvoh/dream/utils'
 import { Command } from 'commander'
 import Koa from 'koa'
-import bodyParser from 'koa-bodyparser'
 import * as http from 'node:http'
 import * as https from 'node:https'
 import PackageManager from '../cli/helpers/PackageManager.js'
@@ -43,6 +43,12 @@ import importServices, { getServicesOrFail } from './helpers/import/importServic
 import lookupClassByGlobalName from './helpers/lookupClassByGlobalName.js'
 import { cacheOpenapiDoc, getCachedOpenapiDocOrFail, ignoreOpenapiDoc } from './openapi-cache.js'
 import { PsychicAppInitializerCb, PsychicHookEventType, PsychicUseEventType } from './types.js'
+
+/**
+ * Options passed through to `@koa/bodyparser`. The package does not export its
+ * options type by name, so we derive it from the middleware's call signature.
+ */
+export type BodyParserOptions = NonNullable<Parameters<typeof bodyParser>[0]>
 
 export default class PsychicApp {
   /**
@@ -350,9 +356,9 @@ Try setting it to something valid, like:
     return this._redirectAllowedHosts
   }
 
-  private _jsonOptions: bodyParser.Options
+  private _jsonOptions: BodyParserOptions
   /**
-   * Options passed through to `koa-bodyparser`. When unset, the upstream
+   * Options passed through to `@koa/bodyparser`. When unset, the upstream
    * defaults apply — notably `jsonLimit: '1mb'` and `formLimit: '56kb'`,
    * which cap request-body size at the framework boundary and defend against
    * unbounded-payload memory DoS even when no edge (WAF / API Gateway)
@@ -363,9 +369,9 @@ Try setting it to something valid, like:
    *
    * See https://github.com/koajs/bodyparser for the full option list
    * (`jsonLimit`, `formLimit`, `textLimit`, `xmlLimit`, `enableTypes`,
-   * `strict`, `detectJSON`, etc.).
+   * `jsonStrict`, `detectJSON`, etc.).
    */
-  public get jsonOptions() {
+  public get jsonOptions(): BodyParserOptions {
     return this._jsonOptions
   }
 
@@ -676,7 +682,7 @@ Try setting it to something valid, like:
                       : Opt extends 'sessionCookieName'
                         ? string
                         : Opt extends 'json'
-                          ? bodyParser.Options
+                          ? BodyParserOptions
                           : Opt extends 'logger'
                             ? PsychicLogger
                             : Opt extends 'ssl'
@@ -762,7 +768,7 @@ Try setting it to something valid, like:
         break
 
       case 'json':
-        this._jsonOptions = { ...this.jsonOptions, ...(value as bodyParser.Options) }
+        this._jsonOptions = { ...this.jsonOptions, ...(value as BodyParserOptions) }
         break
 
       case 'logger':

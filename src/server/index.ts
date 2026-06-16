@@ -1,8 +1,8 @@
+import { bodyParser } from '@koa/bodyparser'
 import cors from '@koa/cors'
 import etag from '@koa/etag'
 import { closeAllDbConnections } from '@rvoh/dream/db'
 import Koa from 'koa'
-import koaBodyparser from 'koa-bodyparser'
 import conditional from 'koa-conditional-get'
 import { Server } from 'node:http'
 import logIfDevelopment from '../controller/helpers/logIfDevelopment.js'
@@ -250,7 +250,7 @@ export default class PsychicServer {
   }
 
   private initializeJSON() {
-    this.koaApp.use(koaBodyparser(PsychicApp.getOrFail().jsonOptions))
+    this.koaApp.use(bodyParser(PsychicApp.getOrFail().jsonOptions))
   }
 
   private async buildRoutes() {

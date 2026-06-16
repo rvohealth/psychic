@@ -1,3 +1,8 @@
+## 3.6.0
+
+- Migrate the JSON/body middleware from the legacy `koa-bodyparser` to the officially-maintained `@koa/bodyparser` (`^6.1.0`), keeping psychic current with the koa org's supported packages. `@koa/bodyparser` ships its own types, so the `@types/koa-bodyparser` peer/dev dependency is dropped. The unused `@types/koa-etag` peer/dev dependency is also removed (psychic imports `@koa/etag`, which self-types; `koa-etag` was never imported).
+  - **Breaking (only if you set `psy.set('json', …)`):** the options object is now `@koa/bodyparser`'s, so the error hook is `onError` (was `onerror`) and `ctx.request.body` is typed `unknown` (was `any`). The common limit/type options (`jsonLimit`, `formLimit`, `textLimit`, `xmlLimit`, `enableTypes`, `jsonStrict`, `detectJSON`) are unchanged. Apps that don't configure `json` are unaffected. The publicly-exported options type is now `BodyParserOptions` (derived from the middleware signature), replacing the old `bodyParser.Options` namespace type.
+
 ## 3.5.0
 
 - `PackageManager` — used by the CLI to spawn package-manager subprocesses during `sync` (run by `db:migrate`/`db:reset`), generators, and setup commands — now emits correct commands for `bun` and `deno` alongside pnpm/yarn/npm: `run` → `bun run <cmd>` / `deno task <cmd>`; `exec` → `bunx` / `deno run -A npm:<bin>`; `add` → `bun add` / `deno add` (with `npm:` specifier prefixing). The prior `<pm> <cmd>` default fit pnpm/yarn but produced e.g. `deno post-sync`, which Deno reads as a file path (→ "Module not found"), breaking `sync` under Deno. Enables `@rvoh/create-psychic` to scaffold Bun/Deno apps. Requires `@rvoh/dream` ≥ 2.12.0 in the consuming app (its package-manager enum must list bun/deno).
