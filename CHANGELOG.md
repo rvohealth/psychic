@@ -1,3 +1,7 @@
+## 3.7.0
+
+- `g:resource` controllers generated in the `internal` namespace now scope queries to the authenticated internal user the same way default-namespace controllers scope to the current user — `this.currentInternalUser.associationQuery('posts')` / `this.currentInternalUser.createAssociation('posts', …)` — instead of reaching every record in the system via direct model access. Previously the `internal` namespace was treated identically to `admin`, lifting all owner scoping; that meant a generated internal resource defaulted to letting any authenticated internal user read and mutate any record, an unsafe default for a scaffold. The `admin` namespace is unchanged (still unscoped by default), and supplying `--owning-model` still scopes to that model in either namespace. The generated resource spec gains the matching "created by another InternalUser" omission/not-found/not-updated/not-deleted contexts. Generated scaffolds are emitted commented-out, so this only affects newly generated code — no runtime behavior in existing apps changes.
+
 ## 3.6.0
 
 - Migrate the JSON/body middleware from the legacy `koa-bodyparser` to the officially-maintained `@koa/bodyparser` (`^6.1.0`), keeping psychic current with the koa org's supported packages. `@koa/bodyparser` ships its own types, so the `@types/koa-bodyparser` peer/dev dependency is dropped. The unused `@types/koa-etag` peer/dev dependency is also removed (psychic imports `@koa/etag`, which self-types; `koa-etag` was never imported).

@@ -1838,7 +1838,7 @@ describe('Admin/ArticlesController', () => {
   })
 
   context('an Internal controller', () => {
-    it("replaces authenticates with the InternalUser, but created resources don't belong to the InternalUser", () => {
+    it('authenticates with the InternalUser and scopes resources to that InternalUser', () => {
       const res = generateResourceControllerSpecContent({
         fullyQualifiedControllerName: 'Internal/ArticlesController',
         route: 'internal/articles',
@@ -1871,7 +1871,7 @@ describe('Internal/ArticlesController', () => {
     }
 
     it('returns the index of Articles', async () => {
-      const article = await createArticle()
+      const article = await createArticle({ internalUser })
 
       const { body } = await index(200)
 
@@ -1880,6 +1880,16 @@ describe('Internal/ArticlesController', () => {
           id: article.id,
         }),
       ])
+    })
+
+    context('Articles created by another InternalUser', () => {
+      it('are omitted', async () => {
+        await createArticle()
+
+        const { body } = await index(200)
+
+        expect(body.results).toEqual([])
+      })
     })
   })
 
@@ -1891,7 +1901,7 @@ describe('Internal/ArticlesController', () => {
     }
 
     it('returns the specified Article', async () => {
-      const article = await createArticle()
+      const article = await createArticle({ internalUser })
 
       const { body } = await show(article, 200)
 
@@ -1901,6 +1911,14 @@ describe('Internal/ArticlesController', () => {
           body: article.body,
         }),
       )
+    })
+
+    context('Article created by another InternalUser', () => {
+      it('is not found', async () => {
+        const otherInternalUserArticle = await createArticle()
+
+        await show(otherInternalUserArticle, 404)
+      })
     })
   })
 
@@ -1914,12 +1932,12 @@ describe('Internal/ArticlesController', () => {
       })
     }
 
-    it('creates a Article', async () => {
+    it('creates a Article for this InternalUser', async () => {
       const { body } = await create({
         body: 'The Article body',
       }, 201)
 
-      const article = await Article.firstOrFail()
+      const article = await internalUser.associationQuery('articles').firstOrFail()
       expect(article.body).toEqual('The Article body')
 
       expect(body).toEqual(
@@ -1944,7 +1962,7 @@ describe('Internal/ArticlesController', () => {
     }
 
     it('updates the Article', async () => {
-      const article = await createArticle()
+      const article = await createArticle({ internalUser })
 
       await update(article, {
         body: 'Updated Article body',
@@ -1952,6 +1970,20 @@ describe('Internal/ArticlesController', () => {
 
       await article.reload()
       expect(article.body).toEqual('Updated Article body')
+    })
+
+    context('a Article created by another InternalUser', () => {
+      it('is not updated', async () => {
+        const article = await createArticle()
+        const originalBody = article.body
+
+        await update(article, {
+          body: 'Updated Article body',
+        }, 404)
+
+        await article.reload()
+        expect(article.body).toEqual(originalBody)
+      })
     })
   })
 
@@ -1963,11 +1995,21 @@ describe('Internal/ArticlesController', () => {
     }
 
     it('deletes the Article', async () => {
-      const article = await createArticle()
+      const article = await createArticle({ internalUser })
 
       await destroy(article, 204)
 
       expect(await Article.find(article.id)).toBeNull()
+    })
+
+    context('a Article created by another InternalUser', () => {
+      it('is not deleted', async () => {
+        const article = await createArticle()
+
+        await destroy(article, 404)
+
+        expect(await Article.find(article.id)).toMatchDreamModel(article)
+      })
     })
   })
 })

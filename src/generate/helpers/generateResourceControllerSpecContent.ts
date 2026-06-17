@@ -101,7 +101,7 @@ function createModelConfiguration(options: GenerateSpecOptions): ModelConfigurat
     ? camelize(DreamApp.system.standardizeFullyQualifiedModelName(options.owningModel).split('/').pop()!)
     : userVariableName
 
-  const useDirectModelAccess = (options.forAdmin || options.forInternal) && !options.owningModel
+  const useDirectModelAccess = options.forAdmin && !options.owningModel
   const simpleCreationCommand = `const ${modelVariableName} = await create${modelClassName}(${useDirectModelAccess ? '' : `{ ${owningModelVariableName} }`})`
 
   return {

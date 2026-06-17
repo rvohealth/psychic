@@ -164,8 +164,9 @@ ${INDENT}  pnpm psy g:sti-child --model-name=Condo Rental/Condo extends Rental`,
         '--owning-model <modelName>',
         `The model class that owns this resource. The generated controller will use \`associationQuery\` and \`createAssociation\` on the owning model to scope queries and create records.
 ${INDENT}
-${INDENT}Defaults to \`this.currentUser\` for non-admin/internal routes (e.g., \`this.currentUser.associationQuery('posts').findOrFail(this.castParam('id', 'uuid'))\`).
-${INDENT}Defaults to \`null\` for admin/internal namespaced controllers (e.g., \`Post.findOrFail(this.castParam('id', 'uuid'))\`).
+${INDENT}Defaults to \`this.currentUser\` for non-admin routes (e.g., \`this.currentUser.associationQuery('posts').findOrFail(this.castParam('id', 'uuid'))\`).
+${INDENT}Defaults to \`this.currentInternalUser\` for internal namespaced controllers (e.g., \`this.currentInternalUser.associationQuery('posts').findOrFail(this.castParam('id', 'uuid'))\`).
+${INDENT}Defaults to \`null\` for admin namespaced controllers (e.g., \`Post.findOrFail(this.castParam('id', 'uuid'))\`).
 ${INDENT}Supplying an owning-modle changes the the generated code in the controller to be relative to the owning model.
 ${INDENT}
 ${INDENT}Example:
@@ -200,7 +201,7 @@ ${INDENT}  # model is named GroupDanceLesson instead of LessonDanceGroup`,
         '<path>',
         `The URL path for this resource's routes, relative to the root domain. Use \`\\{\\}\` as a placeholder for a parent resource's ID parameter when nesting.
 ${INDENT}
-${INDENT}The path determines the controller namespace hierarchy. Paths that begin with "admin" and "internal" remove the \`currentUser\` scoping of queries (\`--owning-model\` may be provided to apply query scoping). Each segment maps to a directory level in the controllers folder.
+${INDENT}The path determines the controller namespace hierarchy. Paths that begin with "internal" scope queries to \`this.currentInternalUser\` instead of \`this.currentUser\`. Paths that begin with "admin" remove owner scoping of queries entirely (\`--owning-model\` may be provided to apply query scoping). Each segment maps to a directory level in the controllers folder.
 ${INDENT}
 ${INDENT}Examples:
 ${INDENT}  v1/posts                          # /v1/posts, /v1/posts/:id

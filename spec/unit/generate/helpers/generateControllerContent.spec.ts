@@ -704,7 +704,7 @@ export default class AdminArticlesController extends AdminAuthedController {
 
     context('in the Internal namespace', () => {
       it(
-        'loads/creates/updates/deletes resources without an owning model ' +
+        'loads/creates/updates/deletes resources scoped to the current internal user ' +
           'and sets the serializerKey to internal serializers',
         () => {
           const res = generateControllerContent({
@@ -739,7 +739,7 @@ export default class InternalArticlesController extends InternalAuthedController
     fastJsonStringify: true,
   })
   public async index() {
-    // const articles = await Article
+    // const articles = await this.currentInternalUser.associationQuery('articles')
     //   .preloadFor('internalSummary')
     //   .cursorPaginate({ cursor: this.castParam('cursor', 'string', { allowNull: true }) })
     // this.ok(articles)
@@ -768,7 +768,7 @@ export default class InternalArticlesController extends InternalAuthedController
     },
   })
   public async create() {
-    // let article = await Article.create(this.extractParams(Article, paramSafeColumns))
+    // let article = await this.currentInternalUser.createAssociation('articles', this.extractParams(Article, paramSafeColumns))
     // if (article.isPersisted) article = await article.loadFor('internal').execute()
     // this.created(article)
   }
@@ -812,7 +812,7 @@ export default class InternalArticlesController extends InternalAuthedController
   }
 
   private async article() {
-    // return await Article
+    // return await this.currentInternalUser.associationQuery('articles')
     //   .preloadFor('internal')
     //   .findOrFail(this.castParam('id', 'string'))
   }

@@ -44,8 +44,10 @@ export default function generateControllerContent({
     fullyQualifiedControllerName,
   )
 
-  // Determine user model variables
-  const actualOwningModel = owningModel || 'User'
+  // Determine user model variables. Internal-namespaced controllers scope to
+  // the current internal user the same way default controllers scope to the
+  // current user; only the Admin namespace bypasses owner scoping entirely.
+  const actualOwningModel = owningModel || (forInternal ? 'InternalUser' : 'User')
   const owningModelClassName = DreamApp.system.globalClassNameFromFullyQualifiedModelName(actualOwningModel)
   const owningModelProperty = `current${owningModelClassName}`
 
@@ -69,7 +71,7 @@ export default function generateControllerContent({
     serializerKey: 'internal',`
       : ''
 
-  const useDirectModelAccess = (forAdmin || forInternal) && !owningModel
+  const useDirectModelAccess = forAdmin && !owningModel
   const loadQueryBase: string = useDirectModelAccess
     ? (modelClassName ?? 'no-class-name')
     : `this.${owningModelProperty}.associationQuery('${pluralizedModelAttributeName}')`
