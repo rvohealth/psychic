@@ -1,0 +1,55 @@
+name: Release
+
+# Publishes to npm using OIDC trusted publishing (no NPM_TOKEN required).
+# npm automatically generates a signed provenance attestation on publish.
+on:
+  release:
+    types: [published]
+
+permissions:
+  contents: read
+  id-token: write # required for npm OIDC trusted publishing
+
+concurrency:
+  group: release-${{ github.event.release.tag_name }}
+  cancel-in-progress: false
+
+jobs:
+  publish:
+    name: Publish to npm
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "24"
+          registry-url: "https://registry.npmjs.org"
+          package-manager-cache: false # never cache dependencies in release builds
+
+      - name: Enable corepack
+        run: corepack enable
+
+      # Trusted publishing requires npm >= 11.5.1; Node 24 bundles an older npm.
+      - name: Upgrade npm to a trusted-publishing-capable version
+        run: npm install --global npm@latest
+
+      - name: Install dependencies
+        run: pnpm install --frozen-lockfile
+
+      - name: Verify package.json version matches the release tag
+        run: |
+          PKG_VERSION="v$(node -p "require('./package.json').version")"
+          TAG="${{ github.event.release.tag_name }}"
+          if [ "$PKG_VERSION" != "$TAG" ]; then
+            echo "::error::package.json version ($PKG_VERSION) does not match release tag ($TAG)"
+            exit 1
+          fi
+
+      - name: Build
+        run: pnpm build
+
+      # Do NOT set NODE_AUTH_TOKEN — its presence forces the legacy token path
+      # and disables OIDC trusted publishing. npm publish emits provenance.
+      - name: Publish to npm
+        run: npm publish
