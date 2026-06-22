@@ -292,7 +292,7 @@ export default class Params {
     if (paramValue === null || paramValue === undefined) {
       if (expectedType === 'null') return null as ReturnType
       if (this.shouldUseOpenapiValidation(expectedType)) {
-        return paramValue as ReturnType
+        return this.validateOpenapiOrThrow(paramName, paramValue, expectedType) as ReturnType
       }
 
       this.throwUnlessAllowNull(
@@ -457,7 +457,7 @@ export default class Params {
 
   private shouldUseOpenapiValidation<
     ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
-  >(expectedType: ExpectedType): boolean {
+  >(expectedType: ExpectedType): expectedType is ExpectedType & OpenapiSchemaBody {
     return isObject(expectedType)
   }
 

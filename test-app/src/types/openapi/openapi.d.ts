@@ -186,6 +186,7 @@ export interface paths {
                         password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
+                        secret?: string | null;
                     };
                 };
             };
@@ -307,6 +308,7 @@ export interface paths {
                         password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
+                        secret?: string | null;
                     };
                 };
             };
@@ -2507,6 +2509,7 @@ export interface paths {
                         password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
+                        secret?: string | null;
                     };
                 };
             };
@@ -2703,6 +2706,7 @@ export interface paths {
                         password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
+                        secret?: string | null;
                     };
                 };
             };
@@ -3033,6 +3037,7 @@ export interface paths {
                         password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
+                        secret?: string | null;
                         /** @description Pagination cursor */
                         cursor?: string | null;
                     };
@@ -3219,6 +3224,7 @@ export interface paths {
                         password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
+                        secret?: string | null;
                         /** @description Page number */
                         page?: number;
                     };
@@ -3405,6 +3411,7 @@ export interface paths {
                         password?: string | null;
                         openapiVirtualSpecTest?: string | null;
                         openapiVirtualSpecTest2?: string[];
+                        secret?: string | null;
                         /** @description Pagination cursor */
                         cursor?: string | null;
                     };
