@@ -1,6 +1,6 @@
 import { Dream } from '@rvoh/dream'
 import { DreamParamSafeAttributes, DreamParamSafeColumnNames, StrictInterface } from '@rvoh/dream/types'
-import { ParamsForOpts } from '../params.js'
+import type { ParamsForOpts } from '../params.js'
 
 export default function paramNamesForDreamClass<
   T extends typeof Dream,

@@ -2,12 +2,14 @@ import { CalendarDate, ClockTime, ClockTimeTz, DateTime, Dream } from '@rvoh/dre
 import {
   OpenapiSchemaArray,
   OpenapiSchemaBody,
+  OpenapiSchemaBodyShorthand,
   OpenapiSchemaInteger,
   OpenapiSchemaNumber,
   OpenapiSchemaObjectBase,
   OpenapiSchemaPrimitiveGeneric,
   OpenapiSchemaPropertiesShorthand,
   OpenapiSchemaString,
+  OpenapiShorthandPrimitiveTypes,
 } from '@rvoh/dream/openapi'
 import {
   DreamAttributes,
@@ -29,6 +31,7 @@ import isObject from '../helpers/isObject.js'
 import isUuid from '../helpers/isUuid.js'
 import { validateObject } from '../helpers/validateOpenApiSchema.js'
 import { Inc } from '../i18n/conf/types.js'
+import type { VirtualAttributeStatement } from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
 
 export default class Params {
@@ -120,7 +123,13 @@ export default class Params {
             { allowNull: columnMetadata.allowNull },
           )
         } else if (dreamClass.isVirtualColumn(columnName)) {
-          returnObj[columnName as keyof typeof returnObj] = params[columnName as keyof typeof params]
+          const virtualCast = virtualAttributeCast(dreamClass, columnName)
+          returnObj[columnName as keyof typeof returnObj] = this.cast(
+            params,
+            columnName.toString(),
+            virtualCast.expectedType,
+            { allowNull: virtualCast.allowNull },
+          )
         } else if (columnMetadata?.enumValues) {
           const paramValue = params[columnName as keyof typeof params]
 
@@ -282,14 +291,16 @@ export default class Params {
 
     if (paramValue === null || paramValue === undefined) {
       if (expectedType === 'null') return null as ReturnType
-      if (!this.shouldUseOpenapiValidation(expectedType)) {
-        this.throwUnlessAllowNull(
-          paramName,
-          paramValue,
-          typeToError(expectedType as PsychicParamsPrimitiveLiteral),
-          opts,
-        )
+      if (this.shouldUseOpenapiValidation(expectedType)) {
+        return paramValue as ReturnType
       }
+
+      this.throwUnlessAllowNull(
+        paramName,
+        paramValue,
+        typeToError(expectedType as PsychicParamsPrimitiveLiteral),
+        opts,
+      )
 
       return paramValue as ReturnType
     }
@@ -434,15 +445,7 @@ export default class Params {
 
       default:
         if (this.shouldUseOpenapiValidation(expectedType)) {
-          const res = validateObject(paramValue, expectedType, { coerceTypes: true })
-          if (res.isValid) {
-            return res.data as ReturnType
-          } else {
-            throw new ParamValidationError(
-              paramName,
-              res.errors?.map(err => err.message) || ['openapi validation failed'],
-            )
-          }
+          return this.validateOpenapiOrThrow(paramName, paramValue, expectedType) as ReturnType
         }
 
         // TODO: serialize/sanitize before printing, handle array types
@@ -456,6 +459,20 @@ export default class Params {
     ExpectedType extends PsychicParamsPrimitiveLiteral | RegExp | OpenapiSchemaBody,
   >(expectedType: ExpectedType): boolean {
     return isObject(expectedType)
+  }
+
+  private validateOpenapiOrThrow(
+    paramName: string,
+    paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+    expectedType: OpenapiSchemaBody,
+  ) {
+    const res = validateObject(paramValue, expectedType, { coerceTypes: true })
+    if (res.isValid) return res.data
+
+    throw new ParamValidationError(
+      paramName,
+      res.errors?.map(err => err.message) || ['openapi validation failed'],
+    )
   }
 
   public restrict(allowed: string[]) {
@@ -723,6 +740,141 @@ const DB_TYPE_TO_CAST_TYPE: Record<string, PsychicParamsPrimitiveLiteral> = {
   numeric: 'number',
   'numeric[]': 'number[]',
 }
+
+function virtualAttributeCast(
+  dreamClass: typeof Dream,
+  columnName: string,
+): {
+  expectedType: PsychicParamsPrimitiveLiteral
+  allowNull: boolean
+} {
+  const metadata = (dreamClass['virtualAttributes'] as VirtualAttributeStatement[]).find(
+    statement => statement.property === columnName,
+  )
+
+  const primitiveCast = primitiveCastFromOpenapi(metadata?.type)
+  if (!primitiveCast) throw new Error(`Unable to infer params cast type for virtual column: ${columnName}`)
+  return primitiveCast
+}
+
+function primitiveCastFromOpenapi(
+  openapi: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined,
+): { expectedType: PsychicParamsPrimitiveLiteral; allowNull: boolean } | null {
+  if (!openapi) return null
+
+  if (Array.isArray(openapi)) {
+    const nonNullOpenapi = openapi.find(type => type !== 'null')
+    const primitiveCast = primitiveCastFromOpenapi(
+      nonNullOpenapi as OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined,
+    )
+    if (!primitiveCast) return null
+    return { ...primitiveCast, allowNull: true }
+  }
+
+  if (typeof openapi === 'string') {
+    const expectedType = shorthandToCastType(openapi)
+    return expectedType ? { expectedType, allowNull: false } : null
+  }
+
+  if (!('type' in openapi)) return null
+
+  const openapiType = openapi.type
+  const allowNull = Array.isArray(openapiType) && openapiType.includes('null')
+  const nonNullType = Array.isArray(openapiType) ? openapiType.find(type => type !== 'null') : openapiType
+
+  if (nonNullType === 'array') {
+    if (!('items' in openapi)) return null
+    const item = openapi.items
+    const itemType = item && 'type' in item ? item.type : undefined
+    const itemFormat = item && 'format' in item ? item.format : undefined
+    if (Array.isArray(itemType)) return null
+    const itemCastType = openapiTypeToCastType(itemType, itemFormat)
+    if (!itemCastType) return null
+    return { expectedType: `${itemCastType}[]` as PsychicParamsPrimitiveLiteral, allowNull }
+  }
+
+  const expectedType = openapiTypeToCastType(nonNullType, 'format' in openapi ? openapi.format : undefined)
+  return expectedType ? { expectedType, allowNull } : null
+}
+
+function shorthandToCastType(openapi: string): PsychicParamsPrimitiveLiteral | null {
+  switch (openapi) {
+    case 'date-time':
+      return 'datetime'
+    case 'date-time[]':
+      return 'datetime[]'
+    case 'decimal':
+      return 'number'
+    case 'decimal[]':
+      return 'number[]'
+    case 'json':
+      return 'json'
+    case 'null':
+      return 'null'
+    default:
+      return PARAM_CAST_TYPES.includes(openapi as PsychicParamsPrimitiveLiteral)
+        ? (openapi as PsychicParamsPrimitiveLiteral)
+        : null
+  }
+}
+
+function openapiTypeToCastType(
+  openapiType: string | undefined,
+  format: string | undefined,
+): PsychicParamsPrimitiveLiteral | null {
+  switch (openapiType) {
+    case 'boolean':
+      return 'boolean'
+    case 'integer':
+      return 'integer'
+    case 'number':
+      return 'number'
+    case 'null':
+      return 'null'
+    case 'object':
+      return 'json'
+    case 'string':
+      switch (format) {
+        case 'date':
+          return 'date'
+        case 'date-time':
+          return 'datetime'
+        case 'uuid':
+          return 'uuid'
+        default:
+          return 'string'
+      }
+    default:
+      return null
+  }
+}
+
+const PARAM_CAST_TYPES: PsychicParamsPrimitiveLiteral[] = [
+  'bigint',
+  'bigint[]',
+  'boolean',
+  'boolean[]',
+  'date',
+  'date[]',
+  'datetime',
+  'datetime[]',
+  'integer',
+  'integer[]',
+  'json',
+  'json[]',
+  'null',
+  'null[]',
+  'number',
+  'number[]',
+  'string',
+  'string[]',
+  'time',
+  'time[]',
+  'timetz',
+  'timetz[]',
+  'uuid',
+  'uuid[]',
+]
 
 const typeToErrorMap: Record<PsychicParamsPrimitiveLiteral, string> = {
   bigint: 'expected bigint',
