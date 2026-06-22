@@ -59,7 +59,7 @@ export interface OpenapiBodySegmentRendererOpts {
  * - Nullable array shorthands like `['string[]', 'null']` → `{ type: ['array', 'null'], items: { type: 'string' } }`
  * - Serializer references like `{ $serializer: SomeSerializer }` → `{ $ref: '#/components/schemas/SerializerOpenapiName' }`
  * - Serializable references like `{ $serializable: SomeModel, key: 'summary' }` → resolved serializer reference
- * - Nested model-derived request-body references like `{ for: SomeModel, including, only, required, combining }` → an inline object schema derived from the model's param-safe columns (request-only)
+ * - Nested model-derived request-body references like `{ for: SomeModel, params, including, required, combining }` → an inline object schema derived from the model's param-safe columns (request-only)
  *
  * The class recursively processes nested structures (objects, arrays, unions) and maintains
  * a collection of referenced serializers that need to be included in the final OpenAPI document.
@@ -628,6 +628,7 @@ The following values will be allowed:
 
     const ref = bodySegment as unknown as {
       for: typeof Dream
+      params?: readonly string[]
       including?: readonly string[]
       only?: readonly string[]
       required?: readonly string[]
@@ -637,6 +638,7 @@ The following values will be allowed:
     const paramsShape = buildDreamRequestBodyShape(
       ref.for,
       {
+        params: ref.params,
         only: ref.only,
         including: ref.including,
         required: ref.required,

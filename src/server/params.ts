@@ -683,6 +683,7 @@ export interface ExtractParamsOpts {
 
 export interface OpenAPIDreamModelRequestBodyModifications<OnlyArray, IncludingArray>
   extends ParamsForOptsBase<OnlyArray> {
+  params?: OnlyArray
   combining?: OpenapiSchemaPropertiesShorthand
   including?: IncludingArray
 }
