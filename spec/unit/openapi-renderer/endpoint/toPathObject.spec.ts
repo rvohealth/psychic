@@ -1263,8 +1263,30 @@ describe('OpenapiEndpointRenderer', () => {
           })
         })
 
-        context('with only provided', () => {
+        context('with params provided', () => {
           it('excludes params to the list provided', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+              requestBody: { params: ['email'] },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response['/users']!.post.requestBody).toEqual({
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      email: {
+                        type: 'string',
+                      },
+                    },
+                  },
+                },
+              },
+            })
+          })
+
+          it('supports only as a deprecated alias', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
               requestBody: { only: ['email'] },
             })
@@ -1290,7 +1312,7 @@ describe('OpenapiEndpointRenderer', () => {
         context('with including provided', () => {
           it('includes params provided by the list', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
-              requestBody: { only: ['email'], including: ['id'] },
+              requestBody: { params: ['email'], including: ['id'] },
             })
 
             const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
@@ -1343,7 +1365,7 @@ describe('OpenapiEndpointRenderer', () => {
           context('with including provided with blank only', () => {
             it('includes params provided by the including list exclusively', () => {
               const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
-                requestBody: { including: ['id'], only: [] },
+                requestBody: { including: ['id'], params: [] },
               })
 
               const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
@@ -1401,7 +1423,7 @@ describe('OpenapiEndpointRenderer', () => {
             it('combines whatever is provided to combining along with the only/including args', () => {
               const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
                 requestBody: {
-                  only: ['email'],
+                  params: ['email'],
                   including: ['id'],
                   combining: {
                     name: 'string',
@@ -1436,10 +1458,10 @@ describe('OpenapiEndpointRenderer', () => {
         })
       })
 
-      context('requestBody leverages only opt', () => {
-        it('only renders attributes specified in only array', () => {
+      context('requestBody leverages params opt', () => {
+        it('only renders attributes specified in params array', () => {
           const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
-            requestBody: { only: ['species', 'name'] },
+            requestBody: { params: ['species', 'name'] },
           })
 
           const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
@@ -1465,7 +1487,7 @@ describe('OpenapiEndpointRenderer', () => {
           context('requestBody leverages required opt', () => {
             it('renders the required options in the required field', () => {
               const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
-                requestBody: { only: ['species', 'name'], required: ['species'] },
+                requestBody: { params: ['species', 'name'], required: ['species'] },
               })
 
               const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
@@ -1492,7 +1514,7 @@ describe('OpenapiEndpointRenderer', () => {
           context('requestBody leverages for opt', () => {
             it('uses the model provided in the for option to determine request body shape', () => {
               const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
-                requestBody: { for: User, only: ['email'], required: ['id'], including: ['id'] },
+                requestBody: { for: User, params: ['email'], required: ['id'], including: ['id'] },
               })
 
               const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
@@ -1515,7 +1537,7 @@ describe('OpenapiEndpointRenderer', () => {
             context('requestBody leverages for opt with virtual attributes', () => {
               it('includes virtual attributes in the request body', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
-                  requestBody: { for: User, only: ['openapiVirtualSpecTest'] },
+                  requestBody: { for: User, params: ['openapiVirtualSpecTest'] },
                 })
 
                 const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
@@ -2013,7 +2035,7 @@ describe('OpenapiEndpointRenderer', () => {
           it("expands OpenAPI.forDream(Model) into an object schema using that model's param-safe columns", () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
               requestBody: {
-                only: ['email'],
+                params: ['email'],
                 combining: {
                   pets: {
                     type: 'array',
@@ -2041,7 +2063,7 @@ describe('OpenapiEndpointRenderer', () => {
           it('attaches required on the nested model schema, not on the outer array', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
               requestBody: {
-                only: ['email'],
+                params: ['email'],
                 combining: {
                   pets: {
                     type: 'array',
@@ -2066,7 +2088,7 @@ describe('OpenapiEndpointRenderer', () => {
           it('adds the included column to the nested model schema', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
               requestBody: {
-                only: ['email'],
+                params: ['email'],
                 combining: {
                   pets: {
                     type: 'array',
@@ -2088,11 +2110,11 @@ describe('OpenapiEndpointRenderer', () => {
           it('narrows the nested model schema to just the listed columns', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
               requestBody: {
-                only: ['email'],
+                params: ['email'],
                 combining: {
                   pets: {
                     type: 'array',
-                    items: OpenAPI.forDream(Pet, { only: ['name'] }),
+                    items: OpenAPI.forDream(Pet, { params: ['name'] }),
                   },
                 },
               },
@@ -2114,14 +2136,14 @@ describe('OpenapiEndpointRenderer', () => {
           it('expands an OpenAPI.forDream nested inside another forDream call combining', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
               requestBody: {
-                only: ['email'],
+                params: ['email'],
                 combining: {
                   pets: {
                     type: 'array',
                     items: OpenAPI.forDream(Pet, {
-                      only: ['name'],
+                      params: ['name'],
                       combining: {
-                        owner: OpenAPI.forDream(User, { only: ['email'] }),
+                        owner: OpenAPI.forDream(User, { params: ['email'] }),
                       },
                     }),
                   },
@@ -2151,7 +2173,7 @@ describe('OpenapiEndpointRenderer', () => {
                 type: 'object',
                 required: ['pet'],
                 properties: {
-                  pet: OpenAPI.forDream(Pet, { only: ['name'] }),
+                  pet: OpenAPI.forDream(Pet, { params: ['name'] }),
                 },
               },
             })
@@ -2186,7 +2208,7 @@ describe('OpenapiEndpointRenderer', () => {
                 properties: {
                   pets: {
                     type: 'array',
-                    items: OpenAPI.forDream(Pet, { only: ['name'] }),
+                    items: OpenAPI.forDream(Pet, { params: ['name'] }),
                   },
                 },
               },
@@ -2211,7 +2233,7 @@ describe('OpenapiEndpointRenderer', () => {
           it('hand-rolled nested object fragments continue to render identically', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
               requestBody: {
-                only: ['email'],
+                params: ['email'],
                 combining: {
                   items: {
                     type: 'array',
@@ -2246,11 +2268,11 @@ describe('OpenapiEndpointRenderer', () => {
         })
 
         it('type test - ensure OpenAPI.forDream column-name options are constrained to the model and that nested for: is rejected in response shorthand', () => {
-          // valid: param-safe column names in only/including/required
-          OpenAPI.forDream(Pet, { only: ['name'], including: ['userId'], required: ['name'] })
+          // valid: param-safe column names in params/including/required
+          OpenAPI.forDream(Pet, { params: ['name'], including: ['userId'], required: ['name'] })
 
           // @ts-expect-error — 'notARealColumn' is not a column of Pet
-          OpenAPI.forDream(Pet, { only: ['notARealColumn'] })
+          OpenAPI.forDream(Pet, { params: ['notARealColumn'] })
 
           // @ts-expect-error — 'notARealColumn' is not a column of Pet
           OpenAPI.forDream(Pet, { including: ['notARealColumn'] })

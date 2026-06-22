@@ -87,7 +87,7 @@ export default function generateControllerContent({
     description: 'Create ${aOrAnDreamModelName(modelClassName!)}',${defaultOpenapiSerializerKeyProperty}
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async create() {
@@ -169,7 +169,7 @@ export default function generateControllerContent({
     description: 'Update ${aOrAnDreamModelName(modelClassName!)}',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async update() {

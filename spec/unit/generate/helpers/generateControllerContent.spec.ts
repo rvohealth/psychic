@@ -59,7 +59,7 @@ export default class PostsController extends AuthedController {
     description: 'Create a Post',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async create() {
@@ -74,7 +74,7 @@ export default class PostsController extends AuthedController {
     description: 'Update a Post',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async update() {
@@ -157,7 +157,7 @@ export default class HostingAgreementController extends AuthedController {
     description: 'Create a HostingAgreement',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async create() {
@@ -172,7 +172,7 @@ export default class HostingAgreementController extends AuthedController {
     description: 'Update a HostingAgreement',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async update() {
@@ -261,7 +261,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
     description: 'Create a HealthPost',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async create() {
@@ -276,7 +276,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
     description: 'Update a HealthPost',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async update() {
@@ -418,7 +418,7 @@ export default class PostsController extends AuthedController {
     description: 'Create a Post',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async create() {
@@ -433,7 +433,7 @@ export default class PostsController extends AuthedController {
     description: 'Update a Post',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async update() {
@@ -537,7 +537,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     serializerKey: 'admin',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async create() {
@@ -552,7 +552,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     description: 'Update a Article',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async update() {
@@ -654,7 +654,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     serializerKey: 'admin',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async create() {
@@ -669,7 +669,7 @@ export default class AdminArticlesController extends AdminAuthedController {
     description: 'Update a Article',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async update() {
@@ -764,7 +764,7 @@ export default class InternalArticlesController extends InternalAuthedController
     serializerKey: 'internal',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async create() {
@@ -779,7 +779,7 @@ export default class InternalArticlesController extends InternalAuthedController
     description: 'Update a Article',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async update() {
@@ -882,7 +882,7 @@ export default class InternalArticlesController extends InternalAuthedController
     serializerKey: 'internal',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async create() {
@@ -897,7 +897,7 @@ export default class InternalArticlesController extends InternalAuthedController
     description: 'Update a Article',
     fastJsonStringify: true,
     requestBody: {
-      only: paramSafeColumns,
+      params: paramSafeColumns,
     },
   })
   public async update() {

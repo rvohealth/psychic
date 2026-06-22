@@ -5,6 +5,7 @@ import openapiParamNamesForDreamClass from '../../server/helpers/openapiParamNam
 import { dreamColumnOpenapiShape } from './dreamColumnOpenapiShape.js'
 
 export interface BuildDreamRequestBodyShapeOpts {
+  params?: readonly string[] | undefined
   only?: readonly string[] | undefined
   including?: readonly string[] | undefined
   required?: readonly string[] | undefined
@@ -26,9 +27,12 @@ export default function buildDreamRequestBodyShape(
   opts: BuildDreamRequestBodyShapeOpts,
   source: string,
 ): OpenapiSchemaObject {
-  const { only, including, required, combining } = opts
+  const { params, only, including, required, combining } = opts
 
-  const paramSafeColumns = openapiParamNamesForDreamClass(dreamClass, { only, including } as any)
+  const paramSafeColumns = openapiParamNamesForDreamClass(dreamClass, {
+    only: params ?? only,
+    including,
+  } as any)
 
   const paramsShape: OpenapiSchemaObject = {
     type: 'object',
