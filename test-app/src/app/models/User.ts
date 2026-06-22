@@ -99,6 +99,9 @@ export default class User extends ApplicationModel {
   @deco.Virtual('string[]')
   public openapiVirtualSpecTest2: string | null | undefined
 
+  @deco.Encrypted()
+  public secret: DreamColumn<User, 'encryptedSecret'>
+
   public openapiVirtualSpecTest3: string | null | undefined
 
   @deco.HasMany('Balloon')

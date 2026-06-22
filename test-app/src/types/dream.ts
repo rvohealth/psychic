@@ -871,6 +871,7 @@ export const schema = {
       'createdAt',
       'createdOn',
       'email',
+      'encryptedSecret',
       'favoriteBigint',
       'favoriteBigints',
       'favoriteBooleans',
@@ -990,6 +991,15 @@ export const schema = {
         enumValues: null,
         dbType: 'character varying',
         allowNull: false,
+        isArray: false,
+      },
+      encryptedSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
         isArray: false,
       },
       favoriteBigint: {
@@ -1411,6 +1421,7 @@ export const schema = {
       'openapiVirtualSpecTest',
       'openapiVirtualSpecTest2',
       'password',
+      'secret',
     ],
     associations: {
       balloons: {

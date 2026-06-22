@@ -214,6 +214,7 @@ export interface Users {
   createdAt: Generated<Timestamp>
   createdOn: Generated<Timestamp>
   email: string
+  encryptedSecret: string | null
   favoriteBigint: Int8 | null
   favoriteBigints: ArrayType<Int8> | null
   favoriteBooleans: boolean[] | null

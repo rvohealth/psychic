@@ -84,6 +84,24 @@ describe('Params', () => {
       })
     })
 
+    context('@Encrypted attributes', () => {
+      it('casts the decorated property from its inferred OpenAPI shape', () => {
+        expect(Params.for({ secret: 'shh' }, User)).toEqual({ secret: 'shh' })
+      })
+
+      it('permits null when the backing encrypted column allows null', () => {
+        expect(Params.for({ secret: null }, User)).toEqual({ secret: null })
+      })
+
+      it('rejects values that do not match the inferred OpenAPI shape', () => {
+        expect(() => Params.for({ secret: 123 }, User)).toThrow(ParamValidationErrors)
+      })
+
+      it('does not extract the encrypted backing column', () => {
+        expect(Params.for({ encryptedSecret: 'ciphertext' }, User)).toEqual({})
+      })
+    })
+
     context('array option is true', () => {
       it('expects top-level array', () => {
         expect(Params.for([{ id: 123, email: 'how', password: 'yadoin' }], User, { array: true })).toEqual([
@@ -869,6 +887,20 @@ describe('Params', () => {
 
   describe('#cast', () => {
     context('data types', () => {
+      context('OpenAPI schemas', () => {
+        const shape = {
+          type: 'object' as const,
+          properties: {
+            name: { type: 'string' as const },
+          },
+          required: ['name'],
+        }
+
+        it('validates nullish values against the OpenAPI schema', () => {
+          expect(() => Params.cast({ user: null }, 'user', shape)).toThrow(ParamValidationError)
+        })
+      })
+
       context('primitive values', () => {
         context('string', () => {
           context('with a valid value', () => {
