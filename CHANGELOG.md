@@ -1,3 +1,7 @@
+## 3.7.1
+
+- `Params.for` and `PsychicController#extractParams` now cast and validate Dream virtual columns, including `@Encrypted` fields, from their declared OpenAPI metadata instead of passing them through unchecked. This makes virtual param handling match concrete Dream columns: `@Virtual(['string', 'null'])` and nullable `@Encrypted` params reject non-strings while allowing `null`, and virtual array shorthands such as `string[]` are cast through the same array path used for database-backed array columns.
+
 ## 3.7.0
 
 - `g:resource` controllers generated in the `internal` namespace now scope queries to the authenticated internal user the same way default-namespace controllers scope to the current user — `this.currentInternalUser.associationQuery('posts')` / `this.currentInternalUser.createAssociation('posts', …)` — instead of reaching every record in the system via direct model access. Previously the `internal` namespace was treated identically to `admin`, lifting all owner scoping; that meant a generated internal resource defaulted to letting any authenticated internal user read and mutate any record, an unsafe default for a scaffold. The `admin` namespace is unchanged (still unscoped by default), and supplying `--owning-model` still scopes to that model in either namespace. The generated resource spec gains the matching "created by another InternalUser" omission/not-found/not-updated/not-deleted contexts. Generated scaffolds are emitted commented-out, so this only affects newly generated code — no runtime behavior in existing apps changes.

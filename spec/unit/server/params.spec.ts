@@ -65,6 +65,23 @@ describe('Params', () => {
           password: 'yadoin',
         })
       })
+
+      it('validates virtual attributes against their OpenAPI shape', () => {
+        expect(() => Params.for({ password: 123 }, User)).toThrow(ParamValidationErrors)
+      })
+
+      it('permits null for nullable virtual attributes', () => {
+        expect(Params.for({ password: null }, User)).toEqual({ password: null })
+      })
+
+      it('validates virtual array attributes against their OpenAPI shape', () => {
+        expect(Params.for({ openapiVirtualSpecTest2: ['howdy'] }, User)).toEqual({
+          openapiVirtualSpecTest2: ['howdy'],
+        })
+        expect(Params.for({ openapiVirtualSpecTest2: 'howdy' }, User)).toEqual({
+          openapiVirtualSpecTest2: ['howdy'],
+        })
+      })
     })
 
     context('array option is true', () => {
