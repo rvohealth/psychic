@@ -667,6 +667,7 @@ export default class OpenapiEndpointRenderer<
   private shouldAutogenerateBody() {
     const body = this.requestBody as OpenapiSchemaRequestBodyForOption<typeof Dream>
     if (!body) return true
+    if (body.params) return true
     if (body.only) return true
     if (body.including) return true
     if (body.combining) return true
@@ -694,13 +695,14 @@ export default class OpenapiEndpointRenderer<
     const dreamClass = forDreamClass || this.getSingleDreamModelClass()
     if (!dreamClass) return this.defaultRequestBody()
 
-    const { only, including, required, combining } = (this.requestBody ||
+    const { params, only, including, required, combining } = (this.requestBody ||
       {}) as OpenapiSchemaRequestBodyForOption<typeof Dream>
 
     const source = this.controllerClass.controllerActionPath(this.action)
     const paramsShape = buildDreamRequestBodyShape(
       dreamClass,
       {
+        params: params as readonly string[] | undefined,
         only: only as readonly string[] | undefined,
         including: including as readonly string[] | undefined,
         required: required as readonly string[] | undefined,
@@ -1678,8 +1680,13 @@ type DreamShorthandPrev = [never, 0, 1, 2, 3]
  */
 export type OpenapiSchemaNestedFor<Depth extends 0 | 1 | 2 | 3 = 3> = {
   for: typeof Dream
-  including?: readonly string[]
+  params?: readonly string[]
+  /**
+   * @deprecated Use `params` instead. `only` remains as a compatibility alias
+   * for apps written before `extractParams` made request params explicit.
+   */
   only?: readonly string[]
+  including?: readonly string[]
   required?: readonly string[]
   combining?: Depth extends 0
     ? OpenapiSchemaPropertiesShorthand
@@ -1747,15 +1754,14 @@ export interface OpenapiSchemaRequestBodyForDreamClass<ForOption extends typeof 
   for: ForOption
 
   /**
-   * Narrow down which fields on the model you would like
-   * to include. If a `for` option is provided, the fields
-   * will be derived from that model class. Otherwise, it
-   * will be derrived from the first argument passed to
-   * the OpenAPI decorator, provided it is a dream model.
+   * Explicitly list which request params to include from the model. If a `for`
+   * option is provided, the params will be derived from that model class.
+   * Otherwise, they will be derived from the first argument passed to the
+   * OpenAPI decorator, provided it is a Dream model.
    *
    * ```ts
    * @OpenAPI({
-   *   requestBody: { for: Pet, only: ['species', 'name'] }
+   *   requestBody: { for: Pet, params: ['species', 'name'] }
    * })
    * public create() {
    *   ...
@@ -1766,12 +1772,18 @@ export interface OpenapiSchemaRequestBodyForDreamClass<ForOption extends typeof 
    *
    * ```ts
    * @OpenAPI(Pet, {
-   *   requestBody: { only: ['species', 'name'] }
+   *   requestBody: { params: ['species', 'name'] }
    * })
    * public create() {
    *   ...
    * }
    * ```
+   */
+  params?: (keyof DreamParamSafeAttributes<InstanceType<ForOption>>)[]
+
+  /**
+   * @deprecated Use `params` instead. `only` remains as a compatibility alias
+   * for apps written before `extractParams` made request params explicit.
    */
   only?: (keyof DreamParamSafeAttributes<InstanceType<ForOption>>)[]
 
@@ -1826,7 +1838,7 @@ export interface OpenapiSchemaRequestBodyForDreamClass<ForOption extends typeof 
    * `combining` values may also be a nested `for:` sentinel — the same
    * shape as the top-level model-driven `requestBody`, just nested. It
    * derives an object schema from another Dream model's param-safe
-   * columns and accepts the same `including` / `only` / `required` /
+   * columns and accepts the same `params` / `including` / `required` /
    * `combining` siblings.
    *
    * ```ts
@@ -1902,20 +1914,25 @@ export interface OpenapiSchemaRequestBodyForBaseDreamClass<
   for?: never
 
   /**
-   * Narrow down which fields on the model you would like
-   * to include. If a `for` option is provided, the fields
-   * will be derived from that model class. Otherwise, it
-   * will be derrived from the first argument passed to
-   * the OpenAPI decorator, provided it is a dream model.
+   * Explicitly list which request params to include from the model. If a `for`
+   * option is provided, the params will be derived from that model class.
+   * Otherwise, they will be derived from the first argument passed to the
+   * OpenAPI decorator, provided it is a Dream model.
    *
    * ```ts
    * @OpenAPI(Pet, {
-   *   requestBody: { only: ['species', 'name'] }
+   *   requestBody: { params: ['species', 'name'] }
    * })
    * public create() {
    *   ...
    * }
    * ```
+   */
+  params?: Only
+
+  /**
+   * @deprecated Use `params` instead. `only` remains as a compatibility alias
+   * for apps written before `extractParams` made request params explicit.
    */
   only?: Only
 
@@ -1956,7 +1973,7 @@ export interface OpenapiSchemaRequestBodyForBaseDreamClass<
    * `combining` values may also be a nested `for:` sentinel — the same
    * shape as the top-level model-driven `requestBody`, just nested. It
    * derives an object schema from another Dream model's param-safe
-   * columns and accepts the same `including` / `only` / `required` /
+   * columns and accepts the same `params` / `including` / `required` /
    * `combining` siblings.
    *
    * ```ts

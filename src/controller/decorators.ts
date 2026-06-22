@@ -142,9 +142,9 @@ export function OpenAPI(
 export namespace OpenAPI {
   /**
    * Type-narrowed helper for nesting a Dream-model-driven shape inside a
-   * request body. Returns the same `{ for, only, including, required,
+   * request body. Returns the same `{ for, params, including, required,
    * combining }` shape the renderer recognizes natively, but typed via a
-   * function-level generic so `only` / `including` / `required` are
+   * function-level generic so `params` / `including` / `required` are
    * constrained to columns of the model passed as the first argument.
    *
    * ```ts
@@ -173,6 +173,11 @@ export namespace OpenAPI {
   export function forDream<const M extends typeof Dream>(
     model: M,
     opts: {
+      params?: readonly (keyof DreamParamSafeAttributes<InstanceType<M>>)[]
+      /**
+       * @deprecated Use `params` instead. `only` remains as a compatibility alias
+       * for apps written before `extractParams` made request params explicit.
+       */
       only?: readonly (keyof DreamParamSafeAttributes<InstanceType<M>>)[]
       including?: readonly Exclude<
         keyof UpdateableProperties<InstanceType<M>>,

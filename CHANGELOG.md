@@ -1,6 +1,7 @@
-## 3.7.1
+## 3.8.0
 
 - `Params.for` and `PsychicController#extractParams` now cast and validate Dream virtual columns, including `@Encrypted` fields, from their declared OpenAPI metadata instead of passing them through unchecked. This makes virtual param handling match concrete Dream columns: `@Virtual(['string', 'null'])` and nullable `@Encrypted` params reject non-strings while allowing `null`, and virtual array shorthands such as `string[]` are cast through the same array path used for database-backed array columns.
+- `@OpenAPI` model-derived `requestBody` allowlists now use `params` as the canonical key (`requestBody: { params: paramSafeColumns }`) to match the explicit `extractParams(Model, paramSafeColumns)` flow. The previous `only` key still works as a deprecated compatibility alias, including inside nested `{ for: Model }` request-body shorthand and `OpenAPI.forDream(Model, ...)`, but newly generated `create` / `update` scaffolds emit `params` so the documented request shape and runtime extraction call both read as explicit request params.
 
 ## 3.7.0
 
