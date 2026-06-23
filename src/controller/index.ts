@@ -1222,6 +1222,38 @@ export default class PsychicController {
    * @param message - Optional error message to include in the response
    * @throws {HttpStatusUnauthorized} Always throws this error
    *
+   * **Optional-auth pattern (public endpoints with personalized fields)**
+   *
+   * When a namespace has a mix of public and protected routes, put the optional
+   * auth logic in the namespace-level base controller and enforce it in child
+   * controllers that require a user. This avoids cross-namespace inheritance and
+   * keeps `psy check:controller-hierarchy` happy.
+   *
+   * ```ts
+   * // V1/BaseController — loads the user if a session exists, but does not require one.
+   * // Public routes (e.g. ListingsController#index) extend this and return personalized
+   * // data when currentUser is present, or anonymous data when it is not.
+   * class V1BaseController extends ApplicationController {
+   *   protected currentUser: User | null = null
+   *
+   *   @BeforeAction()
+   *   public async loadCurrentUser() {
+   *     this.currentUser = await User.find(this.session.get('userId'))
+   *   }
+   * }
+   *
+   * // V1/HostBaseController — extends V1BaseController and requires the user.
+   * // All host-management routes extend this instead of V1BaseController.
+   * class V1HostBaseController extends V1BaseController {
+   *   protected currentUser!: User // narrowed: never null past this point
+   *
+   *   @BeforeAction()
+   *   public requireCurrentUser() {
+   *     if (!this.currentUser) this.unauthorized()
+   *   }
+   * }
+   * ```
+   *
    * @example
    * ```ts
    * class UsersController extends ApplicationController {
