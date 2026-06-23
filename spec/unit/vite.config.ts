@@ -3,6 +3,8 @@ import '../../test-app/src/conf/global.js'
 import path from 'node:path'
 import { defineConfig } from 'vitest/config'
 
+const maxWorkers = parseInt(process.env.PSYCHIC_UNIT_MAX_WORKERS || process.env.DREAM_PARALLEL_TESTS || '1')
+
 export default defineConfig({
   resolve: {
     alias: {
@@ -19,8 +21,8 @@ export default defineConfig({
     globals: true,
     setupFiles: ['luxon-jest-matchers', './spec/unit/setup/hooks.js'],
     fileParallelism: true,
-    maxConcurrency: parseInt(process.env.DREAM_PARALLEL_TESTS || '1'),
-    maxWorkers: parseInt(process.env.DREAM_PARALLEL_TESTS || '1'),
+    maxConcurrency: maxWorkers,
+    maxWorkers,
     mockReset: true,
     watch: false,
 
