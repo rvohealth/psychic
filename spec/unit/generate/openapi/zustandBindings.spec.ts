@@ -22,7 +22,7 @@ describe('generateOpenapiZustandBindings', () => {
 
   async function cleanup() {
     try {
-      await fs.rm('./test-app/src/conf/initializers/openapi', { recursive: true })
+      await fs.rm('./test-app/src/conf/initializers/openapi/myApi.ts')
     } catch {
       // noop
     }

@@ -78,7 +78,7 @@ jobs:
       APP_ENCRYPTION_KEY: ${{ vars.APP_ENCRYPTION_KEY }}
       LEGACY_APP_ENCRYPTION_KEY: ${{ vars.LEGACY_APP_ENCRYPTION_KEY }}
       COLUMN_ENCRYPTION_KEY: ${{ vars.COLUMN_ENCRYPTION_KEY }}
-      DREAM_PARALLEL_TESTS: 4
+      DREAM_PARALLEL_TESTS: 1
       CI: "1"
     steps:
       - uses: actions/checkout@v4
@@ -137,7 +137,7 @@ jobs:
       APP_ENCRYPTION_KEY: ${{ vars.APP_ENCRYPTION_KEY }}
       LEGACY_APP_ENCRYPTION_KEY: ${{ vars.LEGACY_APP_ENCRYPTION_KEY }}
       COLUMN_ENCRYPTION_KEY: ${{ vars.COLUMN_ENCRYPTION_KEY }}
-      DREAM_PARALLEL_TESTS: 1
+      DREAM_PARALLEL_TESTS: 4
       CI: "1"
     steps:
       - uses: actions/checkout@v4
@@ -161,6 +161,9 @@ jobs:
 
       - name: reset database
         run: pnpm psy db:reset
+
+      - name: prepare parallel test databases
+        run: pnpm psy db:migrate --skip-sync
 
       - name: run feature specs
         run: pnpm fspec
