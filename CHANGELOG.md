@@ -1,3 +1,7 @@
+## 3.8.1
+
+- `psy check:controller-hierarchy` violation messages now include a remediation tip pointing to the child controller's directory, suggesting the optional-auth-at-namespace-base pattern: create a `BaseController` at the same level as the violating controller and use `requireCurrentUser()` in controllers that need it. The `unauthorized()` JSDoc is also expanded with an example of this pattern.
+
 ## 3.8.0
 
 - `Params.for` and `PsychicController#extractParams` now cast and validate Dream virtual columns, including `@Encrypted` fields, from their declared OpenAPI metadata instead of passing them through unchecked. This makes virtual param handling match concrete Dream columns: `@Virtual(['string', 'null'])` and nullable `@Encrypted` params reject non-strings while allowing `null`, and virtual array shorthands such as `string[]` are cast through the same array path used for database-backed array columns.

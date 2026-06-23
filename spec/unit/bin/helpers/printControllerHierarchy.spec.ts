@@ -114,7 +114,7 @@ describe('printControllerHierarchy', () => {
         controllersPath,
       )
       expect(result).toEqual(
-        '[hierarchy violation: src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]',
+        '[hierarchy violation: src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]\n  Tip: create a BaseController in src/app/controllers/Api/V1/ that extends the appropriate parent, then use requireCurrentUser() in controllers that require a user.',
       )
     })
 
@@ -125,7 +125,7 @@ describe('printControllerHierarchy', () => {
         controllersPath,
       )
       expect(result).toEqual(
-        '[hierarchy violation: src/app/controllers/Internal/Candidates/CitiesController.ts should extend a BaseController at its same level]',
+        '[hierarchy violation: src/app/controllers/Internal/Candidates/CitiesController.ts should extend a BaseController at its same level]\n  Tip: create a BaseController in src/app/controllers/Internal/Candidates/ that extends the appropriate parent, then use requireCurrentUser() in controllers that require a user.',
       )
     })
   })
@@ -241,7 +241,7 @@ describe('printControllerHierarchy', () => {
       // Api/V1/UsersController extends ApplicationController (root dir), but lives in Api/V1/
       // That skips the Api/ directory level, so it should have a violation
       const expectedViolation = colors.yellow(
-        '[hierarchy violation: test-app/src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]',
+        '[hierarchy violation: test-app/src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]\n  Tip: create a BaseController in test-app/src/app/controllers/Api/V1/ that extends the appropriate parent, then use requireCurrentUser() in controllers that require a user.',
       )
       const violationLine = lines.find(l => l.includes(expectedViolation))
       expect(violationLine).toBeDefined()
@@ -263,7 +263,7 @@ describe('printControllerHierarchy', () => {
       const lines = controllerHierarchyLines()
 
       const expectedViolation = colors.yellow(
-        '[hierarchy violation: test-app/src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]',
+        '[hierarchy violation: test-app/src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]\n  Tip: create a BaseController in test-app/src/app/controllers/Api/V1/ that extends the appropriate parent, then use requireCurrentUser() in controllers that require a user.',
       )
       const violationIdx = lines.findIndex(l => l.includes(expectedViolation))
       expect(violationIdx).toBeGreaterThan(-1)
@@ -291,7 +291,7 @@ describe('printControllerHierarchy', () => {
       // Api/V1/UsersController extends ApplicationController but is two directories deep
       const v1Violation = violations.find(v => v.includes('Api/V1/UsersController.ts'))
       expect(v1Violation).toEqual(
-        '[hierarchy violation: test-app/src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]',
+        '[hierarchy violation: test-app/src/app/controllers/Api/V1/UsersController.ts should extend a BaseController at its same level]\n  Tip: create a BaseController in test-app/src/app/controllers/Api/V1/ that extends the appropriate parent, then use requireCurrentUser() in controllers that require a user.',
       )
     })
 

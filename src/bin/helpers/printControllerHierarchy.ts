@@ -178,7 +178,8 @@ export function hierarchyViolation(
   }
 
   const childFilePath = controllersPath + '/' + childGlobalName.replace(/^controllers\//, '') + '.ts'
-  return `[hierarchy violation: ${childFilePath} should extend a BaseController at its same level]`
+  const childDirPath = controllersPath + '/' + childDir.replace(/^controllers\//, '')
+  return `[hierarchy violation: ${childFilePath} should extend a BaseController at its same level]\n  Tip: create a BaseController in ${childDirPath} that extends the appropriate parent, then use requireCurrentUser() in controllers that require a user.`
 }
 
 function collectTreeLines(
