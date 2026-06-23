@@ -4,7 +4,6 @@ import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
 import { DreamSerializerBuilder, ObjectSerializerBuilder } from '@rvoh/dream/system'
 import {
   DreamModelSerializerType,
-  DreamParamSafeAttributes,
   DreamParamSafeColumnNames,
   SerializerRendererOpts,
   StrictInterface,
@@ -57,6 +56,7 @@ import Params, {
   ExtractParamsOpts,
   ParamsCastOptions,
   ParamsForOpts,
+  PsychicParamSafeAttributes,
   ValidatedAllowsNull,
   ValidatedReturnType,
 } from '../server/params.js'
@@ -533,7 +533,7 @@ export default class PsychicController {
   public paramsFor<
     T extends typeof Dream,
     I extends InstanceType<T>,
-    const OnlyArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
+    const OnlyArray extends readonly (keyof PsychicParamSafeAttributes<I>)[],
     ForOpts extends StrictInterface<ForOpts, ParamsForOpts<OnlyArray>>,
     ParamSafeColumnsOverride extends I['paramSafeColumns' & keyof I] extends never
       ? undefined
@@ -544,17 +544,17 @@ export default class PsychicController {
           ParamSafeColumnsOverride[number] & DreamParamSafeColumnNames<I>
         >[]
       : DreamParamSafeColumnNames<I>[],
-    ParamSafeAttrs extends DreamParamSafeAttributes<InstanceType<T>>,
-    ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
+    ParamSafeAttrs extends PsychicParamSafeAttributes<InstanceType<T>>,
+    ReturnPartialType extends ForOpts['only'] extends readonly (keyof PsychicParamSafeAttributes<
       InstanceType<T>
     >)[]
       ? Partial<{
           [K in ForOpts['only'][number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
         }>
       : Partial<{
-          [K in ParamSafeColumns[number & keyof ParamSafeColumns] & string]: DreamParamSafeAttributes<
+          [K in ParamSafeColumns[number & keyof ParamSafeColumns] & string]: PsychicParamSafeAttributes<
             InstanceType<T>
-          >[K & keyof DreamParamSafeAttributes<InstanceType<T>>]
+          >[K & keyof PsychicParamSafeAttributes<InstanceType<T>>]
         }>,
     ReturnPayload extends ForOpts['array'] extends true ? ReturnPartialType[] : ReturnPartialType,
   >(this: PsychicController, dreamClass: T, opts?: ForOpts): ReturnPayload {
@@ -573,8 +573,8 @@ export default class PsychicController {
    * the call site, so reviewers can see exactly which fields are accepted
    * from the request.
    *
-   * The `allowed` array is compile-time constrained to
-   * `DreamParamSafeColumnNames<InstanceType<T>>`, so protected columns
+   * The `allowed` array is compile-time constrained to the model's
+   * param-safe keys, so protected columns
    * (primary key, timestamps, belongs-to foreign keys, polymorphic type
    * fields, STI `type` column, and any column in `explicitUnsafeParamColumns`)
    * are TypeScript errors. At runtime, the intersection against the model's
@@ -602,9 +602,9 @@ export default class PsychicController {
   public extractParams<
     T extends typeof Dream,
     I extends InstanceType<T>,
-    const AllowedArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
+    const AllowedArray extends readonly (keyof PsychicParamSafeAttributes<I>)[],
     OptsType extends StrictInterface<OptsType, ExtractParamsOpts>,
-    ParamSafeAttrs extends DreamParamSafeAttributes<I>,
+    ParamSafeAttrs extends PsychicParamSafeAttributes<I>,
     ReturnPartial extends Partial<{
       [K in AllowedArray[number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
     }>,
@@ -612,7 +612,7 @@ export default class PsychicController {
   >(this: PsychicController, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
     const source = opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return Params.extract(source, dreamClass, allowed as any, opts as any)
+    return Params.extract(source, dreamClass, allowed as any, opts as any) as ReturnPayload
   }
 
   /**

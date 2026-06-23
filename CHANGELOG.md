@@ -1,3 +1,8 @@
+## 3.8.1
+
+- `Params.for`, `Params.extract`, `PsychicController#paramsFor`, and `PsychicController#extractParams` now preserve concrete TypeScript return types for Dream virtual columns, including `@Encrypted` properties, instead of deriving them as `any`. This keeps virtual and encrypted params type-safe after extraction while retaining Dream's existing param-safe typing for database-backed columns.
+- The GitHub Actions feature-spec job now creates Dream's per-worker test database pool before running Vitest, matching the Dream 2.14 test database behavior used by the unit and sync-diff jobs.
+
 ## 3.8.0
 
 - `Params.for` and `PsychicController#extractParams` now cast and validate Dream virtual columns, including `@Encrypted` fields, from their declared OpenAPI metadata instead of passing them through unchecked. This makes virtual param handling match concrete Dream columns: `@Virtual(['string', 'null'])` and nullable `@Encrypted` params reject non-strings while allowing `null`, and virtual array shorthands such as `string[]` are cast through the same array path used for database-backed array columns.

@@ -137,6 +137,8 @@ jobs:
       APP_ENCRYPTION_KEY: ${{ vars.APP_ENCRYPTION_KEY }}
       LEGACY_APP_ENCRYPTION_KEY: ${{ vars.LEGACY_APP_ENCRYPTION_KEY }}
       COLUMN_ENCRYPTION_KEY: ${{ vars.COLUMN_ENCRYPTION_KEY }}
+      DREAM_PARALLEL_TESTS: 1
+      CI: "1"
     steps:
       - uses: actions/checkout@v4
       - uses: actions/setup-node@v6

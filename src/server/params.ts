@@ -34,6 +34,19 @@ import { Inc } from '../i18n/conf/types.js'
 import type { VirtualAttributeStatement } from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
 
+type IsAny<T> = 0 extends 1 & T ? true : false
+
+type PsychicParamSafeAttributeValue<I extends Dream, K extends keyof DreamParamSafeAttributes<I>> =
+  IsAny<DreamParamSafeAttributes<I>[K]> extends true
+    ? K extends keyof I
+      ? I[K]
+      : DreamParamSafeAttributes<I>[K]
+    : DreamParamSafeAttributes<I>[K]
+
+export type PsychicParamSafeAttributes<I extends Dream> = {
+  [K in keyof DreamParamSafeAttributes<I>]: PsychicParamSafeAttributeValue<I, K>
+}
+
 export default class Params {
   /**
    * ### .for
@@ -63,8 +76,8 @@ export default class Params {
           ParamSafeColumnsOverride[number] & DreamParamSafeColumnNames<I>
         >[]
       : DreamParamSafeColumnNames<I>[],
-    ParamSafeAttrs extends DreamParamSafeAttributes<InstanceType<T>>,
-    ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
+    ParamSafeAttrs extends PsychicParamSafeAttributes<InstanceType<T>>,
+    ReturnPartialType extends ForOpts['only'] extends readonly (keyof PsychicParamSafeAttributes<
       InstanceType<T>
     >)[]
       ? Partial<{
@@ -178,7 +191,7 @@ export default class Params {
    * {@link Params.for} with `only` moved to a required positional argument.
    * Use from a controller via {@link PsychicController.extractParams}.
    *
-   * The `allowed` array is constrained to `DreamParamSafeColumnNames<I>` at
+   * The `allowed` array is constrained to the model's param-safe keys at
    * the type level, so protected columns (primary key, timestamps, belongs-to
    * foreign keys, polymorphic type fields, STI `type` column, and any column
    * in `explicitUnsafeParamColumns`) are TypeScript compile errors. At
@@ -189,16 +202,16 @@ export default class Params {
   public static extract<
     T extends typeof Dream,
     I extends InstanceType<T>,
-    const AllowedArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
+    const AllowedArray extends readonly (keyof PsychicParamSafeAttributes<I>)[],
     OptsType extends StrictInterface<OptsType, ExtractParamsOpts>,
-    ParamSafeAttrs extends DreamParamSafeAttributes<I>,
+    ParamSafeAttrs extends PsychicParamSafeAttributes<I>,
     ReturnPartial extends Partial<{
       [K in AllowedArray[number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
     }>,
     ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
   >(params: object, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return Params.for(params, dreamClass, { ...(opts ?? {}), only: allowed } as any)
+    return Params.for(params, dreamClass, { ...(opts ?? {}), only: allowed } as any) as ReturnPayload
   }
 
   public static restrict<T extends typeof Params>(

@@ -2,6 +2,9 @@ import PsychicController from '../../../src/controller/index.js'
 import User from '../../../test-app/src/app/models/User.js'
 import { createMockKoaContext } from '../controller/helpers/mockRequest.js'
 
+type IsAny<T> = 0 extends 1 & T ? true : false
+type ExpectFalse<T extends false> = T
+
 // R-011 `extractParams` is the explicit-allowlist primitive replacing
 // bare `paramsFor(Model)` as the generator default. It enforces the same
 // runtime invariants that `paramsFor` did; the security-relevant delta is
@@ -39,6 +42,64 @@ describe('PsychicController extract-params primitives (R-011)', () => {
       // itself is the compile-time proof. The runtime check below also strips them.
       const result = controller.extractParams(User, ['name', 'id', 'createdAt'])
       expect(result).toEqual({ name: 'howyadoin' })
+    })
+
+    it('derives concrete types for virtual and encrypted params', () => {
+      const ctx = createMockKoaContext({
+        body: {
+          password: 'let-me-in',
+          secret: 'shh',
+          openapiVirtualSpecTest: 'howyadoin',
+          openapiVirtualSpecTest2: ['howdy'],
+        },
+      })
+      const controller = new PsychicController(ctx, { action: 'hello' })
+
+      const result = controller.extractParams(User, [
+        'password',
+        'secret',
+        'openapiVirtualSpecTest',
+        'openapiVirtualSpecTest2',
+      ])
+      type Result = typeof result
+      type PasswordIsNotAny = ExpectFalse<IsAny<Result['password']>>
+      type SecretIsNotAny = ExpectFalse<IsAny<Result['secret']>>
+      type OpenapiVirtualSpecTestIsNotAny = ExpectFalse<IsAny<Result['openapiVirtualSpecTest']>>
+      type OpenapiVirtualSpecTest2IsNotAny = ExpectFalse<IsAny<Result['openapiVirtualSpecTest2']>>
+
+      const password: string | null | undefined = result.password
+      const secret: string | null | undefined = result.secret
+      const openapiVirtualSpecTest: string | null | undefined = result.openapiVirtualSpecTest
+      const openapiVirtualSpecTest2: string[] | undefined = result.openapiVirtualSpecTest2
+
+      // @ts-expect-error virtual params are not `any`
+      const invalidPassword: number = result.password
+      // @ts-expect-error encrypted params are not `any`
+      const invalidSecret: number = result.secret
+      // @ts-expect-error virtual params with OpenAPI metadata are not `any`
+      const invalidOpenapiVirtualSpecTest: number = result.openapiVirtualSpecTest
+      // @ts-expect-error array virtual params are not `any` or scalar
+      const invalidOpenapiVirtualSpecTest2: string = result.openapiVirtualSpecTest2
+
+      void (null as unknown as PasswordIsNotAny)
+      void (null as unknown as SecretIsNotAny)
+      void (null as unknown as OpenapiVirtualSpecTestIsNotAny)
+      void (null as unknown as OpenapiVirtualSpecTest2IsNotAny)
+      void password
+      void secret
+      void openapiVirtualSpecTest
+      void openapiVirtualSpecTest2
+      void invalidPassword
+      void invalidSecret
+      void invalidOpenapiVirtualSpecTest
+      void invalidOpenapiVirtualSpecTest2
+
+      expect(result).toEqual({
+        password: 'let-me-in',
+        secret: 'shh',
+        openapiVirtualSpecTest: 'howyadoin',
+        openapiVirtualSpecTest2: ['howdy'],
+      })
     })
 
     context('with a key option', () => {
