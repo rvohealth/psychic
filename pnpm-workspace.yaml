@@ -10,3 +10,7 @@ overrides:
 allowBuilds:
   esbuild: true
   puppeteer: true
+
+minimumReleaseAgeExclude:
+  - '@rvoh/dream-spec-helpers@2.2.0'
+  - '@rvoh/dream@2.14.0'
