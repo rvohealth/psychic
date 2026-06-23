@@ -34,21 +34,6 @@ import { Inc } from '../i18n/conf/types.js'
 import type { VirtualAttributeStatement } from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
 
-type PsychicParamSafeAttributeValue<
-  I extends Dream,
-  K extends PropertyKey,
-> = K extends keyof DreamAttributes<I>
-  ? DreamAttributes<I>[K]
-  : K extends keyof I
-    ? I[K]
-    : K extends keyof DreamParamSafeAttributes<I>
-      ? DreamParamSafeAttributes<I>[K]
-      : never
-
-export type PsychicParamSafeAttributes<I extends Dream> = {
-  [K in keyof DreamParamSafeAttributes<I>]: PsychicParamSafeAttributeValue<I, K>
-}
-
 export default class Params {
   /**
    * ### .for
@@ -78,8 +63,8 @@ export default class Params {
           ParamSafeColumnsOverride[number] & DreamParamSafeColumnNames<I>
         >[]
       : DreamParamSafeColumnNames<I>[],
-    ParamSafeAttrs extends PsychicParamSafeAttributes<InstanceType<T>>,
-    ReturnPartialType extends ForOpts['only'] extends readonly (keyof PsychicParamSafeAttributes<
+    ParamSafeAttrs extends DreamParamSafeAttributes<InstanceType<T>>,
+    ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
       InstanceType<T>
     >)[]
       ? Partial<{
@@ -204,16 +189,16 @@ export default class Params {
   public static extract<
     T extends typeof Dream,
     I extends InstanceType<T>,
-    const AllowedArray extends readonly (keyof PsychicParamSafeAttributes<I>)[],
+    const AllowedArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
     OptsType extends StrictInterface<OptsType, ExtractParamsOpts>,
-    ParamSafeAttrs extends PsychicParamSafeAttributes<I>,
+    ParamSafeAttrs extends DreamParamSafeAttributes<I>,
     ReturnPartial extends Partial<{
       [K in AllowedArray[number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
     }>,
     ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
   >(params: object, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return Params.for(params, dreamClass, { ...(opts ?? {}), only: allowed } as any) as ReturnPayload
+    return Params.for(params, dreamClass, { ...(opts ?? {}), only: allowed } as any)
   }
 
   public static restrict<T extends typeof Params>(
