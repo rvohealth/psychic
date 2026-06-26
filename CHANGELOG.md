@@ -1,3 +1,7 @@
+## 3.9.0
+
+- switch to Github action publishing to npmjs.com
+
 ## 3.8.1
 
 - OpenAPI generation no longer advertises `422` ValidationErrors as a default response on every endpoint. Psychic's automatic validation rescue paths for Dream validation errors, OpenAPI request validation failures, and param validation errors return `400` by design; `422` remains available only when an endpoint explicitly raises it, such as through `unprocessableContent(...)`.
