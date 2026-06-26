@@ -2,14 +2,15 @@ overrides:
   diff: '>=8.0.3'
   path-to-regexp: '>=8.4.0'
 
+strictDepBuilds: false
 # SECURITY — allowBuilds is a supply-chain allowlist. pnpm 10+ blocks ALL
 # dependency lifecycle scripts (postinstall, etc.) by default; that default is
 # the primary defense against Shai-Hulud-class npm worms. Only packages listed
 # below (= true) may run install/build scripts. Keep this MINIMAL — every entry
 # re-opens script execution for that package, so add one only with clear cause.
 allowBuilds:
-  esbuild: true
-  puppeteer: true
+  esbuild: false
+  puppeteer: false
 
 minimumReleaseAgeExclude:
   - '@rvoh/dream-spec-helpers@2.2.0'

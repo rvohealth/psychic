@@ -1,3 +1,7 @@
+## 3.8.3
+
+- upgrade to pnpm@11.9.0; add strictDepBuilds: false and deny esbuild/puppeteer build scripts in pnpm-workspace.yaml
+
 ## 3.8.2
 
 - switch to Github action publishing to npmjs.com
