@@ -1,3 +1,7 @@
+## 3.8.1
+
+- OpenAPI generation no longer advertises `422` ValidationErrors as a default response on every endpoint. Psychic's automatic validation rescue paths for Dream validation errors, OpenAPI request validation failures, and param validation errors return `400` by design; `422` remains available only when an endpoint explicitly raises it, such as through `unprocessableContent(...)`.
+
 ## 3.8.0
 
 - `Params.for` and `PsychicController#extractParams` now cast and validate Dream virtual columns, including `@Encrypted` fields, from their declared OpenAPI metadata instead of passing them through unchecked. This makes virtual param handling match concrete Dream columns: `@Virtual(['string', 'null'])` and nullable `@Encrypted` params reject non-strings while allowing `null`, and virtual array shorthands such as `string[]` are cast through the same array path used for database-backed array columns.

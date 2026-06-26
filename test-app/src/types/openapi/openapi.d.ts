@@ -38,7 +38,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -89,7 +88,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -199,7 +197,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -321,7 +318,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -365,7 +361,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -419,7 +414,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -478,7 +472,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -528,7 +521,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -578,7 +570,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -639,7 +630,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -698,7 +688,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -754,7 +743,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -808,7 +796,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -856,7 +843,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -914,7 +900,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -963,7 +948,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1011,7 +995,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1071,7 +1054,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1127,7 +1109,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1168,7 +1149,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1222,7 +1202,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1276,7 +1255,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1332,7 +1310,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1445,7 +1422,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1526,7 +1502,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1575,7 +1550,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1639,7 +1613,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1697,7 +1670,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1751,7 +1723,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1800,7 +1771,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1859,7 +1829,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1909,7 +1878,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -1965,7 +1933,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2015,7 +1982,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2072,7 +2038,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2125,7 +2090,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2175,7 +2139,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2225,7 +2188,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2275,7 +2237,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2325,7 +2286,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2375,7 +2335,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2425,7 +2384,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2529,7 +2487,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2583,7 +2540,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2618,7 +2574,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2719,7 +2674,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2767,7 +2721,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2821,7 +2774,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2875,7 +2827,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -2934,7 +2885,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -3062,7 +3012,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -3121,7 +3070,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -3251,7 +3199,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -3308,7 +3255,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
@@ -3436,7 +3382,6 @@ export interface paths {
                 404: components["responses"]["NotFound"];
                 409: components["responses"]["Conflict"];
                 418: components["responses"]["CustomResponse"];
-                422: components["responses"]["ValidationErrors"];
                 490: components["responses"]["CustomResponse"];
                 500: components["responses"]["InternalServerError"];
             };
