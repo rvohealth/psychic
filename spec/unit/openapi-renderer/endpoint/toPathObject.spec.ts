@@ -2306,11 +2306,9 @@ describe('OpenapiEndpointRenderer', () => {
               400: {
                 $ref: '#/components/responses/BadRequest',
               },
-              422: {
-                $ref: '#/components/responses/ValidationErrors',
-              },
             }),
           )
+          expect(response['/users/howyadoin']!.get.responses).not.toHaveProperty('422')
         })
       })
 
@@ -2351,6 +2349,25 @@ describe('OpenapiEndpointRenderer', () => {
                     },
                   },
                 },
+              },
+            }),
+          )
+        })
+
+        it('endpoint-level 422 responses are still rendered when explicitly specified', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+            responses: {
+              422: {
+                description: 'Validation errors intended for display',
+              },
+            },
+          })
+
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          expect(response['/users/howyadoin']!.get.responses).toEqual(
+            expect.objectContaining({
+              422: {
+                description: 'Validation errors intended for display',
               },
             }),
           )

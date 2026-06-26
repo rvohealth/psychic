@@ -49,9 +49,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -105,9 +102,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -530,9 +524,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -964,9 +955,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -1028,9 +1016,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -1098,9 +1083,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -1192,9 +1174,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -1259,9 +1238,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -1330,9 +1306,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -1426,9 +1399,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -1519,9 +1489,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -1580,9 +1547,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -1643,9 +1607,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -1697,9 +1658,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -1767,9 +1725,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -1830,9 +1785,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -1884,9 +1836,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -1962,9 +1911,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -2024,9 +1970,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -2072,9 +2015,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -2135,9 +2075,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -2196,9 +2133,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -2262,9 +2196,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -2452,9 +2383,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -2629,9 +2557,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -2702,9 +2627,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -2800,9 +2722,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -2868,9 +2787,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -2932,9 +2848,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -2989,9 +2902,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -3074,9 +2984,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -3143,9 +3050,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -3205,9 +3109,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -3259,9 +3160,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -3342,9 +3240,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -3408,9 +3303,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -3462,9 +3354,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -3518,9 +3407,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -3572,9 +3458,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -3628,9 +3511,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -3682,9 +3562,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -4114,9 +3991,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -4158,9 +4032,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -4222,9 +4093,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -4635,9 +4503,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -4669,9 +4534,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -4733,9 +4595,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -4796,9 +4655,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -4858,9 +4714,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -4944,9 +4797,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -5401,9 +5251,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -5488,9 +5335,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -5947,9 +5791,6 @@
           "418": {
             "$ref": "#/components/responses/CustomResponse"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
           },
@@ -6032,9 +5873,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"
@@ -6488,9 +6326,6 @@
           },
           "418": {
             "$ref": "#/components/responses/CustomResponse"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomResponse"

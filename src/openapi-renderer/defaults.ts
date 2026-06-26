@@ -20,9 +20,6 @@ export const DEFAULT_OPENAPI_RESPONSES = {
   409: {
     $ref: '#/components/responses/Conflict',
   },
-  422: {
-    $ref: '#/components/responses/ValidationErrors',
-  },
   500: {
     $ref: '#/components/responses/InternalServerError',
   },

@@ -39,9 +39,6 @@
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomAdminResponse"
           },
@@ -84,9 +81,6 @@
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomAdminResponse"
           },
@@ -128,9 +122,6 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomAdminResponse"
@@ -189,9 +180,6 @@
           "409": {
             "$ref": "#/components/responses/Conflict"
           },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
-          },
           "490": {
             "$ref": "#/components/responses/CustomAdminResponse"
           },
@@ -233,9 +221,6 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomAdminResponse"
@@ -332,9 +317,6 @@
           },
           "409": {
             "$ref": "#/components/responses/Conflict"
-          },
-          "422": {
-            "$ref": "#/components/responses/ValidationErrors"
           },
           "490": {
             "$ref": "#/components/responses/CustomAdminResponse"

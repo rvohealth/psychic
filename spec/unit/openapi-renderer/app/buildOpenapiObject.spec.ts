@@ -777,7 +777,6 @@ describe('OpenapiAppRenderer', () => {
               '403': { $ref: '#/components/responses/Forbidden' },
               '404': { $ref: '#/components/responses/NotFound' },
               '409': { $ref: '#/components/responses/Conflict' },
-              '422': { $ref: '#/components/responses/ValidationErrors' },
               '490': { $ref: '#/components/responses/CustomAdminResponse' },
               '500': { $ref: '#/components/responses/InternalServerError' },
             },
