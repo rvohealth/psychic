@@ -2,6 +2,15 @@
 
 This file provides instructions for AI agents working on this project.
 
+## Release Requirements
+
+For any public-facing functionality change, bug fix, behavior change, API change, CLI change, generated output change, or documentation-affecting framework change, update both:
+
+- `package.json` version
+- `CHANGELOG.md`
+
+Do this before opening a PR.
+
 ## Database Commands
 
 ### Migrate the Database

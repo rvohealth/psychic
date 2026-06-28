@@ -182,6 +182,12 @@ describe('Params', () => {
 
           expect(error!.errors).toEqual({ favoriteTreats: ['did not match expected enum values'] })
         })
+
+        it('trims enum values before validating', () => {
+          expect(Params.for({ favoriteTreats: ['  efishy feesh  ', '\nsnick snowcks\t'] }, Pet)).toEqual({
+            favoriteTreats: ['efishy feesh', 'snick snowcks'],
+          })
+        })
       })
     })
 
@@ -1378,6 +1384,19 @@ describe('Params', () => {
                   }),
                 ).toThrow(ParamValidationError)
               })
+            })
+          })
+
+          context('with enum passed', () => {
+            it('trims values before validating against the enum', () => {
+              const result: TestEnum[] = Params.cast(
+                { howyadoin: ['  hello  ', '\nworld\t'] },
+                'howyadoin',
+                'string[]',
+                { enum: TestEnumValues },
+              )
+
+              expect(result).toEqual(['hello', 'world'])
             })
           })
         })

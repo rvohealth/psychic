@@ -285,6 +285,8 @@ export default class Params {
     expectedType: ExpectedType,
     opts?: OptsType,
   ): AllowNullOrUndefined extends true ? ValidatedType | null | undefined : ValidatedType {
+    if (typeof paramValue === 'string') paramValue = paramValue.trim()
+
     if (expectedType instanceof RegExp) {
       return this.matchRegexOrThrow(paramName, paramValue as string, expectedType) as ReturnType
     }

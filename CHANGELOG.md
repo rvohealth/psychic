@@ -1,3 +1,7 @@
+## 3.8.4
+
+- String array params now trim each string element before validation/casting, matching scalar string params. This fixes enum-backed string arrays in `castParam`, `extractParams`, and `Params.for` rejecting otherwise-valid values with leading or trailing whitespace.
+
 ## 3.8.3
 
 - upgrade to pnpm@11.9.0; add strictDepBuilds: false and deny esbuild/puppeteer build scripts in pnpm-workspace.yaml
