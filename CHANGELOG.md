@@ -1,3 +1,7 @@
+## 3.8.5
+
+- Remove the default `ValidationErrors` OpenAPI response component and document `400` as the preferred status for deliberate user-facing validation error payloads. Psychic still supports explicit `422` responses and `unprocessableContent(...)`; automatic validation rescue paths continue to return bare `400` responses.
+
 ## 3.8.4
 
 - String array params now trim each string element before validation/casting, matching scalar string params. This fixes enum-backed string arrays in `castParam`, `extractParams`, and `Params.for` rejecting otherwise-valid values with leading or trailing whitespace.

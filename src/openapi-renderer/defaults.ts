@@ -110,18 +110,6 @@ export const DEFAULT_OPENAPI_COMPONENT_RESPONSES = {
     description: 'The request failed because a conflict was detected with the given request params',
   },
 
-  // 422
-  ValidationErrors: {
-    description: 'The request failed to process due to validation errors with the provided values',
-    content: {
-      'application/json': {
-        schema: {
-          $ref: '#/components/schemas/ValidationErrors',
-        },
-      },
-    },
-  },
-
   // 500
   InternalServerError: {
     description:

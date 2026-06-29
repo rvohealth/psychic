@@ -385,16 +385,14 @@ suggested fix:  "${convertRouteParams(path)}"
 
   /**
    * Automatically rescue certain errors and convert them into status codes.
-   * Validation errors (OpenAPI or otherwise) are by default converted to
-   * 400. 422 MUST ONLY be returned when accompanied by a ValidationErrors
-   * payload (even if the errors object is empty) that is intended to be displayed
-   * to the end user to indicate fields that must be corrected to be
-   * accepted.
+   * Validation errors (OpenAPI or otherwise) are converted to 400. When a
+   * controller deliberately returns field-level validation details for display
+   * to an end user, prefer a 400 response carrying an errors payload in the
+   * same shape as Dream#errors: { errors: { field: ['message'] } }.
    *
-   * Philosophy: do not return information (even difference between 400 & 422)
-   * unless it is explicitly intended for that information to be used to enable
-   * a front end interface to display information to support user-visible
-   * validation (e.g. an email must be formatted correctly).
+   * Philosophy: do not return information unless it is explicitly intended for
+   * that information to be used by a front-end interface supporting
+   * user-visible validation (e.g. an email must be formatted correctly).
    *
    * By default, do not provide an attacker with any visibility into which layer
    * of the application rejected their request.
