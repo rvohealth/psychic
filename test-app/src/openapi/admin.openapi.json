@@ -355,16 +355,6 @@
       "Conflict": {
         "description": "The request failed because a conflict was detected with the given request params"
       },
-      "ValidationErrors": {
-        "description": "The request failed to process due to validation errors with the provided values",
-        "content": {
-          "application/json": {
-            "schema": {
-              "$ref": "#/components/schemas/ValidationErrors"
-            }
-          }
-        }
-      },
       "InternalServerError": {
         "description": "the server encountered an unexpected condition that prevented it from fulfilling the request"
       },
