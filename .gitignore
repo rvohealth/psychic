@@ -16,6 +16,7 @@ spec/tmp/controllers/*
 .vim/*
 dist
 typetrace/*
+test-app/src/conf/initializers/openapi/testappApi.ts
 
 .pnp.*
 plans/
