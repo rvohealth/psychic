@@ -3,8 +3,8 @@
 import { OpenapiSchemaBodyShorthand, OpenapiShorthandPrimitiveTypes } from '@rvoh/dream/openapi'
 import { DreamModelSerializerType, SimpleObjectSerializerType } from '@rvoh/dream/types'
 
-import { DreamApp } from '@rvoh/dream'
 import isObject from '../../helpers/isObject.js'
+import serializersAndRefsFromSerializableRef from './serializersAndRefsFromSerializableRef.js'
 
 /**
  * @internal
@@ -66,12 +66,9 @@ function extractSerializers(
     serializers.add(value.$serializer)
     //
   } else if (value.$serializable) {
-    const foundSerializers = DreamApp.system.inferSerializersFromDreamClassOrViewModelClass(
-      value.$serializable,
-      value.$serializableSerializerKey,
+    serializersAndRefsFromSerializableRef(value).serializers.forEach(serializer =>
+      serializers.add(serializer),
     )
-
-    foundSerializers.forEach(serializer => serializers.add(serializer))
 
     //
   } else if (isObject(value)) {

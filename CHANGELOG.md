@@ -1,3 +1,7 @@
+## 3.8.6
+
+- Fix hand-written OpenAPI response schemas using `$serializable` with an STI base model so they now emit the same `anyOf` union of child serializers that serializer-derived rendering already produces. Non-STI `$serializable` responses and STI keys that resolve to one shared serializer keep their existing single `$ref` shape.
+
 ## 3.8.5
 
 - Remove the default `ValidationErrors` OpenAPI response component and document `400` as the preferred status for deliberate user-facing validation error payloads. Psychic still supports explicit `422` responses and `unprocessableContent(...)`; automatic validation rescue paths continue to return bare `400` responses.

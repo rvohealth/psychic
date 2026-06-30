@@ -2,10 +2,10 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unsafe-assignment */
 /* eslint-disable @typescript-eslint/no-unsafe-member-access */
-import { DreamApp } from '@rvoh/dream'
 import { OpenapiSchemaBodyShorthand, OpenapiShorthandPrimitiveTypes } from '@rvoh/dream/openapi'
 import isObject from '../../helpers/isObject.js'
 import SerializerOpenapiRenderer from '../SerializerOpenapiRenderer.js'
+import serializersAndRefsFromSerializableRef from './serializersAndRefsFromSerializableRef.js'
 
 /**
  * @internal
@@ -73,14 +73,8 @@ function transformValue(value: any): any {
     }
     //
   } else if (value.$serializable) {
-    const { $serializable, $serializableSerializerKey, ...rest } = value
-
-    const foundSerializers = DreamApp.system.inferSerializersFromDreamClassOrViewModelClass(
-      $serializable,
-      $serializableSerializerKey,
-    )
-
-    const refs = foundSerializers.map(serializer => new SerializerOpenapiRenderer(serializer).serializerRef)
+    const { $serializable, $serializableSerializerKey, key, ...rest } = value
+    const { refs } = serializersAndRefsFromSerializableRef({ $serializable, $serializableSerializerKey, key })
 
     if (refs.length === 0) return rest
     if (refs.length === 1) {

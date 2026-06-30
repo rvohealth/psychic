@@ -3,7 +3,11 @@ import OpenapiSegmentExpander, {
   OpenapiBodyTarget,
 } from '../../../../src/openapi-renderer/body-segment.js'
 import { OpenapiRenderOpts } from '../../../../src/openapi-renderer/endpoint.js'
+import Balloon from '../../../../test-app/src/app/models/Balloon.js'
 import User from '../../../../test-app/src/app/models/User.js'
+import LatexSerializer from '../../../../test-app/src/app/serializers/Balloon/LatexSerializer.js'
+import MylarSerializer from '../../../../test-app/src/app/serializers/Balloon/MylarSerializer.js'
+import { BalloonSummarySerializer } from '../../../../test-app/src/app/serializers/BalloonSerializer.js'
 import { UserSummarySerializer } from '../../../../test-app/src/app/serializers/UserSerializer.js'
 
 describe('OpenapiBodySegmentRenderer', () => {
@@ -153,6 +157,120 @@ describe('OpenapiBodySegmentRenderer', () => {
           },
         })
         expect(results.referencedSerializers).toEqual([UserSummarySerializer])
+      })
+
+      it('expands an STI base model into refs for each child serializer', () => {
+        const results = subject({
+          type: 'object',
+          properties: {
+            result: {
+              $serializable: Balloon,
+            },
+          },
+        } as OpenapiBodySegment)
+
+        expect(results.openapi).toEqual({
+          type: 'object',
+          properties: {
+            result: {
+              anyOf: [
+                {
+                  $ref: '#/components/schemas/BalloonLatex',
+                },
+                {
+                  $ref: '#/components/schemas/BalloonMylar',
+                },
+              ],
+            },
+          },
+        })
+        expect(results.referencedSerializers).toEqual([LatexSerializer, MylarSerializer])
+      })
+
+      it('expands a many STI base model into refs for each child serializer in the array items', () => {
+        const results = subject({
+          type: 'object',
+          properties: {
+            results: {
+              $serializable: Balloon,
+              many: true,
+            },
+          },
+        } as OpenapiBodySegment)
+
+        expect(results.openapi).toEqual({
+          type: 'object',
+          properties: {
+            results: {
+              type: 'array',
+              items: {
+                anyOf: [
+                  {
+                    $ref: '#/components/schemas/BalloonLatex',
+                  },
+                  {
+                    $ref: '#/components/schemas/BalloonMylar',
+                  },
+                ],
+              },
+            },
+          },
+        })
+        expect(results.referencedSerializers).toEqual([LatexSerializer, MylarSerializer])
+      })
+
+      it('includes null in the STI union when maybeNull is true', () => {
+        const results = subject({
+          type: 'object',
+          properties: {
+            result: {
+              $serializable: Balloon,
+              maybeNull: true,
+            },
+          },
+        } as OpenapiBodySegment)
+
+        expect(results.openapi).toEqual({
+          type: 'object',
+          properties: {
+            result: {
+              anyOf: [
+                {
+                  $ref: '#/components/schemas/BalloonLatex',
+                },
+                {
+                  $ref: '#/components/schemas/BalloonMylar',
+                },
+                {
+                  type: 'null',
+                },
+              ],
+            },
+          },
+        })
+        expect(results.referencedSerializers).toEqual([LatexSerializer, MylarSerializer])
+      })
+
+      it('keeps the single ref shape when all STI children resolve to the same serializer', () => {
+        const results = subject({
+          type: 'object',
+          properties: {
+            result: {
+              $serializable: Balloon,
+              $serializableSerializerKey: 'sameForAllSti',
+            },
+          },
+        } as OpenapiBodySegment)
+
+        expect(results.openapi).toEqual({
+          type: 'object',
+          properties: {
+            result: {
+              $ref: '#/components/schemas/BalloonSummary',
+            },
+          },
+        })
+        expect(results.referencedSerializers).toEqual([BalloonSummarySerializer])
       })
     })
   })
