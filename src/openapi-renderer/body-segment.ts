@@ -92,6 +92,7 @@ export default class OpenapiSegmentExpander {
   private bodySegment: OpenapiBodySegment
   private casing: SerializerCasing
   private suppressResponseEnums: boolean
+  private legacyImplicitRequestBodyParams: boolean
   private target: OpenapiBodyTarget
   private source: string
 
@@ -108,6 +109,7 @@ export default class OpenapiSegmentExpander {
     this.bodySegment = bodySegment
     this.casing = renderOpts.casing
     this.suppressResponseEnums = renderOpts.suppressResponseEnums
+    this.legacyImplicitRequestBodyParams = renderOpts.legacyImplicitRequestBodyParams
     this.target = target
     this.source = source ?? 'unknown'
   }
@@ -644,6 +646,7 @@ The following values will be allowed:
         including: ref.including,
         required: ref.required,
         combining: ref.combining,
+        legacyImplicitRequestBodyParams: this.legacyImplicitRequestBodyParams,
       },
       this.source,
     )

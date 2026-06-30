@@ -353,9 +353,6 @@
                       "null"
                     ]
                   },
-                  "passwordDigest": {
-                    "type": "string"
-                  },
                   "requiredCollarCount": {
                     "type": "string",
                     "format": "bigint"
@@ -782,9 +779,6 @@
                       "string",
                       "null"
                     ]
-                  },
-                  "passwordDigest": {
-                    "type": "string"
                   },
                   "requiredCollarCount": {
                     "type": "string",
@@ -3813,9 +3807,6 @@
                       "null"
                     ]
                   },
-                  "passwordDigest": {
-                    "type": "string"
-                  },
                   "requiredCollarCount": {
                     "type": "string",
                     "format": "bigint"
@@ -4330,9 +4321,6 @@
                       "string",
                       "null"
                     ]
-                  },
-                  "passwordDigest": {
-                    "type": "string"
                   },
                   "requiredCollarCount": {
                     "type": "string",
@@ -5048,9 +5036,6 @@
                       "null"
                     ]
                   },
-                  "passwordDigest": {
-                    "type": "string"
-                  },
                   "requiredCollarCount": {
                     "type": "string",
                     "format": "bigint"
@@ -5586,9 +5571,6 @@
                       "null"
                     ]
                   },
-                  "passwordDigest": {
-                    "type": "string"
-                  },
                   "requiredCollarCount": {
                     "type": "string",
                     "format": "bigint"
@@ -6123,9 +6105,6 @@
                       "string",
                       "null"
                     ]
-                  },
-                  "passwordDigest": {
-                    "type": "string"
                   },
                   "requiredCollarCount": {
                     "type": "string",

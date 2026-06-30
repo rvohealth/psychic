@@ -334,6 +334,9 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   @OpenAPI(ModelWithoutSerializer, {
     fastJsonStringify: true,
     status: 204,
+    requestBody: {
+      params: ['name'],
+    },
   })
   public dontThrowMissingSerializersDefinition204() {
     this.noContent()
@@ -342,6 +345,9 @@ export default class OpenapiValidationTestsController extends ApplicationControl
   @OpenAPI(ModelWithoutSerializer, {
     fastJsonStringify: true,
     status: 201,
+    requestBody: {
+      params: ['name'],
+    },
     responses: {
       201: {
         type: 'string',

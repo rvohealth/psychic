@@ -965,6 +965,30 @@ interface PsychicOpenapiBaseOptions {
   suppressResponseEnums?: boolean
 
   /**
+   * @deprecated escape hatch — prefer explicit `params`/`only` on each request body.
+   *
+   * When true, restores the legacy behavior where a model-derived `requestBody`
+   * (or nested `$dream`/`for:` segment) given no `params`/`only` implicitly
+   * exposes ALL param-safe columns of the model.
+   *
+   * As of 3.9.0 the default flipped: an absent `params`/`only` now resolves to
+   * NO model columns, so that database-level structure is not implicitly leaked
+   * into the OpenAPI shape (an attacker could otherwise infer the column set).
+   * A top-level model-derived `requestBody` with nothing to contribute is
+   * omitted entirely; a nested `$dream`/`for:` segment renders an empty object.
+   *
+   * Set this to true to keep the pre-3.9.0 implicit-all behavior while you
+   * migrate to explicit allowlists.
+   *
+   * ```ts
+   * psy.set('openapi', {
+   *   legacyImplicitRequestBodyParams: true,
+   * })
+   * ```
+   */
+  legacyImplicitRequestBodyParams?: boolean
+
+  /**
    * When true, psychic will use the `openapi-typescript` package
    * to read this openapi.json file and create typescript interfaces
    * from it, which can then be leveraged throughout your app to

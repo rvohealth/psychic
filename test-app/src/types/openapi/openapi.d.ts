@@ -155,7 +155,6 @@ export interface paths {
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
-                        passwordDigest?: string;
                         /** Format: bigint */
                         requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
@@ -276,7 +275,6 @@ export interface paths {
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
-                        passwordDigest?: string;
                         /** Format: bigint */
                         requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
@@ -2438,7 +2436,6 @@ export interface paths {
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
-                        passwordDigest?: string;
                         /** Format: bigint */
                         requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
@@ -2632,7 +2629,6 @@ export interface paths {
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
-                        passwordDigest?: string;
                         /** Format: bigint */
                         requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
@@ -2958,7 +2954,6 @@ export interface paths {
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
-                        passwordDigest?: string;
                         /** Format: bigint */
                         requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
@@ -3143,7 +3138,6 @@ export interface paths {
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
-                        passwordDigest?: string;
                         /** Format: bigint */
                         requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;
@@ -3328,7 +3322,6 @@ export interface paths {
                         nicknames?: string[] | null;
                         notes?: string | null;
                         optionalUuid?: string | null;
-                        passwordDigest?: string;
                         /** Format: bigint */
                         requiredCollarCount?: string | number | bigint;
                         requiredCollarCountInt?: number;

@@ -1,3 +1,8 @@
+## 3.9.0
+
+- BREAKING: model-derived `@OpenAPI` request bodies no longer implicitly advertise every param-safe column. When a model-derived `requestBody` is given no `params`/`only` (and no `combining`/`required`/pagination body param), the default is now to advertise NO model columns: a top-level model-derived `requestBody` is omitted entirely, and a nested `{ for: Model }` sentinel renders an empty object. This prevents database-level structure from leaking into the generated OpenAPI shape by default. Endpoints that should advertise settable columns must now list them explicitly via `requestBody: { params: [...] }`. Explicit `params`/`only` behavior is unchanged, and the runtime `paramsFor`/`extractParams` allowlists are unaffected.
+- Added an opt-in `legacyImplicitRequestBodyParams` flag on the OpenAPI config (covering both the default and named specs) that restores the previous implicit-all behavior. It is a deprecated escape hatch intended to ease migration.
+
 ## 3.8.6
 
 - Fix hand-written OpenAPI response schemas using `$serializable` with an STI base model so they now emit the same `anyOf` union of child serializers that serializer-derived rendering already produces. Non-STI `$serializable` responses and STI keys that resolve to one shared serializer keep their existing single `$ref` shape.

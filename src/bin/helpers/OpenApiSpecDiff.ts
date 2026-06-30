@@ -248,9 +248,13 @@ export class OpenApiSpecDiff {
 
   /**
    * Retrieves head branch content for a file
+   *
+   * Marked `protected` so tests can supply a deterministic baseline instead of
+   * the live head branch. Production code never overrides this.
+   *
    * @param absoluteFilePath - Absolute path to the file
    */
-  private getHeadBranchContent(absoluteFilePath: string): string {
+  protected getHeadBranchContent(absoluteFilePath: string): string {
     if (!this.oasdiffConfig) {
       throw new Error('OasDiff config not initialized')
     }

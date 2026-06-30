@@ -57,6 +57,7 @@ import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 export interface OpenapiRenderOpts {
   casing: SerializerCasing
   suppressResponseEnums: boolean
+  legacyImplicitRequestBodyParams: boolean
 }
 
 export interface ToPathObjectOpts {
@@ -707,9 +708,20 @@ export default class OpenapiEndpointRenderer<
         including: including as readonly string[] | undefined,
         required: required as readonly string[] | undefined,
         combining: combining as Record<string, unknown> | undefined,
+        legacyImplicitRequestBodyParams: renderOpts.legacyImplicitRequestBodyParams,
       },
       source,
     )
+
+    // When the model-derived shape contributes no properties and no `required`
+    // (e.g. the new none-default with no `params`/`only`/`combining`), there is
+    // nothing meaningful to advertise. Fall back to `defaultRequestBody()`, which
+    // omits the body entirely unless body-level pagination params are present.
+    const shapeProperties = (paramsShape as { properties?: Record<string, unknown> }).properties
+    const shapeRequired = (paramsShape as { required?: unknown }).required
+    if (Object.keys(shapeProperties ?? {}).length === 0 && !shapeRequired) {
+      return this.defaultRequestBody()
+    }
 
     let processedSchema = new OpenapiSegmentExpander(paramsShape, {
       renderOpts,

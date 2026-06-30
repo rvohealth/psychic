@@ -8,6 +8,75 @@ import Post from './Post.js'
 
 const deco = new Decorators<typeof User>()
 
+/**
+ * The settable request params for a User: every param-safe column and virtual
+ * EXCEPT `passwordDigest`, which is derived in a `BeforeSave` hook and is not a
+ * legitimate request param. `password` and `secret` are intentionally retained
+ * (both are param-safe and accepted by `paramsFor(User)`).
+ *
+ * Shared across the User controllers' `@OpenAPI` `requestBody.params` and their
+ * `paramsFor(User, { only })` calls so the OpenAPI spec and runtime allowlist
+ * stay aligned. Now that request bodies default to advertising no model columns,
+ * this const is how the User endpoints opt back into their real settable set.
+ */
+export const userParamSafeColumns = [
+  'aDatetime',
+  'bio',
+  'birthdate',
+  'collarCount',
+  'collarCountInt',
+  'collarCountNumeric',
+  'createdOn',
+  'email',
+  'favoriteBigint',
+  'favoriteBigints',
+  'favoriteBooleans',
+  'favoriteCitext',
+  'favoriteCitexts',
+  'favoriteDates',
+  'favoriteDatetimes',
+  'favoriteIntegers',
+  'favoriteJsonbs',
+  'favoriteJsons',
+  'favoriteNumerics',
+  'favoriteTexts',
+  'favoriteTreats',
+  'favoriteUuids',
+  'jsonData',
+  'jsonbData',
+  'likesTreats',
+  'likesWalks',
+  'name',
+  'nicknames',
+  'notes',
+  'openapiVirtualSpecTest',
+  'openapiVirtualSpecTest2',
+  'optionalUuid',
+  'password',
+  'requiredCollarCount',
+  'requiredCollarCountInt',
+  'requiredFavoriteBigint',
+  'requiredFavoriteBigints',
+  'requiredFavoriteBooleans',
+  'requiredFavoriteCitext',
+  'requiredFavoriteCitexts',
+  'requiredFavoriteDates',
+  'requiredFavoriteDatetimes',
+  'requiredFavoriteIntegers',
+  'requiredFavoriteJsonbs',
+  'requiredFavoriteJsons',
+  'requiredFavoriteNumerics',
+  'requiredFavoriteTexts',
+  'requiredFavoriteUuids',
+  'requiredJsonData',
+  'requiredJsonbData',
+  'requiredNicknames',
+  'secret',
+  'species',
+  'uuid',
+  'volume',
+] as const
+
 export default class User extends ApplicationModel {
   public override get table() {
     return 'users' as const

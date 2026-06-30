@@ -34,6 +34,21 @@ describe('OpenapiEndpointRenderer', () => {
       renderOpts: {
         casing: 'camel',
         suppressResponseEnums: false,
+        legacyImplicitRequestBodyParams: false,
+      },
+      ...opts,
+    }
+  }
+
+  // Opts that opt in to the deprecated implicit-all request-body behavior, for
+  // specs that exercise model-derived request bodies with no `params`/`only`.
+  function legacyToPathObjectOpts(opts: Partial<ToPathObjectOpts> = {}): ToPathObjectOpts {
+    return {
+      openapiName: 'default',
+      renderOpts: {
+        casing: 'camel',
+        suppressResponseEnums: false,
+        legacyImplicitRequestBodyParams: true,
       },
       ...opts,
     }
@@ -1178,7 +1193,7 @@ describe('OpenapiEndpointRenderer', () => {
             requestBody: { for: User },
           })
 
-          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
           expect(response['/users']!.post.requestBody).toEqual({
             content: {
               'application/json': {
@@ -1214,7 +1229,7 @@ describe('OpenapiEndpointRenderer', () => {
                   requestBody: { for: User },
                 })
 
-                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                 expect(response['/users']!.post.requestBody).toEqual({
                   content: {
                     'application/json': {
@@ -1239,7 +1254,7 @@ describe('OpenapiEndpointRenderer', () => {
                   requestBody: { for: User },
                 })
 
-                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                 expect(response['/users']!.post.requestBody).toEqual({
                   content: {
                     'application/json': {
@@ -1341,7 +1356,7 @@ describe('OpenapiEndpointRenderer', () => {
                 requestBody: { including: ['id'] },
               })
 
-              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
               expect(response['/users']!.post.requestBody).toEqual({
                 content: {
                   'application/json': {
@@ -1398,7 +1413,7 @@ describe('OpenapiEndpointRenderer', () => {
                 },
               })
 
-              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
               expect(response['/users']!.post.requestBody).toEqual({
                 content: {
                   'application/json': {
@@ -1571,7 +1586,7 @@ describe('OpenapiEndpointRenderer', () => {
           it('provides request body matching the model', () => {
             const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
             expect(response['/users']!.post.requestBody).toEqual(
               expect.objectContaining({
                 content: {
@@ -1644,7 +1659,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('returns string', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                 expect(response['/users']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -1665,7 +1680,7 @@ describe('OpenapiEndpointRenderer', () => {
                 it('returns string within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                  const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                   expect(response['/users']!.post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -1691,7 +1706,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('returns string', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                 expect(response['/users']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -1712,7 +1727,7 @@ describe('OpenapiEndpointRenderer', () => {
                 it('returns string within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                  const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                   expect(response['/users']!.post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -1738,7 +1753,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('returns object schema', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                 expect(response['/users']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -1759,7 +1774,7 @@ describe('OpenapiEndpointRenderer', () => {
                 it('returns object schema within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                  const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                   expect(response['/users']!.post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -1785,7 +1800,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('returns object schema', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                 expect(response['/users']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -1806,7 +1821,7 @@ describe('OpenapiEndpointRenderer', () => {
                 it('returns object schema within an array', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                  const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                   expect(response['/users']!.post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -1832,7 +1847,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('returns an anyOf statement, allowing all types', () => {
                 const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                 expect(response['/users']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -1853,7 +1868,7 @@ describe('OpenapiEndpointRenderer', () => {
                 it('uses the provided type', () => {
                   const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
 
-                  const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                  const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                   expect(response['/users']!.post.requestBody).toEqual(
                     expect.objectContaining({
                       content: {
@@ -1884,7 +1899,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('renders enums as string with enum option', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
-                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                 expect(response['/pets']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -1905,7 +1920,7 @@ describe('OpenapiEndpointRenderer', () => {
               it('renders enum[] as array with string with enum option', () => {
                 const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'create')
 
-                const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+                const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
                 expect(response['/pets']!.post.requestBody).toEqual(
                   expect.objectContaining({
                     content: {
@@ -1943,7 +1958,13 @@ describe('OpenapiEndpointRenderer', () => {
 
                 const response = renderer.toPathObject(
                   routes,
-                  defaultToPathObjectOpts({ renderOpts: { casing: 'camel', suppressResponseEnums: true } }),
+                  defaultToPathObjectOpts({
+                    renderOpts: {
+                      casing: 'camel',
+                      suppressResponseEnums: true,
+                      legacyImplicitRequestBodyParams: true,
+                    },
+                  }),
                 ).openapi
 
                 expect(response['/pets']!.post.requestBody).toEqual(
@@ -1985,7 +2006,7 @@ describe('OpenapiEndpointRenderer', () => {
             it('are omitted', () => {
               const renderer = new OpenapiEndpointRenderer(Post, PetsController, 'myPosts')
 
-              const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+              const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
               expect(response['/pets/{id}/my-posts']!.post.requestBody).toEqual(
                 expect.objectContaining({
                   content: {
@@ -2008,7 +2029,7 @@ describe('OpenapiEndpointRenderer', () => {
           it('prvoides request body matching the model', () => {
             const renderer = new OpenapiEndpointRenderer(Pet, PetsController, 'update')
 
-            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
             expect(response['/pets/{id}']!.patch.requestBody).toEqual(
               expect.objectContaining({
                 content: {
@@ -2045,7 +2066,7 @@ describe('OpenapiEndpointRenderer', () => {
               },
             })
 
-            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
             const schema = (response['/users']!.post.requestBody as any).content['application/json']
               .schema as any
             expect(schema.properties.email).toEqual({ type: 'string' })
@@ -2073,7 +2094,7 @@ describe('OpenapiEndpointRenderer', () => {
               },
             })
 
-            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
             const schema = (response['/users']!.post.requestBody as any).content['application/json']
               .schema as any
             expect(schema.properties.pets.type).toEqual('array')
@@ -2098,7 +2119,7 @@ describe('OpenapiEndpointRenderer', () => {
               },
             })
 
-            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
             const schema = (response['/users']!.post.requestBody as any).content['application/json']
               .schema as any
             const itemKeys = Object.keys(schema.properties.pets.items.properties)
@@ -3159,7 +3180,13 @@ describe('OpenapiEndpointRenderer', () => {
 
             const response = renderer.toPathObject(
               routes,
-              defaultToPathObjectOpts({ renderOpts: { casing: 'camel', suppressResponseEnums: true } }),
+              defaultToPathObjectOpts({
+                renderOpts: {
+                  casing: 'camel',
+                  suppressResponseEnums: true,
+                  legacyImplicitRequestBodyParams: false,
+                },
+              }),
             ).openapi
 
             expect(response['/users/howyadoin']!.get.responses).toEqual(
@@ -3383,6 +3410,99 @@ The following values will be allowed:
               tags: ['hello', 'world'],
             }) as object,
           }) as object,
+        })
+      })
+    })
+
+    context('model-derived request-body params default', () => {
+      context('when neither params nor only is provided (the none-default)', () => {
+        it('omits a top-level model-derived request body entirely', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
+
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          expect(response['/users']!.post.requestBody).toBeUndefined()
+        })
+
+        it('omits a top-level `for:` model-derived request body entirely', () => {
+          const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'create', {
+            requestBody: { for: User },
+          })
+
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          expect(response['/users']!.post.requestBody).toBeUndefined()
+        })
+
+        it('renders an empty object for a nested `for:` sentinel', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+            requestBody: {
+              type: 'object',
+              properties: {
+                user: { for: User },
+              },
+            },
+          })
+
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          expect(response['/users']!.post.requestBody).toEqual({
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    user: {
+                      type: 'object',
+                      properties: {},
+                    },
+                  },
+                },
+              },
+            },
+          })
+        })
+      })
+
+      context('when legacyImplicitRequestBodyParams is true', () => {
+        it('restores the implicit-all behavior for a model-derived request body', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create')
+
+          const response = renderer.toPathObject(routes, legacyToPathObjectOpts()).openapi
+          expect(response['/users']!.post.requestBody).toEqual(
+            expect.objectContaining({
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: expect.objectContaining({
+                      email: { type: 'string' },
+                      passwordDigest: { type: 'string' },
+                    }),
+                  },
+                },
+              },
+            }),
+          )
+        })
+      })
+
+      context('when explicit params are provided', () => {
+        it('renders exactly those params regardless of the none-default', () => {
+          const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+            requestBody: { params: ['email'] },
+          })
+
+          const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+          expect(response['/users']!.post.requestBody).toEqual({
+            content: {
+              'application/json': {
+                schema: {
+                  type: 'object',
+                  properties: {
+                    email: { type: 'string' },
+                  },
+                },
+              },
+            },
+          })
         })
       })
     })

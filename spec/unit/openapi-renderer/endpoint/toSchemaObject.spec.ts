@@ -45,6 +45,7 @@ describe('OpenapiEndpointRenderer', () => {
       renderOpts: {
         casing: 'camel',
         suppressResponseEnums: false,
+        legacyImplicitRequestBodyParams: false,
       },
     }
   }
@@ -55,6 +56,7 @@ describe('OpenapiEndpointRenderer', () => {
       renderOpts: {
         casing: 'camel',
         suppressResponseEnums: false,
+        legacyImplicitRequestBodyParams: false,
       },
       alreadyExtractedDescendantSerializers: {},
       renderedSchemasOpenapi: {},
@@ -310,7 +312,11 @@ describe('OpenapiEndpointRenderer', () => {
             )
 
             const toSchemaObjectOpts = defaultToSchemaObjectOpts({
-              renderOpts: { casing: 'camel', suppressResponseEnums: true },
+              renderOpts: {
+                casing: 'camel',
+                suppressResponseEnums: true,
+                legacyImplicitRequestBodyParams: false,
+              },
             })
             renderer.toSchemaObject(toSchemaObjectOpts)
 
@@ -348,7 +354,11 @@ The following values will be allowed:
             )
 
             const toSchemaObjectOpts = defaultToSchemaObjectOpts({
-              renderOpts: { casing: 'camel', suppressResponseEnums: true },
+              renderOpts: {
+                casing: 'camel',
+                suppressResponseEnums: true,
+                legacyImplicitRequestBodyParams: false,
+              },
             })
             renderer.toSchemaObject(toSchemaObjectOpts)
 
@@ -387,7 +397,11 @@ The following values will be allowed:
               )
 
               const toSchemaObjectOpts = defaultToSchemaObjectOpts({
-                renderOpts: { casing: 'camel', suppressResponseEnums: true },
+                renderOpts: {
+                  casing: 'camel',
+                  suppressResponseEnums: true,
+                  legacyImplicitRequestBodyParams: false,
+                },
               })
               renderer.toSchemaObject(toSchemaObjectOpts)
 
@@ -1329,7 +1343,11 @@ The following values will be allowed:
         )
 
         const toSchemaObjectOpts = defaultToSchemaObjectOpts({
-          renderOpts: { casing: 'camel', suppressResponseEnums: true },
+          renderOpts: {
+            casing: 'camel',
+            suppressResponseEnums: true,
+            legacyImplicitRequestBodyParams: false,
+          },
         })
         renderer.toSchemaObject(toSchemaObjectOpts)
 
