@@ -33,6 +33,7 @@ import isBlankDescription from './helpers/isBlankDescription.js'
 import maybeNullOpenapiShorthandToOpenapiShorthand from './helpers/maybeNullOpenapiShorthandToOpenapiShorthand.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import schemaToRef from './helpers/schemaToRef.js'
+import serializersAndRefsFromSerializableRef from './helpers/serializersAndRefsFromSerializableRef.js'
 import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 
 export interface OpenapiBodySegmentRendererOpts {
@@ -653,20 +654,43 @@ The following values will be allowed:
   private serializableStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
     const serializableRef = bodySegment as OpenapiSchemaShorthandExpressionSerializableRef
     const key = serializableRef.$serializableSerializerKey || serializableRef.key || 'default'
-    const serializer = DreamApp.system.inferSerializerFromDreamOrViewModel(
-      serializableRef.$serializable.prototype as Dream,
-      key,
-    )
+    const { serializers, refs } = serializersAndRefsFromSerializableRef(serializableRef, {
+      casing: this.casing,
+      suppressResponseEnums: this.suppressResponseEnums,
+    })
 
-    if (!serializer)
+    if (serializers.length === 0)
       throw new Error(
         `Failed to locate serializers getter from: ${serializableRef.$serializable.name} using key: ${key}`,
       )
 
-    return this.serializerStatement({
-      $serializer: serializer,
-      ...serializableRef,
-    })
+    if (serializers.length === 1) {
+      return this.serializerStatement({
+        $serializer: serializers[0],
+        ...serializableRef,
+      })
+    }
+
+    const serializerAnyOf = { anyOf: refs }
+
+    if (serializableRef.many) {
+      return {
+        referencedSerializers: serializers,
+        openapi: {
+          type: serializableRef.maybeNull ? ['array', 'null'] : 'array',
+          items: serializerAnyOf,
+        },
+      }
+    }
+
+    if (serializableRef.maybeNull) {
+      return {
+        referencedSerializers: serializers,
+        openapi: { anyOf: [...refs, { type: 'null' }] },
+      }
+    }
+
+    return { referencedSerializers: serializers, openapi: serializerAnyOf }
   }
 
   /**

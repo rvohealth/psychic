@@ -3544,15 +3544,6 @@ export interface components {
             };
             content?: never;
         };
-        /** @description The request failed to process due to validation errors with the provided values */
-        ValidationErrors: {
-            headers: {
-                [name: string]: unknown;
-            };
-            content: {
-                "application/json": components["schemas"]["ValidationErrors"];
-            };
-        };
         /** @description the server encountered an unexpected condition that prevented it from fulfilling the request */
         InternalServerError: {
             headers: {
