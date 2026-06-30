@@ -36,6 +36,23 @@ interface OpenapiFile {
   }
 }
 
+// Diffs against a controlled baseline (the spec file's committed contents at the
+// start of each test) rather than the live head branch. This keeps the suite
+// deterministic: it exercises oasdiff's breaking/non-breaking classification
+// without depending on the working-tree fixture being byte-identical to `main`.
+// (This PR intentionally drops `passwordDigest` from several request bodies, so
+// the fixture is NOT identical to the live `main` until this merges.) The
+// production diff — `psy openapi:spec-diff` against real `main` — is unchanged.
+class ControlledBaselineOpenApiSpecDiff extends OpenApiSpecDiff {
+  constructor(private readonly baselineContent: string) {
+    super()
+  }
+
+  protected override getHeadBranchContent(): string {
+    return this.baselineContent
+  }
+}
+
 describe('OpenApiSpecDiff', () => {
   const mockConfigs: [string, DefaultPsychicOpenapiOptions][] = [
     ['api1', { outputFilepath: 'test-app/src/openapi/openapi.json' }],
@@ -53,25 +70,28 @@ describe('OpenApiSpecDiff', () => {
 
   describe('compare', () => {
     it('is successful - no changes detected', () => {
+      const diff = new ControlledBaselineOpenApiSpecDiff(originalFileContent)
       expect(() => {
-        OpenApiSpecDiff.compare(mockConfigs)
+        diff.compare(mockConfigs)
       }).not.toThrow()
     })
 
     context('when removing a required field', () => {
       it('throws a breaking change', () => {
+        const diff = new ControlledBaselineOpenApiSpecDiff(originalFileContent)
         const doc: OpenapiFile = JSON.parse(originalFileContent) as OpenapiFile
 
         doc.components.schemas.Pet.required = []
         fs.writeFileSync('./test-app/src/openapi/openapi.json', JSON.stringify(doc, null, 2))
 
         expect(() => {
-          OpenApiSpecDiff.compare(mockConfigs)
+          diff.compare(mockConfigs)
         }).toThrow(BreakingChangesDetectedInOpenApiSpecError)
       })
     })
     context('when making a non-breaking change', () => {
       it('logs the change but does not throw an error', () => {
+        const diff = new ControlledBaselineOpenApiSpecDiff(originalFileContent)
         const doc: OpenapiFile = JSON.parse(originalFileContent) as OpenapiFile
 
         doc.paths['/api/pets/{id}'].parameters.push({
@@ -84,7 +104,7 @@ describe('OpenApiSpecDiff', () => {
         fs.writeFileSync('./test-app/src/openapi/openapi.json', JSON.stringify(doc, null, 2))
 
         expect(() => {
-          OpenApiSpecDiff.compare(mockConfigs)
+          diff.compare(mockConfigs)
         }).not.toThrow(BreakingChangesDetectedInOpenApiSpecError)
       })
     })

@@ -57,6 +57,9 @@ export default class OpenapiDecoratorTestController extends ApplicationControlle
   @OpenAPI(Availability, {
     fastJsonStringify: true,
     status: 200,
+    requestBody: {
+      params: ['end', 'endtz', 'start', 'starttz', 'times', 'timetzs'],
+    },
   })
   public testTimes() {
     this.ok()

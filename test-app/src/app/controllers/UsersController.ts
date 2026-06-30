@@ -1,7 +1,7 @@
 import { DateTime } from '@rvoh/dream'
 import { Encrypt } from '@rvoh/dream/utils'
 import { BeforeAction, OpenAPI } from '../../../../src/package-exports/index.js'
-import User from '../models/User.js'
+import User, { userParamSafeColumns } from '../models/User.js'
 import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer.js'
 import { UserWithPostsSerializer } from '../serializers/UserSerializer.js'
 import ApplicationController from './ApplicationController.js'
@@ -62,6 +62,9 @@ export default class UsersController extends ApplicationController {
     fastJsonStringify: true,
     status: 201,
     serializerKey: 'extra',
+    requestBody: {
+      params: userParamSafeColumns,
+    },
   })
   public async create() {
     const user = await User.create(this.userParams)
@@ -99,6 +102,9 @@ export default class UsersController extends ApplicationController {
       body: 'page',
     },
     serializerKey: 'summary',
+    requestBody: {
+      params: userParamSafeColumns,
+    },
   })
   public async paginatedPost() {
     const users = await User.order('createdAt').paginate({
@@ -127,6 +133,9 @@ export default class UsersController extends ApplicationController {
       body: 'cursor',
     },
     serializerKey: 'summary',
+    requestBody: {
+      params: userParamSafeColumns,
+    },
   })
   public async cursorPaginatedPost() {
     const users = await User.order('createdAt').cursorPaginate({
@@ -155,6 +164,9 @@ export default class UsersController extends ApplicationController {
       body: 'cursor',
     },
     serializerKey: 'summary',
+    requestBody: {
+      params: userParamSafeColumns,
+    },
   })
   public async scrollPaginatedPost() {
     const users = await User.order('createdAt').scrollPaginate({
@@ -200,10 +212,13 @@ export default class UsersController extends ApplicationController {
     fastJsonStringify: true,
     status: 204,
     pathParams: { id: { description: 'The ID of the User' } },
+    requestBody: {
+      params: userParamSafeColumns,
+    },
   })
   public async update() {
     const user = await User.findOrFail(this.castParam('id', 'bigint'))
-    await user.update(this.paramsFor(User))
+    await user.update(this.paramsFor(User, { only: userParamSafeColumns }))
     this.ok(user)
   }
 
@@ -264,6 +279,6 @@ export default class UsersController extends ApplicationController {
   public beforeAllTestContent = 'before all action was NOT called for all'
 
   private get userParams() {
-    return this.paramsFor(User, { key: 'user' })
+    return this.paramsFor(User, { key: 'user', only: userParamSafeColumns })
   }
 }

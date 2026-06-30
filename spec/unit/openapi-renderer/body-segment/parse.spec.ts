@@ -20,6 +20,7 @@ describe('OpenapiBodySegmentRenderer', () => {
     renderOpts: {
       casing: 'camel',
       suppressResponseEnums: false,
+      legacyImplicitRequestBodyParams: false,
     },
     target: 'response',
   }

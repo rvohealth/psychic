@@ -15,6 +15,7 @@ import {
   OpenapiRenderOpts,
   OpenapiSchema,
 } from './endpoint.js'
+import legacyImplicitRequestBodyParamsConfig from './helpers/legacyImplicitRequestBodyParamsConfig.js'
 import suppressResponseEnumsConfig from './helpers/suppressResponseEnumsConfig.js'
 
 const debugEnabled = debuglog('psychic').enabled
@@ -68,6 +69,7 @@ export default class OpenapiAppRenderer {
     const renderOpts: OpenapiRenderOpts = {
       casing: 'camel',
       suppressResponseEnums: suppressResponseEnumsConfig(openapiName),
+      legacyImplicitRequestBodyParams: legacyImplicitRequestBodyParamsConfig(openapiName),
     }
 
     const alreadyExtractedDescendantSerializers: Record<string, boolean> = {}

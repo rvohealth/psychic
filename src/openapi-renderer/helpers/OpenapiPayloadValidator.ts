@@ -14,6 +14,7 @@ import OpenapiEndpointRenderer, {
   OpenapiParameterResponse,
   OpenapiRenderOpts,
 } from '../endpoint.js'
+import legacyImplicitRequestBodyParamsConfig from './legacyImplicitRequestBodyParamsConfig.js'
 import suppressResponseEnumsConfig from './suppressResponseEnumsConfig.js'
 import { cacheValidator, getCachedValidator } from './validator-cache.js'
 
@@ -248,6 +249,7 @@ export default class OpenapiPayloadValidator {
     return {
       casing: 'camel',
       suppressResponseEnums: suppressResponseEnumsConfig(this.openapiName),
+      legacyImplicitRequestBodyParams: legacyImplicitRequestBodyParamsConfig(this.openapiName),
     }
   }
 

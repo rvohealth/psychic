@@ -8,6 +8,26 @@ export default class PetsController extends ApplicationController {
   @OpenAPI(Pet, {
     fastJsonStringify: true,
     status: 201,
+    requestBody: {
+      params: [
+        'collarCount',
+        'collarCountInt',
+        'collarCountNumeric',
+        'favoriteTreat',
+        'favoriteTreats',
+        'lastHeardAt',
+        'lastSeenAt',
+        'likesTreats',
+        'likesWalks',
+        'name',
+        'nonNullFavoriteTreats',
+        'nonNullSpecies',
+        'requiredCollarCount',
+        'requiredCollarCountInt',
+        'requiredCollarCountNumeric',
+        'species',
+      ],
+    },
   })
   public async create() {
     const user = await User.findOrFail(this.castParam('userId', 'number'))
@@ -18,6 +38,26 @@ export default class PetsController extends ApplicationController {
   @OpenAPI(Pet, {
     fastJsonStringify: true,
     status: 204,
+    requestBody: {
+      params: [
+        'collarCount',
+        'collarCountInt',
+        'collarCountNumeric',
+        'favoriteTreat',
+        'favoriteTreats',
+        'lastHeardAt',
+        'lastSeenAt',
+        'likesTreats',
+        'likesWalks',
+        'name',
+        'nonNullFavoriteTreats',
+        'nonNullSpecies',
+        'requiredCollarCount',
+        'requiredCollarCountInt',
+        'requiredCollarCountNumeric',
+        'species',
+      ],
+    },
   })
   public async update() {
     const pet = await Pet.findOrFail(this.castParam('id', 'bigint'))
@@ -40,6 +80,9 @@ export default class PetsController extends ApplicationController {
   @OpenAPI(Post, {
     fastJsonStringify: true,
     status: 204,
+    requestBody: {
+      params: ['body'],
+    },
   })
   public myPosts() {
     this.noContent()

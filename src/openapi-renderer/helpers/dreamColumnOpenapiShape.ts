@@ -67,6 +67,7 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
           renderOpts: {
             casing: 'camel',
             suppressResponseEnums: false,
+            legacyImplicitRequestBodyParams: false,
           },
           target: 'request',
         }).render().openapi,

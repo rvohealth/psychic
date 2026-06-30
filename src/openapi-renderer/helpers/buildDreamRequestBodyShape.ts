@@ -10,6 +10,14 @@ export interface BuildDreamRequestBodyShapeOpts {
   including?: readonly string[] | undefined
   required?: readonly string[] | undefined
   combining?: Record<string, unknown> | undefined
+
+  /**
+   * When true, restores the legacy behavior of resolving to ALL param-safe
+   * columns when no `params`/`only` are provided. When false/undefined (the
+   * default), an absent `params`/`only` resolves to NO model columns, so that
+   * database-level structure is not implicitly leaked into the OpenAPI shape.
+   */
+  legacyImplicitRequestBodyParams?: boolean | undefined
 }
 
 /**
@@ -27,10 +35,17 @@ export default function buildDreamRequestBodyShape(
   opts: BuildDreamRequestBodyShapeOpts,
   source: string,
 ): OpenapiSchemaObject {
-  const { params, only, including, required, combining } = opts
+  const { params, only, including, required, combining, legacyImplicitRequestBodyParams } = opts
+
+  // When neither `params` nor `only` is provided, the default is to resolve to
+  // NO model columns (an empty allowlist), rather than implicitly exposing every
+  // param-safe column. The legacy implicit-all behavior can be re-activated via
+  // the `legacyImplicitRequestBodyParams` opt-in.
+  const resolvedOnly = params ?? only
+  const onlyForResolution = resolvedOnly === undefined && !legacyImplicitRequestBodyParams ? [] : resolvedOnly
 
   const paramSafeColumns = openapiParamNamesForDreamClass(dreamClass, {
-    only: params ?? only,
+    only: onlyForResolution,
     including,
   } as any)
 
