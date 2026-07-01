@@ -1,3 +1,4 @@
+import { Encrypt } from '@rvoh/dream/utils'
 import * as LoadControllersModule from '../../../src/psychic-app/helpers/import/importControllers.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
 import importDefault from '../../../test-app/src/app/helpers/importDefault.js'
@@ -56,6 +57,68 @@ describe('invalid cookie encryption key (Phase 3)', () => {
       } finally {
         warnSpy.mockRestore()
       }
+    })
+  })
+})
+
+// ITEM8-02 — PsychicApp.init previously validated only the `current` cookie
+// encryption key at boot. A malformed `legacy` key (used for cookie-decryption
+// fallback after a key rotation) passed boot and only surfaced as a 500 at the
+// first legacy-fallback cookie. Boot now validates `legacy` too, using the same
+// fail-closed-in-production mechanism as `current`, and names it as the legacy
+// key so a misconfigured rotation is not mistaken for the current key.
+
+describe('invalid legacy cookie encryption key (ITEM8-02)', () => {
+  const validCurrentKey = Encrypt.generateKey('aes-256-gcm')
+
+  beforeEach(() => {
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-argument
+    vi.spyOn(LoadControllersModule, 'default').mockResolvedValue({} as any)
+  })
+
+  const cbWithKeys = (legacyKey: string | undefined) => async (app: PsychicApp) => {
+    app.set('apiRoot', 'how/yadoin')
+    app.set('routes', () => {})
+    app.set('packageManager', 'yarn')
+    app.set('encryption', {
+      cookies: {
+        current: { algorithm: 'aes-256-gcm', key: validCurrentKey },
+        ...(legacyKey === undefined ? {} : { legacy: { algorithm: 'aes-256-gcm' as const, key: legacyKey } }),
+      },
+    })
+    await app.load('controllers', 'how/yadoin', path => importDefault(path))
+  }
+
+  context('when the legacy key is invalid', () => {
+    context('in production', () => {
+      let originalNodeEnv: string | undefined
+      beforeEach(() => {
+        originalNodeEnv = process.env.NODE_ENV
+        process.env.NODE_ENV = 'production'
+      })
+      afterEach(() => {
+        process.env.NODE_ENV = originalNodeEnv
+      })
+
+      it('refuses to boot and names the legacy key', async () => {
+        await expect(
+          PsychicApp.init(cbWithKeys('definitely-not-a-valid-base64-32-byte-key'), dreamCb),
+        ).rejects.toThrow(/legacy key value for cookies encryption is invalid/)
+      })
+    })
+  })
+
+  context('when the legacy key is valid', () => {
+    it('boots without throwing', async () => {
+      await expect(
+        PsychicApp.init(cbWithKeys(Encrypt.generateKey('aes-256-gcm')), dreamCb),
+      ).resolves.not.toThrow()
+    })
+  })
+
+  context('when no legacy key is configured', () => {
+    it('boots without throwing', async () => {
+      await expect(PsychicApp.init(cbWithKeys(undefined), dreamCb)).resolves.not.toThrow()
     })
   })
 })

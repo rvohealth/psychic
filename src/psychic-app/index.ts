@@ -85,8 +85,17 @@ export default class PsychicApp {
       if (psychicApp.encryption?.cookies?.current)
         this.checkEncryptionKey(
           'cookies',
+          'current',
           psychicApp.encryption.cookies.current.key,
           psychicApp.encryption.cookies.current.algorithm,
+        )
+
+      if (psychicApp.encryption?.cookies?.legacy)
+        this.checkEncryptionKey(
+          'cookies',
+          'legacy',
+          psychicApp.encryption.cookies.legacy.key,
+          psychicApp.encryption.cookies.legacy.algorithm,
         )
 
       await psychicApp.inflections?.()
@@ -248,18 +257,20 @@ export default class PsychicApp {
    * are not broken by a hard failure.
    *
    * @param encryptionIdentifier - currently must be 'cookies', though this may change in the future
+   * @param keyType - whether this is the 'current' or 'legacy' key (named in the error so a misconfigured legacy key is not mistaken for the current one)
    * @param key - the encryption key you want to check
    * @param algorithm - the encryption algorithm you want to check
    */
   private static checkEncryptionKey(
     encryptionIdentifier: 'cookies',
+    keyType: 'current' | 'legacy',
     key: string,
     algorithm: EncryptAlgorithm,
   ): void {
     if (Encrypt.validateKey(key, algorithm)) return
 
     const message = `
-Your current key value for ${encryptionIdentifier} encryption is invalid.
+Your ${keyType} key value for ${encryptionIdentifier} encryption is invalid.
 Try setting it to something valid, like:
   ${Encrypt.generateKey(algorithm)}
 
