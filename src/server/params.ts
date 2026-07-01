@@ -134,8 +134,11 @@ export default class Params {
           const paramValue = params[columnName as keyof typeof params]
 
           if (columnMetadata.isArray) {
+            // Single-value query arrays are conformed to arrays upstream in
+            // conformQueryArrayParamsToOpenapiShape, so a non-array reaching
+            // here is a real error rather than something to coerce.
             if (!Array.isArray(paramValue))
-              returnObj[columnName as keyof typeof returnObj] = ['expected an array of enum values']
+              throw new ParamValidationError(columnName.toString(), ['expected an array of enum values'])
 
             returnObj[columnName as keyof typeof returnObj] = (paramValue as string[]).map(p => {
               return new this(params).cast(columnName.toString(), p, 'string', {

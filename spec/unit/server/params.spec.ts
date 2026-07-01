@@ -188,6 +188,33 @@ describe('Params', () => {
             favoriteTreats: ['efishy feesh', 'snick snowcks'],
           })
         })
+
+        // A non-array value reaching the array-enum branch is a real error:
+        // single-value query arrays are conformed to arrays upstream in
+        // conformQueryArrayParamsToOpenapiShape. The branch must reject a bare
+        // scalar with a 400-style ParamValidationErrors (never a 500 from
+        // calling .map on a non-array).
+        context('when a bare scalar is supplied instead of an array', () => {
+          it('rejects the scalar with a 400-style ParamValidationErrors (never a 500)', () => {
+            expect(() => Params.for({ favoriteTreats: 'efishy feesh' }, Pet)).toThrow(ParamValidationErrors)
+
+            let error: ParamValidationErrors
+            try {
+              Params.for({ favoriteTreats: 'efishy feesh' }, Pet)
+            } catch (err) {
+              error = err as ParamValidationErrors
+            }
+
+            expect(error!).toBeInstanceOf(ParamValidationErrors)
+            expect(error!.errors).toEqual({ favoriteTreats: ['expected an array of enum values'] })
+          })
+
+          it('rejects even a scalar that would be a valid enum member', () => {
+            expect(() => Params.for({ favoriteTreats: 'efishy feeshzzz' }, Pet)).toThrow(
+              ParamValidationErrors,
+            )
+          })
+        })
       })
     })
 
