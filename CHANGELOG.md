@@ -1,3 +1,8 @@
+## 3.10.0
+
+- Security hardening (audit 2026-07-01):
+  - `castParam` / `Params.cast` gained `maxLength`/`minLength` (for `string`) and `minimum`/`maximum` (for `number`/`integer`/`bigint`) options so the request-boundary enforcer can express length and numeric-range bounds, not just `enum`/`allowNull`/`match`. Constraints are applied after type coercion and throw `ParamValidationError` on violation; option names mirror JSON-schema/OpenAPI. For array casts (`string[]`, `integer[]`, etc.) the bounds are enforced element-wise, and `bigint` range checks compare without precision loss.
+
 ## 3.9.0
 
 - BREAKING: model-derived `@OpenAPI` request bodies no longer implicitly advertise every param-safe column. When a model-derived `requestBody` is given no `params`/`only` (and no `combining`/`required`/pagination body param), the default is now to advertise NO model columns: a top-level model-derived `requestBody` is omitted entirely, and a nested `{ for: Model }` sentinel renders an empty object. This prevents database-level structure from leaking into the generated OpenAPI shape by default. Endpoints that should advertise settable columns must now list them explicitly via `requestBody: { params: [...] }`. Explicit `params`/`only` behavior is unchanged, and the runtime `paramsFor`/`extractParams` allowlists are unaffected.

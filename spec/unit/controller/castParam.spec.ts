@@ -140,6 +140,115 @@ describe('PsychicController#castParam', () => {
     })
   })
 
+  context('string length constraints', () => {
+    context('maxLength', () => {
+      it('passes when the value is within the maximum length', () => {
+        expect(controller.castParam('name', 'string', { maxLength: 10 })).toEqual('howyadoin')
+      })
+
+      it('throws ParamValidationError when the value exceeds the maximum length', () => {
+        expect(() => controller.castParam('name', 'string', { maxLength: 8 })).toThrow(ParamValidationError)
+      })
+    })
+
+    context('minLength', () => {
+      it('passes when the value meets the minimum length', () => {
+        expect(controller.castParam('name', 'string', { minLength: 9 })).toEqual('howyadoin')
+      })
+
+      it('throws ParamValidationError when the value is shorter than the minimum length', () => {
+        expect(() => controller.castParam('name', 'string', { minLength: 10 })).toThrow(ParamValidationError)
+      })
+    })
+
+    context('combined with an existing enum option', () => {
+      it('applies both constraints', () => {
+        expect(controller.castParam('hello', 'string', { enum: TestEnumValues, maxLength: 5 })).toEqual(
+          'hello',
+        )
+        expect(() => controller.castParam('hello', 'string', { enum: TestEnumValues, maxLength: 4 })).toThrow(
+          ParamValidationError,
+        )
+      })
+    })
+
+    context('element-wise on a string[] cast', () => {
+      it('passes when every element is within the maximum length', () => {
+        expect(controller.castParam('helloWorldArray', 'string[]', { maxLength: 5 })).toEqual([
+          'hello',
+          'world',
+        ])
+      })
+
+      it('throws ParamValidationError when any element exceeds the maximum length', () => {
+        expect(() => controller.castParam('helloWorldArray', 'string[]', { maxLength: 4 })).toThrow(
+          ParamValidationError,
+        )
+      })
+    })
+  })
+
+  context('numeric range constraints', () => {
+    context('integer', () => {
+      it('passes when the value is within maximum', () => {
+        expect(controller.castParam('id', 'integer', { maximum: 100 })).toEqual(1)
+      })
+
+      it('throws ParamValidationError when the value exceeds maximum', () => {
+        expect(() => controller.castParam('id', 'integer', { maximum: 0 })).toThrow(ParamValidationError)
+      })
+
+      it('passes when the value meets minimum', () => {
+        expect(controller.castParam('id', 'integer', { minimum: 1 })).toEqual(1)
+      })
+
+      it('throws ParamValidationError when the value is below minimum', () => {
+        expect(() => controller.castParam('id', 'integer', { minimum: 5 })).toThrow(ParamValidationError)
+      })
+    })
+
+    context('number', () => {
+      it('passes when within range', () => {
+        expect(controller.castParam('id', 'number', { minimum: 1, maximum: 1 })).toEqual(1)
+      })
+
+      it('throws ParamValidationError when above maximum', () => {
+        expect(() => controller.castParam('id', 'number', { maximum: 0 })).toThrow(ParamValidationError)
+      })
+    })
+
+    context('bigint', () => {
+      it('passes when within range', () => {
+        expect(controller.castParam('id', 'bigint', { minimum: 0, maximum: 100 })).toEqual('1')
+      })
+
+      it('throws ParamValidationError when above maximum', () => {
+        expect(() => controller.castParam('id', 'bigint', { maximum: 0 })).toThrow(ParamValidationError)
+      })
+    })
+
+    context('element-wise on an integer[] cast', () => {
+      let arrayController: PsychicController
+
+      beforeEach(() => {
+        const ctx = createMockKoaContext({ body: { amounts: [2, 5, 20] } })
+        arrayController = new PsychicController(ctx, { action: 'hello' })
+      })
+
+      it('passes when every element is within range', () => {
+        expect(arrayController.castParam('amounts', 'integer[]', { minimum: 0, maximum: 100 })).toEqual([
+          2, 5, 20,
+        ])
+      })
+
+      it('throws ParamValidationError when any element exceeds maximum', () => {
+        expect(() => arrayController.castParam('amounts', 'integer[]', { maximum: 10 })).toThrow(
+          ParamValidationError,
+        )
+      })
+    })
+  })
+
   context('with openapi shape provided', () => {
     context('openapi shape is valid', () => {
       it('casts the param to the shape, coercing types where pertinent', () => {

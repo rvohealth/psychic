@@ -313,6 +313,7 @@ export default class Params {
         if (typeof paramValue !== 'string')
           throw new ParamValidationError(paramName, [typeToError(expectedType)])
 
+        this.throwUnlessWithinLength(paramName, paramValue, opts)
         if (opts?.enum && !opts.enum.includes(paramValue))
           throw new ParamValidationError(paramName, ['did not match expected enum values'])
         if (opts?.match) return this.matchRegexOrThrow(paramName, paramValue, opts.match) as ReturnType
@@ -323,6 +324,7 @@ export default class Params {
           throw new ParamValidationError(paramName, [typeToError(expectedType)])
         if (!integerRegexp.test(paramValue?.toString()))
           throw new ParamValidationError(paramName, [typeToError(expectedType)])
+        this.throwUnlessWithinRange(paramName, BigInt(paramValue.toString()), opts)
         return paramValue.toString() as ReturnType
 
       case 'boolean':
@@ -390,26 +392,35 @@ export default class Params {
         throw new ParamValidationError(paramName, [typeToError(expectedType)])
       }
 
-      case 'integer':
+      case 'integer': {
         if (typeof paramValue !== 'string' && typeof paramValue !== 'number')
           throw new ParamValidationError(paramName, [typeToError(expectedType)])
         if (!integerRegexp.test(paramValue?.toString()))
           throw new ParamValidationError(paramName, [typeToError(expectedType)])
-        return parseInt(paramValue as string, 10) as ReturnType
+        const integerValue = parseInt(paramValue as string, 10)
+        this.throwUnlessWithinRange(paramName, integerValue, opts)
+        return integerValue as ReturnType
+      }
 
       case 'json':
         if (typeof paramValue !== 'object')
           throw new ParamValidationError(paramName, [typeToError(expectedType)])
         return paramValue as ReturnType
 
-      case 'number':
-        if (typeof paramValue === 'number') return paramValue as ReturnType
+      case 'number': {
+        if (typeof paramValue === 'number') {
+          this.throwUnlessWithinRange(paramName, paramValue, opts)
+          return paramValue as ReturnType
+        }
         if (typeof paramValue === 'string') {
           if (paramValue.length === 0 || Number.isNaN(Number(paramValue)))
             throw new ParamValidationError(paramName, [typeToError(expectedType)])
-          return Number(paramValue) as ReturnType
+          const numberValue = Number(paramValue)
+          this.throwUnlessWithinRange(paramName, numberValue, opts)
+          return numberValue as ReturnType
         }
         throw new ParamValidationError(paramName, [typeToError(expectedType)])
+      }
 
       case 'null':
         if (paramValue !== null) throw new ParamValidationError(paramName, [typeToError(expectedType)])
@@ -512,6 +523,57 @@ export default class Params {
     if (paramValue.length > 1000) throw new Error('We do not accept strings over 1000 chars')
     if (expectedType.test(paramValue)) return paramValue
     throw new ParamValidationError(paramName, [typeToError(expectedType)])
+  }
+
+  /**
+   * Enforces `minLength`/`maxLength` (inclusive) against an already-coerced
+   * string value, throwing {@link ParamValidationError} on violation. Mirrors
+   * JSON-schema / OpenAPI string-length constraints.
+   */
+  private throwUnlessWithinLength(
+    paramName: string,
+    paramValue: string,
+    opts?: ParamsCastOptions<readonly string[]>,
+  ) {
+    if (opts?.minLength !== undefined && paramValue.length < opts.minLength)
+      throw new ParamValidationError(paramName, [
+        `expected string with length no less than ${opts.minLength}`,
+      ])
+    if (opts?.maxLength !== undefined && paramValue.length > opts.maxLength)
+      throw new ParamValidationError(paramName, [
+        `expected string with length no greater than ${opts.maxLength}`,
+      ])
+  }
+
+  /**
+   * Enforces `minimum`/`maximum` (inclusive) against an already-coerced numeric
+   * value, throwing {@link ParamValidationError} on violation. Accepts a
+   * `bigint` so `bigint` casts are checked without precision loss; the bounds
+   * themselves are compared as `bigint` when they are integers and otherwise
+   * fall back to floating-point comparison. Mirrors JSON-schema / OpenAPI
+   * numeric-range constraints.
+   */
+  private throwUnlessWithinRange(
+    paramName: string,
+    paramValue: number | bigint,
+    opts?: ParamsCastOptions<readonly string[]>,
+  ) {
+    if (opts?.minimum !== undefined && this.isBelowNumericBound(paramValue, opts.minimum))
+      throw new ParamValidationError(paramName, [`expected a value no less than ${opts.minimum}`])
+    if (opts?.maximum !== undefined && this.isAboveNumericBound(paramValue, opts.maximum))
+      throw new ParamValidationError(paramName, [`expected a value no greater than ${opts.maximum}`])
+  }
+
+  private isBelowNumericBound(value: number | bigint, bound: number): boolean {
+    if (typeof value === 'bigint')
+      return Number.isInteger(bound) ? value < BigInt(bound) : Number(value) < bound
+    return value < bound
+  }
+
+  private isAboveNumericBound(value: number | bigint, bound: number): boolean {
+    if (typeof value === 'bigint')
+      return Number.isInteger(bound) ? value > BigInt(bound) : Number(value) > bound
+    return value > bound
   }
 
   private throwUnlessAllowNull(
@@ -662,6 +724,34 @@ export type ParamsCastOptions<EnumType> = {
   allowNull?: boolean
   match?: RegExp
   enum?: EnumType
+
+  /**
+   * Maximum permitted string length (inclusive). Enforced after coercion for
+   * `string` casts (and element-wise for `string[]`). Mirrors JSON-schema /
+   * OpenAPI `maxLength`.
+   */
+  maxLength?: number
+
+  /**
+   * Minimum permitted string length (inclusive). Enforced after coercion for
+   * `string` casts (and element-wise for `string[]`). Mirrors JSON-schema /
+   * OpenAPI `minLength`.
+   */
+  minLength?: number
+
+  /**
+   * Minimum permitted numeric value (inclusive). Enforced after coercion for
+   * `number`/`integer`/`bigint` casts (and element-wise for their array
+   * variants). Mirrors JSON-schema / OpenAPI `minimum`.
+   */
+  minimum?: number
+
+  /**
+   * Maximum permitted numeric value (inclusive). Enforced after coercion for
+   * `number`/`integer`/`bigint` casts (and element-wise for their array
+   * variants). Mirrors JSON-schema / OpenAPI `maximum`.
+   */
+  maximum?: number
 }
 
 interface ParamsForOptsBase<OnlyArray> {
