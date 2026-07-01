@@ -308,6 +308,11 @@ export default class Params {
     }
 
     const integerRegexp = /^-?\d+$/
+    // Plain decimal numeric string: optional sign, digits with an optional
+    // fractional part (or a bare fractional part), and an optional decimal
+    // exponent. Deliberately excludes hex/octal/binary literals and the
+    // "Infinity"/"NaN" keywords that `Number()` would otherwise accept.
+    const decimalNumberRegexp = /^-?(?:\d+(?:\.\d*)?|\.\d+)(?:[eE][+-]?\d+)?$/
     switch (expectedType) {
       case 'string':
         if (typeof paramValue !== 'string')
@@ -398,6 +403,14 @@ export default class Params {
         if (!integerRegexp.test(paramValue?.toString()))
           throw new ParamValidationError(paramName, [typeToError(expectedType)])
         const integerValue = parseInt(paramValue as string, 10)
+        // Reject values outside the safe-integer range: a long digit string
+        // (e.g. a 40-digit number) would otherwise be silently rounded to a
+        // nearby float by parseInt. Genuinely large integers should be cast as
+        // `bigint`, which preserves the exact value as a string.
+        if (!Number.isSafeInteger(integerValue))
+          throw new ParamValidationError(paramName, [
+            'expected an integer within the safe integer range (use bigint for larger values)',
+          ])
         this.throwUnlessWithinRange(paramName, integerValue, opts)
         return integerValue as ReturnType
       }
@@ -409,13 +422,19 @@ export default class Params {
 
       case 'number': {
         if (typeof paramValue === 'number') {
+          if (!Number.isFinite(paramValue))
+            throw new ParamValidationError(paramName, [typeToError(expectedType)])
           this.throwUnlessWithinRange(paramName, paramValue, opts)
           return paramValue as ReturnType
         }
         if (typeof paramValue === 'string') {
-          if (paramValue.length === 0 || Number.isNaN(Number(paramValue)))
-            throw new ParamValidationError(paramName, [typeToError(expectedType)])
+          // Require a plain decimal numeric string and a finite result. This
+          // rejects hex/octal/binary forms ("0x10"), the literals "Infinity"/
+          // "NaN", and magnitudes that overflow to Infinity ("1e999"), all of
+          // which `Number()` would otherwise silently coerce.
           const numberValue = Number(paramValue)
+          if (!decimalNumberRegexp.test(paramValue) || !Number.isFinite(numberValue))
+            throw new ParamValidationError(paramName, [typeToError(expectedType)])
           this.throwUnlessWithinRange(paramName, numberValue, opts)
           return numberValue as ReturnType
         }

@@ -249,6 +249,42 @@ describe('PsychicController#castParam', () => {
     })
   })
 
+  context('numeric coercion hardening', () => {
+    function coerceController(body: Record<string, unknown>) {
+      const ctx = createMockKoaContext({ body })
+      return new PsychicController(ctx, { action: 'hello' })
+    }
+
+    context('number', () => {
+      it('still accepts ordinary decimals and floats', () => {
+        expect(coerceController({ n: '42' }).castParam('n', 'number')).toEqual(42)
+        expect(coerceController({ n: '-3.14' }).castParam('n', 'number')).toEqual(-3.14)
+        expect(coerceController({ n: '1e3' }).castParam('n', 'number')).toEqual(1000)
+      })
+
+      it('rejects Infinity/1e999/hex forms with a ParamValidationError', () => {
+        expect(() => coerceController({ n: 'Infinity' }).castParam('n', 'number')).toThrow(
+          ParamValidationError,
+        )
+        expect(() => coerceController({ n: '1e999' }).castParam('n', 'number')).toThrow(ParamValidationError)
+        expect(() => coerceController({ n: '0x10' }).castParam('n', 'number')).toThrow(ParamValidationError)
+      })
+    })
+
+    context('integer', () => {
+      it('still accepts ordinary integers', () => {
+        expect(coerceController({ n: '42' }).castParam('n', 'integer')).toEqual(42)
+        expect(coerceController({ n: '-7' }).castParam('n', 'integer')).toEqual(-7)
+      })
+
+      it('rejects a precision-losing 40-digit integer string with a ParamValidationError', () => {
+        expect(() =>
+          coerceController({ n: '1234567890123456789012345678901234567890' }).castParam('n', 'integer'),
+        ).toThrow(ParamValidationError)
+      })
+    })
+  })
+
   context('with openapi shape provided', () => {
     context('openapi shape is valid', () => {
       it('casts the param to the shape, coercing types where pertinent', () => {

@@ -2,6 +2,7 @@
 
 - Security hardening (audit 2026-07-01):
   - `castParam` / `Params.cast` gained `maxLength`/`minLength` (for `string`) and `minimum`/`maximum` (for `number`/`integer`/`bigint`) options so the request-boundary enforcer can express length and numeric-range bounds, not just `enum`/`allowNull`/`match`. Constraints are applied after type coercion and throw `ParamValidationError` on violation; option names mirror JSON-schema/OpenAPI. For array casts (`string[]`, `integer[]`, etc.) the bounds are enforced element-wise, and `bigint` range checks compare without precision loss.
+  - Tightened numeric coercion in `castParam` / `Params.cast`. BEHAVIOR CHANGE (these inputs now return `400` instead of coercing): `number` casts reject non-finite and non-decimal string forms — `"Infinity"`, `"NaN"`, magnitude overflows like `"1e999"` (which `Number()` turned into `Infinity`), and hex/octal/binary literals like `"0x10"` (which coerced to `16`); a non-finite JS `number` value is likewise rejected. `integer` casts reject values outside the JavaScript safe-integer range instead of silently rounding a long digit string (e.g. a 40-digit number) to a nearby float — cast such values as `bigint` to preserve them exactly. Ordinary decimals, floats, scientific notation (`"1e3"`), and normal integers are unaffected, and `bigint` still handles arbitrarily large values.
 
 ## 3.9.0
 

@@ -1216,6 +1216,36 @@ describe('Params', () => {
               )
             })
           })
+
+          context('with a non-finite or non-decimal value', () => {
+            it('raises a validation exception', () => {
+              expect(() => Params.cast({ howyadoin: 'Infinity' }, 'howyadoin', 'number')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: '1e999' }, 'howyadoin', 'number')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: '0x10' }, 'howyadoin', 'number')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: 'NaN' }, 'howyadoin', 'number')).toThrow(
+                ParamValidationError,
+              )
+              expect(() => Params.cast({ howyadoin: Infinity }, 'howyadoin', 'number')).toThrow(
+                ParamValidationError,
+              )
+            })
+          })
+
+          context('with a pathologically long non-numeric string', () => {
+            it('rejects it quickly without catastrophic backtracking', () => {
+              const start = Date.now()
+              expect(() =>
+                Params.cast({ howyadoin: '9'.repeat(100000) + '!' }, 'howyadoin', 'number'),
+              ).toThrow(ParamValidationError)
+              expect(Date.now() - start).toBeLessThan(1000)
+            })
+          })
         })
 
         context('integer', () => {
@@ -1236,6 +1266,25 @@ describe('Params', () => {
               expect(() => Params.cast({ howyadoin: '0x777' }, 'howyadoin', 'integer')).toThrow(
                 ParamValidationError,
               )
+            })
+          })
+
+          context('with a value outside the safe integer range', () => {
+            it('raises a validation exception rather than returning a rounded float', () => {
+              // 40-digit string: parseInt would silently round this to a nearby float
+              expect(() =>
+                Params.cast(
+                  { howyadoin: '1234567890123456789012345678901234567890' },
+                  'howyadoin',
+                  'integer',
+                ),
+              ).toThrow(ParamValidationError)
+            })
+
+            it('handles genuinely large integers losslessly when cast as bigint', () => {
+              expect(
+                Params.cast({ howyadoin: '1234567890123456789012345678901234567890' }, 'howyadoin', 'bigint'),
+              ).toEqual('1234567890123456789012345678901234567890')
             })
           })
         })
