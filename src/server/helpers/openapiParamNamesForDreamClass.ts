@@ -6,7 +6,10 @@ import {
   UpdateableProperties,
 } from '@rvoh/dream/types'
 import type { VirtualAttributeStatement } from '../../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
-import type { OpenAPIDreamModelRequestBodyModifications } from '../params.js'
+import type {
+  ExtractedDreamParamSafeAttributes,
+  OpenAPIDreamModelRequestBodyModifications,
+} from '../params.js'
 import paramNamesForDreamClass from './paramNamesForDreamClass.js'
 
 export default function openapiParamNamesForDreamClass<
@@ -28,14 +31,11 @@ export default function openapiParamNamesForDreamClass<
   ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
     InstanceType<T>
   >)[]
-    ? Partial<{
-        [K in ForOpts['only'][number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
-      }>
-    : Partial<{
-        [K in ParamSafeColumns[number & keyof ParamSafeColumns] & string]: DreamParamSafeAttributes<
-          InstanceType<T>
-        >[K & keyof DreamParamSafeAttributes<InstanceType<T>>]
-      }>,
+    ? ExtractedDreamParamSafeAttributes<ParamSafeAttrs, ForOpts['only'][number] & keyof ParamSafeAttrs>
+    : ExtractedDreamParamSafeAttributes<
+        ParamSafeAttrs,
+        ParamSafeColumns[number & keyof ParamSafeColumns] & string & keyof ParamSafeAttrs
+      >,
   ReturnPartialTypeWithIncluding extends ForOpts['including'] extends readonly (keyof UpdateableProperties<
     InstanceType<T>
   >)[]

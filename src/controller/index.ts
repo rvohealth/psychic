@@ -54,6 +54,7 @@ import OpenapiPayloadValidator from '../openapi-renderer/helpers/OpenapiPayloadV
 import { cacheStringify, getCachedStringify } from '../openapi-renderer/helpers/stringify-cache.js'
 import PsychicApp from '../psychic-app/index.js'
 import Params, {
+  type ExtractedDreamParamSafeAttributes,
   ExtractParamsOpts,
   ParamsCastOptions,
   ParamsForOpts,
@@ -548,14 +549,11 @@ export default class PsychicController {
     ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
       InstanceType<T>
     >)[]
-      ? Partial<{
-          [K in ForOpts['only'][number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
-        }>
-      : Partial<{
-          [K in ParamSafeColumns[number & keyof ParamSafeColumns] & string]: DreamParamSafeAttributes<
-            InstanceType<T>
-          >[K & keyof DreamParamSafeAttributes<InstanceType<T>>]
-        }>,
+      ? ExtractedDreamParamSafeAttributes<ParamSafeAttrs, ForOpts['only'][number] & keyof ParamSafeAttrs>
+      : ExtractedDreamParamSafeAttributes<
+          ParamSafeAttrs,
+          ParamSafeColumns[number & keyof ParamSafeColumns] & string & keyof ParamSafeAttrs
+        >,
     ReturnPayload extends ForOpts['array'] extends true ? ReturnPartialType[] : ReturnPartialType,
   >(this: PsychicController, dreamClass: T, opts?: ForOpts): ReturnPayload {
     return Params.for(
@@ -605,9 +603,10 @@ export default class PsychicController {
     const AllowedArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
     OptsType extends StrictInterface<OptsType, ExtractParamsOpts>,
     ParamSafeAttrs extends DreamParamSafeAttributes<I>,
-    ReturnPartial extends Partial<{
-      [K in AllowedArray[number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
-    }>,
+    ReturnPartial extends ExtractedDreamParamSafeAttributes<
+      ParamSafeAttrs,
+      AllowedArray[number] & keyof ParamSafeAttrs
+    >,
     ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
   >(this: PsychicController, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
     const source = opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params

@@ -1,6 +1,6 @@
 import { Dream } from '@rvoh/dream'
 import { DreamParamSafeAttributes, DreamParamSafeColumnNames, StrictInterface } from '@rvoh/dream/types'
-import type { ParamsForOpts } from '../params.js'
+import type { ExtractedDreamParamSafeAttributes, ParamsForOpts } from '../params.js'
 
 export default function paramNamesForDreamClass<
   T extends typeof Dream,
@@ -17,14 +17,11 @@ export default function paramNamesForDreamClass<
   ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
     InstanceType<T>
   >)[]
-    ? Partial<{
-        [K in ForOpts['only'][number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
-      }>
-    : Partial<{
-        [K in ParamSafeColumns[number & keyof ParamSafeColumns] & string]: DreamParamSafeAttributes<
-          InstanceType<T>
-        >[K & keyof DreamParamSafeAttributes<InstanceType<T>>]
-      }>,
+    ? ExtractedDreamParamSafeAttributes<ParamSafeAttrs, ForOpts['only'][number] & keyof ParamSafeAttrs>
+    : ExtractedDreamParamSafeAttributes<
+        ParamSafeAttrs,
+        ParamSafeColumns[number & keyof ParamSafeColumns] & string & keyof ParamSafeAttrs
+      >,
   RetArray = (keyof ReturnPartialType)[],
 >(dreamClass: T, { only }: ForOpts = {} as ForOpts): RetArray {
   return Array.isArray(only)

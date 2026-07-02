@@ -1,3 +1,7 @@
+## 3.10.1
+
+- Tightened the inferred return type for `Params.for`, `Params.extract`, `PsychicController#paramsFor`, and `PsychicController#extractParams` so optional extracted keys no longer also include `undefined` in their value unions. This matches runtime behavior, where missing or explicitly `undefined` request values are omitted from the returned object. Nullable columns still infer `T | null`, and `{ array: true }` returns the same tightened element type for nested model-array request bodies.
+
 ## 3.10.0
 
 - Security hardening (audit 2026-07-01):

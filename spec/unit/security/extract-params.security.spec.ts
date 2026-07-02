@@ -79,6 +79,9 @@ describe('PsychicController extract-params primitives (R-011)', () => {
         }
 
         const result = controller.extractParams(User, ['name'], { key: 'users', array: true })
+        const typedResult: Partial<{ name: string | null }>[] = result
+
+        expect(typedResult).toEqual(result)
         expect(result).toEqual([{ name: 'a' }, { name: 'b' }])
       })
     })
