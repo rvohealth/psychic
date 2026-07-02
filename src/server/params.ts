@@ -34,6 +34,13 @@ import { Inc } from '../i18n/conf/types.js'
 import type { VirtualAttributeStatement } from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
 
+export type ExtractedDreamParamSafeAttributes<
+  ParamSafeAttrs,
+  ParamNames extends keyof ParamSafeAttrs,
+> = Partial<{
+  [K in ParamNames]: Exclude<ParamSafeAttrs[K], undefined>
+}>
+
 export default class Params {
   /**
    * ### .for
@@ -67,14 +74,11 @@ export default class Params {
     ReturnPartialType extends ForOpts['only'] extends readonly (keyof DreamParamSafeAttributes<
       InstanceType<T>
     >)[]
-      ? Partial<{
-          [K in ForOpts['only'][number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
-        }>
-      : Partial<{
-          [K in ParamSafeColumns[number & keyof ParamSafeColumns] &
-            string &
-            keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
-        }>,
+      ? ExtractedDreamParamSafeAttributes<ParamSafeAttrs, ForOpts['only'][number] & keyof ParamSafeAttrs>
+      : ExtractedDreamParamSafeAttributes<
+          ParamSafeAttrs,
+          ParamSafeColumns[number & keyof ParamSafeColumns] & string & keyof ParamSafeAttrs
+        >,
     ReturnPayload extends ForOpts['array'] extends true ? ReturnPartialType[] : ReturnPartialType,
   >(params: object, dreamClass: T, forOpts: ForOpts = {} as ForOpts): ReturnPayload {
     const { array = false } = forOpts
@@ -195,9 +199,10 @@ export default class Params {
     const AllowedArray extends readonly (keyof DreamParamSafeAttributes<I>)[],
     OptsType extends StrictInterface<OptsType, ExtractParamsOpts>,
     ParamSafeAttrs extends DreamParamSafeAttributes<I>,
-    ReturnPartial extends Partial<{
-      [K in AllowedArray[number] & keyof ParamSafeAttrs]: ParamSafeAttrs[K & keyof ParamSafeAttrs]
-    }>,
+    ReturnPartial extends ExtractedDreamParamSafeAttributes<
+      ParamSafeAttrs,
+      AllowedArray[number] & keyof ParamSafeAttrs
+    >,
     ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
   >(params: object, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
