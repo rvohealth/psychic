@@ -106,6 +106,46 @@ describe('DreamSerializer delegated attributes', () => {
     })
   })
 
+  context('when repeating the same key using required: false to shadow a default', () => {
+    it('keeps the key required because the fallback declaration still writes it', () => {
+      const MySerializer = (data: Pet) =>
+        DreamSerializer(Pet, data)
+          .delegatedAttribute('user', 'name', { openapi: 'string' })
+          .delegatedAttribute('user', 'name', { openapi: 'string', required: false })
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      expect(serializerOpenapiRenderer.renderedOpenapi().openapi).toMatchObject({
+        required: ['name'],
+        properties: {
+          name: {
+            type: 'string',
+          },
+        },
+      })
+    })
+
+    it('uses the renamed output key in properties and required when shadowing with as', () => {
+      const MySerializer = (data: Pet) =>
+        DreamSerializer(Pet, data)
+          .delegatedAttribute('user', 'name', { as: 'displayName', openapi: 'string' })
+          .delegatedAttribute('user', 'name', {
+            as: 'displayName',
+            openapi: 'string',
+            required: false,
+          })
+
+      const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
+      expect(serializerOpenapiRenderer.renderedOpenapi().openapi).toMatchObject({
+        required: ['displayName'],
+        properties: {
+          displayName: {
+            type: 'string',
+          },
+        },
+      })
+    })
+  })
+
   context('optional inferred from the association', () => {
     context('when the column is already nullable', () => {
       it('does not redundantly wrap with null', () => {
