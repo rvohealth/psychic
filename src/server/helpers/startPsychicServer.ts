@@ -20,9 +20,16 @@ export default async function startPsychicServer({
   port,
   sslCredentials,
 }: StartPsychicServerOptions): Promise<Server> {
-  return await new Promise(accept => {
+  return await new Promise((accept, reject) => {
     const httpOrHttps = createPsychicHttpInstance(app, sslCredentials)
+
+    // without this listener, a failed bind (e.g. EADDRINUSE, EACCES) escapes
+    // as an uncaught 'error' event and this promise never settles
+    const onListenError = (error: Error) => reject(error)
+    httpOrHttps.once('error', onListenError)
+
     const server = httpOrHttps.listen(port, () => {
+      httpOrHttps.off('error', onListenError)
       welcomeMessage({ port })
       accept(server)
     })
