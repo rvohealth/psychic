@@ -206,9 +206,7 @@ export default class PsychicServer {
         setTimeout(
           () =>
             reject(
-              new Error(
-                `[psychic] graceful shutdown timed out after ${PsychicServer.SHUTDOWN_TIMEOUT_MS}ms`,
-              ),
+              new Error(`[psychic] graceful shutdown timed out after ${PsychicServer.SHUTDOWN_TIMEOUT_MS}ms`),
             ),
           PsychicServer.SHUTDOWN_TIMEOUT_MS,
         ).unref()

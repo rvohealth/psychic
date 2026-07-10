@@ -1,5 +1,6 @@
 import { DreamCLI } from '@rvoh/dream/system'
 import Koa from 'koa'
+import { EventEmitter } from 'node:events'
 import * as fs from 'node:fs'
 import * as http from 'node:http'
 import { Server } from 'node:http'
@@ -23,13 +24,17 @@ export default async function startPsychicServer({
   return await new Promise((accept, reject) => {
     const httpOrHttps = createPsychicHttpInstance(app, sslCredentials)
 
+    // typescript cannot call event-emitter methods on the http/https server
+    // union directly (incompatible overload sets), but both are EventEmitters
+    const emitter: EventEmitter = httpOrHttps
+
     // without this listener, a failed bind (e.g. EADDRINUSE, EACCES) escapes
     // as an uncaught 'error' event and this promise never settles
     const onListenError = (error: Error) => reject(error)
-    httpOrHttps.once('error', onListenError)
+    emitter.once('error', onListenError)
 
     const server = httpOrHttps.listen(port, () => {
-      httpOrHttps.off('error', onListenError)
+      emitter.off('error', onListenError)
       welcomeMessage({ port })
       accept(server)
     })

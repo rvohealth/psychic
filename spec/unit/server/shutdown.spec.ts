@@ -1,11 +1,12 @@
 import * as net from 'node:net'
+import { MockInstance } from 'vitest'
 import { PsychicApp, PsychicServer } from '../../../src/package-exports/index.js'
 
 describe('PsychicServer signal handling', () => {
   let server: PsychicServer
   let handlers: Record<string, (...args: unknown[]) => void>
-  let exitSpy: ReturnType<typeof vi.spyOn>
-  let logWithLevelSpy: ReturnType<typeof vi.spyOn>
+  let exitSpy: MockInstance
+  let logWithLevelSpy: MockInstance
 
   async function freePort(): Promise<number> {
     const probe = net.createServer()
@@ -21,20 +22,13 @@ describe('PsychicServer signal handling', () => {
 
   beforeEach(async () => {
     handlers = {}
-    vi.spyOn(process, 'on').mockImplementation(((
-      event: string,
-      handler: (...args: unknown[]) => void,
-    ) => {
+    vi.spyOn(process, 'on').mockImplementation(((event: string, handler: (...args: unknown[]) => void) => {
       handlers[event] = handler
       return process
     }) as typeof process.on)
 
-    exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never) as ReturnType<
-      typeof vi.spyOn
-    >
-    logWithLevelSpy = vi.spyOn(PsychicApp, 'logWithLevel').mockReturnValue(undefined) as ReturnType<
-      typeof vi.spyOn
-    >
+    exitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+    logWithLevelSpy = vi.spyOn(PsychicApp, 'logWithLevel').mockReturnValue(undefined)
 
     server = new PsychicServer()
     await server.start(await freePort())
