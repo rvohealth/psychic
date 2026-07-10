@@ -1,6 +1,9 @@
 import { DreamCLI } from '@rvoh/dream/system'
 import { Command } from 'commander'
-import PsychicBin, { BreakingChangesDetectedInOpenApiSpecError } from '../bin/index.js'
+import PsychicBin, {
+  BreakingChangesDetectedInOpenApiSpecError,
+  OpenApiSpecDiffToolFailureError,
+} from '../bin/index.js'
 import generateController from '../generate/controller.js'
 import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/syncOpenapiTypescript.js'
@@ -624,6 +627,15 @@ ${INDENT}  pnpm psy diff:openapi --fail-on-breaking  # exit 1 if breaking change
           if (error instanceof BreakingChangesDetectedInOpenApiSpecError) {
             if (options.failOnBreaking) {
               console.error(error.message)
+              process.exit(1)
+            }
+          } else if (error instanceof OpenApiSpecDiffToolFailureError) {
+            // a failed diff tool is inconclusive; under --fail-on-breaking an
+            // inconclusive result must fail the CI gate rather than pass as
+            // "no breaking changes". Without the flag (informational mode),
+            // the failure is printed loudly but the exit code is unchanged.
+            console.error(error.message)
+            if (options.failOnBreaking) {
               process.exit(1)
             }
           } else {
