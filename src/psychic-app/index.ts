@@ -611,6 +611,24 @@ Try setting it to something valid, like:
     this._plugins.push(cb)
   }
 
+  /**
+   * Registers a callback for one of psychic's lifecycle hooks.
+   *
+   * ### `server:error`
+   *
+   * Called any time the server encounters an error it isn't sure how to
+   * respond to (i.e. a 500). This covers errors thrown from controller
+   * actions as well as errors raised outside the router — e.g. in the body
+   * parser, cors callbacks, custom `psy.use` middleware, or after-routes
+   * mounts — which are captured by an error boundary mounted outermost in
+   * the middleware stack. Hooks are awaited and may shape the response via
+   * `ctx`; if they don't, psychic responds 500. Errors carrying a 4xx status
+   * (e.g. a body-parser 400) are rendered as that status and never reach
+   * `server:error` hooks.
+   *
+   * NOTE: once any `server:error` hook is registered, psychic considers the
+   * error handled and does not re-throw it to Koa.
+   */
   public on<T extends PsychicHookEventType>(
     hookEventType: T,
     cb: T extends 'server:error'
