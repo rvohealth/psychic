@@ -1,3 +1,7 @@
+## 3.11.0
+
+- `psy diff:openapi --fail-on-breaking` now exits nonzero when the diff tooling itself fails (oasdiff invocation error, spec file missing on the current branch, head-branch spec unreadable), instead of reporting "no breaking changes" and passing the CI gate. Tool failures throw a new `OpenApiSpecDiffToolFailureError` whose message explicitly distinguishes "the diff tool failed (inconclusive)" from "breaking changes found". Failed oasdiff invocations are now propagated as structured errors rather than string-matched on `'Command failed'`, and a failed head-branch retrieval for one file is recorded as that file's error (other files are still compared) instead of aborting the whole run with a raw error. Without `--fail-on-breaking` (informational mode), tool failures are printed loudly but the exit code is unchanged. A genuine no-changes run still exits 0, and the breaking-changes path is unchanged.
+
 ## 3.10.1
 
 - Tightened the inferred return type for `Params.for`, `Params.extract`, `PsychicController#paramsFor`, and `PsychicController#extractParams` so optional extracted keys no longer also include `undefined` in their value unions. This matches runtime behavior, where missing or explicitly `undefined` request values are omitted from the returned object. Nullable columns still infer `T | null`, and `{ array: true }` returns the same tightened element type for nested model-array request bodies.
