@@ -1,3 +1,10 @@
+## 3.11.0
+
+- Server lifecycle correctness:
+  - `PsychicServer#start` now rejects when the underlying `listen` fails (e.g. `EADDRINUSE`, `EACCES`). Previously the bind error escaped as an uncaught `'error'` event and the start promise hung unsettled forever.
+  - SIGINT/SIGTERM graceful shutdown can no longer hang or leave the process alive: shutdown is bounded by a 15s timeout (`PsychicServer.SHUTDOWN_TIMEOUT_MS`); a failing or hung `server:shutdown` hook (or db close) logs at error level and exits with code 1; a clean shutdown still exits 0. Previously a rejecting shutdown hook was an unhandled rejection that could leave the process ignoring subsequent SIGTERMs, and the exit code was always 0 even after partial shutdown failure.
+  - `PsychicServer#boot` failure rethrows now preserve the original error via `{ cause }` instead of dropping its class and stack.
+
 ## 3.10.1
 
 - Tightened the inferred return type for `Params.for`, `Params.extract`, `PsychicController#paramsFor`, and `PsychicController#extractParams` so optional extracted keys no longer also include `undefined` in their value unions. This matches runtime behavior, where missing or explicitly `undefined` request values are omitted from the returned object. Nullable columns still infer `T | null`, and `{ array: true }` returns the same tightened element type for nested model-array request bodies.
