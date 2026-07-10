@@ -167,9 +167,50 @@ export default class PsychicServer {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public $attached: Record<string, any> = {}
 
+  /**
+   * @internal
+   *
+   * the maximum number of milliseconds graceful shutdown is allowed
+   * to run before the process exits anyway, so that a hung
+   * `server:shutdown` hook or db close can never keep a dying
+   * process alive
+   */
+  public static readonly SHUTDOWN_TIMEOUT_MS = 15000
+
   private async shutdownAndExit() {
-    await this.stop()
-    process.exit()
+    let exitCode = 0
+
+    try {
+      await this.stopWithTimeout()
+    } catch (error) {
+      PsychicApp.logWithLevel('error', '[psychic] error during graceful shutdown:', error)
+      exitCode = 1
+    }
+
+    process.exit(exitCode)
+  }
+
+  /**
+   * @internal
+   *
+   * runs {@link PsychicServer.stop}, rejecting if it has not settled
+   * within SHUTDOWN_TIMEOUT_MS
+   */
+  private async stopWithTimeout() {
+    await Promise.race([
+      this.stop(),
+      new Promise<never>((_, reject) => {
+        setTimeout(
+          () =>
+            reject(
+              new Error(
+                `[psychic] graceful shutdown timed out after ${PsychicServer.SHUTDOWN_TIMEOUT_MS}ms`,
+              ),
+            ),
+          PsychicServer.SHUTDOWN_TIMEOUT_MS,
+        ).unref()
+      }),
+    ])
   }
 
   public async stop({
