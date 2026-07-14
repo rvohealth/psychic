@@ -124,8 +124,12 @@ export class OpenApiSpecDiff {
 
   /**
    * Validates that oasdiff is installed and builds the oasdiff config
+   *
+   * Marked `protected` so tests can supply a deterministic config (e.g. a
+   * command guaranteed to fail) instead of probing the local oasdiff install
+   * and git remote. Production code never overrides this.
    */
-  private getOasDiffConfig(): OasDiffConfig {
+  protected getOasDiffConfig(): OasDiffConfig {
     const headBranch = this.getHeadBranch()
 
     if (this.hasOasDiffInstalled()) {
@@ -178,8 +182,10 @@ export class OpenApiSpecDiff {
       })
       return output.trim()
     } catch (error) {
-      const errorOutput = error instanceof Error ? error.message : String(error)
-      return errorOutput
+      // a failed oasdiff invocation must never be mistaken for diff output
+      // (previously the error text was returned and string-matched, so a
+      // broken oasdiff read as "no breaking changes")
+      throw new OasDiffCommandFailedError(subcommand, error)
     }
   }
 
@@ -205,7 +211,7 @@ export class OpenApiSpecDiff {
   private compareSpecs(
     mainFilePath: string,
     currentFilePath: string,
-  ): Pick<ComparisonResult, 'breaking' | 'changelog' | 'error'> {
+  ): Pick<ComparisonResult, 'breaking' | 'changelog'> {
     if (!this.oasdiffConfig) {
       throw new Error('OasDiff config not initialized')
     }
@@ -213,28 +219,17 @@ export class OpenApiSpecDiff {
     const breakingChanges = this.runOasDiffCommand('breaking', mainFilePath, currentFilePath)
     const changelogChanges = this.runOasDiffCommand('changelog', mainFilePath, currentFilePath)
     const breaking =
-      breakingChanges &&
-      !breakingChanges.includes('Command failed') &&
-      !this.isNoChangesOutput(breakingChanges)
+      breakingChanges && !this.isNoChangesOutput(breakingChanges)
         ? breakingChanges.split('\n').filter(line => line.trim())
         : []
     const changelog =
-      changelogChanges &&
-      !changelogChanges.includes('Command failed') &&
-      !this.isNoChangesOutput(changelogChanges)
+      changelogChanges && !this.isNoChangesOutput(changelogChanges)
         ? changelogChanges.split('\n').filter(line => line.trim())
         : []
-
-    const failedToCompare = breakingChanges.includes('Command failed')
-      ? breakingChanges
-      : changelogChanges.includes('Command failed')
-        ? changelogChanges
-        : ''
 
     return {
       breaking,
       changelog,
-      error: failedToCompare,
     }
   }
 
@@ -304,20 +299,25 @@ export class OpenApiSpecDiff {
 
     const tempMainFilePath = this.createTempFilePath(config.outputFilepath!)
 
-    const mainContent = this.getHeadBranchContent(currentFilePath)
-
-    fs.mkdirSync(path.dirname(tempMainFilePath), { recursive: true })
-    fs.writeFileSync(tempMainFilePath, mainContent)
-
     try {
-      const { breaking, changelog, error } = this.compareSpecs(tempMainFilePath, currentFilePath)
+      // inside the try so a failed `git show` (e.g. file unreadable on the
+      // head branch) is recorded as this file's error instead of escaping
+      // and aborting the entire diff run with a raw error
+      const mainContent = this.getHeadBranchContent(currentFilePath)
+
+      fs.mkdirSync(path.dirname(tempMainFilePath), { recursive: true })
+      fs.writeFileSync(tempMainFilePath, mainContent)
+
+      const { breaking, changelog } = this.compareSpecs(tempMainFilePath, currentFilePath)
 
       result.breaking = breaking
       result.changelog = changelog
       result.hasChanges = breaking.length > 0 || changelog.length > 0
-      result.error = error ?? ''
     } catch (error) {
-      result.error = `Could not retrieve ${config.outputFilepath!} from ${this.oasdiffConfig?.headBranch} branch: ${String(error)}`
+      result.error =
+        error instanceof OasDiffCommandFailedError
+          ? error.message
+          : `Could not retrieve ${config.outputFilepath!} from ${this.oasdiffConfig?.headBranch} branch: ${String(error)}`
     } finally {
       if (fs.existsSync(tempMainFilePath)) {
         fs.unlinkSync(tempMainFilePath)
@@ -333,10 +333,12 @@ export class OpenApiSpecDiff {
   private processResults(results: ComparisonResult[]): void {
     let hasAnyChanges = false
     let hasBreakingChanges = false
+    const erroredFiles: string[] = []
 
     for (const result of results) {
       if (result.error) {
         this.logError(result)
+        erroredFiles.push(result.file)
       } else if (result.hasChanges) {
         this.logChanges(result)
         hasAnyChanges = true
@@ -354,7 +356,7 @@ export class OpenApiSpecDiff {
       }
     }
 
-    this.logSummary(hasAnyChanges, hasBreakingChanges)
+    this.logSummary(hasAnyChanges, hasBreakingChanges, erroredFiles)
   }
 
   /**
@@ -418,7 +420,7 @@ export class OpenApiSpecDiff {
   /**
    * Log final summary and handle exit conditions
    */
-  private logSummary(hasAnyChanges: boolean, hasBreakingChanges: boolean): void {
+  private logSummary(hasAnyChanges: boolean, hasBreakingChanges: boolean, erroredFiles: string[]): void {
     DreamCLI.logger.logContinueProgress(`\n${colorize(`${'='.repeat(60)}`, { color: 'gray' })}`, {
       logPrefixColor: 'gray',
     })
@@ -436,6 +438,13 @@ export class OpenApiSpecDiff {
       })
 
       throw new BreakingChangesDetectedInOpenApiSpecError(this.oasdiffConfig!)
+    } else if (erroredFiles.length > 0) {
+      DreamCLI.logger.logContinueProgress(
+        `${colorize(`❌ CRITICAL:`, { color: 'redBright' })} ${colorize(`The OpenAPI diff tooling failed for: ${erroredFiles.join(', ')}. This result is inconclusive — it is NOT a clean "no breaking changes" result.`, { color: 'whiteBright' })}`,
+        { logPrefixColor: 'redBright' },
+      )
+
+      throw new OpenApiSpecDiffToolFailureError(erroredFiles)
     } else if (hasAnyChanges) {
       const summary = colorize(
         `📊 Summary: Some OpenAPI files have non-breaking changes in current branch compared to ${this.oasdiffConfig?.headBranch}`,
@@ -475,5 +484,41 @@ export class BreakingChangesDetectedInOpenApiSpecError extends Error {
 
   public override get message() {
     return `Breaking changes detected in current branch compared to ${this.oasdiffConfig.headBranch}! Review before merging.`
+  }
+}
+
+/**
+ * Thrown when the diff tooling itself fails (oasdiff invocation error,
+ * unreadable head-branch spec, missing spec file), as opposed to oasdiff
+ * successfully running and detecting breaking changes
+ * ({@link BreakingChangesDetectedInOpenApiSpecError}). Under
+ * `psy diff:openapi --fail-on-breaking`, both exit nonzero, but with
+ * distinguishable messages: an inconclusive diff must never pass a CI gate
+ * as "no breaking changes".
+ */
+export class OpenApiSpecDiffToolFailureError extends Error {
+  constructor(private readonly erroredFiles: string[]) {
+    super()
+    this.name = 'OpenApiSpecDiffToolFailureError'
+  }
+
+  public override get message() {
+    return `OpenAPI spec diff could not complete for: ${this.erroredFiles.join(', ')}. The diff tooling failed, so this result is inconclusive — this is a tool failure, NOT a breaking-changes result.`
+  }
+}
+
+/**
+ * Internal marker for a failed oasdiff invocation, so
+ * {@link OpenApiSpecDiff.compareConfig} can distinguish "oasdiff itself
+ * failed" from "could not retrieve head-branch content" when recording
+ * a per-file error.
+ */
+export class OasDiffCommandFailedError extends Error {
+  constructor(subcommand: string, cause: unknown) {
+    super(
+      `oasdiff ${subcommand} invocation failed: ${cause instanceof Error ? cause.message : String(cause)}`,
+      { cause },
+    )
+    this.name = 'OasDiffCommandFailedError'
   }
 }

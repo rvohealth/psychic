@@ -16,7 +16,10 @@ import printControllerHierarchy, {
 } from './helpers/printControllerHierarchy.js'
 import printRoutes from './helpers/printRoutes.js'
 
-export { BreakingChangesDetectedInOpenApiSpecError } from './helpers/OpenApiSpecDiff.js'
+export {
+  BreakingChangesDetectedInOpenApiSpecError,
+  OpenApiSpecDiffToolFailureError,
+} from './helpers/OpenApiSpecDiff.js'
 
 export default class PsychicBin {
   public static async generateController(controllerName: string, actions: string[]) {

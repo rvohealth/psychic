@@ -2,7 +2,9 @@ import * as fs from 'node:fs'
 import { afterEach, beforeEach, describe, expect, it } from 'vitest'
 import {
   BreakingChangesDetectedInOpenApiSpecError,
+  OasDiffConfig,
   OpenApiSpecDiff,
+  OpenApiSpecDiffToolFailureError,
 } from '../../../../src/bin/helpers/OpenApiSpecDiff.js'
 import type { DefaultPsychicOpenapiOptions } from '../../../../src/psychic-app/index.js'
 
@@ -53,6 +55,27 @@ class ControlledBaselineOpenApiSpecDiff extends OpenApiSpecDiff {
   }
 }
 
+// Simulates the oasdiff binary itself failing (not installed correctly,
+// internal oasdiff error, etc.) by pointing the diff at a command that
+// cannot be invoked. The real `runOasDiffCommand` error path is exercised.
+class FailingOasdiffCommandOpenApiSpecDiff extends ControlledBaselineOpenApiSpecDiff {
+  protected override getOasDiffConfig(): OasDiffConfig {
+    return {
+      command: 'oasdiff-command-that-does-not-exist-for-specs',
+      baseArgs: [],
+      headBranch: 'main',
+    }
+  }
+}
+
+// Simulates an unreadable head-branch spec (e.g. `git show` failing for the
+// file) so the per-file retrieval error path is exercised.
+class UnreadableHeadBranchOpenApiSpecDiff extends OpenApiSpecDiff {
+  protected override getHeadBranchContent(): string {
+    throw new Error('simulated: could not read file from head branch')
+  }
+}
+
 describe('OpenApiSpecDiff', () => {
   const mockConfigs: [string, DefaultPsychicOpenapiOptions][] = [
     ['api1', { outputFilepath: 'test-app/src/openapi/openapi.json' }],
@@ -89,6 +112,44 @@ describe('OpenApiSpecDiff', () => {
         }).toThrow(BreakingChangesDetectedInOpenApiSpecError)
       })
     })
+    context('when the oasdiff invocation itself fails', () => {
+      it('throws OpenApiSpecDiffToolFailureError rather than reporting no breaking changes', () => {
+        const diff = new FailingOasdiffCommandOpenApiSpecDiff(originalFileContent)
+
+        expect(() => {
+          diff.compare(mockConfigs)
+        }).toThrow(OpenApiSpecDiffToolFailureError)
+      })
+
+      it('distinguishes tool failure from a breaking-changes result in its message', () => {
+        const diff = new FailingOasdiffCommandOpenApiSpecDiff(originalFileContent)
+
+        expect(() => {
+          diff.compare(mockConfigs)
+        }).toThrow(/tool failure, NOT a breaking-changes result/)
+      })
+    })
+
+    context('when the spec file does not exist in the current branch', () => {
+      it('throws OpenApiSpecDiffToolFailureError', () => {
+        const diff = new ControlledBaselineOpenApiSpecDiff(originalFileContent)
+
+        expect(() => {
+          diff.compare([['api1', { outputFilepath: 'test-app/src/openapi/nonexistent.json' }]])
+        }).toThrow(OpenApiSpecDiffToolFailureError)
+      })
+    })
+
+    context('when head-branch content cannot be retrieved for a file', () => {
+      it('throws OpenApiSpecDiffToolFailureError instead of escaping with a raw error', () => {
+        const diff = new UnreadableHeadBranchOpenApiSpecDiff()
+
+        expect(() => {
+          diff.compare(mockConfigs)
+        }).toThrow(OpenApiSpecDiffToolFailureError)
+      })
+    })
+
     context('when making a non-breaking change', () => {
       it('logs the change but does not throw an error', () => {
         const diff = new ControlledBaselineOpenApiSpecDiff(originalFileContent)
