@@ -7,6 +7,7 @@ import passport from 'koa-passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import * as winston from 'winston'
 import PsychicDevtools from '../../../src/devtools/PsychicDevtools.js'
+import HttpStatusUnauthorized from '../../../src/error/http/Unauthorized.js'
 import EnvInternal from '../../../src/helpers/EnvInternal.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
 import importDefault from '../app/helpers/importDefault.js'
@@ -244,6 +245,25 @@ export default async (psy: PsychicApp) => {
     await next()
   })
 
+  // middleware used by spec/unit/server/error-boundary.spec.ts to verify that
+  // errors thrown outside the router (i.e. in middleware) are captured by
+  // psychic's error boundary and escalated to server:error hooks
+  psy.use(async (ctx, next) => {
+    switch (ctx.path) {
+      case '/middleware-error-500':
+        throw new Error('middleware error 500')
+
+      case '/middleware-error-shaped':
+        throw new Error('middleware error shaped')
+
+      case '/middleware-error-401':
+        throw new HttpStatusUnauthorized({ reason: 'custom middleware unauthorized' })
+
+      default:
+        await next()
+    }
+  })
+
   // run a callback on server boot (but before routes are processed)
   psy.on('server:init:before-middleware', () => {
     __forTestingOnly('server:init:before-middleware')
@@ -258,7 +278,9 @@ export default async (psy: PsychicApp) => {
     __forTestingOnly('server:init:after-routes')
   })
 
-  // run a callback after the config is loaded, but only if NODE_ENV=prod
+  // run any time an error escalates to server:error hooks: a 500-level error
+  // from a controller action, or an error raised outside the router (e.g. in
+  // middleware), which psychic's error boundary captures
   psy.on('server:error', (err, ctx) => {
     __forTestingOnly('server:error')
 
@@ -266,7 +288,12 @@ export default async (psy: PsychicApp) => {
       console.error(err)
     }
 
-    if (!ctx.headerSent) {
+    if (err.message === 'middleware error shaped') {
+      // used by spec/unit/server/error-boundary.spec.ts to prove that
+      // server:error hooks can shape the response on the error-boundary path
+      ctx.status = 503
+      ctx.body = { shapedBy: 'server:error' }
+    } else if (!ctx.headerSent) {
       ctx.status = 500
       ctx.body = ''
     } else if (EnvInternal.isDevelopmentOrTest) throw err
