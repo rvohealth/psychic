@@ -5,10 +5,12 @@ import { closeAllDbConnections } from '@rvoh/dream/db'
 import Koa from 'koa'
 import conditional from 'koa-conditional-get'
 import { Server } from 'node:http'
+import * as util from 'node:util'
 import logIfDevelopment from '../controller/helpers/logIfDevelopment.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import PsychicApp, { PsychicSslCredentials } from '../psychic-app/index.js'
 import PsychicRouter from '../router/index.js'
+import errorBoundaryMiddleware, { ERROR_LOGGING_DEPTH } from './helpers/errorBoundaryMiddleware.js'
 import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
@@ -43,6 +45,23 @@ export default class PsychicServer {
 
     const psychicApp = PsychicApp.getOrFail()
 
+    // outermost middleware: catches errors thrown from anything mounted
+    // after it (body parser, cors, custom `psy.use` middleware, after-routes
+    // mounts) and escalates genuine server errors to server:error hooks.
+    // Errors from controller actions are still processed by the router; the
+    // boundary only sees errors the router never caught.
+    this.koaApp.use(errorBoundaryMiddleware())
+
+    // residual error sink: the few errors Koa surfaces outside the error
+    // boundary (errors thrown after headers were sent, response-stream
+    // failures, errors the router deliberately re-throws to Koa in
+    // dev/test). Registering a listener supersedes Koa's default stderr
+    // logger, so these flow through the configured psychic logger instead
+    // of going dark.
+    this.koaApp.on('error', (err: Error) => {
+      PsychicApp.logWithLevel('error', util.inspect(err, { depth: ERROR_LOGGING_DEPTH }))
+    })
+
     this.setSecureDefaultHeaders()
 
     this.koaApp.use(async (ctx, next) => {
@@ -69,10 +88,13 @@ export default class PsychicServer {
     } catch (err) {
       const error = err as Error
       PsychicApp.logWithLevel('error', error)
-      throw new Error(`
+      throw new Error(
+        `
         Failed to boot psychic config. the error thrown was:
           ${error.message}
-      `)
+      `,
+        { cause: error },
+      )
     }
 
     for (const serverInitAfterMiddlewareHook of PsychicApp.getOrFail().specialHooks
@@ -167,9 +189,48 @@ export default class PsychicServer {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public $attached: Record<string, any> = {}
 
+  /**
+   * @internal
+   *
+   * the maximum number of milliseconds graceful shutdown is allowed
+   * to run before the process exits anyway, so that a hung
+   * `server:shutdown` hook or db close can never keep a dying
+   * process alive
+   */
+  public static readonly SHUTDOWN_TIMEOUT_MS = 15000
+
   private async shutdownAndExit() {
-    await this.stop()
-    process.exit()
+    let exitCode = 0
+
+    try {
+      await this.stopWithTimeout()
+    } catch (error) {
+      PsychicApp.logWithLevel('error', '[psychic] error during graceful shutdown:', error)
+      exitCode = 1
+    }
+
+    process.exit(exitCode)
+  }
+
+  /**
+   * @internal
+   *
+   * runs {@link PsychicServer.stop}, rejecting if it has not settled
+   * within SHUTDOWN_TIMEOUT_MS
+   */
+  private async stopWithTimeout() {
+    await Promise.race([
+      this.stop(),
+      new Promise<never>((_, reject) => {
+        setTimeout(
+          () =>
+            reject(
+              new Error(`[psychic] graceful shutdown timed out after ${PsychicServer.SHUTDOWN_TIMEOUT_MS}ms`),
+            ),
+          PsychicServer.SHUTDOWN_TIMEOUT_MS,
+        ).unref()
+      }),
+    ])
   }
 
   public async stop({
