@@ -21,6 +21,7 @@ import {
   PsychicControllerActions,
   routePath,
 } from '../router/helpers.js'
+import { psychicRouterProcessedErrorStateKey } from '../server/helpers/errorBoundaryMiddleware.js'
 import RouteManager, {
   ControllerActionRouteConfig,
   KoaMiddleware,
@@ -502,6 +503,13 @@ suggested fix:  "${convertRouteParams(path)}"
          */
         controllerInstance['koaSendStatus'](400)
       } else {
+        // mark the request so the error-boundary middleware passes anything
+        // this branch throws straight through to Koa: the deliberate
+        // dev/test re-throw of a failing server:error hook below must not
+        // run the hooks a second time, and with no hooks registered the
+        // re-thrown action error keeps Koa's default handling
+        ctx.state[psychicRouterProcessedErrorStateKey] = true
+
         PsychicApp.logWithLevel('error', util.inspect(err, { depth: ERROR_LOGGING_DEPTH }))
 
         if (PsychicApp.getOrFail().specialHooks.serverError.length) {

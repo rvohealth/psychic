@@ -5,10 +5,12 @@ import { closeAllDbConnections } from '@rvoh/dream/db'
 import Koa from 'koa'
 import conditional from 'koa-conditional-get'
 import { Server } from 'node:http'
+import * as util from 'node:util'
 import logIfDevelopment from '../controller/helpers/logIfDevelopment.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import PsychicApp, { PsychicSslCredentials } from '../psychic-app/index.js'
 import PsychicRouter from '../router/index.js'
+import errorBoundaryMiddleware, { ERROR_LOGGING_DEPTH } from './helpers/errorBoundaryMiddleware.js'
 import startPsychicServer, {
   createPsychicHttpInstance,
   StartPsychicServerOptions,
@@ -42,6 +44,23 @@ export default class PsychicServer {
     if (this.booted) return
 
     const psychicApp = PsychicApp.getOrFail()
+
+    // outermost middleware: catches errors thrown from anything mounted
+    // after it (body parser, cors, custom `psy.use` middleware, after-routes
+    // mounts) and escalates genuine server errors to server:error hooks.
+    // Errors from controller actions are still processed by the router; the
+    // boundary only sees errors the router never caught.
+    this.koaApp.use(errorBoundaryMiddleware())
+
+    // residual error sink: the few errors Koa surfaces outside the error
+    // boundary (errors thrown after headers were sent, response-stream
+    // failures, errors the router deliberately re-throws to Koa in
+    // dev/test). Registering a listener supersedes Koa's default stderr
+    // logger, so these flow through the configured psychic logger instead
+    // of going dark.
+    this.koaApp.on('error', (err: Error) => {
+      PsychicApp.logWithLevel('error', util.inspect(err, { depth: ERROR_LOGGING_DEPTH }))
+    })
 
     this.setSecureDefaultHeaders()
 
