@@ -50,6 +50,9 @@ ${INDENT}    - timetz[]
 ${INDENT}    - integer
 ${INDENT}    - integer[]
 ${INDENT}
+${INDENT}    - boolean
+${INDENT}    - boolean[]
+${INDENT}
 ${INDENT}    - decimal:
 ${INDENT}    - decimal[]:
 ${INDENT}        precision,scale is required, e.g.: volume:decimal:3,2 or volume:decimal:3,2:optional
