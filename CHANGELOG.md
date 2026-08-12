@@ -1,3 +1,7 @@
+## 3.11.2
+
+- Errors thrown while generating the per-`openapiName` OpenAPI cache during `PsychicApp.init` (e.g. a serializer misconfiguration) are now wrapped with context naming the step and the failing document — "Failed to generate the OpenAPI document 'default' during PsychicApp.init." — with the original error preserved via `{ cause }` (and its message embedded). Previously the underlying error propagated raw, with nothing tying it to OpenAPI generation or identifying which document failed. Other documents and the success path are unchanged.
+
 ## 3.11.1
 
 - Added `boolean` / `boolean[]` to the "supported types" list in `baseColumnsWithTypesDescription` (`g:resource --help` and other generators sharing this help text), which previously documented every other column shorthand type except `boolean` even though it is a fully-supported column type.

@@ -176,7 +176,16 @@ export default class PsychicApp {
    */
   private buildOpenapiCache(): void {
     Object.keys(this.openapi).forEach(openapiName => {
-      this.cacheOpenapiDoc(openapiName)
+      try {
+        this.cacheOpenapiDoc(openapiName)
+      } catch (cause) {
+        const message = cause instanceof Error ? cause.message : String(cause)
+        throw new Error(
+          `Failed to generate the OpenAPI document '${openapiName}' during PsychicApp.init. The error thrown was:
+  ${message}`,
+          { cause },
+        )
+      }
     })
   }
 

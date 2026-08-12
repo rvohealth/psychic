@@ -1,6 +1,7 @@
 import PsychicAppInitMissingApiRoot from '../../../src/error/psychic-app/init-missing-api-root.js'
 import PsychicAppInitMissingCallToLoadControllers from '../../../src/error/psychic-app/init-missing-call-to-load-controllers.js'
 import PsychicAppInitMissingRoutesCallback from '../../../src/error/psychic-app/init-missing-routes-callback.js'
+import OpenapiAppRenderer from '../../../src/openapi-renderer/app.js'
 import * as LoadControllersModule from '../../../src/psychic-app/helpers/import/importControllers.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
 import { _testOnlyClearOpenapiCache } from '../../../src/psychic-app/openapi-cache.js'
@@ -40,6 +41,95 @@ describe('PsychicApp#init', () => {
 
         await initializePsychicApp()
         process.env.SKIP_TEST_ROUTE = undefined
+      })
+    })
+  })
+
+  context('when generating an openapi document throws', () => {
+    async function initAndCatch(): Promise<Error> {
+      let thrownError: Error | undefined
+      try {
+        await initializePsychicApp()
+      } catch (err) {
+        thrownError = err as Error
+      }
+
+      expect(thrownError).toBeInstanceOf(Error)
+      return thrownError!
+    }
+
+    it('wraps the error with the failing openapiName and the PsychicApp.init step, embedding the original message and preserving the original error as cause', async () => {
+      const originalError = new Error('serializer misconfiguration')
+      vi.spyOn(OpenapiAppRenderer, '_toObject').mockImplementation(() => {
+        throw originalError
+      })
+
+      // blow away the openapi cache, so that re-running
+      // initializePsychicApp reaches the generation path
+      // (cacheOpenapiDoc early-returns for already-cached names)
+      _testOnlyClearOpenapiCache('default')
+
+      const thrownError = await initAndCatch()
+
+      expect(thrownError.message).toContain(
+        "Failed to generate the OpenAPI document 'default' during PsychicApp.init.",
+      )
+      expect(thrownError.message).toContain('serializer misconfiguration')
+      expect(thrownError.cause).toBe(originalError)
+    })
+
+    it('names the specific failing document, not just the first registered one', async () => {
+      // populate the openapi cache for every registered openapiName,
+      // then clear only 'admin', so it is the only document regenerated
+      // (cacheOpenapiDoc early-returns for already-cached names)
+      await initializePsychicApp()
+
+      vi.spyOn(OpenapiAppRenderer, '_toObject').mockImplementation(() => {
+        throw new Error('boom')
+      })
+      _testOnlyClearOpenapiCache('admin')
+
+      const thrownError = await initAndCatch()
+
+      expect(thrownError.message).toContain(
+        "Failed to generate the OpenAPI document 'admin' during PsychicApp.init.",
+      )
+    })
+
+    context('when the thrown value is not an Error instance', () => {
+      it('embeds a stringified representation of a thrown string, preserving it as cause', async () => {
+        await initializePsychicApp()
+
+        vi.spyOn(OpenapiAppRenderer, '_toObject').mockImplementation(() => {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error
+          throw 'string boom'
+        })
+        _testOnlyClearOpenapiCache('default')
+
+        const thrownError = await initAndCatch()
+
+        expect(thrownError.message).toContain(
+          "Failed to generate the OpenAPI document 'default' during PsychicApp.init.",
+        )
+        expect(thrownError.message).toContain('string boom')
+        expect(thrownError.cause).toBe('string boom')
+      })
+
+      it('wraps a thrown null without crashing the catch block, preserving it as cause', async () => {
+        await initializePsychicApp()
+
+        vi.spyOn(OpenapiAppRenderer, '_toObject').mockImplementation(() => {
+          // eslint-disable-next-line @typescript-eslint/only-throw-error
+          throw null
+        })
+        _testOnlyClearOpenapiCache('default')
+
+        const thrownError = await initAndCatch()
+
+        expect(thrownError.message).toContain(
+          "Failed to generate the OpenAPI document 'default' during PsychicApp.init.",
+        )
+        expect(thrownError.cause).toBeNull()
       })
     })
   })
