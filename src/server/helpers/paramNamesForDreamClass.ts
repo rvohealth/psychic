@@ -25,8 +25,8 @@ export default function paramNamesForDreamClass<
   RetArray = (keyof ReturnPartialType)[],
 >(dreamClass: T, { only }: ForOpts = {} as ForOpts): RetArray {
   return Array.isArray(only)
-    ? ((dreamClass.paramSafeColumnsOrFallback() as string[]).filter(column =>
+    ? ((dreamClass['paramSafeColumnsOrFallback']() as string[]).filter(column =>
         only.includes(column as (typeof only)[number]),
       ) as unknown as RetArray)
-    : (dreamClass.paramSafeColumnsOrFallback() as string[] as RetArray)
+    : (dreamClass['paramSafeColumnsOrFallback']() as string[] as RetArray)
 }
