@@ -1,3 +1,7 @@
+## 3.11.3
+
+- Psychic's two `paramSafeColumnsOrFallback` call sites now reach the member through a typed bracket-access back-door — cast to `(this: T) => string[]` and invoked with an explicit receiver — so psychic keeps compiling and linting when dream makes `Dream.paramSafeColumnsOrFallback` `private static` (dream 2.26.0, closing the explicit route back to advertising a model's whole writable surface in OpenAPI request bodies). No consumer-observable behavior change. Also corrects a stale dream line-range citation in a `paramSafeColumnNamesFromCliTokens.ts` comment. (Shipped in #532, which landed without a bump; this release carries it.)
+
 ## 3.11.2
 
 - Errors thrown while generating the per-`openapiName` OpenAPI cache during `PsychicApp.init` (e.g. a serializer misconfiguration) are now wrapped with context naming the step and the failing document — "Failed to generate the OpenAPI document 'default' during PsychicApp.init." — with the original error preserved via `{ cause }` (and its message embedded). Previously the underlying error propagated raw, with nothing tying it to OpenAPI generation or identifying which document failed. Other documents and the success path are unchanged.
