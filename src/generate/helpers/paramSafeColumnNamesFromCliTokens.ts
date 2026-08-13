@@ -3,10 +3,9 @@ import parseAttribute from './parseAttribute.js'
 /**
  * Derive the param-safe column names from the `columnsWithTypes` CLI tokens
  * supplied to `psy g:resource`. Filters the same set Dream's
- * `defaultParamSafeColumns()` filters at runtime
- * (`dream/src/Dream.ts:826-844`) — accepted deliberate duplication, since
- * the generator runs before a live model class exists (greenfield) and
- * therefore cannot introspect via `ModelClass.paramSafeColumnsOrFallback()`.
+ * `defaultParamSafeColumns()` filters at runtime — accepted deliberate
+ * duplication, since the generator runs before a live model class exists
+ * (greenfield) and therefore cannot introspect one.
  *
  * Delegates token parsing + camelCase normalization to the shared
  * `parseAttribute` helper so the casing emitted into generated controllers

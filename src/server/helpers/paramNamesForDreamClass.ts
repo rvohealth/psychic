@@ -24,9 +24,19 @@ export default function paramNamesForDreamClass<
       >,
   RetArray = (keyof ReturnPartialType)[],
 >(dreamClass: T, { only }: ForOpts = {} as ForOpts): RetArray {
+  // `paramSafeColumnsOrFallback` is a Dream internal, reached through the bracketed
+  // back-door (the same escape hatch psychic uses for `virtualAttributes`). Dream
+  // declares it `private static`, which TypeScript erases to an untyped member in
+  // `Dream.d.ts`, so the member is cast to a concrete signature here to keep the
+  // return shape checked instead of degrading to `any`. `.call` preserves `this`,
+  // which the Dream implementation relies on.
+  const paramSafeColumns = (
+    dreamClass['paramSafeColumnsOrFallback'] as unknown as (this: T) => string[]
+  ).call(dreamClass)
+
   return Array.isArray(only)
-    ? ((dreamClass.paramSafeColumnsOrFallback() as string[]).filter(column =>
+    ? (paramSafeColumns.filter(column =>
         only.includes(column as (typeof only)[number]),
       ) as unknown as RetArray)
-    : (dreamClass.paramSafeColumnsOrFallback() as string[] as RetArray)
+    : (paramSafeColumns as unknown as RetArray)
 }
