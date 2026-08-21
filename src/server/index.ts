@@ -85,13 +85,12 @@ export default class PsychicServer {
 
     try {
       await PsychicApp.getOrFail().boot()
-    } catch (err) {
-      const error = err as Error
-      PsychicApp.logWithLevel('error', error)
+    } catch (error) {
+      PsychicApp.logWithLevel('error', error as Error)
       throw new Error(
         `
         Failed to boot psychic config. the error thrown was:
-          ${error.message}
+          ${(error as Error).message}
       `,
         { cause: error },
       )
