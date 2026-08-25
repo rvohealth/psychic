@@ -151,6 +151,12 @@ export default async (psy: PsychicApp) => {
     outputFilepath: path.join('test-app', 'src', 'openapi', 'internal.openapi.json'),
   })
 
+  // exercised by the OpenAPI-derived enum sync unit specs (cross-chain and
+  // multi-site union cases live in this spec)
+  psy.set('openapi', 'enumTest', {
+    outputFilepath: path.join('test-app', 'src', 'openapi', 'enumTest.openapi.json'),
+  })
+
   psy.set('openapi', 'admin', {
     info: {
       title: 'admin',
