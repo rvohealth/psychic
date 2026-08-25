@@ -15,7 +15,7 @@ import AppEnv from '../AppEnv.js'
 export default function syncCustomEnums(psy: PsychicApp) {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
-      await DreamCLI.logger.logProgress(\`[syncCustomEnums] syncing enums to ${outfile}...\`, async () => {
+      await DreamCLI.logger.logProgress(${JSON.stringify(`[syncCustomEnums] syncing enums to ${outfile}...`)}, async () => {
         await PsychicBin.syncClientEnums(${syncClientEnumsArgs})
       })
     }
@@ -49,7 +49,7 @@ export default function syncCustomEnums(psy: PsychicApp) {
     await generateSyncEnumsInitializer('./client/howyadoin/enums.ts', 'sync-custom-enums.ts', 'mobile')
 
     const contents = (await fs.readFile(initializerPath)).toString()
-    expect(contents).toEqual(initializerContents(`'./client/howyadoin/enums.ts', 'mobile'`))
+    expect(contents).toEqual(initializerContents(`"./client/howyadoin/enums.ts", "mobile"`))
   })
 
   context('when no openapiName is provided', () => {
@@ -57,7 +57,43 @@ export default function syncCustomEnums(psy: PsychicApp) {
       await generateSyncEnumsInitializer('./client/howyadoin/enums.ts', 'sync-custom-enums.ts')
 
       const contents = (await fs.readFile(initializerPath)).toString()
-      expect(contents).toEqual(initializerContents(`'./client/howyadoin/enums.ts'`))
+      expect(contents).toEqual(initializerContents(`"./client/howyadoin/enums.ts"`))
+    })
+  })
+
+  context('when the outfile or openapiName contains quotes, backslashes, or template syntax', () => {
+    const trickyOutfile = './client/weird `path`/it\'s "quoted"\\${dir}/enums.ts'
+    const trickyOpenapiName = 'partner\'s "mobile"\\v1'
+
+    it('escapes the syncClientEnums arguments so they round-trip the exact strings', async () => {
+      await generateSyncEnumsInitializer(trickyOutfile, 'sync-custom-enums.ts', trickyOpenapiName)
+
+      const contents = (await fs.readFile(initializerPath)).toString()
+      const argsMatch = contents.match(/PsychicBin\.syncClientEnums\((.*)\)/)
+      expect(argsMatch).not.toBeNull()
+      // the embedded literals must decode back to the exact original strings
+      expect(JSON.parse(`[${argsMatch![1]}]`)).toEqual([trickyOutfile, trickyOpenapiName])
+    })
+
+    it('escapes the outfile embedded in the log-progress message', async () => {
+      await generateSyncEnumsInitializer(trickyOutfile, 'sync-custom-enums.ts', trickyOpenapiName)
+
+      const contents = (await fs.readFile(initializerPath)).toString()
+      const logMatch = contents.match(/logProgress\((.*), async \(\) => \{/)
+      expect(logMatch).not.toBeNull()
+      expect(JSON.parse(logMatch![1])).toEqual(`[syncCustomEnums] syncing enums to ${trickyOutfile}...`)
+    })
+
+    it('leaves the rest of the generated initializer intact', async () => {
+      await generateSyncEnumsInitializer(trickyOutfile, 'sync-custom-enums.ts', trickyOpenapiName)
+
+      const contents = (await fs.readFile(initializerPath)).toString()
+      expect(contents).toEqual(
+        initializerContents(
+          `${JSON.stringify(trickyOutfile)}, ${JSON.stringify(trickyOpenapiName)}`,
+          trickyOutfile,
+        ),
+      )
     })
   })
 
@@ -73,7 +109,7 @@ export default function syncCustomEnums(psy: PsychicApp) {
 
         expect(confirm).not.toHaveBeenCalled()
         expect((await fs.readFile(initializerPath)).toString()).toEqual(
-          initializerContents(`'./client/howyadoin/enums.ts', 'mobile'`),
+          initializerContents(`"./client/howyadoin/enums.ts", "mobile"`),
         )
       })
     })
@@ -95,7 +131,7 @@ export default function syncCustomEnums(psy: PsychicApp) {
 
         expect(confirm).toHaveBeenCalledWith([expect.stringContaining('sync-custom-enums.ts') as string])
         expect((await fs.readFile(initializerPath)).toString()).toEqual(
-          initializerContents(`'./client/howyadoin/enums.ts', 'internal'`),
+          initializerContents(`"./client/howyadoin/enums.ts", "internal"`),
         )
       })
 
@@ -110,7 +146,7 @@ export default function syncCustomEnums(psy: PsychicApp) {
         )
 
         expect((await fs.readFile(initializerPath)).toString()).toEqual(
-          initializerContents(`'./client/howyadoin/enums.ts', 'mobile'`),
+          initializerContents(`"./client/howyadoin/enums.ts", "mobile"`),
         )
       })
 
@@ -132,7 +168,7 @@ export default function syncCustomEnums(psy: PsychicApp) {
           expect(confirm).not.toHaveBeenCalled()
           await fs.chmod(initializerPath, 0o600)
           expect((await fs.readFile(initializerPath)).toString()).toEqual(
-            initializerContents(`'./client/howyadoin/enums.ts', 'mobile'`),
+            initializerContents(`"./client/howyadoin/enums.ts", "mobile"`),
           )
         })
       })
@@ -146,7 +182,7 @@ export default function syncCustomEnums(psy: PsychicApp) {
         ).rejects.toThrow(CannotConfirmOverwriteError)
 
         expect((await fs.readFile(initializerPath)).toString()).toEqual(
-          initializerContents(`'./client/howyadoin/enums.ts', 'mobile'`),
+          initializerContents(`"./client/howyadoin/enums.ts", "mobile"`),
         )
       })
     })

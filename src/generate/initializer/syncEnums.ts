@@ -35,7 +35,16 @@ export default async function generateSyncEnumsInitializer(
   const destDir = path.join(psychicPath('conf'), 'initializers')
   const initializerPath = path.join(destDir, `${initializerFilenameWithoutExtension}.ts`)
 
-  const syncClientEnumsArgs = openapiName === undefined ? `'${outfile}'` : `'${outfile}', '${openapiName}'`
+  // outfile and openapiName are embedded in generated source, so they are
+  // emitted as JSON string literals (valid JS string literals) rather than
+  // hand-built quoted strings: a quote, backslash, backtick, or dollar-brace in
+  // either must round-trip instead of producing a syntactically broken or
+  // misbehaving initializer
+  const syncClientEnumsArgs =
+    openapiName === undefined
+      ? JSON.stringify(outfile)
+      : `${JSON.stringify(outfile)}, ${JSON.stringify(openapiName)}`
+  const logProgressMessage = JSON.stringify(`[${camelized}] syncing enums to ${outfile}...`)
 
   const contents = `\
 import { DreamCLI } from '@rvoh/dream/system'
@@ -46,7 +55,7 @@ import AppEnv from '../AppEnv.js'
 export default function ${camelized}(psy: PsychicApp) {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
-      await DreamCLI.logger.logProgress(\`[${camelized}] syncing enums to ${outfile}...\`, async () => {
+      await DreamCLI.logger.logProgress(${logProgressMessage}, async () => {
         await PsychicBin.syncClientEnums(${syncClientEnumsArgs})
       })
     }
