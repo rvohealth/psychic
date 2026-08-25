@@ -308,18 +308,18 @@ ${INDENT}  pnpm psy setup:sync:enums --openapi-name=default --output-file=../cli
         async ({
           outputFile,
           openapiName,
-          initializerName,
+          initializerFilename,
         }: {
           outputFile: string
           openapiName: string
-          initializerName: string
+          initializerFilename?: string
         }) => {
           await initializePsychicApp({
             bypassDreamIntegrityChecks: true,
             bypassDbConnectionsDuringInit: true,
           })
           validateOpenapiName(openapiName)
-          await generateSyncEnumsInitializer(outputFile, initializerName, openapiName)
+          await generateSyncEnumsInitializer(outputFile, initializerFilename, openapiName)
           process.exit()
         },
       )
@@ -471,20 +471,16 @@ ${INDENT}  pnpm psy setup:sync:openapi-typescript ./src/openapi/openapi.json ../
           openapiFilepath: string,
           outfile: string,
           {
-            initializerName,
+            initializerFilename,
           }: {
-            initializerName: string
+            initializerFilename?: `${string}.ts`
           },
         ) => {
           await initializePsychicApp({
             bypassDreamIntegrityChecks: true,
             bypassDbConnectionsDuringInit: true,
           })
-          await generateSyncOpenapiTypescriptInitializer(
-            openapiFilepath,
-            outfile,
-            initializerName as `${string}.d.ts`,
-          )
+          await generateSyncOpenapiTypescriptInitializer(openapiFilepath, outfile, initializerFilename)
           process.exit()
         },
       )
