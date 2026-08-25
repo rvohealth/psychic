@@ -159,11 +159,15 @@ function baseDbType(dreamColumnInfo: DreamColumnInfo) {
  * Returns the enum values the rendered spec actually exposes for an
  * enum-backed column:
  *
- * - array columns: a serializer override carries its enum at `items.enum`,
- *   and the override's whole `items` object replaces the model-derived
- *   `items` via the trailing spread in `dreamColumnOpenapiShape` — so the
- *   spec-visible set is the override's `items.enum` when present, else the
- *   column's full enum values
+ * - array columns with an `items:` override: the override's whole `items`
+ *   object replaces the model-derived, enum-bearing `items` via the trailing
+ *   spread in `dreamColumnOpenapiShape` — so the spec-visible set is the
+ *   override's `items.enum` when present, else the top-level `enum:`
+ *   override (which the spread still exposes), else nothing at all
+ * - array columns without an `items:` override: a top-level `enum:` override
+ *   is fed into the rendered `items.enum` by
+ *   `singularAttributeOpenapiShape`, so it wins, else the column's full enum
+ *   values
  * - scalar columns: the explicit top-level `enum:` override wins via the
  *   trailing spread, else the column's full enum values
  *
@@ -175,12 +179,14 @@ function specVisibleEnumValues(
   dreamColumnInfo: DreamColumnInfo,
   openapiObject: OpenapiSchemaBody,
 ): readonly (string | null)[] {
+  const topLevelEnum = (openapiObject as OpenapiSchemaString).enum
+
   if (dreamColumnInfo.isArray) {
-    const itemsEnum = (openapiObject as { items?: { enum?: (string | null)[] } }).items?.enum
-    return itemsEnum ?? dreamColumnInfo.enumValues ?? []
+    const itemsOverride = (openapiObject as { items?: { enum?: (string | null)[] } }).items
+    if (itemsOverride) return itemsOverride.enum ?? topLevelEnum ?? []
+    return topLevelEnum ?? dreamColumnInfo.enumValues ?? []
   }
 
-  const topLevelEnum = (openapiObject as OpenapiSchemaString).enum
   return topLevelEnum ?? dreamColumnInfo.enumValues ?? []
 }
 

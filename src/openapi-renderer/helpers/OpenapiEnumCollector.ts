@@ -26,12 +26,20 @@ export default class OpenapiEnumCollector {
   /**
    * Records the spec-visible values rendered for an enum-backed Dream column.
    *
+   * A site that renders no values (e.g. an override that hides the enum
+   * entirely) records nothing: an enum is only registered once at least one
+   * of its values is actually visible somewhere in the spec, so it never
+   * produces an empty export.
+   *
    * @param dbType - the column's pg type name (a trailing `[]` marking an
    * array column is stripped)
    * @param values - the values the spec renders at this site (never the
    * `null`-augmented rendered array)
    */
   public collect(dbType: string, values: readonly (string | null)[]): void {
+    const stringValues = values.filter(value => typeof value === 'string')
+    if (!stringValues.length) return
+
     const enumName = dbType.replace('[]', '')
 
     let valueSet = this.collected.get(enumName)
@@ -40,8 +48,8 @@ export default class OpenapiEnumCollector {
       this.collected.set(enumName, valueSet)
     }
 
-    for (const value of values) {
-      if (typeof value === 'string') valueSet.add(value)
+    for (const value of stringValues) {
+      valueSet.add(value)
     }
   }
 

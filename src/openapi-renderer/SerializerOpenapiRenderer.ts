@@ -173,6 +173,18 @@ export default class SerializerOpenapiRenderer {
     let referencedSerializers: (DreamModelSerializerType | SimpleObjectSerializerType)[] = []
     let renderedOpenapi: Record<string, OpenapiSchemaBodyShorthand> = {}
 
+    // a later declaration of the same output key replaces the earlier
+    // declaration's rendered schema, so enum collection cannot happen
+    // immediately: values hidden by the winning declaration would leak into
+    // the collector. Each declaration instead collects into its own buffer,
+    // and only buffers whose rendered schema survives in the final property
+    // map are flushed into the real collector after the reduce completes.
+    const pendingEnumCollections: {
+      outputAttributeName: string
+      buffer: OpenapiEnumCollector
+      schema: OpenapiSchemaBodyShorthand
+    }[] = []
+
     renderedOpenapi = this.serializerBuilder['attributes'].reduce((accumulator, attribute) => {
       const attributeType = attribute.type
       let newlyReferencedSerializers: (DreamModelSerializerType | SimpleObjectSerializerType)[] = []
@@ -237,6 +249,8 @@ export default class SerializerOpenapiRenderer {
               target = DataTypeForOpenapi
             }
 
+            const declarationEnumCollector = this.enumCollector ? new OpenapiEnumCollector() : undefined
+
             const resolvedSchema = allSerializersToRefsInOpenapi(
               (target as typeof Dream)?.isDream
                 ? dreamColumnOpenapiShape(
@@ -246,7 +260,7 @@ export default class SerializerOpenapiRenderer {
                     openapi,
                     {
                       suppressResponseEnums: this.suppressResponseEnums,
-                      enumCollector: this.enumCollector,
+                      enumCollector: declarationEnumCollector,
                     },
                   )
                 : openapiShorthandToOpenapi(openapi as any),
@@ -256,25 +270,37 @@ export default class SerializerOpenapiRenderer {
               attributeType === 'delegatedAttribute' &&
               ((attribute.options as { optional?: boolean }).optional ?? delegatedAssociationOptional)
 
+            let finalSchema: OpenapiSchemaBodyShorthand
+
             if (optional && !openapiSchemaIncludesNull(resolvedSchema)) {
               const schemaRecord = resolvedSchema as Record<string, any>
               if (typeof schemaRecord.type === 'string') {
-                accumulator[outputAttributeName] = {
+                finalSchema = {
                   ...schemaRecord,
                   type: [schemaRecord.type, 'null'],
                 } as OpenapiSchemaBodyShorthand
               } else if (Array.isArray(schemaRecord.type)) {
-                accumulator[outputAttributeName] = {
+                finalSchema = {
                   ...schemaRecord,
                   type: [...(schemaRecord.type as string[]), 'null'],
                 } as OpenapiSchemaBodyShorthand
               } else {
-                accumulator[outputAttributeName] = {
+                finalSchema = {
                   anyOf: [resolvedSchema, NULL_OBJECT_OPENAPI],
                 }
               }
             } else {
-              accumulator[outputAttributeName] = resolvedSchema
+              finalSchema = resolvedSchema
+            }
+
+            accumulator[outputAttributeName] = finalSchema
+
+            if (declarationEnumCollector) {
+              pendingEnumCollections.push({
+                outputAttributeName,
+                buffer: declarationEnumCollector,
+                schema: finalSchema,
+              })
             }
 
             return accumulator
@@ -401,6 +427,22 @@ export default class SerializerOpenapiRenderer {
 
       return accumulator
     }, renderedOpenapi)
+
+    const enumCollector = this.enumCollector
+    if (enumCollector) {
+      for (const pending of pendingEnumCollections) {
+        // reference identity with the final property map proves this
+        // declaration's rendered schema is the one the spec exposes; any
+        // buffer whose schema was shadowed by a later same-key declaration
+        // (of any attribute type) is dropped unflushed
+        if (renderedOpenapi[pending.outputAttributeName] === pending.schema) {
+          const enumMap = pending.buffer.toEnumMap()
+          for (const enumName of Object.keys(enumMap)) {
+            enumCollector.collect(enumName, enumMap[enumName] ?? [])
+          }
+        }
+      }
+    }
 
     return {
       referencedSerializers: uniq(referencedSerializers, serializer => (serializer as any).globalName),

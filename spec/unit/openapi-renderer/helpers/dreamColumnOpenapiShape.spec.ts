@@ -3,6 +3,7 @@ import {
   dreamColumnOpenapiShape,
   UseCustomOpenapiForJson,
 } from '../../../../src/openapi-renderer/helpers/dreamColumnOpenapiShape.js'
+import OpenapiEnumCollector from '../../../../src/openapi-renderer/helpers/OpenapiEnumCollector.js'
 import Availability from '../../../../test-app/src/app/models/Availability.js'
 import User from '../../../../test-app/src/app/models/User.js'
 import { PetTreatsEnumValues, SpeciesTypesEnumValues } from '../../../../test-app/src/types/db.js'
@@ -620,6 +621,99 @@ describe('dreamAttributeOpenapiShape', () => {
         }
 
         expect(openApiShape).toEqual(expectedOpenapiShape)
+      })
+    })
+
+    context('with an enumCollector', () => {
+      context('scalar enum column', () => {
+        it('collects the full pg value set when there is no override, without the rendered null', () => {
+          const enumCollector = new OpenapiEnumCollector()
+          dreamColumnOpenapiShape('Test', User, 'species', undefined, { enumCollector })
+
+          expect(enumCollector.toEnumMap()).toEqual({
+            species_types_enum: [...SpeciesTypesEnumValues].sort(),
+          })
+        })
+
+        it('collects only the subset exposed by a top-level enum: override', () => {
+          const enumCollector = new OpenapiEnumCollector()
+          dreamColumnOpenapiShape(
+            'Test',
+            User,
+            'species',
+            { type: ['string', 'null'], enum: ['cat'] },
+            { enumCollector },
+          )
+
+          expect(enumCollector.toEnumMap()).toEqual({ species_types_enum: ['cat'] })
+        })
+      })
+
+      context('array enum column', () => {
+        it('collects the full pg value set when there is no override', () => {
+          const enumCollector = new OpenapiEnumCollector()
+          dreamColumnOpenapiShape('Test', User, 'favoriteTreats', undefined, { enumCollector })
+
+          expect(enumCollector.toEnumMap()).toEqual({
+            pet_treats_enum: [...PetTreatsEnumValues].sort(),
+          })
+        })
+
+        it('collects only the subset exposed by an items-level enum: override', () => {
+          const enumCollector = new OpenapiEnumCollector()
+          dreamColumnOpenapiShape(
+            'Test',
+            User,
+            'favoriteTreats',
+            { type: ['array', 'null'], items: { type: 'string', enum: ['snick snowcks'] } },
+            { enumCollector },
+          )
+
+          expect(enumCollector.toEnumMap()).toEqual({ pet_treats_enum: ['snick snowcks'] })
+        })
+
+        context('items: override without an enum', () => {
+          it('collects nothing, mirroring the enum-free rendered spec', () => {
+            const enumCollector = new OpenapiEnumCollector()
+            const openApiShape = dreamColumnOpenapiShape(
+              'Test',
+              User,
+              'favoriteTreats',
+              { type: ['array', 'null'], items: { type: 'string' } },
+              { enumCollector },
+            )
+
+            // the override's whole `items` object replaces the model-derived
+            // `items`, so the rendered spec exposes no enum values at all
+            expect(openApiShape).toEqual({
+              type: ['array', 'null'],
+              items: { type: 'string' },
+            })
+            expect(enumCollector.toEnumMap()).toEqual({})
+          })
+        })
+
+        context('top-level enum: override', () => {
+          it('collects only the override subset the renderer feeds into items.enum', () => {
+            const enumCollector = new OpenapiEnumCollector()
+            // a top-level `enum:` on an array column is not expressible in
+            // the shorthand types, but the renderer honors it at runtime by
+            // feeding it into the rendered `items.enum`
+            const openApiShape = dreamColumnOpenapiShape(
+              'Test',
+              User,
+              'favoriteTreats',
+              { type: ['array', 'null'], enum: ['snick snowcks'] } as unknown as OpenapiSchemaBody,
+              { enumCollector },
+            )
+
+            expect((openApiShape as { items?: unknown }).items).toEqual({
+              type: 'string',
+              enum: ['snick snowcks'],
+            })
+            expect(enumCollector.toEnumMap()).toEqual({ pet_treats_enum: ['snick snowcks'] })
+          })
+        })
       })
     })
   })
