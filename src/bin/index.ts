@@ -2,6 +2,7 @@ import { CliFileWriter, DreamBin, DreamCLI } from '@rvoh/dream/system'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import ASTPsychicTypesBuilder from '../cli/helpers/ASTPsychicTypesBuilder.js'
+import validateOpenapiName from '../cli/helpers/validateOpenapiName.js'
 import generateController from '../generate/controller.js'
 import generateResource from '../generate/resource.js'
 import EnvInternal from '../helpers/EnvInternal.js'
@@ -158,8 +159,14 @@ export default class PsychicBin {
    * enum that actually appears in that spec's rendered surface. The enum
    * collection itself renders the spec in memory and requires no database
    * connection.
+   *
+   * An unregistered `openapiName` throws before anything is written —
+   * otherwise the render would silently produce a skeleton document and
+   * overwrite the client enums file with an empty module.
    */
   public static async syncClientEnums(outfile: string, openapiName: string = 'default') {
+    validateOpenapiName(openapiName)
+
     DreamCLI.logger.logStartProgress(`syncing client enums...`)
 
     const enumsStr = enumsFileStr(openapiName)

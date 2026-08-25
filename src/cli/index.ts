@@ -12,6 +12,7 @@ import generateOpenapiZustandBindings from '../generate/openapi/zustandBindings.
 import generateResource from '../generate/resource.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import Watcher from '../watcher/Watcher.js'
+import validateOpenapiName from './helpers/validateOpenapiName.js'
 
 const INDENT = '                  '
 
@@ -281,37 +282,44 @@ ${INDENT}  V1/Admin/Reports        # src/app/controllers/V1/Admin/ReportsControl
     program
       .command('setup:sync:enums')
       .description(
-        `Generates an initializer that automatically exports all Dream enum types to a TypeScript file during sync. This is a one-time setup command — once the initializer exists, enums are synced automatically on every \`pnpm psy sync\`.
+        `Generates an initializer that automatically exports the enum types appearing in one of your app's OpenAPI specs to a TypeScript file during sync. This is a one-time setup command — once the initializer exists, enums are synced automatically on every \`pnpm psy sync\`.
 ${INDENT}
-${INDENT}Use this to share enum types between your backend and frontend without manual duplication.
+${INDENT}Use this to share enum types between your backend and frontend without manual duplication. Only enums that actually appear in the selected OpenAPI spec's rendered surface are exported, and each carries only the values that spec renders.
 ${INDENT}
-${INDENT}**WARNING**: This currently syncs **all** database enums to the specified front end, which may not be appropriate for all use cases. It's on our roadmap to base this on specified OpenAPI specs.
+${INDENT}Re-running with different settings prompts before overwriting the existing initializer. Note: re-running with a different --initializer-filename generates a second initializer without prompting, leaving the previous one active — remove the old initializer manually to avoid double-syncing.
 ${INDENT}
 ${INDENT}Example:
-${INDENT}  pnpm psy setup:sync:enums ../client/src/api/enums.ts`,
+${INDENT}  pnpm psy setup:sync:enums --openapi-name=default --output-file=../client/src/api/enums.ts`,
       )
-      .argument(
-        '<outfile>',
+      .requiredOption(
+        '--output-file <outputFile>',
         'the output path (relative to backend root) where enum types will be written on each sync. Should end with .ts, e.g., "../client/src/api/enums.ts"',
+      )
+      .option(
+        '--openapi-name <openapiName>',
+        "the name of the registered OpenAPI spec whose enums will be exported, e.g. 'mobile'. Defaults to 'default' (the unnamed psy.set('openapi', ...) registration)",
+        'default',
       )
       .option(
         '--initializer-filename <initializerFilename>',
         'custom filename for the generated initializer in src/conf/initializers/. Defaults to `sync-enums.ts`',
       )
       .action(
-        async (
-          outfile: string,
-          {
-            initializerName,
-          }: {
-            initializerName: string
-          },
-        ) => {
+        async ({
+          outputFile,
+          openapiName,
+          initializerName,
+        }: {
+          outputFile: string
+          openapiName: string
+          initializerName: string
+        }) => {
           await initializePsychicApp({
             bypassDreamIntegrityChecks: true,
             bypassDbConnectionsDuringInit: true,
           })
-          await generateSyncEnumsInitializer(outfile, initializerName)
+          validateOpenapiName(openapiName)
+          await generateSyncEnumsInitializer(outputFile, initializerName, openapiName)
           process.exit()
         },
       )
