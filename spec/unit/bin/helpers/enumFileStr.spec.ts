@@ -1,9 +1,8 @@
 import enumsFileStr from '../../../../src/bin/helpers/enumsFileStr.js'
 
 describe('enumFileStr', () => {
-  it('alphabetically sorts enums', async () => {
-    console.log(await enumsFileStr())
-    expect(await enumsFileStr()).toEqual(
+  it('alphabetically sorts enums', () => {
+    expect(enumsFileStr()).toEqual(
       expect.stringContaining(`\
 "
   Dear pathetic humans,
@@ -24,5 +23,11 @@ export const BalloonColorsEnumValues = [
 export type BalloonColorsEnumValues = (typeof BalloonColorsEnumValues)[number]\
 `),
     )
+  })
+
+  it('only exports enums that appear in the selected OpenAPI spec surface', () => {
+    // balloon_types_enum exists in the database, but no site in the default
+    // spec renders it, so it is not exported
+    expect(enumsFileStr()).not.toEqual(expect.stringContaining('BalloonTypesEnumValues'))
   })
 })

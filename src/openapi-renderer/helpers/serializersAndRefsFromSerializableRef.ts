@@ -6,15 +6,18 @@ import {
 import { DreamModelSerializerType, SerializerCasing, SimpleObjectSerializerType } from '@rvoh/dream/types'
 import { sortBy, uniq } from '@rvoh/dream/utils'
 import SerializerOpenapiRenderer from '../SerializerOpenapiRenderer.js'
+import OpenapiEnumCollector from './OpenapiEnumCollector.js'
 
 export default function serializersAndRefsFromSerializableRef(
   serializableRef: OpenapiSchemaShorthandExpressionSerializableRef,
   {
     casing = 'camel',
     suppressResponseEnums = false,
+    enumCollector = undefined,
   }: {
     casing?: SerializerCasing
     suppressResponseEnums?: boolean
+    enumCollector?: OpenapiEnumCollector | undefined
   } = {},
 ): {
   serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[]
@@ -29,6 +32,7 @@ export default function serializersAndRefsFromSerializableRef(
       ref: new SerializerOpenapiRenderer(serializer, {
         casing,
         suppressResponseEnums,
+        enumCollector,
       }).serializerRef,
     })),
     ({ ref }) => ref.$ref,

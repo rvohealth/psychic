@@ -32,12 +32,14 @@ import ObjectSerializerRendersOneAndManyRequireClassType from '../error/openapi/
 import allSerializersFromHandWrittenOpenapi from './helpers/allSerializersFromHandWrittenOpenapi.js'
 import allSerializersToRefsInOpenapi from './helpers/allSerializersToRefsInOpenapi.js'
 import { dreamColumnOpenapiShape } from './helpers/dreamColumnOpenapiShape.js'
+import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
 import openapiShorthandToOpenapi from './helpers/openapiShorthandToOpenapi.js'
 const NULL_OBJECT_OPENAPI: OpenapiSchemaBody = { type: 'null' }
 
 export default class SerializerOpenapiRenderer {
   private casing: SerializerCasing
   private suppressResponseEnums: boolean
+  private enumCollector: OpenapiEnumCollector | undefined
   private allOfSiblings: OpenapiSchemaBodyShorthand[] = []
 
   constructor(
@@ -45,15 +47,18 @@ export default class SerializerOpenapiRenderer {
     {
       casing = 'camel',
       suppressResponseEnums = false,
+      enumCollector = undefined,
     }: {
       casing?: SerializerCasing
       suppressResponseEnums?: boolean
+      enumCollector?: OpenapiEnumCollector | undefined
     } = {},
   ) {
     if (!DreamApp.system.isDreamSerializer(this.serializer))
       throw new NonSerializerPassedToSerializerOpenapiRenderer(this.serializer)
     this.casing = casing
     this.suppressResponseEnums = suppressResponseEnums
+    this.enumCollector = enumCollector
   }
 
   public get globalName(): string {
@@ -241,6 +246,7 @@ export default class SerializerOpenapiRenderer {
                     openapi,
                     {
                       suppressResponseEnums: this.suppressResponseEnums,
+                      enumCollector: this.enumCollector,
                     },
                   )
                 : openapiShorthandToOpenapi(openapi as any),

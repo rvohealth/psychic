@@ -152,10 +152,17 @@ export default class PsychicBin {
     DreamCLI.logger.logEndProgress()
   }
 
-  public static async syncClientEnums(outfile: string) {
+  /**
+   * Syncs the client enums file for the OpenAPI spec registered under
+   * `openapiName` (default: `'default'`), writing one exported const per pg
+   * enum that actually appears in that spec's rendered surface. The enum
+   * collection itself renders the spec in memory and requires no database
+   * connection.
+   */
+  public static async syncClientEnums(outfile: string, openapiName: string = 'default') {
     DreamCLI.logger.logStartProgress(`syncing client enums...`)
 
-    const enumsStr = await enumsFileStr()
+    const enumsStr = enumsFileStr(openapiName)
 
     try {
       const dir = path.dirname(outfile)

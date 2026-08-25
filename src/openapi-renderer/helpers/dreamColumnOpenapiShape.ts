@@ -10,6 +10,7 @@ import { DbTypes } from '@rvoh/dream/types'
 import { SerializingPlainPropertyWithoutOpenapiShape } from '../../error/openapi/SerializingPlainPropertyWithoutOpenapiShape.js'
 import UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute from '../../error/openapi/UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute.js'
 import OpenapiSegmentExpander from '../body-segment.js'
+import OpenapiEnumCollector from './OpenapiEnumCollector.js'
 import openapiShorthandToOpenapi from './openapiShorthandToOpenapi.js'
 
 export interface VirtualAttributeStatement {
@@ -48,9 +49,11 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
   {
     suppressResponseEnums = false,
     allowGenericJson = false,
+    enumCollector = undefined,
   }: {
     suppressResponseEnums?: boolean
     allowGenericJson?: boolean
+    enumCollector?: OpenapiEnumCollector | undefined
   } = {},
 ): OpenapiSchemaBody {
   if (dreamClass.isVirtualColumn(column)) {
@@ -68,6 +71,10 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
             casing: 'camel',
             suppressResponseEnums: false,
             legacyImplicitRequestBodyParams: false,
+            // a nested `for:` sentinel inside a virtual attribute's `type`
+            // reaches enum-backed columns through this hand-built expander,
+            // so the collector must ride along here as well
+            enumCollector,
           },
           target: 'request',
         }).render().openapi,
@@ -102,6 +109,16 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
   const openapiObject = openapiShorthandToOpenapi((openapi ?? {}) as any)
+
+  // collect the spec-visible enum values for this column. Collection is
+  // upstream of `suppressResponseEnums` (suppressed specs still collect
+  // their real values) and downstream of serializer `enum:` overrides
+  // (values hidden by an override are never collected). The recorded set is
+  // never the rendered `null`-augmented array.
+  if (dreamColumnInfo.enumValues && enumCollector) {
+    enumCollector.collect(dreamColumnInfo.dbType, specVisibleEnumValues(dreamColumnInfo, openapiObject))
+  }
+
   const singleType = singularAttributeOpenapiShape(
     source,
     column,
@@ -134,6 +151,37 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
 
 function baseDbType(dreamColumnInfo: DreamColumnInfo) {
   return dreamColumnInfo.dbType.replace('[]', '')
+}
+
+/**
+ * @internal
+ *
+ * Returns the enum values the rendered spec actually exposes for an
+ * enum-backed column:
+ *
+ * - array columns: a serializer override carries its enum at `items.enum`,
+ *   and the override's whole `items` object replaces the model-derived
+ *   `items` via the trailing spread in `dreamColumnOpenapiShape` — so the
+ *   spec-visible set is the override's `items.enum` when present, else the
+ *   column's full enum values
+ * - scalar columns: the explicit top-level `enum:` override wins via the
+ *   trailing spread, else the column's full enum values
+ *
+ * Presence semantics intentionally mirror the rendered output's spread
+ * behavior (an explicitly-provided override replaces the model-derived set,
+ * even when empty).
+ */
+function specVisibleEnumValues(
+  dreamColumnInfo: DreamColumnInfo,
+  openapiObject: OpenapiSchemaBody,
+): readonly (string | null)[] {
+  if (dreamColumnInfo.isArray) {
+    const itemsEnum = (openapiObject as { items?: { enum?: (string | null)[] } }).items?.enum
+    return itemsEnum ?? dreamColumnInfo.enumValues ?? []
+  }
+
+  const topLevelEnum = (openapiObject as OpenapiSchemaString).enum
+  return topLevelEnum ?? dreamColumnInfo.enumValues ?? []
 }
 
 function singularAttributeOpenapiShape(

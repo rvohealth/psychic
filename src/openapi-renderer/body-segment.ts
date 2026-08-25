@@ -30,6 +30,7 @@ import isArrayParamName from '../helpers/isArrayParamName.js'
 import { OpenapiEndpointResponse, OpenapiRenderOpts, OpenapiResponses } from './endpoint.js'
 import buildDreamRequestBodyShape from './helpers/buildDreamRequestBodyShape.js'
 import isBlankDescription from './helpers/isBlankDescription.js'
+import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
 import maybeNullOpenapiShorthandToOpenapiShorthand from './helpers/maybeNullOpenapiShorthandToOpenapiShorthand.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import schemaToRef from './helpers/schemaToRef.js'
@@ -93,6 +94,7 @@ export default class OpenapiSegmentExpander {
   private casing: SerializerCasing
   private suppressResponseEnums: boolean
   private legacyImplicitRequestBodyParams: boolean
+  private enumCollector: OpenapiEnumCollector | undefined
   private target: OpenapiBodyTarget
   private source: string
 
@@ -110,6 +112,7 @@ export default class OpenapiSegmentExpander {
     this.casing = renderOpts.casing
     this.suppressResponseEnums = renderOpts.suppressResponseEnums
     this.legacyImplicitRequestBodyParams = renderOpts.legacyImplicitRequestBodyParams
+    this.enumCollector = renderOpts.enumCollector
     this.target = target
     this.source = source ?? 'unknown'
   }
@@ -575,6 +578,7 @@ The following values will be allowed:
     const serializerRef = new SerializerOpenapiRenderer(serializer, {
       casing: this.casing,
       suppressResponseEnums: this.suppressResponseEnums,
+      enumCollector: this.enumCollector,
     }).serializerRef
 
     if (serializerRefBodySegment.many) {
@@ -647,6 +651,7 @@ The following values will be allowed:
         required: ref.required,
         combining: ref.combining,
         legacyImplicitRequestBodyParams: this.legacyImplicitRequestBodyParams,
+        enumCollector: this.enumCollector,
       },
       this.source,
     )
@@ -660,6 +665,7 @@ The following values will be allowed:
     const { serializers, refs } = serializersAndRefsFromSerializableRef(serializableRef, {
       casing: this.casing,
       suppressResponseEnums: this.suppressResponseEnums,
+      enumCollector: this.enumCollector,
     })
 
     if (serializers.length === 0)
