@@ -1,7 +1,32 @@
 import fs from 'node:fs/promises'
+import { CannotConfirmOverwriteError } from '../../../../src/cli/helpers/confirmOverwrite.js'
+import generateInitializer from '../../../../src/generate/helpers/syncOpenapiTypescript/generateInitializer.js'
 import generateSyncOpenapiTypescriptInitializer from '../../../../src/generate/initializer/syncOpenapiTypescript.js'
 
 describe('generateSyncOpenapiTypescriptInitializer', () => {
+  const initializerPath = 'test-app/src/conf/initializers/sync-openapi-typescript.ts'
+
+  function initializerContents(openapiFilepath: string, outfile: string) {
+    return `\
+import { DreamCLI } from '@rvoh/dream/system'
+import { PsychicApp } from "@rvoh/psychic"
+import AppEnv from '../AppEnv.js'
+
+export default (psy: PsychicApp) => {
+  psy.on('cli:sync', async () => {
+    if (AppEnv.isDevelopmentOrTest) {
+      await DreamCLI.logger.logProgress(\`[sync-openapi-typescript] extracting types from ${openapiFilepath} to ${outfile}...\`, async () => {
+        await DreamCLI.spawn('pnpm', { args: ["exec","openapi-typescript","${openapiFilepath}","-o","${outfile}"] })
+      })
+    }
+  })
+}`
+  }
+
+  beforeAll(() => {
+    process.env.BYPASS_CLI_PROMPT = '1'
+  })
+
   beforeEach(async () => {
     await cleanup()
   })
@@ -30,19 +55,81 @@ describe('generateSyncOpenapiTypescriptInitializer', () => {
     const contents = (
       await fs.readFile('test-app/src/conf/initializers/sync-openapi-typescript.ts')
     ).toString()
-    expect(contents).toEqual(`\
-import { DreamCLI } from '@rvoh/dream/system'
-import { PsychicApp } from "@rvoh/psychic"
-import AppEnv from '../AppEnv.js'
-
-export default (psy: PsychicApp) => {
-  psy.on('cli:sync', async () => {
-    if (AppEnv.isDevelopmentOrTest) {
-      await DreamCLI.logger.logProgress(\`[sync-openapi-typescript] extracting types from ./openapi.json to ./sync-custom-openapi-typescript.d.ts...\`, async () => {
-        await DreamCLI.spawn('pnpm', { args: ["exec","openapi-typescript","./openapi.json","-o","./sync-custom-openapi-typescript.d.ts"] })
-      })
-    }
+    expect(contents).toEqual(initializerContents('./openapi.json', './sync-custom-openapi-typescript.d.ts'))
   })
-}`)
+
+  context('when the initializer file already exists', () => {
+    context('with byte-identical contents', () => {
+      it('silently no-ops without prompting', async () => {
+        await generateInitializer('./openapi.json', './types.d.ts', 'sync-openapi-typescript.ts')
+
+        const confirm = vi.fn()
+        await generateInitializer('./openapi.json', './types.d.ts', 'sync-openapi-typescript.ts', {
+          confirm,
+        })
+
+        expect(confirm).not.toHaveBeenCalled()
+        expect((await fs.readFile(initializerPath)).toString()).toEqual(
+          initializerContents('./openapi.json', './types.d.ts'),
+        )
+      })
+    })
+
+    context('with different contents', () => {
+      beforeEach(async () => {
+        await generateInitializer('./openapi.json', './types.d.ts', 'sync-openapi-typescript.ts')
+      })
+
+      it('prompts with the initializer path and overwrites on confirmation (previously it silently overwrote)', async () => {
+        const confirm = vi.fn().mockResolvedValue(true)
+
+        await generateInitializer(
+          './admin.openapi.json',
+          './admin.types.d.ts',
+          'sync-openapi-typescript.ts',
+          {
+            confirm,
+          },
+        )
+
+        expect(confirm).toHaveBeenCalledTimes(1)
+        expect(confirm).toHaveBeenCalledWith([
+          expect.stringContaining('sync-openapi-typescript.ts') as string,
+        ])
+        expect((await fs.readFile(initializerPath)).toString()).toEqual(
+          initializerContents('./admin.openapi.json', './admin.types.d.ts'),
+        )
+      })
+
+      it('leaves the existing file untouched when the prompt is declined', async () => {
+        const confirm = vi.fn().mockResolvedValue(false)
+
+        await generateInitializer(
+          './admin.openapi.json',
+          './admin.types.d.ts',
+          'sync-openapi-typescript.ts',
+          {
+            confirm,
+          },
+        )
+
+        expect((await fs.readFile(initializerPath)).toString()).toEqual(
+          initializerContents('./openapi.json', './types.d.ts'),
+        )
+      })
+
+      it('fails loudly instead of silently choosing when the prompt is bypassed', async () => {
+        // BYPASS_CLI_PROMPT=1 (set for this suite) would short-circuit
+        // cliPrompt to '', so the default confirm must throw rather than
+        // treating that as an answer
+        await expect(
+          generateInitializer('./admin.openapi.json', './admin.types.d.ts', 'sync-openapi-typescript.ts'),
+        ).rejects.toThrow(CannotConfirmOverwriteError)
+
+        expect((await fs.readFile(initializerPath)).toString()).toEqual(
+          initializerContents('./openapi.json', './types.d.ts'),
+        )
+      })
+    })
   })
 })

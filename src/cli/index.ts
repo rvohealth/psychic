@@ -331,6 +331,8 @@ ${INDENT}  pnpm psy setup:sync:enums --openapi-name=default --output-file=../cli
 ${INDENT}
 ${INDENT}Use this for React frontends using Redux Toolkit / RTK Query. For Zustand or other state managers, use setup:sync:openapi-zustand instead.
 ${INDENT}
+${INDENT}Re-running with different settings prompts once — listing every affected file, including the api file scaffold (which may carry your baseUrl/auth customizations) — before overwriting anything. Note: re-running with a different --export-name generates a new codegen config and initializer without prompting, leaving the previous initializer active — remove the old files manually to avoid double-syncing.
+${INDENT}
 ${INDENT}Example:
 ${INDENT}  pnpm psy setup:sync:openapi-redux \\
 ${INDENT}    --schema-file=./src/openapi/openapi.json \\
@@ -395,6 +397,8 @@ ${INDENT}    --export-name=backendApi`,
 ${INDENT}
 ${INDENT}Use this for frontends using Zustand, Jotai, or any non-Redux state manager. For RTK Query / Redux Toolkit, use setup:sync:openapi-redux instead.
 ${INDENT}
+${INDENT}Re-running with different settings prompts once — listing every affected file, including the client config scaffold (which may carry your baseUrl/auth customizations) — before overwriting anything. Note: re-running with a different --export-name generates a new initializer without prompting, leaving the previous one active — remove the old initializer manually to avoid double-syncing.
+${INDENT}
 ${INDENT}Example:
 ${INDENT}  pnpm psy setup:sync:openapi-zustand \\
 ${INDENT}    --schema-file=./src/openapi/openapi.json \\
@@ -450,6 +454,8 @@ ${INDENT}    --export-name=backendApi`,
         `Generates an initializer that converts your OpenAPI spec to TypeScript type definitions during sync. This is a one-time setup command — once configured, types are regenerated automatically on every \`pnpm psy sync\`.
 ${INDENT}
 ${INDENT}Use this when you need raw TypeScript types from the OpenAPI spec without a full API client. For typed API functions, use setup:sync:openapi-zustand or setup:sync:openapi-redux instead.
+${INDENT}
+${INDENT}Re-running with different settings prompts before overwriting the existing initializer. Note: re-running with a different --initializer-filename generates a second initializer without prompting, leaving the previous one active — remove the old initializer manually to avoid double-syncing.
 ${INDENT}
 ${INDENT}Example:
 ${INDENT}  pnpm psy setup:sync:openapi-typescript ./src/openapi/openapi.json ../client/src/api/openapi.types.d.ts`,

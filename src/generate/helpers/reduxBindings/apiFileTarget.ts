@@ -1,22 +1,17 @@
-import * as fs from 'node:fs/promises'
-import * as path from 'node:path'
+import { FileWriteTarget } from '../../../cli/helpers/applyConfirmedWriteSet.js'
 
-export default async function writeApiFile({ apiFile, apiImport }: { apiFile: string; apiImport: string }) {
-  const destDir = path.dirname(apiFile)
-
-  try {
-    await fs.access(apiFile)
-    return // early return if the file already exists
-  } catch {
-    // noop
-  }
-
-  try {
-    await fs.access(destDir)
-  } catch {
-    await fs.mkdir(destDir, { recursive: true })
-  }
-
+/**
+ * Computes the RTK Query base api file write target. This is a user-customizable
+ * scaffold (baseUrl, auth headers, etc.), so overwriting an existing, edited
+ * copy must go through the overwrite confirmation.
+ */
+export default function apiFileTarget({
+  apiFile,
+  apiImport,
+}: {
+  apiFile: string
+  apiImport: string
+}): FileWriteTarget {
   const contents = `\
 // Or from '@reduxjs/toolkit/query' if not using the auto-generated hooks
 import { createApi, fetchBaseQuery } from '@reduxjs/toolkit/query/react'
@@ -66,5 +61,5 @@ export const ${apiImport} = createApi({
   endpoints: () => ({}),
 })`
 
-  await fs.writeFile(apiFile, contents)
+  return { filePath: apiFile, contents }
 }

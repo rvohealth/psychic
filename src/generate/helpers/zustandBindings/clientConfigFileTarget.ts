@@ -1,22 +1,15 @@
-import * as fs from 'node:fs/promises'
-import * as path from 'node:path'
+import { FileWriteTarget } from '../../../cli/helpers/applyConfirmedWriteSet.js'
 
-export default async function writeClientConfigFile({ clientConfigFile }: { clientConfigFile: string }) {
-  const destDir = path.dirname(clientConfigFile)
-
-  try {
-    await fs.access(clientConfigFile)
-    return // early return if the file already exists
-  } catch {
-    // noop
-  }
-
-  try {
-    await fs.access(destDir)
-  } catch {
-    await fs.mkdir(destDir, { recursive: true })
-  }
-
+/**
+ * Computes the @hey-api/openapi-ts client config write target. This is a
+ * user-customizable scaffold (baseUrl, auth headers, etc.), so overwriting an
+ * existing, edited copy must go through the overwrite confirmation.
+ */
+export default function clientConfigFileTarget({
+  clientConfigFile,
+}: {
+  clientConfigFile: string
+}): FileWriteTarget {
   const contents = `\
 import { client } from './client.gen'
 
@@ -42,5 +35,5 @@ client.setConfig({
   // },
 })`
 
-  await fs.writeFile(clientConfigFile, contents)
+  return { filePath: clientConfigFile, contents }
 }
