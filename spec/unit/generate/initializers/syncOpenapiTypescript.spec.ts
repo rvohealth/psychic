@@ -1,7 +1,9 @@
+import { DreamCLI } from '@rvoh/dream/system'
 import fs from 'node:fs/promises'
 import { CannotConfirmOverwriteError } from '../../../../src/cli/helpers/confirmOverwrite.js'
 import generateInitializer from '../../../../src/generate/helpers/syncOpenapiTypescript/generateInitializer.js'
 import generateSyncOpenapiTypescriptInitializer from '../../../../src/generate/initializer/syncOpenapiTypescript.js'
+import EnvInternal from '../../../../src/helpers/EnvInternal.js'
 
 describe('generateSyncOpenapiTypescriptInitializer', () => {
   const initializerPath = 'test-app/src/conf/initializers/sync-openapi-typescript.ts'
@@ -116,6 +118,50 @@ export default (psy: PsychicApp) => {
         expect((await fs.readFile(initializerPath)).toString()).toEqual(
           initializerContents('./openapi.json', './types.d.ts'),
         )
+      })
+
+      context('the follow-on openapi-typescript install (observable only through the public wrapper)', () => {
+        let spawnSpy: ReturnType<typeof vi.spyOn>
+
+        beforeEach(() => {
+          // installOpenapiTypescript early-returns under EnvInternal.isTest,
+          // so stub it out to observe whether the install would run for real users
+          vi.spyOn(EnvInternal, 'isTest', 'get').mockReturnValue(false)
+          spawnSpy = vi.spyOn(DreamCLI, 'spawn').mockResolvedValue(undefined)
+        })
+
+        afterEach(() => {
+          vi.restoreAllMocks()
+        })
+
+        it('skips the install when the overwrite prompt is declined', async () => {
+          const confirm = vi.fn().mockResolvedValue(false)
+
+          await generateSyncOpenapiTypescriptInitializer(
+            './admin.openapi.json',
+            './admin.types.d.ts',
+            'sync-openapi-typescript.ts',
+            { confirm },
+          )
+
+          expect(spawnSpy).not.toHaveBeenCalled()
+          expect((await fs.readFile(initializerPath)).toString()).toEqual(
+            initializerContents('./openapi.json', './types.d.ts'),
+          )
+        })
+
+        it('runs the install when the overwrite is confirmed', async () => {
+          const confirm = vi.fn().mockResolvedValue(true)
+
+          await generateSyncOpenapiTypescriptInitializer(
+            './admin.openapi.json',
+            './admin.types.d.ts',
+            'sync-openapi-typescript.ts',
+            { confirm },
+          )
+
+          expect(spawnSpy).toHaveBeenCalledWith('pnpm', { args: ['add', '-D', 'openapi-typescript'] })
+        })
       })
 
       it('fails loudly instead of silently choosing when the prompt is bypassed', async () => {

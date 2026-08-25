@@ -14,6 +14,10 @@ import psychicPath from '../../../helpers/path/psychicPath.js'
  * - different content → confirm-then-overwrite (an unanswerable prompt —
  *   no TTY, bypassed, or empty answer — fails loudly rather than silently
  *   overwriting, which was the previous behavior)
+ *
+ * Returns `true` when the write was applied (or nothing needed writing),
+ * `false` when the user declined — callers should skip any follow-on side
+ * effects (e.g. the openapi-typescript install) on `false`.
  */
 export default async function generateInitializer(
   openapiFilepath: string,
@@ -22,9 +26,9 @@ export default async function generateInitializer(
   {
     confirm,
   }: {
-    confirm?: ConfirmOverwriteFn
+    confirm?: ConfirmOverwriteFn | undefined
   } = {},
-) {
+): Promise<boolean> {
   if (!/\.d\.ts$/.test(outfile)) throw new Error(`outfile must have extension .d.ts`)
 
   const initializerFilenameWithoutExtension = initializerFilename.replace(/\.ts$/, '')
@@ -51,5 +55,5 @@ export default (psy: PsychicApp) => {
 }\
 `
 
-  await applyConfirmedWriteSet([{ filePath: initializerPath, contents }], { confirm })
+  return await applyConfirmedWriteSet([{ filePath: initializerPath, contents }], { confirm })
 }

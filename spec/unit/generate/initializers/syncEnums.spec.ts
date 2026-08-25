@@ -114,6 +114,29 @@ export default function syncCustomEnums(psy: PsychicApp) {
         )
       })
 
+      context('but the existing file cannot be read (e.g. EACCES)', () => {
+        afterEach(async () => {
+          await fs.chmod(initializerPath, 0o600).catch(() => undefined)
+        })
+
+        it('rethrows the read failure without confirming or writing (unreadable is not the same as missing)', async () => {
+          await fs.chmod(initializerPath, 0o200)
+          const confirm = vi.fn()
+
+          await expect(
+            generateSyncEnumsInitializer('./client/howyadoin/enums.ts', 'sync-custom-enums.ts', 'internal', {
+              confirm,
+            }),
+          ).rejects.toThrow(/EACCES/)
+
+          expect(confirm).not.toHaveBeenCalled()
+          await fs.chmod(initializerPath, 0o600)
+          expect((await fs.readFile(initializerPath)).toString()).toEqual(
+            initializerContents(`'./client/howyadoin/enums.ts', 'mobile'`),
+          )
+        })
+      })
+
       it('fails loudly instead of silently choosing when the prompt is bypassed', async () => {
         // BYPASS_CLI_PROMPT=1 (set for this suite) would short-circuit
         // cliPrompt to '', so the default confirm must throw rather than

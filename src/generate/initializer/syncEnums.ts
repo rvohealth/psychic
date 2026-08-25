@@ -57,8 +57,12 @@ export default function ${camelized}(psy: PsychicApp) {
   let existingContents: string | undefined
   try {
     existingContents = (await fs.readFile(initializerPath)).toString()
-  } catch {
-    // noop: the file does not exist yet
+  } catch (error) {
+    // only a missing file (ENOENT) means "create it": any other read
+    // failure (EACCES, EISDIR, I/O errors) must not be treated as missing,
+    // or an existing — possibly user-customized — file would be
+    // overwritten without confirmation
+    if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
   }
 
   if (existingContents !== undefined) {

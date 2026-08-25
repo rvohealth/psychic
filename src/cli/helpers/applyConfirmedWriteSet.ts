@@ -47,8 +47,12 @@ export default async function applyConfirmedWriteSet(
       let existingContents: string | undefined
       try {
         existingContents = (await fs.readFile(target.filePath)).toString()
-      } catch {
-        // noop: the file does not exist yet
+      } catch (error) {
+        // only a missing file (ENOENT) means "create it": any other read
+        // failure (EACCES, EISDIR, I/O errors) must not be treated as missing,
+        // or an existing — possibly user-customized — file would be
+        // overwritten without the confirmation above
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
       }
       return { ...target, existingContents }
     }),
