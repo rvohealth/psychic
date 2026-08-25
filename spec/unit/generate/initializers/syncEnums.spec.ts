@@ -36,7 +36,13 @@ export default function syncCustomEnums(psy: PsychicApp) {
   })
 
   async function cleanup() {
-    for (const filename of ['sync-enums.ts', 'sync-custom-enums.ts']) {
+    for (const filename of [
+      'sync-enums.ts',
+      'sync-custom-enums.ts',
+      "it's-enums.ts",
+      '1-2-3.ts',
+      'default.ts',
+    ]) {
       try {
         await fs.rm(`./test-app/src/conf/initializers/${filename}`)
       } catch {
@@ -80,8 +86,9 @@ export default function syncCustomEnums(psy: PsychicApp) {
 
       const contents = (await fs.readFile(initializerPath)).toString()
       const logMatch = contents.match(/logProgress\((.*), async \(\) => \{/)
-      expect(logMatch).not.toBeNull()
-      expect(JSON.parse(logMatch![1])).toEqual(`[syncCustomEnums] syncing enums to ${trickyOutfile}...`)
+      const logLiteral = logMatch?.[1]
+      expect(logLiteral).toBeDefined()
+      expect(JSON.parse(logLiteral!)).toEqual(`[syncCustomEnums] syncing enums to ${trickyOutfile}...`)
     })
 
     it('leaves the rest of the generated initializer intact', async () => {
@@ -94,6 +101,35 @@ export default function syncCustomEnums(psy: PsychicApp) {
           trickyOutfile,
         ),
       )
+    })
+  })
+
+  context('when the initializer filename would not camelize into a valid identifier', () => {
+    it('strips the invalid characters from the generated function name', async () => {
+      // Dream's camelize preserves quotes/backticks/dollar-braces:
+      // camelize("it's-enums") === "it'sEnums", which is not a valid identifier
+      await generateSyncEnumsInitializer('./client/howyadoin/enums.ts', "it's-enums.ts", 'mobile')
+
+      const contents = (await fs.readFile("./test-app/src/conf/initializers/it's-enums.ts")).toString()
+      expect(contents).toContain('export default function itsEnums(psy: PsychicApp) {')
+      expect(contents).toContain(JSON.stringify(`[itsEnums] syncing enums to ./client/howyadoin/enums.ts...`))
+    })
+
+    it("falls back to 'syncEnums' when the stripped name would start with a digit", async () => {
+      await generateSyncEnumsInitializer('./client/howyadoin/enums.ts', '1-2-3.ts', 'mobile')
+
+      const contents = (await fs.readFile('./test-app/src/conf/initializers/1-2-3.ts')).toString()
+      expect(contents).toContain('export default function syncEnums(psy: PsychicApp) {')
+      expect(contents).toContain(
+        JSON.stringify(`[syncEnums] syncing enums to ./client/howyadoin/enums.ts...`),
+      )
+    })
+
+    it("falls back to 'syncEnums' when the camelized name is a reserved word", async () => {
+      await generateSyncEnumsInitializer('./client/howyadoin/enums.ts', 'default.ts', 'mobile')
+
+      const contents = (await fs.readFile('./test-app/src/conf/initializers/default.ts')).toString()
+      expect(contents).toContain('export default function syncEnums(psy: PsychicApp) {')
     })
   })
 

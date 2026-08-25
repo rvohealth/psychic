@@ -4,6 +4,32 @@ import * as path from 'node:path'
 import confirmOverwrite from '../../cli/helpers/confirmOverwrite.js'
 import psychicPath from '../../helpers/path/psychicPath.js'
 
+// prettier-ignore
+const RESERVED_WORDS = new Set([
+  'await', 'break', 'case', 'catch', 'class', 'const', 'continue', 'debugger',
+  'default', 'delete', 'do', 'else', 'enum', 'export', 'extends', 'false',
+  'finally', 'for', 'function', 'if', 'implements', 'import', 'in',
+  'instanceof', 'interface', 'let', 'new', 'null', 'package', 'private',
+  'protected', 'public', 'return', 'static', 'super', 'switch', 'this',
+  'throw', 'true', 'try', 'typeof', 'var', 'void', 'while', 'with', 'yield',
+])
+
+/**
+ * The camelized initializer filename becomes the generated initializer's
+ * function name — an identifier position, where JSON.stringify cannot help
+ * and Dream's camelize preserves quotes, backticks, and dollar-braces
+ * (`camelize("it's-enums") === "it'sEnums"`). Strip anything that is not a
+ * valid identifier character, and fall back to `'syncEnums'` when nothing
+ * identifier-safe remains, the result would start with a digit, or the
+ * result is a reserved word — so no filename can produce a syntactically
+ * broken generated file.
+ */
+function initializerFunctionName(camelized: string): string {
+  const stripped = camelized.replace(/[^A-Za-z0-9_$]/g, '')
+  if (!/^[A-Za-z_$][A-Za-z0-9_$]*$/.test(stripped) || RESERVED_WORDS.has(stripped)) return 'syncEnums'
+  return stripped
+}
+
 /**
  * Generates the sync-enums initializer, which hooks `cli:sync` to write the
  * client enums file for the selected OpenAPI spec on every `pnpm psy sync`.
@@ -30,7 +56,7 @@ export default async function generateSyncEnumsInitializer(
   } = {},
 ) {
   const initializerFilenameWithoutExtension = initializerFilename.replace(/\.ts$/, '')
-  const camelized = camelize(initializerFilenameWithoutExtension)
+  const functionName = initializerFunctionName(camelize(initializerFilenameWithoutExtension))
 
   const destDir = path.join(psychicPath('conf'), 'initializers')
   const initializerPath = path.join(destDir, `${initializerFilenameWithoutExtension}.ts`)
@@ -44,7 +70,7 @@ export default async function generateSyncEnumsInitializer(
     openapiName === undefined
       ? JSON.stringify(outfile)
       : `${JSON.stringify(outfile)}, ${JSON.stringify(openapiName)}`
-  const logProgressMessage = JSON.stringify(`[${camelized}] syncing enums to ${outfile}...`)
+  const logProgressMessage = JSON.stringify(`[${functionName}] syncing enums to ${outfile}...`)
 
   const contents = `\
 import { DreamCLI } from '@rvoh/dream/system'
@@ -52,7 +78,7 @@ import { PsychicApp } from "@rvoh/psychic"
 import { PsychicBin } from "@rvoh/psychic/system"
 import AppEnv from '../AppEnv.js'
 
-export default function ${camelized}(psy: PsychicApp) {
+export default function ${functionName}(psy: PsychicApp) {
   psy.on('cli:sync', async () => {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(${logProgressMessage}, async () => {
