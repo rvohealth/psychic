@@ -29,17 +29,18 @@ export default function enumsFileStr(openapiName: string = 'default') {
   Object.keys(enums)
     .sort()
     .forEach(enumName => {
-      const exportedTypeName = pascalizeFileName(enumName) + 'Values'
+      const exportedTypeName = pascalizeFileName(enumName)
+      const exportedConstName = exportedTypeName + 'Values'
       const values = enums[enumName] || []
 
       enumsFileStr += `\
-export const ${exportedTypeName} = [
+export const ${exportedConstName} = [
   ${values
     .sort()
     .map(val => `'${val}'`)
     .join(',\n  ')}
 ] as const
-export type ${exportedTypeName.replace(/Values^/, '')} = (typeof ${exportedTypeName})[number]
+export type ${exportedTypeName} = (typeof ${exportedConstName})[number]
 
 `
     })

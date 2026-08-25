@@ -26,7 +26,7 @@ export const BalloonColorsEnumValues = [
   'green',
   'red'
 ] as const
-export type BalloonColorsEnumValues = (typeof BalloonColorsEnumValues)[number]\
+export type BalloonColorsEnum = (typeof BalloonColorsEnumValues)[number]\
 `),
       )
     })
@@ -55,7 +55,7 @@ export const PetTreatsEnumValues = [
   'efishy feesh',
   'snick snowcks'
 ] as const
-export type PetTreatsEnumValues = (typeof PetTreatsEnumValues)[number]`),
+export type PetTreatsEnum = (typeof PetTreatsEnumValues)[number]`),
       )
     })
 
