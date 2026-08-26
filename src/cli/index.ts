@@ -284,7 +284,9 @@ ${INDENT}  V1/Admin/Reports        # src/app/controllers/V1/Admin/ReportsControl
       .description(
         `Generates an initializer that automatically exports the enum types appearing in one of your app's OpenAPI specs to a TypeScript file during sync. This is a one-time setup command — once the initializer exists, enums are synced automatically on every \`pnpm psy sync\`.
 ${INDENT}
-${INDENT}Use this to share enum types between your backend and frontend without manual duplication. Only enums that actually appear in the selected OpenAPI spec's rendered surface are exported, and each carries only the values that spec renders.
+${INDENT}Use this to share enum types between your backend and frontend without manual duplication. The export set is an information-disclosure boundary, not just a convenience: the generated file is part of your app's public surface, so only enums that actually appear in the selected OpenAPI spec's rendered surface are exported, and each carries only the values that spec renders — a frontend never receives backend implementation details its spec does not expose.
+${INDENT}
+${INDENT}An enum or value absent from the generated file is this boundary doing its job, not a bug. When a client genuinely needs a value, widen the spec that serves that client — never hand-write the value into frontend code, which puts back exactly what the scoping keeps out.
 ${INDENT}
 ${INDENT}Re-running with different settings prompts before overwriting the existing initializer. Note: re-running with a different --initializer-filename generates a second initializer without prompting, leaving the previous one active — remove the old initializer manually to avoid double-syncing.
 ${INDENT}
@@ -297,7 +299,7 @@ ${INDENT}  pnpm psy setup:sync:enums --openapi-name=default --output-file=../cli
       )
       .option(
         '--openapi-name <openapiName>',
-        "the name of the registered OpenAPI spec whose enums will be exported, e.g. 'mobile'. Defaults to 'default' (the unnamed psy.set('openapi', ...) registration)",
+        "the name of the registered OpenAPI spec whose enums will be exported, e.g. 'mobile'. Which spec you point at is what decides the enums and values that client receives. Defaults to 'default' (the unnamed psy.set('openapi', ...) registration)",
         'default',
       )
       .option(

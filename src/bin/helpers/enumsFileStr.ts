@@ -15,6 +15,10 @@ import PsychicApp from '../../psychic-app/index.js'
  * Only enums reachable from the selected spec's surface are exported, and
  * each export carries exactly the spec-visible value set (the union of the
  * values the spec's sites render). No database connection is required.
+ *
+ * The spec-scoped export set is an information-disclosure boundary: the
+ * generated file is client-visible surface, so an enum or value the spec
+ * does not render is deliberately absent rather than missing.
  */
 export default function enumsFileStr(openapiName: string = 'default') {
   const psychicApp = PsychicApp.getOrFail()

@@ -160,6 +160,11 @@ export default class PsychicBin {
    * collection itself renders the spec in memory and requires no database
    * connection.
    *
+   * The spec-scoped export set is an information-disclosure boundary: the
+   * generated file is client-visible surface, so an enum or value the spec
+   * does not render is deliberately absent — widen the spec, don't route
+   * around the file.
+   *
    * An unregistered `openapiName` throws before anything is written —
    * otherwise the render would silently produce a skeleton document and
    * overwrite the client enums file with an empty module.
