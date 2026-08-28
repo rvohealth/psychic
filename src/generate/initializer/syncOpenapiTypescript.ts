@@ -8,11 +8,16 @@ export default async function generateSyncOpenapiTypescriptInitializer(
   initializerFilename: `${string}.ts` = 'sync-openapi-typescript.ts',
   {
     confirm,
+    overwrite = false,
   }: {
     confirm?: ConfirmOverwriteFn | undefined
+    overwrite?: boolean | undefined
   } = {},
 ) {
-  const applied = await generateInitializer(openapiFilepath, outfile, initializerFilename, { confirm })
+  const applied = await generateInitializer(openapiFilepath, outfile, initializerFilename, {
+    confirm,
+    overwrite,
+  })
   // declining the overwrite prompt must also skip the follow-on package
   // install (mirroring the redux/zustand binding generators)
   if (!applied) return

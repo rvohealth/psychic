@@ -57,8 +57,10 @@ export default async function generateSyncEnumsInitializer(
   openapiName?: string,
   {
     confirm = confirmOverwrite,
+    overwrite = false,
   }: {
     confirm?: (filePaths: string[]) => Promise<boolean>
+    overwrite?: boolean
   } = {},
 ) {
   const initializerFilenameWithoutExtension =
@@ -112,10 +114,14 @@ export default function ${functionName}(psy: PsychicApp) {
   if (existingContents !== undefined) {
     if (existingContents === contents) return // byte-identical re-run: silent no-op
 
-    const confirmed = await confirm([initializerPath])
-    if (!confirmed) {
-      console.log(`Declined overwrite of ${initializerPath}; leaving the existing file untouched.`)
-      return
+    // overwrite: true is pre-given consent for non-interactive callers —
+    // exactly what answering y at the prompt would do
+    if (!overwrite) {
+      const confirmed = await confirm([initializerPath])
+      if (!confirmed) {
+        console.log(`Declined overwrite of ${initializerPath}; leaving the existing file untouched.`)
+        return
+      }
     }
   }
 

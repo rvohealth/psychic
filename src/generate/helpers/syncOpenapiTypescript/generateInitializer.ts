@@ -25,8 +25,10 @@ export default async function generateInitializer(
   initializerFilename: string,
   {
     confirm,
+    overwrite = false,
   }: {
     confirm?: ConfirmOverwriteFn | undefined
+    overwrite?: boolean | undefined
   } = {},
 ): Promise<boolean> {
   if (!/\.d\.ts$/.test(outfile)) throw new Error(`outfile must have extension .d.ts`)
@@ -55,5 +57,5 @@ export default (psy: PsychicApp) => {
 }\
 `
 
-  return await applyConfirmedWriteSet([{ filePath: initializerPath, contents }], { confirm })
+  return await applyConfirmedWriteSet([{ filePath: initializerPath, contents }], { confirm, overwrite })
 }

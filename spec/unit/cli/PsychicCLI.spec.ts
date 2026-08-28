@@ -3,10 +3,14 @@ import type { MockInstance } from 'vitest'
 import PsychicCLI from '../../../src/cli/index.js'
 import generateSyncEnumsInitializer from '../../../src/generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../../../src/generate/initializer/syncOpenapiTypescript.js'
+import generateOpenapiReduxBindings from '../../../src/generate/openapi/reduxBindings.js'
+import generateOpenapiZustandBindings from '../../../src/generate/openapi/zustandBindings.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
 
 vi.mock('../../../src/generate/initializer/syncEnums.js')
 vi.mock('../../../src/generate/initializer/syncOpenapiTypescript.js')
+vi.mock('../../../src/generate/openapi/reduxBindings.js')
+vi.mock('../../../src/generate/openapi/zustandBindings.js')
 
 describe('PsychicCLI setup:sync commands', () => {
   let processExitSpy: MockInstance
@@ -37,7 +41,20 @@ describe('PsychicCLI setup:sync commands', () => {
         { from: 'user' },
       )
 
-      expect(generateSyncEnumsInitializer).toHaveBeenCalledWith('../client/src/api/enums.ts', 'mobile')
+      expect(generateSyncEnumsInitializer).toHaveBeenCalledWith('../client/src/api/enums.ts', 'mobile', {
+        overwrite: false,
+      })
+    })
+
+    it('passes --overwrite through as pre-given consent', async () => {
+      await buildProgram().parseAsync(
+        ['setup:sync:enums', '--output-file=../client/src/api/enums.ts', '--overwrite'],
+        { from: 'user' },
+      )
+
+      expect(generateSyncEnumsInitializer).toHaveBeenCalledWith('../client/src/api/enums.ts', 'default', {
+        overwrite: true,
+      })
     })
 
     context('when --openapi-name is omitted', () => {
@@ -46,7 +63,9 @@ describe('PsychicCLI setup:sync commands', () => {
           from: 'user',
         })
 
-        expect(generateSyncEnumsInitializer).toHaveBeenCalledWith('../client/src/api/enums.ts', 'default')
+        expect(generateSyncEnumsInitializer).toHaveBeenCalledWith('../client/src/api/enums.ts', 'default', {
+          overwrite: false,
+        })
       })
     })
 
@@ -140,6 +159,7 @@ describe('PsychicCLI setup:sync commands', () => {
         './src/openapi/openapi.json',
         '../client/src/api/types.d.ts',
         'custom-sync-openapi-typescript.ts',
+        { overwrite: false },
       )
     })
 
@@ -154,8 +174,80 @@ describe('PsychicCLI setup:sync commands', () => {
           './src/openapi/openapi.json',
           '../client/src/api/types.d.ts',
           undefined,
+          { overwrite: false },
         )
       })
+    })
+  })
+
+  describe('--overwrite pass-through on the binding generators', () => {
+    it('setup:sync:openapi-redux passes --overwrite as pre-given consent', async () => {
+      await buildProgram().parseAsync(
+        [
+          'setup:sync:openapi-redux',
+          '--schema-file=./src/openapi/openapi.json',
+          '--api-file=../client/app/api.ts',
+          '--api-import=emptyBackendApi',
+          '--output-file=../client/app/backendApi.ts',
+          '--export-name=backendApi',
+          '--overwrite',
+        ],
+        { from: 'user' },
+      )
+
+      expect(generateOpenapiReduxBindings).toHaveBeenCalledWith(
+        {
+          exportName: 'backendApi',
+          schemaFile: './src/openapi/openapi.json',
+          apiFile: '../client/app/api.ts',
+          apiImport: 'emptyBackendApi',
+          outputFile: '../client/app/backendApi.ts',
+        },
+        { overwrite: true },
+      )
+    })
+
+    it('setup:sync:openapi-zustand passes --overwrite as pre-given consent', async () => {
+      await buildProgram().parseAsync(
+        [
+          'setup:sync:openapi-zustand',
+          '--schema-file=./src/openapi/openapi.json',
+          '--output-dir=../client/app/api/backend',
+          '--client-config-file=../client/app/api/backend/client.ts',
+          '--export-name=backendApi',
+          '--overwrite',
+        ],
+        { from: 'user' },
+      )
+
+      expect(generateOpenapiZustandBindings).toHaveBeenCalledWith(
+        {
+          exportName: 'backendApi',
+          schemaFile: './src/openapi/openapi.json',
+          outputDir: '../client/app/api/backend',
+          clientConfigFile: '../client/app/api/backend/client.ts',
+        },
+        { overwrite: true },
+      )
+    })
+
+    it('setup:sync:openapi-typescript passes --overwrite as pre-given consent', async () => {
+      await buildProgram().parseAsync(
+        [
+          'setup:sync:openapi-typescript',
+          './src/openapi/openapi.json',
+          '../client/src/api/types.d.ts',
+          '--overwrite',
+        ],
+        { from: 'user' },
+      )
+
+      expect(generateSyncOpenapiTypescriptInitializer).toHaveBeenCalledWith(
+        './src/openapi/openapi.json',
+        '../client/src/api/types.d.ts',
+        undefined,
+        { overwrite: true },
+      )
     })
   })
 })

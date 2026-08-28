@@ -25,6 +25,42 @@ describe('applyConfirmedWriteSet', () => {
     expect((await fs.readFile(filePath)).toString()).toEqual('generated')
   })
 
+  context('with overwrite: true (pre-given non-interactive consent)', () => {
+    it('replaces a differing target without confirming, still creating missing and skipping identical targets', async () => {
+      await fs.writeFile(filePath, 'customized')
+      const identicalPath = `${tmpDir}/identical.ts`
+      await fs.writeFile(identicalPath, 'same')
+      const missingPath = `${tmpDir}/missing.ts`
+      const confirm = vi.fn()
+
+      const applied = await applyConfirmedWriteSet(
+        [
+          { filePath, contents: 'generated' },
+          { filePath: identicalPath, contents: 'same' },
+          { filePath: missingPath, contents: 'new' },
+        ],
+        { confirm, overwrite: true },
+      )
+
+      expect(applied).toBe(true)
+      expect(confirm).not.toHaveBeenCalled()
+      expect((await fs.readFile(filePath)).toString()).toEqual('generated')
+      expect((await fs.readFile(identicalPath)).toString()).toEqual('same')
+      expect((await fs.readFile(missingPath)).toString()).toEqual('new')
+    })
+
+    it('still rethrows on an unreadable existing target — overwrite consents to replacing files, not to skipping the unreadable guard', async () => {
+      await fs.writeFile(filePath, 'customized', { mode: 0o200 })
+
+      await expect(
+        applyConfirmedWriteSet([{ filePath, contents: 'generated' }], { overwrite: true }),
+      ).rejects.toThrow(/EACCES/)
+
+      await fs.chmod(filePath, 0o600)
+      expect((await fs.readFile(filePath)).toString()).toEqual('customized')
+    })
+  })
+
   context('when an existing target cannot be read (e.g. EACCES)', () => {
     it('rethrows the read failure without confirming or writing (unreadable is not the same as missing)', async () => {
       await fs.writeFile(filePath, 'customized', { mode: 0o200 })

@@ -19,9 +19,11 @@ These file(s) already exist with different content, and overwriting them require
 ${
   emptyAnswer
     ? `an explicit answer. Re-run this command and answer y (overwrite) or n (leave the
-file(s) untouched), or move/remove the file(s) above and re-run.`
+file(s) untouched), re-run with --overwrite to replace them without prompting, or
+move/remove the file(s) above and re-run.`
     : `interactive confirmation. Re-run this command from an interactive terminal (TTY),
-or move/remove the file(s) above and re-run.`
+re-run with --overwrite to replace the file(s) above without prompting, or
+move/remove them and re-run.`
 }`)
   }
 }

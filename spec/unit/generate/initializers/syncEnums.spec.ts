@@ -178,6 +178,18 @@ export default function ${functionName}(psy: PsychicApp) {
         })
       })
 
+      it('overwrites without prompting when overwrite: true is passed (non-interactive consent)', async () => {
+        // BYPASS_CLI_PROMPT=1 (set for this suite) makes the default confirm
+        // throw, so success here proves the flag skips the prompt entirely
+        await generateSyncEnumsInitializer('./client/elsewhere/enums.ts', 'mobile', { overwrite: true })
+
+        expect((await fs.readFile(initializerPath)).toString()).toEqual(
+          initializerContents(`"./client/elsewhere/enums.ts", "mobile"`, {
+            outfile: './client/elsewhere/enums.ts',
+          }),
+        )
+      })
+
       it('fails loudly instead of silently choosing when the prompt is bypassed', async () => {
         // BYPASS_CLI_PROMPT=1 (set for this suite) would short-circuit
         // cliPrompt to '', so the default confirm must throw rather than

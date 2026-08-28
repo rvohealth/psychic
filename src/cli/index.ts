@@ -302,15 +302,30 @@ ${INDENT}  pnpm psy setup:sync:enums --openapi-name=default --output-file=../cli
         "the name of the registered OpenAPI spec whose enums will be exported, e.g. 'mobile'. Which spec you point at is what decides the enums and values that client receives, and it names the generated initializer. Defaults to 'default' (the unnamed psy.set('openapi', ...) registration)",
         'default',
       )
-      .action(async ({ outputFile, openapiName }: { outputFile: string; openapiName: string }) => {
-        await initializePsychicApp({
-          bypassDreamIntegrityChecks: true,
-          bypassDbConnectionsDuringInit: true,
-        })
-        validateOpenapiName(openapiName)
-        await generateSyncEnumsInitializer(outputFile, openapiName)
-        process.exit()
-      })
+      .option(
+        '--overwrite',
+        'replace existing generated files that differ, without prompting — the consent the interactive prompt would ask for, for non-interactive use (agents, CI). Missing files are still created and byte-identical files are still left untouched',
+        false,
+      )
+      .action(
+        async ({
+          outputFile,
+          openapiName,
+          overwrite,
+        }: {
+          outputFile: string
+          openapiName: string
+          overwrite: boolean
+        }) => {
+          await initializePsychicApp({
+            bypassDreamIntegrityChecks: true,
+            bypassDbConnectionsDuringInit: true,
+          })
+          validateOpenapiName(openapiName)
+          await generateSyncEnumsInitializer(outputFile, openapiName, { overwrite })
+          process.exit()
+        },
+      )
 
     program
       .command('setup:sync:openapi-redux')
@@ -349,6 +364,11 @@ ${INDENT}    --export-name=backendApi`,
         '--export-name <exportName>',
         'the camelCased name for the exported enhanced API object, e.g., backendApi',
       )
+      .option(
+        '--overwrite',
+        'replace existing generated files that differ, without prompting — the consent the interactive prompt would ask for, for non-interactive use (agents, CI). Missing files are still created and byte-identical files are still left untouched',
+        false,
+      )
       .action(
         async ({
           schemaFile,
@@ -356,24 +376,29 @@ ${INDENT}    --export-name=backendApi`,
           apiImport,
           outputFile,
           exportName,
+          overwrite,
         }: {
           schemaFile: string
           apiFile: string
           apiImport: string
           outputFile: string
           exportName: string
+          overwrite: boolean
         }) => {
           await initializePsychicApp({
             bypassDreamIntegrityChecks: true,
             bypassDbConnectionsDuringInit: true,
           })
-          await generateOpenapiReduxBindings({
-            exportName,
-            schemaFile,
-            apiFile,
-            apiImport,
-            outputFile,
-          })
+          await generateOpenapiReduxBindings(
+            {
+              exportName,
+              schemaFile,
+              apiFile,
+              apiImport,
+              outputFile,
+            },
+            { overwrite },
+          )
           process.exit()
         },
       )
@@ -410,28 +435,38 @@ ${INDENT}    --export-name=backendApi`,
         '--export-name <exportName>',
         'the camelCased name for the exported API module, e.g., backendApi',
       )
+      .option(
+        '--overwrite',
+        'replace existing generated files that differ, without prompting — the consent the interactive prompt would ask for, for non-interactive use (agents, CI). Missing files are still created and byte-identical files are still left untouched',
+        false,
+      )
       .action(
         async ({
           schemaFile,
           outputDir,
           clientConfigFile,
           exportName,
+          overwrite,
         }: {
           schemaFile: string
           outputDir: string
           clientConfigFile: string
           exportName: string
+          overwrite: boolean
         }) => {
           await initializePsychicApp({
             bypassDreamIntegrityChecks: true,
             bypassDbConnectionsDuringInit: true,
           })
-          await generateOpenapiZustandBindings({
-            exportName,
-            schemaFile,
-            outputDir,
-            clientConfigFile,
-          })
+          await generateOpenapiZustandBindings(
+            {
+              exportName,
+              schemaFile,
+              outputDir,
+              clientConfigFile,
+            },
+            { overwrite },
+          )
           process.exit()
         },
       )
@@ -460,21 +495,30 @@ ${INDENT}  pnpm psy setup:sync:openapi-typescript ./src/openapi/openapi.json ../
         '--initializer-filename <initializerFilename>',
         'custom filename for the generated initializer in src/conf/initializers/. Defaults to `sync-openapi-typescript.ts`',
       )
+      .option(
+        '--overwrite',
+        'replace existing generated files that differ, without prompting — the consent the interactive prompt would ask for, for non-interactive use (agents, CI). Missing files are still created and byte-identical files are still left untouched',
+        false,
+      )
       .action(
         async (
           openapiFilepath: string,
           outfile: string,
           {
             initializerFilename,
+            overwrite,
           }: {
             initializerFilename?: `${string}.ts`
+            overwrite: boolean
           },
         ) => {
           await initializePsychicApp({
             bypassDreamIntegrityChecks: true,
             bypassDbConnectionsDuringInit: true,
           })
-          await generateSyncOpenapiTypescriptInitializer(openapiFilepath, outfile, initializerFilename)
+          await generateSyncOpenapiTypescriptInitializer(openapiFilepath, outfile, initializerFilename, {
+            overwrite,
+          })
           process.exit()
         },
       )

@@ -33,14 +33,17 @@ export default async function generateOpenapiZustandBindings(
   options: OpenapiZustandBindingsOptions = {},
   {
     confirm,
+    overwrite = false,
   }: {
     confirm?: ConfirmOverwriteFn
+    overwrite?: boolean
   } = {},
 ) {
   const opts = await promptForOptions(options)
 
   const applied = await applyConfirmedWriteSet([clientConfigFileTarget(opts), initializerTarget(opts)], {
     confirm,
+    overwrite,
   })
   if (!applied) return
 

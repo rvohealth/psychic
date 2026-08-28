@@ -34,15 +34,17 @@ export default async function generateOpenapiReduxBindings(
   options: OpenapiReduxBindingsOptions = {},
   {
     confirm,
+    overwrite = false,
   }: {
     confirm?: ConfirmOverwriteFn
+    overwrite?: boolean
   } = {},
 ) {
   const opts = await promptForOptions(options)
 
   const applied = await applyConfirmedWriteSet(
     [openapiJsonFileTarget(opts), apiFileTarget(opts), initializerTarget(opts)],
-    { confirm },
+    { confirm, overwrite },
   )
   if (!applied) return
 

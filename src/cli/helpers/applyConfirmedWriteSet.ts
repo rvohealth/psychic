@@ -30,6 +30,11 @@ export type ConfirmOverwriteFn = (filePaths: string[]) => Promise<boolean>
  * ({@link confirmOverwrite}) throws before any write. Specs answer the
  * confirmation through the injectable `confirm` seam instead.
  *
+ * `overwrite: true` is pre-given consent for non-interactive callers (agents,
+ * CI): differing targets are replaced without prompting — exactly what
+ * answering `y` at the prompt would do, and nothing more (missing targets are
+ * still created, byte-identical targets still left alone).
+ *
  * Returns `true` when the writes were applied (or nothing needed writing),
  * `false` when the user declined — callers should skip any follow-on side
  * effects (package installs, next-steps messages) on `false`.
@@ -38,8 +43,10 @@ export default async function applyConfirmedWriteSet(
   targets: FileWriteTarget[],
   {
     confirm = confirmOverwrite,
+    overwrite = false,
   }: {
     confirm?: ConfirmOverwriteFn | undefined
+    overwrite?: boolean | undefined
   } = {},
 ): Promise<boolean> {
   const targetsWithExistingContents = await Promise.all(
@@ -62,7 +69,7 @@ export default async function applyConfirmedWriteSet(
     target => target.existingContents !== undefined && target.existingContents !== target.contents,
   )
 
-  if (differingTargets.length) {
+  if (differingTargets.length && !overwrite) {
     const confirmed = await confirm(differingTargets.map(target => target.filePath))
     if (!confirmed) {
       console.log(`\
