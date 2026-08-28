@@ -1,11 +1,22 @@
 import { DreamCLI } from '@rvoh/dream/system'
 import fs from 'node:fs/promises'
 import { MockInstance } from 'vitest'
+import { CannotConfirmOverwriteError } from '../../../../src/cli/helpers/confirmOverwrite.js'
 import generateZustandStoreFromSdk from '../../../../src/generate/helpers/zustandBindings/generateStoreFromSdk.js'
 import generateOpenapiZustandBindings from '../../../../src/generate/openapi/zustandBindings.js'
 
 describe('generateOpenapiZustandBindings', () => {
   let dreamCliSpy: MockInstance
+
+  const initializerPath = 'test-app/src/conf/initializers/openapi/myApi.ts'
+  const clientConfigPath = 'test-client/app/api/myApi/client.ts'
+
+  const fullOptions = {
+    exportName: 'myApi',
+    schemaFile: './src/openapi/openapi.json',
+    outputDir: '../client/app/api/myApi',
+    clientConfigFile: clientConfigPath,
+  }
 
   beforeAll(() => {
     process.env.BYPASS_CLI_PROMPT = '1'
@@ -21,10 +32,12 @@ describe('generateOpenapiZustandBindings', () => {
   })
 
   async function cleanup() {
-    try {
-      await fs.rm('./test-app/src/conf/initializers/openapi/myApi.ts')
-    } catch {
-      // noop
+    for (const initializerFilename of ['myApi.ts', 'testappApi.ts']) {
+      try {
+        await fs.rm(`./test-app/src/conf/initializers/openapi/${initializerFilename}`)
+      } catch {
+        // noop
+      }
     }
 
     try {
@@ -38,10 +51,10 @@ describe('generateOpenapiZustandBindings', () => {
     context('the clientConfigFile does not exist', () => {
       it('generates a client config file that configures the @hey-api/openapi-ts client', async () => {
         await generateOpenapiZustandBindings({
-          clientConfigFile: 'test-client/app/api/myApi/client.ts',
+          ...fullOptions,
         })
 
-        const contents = (await fs.readFile('./test-client/app/api/myApi/client.ts')).toString()
+        const contents = (await fs.readFile(clientConfigPath)).toString()
 
         expect(contents).toEqual(`\
 import { client } from './client.gen'
@@ -70,19 +83,31 @@ client.setConfig({
       })
     })
 
-    context('the clientConfigFile already exists', () => {
+    context('the clientConfigFile already exists with user customizations', () => {
       beforeEach(async () => {
         await fs.mkdir('test-client/app/api/myApi', { recursive: true })
-        await fs.writeFile('test-client/app/api/myApi/client.ts', 'hello world')
+        await fs.writeFile(clientConfigPath, 'hello world')
       })
 
-      it('does not regenerate it', async () => {
-        await generateOpenapiZustandBindings({
-          clientConfigFile: 'test-client/app/api/myApi/client.ts',
-        })
+      it('keeps every file untouched when the overwrite prompt is declined (no file is written before the prompt)', async () => {
+        const confirm = vi.fn().mockResolvedValue(false)
 
-        const contents = (await fs.readFile('./test-client/app/api/myApi/client.ts')).toString()
-        expect(contents).toEqual('hello world')
+        await generateOpenapiZustandBindings({ ...fullOptions }, { confirm })
+
+        expect(confirm).toHaveBeenCalledWith([clientConfigPath])
+        expect((await fs.readFile(clientConfigPath)).toString()).toEqual('hello world')
+        // the initializer (a missing target) must not have been created either
+        await expect(fs.access(initializerPath)).rejects.toThrow()
+      })
+
+      it('overwrites the customized scaffold when the prompt is confirmed', async () => {
+        const confirm = vi.fn().mockResolvedValue(true)
+
+        await generateOpenapiZustandBindings({ ...fullOptions }, { confirm })
+
+        const contents = (await fs.readFile(clientConfigPath)).toString()
+        expect(contents).toContain('client.setConfig({')
+        expect((await fs.readFile(initializerPath)).toString()).toContain('generateZustandStoreFromSdk')
       })
     })
   })
@@ -90,13 +115,11 @@ client.setConfig({
   context('psychic initializer', () => {
     it('generates a psychic initializer that runs @hey-api/openapi-ts and generates the zustand store on sync', async () => {
       await generateOpenapiZustandBindings({
-        exportName: 'myApi',
-        schemaFile: './src/openapi/openapi.json',
-        outputDir: '../client/app/api/myApi',
-        clientConfigFile: 'test-client/app/api/myApi/client.ts',
+        ...fullOptions,
+        clientConfigFile: clientConfigPath,
       })
 
-      const contents = (await fs.readFile('test-app/src/conf/initializers/openapi/myApi.ts')).toString()
+      const contents = (await fs.readFile(initializerPath)).toString()
       expect(contents).toEqual(`\
 import { DreamCLI } from '@rvoh/dream/system'
 import { PsychicApp } from '@rvoh/psychic'
@@ -129,7 +152,7 @@ export default function initializeMyApi(psy: PsychicApp) {
       beforeEach(async () => {
         await fs.mkdir('test-app/src/conf/initializers/openapi', { recursive: true })
         await fs.writeFile(
-          'test-app/src/conf/initializers/openapi/myApi.ts',
+          initializerPath,
           `\
 import { DreamCLI } from '@rvoh/dream/system'
 import { PsychicApp } from '@rvoh/psychic'
@@ -154,45 +177,58 @@ export default function initializeMyApi(psy: PsychicApp) {
         )
       })
 
-      it('regenerates the initializer to include store generation', async () => {
-        await generateOpenapiZustandBindings({
-          exportName: 'myApi',
-          schemaFile: './src/openapi/openapi.json',
-          outputDir: '../client/app/api/myApi',
-          clientConfigFile: 'test-client/app/api/myApi/client.ts',
-        })
+      it('prompts with the initializer path and regenerates it to include store generation on confirmation', async () => {
+        const confirm = vi.fn().mockResolvedValue(true)
 
-        const contents = (await fs.readFile('test-app/src/conf/initializers/openapi/myApi.ts')).toString()
+        await generateOpenapiZustandBindings({ ...fullOptions }, { confirm })
+
+        expect(confirm).toHaveBeenCalledTimes(1)
+        expect(confirm).toHaveBeenCalledWith([expect.stringContaining('myApi.ts') as string])
+
+        const contents = (await fs.readFile(initializerPath)).toString()
         expect(contents).toContain('generateZustandStoreFromSdk')
+      })
+
+      it('leaves the initializer untouched when the prompt is declined, and skips the follow-on package install', async () => {
+        const confirm = vi.fn().mockResolvedValue(false)
+        dreamCliSpy.mockClear()
+
+        await generateOpenapiZustandBindings({ ...fullOptions }, { confirm })
+
+        const contents = (await fs.readFile(initializerPath)).toString()
+        expect(contents).not.toContain('generateZustandStoreFromSdk')
+        expect(dreamCliSpy).not.toHaveBeenCalled()
+      })
+
+      it('fails loudly before any write instead of silently choosing when the prompt is bypassed', async () => {
+        // BYPASS_CLI_PROMPT=1 (set for this suite) would short-circuit
+        // cliPrompt to '', so the default confirm must throw rather than
+        // treating that as an answer
+        await expect(generateOpenapiZustandBindings({ ...fullOptions })).rejects.toThrow(
+          CannotConfirmOverwriteError,
+        )
+
+        const contents = (await fs.readFile(initializerPath)).toString()
+        expect(contents).not.toContain('generateZustandStoreFromSdk')
+        // the client config (a missing target) must not have been created either
+        await expect(fs.access(clientConfigPath)).rejects.toThrow()
       })
     })
 
     context('when the initializer already exists and matches the expected output', () => {
       beforeEach(async () => {
         // first run to create the initializer
-        await generateOpenapiZustandBindings({
-          exportName: 'myApi',
-          schemaFile: './src/openapi/openapi.json',
-          outputDir: '../client/app/api/myApi',
-          clientConfigFile: 'test-client/app/api/myApi/client.ts',
-        })
+        await generateOpenapiZustandBindings({ ...fullOptions })
       })
 
-      it('does not regenerate it', async () => {
-        const contentsBefore = (
-          await fs.readFile('test-app/src/conf/initializers/openapi/myApi.ts')
-        ).toString()
+      it('silently no-ops without prompting', async () => {
+        const confirm = vi.fn()
+        const contentsBefore = (await fs.readFile(initializerPath)).toString()
 
-        await generateOpenapiZustandBindings({
-          exportName: 'myApi',
-          schemaFile: './src/openapi/openapi.json',
-          outputDir: '../client/app/api/myApi',
-          clientConfigFile: 'test-client/app/api/myApi/client.ts',
-        })
+        await generateOpenapiZustandBindings({ ...fullOptions }, { confirm })
 
-        const contentsAfter = (
-          await fs.readFile('test-app/src/conf/initializers/openapi/myApi.ts')
-        ).toString()
+        expect(confirm).not.toHaveBeenCalled()
+        const contentsAfter = (await fs.readFile(initializerPath)).toString()
         expect(contentsAfter).toEqual(contentsBefore)
       })
     })
@@ -202,7 +238,7 @@ export default function initializeMyApi(psy: PsychicApp) {
     it('adds the @hey-api/openapi-ts package as a dev dependency', async () => {
       await generateOpenapiZustandBindings({
         exportName: 'myApi',
-        clientConfigFile: 'test-client/app/api/myApi/client.ts',
+        clientConfigFile: clientConfigPath,
       })
 
       expect(dreamCliSpy).toHaveBeenCalledWith('pnpm', { args: ['add', '-D', '@hey-api/openapi-ts'] })

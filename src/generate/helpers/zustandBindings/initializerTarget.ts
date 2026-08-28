@@ -1,10 +1,15 @@
 import { camelize, pascalize } from '@rvoh/dream/utils'
-import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
+import { FileWriteTarget } from '../../../cli/helpers/applyConfirmedWriteSet.js'
 import PackageManager from '../../../cli/helpers/PackageManager.js'
 import psychicPath from '../../../helpers/path/psychicPath.js'
 
-export default async function writeInitializer({
+/**
+ * Computes the psychic initializer write target, which taps into the sync
+ * hooks to automatically run the @hey-api/openapi-ts CLI util and generate a
+ * zustand store from the SDK output.
+ */
+export default function initializerTarget({
   exportName,
   schemaFile,
   outputDir,
@@ -12,7 +17,7 @@ export default async function writeInitializer({
   exportName: string
   schemaFile: string
   outputDir: string
-}) {
+}): FileWriteTarget {
   const pascalized = pascalize(exportName)
   const camelized = camelize(exportName)
   const { command, args } = PackageManager.exec('openapi-ts', ['-i', schemaFile, '-o', outputDir])
@@ -49,20 +54,5 @@ export default function initialize${pascalized}(psy: PsychicApp) {
 }\
 `
 
-  try {
-    const existingContents = (await fs.readFile(initializerPath)).toString()
-    if (existingContents === contents) {
-      return // early return if the file already matches exactly
-    }
-  } catch {
-    // noop — file doesn't exist yet
-  }
-
-  try {
-    await fs.access(destDir)
-  } catch {
-    await fs.mkdir(destDir, { recursive: true })
-  }
-
-  await fs.writeFile(initializerPath, contents)
+  return { filePath: initializerPath, contents }
 }

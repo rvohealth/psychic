@@ -12,6 +12,7 @@ import generateOpenapiZustandBindings from '../generate/openapi/zustandBindings.
 import generateResource from '../generate/resource.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import Watcher from '../watcher/Watcher.js'
+import validateOpenapiName from './helpers/validateOpenapiName.js'
 
 const INDENT = '                  '
 
@@ -281,37 +282,47 @@ ${INDENT}  V1/Admin/Reports        # src/app/controllers/V1/Admin/ReportsControl
     program
       .command('setup:sync:enums')
       .description(
-        `Generates an initializer that automatically exports all Dream enum types to a TypeScript file during sync. This is a one-time setup command — once the initializer exists, enums are synced automatically on every \`pnpm psy sync\`.
+        `Generates an initializer that automatically exports the enum types appearing in one of your app's OpenAPI specs to a TypeScript file during sync. This is a one-time setup command — once the initializer exists, enums are synced automatically on every \`pnpm psy sync\`.
 ${INDENT}
-${INDENT}Use this to share enum types between your backend and frontend without manual duplication.
+${INDENT}Use this to share enum types between your backend and frontend without manual duplication. The export set is an information-disclosure boundary, not just a convenience: the generated file is part of your app's public surface, so only enums that actually appear in the selected OpenAPI spec's rendered surface are exported, and each carries only the values that spec renders — a frontend never receives backend implementation details its spec does not expose.
 ${INDENT}
-${INDENT}**WARNING**: This currently syncs **all** database enums to the specified front end, which may not be appropriate for all use cases. It's on our roadmap to base this on specified OpenAPI specs.
+${INDENT}An enum or value absent from the generated file is this boundary doing its job, not a bug. When a client genuinely needs a value, widen the spec that serves that client — never hand-write the value into frontend code, which puts back exactly what the scoping keeps out.
+${INDENT}
+${INDENT}The initializer filename is derived from the spec (sync-enums.ts for 'default', sync-enums-<name>.ts otherwise), so an app with one front end per OpenAPI spec runs this setup once per spec, each with its own --output-file. Re-running for the same spec with different settings prompts before overwriting its initializer. Two initializers pointed at the same --output-file will overwrite each other on every sync.
 ${INDENT}
 ${INDENT}Example:
-${INDENT}  pnpm psy setup:sync:enums ../client/src/api/enums.ts`,
+${INDENT}  pnpm psy setup:sync:enums --openapi-name=default --output-file=../client/src/api/enums.ts`,
       )
-      .argument(
-        '<outfile>',
+      .requiredOption(
+        '--output-file <outputFile>',
         'the output path (relative to backend root) where enum types will be written on each sync. Should end with .ts, e.g., "../client/src/api/enums.ts"',
       )
       .option(
-        '--initializer-filename <initializerFilename>',
-        'custom filename for the generated initializer in src/conf/initializers/. Defaults to `sync-enums.ts`',
+        '--openapi-name <openapiName>',
+        "the name of the registered OpenAPI spec whose enums will be exported, e.g. 'mobile'. Which spec you point at is what decides the enums and values that client receives, and it names the generated initializer. Defaults to 'default' (the unnamed psy.set('openapi', ...) registration)",
+        'default',
+      )
+      .option(
+        '--overwrite',
+        'replace existing generated files that differ, without prompting — the consent the interactive prompt would ask for, for non-interactive use (agents, CI). Missing files are still created and byte-identical files are still left untouched',
+        false,
       )
       .action(
-        async (
-          outfile: string,
-          {
-            initializerName,
-          }: {
-            initializerName: string
-          },
-        ) => {
+        async ({
+          outputFile,
+          openapiName,
+          overwrite,
+        }: {
+          outputFile: string
+          openapiName: string
+          overwrite: boolean
+        }) => {
           await initializePsychicApp({
             bypassDreamIntegrityChecks: true,
             bypassDbConnectionsDuringInit: true,
           })
-          await generateSyncEnumsInitializer(outfile, initializerName)
+          validateOpenapiName(openapiName)
+          await generateSyncEnumsInitializer(outputFile, openapiName, { overwrite })
           process.exit()
         },
       )
@@ -322,6 +333,8 @@ ${INDENT}  pnpm psy setup:sync:enums ../client/src/api/enums.ts`,
         `Generates an initializer that creates typed RTK Query API bindings from your OpenAPI spec during sync. This is a one-time setup command — once configured, bindings are regenerated automatically on every \`pnpm psy sync\`.
 ${INDENT}
 ${INDENT}Use this for React frontends using Redux Toolkit / RTK Query. For Zustand or other state managers, use setup:sync:openapi-zustand instead.
+${INDENT}
+${INDENT}Re-running with different settings prompts once — listing every affected file, including the api file scaffold (which may carry your baseUrl/auth customizations) — before overwriting anything. Note: re-running with a different --export-name generates a new codegen config and initializer without prompting, leaving the previous initializer active — remove the old files manually to avoid double-syncing.
 ${INDENT}
 ${INDENT}Example:
 ${INDENT}  pnpm psy setup:sync:openapi-redux \\
@@ -351,6 +364,11 @@ ${INDENT}    --export-name=backendApi`,
         '--export-name <exportName>',
         'the camelCased name for the exported enhanced API object, e.g., backendApi',
       )
+      .option(
+        '--overwrite',
+        'replace existing generated files that differ, without prompting — the consent the interactive prompt would ask for, for non-interactive use (agents, CI). Missing files are still created and byte-identical files are still left untouched',
+        false,
+      )
       .action(
         async ({
           schemaFile,
@@ -358,24 +376,29 @@ ${INDENT}    --export-name=backendApi`,
           apiImport,
           outputFile,
           exportName,
+          overwrite,
         }: {
           schemaFile: string
           apiFile: string
           apiImport: string
           outputFile: string
           exportName: string
+          overwrite: boolean
         }) => {
           await initializePsychicApp({
             bypassDreamIntegrityChecks: true,
             bypassDbConnectionsDuringInit: true,
           })
-          await generateOpenapiReduxBindings({
-            exportName,
-            schemaFile,
-            apiFile,
-            apiImport,
-            outputFile,
-          })
+          await generateOpenapiReduxBindings(
+            {
+              exportName,
+              schemaFile,
+              apiFile,
+              apiImport,
+              outputFile,
+            },
+            { overwrite },
+          )
           process.exit()
         },
       )
@@ -386,6 +409,8 @@ ${INDENT}    --export-name=backendApi`,
         `Generates an initializer that creates typed API functions from your OpenAPI spec using @hey-api/openapi-ts during sync. This is a one-time setup command — once configured, API functions are regenerated automatically on every \`pnpm psy sync\`.
 ${INDENT}
 ${INDENT}Use this for frontends using Zustand, Jotai, or any non-Redux state manager. For RTK Query / Redux Toolkit, use setup:sync:openapi-redux instead.
+${INDENT}
+${INDENT}Re-running with different settings prompts once — listing every affected file, including the client config scaffold (which may carry your baseUrl/auth customizations) — before overwriting anything. Note: re-running with a different --export-name generates a new initializer without prompting, leaving the previous one active — remove the old initializer manually to avoid double-syncing.
 ${INDENT}
 ${INDENT}Example:
 ${INDENT}  pnpm psy setup:sync:openapi-zustand \\
@@ -410,28 +435,38 @@ ${INDENT}    --export-name=backendApi`,
         '--export-name <exportName>',
         'the camelCased name for the exported API module, e.g., backendApi',
       )
+      .option(
+        '--overwrite',
+        'replace existing generated files that differ, without prompting — the consent the interactive prompt would ask for, for non-interactive use (agents, CI). Missing files are still created and byte-identical files are still left untouched',
+        false,
+      )
       .action(
         async ({
           schemaFile,
           outputDir,
           clientConfigFile,
           exportName,
+          overwrite,
         }: {
           schemaFile: string
           outputDir: string
           clientConfigFile: string
           exportName: string
+          overwrite: boolean
         }) => {
           await initializePsychicApp({
             bypassDreamIntegrityChecks: true,
             bypassDbConnectionsDuringInit: true,
           })
-          await generateOpenapiZustandBindings({
-            exportName,
-            schemaFile,
-            outputDir,
-            clientConfigFile,
-          })
+          await generateOpenapiZustandBindings(
+            {
+              exportName,
+              schemaFile,
+              outputDir,
+              clientConfigFile,
+            },
+            { overwrite },
+          )
           process.exit()
         },
       )
@@ -442,6 +477,8 @@ ${INDENT}    --export-name=backendApi`,
         `Generates an initializer that converts your OpenAPI spec to TypeScript type definitions during sync. This is a one-time setup command — once configured, types are regenerated automatically on every \`pnpm psy sync\`.
 ${INDENT}
 ${INDENT}Use this when you need raw TypeScript types from the OpenAPI spec without a full API client. For typed API functions, use setup:sync:openapi-zustand or setup:sync:openapi-redux instead.
+${INDENT}
+${INDENT}Re-running with different settings prompts before overwriting the existing initializer. Note: re-running with a different --initializer-filename generates a second initializer without prompting, leaving the previous one active — remove the old initializer manually to avoid double-syncing.
 ${INDENT}
 ${INDENT}Example:
 ${INDENT}  pnpm psy setup:sync:openapi-typescript ./src/openapi/openapi.json ../client/src/api/openapi.types.d.ts`,
@@ -458,25 +495,30 @@ ${INDENT}  pnpm psy setup:sync:openapi-typescript ./src/openapi/openapi.json ../
         '--initializer-filename <initializerFilename>',
         'custom filename for the generated initializer in src/conf/initializers/. Defaults to `sync-openapi-typescript.ts`',
       )
+      .option(
+        '--overwrite',
+        'replace existing generated files that differ, without prompting — the consent the interactive prompt would ask for, for non-interactive use (agents, CI). Missing files are still created and byte-identical files are still left untouched',
+        false,
+      )
       .action(
         async (
           openapiFilepath: string,
           outfile: string,
           {
-            initializerName,
+            initializerFilename,
+            overwrite,
           }: {
-            initializerName: string
+            initializerFilename?: `${string}.ts`
+            overwrite: boolean
           },
         ) => {
           await initializePsychicApp({
             bypassDreamIntegrityChecks: true,
             bypassDbConnectionsDuringInit: true,
           })
-          await generateSyncOpenapiTypescriptInitializer(
-            openapiFilepath,
-            outfile,
-            initializerName as `${string}.d.ts`,
-          )
+          await generateSyncOpenapiTypescriptInitializer(openapiFilepath, outfile, initializerFilename, {
+            overwrite,
+          })
           process.exit()
         },
       )

@@ -48,6 +48,7 @@ import OpenapiSegmentExpander, {
 } from './body-segment.js'
 import { DEFAULT_OPENAPI_RESPONSES, OpenapiValidateTarget } from './defaults.js'
 import buildDreamRequestBodyShape from './helpers/buildDreamRequestBodyShape.js'
+import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
 import openapiOpts from './helpers/openapiOpts.js'
 import openapiRoute from './helpers/openapiRoute.js'
 import safelyAttachCursorPaginationParamToRequestBodySegment from './helpers/safelyAttachCursorPaginationParamToRequestBodySegment.js'
@@ -58,6 +59,13 @@ export interface OpenapiRenderOpts {
   casing: SerializerCasing
   suppressResponseEnums: boolean
   legacyImplicitRequestBodyParams: boolean
+  /**
+   * When present, every enum-backed Dream column rendered into the document
+   * reports its spec-visible values to this collector (used by
+   * `PsychicBin.syncClientEnums` to derive client enums from the OpenAPI
+   * surface without a database connection).
+   */
+  enumCollector?: OpenapiEnumCollector | undefined
 }
 
 export interface ToPathObjectOpts {
@@ -709,6 +717,7 @@ export default class OpenapiEndpointRenderer<
         required: required as readonly string[] | undefined,
         combining: combining as Record<string, unknown> | undefined,
         legacyImplicitRequestBodyParams: renderOpts.legacyImplicitRequestBodyParams,
+        enumCollector: renderOpts.enumCollector,
       },
       source,
     )

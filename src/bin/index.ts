@@ -2,6 +2,7 @@ import { CliFileWriter, DreamBin, DreamCLI } from '@rvoh/dream/system'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import ASTPsychicTypesBuilder from '../cli/helpers/ASTPsychicTypesBuilder.js'
+import validateOpenapiName from '../cli/helpers/validateOpenapiName.js'
 import generateController from '../generate/controller.js'
 import generateResource from '../generate/resource.js'
 import EnvInternal from '../helpers/EnvInternal.js'
@@ -152,10 +153,28 @@ export default class PsychicBin {
     DreamCLI.logger.logEndProgress()
   }
 
-  public static async syncClientEnums(outfile: string) {
+  /**
+   * Syncs the client enums file for the OpenAPI spec registered under
+   * `openapiName` (default: `'default'`), writing one exported const per pg
+   * enum that actually appears in that spec's rendered surface. The enum
+   * collection itself renders the spec in memory and requires no database
+   * connection.
+   *
+   * The spec-scoped export set is an information-disclosure boundary: the
+   * generated file is client-visible surface, so an enum or value the spec
+   * does not render is deliberately absent — widen the spec, don't route
+   * around the file.
+   *
+   * An unregistered `openapiName` throws before anything is written —
+   * otherwise the render would silently produce a skeleton document and
+   * overwrite the client enums file with an empty module.
+   */
+  public static async syncClientEnums(outfile: string, openapiName: string = 'default') {
+    validateOpenapiName(openapiName)
+
     DreamCLI.logger.logStartProgress(`syncing client enums...`)
 
-    const enumsStr = await enumsFileStr()
+    const enumsStr = enumsFileStr(openapiName)
 
     try {
       const dir = path.dirname(outfile)

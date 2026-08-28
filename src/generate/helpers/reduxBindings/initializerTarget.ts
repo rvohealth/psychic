@@ -1,29 +1,20 @@
 import { camelize, pascalize } from '@rvoh/dream/utils'
-import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
+import { FileWriteTarget } from '../../../cli/helpers/applyConfirmedWriteSet.js'
 import PackageManager from '../../../cli/helpers/PackageManager.js'
 import psychicPath from '../../../helpers/path/psychicPath.js'
 
-export default async function writeInitializer({ exportName }: { exportName: string }) {
+/**
+ * Computes the psychic initializer write target, which taps into the sync
+ * hooks to automatically run the @rtk-query/codegen-openapi CLI util.
+ */
+export default function initializerTarget({ exportName }: { exportName: string }): FileWriteTarget {
   const pascalized = pascalize(exportName)
   const camelized = camelize(exportName)
 
   const destDir = path.join(psychicPath('conf'), 'initializers', 'openapi')
   const initializerFilename = `${camelized}.ts`
   const initializerPath = path.join(destDir, initializerFilename)
-
-  try {
-    await fs.access(initializerPath)
-    return // early return if the file already exists
-  } catch {
-    // noop
-  }
-
-  try {
-    await fs.access(destDir)
-  } catch {
-    await fs.mkdir(destDir, { recursive: true })
-  }
 
   const filePath = path.join('.', 'src', 'conf', 'openapi', `${camelized}.openapi-codegen.json`)
   const { command, args } = PackageManager.exec('rtk-query-codegen-openapi', [filePath])
@@ -51,5 +42,5 @@ export default function initialize${pascalized}(psy: PsychicApp) {
 }\
 `
 
-  await fs.writeFile(initializerPath, contents)
+  return { filePath: initializerPath, contents }
 }

@@ -16,6 +16,7 @@ import {
   OpenapiSchema,
 } from './endpoint.js'
 import legacyImplicitRequestBodyParamsConfig from './helpers/legacyImplicitRequestBodyParamsConfig.js'
+import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
 import suppressResponseEnumsConfig from './helpers/suppressResponseEnumsConfig.js'
 
 const debugEnabled = debuglog('psychic').enabled
@@ -64,12 +65,16 @@ export default class OpenapiAppRenderer {
   public static _toObject(
     routes: RouteConfig[],
     openapiName: string,
-    { bypassMissingRoutes = false }: { bypassMissingRoutes?: boolean } = {},
+    {
+      bypassMissingRoutes = false,
+      enumCollector = undefined,
+    }: { bypassMissingRoutes?: boolean; enumCollector?: OpenapiEnumCollector | undefined } = {},
   ): OpenapiSchema {
     const renderOpts: OpenapiRenderOpts = {
       casing: 'camel',
       suppressResponseEnums: suppressResponseEnumsConfig(openapiName),
       legacyImplicitRequestBodyParams: legacyImplicitRequestBodyParamsConfig(openapiName),
+      enumCollector,
     }
 
     const alreadyExtractedDescendantSerializers: Record<string, boolean> = {}

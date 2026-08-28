@@ -1,9 +1,13 @@
 import { camelize } from '@rvoh/dream/utils'
-import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
+import { FileWriteTarget } from '../../../cli/helpers/applyConfirmedWriteSet.js'
 import psychicPath from '../../../helpers/path/psychicPath.js'
 
-export default async function writeOpenapiJsonFile({
+/**
+ * Computes the @rtk-query/codegen-openapi config JSON write target. This file
+ * holds the re-runnable settings (schemaFile/apiFile/outputFile/apiImport/exportName).
+ */
+export default function openapiJsonFileTarget({
   exportName,
   schemaFile,
   apiFile,
@@ -15,10 +19,10 @@ export default async function writeOpenapiJsonFile({
   apiFile: string
   apiImport: string
   outputFile: string
-}) {
+}): FileWriteTarget {
   const destFilename = `${camelize(exportName)}.openapi-codegen.json`
   const destDir = path.join(psychicPath('conf'), 'openapi')
-  const destPath = path.join(destDir, destFilename)
+  const filePath = path.join(destDir, destFilename)
 
   const jsonData = {
     schemaFile: path.join('..', '..', '..', replacePrefixingPathSegment(schemaFile)),
@@ -29,13 +33,7 @@ export default async function writeOpenapiJsonFile({
     hooks: true,
   }
 
-  try {
-    await fs.access(destDir)
-  } catch {
-    await fs.mkdir(destDir)
-  }
-
-  await fs.writeFile(destPath, JSON.stringify(jsonData, null, 2))
+  return { filePath, contents: JSON.stringify(jsonData, null, 2) }
 }
 
 function replacePrefixingPathSegment(path: string) {

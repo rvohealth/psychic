@@ -7,6 +7,9 @@ import ApiV1UsersController from '../app/controllers/Api/V1/UsersController.js'
 import AuthedUsersController from '../app/controllers/AuthedUsersController.js'
 import BalloonsController from '../app/controllers/BalloonsController.js'
 import CircularController from '../app/controllers/CircularController.js'
+import EnumSyncCrossChainTestsController from '../app/controllers/EnumSyncCrossChainTestsController.js'
+import InternalEnumSyncTestsController from '../app/controllers/Internal/EnumSyncTestsController.js'
+import MobileEnumSyncTestsController from '../app/controllers/MobileEnumSyncTestsController.js'
 import GreeterController from '../app/controllers/GreeterController.js'
 import OpenapiDecoratorTestController from '../app/controllers/OpenapiDecoratorTestsController.js'
 import OpenapiMissingRouteTestController from '../app/controllers/OpenapiMissingRouteTestController.js'
@@ -253,6 +256,27 @@ export default function routes(r: PsychicRouter) {
   })
 
   r.get('/admin/test', AdminTestController, 'test')
+
+  // fixture routes for the OpenAPI-derived enum sync unit specs (the
+  // controllers scope these endpoints to the internal/mobile/enumTest specs)
+  r.get('enum-sync-tests/internal/species-subset', InternalEnumSyncTestsController, 'speciesSubset')
+  r.post('enum-sync-tests/internal/treat-request-body', InternalEnumSyncTestsController, 'treatRequestBody')
+  r.post(
+    'enum-sync-tests/internal/nested-for-combining',
+    InternalEnumSyncTestsController,
+    'nestedForCombining',
+  )
+  r.get('enum-sync-tests/mobile/balloon-color', MobileEnumSyncTestsController, 'balloonColorResponse')
+  r.get('enum-sync-tests/mobile/treats-items-subset', MobileEnumSyncTestsController, 'treatsItemsSubset')
+  r.post('enum-sync-tests/mobile/species-shadowed', MobileEnumSyncTestsController, 'speciesShadowed')
+  r.get('enum-sync-tests/mobile/hand-written-enum', MobileEnumSyncTestsController, 'handWrittenEnum')
+  r.get('enum-sync-tests/enum-test/color-blue', EnumSyncCrossChainTestsController, 'colorBlueSubset')
+  r.get('enum-sync-tests/enum-test/color-green', EnumSyncCrossChainTestsController, 'colorGreenSubset')
+  r.post(
+    'enum-sync-tests/enum-test/species-union',
+    EnumSyncCrossChainTestsController,
+    'speciesOverrideAndRequestBody',
+  )
 
   // ensure that random middleware can still be provided top-level,
   // same as with a koa application

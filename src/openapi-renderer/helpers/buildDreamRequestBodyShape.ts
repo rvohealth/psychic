@@ -3,6 +3,7 @@ import { Dream } from '@rvoh/dream'
 import { OpenapiSchemaBody, OpenapiSchemaObject, OpenapiSchemaProperties } from '@rvoh/dream/openapi'
 import openapiParamNamesForDreamClass from '../../server/helpers/openapiParamNamesForDreamClass.js'
 import { dreamColumnOpenapiShape } from './dreamColumnOpenapiShape.js'
+import OpenapiEnumCollector from './OpenapiEnumCollector.js'
 
 export interface BuildDreamRequestBodyShapeOpts {
   params?: readonly string[] | undefined
@@ -10,6 +11,15 @@ export interface BuildDreamRequestBodyShapeOpts {
   including?: readonly string[] | undefined
   required?: readonly string[] | undefined
   combining?: Record<string, unknown> | undefined
+
+  /**
+   * When present, enum-backed columns rendered into this request-body shape
+   * report their values to the collector (see `OpenapiEnumCollector`).
+   * Columns shadowed by a same-key `combining` entry contribute nothing —
+   * the `combining` entry replaces their rendered property, so the final
+   * spec never shows the model-derived shape for those keys.
+   */
+  enumCollector?: OpenapiEnumCollector | undefined
 
   /**
    * When true, restores the legacy behavior of resolving to ALL param-safe
@@ -35,7 +45,8 @@ export default function buildDreamRequestBodyShape(
   opts: BuildDreamRequestBodyShapeOpts,
   source: string,
 ): OpenapiSchemaObject {
-  const { params, only, including, required, combining, legacyImplicitRequestBodyParams } = opts
+  const { params, only, including, required, combining, legacyImplicitRequestBodyParams, enumCollector } =
+    opts
 
   // When neither `params` nor `only` is provided, the default is to resolve to
   // NO model columns (an empty allowlist), rather than implicitly exposing every
@@ -58,10 +69,16 @@ export default function buildDreamRequestBodyShape(
     paramsShape.required = required as string[]
   }
 
+  // a same-key `combining` entry is spread over the model-derived property
+  // below, so the model-derived shape for that key never reaches the final
+  // spec — shadowed columns must not contribute collected enum values
+  const combiningKeys = new Set(Object.keys(combining || {}))
+
   paramsShape.properties = paramSafeColumns.reduce(
     (acc, columnName) => {
       acc[columnName] = dreamColumnOpenapiShape(source, dreamClass, columnName, undefined, {
         allowGenericJson: true,
+        enumCollector: combiningKeys.has(columnName) ? undefined : enumCollector,
       })
       return acc
     },

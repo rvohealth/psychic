@@ -1,5 +1,6 @@
 import { DreamSerializer } from '@rvoh/dream'
 import { SerializingPlainPropertyWithoutOpenapiShape } from '../../../../../src/error/openapi/SerializingPlainPropertyWithoutOpenapiShape.js'
+import OpenapiEnumCollector from '../../../../../src/openapi-renderer/helpers/OpenapiEnumCollector.js'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 import User from '../../../../../test-app/src/app/models/User.js'
 import UserSerializer from '../../../../../test-app/src/app/serializers/UserSerializer.js'
@@ -304,6 +305,46 @@ describe('DreamSerializer attributes', () => {
             },
           }),
         )
+      })
+    })
+  })
+
+  context('with an enumCollector', () => {
+    context('when a later same-key declaration shadows an enum override', () => {
+      it('collects only the values of the declaration that wins the rendered property', () => {
+        const enumCollector = new OpenapiEnumCollector()
+        const MySerializer = (data: User) =>
+          DreamSerializer(User, data)
+            .attribute('species', { openapi: { type: ['string', 'null'], enum: ['cat'] } })
+            .attribute('species', { openapi: { type: ['string', 'null'], enum: ['noncat'] } })
+
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer, { enumCollector })
+        expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
+          species: {
+            type: ['string', 'null'],
+            enum: ['noncat'],
+          },
+        })
+
+        expect(enumCollector.toEnumMap()).toEqual({ species_types_enum: ['noncat'] })
+      })
+    })
+
+    context('when distinct keys carry different enum overrides of the same pg enum', () => {
+      it('collects the union of both declarations', () => {
+        const enumCollector = new OpenapiEnumCollector()
+        const MySerializer = (data: User) =>
+          DreamSerializer(User, data)
+            .attribute('species', { openapi: { type: ['string', 'null'], enum: ['cat'] } })
+            .attribute('species', {
+              as: 'otherSpecies',
+              openapi: { type: ['string', 'null'], enum: ['noncat'] },
+            })
+
+        const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer, { enumCollector })
+        serializerOpenapiRenderer['renderedOpenapiAttributes']()
+
+        expect(enumCollector.toEnumMap()).toEqual({ species_types_enum: ['cat', 'noncat'] })
       })
     })
   })
