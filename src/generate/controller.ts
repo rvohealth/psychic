@@ -124,13 +124,16 @@ export default async function generateController({
       }),
     )
   } catch (error) {
-    throw new Error(`
+    throw new Error(
+      `
       Something happened while trying to create the controller file:
         ${relFilePath}
 
       Does this file already exist? Here is the error that was raised:
         ${(error as Error).message}
-    `)
+    `,
+      { cause: error },
+    )
   }
 
   await generateControllerSpec({
@@ -224,12 +227,15 @@ async function generateControllerSpec({
         : generateControllerSpecContent(fullyQualifiedControllerName), //, route, fullyQualifiedModelName, actions),
     )
   } catch (error) {
-    throw new Error(`
+    throw new Error(
+      `
       Something happened while trying to create the controller spec file:
         ${relFilePath}
 
       Does this file already exist? Here is the error that was raised:
         ${(error as Error).message}
-    `)
+    `,
+      { cause: error },
+    )
   }
 }
