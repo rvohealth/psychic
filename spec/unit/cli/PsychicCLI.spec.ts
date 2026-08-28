@@ -31,35 +31,46 @@ describe('PsychicCLI setup:sync commands', () => {
   })
 
   describe('setup:sync:enums', () => {
-    it('passes --initializer-filename through to the initializer generator', async () => {
+    it('passes --openapi-name through to the initializer generator', async () => {
       await buildProgram().parseAsync(
-        [
-          'setup:sync:enums',
-          '--output-file=../client/src/api/enums.ts',
-          '--initializer-filename=custom-sync-enums.ts',
-        ],
+        ['setup:sync:enums', '--output-file=../client/src/api/enums.ts', '--openapi-name=mobile'],
         { from: 'user' },
       )
 
-      expect(generateSyncEnumsInitializer).toHaveBeenCalledWith(
-        '../client/src/api/enums.ts',
-        'custom-sync-enums.ts',
-        'default',
-      )
+      expect(generateSyncEnumsInitializer).toHaveBeenCalledWith('../client/src/api/enums.ts', 'mobile')
     })
 
-    context('when --initializer-filename is omitted', () => {
-      it('passes undefined so the generator applies its default filename', async () => {
+    context('when --openapi-name is omitted', () => {
+      it("passes 'default' so the generator derives the default sync-enums.ts filename", async () => {
         await buildProgram().parseAsync(['setup:sync:enums', '--output-file=../client/src/api/enums.ts'], {
           from: 'user',
         })
 
-        expect(generateSyncEnumsInitializer).toHaveBeenCalledWith(
-          '../client/src/api/enums.ts',
-          undefined,
-          'default',
-        )
+        expect(generateSyncEnumsInitializer).toHaveBeenCalledWith('../client/src/api/enums.ts', 'default')
       })
+    })
+
+    it('does not accept --initializer-filename (the filename is derived from the spec name)', async () => {
+      const program = new Command()
+      program.exitOverride()
+      program.configureOutput({ writeErr: () => {} })
+      PsychicCLI.provide(program, {
+        initializePsychicApp: () => Promise.resolve(PsychicApp.getOrFail()),
+        seedDb: () => {},
+      })
+
+      await expect(
+        program.parseAsync(
+          [
+            'setup:sync:enums',
+            '--output-file=../client/src/api/enums.ts',
+            '--initializer-filename=custom.ts',
+          ],
+          { from: 'user' },
+        ),
+      ).rejects.toMatchObject({ code: 'commander.unknownOption' })
+
+      expect(generateSyncEnumsInitializer).not.toHaveBeenCalled()
     })
 
     context('pre-3.12 positional invocation (`setup:sync:enums <outfile>`)', () => {

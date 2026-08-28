@@ -288,7 +288,7 @@ ${INDENT}Use this to share enum types between your backend and frontend without 
 ${INDENT}
 ${INDENT}An enum or value absent from the generated file is this boundary doing its job, not a bug. When a client genuinely needs a value, widen the spec that serves that client — never hand-write the value into frontend code, which puts back exactly what the scoping keeps out.
 ${INDENT}
-${INDENT}Re-running with different settings prompts before overwriting the existing initializer. Note: re-running with a different --initializer-filename generates a second initializer without prompting, leaving the previous one active — remove the old initializer manually to avoid double-syncing.
+${INDENT}The initializer filename is derived from the spec (sync-enums.ts for 'default', sync-enums-<name>.ts otherwise), so an app with one front end per OpenAPI spec runs this setup once per spec, each with its own --output-file. Re-running for the same spec with different settings prompts before overwriting its initializer. Two initializers pointed at the same --output-file will overwrite each other on every sync.
 ${INDENT}
 ${INDENT}Example:
 ${INDENT}  pnpm psy setup:sync:enums --openapi-name=default --output-file=../client/src/api/enums.ts`,
@@ -299,32 +299,18 @@ ${INDENT}  pnpm psy setup:sync:enums --openapi-name=default --output-file=../cli
       )
       .option(
         '--openapi-name <openapiName>',
-        "the name of the registered OpenAPI spec whose enums will be exported, e.g. 'mobile'. Which spec you point at is what decides the enums and values that client receives. Defaults to 'default' (the unnamed psy.set('openapi', ...) registration)",
+        "the name of the registered OpenAPI spec whose enums will be exported, e.g. 'mobile'. Which spec you point at is what decides the enums and values that client receives, and it names the generated initializer. Defaults to 'default' (the unnamed psy.set('openapi', ...) registration)",
         'default',
       )
-      .option(
-        '--initializer-filename <initializerFilename>',
-        'custom filename for the generated initializer in src/conf/initializers/. Defaults to `sync-enums.ts`',
-      )
-      .action(
-        async ({
-          outputFile,
-          openapiName,
-          initializerFilename,
-        }: {
-          outputFile: string
-          openapiName: string
-          initializerFilename?: string
-        }) => {
-          await initializePsychicApp({
-            bypassDreamIntegrityChecks: true,
-            bypassDbConnectionsDuringInit: true,
-          })
-          validateOpenapiName(openapiName)
-          await generateSyncEnumsInitializer(outputFile, initializerFilename, openapiName)
-          process.exit()
-        },
-      )
+      .action(async ({ outputFile, openapiName }: { outputFile: string; openapiName: string }) => {
+        await initializePsychicApp({
+          bypassDreamIntegrityChecks: true,
+          bypassDbConnectionsDuringInit: true,
+        })
+        validateOpenapiName(openapiName)
+        await generateSyncEnumsInitializer(outputFile, openapiName)
+        process.exit()
+      })
 
     program
       .command('setup:sync:openapi-redux')

@@ -1,4 +1,4 @@
-import { camelize } from '@rvoh/dream/utils'
+import { camelize, hyphenize } from '@rvoh/dream/utils'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
 import confirmOverwrite from '../../cli/helpers/confirmOverwrite.js'
@@ -15,13 +15,13 @@ const RESERVED_WORDS = new Set([
 ])
 
 /**
- * The camelized initializer filename becomes the generated initializer's
+ * The camelized initializer basename becomes the generated initializer's
  * function name — an identifier position, where JSON.stringify cannot help
  * and Dream's camelize preserves quotes, backticks, and dollar-braces
  * (`camelize("it's-enums") === "it'sEnums"`). Strip anything that is not a
  * valid identifier character, and fall back to `'syncEnums'` when nothing
  * identifier-safe remains, the result would start with a digit, or the
- * result is a reserved word — so no filename can produce a syntactically
+ * result is a reserved word — so no openapiName can produce a syntactically
  * broken generated file.
  */
 function initializerFunctionName(camelized: string): string {
@@ -33,6 +33,13 @@ function initializerFunctionName(camelized: string): string {
 /**
  * Generates the sync-enums initializer, which hooks `cli:sync` to write the
  * client enums file for the selected OpenAPI spec on every `pnpm psy sync`.
+ *
+ * The initializer filename is derived from the spec, the same way the
+ * zustand/redux setup commands derive theirs from `--export-name`: the
+ * `'default'` spec (or an omitted `openapiName`) generates
+ * `sync-enums.ts`, and any other spec generates `sync-enums-<name>.ts`
+ * (hyphenized) — so an app with one front end per OpenAPI spec runs this
+ * setup once per spec and each run owns its own initializer.
  *
  * When `openapiName` is provided, the generated initializer bakes it into
  * the `PsychicBin.syncClientEnums` call alongside the outfile; when omitted,
@@ -47,7 +54,6 @@ function initializerFunctionName(camelized: string): string {
  */
 export default async function generateSyncEnumsInitializer(
   outfile: string,
-  initializerFilename: string = 'sync-enums.ts',
   openapiName?: string,
   {
     confirm = confirmOverwrite,
@@ -55,7 +61,10 @@ export default async function generateSyncEnumsInitializer(
     confirm?: (filePaths: string[]) => Promise<boolean>
   } = {},
 ) {
-  const initializerFilenameWithoutExtension = initializerFilename.replace(/\.ts$/, '')
+  const initializerFilenameWithoutExtension =
+    openapiName === undefined || openapiName === 'default'
+      ? 'sync-enums'
+      : `sync-enums-${hyphenize(openapiName)}`
   const functionName = initializerFunctionName(camelize(initializerFilenameWithoutExtension))
 
   const destDir = path.join(psychicPath('conf'), 'initializers')
