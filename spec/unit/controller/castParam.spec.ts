@@ -18,6 +18,7 @@ describe('PsychicController#castParam', () => {
         updatedAt: 'birld',
         deletedAt: 'sometimeago',
         subBody: { hello: 'world', nullValue: null },
+        nullSubBody: null,
         dotNotationToArray: ['a'],
         dotNotationToString: 'a',
         hello: 'hello',
@@ -116,6 +117,12 @@ describe('PsychicController#castParam', () => {
     })
   })
 
+  context('when the specified sub-object is null', () => {
+    it('throws ParamValidationError', () => {
+      expect(() => controller.castParam('nullSubBody.hello', 'string')).toThrow(ParamValidationError)
+    })
+  })
+
   context('when dot notation specifies a non-object', () => {
     it('throws ParamValidationError', () => {
       expect(() => controller.castParam('dotNotationToString.hello', 'string')).toThrow(ParamValidationError)
@@ -143,6 +150,48 @@ describe('PsychicController#castParam', () => {
       it('returns null', () => {
         expect(controller.castParam('subBody.nullValue', 'string', { allowNull: true })).toBeNull()
       })
+    })
+
+    context('when the specified sub-object is null', () => {
+      it('throws ParamValidationError', () => {
+        expect(() => controller.castParam('nullSubBody.hello', 'string', { allowNull: true })).toThrow(
+          ParamValidationError,
+        )
+      })
+    })
+
+    context('with a RegExp expected type', () => {
+      it('returns undefined when the parameter is absent', () => {
+        expect(controller.castParam('code', /^\d{4}$/, { allowNull: true })).toBeUndefined()
+      })
+
+      it('returns undefined when a dot-notation intermediate is absent', () => {
+        expect(controller.castParam('invalidSubBody.code', /^\d{4}$/, { allowNull: true })).toBeUndefined()
+      })
+
+      it('returns null when the parameter is explicitly null', () => {
+        expect(controller.castParam('subBody.nullValue', /^\d{4}$/, { allowNull: true })).toBeNull()
+      })
+
+      it('throws ParamValidationError when a present value does not match', () => {
+        expect(() => controller.castParam('name', /^\d{4}$/, { allowNull: true })).toThrow(
+          ParamValidationError,
+        )
+      })
+    })
+  })
+
+  context('with a RegExp expected type', () => {
+    it('throws ParamValidationError when the parameter is absent', () => {
+      expect(() => controller.castParam('code', /^\d{4}$/)).toThrow(ParamValidationError)
+    })
+
+    it('throws ParamValidationError when the parameter is explicitly null', () => {
+      expect(() => controller.castParam('subBody.nullValue', /^\d{4}$/)).toThrow(ParamValidationError)
+    })
+
+    it('returns a present value that matches', () => {
+      expect(controller.castParam('name', /^howya/)).toEqual('howyadoin')
     })
   })
 

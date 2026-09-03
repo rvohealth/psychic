@@ -296,6 +296,11 @@ export default class Params {
     if (typeof paramValue === 'string') paramValue = paramValue.trim()
 
     if (expectedType instanceof RegExp) {
+      if (paramValue === null || paramValue === undefined) {
+        this.throwUnlessAllowNull(paramName, paramValue, typeToError(expectedType), opts)
+        return paramValue as ReturnType
+      }
+
       return this.matchRegexOrThrow(paramName, paramValue as string, expectedType) as ReturnType
     }
 
