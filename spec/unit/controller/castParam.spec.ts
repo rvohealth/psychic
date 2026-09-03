@@ -17,7 +17,7 @@ describe('PsychicController#castParam', () => {
         createdAt: 'hello',
         updatedAt: 'birld',
         deletedAt: 'sometimeago',
-        subBody: { hello: 'world' },
+        subBody: { hello: 'world', nullValue: null },
         dotNotationToArray: ['a'],
         dotNotationToString: 'a',
         hello: 'hello',
@@ -134,8 +134,14 @@ describe('PsychicController#castParam', () => {
     })
 
     context("when the specified sub-object doesn't exist", () => {
+      it('returns undefined', () => {
+        expect(controller.castParam('invalidSubBody.hello', 'string', { allowNull: true })).toBeUndefined()
+      })
+    })
+
+    context('when the nested value is explicitly null', () => {
       it('returns null', () => {
-        expect(controller.castParam('invalidSubBody.hello', 'string', { allowNull: true })).toBeNull()
+        expect(controller.castParam('subBody.nullValue', 'string', { allowNull: true })).toBeNull()
       })
     })
   })
