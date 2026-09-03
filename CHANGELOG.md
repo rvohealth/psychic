@@ -1,3 +1,7 @@
+## 3.13.0
+
+- **Behavior change:** `castParam` with `allowNull: true` now consistently preserves nullish input for primitive-literal and RegExp expected types: an absent value at any depth returns `undefined`, except when the expected type is `'null'`, which returns `null` because null is the requested type; an explicitly `null` leaf returns `null`. Previously, an absent dot-notation intermediate returned `null`, and direct RegExp validators rejected nullish leaves despite `allowNull`. This preserves the distinction between omission and explicit clearing in partial updates and makes direct RegExp validators behave like the equivalent string `match` option. Callers that relied on an absent nested object producing `null` should handle `undefined` instead. A `null` dot-notation intermediate remains invalid input, but now produces `ParamValidationError` rather than allowing a `TypeError` to escape. OpenAPI-schema leaves remain governed by their schema.
+
 ## 3.12.0
 
 - **Behavior change:** client enum syncing is now OpenAPI-driven and per-spec, replacing the pg-catalog dump that exported every database enum (and required a live database). `setup:sync:enums` now takes named arguments instead of a positional outfile — `setup:sync:enums <outfile>` becomes `setup:sync:enums --openapi-name=<name> --output-file=<path>` (`--openapi-name` is optional and defaults to `'default'`; old positional invocations fail loudly) — and the generated initializer bakes the chosen spec name into its `PsychicBin.syncClientEnums` call.

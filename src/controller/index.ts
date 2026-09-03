@@ -407,7 +407,11 @@ export default class PsychicController {
    * @param opts - Optional validation options with the following supported properties:
    *   - `enum`: Array of allowed string values to restrict the parameter to specific choices
    *   - `allowNull`: Boolean indicating whether null values are permitted (default: false)
-   * @returns The validated and type-cast parameter value
+   * @returns The validated and type-cast parameter value. With `allowNull`, an absent value at any
+   * depth returns `undefined`, except when the expected type is `'null'`, which returns `null`
+   * because null is the requested type. An explicitly `null` leaf returns `null` for
+   * primitive-literal and RegExp expected types. OpenAPI-schema leaves remain governed by their
+   * schema, and a present non-object intermediate is always invalid dot notation.
    * @throws {ParamValidationError} When validation fails (converted to 400 response by Psychic)
    *
    * @example
@@ -488,15 +492,15 @@ export default class PsychicController {
     const nestedParams = params[key]
 
     if (nestedParams === undefined) {
-      if (opts?.allowNull) return null as FinalReturnType
+      if (opts?.allowNull) return undefined as FinalReturnType
       throw new InvalidDotNotationPath()
-    } else if (Array.isArray(nestedParams)) {
+    } else if (nestedParams === null || Array.isArray(nestedParams)) {
       throw new InvalidDotNotationPath()
     } else if (typeof nestedParams !== 'object') {
       throw new InvalidDotNotationPath()
     }
 
-    return this._castParam(keys, nestedParams as PsychicParamsDictionary, expectedType, opts)
+    return this._castParam(keys, nestedParams, expectedType, opts)
   }
 
   /**
