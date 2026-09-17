@@ -1,6 +1,5 @@
 export { type PsychicOpenapiControllerConfig, type PsychicOpenapiNames } from '../controller/index.js'
 export {
-  MissingControllerActionPairingInRoutes,
   type OpenapiContent,
   type OpenapiEndpointRendererOpts,
   type OpenapiEndpointResponse,
