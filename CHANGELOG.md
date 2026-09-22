@@ -1,3 +1,7 @@
+## 3.15.0
+
+- Map Dream's `CannotSaveMissingDream` to HTTP `404`, matching `RecordNotFound`, when a persisted record is deleted before a concurrent update saves it. Requires `@rvoh/dream` `^2.31.0`.
+
 ## 3.14.0
 
 - Removed `MissingControllerActionPairingInRoutes` from the `@rvoh/psychic/openapi` exports. It is an internal control-flow signal, thrown by the OpenAPI endpoint renderer when an `@OpenAPI`-decorated method has no matching route and caught by the OpenAPI document generator to implement `bypassMissingRoutes`. Psychic applications have no reason to throw it and no code path that can usefully catch it, so its export was accidental surface rather than public API. The class itself is unchanged and still reported in the same way — an `@OpenAPI` decorator with no matching route still fails with the same message — only the export is gone.

@@ -1,4 +1,9 @@
-import { DataIncompatibleWithDatabaseField, RecordNotFound, ValidationError } from '@rvoh/dream/errors'
+import {
+  CannotSaveMissingDream,
+  DataIncompatibleWithDatabaseField,
+  RecordNotFound,
+  ValidationError,
+} from '@rvoh/dream/errors'
 import { camelize } from '@rvoh/dream/utils'
 import Koa from 'koa'
 import KoaRouter from '@koa/router'
@@ -424,7 +429,7 @@ suggested fix:  "${convertRouteParams(path)}"
         } else {
           controllerInstance['koaSendStatus'](httpErr.status)
         }
-      } else if (err instanceof RecordNotFound) {
+      } else if (err instanceof RecordNotFound || err instanceof CannotSaveMissingDream) {
         controllerInstance['koaSendStatus'](404)
       } else if (err instanceof DataIncompatibleWithDatabaseField) {
         /**

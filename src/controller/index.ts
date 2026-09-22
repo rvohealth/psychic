@@ -565,7 +565,7 @@ export default class PsychicController {
       dreamClass,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       opts as any,
-    )
+    ) as unknown as ReturnPayload
   }
 
   /**
