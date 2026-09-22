@@ -1,3 +1,4 @@
+import { ObjectSerializer } from '@rvoh/dream'
 import { DreamCLI } from '@rvoh/dream/system'
 import Koa from 'koa'
 import * as path from 'node:path'
@@ -7,6 +8,8 @@ import passport from 'koa-passport'
 import { Strategy as LocalStrategy } from 'passport-local'
 import * as winston from 'winston'
 import PsychicDevtools from '../../../src/devtools/PsychicDevtools.js'
+import HttpStatusConflict from '../../../src/error/http/Conflict.js'
+import HttpStatusServiceUnavailable from '../../../src/error/http/ServiceUnavailable.js'
 import HttpStatusUnauthorized from '../../../src/error/http/Unauthorized.js'
 import EnvInternal from '../../../src/helpers/EnvInternal.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
@@ -265,6 +268,15 @@ export default async (psy: PsychicApp) => {
       case '/middleware-error-401':
         throw new HttpStatusUnauthorized({ reason: 'custom middleware unauthorized' })
 
+      case '/middleware-error-409-with-serializer':
+        throw new HttpStatusConflict(MiddlewareConflictSerializer())
+
+      case '/middleware-error-409-with-serializer-array':
+        throw new HttpStatusConflict([MiddlewareConflictSerializer()])
+
+      case '/middleware-error-503-with-serializer':
+        throw new HttpStatusServiceUnavailable(MiddlewareConflictSerializer())
+
       default:
         await next()
     }
@@ -299,6 +311,9 @@ export default async (psy: PsychicApp) => {
       // server:error hooks can shape the response on the error-boundary path
       ctx.status = 503
       ctx.body = { shapedBy: 'server:error' }
+    } else if (ctx.path === '/middleware-error-503-with-serializer') {
+      // leave the error boundary's default response in place so
+      // spec/unit/server/error-boundary.spec.ts can observe it
     } else if (!ctx.headerSent) {
       ctx.status = 500
       ctx.body = ''
@@ -365,3 +380,10 @@ export function __forTestingOnly(message: string) {
   process.env.__PSYCHIC_HOOKS_TEST_CACHE ||= ''
   process.env.__PSYCHIC_HOOKS_TEST_CACHE += `,${message}`
 }
+
+// used by spec/unit/server/error-boundary.spec.ts: the unexposed field proves
+// the builder is rendered rather than sent as is
+const MiddlewareConflictSerializer = () =>
+  ObjectSerializer({ conflictReason: 'taken', unexposed: 'secret' }).attribute('conflictReason', {
+    openapi: 'string',
+  })

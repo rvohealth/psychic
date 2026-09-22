@@ -3,7 +3,7 @@ import { Encrypt } from '@rvoh/dream/utils'
 import { BeforeAction, OpenAPI } from '../../../../src/package-exports/index.js'
 import User, { userParamSafeColumns } from '../models/User.js'
 import { CommentTestingBasicSerializerRefSerializer } from '../serializers/CommentSerializer.js'
-import { UserWithPostsSerializer } from '../serializers/UserSerializer.js'
+import { UserConflictSerializer, UserWithPostsSerializer } from '../serializers/UserSerializer.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class UsersController extends ApplicationController {
@@ -197,6 +197,61 @@ export default class UsersController extends ApplicationController {
   public async testFastJsonStringifyWithSerializerRef() {
     const user = await User.preload('posts', 'comments').findOrFail(this.castParam('id', 'bigint'))
     this.ok(UserWithPostsSerializer(user))
+  }
+
+  @OpenAPI({
+    fastJsonStringify: true,
+    status: 200,
+    responses: {
+      409: {
+        $serializer: UserConflictSerializer,
+      },
+    },
+  })
+  public async testConflictWithSerializer() {
+    const user = await User.findOrFail(this.castParam('id', 'bigint'))
+    this.serializerPassthrough({ howyadoin: 'howyadoin' })
+    this.conflict(UserConflictSerializer({ reason: 'taken', user }))
+  }
+
+  @OpenAPI({
+    status: 200,
+    responses: {
+      409: {
+        $serializer: UserConflictSerializer,
+      },
+    },
+  })
+  public async testConflictWithSerializerWithoutFastJsonStringify() {
+    const user = await User.findOrFail(this.castParam('id', 'bigint'))
+    this.serializerPassthrough({ howyadoin: 'howyadoin' })
+    this.conflict(UserConflictSerializer({ reason: 'taken', user }))
+  }
+
+  @OpenAPI({
+    status: 200,
+    responses: {
+      409: {
+        type: 'array',
+        items: {
+          $serializer: UserConflictSerializer,
+        },
+      },
+    },
+  })
+  public async testConflictWithSerializerArray() {
+    const user = await User.findOrFail(this.castParam('id', 'bigint'))
+    this.serializerPassthrough({ howyadoin: 'howyadoin' })
+    this.conflict([UserConflictSerializer({ reason: 'taken', user })])
+  }
+
+  @OpenAPI(UserConflictSerializer, {
+    status: 203,
+  })
+  public async testNonAuthoritativeInformationWithSerializer() {
+    const user = await User.findOrFail(this.castParam('id', 'bigint'))
+    this.serializerPassthrough({ howyadoin: 'howyadoin' })
+    this.nonAuthoritativeInformation(UserConflictSerializer({ reason: 'taken', user }))
   }
 
   @OpenAPI(UserWithPostsSerializer, {

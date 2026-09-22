@@ -52,5 +52,23 @@ describe('PsychicServer error boundary', () => {
       expect(res.body).toEqual({ reason: 'custom middleware unauthorized' })
       expect(serverErrorHookCallCount()).toEqual(0)
     })
+
+    it('renders a serializer passed as HttpError data', async () => {
+      const res = await request.get('/middleware-error-409-with-serializer', 409)
+      expect(res.body).toEqual({ conflictReason: 'taken' })
+    })
+
+    it('renders an array of serializers passed as HttpError data', async () => {
+      const res = await request.get('/middleware-error-409-with-serializer-array', 409)
+      expect(res.body).toEqual([{ conflictReason: 'taken' }])
+    })
+  })
+
+  context('a 5xx HttpError thrown from middleware', () => {
+    it('renders a serializer passed as HttpError data', async () => {
+      const res = await request.get('/middleware-error-503-with-serializer', 503)
+      expect(res.body).toEqual({ conflictReason: 'taken' })
+      expect(serverErrorHookCallCount()).toEqual(1)
+    })
   })
 })

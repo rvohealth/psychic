@@ -1,4 +1,4 @@
-import { DreamSerializer } from '@rvoh/dream'
+import { DreamSerializer, ObjectSerializer } from '@rvoh/dream'
 import User from '../models/User.js'
 
 // Summary serializer: only id
@@ -45,3 +45,14 @@ export const UserWithOptionalFlattenedPostSerializer = (user: User) =>
     flatten: true,
     optional: true,
   })
+
+export const UserWithPassthroughSerializer = (data: User, passthrough: { howyadoin: string }) =>
+  UserSummarySerializer(data, passthrough).customAttribute('howyadoin', () => passthrough.howyadoin, {
+    openapi: 'string',
+  })
+
+// renders a nested serializer so that controller passthrough data is observable in the output
+export const UserConflictSerializer = (data: { reason: string; user: User }) =>
+  ObjectSerializer(data)
+    .attribute('reason', { openapi: 'string' })
+    .rendersOne('user', { serializer: UserWithPassthroughSerializer })

@@ -78,6 +78,18 @@ export default function routes(r: PsychicRouter) {
       UsersController,
       'testFastJsonStringifyWithSerializerRef',
     )
+    r.get('conflict-with-serializer', UsersController, 'testConflictWithSerializer')
+    r.get(
+      'conflict-with-serializer-without-fast-json-stringify',
+      UsersController,
+      'testConflictWithSerializerWithoutFastJsonStringify',
+    )
+    r.get('conflict-with-serializer-array', UsersController, 'testConflictWithSerializerArray')
+    r.get(
+      'non-authoritative-information-with-serializer',
+      UsersController,
+      'testNonAuthoritativeInformationWithSerializer',
+    )
   })
   r.resources('pets', { only: ['create', 'update'] }, r => {
     r.put('update2', PetsController, 'update2')
