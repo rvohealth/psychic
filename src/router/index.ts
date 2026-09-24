@@ -425,7 +425,7 @@ suggested fix:  "${convertRouteParams(path)}"
       if (errorIsRescuableHttpError(err)) {
         const httpErr = err as HttpError
         if (httpErr.data) {
-          controllerInstance['koaSendJson'](httpErr.data, httpErr.status)
+          controllerInstance['koaSendHttpErrorJson'](httpErr.data, httpErr.status)
         } else {
           controllerInstance['koaSendStatus'](httpErr.status)
         }

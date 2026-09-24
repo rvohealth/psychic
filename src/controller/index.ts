@@ -1,7 +1,6 @@
 import { Dream, DreamApp } from '@rvoh/dream'
 import { GlobalNameNotSet } from '@rvoh/dream/errors'
 import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
-import { DreamSerializerBuilder, ObjectSerializerBuilder } from '@rvoh/dream/system'
 import {
   DreamModelSerializerType,
   DreamParamSafeAttributes,
@@ -48,6 +47,7 @@ import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent.j
 import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import isSafeRedirectTarget from '../helpers/isSafeRedirectTarget.js'
+import renderSerializerBuilders, { dataIsSerializerBuilder } from '../helpers/renderSerializerBuilders.js'
 import toJson from '../helpers/toJson.js'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
 import OpenapiPayloadValidator from '../openapi-renderer/helpers/OpenapiPayloadValidator.js'
@@ -715,9 +715,7 @@ export default class PsychicController {
     const psychicControllerClass: typeof PsychicController = this.constructor as typeof PsychicController
 
     // if we already have a serializer, let's just render it
-    if (data instanceof DreamSerializerBuilder || data instanceof ObjectSerializerBuilder) {
-      return data.render(this.defaultSerializerPassthrough, this.renderOpts)
-    }
+    if (dataIsSerializerBuilder(data)) return this.renderSerializerBuilders(data) as SerializerResult | null
 
     const openapiDef = (this.constructor as typeof PsychicController)?.openapi?.[this.action]
 
@@ -803,6 +801,32 @@ export default class PsychicController {
     } else {
       return this.singleObjectJson(data, opts)
     }
+  }
+
+  /**
+   * @internal
+   *
+   * Renders a serializer builder, or an array of them, with the controller's
+   * serializer passthrough and render options. Anything else is returned as is.
+   */
+  private renderSerializerBuilders(data: unknown) {
+    return renderSerializerBuilders(data, this.defaultSerializerPassthrough, this.renderOpts)
+  }
+
+  /**
+   * @internal
+   *
+   * Sends the data attached to a rescued HttpError (e.g. `this.conflict(MySerializer(obj))`).
+   * Serializer builders, and arrays of them, are rendered the same way success responses
+   * render them (with the controller's serializer passthrough and render options).
+   * Anything else is sent as is.
+   */
+  private koaSendHttpErrorJson(
+    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+    data: any,
+    statusCode: number,
+  ) {
+    this.koaSendJson(this.renderSerializerBuilders(data), statusCode)
   }
 
   /**
@@ -1129,7 +1153,7 @@ export default class PsychicController {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public nonAuthoritativeInformation(message: any = undefined) {
     if (message) {
-      this.koaSendJson(message, 203)
+      this.koaSendJson(this.renderSerializerBuilders(message), 203)
     } else {
       this.koaSendStatus(203)
     }

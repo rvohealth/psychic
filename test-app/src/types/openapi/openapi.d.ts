@@ -2676,6 +2676,183 @@ export interface paths {
         };
         trace?: never;
     };
+    "/users/{id}/conflict-with-serializer": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserConflict"];
+                    };
+                };
+                418: components["responses"]["CustomResponse"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{id}/conflict-with-serializer-array": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserConflict"][];
+                    };
+                };
+                418: components["responses"]["CustomResponse"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{id}/conflict-with-serializer-without-fast-json-stringify": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserConflict"];
+                    };
+                };
+                418: components["responses"]["CustomResponse"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/{id}/fast-json-stringify-with-serializer-ref": {
         parameters: {
             query?: never;
@@ -2762,6 +2939,59 @@ export interface paths {
                     };
                     content: {
                         "application/json": components["schemas"]["CommentTestingBasicSerializerRef"];
+                    };
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
+    "/users/{id}/non-authoritative-information-with-serializer": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Non authoritative information */
+                203: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserConflict"];
                     };
                 };
                 400: components["responses"]["BadRequest"];
@@ -3463,6 +3693,10 @@ export interface components {
             id: number;
             name: string | null;
         };
+        UserConflict: {
+            reason: string;
+            user: components["schemas"]["UserWithPassthrough"];
+        };
         UserExtra: {
             howyadoin: {
                 name?: string;
@@ -3476,6 +3710,10 @@ export interface components {
             nicknames: string[] | null;
         };
         UserSummary: {
+            id: number;
+        };
+        UserWithPassthrough: {
+            howyadoin: string;
             id: number;
         };
         UserWithPosts: {

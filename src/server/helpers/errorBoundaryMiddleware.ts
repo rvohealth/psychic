@@ -2,6 +2,7 @@ import Koa from 'koa'
 import * as util from 'node:util'
 import HttpError from '../../error/http/index.js'
 import EnvInternal from '../../helpers/EnvInternal.js'
+import renderSerializerBuilders from '../../helpers/renderSerializerBuilders.js'
 import PsychicApp from '../../psychic-app/index.js'
 
 export const ERROR_LOGGING_DEPTH = 6
@@ -56,8 +57,7 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
         // client-shaped errors are a handled response, not a server error;
         // server:error hooks are never called for them
         ctx.status = status
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-        ctx.body = err instanceof HttpError && err.data !== undefined ? err.data : ''
+        ctx.body = httpErrorBody(err)
         return
       }
 
@@ -65,8 +65,7 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
 
       // default server-error response; server:error hooks may reshape it
       ctx.status = status ?? 500
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-      ctx.body = err instanceof HttpError && err.data !== undefined ? err.data : ''
+      ctx.body = httpErrorBody(err)
 
       try {
         for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {
@@ -109,4 +108,15 @@ function statusFromError(err: unknown): number | null {
   } catch {
     return null
   }
+}
+
+/**
+ * @internal
+ *
+ * The response body for an error caught by the boundary: an `HttpError`'s
+ * data, with serializer builders rendered (there is no controller here, so
+ * no serializer passthrough), or an empty body.
+ */
+function httpErrorBody(err: Error) {
+  return err instanceof HttpError && err.data !== undefined ? renderSerializerBuilders(err.data) : ''
 }

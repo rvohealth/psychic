@@ -5,6 +5,7 @@
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { OpenAPI } from '../../../../src/controller/decorators.js'
 import OpenapiEndpointRenderer, { ToPathObjectOpts } from '../../../../src/openapi-renderer/endpoint.js'
+import { type OpenapiResponsesOption } from '../../../../src/package-exports/openapi.js'
 import PsychicApp from '../../../../src/psychic-app/index.js'
 import { RouteConfig } from '../../../../src/router/route-manager.js'
 import ApiPetsController from '../../../../test-app/src/app/controllers/Api/PetsController.js'
@@ -22,6 +23,7 @@ import {
 } from '../../../../test-app/src/app/serializers/CommentSerializer.js'
 import PostSerializer from '../../../../test-app/src/app/serializers/PostSerializer.js'
 import UserSerializer, {
+  UserConflictSerializer,
   UserWithPostsSerializer,
 } from '../../../../test-app/src/app/serializers/UserSerializer.js'
 
@@ -2392,6 +2394,51 @@ describe('OpenapiEndpointRenderer', () => {
               },
             }),
           )
+        })
+
+        context('with a shared responses object annotated with OpenapiResponsesOption', () => {
+          const sharedResponses: OpenapiResponsesOption = {
+            409: { $serializer: UserConflictSerializer },
+            418: { description: 'boo!lean', type: 'boolean' },
+          }
+
+          it('is accepted by the @OpenAPI decorator', () => {
+            // the compile-time check is the assertion: a shared const annotated with
+            // OpenapiResponsesOption must be assignable to the decorator's `responses`
+            OpenAPI(User, { status: 201, responses: sharedResponses })
+            OpenAPI(User, { status: 204, responses: sharedResponses })
+          })
+
+          it('renders the shared responses', () => {
+            const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
+              responses: sharedResponses,
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response['/users/howyadoin']!.get.responses).toEqual(
+              expect.objectContaining({
+                '409': {
+                  description: 'Conflict',
+                  content: {
+                    'application/json': {
+                      schema: { $ref: '#/components/schemas/UserConflict' },
+                    },
+                  },
+                },
+                '418': {
+                  description: 'Status 418',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        description: 'boo!lean',
+                        type: 'boolean',
+                      },
+                    },
+                  },
+                },
+              }),
+            )
+          })
         })
 
         context('default responses are explicitly bypassed', () => {

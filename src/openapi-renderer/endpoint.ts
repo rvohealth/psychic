@@ -1407,14 +1407,7 @@ export interface OpenapiEndpointRendererOpts<
    *  })
    * ```
    */
-  responses?: Partial<
-    Record<
-      HttpStatusCode,
-      | (OpenapiSchemaBodyShorthand & { description?: string; contentType?: string | string[] })
-      | { description?: string; contentType: string | string[] }
-      | { description: string }
-    >
-  >
+  responses?: OpenapiResponsesOption
 
   /**
    * enables you to augment the default response that Psychic
@@ -2123,6 +2116,37 @@ export interface OpenapiMethodBody {
   responses: OpenapiResponses
 }
 
+/**
+ * The shape of the `responses` option accepted by the `@OpenAPI`
+ * decorator: a map of HTTP status codes to shorthand response
+ * declarations (e.g. `{ $serializer: SomeSerializer }`).
+ *
+ * Annotate a responses object shared across several actions with
+ * this type so it is accepted by `@OpenAPI(..., { responses })`:
+ *
+ * ```ts
+ * const conflictResponses: OpenapiResponsesOption = {
+ *   409: { $serializer: BookingConflictSerializer },
+ * }
+ * ```
+ *
+ * Not to be confused with {@link OpenapiResponses}, which is the
+ * shape of the rendered OpenAPI document's responses.
+ */
+export type OpenapiResponsesOption = Partial<
+  Record<
+    HttpStatusCode,
+    | (OpenapiSchemaBodyShorthand & { description?: string; contentType?: string | string[] })
+    | { description?: string; contentType: string | string[] }
+    | { description: string }
+  >
+>
+
+/**
+ * The shape of the responses in the rendered OpenAPI document.
+ * This is not the input accepted by the `@OpenAPI` decorator's
+ * `responses` option; for that, use {@link OpenapiResponsesOption}.
+ */
 export interface OpenapiResponses {
   summary?: string
   description?: string

@@ -4532,6 +4532,189 @@
         }
       }
     },
+    "/users/{id}/conflict-with-serializer": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserConflict"
+                }
+              }
+            }
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/users/{id}/conflict-with-serializer-array": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "type": "array",
+                  "items": {
+                    "$ref": "#/components/schemas/UserConflict"
+                  }
+                }
+              }
+            }
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/users/{id}/conflict-with-serializer-without-fast-json-stringify": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "description": "Conflict",
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserConflict"
+                }
+              }
+            }
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/users/{id}/fast-json-stringify-with-serializer-ref": {
       "parameters": [
         {
@@ -4624,6 +4807,66 @@
                 }
               }
             }
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/users/{id}/non-authoritative-information-with-serializer": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        },
+        {
+          "in": "path",
+          "name": "id",
+          "required": true,
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "get": {
+        "tags": [],
+        "responses": {
+          "203": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/UserConflict"
+                }
+              }
+            },
+            "description": "Non authoritative information"
           },
           "400": {
             "$ref": "#/components/responses/BadRequest"
@@ -6645,6 +6888,21 @@
           }
         }
       },
+      "UserConflict": {
+        "type": "object",
+        "required": [
+          "reason",
+          "user"
+        ],
+        "properties": {
+          "reason": {
+            "type": "string"
+          },
+          "user": {
+            "$ref": "#/components/schemas/UserWithPassthrough"
+          }
+        }
+      },
       "UserExtra": {
         "type": "object",
         "required": [
@@ -6702,6 +6960,21 @@
           "id"
         ],
         "properties": {
+          "id": {
+            "type": "integer"
+          }
+        }
+      },
+      "UserWithPassthrough": {
+        "type": "object",
+        "required": [
+          "howyadoin",
+          "id"
+        ],
+        "properties": {
+          "howyadoin": {
+            "type": "string"
+          },
           "id": {
             "type": "integer"
           }
