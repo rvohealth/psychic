@@ -1,3 +1,7 @@
+## 3.15.2
+
+- Update Ajv and fast-json-stringify and refresh their dependency graph to resolve the fast-uri security advisories.
+
 ## 3.15.1
 
 - Fix serializer builders being sent without being rendered. Passing a serializer to an error helper, e.g. `this.conflict(BookingConflictSerializer(booking))`, or to `this.nonAuthoritativeInformation(...)` (203), sent the builder's internals to the client instead of the rendered body. That included every attribute of the underlying model, whatever the serializer exposed. The same happened when middleware (e.g. `psy.use`) threw an `HttpStatus*` error carrying a serializer. Serializer builders, and arrays of them, are now rendered. From a controller they are rendered the same way success responses render them: with the controller's `serializerPassthrough` data and render options, with or without `fastJsonStringify`. This matches an `@OpenAPI` `responses: { 409: { $serializer: BookingConflictSerializer } }` declaration. From middleware there is no controller, so they are rendered without passthrough data. `this.internalServerError(...)` is unchanged: its data is never sent. Other data is still sent as is.
