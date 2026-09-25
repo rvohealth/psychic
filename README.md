@@ -1,6 +1,6 @@
 # Psychic
 
-Psychic is a typescript first Node framework built on top of [kysely](http://kysely.dev) and heavily inspired by Ruby on Rails. It provides a light-weight routing layer around [expressjs](https://expressjs.com) to create a familiar MVC pattern for those coming from a conventional MVC framework, and...
+Psychic is a typescript first Node framework built on top of [kysely](http://kysely.dev) and heavily inspired by Ruby on Rails. It provides a light-weight routing layer around [Koa](https://koajs.com/) to create a familiar MVC pattern for those coming from a conventional MVC framework, and...
 
 Introducing [dream](https://psychicframework.com/docs/models/overview)!, a robust, type-safe ORM with an incredibly powerful autocomplete API, through associations, polymorphism, single table inheritence, deep OpenAPI integration, and much more.
 
