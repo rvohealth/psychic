@@ -1,6 +1,6 @@
 ## 3.15.2
 
-- Update Ajv and fast-json-stringify and refresh their dependency graph to resolve the fast-uri security advisories.
+- Update Ajv, fast-json-stringify, and Supertest; refresh the dependency graph to resolve the fast-uri and qs security advisories.
 
 ## 3.15.1
 
