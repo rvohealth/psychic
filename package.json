@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "3.15.2",
+  "version": "3.15.3",
   "author": "RVOHealth",
   "publishConfig": {
     "access": "public"
@@ -102,7 +102,7 @@
     "@types/koa-passport": "^6.0.3",
     "@types/koa__cors": "^5.0.0",
     "@types/koa__router": "^12.0.5",
-    "@types/node": "^22.17.1",
+    "@types/node": "^26.6.3",
     "@types/passport": "^0",
     "@types/passport-local": "^1",
     "@types/pg": "^8.11.8",
