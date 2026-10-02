@@ -90,7 +90,7 @@ jobs:
           node-version: ${{ matrix.node-version }}
       - uses: actions/setup-go@v7
         with:
-          go-version: "1.24"
+          go-version: "stable"
 
       - run: corepack enable
       - run: go install github.com/oasdiff/oasdiff@latest
