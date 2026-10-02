@@ -1,3 +1,7 @@
+## 3.15.3
+
+- Set the development Node.js types to Node 26 while retaining runtime compatibility with Node 24 and newer. Node 26 is now the primary CI and release runtime, with Node 24 retained in the build, lint, and unit test matrix.
+
 ## 3.15.2
 
 - Update Ajv, fast-json-stringify, and Supertest; refresh the dependency graph to resolve the fast-uri and qs security advisories.

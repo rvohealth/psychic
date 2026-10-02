@@ -24,6 +24,10 @@ For any public-facing functionality change, bug fix, behavior change, API change
 
 Do this before opening a PR.
 
+## Node.js Support
+
+Psychic supports Node.js 24 and newer. Node.js 26 is the primary CI and release runtime; keep Node.js 24 in the build, lint, and unit test matrix to verify the supported floor. Development types may target the current primary Node.js version, but runtime code and emitted public types must remain compatible with Node.js 24.
+
 ## Public Error Exports
 
 Export an error only when a developer of a Psychic application needs to throw
