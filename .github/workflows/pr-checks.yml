@@ -23,7 +23,7 @@ jobs:
     name: Cooldown exclude allowlist
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - name: minimumReleaseAgeExclude must be @rvoh/* only
         run: |
           # SECURITY: the minimumReleaseAge cooldown bypass list must stay @rvoh/*
@@ -82,15 +82,15 @@ jobs:
       PSYCHIC_UNIT_MAX_WORKERS: 1
       CI: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
         with:
           fetch-depth: 0
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
-      - uses: actions/setup-go@v5
+      - uses: actions/setup-go@v7
         with:
-          go-version: "1.24"
+          go-version: "stable"
 
       - run: corepack enable
       - run: go install github.com/oasdiff/oasdiff@latest
@@ -141,7 +141,7 @@ jobs:
       DREAM_PARALLEL_TESTS: 4
       CI: "1"
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: "24"
@@ -170,7 +170,7 @@ jobs:
         run: pnpm fspec
 
       - name: Archive screenshots
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v7
         if: ${{ failure() }}
         with:
           name: Feature spec screenshots
@@ -185,7 +185,7 @@ jobs:
     env:
       NODE_ENV: development
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
@@ -205,7 +205,7 @@ jobs:
       NODE_ENV: development
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: ${{ matrix.node-version }}
@@ -259,7 +259,7 @@ jobs:
       CI: "1"
 
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: actions/setup-node@v6
         with:
           node-version: "26"
