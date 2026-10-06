@@ -475,11 +475,24 @@ function associationOpenapi(
   associationOpts: { optional: boolean }
   referencedSerializersAndOpenapiSchemaBodyShorthand: ReferencedSerializersAndOpenapiSchemaBodyShorthand
 } {
+  const association:
+    | BelongsToStatement<any, any, any, any>
+    | HasManyStatement<any, any, any, any>
+    | HasOneStatement<any, any, any, any>
+    | undefined =
+    (DataTypeForOpenapi as typeof Dream)?.isDream &&
+    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
+    (DataTypeForOpenapi as typeof Dream)['getAssociationMetadata'](attribute.name)
+
+  // whether the association may be null is a property of the association, not
+  // of the serializer that renders it, so a serializer override keeps it
+  const optional: boolean = !!(association as BelongsToStatement<any, any, any, any>)?.optional
+
   const serializerOverride = attribute.options.serializer
   if (serializerOverride) {
     try {
       return {
-        associationOpts: { optional: false },
+        associationOpts: { optional },
         referencedSerializersAndOpenapiSchemaBodyShorthand: {
           referencedSerializers: [
             serializerOverride,
@@ -496,15 +509,6 @@ function associationOpenapi(
   }
 
   let associatedClasses: (typeof Dream | ViewModelClass)[]
-  const association:
-    | BelongsToStatement<any, any, any, any>
-    | HasManyStatement<any, any, any, any>
-    | HasOneStatement<any, any, any, any>
-    | undefined =
-    (DataTypeForOpenapi as typeof Dream)?.isDream &&
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-call
-    (DataTypeForOpenapi as typeof Dream)['getAssociationMetadata'](attribute.name)
-  const optional: boolean = !!(association as BelongsToStatement<any, any, any, any>)?.optional
 
   if (association) {
     associatedClasses = DreamApp.system.expandStiClasses(association.modelCB())
