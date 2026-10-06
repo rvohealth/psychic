@@ -1,4 +1,6 @@
 import PsychicController from '../../../src/controller/index.js'
+import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
+import ParamValidationErrors from '../../../src/error/controller/ParamValidationErrors.js'
 import User from '../../../test-app/src/app/models/User.js'
 import { createMockKoaContext } from '../controller/helpers/mockRequest.js'
 
@@ -83,6 +85,56 @@ describe('PsychicController extract-params primitives (R-011)', () => {
 
         expect(typedResult).toEqual(result)
         expect(result).toEqual([{ name: 'a' }, { name: 'b' }])
+      })
+
+      // an optional list the client leaves out is an empty list, as a missing
+      // key without `array: true` is an empty object
+      it('returns an empty array when the key is missing', () => {
+        const ctx = createMockKoaContext({ body: {} })
+        const controller = new PsychicController(ctx, { action: 'hello' })
+
+        expect(controller.extractParams(User, ['name'], { key: 'users', array: true })).toEqual([])
+      })
+
+      it('returns an empty array when the key is null', () => {
+        const ctx = createMockKoaContext({ body: { users: null } })
+        const controller = new PsychicController(ctx, { action: 'hello' })
+
+        expect(controller.extractParams(User, ['name'], { key: 'users', array: true })).toEqual([])
+      })
+
+      it.each([
+        ['a single object', { name: 'a' }],
+        ['an empty object', {}],
+        ['a falsy value', ''],
+        ['an array containing null', [null]],
+      ])('rejects %s with ParamValidationErrors', (_, users) => {
+        const ctx = createMockKoaContext({ body: { users } })
+        const controller = new PsychicController(ctx, { action: 'hello' })
+
+        expect(() => controller.extractParams(User, ['name'], { key: 'users', array: true })).toThrow(
+          ParamValidationErrors,
+        )
+      })
+
+      // the params are always an object (a top-level JSON array body is merged
+      // into numeric keys), so `array: true` can only read a list under a key:
+      // without one it is a programming error, not a client error
+      it('raises a developer error, not a ParamValidationErrors, when no key is given', () => {
+        const ctx = createMockKoaContext({ body: { users: [{ name: 'a' }] } })
+        const controller = new PsychicController(ctx, { action: 'hello' })
+
+        let error: unknown
+        try {
+          controller.extractParams(User, ['name'], { array: true })
+        } catch (err) {
+          error = err
+        }
+
+        expect(error).toBeInstanceOf(Error)
+        expect(error).not.toBeInstanceOf(ParamValidationError)
+        expect(error).not.toBeInstanceOf(ParamValidationErrors)
+        expect((error as Error).message).toMatch(/extractParams with `array: true` requires a `key`/)
       })
     })
   })

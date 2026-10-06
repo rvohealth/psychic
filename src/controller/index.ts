@@ -523,7 +523,12 @@ export default class PsychicController {
    * @param opts.only - Restrict the list of allowed params to only these attributes
    * @param opts.including - Include params that would normally be excluded from safe params
    * @param opts.key - Extract params from a nested key in the params object instead of root level
-   * @param opts.array - If true, expects and returns an array of param objects (specifically for query params, which, due to the way query params are processed, are often collapsed to a non-array value)
+   * @param opts.array - If true, expects and returns an array of param objects read from `opts.key`, which is
+   *   then required: the request params are always an object (a top-level JSON array body arrives as numeric
+   *   keys), so there is no array to read without a key, and omitting it throws an error naming the mistake.
+   *   A missing or null key returns `[]`. Any other value that is not an array of objects (a single object, a
+   *   string, an array containing `null` or a primitive) is rejected with a 400 (`ParamValidationErrors`); a
+   *   single value is never wrapped into an array.
    * @returns A typed object containing the validated and casted params for this Dream model
    * @throws {ParamValidationError} When any parameter validation fails
    *
@@ -562,7 +567,7 @@ export default class PsychicController {
     ReturnPayload extends ForOpts['array'] extends true ? ReturnPartialType[] : ReturnPartialType,
   >(this: PsychicController, dreamClass: T, opts?: ForOpts): ReturnPayload {
     return Params.for(
-      opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params,
+      this.paramsSourceFor('paramsFor', opts),
       dreamClass,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       opts as any,
@@ -588,7 +593,12 @@ export default class PsychicController {
    * @param allowed - Required. The columns permitted from the request.
    * @param opts - Optional configuration
    * @param opts.key - Extract params from a nested key in the params object instead of root level
-   * @param opts.array - If true, expects and returns an array of param objects
+   * @param opts.array - If true, expects and returns an array of param objects read from `opts.key`, which is
+   *   then required: the request params are always an object (a top-level JSON array body arrives as numeric
+   *   keys), so there is no array to read without a key, and omitting it throws an error naming the mistake.
+   *   A missing or null key returns `[]`. Any other value that is not an array of objects (a single object, a
+   *   string, an array containing `null` or a primitive) is rejected with a 400 (`ParamValidationErrors`); a
+   *   single value is never wrapped into an array.
    * @returns A typed object containing the validated and casted params
    * @throws {ParamValidationError} When any parameter validation fails
    *
@@ -614,9 +624,35 @@ export default class PsychicController {
     >,
     ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
   >(this: PsychicController, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
-    const source = opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params
+    const source = this.paramsSourceFor('extractParams', opts)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return Params.extract(source, dreamClass, allowed as any, opts as any)
+  }
+
+  /**
+   * The value paramsFor and extractParams pass to Params: the params at
+   * `opts.key`, or all of the params when no key is given. Without
+   * `array: true`, a missing, null or other falsy value at the key is `{}`.
+   * With `array: true`, a missing or null value is `[]` (an omitted optional
+   * list is an empty list), and any other value is left for Params.for to
+   * accept or reject with a 400.
+   */
+  private paramsSourceFor(
+    methodName: 'paramsFor' | 'extractParams',
+    opts: { array?: boolean; key?: string } | undefined,
+  ): object {
+    if (opts?.array && !opts.key)
+      throw new Error(
+        `${methodName} with \`array: true\` requires a \`key\` naming the request param that holds the array, ` +
+          `e.g. { key: 'rooms', array: true }. The request params are always an object (a top-level JSON array ` +
+          `body arrives as numeric keys), so without a key there is no array to read.`,
+      )
+
+    if (!opts?.key) return this.params
+
+    const value = this.params[opts.key]
+    if (opts.array) return (value ?? []) as object
+    return (value as object) || {}
   }
 
   /**

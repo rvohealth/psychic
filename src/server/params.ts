@@ -55,6 +55,13 @@ export default class Params {
    * // raise error if not matching attributes for User model
    * const params = Params.for(this.params.user, User)
    * ```
+   *
+   * With `array: true`, `params` must be an array of objects and an array is
+   * returned. Anything else, including `null`, `undefined`, and an array
+   * containing `null`, a primitive, or an array, raises
+   * `ParamValidationErrors`, which the router answers with a 400. A single
+   * value is never wrapped into an array. (`paramsFor` and `extractParams`
+   * read a missing or null `key` as `[]` before calling this.)
    */
   public static for<
     T extends typeof Dream,
@@ -85,8 +92,16 @@ export default class Params {
 
     if (!dreamClass?.isDream) throw new Error(`Params.for must receive a dream class as it's second argument`)
     if (array) {
-      if (!Array.isArray(params))
-        throw new Error(`Params.for was expecting a top-level array. got ${typeof params}`)
+      // A value that is not an array of objects (a single object, a string,
+      // an object with numeric keys, an element that is null, a primitive or
+      // an array) is a client error. A single value is never wrapped into an
+      // array: single-value query arrays are conformed to arrays upstream in
+      // conformQueryArrayParamsToOpenapiShape, so this is not the place to
+      // coerce.
+      if (!Array.isArray(params) || !params.every(isObject))
+        throw new ParamValidationErrors({
+          [forOpts.key || 'params']: ['expected an array of objects'],
+        })
 
       return params.map(param =>
         // eslint-disable-next-line @typescript-eslint/no-explicit-any

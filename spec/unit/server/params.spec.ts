@@ -126,6 +126,50 @@ describe('Params', () => {
           ])
         })
       })
+
+      it('returns an empty array for an empty array', () => {
+        expect(Params.for([], User, { array: true })).toEqual([])
+      })
+
+      // A value that is not an array of objects is a client error, so it is
+      // rejected with a 400-style ParamValidationErrors (never a 500), and a
+      // single value is never wrapped into an array.
+      context('when the value is not an array of objects', () => {
+        function paramValidationErrorsFrom(fn: () => unknown) {
+          let error: unknown
+          try {
+            fn()
+          } catch (err) {
+            error = err
+          }
+
+          expect(error).toBeInstanceOf(ParamValidationErrors)
+          return error as ParamValidationErrors
+        }
+
+        it.each([
+          ['an empty object', {}],
+          ['a single object', { email: 'how' }],
+          ['a string', 'how'],
+          ['an object with numeric keys', { '0': { email: 'how' } }],
+          ['null', null],
+          ['an array containing null', [null]],
+          ['an array containing a number', [1]],
+          ['an array containing a string', ['how']],
+          ['an array containing an array', [[{ email: 'how' }]]],
+          ['an array mixing objects and non-objects', [{ email: 'how' }, null]],
+        ])('rejects %s', (_, value) => {
+          const error = paramValidationErrorsFrom(() => Params.for(value as object, User, { array: true }))
+          expect(error.errors).toEqual({ params: ['expected an array of objects'] })
+        })
+
+        it('names the error after the key when one is given', () => {
+          const error = paramValidationErrorsFrom(() =>
+            Params.for({ email: 'how' }, User, { array: true, key: 'users' }),
+          )
+          expect(error.errors).toEqual({ users: ['expected an array of objects'] })
+        })
+      })
     })
 
     context('with only option passed', () => {
