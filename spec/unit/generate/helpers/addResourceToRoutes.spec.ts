@@ -1,10 +1,18 @@
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
-import addResourceToRoutes, {
-  addResourceToRoutes_routeToRegexAndReplacements,
-} from '../../../../src/generate/helpers/addResourceToRoutes.js'
+import { MockInstance } from 'vitest'
+import addResourceToRoutes from '../../../../src/generate/helpers/addResourceToRoutes.js'
 import * as psychicPathModule from '../../../../src/helpers/path/psychicPath.js'
 import PsychicApp from '../../../../src/psychic-app/index.js'
+
+function routesFile(body: string) {
+  return `\
+import { PsychicRouter } from '@rvoh/psychic'
+
+export default function routes(r: PsychicRouter) {
+${body}}
+`
+}
 
 describe('addResourceToRoutes', () => {
   let psychicApp: PsychicApp
@@ -19,6 +27,23 @@ describe('addResourceToRoutes', () => {
     supportDir = path.join(psychicApp.apiRoot, 'spec', 'support', 'generators', 'routes')
     vi.spyOn(psychicPathModule, 'default').mockReturnValue(tmpRoutesFileRelativePath)
   })
+
+  async function readRoutes() {
+    return (await fs.readFile(tmpRoutesFilepath)).toString()
+  }
+
+  async function addRoute(
+    routesBefore: string,
+    route: string,
+    options: { singular: boolean; onlyActions: string[] | undefined } = {
+      singular: false,
+      onlyActions: undefined,
+    },
+  ) {
+    await fs.writeFile(tmpRoutesFilepath, routesBefore)
+    await addResourceToRoutes(route, options)
+    return await readRoutes()
+  }
 
   context('with the boilerplate routes file', () => {
     context('with a simple resource', () => {
@@ -155,86 +180,484 @@ describe('addResourceToRoutes', () => {
       })
     })
   })
-})
 
-describe('addResourceToRoutes_routeToRegexAndReplacements', () => {
-  it('"posts"', () => {
-    const { regexAndReplacements } = addResourceToRoutes_routeToRegexAndReplacements('', 'posts', {
-      singular: false,
-      onlyActions: undefined,
+  context('when the namespace is not the first child of its parent block', () => {
+    it('adds the resource inside the existing namespace instead of writing a second one', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('places')
     })
-    expect(regexAndReplacements[0]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
-    expect(regexAndReplacements[0]!.replacement).toEqual(
-      `export $1(r: PsychicRouter)$2{\n  r.resources('posts')\n`,
-    )
+    r.namespace('guest', r => {
+      r.resources('bookings')
+    })
+  })
+`),
+        'v1/guest/reviews',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('places')
+    })
+    r.namespace('guest', r => {
+      r.resources('reviews')
+
+      r.resources('bookings')
+    })
+  })
+`),
+      )
+    })
+
+    it('writes only the wrappers that are missing beneath it', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('pets')
+    r.namespace('host', r => {
+      r.resources('bookings')
+    })
+  })
+`),
+        'v1/host/places/{}/rooms',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('pets')
+    r.namespace('host', r => {
+      r.resources('places', r => {
+        r.resources('rooms')
+      })
+
+      r.resources('bookings')
+    })
+  })
+`),
+      )
+    })
   })
 
-  it('"api/posts"', () => {
-    const { regexAndReplacements } = addResourceToRoutes_routeToRegexAndReplacements('', 'api/posts', {
-      singular: false,
-      onlyActions: undefined,
+  context('when the parent resource is not the first child of its block', () => {
+    it('converts that parent to the callback form and nests the resource in it', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('bookings')
+      r.resources('places')
     })
+  })
+`),
+        'v1/host/places/{}/rooms',
+      )
 
-    const sharedExpectedReplacement = `  r.namespace('api', r => {\n    r.resources('posts')\n`
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('bookings')
+      r.resources('places', r => {
+        r.resources('rooms')
 
-    expect(regexAndReplacements[0]!.regex).toEqual(/^ {2}r\.namespace\('api', r => \{\n/m)
-    expect(regexAndReplacements[0]!.replacement).toEqual(sharedExpectedReplacement)
-
-    expect(regexAndReplacements[1]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
-    expect(regexAndReplacements[1]!.replacement).toEqual(
-      `export $1(r: PsychicRouter)$2{\n${sharedExpectedReplacement}`,
-    )
+      })
+    })
+  })
+`),
+      )
+    })
   })
 
-  it('"api/v1/posts"', () => {
-    const { regexAndReplacements } = addResourceToRoutes_routeToRegexAndReplacements('', 'api/v1/posts', {
-      singular: false,
-      onlyActions: undefined,
+  context('when the parent resource already has a block and is not the first child', () => {
+    it('adds the resource to that block instead of writing a second one', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('bookings')
+      r.resources('places', r => {
+        r.resources('rooms')
+      })
     })
+  })
+`),
+        'v1/host/places/{}/bookings',
+      )
 
-    const sharedExpectedReplacement = `  r.namespace('api', r => {\n    r.namespace('v1', r => {\n      r.resources('posts')\n`
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('bookings')
+      r.resources('places', r => {
+        r.resources('bookings')
 
-    expect(regexAndReplacements[0]!.regex).toEqual(
-      /^ {2}r\.namespace\('api', r => \{\n {4}r\.namespace\('v1', r => \{\n/m,
-    )
-    expect(regexAndReplacements[0]!.replacement).toEqual(sharedExpectedReplacement)
-
-    expect(regexAndReplacements[1]!.regex).toEqual(/^ {2}r\.namespace\('api', r => \{\n/m)
-    expect(regexAndReplacements[1]!.replacement).toEqual(sharedExpectedReplacement)
-
-    expect(regexAndReplacements[2]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
-    expect(regexAndReplacements[2]!.replacement).toEqual(
-      `export $1(r: PsychicRouter)$2{\n${sharedExpectedReplacement}`,
-    )
+        r.resources('rooms')
+      })
+    })
+  })
+`),
+      )
+    })
   })
 
-  it('"api/tickets/{}/comments"', () => {
-    const { routes, regexAndReplacements } = addResourceToRoutes_routeToRegexAndReplacements(
-      `    r.resources('tickets')`,
-      'api/tickets/{}/comments',
-      {
-        singular: false,
-        onlyActions: undefined,
-      },
-    )
-
-    expect(routes).toEqual(`    r.resources('tickets', r => {
+  context('when the parent resource is declared with options', () => {
+    it('keeps its only option and adds no unrestricted duplicate', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('bookings')
+      r.resources('places', { only: ['index', 'show'] })
     })
+  })
+`),
+        'v1/host/places/{}/rooms',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('bookings')
+      r.resources('places', { only: ['index', 'show'] }, r => {
+        r.resources('rooms')
+
+      })
+    })
+  })
+`),
+      )
+    })
+
+    it('keeps its except option and adds no unrestricted duplicate', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('places', { except: ['destroy'] })
+  })
+`),
+        'v1/places/{}/rooms',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('places', { except: ['destroy'] }, r => {
+      r.resources('rooms')
+
+    })
+  })
+`),
+      )
+    })
+
+    it('adds the resource to a block the parent already has alongside its options', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('bookings')
+    r.resources('places', { only: ['index', 'show'] }, r => {
+      r.resources('photos')
+    })
+  })
+`),
+        'v1/places/{}/rooms',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('bookings')
+    r.resources('places', { only: ['index', 'show'] }, r => {
+      r.resources('rooms')
+
+      r.resources('photos')
+    })
+  })
+`),
+      )
+    })
+  })
+
+  context('when a resource named like the parent is declared under another namespace first', () => {
+    it('converts only the parent on the route', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('guest', r => {
+      r.resources('places')
+    })
+    r.namespace('host', r => {
+      r.resources('places')
+    })
+  })
+`),
+        'v1/host/places/{}/rooms',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('guest', r => {
+      r.resources('places')
+    })
+    r.namespace('host', r => {
+      r.resources('places', r => {
+        r.resources('rooms')
+
+      })
+    })
+  })
+`),
+      )
+    })
+
+    it('leaves a more deeply nested resource with that name alone', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('guest', r => {
+      r.namespace('archive', r => {
+        r.resources('places')
+      })
+    })
+    r.namespace('host', r => {
+      r.resources('places')
+    })
+  })
+`),
+        'v1/host/places/{}/rooms',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('guest', r => {
+      r.namespace('archive', r => {
+        r.resources('places')
+      })
+    })
+    r.namespace('host', r => {
+      r.resources('places', r => {
+        r.resources('rooms')
+
+      })
+    })
+  })
+`),
+      )
+    })
+  })
+
+  context('when the routes function is an arrow function', () => {
+    it('adds the resource to it', async () => {
+      const routes = await addRoute(
+        `\
+import { PsychicRouter } from '@rvoh/psychic'
+
+export const routes = (r: PsychicRouter) => {
+  r.resources('pets')
+}
+`,
+        'posts',
+      )
+
+      expect(routes).toEqual(`\
+import { PsychicRouter } from '@rvoh/psychic'
+
+export const routes = (r: PsychicRouter) => {
+  r.resources('posts')
+
+  r.resources('pets')
+}
+`)
+    })
+  })
+
+  context('when a namespace is declared with double quotes', () => {
+    it('adds the resource inside it', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace("v1", r => {
+    r.resources("pets")
+  })
+`),
+        'v1/posts',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace("v1", r => {
+    r.resources('posts')
+
+    r.resources("pets")
+  })
+`),
+      )
+    })
+  })
+
+  context('when the same resource is generated a second time', () => {
+    const reruns: [string, { singular: boolean; onlyActions: string[] | undefined }][] = [
+      ['posts', { singular: false, onlyActions: undefined }],
+      ['post', { singular: true, onlyActions: undefined }],
+      ['posts', { singular: false, onlyActions: ['create', 'show'] }],
+      ['api/v1/posts', { singular: false, onlyActions: undefined }],
+      ['v1/host/places/{}/rooms', { singular: false, onlyActions: undefined }],
+    ]
+
+    for (const [route, options] of reruns) {
+      const description = [
+        route,
+        options.singular ? '(singular)' : undefined,
+        options.onlyActions ? `--only=${options.onlyActions.join(',')}` : undefined,
+      ]
+        .filter(Boolean)
+        .join(' ')
+
+      it(`leaves the routes file unchanged on the second run of "${description}"`, async () => {
+        const boilerplate = (await fs.readFile(path.join(supportDir, 'boilerplate.ts'))).toString()
+        const afterFirstRun = await addRoute(boilerplate, route, options)
+        expect(afterFirstRun).not.toEqual(boilerplate)
+
+        await addResourceToRoutes(route, options)
+        expect(await readRoutes()).toEqual(afterFirstRun)
+      })
+    }
+
+    it('leaves an existing nested declaration of the resource alone', async () => {
+      const before = routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('pets')
+    r.resources('places', r => {
+      r.resources('rooms')
+    })
+  })
 `)
 
-    const sharedExpectedReplacement = `  r.namespace('api', r => {\n    r.resources('tickets', r => {\n      r.resources('comments')\n`
+      expect(await addRoute(before, 'v1/places')).toEqual(before)
+    })
+  })
 
-    expect(regexAndReplacements[0]!.regex).toEqual(
-      /^ {2}r\.namespace\('api', r => \{\n {4}r\.resources\('tickets', r => \{\n/m,
+  context('when the routes file declares a block in a form the generator does not edit', () => {
+    let consoleWarnSpy: MockInstance<typeof console.warn>
+
+    beforeEach(() => {
+      consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      consoleWarnSpy.mockRestore()
+    })
+
+    function warning() {
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1)
+      return String(consoleWarnSpy.mock.calls[0]?.[0])
+    }
+
+    it('leaves the file unchanged when the options of the parent resource span several lines', async () => {
+      const before = routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('bookings')
+      r.resources('places', {
+        only: ['index', 'show'],
+      })
+    })
+  })
+`)
+
+      expect(await addRoute(before, 'v1/host/places/{}/rooms')).toEqual(before)
+      expect(warning()).toContain('Could not add the route for v1/host/places/{}/rooms to spec/tmp/routes.ts')
+      expect(warning()).toContain(
+        "line 7, `r.resources('places', {`, declares resources 'places' in a form the generator does not edit",
+      )
+      expect(warning()).toContain(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('places', r => {
+        r.resources('rooms')
+      })
+    })
+  })`)
+    })
+
+    it('leaves the file unchanged when the call is split before the name of the parent', async () => {
+      const before = routesFile(`\
+  r.namespace('v1', r => {
+    r.resources(
+      'places',
+      { only: ['index', 'show', 'create', 'update', 'destroy'] },
+      r => {
+        r.resources('photos')
+      },
     )
-    expect(regexAndReplacements[0]!.replacement).toEqual(sharedExpectedReplacement)
+  })
+`)
 
-    expect(regexAndReplacements[1]!.regex).toEqual(/^ {2}r\.namespace\('api', r => \{\n/m)
-    expect(regexAndReplacements[1]!.replacement).toEqual(sharedExpectedReplacement)
+      expect(await addRoute(before, 'v1/places/{}/rooms')).toEqual(before)
+      expect(warning()).toContain(
+        "line 5, `r.resources(`, declares resources 'places' in a form the generator does not edit",
+      )
+    })
 
-    expect(regexAndReplacements[2]!.regex).toEqual(/^export ([^(]+)\(r: PsychicRouter\)([^{]*)\{\n/m)
-    expect(regexAndReplacements[2]!.replacement).toEqual(
-      `export $1(r: PsychicRouter)$2{\n${sharedExpectedReplacement}`,
-    )
+    it('leaves the file unchanged when a namespace callback names its router differently', async () => {
+      const before = routesFile(`\
+  r.namespace('v1', router => {
+    router.resources('pets')
+  })
+`)
+
+      expect(await addRoute(before, 'v1/posts')).toEqual(before)
+      expect(warning()).toContain(
+        "line 4, `r.namespace('v1', router => {`, declares namespace 'v1' in a form the generator does not edit",
+      )
+    })
+
+    it('leaves the file unchanged when the resource itself is declared in a form it does not edit', async () => {
+      const before = routesFile(`\
+  r.resources('posts', {
+    only: ['index'],
+  })
+`)
+
+      expect(await addRoute(before, 'posts')).toEqual(before)
+      expect(warning()).toContain(
+        "line 4, `r.resources('posts', {`, declares resources 'posts' in a form the generator does not edit",
+      )
+    })
+
+    it('leaves the file unchanged when a block on the route has no closer at its indentation', async () => {
+      const before = routesFile(`\
+  r.namespace('v1', r => {
+  r.resources('pets')
+  })
+`)
+
+      expect(await addRoute(before, 'v1/posts')).toEqual(before)
+      expect(warning()).toContain(
+        "the block opened on line 4, `r.namespace('v1', r => {`, has no `})` closing it at the same indentation",
+      )
+    })
+
+    it('leaves the file unchanged when no routes function taking `r` is found', async () => {
+      const before = `\
+import { PsychicRouter } from '@rvoh/psychic'
+
+export default function routes(router: PsychicRouter) {
+  router.resources('pets')
+}
+`
+
+      expect(await addRoute(before, 'posts')).toEqual(before)
+      expect(warning()).toContain('no `export ... (r: PsychicRouter) {` routes function was found')
+      expect(warning()).toContain(`r.resources('posts')`)
+    })
   })
 })
