@@ -171,14 +171,16 @@ ${INDENT}  pnpm psy g:sti-child --model-name=Condo Rental/Condo extends Rental`,
         '--owning-model <modelName>',
         `The model class that owns this resource. The generated controller will use \`associationQuery\` and \`createAssociation\` on the owning model to scope queries and create records.
 ${INDENT}
-${INDENT}Defaults to \`this.currentUser\` for non-admin routes (e.g., \`this.currentUser.associationQuery('posts').findOrFail(this.castParam('id', 'uuid'))\`).
-${INDENT}Defaults to \`this.currentInternalUser\` for internal namespaced controllers (e.g., \`this.currentInternalUser.associationQuery('posts').findOrFail(this.castParam('id', 'uuid'))\`).
-${INDENT}Defaults to \`null\` for admin namespaced controllers (e.g., \`Post.findOrFail(this.castParam('id', 'uuid'))\`).
-${INDENT}Supplying an owning-modle changes the the generated code in the controller to be relative to the owning model.
+${INDENT}Defaults to \`this.currentUser\` for non-admin routes (e.g., \`this.currentUser.associationQuery('posts').findOrFail(this.castParam('id', <idType>))\`).
+${INDENT}Defaults to \`this.currentInternalUser\` for internal namespaced controllers (e.g., \`this.currentInternalUser.associationQuery('posts').findOrFail(this.castParam('id', <idType>))\`).
+${INDENT}Defaults to \`null\` for admin namespaced controllers (e.g., \`Post.findOrFail(this.castParam('id', <idType>))\`).
+${INDENT}Supplying an owning model changes the generated code in the controller to be relative to the owning model.
+${INDENT}
+${INDENT}<idType> follows the app's \`primaryKeyType\` setting (conf/dream.ts): 'bigint' for bigint and bigserial, 'integer' for integer, and 'uuid' for uuid, uuid4 and uuid7.
 ${INDENT}
 ${INDENT}Example:
 ${INDENT}  pnpm psy g:resource --owning-model=Host v1/host/places Place
-${INDENT}  # results in \`await this.currentHost.associationQuery('places').findOrFail(this.castParam('id', 'uuid'))\``,
+${INDENT}  # results in \`await this.currentHost.associationQuery('places').findOrFail(this.castParam('id', <idType>))\``,
       )
       .option(
         '--connection-name <connectionName>',

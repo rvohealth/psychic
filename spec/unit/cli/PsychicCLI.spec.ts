@@ -12,19 +12,19 @@ vi.mock('../../../src/generate/initializer/syncOpenapiTypescript.js')
 vi.mock('../../../src/generate/openapi/reduxBindings.js')
 vi.mock('../../../src/generate/openapi/zustandBindings.js')
 
+function buildProgram(): Command {
+  const program = new Command()
+
+  PsychicCLI.provide(program, {
+    initializePsychicApp: () => Promise.resolve(PsychicApp.getOrFail()),
+    seedDb: () => {},
+  })
+
+  return program
+}
+
 describe('PsychicCLI setup:sync commands', () => {
   let processExitSpy: MockInstance
-
-  function buildProgram(): Command {
-    const program = new Command()
-
-    PsychicCLI.provide(program, {
-      initializePsychicApp: () => Promise.resolve(PsychicApp.getOrFail()),
-      seedDb: () => {},
-    })
-
-    return program
-  }
 
   beforeEach(() => {
     processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
@@ -247,6 +247,45 @@ describe('PsychicCLI setup:sync commands', () => {
         '../client/src/api/types.d.ts',
         undefined,
         { overwrite: true },
+      )
+    })
+  })
+})
+
+describe('PsychicCLI g:resource --help', () => {
+  // The help is a static string, built before any app is initialized, so it
+  // must stay true for every app rather than describe one app's configuration
+  function gResourceHelp(): string {
+    const command = buildProgram().commands.find(command => command.name() === 'generate:resource')
+    if (!command) throw new Error('expected PsychicCLI to register generate:resource')
+    return command.helpInformation()
+  }
+
+  context('--owning-model', () => {
+    it("shows the id cast as following the app's primaryKeyType rather than one fixed cast type", () => {
+      const help = gResourceHelp()
+
+      expect(help).toContain(
+        "Defaults to `this.currentUser` for non-admin routes (e.g., `this.currentUser.associationQuery('posts').findOrFail(this.castParam('id', <idType>))`).",
+      )
+      expect(help).toContain(
+        "Defaults to `this.currentInternalUser` for internal namespaced controllers (e.g., `this.currentInternalUser.associationQuery('posts').findOrFail(this.castParam('id', <idType>))`).",
+      )
+      expect(help).toContain(
+        "Defaults to `null` for admin namespaced controllers (e.g., `Post.findOrFail(this.castParam('id', <idType>))`).",
+      )
+      expect(help).toContain(
+        "# results in `await this.currentHost.associationQuery('places').findOrFail(this.castParam('id', <idType>))`",
+      )
+      expect(help).toContain(
+        "<idType> follows the app's `primaryKeyType` setting (conf/dream.ts): 'bigint' for bigint and bigserial, 'integer' for integer, and 'uuid' for uuid, uuid4 and uuid7.",
+      )
+      expect(help).not.toMatch(/castParam\('id', '/)
+    })
+
+    it('describes the owning model without typos', () => {
+      expect(gResourceHelp()).toContain(
+        'Supplying an owning model changes the generated code in the controller to be relative to the owning model.',
       )
     })
   })

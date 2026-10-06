@@ -292,8 +292,41 @@ function loadModelStatement(
   return `  private async ${camelize(modelClassName)}() {
     // return await ${loadQueryBase}
     //   .preloadFor('${forAdmin ? 'admin' : forInternal ? 'internal' : 'default'}')
-    //   ${singular ? '.firstOrFail()' : ".findOrFail(this.castParam('id', 'string'))"}
+    //   ${singular ? '.firstOrFail()' : `.findOrFail(this.castParam('id', '${idCastType()}'))`}
   }`
+}
+
+/**
+ * The castParam type for the id of a model generated in this app. It follows
+ * the app's primaryKeyType, the same setting the generated migration reads to
+ * type the id column, so a malformed id is rejected by castParam with a 400
+ * instead of reaching the database, where Postgres rejects it and the request
+ * fails with a 500.
+ */
+function idCastType(): 'bigint' | 'integer' | 'uuid' {
+  const primaryKeyType = DreamApp.getOrFail().primaryKeyType
+
+  switch (primaryKeyType) {
+    case 'bigint':
+    case 'bigserial':
+      return 'bigint'
+
+    case 'integer':
+      return 'integer'
+
+    case 'uuid':
+    case 'uuid4':
+    case 'uuid7':
+      return 'uuid'
+
+    default: {
+      // protection so that if Dream ever adds a primary key type, this will throw a type error at build time
+      const _never: never = primaryKeyType
+      throw new Error(
+        `Unrecognized primaryKeyType '${_never as string}': cannot choose the castParam type for the id in the generated controller`,
+      )
+    }
+  }
 }
 
 function importStatementForModel(destinationModelName: string) {
