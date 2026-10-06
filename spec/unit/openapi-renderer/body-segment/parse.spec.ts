@@ -1,3 +1,4 @@
+import { validateObject } from '../../../../src/helpers/validateOpenApiSchema.js'
 import OpenapiSegmentExpander, {
   OpenapiBodySegment,
   OpenapiBodyTarget,
@@ -272,6 +273,42 @@ describe('OpenapiBodySegmentRenderer', () => {
           },
         })
         expect(results.referencedSerializers).toEqual([BalloonSummarySerializer])
+      })
+    })
+
+    context('a single serializer with maybeNull', () => {
+      const userSummaryComponents = {
+        components: {
+          schemas: {
+            UserSummary: { type: 'object', required: ['id'], properties: { id: { type: 'integer' } } },
+          },
+        },
+      }
+
+      it('is anyOf the ref or null, which validates a null', () => {
+        const results = subject({
+          type: 'object',
+          properties: {
+            fromSerializer: { $serializer: UserSummarySerializer, maybeNull: true },
+            fromSerializable: { $serializable: User, $serializableSerializerKey: 'summary', maybeNull: true },
+          },
+        } as OpenapiBodySegment)
+
+        const nullableUserSummary = {
+          anyOf: [{ $ref: '#/components/schemas/UserSummary' }, { type: 'null' }],
+        }
+        expect(results.openapi).toEqual({
+          type: 'object',
+          properties: { fromSerializer: nullableUserSummary, fromSerializable: nullableUserSummary },
+        })
+
+        const schema = { ...results.openapi, ...userSummaryComponents }
+        expect(
+          validateObject({ fromSerializer: null, fromSerializable: null }, schema).errors,
+        ).toBeUndefined()
+        expect(
+          validateObject({ fromSerializer: { id: 1 }, fromSerializable: { id: 2 } }, schema).isValid,
+        ).toBe(true)
       })
     })
   })

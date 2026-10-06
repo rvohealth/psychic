@@ -136,6 +136,73 @@ describe('allSerializersToRefsInOpenapi', () => {
     })
   })
 
+  context('with many and maybeNull', () => {
+    it('expands a $serializer into an array, a nullable ref, or a nullable array', () => {
+      const openapi: OpenapiSchemaBodyShorthand = {
+        type: 'object',
+        properties: {
+          many: { $serializer: PetSerializer, many: true },
+          maybeNull: { $serializer: PetSerializer, maybeNull: true },
+          manyMaybeNull: { $serializer: PetSerializer, many: true, maybeNull: true },
+        },
+      }
+
+      expect(allSerializersToRefsInOpenapi(openapi)).toEqual({
+        type: 'object',
+        properties: {
+          many: { type: 'array', items: { $ref: '#/components/schemas/Pet' } },
+          maybeNull: { anyOf: [{ $ref: '#/components/schemas/Pet' }, { type: 'null' }] },
+          manyMaybeNull: { type: ['array', 'null'], items: { $ref: '#/components/schemas/Pet' } },
+        },
+      })
+    })
+
+    it('expands a $serializable the same way', () => {
+      const openapi: OpenapiSchemaBodyShorthand = {
+        type: 'object',
+        properties: {
+          many: { $serializable: Pet, many: true },
+          maybeNull: { $serializable: Pet, maybeNull: true },
+          manyMaybeNull: { $serializable: Pet, many: true, maybeNull: true },
+        },
+      }
+
+      expect(allSerializersToRefsInOpenapi(openapi)).toEqual({
+        type: 'object',
+        properties: {
+          many: { type: 'array', items: { $ref: '#/components/schemas/Pet' } },
+          maybeNull: { anyOf: [{ $ref: '#/components/schemas/Pet' }, { type: 'null' }] },
+          manyMaybeNull: { type: ['array', 'null'], items: { $ref: '#/components/schemas/Pet' } },
+        },
+      })
+    })
+
+    it('expands a $serializable STI base model into an array of anyOf the child refs, or adds null to the anyOf', () => {
+      const openapi: OpenapiSchemaBodyShorthand = {
+        type: 'object',
+        properties: {
+          many: { $serializable: Balloon, many: true },
+          maybeNull: { $serializable: Balloon, maybeNull: true },
+          manyMaybeNull: { $serializable: Balloon, many: true, maybeNull: true },
+        },
+      }
+
+      const stiRefs = [
+        { $ref: '#/components/schemas/BalloonLatex' },
+        { $ref: '#/components/schemas/BalloonMylar' },
+      ]
+
+      expect(allSerializersToRefsInOpenapi(openapi)).toEqual({
+        type: 'object',
+        properties: {
+          many: { type: 'array', items: { anyOf: stiRefs } },
+          maybeNull: { anyOf: [...stiRefs, { type: 'null' }] },
+          manyMaybeNull: { type: ['array', 'null'], items: { anyOf: stiRefs } },
+        },
+      })
+    })
+  })
+
   context('STI base models', () => {
     it('are extracted into serializers for all STI children', () => {
       const openapi: OpenapiSchemaBodyShorthand = {

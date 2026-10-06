@@ -97,7 +97,7 @@ describe('DreamSerializer rendersOne', () => {
       })
 
       context('when flatten', () => {
-        it('the custom serializer’s ref is wrapped in anyOf with null', () => {
+        it('the association is the custom serializer, or an object whose fields, when present, are null', () => {
           const MySerializer = (data: Balloon) =>
             DreamSerializer(Balloon, data)
               .attribute('color')
@@ -121,7 +121,10 @@ describe('DreamSerializer rendersOne', () => {
                     $ref: '#/components/schemas/CustomUser',
                   },
                   {
-                    type: 'null',
+                    type: 'object',
+                    properties: {
+                      name: { type: 'null' },
+                    },
                   },
                 ],
               },
@@ -204,7 +207,7 @@ describe('DreamSerializer rendersOne', () => {
     })
 
     context('when optional and flatten', () => {
-      it('the other association is wrapped in anyOf with null', () => {
+      it('the association is its serializer, or an object whose fields, when present, are null', () => {
         const MySerializer = (data: Pet) =>
           DreamSerializer(Pet, data)
             .attribute('species')
@@ -228,7 +231,12 @@ describe('DreamSerializer rendersOne', () => {
                   $ref: '#/components/schemas/User',
                 },
                 {
-                  type: 'null',
+                  type: 'object',
+                  properties: {
+                    email: { type: 'null' },
+                    id: { type: 'null' },
+                    name: { type: 'null' },
+                  },
                 },
               ],
             },

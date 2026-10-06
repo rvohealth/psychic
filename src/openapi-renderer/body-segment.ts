@@ -34,6 +34,7 @@ import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
 import maybeNullOpenapiShorthandToOpenapiShorthand from './helpers/maybeNullOpenapiShorthandToOpenapiShorthand.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import schemaToRef from './helpers/schemaToRef.js'
+import serializerRefsToOpenapi from './helpers/serializerRefsToOpenapi.js'
 import serializersAndRefsFromSerializableRef from './helpers/serializersAndRefsFromSerializableRef.js'
 import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 
@@ -581,28 +582,10 @@ The following values will be allowed:
       enumCollector: this.enumCollector,
     }).serializerRef
 
-    if (serializerRefBodySegment.many) {
-      const returnVal = {
-        type: serializerRefBodySegment.maybeNull ? ['array', 'null'] : 'array',
-        items: serializerRef,
-      } as OpenapiSchemaArray
-
-      return {
-        referencedSerializers: [serializer],
-        openapi: returnVal,
-      }
+    return {
+      referencedSerializers: [serializer],
+      openapi: serializerRefsToOpenapi([serializerRef], serializerRefBodySegment),
     }
-
-    if (serializerRefBodySegment.maybeNull) {
-      return {
-        referencedSerializers: [serializer],
-        openapi: {
-          allOf: [serializerRef, { type: 'null' }],
-        },
-      }
-    }
-
-    return { referencedSerializers: [serializer], openapi: serializerRef }
   }
 
   /**
@@ -680,26 +663,7 @@ The following values will be allowed:
       })
     }
 
-    const serializerAnyOf = { anyOf: refs }
-
-    if (serializableRef.many) {
-      return {
-        referencedSerializers: serializers,
-        openapi: {
-          type: serializableRef.maybeNull ? ['array', 'null'] : 'array',
-          items: serializerAnyOf,
-        },
-      }
-    }
-
-    if (serializableRef.maybeNull) {
-      return {
-        referencedSerializers: serializers,
-        openapi: { anyOf: [...refs, { type: 'null' }] },
-      }
-    }
-
-    return { referencedSerializers: serializers, openapi: serializerAnyOf }
+    return { referencedSerializers: serializers, openapi: serializerRefsToOpenapi(refs, serializableRef) }
   }
 
   /**
