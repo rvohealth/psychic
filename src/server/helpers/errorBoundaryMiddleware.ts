@@ -2,6 +2,10 @@ import Koa from 'koa'
 import * as util from 'node:util'
 import HttpError from '../../error/http/index.js'
 import EnvInternal from '../../helpers/EnvInternal.js'
+import errorIsDeliberateServerError, {
+  errorIsDeliberateKoaServerError,
+  setKoaHttpErrorHeaders,
+} from '../../helpers/error/errorIsDeliberateServerError.js'
 import renderSerializerBuilders from '../../helpers/renderSerializerBuilders.js'
 import PsychicApp from '../../psychic-app/index.js'
 
@@ -29,11 +33,20 @@ export const psychicRouterProcessedErrorStateKey = '_psychicRouterProcessedError
  * so any error those layers throw (and the router doesn't catch) lands here
  * instead of falling through to Koa's default handler.
  *
- * Errors carrying a 4xx status (e.g. a body-parser 400, or an `HttpError`
- * thrown from custom middleware) already name their response: the boundary
- * renders that status without involving `server:error` hooks. Anything else
- * is a genuine server error: it is logged, given a default 500 response, and
- * escalated to `server:error` hooks, which may reshape the response.
+ * Some errors already name their response. The boundary renders their
+ * status as a handled response, without logging them as server errors or
+ * involving `server:error` hooks:
+ *
+ * - errors carrying a 4xx status (e.g. a body-parser 400, or an `HttpError`
+ *   thrown from custom middleware)
+ * - deliberate 5xx errors: a psychic `HttpError` other than 500, or a Koa
+ *   `ctx.throw(501–510)` (see `errorIsDeliberateServerError`; the router
+ *   answers these the same way for a controller action)
+ *
+ * Anything else is a genuine server error, including a 500 and another
+ * library's error that merely carries a 5xx `status`: it is logged, given a
+ * default response (its 5xx status, or 500), and escalated to
+ * `server:error` hooks, which may reshape the response.
  */
 export default function errorBoundaryMiddleware(): Koa.Middleware {
   return async function psychicErrorBoundary(ctx, next) {
@@ -53,9 +66,11 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
 
       const status = statusFromError(err)
 
-      if (status !== null && status < 500) {
-        // client-shaped errors are a handled response, not a server error;
-        // server:error hooks are never called for them
+      if (status !== null && (status < 500 || errorIsDeliberateServerError(err))) {
+        // client-shaped errors and deliberate 5xx errors are a handled
+        // response, not a server error; server:error hooks are never called
+        // for them
+        if (errorIsDeliberateKoaServerError(err)) setKoaHttpErrorHeaders(ctx, err)
         ctx.status = status
         ctx.body = httpErrorBody(err)
         return

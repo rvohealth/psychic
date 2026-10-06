@@ -633,7 +633,11 @@ Try setting it to something valid, like:
    * the middleware stack. Hooks are awaited and may shape the response via
    * `ctx`; if they don't, psychic responds 500. Errors carrying a 4xx status
    * (e.g. a body-parser 400) are rendered as that status and never reach
-   * `server:error` hooks.
+   * `server:error` hooks. Psychic `HttpError`s other than 500 (e.g. from
+   * `this.serviceUnavailable()`), and `ctx.throw` errors with a 501–510
+   * status, render as their status and never reach the hooks either, whether
+   * thrown from a controller or from middleware; an uncaught error from any
+   * other library that carries no status or a 5xx status still does.
    *
    * NOTE: once any `server:error` hook is registered, psychic considers the
    * error handled and does not re-throw it to Koa.

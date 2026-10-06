@@ -16,6 +16,7 @@ import HttpError from '../error/http/index.js'
 import OpenapiRequestValidationFailure from '../error/openapi/OpenapiRequestValidationFailure.js'
 import CannotCommitRoutesWithoutKoaApp from '../error/router/cannot-commit-routes-without-koa-app.js'
 import EnvInternal from '../helpers/EnvInternal.js'
+import { errorIsDeliberateKoaServerError } from '../helpers/error/errorIsDeliberateServerError.js'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
 import PsychicApp from '../psychic-app/index.js'
 import {
@@ -429,6 +430,10 @@ suggested fix:  "${convertRouteParams(path)}"
         } else {
           controllerInstance['koaSendStatus'](httpErr.status)
         }
+      } else if (errorIsDeliberateKoaServerError(err)) {
+        // a deliberate 5xx from Koa's ctx.throw(501–510): a handled
+        // response, like the psychic HttpErrors above, not a server error
+        controllerInstance['koaSendDeliberateKoaServerError'](err)
       } else if (err instanceof RecordNotFound || err instanceof CannotSaveMissingDream) {
         controllerInstance['koaSendStatus'](404)
       } else if (err instanceof DataIncompatibleWithDatabaseField) {

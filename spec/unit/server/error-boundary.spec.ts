@@ -64,11 +64,11 @@ describe('PsychicServer error boundary', () => {
     })
   })
 
-  context('a 5xx HttpError thrown from middleware', () => {
-    it('renders a serializer passed as HttpError data', async () => {
+  context('a deliberate 5xx HttpError thrown from middleware', () => {
+    it('renders a serializer passed as HttpError data without calling server:error hooks', async () => {
       const res = await request.get('/middleware-error-503-with-serializer', 503)
       expect(res.body).toEqual({ conflictReason: 'taken' })
-      expect(serverErrorHookCallCount()).toEqual(1)
+      expect(serverErrorHookCallCount()).toEqual(0)
     })
   })
 })

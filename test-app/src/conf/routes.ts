@@ -22,6 +22,7 @@ import ResponseStatusesController from '../app/controllers/ResponseStatusesContr
 import ScopeTestController from '../app/controllers/ScopeTestController.js'
 import SerializerFallbackTestsController from '../app/controllers/SerializerFallbackTestsController.js'
 import SerializerTestsController from '../app/controllers/SerializerTestsController.js'
+import ServerErrorsController from '../app/controllers/ServerErrorsController.js'
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
 import User from '../app/models/User.js'
@@ -228,6 +229,7 @@ export default function routes(r: PsychicRouter) {
   r.get('gateway-timeout', ResponseStatusesController, 'throwGatewayTimeout') // 504
   r.get('insufficient-storage', ResponseStatusesController, 'throwInsufficientStorage') // 507
   r.get('not-extended', ResponseStatusesController, 'throwNotExtended') // 510
+  r.get('server-errors/:scenario', ServerErrorsController, 'throwScenario')
   // end: response status tests
 
   r.namespace('api', r => {

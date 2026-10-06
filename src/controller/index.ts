@@ -46,6 +46,7 @@ import HttpStatusUnavailableForLegalReasons from '../error/http/UnavailableForLe
 import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent.js'
 import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType.js'
 import EnvInternal from '../helpers/EnvInternal.js'
+import { KoaHttpError, setKoaHttpErrorHeaders } from '../helpers/error/errorIsDeliberateServerError.js'
 import isSafeRedirectTarget from '../helpers/isSafeRedirectTarget.js'
 import renderSerializerBuilders, { dataIsSerializerBuilder } from '../helpers/renderSerializerBuilders.js'
 import toJson from '../helpers/toJson.js'
@@ -936,6 +937,21 @@ export default class PsychicController {
     this.logIfDevelopment()
   }
 
+  /**
+   * @internal
+   *
+   * Sends a deliberate 5xx thrown with Koa's `ctx.throw(501–510)` (see
+   * `errorIsDeliberateServerError`): its status with an empty body, plus any
+   * headers passed to `ctx.throw` (e.g. `Retry-After`). The error's message
+   * and other properties are never sent.
+   */
+  private koaSendDeliberateKoaServerError(err: KoaHttpError) {
+    if (this._responseSent) return
+
+    setKoaHttpErrorHeaders(this.ctx, err)
+    this.koaSendStatus(err.status)
+  }
+
   private koaRedirect(statusCode: number, newLocation: string) {
     if (this._responseSent) return
 
@@ -1436,36 +1452,135 @@ export default class PsychicController {
     throw new HttpStatusInternalServerError(data)
   }
 
+  /**
+   * Throws an HTTP 501 Not Implemented error. Use this when the server does not
+   * support the functionality required to fulfill the request.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusNotImplemented} Always throws this error
+   */
   // 501
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public notImplemented(message: any = undefined) {
     throw new HttpStatusNotImplemented(message)
   }
 
+  /**
+   * Throws an HTTP 502 Bad Gateway error. Use this when an upstream server this
+   * request depends on returned an invalid response.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusBadGateway} Always throws this error
+   */
   // 502
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public badGateway(message: any = undefined) {
     throw new HttpStatusBadGateway(message)
   }
 
+  /**
+   * Throws an HTTP 503 Service Unavailable error. Use this when the server cannot
+   * handle the request right now, e.g. during maintenance or while a service it
+   * depends on is down.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusServiceUnavailable} Always throws this error
+   *
+   * @example
+   * ```ts
+   * class PaymentsController extends ApplicationController {
+   *   public async create() {
+   *     try {
+   *       await chargeCard(this.castParam('token', 'string'))
+   *     } catch (error) {
+   *       reportToErrorTracker(error)
+   *       this.serviceUnavailable()
+   *     }
+   *   }
+   * }
+   * ```
+   */
   // 503
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public serviceUnavailable(message: any = undefined) {
     throw new HttpStatusServiceUnavailable(message)
   }
 
+  /**
+   * Throws an HTTP 504 Gateway Timeout error. Use this when an upstream server
+   * this request depends on did not respond in time.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusGatewayTimeout} Always throws this error
+   */
   // 504
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public gatewayTimeout(message: any = undefined) {
     throw new HttpStatusGatewayTimeout(message)
   }
 
+  /**
+   * Throws an HTTP 507 Insufficient Storage error. Use this when the server cannot
+   * store what it needs to complete the request.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusInsufficientStorage} Always throws this error
+   */
   // 507
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public insufficientStorage(message: any = undefined) {
     throw new HttpStatusInsufficientStorage(message)
   }
 
+  /**
+   * Throws an HTTP 510 Not Extended error. Use this when further extensions to the
+   * request are required for the server to fulfill it.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusNotExtended} Always throws this error
+   */
   // 510
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public notExtended(message: any = undefined) {
