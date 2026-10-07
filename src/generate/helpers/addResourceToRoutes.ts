@@ -8,6 +8,12 @@ import { ResourceMethods, ResourcesMethods } from '../../router/types.js'
 
 const ROUTES_FUNCTION_OPENER = /^export [^(]+\(r: PsychicRouter\)[^{]*\{$/
 
+/**
+ * Declares the resource in the routes file. `onlyActions` is the actions
+ * the run generated when it was given `--only` (the controller's list, so an
+ * `--only` entry the resource has no action for is not routed), or
+ * undefined without `--only`.
+ */
 export default async function addResourceToRoutes(
   route: string,
   options: {
@@ -87,14 +93,20 @@ ${routeLines(ancestors, resourceDeclaration.code, 2).join('\n')}
  *
  * When the route already declares the resource, the declaration is kept where
  * it is and made to route the actions this run generated: its options become
- * `{ only: [...] }` from `--only`, or none without it, replacing any `only` and
- * `except` it had, and its callback, with the routes nested in it, is kept.
+ * `{ only: [...] }` listing them when the run had `--only`, or none without
+ * it, replacing any `only` and `except` it had, and its callback, with the
+ * routes nested in it, is kept.
  * The actions are compared, not the text, so a declaration already routing
  * them (in another order, or through `except`) is left as it is. A resource
  * declared more than once on the route, or with options other than `only` and
  * `except` lists of action names (e.g. a `controller`), is left unchanged and
  * reported, since editing one line could not make the route match the
  * regenerated controller.
+ *
+ * The scan skips `/* ... *\/` block comments, so a declaration commented out
+ * that way is never found, edited or counted, and it never edits a line that
+ * holds a block comment; such a line declaring a block on the route outside
+ * its comment is reported.
  *
  * The scan assumes a prettier-formatted file: 2-space indentation, single-line
  * call openers, and `r => {` callbacks. When the routes function is indented
@@ -362,14 +374,16 @@ function callbackOpener({ method, name }: RouteAncestor) {
 
 /**
  * The block opened on the given line: it ends at the first following line
- * that is indented no deeper than the opener, which must be the closer.
+ * holding code outside block comments that is indented no deeper than the
+ * opener, which must be the closer.
  */
 function findBlock(lines: string[], openerIndex: number, closer: '}' | '})'): Block | undefined {
   const indent = indentation(lines[openerIndex] ?? '')
+  const readCode = blockCommentReader()
 
   for (let index = openerIndex + 1; index < lines.length; index++) {
     const line = lines[index] ?? ''
-    if (line.trim() === '' || indentation(line) > indent) continue
+    if ((readCode(line) ?? line).trim() === '' || indentation(line) > indent) continue
     if (indentation(line) === indent && line.slice(indent).startsWith(closer))
       return { openerIndex, indent, closerIndex: index }
     return undefined
@@ -425,8 +439,9 @@ function unrecognizedDeclaration(
  * file order. A declaration in one of the forms the generator writes or
  * converts is `recognized`; any other declaration of the same name (a call
  * split across lines, options spanning several lines, a callback naming its
- * router something other than `r`) is returned unrecognized, so that it is
- * never mistaken for an absent block.
+ * router something other than `r`, code sharing its line with a block
+ * comment) is returned unrecognized, so that it is never mistaken for an
+ * absent block. A declaration inside a block comment is not a child.
  */
 function findChildren(lines: string[], block: Block, method: RouteMethod, name: string): BlockChild[] {
   const childIndent = block.indent + 2
@@ -438,12 +453,26 @@ function findChildren(lines: string[], block: Block, method: RouteMethod, name: 
   )
   const declarationOpening = new RegExp(`^r\\.${method}\\(${quotedName}[,)]`)
   const nameOnItsOwnLine = new RegExp(`^${quotedName},?$`)
+  const declares = (code: string, index: number) =>
+    declarationOpening.test(code) ||
+    (code === `r.${method}(` && nameOnItsOwnLine.test(nextNonBlankLine(lines, index)?.trim() ?? ''))
+  const readCode = blockCommentReader()
   const children: BlockChild[] = []
 
   for (let index = block.openerIndex + 1; index < block.closerIndex; index++) {
     const line = lines[index] ?? ''
+    const codeOutsideBlockComments = readCode(line)
     if (line.trim() === '' || indentation(line) !== childIndent) continue
     const code = line.slice(childIndent)
+
+    // A line a block comment touches is never edited: a declaration on it
+    // outside the comment is returned unrecognized, and one inside the comment
+    // is commented out, so it is not a child at all.
+    if (codeOutsideBlockComments !== undefined) {
+      if (declares(codeOutsideBlockComments.trim(), index))
+        children.push({ lineIndex: index, recognized: false, code })
+      continue
+    }
 
     const match = recognizedDeclaration.exec(code)
     if (match)
@@ -454,15 +483,67 @@ function findChildren(lines: string[], block: Block, method: RouteMethod, name: 
         options: match[1],
         hasCallback: method === 'namespace' || match[2] !== ')',
       })
-    else if (
-      declarationOpening.test(code) ||
-      (code === `r.${method}(` && nameOnItsOwnLine.test(nextNonBlankLine(lines, index)?.trim() ?? ''))
-    )
-      children.push({ lineIndex: index, recognized: false, code })
+    else if (declares(code, index)) children.push({ lineIndex: index, recognized: false, code })
   }
 
   return children
 }
+
+/**
+ * Reads lines in file order, following `/* ... *\/` block comments from one
+ * line to the next. For each line it returns the line's code with the block
+ * comments removed when a block comment touches the line (the line starts
+ * inside one, or one starts on it), and undefined when none does, so the
+ * line is the code. A comment opened and closed on one line starts no
+ * comment on the lines after it, code after the `*\/` closing a comment is
+ * code, and a `/*` inside a quoted string or after `//` starts no comment.
+ * A string continued across lines (a multi-line template literal) is not
+ * followed.
+ */
+function blockCommentReader() {
+  let inBlockComment = false
+
+  return (line: string): string | undefined => {
+    let touched = inBlockComment
+    let code = ''
+    let position = 0
+
+    while (position < line.length) {
+      if (inBlockComment) {
+        const commentEnd = line.indexOf('*/', position)
+        if (commentEnd === -1) break
+        inBlockComment = false
+        position = commentEnd + 2
+        continue
+      }
+
+      const token = CODE_TOKEN.exec(line.slice(position))
+      if (!token || token[0] === '//') {
+        code += line.slice(position)
+        break
+      }
+
+      const tokenStart = position + token.index
+      if (token[0] === '/*') {
+        touched = true
+        inBlockComment = true
+        code += line.slice(position, tokenStart)
+        position = tokenStart + 2
+      } else {
+        code += line.slice(position, tokenStart + token[0].length)
+        position = tokenStart + token[0].length
+      }
+    }
+
+    return touched ? code : undefined
+  }
+}
+
+/**
+ * The first token on a line of code that changes how the rest of it is read:
+ * a block comment opener, a line comment opener, or a quoted string.
+ */
+const CODE_TOKEN = /\/\*|\/\/|'(?:[^'\\]|\\.)*'|"(?:[^"\\]|\\.)*"|`(?:[^`\\]|\\.)*`/
 
 function nextNonBlankLine(lines: string[], index: number) {
   return lines.slice(index + 1).find(line => line.trim() !== '')

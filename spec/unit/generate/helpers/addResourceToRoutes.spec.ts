@@ -965,6 +965,183 @@ The file was left unchanged. Edit the route by hand so that it declares the reso
     })
   })
 
+  context('when the routes file holds a block comment', () => {
+    let consoleWarnSpy: MockInstance<typeof console.warn>
+
+    beforeEach(() => {
+      consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      consoleWarnSpy.mockRestore()
+    })
+
+    it('adds a live declaration of a resource declared only inside the comment', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  /*
+  r.resources('posts')
+  */
+`),
+        'posts',
+        { singular: false, onlyActions: ['index'] },
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.resources('posts', { only: ['index'] })
+
+  /*
+  r.resources('posts')
+  */
+`),
+      )
+      expect(consoleWarnSpy).not.toHaveBeenCalled()
+    })
+
+    it('adds a live declaration when the comment opens after code on a line', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.resources('pets') /*
+  r.resources('posts')
+  */
+`),
+        'posts',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.resources('posts')
+
+  r.resources('pets') /*
+  r.resources('posts')
+  */
+`),
+      )
+      expect(consoleWarnSpy).not.toHaveBeenCalled()
+    })
+
+    it('rewrites only the live declaration of a resource also declared inside the comment', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  /*
+  r.resources('posts')
+  */
+  r.resources('posts', { only: ['show'] })
+`),
+        'posts',
+        { singular: false, onlyActions: ['index'] },
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  /*
+  r.resources('posts')
+  */
+  r.resources('posts', { only: ['index'] })
+`),
+      )
+      expect(consoleWarnSpy).not.toHaveBeenCalled()
+    })
+
+    it('writes a live namespace instead of adding the resource to one declared inside the comment', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  /*
+  r.namespace('v1', r => {
+    r.resources('pets')
+  })
+  */
+`),
+        'v1/posts',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('posts')
+  })
+
+  /*
+  r.namespace('v1', r => {
+    r.resources('pets')
+  })
+  */
+`),
+      )
+      expect(consoleWarnSpy).not.toHaveBeenCalled()
+    })
+
+    it('reads a block whose comment ends less indented than the block', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('pets')
+    /*
+    r.resources('posts')
+*/
+  })
+`),
+        'v1/posts',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('posts')
+
+    r.resources('pets')
+    /*
+    r.resources('posts')
+*/
+  })
+`),
+      )
+      expect(consoleWarnSpy).not.toHaveBeenCalled()
+    })
+
+    it('leaves the file unchanged when the resource is declared after the end of the comment on its last line', async () => {
+      const before = routesFile(`\
+  /*
+  r.resources('posts')
+  */ r.resources('posts', { only: ['show'] })
+`)
+
+      expect(await addRoute(before, 'posts', { singular: false, onlyActions: ['index'] })).toEqual(before)
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1)
+      expect(String(consoleWarnSpy.mock.calls[0]?.[0])).toContain(
+        "line 6, `*/ r.resources('posts', { only: ['show'] })`, declares resources 'posts' in a form the generator does not edit",
+      )
+    })
+
+    const linesOpeningNoComment: [string, string][] = [
+      ['a comment opened and closed on one line', "  /* r.resources('posts') */"],
+      ['a /* inside a string', "  r.get('files/*path', FilesController, 'show')"],
+      ['a /* inside a line comment', '  // the routes below replaced /* the old ones'],
+    ]
+
+    for (const [description, line] of linesOpeningNoComment) {
+      it(`reads the lines after ${description}`, async () => {
+        const routes = await addRoute(
+          routesFile(`\
+${line}
+  r.resources('posts', { only: ['show'] })
+`),
+          'posts',
+          { singular: false, onlyActions: ['index'] },
+        )
+
+        expect(routes).toEqual(
+          routesFile(`\
+${line}
+  r.resources('posts', { only: ['index'] })
+`),
+        )
+        expect(consoleWarnSpy).not.toHaveBeenCalled()
+      })
+    }
+  })
+
   context('when the routes file declares a block in a form the generator does not edit', () => {
     let consoleWarnSpy: MockInstance<typeof console.warn>
 
