@@ -108,5 +108,54 @@ describe('Session', () => {
         })
       })
     })
+
+    context('with expires passed', () => {
+      const expires = new Date(Date.now() + 10 * 24 * 60 * 60 * 1000)
+
+      it('passes expires with no maxAge, so the default maxAge does not replace it', () => {
+        subject(user.id.toString(), { expires })
+        expect(cookieSetSpy).toHaveBeenCalledWith('auth_token', 'abc123', {
+          secure: false,
+          httpOnly: true,
+          sameSite: 'strict',
+          expires,
+        })
+      })
+
+      context('when it is not a valid Date', () => {
+        it('drops it and passes the default maxAge, as when no expires is passed', () => {
+          subject(user.id.toString(), { expires: new Date('not a date') })
+          expect(cookieSetSpy).toHaveBeenCalledWith('auth_token', 'abc123', {
+            secure: false,
+            httpOnly: true,
+            sameSite: 'strict',
+            maxAge: 4 * 60 * 60 * 24 * 1000,
+          })
+        })
+
+        it('drops one that is not a Date at all, rather than throwing', () => {
+          subject(user.id.toString(), { expires: '2099-01-01' as unknown as Date })
+          expect(cookieSetSpy).toHaveBeenCalledWith('auth_token', 'abc123', {
+            secure: false,
+            httpOnly: true,
+            sameSite: 'strict',
+            maxAge: 4 * 60 * 60 * 24 * 1000,
+          })
+        })
+      })
+
+      context('with maxAge passed too', () => {
+        it('passes the maxAge, which the cookies library sends in place of expires', () => {
+          subject(user.id.toString(), { expires, maxAge: { days: 1 } })
+          expect(cookieSetSpy).toHaveBeenCalledWith('auth_token', 'abc123', {
+            secure: false,
+            httpOnly: true,
+            sameSite: 'strict',
+            expires,
+            maxAge: 24 * 60 * 60 * 1000,
+          })
+        })
+      })
+    })
   })
 })

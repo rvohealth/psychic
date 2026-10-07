@@ -7,6 +7,7 @@ import ApiV1UsersController from '../app/controllers/Api/V1/UsersController.js'
 import AuthedUsersController from '../app/controllers/AuthedUsersController.js'
 import BalloonsController from '../app/controllers/BalloonsController.js'
 import CircularController from '../app/controllers/CircularController.js'
+import CookiesTestController from '../app/controllers/CookiesTestController.js'
 import EnumSyncCrossChainTestsController from '../app/controllers/EnumSyncCrossChainTestsController.js'
 import InternalEnumSyncTestsController from '../app/controllers/Internal/EnumSyncTestsController.js'
 import MobileEnumSyncTestsController from '../app/controllers/MobileEnumSyncTestsController.js'
@@ -37,6 +38,7 @@ export default function routes(r: PsychicRouter) {
   r.options('ping', UsersController, 'ping')
   r.post('auth', UnauthedUsersController, 'signin')
   r.get('auth-ping', AuthedUsersController, 'ping')
+  r.get('cookies-test', CookiesTestController, 'setTestCookie')
   r.get('api-ping', ApiUsersController, 'ping')
   r.post('cast-param-test', ParamsTestController, 'testCastParam')
   r.get('display-params', ParamsTestController, 'displayParams')

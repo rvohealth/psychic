@@ -678,16 +678,28 @@ export default class PsychicController {
   /**
    * Sets a cookie in the response with the specified name, data, and options.
    *
+   * The cookie lasts for `opts.maxAge` when it is passed, else until
+   * `opts.expires` when it is a valid Date, else for the app's `cookie` `maxAge`
+   * (`psy.set('cookie', { maxAge })` in conf/app.ts), or 31 days when the app
+   * sets none. When both `maxAge` and `expires` are passed, `maxAge` wins.
+   *
    * @param name - The name of the cookie to set
    * @param data - The string data to store in the cookie
-   * @param opts - Optional cookie configuration (expires, httpOnly, secure, etc.)
+   * @param opts - Optional cookie configuration (maxAge, expires, httpOnly, secure, etc.)
    *
    * @example
    * ```ts
    * class UsersController extends ApplicationController {
    *   public setPreferences() {
-   *     this.setCookie('theme', 'dark', { expires: new Date('2025-12-31') })
+   *     this.setCookie('theme', 'dark', { maxAge: { days: 365 } })
    *     this.setCookie('lang', 'en', { httpOnly: false })
+   *   }
+   *
+   *   public async acceptInvitation() {
+   *     const invitation = await Invitation.findByOrFail({ token: this.castParam('token', 'string') })
+   *     // the cookie expires when the invitation does
+   *     this.setCookie('invitation', invitation.token, { expires: invitation.expiresAt.toJSDate() })
+   *     this.noContent()
    *   }
    * }
    * ```

@@ -2,7 +2,7 @@ import Koa from 'koa'
 import InternalEncrypt from '../encrypt/internal-encrypt.js'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js'
 import EnvInternal from '../helpers/EnvInternal.js'
-import PsychicApp, { CustomCookieOptions } from '../psychic-app/index.js'
+import PsychicApp, { CustomCookieMaxAgeOptions, CustomCookieOptions } from '../psychic-app/index.js'
 
 export default class Session {
   constructor(private ctx: Koa.Context) {}
@@ -14,6 +14,8 @@ export default class Session {
   }
 
   public setCookie(name: string, data: string, opts: CustomSessionCookieOptions = {}) {
+    const expires = validDateOrUndefined(opts.expires)
+
     this.ctx.cookies.set(name, InternalEncrypt.encryptCookie(data), {
       ...opts,
       secure: opts.secure ?? EnvInternal.isProduction,
@@ -24,10 +26,19 @@ export default class Session {
       // for an API: the cookie should only ride requests that originated
       // from our own client code, never from third-party pages.
       sameSite: opts.sameSite ?? 'strict',
-      maxAge: opts.maxAge
-        ? cookieMaxAgeFromCookieOpts(opts.maxAge)
-        : (PsychicApp.getOrFail().cookieOptions?.maxAge ?? cookieMaxAgeFromCookieOpts()),
+      expires,
+      maxAge: this.cookieMaxAge(opts.maxAge, expires),
     })
+  }
+
+  // The cookies library never sends Max-Age: when it gets a maxAge, it sends
+  // an expires computed from it, replacing any expires passed. So a maxAge
+  // passed always wins, and an expires passed without one must get no
+  // default maxAge, or the default would replace it.
+  private cookieMaxAge(maxAge: CustomCookieMaxAgeOptions | undefined, expires: Date | undefined) {
+    if (maxAge) return cookieMaxAgeFromCookieOpts(maxAge)
+    if (expires) return undefined
+    return PsychicApp.getOrFail().cookieOptions?.maxAge ?? cookieMaxAgeFromCookieOpts()
   }
 
   public clearCookie(name: string) {
@@ -45,7 +56,19 @@ export interface CustomSessionCookieOptions extends CustomCookieOptions {
   domain?: string
   path?: string
   sameSite?: 'strict' | 'lax' | 'none' | boolean
+  /**
+   * When the cookie expires. When `maxAge` is passed too, `maxAge` wins.
+   * When neither is passed, the app's `cookie` `maxAge` applies. An invalid
+   * Date (e.g. `new Date('garbage')`) counts as not passed.
+   */
   expires?: Date
   signed?: boolean
   overwrite?: boolean
+}
+
+// an expires that is not a valid Date (e.g. new Date('garbage'), or a string
+// from untyped code) is treated as no expires, so the header never carries
+// `expires=Invalid Date`
+function validDateOrUndefined(date: unknown): Date | undefined {
+  return date instanceof Date && !Number.isNaN(date.getTime()) ? date : undefined
 }
