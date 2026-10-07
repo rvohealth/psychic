@@ -955,7 +955,7 @@ interface PsychicOpenapiBaseOptions {
    * ```ts
    * psy.set('openapi', {
    *   info: {
-   *     version: 1,
+   *     version: '1.0.0',
    *     title: 'my app',
    *     description: 'openapi spec for my app'
    *   }
@@ -999,7 +999,8 @@ interface PsychicOpenapiBaseOptions {
    * of the app would continue to experience the issue.
    *
    * ```ts
-   * psy.set('openapi', 'mobile.openapi.json', {
+   * psy.set('openapi', 'mobile', {
+   *   outputFilepath: path.join('src', 'openapi', 'mobile.openapi.json'),
    *   suppressResponseEnums: true,
    * })
    * ```
@@ -1060,105 +1061,156 @@ interface PsychicOpenapiBaseOptions {
   syncTypes?: boolean
 
   /**
-   * an object containing default values for all endpoints,
-   * like headers and responses.
+   * default values for this OpenAPI document: headers and
+   * responses added to every endpoint in it, and the document's
+   * security schemes, security requirements and extra components.
+   * Each OpenAPI document has its own `defaults`; a named one, such
+   * as `psy.set('openapi', 'mobile', { ... })`, does not inherit
+   * those of the default document.
    *
    * ```ts
    * psy.set('openapi', {
    *   defaults: {
    *     headers: {
    *       locale: {
-   *         type: 'string',
-   *         enum: LocalesEnumValues,
-   *       }
-   *     }
-   *   }
+   *         required: false,
+   *         schema: { type: 'string', enum: ['en-US', 'es-ES'] },
+   *       },
+   *     },
+   *     responses: {
+   *       429: { $ref: '#/components/responses/TooManyRequests' },
+   *     },
+   *     components: {
+   *       responses: {
+   *         TooManyRequests: { description: 'too many requests' },
+   *       },
+   *     },
+   *   },
    * })
    * ```
    */
   defaults?: {
     /**
-     * an object containing the default headers for your app.
-     * This will be applied to all endpoints, unless they
-     * explicitly bypass default headers.
+     * headers added to every endpoint in this OpenAPI document,
+     * unless the endpoint passes `omitDefaultHeaders: true` to
+     * `@OpenAPI` or its controller's `openapiConfig` sets
+     * `omitDefaultHeaders: true`. A header the endpoint declares
+     * with the same name replaces the default.
+     *
+     * Each header needs `required`. Its `description` defaults to
+     * the header's name, and its `schema` to `{ type: 'string' }`.
      *
      * ```ts
      * psy.set('openapi', {
      *   defaults: {
      *     headers: {
      *       locale: {
-     *         type: 'string',
-     *         enum: LocalesEnumValues,
-     *       }
-     *     }
-     *   }
+     *         required: false,
+     *         description: 'the locale to respond in',
+     *         schema: { type: 'string', enum: ['en-US', 'es-ES'] },
+     *       },
+     *     },
+     *   },
      * })
      * ```
      */
     headers?: OpenapiHeaders
 
     /**
-     * an object containing the default responses for your app.
-     * This will be applied to all endpoints, unless they
-     * explicitly bypass default responses.
+     * responses added to every endpoint in this OpenAPI document,
+     * unless the endpoint passes `omitDefaultResponses: true` to
+     * `@OpenAPI` or its controller's `openapiConfig` sets
+     * `omitDefaultResponses: true`, which drops Psychic's own
+     * default responses too.
      *
-     * Psychic provides default responses for errors like 400,
-     * 401, 403, 404, 409, and 422, so only override these if
-     * you need to either change or add to these values.
+     * Psychic already adds responses for 400, 401, 403, 404, 409
+     * and 500 to every endpoint, each a `$ref` to a response it
+     * defines in `components.responses`. 422 is not among them,
+     * because Psychic answers validation failures with a 400; an
+     * endpoint that sends a 422 itself, e.g. with
+     * `this.unprocessableContent(...)`, should declare it in its own
+     * `@OpenAPI` `responses`. Set this only to replace one of these
+     * defaults or to add another. An entry here replaces Psychic's
+     * default for the same status, and a response the endpoint
+     * declares for that status replaces both.
+     *
+     * Each value is a response as it appears in the rendered OpenAPI
+     * document (a `$ref`, or a `description` with optional `content`),
+     * not the `@OpenAPI` decorator's `responses` shorthand. Define the
+     * response a `$ref` points to in `components`.
      *
      * ```ts
      * psy.set('openapi', {
      *   defaults: {
-     *     headers: {
-     *       locale: {
-     *         type: 'string',
-     *         enum: LocalesEnumValues,
-     *       }
-     *     }
-     *   }
+     *     responses: {
+     *       429: { $ref: '#/components/responses/TooManyRequests' },
+     *       503: { description: 'down for maintenance' },
+     *     },
+     *     components: {
+     *       responses: {
+     *         TooManyRequests: { description: 'too many requests' },
+     *       },
+     *     },
+     *   },
      * })
      * ```
      */
     responses?: OpenapiResponses
 
     /**
-     * an object containing the default security schemes
-     * for your app.
+     * the security schemes for this OpenAPI document, rendered
+     * into its `components.securitySchemes`. To require one, name
+     * it in `security`, or in an `@OpenAPI` decorator's `security`
+     * for a single endpoint.
      *
      * ```ts
      * psy.set('openapi', {
      *   defaults: {
      *     securitySchemes: {
      *       myHttpAuth: {
-     *         type: 'http'
-     *         scheme: 'bearer'
-     *       }
-     *     }
-     *   }
+     *         type: 'http',
+     *         scheme: 'bearer',
+     *       },
+     *     },
+     *   },
      * })
      * ```
      */
     securitySchemes?: OpenapiSecuritySchemes
 
     /**
-     * an object containing the default security
-     * for your app.
+     * the security requirements for this OpenAPI document, rendered
+     * at its root, where they apply to every endpoint that does not
+     * set its own `security` in `@OpenAPI`. This documents
+     * authentication; Psychic does not enforce it.
+     *
+     * It is an array, as in the OpenAPI document. Each entry maps
+     * the name of a scheme in `securitySchemes` to the scopes it
+     * requires (`[]` for a scheme without scopes, such as bearer
+     * auth).
      *
      * ```ts
      * psy.set('openapi', {
      *   defaults: {
-     *     security: {
-     *       myHttpAuth: []
-     *     }
-     *   }
+     *     securitySchemes: {
+     *       myHttpAuth: {
+     *         type: 'http',
+     *         scheme: 'bearer',
+     *       },
+     *     },
+     *     security: [{ myHttpAuth: [] }],
+     *   },
      * })
      * ```
      */
     security?: OpenapiSecurity
 
     /**
-     * an object containing the default components
-     * for your app.
+     * extra components for this OpenAPI document, merged into its
+     * `components` beside the schemas Psychic renders for your
+     * serializers and its own default schemas and responses.
+     * Reference one with a `$ref`, e.g.
+     * `{ $ref: '#/components/schemas/Chalupa' }`.
      *
      * ```ts
      * psy.set('openapi', {
@@ -1166,11 +1218,14 @@ interface PsychicOpenapiBaseOptions {
      *     components: {
      *       schemas: {
      *         Chalupa: {
-     *           delicious: boolean
-     *         }
-     *       }
-     *     }
-     *   }
+     *           type: 'object',
+     *           properties: {
+     *             delicious: { type: 'boolean' },
+     *           },
+     *         },
+     *       },
+     *     },
+     *   },
      * })
      * ```
      */
