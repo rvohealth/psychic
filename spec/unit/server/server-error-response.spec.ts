@@ -1,7 +1,14 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import { MockInstance } from 'vitest'
 import { PsychicServer } from '../../../src/package-exports/index.js'
+import EnvInternal from '../../../src/helpers/EnvInternal.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
+
+// the scenarios are thrown by test-app/src/app/controllers/ServerErrorsController.ts
+const scenarioPathPrefixes = [
+  ['thrown from a controller action', '/server-errors'],
+  ['thrown from middleware', '/middleware-server-errors'],
+] as const
 
 // PsychicApp is initialized afresh before every spec (spec/unit/setup/hooks.ts),
 // so replacing its server:error hooks here lasts for one spec only
@@ -69,10 +76,7 @@ describe('a visitor hits a route that raises a server error', () => {
 
     // the hook's error is re-thrown to Koa so specs see it; Koa cannot set the
     // status of these errors, so psychic hands Koa a plain Error wrapping them
-    context.each([
-      ['thrown from a controller action', '/server-errors'],
-      ['thrown from middleware', '/middleware-server-errors'],
-    ])('%s', (_, pathPrefix) => {
+    context.each(scenarioPathPrefixes)('%s', (_, pathPrefix) => {
       it.each([
         ['an HttpStatusInternalServerError', 'psychic-500'],
         ['a frozen error', 'frozen-error'],
@@ -81,6 +85,60 @@ describe('a visitor hits a route that raises a server error', () => {
         expect(res.text).toEqual('Internal Server Error')
         // psychic's log line, and the hook's error reaching Koa's error handler
         expect(errorLogCount()).toEqual(2)
+      })
+    })
+  })
+
+  context('with a server:error hook that only reports the error and sets no response', () => {
+    let reportedErrors: Error[]
+
+    beforeEach(() => {
+      reportedErrors = []
+      replaceServerErrorHooks(err => {
+        reportedErrors.push(err)
+      })
+    })
+
+    context.each(scenarioPathPrefixes)('%s', (_, pathPrefix) => {
+      it.each([
+        ['a plain Error', 'non-http-error'],
+        // e.g. an uncaught Google API client error mirroring an upstream 503
+        ['a library error carrying a 503 status', 'status-bearing-library-error'],
+      ])('%s is answered with a 500 and an empty body', async (_, scenario) => {
+        const res = await request.get(`${pathPrefix}/${scenario}`, 500)
+        expect(res.text).toEqual('')
+        expect(reportedErrors).toHaveLength(1)
+        expect(errorLogCount()).toEqual(1)
+      })
+    })
+
+    it('answers an action that wrote a success response and then threw with a 500 and an empty body', async () => {
+      const res = await request.get('/ok-then-throw', 500)
+      expect(res.text).toEqual('')
+      expect(reportedErrors).toHaveLength(1)
+    })
+
+    it('leaves a response whose headers were sent before the action threw as it was', async () => {
+      const res = await request.get('/headers-sent-then-throw', 202)
+      expect(res.text).toEqual('partial response')
+      expect(reportedErrors).toHaveLength(1)
+    })
+  })
+
+  context('in production, with a server:error hook that throws', () => {
+    beforeEach(() => {
+      vi.spyOn(EnvInternal, 'isDevelopmentOrTest', 'get').mockReturnValue(false)
+      replaceServerErrorHooks(() => {
+        throw new Error('the error tracker is unreachable')
+      })
+    })
+
+    context.each(scenarioPathPrefixes)('%s', (_, pathPrefix) => {
+      it('logs the hook error and answers the server error with a 500 and an empty body', async () => {
+        const res = await request.get(`${pathPrefix}/non-http-error`, 500)
+        expect(res.text).toEqual('')
+        // the server error, then the hook error and the line introducing it
+        expect(errorLogCount()).toEqual(3)
       })
     })
   })

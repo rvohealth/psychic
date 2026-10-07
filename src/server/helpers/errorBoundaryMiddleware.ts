@@ -47,8 +47,10 @@ export const psychicRouterProcessedErrorStateKey = '_psychicRouterProcessedError
  *
  * Anything else is a genuine server error, including a 500 and another
  * library's error that merely carries a 5xx `status`: it is logged, given a
- * default response (its 5xx status, or 500), and escalated to
- * `server:error` hooks, which may reshape the response.
+ * default response of 500, whatever status the error carries (the router
+ * gives a server error from a controller action the same default), and
+ * escalated to `server:error` hooks, which may reshape the response. When
+ * the hooks set no response, the 500 is sent.
  */
 export default function errorBoundaryMiddleware(): Koa.Middleware {
   return async function psychicErrorBoundary(ctx, next) {
@@ -80,8 +82,9 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
 
       PsychicApp.logWithLevel('error', util.inspect(err, { depth: ERROR_LOGGING_DEPTH }))
 
-      // default server-error response; server:error hooks may reshape it
-      ctx.status = status ?? 500
+      // default server-error response, whatever status the error carries;
+      // server:error hooks may reshape it
+      ctx.status = 500
       ctx.body = httpErrorBody(err)
 
       try {

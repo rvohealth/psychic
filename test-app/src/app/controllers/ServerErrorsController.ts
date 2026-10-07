@@ -87,4 +87,20 @@ export default class ServerErrorsController extends ApplicationController {
   public redirectToReturnTo() {
     this.redirect(this.castParam('returnTo', 'string'))
   }
+
+  // writes a success response, which is not sent until the action returns,
+  // and then fails
+  public okThenThrow() {
+    this.ok({ secretSuccess: true })
+    throw new Error('thrown after ok')
+  }
+
+  // sends the response headers, so the response can no longer be reshaped,
+  // and then fails
+  public sendHeadersThenThrow() {
+    this.ctx.status = 202
+    this.ctx.body = 'partial response'
+    this.ctx.flushHeaders()
+    throw new Error('thrown after the headers were sent')
+  }
 }

@@ -630,8 +630,12 @@ Try setting it to something valid, like:
    * actions as well as errors raised outside the router — e.g. in the body
    * parser, cors callbacks, custom `psy.use` middleware, or after-routes
    * mounts — which are captured by an error boundary mounted outermost in
-   * the middleware stack. Hooks are awaited and may shape the response via
-   * `ctx`; if they don't, psychic responds 500. Errors carrying a 4xx status
+   * the middleware stack. Before the hooks run, psychic logs the error and
+   * gives the response a default status of 500, whatever status the error
+   * carries, and, for an error thrown from a controller action, an empty
+   * body. Hooks are awaited and may reshape the response via `ctx`; if they
+   * don't (e.g. a hook that only reports the error to an error tracker),
+   * psychic responds with that default. Errors carrying a 4xx status
    * (e.g. a body-parser 400) are rendered as that status and never reach
    * `server:error` hooks. Psychic `HttpError`s other than 500 (e.g. from
    * `this.serviceUnavailable()`), and `ctx.throw` errors with a 501–510
@@ -641,11 +645,11 @@ Try setting it to something valid, like:
    *
    * NOTE: psychic answers these errors itself, whether or not any
    * `server:error` hooks are registered, and does not hand them to Koa's
-   * default error handler, so Koa's `'error'` event does not fire for them.
-   * A server error thrown from a controller action is given a 500 with an
-   * empty body before the hooks run; with no hooks registered, that is the
-   * response. An error thrown by a hook itself is logged in production; in
-   * development and test it is re-thrown to Koa so that specs see it.
+   * default error handler, so Koa's `'error'` event does not fire for them;
+   * with no hooks registered, the default is the response. An error thrown
+   * by a hook itself is logged in production, and the response is sent as
+   * the hooks left it; in development and test the hook's error is re-thrown
+   * to Koa so that specs see it.
    */
   public on<T extends PsychicHookEventType>(
     hookEventType: T,

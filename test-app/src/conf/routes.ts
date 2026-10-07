@@ -234,6 +234,8 @@ export default function routes(r: PsychicRouter) {
   r.get('not-extended', ResponseStatusesController, 'throwNotExtended') // 510
   r.get('server-errors/:scenario', ServerErrorsController, 'throwScenario')
   r.get('redirect-to-return-to', ServerErrorsController, 'redirectToReturnTo')
+  r.get('ok-then-throw', ServerErrorsController, 'okThenThrow')
+  r.get('headers-sent-then-throw', ServerErrorsController, 'sendHeadersThenThrow')
   // end: response status tests
 
   r.namespace('api', r => {
