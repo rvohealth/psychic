@@ -206,7 +206,7 @@ export default class SerializerOpenapiRenderer {
 
             if (attribute.options.flatten) {
               this.allOfSiblings.push(
-                this.flattenedCustomAttributeOpenapi(openapiShorthandToOpenapi(openapi as any)),
+                this.flattenedCustomAttributeOpenapi(attribute, openapiShorthandToOpenapi(openapi as any)),
               )
             } else {
               accumulator[outputAttributeName] = allSerializersToRefsInOpenapi(
@@ -330,13 +330,16 @@ export default class SerializerOpenapiRenderer {
               if (attribute.options.flatten && optional) {
                 this.allOfSiblings.push(
                   this.flattenedNullableOpenapi(
+                    attribute,
                     referencedSerializersAndOpenapiSchemaBodyShorthand.openapi,
                     serializers,
                   ),
                 )
                 //
               } else if (attribute.options.flatten) {
-                this.allOfSiblings.push(referencedSerializersAndOpenapiSchemaBodyShorthand.openapi)
+                this.allOfSiblings.push(
+                  withMergeableRefs(referencedSerializersAndOpenapiSchemaBodyShorthand.openapi),
+                )
                 //
               } else if (optional) {
                 accumulator[outputAttributeName] = {
@@ -470,6 +473,20 @@ export default class SerializerOpenapiRenderer {
     if (visitedSerializers.has(this.serializer)) return []
     visitedSerializers.add(this.serializer)
 
+    return uniq(
+      this.serializerBuilder['attributes'].flatMap(attribute =>
+        this.attributeFieldNames(attribute, visitedSerializers),
+      ),
+    )
+  }
+
+  /**
+   * @internal
+   *
+   * The keys one of this serializer's attributes renders into its object (see
+   * `renderedFieldNames`)
+   */
+  private attributeFieldNames(attribute: SerializerAttribute, visitedSerializers: Set<unknown>): string[] {
     const DataTypeForOpenapi = this.serializerBuilder['$typeForOpenapi'] as
       | typeof Dream
       | ViewModelClass
@@ -482,39 +499,35 @@ export default class SerializerOpenapiRenderer {
         ),
       )
 
-    return uniq(
-      this.serializerBuilder['attributes'].flatMap(attribute => {
-        const attributeType = attribute.type
-        switch (attributeType) {
-          case 'attribute':
-          case 'delegatedAttribute':
-          case 'rendersMany':
-            return [this.setCase(attribute.options?.as ?? attribute.name)]
+    const attributeType = attribute.type
+    switch (attributeType) {
+      case 'attribute':
+      case 'delegatedAttribute':
+      case 'rendersMany':
+        return [this.setCase(attribute.options?.as ?? attribute.name)]
 
-          case 'customAttribute':
-            if (!attribute.options.flatten) return [this.setCase(attribute.name)]
-            return flattenedOpenapiFieldNames(attribute.options.openapi, nestedFieldNames)
+      case 'customAttribute':
+        if (!attribute.options.flatten) return [this.setCase(attribute.name)]
+        return flattenedOpenapiFieldNames(attribute.options.openapi, nestedFieldNames)
 
-          case 'rendersOne':
-            if (!attribute.options.flatten) return [this.setCase(attribute.options.as ?? attribute.name)]
+      case 'rendersOne':
+        if (!attribute.options.flatten) return [this.setCase(attribute.options.as ?? attribute.name)]
 
-            try {
-              return nestedFieldNames(associationSerializers(attribute, DataTypeForOpenapi).serializers)
-            } catch (error) {
-              // the association's OpenAPI shape cannot be defined (the rendersOne
-              // case of renderedOpenapiAttributes renders a placeholder for it)
-              if (error instanceof CallingSerializersThrewError) return []
-              throw error
-            }
-
-          default: {
-            // protection so that if a new ValidationType is ever added, this will throw a type error at build time
-            const _never: never = attributeType
-            throw new Error(`Unhandled serializer attribute type: ${_never as string}`)
-          }
+        try {
+          return nestedFieldNames(associationSerializers(attribute, DataTypeForOpenapi).serializers)
+        } catch (error) {
+          // the association's OpenAPI shape cannot be defined (the rendersOne
+          // case of renderedOpenapiAttributes renders a placeholder for it)
+          if (error instanceof CallingSerializersThrewError) return []
+          throw error
         }
-      }),
-    )
+
+      default: {
+        // protection so that if a new ValidationType is ever added, this will throw a type error at build time
+        const _never: never = attributeType
+        throw new Error(`Unhandled serializer attribute type: ${_never as string}`)
+      }
+    }
   }
 
   /**
@@ -522,12 +535,15 @@ export default class SerializerOpenapiRenderer {
    *
    * The `allOf` sibling for a customAttribute with `flatten: true`
    */
-  private flattenedCustomAttributeOpenapi(openapi: OpenapiSchemaBodyShorthand): OpenapiSchemaBodyShorthand {
+  private flattenedCustomAttributeOpenapi(
+    attribute: SerializerAttribute,
+    openapi: OpenapiSchemaBodyShorthand,
+  ): OpenapiSchemaBodyShorthand {
     const serializerRef = openapi as Partial<
       OpenapiSchemaShorthandExpressionSerializerRef & OpenapiSchemaShorthandExpressionSerializableRef
     >
     if (!isObject(openapi) || !(serializerRef.$serializer || serializerRef.$serializable))
-      return allSerializersToRefsInOpenapi(openapi)
+      return withMergeableRefs(allSerializersToRefsInOpenapi(openapi))
 
     const { many, maybeNull, ...singleSerializerRef } = serializerRef
     const refOpenapi = allSerializersToRefsInOpenapi(singleSerializerRef as OpenapiSchemaBodyShorthand)
@@ -535,14 +551,15 @@ export default class SerializerOpenapiRenderer {
     // flattening an array would spread its indexes into this object, so a
     // flattened `many` has no faithful shape; it renders the ref(s) alone, as
     // it did before `many` was expanded
-    if (many || !maybeNull) return refOpenapi
+    if (many) return refOpenapi
+    if (!maybeNull) return withMergeableRefs(refOpenapi)
 
     const serializers = allSerializersFromHandWrittenOpenapi(
       singleSerializerRef as OpenapiSchemaBodyShorthand,
     )
     if (!serializers.length) return refOpenapi
 
-    return this.flattenedNullableOpenapi(refOpenapi, serializers)
+    return this.flattenedNullableOpenapi(attribute, refOpenapi, serializers)
   }
 
   /**
@@ -555,14 +572,30 @@ export default class SerializerOpenapiRenderer {
    * sibling can never match it. When the nested value is null, Dream leaves the
    * nested fields out (a flattened customAttribute spreads nothing) or sends
    * them as null (a flattened rendersOne renders its serializer over `{}`). So
-   * the sibling is the nested serializer, or an object whose nested fields are
-   * null when present. Listing those fields also lets the `allOf` wrapper's
+   * the sibling is the nested serializer (its ref inside an `allOf`; see
+   * `mergeableRef`), or an object whose nested fields are null when present.
+   * Listing those fields also lets the `allOf` wrapper's
    * `unevaluatedProperties: false` accept them.
+   *
+   * A nested field that another of this serializer's attributes also renders
+   * is left out of that object: when the nested value is null, the key holds
+   * the other attribute's value (a null flattened customAttribute spreads
+   * nothing), so the other attribute's schema describes it. Listing it as null
+   * would contradict that schema, rejecting the payload and making
+   * fast-json-stringify fail to compile.
    */
   private flattenedNullableOpenapi(
+    attribute: SerializerAttribute,
     openapi: OpenapiSchemaBodyShorthand,
     serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[],
   ): OpenapiSchemaBodyShorthand {
+    const visitedSerializers = new Set<unknown>([this.serializer])
+    const otherAttributesFieldNames = new Set(
+      this.serializerBuilder['attributes']
+        .filter(otherAttribute => otherAttribute !== attribute)
+        .flatMap(otherAttribute => this.attributeFieldNames(otherAttribute, visitedSerializers)),
+    )
+
     const fieldNames = sort(
       uniq(
         serializers.flatMap(serializer =>
@@ -571,13 +604,13 @@ export default class SerializerOpenapiRenderer {
           ),
         ),
       ),
-    )
+    ).filter(fieldName => !otherAttributesFieldNames.has(fieldName))
 
     const refs = (openapi as OpenapiSchemaShorthandExpressionAnyOf).anyOf ?? [openapi]
 
     return {
       anyOf: [
-        ...refs,
+        ...refs.map(mergeableRef),
         {
           type: 'object',
           properties: Object.fromEntries(fieldNames.map(fieldName => [fieldName, { type: 'null' }])),
@@ -736,6 +769,27 @@ function associationSerializers(
   return { optional, serializers }
 }
 
+// a `$ref` in the `anyOf` of a flattened `allOf` sibling, inside an `allOf`.
+//
+// fast-json-stringify serializes a flattened object by merging the members of
+// its `allOf`, and merges two members that are `anyOf`s into one `anyOf` of
+// every pairing of their branches. A pairing holding a bare `$ref` keeps only
+// that `$ref` (two of them keep neither), losing the other branch, so the
+// nested fields are left out of the response. A `$ref` inside an `allOf` is
+// merged with the other branch instead. Validation is unchanged.
+function mergeableRef(openapi: OpenapiSchemaBodyShorthand): OpenapiSchemaBodyShorthand {
+  return isObject(openapi) && (openapi as OpenapiSchemaExpressionRef).$ref ? { allOf: [openapi] } : openapi
+}
+
+// a flattened `allOf` sibling with each `$ref` in its `anyOf` (the children
+// of an STI base model, or a hand-written `anyOf`) inside an `allOf` (see
+// `mergeableRef`). A lone `$ref` sibling is left as it is: fast-json-stringify
+// resolves it before merging
+function withMergeableRefs(openapi: OpenapiSchemaBodyShorthand): OpenapiSchemaBodyShorthand {
+  const anyOf = isObject(openapi) ? (openapi as OpenapiSchemaShorthandExpressionAnyOf).anyOf : undefined
+  return Array.isArray(anyOf) ? { ...openapi, anyOf: anyOf.map(mergeableRef) } : openapi
+}
+
 // the keys a flattened customAttribute's openapi spreads into the object
 function flattenedOpenapiFieldNames(
   openapi: unknown,
@@ -790,6 +844,8 @@ function descendantSerializers(
 // STI children, so they don't have serializers and calling `.serializers`
 // throws an error)
 class CallingSerializersThrewError extends Error {}
+
+type SerializerAttribute = DreamSerializerBuilder<any, any, any>['attributes'][number]
 
 interface ReferencedSerializersAndOpenapiSchemaBodyShorthand {
   referencedSerializers: (DreamModelSerializerType | SimpleObjectSerializerType)[]
