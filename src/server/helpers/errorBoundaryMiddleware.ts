@@ -6,6 +6,7 @@ import errorIsDeliberateServerError, {
   errorIsDeliberateKoaServerError,
   setKoaHttpErrorHeaders,
 } from '../../helpers/error/errorIsDeliberateServerError.js'
+import errorKoaCanHandle from '../../helpers/error/errorKoaCanHandle.js'
 import renderSerializerBuilders from '../../helpers/renderSerializerBuilders.js'
 import PsychicApp from '../../psychic-app/index.js'
 
@@ -14,13 +15,14 @@ export const ERROR_LOGGING_DEPTH = 6
 /**
  * @internal
  *
- * Set on `ctx.state` by the router when it processes an error thrown from a
- * controller action (running `server:error` hooks when any are registered,
- * or deliberately re-throwing to Koa when none are). The error boundary
- * passes marked errors through untouched so a single request can never run
- * `server:error` hooks twice, and so the router's deliberate dev/test
- * re-throw behavior reaches Koa exactly as it did before the boundary
- * existed.
+ * Set on `ctx.state` by the router when it answers an error thrown from a
+ * controller action as a server error. The router answers it itself,
+ * whether or not any `server:error` hooks are registered, and never
+ * re-throws it to Koa; the only error it throws afterwards is a failing
+ * `server:error` hook's, which it deliberately re-throws in development and
+ * test. The error boundary passes errors thrown on a marked request through
+ * to Koa untouched, so a single request can never run `server:error` hooks
+ * twice.
  */
 export const psychicRouterProcessedErrorStateKey = '_psychicRouterProcessedError'
 
@@ -89,8 +91,9 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
       } catch (hookError) {
         if (EnvInternal.isDevelopmentOrTest) {
           // mirror the router's deliberate dev/test behavior for throwing
-          // server:error hooks: surface the hook error so specs can see it
-          throw hookError
+          // server:error hooks: surface the hook error so specs can see it,
+          // as an error Koa's default error handler can respond to
+          throw errorKoaCanHandle(hookError)
         } else {
           PsychicApp.logWithLevel(
             'error',

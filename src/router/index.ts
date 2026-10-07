@@ -18,6 +18,7 @@ import CannotCommitRoutesWithoutKoaApp from '../error/router/cannot-commit-route
 import EnvInternal from '../helpers/EnvInternal.js'
 import { errorIsDeliberateKoaServerError } from '../helpers/error/errorIsDeliberateServerError.js'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
+import errorKoaCanHandle from '../helpers/error/errorKoaCanHandle.js'
 import PsychicApp from '../psychic-app/index.js'
 import {
   applyResourcefulAction,
@@ -513,41 +514,52 @@ suggested fix:  "${convertRouteParams(path)}"
          */
         controllerInstance['koaSendStatus'](400)
       } else {
-        // mark the request so the error-boundary middleware passes anything
-        // this branch throws straight through to Koa: the deliberate
-        // dev/test re-throw of a failing server:error hook below must not
-        // run the hooks a second time, and with no hooks registered the
-        // re-thrown action error keeps Koa's default handling
+        // a server error: psychic answers it itself, whether or not any
+        // server:error hooks are registered, and never hands it to Koa's
+        // default error handler. Mark the request so the error-boundary
+        // middleware passes the deliberate dev/test re-throw of a failing
+        // server:error hook below straight through to Koa, instead of
+        // running the hooks a second time
         ctx.state[psychicRouterProcessedErrorStateKey] = true
 
         PsychicApp.logWithLevel('error', util.inspect(err, { depth: ERROR_LOGGING_DEPTH }))
 
-        if (PsychicApp.getOrFail().specialHooks.serverError.length) {
-          try {
-            for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {
-              await hook(err, ctx)
-            }
-          } catch (error) {
-            if (EnvInternal.isDevelopmentOrTest) {
-              // In development and test, we want to throw so that, for example, double-setting of
-              // status headers throws an error in specs. We couldn't figure out how to write
-              // a spec for ensuring that such errors made it through because Supertest would
-              // respond with the first header sent, which was successful, and the exception only
-              // happened when Jest ended the spec.
-              throw error
-            } else {
-              PsychicApp.logWithLevel(
-                'error',
-                `
-                  Something went wrong while attempting to call your custom server:error hooks.
-                  Psychic will rescue errors thrown here to prevent the server from crashing.
-                  The error thrown is:
-                `,
-              )
-              PsychicApp.logWithLevel('error', error)
-            }
+        // default server-error response, which server:error hooks may
+        // reshape; with no hooks registered, it is the response. A server
+        // error's data is never sent
+        if (!ctx.headerSent) {
+          ctx.status = 500
+          ctx.body = ''
+        }
+
+        try {
+          for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {
+            await hook(err, ctx)
           }
-        } else throw err
+        } catch (error) {
+          if (EnvInternal.isDevelopmentOrTest) {
+            // In development and test, we want to throw so that, for example, double-setting of
+            // status headers throws an error in specs. We couldn't figure out how to write
+            // a spec for ensuring that such errors made it through because Supertest would
+            // respond with the first header sent, which was successful, and the exception only
+            // happened when Jest ended the spec.
+            //
+            // Koa's default error handler crashes, sending no response, on an error whose
+            // status it cannot set, such as the psychic 500 a hook re-throws; it is handed
+            // a plain Error wrapping such an error instead.
+            throw errorKoaCanHandle(error)
+          } else {
+            PsychicApp.logWithLevel(
+              'error',
+              `
+                Something went wrong while attempting to call your custom server:error hooks.
+                Psychic will rescue errors thrown here to prevent the server from crashing.
+                The error thrown is:
+              `,
+            )
+            PsychicApp.logWithLevel('error', error)
+          }
+        }
       }
     }
   }

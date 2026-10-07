@@ -233,6 +233,7 @@ export default function routes(r: PsychicRouter) {
   r.get('insufficient-storage', ResponseStatusesController, 'throwInsufficientStorage') // 507
   r.get('not-extended', ResponseStatusesController, 'throwNotExtended') // 510
   r.get('server-errors/:scenario', ServerErrorsController, 'throwScenario')
+  r.get('redirect-to-return-to', ServerErrorsController, 'redirectToReturnTo')
   // end: response status tests
 
   r.namespace('api', r => {

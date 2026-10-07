@@ -639,8 +639,13 @@ Try setting it to something valid, like:
    * thrown from a controller or from middleware; an uncaught error from any
    * other library that carries no status or a 5xx status still does.
    *
-   * NOTE: once any `server:error` hook is registered, psychic considers the
-   * error handled and does not re-throw it to Koa.
+   * NOTE: psychic answers these errors itself, whether or not any
+   * `server:error` hooks are registered, and does not hand them to Koa's
+   * default error handler, so Koa's `'error'` event does not fire for them.
+   * A server error thrown from a controller action is given a 500 with an
+   * empty body before the hooks run; with no hooks registered, that is the
+   * response. An error thrown by a hook itself is logged in production; in
+   * development and test it is re-thrown to Koa so that specs see it.
    */
   public on<T extends PsychicHookEventType>(
     hookEventType: T,

@@ -7,7 +7,7 @@ import ApplicationController from './ApplicationController.js'
  * Used by spec/unit/scenarios/response-statuses/deliberate-5xx.spec.ts, which
  * throws each of these errors both from a controller action (this controller)
  * and from middleware (test-app/src/conf/app.ts), so one rule is pinned on
- * both request paths.
+ * both request paths, and by spec/unit/server/server-error-response.spec.ts.
  */
 export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): never {
   switch (scenario) {
@@ -65,6 +65,13 @@ export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): ne
     case 'non-http-error':
       throw new Error('something broke')
 
+    case 'frozen-error': {
+      // an error nothing can add properties to, such as a status
+      const frozenError = new Error('frozen')
+      Object.freeze(frozenError)
+      throw frozenError
+    }
+
     default:
       throw new Error(`unknown server error scenario: ${scenario}`)
   }
@@ -73,5 +80,11 @@ export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): ne
 export default class ServerErrorsController extends ApplicationController {
   public throwScenario() {
     throwServerErrorScenario(this.ctx, this.castParam('scenario', 'string'))
+  }
+
+  // redirects to a target the request supplies, e.g. a `returnTo` param; psychic
+  // refuses an unsafe target by throwing HttpStatusInternalServerError
+  public redirectToReturnTo() {
+    this.redirect(this.castParam('returnTo', 'string'))
   }
 }
