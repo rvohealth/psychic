@@ -47,6 +47,14 @@ describe('PsychicServer error boundary', () => {
       expect(serverErrorHookCallCount()).toEqual(0)
     })
 
+    it('responds 413 to a body over the size limit without calling server:error hooks (body parser 413)', async () => {
+      await request.post('/ping', 413, {
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        data: { tooLarge: 'x'.repeat(60 * 1024) },
+      })
+      expect(serverErrorHookCallCount()).toEqual(0)
+    })
+
     it('renders HttpError data as the response body without calling server:error hooks', async () => {
       const res = await request.get('/middleware-error-401', 401)
       expect(res.body).toEqual({ reason: 'custom middleware unauthorized' })

@@ -2,10 +2,11 @@ import Koa from 'koa'
 import * as util from 'node:util'
 import HttpError from '../../error/http/index.js'
 import EnvInternal from '../../helpers/EnvInternal.js'
-import errorIsDeliberateServerError, {
-  errorIsDeliberateKoaServerError,
+import errorIsDeliberateHttpError, {
+  errorIsDeliberateKoaHttpError,
   setKoaHttpErrorHeaders,
-} from '../../helpers/error/errorIsDeliberateServerError.js'
+} from '../../helpers/error/errorIsDeliberateHttpError.js'
+import errorIsFromBodyParser from '../../helpers/error/errorIsFromBodyParser.js'
 import errorKoaCanHandle from '../../helpers/error/errorKoaCanHandle.js'
 import renderSerializerBuilders from '../../helpers/renderSerializerBuilders.js'
 import PsychicApp from '../../psychic-app/index.js'
@@ -39,18 +40,20 @@ export const psychicRouterProcessedErrorStateKey = '_psychicRouterProcessedError
  * status as a handled response, without logging them as server errors or
  * involving `server:error` hooks:
  *
- * - errors carrying a 4xx status (e.g. a body-parser 400, or an `HttpError`
- *   thrown from custom middleware)
- * - deliberate 5xx errors: a psychic `HttpError` other than 500, or a Koa
- *   `ctx.throw(501–510)` (see `errorIsDeliberateServerError`; the router
- *   answers these the same way for a controller action)
+ * - deliberate http errors: a psychic `HttpError` other than 500 (e.g. one
+ *   thrown from custom middleware), or a Koa `ctx.throw` with a 4xx or
+ *   501–510 status, with the headers passed to it (see
+ *   `errorIsDeliberateHttpError`; the router answers these the same way for
+ *   a controller action)
+ * - the body parser's own 4xx errors, e.g. a 400 for malformed JSON or a 413
+ *   for a body over the size limit (see `errorIsFromBodyParser`)
  *
  * Anything else is a genuine server error, including a 500 and another
- * library's error that merely carries a 5xx `status`: it is logged, given a
- * default response of 500 with an empty body, whatever status or data the
- * error carries (the router gives a server error from a controller action
- * the same default), and escalated to `server:error` hooks, which may
- * reshape the response. When the hooks set no response, the default is
+ * library's error that merely carries a 4xx or 5xx `status`: it is logged,
+ * given a default response of 500 with an empty body, whatever status or
+ * data the error carries (the router gives a server error from a controller
+ * action the same default), and escalated to `server:error` hooks, which
+ * may reshape the response. When the hooks set no response, the default is
  * sent. A server error's data, e.g. an `HttpStatusInternalServerError`'s,
  * is logged with it but never sent to the client.
  */
@@ -72,11 +75,14 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
 
       const status = statusFromError(err)
 
-      if (status !== null && (status < 500 || errorIsDeliberateServerError(err))) {
-        // client-shaped errors and deliberate 5xx errors are a handled
-        // response, not a server error; server:error hooks are never called
-        // for them
-        if (errorIsDeliberateKoaServerError(err)) setKoaHttpErrorHeaders(ctx, err)
+      if (
+        status !== null &&
+        (errorIsDeliberateHttpError(err) || (status < 500 && errorIsFromBodyParser(err)))
+      ) {
+        // deliberate http errors and the body parser's own 4xx errors are a
+        // handled response, not a server error; server:error hooks are never
+        // called for them
+        if (errorIsDeliberateKoaHttpError(err)) setKoaHttpErrorHeaders(ctx, err)
         ctx.status = status
         ctx.body = httpErrorBody(err)
         return
@@ -138,10 +144,10 @@ function statusFromError(err: unknown): number | null {
  * @internal
  *
  * The response body for an error the boundary answers as a handled response
- * (a 4xx or a deliberate 5xx): an `HttpError`'s data, with serializer
- * builders rendered (there is no controller here, so no serializer
- * passthrough), or an empty body. Never used for a server error, whose data
- * is never sent.
+ * (a deliberate http error, or the body parser's own 4xx error): an
+ * `HttpError`'s data, with serializer builders rendered (there is no
+ * controller here, so no serializer passthrough), or an empty body. Never
+ * used for a server error, whose data is never sent.
  */
 function httpErrorBody(err: Error) {
   return err instanceof HttpError && err.data !== undefined ? renderSerializerBuilders(err.data) : ''

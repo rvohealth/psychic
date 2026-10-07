@@ -8,6 +8,7 @@ import { Server } from 'node:http'
 import * as util from 'node:util'
 import logIfDevelopment from '../controller/helpers/logIfDevelopment.js'
 import EnvInternal from '../helpers/EnvInternal.js'
+import { markBodyParserErrors } from '../helpers/error/errorIsFromBodyParser.js'
 import PsychicApp, { PsychicSslCredentials } from '../psychic-app/index.js'
 import PsychicRouter from '../router/index.js'
 import errorBoundaryMiddleware, { ERROR_LOGGING_DEPTH } from './helpers/errorBoundaryMiddleware.js'
@@ -310,7 +311,9 @@ export default class PsychicServer {
   }
 
   private initializeJSON() {
-    this.koaApp.use(bodyParser(PsychicApp.getOrFail().jsonOptions))
+    // the body parser's own errors (e.g. a 400 for malformed JSON) are
+    // marked, so the error boundary answers them as handled responses
+    this.koaApp.use(markBodyParserErrors(bodyParser(PsychicApp.getOrFail().jsonOptions)))
   }
 
   private async buildRoutes() {

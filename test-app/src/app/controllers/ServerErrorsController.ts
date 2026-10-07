@@ -1,16 +1,31 @@
 import Koa from 'koa'
 import HttpStatusInternalServerError from '../../../../src/error/http/InternalServerError.js'
+import HttpStatusNotFound from '../../../../src/error/http/NotFound.js'
 import HttpStatusServiceUnavailable from '../../../../src/error/http/ServiceUnavailable.js'
 import ApplicationController from './ApplicationController.js'
 
 /**
- * Used by spec/unit/scenarios/response-statuses/deliberate-5xx.spec.ts, which
- * throws each of these errors both from a controller action (this controller)
- * and from middleware (test-app/src/conf/app.ts), so one rule is pinned on
- * both request paths, and by spec/unit/server/server-error-response.spec.ts.
+ * Used by spec/unit/scenarios/response-statuses/deliberate-4xx.spec.ts and
+ * deliberate-5xx.spec.ts, which throw each of these errors both from a
+ * controller action (this controller) and from middleware
+ * (test-app/src/conf/app.ts), so one rule is pinned on both request paths,
+ * and by spec/unit/server/server-error-response.spec.ts.
  */
 export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): never {
   switch (scenario) {
+    // deliberate 4xx errors: a handled response
+    case 'psychic-404':
+      throw new HttpStatusNotFound({ reason: 'no such widget' })
+
+    case 'koa-404':
+      return ctx.throw(404, 'widget 42 not found')
+
+    case 'koa-404-wrapped':
+      return ctx.throw(404, new Error('upstream detail'))
+
+    case 'koa-401-with-headers':
+      return ctx.throw(401, { headers: { 'WWW-Authenticate': 'Bearer' } })
+
     // deliberate 5xx errors: a handled response
     case 'psychic-503':
       throw new HttpStatusServiceUnavailable({ reason: 'down for maintenance' })
@@ -61,6 +76,16 @@ export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): ne
       // e.g. an uncaught Google API client error, which mirrors the upstream
       // status but is not an http-errors error
       throw Object.assign(new Error('upstream service unavailable'), { status: 503 })
+
+    case 'status-bearing-library-4xx-error':
+      // e.g. an uncaught API client error mirroring an upstream 401 because
+      // the server's own credentials were rejected
+      throw Object.assign(new Error('upstream unauthorized'), { status: 401 })
+
+    case 'body-parser-shaped-error':
+      // shaped like the body parser's error for malformed JSON, but thrown
+      // from somewhere else
+      throw Object.assign(new SyntaxError('Unexpected token'), { status: 400, body: 'not json' })
 
     case 'non-http-error':
       throw new Error('something broke')

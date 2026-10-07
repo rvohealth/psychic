@@ -46,7 +46,7 @@ import HttpStatusUnavailableForLegalReasons from '../error/http/UnavailableForLe
 import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent.js'
 import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType.js'
 import EnvInternal from '../helpers/EnvInternal.js'
-import { KoaHttpError, setKoaHttpErrorHeaders } from '../helpers/error/errorIsDeliberateServerError.js'
+import { KoaHttpError, setKoaHttpErrorHeaders } from '../helpers/error/errorIsDeliberateHttpError.js'
 import isSafeRedirectTarget from '../helpers/isSafeRedirectTarget.js'
 import renderSerializerBuilders, { dataIsSerializerBuilder } from '../helpers/renderSerializerBuilders.js'
 import toJson from '../helpers/toJson.js'
@@ -988,14 +988,14 @@ export default class PsychicController {
   /**
    * @internal
    *
-   * Sends a deliberate 5xx thrown with Koa's `ctx.throw(501–510)` (see
-   * `errorIsDeliberateServerError`): its status with an empty body, plus any
-   * headers passed to `ctx.throw` (e.g. `Retry-After`). The error's message
-   * and other properties are never sent, and neither are the headers a
-   * caught error wrapped with `ctx.throw(503, caughtError)` carries (see
-   * `setKoaHttpErrorHeaders`).
+   * Sends a deliberate 4xx or 501–510 thrown with Koa's `ctx.throw` (see
+   * `errorIsDeliberateHttpError`): its status with an empty body, plus any
+   * headers passed to `ctx.throw` (e.g. `WWW-Authenticate` or
+   * `Retry-After`). The error's message and other properties are never
+   * sent, and neither are the headers a caught error wrapped with
+   * `ctx.throw(503, caughtError)` carries (see `setKoaHttpErrorHeaders`).
    */
-  private koaSendDeliberateKoaServerError(err: KoaHttpError) {
+  private koaSendDeliberateKoaHttpError(err: KoaHttpError) {
     if (this._responseSent) return
 
     setKoaHttpErrorHeaders(this.ctx, err)

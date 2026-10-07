@@ -636,13 +636,15 @@ Try setting it to something valid, like:
    * `HttpStatusInternalServerError`'s, is logged but never sent. Hooks are
    * awaited and may reshape the response via `ctx`; if they don't (e.g. a
    * hook that only reports the error to an error tracker), psychic responds
-   * with that default. Errors carrying a 4xx status
-   * (e.g. a body-parser 400) are rendered as that status and never reach
-   * `server:error` hooks. Psychic `HttpError`s other than 500 (e.g. from
-   * `this.serviceUnavailable()`), and `ctx.throw` errors with a 501–510
-   * status, render as their status and never reach the hooks either, whether
-   * thrown from a controller or from middleware; an uncaught error from any
-   * other library that carries no status or a 5xx status still does.
+   * with that default. Errors that name their response on purpose render as
+   * their status and never reach `server:error` hooks, whether thrown from a
+   * controller or from middleware: psychic `HttpError`s other than 500 (e.g.
+   * from `this.notFound()` or `this.serviceUnavailable()`), and `ctx.throw`
+   * errors with a 4xx or 501–510 status (with the headers passed to
+   * `ctx.throw`); so do the body parser's own 4xx errors (e.g. a 400 for
+   * malformed JSON). An uncaught error from any other library reaches the
+   * hooks and is answered 500, whether it carries no status or a 4xx or 5xx
+   * one (e.g. an API client error mirroring an upstream 401).
    *
    * NOTE: psychic answers these errors itself, whether or not any
    * `server:error` hooks are registered, and does not hand them to Koa's
