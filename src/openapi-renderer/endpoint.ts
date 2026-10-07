@@ -1380,12 +1380,21 @@ export interface OpenapiEndpointRendererOpts<
   summary?: string
 
   /**
-   * which security scheme to use for this endpoint.
+   * the security requirements for this endpoint, rendered on its
+   * operation in the OpenAPI document, where they apply instead of
+   * the document's `defaults.security` from `psy.set('openapi', ...)`.
+   * This documents authentication; Psychic does not enforce it.
+   *
+   * It is an array, as in the OpenAPI document. Each entry maps
+   * the name of a scheme in `defaults.securitySchemes` to the
+   * scopes it requires (`[]` for a scheme without scopes, such as
+   * bearer auth). Pass `security: []` for an endpoint that
+   * requires none.
    *
    * ```ts
    * \@OpenAPI(User, {
    *    status: 204,
-   *    security: { customAuth: [] },
+   *    security: [{ customAuth: [] }],
    *  })
    * ```
    */
@@ -1516,6 +1525,7 @@ export interface OpenapiEndpointRendererOpts<
    *        ... // custom options to provide to the underlying ajv instance
    *     }
    *   }
+   * }
    * ```
    */
   validate?: OpenapiValidateOption | undefined
