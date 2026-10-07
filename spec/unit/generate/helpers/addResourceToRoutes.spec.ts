@@ -634,6 +634,21 @@ export const routes = (r: PsychicRouter) => {
   })
 
   context('when the same resource is generated a second time', () => {
+    let consoleWarnSpy: MockInstance<typeof console.warn>
+
+    beforeEach(() => {
+      consoleWarnSpy = vi.spyOn(console, 'warn').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      consoleWarnSpy.mockRestore()
+    })
+
+    function warning() {
+      expect(consoleWarnSpy).toHaveBeenCalledTimes(1)
+      return String(consoleWarnSpy.mock.calls[0]?.[0])
+    }
+
     const reruns: [string, { singular: boolean; onlyActions: string[] | undefined }][] = [
       ['posts', { singular: false, onlyActions: undefined }],
       ['post', { singular: true, onlyActions: undefined }],
@@ -658,6 +673,7 @@ export const routes = (r: PsychicRouter) => {
 
         await addResourceToRoutes(route, options)
         expect(await readRoutes()).toEqual(afterFirstRun)
+        expect(consoleWarnSpy).not.toHaveBeenCalled()
       })
     }
 
@@ -672,6 +688,280 @@ export const routes = (r: PsychicRouter) => {
 `)
 
       expect(await addRoute(before, 'v1/places')).toEqual(before)
+      expect(consoleWarnSpy).not.toHaveBeenCalled()
+    })
+
+    it('replaces the actions of the declaration in place when --only narrows them', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('pets')
+    r.resources('posts')
+    r.resources('tags')
+  })
+`),
+        'v1/posts',
+        { singular: false, onlyActions: ['index', 'show'] },
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('pets')
+    r.resources('posts', { only: ['index', 'show'] })
+    r.resources('tags')
+  })
+`),
+      )
+    })
+
+    it('replaces the actions of the declaration in place when --only widens them', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.resources('pets')
+  r.resources('posts', { only: ['index'] })
+`),
+        'posts',
+        { singular: false, onlyActions: ['index', 'create', 'show'] },
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.resources('pets')
+  r.resources('posts', { only: ['index', 'create', 'show'] })
+`),
+      )
+    })
+
+    it('removes the options of the declaration when the re-run has no --only', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.resources('posts', { only: ['index'] })
+`),
+        'posts',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.resources('posts')
+`),
+      )
+    })
+
+    it('replaces the actions of a singular resource', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.resource('profile', { only: ['show'] })
+`),
+        'profile',
+        { singular: true, onlyActions: ['show', 'update'] },
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.resource('profile', { only: ['show', 'update'] })
+`),
+      )
+    })
+
+    it('keeps the callback of the declaration and the routes nested in it', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('places', r => {
+      r.resources('rooms')
+    })
+  })
+`),
+        'v1/places',
+        { singular: false, onlyActions: ['index', 'show'] },
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('places', { only: ['index', 'show'] }, r => {
+      r.resources('rooms')
+    })
+  })
+`),
+      )
+    })
+
+    it('keeps the callback of a declaration with options when the re-run removes them', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('places', { only: ['index'] }, r => {
+      r.resources('rooms')
+    })
+  })
+`),
+        'v1/places',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('places', r => {
+      r.resources('rooms')
+    })
+  })
+`),
+      )
+    })
+
+    it('replaces a hand-written except, routing every action when the re-run has no --only', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.resources('posts', { except: ['destroy'] })
+`),
+        'posts',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.resources('posts')
+`),
+      )
+    })
+
+    it('replaces an only and except pair together', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.resources('posts', { only: ['index', 'show'], except: ['show'] })
+`),
+        'posts',
+        { singular: false, onlyActions: ['create'] },
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.resources('posts', { only: ['create'] })
+`),
+      )
+    })
+
+    const sameActions: [string, string, { singular: boolean; onlyActions: string[] | undefined }][] = [
+      [
+        'the same actions in another order',
+        "{ only: ['show', 'create'] }",
+        { singular: false, onlyActions: ['create', 'show'] },
+      ],
+      [
+        'every action but the excepted one',
+        "{ except: ['destroy'] }",
+        { singular: false, onlyActions: ['index', 'create', 'show', 'update'] },
+      ],
+      [
+        'every action by name',
+        "{ only: ['index', 'create', 'show', 'update', 'destroy'] }",
+        { singular: false, onlyActions: undefined },
+      ],
+      [
+        'the same actions in double quotes',
+        '{ only: ["index", "show"], }',
+        { singular: false, onlyActions: ['index', 'show'] },
+      ],
+    ]
+
+    for (const [description, existingOptions, options] of sameActions) {
+      it(`leaves a declaration routing ${description} unchanged`, async () => {
+        const before = routesFile(`\
+  r.resources('posts', ${existingOptions})
+`)
+
+        expect(await addRoute(before, 'posts', options)).toEqual(before)
+        expect(consoleWarnSpy).not.toHaveBeenCalled()
+      })
+    }
+
+    context('when the declaration cannot be rewritten', () => {
+      it('leaves the file unchanged and prints the existing and wanted lines when the declaration names its controller', async () => {
+        const before = routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('posts', { controller: PostsController })
+  })
+`)
+
+        expect(await addRoute(before, 'v1/posts', { singular: false, onlyActions: ['index'] })).toEqual(
+          before,
+        )
+        expect(warning()).toEqual(`
+Could not update the route for v1/posts in spec/tmp/routes.ts:
+  line 5, \`r.resources('posts', { controller: PostsController })\`, declares resources 'posts' with options other than \`only\` and \`except\` lists of action names, which the generator does not rewrite
+
+The file was left unchanged. Edit the route by hand so that it declares the resource once, with these actions, keeping any routes nested in it:
+
+  r.namespace('v1', r => {
+    r.resources('posts', { only: ['index'] })
+  })
+`)
+      })
+
+      it('leaves the file unchanged when the actions are not a list of action names', async () => {
+        const before = routesFile(`\
+  r.resources('posts', { only: postActions })
+`)
+
+        expect(await addRoute(before, 'posts')).toEqual(before)
+        expect(warning()).toContain(
+          "line 4, `r.resources('posts', { only: postActions })`, declares resources 'posts' with options other than",
+        )
+      })
+
+      it('leaves the file unchanged and prints every declaration when the resource is declared more than once in its block', async () => {
+        const before = routesFile(`\
+  r.resources('posts', { only: ['index'] })
+  r.resources('pets')
+  r.resources('posts', { only: ['show'] })
+`)
+
+        expect(await addRoute(before, 'posts', { singular: false, onlyActions: ['index'] })).toEqual(before)
+        expect(warning()).toContain(`\
+  resources 'posts' is declared more than once on the route, and the generator edits only a single declaration:
+    line 4: r.resources('posts', { only: ['index'] })
+    line 6: r.resources('posts', { only: ['show'] })`)
+        expect(warning()).toContain(`\
+The file was left unchanged. Edit the route by hand so that it declares the resource once, with these actions, keeping any routes nested in it:
+
+  r.resources('posts', { only: ['index'] })`)
+      })
+
+      it('leaves the file unchanged when the resource is declared in two blocks of its namespace', async () => {
+        const before = routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('posts')
+  })
+  r.namespace('v1', r => {
+    r.resources('posts')
+  })
+`)
+
+        expect(await addRoute(before, 'v1/posts')).toEqual(before)
+        expect(warning()).toContain(`\
+    line 5: r.resources('posts')
+    line 8: r.resources('posts')`)
+      })
+
+      it('leaves the file unchanged when another block on the route cannot be read', async () => {
+        const before = routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('posts')
+  })
+  r.namespace('v1', router => {
+    router.resources('posts')
+  })
+`)
+
+        expect(await addRoute(before, 'v1/posts', { singular: false, onlyActions: ['index'] })).toEqual(
+          before,
+        )
+        expect(warning()).toContain('Could not update the route for v1/posts in spec/tmp/routes.ts')
+        expect(warning()).toContain(
+          "line 7, `r.namespace('v1', router => {`, declares namespace 'v1' in a form the generator does not edit",
+        )
+      })
     })
   })
 

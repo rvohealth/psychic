@@ -4,6 +4,7 @@ import * as path from 'node:path'
 import UnexpectedUndefined from '../../error/UnexpectedUndefined.js'
 import psychicPath from '../../helpers/path/psychicPath.js'
 import PsychicApp from '../../psychic-app/index.js'
+import { ResourceMethods, ResourcesMethods } from '../../router/types.js'
 
 const ROUTES_FUNCTION_OPENER = /^export [^(]+\(r: PsychicRouter\)[^{]*\{$/
 
@@ -36,23 +37,35 @@ export default async function addResourceToRoutes(
   const result = insertResourceIntoRoutes(routes, ancestors, resourceDeclaration)
 
   switch (result.outcome) {
-    case 'inserted':
+    case 'changed':
       await fs.writeFile(routesFilePath, result.routes)
       break
 
     case 'alreadyDeclared':
       break
 
-    case 'unparseable':
+    case 'unparseable': {
+      const relativeRoutesFilePath = path.relative(psychicApp.apiRoot, routesFilePath)
+      const [failure, instruction] = result.resourceDeclared
+        ? [
+            `Could not update the route for ${route} in ${relativeRoutesFilePath}`,
+            'Edit the route by hand so that it declares the resource once, with these actions, keeping any routes nested in it:',
+          ]
+        : [
+            `Could not add the route for ${route} to ${relativeRoutesFilePath}`,
+            'Add the route by hand, merging these blocks into any that already exist:',
+          ]
+
       console.warn(`
-Could not add the route for ${route} to ${path.relative(psychicApp.apiRoot, routesFilePath)}:
+${failure}:
   ${result.reason}
 
-The file was left unchanged. Add the route by hand, merging these blocks into any that already exist:
+The file was left unchanged. ${instruction}
 
 ${routeLines(ancestors, resourceDeclaration.code, 2).join('\n')}
 `)
       break
+    }
   }
 }
 
@@ -71,6 +84,17 @@ ${routeLines(ancestors, resourceDeclaration.code, 2).join('\n')}
  * (`r.resources('places')` or `r.resources('places', { only: [...] })`) is
  * converted to the callback form, keeping its options, only when the new
  * resource is inserted into it.
+ *
+ * When the route already declares the resource, the declaration is kept where
+ * it is and made to route the actions this run generated: its options become
+ * `{ only: [...] }` from `--only`, or none without it, replacing any `only` and
+ * `except` it had, and its callback, with the routes nested in it, is kept.
+ * The actions are compared, not the text, so a declaration already routing
+ * them (in another order, or through `except`) is left as it is. A resource
+ * declared more than once on the route, or with options other than `only` and
+ * `except` lists of action names (e.g. a `controller`), is left unchanged and
+ * reported, since editing one line could not make the route match the
+ * regenerated controller.
  *
  * The scan assumes a prettier-formatted file: 2-space indentation, single-line
  * call openers, and `r => {` callbacks. When the routes function is indented
@@ -105,9 +129,24 @@ function insertResourceIntoRoutes(
   const placement = findPlacement(lines, routesFunction, ancestors, resourceDeclaration)
 
   switch (placement.outcome) {
-    case 'alreadyDeclared':
     case 'unparseable':
       return placement
+
+    case 'declared': {
+      const [declaration, ...otherDeclarations] = placement.declarations
+      if (declaration === undefined) throw new UnexpectedUndefined()
+      if (otherDeclarations.length) return declaredMoreThanOnce(placement.declarations, resourceDeclaration)
+
+      const actions = declaredActions(declaration.options, resourceDeclaration.method)
+      if (!actions) return optionsNotRewritten(declaration, resourceDeclaration)
+      if (sameActions(actions, resourceDeclaration.actions)) return { outcome: 'alreadyDeclared' }
+
+      const code = declaration.hasCallback
+        ? `${resourceDeclaration.code.slice(0, -1)}, r => {`
+        : resourceDeclaration.code
+      lines[declaration.lineIndex] = `${spaces(indentation(lines[declaration.lineIndex] ?? ''))}${code}`
+      break
+    }
 
     case 'convertParent': {
       const { parent, indent, missingAncestors } = placement
@@ -134,7 +173,7 @@ function insertResourceIntoRoutes(
     }
   }
 
-  return { outcome: 'inserted', routes: lines.join('\n') }
+  return { outcome: 'changed', routes: lines.join('\n') }
 }
 
 /**
@@ -147,37 +186,38 @@ function insertResourceIntoRoutes(
  * segments of the route, the resource itself included, already declared
  * beneath the block.
  *
- * The route counts as already declared, and nothing is inserted, when any
- * declaration of it on the route has the same options; otherwise a
+ * When the route already declares the resource, nothing is inserted: the
+ * result lists every declaration of it on the route, in file order. A
  * declaration on the route the generator cannot read leaves the file
- * unparseable, since it may hold the parent the resource belongs in.
+ * unparseable even then, since it may hold the parent the resource belongs in
+ * or another declaration of the resource.
  */
 function findPlacement(
   lines: string[],
   block: Block,
   ancestors: RouteAncestor[],
   resourceDeclaration: ResourceDeclaration,
-): Placement | Exclude<InsertionResult, { outcome: 'inserted' }> {
+): Placement | Declared | Unparseable {
   const [ancestor, ...remainingAncestors] = ancestors
 
   if (ancestor === undefined) {
     const declarations = findChildren(lines, block, resourceDeclaration.method, resourceDeclaration.name)
-    if (
-      declarations.some(
-        declaration =>
-          declaration.recognized && sameOptions(declaration.options, resourceDeclaration.options),
-      )
-    )
-      return { outcome: 'alreadyDeclared' }
 
     const unrecognized = declarations.find(declaration => !declaration.recognized)
-    if (unrecognized) return unrecognizedDeclaration(unrecognized, resourceDeclaration)
+    if (unrecognized)
+      return { ...unrecognizedDeclaration(unrecognized, resourceDeclaration), resourceDeclared: true }
 
-    return { outcome: 'insertIntoBlock', depth: declarations.length ? 1 : 0, block, missingAncestors: [] }
+    const recognized = declarations.filter(
+      (declaration): declaration is RecognizedChild => declaration.recognized,
+    )
+    if (recognized.length) return { outcome: 'declared', declarations: recognized }
+
+    return { outcome: 'insertIntoBlock', depth: 0, block, missingAncestors: [] }
   }
 
   let placement: Placement = { outcome: 'insertIntoBlock', depth: 0, block, missingAncestors: ancestors }
   let unparseable: Unparseable | undefined
+  const resourceDeclarations: RecognizedChild[] = []
 
   for (const declaration of findChildren(lines, block, ancestor.method, ancestor.name)) {
     if (!declaration.recognized) {
@@ -195,7 +235,10 @@ function findPlacement(
       }
 
       const nested = findPlacement(lines, childBlock, remainingAncestors, resourceDeclaration)
-      if (nested.outcome === 'alreadyDeclared') return nested
+      if (nested.outcome === 'declared') {
+        resourceDeclarations.push(...nested.declarations)
+        continue
+      }
       if (nested.outcome === 'unparseable') {
         unparseable ??= nested
         continue
@@ -215,7 +258,10 @@ function findPlacement(
     if (candidate.depth > placement.depth) placement = candidate
   }
 
-  return unparseable ?? placement
+  if (unparseable)
+    return resourceDeclarations.length ? { ...unparseable, resourceDeclared: true } : unparseable
+  if (resourceDeclarations.length) return { outcome: 'declared', declarations: resourceDeclarations }
+  return placement
 }
 
 function parseRoute(
@@ -245,10 +291,57 @@ function parseRoute(
     resourceDeclaration: {
       method,
       name,
-      options,
+      actions: onlyActions ?? defaultActions(method),
       code: `r.${method}('${name}'${options ? `, ${options}` : ''})`,
     },
   }
+}
+
+/**
+ * The actions a declaration with the given options routes, read as the router
+ * reads them: its `only` list when it has one, else every default action not
+ * in its `except` list. Undefined when the options hold anything but
+ * single-line `only` and `except` lists of quoted action names (e.g. a
+ * `controller`, or a variable), which the generator does not rewrite.
+ */
+function declaredActions(options: string | undefined, method: ResourceDeclaration['method']) {
+  const lists: { only?: string[]; except?: string[] } = {}
+  let unread = options?.slice(1, -1) ?? ''
+
+  while (unread.trim() !== '') {
+    const entry = /^\s*(only|except)\s*:\s*\[([^\]]*)\]\s*(?:,|$)/.exec(unread)
+    if (!entry) return undefined
+
+    const key = entry[1] === 'only' ? 'only' : 'except'
+    const actions = actionNames(entry[2] ?? '')
+    if (!actions || lists[key]) return undefined
+
+    lists[key] = actions
+    unread = unread.slice(entry[0].length)
+  }
+
+  return lists.only ?? defaultActions(method).filter(action => !lists.except?.includes(action))
+}
+
+/**
+ * The action names in the text between the brackets of an `only` or `except`
+ * list, or undefined when any item is not a quoted name.
+ */
+function actionNames(list: string) {
+  const items = list.split(',').map(item => item.trim())
+  if (items.at(-1) === '') items.pop()
+
+  const names = items.map(item => /^(?:'(\w+)'|"(\w+)")$/.exec(item)).map(match => match?.[1] ?? match?.[2])
+  return names.every((name): name is string => name !== undefined) ? names : undefined
+}
+
+function defaultActions(method: ResourceDeclaration['method']): readonly string[] {
+  return method === 'resources' ? ResourcesMethods : ResourceMethods
+}
+
+function sameActions(actions: readonly string[], otherActions: readonly string[]) {
+  const otherActionSet = new Set(otherActions)
+  return new Set(actions).size === otherActionSet.size && actions.every(action => otherActionSet.has(action))
 }
 
 /**
@@ -289,6 +382,31 @@ function unclosedBlock(lines: string[], openerIndex: number, closer: '}' | '})')
   return {
     outcome: 'unparseable',
     reason: `the block opened on line ${openerIndex + 1}, \`${(lines[openerIndex] ?? '').trim()}\`, has no \`${closer}\` closing it at the same indentation`,
+  }
+}
+
+function declaredMoreThanOnce(
+  declarations: RecognizedChild[],
+  { method, name }: ResourceDeclaration,
+): Unparseable {
+  return {
+    outcome: 'unparseable',
+    resourceDeclared: true,
+    reason: [
+      `${method} '${name}' is declared more than once on the route, and the generator edits only a single declaration:`,
+      ...declarations.map(({ lineIndex, code }) => `    line ${lineIndex + 1}: ${code}`),
+    ].join('\n'),
+  }
+}
+
+function optionsNotRewritten(
+  { lineIndex, code }: RecognizedChild,
+  { method, name }: ResourceDeclaration,
+): Unparseable {
+  return {
+    outcome: 'unparseable',
+    resourceDeclared: true,
+    reason: `line ${lineIndex + 1}, \`${code}\`, declares ${method} '${name}' with options other than \`only\` and \`except\` lists of action names, which the generator does not rewrite`,
   }
 }
 
@@ -346,11 +464,6 @@ function findChildren(lines: string[], block: Block, method: RouteMethod, name: 
   return children
 }
 
-function sameOptions(existingOptions: string | undefined, options: string | undefined) {
-  const normalize = (code: string | undefined) => (code ?? '').replace(/\s+/g, '').replace(/"/g, "'")
-  return normalize(existingOptions) === normalize(options)
-}
-
 function nextNonBlankLine(lines: string[], index: number) {
   return lines.slice(index + 1).find(line => line.trim() !== '')
 }
@@ -377,7 +490,7 @@ interface RouteAncestor {
 interface ResourceDeclaration {
   method: 'resources' | 'resource'
   name: string
-  options: string | undefined
+  actions: readonly string[]
   code: string
 }
 
@@ -407,9 +520,15 @@ type Placement =
       missingAncestors: RouteAncestor[]
     }
 
+interface Declared {
+  outcome: 'declared'
+  declarations: RecognizedChild[]
+}
+
 interface Unparseable {
   outcome: 'unparseable'
   reason: string
+  resourceDeclared?: true
 }
 
-type InsertionResult = { outcome: 'inserted'; routes: string } | { outcome: 'alreadyDeclared' } | Unparseable
+type InsertionResult = { outcome: 'changed'; routes: string } | { outcome: 'alreadyDeclared' } | Unparseable
