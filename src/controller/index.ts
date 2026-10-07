@@ -994,6 +994,11 @@ export default class PsychicController {
    * `Retry-After`). The error's message and other properties are never
    * sent, and neither are the headers a caught error wrapped with
    * `ctx.throw(503, caughtError)` carries (see `setKoaHttpErrorHeaders`).
+   * The status sent is the error's own: in that wrapped form Koa keeps the
+   * caught error's status when it has one (e.g. an upstream 401), not the
+   * status passed, and Psychic leaves that as Koa decides (see
+   * `errorIsDeliberateKoaHttpError`). Controllers set a deliberate status
+   * with Psychic's helpers (e.g. `this.serviceUnavailable()`).
    */
   private koaSendDeliberateKoaHttpError(err: KoaHttpError) {
     if (this._responseSent) return
