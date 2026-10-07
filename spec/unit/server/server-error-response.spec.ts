@@ -1,4 +1,5 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
+import Koa from 'koa'
 import { MockInstance } from 'vitest'
 import { PsychicServer } from '../../../src/package-exports/index.js'
 import EnvInternal from '../../../src/helpers/EnvInternal.js'
@@ -12,7 +13,7 @@ const scenarioPathPrefixes = [
 
 // PsychicApp is initialized afresh before every spec (spec/unit/setup/hooks.ts),
 // so replacing its server:error hooks here lasts for one spec only
-function replaceServerErrorHooks(...hooks: ((err: Error) => void | Promise<void>)[]) {
+function replaceServerErrorHooks(...hooks: ((err: Error, ctx: Koa.Context) => void | Promise<void>)[]) {
   const serverErrorHooks = PsychicApp.getOrFail().specialHooks.serverError
   serverErrorHooks.splice(0, serverErrorHooks.length, ...hooks)
 }
@@ -139,6 +140,48 @@ describe('a visitor hits a route that raises a server error', () => {
         expect(res.text).toEqual('')
         // the server error, then the hook error and the line introducing it
         expect(errorLogCount()).toEqual(3)
+      })
+    })
+  })
+
+  context("an HttpStatusInternalServerError carrying data, which is for the server's logs only", () => {
+    const hookSetups = [
+      ['in an app with no server:error hooks', () => replaceServerErrorHooks()],
+      [
+        'with the server:error hook psychic generates, which sets only the status',
+        () =>
+          replaceServerErrorHooks((_err, ctx) => {
+            if (!ctx.headerSent) ctx.status = 500
+          }),
+      ],
+      [
+        'with a server:error hook that only reports the error',
+        () =>
+          replaceServerErrorHooks(() => {
+            // reports the error to an error tracker
+          }),
+      ],
+      [
+        "with the test-app's server:error hook, which sets the status and an empty body",
+        () => {
+          // the hooks test-app/src/conf/app.ts registers
+        },
+      ],
+    ] as const
+
+    context.each(hookSetups)('%s', (_, setUpServerErrorHooks) => {
+      beforeEach(() => {
+        setUpServerErrorHooks()
+      })
+
+      context.each(scenarioPathPrefixes)('%s', (_, pathPrefix) => {
+        it('answers a 500 with an empty body, never sending the data', async () => {
+          const res = await request.get(`${pathPrefix}/psychic-500`, 500)
+          expect(res.text).toEqual('')
+          expect(res.headers['content-type']).not.toMatch(/json/)
+          // the error, with its data, is still logged
+          expect(logWithLevelSpy).toHaveBeenCalledWith('error', expect.stringContaining('server side only'))
+        })
       })
     })
   })

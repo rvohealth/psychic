@@ -47,10 +47,12 @@ export const psychicRouterProcessedErrorStateKey = '_psychicRouterProcessedError
  *
  * Anything else is a genuine server error, including a 500 and another
  * library's error that merely carries a 5xx `status`: it is logged, given a
- * default response of 500, whatever status the error carries (the router
- * gives a server error from a controller action the same default), and
- * escalated to `server:error` hooks, which may reshape the response. When
- * the hooks set no response, the 500 is sent.
+ * default response of 500 with an empty body, whatever status or data the
+ * error carries (the router gives a server error from a controller action
+ * the same default), and escalated to `server:error` hooks, which may
+ * reshape the response. When the hooks set no response, the default is
+ * sent. A server error's data, e.g. an `HttpStatusInternalServerError`'s,
+ * is logged with it but never sent to the client.
  */
 export default function errorBoundaryMiddleware(): Koa.Middleware {
   return async function psychicErrorBoundary(ctx, next) {
@@ -82,10 +84,11 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
 
       PsychicApp.logWithLevel('error', util.inspect(err, { depth: ERROR_LOGGING_DEPTH }))
 
-      // default server-error response, whatever status the error carries;
-      // server:error hooks may reshape it
+      // default server-error response, whatever status or data the error
+      // carries (a server error's data is never sent); server:error hooks
+      // may reshape it
       ctx.status = 500
-      ctx.body = httpErrorBody(err)
+      ctx.body = ''
 
       try {
         for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {
@@ -134,9 +137,11 @@ function statusFromError(err: unknown): number | null {
 /**
  * @internal
  *
- * The response body for an error caught by the boundary: an `HttpError`'s
- * data, with serializer builders rendered (there is no controller here, so
- * no serializer passthrough), or an empty body.
+ * The response body for an error the boundary answers as a handled response
+ * (a 4xx or a deliberate 5xx): an `HttpError`'s data, with serializer
+ * builders rendered (there is no controller here, so no serializer
+ * passthrough), or an empty body. Never used for a server error, whose data
+ * is never sent.
  */
 function httpErrorBody(err: Error) {
   return err instanceof HttpError && err.data !== undefined ? renderSerializerBuilders(err.data) : ''

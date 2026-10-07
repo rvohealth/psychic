@@ -631,11 +631,12 @@ Try setting it to something valid, like:
    * parser, cors callbacks, custom `psy.use` middleware, or after-routes
    * mounts — which are captured by an error boundary mounted outermost in
    * the middleware stack. Before the hooks run, psychic logs the error and
-   * gives the response a default status of 500, whatever status the error
-   * carries, and, for an error thrown from a controller action, an empty
-   * body. Hooks are awaited and may reshape the response via `ctx`; if they
-   * don't (e.g. a hook that only reports the error to an error tracker),
-   * psychic responds with that default. Errors carrying a 4xx status
+   * gives the response a default of 500 with an empty body, whatever status
+   * the error carries; the error's data, e.g. an
+   * `HttpStatusInternalServerError`'s, is logged but never sent. Hooks are
+   * awaited and may reshape the response via `ctx`; if they don't (e.g. a
+   * hook that only reports the error to an error tracker), psychic responds
+   * with that default. Errors carrying a 4xx status
    * (e.g. a body-parser 400) are rendered as that status and never reach
    * `server:error` hooks. Psychic `HttpError`s other than 500 (e.g. from
    * `this.serviceUnavailable()`), and `ctx.throw` errors with a 501–510

@@ -5,7 +5,11 @@ export default class HttpError extends Error {
 
   /**
    * @params.data - Whatever is passed here will be json
-   * stringified and rendered as the response body.
+   * stringified and rendered as the response body when psychic answers the
+   * error with its status as a handled response: the 4xx classes, and the
+   * 5xx classes other than `HttpStatusInternalServerError`. An error psychic
+   * answers as a server error, such as `HttpStatusInternalServerError`, has
+   * its data logged but never sent to the client.
    */
   constructor(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
