@@ -1,7 +1,19 @@
 import { DreamSerializer } from '@rvoh/dream'
+import { validateObject } from '../../../../../src/helpers/validateOpenApiSchema.js'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 import Balloon from '../../../../../test-app/src/app/models/Balloon.js'
 import Pet from '../../../../../test-app/src/app/models/Pet.js'
+import User from '../../../../../test-app/src/app/models/User.js'
+import {
+  BalloonTypesEnum,
+  BalloonTypesEnumValues,
+  SpeciesTypesEnumValues,
+} from '../../../../../test-app/src/types/db.js'
+
+// validates a value against a rendered property schema with the Ajv options Psychic validates with
+function validates(schema: unknown, value: unknown) {
+  return validateObject(value, schema as object).isValid
+}
 
 describe('DreamSerializer delegated attributes', () => {
   it('delegates value and type to the specified target', () => {
@@ -78,6 +90,49 @@ describe('DreamSerializer delegated attributes', () => {
             type: ['string', 'null'],
           },
         })
+      })
+    })
+
+    // the test-app reaches its non-nullable enum columns only through User's HasMany
+    // associations; the type argument delegates through one as through a HasOne, and
+    // the renderer resolves either to the associated model the same way
+    context('when the column is a non-nullable enum', () => {
+      it('adds null to the type and to the enum', () => {
+        const MySerializer = (data: User) =>
+          DreamSerializer(User, data).delegatedAttribute<{ pets: Pet }>('pets', 'nonNullSpecies', {
+            optional: true,
+          })
+
+        const { nonNullSpecies } = new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']()
+          .attributes
+        expect(nonNullSpecies).toEqual({
+          type: ['string', 'null'],
+          enum: [...SpeciesTypesEnumValues, null],
+        })
+        expect(validates(nonNullSpecies, null)).toBe(true)
+        SpeciesTypesEnumValues.forEach(value => expect(validates(nonNullSpecies, value)).toBe(true))
+        expect(validates(nonNullSpecies, 'dog')).toBe(false)
+      })
+    })
+
+    context('when the column is a non-nullable STI type', () => {
+      it('adds null to the type and to the enum', () => {
+        // Balloon declares no `type` property, so the type argument adds it
+        const MySerializer = (data: User) =>
+          DreamSerializer(User, data).delegatedAttribute<{ balloons: Balloon & { type: BalloonTypesEnum } }>(
+            'balloons',
+            'type',
+            { optional: true },
+          )
+
+        const { type } = new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']().attributes
+        expect(type).toEqual({
+          type: ['string', 'null'],
+          enum: [...BalloonTypesEnumValues, null],
+        })
+        expect(validates(type, null)).toBe(true)
+        BalloonTypesEnumValues.forEach(value => expect(validates(type, value)).toBe(true))
+        expect(validates(type, 'BalloonFoil')).toBe(false)
       })
     })
   })
@@ -202,6 +257,45 @@ describe('DreamSerializer delegated attributes', () => {
             items: { type: 'string' },
           },
         })
+      })
+    })
+
+    context('when the openapi option is a hand-written enum over a non-nullable column', () => {
+      it('adds null to the type and to the enum', () => {
+        const MySerializer = (data: Balloon) =>
+          DreamSerializer(Balloon, data).delegatedAttribute('user', 'passwordDigest', {
+            openapi: { type: 'string', enum: ['hashed', 'unhashed'] },
+          })
+
+        const { passwordDigest } = new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']()
+          .attributes
+        expect(passwordDigest).toEqual({
+          type: ['string', 'null'],
+          enum: ['hashed', 'unhashed', null],
+        })
+        expect(validates(passwordDigest, null)).toBe(true)
+        expect(validates(passwordDigest, 'hashed')).toBe(true)
+        expect(validates(passwordDigest, 'unhashed')).toBe(true)
+        expect(validates(passwordDigest, 'plain')).toBe(false)
+      })
+    })
+
+    context('when the openapi option is a hand-written enum over a nullable column', () => {
+      it('adds null to the enum without repeating it in the type', () => {
+        const MySerializer = (data: Balloon) =>
+          DreamSerializer(Balloon, data).delegatedAttribute('user', 'name', {
+            openapi: { type: 'string', enum: ['Fred', 'Wilma'] },
+          })
+
+        const { name } = new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']().attributes
+        expect(name).toEqual({
+          type: ['string', 'null'],
+          enum: ['Fred', 'Wilma', null],
+        })
+        expect(validates(name, null)).toBe(true)
+        expect(validates(name, 'Fred')).toBe(true)
+        expect(validates(name, 'Wilma')).toBe(true)
+        expect(validates(name, 'Barney')).toBe(false)
       })
     })
   })

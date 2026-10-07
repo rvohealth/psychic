@@ -1,5 +1,20 @@
 import { CalendarDate, ObjectSerializer } from '@rvoh/dream'
+import { OpenapiSchemaBodyShorthand } from '@rvoh/dream/openapi'
+import { validateObject } from '../../../../../src/helpers/validateOpenApiSchema.js'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
+
+// validates a value against a rendered property schema with the Ajv options Psychic validates with
+function validates(schema: unknown, value: unknown) {
+  return validateObject(value, schema as object).isValid
+}
+
+// renders the schema of a `user.name` delegatedAttribute marked optional
+function optionalNameSchema(openapi: OpenapiSchemaBodyShorthand) {
+  const MySerializer = (data: Pet) =>
+    ObjectSerializer(data).delegatedAttribute('user', 'name', { openapi, optional: true })
+
+  return new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']().attributes.name
+}
 
 interface Address {
   city?: string
@@ -129,6 +144,70 @@ describe('ObjectSerializer delegated attributes', () => {
           },
         })
         expect(results.referencedSerializers).toEqual([AddressSerializer])
+      })
+    })
+
+    context('when the schema is an enum', () => {
+      it('adds null to the type and to the enum', () => {
+        const schema = optionalNameSchema({ type: 'string', enum: ['cat', 'noncat'] })
+
+        expect(schema).toEqual({ type: ['string', 'null'], enum: ['cat', 'noncat', null] })
+        expect(validates(schema, null)).toBe(true)
+        expect(validates(schema, 'cat')).toBe(true)
+        expect(validates(schema, 'noncat')).toBe(true)
+        expect(validates(schema, 'dog')).toBe(false)
+      })
+
+      it('does not add a second null to an enum that already has one', () => {
+        expect(optionalNameSchema({ type: 'string', enum: ['cat', null] })).toEqual({
+          type: ['string', 'null'],
+          enum: ['cat', null],
+        })
+      })
+    })
+
+    context('when the schema is a const', () => {
+      it('adds null to the type and turns the const into an enum of it and null', () => {
+        const schema = optionalNameSchema({ type: 'string', const: 'cat' } as OpenapiSchemaBodyShorthand)
+
+        expect(schema).toEqual({ type: ['string', 'null'], enum: ['cat', null] })
+        expect(validates(schema, null)).toBe(true)
+        expect(validates(schema, 'cat')).toBe(true)
+        expect(validates(schema, 'noncat')).toBe(false)
+      })
+    })
+
+    context('when the schema applies a subschema beside its type', () => {
+      // validates with the document's components alongside, as Psychic does
+      const validatesInDocument = (schema: unknown, value: unknown) =>
+        validates(
+          { ...(schema as object), components: { schemas: { Species: { enum: ['cat', 'noncat'] } } } },
+          value,
+        )
+
+      const schemasApplyingASubschema: [string, object][] = [
+        ['allOf', { type: 'string', allOf: [{ enum: ['cat', 'noncat'] }] }],
+        ['anyOf', { type: 'string', anyOf: [{ enum: ['cat'] }, { enum: ['noncat'] }] }],
+        ['oneOf', { type: 'string', oneOf: [{ enum: ['cat'] }, { enum: ['noncat'] }] }],
+        ['not', { type: 'string', not: { enum: ['dog'] } }],
+        ['if', { type: 'string', if: { minLength: 4 }, then: { enum: ['noncat'] }, else: { enum: ['cat'] } }],
+        ['$ref', { type: 'string', $ref: '#/components/schemas/Species' }],
+        [
+          'allOf, with a type that already includes null',
+          { type: ['string', 'null'], allOf: [{ enum: ['cat', 'noncat'] }] },
+        ],
+      ]
+
+      schemasApplyingASubschema.forEach(([description, schemaApplyingASubschema]) => {
+        it(`is anyOf the schema or null (${description})`, () => {
+          const schema = optionalNameSchema(schemaApplyingASubschema as OpenapiSchemaBodyShorthand)
+
+          expect(schema).toEqual({ anyOf: [schemaApplyingASubschema, { type: 'null' }] })
+          expect(validatesInDocument(schema, null)).toBe(true)
+          expect(validatesInDocument(schema, 'cat')).toBe(true)
+          expect(validatesInDocument(schema, 'noncat')).toBe(true)
+          expect(validatesInDocument(schema, 'dog')).toBe(false)
+        })
       })
     })
   })
