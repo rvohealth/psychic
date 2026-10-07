@@ -1448,7 +1448,20 @@ export interface OpenapiEndpointRendererOpts<
 
   /**
    * the status code that your endpoint will render
-   * when it succeeds.
+   * when it succeeds. It sets the status of the success
+   * response Psychic generates for the OpenAPI document (none
+   * is generated when `responses` declares a 200, 201 or 204),
+   * and the status `this.respond(...)` sends. Other render
+   * helpers send their own status whatever this is set to,
+   * e.g. `this.ok(...)` sends 200 and `this.noContent()` sends 204.
+   *
+   * When not passed, the two differ. The OpenAPI document
+   * gives the success response a 200 when a model, view
+   * model or serializer is passed to the decorator, and a
+   * 204 when none is, while `this.respond(...)` sends 200
+   * either way. So an endpoint with no model, view model or
+   * serializer that answers with `this.respond(...)` should
+   * pass `status` to keep the two in step.
    *
    * ```ts
    * \@OpenAPI(User, {
@@ -1508,8 +1521,34 @@ export interface OpenapiEndpointRendererOpts<
   validate?: OpenapiValidateOption | undefined
 
   /**
-   * The OpenAPI response body automatically enables fast-json-stringify.
-   * If you want to render via JSON.stringify instead, set `fastJsonStringify` to `true`.
+   * when true, responses from this endpoint are serialized with
+   * fast-json-stringify, compiled from the response schema the
+   * OpenAPI document gives the status being sent, which is
+   * faster than `JSON.stringify`. Defaults to `false`, which
+   * serializes with `JSON.stringify`. The actions `psy g:resource`
+   * generates set it to `true`.
+   *
+   * Even when true, a response whose status has no response
+   * schema in the OpenAPI document is serialized with
+   * `JSON.stringify`, e.g. a `this.respond(...)` from an endpoint
+   * with no model, view model or serializer and no `status`,
+   * which sends 200 while the document describes its success
+   * response as a 204 (see `status`).
+   *
+   * Serializing through the schema drops keys the schema does
+   * not declare, coerces values that do not match it (a `null`
+   * where a string is declared is sent as `""`, and a `null`
+   * where an object is declared as `{}`), and throws when a
+   * required property is missing. When a response's shape looks
+   * wrong, compare the data with the schema, or set this to
+   * `false` to see the data as rendered.
+   *
+   * ```ts
+   * \@OpenAPI(User, {
+   *    status: 200,
+   *    fastJsonStringify: true,
+   *  })
+   * ```
    */
   fastJsonStringify?: boolean
 }

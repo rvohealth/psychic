@@ -65,18 +65,19 @@ export function OpenAPI<
  * advantage of powerful type completion and validation, as well as useful
  * shorthand notation to keep annotations simple when possible.
  *
- * @param modelOrSerializer - a function which immediately returns either a serializer class, a dream model class, or else something that has a serializers getter on it.
- * @param body - Optional. The shape of the request body
+ * This comment sits on the implementation signature, so it is not
+ * emitted with the overloads above. The option docs developers see
+ * are the member docs of `OpenapiEndpointRendererOpts`
+ * (`src/openapi-renderer/endpoint.ts`), which cover every option.
+ *
+ * @param modelOrSerializer - Optional. A Dream model class, a view model class, or a serializer, or an array of these, used to render the success response. When omitted, the options are the only argument.
  * @param headers - Optional. The list of request headers to provide for this endpoint
  * @param many - Optional. whether or not to render a top level array for this serializer
- * @param method - The HTTP method to use when hitting this endpoint
- * @param path - Optional. If passed, this path will be used as the request path. If not, it will be looked up in the conf/routes.ts file.
  * @param query - Optional. A list of query params to provide for this endpoint
  * @param responses - Optional. A list of additional responses that your app may return
  * @param serializerKey - Optional. Use this to override the serializer key to use when looking up a serializer by the provided model or view model.
- * @param status - Optional. The status code this endpoint uses when responding successfully. If not passed, 200 is assummed.
+ * @param status - Optional. The status code this endpoint uses when responding successfully. If not passed, the OpenAPI document uses 200 when a model, view model or serializer is passed and 204 when none is, while `this.respond(...)` sends 200 either way.
  * @param tags - Optional. string array
- * @param uri - Optional. A list of uri segments that this endpoint uses
  */
 export function OpenAPI(
   modelOrSerializer?: unknown,
