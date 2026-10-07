@@ -7,25 +7,12 @@ import errorIsDeliberateHttpError, {
   setKoaHttpErrorHeaders,
 } from '../../helpers/error/errorIsDeliberateHttpError.js'
 import errorIsFromBodyParser from '../../helpers/error/errorIsFromBodyParser.js'
+import errorIsRethrownHookError from '../../helpers/error/errorIsRethrownHookError.js'
 import errorKoaCanHandle from '../../helpers/error/errorKoaCanHandle.js'
 import renderSerializerBuilders from '../../helpers/renderSerializerBuilders.js'
 import PsychicApp from '../../psychic-app/index.js'
 
 export const ERROR_LOGGING_DEPTH = 6
-
-/**
- * @internal
- *
- * Set on `ctx.state` by the router when it answers an error thrown from a
- * controller action as a server error. The router answers it itself,
- * whether or not any `server:error` hooks are registered, and never
- * re-throws it to Koa; the only error it throws afterwards is a failing
- * `server:error` hook's, which it deliberately re-throws in development and
- * test. The error boundary passes errors thrown on a marked request through
- * to Koa untouched, so a single request can never run `server:error` hooks
- * twice.
- */
-export const psychicRouterProcessedErrorStateKey = '_psychicRouterProcessedError'
 
 /**
  * @internal
@@ -56,6 +43,14 @@ export const psychicRouterProcessedErrorStateKey = '_psychicRouterProcessedError
  * may reshape the response. When the hooks set no response, the default is
  * sent. A server error's data, e.g. an `HttpStatusInternalServerError`'s,
  * is logged with it but never sent to the client.
+ *
+ * That holds for an error thrown on a request whose controller action's
+ * server error the router has already answered, e.g. by middleware around
+ * the router after `await next()`. The router itself throws only one error
+ * after answering a server error: in development and test, a failing
+ * `server:error` hook's (see `errorIsRethrownHookError`), which the boundary
+ * passes through to Koa untouched, so the hooks never run a second time for
+ * it.
  */
 export default function errorBoundaryMiddleware(): Koa.Middleware {
   return async function psychicErrorBoundary(ctx, next) {
@@ -64,14 +59,16 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
     } catch (error) {
       const err = error as Error
 
-      // the router already processed this error (see the state key docs
-      // above); let it reach Koa unchanged
-      if (ctx.state[psychicRouterProcessedErrorStateKey]) throw err
+      // a failing server:error hook's error, which the router re-threw in
+      // development and test after answering a controller action's server
+      // error; let it reach Koa unchanged
+      if (errorIsRethrownHookError(err)) throw err
 
       // once headers are out, the response can no longer be shaped; Koa's
       // ctx.onerror knows how to clean up the socket, and the app-level
-      // 'error' listener registered by PsychicServer will log it
-      if (ctx.headerSent) throw err
+      // 'error' listener registered by PsychicServer will log it. It is
+      // handed an error it can mark as `headerSent` (not a frozen one)
+      if (ctx.headerSent) throw errorKoaCanHandle(err)
 
       const status = statusFromError(err)
 
@@ -92,9 +89,12 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
 
       // default server-error response, whatever status or data the error
       // carries (a server error's data is never sent); server:error hooks
-      // may reshape it
+      // may reshape it. Middleware that opted out of Koa's response
+      // (`ctx.respond = false`) and failed before sending anything has given
+      // that response up, so Koa sends this one
       ctx.status = 500
       ctx.body = ''
+      ctx.respond = true
 
       try {
         for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {

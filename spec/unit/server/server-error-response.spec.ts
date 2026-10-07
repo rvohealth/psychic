@@ -18,6 +18,31 @@ function replaceServerErrorHooks(...hooks: ((err: Error, ctx: Koa.Context) => vo
   serverErrorHooks.splice(0, serverErrorHooks.length, ...hooks)
 }
 
+// the hook setups an app's server error default must hold under
+const serverErrorHookSetups = [
+  ['in an app with no server:error hooks', () => replaceServerErrorHooks()],
+  [
+    'with the server:error hook psychic generates, which sets only the status',
+    () =>
+      replaceServerErrorHooks((_err, ctx) => {
+        if (!ctx.headerSent) ctx.status = 500
+      }),
+  ],
+  [
+    'with a server:error hook that only reports the error',
+    () =>
+      replaceServerErrorHooks(() => {
+        // reports the error to an error tracker
+      }),
+  ],
+  [
+    "with the test-app's server:error hook, which sets the status and an empty body",
+    () => {
+      // the hooks test-app/src/conf/app.ts registers
+    },
+  ],
+] as const
+
 describe('a visitor hits a route that raises a server error', () => {
   let logWithLevelSpy: MockInstance
 
@@ -145,31 +170,7 @@ describe('a visitor hits a route that raises a server error', () => {
   })
 
   context("an HttpStatusInternalServerError carrying data, which is for the server's logs only", () => {
-    const hookSetups = [
-      ['in an app with no server:error hooks', () => replaceServerErrorHooks()],
-      [
-        'with the server:error hook psychic generates, which sets only the status',
-        () =>
-          replaceServerErrorHooks((_err, ctx) => {
-            if (!ctx.headerSent) ctx.status = 500
-          }),
-      ],
-      [
-        'with a server:error hook that only reports the error',
-        () =>
-          replaceServerErrorHooks(() => {
-            // reports the error to an error tracker
-          }),
-      ],
-      [
-        "with the test-app's server:error hook, which sets the status and an empty body",
-        () => {
-          // the hooks test-app/src/conf/app.ts registers
-        },
-      ],
-    ] as const
-
-    context.each(hookSetups)('%s', (_, setUpServerErrorHooks) => {
+    context.each(serverErrorHookSetups)('%s', (_, setUpServerErrorHooks) => {
       beforeEach(() => {
         setUpServerErrorHooks()
       })
@@ -185,4 +186,82 @@ describe('a visitor hits a route that raises a server error', () => {
       })
     })
   })
+
+  context(
+    "thrown after opting out of Koa's response (ctx.respond = false), before anything was written",
+    () => {
+      context.each(serverErrorHookSetups)('%s', (_, setUpServerErrorHooks) => {
+        beforeEach(() => {
+          setUpServerErrorHooks()
+        })
+
+        context.each(scenarioPathPrefixes)('%s', (_, pathPrefix) => {
+          it('is answered with a 500 and an empty body', async () => {
+            const res = await request.get(`${pathPrefix}/respond-false-then-error`, 500)
+            expect(res.text).toEqual('')
+            expect(errorLogCount()).toEqual(1)
+          })
+        })
+      })
+    },
+  )
+
+  context(
+    "thrown from middleware around the router, once the router has answered a controller action's server error",
+    () => {
+      const pathPrefix = '/middleware-server-errors-after-a-controller-server-error'
+
+      context('in an app with no server:error hooks', () => {
+        beforeEach(() => {
+          replaceServerErrorHooks()
+        })
+
+        it.each([
+          ['an HttpStatusInternalServerError', 'psychic-500'],
+          ['a frozen error', 'frozen-error'],
+          [
+            'a library error carrying a 4xx status, an exposed message and headers',
+            'status-bearing-library-4xx-error-with-headers',
+          ],
+        ])(
+          "%s is answered with a 500 and an empty body, logged, and never handed to Koa's error handler",
+          async (_, scenario) => {
+            const res = await request.get(`${pathPrefix}/${scenario}`, 500)
+            expect(res.text).toEqual('')
+            expect(res.headers['x-upstream-request-id']).toBeUndefined()
+            expect(res.headers['x-content-type-options']).toEqual('nosniff')
+            // the action's error, then the middleware's
+            expect(errorLogCount()).toEqual(2)
+          },
+        )
+
+        it('a deliberate ctx.throw(401) is answered as from any middleware: its status and headers, an empty body, and no log line', async () => {
+          const res = await request.get(`${pathPrefix}/koa-401-with-headers`, 401)
+          expect(res.text).toEqual('')
+          expect(res.headers['www-authenticate']).toEqual('Bearer')
+          expect(res.headers['x-content-type-options']).toEqual('nosniff')
+          // the action's error only
+          expect(errorLogCount()).toEqual(1)
+        })
+      })
+
+      context('with a server:error hook that only reports the error', () => {
+        let reportedErrors: Error[]
+
+        beforeEach(() => {
+          reportedErrors = []
+          replaceServerErrorHooks(err => {
+            reportedErrors.push(err)
+          })
+        })
+
+        it("reports the middleware's server error as well as the action's, and answers a 500 with an empty body", async () => {
+          const res = await request.get(`${pathPrefix}/non-http-error`, 500)
+          expect(res.text).toEqual('')
+          expect(reportedErrors.map(err => err.message)).toEqual(['the action failed', 'something broke'])
+          expect(errorLogCount()).toEqual(2)
+        })
+      })
+    },
+  )
 })

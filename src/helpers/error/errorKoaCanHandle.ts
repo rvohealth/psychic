@@ -23,7 +23,7 @@ const wrapperMessage =
  * a thrown non-error, which Koa wraps itself.
  */
 export default function errorKoaCanHandle(err: unknown): unknown {
-  if (err === null || err === undefined) return new Error(wrapperMessage, { cause: err })
+  if (err === null || err === undefined) return errorWrappedForKoa(err)
   if (!koaTreatsAsError(err)) return err
 
   try {
@@ -32,6 +32,17 @@ export default function errorKoaCanHandle(err: unknown): unknown {
     // a throwing proxy trap: Koa's own assignment could throw too
   }
 
+  return errorWrappedForKoa(err)
+}
+
+/**
+ * @internal
+ *
+ * A plain `Error` whose `cause` is `err`, which Koa's default error handler
+ * answers with a 500: what {@link errorKoaCanHandle} hands Koa in place of
+ * an error Koa cannot respond to.
+ */
+export function errorWrappedForKoa(err: unknown): Error {
   return new Error(wrapperMessage, { cause: err })
 }
 

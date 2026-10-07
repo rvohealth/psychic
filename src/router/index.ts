@@ -18,7 +18,7 @@ import CannotCommitRoutesWithoutKoaApp from '../error/router/cannot-commit-route
 import EnvInternal from '../helpers/EnvInternal.js'
 import { errorIsDeliberateKoaHttpError } from '../helpers/error/errorIsDeliberateHttpError.js'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
-import errorKoaCanHandle from '../helpers/error/errorKoaCanHandle.js'
+import { rethrownHookError } from '../helpers/error/errorIsRethrownHookError.js'
 import PsychicApp from '../psychic-app/index.js'
 import {
   applyResourcefulAction,
@@ -28,7 +28,6 @@ import {
   PsychicControllerActions,
   routePath,
 } from '../router/helpers.js'
-import { psychicRouterProcessedErrorStateKey } from '../server/helpers/errorBoundaryMiddleware.js'
 import RouteManager, {
   ControllerActionRouteConfig,
   KoaMiddleware,
@@ -516,20 +515,19 @@ suggested fix:  "${convertRouteParams(path)}"
       } else {
         // a server error: psychic answers it itself, whether or not any
         // server:error hooks are registered, and never hands it to Koa's
-        // default error handler. Mark the request so the error-boundary
-        // middleware passes the deliberate dev/test re-throw of a failing
-        // server:error hook below straight through to Koa, instead of
-        // running the hooks a second time
-        ctx.state[psychicRouterProcessedErrorStateKey] = true
-
+        // default error handler
         PsychicApp.logWithLevel('error', util.inspect(err, { depth: ERROR_LOGGING_DEPTH }))
 
         // default server-error response, which server:error hooks may
         // reshape; with no hooks registered, it is the response. A server
-        // error's data is never sent
+        // error's data is never sent. An action that opted out of Koa's
+        // response (`ctx.respond = false`, e.g. to write it through
+        // `ctx.res`) and failed before sending anything has given that
+        // response up, so Koa sends this one
         if (!ctx.headerSent) {
           ctx.status = 500
           ctx.body = ''
+          ctx.respond = true
         }
 
         try {
@@ -546,8 +544,11 @@ suggested fix:  "${convertRouteParams(path)}"
             //
             // Koa's default error handler crashes, sending no response, on an error whose
             // status it cannot set, such as the psychic 500 a hook re-throws; it is handed
-            // a plain Error wrapping such an error instead.
-            throw errorKoaCanHandle(error)
+            // a plain Error wrapping such an error instead. The error re-thrown is recorded,
+            // so the error-boundary middleware passes it straight through to Koa instead of
+            // running the hooks a second time; any other error thrown on this request, e.g.
+            // by middleware around the router, is answered by the boundary as usual.
+            throw rethrownHookError(error)
           } else {
             PsychicApp.logWithLevel(
               'error',

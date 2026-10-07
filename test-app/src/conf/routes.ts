@@ -233,6 +233,11 @@ export default function routes(r: PsychicRouter) {
   r.get('insufficient-storage', ResponseStatusesController, 'throwInsufficientStorage') // 507
   r.get('not-extended', ResponseStatusesController, 'throwNotExtended') // 510
   r.get('server-errors/:scenario', ServerErrorsController, 'throwScenario')
+  r.get(
+    'middleware-server-errors-after-a-controller-server-error/:scenario',
+    ServerErrorsController,
+    'throwBeforeMiddlewareThrows',
+  )
   r.get('redirect-to-return-to', ServerErrorsController, 'redirectToReturnTo')
   r.get('ok-then-throw', ServerErrorsController, 'okThenThrow')
   r.get('headers-sent-then-throw', ServerErrorsController, 'sendHeadersThenThrow')

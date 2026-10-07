@@ -82,6 +82,15 @@ export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): ne
       // the server's own credentials were rejected
       throw Object.assign(new Error('upstream unauthorized'), { status: 401 })
 
+    case 'status-bearing-library-4xx-error-with-headers':
+      // the same, also carrying an exposed message and the upstream
+      // response's headers, which Koa's default error handler would send
+      throw Object.assign(new Error('upstream secret detail'), {
+        status: 401,
+        expose: true,
+        headers: { 'x-upstream-request-id': 'req_upstream' },
+      })
+
     case 'body-parser-shaped-error':
       // shaped like the body parser's error for malformed JSON, but thrown
       // from somewhere else
@@ -97,6 +106,12 @@ export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): ne
       throw frozenError
     }
 
+    case 'respond-false-then-error':
+      // opts out of Koa's response, e.g. to write it through ctx.res, and
+      // fails before writing anything
+      ctx.respond = false
+      throw new Error('failed before writing the response')
+
     default:
       throw new Error(`unknown server error scenario: ${scenario}`)
   }
@@ -111,6 +126,13 @@ export default class ServerErrorsController extends ApplicationController {
   // refuses an unsafe target by throwing HttpStatusInternalServerError
   public redirectToReturnTo() {
     this.redirect(this.castParam('returnTo', 'string'))
+  }
+
+  // fails with a server error, which the router answers; test-app middleware
+  // around the router then throws the request's scenario (see
+  // test-app/src/conf/app.ts)
+  public throwBeforeMiddlewareThrows() {
+    throw new Error('the action failed')
   }
 
   // writes a success response, which is not sent until the action returns,

@@ -265,6 +265,15 @@ export default async (psy: PsychicApp) => {
     const serverErrorScenario = /^\/middleware-server-errors\/([^/]+)$/.exec(ctx.path)?.[1]
     if (serverErrorScenario) throwServerErrorScenario(ctx, serverErrorScenario)
 
+    // the same errors, thrown once the router has answered the server error
+    // a controller action threw (spec/unit/server/server-error-response.spec.ts)
+    const scenarioAfterControllerServerError =
+      /^\/middleware-server-errors-after-a-controller-server-error\/([^/]+)$/.exec(ctx.path)?.[1]
+    if (scenarioAfterControllerServerError) {
+      await next()
+      throwServerErrorScenario(ctx, scenarioAfterControllerServerError)
+    }
+
     switch (ctx.path) {
       case '/middleware-error-500':
         throw new Error('middleware error 500')
