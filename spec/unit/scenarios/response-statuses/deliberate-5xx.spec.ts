@@ -74,6 +74,17 @@ describe('a visitor hits a route that responds with a deliberate 5xx (501–510)
           expect(res.text).toEqual('')
           expectHandledResponse()
         })
+
+        it('does not send the headers a wrapped caught error carried', async () => {
+          const res = await request.get(pathFor('koa-503-wrapped-with-own-headers'), 503, {
+            headers: { Origin: 'http://localhost:3000' },
+          })
+          expect(res.headers['request-id']).toBeUndefined()
+          expect(res.headers['access-control-allow-origin']).toEqual('http://localhost:3000')
+          expect(res.headers['content-type']).not.toEqual('application/json')
+          expect(res.text).toEqual('')
+          expectHandledResponse()
+        })
       })
 
       context('a server error', () => {

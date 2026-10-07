@@ -30,6 +30,20 @@ export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): ne
     case 'koa-503-with-headers':
       return ctx.throw(503, { headers: { 'Retry-After': '120' } })
 
+    case 'koa-503-wrapped-with-own-headers':
+      // a caught SDK error that carries the upstream response's headers, as
+      // stripe-node's StripeError does
+      return ctx.throw(
+        503,
+        Object.assign(new Error('upstream'), {
+          headers: {
+            'access-control-allow-origin': '*',
+            'content-type': 'application/json',
+            'request-id': 'req_upstream',
+          },
+        }),
+      )
+
     case 'koa-510':
       return ctx.throw(510)
 

@@ -74,7 +74,20 @@ export function errorIsDeliberateKoaServerError(err: unknown): err is KoaHttpErr
  * Applies the headers passed to Koa's `ctx.throw` (e.g.
  * `ctx.throw(503, { headers: { 'Retry-After': '120' } })`) to the response,
  * as Koa's own error handler does; the developer passed them on purpose.
+ *
+ * Only an error that Koa's `http-errors` created itself
+ * (`instanceof Koa.HttpError`) has its headers applied. The wrapped form,
+ * `ctx.throw(503, caughtError)`, decorates the caught error in place, so its
+ * `headers` may be the upstream response's own (stripe-node's `StripeError`
+ * copies them there: CORS headers, request ids, a JSON content type), and
+ * they must never reach the client. The decorated error cannot tell those
+ * apart from headers passed alongside it, so
+ * `ctx.throw(503, caughtError, { headers })` applies neither. An error made
+ * by another copy of `http-errors` (e.g. `ctx.assert`'s, through
+ * `http-assert`) is not a `Koa.HttpError` either, so its headers are not
+ * applied.
  */
 export function setKoaHttpErrorHeaders(ctx: Koa.Context, err: KoaHttpError) {
+  if (!(err instanceof Koa.HttpError)) return
   if (err.headers && typeof err.headers === 'object') ctx.set(err.headers)
 }

@@ -991,7 +991,9 @@ export default class PsychicController {
    * Sends a deliberate 5xx thrown with Koa's `ctx.throw(501–510)` (see
    * `errorIsDeliberateServerError`): its status with an empty body, plus any
    * headers passed to `ctx.throw` (e.g. `Retry-After`). The error's message
-   * and other properties are never sent.
+   * and other properties are never sent, and neither are the headers a
+   * caught error wrapped with `ctx.throw(503, caughtError)` carries (see
+   * `setKoaHttpErrorHeaders`).
    */
   private koaSendDeliberateKoaServerError(err: KoaHttpError) {
     if (this._responseSent) return
