@@ -455,6 +455,136 @@ describe('addResourceToRoutes', () => {
     })
   })
 
+  context('when a block on the route is declared more than once in its parent', () => {
+    it('nests the resource under a parent declared in a later block instead of adding an unrestricted parent', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('reviews')
+    })
+
+    r.namespace('guest', r => {
+      r.resources('bookings')
+    })
+
+    r.namespace('host', r => {
+      r.resources('places', { only: ['index', 'show'] })
+    })
+  })
+`),
+        'v1/host/places/{}/rooms',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('reviews')
+    })
+
+    r.namespace('guest', r => {
+      r.resources('bookings')
+    })
+
+    r.namespace('host', r => {
+      r.resources('places', { only: ['index', 'show'] }, r => {
+        r.resources('rooms')
+
+      })
+    })
+  })
+`),
+      )
+    })
+
+    it('adds the resource inside a namespace declared only in a later block', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('reviews')
+    })
+
+    r.namespace('host', r => {
+      r.namespace('archive', r => {
+        r.resources('places')
+      })
+    })
+  })
+`),
+        'v1/host/archive/bookings',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('reviews')
+    })
+
+    r.namespace('host', r => {
+      r.namespace('archive', r => {
+        r.resources('bookings')
+
+        r.resources('places')
+      })
+    })
+  })
+`),
+      )
+    })
+
+    it('leaves the file unchanged when a later block already declares the resource', async () => {
+      const before = routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('reviews')
+    })
+
+    r.namespace('host', r => {
+      r.resources('places')
+    })
+  })
+`)
+
+      expect(await addRoute(before, 'v1/host/places')).toEqual(before)
+    })
+
+    it('adds the resource to the first block when no block declares more of the route', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('reviews')
+    })
+
+    r.namespace('host', r => {
+      r.resources('places')
+    })
+  })
+`),
+        'v1/host/bookings',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('bookings')
+
+      r.resources('reviews')
+    })
+
+    r.namespace('host', r => {
+      r.resources('places')
+    })
+  })
+`),
+      )
+    })
+  })
+
   context('when the routes function is an arrow function', () => {
     it('adds the resource to it', async () => {
       const routes = await addRoute(
@@ -619,6 +749,47 @@ export const routes = (r: PsychicRouter) => {
         "line 4, `r.namespace('v1', router => {`, declares namespace 'v1' in a form the generator does not edit",
       )
     })
+
+    it('leaves the file unchanged when a later block with the same name is declared in a form it does not edit', async () => {
+      const before = routesFile(`\
+  r.namespace('v1', r => {
+    r.namespace('host', r => {
+      r.resources('reviews')
+    })
+    r.namespace('host', router => {
+      router.resources('places', { only: ['index', 'show'] })
+    })
+  })
+`)
+
+      expect(await addRoute(before, 'v1/host/places/{}/rooms')).toEqual(before)
+      expect(warning()).toContain(
+        "line 8, `r.namespace('host', router => {`, declares namespace 'host' in a form the generator does not edit",
+      )
+    })
+
+    const tabIndentedRoutes: [string, string][] = [
+      [
+        'v1/posts',
+        "\tr.namespace('admin', r => {\n\t\tr.namespace('v1', r => {\n\t\t\tr.resources('pets')\n\t\t})\n\t})\n",
+      ],
+      [
+        'places/{}/rooms',
+        "\tr.namespace('guest', r => {\n\t\tr.resources('places')\n\t})\n\tr.resources('places')\n",
+      ],
+      ['posts', "\tr.namespace('v1', r => {\n\t\tr.resources('posts')\n\t})\n"],
+    ]
+
+    for (const [route, body] of tabIndentedRoutes) {
+      it(`leaves the file unchanged and says why when adding ${route} to a routes function indented with tabs`, async () => {
+        const before = routesFile(body)
+
+        expect(await addRoute(before, route)).toEqual(before)
+        expect(warning()).toContain(
+          'the routes function is indented with tabs; the generator edits only 2-space indentation',
+        )
+      })
+    }
 
     it('leaves the file unchanged when the resource itself is declared in a form it does not edit', async () => {
       const before = routesFile(`\
