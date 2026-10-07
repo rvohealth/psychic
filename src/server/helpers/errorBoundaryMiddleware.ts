@@ -70,6 +70,11 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
       // handed an error it can mark as `headerSent` (not a frozen one)
       if (ctx.headerSent) throw errorKoaCanHandle(err)
 
+      // Koa sends the answer written below, deliberate or not: middleware
+      // that opted out of Koa's response (`ctx.respond = false`) and failed
+      // before sending anything has given that response up
+      ctx.respond = true
+
       const status = statusFromError(err)
 
       if (
@@ -89,12 +94,9 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
 
       // default server-error response, whatever status or data the error
       // carries (a server error's data is never sent); server:error hooks
-      // may reshape it. Middleware that opted out of Koa's response
-      // (`ctx.respond = false`) and failed before sending anything has given
-      // that response up, so Koa sends this one
+      // may reshape it
       ctx.status = 500
       ctx.body = ''
-      ctx.respond = true
 
       try {
         for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {

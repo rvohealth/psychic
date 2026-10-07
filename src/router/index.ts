@@ -423,6 +423,13 @@ suggested fix:  "${convertRouteParams(path)}"
       await controllerInstance.runAction()
     } catch (error) {
       const err = error as Error
+
+      // Koa sends the answer each branch below writes, deliberate or not: an
+      // action that opted out of Koa's response (`ctx.respond = false`, e.g.
+      // to write it through `ctx.res`) and failed before sending anything has
+      // given that response up
+      if (!ctx.headerSent) ctx.respond = true
+
       if (errorIsRescuableHttpError(err)) {
         const httpErr = err as HttpError
         if (httpErr.data) {
@@ -520,14 +527,10 @@ suggested fix:  "${convertRouteParams(path)}"
 
         // default server-error response, which server:error hooks may
         // reshape; with no hooks registered, it is the response. A server
-        // error's data is never sent. An action that opted out of Koa's
-        // response (`ctx.respond = false`, e.g. to write it through
-        // `ctx.res`) and failed before sending anything has given that
-        // response up, so Koa sends this one
+        // error's data is never sent
         if (!ctx.headerSent) {
           ctx.status = 500
           ctx.body = ''
-          ctx.respond = true
         }
 
         try {

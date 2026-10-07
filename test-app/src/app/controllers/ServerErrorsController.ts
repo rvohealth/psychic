@@ -112,8 +112,18 @@ export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): ne
       ctx.respond = false
       throw new Error('failed before writing the response')
 
-    default:
+    default: {
+      // e.g. respond-false-then-psychic-404: opts out of Koa's response, as
+      // above, and fails with the named scenario's error before writing
+      // anything
+      const scenarioAfterOptingOut = /^respond-false-then-(.+)$/.exec(scenario)?.[1]
+      if (scenarioAfterOptingOut) {
+        ctx.respond = false
+        return throwServerErrorScenario(ctx, scenarioAfterOptingOut)
+      }
+
       throw new Error(`unknown server error scenario: ${scenario}`)
+    }
   }
 }
 

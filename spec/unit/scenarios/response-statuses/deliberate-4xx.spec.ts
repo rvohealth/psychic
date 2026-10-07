@@ -9,6 +9,13 @@ const requestPaths = [
   ['thrown from middleware', (scenario: string) => `/middleware-server-errors/${scenario}`],
 ] as const
 
+// a deliberate error never reaches server:error hooks, so it is answered the
+// same way whichever hooks the app registers
+const serverErrorHookSetups = [
+  ["with the test-app's server:error hook", () => {}],
+  ['in an app with no server:error hooks', () => PsychicApp.getOrFail().specialHooks.serverError.splice(0)],
+] as const
+
 describe('a visitor hits a route that responds with a deliberate 4xx', () => {
   let logWithLevelSpy: MockInstance
 
@@ -79,6 +86,30 @@ describe('a visitor hits a route that responds with a deliberate 4xx', () => {
           expect(serverErrorHookCallCount()).toEqual(1)
         })
       })
+
+      context(
+        "thrown after opting out of Koa's response (ctx.respond = false), before anything was written",
+        () => {
+          context.each(serverErrorHookSetups)('%s', (_, setUpServerErrorHooks) => {
+            beforeEach(() => {
+              setUpServerErrorHooks()
+            })
+
+            it('a psychic HttpError is answered with its status and data, without logging it or calling server:error hooks', async () => {
+              const res = await request.get(pathFor('respond-false-then-psychic-404'), 404)
+              expect(res.body).toEqual({ reason: 'no such widget' })
+              expectHandledResponse()
+            })
+
+            it("an error from Koa's ctx.throw is answered with its status, the headers passed to it and an empty body, without logging it or calling server:error hooks", async () => {
+              const res = await request.get(pathFor('respond-false-then-koa-401-with-headers'), 401)
+              expect(res.headers['www-authenticate']).toEqual('Bearer')
+              expect(res.text).toEqual('')
+              expectHandledResponse()
+            })
+          })
+        },
+      )
     })
   }
 })
