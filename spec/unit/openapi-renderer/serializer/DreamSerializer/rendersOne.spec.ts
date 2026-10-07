@@ -23,8 +23,8 @@ describe('DreamSerializer rendersOne', () => {
     expect(results.referencedSerializers).toEqual([UserSerializer])
   })
 
-  context('when there is no associated model', () => {
-    it('renders null', () => {
+  context('when the BelongsTo association is not optional', () => {
+    it('the association is the ref, without null', () => {
       const MySerializer = (data: Pet) => DreamSerializer(Pet, data).rendersOne('user')
 
       const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)

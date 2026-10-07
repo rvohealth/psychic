@@ -52,8 +52,8 @@ describe('ObjectSerializer attributes', () => {
     })
   })
 
-  context('when serializing null', () => {
-    it('renderedAttributes is null', () => {
+  context('when the serializer accepts null data', () => {
+    it('does not add null to the type', () => {
       const MySerializer = (data: User | null) =>
         ObjectSerializer(data).attribute('email', { openapi: 'string' })
 

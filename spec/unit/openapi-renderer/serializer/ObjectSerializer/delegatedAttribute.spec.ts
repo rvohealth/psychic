@@ -1,9 +1,14 @@
 import { CalendarDate, ObjectSerializer } from '@rvoh/dream'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 
+interface Address {
+  city?: string
+}
+
 interface User {
   name?: string
   birthdate?: CalendarDate
+  address?: Address
 }
 
 interface Pet {
@@ -83,7 +88,7 @@ describe('ObjectSerializer delegated attributes', () => {
   })
 
   context('with `optional: true`', () => {
-    it('wraps the schema in anyOf with null', () => {
+    it('adds null to the type', () => {
       const MySerializer = (data: Pet) =>
         ObjectSerializer(data).delegatedAttribute('user', 'name', { openapi: 'string', optional: true })
 
@@ -102,6 +107,29 @@ describe('ObjectSerializer delegated attributes', () => {
       const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
       // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-member-access
       expect((serializerOpenapiRenderer.renderedOpenapi().openapi as any).required).toEqual(['name'])
+    })
+
+    context('when the schema has no type, as with a $serializer ref', () => {
+      it('is anyOf the ref or null', () => {
+        const AddressSerializer = Object.assign(
+          (data: Address) => ObjectSerializer(data).attribute('city', { openapi: 'string' }),
+          { globalName: 'AddressSerializer', openapiName: 'Address' },
+        )
+
+        const MySerializer = (data: Pet) =>
+          ObjectSerializer(data).delegatedAttribute('user', 'address', {
+            openapi: { $serializer: AddressSerializer },
+            optional: true,
+          })
+
+        const results = new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']()
+        expect(results.attributes).toEqual({
+          address: {
+            anyOf: [{ $ref: '#/components/schemas/Address' }, { type: 'null' }],
+          },
+        })
+        expect(results.referencedSerializers).toEqual([AddressSerializer])
+      })
     })
   })
 })

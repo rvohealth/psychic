@@ -54,7 +54,7 @@ describe('DreamSerializer delegated attributes', () => {
     })
 
     context('when the column is non-nullable', () => {
-      it('wraps the schema in anyOf with null', () => {
+      it('adds null to the type', () => {
         const MySerializer = (data: Pet) =>
           DreamSerializer(Pet, data).delegatedAttribute('user', 'passwordDigest', { optional: true })
 
@@ -68,7 +68,7 @@ describe('DreamSerializer delegated attributes', () => {
     })
 
     context('when the delegated target is a @deco.Virtual column', () => {
-      it('wraps the virtual column schema with null', () => {
+      it('adds null to the type', () => {
         const MySerializer = (data: Pet) =>
           DreamSerializer(Pet, data).delegatedAttribute('user', 'password', { optional: true })
 
