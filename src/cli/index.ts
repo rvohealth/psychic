@@ -80,16 +80,16 @@ ${INDENT}        AND generates the @deco.BelongsTo association and typed propert
 ${INDENT}
 ${INDENT}        use the fully qualified model name (matching its path under src/app/models/):
 ${INDENT}          User:belongs_to                  # creates user_id column + BelongsTo association
-${INDENT}          Health/Coach:belongs_to           # creates health_coach_id column + BelongsTo association
+${INDENT}          Health/Coach:belongs_to           # creates coach_id column + coach BelongsTo association (named for the last segment of the model name)
 ${INDENT}          User:belongs_to:optional          # nullable foreign key (for optional associations)
 ${INDENT}
 ${INDENT}        rename the association with Model@alias — the snake_case alias drives the FK column name AND the
 ${INDENT}        @deco.BelongsTo association + typed FK property on the generated model:
 ${INDENT}          InternalUser@canceled_by:belongs_to:optional       # canceled_by_id column, canceledById property, canceledBy association,
 ${INDENT}                                                             #   @deco.BelongsTo('InternalUser', { on: 'canceledById', optional: true })
-${INDENT}          Messaging/Template@template:belongs_to             # template_id column, templateId property, template association
-${INDENT}                                                             #   (strips the namespace from the property/association names while keeping
-${INDENT}                                                             #   the namespaced model reference intact)
+${INDENT}          Sports/Coach@sports_coach:belongs_to               # sports_coach_id column, sportsCoachId property, sportsCoach association
+${INDENT}                                                             #   (without the alias, Sports/Coach:belongs_to would also create coach_id,
+${INDENT}                                                             #   coachId and coach, colliding with Health/Coach:belongs_to)
 ${INDENT}        Aliasing also lets you declare multiple FKs to the same model in one generator call without column collisions.`
 
 export default class PsychicCLI {
@@ -154,7 +154,7 @@ ${INDENT}  --only=index,show,update     # modify only (e.g., settings management
       )
       .option(
         '--sti-base-serializer',
-        `Creates generically typed base serializers (default and summary) that accept a \`StiChildClass\` parameter and include the \`type\` attribute with a per-child enum constraint. This allows consuming applications to determine the response shape based on the STI type discriminator.
+        `Creates generically typed base serializers (default and summary) that accept a \`StiChildClass\` parameter. When a \`type\` column is passed, as in the example below, the default serializer includes the \`type\` attribute with a per-child enum constraint, which allows consuming applications to determine the response shape based on the STI type discriminator. The summary serializer includes only \`id\`, so responses from the generated \`index\` action, which renders the summary, carry no \`type\`.
 ${INDENT}
 ${INDENT}Use this when generating the parent model of an STI hierarchy. After generating the parent, use g:sti-child for each child type.
 ${INDENT}

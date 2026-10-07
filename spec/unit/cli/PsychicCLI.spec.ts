@@ -289,4 +289,37 @@ describe('PsychicCLI g:resource --help', () => {
       )
     })
   })
+
+  context('belongs_to columns', () => {
+    it('names the FK column and association of a namespaced model for the last segment of its name', () => {
+      const help = gResourceHelp()
+
+      expect(help).toContain(
+        'Health/Coach:belongs_to           # creates coach_id column + coach BelongsTo association (named for the last segment of the model name)',
+      )
+      expect(help).not.toContain('health_coach_id')
+    })
+
+    it('shows an alias renaming a namespaced association rather than stripping the namespace, which the default already does', () => {
+      const help = gResourceHelp()
+
+      expect(help).toContain(
+        'Sports/Coach@sports_coach:belongs_to               # sports_coach_id column, sportsCoachId property, sportsCoach association',
+      )
+      expect(help).toContain('#   (without the alias, Sports/Coach:belongs_to would also create coach_id,')
+      expect(help).toContain('#   coachId and coach, colliding with Health/Coach:belongs_to)')
+      expect(help).not.toContain('strips the namespace')
+    })
+  })
+
+  context('--sti-base-serializer', () => {
+    it('says only the default base serializer includes the type attribute, and the summary only id', () => {
+      const help = gResourceHelp()
+
+      expect(help).toContain(
+        'Creates generically typed base serializers (default and summary) that accept a `StiChildClass` parameter. When a `type` column is passed, as in the example below, the default serializer includes the `type` attribute with a per-child enum constraint, which allows consuming applications to determine the response shape based on the STI type discriminator. The summary serializer includes only `id`, so responses from the generated `index` action, which renders the summary, carry no `type`.',
+      )
+      expect(help).not.toContain('parameter and include the `type` attribute')
+    })
+  })
 })
