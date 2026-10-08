@@ -190,6 +190,18 @@ export default function routes(r: PsychicRouter) {
   r.get('non-authoritative-information', ResponseStatusesController, 'sendNonAuthoritativeInformation') // 203
   r.get('no-content', ResponseStatusesController, 'sendNoContent') // 204
   r.get('reset-content', ResponseStatusesController, 'sendResetContent') // 205
+  r.get('respond-documented-no-content', ResponseStatusesController, 'respondDocumentedNoContent') // 204
+  r.get(
+    'respond-documented-no-content-with-data',
+    ResponseStatusesController,
+    'respondDocumentedNoContentWithData',
+  ) // 500
+  r.get(
+    'respond-documented-no-content-with-null',
+    ResponseStatusesController,
+    'respondDocumentedNoContentWithNull',
+  ) // 500
+  r.get('respond-documented-created', ResponseStatusesController, 'respondDocumentedCreated') // 201
 
   // 3xx series
   r.get('moved-permanently', ResponseStatusesController, 'sendMovedPermanently') // 301

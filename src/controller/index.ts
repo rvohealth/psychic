@@ -14,6 +14,7 @@ import Koa from 'koa'
 import { debuglog } from 'node:util'
 import { ControllerHook } from '../controller/hooks.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
+import RespondWithDataOnNoContentEndpoint from '../error/controller/RespondWithDataOnNoContentEndpoint.js'
 import HttpStatusBadGateway from '../error/http/BadGateway.js'
 import HttpStatusBadRequest from '../error/http/BadRequest.js'
 import HttpStatusConflict from '../error/http/Conflict.js'
@@ -1072,8 +1073,29 @@ export default class PsychicController {
   }
 
   /**
-   * Sets the response status and data for serialization. Uses the status code
-   * defined in the OpenAPI decorator if present, otherwise defaults to 200.
+   * Sends the data, serialized, with the success status the endpoint's
+   * OpenAPI document shows, so the response matches what the `@OpenAPI`
+   * decorator documents:
+   *
+   * - the decorator's `status`, when the document shows it
+   * - else 200, when the document shows a 200 (e.g. a decorator with a
+   *   model, view model or serializer and no `status`)
+   * - else the lowest success status the document shows, e.g. 204 for
+   *   `@OpenAPI()` with no model, view model, serializer or `status`, or
+   *   201 when the decorator's `responses` declares only a 201
+   *
+   * The document's success statuses include any 2xx its
+   * `defaults.responses` adds to every endpoint, unless the endpoint
+   * sets `omitDefaultResponses`. A controller whose `openapiNames` puts
+   * it in several OpenAPI documents gets a status every one of them
+   * shows, since its response is validated against each; a 2xx only
+   * some of them add is not sent.
+   *
+   * With no `@OpenAPI` decorator, it sends 200. With no data, it sends
+   * `{}`, except on a 204 No Content, which is sent with no body. A 204
+   * cannot carry a body, so on an endpoint whose status is 204, passing
+   * data (anything but `undefined`, including `null`) throws an error
+   * instead of dropping it.
    *
    * @param data - The data to send in the response
    * @param opts - Optional rendering options for serialization
@@ -1081,18 +1103,40 @@ export default class PsychicController {
    * @example
    * ```ts
    * class UsersController extends ApplicationController {
+   *   \@OpenAPI(User, { many: true })
    *   public index() {
    *     const users = User.all()
-   *     this.respond(users) // Uses OpenAPI-defined status or 200
+   *     this.respond(users) // 200, the status the OpenAPI document shows
+   *   }
+   *
+   *   \@OpenAPI()
+   *   public destroy() {
+   *     // ...
+   *     this.respond() // 204, the status the OpenAPI document shows
    *   }
    * }
    * ```
    */
-  public respond<T>(data: T = {} as T, opts: RenderOptions = {}) {
-    const openapiData = (this.constructor as typeof PsychicController).openapi[this.action]
-    this.ctx.status = openapiData?.['status'] || 200
+  public respond<T>(data?: T, opts: RenderOptions = {}) {
+    const openapiNames = this.computedOpenapiNames
+    const status = this.currentOpenapiRenderer?.respondStatus(openapiNames) ?? 200
 
-    this.json(data, opts)
+    if (status === 204) {
+      // a 204 cannot carry a body, so throw rather than silently drop the data
+      if (data !== undefined) {
+        throw new RespondWithDataOnNoContentEndpoint(
+          this.constructor as typeof PsychicController,
+          this.action,
+          openapiNames,
+        )
+      }
+
+      this.koaSendStatus(204)
+      return
+    }
+
+    this.ctx.status = status
+    this.json(data === undefined ? {} : data, opts)
   }
 
   /**

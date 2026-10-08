@@ -76,7 +76,7 @@ export function OpenAPI<
  * @param query - Optional. A list of query params to provide for this endpoint
  * @param responses - Optional. A list of additional responses that your app may return
  * @param serializerKey - Optional. Use this to override the serializer key to use when looking up a serializer by the provided model or view model.
- * @param status - Optional. The status code this endpoint uses when responding successfully. If not passed, the OpenAPI document uses 200 when a model, view model or serializer is passed and 204 when none is, while `this.respond(...)` sends 200 either way.
+ * @param status - Optional. The status code this endpoint uses when responding successfully. If not passed, the OpenAPI document uses 200 when a model, view model or serializer is passed and 204 when none is. `this.respond(...)` sends the success status the document shows.
  * @param tags - Optional. string array
  */
 export function OpenAPI(

@@ -782,17 +782,14 @@ export default class OpenapiEndpointRenderer<
       target: 'response',
     }
 
-    const computedStatus: HttpStatusCodeNumber = this.status || this.defaultStatus
+    const generatedSuccessStatus = this.generatedSuccessStatus
     let serializersAppearingInHandWrittenOpenapi: SerializerArray = []
 
-    const didUserProvideSuccessOpenapi =
-      this.responses?.['200'] || this.responses?.['201'] || this.responses?.['204']
-
-    if (!didUserProvideSuccessOpenapi) {
+    if (generatedSuccessStatus !== undefined) {
       if (this.status === 204) {
         responseData = {
           204: {
-            description: this.defaultResponseDescription(computedStatus),
+            description: this.defaultResponseDescription(generatedSuccessStatus),
             $ref: '#/components/responses/NoContent',
           },
         }
@@ -805,9 +802,9 @@ export default class OpenapiEndpointRenderer<
         ]
 
         responseData = {
-          [computedStatus]: {
+          [generatedSuccessStatus]: {
             ...parsingResults.openapi,
-            description: this.defaultResponseDescription(computedStatus),
+            description: this.defaultResponseDescription(generatedSuccessStatus),
           },
         }
       }
@@ -862,19 +859,7 @@ export default class OpenapiEndpointRenderer<
       }
     })
 
-    const defaultResponses = this.omitDefaultResponses
-      ? {}
-      : openapiOpts(openapiName)?.defaults?.responses || {}
-
-    const psychicAndConfigLevelDefaults = this.omitDefaultResponses
-      ? {}
-      : cloneDeepSafe(
-          {
-            ...DEFAULT_OPENAPI_RESPONSES,
-            ...defaultResponses,
-          },
-          obj => obj,
-        )
+    const psychicAndConfigLevelDefaults = cloneDeepSafe(this.defaultResponses(openapiName), obj => obj)
 
     Object.keys(psychicAndConfigLevelDefaults).forEach(key => {
       if (!responseData[key as keyof typeof responseData]) {
@@ -907,12 +892,122 @@ export default class OpenapiEndpointRenderer<
   /**
    * @internal
    *
+   * The default responses the named OpenAPI document adds to this
+   * endpoint: Psychic's own, replaced and extended by the document's
+   * `defaults.responses`, or none when `omitDefaultResponses` is set.
+   * parseResponses adds each one whose status the endpoint does not
+   * document itself, and `respondStatus` reads their success statuses
+   * here too, so the status `this.respond(...)` sends is one the
+   * rendered document shows.
+   */
+  private defaultResponses(openapiName: string): OpenapiResponses {
+    if (this.omitDefaultResponses) return {}
+
+    return {
+      ...DEFAULT_OPENAPI_RESPONSES,
+      ...(openapiOpts(openapiName)?.defaults?.responses || {}),
+    }
+  }
+
+  /**
+   * @internal
+   *
    * Returns the default status code that should be used
    * if it was not passed.
    */
   private get defaultStatus(): HttpStatusCodeNumber {
     if (!this.dreamsOrSerializers) return 204
     return 200
+  }
+
+  /**
+   * @internal
+   *
+   * The status of the success response Psychic generates for the
+   * OpenAPI document: the `status` option, else the default status
+   * (200 with a model, view model or serializer, 204 without one).
+   * Undefined when `responses` declares a 200, 201 or 204, which
+   * replaces the generated success response.
+   */
+  private get generatedSuccessStatus(): HttpStatusCodeNumber | undefined {
+    const didUserProvideSuccessOpenapi =
+      this.responses?.['200'] || this.responses?.['201'] || this.responses?.['204']
+
+    if (didUserProvideSuccessOpenapi) return undefined
+    return this.status || this.defaultStatus
+  }
+
+  /**
+   * @internal
+   *
+   * The success statuses the endpoint's own decorator documents: the
+   * generated success response's (see `generatedSuccessStatus`) and
+   * the 2xx statuses `responses` declares. Every OpenAPI document the
+   * endpoint is in shows them.
+   */
+  private get decoratorSuccessStatuses(): Set<number> {
+    const statuses = new Set<number>(successStatuses(Object.keys(this.responses || {})))
+
+    const generatedSuccessStatus = this.generatedSuccessStatus
+    if (generatedSuccessStatus !== undefined) statuses.add(generatedSuccessStatus)
+
+    return statuses
+  }
+
+  /**
+   * @internal
+   *
+   * The success statuses the named OpenAPI document shows for this
+   * endpoint, which are the 2xx statuses of the responses
+   * parseResponses renders for it: the decorator's own (see
+   * `decoratorSuccessStatuses`) and those of the document's default
+   * responses (see `defaultResponses`).
+   */
+  private documentedSuccessStatuses(openapiName: string): Set<number> {
+    const statuses = this.decoratorSuccessStatuses
+    successStatuses(Object.keys(this.defaultResponses(openapiName))).forEach(status => statuses.add(status))
+    return statuses
+  }
+
+  /**
+   * @internal
+   *
+   * The status `this.respond(...)` sends: a success status every
+   * OpenAPI document the endpoint is in shows, given as the
+   * controller's `openapiNames`, since Psychic validates a response
+   * against each of them. Of those statuses, it is the `status`
+   * option when they include it, else 200 when they include a 200,
+   * else the lowest, e.g. 204 for a decorator with no model, view
+   * model, serializer or `status`, or 201 when `responses` declares
+   * only a 201.
+   *
+   * A document shows the success statuses the decorator documents
+   * (see `decoratorSuccessStatuses`; a 200, 201 or 204 in `responses`
+   * replaces the generated success response, so `status` is then
+   * shown only when `responses` declares it too) and the 2xx statuses
+   * its `defaults.responses` adds, unless `omitDefaultResponses` is
+   * set. Every document shows the decorator's success statuses, so
+   * there is always a status they all show. A 2xx that only some of
+   * the documents add is not sent. With no document, the status is
+   * one the decorator documents.
+   */
+  public respondStatus(openapiNames: readonly string[]): HttpStatusCodeNumber {
+    const successStatusesEveryDocumentShows = openapiNames.length
+      ? openapiNames
+          .map(openapiName => this.documentedSuccessStatuses(openapiName))
+          .reduce(
+            (shownByEveryDocument, shownByThisDocument) =>
+              new Set([...shownByEveryDocument].filter(status => shownByThisDocument.has(status))),
+          )
+      : this.decoratorSuccessStatuses
+
+    const preferredStatus = this.status || 200
+    if (successStatusesEveryDocumentShows.has(preferredStatus)) return preferredStatus
+
+    // never empty: without a declared 200, 201 or 204 there is a generated
+    // success response, and every document shows the decorator's success statuses
+    const [lowestSuccessStatus] = [...successStatusesEveryDocumentShows].sort((a, b) => a - b)
+    return (lowestSuccessStatus ?? preferredStatus) as HttpStatusCodeNumber
   }
 
   /**
@@ -1459,18 +1554,26 @@ export interface OpenapiEndpointRendererOpts<
    * the status code that your endpoint will render
    * when it succeeds. It sets the status of the success
    * response Psychic generates for the OpenAPI document (none
-   * is generated when `responses` declares a 200, 201 or 204),
-   * and the status `this.respond(...)` sends. Other render
-   * helpers send their own status whatever this is set to,
-   * e.g. `this.ok(...)` sends 200 and `this.noContent()` sends 204.
+   * is generated when `responses` declares a 200, 201 or 204).
+   * When not passed, the document gives that response a 200
+   * when a model, view model or serializer is passed to the
+   * decorator, and a 204, with no content, when none is.
    *
-   * When not passed, the two differ. The OpenAPI document
-   * gives the success response a 200 when a model, view
-   * model or serializer is passed to the decorator, and a
-   * 204 when none is, while `this.respond(...)` sends 200
-   * either way. So an endpoint with no model, view model or
-   * serializer that answers with `this.respond(...)` should
-   * pass `status` to keep the two in step.
+   * `this.respond(...)` sends a success status the document
+   * shows: this status when the document shows it, else 200
+   * when the document shows a 200, else the lowest success
+   * status the document shows. This status is not shown when
+   * `responses` declares a 200, 201 or 204 but not this status,
+   * e.g. with `status: 201` and `responses` declaring only a
+   * 200, `this.respond(...)` sends 200. The document's success
+   * statuses include any 2xx its `defaults.responses` adds,
+   * unless `omitDefaultResponses` is set; for a controller in
+   * several OpenAPI documents, they are those every one of them
+   * shows. On a 204, `this.respond()` sends no body, and passing
+   * it data throws, since a 204 cannot carry a body. Other
+   * render helpers send their own status whatever this is set
+   * to, e.g. `this.ok(...)` sends 200 and `this.noContent()`
+   * sends 204.
    *
    * ```ts
    * \@OpenAPI(User, {
@@ -1540,10 +1643,11 @@ export interface OpenapiEndpointRendererOpts<
    *
    * Even when true, a response whose status has no response
    * schema in the OpenAPI document is serialized with
-   * `JSON.stringify`, e.g. a `this.respond(...)` from an endpoint
-   * with no model, view model or serializer and no `status`,
-   * which sends 200 while the document describes its success
-   * response as a 204 (see `status`).
+   * `JSON.stringify`, e.g. `this.ok(...)` from an endpoint whose
+   * document shows no 200, or `this.respond(...)` from an
+   * endpoint with `status: 200` and no model, view model or
+   * serializer, whose success response the document describes
+   * with no content.
    *
    * Serializing through the schema drops keys the schema does
    * not declare, coerces values that do not match it (a `null`
@@ -2264,6 +2368,18 @@ export interface OpenapiOAuth2SecurityScheme {
 }
 
 export type OpenapiOauth2Flow = 'authorizationCode' | 'implicit' | 'password' | 'clientCredentials'
+
+/**
+ * @internal
+ *
+ * The success (2xx) statuses among the keys of a responses object,
+ * which may also hold non-status keys such as `description`.
+ */
+function successStatuses(responseKeys: string[]): number[] {
+  return responseKeys
+    .map(responseKey => parseInt(responseKey))
+    .filter(status => status >= 200 && status < 300)
+}
 
 function statusDescription(status: HttpStatusCodeNumber | HttpStatusCode) {
   switch (status) {
