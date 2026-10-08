@@ -409,11 +409,13 @@ export default class PsychicController {
    * @param opts - Optional validation options with the following supported properties:
    *   - `enum`: Array of allowed string values to restrict the parameter to specific choices
    *   - `allowNull`: Boolean indicating whether null values are permitted (default: false)
-   * @returns The validated and type-cast parameter value. With `allowNull`, an absent value at any
-   * depth returns `undefined`, except when the expected type is `'null'`, which returns `null`
-   * because null is the requested type. An explicitly `null` leaf returns `null` for
-   * primitive-literal and RegExp expected types. OpenAPI-schema leaves remain governed by their
-   * schema, and a present non-object intermediate is always invalid dot notation.
+   * @returns The validated and type-cast parameter value. With `allowNull`, an absent dot-notation
+   * intermediate (no `user` for `'user.profile.age'`) returns `undefined` for every expected type,
+   * including `'null'` and OpenAPI schemas. For primitive-literal and RegExp expected types, an
+   * absent leaf returns `undefined`, except that the `'null'` expected type returns `null` because
+   * null is the requested type, and an explicitly `null` leaf returns `null`. OpenAPI-schema leaves
+   * remain governed by their schema. A present intermediate that is `null`, an array or any other
+   * non-object is always invalid dot notation and raises ParamValidationError, even with `allowNull`.
    * @throws {ParamValidationError} When validation fails (converted to 400 response by Psychic)
    *
    * @example
