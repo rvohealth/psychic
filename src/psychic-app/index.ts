@@ -359,8 +359,14 @@ Try setting it to something valid, like:
     return this._httpServerOptions
   }
 
-  private _corsOptions: cors.Options
-  public get corsOptions() {
+  private _corsOptions: cors.Options | undefined
+  /**
+   * Options passed through to `@koa/cors`, from `psy.set('cors', …)`.
+   * Returns `undefined` when the app never sets cors; Psychic then does not
+   * mount `@koa/cors`, so it adds no CORS headers to responses. Values are
+   * spread-merged across calls.
+   */
+  public get corsOptions(): cors.Options | undefined {
     return this._corsOptions
   }
 
@@ -376,10 +382,11 @@ Try setting it to something valid, like:
     return this._redirectAllowedHosts
   }
 
-  private _jsonOptions: BodyParserOptions
+  private _jsonOptions: BodyParserOptions | undefined
   /**
-   * Options passed through to `@koa/bodyparser`. When unset, the upstream
-   * defaults apply — notably `jsonLimit: '1mb'` and `formLimit: '56kb'`,
+   * Options passed through to `@koa/bodyparser`, from `psy.set('json', …)`.
+   * Returns `undefined` when the app never sets json; the upstream
+   * defaults then apply — notably `jsonLimit: '1mb'` and `formLimit: '56kb'`,
    * which cap request-body size at the framework boundary and defend against
    * unbounded-payload memory DoS even when no edge (WAF / API Gateway)
    * enforces a cap.
@@ -391,12 +398,18 @@ Try setting it to something valid, like:
    * (`jsonLimit`, `formLimit`, `textLimit`, `xmlLimit`, `enableTypes`,
    * `jsonStrict`, `detectJSON`, etc.).
    */
-  public get jsonOptions(): BodyParserOptions {
+  public get jsonOptions(): BodyParserOptions | undefined {
     return this._jsonOptions
   }
 
-  private _cookieOptions: { maxAge: number }
-  public get cookieOptions() {
+  private _cookieOptions: { maxAge: number } | undefined
+  /**
+   * The app's default cookie options, from `psy.set('cookie', …)`, with
+   * `maxAge` in milliseconds. Returns `undefined` when the app never sets
+   * cookie; a cookie set through `setCookie` with neither `maxAge` nor
+   * `expires` then lasts 31 days.
+   */
+  public get cookieOptions(): { maxAge: number } | undefined {
     return this._cookieOptions
   }
 
