@@ -798,5 +798,135 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
         })
       })
     })
+
+    // The document's components carry no property lock, flattened or not, so a
+    // key a flattened serializer does not declare passes response validation,
+    // as it does for a plain serializer. A lock on a flattened serializer's
+    // component would reject every payload of a serializer flattening it: the
+    // component's `unevaluatedProperties` sees only the properties evaluated
+    // inside the component, not the flattening serializer's own.
+    context('a serializer flattening one that flattens another', () => {
+      interface Address {
+        city: string
+      }
+
+      interface ContactWithAddress {
+        email: string
+        address: Address
+      }
+
+      const AddressSerializer = named(
+        (data: Address) => ObjectSerializer(data).attribute('city', { openapi: 'string' }),
+        'NestedAddress',
+      )
+      const ContactWithAddressSerializer = named(
+        (data: ContactWithAddress) =>
+          ObjectSerializer(data)
+            .attribute('email', { openapi: 'string' })
+            .rendersOne('address', { serializer: AddressSerializer, flatten: true }),
+        'NestedContactWithAddress',
+      )
+
+      const contact: ContactWithAddress = { email: 'a@b.c', address: { city: 'Paris' } }
+      const nestedPresentPayload = { species: 'cat', email: 'a@b.c', city: 'Paris' }
+
+      // each payload passes response validation and is sent as is, and so does
+      // the first one with a key no serializer declares
+      function expectValidatedAgainstOpenComponents(serializer: Serializer, payloads: unknown[]) {
+        expectValidatedAndSerialized(serializer, payloads)
+
+        expect(JSON.stringify(documentComponents(serializer))).not.toMatch(
+          /additionalProperties|unevaluatedProperties/,
+        )
+        expect(
+          validateAgainstDocument({ ...(payloads[0] as object), bogus: 1 }, serializer).errors,
+        ).toBeUndefined()
+      }
+
+      it('a plain serializer’s component also accepts a key the serializer does not declare', () => {
+        expect(validateAgainstDocument({ city: 'Paris', bogus: 1 }, AddressSerializer).errors).toBeUndefined()
+      })
+
+      context('through a rendersOne', () => {
+        const PetSerializer = named(
+          (data: { species: string; contact: ContactWithAddress }) =>
+            ObjectSerializer(data)
+              .attribute('species', { openapi: 'string' })
+              .rendersOne('contact', { serializer: ContactWithAddressSerializer, flatten: true }),
+          'NestedFlattenPet',
+        )
+
+        it('validates the payload Dream renders against the document, and accepts an unknown key', () => {
+          const present = PetSerializer({ species: 'cat', contact }).render()
+          expect(present).toEqual(nestedPresentPayload)
+
+          expectValidatedAgainstOpenComponents(PetSerializer, [present])
+        })
+      })
+
+      context('through an optional rendersOne', () => {
+        const PetSerializer = named(
+          (data: { species: string; contact: ContactWithAddress | null }) =>
+            ObjectSerializer(data).attribute('species', { openapi: 'string' }).rendersOne('contact', {
+              serializer: ContactWithAddressSerializer,
+              flatten: true,
+              optional: true,
+            }),
+          'NestedFlattenOptionalPet',
+        )
+
+        it('validates the payloads Dream renders against the document, with the nested fields present or null, and accepts an unknown key', () => {
+          const present = PetSerializer({ species: 'cat', contact }).render()
+          const absent = PetSerializer({ species: 'cat', contact: null }).render()
+          expect(present).toEqual(nestedPresentPayload)
+          expect(absent).toEqual({ species: 'cat', email: null, city: null })
+
+          expectValidatedAgainstOpenComponents(PetSerializer, [present, absent])
+        })
+      })
+
+      context('through a customAttribute whose openapi is a $serializer', () => {
+        const PetSerializer = named(
+          (data: { species: string; contact: ContactWithAddress }) =>
+            ObjectSerializer(data)
+              .attribute('species', { openapi: 'string' })
+              .customAttribute('contact', () => ContactWithAddressSerializer(data.contact).render(), {
+                flatten: true,
+                openapi: { $serializer: ContactWithAddressSerializer },
+              }),
+          'NestedFlattenCustomAttributePet',
+        )
+
+        it('validates the payload Dream renders against the document, and accepts an unknown key', () => {
+          const present = PetSerializer({ species: 'cat', contact }).render()
+          expect(present).toEqual(nestedPresentPayload)
+
+          expectValidatedAgainstOpenComponents(PetSerializer, [present])
+        })
+      })
+
+      context('through a customAttribute whose openapi is a maybeNull $serializer', () => {
+        const PetSerializer = named(
+          (data: { species: string; contact: ContactWithAddress | null }) =>
+            ObjectSerializer(data)
+              .attribute('species', { openapi: 'string' })
+              .customAttribute(
+                'contact',
+                () => (data.contact ? ContactWithAddressSerializer(data.contact).render() : null),
+                { flatten: true, openapi: { $serializer: ContactWithAddressSerializer, maybeNull: true } },
+              ),
+          'NestedFlattenMaybeNullCustomAttributePet',
+        )
+
+        it('validates the payloads Dream renders against the document, with the nested fields present or omitted, and accepts an unknown key', () => {
+          const present = PetSerializer({ species: 'cat', contact }).render()
+          const absent = PetSerializer({ species: 'cat', contact: null }).render()
+          expect(present).toEqual(nestedPresentPayload)
+          expect(absent).toEqual({ species: 'cat' })
+
+          expectValidatedAgainstOpenComponents(PetSerializer, [present, absent])
+        })
+      })
+    })
   })
 })

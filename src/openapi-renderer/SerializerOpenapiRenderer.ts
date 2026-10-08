@@ -101,9 +101,13 @@ export default class SerializerOpenapiRenderer {
     )
 
     if (this.allOfSiblings.length) {
-      // Property-level locks live only at the `allOf` wrapper (never on the
-      // inline branch or the `$ref`'d siblings) so that all branches'
+      // This schema's property lock lives only at the `allOf` wrapper (never
+      // on the inline branch or the `$ref`'d siblings) so that all branches'
       // properties are visible to `unevaluatedProperties` for the union check.
+      // The document builder (`OpenapiSegmentExpander`) keeps only the
+      // `allOf`, with its `description` and `summary`, so the serializer's
+      // component in the OpenAPI document carries no property lock, like
+      // every other serializer's component.
       return {
         ...referencedSerializersAndOpenapiSchemaBodyShorthand,
         openapi: {
@@ -162,9 +166,10 @@ export default class SerializerOpenapiRenderer {
         // are not emitted on leaf schemas: when a leaf is composed via `$ref`
         // inside an `allOf`, neither keyword sees properties contributed by
         // sibling branches, so a per-leaf lock incorrectly rejects flattened
-        // properties. Strictness is enforced at the `allOf`-wrapper level
-        // (`unevaluatedProperties: false`) when flattening occurs, and at the
-        // validation-pipeline level for top-level schemas.
+        // properties. No component in the OpenAPI document carries a lock,
+        // flattened or not: the `allOf` wrapper's `unevaluatedProperties: false`
+        // (see `renderedOpenapi`) is dropped when the document is built, so
+        // response validation accepts a key a serializer does not declare.
       },
     }
   }

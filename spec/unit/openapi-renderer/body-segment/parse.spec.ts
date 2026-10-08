@@ -311,5 +311,86 @@ describe('OpenapiBodySegmentRenderer', () => {
         ).toBe(true)
       })
     })
+
+    // `description` and `summary` are the fields Dream's OpenAPI types allow
+    // beside `allOf`, `anyOf` and `oneOf`; every other key beside a combinator
+    // is dropped, so a combinator never gains a `type` or a property lock
+    context('keys beside a combinator', () => {
+      const keysDropped = {
+        type: ['object', 'null'],
+        required: ['name'],
+        additionalProperties: false,
+        unevaluatedProperties: false,
+      }
+
+      it('keeps description and summary beside allOf, and drops every other key', () => {
+        expect(
+          subjectOpenapi({
+            description: 'a named, aged thing',
+            summary: 'named and aged',
+            ...keysDropped,
+            allOf: [
+              { type: 'object', properties: { name: 'string' } },
+              { type: 'object', properties: { age: 'integer' } },
+            ],
+          } as OpenapiBodySegment),
+        ).toEqual({
+          allOf: [
+            { type: 'object', properties: { name: { type: 'string' } } },
+            { type: 'object', properties: { age: { type: 'integer' } } },
+          ],
+          description: 'a named, aged thing',
+          summary: 'named and aged',
+        })
+      })
+
+      it('keeps description and summary beside anyOf, and drops every other key', () => {
+        expect(
+          subjectOpenapi({
+            description: 'a name or a count',
+            summary: 'name or count',
+            ...keysDropped,
+            anyOf: [{ type: 'string' }, { type: 'integer' }],
+          } as OpenapiBodySegment),
+        ).toEqual({
+          anyOf: [{ type: 'string' }, { type: 'integer' }],
+          description: 'a name or a count',
+          summary: 'name or count',
+        })
+      })
+
+      it('keeps description and summary beside oneOf, and drops every other key', () => {
+        expect(
+          subjectOpenapi({
+            description: 'a name or a count',
+            summary: 'name or count',
+            ...keysDropped,
+            oneOf: [{ type: 'string' }, { type: 'integer' }],
+          } as OpenapiBodySegment),
+        ).toEqual({
+          oneOf: [{ type: 'string' }, { type: 'integer' }],
+          description: 'a name or a count',
+          summary: 'name or count',
+        })
+      })
+
+      it('makes a combinator nullable with a { type: null } branch, which renders and validates null', () => {
+        const openapi = subjectOpenapi({
+          description: 'the pet, when there is one',
+          anyOf: [{ type: 'object', required: ['name'], properties: { name: 'string' } }, { type: 'null' }],
+        })
+
+        expect(openapi).toEqual({
+          anyOf: [
+            { type: 'object', required: ['name'], properties: { name: { type: 'string' } } },
+            { type: 'null' },
+          ],
+          description: 'the pet, when there is one',
+        })
+        expect(validateObject(null, openapi).errors).toBeUndefined()
+        expect(validateObject({ name: 'Fido' }, openapi).errors).toBeUndefined()
+        expect(validateObject({}, openapi).isValid).toBe(false)
+      })
+    })
   })
 })
