@@ -1,5 +1,6 @@
 import Koa from 'koa'
 import errorIsFromBodyParser, {
+  errorIsBodyDecompressionFailure,
   excludeBodyParserCallbackErrors,
   markBodyParserErrors,
 } from '../../../../src/helpers/error/errorIsFromBodyParser.js'
@@ -37,6 +38,63 @@ describe('errorIsFromBodyParser', () => {
     )
     expect(errorIsFromBodyParser(null)).toBe(false)
     expect(errorIsFromBodyParser('not an error')).toBe(false)
+  })
+})
+
+describe('errorIsBodyDecompressionFailure', () => {
+  function zlibError(code: string, errno: unknown) {
+    return Object.assign(new Error(`decompression failed: ${code}`), { errno, code })
+  }
+
+  async function thrownByBodyParser(err: Error) {
+    await errorThrownThrough(markBodyParserErrors(() => Promise.reject(err)))
+    return err
+  }
+
+  it.each([
+    ['Z_DATA_ERROR', -3],
+    ['Z_BUF_ERROR', -5],
+    ['Z_NEED_DICT', 2],
+    ['ERR__ERROR_FORMAT_PADDING_1', -14],
+    ['ERR__ERROR_FORMAT_EXUBERANT_NIBBLE', -1],
+  ])(
+    "is true for the body parser's own %s error, a body that is not valid compressed data",
+    async (code, errno) => {
+      expect(errorIsBodyDecompressionFailure(await thrownByBodyParser(zlibError(code, errno)))).toBe(true)
+    },
+  )
+
+  it.each([
+    ['Z_MEM_ERROR', -4],
+    ['Z_STREAM_ERROR', -2],
+    ['Z_VERSION_ERROR', -6],
+    ['ERR__ERROR_ALLOC_RING_BUFFER_1', -26],
+    ['ERR__ERROR_UNREACHABLE', -31],
+  ])("is false for the body parser's own %s error, a failure on the server's side", async (code, errno) => {
+    expect(errorIsBodyDecompressionFailure(await thrownByBodyParser(zlibError(code, errno)))).toBe(false)
+  })
+
+  it('is false for a zlib-shaped error the body parser never threw', async () => {
+    const downstreamError = zlibError('Z_DATA_ERROR', -3)
+    await errorThrownThrough(
+      markBodyParserErrors((_ctx, next) => next()),
+      () => Promise.reject(downstreamError),
+    )
+
+    expect(errorIsBodyDecompressionFailure(downstreamError)).toBe(false)
+    expect(errorIsBodyDecompressionFailure(zlibError('Z_DATA_ERROR', -3))).toBe(false)
+    expect(errorIsBodyDecompressionFailure(null)).toBe(false)
+  })
+
+  it("is false for the body parser's own error without a numeric errno or a code", async () => {
+    expect(errorIsBodyDecompressionFailure(await thrownByBodyParser(zlibError('Z_DATA_ERROR', '-3')))).toBe(
+      false,
+    )
+    expect(
+      errorIsBodyDecompressionFailure(
+        await thrownByBodyParser(Object.assign(new SyntaxError('Unexpected token'), { status: 400 })),
+      ),
+    ).toBe(false)
   })
 })
 

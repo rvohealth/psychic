@@ -14,7 +14,9 @@ const callbackErrors = new WeakSet<object>()
  * Whether an error was thrown by the body parser while parsing the request
  * body, e.g. co-body's error for malformed JSON (a `SyntaxError` with
  * `status: 400`) or raw-body's 413 for a body over the size limit. The error
- * boundary answers such an error with its 4xx status as a handled response.
+ * boundary answers such an error with its 4xx status as a handled response,
+ * and a body that fails to decompress, whose error carries no status, with a
+ * 400 (see {@link errorIsBodyDecompressionFailure}).
  *
  * Recognized by where it was thrown (see {@link markBodyParserErrors}),
  * never by its shape: co-body's error for malformed JSON carries only a
@@ -26,6 +28,44 @@ const callbackErrors = new WeakSet<object>()
  */
 export default function errorIsFromBodyParser(err: unknown): boolean {
   return typeof err === 'object' && err !== null && bodyParserErrors.has(err)
+}
+
+// the zlib error codes for a request body that is not valid gzip or deflate
+// data: corrupt (Z_DATA_ERROR), cut short or empty (Z_BUF_ERROR), or needing
+// a preset dictionary (Z_NEED_DICT)
+const clientZlibErrorCodes = new Set(['Z_DATA_ERROR', 'Z_BUF_ERROR', 'Z_NEED_DICT'])
+
+// the prefix of the brotli decoder's error codes for a request body that is
+// not valid br data
+const clientBrotliErrorCodePrefix = 'ERR__ERROR_FORMAT_'
+
+/**
+ * @internal
+ *
+ * Whether an error is the body parser's own failure to decompress a request
+ * body sent with a gzip, deflate or br `Content-Encoding`, because the body
+ * is not valid compressed data: the client's fault, which the error boundary
+ * answers with a 400 as a handled response, like malformed JSON. The error
+ * zlib throws for it carries no `status`, only a numeric `errno` and a
+ * `code`.
+ *
+ * Provenance comes first (see {@link errorIsFromBodyParser}), so a
+ * zlib-shaped error thrown anywhere else, including by the app's own
+ * `onError` callback in place of the body parser's error, is not one. Among
+ * the body parser's own errors, only the codes for an invalid body count; a
+ * failure on the server's side, such as zlib running out of memory
+ * (`Z_MEM_ERROR`) or the brotli decoder failing to allocate
+ * (`ERR__ERROR_ALLOC_*`), is a server error.
+ */
+export function errorIsBodyDecompressionFailure(err: unknown): boolean {
+  if (!errorIsFromBodyParser(err)) return false
+
+  const { errno, code } = err as { errno?: unknown; code?: unknown }
+  return (
+    typeof errno === 'number' &&
+    typeof code === 'string' &&
+    (clientZlibErrorCodes.has(code) || code.startsWith(clientBrotliErrorCodePrefix))
+  )
 }
 
 /**

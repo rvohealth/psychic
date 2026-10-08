@@ -314,11 +314,12 @@ export default class PsychicServer {
   }
 
   private initializeJSON() {
-    // the body parser's own errors (e.g. a 400 for malformed JSON) are
-    // marked, so the error boundary answers them as handled responses; an
-    // error from the app's own detectJSON or onError callback is not. An app
-    // that never calls psy.set('json', …) leaves jsonOptions undefined, and
-    // gets the body parser's own defaults
+    // the body parser's own errors (e.g. a 400 for malformed JSON, or its
+    // failure to decompress a body that is not valid gzip, deflate or br
+    // data) are marked, so the error boundary answers them as handled
+    // responses; an error from the app's own detectJSON or onError callback
+    // is not. An app that never calls psy.set('json', …) leaves jsonOptions
+    // undefined, and gets the body parser's own defaults
     const jsonOptions = excludeBodyParserCallbackErrors(PsychicApp.getOrFail().jsonOptions ?? {})
     this.koaApp.use(markBodyParserErrors(bodyParser(jsonOptions)))
   }

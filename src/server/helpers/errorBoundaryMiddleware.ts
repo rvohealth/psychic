@@ -6,7 +6,9 @@ import errorIsDeliberateHttpError, {
   errorIsDeliberateKoaHttpError,
   setKoaHttpErrorHeaders,
 } from '../../helpers/error/errorIsDeliberateHttpError.js'
-import errorIsFromBodyParser from '../../helpers/error/errorIsFromBodyParser.js'
+import errorIsFromBodyParser, {
+  errorIsBodyDecompressionFailure,
+} from '../../helpers/error/errorIsFromBodyParser.js'
 import errorIsRethrownHookError from '../../helpers/error/errorIsRethrownHookError.js'
 import errorKoaCanHandle from '../../helpers/error/errorKoaCanHandle.js'
 import httpErrorHasBody from '../../helpers/error/httpErrorHasBody.js'
@@ -35,7 +37,9 @@ export const ERROR_LOGGING_DEPTH = 6
  *   `errorIsDeliberateHttpError`; the router answers these the same way for
  *   a controller action)
  * - the body parser's own 4xx errors, e.g. a 400 for malformed JSON or a 413
- *   for a body over the size limit (see `errorIsFromBodyParser`)
+ *   for a body over the size limit (see `errorIsFromBodyParser`), and its
+ *   failure to decompress a body that is not valid gzip, deflate or br data,
+ *   answered with a 400 (see `errorIsBodyDecompressionFailure`)
  *
  * Anything else is a genuine server error, including a 500 and another
  * library's error that merely carries a 4xx or 5xx `status`: it is logged,
@@ -77,7 +81,9 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
       // before sending anything has given that response up
       ctx.respond = true
 
-      const status = statusFromError(err)
+      // a body that fails to decompress is the client's fault, though the
+      // error zlib throws for it carries no status
+      const status = statusFromError(err) ?? (errorIsBodyDecompressionFailure(err) ? 400 : null)
 
       if (
         status !== null &&
@@ -131,7 +137,9 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
  *
  * Extracts an http response status from an error when the error names one:
  * psychic `HttpError` subclasses, Koa `ctx.throw`/http-errors errors, and
- * body-parser failures all carry a numeric `status`. Guarded property access
+ * most body-parser failures carry a numeric `status`. The body parser's
+ * failure to decompress a request body carries none; the boundary answers it
+ * with a 400 (see `errorIsBodyDecompressionFailure`). Guarded property access
  * because the base `HttpError#status` getter throws.
  */
 function statusFromError(err: unknown): number | null {
