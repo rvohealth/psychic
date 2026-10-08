@@ -578,6 +578,26 @@ ${INDENT}  GET    /v1/host/places/:id            V1/Host/PlacesController#show`,
       })
 
     program
+      .command('resolve-aliases')
+      .description(
+        `Rewrites the tsconfig \`paths\` aliases (e.g. @conf/..., @models/...) that tsc leaves in its output to relative paths, so that \`node\` can run the build. Run it after tsc in your build script, with the same tsconfig:
+${INDENT}
+${INDENT}  tsc -p ./tsconfig.build.json && pnpm psy resolve-aliases -p ./tsconfig.build.json
+${INDENT}
+${INDENT}It reads the tsconfig as tsc does (honoring \`extends\`), finds imports with TypeScript's parser, and resolves them with TypeScript's module resolution, rewriting static, side-effect, \`export ... from\`, dynamic and \`require\` imports in the emitted .js and .d.ts files. Text that only looks like an import (in a string, a comment, or the argument of a method named require, such as module.require(...)), relative imports, packages, and imports that resolve to no file the build emitted are left unchanged, so running it again changes nothing.
+${INDENT}
+${INDENT}It never initializes your app, so it needs no database connection.`,
+      )
+      .option(
+        '-p, --project <path>',
+        'the tsconfig the build compiled with, or a directory containing a tsconfig.json, as with `tsc -p`. Defaults to the nearest tsconfig.json at or above the current directory, as tsc does',
+      )
+      .action((options: { project?: string }) => {
+        PsychicBin.resolveAliases({ project: options.project })
+        process.exit()
+      })
+
+    program
       .command('sync')
       .description(
         `Regenerates all auto-generated types and specs from the current state of your application. This is the most commonly run command after making changes to models, serializers, controllers, or routes. It performs:

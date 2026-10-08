@@ -1,5 +1,6 @@
 import { Command } from 'commander'
 import type { MockInstance } from 'vitest'
+import PsychicBin from '../../../src/bin/index.js'
 import PsychicCLI from '../../../src/cli/index.js'
 import generateSyncEnumsInitializer from '../../../src/generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../../../src/generate/initializer/syncOpenapiTypescript.js'
@@ -248,6 +249,65 @@ describe('PsychicCLI setup:sync commands', () => {
         undefined,
         { overwrite: true },
       )
+    })
+  })
+})
+
+describe('PsychicCLI resolve-aliases', () => {
+  let processExitSpy: MockInstance
+  let resolveAliasesSpy: MockInstance
+  let initializePsychicApp: ReturnType<typeof vi.fn<() => Promise<PsychicApp>>>
+
+  // A build step runs this command right after tsc, where the app's database
+  // and environment variables may be unavailable, so it must never initialize
+  // the app
+  function buildResolveAliasesProgram(): Command {
+    const program = new Command()
+    initializePsychicApp = vi.fn(() => Promise.resolve(PsychicApp.getOrFail()))
+
+    PsychicCLI.provide(program, { initializePsychicApp, seedDb: () => {} })
+
+    return program
+  }
+
+  beforeEach(() => {
+    processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+    resolveAliasesSpy = vi.spyOn(PsychicBin, 'resolveAliases').mockReturnValue({
+      tsconfigPath: '/app/tsconfig.build.json',
+      filesChanged: 0,
+      specifiersRewritten: 0,
+    })
+  })
+
+  afterEach(() => {
+    processExitSpy.mockRestore()
+    resolveAliasesSpy.mockRestore()
+  })
+
+  it('passes -p through as the project, without initializing the app, and exits', async () => {
+    await buildResolveAliasesProgram().parseAsync(['resolve-aliases', '-p', './tsconfig.build.json'], {
+      from: 'user',
+    })
+
+    expect(resolveAliasesSpy).toHaveBeenCalledWith({ project: './tsconfig.build.json' })
+    expect(initializePsychicApp).not.toHaveBeenCalled()
+    expect(processExitSpy).toHaveBeenCalledWith()
+  })
+
+  it('accepts --project', async () => {
+    await buildResolveAliasesProgram().parseAsync(['resolve-aliases', '--project', './tsconfig.build.json'], {
+      from: 'user',
+    })
+
+    expect(resolveAliasesSpy).toHaveBeenCalledWith({ project: './tsconfig.build.json' })
+  })
+
+  context('without -p', () => {
+    it('passes no project, so the tsconfig defaults as it does for tsc', async () => {
+      await buildResolveAliasesProgram().parseAsync(['resolve-aliases'], { from: 'user' })
+
+      expect(resolveAliasesSpy).toHaveBeenCalledWith({ project: undefined })
+      expect(initializePsychicApp).not.toHaveBeenCalled()
     })
   })
 })
