@@ -872,6 +872,10 @@ export default class PsychicController {
    * as JSON. Serializer builders, and arrays of them, are rendered the same way success
    * responses render them (with the controller's serializer passthrough and render options).
    * Anything else is sent as is, JSON-encoded, including a string, `0`, `false` and `''`.
+   * On an endpoint with `fastJsonStringify`, an object or array (a rendered serializer
+   * included) is serialized through the response schema the endpoint documents for the
+   * status, when it documents one; a string, number or boolean is JSON-encoded without that
+   * schema, so `this.conflict(false)` sends `false` whatever the schema describes.
    * The router calls this only for data other than `undefined` and `null` (see
    * `httpErrorHasBody`); an error without data is sent with an empty body.
    */
@@ -880,7 +884,12 @@ export default class PsychicController {
     data: any,
     statusCode: number,
   ) {
-    this.koaSendJson(this.renderSerializerBuilders(data), statusCode)
+    const body = this.renderSerializerBuilders(data)
+    // a string, number or boolean skips fast-json-stringify: through a schema
+    // that describes an object, it sends one as `{}`, or throws when the
+    // schema has a required property, turning the deliberate error into a 500
+    const isScalar = typeof body === 'string' || typeof body === 'number' || typeof body === 'boolean'
+    this.koaSendJson(body, statusCode, { fastJsonStringify: !isScalar })
   }
 
   /**
@@ -897,10 +906,16 @@ export default class PsychicController {
     this.koaSendJson(data)
   }
 
+  /**
+   * @param opts.fastJsonStringify - `false` serializes with `JSON.stringify`
+   * even on an endpoint with `fastJsonStringify`. By default, the endpoint's
+   * `fastJsonStringify` option decides.
+   */
   private koaSendJson(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
     statusCode: number = this.ctx.status || 200,
+    { fastJsonStringify = true }: { fastJsonStringify?: boolean } = {},
   ) {
     // In Express, calling res.json() after a response was already sent was a no-op.
     // In Koa, ctx.body/ctx.status are plain assignments, so the last write wins.
@@ -910,9 +925,10 @@ export default class PsychicController {
 
     this.ctx.status = statusCode
 
-    const stringifyFn = this.currentOpenapiRenderer?.['fastJsonStringify']
-      ? this.getFastJsonStringifyFunction(statusCode)
-      : undefined
+    const stringifyFn =
+      fastJsonStringify && this.currentOpenapiRenderer?.['fastJsonStringify']
+        ? this.getFastJsonStringifyFunction(statusCode)
+        : undefined
 
     if (stringifyFn) {
       this.ctx.type = 'application/json'

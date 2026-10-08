@@ -1647,7 +1647,12 @@ export interface OpenapiEndpointRendererOpts<
    * document shows no 200, or `this.respond(...)` from an
    * endpoint with `status: 200` and no model, view model or
    * serializer, whose success response the document describes
-   * with no content.
+   * with no content. So is the data of an `HttpError` when it is
+   * a string, number or boolean, e.g. `this.conflict('taken')` or
+   * `this.badRequest(false)`, which is sent as that value whatever
+   * the schema for the error's status describes; object or array
+   * data (a rendered serializer included) goes through that
+   * schema.
    *
    * Serializing through the schema drops keys the schema does
    * not declare, coerces values that do not match it (a `null`

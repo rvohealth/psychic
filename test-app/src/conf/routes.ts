@@ -89,6 +89,7 @@ export default function routes(r: PsychicRouter) {
       'testConflictWithSerializerWithoutFastJsonStringify',
     )
     r.get('conflict-with-serializer-array', UsersController, 'testConflictWithSerializerArray')
+    r.get('conflict-with-primitive', UsersController, 'testConflictWithPrimitive')
     r.get(
       'non-authoritative-information-with-serializer',
       UsersController,

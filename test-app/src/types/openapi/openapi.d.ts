@@ -2868,6 +2868,71 @@ export interface paths {
         };
         trace?: never;
     };
+    "/users/{id}/conflict-with-primitive": {
+        parameters: {
+            query: {
+                /** @description data */
+                data: "false" | "zero" | "empty-string" | "string";
+            };
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path: {
+                id: string;
+            };
+            cookie?: never;
+        };
+        get: {
+            parameters: {
+                query: {
+                    /** @description data */
+                    data: "false" | "zero" | "empty-string" | "string";
+                };
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path: {
+                    id: string;
+                };
+                cookie?: never;
+            };
+            requestBody?: never;
+            responses: {
+                /** @description Success */
+                200: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content?: never;
+                };
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                /** @description Conflict */
+                409: {
+                    headers: {
+                        [name: string]: unknown;
+                    };
+                    content: {
+                        "application/json": components["schemas"]["UserConflict"];
+                    };
+                };
+                418: components["responses"]["CustomResponse"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        put?: never;
+        post?: never;
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/users/{id}/conflict-with-serializer": {
         parameters: {
             query?: never;
