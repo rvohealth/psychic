@@ -47,6 +47,30 @@ describe('a visitor hits a route that responds with a deliberate 4xx', () => {
           expect(res.body).toEqual({ reason: 'no such widget' })
           expectHandledResponse()
         })
+
+        it.each([
+          ['no data', 'psychic-404-no-data'],
+          // never a 204, which would answer the error as a success
+          ['null data', 'psychic-404-null-data'],
+        ])('with %s responds with its status and an empty body', async (_, scenario) => {
+          const res = await request.get(pathFor(scenario), 404)
+          expect(res.text).toEqual('')
+          expectHandledResponse()
+        })
+
+        it.each([
+          ['0', 'psychic-404-zero-data', '0'],
+          ['false', 'psychic-404-false-data', 'false'],
+          ["''", 'psychic-404-empty-string-data', '""'],
+          ['a string', 'psychic-404-string-data', '"no such widget"'],
+          // never as HTML
+          ['a string starting with <', 'psychic-404-html-string-data', '"<b>no such widget</b>"'],
+        ])('sends %s data as JSON', async (_, scenario, json) => {
+          const res = await request.get(pathFor(scenario), 404)
+          expect(res.headers['content-type']).toEqual('application/json; charset=utf-8')
+          expect(res.text).toEqual(json)
+          expectHandledResponse()
+        })
       })
 
       context("an error from Koa's ctx.throw with a 4xx status", () => {
@@ -98,6 +122,12 @@ describe('a visitor hits a route that responds with a deliberate 4xx', () => {
             it('a psychic HttpError is answered with its status and data, without logging it or calling server:error hooks', async () => {
               const res = await request.get(pathFor('respond-false-then-psychic-404'), 404)
               expect(res.body).toEqual({ reason: 'no such widget' })
+              expectHandledResponse()
+            })
+
+            it('a psychic HttpError with null data is answered with its status and an empty body', async () => {
+              const res = await request.get(pathFor('respond-false-then-psychic-404-null-data'), 404)
+              expect(res.text).toEqual('')
               expectHandledResponse()
             })
 

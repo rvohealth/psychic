@@ -17,6 +17,29 @@ export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): ne
     case 'psychic-404':
       throw new HttpStatusNotFound({ reason: 'no such widget' })
 
+    // a psychic HttpError's data is sent as JSON; without data (undefined or
+    // null), the body is empty
+    case 'psychic-404-no-data':
+      throw new HttpStatusNotFound()
+
+    case 'psychic-404-null-data':
+      throw new HttpStatusNotFound(null)
+
+    case 'psychic-404-zero-data':
+      throw new HttpStatusNotFound(0)
+
+    case 'psychic-404-false-data':
+      throw new HttpStatusNotFound(false)
+
+    case 'psychic-404-empty-string-data':
+      throw new HttpStatusNotFound('')
+
+    case 'psychic-404-string-data':
+      throw new HttpStatusNotFound('no such widget')
+
+    case 'psychic-404-html-string-data':
+      throw new HttpStatusNotFound('<b>no such widget</b>')
+
     case 'koa-404':
       return ctx.throw(404, 'widget 42 not found')
 
@@ -29,6 +52,21 @@ export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): ne
     // deliberate 5xx errors: a handled response
     case 'psychic-503':
       throw new HttpStatusServiceUnavailable({ reason: 'down for maintenance' })
+
+    case 'psychic-503-null-data':
+      throw new HttpStatusServiceUnavailable(null)
+
+    case 'psychic-503-zero-data':
+      throw new HttpStatusServiceUnavailable(0)
+
+    case 'psychic-503-false-data':
+      throw new HttpStatusServiceUnavailable(false)
+
+    case 'psychic-503-empty-string-data':
+      throw new HttpStatusServiceUnavailable('')
+
+    case 'psychic-503-string-data':
+      throw new HttpStatusServiceUnavailable('down for maintenance')
 
     case 'koa-501':
       return ctx.throw(501)

@@ -19,6 +19,7 @@ import EnvInternal from '../helpers/EnvInternal.js'
 import { errorIsDeliberateKoaHttpError } from '../helpers/error/errorIsDeliberateHttpError.js'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
 import { rethrownHookError } from '../helpers/error/errorIsRethrownHookError.js'
+import httpErrorHasBody from '../helpers/error/httpErrorHasBody.js'
 import PsychicApp from '../psychic-app/index.js'
 import {
   applyResourcefulAction,
@@ -432,7 +433,7 @@ suggested fix:  "${convertRouteParams(path)}"
 
       if (errorIsRescuableHttpError(err)) {
         const httpErr = err as HttpError
-        if (httpErr.data) {
+        if (httpErrorHasBody(httpErr)) {
           controllerInstance['koaSendHttpErrorJson'](httpErr.data, httpErr.status)
         } else {
           controllerInstance['koaSendStatus'](httpErr.status)

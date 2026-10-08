@@ -865,10 +865,12 @@ export default class PsychicController {
   /**
    * @internal
    *
-   * Sends the data attached to a rescued HttpError (e.g. `this.conflict(MySerializer(obj))`).
-   * Serializer builders, and arrays of them, are rendered the same way success responses
-   * render them (with the controller's serializer passthrough and render options).
-   * Anything else is sent as is.
+   * Sends the data attached to a rescued HttpError (e.g. `this.conflict(MySerializer(obj))`)
+   * as JSON. Serializer builders, and arrays of them, are rendered the same way success
+   * responses render them (with the controller's serializer passthrough and render options).
+   * Anything else is sent as is, JSON-encoded, including a string, `0`, `false` and `''`.
+   * The router calls this only for data other than `undefined` and `null` (see
+   * `httpErrorHasBody`); an error without data is sent with an empty body.
    */
   private koaSendHttpErrorJson(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any

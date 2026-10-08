@@ -9,7 +9,9 @@ import errorIsDeliberateHttpError, {
 import errorIsFromBodyParser from '../../helpers/error/errorIsFromBodyParser.js'
 import errorIsRethrownHookError from '../../helpers/error/errorIsRethrownHookError.js'
 import errorKoaCanHandle from '../../helpers/error/errorKoaCanHandle.js'
+import httpErrorHasBody from '../../helpers/error/httpErrorHasBody.js'
 import renderSerializerBuilders from '../../helpers/renderSerializerBuilders.js'
+import toJson from '../../helpers/toJson.js'
 import PsychicApp from '../../psychic-app/index.js'
 
 export const ERROR_LOGGING_DEPTH = 6
@@ -86,7 +88,7 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
         // called for them
         if (errorIsDeliberateKoaHttpError(err)) setKoaHttpErrorHeaders(ctx, err)
         ctx.status = status
-        ctx.body = httpErrorBody(err)
+        writeHandledErrorBody(ctx, err)
         return
       }
 
@@ -145,12 +147,21 @@ function statusFromError(err: unknown): number | null {
 /**
  * @internal
  *
- * The response body for an error the boundary answers as a handled response
- * (a deliberate http error, or the body parser's own 4xx error): an
- * `HttpError`'s data, with serializer builders rendered (there is no
- * controller here, so no serializer passthrough), or an empty body. Never
- * used for a server error, whose data is never sent.
+ * Writes the response body for an error the boundary answers as a handled
+ * response (a deliberate http error, or the body parser's own 4xx error): an
+ * `HttpError`'s data as JSON, as a controller action sends it, so a string
+ * is JSON-encoded, never sent as text or HTML, and `0`, `false` and `''` are
+ * sent too; serializer builders are rendered, without serializer
+ * passthrough, since there is no controller here. The body is empty for an
+ * `HttpError` without data (`undefined` or `null`, see `httpErrorHasBody`)
+ * and for any other error; it is never a `null` body, which Koa would answer
+ * with a 204. Never used for a server error, whose data is never sent.
  */
-function httpErrorBody(err: Error) {
-  return err instanceof HttpError && err.data !== undefined ? renderSerializerBuilders(err.data) : ''
+function writeHandledErrorBody(ctx: Koa.Context, err: Error) {
+  if (err instanceof HttpError && httpErrorHasBody(err)) {
+    ctx.type = 'json'
+    ctx.body = toJson(renderSerializerBuilders(err.data))
+  } else {
+    ctx.body = ''
+  }
 }

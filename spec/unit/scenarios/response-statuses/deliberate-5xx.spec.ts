@@ -47,6 +47,25 @@ describe('a visitor hits a route that responds with a deliberate 5xx (501–510)
           expect(res.body).toEqual({ reason: 'down for maintenance' })
           expectHandledResponse()
         })
+
+        // never a 204, which would answer the error as a success
+        it('with null data responds with its status and an empty body', async () => {
+          const res = await request.get(pathFor('psychic-503-null-data'), 503)
+          expect(res.text).toEqual('')
+          expectHandledResponse()
+        })
+
+        it.each([
+          ['0', 'psychic-503-zero-data', '0'],
+          ['false', 'psychic-503-false-data', 'false'],
+          ["''", 'psychic-503-empty-string-data', '""'],
+          ['a string', 'psychic-503-string-data', '"down for maintenance"'],
+        ])('sends %s data as JSON', async (_, scenario, json) => {
+          const res = await request.get(pathFor(scenario), 503)
+          expect(res.headers['content-type']).toEqual('application/json; charset=utf-8')
+          expect(res.text).toEqual(json)
+          expectHandledResponse()
+        })
       })
 
       context("an error from Koa's ctx.throw with a 501–510 status", () => {
@@ -122,6 +141,12 @@ describe('a visitor hits a route that responds with a deliberate 5xx (501–510)
             it('a psychic HttpError is answered with its status and data, without logging it or calling server:error hooks', async () => {
               const res = await request.get(pathFor('respond-false-then-psychic-503'), 503)
               expect(res.body).toEqual({ reason: 'down for maintenance' })
+              expectHandledResponse()
+            })
+
+            it('a psychic HttpError with null data is answered with its status and an empty body', async () => {
+              const res = await request.get(pathFor('respond-false-then-psychic-503-null-data'), 503)
+              expect(res.text).toEqual('')
               expectHandledResponse()
             })
 
