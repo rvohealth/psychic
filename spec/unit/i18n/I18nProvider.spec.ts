@@ -27,6 +27,13 @@ describe('I18nProvider.provide', () => {
         prototypeNames: 'Hello %{name}, %{constructor} %{toString} %{__proto__}',
         unusualKeys: '%{} and %{a}b}',
       },
+      fallback: {
+        onlyInBase: 'Only in the base locale',
+        withInterpolation: 'Hello %{name}, only in the base locale',
+      },
+      account: {
+        title: 'Base title',
+      },
     },
 
     es: {
@@ -40,6 +47,7 @@ describe('I18nProvider.provide', () => {
           },
         },
       },
+      account: 'Cuenta',
     },
   } as const
   const i18n = I18nProvider.provide(defaultAllLocales, 'en')
@@ -64,6 +72,55 @@ describe('I18nProvider.provide', () => {
     it('returns the original translation key', () => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
       expect(i18n(locale, 'this.not.found' as any)).toEqual('this.not.found')
+    })
+  })
+
+  context('with a key missing from the requested locale', () => {
+    it('returns the base locale translation', () => {
+      expect(i18n('es-ES', 'fallback.onlyInBase')).toEqual('Only in the base locale')
+    })
+
+    it('interpolates the base locale translation', () => {
+      expect(i18n('es-ES', 'fallback.withInterpolation', { name: 'Bruno' })).toEqual(
+        'Hello Bruno, only in the base locale',
+      )
+    })
+
+    it('does not treat a string at an ancestor of the key as its translation', () => {
+      expect(i18n('es-ES', 'account.title')).toEqual('Base title')
+    })
+  })
+
+  context('with a key missing from every locale', () => {
+    it('returns the original translation key', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+      expect(i18n('es-ES', 'this.not.found' as any)).toEqual('this.not.found')
+    })
+  })
+
+  context('with a key that resolves to a nested object rather than a string', () => {
+    it('returns the original translation key', () => {
+      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
+      expect(i18n('en-US', 'chalupas.on' as any)).toEqual('chalupas.on')
+    })
+  })
+
+  context('with a base locale other than en', () => {
+    const i18nWithSpanishBase = I18nProvider.provide(
+      {
+        es: { greeting: 'Hola', farewell: 'Adiós' },
+        fr: { greeting: 'Bonjour' },
+      } as const,
+      'es',
+    )
+
+    it('falls back to the base locale for an unsupported locale', () => {
+      expect(i18nWithSpanishBase('de-DE', 'greeting')).toEqual('Hola')
+    })
+
+    it('falls back to the base locale for a key missing from the requested locale', () => {
+      expect(i18nWithSpanishBase('fr-FR', 'greeting')).toEqual('Bonjour')
+      expect(i18nWithSpanishBase('fr-FR', 'farewell')).toEqual('Adiós')
     })
   })
 
