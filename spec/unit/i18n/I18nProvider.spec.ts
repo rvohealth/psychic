@@ -20,6 +20,13 @@ describe('I18nProvider.provide', () => {
           },
         },
       },
+      interpolation: {
+        repeated: '%{name} booked %{place}. Thanks, %{name}!',
+        total: 'Total: %{price}',
+        unknown: 'Hello %{name}, your code is %{code}',
+        prototypeNames: 'Hello %{name}, %{constructor} %{toString} %{__proto__}',
+        unusualKeys: '%{} and %{a}b}',
+      },
     },
 
     es: {
@@ -91,8 +98,51 @@ describe('I18nProvider.provide', () => {
       expect(translation).toEqual('You are going to buy 3 tickets to chalupas on ice, the musical')
     })
 
+    it('replaces every occurrence of a placeholder', () => {
+      expect(i18n('en-US', 'interpolation.repeated', { name: 'Bruno', place: 'Denver' })).toEqual(
+        'Bruno booked Denver. Thanks, Bruno!',
+      )
+    })
+
+    it('inserts values containing replacement patterns literally', () => {
+      expect(i18n('en-US', 'interpolation.total', { price: '$$5' })).toEqual('Total: $$5')
+      expect(i18n('en-US', 'interpolation.total', { price: "$'" })).toEqual("Total: $'")
+      expect(i18n('en-US', 'interpolation.total', { price: '$&!' })).toEqual('Total: $&!')
+      expect(i18n('en-US', 'interpolation.total', { price: '$`' })).toEqual('Total: $`')
+    })
+
+    it('does not interpolate placeholders inside a supplied value', () => {
+      expect(i18n('en-US', 'interpolation.repeated', { name: '%{place}', place: 'Denver' })).toEqual(
+        '%{place} booked Denver. Thanks, %{place}!',
+      )
+      expect(i18n('en-US', 'interpolation.repeated', { place: '%{name}', name: 'Bruno' })).toEqual(
+        'Bruno booked %{name}. Thanks, Bruno!',
+      )
+    })
+
+    it('leaves a placeholder with no supplied value as written', () => {
+      expect(i18n('en-US', 'interpolation.unknown', { name: 'Bruno' })).toEqual(
+        'Hello Bruno, your code is %{code}',
+      )
+    })
+
+    it('leaves a placeholder named after an Object.prototype member as written', () => {
+      expect(i18n('en-US', 'interpolation.prototypeNames', { name: 'Bruno' })).toEqual(
+        'Hello Bruno, %{constructor} %{toString} %{__proto__}',
+      )
+    })
+
+    it('interpolates an empty key and a key containing a closing brace', () => {
+      expect(i18n('en-US', 'interpolation.unusualKeys', { '': 'empty', 'a}b': 'braced' })).toEqual(
+        'empty and braced',
+      )
+      expect(i18n('en-US', 'interpolation.unusualKeys', { 'a}b': 'braced', a: 'short' })).toEqual(
+        '%{} and braced',
+      )
+    })
+
     context('with an undefined interpolation value', () => {
-      it('includes the supplied values in the interpolation', () => {
+      it('throws I18nInterpolationReceivedUndefined', () => {
         expect(() =>
           i18n('en-US', 'chalupas.on.ice.the.tickets', {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment
@@ -103,7 +153,7 @@ describe('I18nProvider.provide', () => {
     })
 
     context('with a null interpolation value', () => {
-      it('includes the supplied values in the interpolation', () => {
+      it('throws I18nInterpolationReceivedNull', () => {
         expect(() =>
           i18n('en-US', 'chalupas.on.ice.the.tickets', {
             // eslint-disable-next-line @typescript-eslint/no-explicit-any, @typescript-eslint/no-unsafe-assignment

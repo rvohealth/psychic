@@ -62,16 +62,36 @@ function applyInterpolations(
 ) {
   if (!interpolations) return str
 
+  const replacements = new Map<string, string>()
   Object.keys(interpolations).forEach(key => {
     const interpolationValue = interpolations[key]
     if (interpolationValue === undefined) throw new I18nInterpolationReceivedUndefined(i18nPathString, key)
     if (interpolationValue === null) throw new I18nInterpolationReceivedNull(i18nPathString, key)
 
-    const replacement: string = interpolationValue.toString()
-    str = str.replace(`%{${key}}`, replacement)
+    replacements.set(key, interpolationValue.toString())
   })
 
-  return str
+  if (replacements.size === 0) return str
+
+  // A single pass over the translation, matching only the supplied keys
+  // (longest first, so `%{a}b}` matches the key `a}b` rather than `a`).
+  // The replacer function inserts each value verbatim, without expanding
+  // `$&`/`$'`/`$$` patterns, and substituted text is never re-scanned, so a
+  // value containing `%{other}` stays literal. Placeholders without a supplied
+  // value are left as written.
+  const keyPattern = [...replacements.keys()]
+    .sort((a, b) => b.length - a.length)
+    .map(escapeRegExp)
+    .join('|')
+
+  return str.replace(
+    new RegExp(`%\\{(${keyPattern})\\}`, 'g'),
+    (match, key: string) => replacements.get(key) ?? match,
+  )
+}
+
+function escapeRegExp(str: string) {
+  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
 }
 
 function _i18n(i18nHash: GenericI18nObject, i18nPath: string[]): string {
