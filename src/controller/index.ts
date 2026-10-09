@@ -662,7 +662,18 @@ export default class PsychicController {
    * Gets a cookie value from the request and casts it to the specified type.
    *
    * @param name - The name of the cookie to retrieve
-   * @returns The cookie value cast to RetType, or null if the cookie doesn't exist
+   * A cookie whose value cannot be decrypted (tampered with, garbage, or
+   * encrypted with a key that is neither the current nor the legacy cookie
+   * key) is read as absent: `getCookie` logs a warning naming the cookie and
+   * the error class (never the value), returns null, and leaves the cookie in
+   * place. An error that points at an app or configuration bug still throws:
+   * `DecryptionParseError` (the value decrypted but is not JSON), and a
+   * configured current or legacy key of the wrong length when the cookie
+   * value is well formed. A malformed value fails before the key is used, so
+   * it is read as absent even under such a key. A production app with a
+   * wrong-length key fails at boot; in other environments the boot only warns.
+   *
+   * @returns The cookie value cast to RetType, or null if the cookie doesn't exist or cannot be decrypted
    *
    * @example
    * ```ts

@@ -1,3 +1,4 @@
+import { DecryptionError, DecryptionRotationError } from '@rvoh/dream/errors'
 import Koa from 'koa'
 import InternalEncrypt from '../encrypt/internal-encrypt.js'
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js'
@@ -7,10 +8,33 @@ import PsychicApp, { CustomCookieMaxAgeOptions, CustomCookieOptions } from '../p
 export default class Session {
   constructor(private ctx: Koa.Context) {}
 
+  // A client can send any cookie value, so one that cannot be decrypted
+  // (tampered with, garbage, or encrypted with a key no longer configured) is
+  // read as absent, the way a missing cookie is, and the request goes on as if
+  // the cookie was never sent. The cookie is left in place: clearing it could
+  // miss a cookie set with a custom path or domain, and could wipe a fresh
+  // session cookie set by a concurrent login. Errors that point at an app or
+  // configuration bug, not at the value sent, still propagate, except that a
+  // malformed value is read as absent even under a wrong-length key (see
+  // undecryptableCookieErrorClassName).
   public getCookie(name: string) {
     const value = this.ctx.cookies.get(name)
-    if (value) return InternalEncrypt.decryptCookie(value)
-    return null
+    if (!value) return null
+
+    try {
+      return InternalEncrypt.decryptCookie(value)
+    } catch (err) {
+      const errorClassName = undecryptableCookieErrorClassName(err)
+      if (!errorClassName) throw err
+
+      // warn, not error: any client can trigger this, so logging it as an error
+      // would let anyone flood error alerting. Never log the cookie value.
+      PsychicApp.logWithLevel(
+        'warn',
+        `[psychic] could not decrypt cookie "${name}" (${errorClassName}); treating it as absent`,
+      )
+      return null
+    }
   }
 
   public setCookie(name: string, data: string, opts: CustomSessionCookieOptions = {}) {
@@ -64,6 +88,30 @@ export interface CustomSessionCookieOptions extends CustomCookieOptions {
   expires?: Date
   signed?: boolean
   overwrite?: boolean
+}
+
+// The name of the error class when err means the cookie value sent cannot be
+// decrypted, else undefined. DecryptionParseError (the value decrypted but is
+// not JSON) means the app encrypted the wrong format, and a key of the wrong
+// length (which Dream wraps as the cause of a DecryptionError) means the app's
+// encryption config is broken, so neither is the client's doing. Dream reports
+// the wrong key length only once it reaches the key: a value too malformed to
+// parse fails first, with a cause that is not ERR_CRYPTO_INVALID_KEYLEN, and so
+// is read as absent. PsychicApp.init rejects a wrong-length key at boot in
+// production and only warns elsewhere, so that case arises outside production.
+function undecryptableCookieErrorClassName(err: unknown) {
+  if (err instanceof DecryptionError) return isInvalidKeyLength(err) ? undefined : 'DecryptionError'
+
+  if (err instanceof DecryptionRotationError)
+    return isInvalidKeyLength(err.currentKeyError) || isInvalidKeyLength(err.legacyKeyError)
+      ? undefined
+      : 'DecryptionRotationError'
+
+  return undefined
+}
+
+function isInvalidKeyLength(err: DecryptionError) {
+  return (err.cause as { code?: unknown } | undefined)?.code === 'ERR_CRYPTO_INVALID_KEYLEN'
 }
 
 // an expires that is not a valid Date (e.g. new Date('garbage'), or a string
