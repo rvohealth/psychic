@@ -1695,7 +1695,12 @@ export type OpenapiValidateOption = {
 
   /**
    * set to true if you want everything to be
-   * validated against the openapi schema
+   * validated against the openapi schema, or to
+   * false if you want nothing validated. When set,
+   * `all` overrides the per-target flags
+   * (`requestBody`, `responseBody`, `headers`,
+   * `query`), so `{ all: false, requestBody: true }`
+   * validates nothing.
    */
   all?: boolean
 

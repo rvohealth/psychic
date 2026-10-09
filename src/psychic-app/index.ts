@@ -486,11 +486,14 @@ Try setting it to something valid, like:
    *
    * @param openapiName - the openapiName you are looking to check validation for
    * @param target - the target for the validation, either 'requestBody', 'headers', 'query', or 'responseBody'
-   * @returns true if the validation for this particular openapiName is active
+   * @returns true if the validation for this particular openapiName is active.
+   * An explicitly set `all` (true or false) wins over the per-target flag,
+   * matching the `@OpenAPI` decorator's `validate` option.
    */
   public openapiValidationIsActive(openapiName: string, target: OpenapiValidateTarget): boolean {
-    const openapiConf = this.openapi[openapiName]
-    return openapiConf?.validate?.all || openapiConf?.validate?.[target] || false
+    const validate = this.openapi[openapiName]?.validate
+    if (validate?.all !== undefined) return validate.all
+    return validate?.[target] ?? false
   }
 
   private _paths: Required<PsychicPathOptions> = {
