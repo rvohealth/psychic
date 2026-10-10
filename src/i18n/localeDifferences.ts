@@ -1,3 +1,5 @@
+import { placeholderNames } from './placeholders.js'
+
 /**
  * Compares every locale in `allLocales` with the base locale at
  * `singleLocaleKey` and returns one readable line per difference; an empty
@@ -88,11 +90,9 @@ function compareValues(baseValue: unknown, localeValue: unknown, path: string[],
 }
 
 // Placeholders are compared as a set, so order and repetition do not count as
-// differences. Psychic replaces `%{key}` for whatever keys a caller supplies,
-// including keys that contain `}` (`%{a}b}` resolves the key `a}b`), so a name
-// is every text between a `%{` and any later `}` that does not cross another
-// `%{`. `%{a}b}` therefore names both `a` and `a}b`, and a translation that
-// differs from the base only after its first `}` is still reported.
+// differences. Names are read with the grammar `provide` replaces them by
+// (`%{` + a name without braces + `}`), so literal brace text is not a
+// placeholder.
 function describePlaceholders(translation: string) {
   const names = [...placeholderNames(translation)]
   if (names.length === 0) return 'no placeholders'
@@ -100,24 +100,6 @@ function describePlaceholders(translation: string) {
     .sort()
     .map(name => `%{${name}}`)
     .join(', ')
-}
-
-function placeholderNames(translation: string) {
-  const names = new Set<string>()
-  let start = translation.indexOf('%{')
-
-  while (start !== -1) {
-    const nextStart = translation.indexOf('%{', start + 2)
-    const end = nextStart === -1 ? translation.length : nextStart
-
-    for (let index = start + 2; index < end; index++) {
-      if (translation[index] === '}') names.add(translation.slice(start + 2, index))
-    }
-
-    start = nextStart
-  }
-
-  return names
 }
 
 function describeValue(value: unknown) {

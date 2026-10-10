@@ -129,25 +129,44 @@ describe('I18nProvider.localeDifferences', () => {
     })
   })
 
-  context('with placeholder names that contain a closing brace', () => {
-    it('reports names that differ beyond the first closing brace', () => {
+  context('with literal braces in a translation', () => {
+    it('excludes braces from each placeholder name, as provide does', () => {
       const allLocales = {
-        en: { tickets: 'Buying %{a}b} tickets' },
-        es: { tickets: 'Comprando %{a}c} boletos' },
-      } as const
-
-      expect(I18nProvider.localeDifferences(allLocales, 'en')).toEqual([
-        'es uses %{a}, %{a}c} at "tickets", where en uses %{a}, %{a}b}',
-      ])
-    })
-
-    it('returns an empty list when the names match', () => {
-      const allLocales = {
-        en: { tickets: 'Buying %{a}b} tickets' },
-        es: { tickets: 'Comprando %{a}b} boletos' },
+        en: {
+          invite: '%{name} invited you. Click {link} to join',
+          plural: '%{count} {count, plural, one {# ticket} other {# tickets}}',
+          example: 'Send %{field} as {"a": 1}',
+        },
+        es: {
+          invite: '%{name} te invitó. Haz clic en {link} para unirte',
+          plural: '%{count} {count, plural, one {# boleto} other {# boletos}}',
+          example: 'Envía %{field} como {"a": 1}',
+        },
       } as const
 
       expect(I18nProvider.localeDifferences(allLocales, 'en')).toEqual([])
+    })
+
+    it('still reports a placeholder that differs', () => {
+      const allLocales = {
+        en: { invite: '%{name} invited you. Click {link} to join' },
+        es: { invite: '%{nombre} te invitó. Haz clic en {link} para unirte' },
+      } as const
+
+      expect(I18nProvider.localeDifferences(allLocales, 'en')).toEqual([
+        'es uses %{nombre} at "invite", where en uses %{name}',
+      ])
+    })
+
+    it('does not let a literal %{ with no closing brace swallow the next placeholder', () => {
+      const allLocales = {
+        en: { hint: 'Type %{ to insert a variable, %{name}' },
+        es: { hint: 'Escribe %{ para insertar una variable, %{nombre}' },
+      } as const
+
+      expect(I18nProvider.localeDifferences(allLocales, 'en')).toEqual([
+        'es uses %{nombre} at "hint", where en uses %{name}',
+      ])
     })
   })
 

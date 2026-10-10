@@ -1,5 +1,6 @@
 import I18nDefaultLocales from '../../../src/i18n/conf/I18nDefaultLocales.js'
 import I18nProvider, {
+  I18nInterpolationKeyContainsBrace,
   I18nInterpolationReceivedNull,
   I18nInterpolationReceivedUndefined,
 } from '../../../src/i18n/provider.js'
@@ -26,6 +27,7 @@ describe('I18nProvider.provide', () => {
         unknown: 'Hello %{name}, your code is %{code}',
         prototypeNames: 'Hello %{name}, %{constructor} %{toString} %{__proto__}',
         unusualKeys: '%{} and %{a}b}',
+        literalOpening: 'Type %{ to insert a variable, %{name}',
       },
       fallback: {
         onlyInBase: 'Only in the base locale',
@@ -189,13 +191,38 @@ describe('I18nProvider.provide', () => {
       )
     })
 
-    it('interpolates an empty key and a key containing a closing brace', () => {
-      expect(i18n('en-US', 'interpolation.unusualKeys', { '': 'empty', 'a}b': 'braced' })).toEqual(
-        'empty and braced',
+    it('interpolates an empty key, and excludes braces from each placeholder name', () => {
+      expect(i18n('en-US', 'interpolation.unusualKeys', { '': 'empty', a: 'short' })).toEqual(
+        'empty and shortb}',
       )
-      expect(i18n('en-US', 'interpolation.unusualKeys', { 'a}b': 'braced', a: 'short' })).toEqual(
-        '%{} and braced',
+    })
+
+    context('with an interpolation key that contains a closing brace', () => {
+      it('throws I18nInterpolationKeyContainsBrace naming the key', () => {
+        expect(() => i18n('en-US', 'interpolation.unusualKeys', { 'a}b': 'braced' })).toThrowError(
+          I18nInterpolationKeyContainsBrace,
+        )
+        expect(() =>
+          i18n('en-US', 'interpolation.unusualKeys', { a: 'short', 'a}b': 'braced' }),
+        ).toThrowError(/interpolationKey: a}b/)
+      })
+    })
+
+    it('interpolates a placeholder that follows a literal %{ with no closing brace', () => {
+      expect(i18n('en-US', 'interpolation.literalOpening', { name: 'Ana' })).toEqual(
+        'Type %{ to insert a variable, Ana',
       )
+    })
+
+    context('with an interpolation key that contains an opening brace', () => {
+      it('throws I18nInterpolationKeyContainsBrace naming the key', () => {
+        expect(() => i18n('en-US', 'interpolation.literalOpening', { 'a{b': 'braced' })).toThrowError(
+          I18nInterpolationKeyContainsBrace,
+        )
+        expect(() =>
+          i18n('en-US', 'interpolation.literalOpening', { name: 'Ana', 'a{b': 'braced' }),
+        ).toThrowError(/interpolationKey: a{b/)
+      })
     })
 
     context('with an undefined interpolation value', () => {

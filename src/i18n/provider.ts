@@ -1,6 +1,7 @@
 import I18nDefaultLocales from './conf/I18nDefaultLocales.js'
 import { DottedLanguageObjectStringPaths } from './conf/types.js'
 import localeDifferences, { isTranslationObject } from './localeDifferences.js'
+import { isPlaceholderName, placeholderPattern } from './placeholders.js'
 
 const SUPPORTED_LOCALES = ['en-US']
 export function supportedLocales() {
@@ -24,6 +25,13 @@ export default class I18nProvider {
    * translation, interpolated the same way, and a key missing from both returns
    * the dotted key itself. To find the keys a locale is missing before a user
    * sees the fallback, call `I18nProvider.localeDifferences` from a spec.
+   *
+   * A placeholder is `%{`, a name containing neither `{` nor `}`, and a
+   * closing `}`, so a literal `%{` with no closing brace stays as written.
+   * Each `%{name}` with a supplied interpolation is replaced; one without is
+   * left as written. An interpolation key containing a brace (`{` or `}`) can
+   * never match a placeholder, and the i18n function throws for it, as it does
+   * for an `undefined` or `null` value.
    *
    * Output-encoding note: interpolated values are substituted verbatim into the
    * translation string. There is no HTML escaping at this layer — Psychic emits
@@ -68,9 +76,10 @@ export default class I18nProvider {
    * translation whose set of `%{…}` placeholders differs from the base's. An
    * empty list means every locale matches.
    *
-   * Placeholders are read the way `provide` replaces them, so a key may
-   * contain `}`: `%{a}b}` counts as both `%{a}` and `%{a}b}`, and a locale
-   * that writes `%{a}c}` there is reported.
+   * Placeholders are read the way `provide` replaces them: `%{`, a name
+   * containing neither `{` nor `}`, and a closing `}`. Literal braces that
+   * are not part of a placeholder, such as `{link}` or ICU/JSON text, are not
+   * compared.
    *
    * Psychic never runs this itself. Call it from a spec, with the same
    * arguments you pass to `provide`, so a CI run lists every difference:
@@ -100,6 +109,8 @@ function applyInterpolations(
 
   const replacements = new Map<string, string>()
   Object.keys(interpolations).forEach(key => {
+    if (!isPlaceholderName(key)) throw new I18nInterpolationKeyContainsBrace(i18nPathString, key)
+
     const interpolationValue = interpolations[key]
     if (interpolationValue === undefined) throw new I18nInterpolationReceivedUndefined(i18nPathString, key)
     if (interpolationValue === null) throw new I18nInterpolationReceivedNull(i18nPathString, key)
@@ -109,25 +120,13 @@ function applyInterpolations(
 
   if (replacements.size === 0) return str
 
-  // A single pass over the translation, matching only the supplied keys
-  // (longest first, so `%{a}b}` matches the key `a}b` rather than `a`).
-  // The replacer function inserts each value verbatim, without expanding
-  // `$&`/`$'`/`$$` patterns, and substituted text is never re-scanned, so a
-  // value containing `%{other}` stays literal. Placeholders without a supplied
-  // value are left as written.
-  const keyPattern = [...replacements.keys()]
-    .sort((a, b) => b.length - a.length)
-    .map(escapeRegExp)
-    .join('|')
-
-  return str.replace(
-    new RegExp(`%\\{(${keyPattern})\\}`, 'g'),
-    (match, key: string) => replacements.get(key) ?? match,
-  )
-}
-
-function escapeRegExp(str: string) {
-  return str.replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+  // A single pass over the translation's placeholders, each `%{` + a name
+  // without braces + `}` (the grammar `localeDifferences` reads). The
+  // replacer inserts each value verbatim, without expanding `$&`/`$'`/`$$`
+  // patterns, and substituted text is never re-scanned, so a value containing
+  // `%{other}` stays literal. Placeholders without a supplied value are left
+  // as written.
+  return str.replace(placeholderPattern(), (match, name: string) => replacements.get(name) ?? match)
 }
 
 // Resolves the full path: a string found before the last segment, or an object
@@ -139,6 +138,28 @@ function findTranslation(i18nObject: unknown, i18nPath: string[]): string | unde
     node = node[segment]
   }
   return typeof node === 'string' ? node : undefined
+}
+
+// Not exported from the package: a key containing `{` or `}` can never match a
+// placeholder, so passing one is a programmer error to fix, not to catch.
+export class I18nInterpolationKeyContainsBrace extends Error {
+  private i18nPathString: string
+  private interpolationKey: string
+
+  constructor(i18nPathString: string, interpolationKey: string) {
+    super()
+    Object.setPrototypeOf(this, I18nInterpolationKeyContainsBrace.prototype)
+    this.i18nPathString = i18nPathString
+    this.interpolationKey = interpolationKey
+  }
+
+  public override get message() {
+    return `
+interpolation key contains a brace ("{" or "}"), which a placeholder name cannot:
+i18n path string: ${this.i18nPathString}
+interpolationKey: ${this.interpolationKey}
+    `
+  }
 }
 
 export class I18nInterpolationReceivedUndefined extends Error {
