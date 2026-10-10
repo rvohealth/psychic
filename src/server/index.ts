@@ -8,6 +8,10 @@ import { Server } from 'node:http'
 import * as util from 'node:util'
 import logIfDevelopment from '../controller/helpers/logIfDevelopment.js'
 import EnvInternal from '../helpers/EnvInternal.js'
+import {
+  excludeBodyParserCallbackErrors,
+  markBodyParserErrors,
+} from '../helpers/error/errorIsFromBodyParser.js'
 import PsychicApp, { PsychicSslCredentials } from '../psychic-app/index.js'
 import PsychicRouter from '../router/index.js'
 import errorBoundaryMiddleware, { ERROR_LOGGING_DEPTH } from './helpers/errorBoundaryMiddleware.js'
@@ -310,7 +314,14 @@ export default class PsychicServer {
   }
 
   private initializeJSON() {
-    this.koaApp.use(bodyParser(PsychicApp.getOrFail().jsonOptions))
+    // the body parser's own errors (e.g. a 400 for malformed JSON, or its
+    // failure to decompress a body that is not valid gzip, deflate or br
+    // data) are marked, so the error boundary answers them as handled
+    // responses; an error from the app's own detectJSON or onError callback
+    // is not. An app that never calls psy.set('json', …) leaves jsonOptions
+    // undefined, and gets the body parser's own defaults
+    const jsonOptions = excludeBodyParserCallbackErrors(PsychicApp.getOrFail().jsonOptions ?? {})
+    this.koaApp.use(markBodyParserErrors(bodyParser(jsonOptions)))
   }
 
   private async buildRoutes() {

@@ -92,8 +92,8 @@ describe('ObjectSerializer customAttributes', () => {
     })
   })
 
-  context('when serializing null', () => {
-    it('renders the attributes as null', () => {
+  context('when the serializer accepts null data', () => {
+    it('does not add null to the type', () => {
       const MySerializer = (user: User | null) =>
         ObjectSerializer(user).customAttribute('email', () => `${user!.email}@peanuts.com`, {
           openapi: 'string',

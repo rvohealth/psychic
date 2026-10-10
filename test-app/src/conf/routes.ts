@@ -7,6 +7,7 @@ import ApiV1UsersController from '../app/controllers/Api/V1/UsersController.js'
 import AuthedUsersController from '../app/controllers/AuthedUsersController.js'
 import BalloonsController from '../app/controllers/BalloonsController.js'
 import CircularController from '../app/controllers/CircularController.js'
+import CookiesTestController from '../app/controllers/CookiesTestController.js'
 import EnumSyncCrossChainTestsController from '../app/controllers/EnumSyncCrossChainTestsController.js'
 import InternalEnumSyncTestsController from '../app/controllers/Internal/EnumSyncTestsController.js'
 import MobileEnumSyncTestsController from '../app/controllers/MobileEnumSyncTestsController.js'
@@ -22,6 +23,7 @@ import ResponseStatusesController from '../app/controllers/ResponseStatusesContr
 import ScopeTestController from '../app/controllers/ScopeTestController.js'
 import SerializerFallbackTestsController from '../app/controllers/SerializerFallbackTestsController.js'
 import SerializerTestsController from '../app/controllers/SerializerTestsController.js'
+import ServerErrorsController from '../app/controllers/ServerErrorsController.js'
 import UnauthedUsersController from '../app/controllers/UnauthedUsersController.js'
 import UsersController from '../app/controllers/UsersController.js'
 import User from '../app/models/User.js'
@@ -36,9 +38,11 @@ export default function routes(r: PsychicRouter) {
   r.options('ping', UsersController, 'ping')
   r.post('auth', UnauthedUsersController, 'signin')
   r.get('auth-ping', AuthedUsersController, 'ping')
+  r.get('cookies-test', CookiesTestController, 'setTestCookie')
   r.get('api-ping', ApiUsersController, 'ping')
   r.post('cast-param-test', ParamsTestController, 'testCastParam')
   r.get('display-params', ParamsTestController, 'displayParams')
+  r.post('array-params-test', ParamsTestController, 'testArrayParams')
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
   r.get('non-existent-action', ParamsTestController, 'thisActionDoesntExistIntentionally' as any)
   r.post('openapi-validation-test', ParamsTestController, 'testOpenapiValidation')
@@ -85,6 +89,7 @@ export default function routes(r: PsychicRouter) {
       'testConflictWithSerializerWithoutFastJsonStringify',
     )
     r.get('conflict-with-serializer-array', UsersController, 'testConflictWithSerializerArray')
+    r.get('conflict-with-primitive', UsersController, 'testConflictWithPrimitive')
     r.get(
       'non-authoritative-information-with-serializer',
       UsersController,
@@ -186,6 +191,18 @@ export default function routes(r: PsychicRouter) {
   r.get('non-authoritative-information', ResponseStatusesController, 'sendNonAuthoritativeInformation') // 203
   r.get('no-content', ResponseStatusesController, 'sendNoContent') // 204
   r.get('reset-content', ResponseStatusesController, 'sendResetContent') // 205
+  r.get('respond-documented-no-content', ResponseStatusesController, 'respondDocumentedNoContent') // 204
+  r.get(
+    'respond-documented-no-content-with-data',
+    ResponseStatusesController,
+    'respondDocumentedNoContentWithData',
+  ) // 500
+  r.get(
+    'respond-documented-no-content-with-null',
+    ResponseStatusesController,
+    'respondDocumentedNoContentWithNull',
+  ) // 500
+  r.get('respond-documented-created', ResponseStatusesController, 'respondDocumentedCreated') // 201
 
   // 3xx series
   r.get('moved-permanently', ResponseStatusesController, 'sendMovedPermanently') // 301
@@ -228,6 +245,15 @@ export default function routes(r: PsychicRouter) {
   r.get('gateway-timeout', ResponseStatusesController, 'throwGatewayTimeout') // 504
   r.get('insufficient-storage', ResponseStatusesController, 'throwInsufficientStorage') // 507
   r.get('not-extended', ResponseStatusesController, 'throwNotExtended') // 510
+  r.get('server-errors/:scenario', ServerErrorsController, 'throwScenario')
+  r.get(
+    'middleware-server-errors-after-a-controller-server-error/:scenario',
+    ServerErrorsController,
+    'throwBeforeMiddlewareThrows',
+  )
+  r.get('redirect-to-return-to', ServerErrorsController, 'redirectToReturnTo')
+  r.get('ok-then-throw', ServerErrorsController, 'okThenThrow')
+  r.get('headers-sent-then-throw', ServerErrorsController, 'sendHeadersThenThrow')
   // end: response status tests
 
   r.namespace('api', r => {

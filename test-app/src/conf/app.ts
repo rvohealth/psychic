@@ -13,6 +13,7 @@ import HttpStatusServiceUnavailable from '../../../src/error/http/ServiceUnavail
 import HttpStatusUnauthorized from '../../../src/error/http/Unauthorized.js'
 import EnvInternal from '../../../src/helpers/EnvInternal.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
+import { throwServerErrorScenario } from '../app/controllers/ServerErrorsController.js'
 import importDefault from '../app/helpers/importDefault.js'
 import srcPath from '../app/helpers/srcPath.js'
 import User from '../app/models/User.js'
@@ -256,8 +257,23 @@ export default async (psy: PsychicApp) => {
 
   // middleware used by spec/unit/server/error-boundary.spec.ts to verify that
   // errors thrown outside the router (i.e. in middleware) are captured by
-  // psychic's error boundary and escalated to server:error hooks
+  // psychic's error boundary, which escalates server errors to server:error
+  // hooks
   psy.use(async (ctx, next) => {
+    // the same errors spec/unit/scenarios/response-statuses/deliberate-5xx.spec.ts
+    // throws from a controller action, thrown here from middleware instead
+    const serverErrorScenario = /^\/middleware-server-errors\/([^/]+)$/.exec(ctx.path)?.[1]
+    if (serverErrorScenario) throwServerErrorScenario(ctx, serverErrorScenario)
+
+    // the same errors, thrown once the router has answered the server error
+    // a controller action threw (spec/unit/server/server-error-response.spec.ts)
+    const scenarioAfterControllerServerError =
+      /^\/middleware-server-errors-after-a-controller-server-error\/([^/]+)$/.exec(ctx.path)?.[1]
+    if (scenarioAfterControllerServerError) {
+      await next()
+      throwServerErrorScenario(ctx, scenarioAfterControllerServerError)
+    }
+
     switch (ctx.path) {
       case '/middleware-error-500':
         throw new Error('middleware error 500')
@@ -311,9 +327,6 @@ export default async (psy: PsychicApp) => {
       // server:error hooks can shape the response on the error-boundary path
       ctx.status = 503
       ctx.body = { shapedBy: 'server:error' }
-    } else if (ctx.path === '/middleware-error-503-with-serializer') {
-      // leave the error boundary's default response in place so
-      // spec/unit/server/error-boundary.spec.ts can observe it
     } else if (!ctx.headerSent) {
       ctx.status = 500
       ctx.body = ''

@@ -1189,6 +1189,74 @@ describe('OpenapiEndpointRenderer', () => {
         })
       })
 
+      context('with description and summary beside a combinator', () => {
+        const requestBodySchema = (requestBody: any) =>
+          new OpenapiEndpointRenderer(User, UsersController, 'create', { requestBody }).toPathObject(
+            routes,
+            defaultToPathObjectOpts(),
+          ).openapi['/users']!.post.requestBody?.content?.['application/json']?.schema
+
+        it('keeps them beside allOf', () => {
+          expect(
+            requestBodySchema({
+              description: 'a named, aged user',
+              summary: 'named and aged',
+              allOf: [
+                { type: 'object', properties: { name: 'string' } },
+                { type: 'object', properties: { age: 'integer' } },
+              ],
+            }),
+          ).toEqual({
+            allOf: [
+              { type: 'object', properties: { name: { type: 'string' } } },
+              { type: 'object', properties: { age: { type: 'integer' } } },
+            ],
+            description: 'a named, aged user',
+            summary: 'named and aged',
+          })
+        })
+
+        it('keeps them beside anyOf', () => {
+          expect(
+            requestBodySchema({
+              description: 'a user by email or by id',
+              summary: 'email or id',
+              anyOf: [
+                { type: 'object', properties: { email: 'string' } },
+                { type: 'object', properties: { id: 'integer' } },
+              ],
+            }),
+          ).toEqual({
+            anyOf: [
+              { type: 'object', properties: { email: { type: 'string' } } },
+              { type: 'object', properties: { id: { type: 'integer' } } },
+            ],
+            description: 'a user by email or by id',
+            summary: 'email or id',
+          })
+        })
+
+        it('keeps them beside oneOf', () => {
+          expect(
+            requestBodySchema({
+              description: 'a user by email or by id',
+              summary: 'email or id',
+              oneOf: [
+                { type: 'object', properties: { email: 'string' } },
+                { type: 'object', properties: { id: 'integer' } },
+              ],
+            }),
+          ).toEqual({
+            oneOf: [
+              { type: 'object', properties: { email: { type: 'string' } } },
+              { type: 'object', properties: { id: { type: 'integer' } } },
+            ],
+            description: 'a user by email or by id',
+            summary: 'email or id',
+          })
+        })
+      })
+
       context('for option is provided to requestBody', () => {
         it('renders params for that dream class', () => {
           const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'create', {
@@ -2790,6 +2858,7 @@ describe('OpenapiEndpointRenderer', () => {
                 content: {
                   'application/json': {
                     schema: {
+                      description: 'Created',
                       allOf: [
                         {
                           type: 'object',
@@ -2846,6 +2915,7 @@ describe('OpenapiEndpointRenderer', () => {
                   content: {
                     'application/json': {
                       schema: {
+                        description: 'Created',
                         allOf: [
                           {
                             type: 'string',
@@ -2900,6 +2970,7 @@ describe('OpenapiEndpointRenderer', () => {
                 content: {
                   'application/json': {
                     schema: {
+                      description: 'Created',
                       anyOf: [
                         {
                           type: 'object',
@@ -2956,6 +3027,7 @@ describe('OpenapiEndpointRenderer', () => {
                 content: {
                   'application/json': {
                     schema: {
+                      description: 'Created',
                       oneOf: [
                         {
                           type: 'object',
@@ -3008,6 +3080,7 @@ describe('OpenapiEndpointRenderer', () => {
                 content: {
                   'application/json': {
                     schema: {
+                      description: 'Created',
                       oneOf: [
                         {
                           $ref: '#/components/schemas/Howyadoin',

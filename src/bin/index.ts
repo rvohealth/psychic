@@ -16,6 +16,7 @@ import printControllerHierarchy, {
   controllerHierarchyViolations,
 } from './helpers/printControllerHierarchy.js'
 import printRoutes from './helpers/printRoutes.js'
+import resolveAliases, { type ResolveAliasesResult } from './helpers/resolveAliases.js'
 
 export {
   BreakingChangesDetectedInOpenApiSpecError,
@@ -51,6 +52,28 @@ export default class PsychicBin {
 
   public static printRoutes() {
     printRoutes()
+  }
+
+  /**
+   * Rewrites the tsconfig `paths` aliases (e.g. `@conf/…`, `@models/…`) that
+   * tsc leaves in its output to relative paths, so that `node` can run the
+   * build, and prints a one-line summary. Run it after `tsc`, with the same
+   * tsconfig. It reads only the tsconfig and the emitted files, and never
+   * initializes the app.
+   *
+   * Imports that resolve to no file the build emitted are left unchanged, so
+   * running it again changes nothing. See `psy resolve-aliases --help`.
+   *
+   * @param options.project - the tsconfig the build compiled with, or a
+   * directory containing a tsconfig.json, as with `tsc -p`. Defaults to the
+   * nearest tsconfig.json at or above the working directory, as tsc does.
+   */
+  public static resolveAliases({ project }: { project?: string | undefined } = {}): ResolveAliasesResult {
+    const result = resolveAliases({ project })
+    console.log(
+      `resolve-aliases: rewrote ${result.specifiersRewritten} aliased imports in ${result.filesChanged} files`,
+    )
+    return result
   }
 
   public static printControllerHierarchy(controllersPath?: string) {

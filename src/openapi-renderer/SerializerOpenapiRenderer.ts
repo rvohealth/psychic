@@ -8,6 +8,9 @@ import {
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
   OpenapiSchemaExpressionRef,
+  OpenapiSchemaShorthandExpressionAnyOf,
+  OpenapiSchemaShorthandExpressionSerializableRef,
+  OpenapiSchemaShorthandExpressionSerializerRef,
 } from '@rvoh/dream/openapi'
 import { DreamSerializerBuilder } from '@rvoh/dream/system'
 import {
@@ -29,6 +32,7 @@ import NonSerializerPassedToSerializerOpenapiRenderer from '../error/openapi/Non
 import NonSerializerSerializerOverrideProvided from '../error/openapi/NonSerializerSerializerOverrideProvided.js'
 import NoSerializerFoundForRendersOneAndMany from '../error/openapi/NoSerializerFoundForRendersOneAndMany.js'
 import ObjectSerializerRendersOneAndManyRequireClassType from '../error/openapi/ObjectSerializerRendersOneAndManyRequireClassType.js'
+import isObject from '../helpers/isObject.js'
 import allSerializersFromHandWrittenOpenapi from './helpers/allSerializersFromHandWrittenOpenapi.js'
 import allSerializersToRefsInOpenapi from './helpers/allSerializersToRefsInOpenapi.js'
 import { dreamColumnOpenapiShape } from './helpers/dreamColumnOpenapiShape.js'
@@ -97,9 +101,13 @@ export default class SerializerOpenapiRenderer {
     )
 
     if (this.allOfSiblings.length) {
-      // Property-level locks live only at the `allOf` wrapper (never on the
-      // inline branch or the `$ref`'d siblings) so that all branches'
+      // This schema's property lock lives only at the `allOf` wrapper (never
+      // on the inline branch or the `$ref`'d siblings) so that all branches'
       // properties are visible to `unevaluatedProperties` for the union check.
+      // The document builder (`OpenapiSegmentExpander`) keeps only the
+      // `allOf`, with its `description` and `summary`, so the serializer's
+      // component in the OpenAPI document carries no property lock, like
+      // every other serializer's component.
       return {
         ...referencedSerializersAndOpenapiSchemaBodyShorthand,
         openapi: {
@@ -158,9 +166,10 @@ export default class SerializerOpenapiRenderer {
         // are not emitted on leaf schemas: when a leaf is composed via `$ref`
         // inside an `allOf`, neither keyword sees properties contributed by
         // sibling branches, so a per-leaf lock incorrectly rejects flattened
-        // properties. Strictness is enforced at the `allOf`-wrapper level
-        // (`unevaluatedProperties: false`) when flattening occurs, and at the
-        // validation-pipeline level for top-level schemas.
+        // properties. No component in the OpenAPI document carries a lock,
+        // flattened or not: the `allOf` wrapper's `unevaluatedProperties: false`
+        // (see `renderedOpenapi`) is dropped when the document is built, so
+        // response validation accepts a key a serializer does not declare.
       },
     }
   }
@@ -202,7 +211,7 @@ export default class SerializerOpenapiRenderer {
 
             if (attribute.options.flatten) {
               this.allOfSiblings.push(
-                allSerializersToRefsInOpenapi(openapiShorthandToOpenapi(openapi as any)),
+                this.flattenedCustomAttributeOpenapi(attribute, openapiShorthandToOpenapi(openapi as any)),
               )
             } else {
               accumulator[outputAttributeName] = allSerializersToRefsInOpenapi(
@@ -270,28 +279,10 @@ export default class SerializerOpenapiRenderer {
               attributeType === 'delegatedAttribute' &&
               ((attribute.options as { optional?: boolean }).optional ?? delegatedAssociationOptional)
 
-            let finalSchema: OpenapiSchemaBodyShorthand
-
-            if (optional && !openapiSchemaIncludesNull(resolvedSchema)) {
-              const schemaRecord = resolvedSchema as Record<string, any>
-              if (typeof schemaRecord.type === 'string') {
-                finalSchema = {
-                  ...schemaRecord,
-                  type: [schemaRecord.type, 'null'],
-                } as OpenapiSchemaBodyShorthand
-              } else if (Array.isArray(schemaRecord.type)) {
-                finalSchema = {
-                  ...schemaRecord,
-                  type: [...(schemaRecord.type as string[]), 'null'],
-                } as OpenapiSchemaBodyShorthand
-              } else {
-                finalSchema = {
-                  anyOf: [resolvedSchema, NULL_OBJECT_OPENAPI],
-                }
-              }
-            } else {
-              finalSchema = resolvedSchema
-            }
+            const finalSchema: OpenapiSchemaBodyShorthand =
+              optional && !openapiSchemaAcceptsNull(resolvedSchema)
+                ? openapiSchemaWithNull(resolvedSchema)
+                : resolvedSchema
 
             accumulator[outputAttributeName] = finalSchema
 
@@ -316,7 +307,7 @@ export default class SerializerOpenapiRenderer {
             const outputAttributeName = this.setCase(attribute.options.as ?? attribute.name)
 
             try {
-              const { associationOpts, referencedSerializersAndOpenapiSchemaBodyShorthand } =
+              const { associationOpts, serializers, referencedSerializersAndOpenapiSchemaBodyShorthand } =
                 associationOpenapi(attribute, DataTypeForOpenapi, alreadyExtractedDescendantSerializers)
               const optional = attribute.options.optional ?? associationOpts.optional
 
@@ -324,12 +315,18 @@ export default class SerializerOpenapiRenderer {
                 referencedSerializersAndOpenapiSchemaBodyShorthand.referencedSerializers
 
               if (attribute.options.flatten && optional) {
-                this.allOfSiblings.push({
-                  anyOf: [referencedSerializersAndOpenapiSchemaBodyShorthand.openapi, NULL_OBJECT_OPENAPI],
-                })
+                this.allOfSiblings.push(
+                  this.flattenedNullableOpenapi(
+                    attribute,
+                    referencedSerializersAndOpenapiSchemaBodyShorthand.openapi,
+                    serializers,
+                  ),
+                )
                 //
               } else if (attribute.options.flatten) {
-                this.allOfSiblings.push(referencedSerializersAndOpenapiSchemaBodyShorthand.openapi)
+                this.allOfSiblings.push(
+                  withMergeableRefs(referencedSerializersAndOpenapiSchemaBodyShorthand.openapi),
+                )
                 //
               } else if (optional) {
                 accumulator[outputAttributeName] = {
@@ -450,6 +447,165 @@ export default class SerializerOpenapiRenderer {
     }
   }
 
+  /**
+   * @internal
+   *
+   * The keys of the object this serializer renders, including the keys of
+   * whatever it flattens into that object. Used to describe a flattened
+   * serializer that may be null (see `flattenedNullableOpenapi`).
+   */
+  private renderedFieldNames(visitedSerializers: Set<unknown> = new Set()): string[] {
+    // a serializer already being listed adds no new keys (and a cycle of
+    // flattened serializers cannot render anyway)
+    if (visitedSerializers.has(this.serializer)) return []
+    visitedSerializers.add(this.serializer)
+
+    return uniq(
+      this.serializerBuilder['attributes'].flatMap(attribute =>
+        this.attributeFieldNames(attribute, visitedSerializers),
+      ),
+    )
+  }
+
+  /**
+   * @internal
+   *
+   * The keys one of this serializer's attributes renders into its object (see
+   * `renderedFieldNames`)
+   */
+  private attributeFieldNames(attribute: SerializerAttribute, visitedSerializers: Set<unknown>): string[] {
+    const DataTypeForOpenapi = this.serializerBuilder['$typeForOpenapi'] as
+      | typeof Dream
+      | ViewModelClass
+      | undefined
+
+    const nestedFieldNames = (serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[]) =>
+      serializers.flatMap(serializer =>
+        new SerializerOpenapiRenderer(serializer, { casing: this.casing }).renderedFieldNames(
+          visitedSerializers,
+        ),
+      )
+
+    const attributeType = attribute.type
+    switch (attributeType) {
+      case 'attribute':
+      case 'delegatedAttribute':
+      case 'rendersMany':
+        return [this.setCase(attribute.options?.as ?? attribute.name)]
+
+      case 'customAttribute':
+        if (!attribute.options.flatten) return [this.setCase(attribute.name)]
+        return flattenedOpenapiFieldNames(attribute.options.openapi, nestedFieldNames)
+
+      case 'rendersOne':
+        if (!attribute.options.flatten) return [this.setCase(attribute.options.as ?? attribute.name)]
+
+        try {
+          return nestedFieldNames(associationSerializers(attribute, DataTypeForOpenapi).serializers)
+        } catch (error) {
+          // the association's OpenAPI shape cannot be defined (the rendersOne
+          // case of renderedOpenapiAttributes renders a placeholder for it)
+          if (error instanceof CallingSerializersThrewError) return []
+          throw error
+        }
+
+      default: {
+        // protection so that if a new ValidationType is ever added, this will throw a type error at build time
+        const _never: never = attributeType
+        throw new Error(`Unhandled serializer attribute type: ${_never as string}`)
+      }
+    }
+  }
+
+  /**
+   * @internal
+   *
+   * The `allOf` sibling for a customAttribute with `flatten: true`
+   */
+  private flattenedCustomAttributeOpenapi(
+    attribute: SerializerAttribute,
+    openapi: OpenapiSchemaBodyShorthand,
+  ): OpenapiSchemaBodyShorthand {
+    const serializerRef = openapi as Partial<
+      OpenapiSchemaShorthandExpressionSerializerRef & OpenapiSchemaShorthandExpressionSerializableRef
+    >
+    if (!isObject(openapi) || !(serializerRef.$serializer || serializerRef.$serializable))
+      return withMergeableRefs(allSerializersToRefsInOpenapi(openapi))
+
+    const { many, maybeNull, ...singleSerializerRef } = serializerRef
+    const refOpenapi = allSerializersToRefsInOpenapi(singleSerializerRef as OpenapiSchemaBodyShorthand)
+
+    // flattening an array would spread its indexes into this object, so a
+    // flattened `many` has no faithful shape; it renders the ref(s) alone, as
+    // it did before `many` was expanded
+    if (many) return refOpenapi
+    if (!maybeNull) return withMergeableRefs(refOpenapi)
+
+    const serializers = allSerializersFromHandWrittenOpenapi(
+      singleSerializerRef as OpenapiSchemaBodyShorthand,
+    )
+    if (!serializers.length) return refOpenapi
+
+    return this.flattenedNullableOpenapi(attribute, refOpenapi, serializers)
+  }
+
+  /**
+   * @internal
+   *
+   * The `allOf` sibling for a flattened serializer that may be null.
+   *
+   * Flattening spreads the nested serializer's fields into this object, so the
+   * rendered value is never null itself, and an `anyOf [ref, { type: 'null' }]`
+   * sibling can never match it. When the nested value is null, Dream leaves the
+   * nested fields out (a flattened customAttribute spreads nothing) or sends
+   * them as null (a flattened rendersOne renders its serializer over `{}`). So
+   * the sibling is the nested serializer (its ref inside an `allOf`; see
+   * `mergeableRef`), or an object whose nested fields are null when present.
+   * Listing those fields also lets the `allOf` wrapper's
+   * `unevaluatedProperties: false` accept them.
+   *
+   * A nested field that another of this serializer's attributes also renders
+   * is left out of that object: when the nested value is null, the key holds
+   * the other attribute's value (a null flattened customAttribute spreads
+   * nothing), so the other attribute's schema describes it. Listing it as null
+   * would contradict that schema, rejecting the payload and making
+   * fast-json-stringify fail to compile.
+   */
+  private flattenedNullableOpenapi(
+    attribute: SerializerAttribute,
+    openapi: OpenapiSchemaBodyShorthand,
+    serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[],
+  ): OpenapiSchemaBodyShorthand {
+    const visitedSerializers = new Set<unknown>([this.serializer])
+    const otherAttributesFieldNames = new Set(
+      this.serializerBuilder['attributes']
+        .filter(otherAttribute => otherAttribute !== attribute)
+        .flatMap(otherAttribute => this.attributeFieldNames(otherAttribute, visitedSerializers)),
+    )
+
+    const fieldNames = sort(
+      uniq(
+        serializers.flatMap(serializer =>
+          new SerializerOpenapiRenderer(serializer, { casing: this.casing }).renderedFieldNames(
+            new Set([this.serializer]),
+          ),
+        ),
+      ),
+    ).filter(fieldName => !otherAttributesFieldNames.has(fieldName))
+
+    const refs = (openapi as OpenapiSchemaShorthandExpressionAnyOf).anyOf ?? [openapi]
+
+    return {
+      anyOf: [
+        ...refs.map(mergeableRef),
+        {
+          type: 'object',
+          properties: Object.fromEntries(fieldNames.map(fieldName => [fieldName, { type: 'null' }])),
+        },
+      ],
+    } as OpenapiSchemaBodyShorthand
+  }
+
   private setCase(attr: string) {
     switch (this.casing) {
       case 'camel':
@@ -473,13 +629,17 @@ function associationOpenapi(
   alreadyExtractedDescendantSerializers: Record<string, boolean>,
 ): {
   associationOpts: { optional: boolean }
+  serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[]
   referencedSerializersAndOpenapiSchemaBodyShorthand: ReferencedSerializersAndOpenapiSchemaBodyShorthand
 } {
+  const { optional, serializers } = associationSerializers(attribute, DataTypeForOpenapi)
+
   const serializerOverride = attribute.options.serializer
   if (serializerOverride) {
     try {
       return {
-        associationOpts: { optional: false },
+        associationOpts: { optional },
+        serializers,
         referencedSerializersAndOpenapiSchemaBodyShorthand: {
           referencedSerializers: [
             serializerOverride,
@@ -495,7 +655,52 @@ function associationOpenapi(
     }
   }
 
-  let associatedClasses: (typeof Dream | ViewModelClass)[]
+  if (serializers.length === 1) {
+    const serializer = serializers[0]!
+    return {
+      associationOpts: { optional },
+      serializers,
+      referencedSerializersAndOpenapiSchemaBodyShorthand: {
+        referencedSerializers: [
+          serializer,
+          ...descendantSerializers(serializer, alreadyExtractedDescendantSerializers),
+        ],
+        openapi: new SerializerOpenapiRenderer(serializer).serializerRef,
+      },
+    }
+  }
+
+  return {
+    associationOpts: { optional },
+    serializers,
+    referencedSerializersAndOpenapiSchemaBodyShorthand: {
+      referencedSerializers: [
+        ...serializers,
+        ...serializers.flatMap(serializer =>
+          descendantSerializers(serializer, alreadyExtractedDescendantSerializers),
+        ),
+      ],
+      openapi: {
+        anyOf: sortBy(
+          serializers.map(serializer => new SerializerOpenapiRenderer(serializer).serializerRef),
+          ref => (ref['$ref'] ? ref['$ref'] : inspect(ref, { depth: 2 })),
+        ),
+      },
+    },
+  }
+}
+
+// the serializers a rendersOne/rendersMany renders its association with, and
+// whether that association may be null
+function associationSerializers(
+  attribute:
+    | InternalAnyTypedSerializerRendersOne<any, string>
+    | InternalAnyTypedSerializerRendersMany<any, string>,
+  DataTypeForOpenapi: typeof Dream | ViewModelClass | undefined,
+): {
+  optional: boolean
+  serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[]
+} {
   const association:
     | BelongsToStatement<any, any, any, any>
     | HasManyStatement<any, any, any, any>
@@ -504,7 +709,15 @@ function associationOpenapi(
     (DataTypeForOpenapi as typeof Dream)?.isDream &&
     // eslint-disable-next-line @typescript-eslint/no-unsafe-call
     (DataTypeForOpenapi as typeof Dream)['getAssociationMetadata'](attribute.name)
+
+  // whether the association may be null is a property of the association, not
+  // of the serializer that renders it, so a serializer override keeps it
   const optional: boolean = !!(association as BelongsToStatement<any, any, any, any>)?.optional
+
+  const serializerOverride = attribute.options.serializer
+  if (serializerOverride) return { optional, serializers: [serializerOverride] }
+
+  let associatedClasses: (typeof Dream | ViewModelClass)[]
 
   if (association) {
     associatedClasses = DreamApp.system.expandStiClasses(association.modelCB())
@@ -539,37 +752,52 @@ function associationOpenapi(
   )
 
   if (serializers.length === 0) throw new NoSerializerFoundForRendersOneAndMany(attribute.name)
-  if (serializers.length === 1) {
-    const serializer = serializers[0]!
-    return {
-      associationOpts: { optional },
-      referencedSerializersAndOpenapiSchemaBodyShorthand: {
-        referencedSerializers: [
-          serializer,
-          ...descendantSerializers(serializer, alreadyExtractedDescendantSerializers),
-        ],
-        openapi: new SerializerOpenapiRenderer(serializer).serializerRef,
-      },
-    }
-  }
 
-  return {
-    associationOpts: { optional },
-    referencedSerializersAndOpenapiSchemaBodyShorthand: {
-      referencedSerializers: [
-        ...serializers,
-        ...serializers.flatMap(serializer =>
-          descendantSerializers(serializer, alreadyExtractedDescendantSerializers),
-        ),
-      ],
-      openapi: {
-        anyOf: sortBy(
-          serializers.map(serializer => new SerializerOpenapiRenderer(serializer).serializerRef),
-          ref => (ref['$ref'] ? ref['$ref'] : inspect(ref, { depth: 2 })),
-        ),
-      },
-    },
-  }
+  return { optional, serializers }
+}
+
+// a `$ref` in the `anyOf` of a flattened `allOf` sibling, inside an `allOf`.
+//
+// fast-json-stringify serializes a flattened object by merging the members of
+// its `allOf`, and merges two members that are `anyOf`s into one `anyOf` of
+// every pairing of their branches. A pairing holding a bare `$ref` keeps only
+// that `$ref` (two of them keep neither), losing the other branch, so the
+// nested fields are left out of the response. A `$ref` inside an `allOf` is
+// merged with the other branch instead. Validation is unchanged.
+function mergeableRef(openapi: OpenapiSchemaBodyShorthand): OpenapiSchemaBodyShorthand {
+  return isObject(openapi) && (openapi as OpenapiSchemaExpressionRef).$ref ? { allOf: [openapi] } : openapi
+}
+
+// a flattened `allOf` sibling with each `$ref` in its `anyOf` (the children
+// of an STI base model, or a hand-written `anyOf`) inside an `allOf` (see
+// `mergeableRef`). A lone `$ref` sibling is left as it is: fast-json-stringify
+// resolves it before merging
+function withMergeableRefs(openapi: OpenapiSchemaBodyShorthand): OpenapiSchemaBodyShorthand {
+  const anyOf = isObject(openapi) ? (openapi as OpenapiSchemaShorthandExpressionAnyOf).anyOf : undefined
+  return Array.isArray(anyOf) ? { ...openapi, anyOf: anyOf.map(mergeableRef) } : openapi
+}
+
+// the keys a flattened customAttribute's openapi spreads into the object
+function flattenedOpenapiFieldNames(
+  openapi: unknown,
+  nestedFieldNames: (serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[]) => string[],
+): string[] {
+  if (!isObject(openapi)) return []
+  const schema = openapi as Record<string, any>
+
+  if (schema.$serializer || schema.$serializable)
+    return nestedFieldNames(allSerializersFromHandWrittenOpenapi(schema as OpenapiSchemaBodyShorthand))
+
+  return [
+    ...Object.keys(isObject(schema.properties) ? schema.properties : {}),
+    ...['allOf', 'anyOf', 'oneOf'].flatMap(combiner =>
+      Array.isArray(schema[combiner])
+        ? (schema[combiner] as unknown[]).flatMap(member =>
+            flattenedOpenapiFieldNames(member, nestedFieldNames),
+          )
+        : [],
+    ),
+  ]
 }
 
 function descendantSerializers(
@@ -604,6 +832,8 @@ function descendantSerializers(
 // throws an error)
 class CallingSerializersThrewError extends Error {}
 
+type SerializerAttribute = DreamSerializerBuilder<any, any, any>['attributes'][number]
+
 interface ReferencedSerializersAndOpenapiSchemaBodyShorthand {
   referencedSerializers: (DreamModelSerializerType | SimpleObjectSerializerType)[]
   openapi: OpenapiSchemaBodyShorthand
@@ -614,18 +844,70 @@ interface ReferencedSerializersAndAttributes {
   attributes: Record<string, OpenapiSchemaBodyShorthand>
 }
 
-function openapiSchemaIncludesNull(schema: OpenapiSchemaBodyShorthand): boolean {
+// root keywords that apply a subschema to the value itself; any of them can
+// still reject null after the schema's own `type` admits it
+const SUBSCHEMA_APPLICATORS = ['allOf', 'anyOf', 'oneOf', 'not', 'if', '$ref'] as const
+
+function hasSubschemaApplicator(schemaRecord: Record<string, unknown>): boolean {
+  return SUBSCHEMA_APPLICATORS.some(keyword => schemaRecord[keyword] !== undefined)
+}
+
+function openapiTypeIncludesNull(type: unknown): boolean {
+  return type === 'null' || (Array.isArray(type) && type.includes('null'))
+}
+
+/**
+ * Whether the schema is known to accept null: its `type`, `enum` and `const`
+ * all admit null and no subschema applied beside them can reject it, or, with
+ * no `type`, a root `anyOf` has a branch that accepts null. A schema this cannot
+ * prove accepts null (a `$ref`, for one) answers false.
+ */
+function openapiSchemaAcceptsNull(schema: OpenapiSchemaBodyShorthand): boolean {
   if (typeof schema !== 'object' || schema === null) return false
 
-  const schemaRecord = schema as Record<string, any>
+  const schemaRecord = schema as Record<string, unknown>
 
-  if (Array.isArray(schemaRecord.type) && schemaRecord.type.includes('null')) return true
-  if (schemaRecord.type === 'null') return true
-  if (
+  if (Array.isArray(schemaRecord.enum) && !schemaRecord.enum.includes(null)) return false
+  if ('const' in schemaRecord && schemaRecord.const !== null) return false
+
+  if (schemaRecord.type !== undefined)
+    return openapiTypeIncludesNull(schemaRecord.type) && !hasSubschemaApplicator(schemaRecord)
+
+  return (
     Array.isArray(schemaRecord.anyOf) &&
-    schemaRecord.anyOf.some((member: any) => openapiSchemaIncludesNull(member as OpenapiSchemaBodyShorthand))
+    schemaRecord.anyOf.some(member => openapiSchemaAcceptsNull(member as OpenapiSchemaBodyShorthand)) &&
+    !hasSubschemaApplicator({ ...schemaRecord, anyOf: undefined })
   )
-    return true
+}
 
-  return false
+/**
+ * Widens a schema to also accept null. When its `type`, `enum` and `const` are
+ * the only keywords that can reject null, null is added to each in place
+ * (a `const` becomes an `enum` of its value and null), matching how a nullable
+ * enum column renders. Otherwise (no `type`, a subschema applied beside it, or
+ * both an `enum` and a `const`) the result is `anyOf` the schema or null.
+ */
+function openapiSchemaWithNull(schema: OpenapiSchemaBodyShorthand): OpenapiSchemaBodyShorthand {
+  const schemaRecord = schema as Record<string, unknown>
+  const { type } = schemaRecord
+  const hasConst = 'const' in schemaRecord
+
+  if (
+    type === undefined ||
+    hasSubschemaApplicator(schemaRecord) ||
+    (hasConst && schemaRecord.enum !== undefined)
+  )
+    return { anyOf: [schema, NULL_OBJECT_OPENAPI] }
+
+  const { const: constValue, ...schemaWithoutConst } = schemaRecord
+  const types = Array.isArray(type) ? (type as unknown[]) : [type]
+  const allowedValues = hasConst ? [constValue] : schemaRecord.enum
+
+  return {
+    ...schemaWithoutConst,
+    type: openapiTypeIncludesNull(type) ? type : [...types, 'null'],
+    ...(Array.isArray(allowedValues)
+      ? { enum: allowedValues.includes(null) ? allowedValues : [...(allowedValues as unknown[]), null] }
+      : {}),
+  } as OpenapiSchemaBodyShorthand
 }

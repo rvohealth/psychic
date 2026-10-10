@@ -80,16 +80,16 @@ ${INDENT}        AND generates the @deco.BelongsTo association and typed propert
 ${INDENT}
 ${INDENT}        use the fully qualified model name (matching its path under src/app/models/):
 ${INDENT}          User:belongs_to                  # creates user_id column + BelongsTo association
-${INDENT}          Health/Coach:belongs_to           # creates health_coach_id column + BelongsTo association
+${INDENT}          Health/Coach:belongs_to           # creates coach_id column + coach BelongsTo association (named for the last segment of the model name)
 ${INDENT}          User:belongs_to:optional          # nullable foreign key (for optional associations)
 ${INDENT}
 ${INDENT}        rename the association with Model@alias — the snake_case alias drives the FK column name AND the
 ${INDENT}        @deco.BelongsTo association + typed FK property on the generated model:
 ${INDENT}          InternalUser@canceled_by:belongs_to:optional       # canceled_by_id column, canceledById property, canceledBy association,
 ${INDENT}                                                             #   @deco.BelongsTo('InternalUser', { on: 'canceledById', optional: true })
-${INDENT}          Messaging/Template@template:belongs_to             # template_id column, templateId property, template association
-${INDENT}                                                             #   (strips the namespace from the property/association names while keeping
-${INDENT}                                                             #   the namespaced model reference intact)
+${INDENT}          Sports/Coach@sports_coach:belongs_to               # sports_coach_id column, sportsCoachId property, sportsCoach association
+${INDENT}                                                             #   (without the alias, Sports/Coach:belongs_to would also create coach_id,
+${INDENT}                                                             #   coachId and coach, colliding with Health/Coach:belongs_to)
 ${INDENT}        Aliasing also lets you declare multiple FKs to the same model in one generator call without column collisions.`
 
 export default class PsychicCLI {
@@ -154,7 +154,7 @@ ${INDENT}  --only=index,show,update     # modify only (e.g., settings management
       )
       .option(
         '--sti-base-serializer',
-        `Creates generically typed base serializers (default and summary) that accept a \`StiChildClass\` parameter and include the \`type\` attribute with a per-child enum constraint. This allows consuming applications to determine the response shape based on the STI type discriminator.
+        `Creates generically typed base serializers (default and summary) that accept a \`StiChildClass\` parameter. When a \`type\` column is passed, as in the example below, the default serializer includes the \`type\` attribute with a per-child enum constraint, which allows consuming applications to determine the response shape based on the STI type discriminator. The summary serializer includes only \`id\`, so responses from the generated \`index\` action, which renders the summary, carry no \`type\`.
 ${INDENT}
 ${INDENT}Use this when generating the parent model of an STI hierarchy. After generating the parent, use g:sti-child for each child type.
 ${INDENT}
@@ -171,14 +171,16 @@ ${INDENT}  pnpm psy g:sti-child --model-name=Condo Rental/Condo extends Rental`,
         '--owning-model <modelName>',
         `The model class that owns this resource. The generated controller will use \`associationQuery\` and \`createAssociation\` on the owning model to scope queries and create records.
 ${INDENT}
-${INDENT}Defaults to \`this.currentUser\` for non-admin routes (e.g., \`this.currentUser.associationQuery('posts').findOrFail(this.castParam('id', 'uuid'))\`).
-${INDENT}Defaults to \`this.currentInternalUser\` for internal namespaced controllers (e.g., \`this.currentInternalUser.associationQuery('posts').findOrFail(this.castParam('id', 'uuid'))\`).
-${INDENT}Defaults to \`null\` for admin namespaced controllers (e.g., \`Post.findOrFail(this.castParam('id', 'uuid'))\`).
-${INDENT}Supplying an owning-modle changes the the generated code in the controller to be relative to the owning model.
+${INDENT}Defaults to \`this.currentUser\` for non-admin routes (e.g., \`this.currentUser.associationQuery('posts').findOrFail(this.castParam('id', <idType>))\`).
+${INDENT}Defaults to \`this.currentInternalUser\` for internal namespaced controllers (e.g., \`this.currentInternalUser.associationQuery('posts').findOrFail(this.castParam('id', <idType>))\`).
+${INDENT}Defaults to \`null\` for admin namespaced controllers (e.g., \`Post.findOrFail(this.castParam('id', <idType>))\`).
+${INDENT}Supplying an owning model changes the generated code in the controller to be relative to the owning model.
+${INDENT}
+${INDENT}<idType> follows the app's \`primaryKeyType\` setting (conf/dream.ts): 'bigint' for bigint and bigserial, 'integer' for integer, and 'uuid' for uuid, uuid4 and uuid7.
 ${INDENT}
 ${INDENT}Example:
 ${INDENT}  pnpm psy g:resource --owning-model=Host v1/host/places Place
-${INDENT}  # results in \`await this.currentHost.associationQuery('places').findOrFail(this.castParam('id', 'uuid'))\``,
+${INDENT}  # results in \`await this.currentHost.associationQuery('places').findOrFail(this.castParam('id', <idType>))\``,
       )
       .option(
         '--connection-name <connectionName>',
@@ -572,6 +574,26 @@ ${INDENT}  GET    /v1/host/places/:id            V1/Host/PlacesController#show`,
       .action(async () => {
         await initializePsychicApp()
         PsychicBin.printRoutes()
+        process.exit()
+      })
+
+    program
+      .command('resolve-aliases')
+      .description(
+        `Rewrites the tsconfig \`paths\` aliases (e.g. @conf/..., @models/...) that tsc leaves in its output to relative paths, so that \`node\` can run the build. Run it after tsc in your build script, with the same tsconfig:
+${INDENT}
+${INDENT}  tsc -p ./tsconfig.build.json && pnpm psy resolve-aliases -p ./tsconfig.build.json
+${INDENT}
+${INDENT}It reads the tsconfig as tsc does (honoring \`extends\`), finds imports with TypeScript's parser, and resolves them with TypeScript's module resolution, rewriting static, side-effect, \`export ... from\`, dynamic and \`require\` imports in the emitted .js and .d.ts files. Text that only looks like an import (in a string, a comment, or the argument of a method named require, such as module.require(...)), relative imports, packages, and imports that resolve to no file the build emitted are left unchanged, so running it again changes nothing.
+${INDENT}
+${INDENT}It never initializes your app, so it needs no database connection.`,
+      )
+      .option(
+        '-p, --project <path>',
+        'the tsconfig the build compiled with, or a directory containing a tsconfig.json, as with `tsc -p`. Defaults to the nearest tsconfig.json at or above the current directory, as tsc does',
+      )
+      .action((options: { project?: string }) => {
+        PsychicBin.resolveAliases({ project: options.project })
         process.exit()
       })
 

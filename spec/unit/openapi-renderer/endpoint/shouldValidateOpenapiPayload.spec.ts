@@ -9,8 +9,9 @@ describe('OpenapiEndpointRenderer#shouldValidateOpenapiPayload', () => {
     openapiName: string,
     target: OpenapiValidateTarget,
     validate: OpenapiValidateOption | undefined,
+    appValidationIsActive: boolean = false,
   ) {
-    vi.spyOn(PsychicApp.prototype, 'openapiValidationIsActive').mockReturnValue(false)
+    vi.spyOn(PsychicApp.prototype, 'openapiValidationIsActive').mockReturnValue(appValidationIsActive)
 
     const renderer = new OpenapiEndpointRenderer(User, UsersController, 'howyadoin', {
       description: 'hello',
@@ -56,27 +57,49 @@ describe('OpenapiEndpointRenderer#shouldValidateOpenapiPayload', () => {
     })
   })
 
-  context('all: false', () => {
-    beforeEach(() => {
-      vi.spyOn(PsychicApp.prototype, 'openapi', 'get').mockReturnValue({
-        default: { validate: { all: true }, outputFilepath: '' },
-      })
-    })
-
+  context('all: false, while validation is active at the app level', () => {
     it('returns false for headers', () => {
-      expect(subject('default', 'headers', { all: false })).toBe(false)
+      expect(subject('default', 'headers', { all: false }, true)).toBe(false)
     })
 
     it('returns false for requestBody', () => {
-      expect(subject('default', 'requestBody', { all: false })).toBe(false)
+      expect(subject('default', 'requestBody', { all: false }, true)).toBe(false)
     })
 
     it('returns false for responseBody', () => {
-      expect(subject('default', 'responseBody', { all: false })).toBe(false)
+      expect(subject('default', 'responseBody', { all: false }, true)).toBe(false)
     })
 
     it('returns false for query', () => {
-      expect(subject('default', 'query', { all: false })).toBe(false)
+      expect(subject('default', 'query', { all: false }, true)).toBe(false)
+    })
+  })
+
+  context('all: false with requestBody: true', () => {
+    it('returns false for requestBody', () => {
+      expect(subject('default', 'requestBody', { all: false, requestBody: true })).toBe(false)
+    })
+  })
+
+  context('all: true with requestBody: false', () => {
+    it('returns true for requestBody', () => {
+      expect(subject('default', 'requestBody', { all: true, requestBody: false })).toBe(true)
+    })
+  })
+
+  context('requestBody: false, while validation is active at the app level', () => {
+    it('returns false for requestBody', () => {
+      expect(subject('default', 'requestBody', { requestBody: false }, true)).toBe(false)
+    })
+
+    it('falls back to the app level for headers', () => {
+      expect(subject('default', 'headers', { requestBody: false }, true)).toBe(true)
+    })
+  })
+
+  context('undefined, while validation is active at the app level', () => {
+    it('falls back to the app level', () => {
+      expect(subject('default', 'requestBody', undefined, true)).toBe(true)
     })
   })
 

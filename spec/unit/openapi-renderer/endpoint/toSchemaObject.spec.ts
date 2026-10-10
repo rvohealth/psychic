@@ -1,3 +1,4 @@
+import { ObjectSerializer } from '@rvoh/dream'
 import OpenapiEndpointRenderer, {
   ToPathObjectOpts,
   ToSchemaObjectOpts,
@@ -865,6 +866,73 @@ The following values will be allowed:
             },
           }),
         )
+      })
+
+      it('keeps description and summary beside allOf, anyOf and oneOf', () => {
+        const DescribedCombinatorsSerializer = Object.assign(
+          (data: { allOfValue: unknown; anyOfValue: unknown; oneOfValue: unknown }) =>
+            ObjectSerializer(data)
+              .attribute('allOfValue', {
+                openapi: {
+                  description: 'a named, aged thing',
+                  summary: 'named and aged',
+                  allOf: [
+                    { type: 'object', properties: { name: 'string' } },
+                    { type: 'object', properties: { age: 'integer' } },
+                  ],
+                },
+              })
+              .attribute('anyOfValue', {
+                openapi: {
+                  description: 'a name or a count',
+                  summary: 'name or count',
+                  anyOf: [{ type: 'string' }, { type: 'integer' }],
+                },
+              })
+              .attribute('oneOfValue', {
+                openapi: {
+                  description: 'a name or a count',
+                  summary: 'name or count',
+                  oneOf: [{ type: 'string' }, { type: 'integer' }],
+                },
+              }),
+          { globalName: 'DescribedCombinatorsSerializer', openapiName: 'DescribedCombinators' },
+        )
+
+        const renderer = new OpenapiEndpointRenderer(
+          DescribedCombinatorsSerializer,
+          UsersController,
+          'howyadoin',
+        )
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual({
+          DescribedCombinators: {
+            type: 'object',
+            required: ['allOfValue', 'anyOfValue', 'oneOfValue'],
+            properties: {
+              allOfValue: {
+                allOf: [
+                  { type: 'object', properties: { name: { type: 'string' } } },
+                  { type: 'object', properties: { age: { type: 'integer' } } },
+                ],
+                description: 'a named, aged thing',
+                summary: 'named and aged',
+              },
+              anyOfValue: {
+                anyOf: [{ type: 'string' }, { type: 'integer' }],
+                description: 'a name or a count',
+                summary: 'name or count',
+              },
+              oneOfValue: {
+                oneOf: [{ type: 'string' }, { type: 'integer' }],
+                description: 'a name or a count',
+                summary: 'name or count',
+              },
+            },
+          },
+        })
       })
     })
 

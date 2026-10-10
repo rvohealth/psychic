@@ -245,6 +245,31 @@ export default class UsersController extends ApplicationController {
     this.conflict([UserConflictSerializer({ reason: 'taken', user })])
   }
 
+  // the documented 409 schema is an object with a required key, which the
+  // string, number or boolean data thrown here does not match
+  @OpenAPI({
+    fastJsonStringify: true,
+    status: 200,
+    query: {
+      data: {
+        required: true,
+        schema: {
+          type: 'string',
+          enum: ['false', 'zero', 'empty-string', 'string'],
+        },
+      },
+    },
+    responses: {
+      409: {
+        $serializer: UserConflictSerializer,
+      },
+    },
+  })
+  public testConflictWithPrimitive() {
+    const data = this.castParam('data', 'string', { enum: ['false', 'zero', 'empty-string', 'string'] })
+    this.conflict({ false: false, zero: 0, 'empty-string': '', string: 'taken' }[data])
+  }
+
   @OpenAPI(UserConflictSerializer, {
     status: 203,
   })

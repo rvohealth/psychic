@@ -14,6 +14,7 @@ import Koa from 'koa'
 import { debuglog } from 'node:util'
 import { ControllerHook } from '../controller/hooks.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
+import RespondWithDataOnNoContentEndpoint from '../error/controller/RespondWithDataOnNoContentEndpoint.js'
 import HttpStatusBadGateway from '../error/http/BadGateway.js'
 import HttpStatusBadRequest from '../error/http/BadRequest.js'
 import HttpStatusConflict from '../error/http/Conflict.js'
@@ -46,6 +47,7 @@ import HttpStatusUnavailableForLegalReasons from '../error/http/UnavailableForLe
 import HttpStatusUnprocessableContent from '../error/http/UnprocessableContent.js'
 import HttpStatusUnsupportedMediaType from '../error/http/UnsupportedMediaType.js'
 import EnvInternal from '../helpers/EnvInternal.js'
+import { KoaHttpError, setKoaHttpErrorHeaders } from '../helpers/error/errorIsDeliberateHttpError.js'
 import isSafeRedirectTarget from '../helpers/isSafeRedirectTarget.js'
 import renderSerializerBuilders, { dataIsSerializerBuilder } from '../helpers/renderSerializerBuilders.js'
 import toJson from '../helpers/toJson.js'
@@ -407,11 +409,13 @@ export default class PsychicController {
    * @param opts - Optional validation options with the following supported properties:
    *   - `enum`: Array of allowed string values to restrict the parameter to specific choices
    *   - `allowNull`: Boolean indicating whether null values are permitted (default: false)
-   * @returns The validated and type-cast parameter value. With `allowNull`, an absent value at any
-   * depth returns `undefined`, except when the expected type is `'null'`, which returns `null`
-   * because null is the requested type. An explicitly `null` leaf returns `null` for
-   * primitive-literal and RegExp expected types. OpenAPI-schema leaves remain governed by their
-   * schema, and a present non-object intermediate is always invalid dot notation.
+   * @returns The validated and type-cast parameter value. With `allowNull`, an absent dot-notation
+   * intermediate (no `user` for `'user.profile.age'`) returns `undefined` for every expected type,
+   * including `'null'` and OpenAPI schemas. For primitive-literal and RegExp expected types, an
+   * absent leaf returns `undefined`, except that the `'null'` expected type returns `null` because
+   * null is the requested type, and an explicitly `null` leaf returns `null`. OpenAPI-schema leaves
+   * remain governed by their schema. A present intermediate that is `null`, an array or any other
+   * non-object is always invalid dot notation and raises ParamValidationError, even with `allowNull`.
    * @throws {ParamValidationError} When validation fails (converted to 400 response by Psychic)
    *
    * @example
@@ -522,7 +526,12 @@ export default class PsychicController {
    * @param opts.only - Restrict the list of allowed params to only these attributes
    * @param opts.including - Include params that would normally be excluded from safe params
    * @param opts.key - Extract params from a nested key in the params object instead of root level
-   * @param opts.array - If true, expects and returns an array of param objects (specifically for query params, which, due to the way query params are processed, are often collapsed to a non-array value)
+   * @param opts.array - If true, expects and returns an array of param objects read from `opts.key`, which is
+   *   then required: the request params are always an object (a top-level JSON array body arrives as numeric
+   *   keys), so there is no array to read without a key, and omitting it throws an error naming the mistake.
+   *   A missing or null key returns `[]`. Any other value that is not an array of objects (a single object, a
+   *   string, an array containing `null` or a primitive) is rejected with a 400 (`ParamValidationErrors`); a
+   *   single value is never wrapped into an array.
    * @returns A typed object containing the validated and casted params for this Dream model
    * @throws {ParamValidationError} When any parameter validation fails
    *
@@ -561,7 +570,7 @@ export default class PsychicController {
     ReturnPayload extends ForOpts['array'] extends true ? ReturnPartialType[] : ReturnPartialType,
   >(this: PsychicController, dreamClass: T, opts?: ForOpts): ReturnPayload {
     return Params.for(
-      opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params,
+      this.paramsSourceFor('paramsFor', opts),
       dreamClass,
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       opts as any,
@@ -587,7 +596,12 @@ export default class PsychicController {
    * @param allowed - Required. The columns permitted from the request.
    * @param opts - Optional configuration
    * @param opts.key - Extract params from a nested key in the params object instead of root level
-   * @param opts.array - If true, expects and returns an array of param objects
+   * @param opts.array - If true, expects and returns an array of param objects read from `opts.key`, which is
+   *   then required: the request params are always an object (a top-level JSON array body arrives as numeric
+   *   keys), so there is no array to read without a key, and omitting it throws an error naming the mistake.
+   *   A missing or null key returns `[]`. Any other value that is not an array of objects (a single object, a
+   *   string, an array containing `null` or a primitive) is rejected with a 400 (`ParamValidationErrors`); a
+   *   single value is never wrapped into an array.
    * @returns A typed object containing the validated and casted params
    * @throws {ParamValidationError} When any parameter validation fails
    *
@@ -613,16 +627,53 @@ export default class PsychicController {
     >,
     ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
   >(this: PsychicController, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
-    const source = opts?.key ? (this.params[opts.key] as typeof this.params) || {} : this.params
+    const source = this.paramsSourceFor('extractParams', opts)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     return Params.extract(source, dreamClass, allowed as any, opts as any)
+  }
+
+  /**
+   * The value paramsFor and extractParams pass to Params: the params at
+   * `opts.key`, or all of the params when no key is given. Without
+   * `array: true`, a missing, null or other falsy value at the key is `{}`.
+   * With `array: true`, a missing or null value is `[]` (an omitted optional
+   * list is an empty list), and any other value is left for Params.for to
+   * accept or reject with a 400.
+   */
+  private paramsSourceFor(
+    methodName: 'paramsFor' | 'extractParams',
+    opts: { array?: boolean; key?: string } | undefined,
+  ): object {
+    if (opts?.array && !opts.key)
+      throw new Error(
+        `${methodName} with \`array: true\` requires a \`key\` naming the request param that holds the array, ` +
+          `e.g. { key: 'rooms', array: true }. The request params are always an object (a top-level JSON array ` +
+          `body arrives as numeric keys), so without a key there is no array to read.`,
+      )
+
+    if (!opts?.key) return this.params
+
+    const value = this.params[opts.key]
+    if (opts.array) return (value ?? []) as object
+    return (value as object) || {}
   }
 
   /**
    * Gets a cookie value from the request and casts it to the specified type.
    *
    * @param name - The name of the cookie to retrieve
-   * @returns The cookie value cast to RetType, or null if the cookie doesn't exist
+   * A cookie whose value cannot be decrypted (tampered with, garbage, or
+   * encrypted with a key that is neither the current nor the legacy cookie
+   * key) is read as absent: `getCookie` logs a warning naming the cookie and
+   * the error class (never the value), returns null, and leaves the cookie in
+   * place. An error that points at an app or configuration bug still throws:
+   * `DecryptionParseError` (the value decrypted but is not JSON), and a
+   * configured current or legacy key of the wrong length when the cookie
+   * value is well formed. A malformed value fails before the key is used, so
+   * it is read as absent even under such a key. A production app with a
+   * wrong-length key fails at boot; in other environments the boot only warns.
+   *
+   * @returns The cookie value cast to RetType, or null if the cookie doesn't exist or cannot be decrypted
    *
    * @example
    * ```ts
@@ -641,16 +692,28 @@ export default class PsychicController {
   /**
    * Sets a cookie in the response with the specified name, data, and options.
    *
+   * The cookie lasts for `opts.maxAge` when it is passed, else until
+   * `opts.expires` when it is a valid Date, else for the app's `cookie` `maxAge`
+   * (`psy.set('cookie', { maxAge })` in conf/app.ts), or 31 days when the app
+   * sets none. When both `maxAge` and `expires` are passed, `maxAge` wins.
+   *
    * @param name - The name of the cookie to set
    * @param data - The string data to store in the cookie
-   * @param opts - Optional cookie configuration (expires, httpOnly, secure, etc.)
+   * @param opts - Optional cookie configuration (maxAge, expires, httpOnly, secure, etc.)
    *
    * @example
    * ```ts
    * class UsersController extends ApplicationController {
    *   public setPreferences() {
-   *     this.setCookie('theme', 'dark', { expires: new Date('2025-12-31') })
+   *     this.setCookie('theme', 'dark', { maxAge: { days: 365 } })
    *     this.setCookie('lang', 'en', { httpOnly: false })
+   *   }
+   *
+   *   public async acceptInvitation() {
+   *     const invitation = await Invitation.findByOrFail({ token: this.castParam('token', 'string') })
+   *     // the cookie expires when the invitation does
+   *     this.setCookie('invitation', invitation.token, { expires: invitation.expiresAt.toJSDate() })
+   *     this.noContent()
    *   }
    * }
    * ```
@@ -816,17 +879,28 @@ export default class PsychicController {
   /**
    * @internal
    *
-   * Sends the data attached to a rescued HttpError (e.g. `this.conflict(MySerializer(obj))`).
-   * Serializer builders, and arrays of them, are rendered the same way success responses
-   * render them (with the controller's serializer passthrough and render options).
-   * Anything else is sent as is.
+   * Sends the data attached to a rescued HttpError (e.g. `this.conflict(MySerializer(obj))`)
+   * as JSON. Serializer builders, and arrays of them, are rendered the same way success
+   * responses render them (with the controller's serializer passthrough and render options).
+   * Anything else is sent as is, JSON-encoded, including a string, `0`, `false` and `''`.
+   * On an endpoint with `fastJsonStringify`, an object or array (a rendered serializer
+   * included) is serialized through the response schema the endpoint documents for the
+   * status, when it documents one; a string, number or boolean is JSON-encoded without that
+   * schema, so `this.conflict(false)` sends `false` whatever the schema describes.
+   * The router calls this only for data other than `undefined` and `null` (see
+   * `httpErrorHasBody`); an error without data is sent with an empty body.
    */
   private koaSendHttpErrorJson(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
     statusCode: number,
   ) {
-    this.koaSendJson(this.renderSerializerBuilders(data), statusCode)
+    const body = this.renderSerializerBuilders(data)
+    // a string, number or boolean skips fast-json-stringify: through a schema
+    // that describes an object, it sends one as `{}`, or throws when the
+    // schema has a required property, turning the deliberate error into a 500
+    const isScalar = typeof body === 'string' || typeof body === 'number' || typeof body === 'boolean'
+    this.koaSendJson(body, statusCode, { fastJsonStringify: !isScalar })
   }
 
   /**
@@ -843,10 +917,16 @@ export default class PsychicController {
     this.koaSendJson(data)
   }
 
+  /**
+   * @param opts.fastJsonStringify - `false` serializes with `JSON.stringify`
+   * even on an endpoint with `fastJsonStringify`. By default, the endpoint's
+   * `fastJsonStringify` option decides.
+   */
   private koaSendJson(
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     data: any,
     statusCode: number = this.ctx.status || 200,
+    { fastJsonStringify = true }: { fastJsonStringify?: boolean } = {},
   ) {
     // In Express, calling res.json() after a response was already sent was a no-op.
     // In Koa, ctx.body/ctx.status are plain assignments, so the last write wins.
@@ -856,9 +936,10 @@ export default class PsychicController {
 
     this.ctx.status = statusCode
 
-    const stringifyFn = this.currentOpenapiRenderer?.['fastJsonStringify']
-      ? this.getFastJsonStringifyFunction(statusCode)
-      : undefined
+    const stringifyFn =
+      fastJsonStringify && this.currentOpenapiRenderer?.['fastJsonStringify']
+        ? this.getFastJsonStringifyFunction(statusCode)
+        : undefined
 
     if (stringifyFn) {
       this.ctx.type = 'application/json'
@@ -936,6 +1017,28 @@ export default class PsychicController {
     this.logIfDevelopment()
   }
 
+  /**
+   * @internal
+   *
+   * Sends a deliberate 4xx or 501–510 thrown with Koa's `ctx.throw` (see
+   * `errorIsDeliberateHttpError`): its status with an empty body, plus any
+   * headers passed to `ctx.throw` (e.g. `WWW-Authenticate` or
+   * `Retry-After`). The error's message and other properties are never
+   * sent, and neither are the headers a caught error wrapped with
+   * `ctx.throw(503, caughtError)` carries (see `setKoaHttpErrorHeaders`).
+   * The status sent is the error's own: in that wrapped form Koa keeps the
+   * caught error's status when it has one (e.g. an upstream 401), not the
+   * status passed, and Psychic leaves that as Koa decides (see
+   * `errorIsDeliberateKoaHttpError`). Controllers set a deliberate status
+   * with Psychic's helpers (e.g. `this.serviceUnavailable()`).
+   */
+  private koaSendDeliberateKoaHttpError(err: KoaHttpError) {
+    if (this._responseSent) return
+
+    setKoaHttpErrorHeaders(this.ctx, err)
+    this.koaSendStatus(err.status)
+  }
+
   private koaRedirect(statusCode: number, newLocation: string) {
     if (this._responseSent) return
 
@@ -999,8 +1102,29 @@ export default class PsychicController {
   }
 
   /**
-   * Sets the response status and data for serialization. Uses the status code
-   * defined in the OpenAPI decorator if present, otherwise defaults to 200.
+   * Sends the data, serialized, with the success status the endpoint's
+   * OpenAPI document shows, so the response matches what the `@OpenAPI`
+   * decorator documents:
+   *
+   * - the decorator's `status`, when the document shows it
+   * - else 200, when the document shows a 200 (e.g. a decorator with a
+   *   model, view model or serializer and no `status`)
+   * - else the lowest success status the document shows, e.g. 204 for
+   *   `@OpenAPI()` with no model, view model, serializer or `status`, or
+   *   201 when the decorator's `responses` declares only a 201
+   *
+   * The document's success statuses include any 2xx its
+   * `defaults.responses` adds to every endpoint, unless the endpoint
+   * sets `omitDefaultResponses`. A controller whose `openapiNames` puts
+   * it in several OpenAPI documents gets a status every one of them
+   * shows, since its response is validated against each; a 2xx only
+   * some of them add is not sent.
+   *
+   * With no `@OpenAPI` decorator, it sends 200. With no data, it sends
+   * `{}`, except on a 204 No Content, which is sent with no body. A 204
+   * cannot carry a body, so on an endpoint whose status is 204, passing
+   * data (anything but `undefined`, including `null`) throws an error
+   * instead of dropping it.
    *
    * @param data - The data to send in the response
    * @param opts - Optional rendering options for serialization
@@ -1008,18 +1132,40 @@ export default class PsychicController {
    * @example
    * ```ts
    * class UsersController extends ApplicationController {
+   *   \@OpenAPI(User, { many: true })
    *   public index() {
    *     const users = User.all()
-   *     this.respond(users) // Uses OpenAPI-defined status or 200
+   *     this.respond(users) // 200, the status the OpenAPI document shows
+   *   }
+   *
+   *   \@OpenAPI()
+   *   public destroy() {
+   *     // ...
+   *     this.respond() // 204, the status the OpenAPI document shows
    *   }
    * }
    * ```
    */
-  public respond<T>(data: T = {} as T, opts: RenderOptions = {}) {
-    const openapiData = (this.constructor as typeof PsychicController).openapi[this.action]
-    this.ctx.status = openapiData?.['status'] || 200
+  public respond<T>(data?: T, opts: RenderOptions = {}) {
+    const openapiNames = this.computedOpenapiNames
+    const status = this.currentOpenapiRenderer?.respondStatus(openapiNames) ?? 200
 
-    this.json(data, opts)
+    if (status === 204) {
+      // a 204 cannot carry a body, so throw rather than silently drop the data
+      if (data !== undefined) {
+        throw new RespondWithDataOnNoContentEndpoint(
+          this.constructor as typeof PsychicController,
+          this.action,
+          openapiNames,
+        )
+      }
+
+      this.koaSendStatus(204)
+      return
+    }
+
+    this.ctx.status = status
+    this.json(data === undefined ? {} : data, opts)
   }
 
   /**
@@ -1436,36 +1582,135 @@ export default class PsychicController {
     throw new HttpStatusInternalServerError(data)
   }
 
+  /**
+   * Throws an HTTP 501 Not Implemented error. Use this when the server does not
+   * support the functionality required to fulfill the request.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusNotImplemented} Always throws this error
+   */
   // 501
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public notImplemented(message: any = undefined) {
     throw new HttpStatusNotImplemented(message)
   }
 
+  /**
+   * Throws an HTTP 502 Bad Gateway error. Use this when an upstream server this
+   * request depends on returned an invalid response.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusBadGateway} Always throws this error
+   */
   // 502
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public badGateway(message: any = undefined) {
     throw new HttpStatusBadGateway(message)
   }
 
+  /**
+   * Throws an HTTP 503 Service Unavailable error. Use this when the server cannot
+   * handle the request right now, e.g. during maintenance or while a service it
+   * depends on is down.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusServiceUnavailable} Always throws this error
+   *
+   * @example
+   * ```ts
+   * class PaymentsController extends ApplicationController {
+   *   public async create() {
+   *     try {
+   *       await chargeCard(this.castParam('token', 'string'))
+   *     } catch (error) {
+   *       reportToErrorTracker(error)
+   *       this.serviceUnavailable()
+   *     }
+   *   }
+   * }
+   * ```
+   */
   // 503
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public serviceUnavailable(message: any = undefined) {
     throw new HttpStatusServiceUnavailable(message)
   }
 
+  /**
+   * Throws an HTTP 504 Gateway Timeout error. Use this when an upstream server
+   * this request depends on did not respond in time.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusGatewayTimeout} Always throws this error
+   */
   // 504
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public gatewayTimeout(message: any = undefined) {
     throw new HttpStatusGatewayTimeout(message)
   }
 
+  /**
+   * Throws an HTTP 507 Insufficient Storage error. Use this when the server cannot
+   * store what it needs to complete the request.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusInsufficientStorage} Always throws this error
+   */
   // 507
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public insufficientStorage(message: any = undefined) {
     throw new HttpStatusInsufficientStorage(message)
   }
 
+  /**
+   * Throws an HTTP 510 Not Extended error. Use this when further extensions to the
+   * request are required for the server to fulfill it.
+   *
+   * A deliberate 5xx is a handled response, not a server error: it is sent
+   * with this status (and `message`, if given, as the response body), it is
+   * not logged as a server error, and it never reaches `server:error` hooks.
+   * To have an error tracker see the underlying failure, report it before
+   * calling this. (`internalServerError`, by contrast, is logged and passed
+   * to `server:error` hooks.)
+   *
+   * @param message - Optional error message to include in the response
+   * @throws {HttpStatusNotExtended} Always throws this error
+   */
   // 510
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   public notExtended(message: any = undefined) {
