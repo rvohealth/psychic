@@ -149,8 +149,8 @@ describe('PsychicBin.resolveAliases', () => {
       compile(path.join(esmApp, 'tsconfig.build.json'))
     })
 
-    it('rewrites static, side-effect, export-from and dynamic imports in the emitted JavaScript to relative paths', () => {
-      PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+    it('rewrites static, side-effect, export-from and dynamic imports in the emitted JavaScript to relative paths', async () => {
+      await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
 
       expect(read(esmApp, 'dist/src/main.js')).toEqual(`import './conf/loadEnv.js';
 import colors from 'yoctocolors';
@@ -170,8 +170,8 @@ console.log([fromA, fromB, greet(user), user instanceof User, typeof colors.red]
 `)
     })
 
-    it('rewrites relative to the directory of each emitted file', () => {
-      PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+    it('rewrites relative to the directory of each emitted file', async () => {
+      await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
 
       expect(read(esmApp, 'dist/src/conf/system/helper.js')).toContain(
         "import { makeUser } from '../../app/greeting.js';",
@@ -179,8 +179,8 @@ console.log([fromA, fromB, greet(user), user instanceof User, typeof colors.red]
       expect(read(esmApp, 'dist/src/app/greeting.js')).toContain("import User from '../models/User.js';")
     })
 
-    it('rewrites the emitted declaration files, including import types', () => {
-      PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+    it('rewrites the emitted declaration files, including import types', async () => {
+      await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
 
       const declarations = read(esmApp, 'dist/src/main.d.ts')
       expect(declarations).toContain("import './conf/loadEnv.js';")
@@ -193,14 +193,14 @@ console.log([fromA, fromB, greet(user), user instanceof User, typeof colors.red]
       expect(read(esmApp, 'dist/src/app/greeting.d.ts')).toContain("import User from '../models/User.js';")
     })
 
-    it('leaves an alias that resolves to no file unchanged', () => {
-      PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+    it('leaves an alias that resolves to no file unchanged', async () => {
+      await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
 
       expect(read(esmApp, 'dist/src/main.js')).toContain("import('@conf/missing.js')")
     })
 
-    it('prints a one-line summary and returns the counts', () => {
-      const result = PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+    it('prints a one-line summary and returns the counts', async () => {
+      const result = await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
 
       // main.js 7, helper.js 1, greeting.js 1; main.d.ts 4, greeting.d.ts 1 (tsc
       // writes helper.d.ts's import type relative already)
@@ -213,17 +213,17 @@ console.log([fromA, fromB, greet(user), user instanceof User, typeof colors.red]
       expect(consoleLogSpy).toHaveBeenCalledWith('resolve-aliases: rewrote 14 aliased imports in 5 files')
     })
 
-    it('changes nothing when run a second time', () => {
-      PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+    it('changes nothing when run a second time', async () => {
+      await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
       const afterFirstRun = readAll(path.join(esmApp, 'dist'))
 
-      const result = PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+      const result = await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
 
       expect(result).toEqual(expect.objectContaining({ filesChanged: 0, specifiersRewritten: 0 }))
       expect(readAll(path.join(esmApp, 'dist'))).toEqual(afterFirstRun)
     })
 
-    it('rewrites export * as namespace re-exports in the JavaScript and the declarations', () => {
+    it('rewrites export * as namespace re-exports in the JavaScript and the declarations', async () => {
       writeTree(esmApp, {
         'src/app/namespaced.ts': `export * as UserModule from '@app/models/User.js'
 export type * as UserTypes from '@app/models/User.js'
@@ -231,7 +231,7 @@ export type * as UserTypes from '@app/models/User.js'
       })
       compile(path.join(esmApp, 'tsconfig.build.json'))
 
-      PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+      await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
 
       expect(read(esmApp, 'dist/src/app/namespaced.js'))
         .toEqual(`export * as UserModule from '../models/User.js';
@@ -242,7 +242,7 @@ export type * as UserTypes from '@app/models/User.js'
       expect(runNode(path.join(esmApp, 'dist/src/app/namespaced.js'))).toEqual('')
     })
 
-    it('rewrites module augmentations in the declarations', () => {
+    it('rewrites module augmentations in the declarations', async () => {
       writeTree(esmApp, {
         'src/app/augmentation.ts': `import User from '@app/models/User.js'
 
@@ -257,19 +257,19 @@ export const augmentedUser = new User()
       })
       compile(path.join(esmApp, 'tsconfig.build.json'))
 
-      PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+      await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
 
       expect(read(esmApp, 'dist/src/app/augmentation.d.ts')).toContain("declare module '../models/User.js' {")
     })
 
-    it('finds an import that follows a regular expression containing a quote', () => {
+    it('finds an import that follows a regular expression containing a quote', async () => {
       writeTree(esmApp, {
         'src/app/afterRegex.ts': `export const loaders = [/'/.test("'"), () => import('@app/greeting.js')]
 `,
       })
       compile(path.join(esmApp, 'tsconfig.build.json'))
 
-      PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+      await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
 
       expect(read(esmApp, 'dist/src/app/afterRegex.js')).toEqual(
         `export const loaders = [/'/.test("'"), () => import('./greeting.js')];
@@ -277,7 +277,7 @@ export const augmentedUser = new User()
       )
     })
 
-    it('leaves the arguments of methods named require unchanged, so runtime data is not rewritten', () => {
+    it('leaves the arguments of methods named require unchanged, so runtime data is not rewritten', async () => {
       const rulesSource = `const rules = { require: (key: string) => key }
 
 console.log([rules.require('@app/greeting.js'), rules?.require('@app/greeting.js')].join(' '))
@@ -286,7 +286,7 @@ console.log([rules.require('@app/greeting.js'), rules?.require('@app/greeting.js
       compile(path.join(esmApp, 'tsconfig.build.json'))
       const emitted = read(esmApp, 'dist/src/app/rules.js')
 
-      PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+      await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
 
       expect(read(esmApp, 'dist/src/app/rules.js')).toEqual(emitted)
       expect(runNode(path.join(esmApp, 'dist/src/app/rules.js'))).toEqual(
@@ -294,12 +294,12 @@ console.log([rules.require('@app/greeting.js'), rules?.require('@app/greeting.js
       )
     })
 
-    it('makes the emitted app runnable with node', () => {
+    it('makes the emitted app runnable with node', async () => {
       expect(() => runNode(path.join(esmApp, 'dist/src/main.js'))).toThrow(
         "Cannot find package '@conf/loadEnv.js'",
       )
 
-      PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
+      await PsychicBin.resolveAliases({ project: path.join(esmApp, 'tsconfig.build.json') })
 
       expect(runNode(path.join(esmApp, 'dist/src/main.js'))).toEqual(
         'loadEnv evaluated\na b hi u true function\n',
@@ -339,8 +339,8 @@ console.log(setting + ' ' + fromIndex)
       compile(path.join(cjsApp, 'tsconfig.json'))
     })
 
-    it('rewrites require calls to the emitted files, and the app runs with node', () => {
-      PsychicBin.resolveAliases({ project: path.join(cjsApp, 'tsconfig.json') })
+    it('rewrites require calls to the emitted files, and the app runs with node', async () => {
+      await PsychicBin.resolveAliases({ project: path.join(cjsApp, 'tsconfig.json') })
 
       const main = read(cjsApp, 'dist/main.js')
       expect(main).toContain('require("./conf/settings.js")')

@@ -272,7 +272,7 @@ describe('PsychicCLI resolve-aliases', () => {
 
   beforeEach(() => {
     processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
-    resolveAliasesSpy = vi.spyOn(PsychicBin, 'resolveAliases').mockReturnValue({
+    resolveAliasesSpy = vi.spyOn(PsychicBin, 'resolveAliases').mockResolvedValue({
       tsconfigPath: '/app/tsconfig.build.json',
       filesChanged: 0,
       specifiersRewritten: 0,

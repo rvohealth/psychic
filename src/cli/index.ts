@@ -592,8 +592,8 @@ ${INDENT}It never initializes your app, so it needs no database connection.`,
         '-p, --project <path>',
         'the tsconfig the build compiled with, or a directory containing a tsconfig.json, as with `tsc -p`. Defaults to the nearest tsconfig.json at or above the current directory, as tsc does',
       )
-      .action((options: { project?: string }) => {
-        PsychicBin.resolveAliases({ project: options.project })
+      .action(async (options: { project?: string }) => {
+        await PsychicBin.resolveAliases({ project: options.project })
         process.exit()
       })
 
