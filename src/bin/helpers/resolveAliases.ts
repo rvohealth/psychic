@@ -62,7 +62,8 @@ const DECLARATION_OUTPUT_EXTENSIONS: [string, string][] = [
  * build emitted (e.g. a missing module) are left unchanged, so running it
  * again changes nothing. Source maps are not updated. A tsconfig that sets
  * `noEmit`, or whose output would overwrite its own source files, is
- * refused with an error before any file is written.
+ * refused with an error before any file is written, and so is one none of
+ * whose emitted files exists yet (tsc has not run, or wrote elsewhere).
  */
 export default function resolveAliases({
   project,
@@ -122,6 +123,19 @@ export default function resolveAliases({
       existence.set(fileName, fileExists)
     }
     return fileExists
+  }
+
+  // when none of the program's output files exists, tsc has not emitted this
+  // build: the command ran before tsc, or with a tsconfig whose outDir is not
+  // the one the build wrote. Rewriting nothing would pass the build script
+  // and leave a dist that node cannot run, so refuse instead
+  const outputFiles = commandLine.fileNames.flatMap(sourceFile =>
+    outputsOf(sourceFile).filter(outputFile => isJsOutput(outputFile) || isDeclarationOutput(outputFile)),
+  )
+  if (outputFiles.length && !outputFiles.some(exists)) {
+    throw new Error(
+      `resolve-aliases: no file tsc emits for ${tsconfigPath} exists, e.g. ${outputFiles[0]}; run tsc -p ${tsconfigPath} first, and pass the tsconfig the build compiled with`,
+    )
   }
 
   let filesChanged = 0

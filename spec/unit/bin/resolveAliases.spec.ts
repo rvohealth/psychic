@@ -413,6 +413,27 @@ describe('resolveAliases', () => {
     })
   })
 
+  // a build script's `tsc && psy resolve-aliases` must not pass with a dist
+  // node cannot run, so a program none of whose output files exists is refused
+  context('before tsc has emitted the build', () => {
+    beforeEach(() => {
+      fs.rmSync(path.join(defaultsApp, 'dist'), { recursive: true, force: true })
+    })
+
+    it('throws, naming a missing output file and the tsc command to run first', () => {
+      const tsconfigPath = path.join(defaultsApp, 'tsconfig.json')
+      const subject = () => resolveAliases({ project: tsconfigPath })
+
+      expect(subject).toThrow(
+        `resolve-aliases: no file tsc emits for ${tsconfigPath} exists, e.g. ${defaultsApp}`,
+      )
+      expect(subject).toThrow(
+        `; run tsc -p ${tsconfigPath} first, and pass the tsconfig the build compiled with`,
+      )
+      expect(fs.existsSync(path.join(defaultsApp, 'dist'))).toBe(false)
+    })
+  })
+
   // tsc emits every source file of its program, not only the files the
   // tsconfig's files/include lists: JSON modules (which a directory include
   // never lists) and any file the build imports from outside include
