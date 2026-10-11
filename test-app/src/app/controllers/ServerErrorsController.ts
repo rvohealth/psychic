@@ -97,6 +97,17 @@ export function throwServerErrorScenario(ctx: Koa.Context, scenario: string): ne
         }),
       )
 
+    case 'koa-503-wrapped-with-own-status':
+      // a caught SDK error that carries its own status, as stripe-node's
+      // StripeError does (statusCode) for a rejected API key; Koa keeps that
+      // status over the one passed
+      return ctx.throw(503, Object.assign(new Error('upstream unauthorized'), { statusCode: 401 }))
+
+    case 'koa-503-wrapped-with-headers-alongside':
+      // headers passed alongside a caught error land on that error, where
+      // they cannot be told apart from headers the error carried itself
+      return ctx.throw(503, new Error('upstream detail'), { headers: { 'Retry-After': '120' } })
+
     case 'koa-510':
       return ctx.throw(510)
 

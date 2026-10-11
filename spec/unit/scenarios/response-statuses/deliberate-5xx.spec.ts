@@ -111,6 +111,15 @@ describe('a visitor hits a route that responds with a deliberate 5xx (501–510)
           expect(res.text).toEqual('')
           expectHandledResponse()
         })
+
+        it('does not apply the headers passed alongside a wrapped caught error either', async () => {
+          // ctx.throw(503, caughtError, { headers }): the headers land on the
+          // caught error, where they cannot be told apart from its own
+          const res = await request.get(pathFor('koa-503-wrapped-with-headers-alongside'), 503)
+          expect(res.headers['retry-after']).toBeUndefined()
+          expect(res.text).toEqual('')
+          expectHandledResponse()
+        })
       })
 
       context('a server error', () => {

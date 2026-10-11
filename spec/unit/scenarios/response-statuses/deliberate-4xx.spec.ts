@@ -87,6 +87,13 @@ describe('a visitor hits a route that responds with a deliberate 4xx', () => {
           expectHandledResponse()
         })
 
+        it("answers the wrapped form with the caught error's own 4xx status, as Koa does, not the status passed", async () => {
+          // ctx.throw(503, caughtError), where caughtError carries a 401
+          const res = await request.get(pathFor('koa-503-wrapped-with-own-status'), 401)
+          expect(res.text).toEqual('')
+          expectHandledResponse()
+        })
+
         it('applies the headers passed to ctx.throw', async () => {
           const res = await request.get(pathFor('koa-401-with-headers'), 401)
           expect(res.headers['www-authenticate']).toEqual('Bearer')
