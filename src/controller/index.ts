@@ -664,9 +664,8 @@ export default class PsychicController {
    * @param name - The name of the cookie to retrieve
    * A cookie whose value cannot be decrypted (tampered with, garbage, or
    * encrypted with a key that is neither the current nor the legacy cookie
-   * key) is read as absent: `getCookie` logs a warning naming the cookie and
-   * the error class (never the value), returns null, and leaves the cookie in
-   * place. An error that points at an app or configuration bug still throws:
+   * key) is read as absent: `getCookie` returns null, logs nothing, and leaves
+   * the cookie in place. An error that points at an app or configuration bug still throws:
    * `DecryptionParseError` (the value decrypted but is not JSON), and a
    * configured current or legacy key of the wrong length when the cookie
    * value is well formed. A malformed value fails before the key is used, so

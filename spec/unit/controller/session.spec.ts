@@ -54,27 +54,23 @@ describe('Session', () => {
       const encryptedWithForeignKey = (data: string) =>
         Encrypt.encrypt(data, { algorithm: 'aes-256-gcm', key: Encrypt.generateKey('aes-256-gcm') })
 
-      function expectWarningNaming(errorClassName: string, cookieValue: string) {
-        expect(logWithLevelSpy).toHaveBeenCalledTimes(1)
-        const [level, message] = logWithLevelSpy.mock.calls[0] as [string, string]
-        expect(level).toEqual('warn')
-        expect(message).toContain('"auth_token"')
-        expect(message).toContain(errorClassName)
-        expect(message).not.toContain(cookieValue)
+      // any client can send one on every request, so nothing is logged
+      function expectNothingLogged() {
+        expect(logWithLevelSpy).not.toHaveBeenCalled()
       }
 
       // the test-app configures a legacy key, so a failure is reported as a
       // DecryptionRotationError once both keys have been tried
       context('with a legacy key configured', () => {
-        it('returns null for a garbage value and logs a warning naming the cookie and error, not the value', () => {
+        it('returns null for a garbage value without logging', () => {
           expect(withCookie('not-a-real-cookie')).toBeNull()
-          expectWarningNaming('DecryptionRotationError', 'not-a-real-cookie')
+          expectNothingLogged()
         })
 
         it('returns null for a value encrypted with a key that is neither the current nor the legacy key', () => {
           const value = encryptedWithForeignKey(user.id.toString())
           expect(withCookie(value)).toBeNull()
-          expectWarningNaming('DecryptionRotationError', value)
+          expectNothingLogged()
         })
       })
 
@@ -84,15 +80,15 @@ describe('Session', () => {
           vi.spyOn(PsychicApp.getOrFail(), 'encryption', 'get').mockReturnValue({ cookies: { current } })
         })
 
-        it('returns null for a garbage value and logs a warning naming DecryptionError, not the value', () => {
+        it('returns null for a garbage value without logging', () => {
           expect(withCookie('not-a-real-cookie')).toBeNull()
-          expectWarningNaming('DecryptionError', 'not-a-real-cookie')
+          expectNothingLogged()
         })
 
         it('returns null for a value encrypted with another key', () => {
           const value = encryptedWithForeignKey(user.id.toString())
           expect(withCookie(value)).toBeNull()
-          expectWarningNaming('DecryptionError', value)
+          expectNothingLogged()
         })
       })
 

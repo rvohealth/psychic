@@ -16,7 +16,7 @@ export default class Session {
   // session cookie set by a concurrent login. Errors that point at an app or
   // configuration bug, not at the value sent, still propagate, except that a
   // malformed value is read as absent even under a wrong-length key (see
-  // undecryptableCookieErrorClassName).
+  // isUndecryptableCookieError).
   public getCookie(name: string) {
     const value = this.ctx.cookies.get(name)
     if (!value) return null
@@ -24,15 +24,9 @@ export default class Session {
     try {
       return InternalEncrypt.decryptCookie(value)
     } catch (err) {
-      const errorClassName = undecryptableCookieErrorClassName(err)
-      if (!errorClassName) throw err
-
-      // warn, not error: any client can trigger this, so logging it as an error
-      // would let anyone flood error alerting. Never log the cookie value.
-      PsychicApp.logWithLevel(
-        'warn',
-        `[psychic] could not decrypt cookie "${name}" (${errorClassName}); treating it as absent`,
-      )
+      // not logged: any client can send an undecryptable cookie on every
+      // request, so a log line here would let anyone write to the app's logs
+      if (!isUndecryptableCookieError(err)) throw err
       return null
     }
   }
@@ -90,8 +84,7 @@ export interface CustomSessionCookieOptions extends CustomCookieOptions {
   overwrite?: boolean
 }
 
-// The name of the error class when err means the cookie value sent cannot be
-// decrypted, else undefined. DecryptionParseError (the value decrypted but is
+// Whether err means the cookie value sent cannot be decrypted. DecryptionParseError (the value decrypted but is
 // not JSON) means the app encrypted the wrong format, and a key of the wrong
 // length (which Dream wraps as the cause of a DecryptionError) means the app's
 // encryption config is broken, so neither is the client's doing. Dream reports
@@ -99,15 +92,13 @@ export interface CustomSessionCookieOptions extends CustomCookieOptions {
 // parse fails first, with a cause that is not ERR_CRYPTO_INVALID_KEYLEN, and so
 // is read as absent. PsychicApp.init rejects a wrong-length key at boot in
 // production and only warns elsewhere, so that case arises outside production.
-function undecryptableCookieErrorClassName(err: unknown) {
-  if (err instanceof DecryptionError) return isInvalidKeyLength(err) ? undefined : 'DecryptionError'
+function isUndecryptableCookieError(err: unknown) {
+  if (err instanceof DecryptionError) return !isInvalidKeyLength(err)
 
   if (err instanceof DecryptionRotationError)
-    return isInvalidKeyLength(err.currentKeyError) || isInvalidKeyLength(err.legacyKeyError)
-      ? undefined
-      : 'DecryptionRotationError'
+    return !isInvalidKeyLength(err.currentKeyError) && !isInvalidKeyLength(err.legacyKeyError)
 
-  return undefined
+  return false
 }
 
 function isInvalidKeyLength(err: DecryptionError) {
