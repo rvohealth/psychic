@@ -7,7 +7,6 @@ export default function routes(r: PsychicRouter) {
         r.resources('comments')
 
       })
-
     })
   })
 

@@ -123,6 +123,23 @@ describe('PsychicController#castParam', () => {
     })
   })
 
+  context('when a sub-object below the first segment is null', () => {
+    it('throws ParamValidationError for the full key', () => {
+      let error: unknown
+      try {
+        controller.castParam('subBody.nullValue.hello', 'string')
+      } catch (err) {
+        error = err
+      }
+
+      expect(error).toBeInstanceOf(ParamValidationError)
+      expect((error as ParamValidationError).paramName).toEqual('subBody.nullValue.hello')
+      expect((error as ParamValidationError).errorMessages).toEqual([
+        'Invalid dot notation in castParam: subBody.nullValue.hello',
+      ])
+    })
+  })
+
   context('when dot notation specifies a non-object', () => {
     it('throws ParamValidationError', () => {
       expect(() => controller.castParam('dotNotationToString.hello', 'string')).toThrow(ParamValidationError)
@@ -160,6 +177,44 @@ describe('PsychicController#castParam', () => {
       })
     })
 
+    context('when a sub-object below the first segment is null', () => {
+      it('throws ParamValidationError', () => {
+        expect(() => controller.castParam('subBody.nullValue.hello', 'string', { allowNull: true })).toThrow(
+          ParamValidationError,
+        )
+      })
+    })
+
+    context("with the 'null' expected type", () => {
+      it('returns undefined when a dot-notation intermediate is absent', () => {
+        expect(controller.castParam('invalidSubBody.hello', 'null', { allowNull: true })).toBeUndefined()
+      })
+
+      it('returns null when the leaf is absent', () => {
+        expect(controller.castParam('subBody.missingLeaf', 'null', { allowNull: true })).toBeNull()
+      })
+
+      it('throws ParamValidationError when a dot-notation intermediate is null', () => {
+        expect(() => controller.castParam('nullSubBody.hello', 'null', { allowNull: true })).toThrow(
+          ParamValidationError,
+        )
+      })
+    })
+
+    context('with an OpenAPI schema expected type', () => {
+      it('returns undefined when a dot-notation intermediate is absent', () => {
+        expect(
+          controller.castParam('invalidSubBody.hello', { type: 'string' }, { allowNull: true }),
+        ).toBeUndefined()
+      })
+
+      it('throws ParamValidationError when a dot-notation intermediate is null, even if the schema accepts null', () => {
+        expect(() =>
+          controller.castParam('nullSubBody.hello', { type: ['string', 'null'] }, { allowNull: true }),
+        ).toThrow(ParamValidationError)
+      })
+    })
+
     context('with a RegExp expected type', () => {
       it('returns undefined when the parameter is absent', () => {
         expect(controller.castParam('code', /^\d{4}$/, { allowNull: true })).toBeUndefined()
@@ -167,6 +222,12 @@ describe('PsychicController#castParam', () => {
 
       it('returns undefined when a dot-notation intermediate is absent', () => {
         expect(controller.castParam('invalidSubBody.code', /^\d{4}$/, { allowNull: true })).toBeUndefined()
+      })
+
+      it('throws ParamValidationError when a dot-notation intermediate is null', () => {
+        expect(() => controller.castParam('nullSubBody.code', /^\d{4}$/, { allowNull: true })).toThrow(
+          ParamValidationError,
+        )
       })
 
       it('returns null when the parameter is explicitly null', () => {

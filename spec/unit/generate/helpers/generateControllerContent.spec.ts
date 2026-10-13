@@ -1,3 +1,4 @@
+import { DreamApp } from '@rvoh/dream'
 import generateControllerContent from '../../../../src/generate/helpers/generateControllerContent.js'
 import paramSafeColumnNamesFromCliTokens from '../../../../src/generate/helpers/paramSafeColumnNamesFromCliTokens.js'
 
@@ -109,7 +110,7 @@ export default class PostsController extends AuthedController {
   private async post() {
     // return await this.currentUser.associationQuery('posts')
     //   .preloadFor('default')
-    //   .findOrFail(this.castParam('id', 'string'))
+    //   .findOrFail(this.castParam('id', 'bigint'))
   }
 }
 `,
@@ -311,7 +312,7 @@ export default class ApiV1HealthPostsController extends AuthedController {
   private async healthPost() {
     // return await this.currentUser.associationQuery('healthPosts')
     //   .preloadFor('default')
-    //   .findOrFail(this.castParam('id', 'string'))
+    //   .findOrFail(this.castParam('id', 'bigint'))
   }
 }
 `,
@@ -468,7 +469,7 @@ export default class PostsController extends AuthedController {
   private async post() {
     // return await this.currentHost.associationQuery('posts')
     //   .preloadFor('default')
-    //   .findOrFail(this.castParam('id', 'string'))
+    //   .findOrFail(this.castParam('id', 'bigint'))
   }
 }
 `,
@@ -587,7 +588,7 @@ export default class AdminArticlesController extends AdminAuthedController {
   private async article() {
     // return await Article
     //   .preloadFor('admin')
-    //   .findOrFail(this.castParam('id', 'string'))
+    //   .findOrFail(this.castParam('id', 'bigint'))
   }
 }
 `,
@@ -693,7 +694,7 @@ export default class AdminArticlesController extends AdminAuthedController {
   private async article() {
     // return await this.currentOrganization.associationQuery('articles')
     //   .preloadFor('admin')
-    //   .findOrFail(this.castParam('id', 'string'))
+    //   .findOrFail(this.castParam('id', 'bigint'))
   }
 }
 `,
@@ -814,7 +815,7 @@ export default class InternalArticlesController extends InternalAuthedController
   private async article() {
     // return await this.currentInternalUser.associationQuery('articles')
     //   .preloadFor('internal')
-    //   .findOrFail(this.castParam('id', 'string'))
+    //   .findOrFail(this.castParam('id', 'bigint'))
   }
 }
 `,
@@ -921,12 +922,64 @@ export default class InternalArticlesController extends InternalAuthedController
   private async article() {
     // return await this.currentOrganization.associationQuery('articles')
     //   .preloadFor('internal')
-    //   .findOrFail(this.castParam('id', 'string'))
+    //   .findOrFail(this.castParam('id', 'bigint'))
   }
 }
 `,
           )
         })
+      })
+    })
+  })
+
+  describe('the id cast in the generated loader', () => {
+    function generateShowController() {
+      return generateControllerContent({
+        ancestorImportStatement: "import AuthedController from './AuthedController.js'",
+        ancestorName: 'AuthedController',
+        fullyQualifiedControllerName: 'PostsController',
+        fullyQualifiedModelName: 'Post',
+        actions: ['show'],
+        forAdmin: false,
+        singular: false,
+      })
+    }
+
+    // The cast follows the app's primaryKeyType, the same setting g:resource's
+    // migration reads to type the id column, so a malformed id is answered with
+    // a 400 by castParam instead of reaching Postgres as a 500.
+    const castTypeForPrimaryKeyType: [DreamApp['primaryKeyType'], 'bigint' | 'integer' | 'uuid'][] = [
+      ['bigint', 'bigint'],
+      ['bigserial', 'bigint'],
+      ['integer', 'integer'],
+      ['uuid', 'uuid'],
+      ['uuid4', 'uuid'],
+      ['uuid7', 'uuid'],
+    ]
+
+    castTypeForPrimaryKeyType.forEach(([primaryKeyType, castType]) => {
+      context(`when the app's primaryKeyType is '${primaryKeyType}'`, () => {
+        beforeEach(() => {
+          vi.spyOn(DreamApp.prototype, 'primaryKeyType', 'get').mockReturnValue(primaryKeyType)
+        })
+
+        it(`casts the id as '${castType}'`, () => {
+          expect(generateShowController()).toContain(
+            `    //   .findOrFail(this.castParam('id', '${castType}'))\n`,
+          )
+        })
+      })
+    })
+
+    context('when the primaryKeyType is not one the generator knows', () => {
+      beforeEach(() => {
+        vi.spyOn(DreamApp.prototype, 'primaryKeyType', 'get').mockReturnValue(
+          'mystery' as unknown as DreamApp['primaryKeyType'],
+        )
+      })
+
+      it('throws rather than emit a cast that does not match the id column', () => {
+        expect(() => generateShowController()).toThrow(/primaryKeyType 'mystery'/)
       })
     })
   })

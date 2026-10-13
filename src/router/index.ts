@@ -16,7 +16,10 @@ import HttpError from '../error/http/index.js'
 import OpenapiRequestValidationFailure from '../error/openapi/OpenapiRequestValidationFailure.js'
 import CannotCommitRoutesWithoutKoaApp from '../error/router/cannot-commit-routes-without-koa-app.js'
 import EnvInternal from '../helpers/EnvInternal.js'
+import { errorIsDeliberateKoaHttpError } from '../helpers/error/errorIsDeliberateHttpError.js'
 import errorIsRescuableHttpError from '../helpers/error/errorIsRescuableHttpError.js'
+import { rethrownHookError } from '../helpers/error/errorIsRethrownHookError.js'
+import httpErrorHasBody from '../helpers/error/httpErrorHasBody.js'
 import PsychicApp from '../psychic-app/index.js'
 import {
   applyResourcefulAction,
@@ -26,7 +29,6 @@ import {
   PsychicControllerActions,
   routePath,
 } from '../router/helpers.js'
-import { psychicRouterProcessedErrorStateKey } from '../server/helpers/errorBoundaryMiddleware.js'
 import RouteManager, {
   ControllerActionRouteConfig,
   KoaMiddleware,
@@ -422,13 +424,24 @@ suggested fix:  "${convertRouteParams(path)}"
       await controllerInstance.runAction()
     } catch (error) {
       const err = error as Error
+
+      // Koa sends the answer each branch below writes, deliberate or not: an
+      // action that opted out of Koa's response (`ctx.respond = false`, e.g.
+      // to write it through `ctx.res`) and failed before sending anything has
+      // given that response up
+      if (!ctx.headerSent) ctx.respond = true
+
       if (errorIsRescuableHttpError(err)) {
         const httpErr = err as HttpError
-        if (httpErr.data) {
+        if (httpErrorHasBody(httpErr)) {
           controllerInstance['koaSendHttpErrorJson'](httpErr.data, httpErr.status)
         } else {
           controllerInstance['koaSendStatus'](httpErr.status)
         }
+      } else if (errorIsDeliberateKoaHttpError(err)) {
+        // a deliberate 4xx or 501–510 from Koa's ctx.throw: a handled
+        // response, like the psychic HttpErrors above, not a server error
+        controllerInstance['koaSendDeliberateKoaHttpError'](err)
       } else if (err instanceof RecordNotFound || err instanceof CannotSaveMissingDream) {
         controllerInstance['koaSendStatus'](404)
       } else if (err instanceof DataIncompatibleWithDatabaseField) {
@@ -508,41 +521,50 @@ suggested fix:  "${convertRouteParams(path)}"
          */
         controllerInstance['koaSendStatus'](400)
       } else {
-        // mark the request so the error-boundary middleware passes anything
-        // this branch throws straight through to Koa: the deliberate
-        // dev/test re-throw of a failing server:error hook below must not
-        // run the hooks a second time, and with no hooks registered the
-        // re-thrown action error keeps Koa's default handling
-        ctx.state[psychicRouterProcessedErrorStateKey] = true
-
+        // a server error: psychic answers it itself, whether or not any
+        // server:error hooks are registered, and never hands it to Koa's
+        // default error handler
         PsychicApp.logWithLevel('error', util.inspect(err, { depth: ERROR_LOGGING_DEPTH }))
 
-        if (PsychicApp.getOrFail().specialHooks.serverError.length) {
-          try {
-            for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {
-              await hook(err, ctx)
-            }
-          } catch (error) {
-            if (EnvInternal.isDevelopmentOrTest) {
-              // In development and test, we want to throw so that, for example, double-setting of
-              // status headers throws an error in specs. We couldn't figure out how to write
-              // a spec for ensuring that such errors made it through because Supertest would
-              // respond with the first header sent, which was successful, and the exception only
-              // happened when Jest ended the spec.
-              throw error
-            } else {
-              PsychicApp.logWithLevel(
-                'error',
-                `
-                  Something went wrong while attempting to call your custom server:error hooks.
-                  Psychic will rescue errors thrown here to prevent the server from crashing.
-                  The error thrown is:
-                `,
-              )
-              PsychicApp.logWithLevel('error', error)
-            }
+        // default server-error response, which server:error hooks may
+        // reshape; with no hooks registered, it is the response. A server
+        // error's data is never sent
+        if (!ctx.headerSent) {
+          ctx.status = 500
+          ctx.body = ''
+        }
+
+        try {
+          for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {
+            await hook(err, ctx)
           }
-        } else throw err
+        } catch (error) {
+          if (EnvInternal.isDevelopmentOrTest) {
+            // In development and test, we want to throw so that, for example, double-setting of
+            // status headers throws an error in specs. We couldn't figure out how to write
+            // a spec for ensuring that such errors made it through because Supertest would
+            // respond with the first header sent, which was successful, and the exception only
+            // happened when Jest ended the spec.
+            //
+            // Koa's default error handler crashes, sending no response, on an error whose
+            // status it cannot set, such as the psychic 500 a hook re-throws; it is handed
+            // a plain Error wrapping such an error instead. The error re-thrown is recorded,
+            // so the error-boundary middleware passes it straight through to Koa instead of
+            // running the hooks a second time; any other error thrown on this request, e.g.
+            // by middleware around the router, is answered by the boundary as usual.
+            throw rethrownHookError(error)
+          } else {
+            PsychicApp.logWithLevel(
+              'error',
+              `
+                Something went wrong while attempting to call your custom server:error hooks.
+                Psychic will rescue errors thrown here to prevent the server from crashing.
+                The error thrown is:
+              `,
+            )
+            PsychicApp.logWithLevel('error', error)
+          }
+        }
       }
     }
   }

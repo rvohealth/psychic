@@ -1,7 +1,6 @@
 import { CliFileWriter, DreamBin, DreamCLI } from '@rvoh/dream/system'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
-import ASTPsychicTypesBuilder from '../cli/helpers/ASTPsychicTypesBuilder.js'
 import validateOpenapiName from '../cli/helpers/validateOpenapiName.js'
 import generateController from '../generate/controller.js'
 import generateResource from '../generate/resource.js'
@@ -16,6 +15,7 @@ import printControllerHierarchy, {
   controllerHierarchyViolations,
 } from './helpers/printControllerHierarchy.js'
 import printRoutes from './helpers/printRoutes.js'
+import type { ResolveAliasesResult } from './helpers/resolveAliases.js'
 
 export {
   BreakingChangesDetectedInOpenApiSpecError,
@@ -51,6 +51,32 @@ export default class PsychicBin {
 
   public static printRoutes() {
     printRoutes()
+  }
+
+  /**
+   * Rewrites the tsconfig `paths` aliases (e.g. `@conf/…`, `@models/…`) that
+   * tsc leaves in its output to relative paths, so that `node` can run the
+   * build, and prints a one-line summary. Run it after `tsc`, with the same
+   * tsconfig. It reads only the tsconfig and the emitted files, and never
+   * initializes the app.
+   *
+   * Imports that resolve to no file the build emitted are left unchanged, so
+   * running it again changes nothing. See `psy resolve-aliases --help`.
+   *
+   * @param options.project - the tsconfig the build compiled with, or a
+   * directory containing a tsconfig.json, as with `tsc -p`. Defaults to the
+   * nearest tsconfig.json at or above the working directory, as tsc does.
+   */
+  public static async resolveAliases({
+    project,
+  }: { project?: string | undefined } = {}): Promise<ResolveAliasesResult> {
+    // loaded lazily because it imports typescript; see syncOpenapiTypescriptFiles
+    const resolveAliases = (await import('./helpers/resolveAliases.js')).default
+    const result = resolveAliases({ project })
+    console.log(
+      `resolve-aliases: rewrote ${result.specifiersRewritten} aliased imports in ${result.filesChanged} files`,
+    )
+    return result
   }
 
   public static printControllerHierarchy(controllersPath?: string) {
@@ -112,6 +138,8 @@ export default class PsychicBin {
   }
 
   public static async syncTypes() {
+    // loaded lazily because it imports typescript; see syncOpenapiTypescriptFiles
+    const ASTPsychicTypesBuilder = (await import('../cli/helpers/ASTPsychicTypesBuilder.js')).default
     await new ASTPsychicTypesBuilder().build()
   }
 
@@ -128,11 +156,16 @@ export default class PsychicBin {
     DreamCLI.logger.logStartProgress(`syncing openapi types...`)
 
     // https://rvohealth.atlassian.net/browse/PDTC-8359
-    // by dynamically importing this file, we prevent both openapi-typescript
-    // and typescript from being required as dependencies, since in production
-    // environments these won't be installed. By running migrations with
-    // --skip-sync, this function will never run, preventing the file which
-    // requires the dev dependencies from ever being imported.
+    // This helper, and the resolveAliases and ASTPsychicTypesBuilder helpers
+    // above, are imported dynamically rather than at the top of this file
+    // because they import typescript (and this one openapi-typescript), which
+    // are devDependencies that a production install does not have. This file
+    // is reachable from the public @rvoh/psychic/system entry, so a static
+    // import of any of them would make an app that imports that entry in
+    // production fail at import time. A dynamic import loads the helper only
+    // when its method runs, which production never does: migrations run with
+    // --skip-sync, so sync and post-sync never run, and resolve-aliases runs
+    // at build time.
     const syncOpenapiTypescriptFiles = (await import('./helpers/syncOpenapiTypescriptFiles.js')).default
 
     await syncOpenapiTypescriptFiles()

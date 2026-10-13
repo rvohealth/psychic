@@ -72,8 +72,8 @@ describe('DreamSerializer customAttributes', () => {
     })
   })
 
-  context('when serializing null', () => {
-    it('renders the attributes as null', () => {
+  context('when the serializer accepts null data', () => {
+    it('does not add null to the type', () => {
       const MySerializer = (user: User | null) =>
         DreamSerializer(User, user).customAttribute('email', () => `${user!.email}@peanuts.com`, {
           openapi: 'string',
@@ -214,7 +214,7 @@ describe('DreamSerializer customAttributes', () => {
     })
 
     context('when optional and flatten', () => {
-      it('the other association is wrapped in anyOf with null', () => {
+      it('the other association is its serializer, or an object whose fields, when present, are null', () => {
         const MySerializer = (data: Pet) =>
           DreamSerializer(Pet, data)
             .attribute('species')
@@ -235,10 +235,15 @@ describe('DreamSerializer customAttributes', () => {
             {
               anyOf: [
                 {
-                  $ref: '#/components/schemas/User',
+                  allOf: [{ $ref: '#/components/schemas/User' }],
                 },
                 {
-                  type: 'null',
+                  type: 'object',
+                  properties: {
+                    email: { type: 'null' },
+                    id: { type: 'null' },
+                    name: { type: 'null' },
+                  },
                 },
               ],
             },

@@ -34,6 +34,7 @@ import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
 import maybeNullOpenapiShorthandToOpenapiShorthand from './helpers/maybeNullOpenapiShorthandToOpenapiShorthand.js'
 import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import schemaToRef from './helpers/schemaToRef.js'
+import serializerRefsToOpenapi from './helpers/serializerRefsToOpenapi.js'
 import serializersAndRefsFromSerializableRef from './helpers/serializersAndRefsFromSerializableRef.js'
 import SerializerOpenapiRenderer from './SerializerOpenapiRenderer.js'
 
@@ -298,6 +299,7 @@ export default class OpenapiSegmentExpander {
       referencedSerializers: referencedSerializersAndOneOfArray.referencedSerializers,
       openapi: {
         oneOf: referencedSerializersAndOneOfArray.oneOf,
+        ...this.combinatorDescriptiveFields(bodySegment),
       },
     }
   }
@@ -334,6 +336,7 @@ export default class OpenapiSegmentExpander {
       referencedSerializers: referencedSerializersAndOneOfArray.referencedSerializers,
       openapi: {
         anyOf: referencedSerializersAndOneOfArray.anyOf,
+        ...this.combinatorDescriptiveFields(bodySegment),
       },
     }
   }
@@ -370,7 +373,32 @@ export default class OpenapiSegmentExpander {
       referencedSerializers: referencedSerializersAndOneOfArray.referencedSerializers,
       openapi: {
         allOf: referencedSerializersAndOneOfArray.allOf,
+        ...this.combinatorDescriptiveFields(bodySegment),
       },
+    }
+  }
+
+  /**
+   * @internal
+   *
+   * The keys kept beside an `allOf`, `anyOf` or `oneOf`: `description` and
+   * `summary`, the fields Dream's OpenAPI types allow beside a combinator.
+   * Every other key beside it (`type`, `required`, `additionalProperties`,
+   * `unevaluatedProperties`, …) is dropped, so no schema gains a property lock
+   * here: a flattened serializer's `allOf` wrapper keeps no lock in the
+   * document's components, which stay as open as every other serializer's.
+   * A combinator applies to every value, `null` included, so a nullable `type`
+   * beside one could never admit `null`; a combinator that may be null lists a
+   * `{ type: 'null' }` branch in its `anyOf` or `oneOf` instead.
+   */
+  private combinatorDescriptiveFields(bodySegment: OpenapiBodySegment): {
+    description?: string
+    summary?: string
+  } {
+    const { description, summary } = bodySegment as { description?: string; summary?: string }
+    return {
+      ...(description ? { description } : {}),
+      ...(summary ? { summary } : {}),
     }
   }
 
@@ -581,28 +609,10 @@ The following values will be allowed:
       enumCollector: this.enumCollector,
     }).serializerRef
 
-    if (serializerRefBodySegment.many) {
-      const returnVal = {
-        type: serializerRefBodySegment.maybeNull ? ['array', 'null'] : 'array',
-        items: serializerRef,
-      } as OpenapiSchemaArray
-
-      return {
-        referencedSerializers: [serializer],
-        openapi: returnVal,
-      }
+    return {
+      referencedSerializers: [serializer],
+      openapi: serializerRefsToOpenapi([serializerRef], serializerRefBodySegment),
     }
-
-    if (serializerRefBodySegment.maybeNull) {
-      return {
-        referencedSerializers: [serializer],
-        openapi: {
-          allOf: [serializerRef, { type: 'null' }],
-        },
-      }
-    }
-
-    return { referencedSerializers: [serializer], openapi: serializerRef }
   }
 
   /**
@@ -680,26 +690,7 @@ The following values will be allowed:
       })
     }
 
-    const serializerAnyOf = { anyOf: refs }
-
-    if (serializableRef.many) {
-      return {
-        referencedSerializers: serializers,
-        openapi: {
-          type: serializableRef.maybeNull ? ['array', 'null'] : 'array',
-          items: serializerAnyOf,
-        },
-      }
-    }
-
-    if (serializableRef.maybeNull) {
-      return {
-        referencedSerializers: serializers,
-        openapi: { anyOf: [...refs, { type: 'null' }] },
-      }
-    }
-
-    return { referencedSerializers: serializers, openapi: serializerAnyOf }
+    return { referencedSerializers: serializers, openapi: serializerRefsToOpenapi(refs, serializableRef) }
   }
 
   /**

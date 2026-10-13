@@ -1,3 +1,4 @@
+import { OpenapiValidateTarget } from '../../../src/openapi-renderer/defaults.js'
 import { OpenapiValidateOption } from '../../../src/openapi-renderer/endpoint.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
 
@@ -71,6 +72,34 @@ describe('PsychicApp#openapiValidationIsActive', () => {
 
     it('returns false for query', () => {
       expect(PsychicApp.getOrFail().openapiValidationIsActive('default', 'query')).toBe(false)
+    })
+  })
+
+  const targets: OpenapiValidateTarget[] = ['headers', 'requestBody', 'responseBody', 'query']
+
+  targets.forEach(enabledTarget => {
+    context(`all: false with ${enabledTarget}: true`, () => {
+      beforeEach(() => {
+        mockValidationValue({ all: false, [enabledTarget]: true })
+      })
+
+      targets.forEach(target => {
+        it(`returns false for ${target}`, () => {
+          expect(PsychicApp.getOrFail().openapiValidationIsActive('default', target)).toBe(false)
+        })
+      })
+    })
+
+    context(`all: true with ${enabledTarget}: false`, () => {
+      beforeEach(() => {
+        mockValidationValue({ all: true, [enabledTarget]: false })
+      })
+
+      targets.forEach(target => {
+        it(`returns true for ${target}`, () => {
+          expect(PsychicApp.getOrFail().openapiValidationIsActive('default', target)).toBe(true)
+        })
+      })
     })
   })
 

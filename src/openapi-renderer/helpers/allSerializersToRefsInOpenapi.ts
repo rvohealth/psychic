@@ -5,6 +5,7 @@
 import { OpenapiSchemaBodyShorthand, OpenapiShorthandPrimitiveTypes } from '@rvoh/dream/openapi'
 import isObject from '../../helpers/isObject.js'
 import SerializerOpenapiRenderer from '../SerializerOpenapiRenderer.js'
+import serializerRefsToOpenapi from './serializerRefsToOpenapi.js'
 import serializersAndRefsFromSerializableRef from './serializersAndRefsFromSerializableRef.js'
 
 /**
@@ -20,6 +21,8 @@ import serializersAndRefsFromSerializableRef from './serializersAndRefsFromSeria
  * The function recursively traverses the schema and transforms:
  * - `{ $serializer: SomeSerializer }` → `{ $ref: '#/components/schemas/SerializerOpenapiName' }`
  * - `{ $serializable: SomeModel, key: 'summary' }` → `{ $ref: '#/components/schemas/ModelSummarySerializer' }`
+ * - `many` and `maybeNull` beside either into an array of the ref and/or a nullable ref
+ *   (see `serializerRefsToOpenapi`)
  *
  * @param openapi - The OpenAPI schema definition that may contain serializer shorthand references
  * @returns The transformed schema with `$ref` statements replacing serializer shorthands
@@ -65,11 +68,11 @@ function transformValue(value: any): any {
 
   // If this is an object with a $serializer property, replace it with $ref
   if (value.$serializer) {
-    const { $serializer, ...rest } = value
-    const openapiRenderer = new SerializerOpenapiRenderer($serializer).serializerRef
+    const { $serializer, many, maybeNull, ...rest } = value
+    const serializerRef = new SerializerOpenapiRenderer($serializer).serializerRef
     return {
       ...rest,
-      ...openapiRenderer,
+      ...serializerRefsToOpenapi([serializerRef], { many, maybeNull }),
     }
     //
   } else if (value.$serializable) {
@@ -77,16 +80,11 @@ function transformValue(value: any): any {
     const { refs } = serializersAndRefsFromSerializableRef({ $serializable, $serializableSerializerKey, key })
 
     if (refs.length === 0) return rest
-    if (refs.length === 1) {
-      return {
-        ...rest,
-        ...refs[0],
-      }
-    }
 
+    const { many, maybeNull, ...restWithoutManyAndMaybeNull } = rest
     return {
-      ...rest,
-      anyOf: refs,
+      ...restWithoutManyAndMaybeNull,
+      ...serializerRefsToOpenapi(refs, { many, maybeNull }),
     }
 
     //
