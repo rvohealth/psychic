@@ -154,7 +154,7 @@ ${INDENT}  --only=index,show,update     # modify only (e.g., settings management
       )
       .option(
         '--sti-base-serializer',
-        `Creates generically typed base serializers (default and summary) that accept a \`StiChildClass\` parameter. When a \`type\` column is passed, as in the example below, the default serializer includes the \`type\` attribute with a per-child enum constraint, which allows consuming applications to determine the response shape based on the STI type discriminator. The summary serializer includes only \`id\`, so responses from the generated \`index\` action, which renders the summary, carry no \`type\`.
+        `Creates generically typed base serializers (summary and default) that accept a \`StiChildClass\` parameter. When a \`type\` column is passed, as in the example below, they render the \`type\` attribute with an OpenAPI enum of just the STI child's class name, which allows consuming applications to determine the response shape based on the STI type discriminator. With @rvoh/dream 2.36.0 or newer, the summary serializer renders \`type\` right after \`id\` and the default serializer inherits it, so responses from the generated \`index\` action, which renders the summary, carry \`type\`; with an older Dream, only the default serializer renders \`type\`, and the summary includes only \`id\`.
 ${INDENT}
 ${INDENT}Use this when generating the parent model of an STI hierarchy. After generating the parent, use g:sti-child for each child type.
 ${INDENT}
