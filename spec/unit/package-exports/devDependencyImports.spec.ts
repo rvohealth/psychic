@@ -128,7 +128,7 @@ function importChain(graph: StaticImportGraph, file: string): string[] {
 }
 
 // one line per static import of a devDependency the entry reaches, e.g.
-// `src/package-exports/system.ts -> src/bin/index.ts -> src/bin/helpers/resolveAliases.ts -> typescript`
+// `src/package-exports/system.ts -> src/bin/index.ts -> src/cli/helpers/ASTPsychicTypesBuilder.ts -> typescript`
 function devOnlyImportChains(entry: string): string[] {
   const graph = staticImportGraph(entry)
   const chains: string[] = []
@@ -152,10 +152,11 @@ describe('the package exports', () => {
   })
 
   it('reports a static import of a devDependency with the chain of imports that reaches it', () => {
-    // resolveAliases imports typescript at the top of its file, which is why
-    // PsychicBin.resolveAliases loads it with a dynamic import
-    expect(devOnlyImportChains(path.join(srcDir, 'bin/helpers/resolveAliases.ts'))).toEqual([
-      'src/bin/helpers/resolveAliases.ts -> typescript',
+    // ASTPsychicTypesBuilder imports typescript at the top of its file, which is
+    // why PsychicBin.syncTypes loads it with a dynamic import
+    expect(devOnlyImportChains(path.join(srcDir, 'cli/helpers/ASTPsychicTypesBuilder.ts'))).toEqual([
+      'src/cli/helpers/ASTPsychicTypesBuilder.ts -> src/cli/helpers/ASTBuilder.ts -> typescript',
+      'src/cli/helpers/ASTPsychicTypesBuilder.ts -> typescript',
     ])
   })
 
