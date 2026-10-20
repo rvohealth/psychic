@@ -6,3 +6,10 @@ export const BalloonSummarySerializer = (data: Balloon, passthrough: object) =>
 
 export default (data: Balloon, passthrough: object) =>
   BalloonSummarySerializer(data, passthrough).attribute('color')
+
+export const BalloonWithTypeOverrideSerializer = (data: Balloon) =>
+  DreamSerializer(Balloon, data).attribute('type', {
+    openapi: {
+      enum: ['BalloonLatex'],
+    },
+  })

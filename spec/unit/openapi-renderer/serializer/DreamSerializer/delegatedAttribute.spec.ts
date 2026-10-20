@@ -32,18 +32,18 @@ describe('DreamSerializer delegated attributes', () => {
     })
   })
 
-  it('can override with explicitly provided OpenAPI shapes', () => {
+  it('can override a virtual column or plain property target with explicitly provided OpenAPI shapes', () => {
     const MySerializer = (data: Pet) =>
       DreamSerializer(Pet, data)
-        .delegatedAttribute('user', 'name', { openapi: 'string' })
-        .delegatedAttribute('user', 'birthdate', { openapi: 'date' })
+        .delegatedAttribute('user', 'password', { openapi: 'string' })
+        .delegatedAttribute('user', 'openapiVirtualSpecTest3', { openapi: 'date' })
 
     const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
     expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
-      name: {
+      password: {
         type: 'string',
       },
-      birthdate: {
+      openapiVirtualSpecTest3: {
         type: 'string',
         format: 'date',
       },
@@ -165,15 +165,15 @@ describe('DreamSerializer delegated attributes', () => {
     it('keeps the key required because the fallback declaration still writes it', () => {
       const MySerializer = (data: Pet) =>
         DreamSerializer(Pet, data)
-          .delegatedAttribute('user', 'name', { openapi: 'string' })
-          .delegatedAttribute('user', 'name', { openapi: 'string', required: false })
+          .delegatedAttribute('user', 'name')
+          .delegatedAttribute('user', 'name', { required: false })
 
       const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
       expect(serializerOpenapiRenderer.renderedOpenapi().openapi).toMatchObject({
         required: ['name'],
         properties: {
           name: {
-            type: 'string',
+            type: ['string', 'null'],
           },
         },
       })
@@ -182,19 +182,15 @@ describe('DreamSerializer delegated attributes', () => {
     it('uses the renamed output key in properties and required when shadowing with as', () => {
       const MySerializer = (data: Pet) =>
         DreamSerializer(Pet, data)
-          .delegatedAttribute('user', 'name', { as: 'displayName', openapi: 'string' })
-          .delegatedAttribute('user', 'name', {
-            as: 'displayName',
-            openapi: 'string',
-            required: false,
-          })
+          .delegatedAttribute('user', 'name', { as: 'displayName' })
+          .delegatedAttribute('user', 'name', { as: 'displayName', required: false })
 
       const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
       expect(serializerOpenapiRenderer.renderedOpenapi().openapi).toMatchObject({
         required: ['displayName'],
         properties: {
           displayName: {
-            type: 'string',
+            type: ['string', 'null'],
           },
         },
       })
@@ -260,42 +256,45 @@ describe('DreamSerializer delegated attributes', () => {
       })
     })
 
-    context('when the openapi option is a hand-written enum over a non-nullable column', () => {
+    context('when the openapi option is a hand-written non-nullable enum', () => {
       it('adds null to the type and to the enum', () => {
         const MySerializer = (data: Balloon) =>
-          DreamSerializer(Balloon, data).delegatedAttribute('user', 'passwordDigest', {
+          DreamSerializer(Balloon, data).delegatedAttribute('user', 'openapiVirtualSpecTest3', {
             openapi: { type: 'string', enum: ['hashed', 'unhashed'] },
           })
 
-        const { passwordDigest } = new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']()
-          .attributes
-        expect(passwordDigest).toEqual({
+        const { openapiVirtualSpecTest3 } = new SerializerOpenapiRenderer(MySerializer)[
+          'renderedOpenapiAttributes'
+        ]().attributes
+        expect(openapiVirtualSpecTest3).toEqual({
           type: ['string', 'null'],
           enum: ['hashed', 'unhashed', null],
         })
-        expect(validates(passwordDigest, null)).toBe(true)
-        expect(validates(passwordDigest, 'hashed')).toBe(true)
-        expect(validates(passwordDigest, 'unhashed')).toBe(true)
-        expect(validates(passwordDigest, 'plain')).toBe(false)
+        expect(validates(openapiVirtualSpecTest3, null)).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'hashed')).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'unhashed')).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'plain')).toBe(false)
       })
     })
 
-    context('when the openapi option is a hand-written enum over a nullable column', () => {
+    context('when the openapi option is a hand-written nullable enum', () => {
       it('adds null to the enum without repeating it in the type', () => {
         const MySerializer = (data: Balloon) =>
-          DreamSerializer(Balloon, data).delegatedAttribute('user', 'name', {
-            openapi: { type: 'string', enum: ['Fred', 'Wilma'] },
+          DreamSerializer(Balloon, data).delegatedAttribute('user', 'openapiVirtualSpecTest3', {
+            openapi: { type: ['string', 'null'], enum: ['Fred', 'Wilma'] },
           })
 
-        const { name } = new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']().attributes
-        expect(name).toEqual({
+        const { openapiVirtualSpecTest3 } = new SerializerOpenapiRenderer(MySerializer)[
+          'renderedOpenapiAttributes'
+        ]().attributes
+        expect(openapiVirtualSpecTest3).toEqual({
           type: ['string', 'null'],
           enum: ['Fred', 'Wilma', null],
         })
-        expect(validates(name, null)).toBe(true)
-        expect(validates(name, 'Fred')).toBe(true)
-        expect(validates(name, 'Wilma')).toBe(true)
-        expect(validates(name, 'Barney')).toBe(false)
+        expect(validates(openapiVirtualSpecTest3, null)).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'Fred')).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'Wilma')).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'Barney')).toBe(false)
       })
     })
   })

@@ -65,6 +65,11 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
     )
 
     if (metadata?.type) {
+      // the serializer's openapi is layered over the virtual attribute's
+      // declared type, as the column branches below layer it over the column's
+      // shape. TypeScript spreads every pairing of the two unions (a `type`
+      // beside an `anyOf`, say), so the merge is asserted to be a schema, as
+      // it is in those branches
       return {
         ...new OpenapiSegmentExpander(metadata.type, {
           renderOpts: {
@@ -79,7 +84,7 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
           target: 'request',
         }).render().openapi,
         ...openapiObject,
-      }
+      } as OpenapiSchemaBody
     } else if (openapi) {
       return openapiObject
     } else {

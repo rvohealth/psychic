@@ -297,7 +297,7 @@ export default function routes(r: PsychicRouter) {
 
   // fixture routes for the OpenAPI-derived enum sync unit specs (the
   // controllers scope these endpoints to the internal/mobile/enumTest specs)
-  r.get('enum-sync-tests/internal/species-subset', InternalEnumSyncTestsController, 'speciesSubset')
+  r.get('enum-sync-tests/internal/type-subset', InternalEnumSyncTestsController, 'typeSubset')
   r.post('enum-sync-tests/internal/treat-request-body', InternalEnumSyncTestsController, 'treatRequestBody')
   r.post(
     'enum-sync-tests/internal/nested-for-combining',
@@ -305,16 +305,13 @@ export default function routes(r: PsychicRouter) {
     'nestedForCombining',
   )
   r.get('enum-sync-tests/mobile/balloon-color', MobileEnumSyncTestsController, 'balloonColorResponse')
-  r.get('enum-sync-tests/mobile/treats-items-subset', MobileEnumSyncTestsController, 'treatsItemsSubset')
+  r.get('enum-sync-tests/mobile/type-latex-subset', MobileEnumSyncTestsController, 'typeLatexSubset')
+  r.get('enum-sync-tests/mobile/type-mylar-subset', MobileEnumSyncTestsController, 'typeMylarSubset')
+  r.get('enum-sync-tests/mobile/treats', MobileEnumSyncTestsController, 'treatsResponse')
   r.post('enum-sync-tests/mobile/species-shadowed', MobileEnumSyncTestsController, 'speciesShadowed')
   r.get('enum-sync-tests/mobile/hand-written-enum', MobileEnumSyncTestsController, 'handWrittenEnum')
-  r.get('enum-sync-tests/enum-test/color-blue', EnumSyncCrossChainTestsController, 'colorBlueSubset')
-  r.get('enum-sync-tests/enum-test/color-green', EnumSyncCrossChainTestsController, 'colorGreenSubset')
-  r.post(
-    'enum-sync-tests/enum-test/species-union',
-    EnumSyncCrossChainTestsController,
-    'speciesOverrideAndRequestBody',
-  )
+  r.get('enum-sync-tests/enum-test/type-latex-subset', EnumSyncCrossChainTestsController, 'typeLatexSubset')
+  r.get('enum-sync-tests/enum-test/type', EnumSyncCrossChainTestsController, 'typeResponse')
 
   // ensure that random middleware can still be provided top-level,
   // same as with a koa application

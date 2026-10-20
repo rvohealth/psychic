@@ -33,10 +33,8 @@ import {
   CommentWithOneOfArraySerializer,
   CommentWithOneOfObjectSerializer,
 } from '../../../../test-app/src/app/serializers/CommentSerializer.js'
-import {
-  PetWithFavoriteTreatsOverrideSerializer,
-  PetWithFavoriteTreatsSerializer,
-} from '../../../../test-app/src/app/serializers/PetSerializer.js'
+import { BalloonWithTypeOverrideSerializer } from '../../../../test-app/src/app/serializers/BalloonSerializer.js'
+import { PetWithFavoriteTreatsSerializer } from '../../../../test-app/src/app/serializers/PetSerializer.js'
 import MyViewModel from '../../../../test-app/src/app/view-models/MyViewModel.js'
 
 describe('OpenapiEndpointRenderer', () => {
@@ -388,10 +386,10 @@ The following values will be allowed:
             )
           })
 
-          context('the enum values are explicitly overridden', () => {
+          context('the enum values of the STI type column are explicitly overridden', () => {
             it('provides the overridden values instead', () => {
               const renderer = new OpenapiEndpointRenderer(
-                PetWithFavoriteTreatsOverrideSerializer,
+                BalloonWithTypeOverrideSerializer,
                 UsersController,
                 'howyadoin',
                 {},
@@ -408,27 +406,13 @@ The following values will be allowed:
 
               expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
                 expect.objectContaining({
-                  PetWithFavoriteTreatsOverride: {
+                  BalloonWithTypeOverride: {
                     type: 'object',
-                    required: ['favoriteTreat', 'favoriteTreats'],
+                    required: ['type'],
                     properties: {
-                      favoriteTreat: {
-                        type: ['string', 'null'],
-                        description:
-                          'The following values will be allowed:\n' +
-                          '  overridden field 1,\n' +
-                          '  overridden field 2',
-                      },
-                      favoriteTreats: {
-                        type: ['array', 'null'],
-                        items: {
-                          type: 'string',
-                          description:
-                            '\n' +
-                            'The following values will be allowed:\n' +
-                            '  overridden field 1,\n' +
-                            '  overridden field 2',
-                        },
+                      type: {
+                        type: 'string',
+                        description: 'The following values will be allowed:\n' + '  BalloonLatex',
                       },
                     },
                   },

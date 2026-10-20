@@ -773,8 +773,10 @@ function mergeableRef(openapi: OpenapiSchemaBodyShorthand): OpenapiSchemaBodySho
 // `mergeableRef`). A lone `$ref` sibling is left as it is: fast-json-stringify
 // resolves it before merging
 function withMergeableRefs(openapi: OpenapiSchemaBodyShorthand): OpenapiSchemaBodyShorthand {
-  const anyOf = isObject(openapi) ? (openapi as OpenapiSchemaShorthandExpressionAnyOf).anyOf : undefined
-  return Array.isArray(anyOf) ? { ...openapi, anyOf: anyOf.map(mergeableRef) } : openapi
+  const anyOfSchema = isObject(openapi) ? (openapi as OpenapiSchemaShorthandExpressionAnyOf) : undefined
+  return Array.isArray(anyOfSchema?.anyOf)
+    ? { ...anyOfSchema, anyOf: anyOfSchema.anyOf.map(mergeableRef) }
+    : openapi
 }
 
 // the keys a flattened customAttribute's openapi spreads into the object

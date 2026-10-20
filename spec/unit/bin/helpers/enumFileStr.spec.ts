@@ -1,6 +1,7 @@
 import enumsFileStr from '../../../../src/bin/helpers/enumsFileStr.js'
 import {
   BalloonColorsEnumValues,
+  BalloonTypesEnumValues,
   PetTreatsEnumValues,
   SpeciesTypesEnumValues,
 } from '../../../../test-app/src/types/db.js'
@@ -74,64 +75,48 @@ export const BalloonColorsEnumValues = [
     })
 
     context('serializer enum: overrides', () => {
+      // Dream lets a serializer narrow the enum of the STI type column only, so
+      // balloon_types_enum carries every override site
       it('exports only the override subset when the enum has no other site in the selected spec', () => {
-        // species_types_enum's only internal-spec site is
-        // PetSpeciesSubsetSerializer's `enum: ['cat']` override
+        // balloon_types_enum's only internal-spec site is
+        // BalloonTypeLatexSubsetSerializer's `enum: ['BalloonLatex']` override
         expect(enumsFileStr('internal')).toEqual(
           expect.stringContaining(`\
-export const SpeciesTypesEnumValues = [
-  'cat'
+export const BalloonTypesEnumValues = [
+  'BalloonLatex'
 ] as const`),
         )
       })
 
       it('never emits a value hidden by the override anywhere in the file', () => {
-        expect(enumsFileStr('internal')).not.toEqual(expect.stringContaining('noncat'))
+        expect(enumsFileStr('internal')).not.toEqual(expect.stringContaining('BalloonMylar'))
       })
 
       it('unions the subsets when the same enum is overridden differently at two sites in one spec', () => {
-        // the enumTest spec renders balloon_colors_enum at two serializer
-        // sites, overridden to ['blue'] and ['green'] respectively
-        const fileStr = enumsFileStr('enumTest')
-
-        expect(fileStr).toEqual(
+        // the mobile spec renders balloon_types_enum at two serializer sites,
+        // overridden to ['BalloonLatex'] and ['BalloonMylar'] respectively; a
+        // collector keeping only the first or the last site would drop one
+        expect(enumsFileStr('mobile')).toEqual(
           expect.stringContaining(`\
-export const BalloonColorsEnumValues = [
-  'blue',
-  'green'
+export const BalloonTypesEnumValues = [
+  'BalloonLatex',
+  'BalloonMylar'
 ] as const`),
         )
-        expect(fileStr).not.toEqual(expect.stringContaining("'red'"))
       })
 
-      it('exports the full value set when the enum also reaches the spec through a request body', () => {
-        // in the enumTest spec, species_types_enum appears via
-        // PetSpeciesSubsetSerializer's `enum: ['cat']` override AND via a
-        // model-derived request body; request bodies have no override
-        // channel, so the union is the full pg value set
+      it('exports the full value set when the enum also reaches the spec through a site without an override', () => {
+        // in the enumTest spec, balloon_types_enum appears via
+        // BalloonTypeLatexSubsetSerializer's `enum: ['BalloonLatex']` override
+        // AND via BalloonTypeResponseSerializer, which renders the column
+        // without one, so the union is the full pg value set
         expect(enumsFileStr('enumTest')).toEqual(
           expect.stringContaining(`\
-export const SpeciesTypesEnumValues = [
-  'cat',
-  'noncat'
+export const BalloonTypesEnumValues = [
+  'BalloonLatex',
+  'BalloonMylar'
 ] as const`),
         )
-      })
-
-      it('honors an items-level override subset on an array enum column', () => {
-        // pet_treats_enum's only mobile-spec site is
-        // PetTreatsItemsSubsetSerializer, whose override carries its enum at
-        // items.enum; a collector falling back to the column's full value set
-        // (because the top-level `enum` key is absent) would fail this
-        const fileStr = enumsFileStr('mobile')
-
-        expect(fileStr).toEqual(
-          expect.stringContaining(`\
-export const PetTreatsEnumValues = [
-  'snick snowcks'
-] as const`),
-        )
-        expect(fileStr).not.toEqual(expect.stringContaining('efishy feesh'))
       })
     })
 
@@ -139,6 +124,15 @@ export const PetTreatsEnumValues = [
       // pet_treats_enum reaches the mobile spec only through the
       // `pet_treats_enum[]` column Pet#favoriteTreats
       const fileStr = enumsFileStr('mobile')
+
+      expect(fileStr).toEqual(
+        expect.stringContaining(`\
+export const PetTreatsEnumValues = [
+  'efishy feesh',
+  'snick snowcks'
+] as const`),
+      )
+
       const exportedNames = [...fileStr.matchAll(/export const (\S+) = \[/g)].map(match => match[1])
 
       expect(exportedNames).toContain('PetTreatsEnumValues')
@@ -189,14 +183,14 @@ export const BalloonColorsEnumValues = [
     it('keeps each spec isolated, with no cross-run bleed', () => {
       const internalBefore = enumsFileStr('internal')
 
-      // the enumTest spec exports the full species_types_enum value set;
+      // the enumTest spec exports the full balloon_types_enum value set;
       // rendering it in between must not leak values into the internal spec's
       // subset export
-      expect(enumsFileStr('enumTest')).toEqual(expect.stringContaining("'noncat'"))
+      expect(enumsFileStr('enumTest')).toEqual(expect.stringContaining("'BalloonMylar'"))
 
       const internalAfter = enumsFileStr('internal')
       expect(internalAfter).toEqual(internalBefore)
-      expect(internalAfter).not.toEqual(expect.stringContaining('noncat'))
+      expect(internalAfter).not.toEqual(expect.stringContaining('BalloonMylar'))
     })
   })
 
@@ -204,6 +198,7 @@ export const BalloonColorsEnumValues = [
     const speciesBefore = JSON.stringify(SpeciesTypesEnumValues)
     const treatsBefore = JSON.stringify(PetTreatsEnumValues)
     const colorsBefore = JSON.stringify(BalloonColorsEnumValues)
+    const typesBefore = JSON.stringify(BalloonTypesEnumValues)
 
     enumsFileStr()
     enumsFileStr('internal')
@@ -213,6 +208,7 @@ export const BalloonColorsEnumValues = [
     expect(JSON.stringify(SpeciesTypesEnumValues)).toEqual(speciesBefore)
     expect(JSON.stringify(PetTreatsEnumValues)).toEqual(treatsBefore)
     expect(JSON.stringify(BalloonColorsEnumValues)).toEqual(colorsBefore)
+    expect(JSON.stringify(BalloonTypesEnumValues)).toEqual(typesBefore)
   })
 
   it('derives enums synchronously from the in-memory render, leaving no room for a database roundtrip', () => {
