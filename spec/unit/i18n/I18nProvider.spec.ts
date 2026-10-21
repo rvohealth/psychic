@@ -1,6 +1,6 @@
 import I18nDefaultLocales from '../../../src/i18n/conf/I18nDefaultLocales.js'
 import I18nProvider, {
-  I18nInterpolationKeyContainsBrace,
+  I18nInterpolationKeyIsNotPlaceholderName,
   I18nInterpolationReceivedNull,
   I18nInterpolationReceivedUndefined,
 } from '../../../src/i18n/provider.js'
@@ -198,9 +198,9 @@ describe('I18nProvider.provide', () => {
     })
 
     context('with an interpolation key that contains a closing brace', () => {
-      it('throws I18nInterpolationKeyContainsBrace naming the key', () => {
+      it('throws I18nInterpolationKeyIsNotPlaceholderName naming the key', () => {
         expect(() => i18n('en-US', 'interpolation.unusualKeys', { 'a}b': 'braced' })).toThrowError(
-          I18nInterpolationKeyContainsBrace,
+          I18nInterpolationKeyIsNotPlaceholderName,
         )
         expect(() =>
           i18n('en-US', 'interpolation.unusualKeys', { a: 'short', 'a}b': 'braced' }),
@@ -215,9 +215,9 @@ describe('I18nProvider.provide', () => {
     })
 
     context('with an interpolation key that contains an opening brace', () => {
-      it('throws I18nInterpolationKeyContainsBrace naming the key', () => {
+      it('throws I18nInterpolationKeyIsNotPlaceholderName naming the key', () => {
         expect(() => i18n('en-US', 'interpolation.literalOpening', { 'a{b': 'braced' })).toThrowError(
-          I18nInterpolationKeyContainsBrace,
+          I18nInterpolationKeyIsNotPlaceholderName,
         )
         expect(() =>
           i18n('en-US', 'interpolation.literalOpening', { name: 'Ana', 'a{b': 'braced' }),

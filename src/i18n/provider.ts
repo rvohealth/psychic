@@ -109,7 +109,7 @@ function applyInterpolations(
 
   const replacements = new Map<string, string>()
   Object.keys(interpolations).forEach(key => {
-    if (!isPlaceholderName(key)) throw new I18nInterpolationKeyContainsBrace(i18nPathString, key)
+    if (!isPlaceholderName(key)) throw new I18nInterpolationKeyIsNotPlaceholderName(i18nPathString, key)
 
     const interpolationValue = interpolations[key]
     if (interpolationValue === undefined) throw new I18nInterpolationReceivedUndefined(i18nPathString, key)
@@ -140,22 +140,23 @@ function findTranslation(i18nObject: unknown, i18nPath: string[]): string | unde
   return typeof node === 'string' ? node : undefined
 }
 
-// Not exported from the package: a key containing `{` or `}` can never match a
-// placeholder, so passing one is a programmer error to fix, not to catch.
-export class I18nInterpolationKeyContainsBrace extends Error {
+// Thrown when an interpolation key fails isPlaceholderName, i.e. contains `{`
+// or `}`, so it can never match a placeholder. Not exported from the package:
+// passing one is a programmer error to fix, not to catch.
+export class I18nInterpolationKeyIsNotPlaceholderName extends Error {
   private i18nPathString: string
   private interpolationKey: string
 
   constructor(i18nPathString: string, interpolationKey: string) {
     super()
-    Object.setPrototypeOf(this, I18nInterpolationKeyContainsBrace.prototype)
+    Object.setPrototypeOf(this, I18nInterpolationKeyIsNotPlaceholderName.prototype)
     this.i18nPathString = i18nPathString
     this.interpolationKey = interpolationKey
   }
 
   public override get message() {
     return `
-interpolation key contains a brace ("{" or "}"), which a placeholder name cannot:
+interpolation key is not a placeholder name, since it contains a brace ("{" or "}"):
 i18n path string: ${this.i18nPathString}
 interpolationKey: ${this.interpolationKey}
     `
