@@ -8,6 +8,7 @@ import OpenapiEndpointRenderer, {
   OpenapiRenderOpts,
   ToSchemaObjectOpts,
 } from '../../../../src/openapi-renderer/endpoint.js'
+import schemaForFastJsonStringify from '../../../../src/openapi-renderer/helpers/schemaForFastJsonStringify.js'
 import SerializerOpenapiRenderer from '../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 import UsersController from '../../../../test-app/src/app/controllers/UsersController.js'
 import Balloon from '../../../../test-app/src/app/models/Balloon.js'
@@ -66,7 +67,9 @@ function validateAgainstDocument(payload: unknown, serializer: Serializer) {
 // serializes as an endpoint with `fastJsonStringify: true` does: with fast-json-stringify,
 // compiled from the response schema as PsychicController#getFastJsonStringifyFunction compiles it
 function stringifyAgainstDocument(payload: unknown, serializer: Serializer) {
-  const stringify = fastJsonStringify(documentSchema(serializer), { ajv: { validateFormats: false } })
+  const stringify = fastJsonStringify(schemaForFastJsonStringify(documentSchema(serializer)), {
+    ajv: { validateFormats: false },
+  })
   return JSON.parse(stringify(payload)) as unknown
 }
 
@@ -262,9 +265,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
       'Contact',
     )
 
-    // each ref is in an `allOf`, which fast-json-stringify merges without losing
-    // a sibling's fields (see `mergeableRef` in SerializerOpenapiRenderer)
-    const contactRef = { allOf: [{ $ref: '#/components/schemas/Contact' }] }
+    const contactRef = { $ref: '#/components/schemas/Contact' }
     const contactFieldsNull = {
       type: 'object',
       properties: { email: { type: 'null' }, name: { type: 'null' } },
@@ -352,8 +353,8 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
             parentInline,
             {
               anyOf: [
-                { allOf: [{ $ref: '#/components/schemas/BalloonLatex' }] },
-                { allOf: [{ $ref: '#/components/schemas/BalloonMylar' }] },
+                { $ref: '#/components/schemas/BalloonLatex' },
+                { $ref: '#/components/schemas/BalloonMylar' },
                 {
                   type: 'object',
                   properties: {
@@ -428,7 +429,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
           parentInline,
           {
             anyOf: [
-              { allOf: [{ $ref: '#/components/schemas/ContactWithAddress' }] },
+              { $ref: '#/components/schemas/ContactWithAddress' },
               {
                 type: 'object',
                 properties: {
@@ -463,7 +464,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
           { type: 'object', required: [], properties: {} },
           {
             anyOf: [
-              { allOf: [{ $ref: '#/components/schemas/PersonName' }] },
+              { $ref: '#/components/schemas/PersonName' },
               { type: 'object', properties: { first_name: { type: 'null' } } },
             ],
           },
@@ -534,10 +535,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
 
     context('beside a flattened STI base model', () => {
       const stiRefs = {
-        anyOf: [
-          { allOf: [{ $ref: '#/components/schemas/BalloonLatex' }] },
-          { allOf: [{ $ref: '#/components/schemas/BalloonMylar' }] },
-        ],
+        anyOf: [{ $ref: '#/components/schemas/BalloonLatex' }, { $ref: '#/components/schemas/BalloonMylar' }],
       }
 
       async function balloons() {
@@ -663,10 +661,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
           allOf: [
             parentInline,
             {
-              anyOf: [
-                { allOf: [{ $ref: '#/components/schemas/Address' }] },
-                { allOf: [{ $ref: '#/components/schemas/Billing' }] },
-              ],
+              anyOf: [{ $ref: '#/components/schemas/Address' }, { $ref: '#/components/schemas/Billing' }],
             },
             { anyOf: [contactRef, contactFieldsNull] },
           ],
@@ -699,7 +694,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
             .attribute('email', { openapi: 'string' }),
         'Owner',
       )
-      const ownerRef = { allOf: [{ $ref: '#/components/schemas/Owner' }] }
+      const ownerRef = { $ref: '#/components/schemas/Owner' }
 
       interface Tag {
         id: string
@@ -778,7 +773,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
               { $ref: '#/components/schemas/Owner' },
               {
                 anyOf: [
-                  { allOf: [{ $ref: '#/components/schemas/Tag' }] },
+                  { $ref: '#/components/schemas/Tag' },
                   { type: 'object', properties: { label: { type: 'null' } } },
                 ],
               },
@@ -823,7 +818,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
               { $ref: '#/components/schemas/Owner' },
               {
                 anyOf: [
-                  { allOf: [{ $ref: '#/components/schemas/Tag' }] },
+                  { $ref: '#/components/schemas/Tag' },
                   { type: 'object', properties: { label: { type: 'null' } } },
                 ],
               },

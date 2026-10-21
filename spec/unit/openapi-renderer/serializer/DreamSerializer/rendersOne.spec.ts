@@ -118,7 +118,7 @@ describe('DreamSerializer rendersOne', () => {
               {
                 anyOf: [
                   {
-                    allOf: [{ $ref: '#/components/schemas/CustomUser' }],
+                    $ref: '#/components/schemas/CustomUser',
                   },
                   {
                     type: 'object',
@@ -228,7 +228,7 @@ describe('DreamSerializer rendersOne', () => {
             {
               anyOf: [
                 {
-                  allOf: [{ $ref: '#/components/schemas/User' }],
+                  $ref: '#/components/schemas/User',
                 },
                 {
                   type: 'object',

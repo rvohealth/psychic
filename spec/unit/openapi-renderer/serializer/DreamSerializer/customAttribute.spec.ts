@@ -235,7 +235,7 @@ describe('DreamSerializer customAttributes', () => {
             {
               anyOf: [
                 {
-                  allOf: [{ $ref: '#/components/schemas/User' }],
+                  $ref: '#/components/schemas/User',
                 },
                 {
                   type: 'object',

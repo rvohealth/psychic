@@ -53,6 +53,7 @@ import renderSerializerBuilders, { dataIsSerializerBuilder } from '../helpers/re
 import toJson from '../helpers/toJson.js'
 import OpenapiEndpointRenderer from '../openapi-renderer/endpoint.js'
 import OpenapiPayloadValidator from '../openapi-renderer/helpers/OpenapiPayloadValidator.js'
+import schemaForFastJsonStringify from '../openapi-renderer/helpers/schemaForFastJsonStringify.js'
 import { cacheStringify, getCachedStringify } from '../openapi-renderer/helpers/stringify-cache.js'
 import PsychicApp from '../psychic-app/index.js'
 import Params, {
@@ -986,10 +987,11 @@ export default class PsychicController {
       const cachedStringify = getCachedStringify(cacheKey)
       if (cachedStringify) return cachedStringify
 
+      const schema = schemaForFastJsonStringify(schemaWithComponents)
       let stringifyFn: <TDoc extends object = object>(doc: TDoc) => string
 
       if (debuglog('json').enabled) {
-        const result = fastJsonStringify(schemaWithComponents, {
+        const result = fastJsonStringify(schema, {
           mode: 'debug',
           ajv: { validateFormats: false },
         })
@@ -997,7 +999,7 @@ export default class PsychicController {
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
         stringifyFn = fastJsonStringify.restore(result as any)
       } else {
-        stringifyFn = fastJsonStringify(schemaWithComponents, { ajv: { validateFormats: false } })
+        stringifyFn = fastJsonStringify(schema, { ajv: { validateFormats: false } })
       }
 
       cacheStringify(cacheKey, stringifyFn)

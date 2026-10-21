@@ -324,9 +324,7 @@ export default class SerializerOpenapiRenderer {
                 )
                 //
               } else if (attribute.options.flatten) {
-                this.allOfSiblings.push(
-                  withMergeableRefs(referencedSerializersAndOpenapiSchemaBodyShorthand.openapi),
-                )
+                this.allOfSiblings.push(referencedSerializersAndOpenapiSchemaBodyShorthand.openapi)
                 //
               } else if (optional) {
                 accumulator[outputAttributeName] = {
@@ -547,7 +545,7 @@ export default class SerializerOpenapiRenderer {
       OpenapiSchemaShorthandExpressionSerializerRef & OpenapiSchemaShorthandExpressionSerializableRef
     >
     if (!isObject(openapi) || !(serializerRef.$serializer || serializerRef.$serializable))
-      return withMergeableRefs(allSerializersToRefsInOpenapi(openapi))
+      return allSerializersToRefsInOpenapi(openapi)
 
     const { many, maybeNull, ...singleSerializerRef } = serializerRef
     const refOpenapi = allSerializersToRefsInOpenapi(singleSerializerRef as OpenapiSchemaBodyShorthand)
@@ -555,8 +553,7 @@ export default class SerializerOpenapiRenderer {
     // flattening an array would spread its indexes into this object, so a
     // flattened `many` has no faithful shape; it renders the ref(s) alone, as
     // it did before `many` was expanded
-    if (many) return refOpenapi
-    if (!maybeNull) return withMergeableRefs(refOpenapi)
+    if (many || !maybeNull) return refOpenapi
 
     const serializers = allSerializersFromHandWrittenOpenapi(
       singleSerializerRef as OpenapiSchemaBodyShorthand,
@@ -576,8 +573,8 @@ export default class SerializerOpenapiRenderer {
    * sibling can never match it. When the nested value is null, Dream leaves the
    * nested fields out (a flattened customAttribute spreads nothing) or sends
    * them as null (a flattened rendersOne renders its serializer over `{}`). So
-   * the sibling is the nested serializer (its ref inside an `allOf`; see
-   * `mergeableRef`), or an object whose nested fields are null when present.
+   * the sibling is the nested serializer (its ref), or an object whose nested
+   * fields are null when present.
    * Listing those fields also lets the `allOf` wrapper's
    * `unevaluatedProperties: false` accept them.
    *
@@ -619,7 +616,7 @@ export default class SerializerOpenapiRenderer {
 
     return {
       anyOf: [
-        ...refs.map(mergeableRef),
+        ...refs,
         {
           type: 'object',
           properties: Object.fromEntries(fieldNames.map(fieldName => [fieldName, { type: 'null' }])),
@@ -764,30 +761,6 @@ function associationSerializers(
   if (serializers.length === 0) throw new NoSerializerFoundForRendersOneAndMany(attribute.name)
 
   return { optional, serializers }
-}
-
-// a `$ref` in the `anyOf` of a flattened `allOf` sibling, inside an `allOf`.
-//
-// fast-json-stringify serializes a flattened object by merging the members of
-// its `allOf`, and merges two members that are `anyOf`s into one `anyOf` of
-// every pairing of their branches. A pairing holding a bare `$ref` keeps only
-// that `$ref` (two of them keep neither), losing the other branch, so the
-// nested fields are left out of the response. A `$ref` inside an `allOf` is
-// merged with the other branch instead. `{ allOf: [$ref] }` validates
-// identically to `$ref`, so the document means the same thing either way.
-function mergeableRef(openapi: OpenapiSchemaBodyShorthand): OpenapiSchemaBodyShorthand {
-  return isObject(openapi) && (openapi as OpenapiSchemaExpressionRef).$ref ? { allOf: [openapi] } : openapi
-}
-
-// a flattened `allOf` sibling with each `$ref` in its `anyOf` (the children
-// of an STI base model, or a hand-written `anyOf`) inside an `allOf` (see
-// `mergeableRef`). A lone `$ref` sibling is left as it is: fast-json-stringify
-// resolves it before merging
-function withMergeableRefs(openapi: OpenapiSchemaBodyShorthand): OpenapiSchemaBodyShorthand {
-  const anyOfSchema = isObject(openapi) ? (openapi as OpenapiSchemaShorthandExpressionAnyOf) : undefined
-  return Array.isArray(anyOfSchema?.anyOf)
-    ? { ...anyOfSchema, anyOf: anyOfSchema.anyOf.map(mergeableRef) }
-    : openapi
 }
 
 // the keys a flattened customAttribute's `openapi` declares it spreads into
