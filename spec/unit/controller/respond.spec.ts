@@ -94,35 +94,9 @@ describe('PsychicController', () => {
       public explicit204Documented200() {
         this.respond({ id: '1' })
       }
-
-      @OpenAPI({ omitDefaultResponses: true })
-      public modellessOmitDefaultsNoData() {
-        this.respond()
-      }
-
-      @OpenAPI({ omitDefaultResponses: true })
-      public modellessOmitDefaultsWithData() {
-        this.respond({ any: 'data' })
-      }
     }
 
-    // renders into two OpenAPI documents, each with its own defaults
-    class MyTwoDocumentController extends PsychicController {
-      public static override get openapiNames() {
-        return ['default', 'mobile']
-      }
-
-      @OpenAPI()
-      public modellessNoData() {
-        this.respond()
-      }
-
-      @OpenAPI()
-      public modellessWithData() {
-        this.respond({ any: 'data' })
-      }
-    }
-    processDynamicallyDefinedControllers(MyController, MyTwoDocumentController)
+    processDynamicallyDefinedControllers(MyController)
 
     beforeEach(() => {
       ctx = createMockKoaContext({ body: { search: 'abc' }, query: { cool: 'boyjohnson' } })
@@ -152,13 +126,6 @@ describe('PsychicController', () => {
       expect(() => respondWith(action)).toThrow(/204 No Content, which cannot carry a body/)
       expect(() => respondWith(action)).toThrow(new RegExp(`controller: MyController\\s+action: ${action}`))
       expect(toJsonSpy).not.toHaveBeenCalled()
-    }
-
-    type MyTwoDocumentControllerAction = Exclude<keyof MyTwoDocumentController, keyof PsychicController>
-
-    function respondInTwoDocumentsWith(action: MyTwoDocumentControllerAction) {
-      const controller = new MyTwoDocumentController(ctx, { action })
-      controller[action]()
     }
 
     // adds responses to the `defaults.responses` of a configured OpenAPI document,
@@ -226,7 +193,7 @@ describe('PsychicController', () => {
     })
 
     context('with responses declaring the only success status', () => {
-      it('sends a declared 200, though the generated default would be 204', () => {
+      it('sends a declared 200, though the automatic default would be 204', () => {
         respondWith('modelless200Responses')
         expectJson(200, { id: '1' })
       })
@@ -267,73 +234,26 @@ describe('PsychicController', () => {
       })
     })
 
-    context("when the OpenAPI document's defaults.responses adds a 200 to every endpoint", () => {
+    context("when the OpenAPI document's defaults.responses adds a 200 and a 201 to every endpoint", () => {
       beforeEach(() => {
-        addDocumentDefaultResponses('default', { 200: documentDefault('ok') })
+        addDocumentDefaultResponses('default', {
+          200: documentDefault('ok'),
+          201: documentDefault('created'),
+        })
       })
 
-      it('sends that documented 200 with the data on an @OpenAPI() with no model, instead of throwing', () => {
-        respondWith('modellessWithData')
-        expectJson(200, { any: 'data' })
-      })
-
-      it('sends that documented 200 when given no data, preferring it over the generated 204', () => {
+      it('still sends the 204 the decorator documents on an @OpenAPI() with no model', () => {
         respondWith('modellessNoData')
-        expectJson(200, {})
-      })
-
-      it('sends 204 under omitDefaultResponses, which leaves the 200 out of the document', () => {
-        respondWith('modellessOmitDefaultsNoData')
         expectNoContent()
-        expectNoContentThrow('modellessOmitDefaultsWithData')
-      })
-    })
-
-    context("when the OpenAPI document's defaults.responses adds a 201 to every endpoint", () => {
-      beforeEach(() => {
-        addDocumentDefaultResponses('default', { 201: documentDefault('created') })
       })
 
-      it('sends the lowest documented success status, the 201, on an @OpenAPI() with no model', () => {
-        respondWith('modellessWithData')
-        expectJson(201, { any: 'data' })
+      it('still throws when passed data on an @OpenAPI() with no model', () => {
+        expectNoContentThrow('modellessWithData')
       })
 
-      it('sends the 200 a model documents, which it prefers', () => {
+      it('sends the 200 a model documents', () => {
         respondWith('modelBacked')
         expectJson(200, { id: '1' })
-      })
-    })
-
-    context('on a controller that renders into more than one OpenAPI document', () => {
-      context('when only one of them adds a 200 to every endpoint', () => {
-        beforeEach(() => {
-          addDocumentDefaultResponses('default', { 200: documentDefault('ok') })
-        })
-
-        it('sends the 204 every document shows, since the other document does not show the 200', () => {
-          respondInTwoDocumentsWith('modellessNoData')
-          expectNoContent()
-        })
-
-        it('throws when passed data, naming the documents', () => {
-          expect(() => respondInTwoDocumentsWith('modellessWithData')).toThrow(
-            /every OpenAPI document this endpoint is in \(default, mobile\) shows[\s\S]*204 No Content, which cannot carry a body/,
-          )
-          expect(toJsonSpy).not.toHaveBeenCalled()
-        })
-      })
-
-      context('when every one of them adds a 200 to every endpoint', () => {
-        beforeEach(() => {
-          addDocumentDefaultResponses('default', { 200: documentDefault('ok') })
-          addDocumentDefaultResponses('mobile', { 200: documentDefault('ok') })
-        })
-
-        it('sends that 200 with the data', () => {
-          respondInTwoDocumentsWith('modellessWithData')
-          expectJson(200, { any: 'data' })
-        })
       })
     })
   })

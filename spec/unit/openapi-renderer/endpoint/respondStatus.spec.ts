@@ -31,22 +31,12 @@ describe('OpenapiEndpointRenderer#respondStatus', () => {
     return Object.keys(openapi).map(status => parseInt(status))
   }
 
-  function expectRespondStatus(
-    endpointRenderer: AnyRenderer,
-    expectedStatus: number,
-    openapiNames: string[] = ['default'],
-  ) {
-    expect(endpointRenderer.respondStatus(openapiNames)).toEqual(expectedStatus)
+  function expectRespondStatus(endpointRenderer: AnyRenderer, expectedStatus: number) {
+    expect(endpointRenderer.respondStatus()).toEqual(expectedStatus)
 
-    openapiNames.forEach(openapiName => {
+    // every document shows it, so the response passes validation against each
+    ;['default', 'mobile'].forEach(openapiName => {
       expect(documentedStatuses(endpointRenderer, openapiName)).toContain(expectedStatus)
-
-      // respondStatus reads the same success statuses parseResponses renders
-      expect([...endpointRenderer['documentedSuccessStatuses'](openapiName)].sort((a, b) => a - b)).toEqual(
-        documentedStatuses(endpointRenderer, openapiName)
-          .filter(status => status >= 200 && status < 300)
-          .sort((a, b) => a - b),
-      )
     })
   }
 
@@ -79,7 +69,7 @@ describe('OpenapiEndpointRenderer#respondStatus', () => {
       expectRespondStatus(renderer(null, { status: 204 }), 204)
     })
 
-    it('with responses declaring only a 200, is 200, though the generated default would be 204', () => {
+    it('with responses declaring only a 200, is 200, though the automatic default would be 204', () => {
       expectRespondStatus(renderer(null, { responses: { 200: body } }), 200)
     })
 
@@ -91,7 +81,7 @@ describe('OpenapiEndpointRenderer#respondStatus', () => {
       expectRespondStatus(renderer(null, { responses: { 204: { description: 'deleted' } } }), 204)
     })
 
-    it('with responses declaring only error statuses, is the generated 204', () => {
+    it('with responses declaring only error statuses, is the automatic 204', () => {
       expectRespondStatus(renderer(null, { responses: { 400: body } }), 204)
     })
   })
@@ -140,67 +130,18 @@ describe('OpenapiEndpointRenderer#respondStatus', () => {
 
     it('otherwise, is the lowest documented success status', () => {
       expectRespondStatus(renderer(null, { responses: { 204: { description: 'deleted' }, 201: body } }), 201)
-      // the generated 204 beside a hand-written 202
+      // the automatic 204 beside a hand-written 202
       expectRespondStatus(renderer(null, { responses: { 202: body } }), 202)
       expect(documentedStatuses(renderer(null, { responses: { 202: body } }))).toContain(204)
     })
   })
 
-  context("when the OpenAPI document's defaults.responses adds a success status", () => {
-    it('counts it as a documented success status, as the rendered document does', () => {
-      addDocumentDefaultResponses('default', { 200: documentDefault })
-      // the default 200 beside the generated 204
-      expectRespondStatus(renderer(null), 200)
-      expect(documentedStatuses(renderer(null))).toEqual(expect.arrayContaining([200, 204]))
-    })
-
-    it('applies the same precedence: the explicit status, else 200, else the lowest', () => {
-      addDocumentDefaultResponses('default', { 201: documentDefault })
-      expectRespondStatus(renderer(null), 201)
-      expectRespondStatus(renderer(null, { status: 204 }), 204)
-      expectRespondStatus(renderer(User), 200)
-    })
-
-    it('does not count it under omitDefaultResponses, which leaves it out of the document', () => {
-      addDocumentDefaultResponses('default', { 200: documentDefault })
-      expectRespondStatus(renderer(null, { omitDefaultResponses: true }), 204)
-    })
-
-    it('a response the endpoint declares for the same status replaces the default', () => {
-      addDocumentDefaultResponses('default', { 201: documentDefault })
-      expectRespondStatus(renderer(null, { responses: { 201: body } }), 201)
-    })
-
-    it('ignores a default that is not a success status', () => {
-      expectRespondStatus(renderer(null), 204)
-      expect(documentedStatuses(renderer(null))).toEqual(expect.arrayContaining([418, 490]))
-    })
-  })
-
-  context('for an endpoint in more than one OpenAPI document', () => {
-    it('is a success status every document shows', () => {
-      addDocumentDefaultResponses('default', { 200: documentDefault })
-      expectRespondStatus(renderer(null), 204, ['default', 'mobile'])
-      expectRespondStatus(renderer(null), 204, ['mobile', 'default'])
-      expectRespondStatus(renderer(null), 200, ['default'])
-      expectRespondStatus(renderer(null), 204, ['mobile'])
-    })
-
-    it('applies the precedence to the success statuses every document shows', () => {
+  context("when an OpenAPI document's defaults.responses adds a success status", () => {
+    it('is still a status the decorator documents, which every document shows', () => {
       addDocumentDefaultResponses('default', { 200: documentDefault, 201: documentDefault })
-      addDocumentDefaultResponses('mobile', { 201: documentDefault })
-      expectRespondStatus(renderer(null), 201, ['default', 'mobile'])
-
-      addDocumentDefaultResponses('mobile', { 200: documentDefault })
-      expectRespondStatus(renderer(null), 200, ['default', 'mobile'])
-    })
-  })
-
-  context('for an endpoint in no OpenAPI document', () => {
-    it('is a success status the decorator itself documents', () => {
-      addDocumentDefaultResponses('default', { 200: documentDefault })
-      expect(renderer(null).respondStatus([])).toEqual(204)
-      expect(renderer(null, { responses: { 201: body } }).respondStatus([])).toEqual(201)
+      expect(documentedStatuses(renderer(null))).toEqual(expect.arrayContaining([200, 201, 204]))
+      expectRespondStatus(renderer(null), 204)
+      expectRespondStatus(renderer(null, { responses: { 202: body } }), 202)
     })
   })
 })

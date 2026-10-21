@@ -896,9 +896,7 @@ export default class OpenapiEndpointRenderer<
    * endpoint: Psychic's own, replaced and extended by the document's
    * `defaults.responses`, or none when `omitDefaultResponses` is set.
    * parseResponses adds each one whose status the endpoint does not
-   * document itself, and `respondStatus` reads their success statuses
-   * here too, so the status `this.respond(...)` sends is one the
-   * rendered document shows.
+   * document itself.
    */
   private defaultResponses(openapiName: string): OpenapiResponses {
     if (this.omitDefaultResponses) return {}
@@ -943,7 +941,7 @@ export default class OpenapiEndpointRenderer<
    * The success statuses the endpoint's own decorator documents: the
    * automatic success response's (see `automaticSuccessStatus`) and
    * the 2xx statuses `responses` declares. Every OpenAPI document the
-   * endpoint is in shows them.
+   * endpoint is in shows them, whatever its `defaults.responses`.
    */
   private get decoratorSuccessStatuses(): Set<number> {
     const statuses = new Set<number>(successStatuses(Object.keys(this.responses || {})))
@@ -957,56 +955,29 @@ export default class OpenapiEndpointRenderer<
   /**
    * @internal
    *
-   * The success statuses the named OpenAPI document shows for this
-   * endpoint, which are the 2xx statuses of the responses
-   * parseResponses renders for it: the decorator's own (see
-   * `decoratorSuccessStatuses`) and those of the document's default
-   * responses (see `defaultResponses`).
-   */
-  private documentedSuccessStatuses(openapiName: string): Set<number> {
-    const statuses = this.decoratorSuccessStatuses
-    successStatuses(Object.keys(this.defaultResponses(openapiName))).forEach(status => statuses.add(status))
-    return statuses
-  }
-
-  /**
-   * @internal
-   *
-   * The status `this.respond(...)` sends: a success status every
-   * OpenAPI document the endpoint is in shows, given as the
-   * controller's `openapiNames`, since Psychic validates a response
-   * against each of them. Of those statuses, it is the `status`
-   * option when they include it, else 200 when they include a 200,
+   * The status `this.respond(...)` sends: one of the success statuses
+   * the decorator documents (see `decoratorSuccessStatuses`), which
+   * every OpenAPI document the endpoint is in shows, so the response
+   * passes validation against each of them. It is the `status` option
+   * when the decorator documents it, else 200 when it documents a 200,
    * else the lowest, e.g. 204 for a decorator with no model, view
    * model, serializer or `status`, or 201 when `responses` declares
-   * only a 201.
+   * only a 201. A 200, 201 or 204 in `responses` replaces the
+   * automatic success response, so `status` is then documented only
+   * when `responses` declares it too.
    *
-   * A document shows the success statuses the decorator documents
-   * (see `decoratorSuccessStatuses`; a 200, 201 or 204 in `responses`
-   * replaces the automatic success response, so `status` is then
-   * shown only when `responses` declares it too) and the 2xx statuses
-   * its `defaults.responses` adds, unless `omitDefaultResponses` is
-   * set. Every document shows the decorator's success statuses, so
-   * there is always a status they all show. A 2xx that only some of
-   * the documents add is not sent. With no document, the status is
-   * one the decorator documents.
+   * A 2xx that a document's `defaults.responses` adds is never sent:
+   * the status comes from the endpoint's own decorator.
    */
-  public respondStatus(openapiNames: readonly string[]): HttpStatusCodeNumber {
-    const successStatusesEveryDocumentShows = openapiNames.length
-      ? openapiNames
-          .map(openapiName => this.documentedSuccessStatuses(openapiName))
-          .reduce(
-            (shownByEveryDocument, shownByThisDocument) =>
-              new Set([...shownByEveryDocument].filter(status => shownByThisDocument.has(status))),
-          )
-      : this.decoratorSuccessStatuses
+  public respondStatus(): HttpStatusCodeNumber {
+    const decoratorStatuses = this.decoratorSuccessStatuses
 
     const preferredStatus = this.status || 200
-    if (successStatusesEveryDocumentShows.has(preferredStatus)) return preferredStatus
+    if (decoratorStatuses.has(preferredStatus)) return preferredStatus
 
     // never empty: without a declared 200, 201 or 204 there is an automatic
-    // success response, and every document shows the decorator's success statuses
-    const [lowestSuccessStatus] = [...successStatusesEveryDocumentShows].sort((a, b) => a - b)
+    // success response
+    const [lowestSuccessStatus] = [...decoratorStatuses].sort((a, b) => a - b)
     return (lowestSuccessStatus ?? preferredStatus) as HttpStatusCodeNumber
   }
 

@@ -72,16 +72,15 @@ describe('a visitor hits a route that answers with this.respond(...)', () => {
     })
 
     context('on an endpoint whose @OpenAPI() has no model, view model, serializer or status', () => {
-      it('answers the documented 200 with the data, which the document validates', async () => {
-        const res = await request.get('/respond-documented-no-content-with-data', 200)
-        expect(res.body).toEqual({ any: 'data' })
+      it('still answers the 204 the decorator documents, with no body', async () => {
+        const res = await request.get('/respond-documented-no-content', 204)
+        expect(res.text).toEqual('')
         expect(errorLogs()).toEqual([])
       })
 
-      it('answers the documented 200 with {} when given no data', async () => {
-        const res = await request.get('/respond-documented-no-content', 200)
-        expect(res.body).toEqual({})
-        expect(errorLogs()).toEqual([])
+      it('still answers a 500 when given data, since the default 200 does not change the status', async () => {
+        await request.get('/respond-documented-no-content-with-data', 500)
+        expect(errorLogs()).toEqual([expect.stringMatching(/204 No Content, which cannot carry a body/)])
       })
     })
   })

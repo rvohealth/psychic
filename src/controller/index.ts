@@ -1112,12 +1112,10 @@ export default class PsychicController {
    *   `@OpenAPI()` with no model, view model, serializer or `status`, or
    *   201 when the decorator's `responses` declares only a 201
    *
-   * The document's success statuses include any 2xx its
-   * `defaults.responses` adds to every endpoint, unless the endpoint
-   * sets `omitDefaultResponses`. A controller whose `openapiNames` puts
-   * it in several OpenAPI documents gets a status every one of them
-   * shows, since its response is validated against each; a 2xx only
-   * some of them add is not sent.
+   * The status comes from the endpoint's own decorator, so every OpenAPI
+   * document the controller's `openapiNames` puts it in shows it. A 2xx
+   * that a document's `defaults.responses` adds to every endpoint is
+   * never sent.
    *
    * With no `@OpenAPI` decorator, it sends 200. With no data, it sends
    * `{}`, except on a 204 No Content, which is sent with no body. A 204
@@ -1146,8 +1144,7 @@ export default class PsychicController {
    * ```
    */
   public respond<T>(data?: T, opts: RenderOptions = {}) {
-    const openapiNames = this.computedOpenapiNames
-    const status = this.currentOpenapiRenderer?.respondStatus(openapiNames) ?? 200
+    const status = this.currentOpenapiRenderer?.respondStatus() ?? 200
 
     if (status === 204) {
       // a 204 cannot carry a body, so throw rather than silently drop the data
@@ -1155,7 +1152,6 @@ export default class PsychicController {
         throw new RespondWithDataOnNoContentEndpoint(
           this.constructor as typeof PsychicController,
           this.action,
-          openapiNames,
         )
       }
 
