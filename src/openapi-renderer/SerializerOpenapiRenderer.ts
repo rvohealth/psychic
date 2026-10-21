@@ -450,11 +450,15 @@ export default class SerializerOpenapiRenderer {
   /**
    * @internal
    *
-   * The keys of the object this serializer renders, including the keys of
-   * whatever it flattens into that object. Used to describe a flattened
+   * The keys Dream sends, as null, in place of this serializer's fields when
+   * a serializer flattening it renders a null value: the key of each attribute
+   * it renders, and the keys of the serializers its flattened rendersOnes
+   * render. A flattened customAttribute adds none, since only its callback
+   * knows its keys. This mirrors `SerializerRenderer#nullFlattenedAttributes`
+   * in Dream, which renders that payload. Used to describe a flattened
    * serializer that may be null (see `flattenedNullableOpenapi`).
    */
-  private renderedFieldNames(visitedSerializers: Set<unknown> = new Set()): string[] {
+  private nullFlattenedFieldNames(visitedSerializers: Set<unknown>): string[] {
     // a serializer already being listed adds no new keys (and a cycle of
     // flattened serializers cannot render anyway)
     if (visitedSerializers.has(this.serializer)) return []
@@ -470,21 +474,14 @@ export default class SerializerOpenapiRenderer {
   /**
    * @internal
    *
-   * The keys one of this serializer's attributes renders into its object (see
-   * `renderedFieldNames`)
+   * The keys Dream sends for one of this serializer's attributes when the
+   * serializer is flattened and null (see `nullFlattenedFieldNames`)
    */
   private attributeFieldNames(attribute: SerializerAttribute, visitedSerializers: Set<unknown>): string[] {
     const DataTypeForOpenapi = this.serializerBuilder['$typeForOpenapi'] as
       | typeof Dream
       | ViewModelClass
       | undefined
-
-    const nestedFieldNames = (serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[]) =>
-      serializers.flatMap(serializer =>
-        new SerializerOpenapiRenderer(serializer, { casing: this.casing }).renderedFieldNames(
-          visitedSerializers,
-        ),
-      )
 
     const attributeType = attribute.type
     switch (attributeType) {
@@ -494,14 +491,16 @@ export default class SerializerOpenapiRenderer {
         return [this.setCase(attribute.options?.as ?? attribute.name)]
 
       case 'customAttribute':
-        if (!attribute.options.flatten) return [this.setCase(attribute.name)]
-        return flattenedOpenapiFieldNames(attribute.options.openapi, nestedFieldNames)
+        return attribute.options.flatten ? [] : [this.setCase(attribute.name)]
 
       case 'rendersOne':
         if (!attribute.options.flatten) return [this.setCase(attribute.options.as ?? attribute.name)]
 
         try {
-          return nestedFieldNames(associationSerializers(attribute, DataTypeForOpenapi).serializers)
+          return this.nestedNullFlattenedFieldNames(
+            associationSerializers(attribute, DataTypeForOpenapi).serializers,
+            visitedSerializers,
+          )
         } catch (error) {
           // the association's OpenAPI shape cannot be defined (the rendersOne
           // case of renderedOpenapiAttributes renders a placeholder for it)
@@ -515,6 +514,24 @@ export default class SerializerOpenapiRenderer {
         throw new Error(`Unhandled serializer attribute type: ${_never as string}`)
       }
     }
+  }
+
+  /**
+   * @internal
+   *
+   * The keys Dream sends, as null, in place of the fields of `serializers`
+   * when a serializer flattening them renders a null value (see
+   * `nullFlattenedFieldNames`)
+   */
+  private nestedNullFlattenedFieldNames(
+    serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[],
+    visitedSerializers: Set<unknown>,
+  ): string[] {
+    return serializers.flatMap(serializer =>
+      new SerializerOpenapiRenderer(serializer, { casing: this.casing }).nullFlattenedFieldNames(
+        visitedSerializers,
+      ),
+    )
   }
 
   /**
@@ -565,11 +582,16 @@ export default class SerializerOpenapiRenderer {
    * `unevaluatedProperties: false` accept them.
    *
    * A nested field that another of this serializer's attributes also renders
-   * is left out of that object: when the nested value is null, the key holds
-   * the other attribute's value (a null flattened customAttribute spreads
-   * nothing), so the other attribute's schema describes it. Listing it as null
-   * would contradict that schema, rejecting the payload and making
-   * fast-json-stringify fail to compile.
+   * is left out of that object. The key holds whichever value was rendered
+   * last, so when the nested value is null it can hold the other attribute's
+   * value: a null flattened customAttribute spreads nothing, and a null
+   * flattened rendersOne declared before the other attribute has its null
+   * overwritten. The other attribute's schema describes that value, and
+   * listing the key as null would contradict it, rejecting the payload and
+   * making fast-json-stringify fail to compile. The keys another flattened
+   * customAttribute renders are the ones its `openapi` declares: Dream sends
+   * none for it when it is null, but when it is present its callback renders
+   * them, and only its `openapi` says which they are.
    */
   private flattenedNullableOpenapi(
     attribute: SerializerAttribute,
@@ -580,17 +602,17 @@ export default class SerializerOpenapiRenderer {
     const otherAttributesFieldNames = new Set(
       this.serializerBuilder['attributes']
         .filter(otherAttribute => otherAttribute !== attribute)
-        .flatMap(otherAttribute => this.attributeFieldNames(otherAttribute, visitedSerializers)),
+        .flatMap(otherAttribute =>
+          otherAttribute.type === 'customAttribute' && otherAttribute.options.flatten
+            ? flattenedOpenapiFieldNames(otherAttribute.options.openapi, nestedSerializers =>
+                this.nestedNullFlattenedFieldNames(nestedSerializers, visitedSerializers),
+              )
+            : this.attributeFieldNames(otherAttribute, visitedSerializers),
+        ),
     )
 
     const fieldNames = sort(
-      uniq(
-        serializers.flatMap(serializer =>
-          new SerializerOpenapiRenderer(serializer, { casing: this.casing }).renderedFieldNames(
-            new Set([this.serializer]),
-          ),
-        ),
-      ),
+      uniq(this.nestedNullFlattenedFieldNames(serializers, new Set([this.serializer]))),
     ).filter(fieldName => !otherAttributesFieldNames.has(fieldName))
 
     const refs = (openapi as OpenapiSchemaShorthandExpressionAnyOf).anyOf ?? [openapi]
@@ -767,7 +789,9 @@ function withMergeableRefs(openapi: OpenapiSchemaBodyShorthand): OpenapiSchemaBo
     : openapi
 }
 
-// the keys a flattened customAttribute's openapi spreads into the object
+// the keys a flattened customAttribute's `openapi` declares it spreads into
+// the object: a serializer ref's are the keys that serializer sends when null
+// (see `nullFlattenedFieldNames`), any other schema's are its properties
 function flattenedOpenapiFieldNames(
   openapi: unknown,
   nestedFieldNames: (serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[]) => string[],

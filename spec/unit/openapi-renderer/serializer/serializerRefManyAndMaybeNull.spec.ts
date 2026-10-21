@@ -398,7 +398,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
       })
     })
 
-    it('includes the fields the nested serializer flattens into itself', () => {
+    it('lists the fields Dream sends as null: those of the serializers the nested serializer flattens, not the keys of a customAttribute it flattens', () => {
       const AddressSerializer = named(
         (data: { city: string }) => ObjectSerializer(data).attribute('city', { openapi: 'string' }),
         'Address',
@@ -434,7 +434,6 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
                 properties: {
                   city: { type: 'null' },
                   email: { type: 'null' },
-                  phoneNumber: { type: 'null' },
                 },
               },
             ],
@@ -702,6 +701,19 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
       )
       const ownerRef = { allOf: [{ $ref: '#/components/schemas/Owner' }] }
 
+      interface Tag {
+        id: string
+        label: string
+      }
+
+      const TagSerializer = named(
+        (data: Tag) =>
+          ObjectSerializer(data)
+            .attribute('id', { openapi: 'string' })
+            .attribute('label', { openapi: 'string' }),
+        'Tag',
+      )
+
       context('an attribute of the serializer flattening it', () => {
         const PetSerializer = named(
           (data: { id: string; species: string; owner: Owner | null }) =>
@@ -746,19 +758,6 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
       })
 
       context('another flattened attribute', () => {
-        interface Tag {
-          id: string
-          label: string
-        }
-
-        const TagSerializer = named(
-          (data: Tag) =>
-            ObjectSerializer(data)
-              .attribute('id', { openapi: 'string' })
-              .attribute('label', { openapi: 'string' }),
-          'Tag',
-        )
-
         const PetSerializer = named(
           (data: { species: string; owner: Owner; tag: Tag | null }) =>
             ObjectSerializer(data)
@@ -769,6 +768,51 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
                 openapi: { $serializer: TagSerializer, maybeNull: true },
               }),
           'OwnedTaggedPet',
+        )
+
+        it('leaves that field out of the null branch, so the other attribute’s schema describes it', () => {
+          expect(new SerializerOpenapiRenderer(PetSerializer).renderedOpenapi().openapi).toEqual({
+            type: 'object',
+            allOf: [
+              parentInline,
+              { $ref: '#/components/schemas/Owner' },
+              {
+                anyOf: [
+                  { allOf: [{ $ref: '#/components/schemas/Tag' }] },
+                  { type: 'object', properties: { label: { type: 'null' } } },
+                ],
+              },
+            ],
+            unevaluatedProperties: false,
+          })
+        })
+
+        it('validates and sends the payloads Dream renders', () => {
+          const owner = { id: 'o1', email: 'a@b.c' }
+
+          expectValidatedAndSerialized(PetSerializer, [
+            PetSerializer({ species: 'cat', owner, tag: { id: 't1', label: 'L' } }).render(),
+            PetSerializer({ species: 'cat', owner, tag: null }).render(),
+          ])
+        })
+      })
+
+      // Dream sends no keys for a null flattened customAttribute, but when it
+      // is present its callback renders the keys its `openapi` declares
+      context('another flattened customAttribute, whose keys its openapi declares', () => {
+        const PetSerializer = named(
+          (data: { species: string; owner: Owner; tag: Tag | null }) =>
+            ObjectSerializer(data)
+              .attribute('species', { openapi: 'string' })
+              .customAttribute('owner', () => OwnerSerializer(data.owner).render(), {
+                flatten: true,
+                openapi: { $serializer: OwnerSerializer },
+              })
+              .customAttribute('tag', () => (data.tag ? TagSerializer(data.tag).render() : null), {
+                flatten: true,
+                openapi: { $serializer: TagSerializer, maybeNull: true },
+              }),
+          'CustomOwnedTaggedPet',
         )
 
         it('leaves that field out of the null branch, so the other attribute’s schema describes it', () => {
