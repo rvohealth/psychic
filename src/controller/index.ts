@@ -898,8 +898,9 @@ export default class PsychicController {
     // a string, number or boolean skips fast-json-stringify: through a schema
     // that describes an object, it sends one as `{}`, or throws when the
     // schema has a required property, turning the deliberate error into a 500
-    const isScalar = typeof body === 'string' || typeof body === 'number' || typeof body === 'boolean'
-    this.koaSendJson(body, statusCode, { fastJsonStringify: !isScalar })
+    const skipFastJsonStringify =
+      typeof body === 'string' || typeof body === 'number' || typeof body === 'boolean'
+    this.koaSendJson(body, statusCode, { fastJsonStringify: !skipFastJsonStringify })
   }
 
   /**
