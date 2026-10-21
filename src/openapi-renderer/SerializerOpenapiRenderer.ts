@@ -634,39 +634,27 @@ function associationOpenapi(
 } {
   const { optional, serializers } = associationSerializers(attribute, DataTypeForOpenapi)
 
-  const serializerOverride = attribute.options.serializer
-  if (serializerOverride) {
+  if (serializers.length === 1) {
+    const serializer = serializers[0]!
     try {
       return {
         associationOpts: { optional },
         serializers,
         referencedSerializersAndOpenapiSchemaBodyShorthand: {
           referencedSerializers: [
-            serializerOverride,
-            ...descendantSerializers(serializerOverride, alreadyExtractedDescendantSerializers),
+            serializer,
+            ...descendantSerializers(serializer, alreadyExtractedDescendantSerializers),
           ],
-          openapi: new SerializerOpenapiRenderer(serializerOverride).serializerRef,
+          openapi: new SerializerOpenapiRenderer(serializer).serializerRef,
         },
       }
     } catch (error) {
-      if (error instanceof NonSerializerPassedToSerializerOpenapiRenderer)
+      // a lone serializer is the `serializer` override when one is given (see
+      // associationSerializers); an inferred serializer is always a serializer
+      const serializerOverride = attribute.options.serializer
+      if (error instanceof NonSerializerPassedToSerializerOpenapiRenderer && serializerOverride)
         throw new NonSerializerSerializerOverrideProvided(attribute, serializerOverride)
       throw error
-    }
-  }
-
-  if (serializers.length === 1) {
-    const serializer = serializers[0]!
-    return {
-      associationOpts: { optional },
-      serializers,
-      referencedSerializersAndOpenapiSchemaBodyShorthand: {
-        referencedSerializers: [
-          serializer,
-          ...descendantSerializers(serializer, alreadyExtractedDescendantSerializers),
-        ],
-        openapi: new SerializerOpenapiRenderer(serializer).serializerRef,
-      },
     }
   }
 
