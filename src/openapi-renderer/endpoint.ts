@@ -782,14 +782,14 @@ export default class OpenapiEndpointRenderer<
       target: 'response',
     }
 
-    const generatedSuccessStatus = this.generatedSuccessStatus
+    const automaticSuccessStatus = this.automaticSuccessStatus
     let serializersAppearingInHandWrittenOpenapi: SerializerArray = []
 
-    if (generatedSuccessStatus !== undefined) {
+    if (automaticSuccessStatus !== undefined) {
       if (this.status === 204) {
         responseData = {
           204: {
-            description: this.defaultResponseDescription(generatedSuccessStatus),
+            description: this.defaultResponseDescription(automaticSuccessStatus),
             $ref: '#/components/responses/NoContent',
           },
         }
@@ -802,9 +802,9 @@ export default class OpenapiEndpointRenderer<
         ]
 
         responseData = {
-          [generatedSuccessStatus]: {
+          [automaticSuccessStatus]: {
             ...parsingResults.openapi,
-            description: this.defaultResponseDescription(generatedSuccessStatus),
+            description: this.defaultResponseDescription(automaticSuccessStatus),
           },
         }
       }
@@ -923,13 +923,13 @@ export default class OpenapiEndpointRenderer<
   /**
    * @internal
    *
-   * The status of the success response Psychic generates for the
-   * OpenAPI document: the `status` option, else the default status
-   * (200 with a model, view model or serializer, 204 without one).
-   * Undefined when `responses` declares a 200, 201 or 204, which
-   * replaces the generated success response.
+   * The status of the success response Psychic writes automatically
+   * into the OpenAPI document: the `status` option, else the default
+   * status (200 with a model, view model or serializer, 204 without
+   * one). Undefined when `responses` declares a 200, 201 or 204, which
+   * replaces the automatic success response.
    */
-  private get generatedSuccessStatus(): HttpStatusCodeNumber | undefined {
+  private get automaticSuccessStatus(): HttpStatusCodeNumber | undefined {
     const didUserProvideSuccessOpenapi =
       this.responses?.['200'] || this.responses?.['201'] || this.responses?.['204']
 
@@ -941,15 +941,15 @@ export default class OpenapiEndpointRenderer<
    * @internal
    *
    * The success statuses the endpoint's own decorator documents: the
-   * generated success response's (see `generatedSuccessStatus`) and
+   * automatic success response's (see `automaticSuccessStatus`) and
    * the 2xx statuses `responses` declares. Every OpenAPI document the
    * endpoint is in shows them.
    */
   private get decoratorSuccessStatuses(): Set<number> {
     const statuses = new Set<number>(successStatuses(Object.keys(this.responses || {})))
 
-    const generatedSuccessStatus = this.generatedSuccessStatus
-    if (generatedSuccessStatus !== undefined) statuses.add(generatedSuccessStatus)
+    const automaticSuccessStatus = this.automaticSuccessStatus
+    if (automaticSuccessStatus !== undefined) statuses.add(automaticSuccessStatus)
 
     return statuses
   }
@@ -983,7 +983,7 @@ export default class OpenapiEndpointRenderer<
    *
    * A document shows the success statuses the decorator documents
    * (see `decoratorSuccessStatuses`; a 200, 201 or 204 in `responses`
-   * replaces the generated success response, so `status` is then
+   * replaces the automatic success response, so `status` is then
    * shown only when `responses` declares it too) and the 2xx statuses
    * its `defaults.responses` adds, unless `omitDefaultResponses` is
    * set. Every document shows the decorator's success statuses, so
@@ -1004,7 +1004,7 @@ export default class OpenapiEndpointRenderer<
     const preferredStatus = this.status || 200
     if (successStatusesEveryDocumentShows.has(preferredStatus)) return preferredStatus
 
-    // never empty: without a declared 200, 201 or 204 there is a generated
+    // never empty: without a declared 200, 201 or 204 there is an automatic
     // success response, and every document shows the decorator's success statuses
     const [lowestSuccessStatus] = [...successStatusesEveryDocumentShows].sort((a, b) => a - b)
     return (lowestSuccessStatus ?? preferredStatus) as HttpStatusCodeNumber
@@ -1553,8 +1553,8 @@ export interface OpenapiEndpointRendererOpts<
   /**
    * the status code that your endpoint will render
    * when it succeeds. It sets the status of the success
-   * response Psychic generates for the OpenAPI document (none
-   * is generated when `responses` declares a 200, 201 or 204).
+   * response Psychic writes automatically into the OpenAPI document
+   * (it writes none when `responses` declares a 200, 201 or 204).
    * When not passed, the document gives that response a 200
    * when a model, view model or serializer is passed to the
    * decorator, and a 204, with no content, when none is.
