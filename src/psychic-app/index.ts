@@ -492,8 +492,7 @@ Try setting it to something valid, like:
    */
   public openapiValidationIsActive(openapiName: string, target: OpenapiValidateTarget): boolean {
     const validate = this.openapi[openapiName]?.validate
-    if (validate?.all !== undefined) return validate.all
-    return validate?.[target] ?? false
+    return validate?.all ?? validate?.[target] ?? false
   }
 
   private _paths: Required<PsychicPathOptions> = {
