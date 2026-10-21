@@ -773,7 +773,8 @@ function associationSerializers(
 // every pairing of their branches. A pairing holding a bare `$ref` keeps only
 // that `$ref` (two of them keep neither), losing the other branch, so the
 // nested fields are left out of the response. A `$ref` inside an `allOf` is
-// merged with the other branch instead. Validation is unchanged.
+// merged with the other branch instead. `{ allOf: [$ref] }` validates
+// identically to `$ref`, so the document means the same thing either way.
 function mergeableRef(openapi: OpenapiSchemaBodyShorthand): OpenapiSchemaBodyShorthand {
   return isObject(openapi) && (openapi as OpenapiSchemaExpressionRef).$ref ? { allOf: [openapi] } : openapi
 }
