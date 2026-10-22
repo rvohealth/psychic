@@ -279,8 +279,8 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
 
     // what Dream sends for each case, and what a valid schema must say about it
     const presentPayload = { species: 'cat', email: 'a@b.c', name: 'A' }
-    const fieldsOmittedPayload = { species: 'cat' } // a flattened customAttribute whose value is null
-    const fieldsNullPayload = { species: 'cat', email: null, name: null } // a flattened rendersOne that is null
+    const fieldsNullPayload = { species: 'cat', email: null, name: null } // a flattened value that is null
+    const fieldsOmittedPayload = { species: 'cat' } // a flattened customAttribute with `required: false` whose callback returns undefined
     const partialPayload = { species: 'cat', email: 'a@b.c' }
     const unknownKeyPayload = { species: 'cat', bogus: 1 }
 
@@ -331,14 +331,14 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
         expect(PetSerializer({ species: 'cat', contact: { email: 'a@b.c', name: 'A' } }).render()).toEqual(
           presentPayload,
         )
-        expect(PetSerializer({ species: 'cat', contact: null }).render()).toEqual(fieldsOmittedPayload)
+        expect(PetSerializer({ species: 'cat', contact: null }).render()).toEqual(fieldsNullPayload)
 
         expectFlattenedNullableValidation(PetSerializer)
       })
     })
 
     context('a customAttribute with flatten and a maybeNull $serializable STI base model', () => {
-      it('is any of the child serializers, or an object whose fields from every child, when present, are null', () => {
+      it('is any of the child serializers, each beside the other child’s fields as null, or an object whose fields from every child, when present, are null', () => {
         const MySerializer = (data: { species: string }) =>
           ObjectSerializer(data)
             .attribute('species', { openapi: 'string' })
@@ -353,8 +353,18 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
             parentInline,
             {
               anyOf: [
-                { $ref: '#/components/schemas/BalloonLatex' },
-                { $ref: '#/components/schemas/BalloonMylar' },
+                {
+                  allOf: [
+                    { $ref: '#/components/schemas/BalloonLatex' },
+                    { type: 'object', properties: { mylarOnlyAttr: { type: 'null' } } },
+                  ],
+                },
+                {
+                  allOf: [
+                    { $ref: '#/components/schemas/BalloonMylar' },
+                    { type: 'object', properties: { latexOnlyAttr: { type: 'null' } } },
+                  ],
+                },
                 {
                   type: 'object',
                   properties: {
@@ -399,7 +409,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
       })
     })
 
-    it('lists the fields Dream sends as null: those of the serializers the nested serializer flattens, not the keys of a customAttribute it flattens', () => {
+    it('lists the fields Dream sends as null: those the nested serializer requires, through the serializers and shapes it flattens, not a key it may omit', () => {
       const AddressSerializer = named(
         (data: { city: string }) => ObjectSerializer(data).attribute('city', { openapi: 'string' }),
         'Address',
@@ -411,7 +421,11 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
             .rendersOne('address', { serializer: AddressSerializer, flatten: true })
             .customAttribute('phone', () => null, {
               flatten: true,
-              openapi: { type: 'object', properties: { phoneNumber: 'string' } },
+              openapi: {
+                type: 'object',
+                required: ['fax'],
+                properties: { phoneNumber: 'string', fax: 'string' },
+              },
             }),
         'ContactWithAddress',
       )
@@ -435,6 +449,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
                 properties: {
                   city: { type: 'null' },
                   email: { type: 'null' },
+                  fax: { type: 'null' },
                 },
               },
             ],
@@ -470,6 +485,281 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
           },
         ],
         unevaluatedProperties: false,
+      })
+    })
+
+    context('a rendersOne with flatten and optional whose serializer has an optional attribute', () => {
+      const ContactWithNicknameSerializer = named(
+        (data: { email: string; nickname?: string }) =>
+          ObjectSerializer(data)
+            .attribute('email', { openapi: 'string' })
+            .attribute('nickname', { openapi: 'string', required: false }),
+        'ContactWithNickname',
+      )
+      const PetSerializer = named(
+        (data: { species: string; contact: { email: string; nickname?: string } | null }) =>
+          ObjectSerializer(data).attribute('species', { openapi: 'string' }).rendersOne('contact', {
+            serializer: ContactWithNicknameSerializer,
+            flatten: true,
+            optional: true,
+          }),
+        'FlattenedOptionalNicknamedContactPet',
+      )
+
+      it('lists only the required fields as null, since Dream omits an optional one of a null value', () => {
+        expect(new SerializerOpenapiRenderer(PetSerializer).renderedOpenapi().openapi).toEqual({
+          type: 'object',
+          allOf: [
+            parentInline,
+            {
+              anyOf: [
+                { $ref: '#/components/schemas/ContactWithNickname' },
+                { type: 'object', properties: { email: { type: 'null' } } },
+              ],
+            },
+          ],
+          unevaluatedProperties: false,
+        })
+      })
+
+      it('validates and sends the payloads Dream renders', () => {
+        const present = PetSerializer({ species: 'cat', contact: { email: 'a@b.c', nickname: 'A' } }).render()
+        const absent = PetSerializer({ species: 'cat', contact: null }).render()
+        expect(absent).toEqual({ species: 'cat', email: null })
+
+        expectValidatedAndSerialized(PetSerializer, [present, absent])
+      })
+    })
+
+    context('a customAttribute with flatten whose openapi is a hand-written shape', () => {
+      interface Phone {
+        phoneNumber: string
+        extension?: string
+        note?: string
+      }
+
+      const PetSerializer = named(
+        (data: { species: string; phone: Phone }) =>
+          ObjectSerializer(data)
+            .attribute('species', { openapi: 'string' })
+            .customAttribute('phone', () => data.phone, {
+              flatten: true,
+              openapi: {
+                type: 'object',
+                required: ['phoneNumber', 'extension'],
+                properties: {
+                  phoneNumber: { type: 'string' },
+                  extension: { type: 'string', description: 'the desk' },
+                  note: { type: 'string' },
+                },
+              },
+            }),
+        'FlattenedPhonePet',
+      )
+
+      it('accepts null for each key the shape requires, since Dream renders one the callback leaves out as null, and leaves an optional key as written', () => {
+        expect(new SerializerOpenapiRenderer(PetSerializer).renderedOpenapi().openapi).toEqual({
+          type: 'object',
+          allOf: [
+            parentInline,
+            {
+              type: 'object',
+              required: ['phoneNumber', 'extension'],
+              properties: {
+                phoneNumber: { type: ['string', 'null'] },
+                extension: { type: ['string', 'null'], description: 'the desk' },
+                note: { type: 'string' },
+              },
+            },
+          ],
+          unevaluatedProperties: false,
+        })
+      })
+
+      it('widens a shorthand property to its nullable shorthand', () => {
+        const MySerializer = (data: { phone: Phone }) =>
+          ObjectSerializer(data).customAttribute('phone', () => data.phone, {
+            flatten: true,
+            openapi: {
+              type: 'object',
+              required: ['phoneNumber', 'extension', 'note'],
+              properties: { phoneNumber: 'string', extension: ['string', 'null'], note: 'null' },
+            },
+          })
+
+        expect(new SerializerOpenapiRenderer(MySerializer).renderedOpenapi().openapi).toEqual({
+          type: 'object',
+          allOf: [
+            { type: 'object', required: [], properties: {} },
+            {
+              type: 'object',
+              required: ['phoneNumber', 'extension', 'note'],
+              properties: { phoneNumber: ['string', 'null'], extension: ['string', 'null'], note: 'null' },
+            },
+          ],
+          unevaluatedProperties: false,
+        })
+      })
+
+      it('validates and sends the payloads Dream renders, with a required key the callback left out as null and an optional one absent', () => {
+        const complete = PetSerializer({
+          species: 'cat',
+          phone: { phoneNumber: '555', extension: '12', note: 'desk' },
+        }).render()
+        const partial = PetSerializer({ species: 'cat', phone: { phoneNumber: '555' } }).render()
+        expect(partial).toEqual({ species: 'cat', phoneNumber: '555', extension: null })
+
+        expectValidatedAndSerialized(PetSerializer, [complete, partial])
+      })
+
+      it('cases the shape’s keys as the serializer is cased, as Dream renders them', () => {
+        expect(
+          new SerializerOpenapiRenderer(PetSerializer, { casing: 'snake' }).renderedOpenapi().openapi,
+        ).toEqual({
+          type: 'object',
+          allOf: [
+            parentInline,
+            {
+              type: 'object',
+              required: ['phone_number', 'extension'],
+              properties: {
+                phone_number: { type: ['string', 'null'] },
+                extension: { type: ['string', 'null'], description: 'the desk' },
+                note: { type: 'string' },
+              },
+            },
+          ],
+          unevaluatedProperties: false,
+        })
+
+        expect(
+          PetSerializer({ species: 'cat', phone: { phoneNumber: '555' } }).render(undefined, {
+            casing: 'snake',
+          }),
+        ).toEqual({ species: 'cat', phone_number: '555', extension: null })
+      })
+    })
+
+    context('a customAttribute with flatten whose openapi is anyOf hand-written shapes', () => {
+      type Location = { city: string; zip?: string } | { iban: string }
+
+      const PetSerializer = named(
+        (data: { species: string; location: Location }) =>
+          ObjectSerializer(data)
+            .attribute('species', { openapi: 'string' })
+            .customAttribute('location', () => data.location, {
+              flatten: true,
+              openapi: {
+                anyOf: [
+                  {
+                    type: 'object',
+                    required: ['city'],
+                    properties: { city: { type: 'string' }, zip: { type: 'string' } },
+                  },
+                  { type: 'object', required: ['iban'], properties: { iban: { type: 'string' } } },
+                ],
+              },
+            }),
+        'FlattenedLocationShapesPet',
+      )
+
+      it('is each shape, its required keys accepting null, beside the keys the other shapes require as null', () => {
+        expect(new SerializerOpenapiRenderer(PetSerializer).renderedOpenapi().openapi).toEqual({
+          type: 'object',
+          allOf: [
+            parentInline,
+            {
+              anyOf: [
+                {
+                  allOf: [
+                    {
+                      type: 'object',
+                      required: ['city'],
+                      properties: { city: { type: ['string', 'null'] }, zip: { type: 'string' } },
+                    },
+                    { type: 'object', properties: { iban: { type: 'null' } } },
+                  ],
+                },
+                {
+                  allOf: [
+                    {
+                      type: 'object',
+                      required: ['iban'],
+                      properties: { iban: { type: ['string', 'null'] } },
+                    },
+                    { type: 'object', properties: { city: { type: 'null' } } },
+                  ],
+                },
+              ],
+            },
+          ],
+          unevaluatedProperties: false,
+        })
+      })
+
+      it('validates and sends the payloads Dream renders', () => {
+        const city = PetSerializer({ species: 'cat', location: { city: 'Paris' } }).render()
+        const cityAndZip = PetSerializer({
+          species: 'cat',
+          location: { city: 'Paris', zip: '75001' },
+        }).render()
+        const iban = PetSerializer({ species: 'cat', location: { iban: 'FR76' } }).render()
+
+        expect(city).toEqual({ species: 'cat', city: 'Paris', iban: null })
+        expect(cityAndZip).toEqual({ species: 'cat', city: 'Paris', zip: '75001', iban: null })
+        expect(iban).toEqual({ species: 'cat', iban: 'FR76', city: null })
+
+        expectValidatedAndSerialized(PetSerializer, [city, cityAndZip, iban])
+      })
+    })
+
+    context('a customAttribute with flatten whose openapi is anyOf a hand-written shape or null', () => {
+      const PetSerializer = named(
+        (data: { species: string; location: { city: string; zip?: string } | null }) =>
+          ObjectSerializer(data)
+            .attribute('species', { openapi: 'string' })
+            .customAttribute('location', () => data.location, {
+              flatten: true,
+              openapi: {
+                anyOf: [
+                  {
+                    type: 'object',
+                    required: ['city'],
+                    properties: { city: { type: 'string' }, zip: { type: 'string' } },
+                  },
+                  { type: 'null' },
+                ],
+              },
+            }),
+        'FlattenedNullableLocationShapePet',
+      )
+
+      it('is the shape, or an object whose required keys, when present, are null', () => {
+        expect(new SerializerOpenapiRenderer(PetSerializer).renderedOpenapi().openapi).toEqual({
+          type: 'object',
+          allOf: [
+            parentInline,
+            {
+              anyOf: [
+                {
+                  type: 'object',
+                  required: ['city'],
+                  properties: { city: { type: ['string', 'null'] }, zip: { type: 'string' } },
+                },
+                { type: 'object', properties: { city: { type: 'null' } } },
+              ],
+            },
+          ],
+          unevaluatedProperties: false,
+        })
+      })
+
+      it('validates and sends the payloads Dream renders', () => {
+        const present = PetSerializer({ species: 'cat', location: { city: 'Paris', zip: '75001' } }).render()
+        const absent = PetSerializer({ species: 'cat', location: null }).render()
+        expect(absent).toEqual({ species: 'cat', city: null })
+
+        expectValidatedAndSerialized(PetSerializer, [present, absent])
       })
     })
 
@@ -534,8 +824,22 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
     })
 
     context('beside a flattened STI base model', () => {
-      const stiRefs = {
-        anyOf: [{ $ref: '#/components/schemas/BalloonLatex' }, { $ref: '#/components/schemas/BalloonMylar' }],
+      // each child, beside the other child's fields as null
+      const stiChildren = {
+        anyOf: [
+          {
+            allOf: [
+              { $ref: '#/components/schemas/BalloonLatex' },
+              { type: 'object', properties: { mylarOnlyAttr: { type: 'null' } } },
+            ],
+          },
+          {
+            allOf: [
+              { $ref: '#/components/schemas/BalloonMylar' },
+              { type: 'object', properties: { latexOnlyAttr: { type: 'null' } } },
+            ],
+          },
+        ],
       }
 
       async function balloons() {
@@ -560,10 +864,10 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
           'FlattenedBalloonPet',
         )
 
-        it('is any of the child serializers', () => {
+        it('is any of the child serializers, each beside the other child’s fields as null', () => {
           expect(new SerializerOpenapiRenderer(PetSerializer).renderedOpenapi().openapi).toEqual({
             type: 'object',
-            allOf: [parentInline, stiRefs, { anyOf: [contactRef, contactFieldsNull] }],
+            allOf: [parentInline, stiChildren, { anyOf: [contactRef, contactFieldsNull] }],
             unevaluatedProperties: false,
           })
         })
@@ -575,6 +879,7 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
           expect(PetSerializer({ species: 'cat', balloon: latex, contact }).render()).toEqual({
             species: 'cat',
             ...LatexSerializer(latex, {}).render(),
+            mylarOnlyAttr: null,
             ...contact,
           })
 
@@ -606,10 +911,10 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
           'FlattenedSerializableBalloonPet',
         )
 
-        it('is any of the child serializers', () => {
+        it('is any of the child serializers, each beside the other child’s fields as null', () => {
           expect(new SerializerOpenapiRenderer(PetSerializer).renderedOpenapi().openapi).toEqual({
             type: 'object',
-            allOf: [parentInline, stiRefs, { anyOf: [contactRef, contactFieldsNull] }],
+            allOf: [parentInline, stiChildren, { anyOf: [contactRef, contactFieldsNull] }],
             unevaluatedProperties: false,
           })
         })
@@ -655,13 +960,26 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
         'FlattenedLocationPet',
       )
 
-      it('is any of the refs', () => {
+      it('is any of the refs, each beside the fields the other refs’ serializers require as null', () => {
         expect(new SerializerOpenapiRenderer(PetSerializer).renderedOpenapi().openapi).toEqual({
           type: 'object',
           allOf: [
             parentInline,
             {
-              anyOf: [{ $ref: '#/components/schemas/Address' }, { $ref: '#/components/schemas/Billing' }],
+              anyOf: [
+                {
+                  allOf: [
+                    { $ref: '#/components/schemas/Address' },
+                    { type: 'object', properties: { iban: { type: 'null' } } },
+                  ],
+                },
+                {
+                  allOf: [
+                    { $ref: '#/components/schemas/Billing' },
+                    { type: 'object', properties: { city: { type: 'null' } } },
+                  ],
+                },
+              ],
             },
             { anyOf: [contactRef, contactFieldsNull] },
           ],
@@ -670,17 +988,25 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
       })
 
       it('validates and sends every flattened field', () => {
-        expectValidatedAndSerialized(PetSerializer, [
-          PetSerializer({
-            species: 'cat',
-            location: { city: 'Paris' },
-            contact: { email: 'a@b.c', name: 'A' },
-          }).render(),
-          PetSerializer({ species: 'cat', location: { iban: 'FR76' }, contact: null }).render(),
-        ])
+        const address = PetSerializer({
+          species: 'cat',
+          location: { city: 'Paris' },
+          contact: { email: 'a@b.c', name: 'A' },
+        }).render()
+        const billing = PetSerializer({ species: 'cat', location: { iban: 'FR76' }, contact: null }).render()
+
+        expect(address).toEqual({ species: 'cat', city: 'Paris', iban: null, email: 'a@b.c', name: 'A' })
+        expect(billing).toEqual({ species: 'cat', iban: 'FR76', city: null, email: null, name: null })
+
+        expectValidatedAndSerialized(PetSerializer, [address, billing])
       })
     })
 
+    // A key two attributes render holds whichever value was rendered last, so
+    // each fixture declares the nullable flattened attribute first: its null for
+    // the shared key is overwritten by the other attribute's value, which that
+    // attribute's schema describes. Declared last, its null would overwrite that
+    // value, which the other attribute's schema does not accept.
     context('whose nested serializer renders a field another attribute also renders', () => {
       interface Owner {
         id: string
@@ -713,12 +1039,12 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
         const PetSerializer = named(
           (data: { id: string; species: string; owner: Owner | null }) =>
             ObjectSerializer(data)
-              .attribute('id', { openapi: 'string' })
-              .attribute('species', { openapi: 'string' })
               .customAttribute('owner', () => (data.owner ? OwnerSerializer(data.owner).render() : null), {
                 flatten: true,
                 openapi: { $serializer: OwnerSerializer, maybeNull: true },
-              }),
+              })
+              .attribute('id', { openapi: 'string' })
+              .attribute('species', { openapi: 'string' }),
           'OwnedPet',
         )
 
@@ -745,8 +1071,8 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
           }).render()
           const nullOwner = PetSerializer({ id: 'p1', species: 'cat', owner: null }).render()
 
-          expect(presentOwner).toEqual({ id: 'o1', species: 'cat', email: 'a@b.c' })
-          expect(nullOwner).toEqual({ id: 'p1', species: 'cat' })
+          expect(presentOwner).toEqual({ id: 'p1', species: 'cat', email: 'a@b.c' })
+          expect(nullOwner).toEqual({ id: 'p1', species: 'cat', email: null })
 
           expectValidatedAndSerialized(PetSerializer, [presentOwner, nullOwner])
         })
@@ -757,11 +1083,11 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
           (data: { species: string; owner: Owner; tag: Tag | null }) =>
             ObjectSerializer(data)
               .attribute('species', { openapi: 'string' })
-              .rendersOne('owner', { serializer: OwnerSerializer, flatten: true })
               .customAttribute('tag', () => (data.tag ? TagSerializer(data.tag).render() : null), {
                 flatten: true,
                 openapi: { $serializer: TagSerializer, maybeNull: true },
-              }),
+              })
+              .rendersOne('owner', { serializer: OwnerSerializer, flatten: true }),
           'OwnedTaggedPet',
         )
 
@@ -770,13 +1096,13 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
             type: 'object',
             allOf: [
               parentInline,
-              { $ref: '#/components/schemas/Owner' },
               {
                 anyOf: [
                   { $ref: '#/components/schemas/Tag' },
                   { type: 'object', properties: { label: { type: 'null' } } },
                 ],
               },
+              { $ref: '#/components/schemas/Owner' },
             ],
             unevaluatedProperties: false,
           })
@@ -792,20 +1118,18 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
         })
       })
 
-      // Dream sends no keys for a null flattened customAttribute, but when it
-      // is present its callback renders the keys its `openapi` declares
       context('another flattened customAttribute, whose keys its openapi declares', () => {
         const PetSerializer = named(
           (data: { species: string; owner: Owner; tag: Tag | null }) =>
             ObjectSerializer(data)
               .attribute('species', { openapi: 'string' })
-              .customAttribute('owner', () => OwnerSerializer(data.owner).render(), {
-                flatten: true,
-                openapi: { $serializer: OwnerSerializer },
-              })
               .customAttribute('tag', () => (data.tag ? TagSerializer(data.tag).render() : null), {
                 flatten: true,
                 openapi: { $serializer: TagSerializer, maybeNull: true },
+              })
+              .customAttribute('owner', () => OwnerSerializer(data.owner).render(), {
+                flatten: true,
+                openapi: { $serializer: OwnerSerializer },
               }),
           'CustomOwnedTaggedPet',
         )
@@ -815,13 +1139,13 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
             type: 'object',
             allOf: [
               parentInline,
-              { $ref: '#/components/schemas/Owner' },
               {
                 anyOf: [
                   { $ref: '#/components/schemas/Tag' },
                   { type: 'object', properties: { label: { type: 'null' } } },
                 ],
               },
+              { $ref: '#/components/schemas/Owner' },
             ],
             unevaluatedProperties: false,
           })
@@ -957,11 +1281,11 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
           'NestedFlattenMaybeNullCustomAttributePet',
         )
 
-        it('validates the payloads Dream renders against the document, with the nested fields present or omitted, and accepts an unknown key', () => {
+        it('validates the payloads Dream renders against the document, with the nested fields present or null, and accepts an unknown key', () => {
           const present = PetSerializer({ species: 'cat', contact }).render()
           const absent = PetSerializer({ species: 'cat', contact: null }).render()
           expect(present).toEqual(nestedPresentPayload)
-          expect(absent).toEqual({ species: 'cat' })
+          expect(absent).toEqual({ species: 'cat', email: null, city: null })
 
           expectValidatedAgainstOpenComponents(PetSerializer, [present, absent])
         })
