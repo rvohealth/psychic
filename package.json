@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "3.16.0",
+  "version": "3.16.1",
   "author": "RVOHealth",
   "publishConfig": {
     "access": "public"
@@ -84,9 +84,33 @@
     "@types/koa-conditional-get": "^2.0.3",
     "@types/koa__cors": "^5.0.0",
     "@types/koa__router": "^12.0.5",
+    "commander": "^14.0.3",
+    "dotenv": "*",
     "koa": "^3.1.2",
     "koa-conditional-get": "^3.0.0",
-    "openapi-typescript": "^7.8.0"
+    "openapi-typescript": "^7.8.0",
+    "pluralize-esm": "^9.0.5",
+    "typescript": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    },
+    "@types/koa-conditional-get": {
+      "optional": true
+    },
+    "@types/koa__cors": {
+      "optional": true
+    },
+    "@types/koa__router": {
+      "optional": true
+    },
+    "openapi-typescript": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",
