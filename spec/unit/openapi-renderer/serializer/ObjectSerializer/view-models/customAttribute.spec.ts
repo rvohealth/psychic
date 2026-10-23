@@ -36,7 +36,7 @@ describe('ObjectSerializer (on a view model) customAttribute', () => {
   })
 
   context('flatten', () => {
-    it('renders the serialized data into this model and adjusts the OpenAPI spec accordingly', () => {
+    it('renders the serialized data into this model, over its own fields, and adjusts the OpenAPI spec accordingly', () => {
       const MySerializer = (data: MyViewModel) =>
         ObjectSerializer(data)
           .attribute('name', { openapi: 'string' })
@@ -46,13 +46,8 @@ describe('ObjectSerializer (on a view model) customAttribute', () => {
       expect(serializerOpenapiRenderer.renderedOpenapi().openapi).toEqual({
         type: 'object',
         allOf: [
-          {
-            type: 'object',
-            required: ['name'],
-            properties: {
-              name: { type: 'string' },
-            },
-          },
+          // the serializer's own `name` is rendered over by the flattened view model's
+          { type: 'object', required: [], properties: {} },
           {
             $ref: '#/components/schemas/ViewModelsMyViewModel',
           },

@@ -64,42 +64,6 @@
         }
       }
     },
-    "/enum-sync-tests/internal/species-subset": {
-      "parameters": [],
-      "get": {
-        "tags": [],
-        "responses": {
-          "200": {
-            "content": {
-              "application/json": {
-                "schema": {
-                  "$ref": "#/components/schemas/PetSpeciesSubset"
-                }
-              }
-            },
-            "description": "Success"
-          },
-          "400": {
-            "$ref": "#/components/responses/BadRequest"
-          },
-          "401": {
-            "$ref": "#/components/responses/Unauthorized"
-          },
-          "403": {
-            "$ref": "#/components/responses/Forbidden"
-          },
-          "404": {
-            "$ref": "#/components/responses/NotFound"
-          },
-          "409": {
-            "$ref": "#/components/responses/Conflict"
-          },
-          "500": {
-            "$ref": "#/components/responses/InternalServerError"
-          }
-        }
-      }
-    },
     "/enum-sync-tests/internal/treat-request-body": {
       "parameters": [],
       "post": {
@@ -151,10 +115,60 @@
           }
         }
       }
+    },
+    "/enum-sync-tests/internal/type-subset": {
+      "parameters": [],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalloonTypeLatexSubset"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
     }
   },
   "components": {
     "schemas": {
+      "BalloonTypeLatexSubset": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "enum": [
+              "BalloonLatex"
+            ]
+          }
+        }
+      },
       "OpenapiValidationErrors": {
         "type": "object",
         "required": [
@@ -207,23 +221,6 @@
                 }
               }
             }
-          }
-        }
-      },
-      "PetSpeciesSubset": {
-        "type": "object",
-        "required": [
-          "species"
-        ],
-        "properties": {
-          "species": {
-            "type": [
-              "string",
-              "null"
-            ],
-            "enum": [
-              "cat"
-            ]
           }
         }
       },

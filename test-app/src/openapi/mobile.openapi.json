@@ -122,7 +122,7 @@
         }
       }
     },
-    "/enum-sync-tests/mobile/treats-items-subset": {
+    "/enum-sync-tests/mobile/treats": {
       "parameters": [],
       "get": {
         "tags": [],
@@ -131,7 +131,79 @@
             "content": {
               "application/json": {
                 "schema": {
-                  "$ref": "#/components/schemas/PetTreatsItemsSubset"
+                  "$ref": "#/components/schemas/PetTreatsResponse"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/enum-sync-tests/mobile/type-latex-subset": {
+      "parameters": [],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalloonTypeLatexSubset"
+                }
+              }
+            },
+            "description": "Success"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
+    "/enum-sync-tests/mobile/type-mylar-subset": {
+      "parameters": [],
+      "get": {
+        "tags": [],
+        "responses": {
+          "200": {
+            "content": {
+              "application/json": {
+                "schema": {
+                  "$ref": "#/components/schemas/BalloonTypeMylarSubset"
                 }
               }
             },
@@ -444,6 +516,30 @@
           }
         }
       },
+      "BalloonTypeLatexSubset": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The following values will be allowed:\n  BalloonLatex"
+          }
+        }
+      },
+      "BalloonTypeMylarSubset": {
+        "type": "object",
+        "required": [
+          "type"
+        ],
+        "properties": {
+          "type": {
+            "type": "string",
+            "description": "The following values will be allowed:\n  BalloonMylar"
+          }
+        }
+      },
       "Comment1OnlyUsedInOneController": {
         "type": "object",
         "required": [
@@ -538,7 +634,7 @@
           }
         }
       },
-      "PetTreatsItemsSubset": {
+      "PetTreatsResponse": {
         "type": "object",
         "required": [
           "favoriteTreats"
@@ -551,7 +647,7 @@
             ],
             "items": {
               "type": "string",
-              "description": "\nThe following values will be allowed:\n  snick snowcks"
+              "description": "The following values will be allowed:\n  efishy feesh,\n  snick snowcks"
             }
           }
         }

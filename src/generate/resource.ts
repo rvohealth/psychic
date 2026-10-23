@@ -37,6 +37,11 @@ export default async function generateResource({
   const fullyQualifiedControllerName = DreamApp.system.standardizeFullyQualifiedModelName(route)
   const resourcefulActions = options.singular ? [...SINGULAR_RESOURCE_ACTIONS] : [...RESOURCE_ACTIONS]
   const onlyActions = options.only?.split(',')
+  // The routes file is given the controller's actions, not the raw --only, so an --only entry the resource
+  // has no action for (`index` with --singular, or a misspelling) is neither generated nor routed.
+  const actions = onlyActions
+    ? resourcefulActions.filter(action => onlyActions.includes(action))
+    : resourcefulActions
 
   const forAdmin = /^Admin\//.test(fullyQualifiedControllerName)
   const forInternal = /^Internal\//.test(fullyQualifiedControllerName)
@@ -59,9 +64,7 @@ export default async function generateResource({
   await generateController({
     fullyQualifiedControllerName,
     fullyQualifiedModelName,
-    actions: onlyActions
-      ? resourcefulActions.filter(action => onlyActions.includes(action))
-      : resourcefulActions,
+    actions,
     columnsWithTypes,
     resourceSpecs: true,
     singular: options.singular,
@@ -70,6 +73,6 @@ export default async function generateResource({
 
   await addResourceToRoutes(route, {
     singular: options.singular,
-    onlyActions,
+    onlyActions: onlyActions ? actions : undefined,
   })
 }

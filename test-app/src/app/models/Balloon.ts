@@ -12,6 +12,7 @@ export default class Balloon extends ApplicationModel {
 
   public id: DreamColumn<Balloon, 'id'>
   public color: DreamColumn<Balloon, 'color'>
+  public type: DreamColumn<Balloon, 'type'>
   public createdAt: DreamColumn<Balloon, 'createdAt'>
   public updatedAt: DreamColumn<Balloon, 'updatedAt'>
 

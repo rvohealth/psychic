@@ -12,6 +12,7 @@ allowBuilds:
   esbuild: false
   puppeteer: false
 
+# We maintain the @rvoh packages, so a fresh publish of one of them is not an
+# upstream supply-chain risk to wait out.
 minimumReleaseAgeExclude:
-  - '@rvoh/dream-spec-helpers@2.2.0'
-  - '@rvoh/dream@2.14.0'
+  - '@rvoh/*'

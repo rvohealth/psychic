@@ -1,4 +1,5 @@
 import { OpenAPI } from '../../../../src/package-exports/index.js'
+import User from '../models/User.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class ParamsTestController extends ApplicationController {
@@ -9,6 +10,10 @@ export default class ParamsTestController extends ApplicationController {
 
   public displayParams() {
     this.ok(this.castParam('howyadoin', 'string[]'))
+  }
+
+  public testArrayParams() {
+    this.ok(this.extractParams(User, ['name'], { key: 'users', array: true }))
   }
 
   @OpenAPI({

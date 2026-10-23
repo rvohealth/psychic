@@ -1,3 +1,4 @@
+import { ObjectSerializer } from '@rvoh/dream'
 import OpenapiEndpointRenderer, {
   ToPathObjectOpts,
   ToSchemaObjectOpts,
@@ -32,10 +33,8 @@ import {
   CommentWithOneOfArraySerializer,
   CommentWithOneOfObjectSerializer,
 } from '../../../../test-app/src/app/serializers/CommentSerializer.js'
-import {
-  PetWithFavoriteTreatsOverrideSerializer,
-  PetWithFavoriteTreatsSerializer,
-} from '../../../../test-app/src/app/serializers/PetSerializer.js'
+import { BalloonWithTypeOverrideSerializer } from '../../../../test-app/src/app/serializers/BalloonSerializer.js'
+import { PetWithFavoriteTreatsSerializer } from '../../../../test-app/src/app/serializers/PetSerializer.js'
 import MyViewModel from '../../../../test-app/src/app/view-models/MyViewModel.js'
 
 describe('OpenapiEndpointRenderer', () => {
@@ -387,10 +386,10 @@ The following values will be allowed:
             )
           })
 
-          context('the enum values are explicitly overridden', () => {
+          context('the enum values of the STI type column are explicitly overridden', () => {
             it('provides the overridden values instead', () => {
               const renderer = new OpenapiEndpointRenderer(
-                PetWithFavoriteTreatsOverrideSerializer,
+                BalloonWithTypeOverrideSerializer,
                 UsersController,
                 'howyadoin',
                 {},
@@ -407,27 +406,13 @@ The following values will be allowed:
 
               expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual(
                 expect.objectContaining({
-                  PetWithFavoriteTreatsOverride: {
+                  BalloonWithTypeOverride: {
                     type: 'object',
-                    required: ['favoriteTreat', 'favoriteTreats'],
+                    required: ['type'],
                     properties: {
-                      favoriteTreat: {
-                        type: ['string', 'null'],
-                        description:
-                          'The following values will be allowed:\n' +
-                          '  overridden field 1,\n' +
-                          '  overridden field 2',
-                      },
-                      favoriteTreats: {
-                        type: ['array', 'null'],
-                        items: {
-                          type: 'string',
-                          description:
-                            '\n' +
-                            'The following values will be allowed:\n' +
-                            '  overridden field 1,\n' +
-                            '  overridden field 2',
-                        },
+                      type: {
+                        type: 'string',
+                        description: 'The following values will be allowed:\n' + '  BalloonLatex',
                       },
                     },
                   },
@@ -866,6 +851,73 @@ The following values will be allowed:
           }),
         )
       })
+
+      it('keeps description and summary beside allOf, anyOf and oneOf', () => {
+        const DescribedCombinatorsSerializer = Object.assign(
+          (data: { allOfValue: unknown; anyOfValue: unknown; oneOfValue: unknown }) =>
+            ObjectSerializer(data)
+              .attribute('allOfValue', {
+                openapi: {
+                  description: 'a named, aged thing',
+                  summary: 'named and aged',
+                  allOf: [
+                    { type: 'object', properties: { name: 'string' } },
+                    { type: 'object', properties: { age: 'integer' } },
+                  ],
+                },
+              })
+              .attribute('anyOfValue', {
+                openapi: {
+                  description: 'a name or a count',
+                  summary: 'name or count',
+                  anyOf: [{ type: 'string' }, { type: 'integer' }],
+                },
+              })
+              .attribute('oneOfValue', {
+                openapi: {
+                  description: 'a name or a count',
+                  summary: 'name or count',
+                  oneOf: [{ type: 'string' }, { type: 'integer' }],
+                },
+              }),
+          { globalName: 'DescribedCombinatorsSerializer', openapiName: 'DescribedCombinators' },
+        )
+
+        const renderer = new OpenapiEndpointRenderer(
+          DescribedCombinatorsSerializer,
+          UsersController,
+          'howyadoin',
+        )
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts()
+        renderer.toSchemaObject(toSchemaObjectOpts)
+
+        expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual({
+          DescribedCombinators: {
+            type: 'object',
+            required: ['allOfValue', 'anyOfValue', 'oneOfValue'],
+            properties: {
+              allOfValue: {
+                allOf: [
+                  { type: 'object', properties: { name: { type: 'string' } } },
+                  { type: 'object', properties: { age: { type: 'integer' } } },
+                ],
+                description: 'a named, aged thing',
+                summary: 'named and aged',
+              },
+              anyOfValue: {
+                anyOf: [{ type: 'string' }, { type: 'integer' }],
+                description: 'a name or a count',
+                summary: 'name or count',
+              },
+              oneOfValue: {
+                oneOf: [{ type: 'string' }, { type: 'integer' }],
+                description: 'a name or a count',
+                summary: 'name or count',
+              },
+            },
+          },
+        })
+      })
     })
 
     context('with an array type passed', () => {
@@ -1089,7 +1141,7 @@ The following values will be allowed:
         })
 
         context('flatten=true', () => {
-          it('renders flattened serializers the same as regular serializers', () => {
+          it('renders flattened serializers the same as regular serializers, the flattened post’s id over the user’s', () => {
             const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'howyadoin', {
               serializerKey: 'withFlattenedAssociation',
             })
@@ -1112,13 +1164,8 @@ The following values will be allowed:
               },
               UserWithFlattenedPost: {
                 allOf: [
-                  {
-                    type: 'object',
-                    required: ['id'],
-                    properties: {
-                      id: { type: 'integer' },
-                    },
-                  },
+                  // the user's own `id` is rendered over by the flattened post's
+                  { type: 'object', required: [], properties: {} },
                   {
                     $ref: '#/components/schemas/PostWithComments',
                   },

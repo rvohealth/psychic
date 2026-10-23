@@ -1,7 +1,6 @@
 import { CliFileWriter, DreamBin, DreamCLI } from '@rvoh/dream/system'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
-import ASTPsychicTypesBuilder from '../cli/helpers/ASTPsychicTypesBuilder.js'
 import validateOpenapiName from '../cli/helpers/validateOpenapiName.js'
 import generateController from '../generate/controller.js'
 import generateResource from '../generate/resource.js'
@@ -112,6 +111,8 @@ export default class PsychicBin {
   }
 
   public static async syncTypes() {
+    // loaded lazily because it imports typescript; see syncOpenapiTypescriptFiles
+    const ASTPsychicTypesBuilder = (await import('../cli/helpers/ASTPsychicTypesBuilder.js')).default
     await new ASTPsychicTypesBuilder().build()
   }
 
@@ -128,11 +129,15 @@ export default class PsychicBin {
     DreamCLI.logger.logStartProgress(`syncing openapi types...`)
 
     // https://rvohealth.atlassian.net/browse/PDTC-8359
-    // by dynamically importing this file, we prevent both openapi-typescript
-    // and typescript from being required as dependencies, since in production
-    // environments these won't be installed. By running migrations with
-    // --skip-sync, this function will never run, preventing the file which
-    // requires the dev dependencies from ever being imported.
+    // This helper, and the ASTPsychicTypesBuilder helper above, are imported
+    // dynamically rather than at the top of this file because they import
+    // typescript (and this one openapi-typescript), which are devDependencies
+    // that a production install does not have. This file is reachable from
+    // the public @rvoh/psychic/system entry, so a static import of either of
+    // them would make an app that imports that entry in production fail at
+    // import time. A dynamic import loads the helper only
+    // when its method runs, which production never does: migrations run with
+    // --skip-sync, so sync and post-sync never run.
     const syncOpenapiTypescriptFiles = (await import('./helpers/syncOpenapiTypescriptFiles.js')).default
 
     await syncOpenapiTypescriptFiles()

@@ -12,19 +12,19 @@ vi.mock('../../../src/generate/initializer/syncOpenapiTypescript.js')
 vi.mock('../../../src/generate/openapi/reduxBindings.js')
 vi.mock('../../../src/generate/openapi/zustandBindings.js')
 
+function buildProgram(): Command {
+  const program = new Command()
+
+  PsychicCLI.provide(program, {
+    initializePsychicApp: () => Promise.resolve(PsychicApp.getOrFail()),
+    seedDb: () => {},
+  })
+
+  return program
+}
+
 describe('PsychicCLI setup:sync commands', () => {
   let processExitSpy: MockInstance
-
-  function buildProgram(): Command {
-    const program = new Command()
-
-    PsychicCLI.provide(program, {
-      initializePsychicApp: () => Promise.resolve(PsychicApp.getOrFail()),
-      seedDb: () => {},
-    })
-
-    return program
-  }
 
   beforeEach(() => {
     processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
@@ -248,6 +248,78 @@ describe('PsychicCLI setup:sync commands', () => {
         undefined,
         { overwrite: true },
       )
+    })
+  })
+})
+
+describe('PsychicCLI g:resource --help', () => {
+  // The help is a static string, built before any app is initialized, so it
+  // must stay true for every app rather than describe one app's configuration
+  function gResourceHelp(): string {
+    const command = buildProgram().commands.find(command => command.name() === 'generate:resource')
+    if (!command) throw new Error('expected PsychicCLI to register generate:resource')
+    return command.helpInformation()
+  }
+
+  context('--owning-model', () => {
+    it("shows the id cast as following the app's primaryKeyType rather than one fixed cast type", () => {
+      const help = gResourceHelp()
+
+      expect(help).toContain(
+        "Defaults to `this.currentUser` for non-admin routes (e.g., `this.currentUser.associationQuery('posts').findOrFail(this.castParam('id', <idType>))`).",
+      )
+      expect(help).toContain(
+        "Defaults to `this.currentInternalUser` for internal namespaced controllers (e.g., `this.currentInternalUser.associationQuery('posts').findOrFail(this.castParam('id', <idType>))`).",
+      )
+      expect(help).toContain(
+        "Defaults to `null` for admin namespaced controllers (e.g., `Post.findOrFail(this.castParam('id', <idType>))`).",
+      )
+      expect(help).toContain(
+        "# results in `await this.currentHost.associationQuery('places').findOrFail(this.castParam('id', <idType>))`",
+      )
+      expect(help).toContain(
+        "<idType> follows the app's `primaryKeyType` setting (conf/dream.ts): 'bigint' for bigint and bigserial, 'integer' for integer, and 'uuid' for uuid, uuid4 and uuid7.",
+      )
+      expect(help).not.toMatch(/castParam\('id', '/)
+    })
+
+    it('describes the owning model without typos', () => {
+      expect(gResourceHelp()).toContain(
+        'Supplying an owning model changes the generated code in the controller to be relative to the owning model.',
+      )
+    })
+  })
+
+  context('belongs_to columns', () => {
+    it('names the FK column and association of a namespaced model for the last segment of its name', () => {
+      const help = gResourceHelp()
+
+      expect(help).toContain(
+        'Health/Coach:belongs_to           # creates coach_id column + coach BelongsTo association (named for the last segment of the model name)',
+      )
+      expect(help).not.toContain('health_coach_id')
+    })
+
+    it('shows an alias renaming a namespaced association rather than stripping the namespace, which the default already does', () => {
+      const help = gResourceHelp()
+
+      expect(help).toContain(
+        'Sports/Coach@sports_coach:belongs_to               # sports_coach_id column, sportsCoachId property, sportsCoach association',
+      )
+      expect(help).toContain('#   (without the alias, Sports/Coach:belongs_to would also create coach_id,')
+      expect(help).toContain('#   coachId and coach, colliding with Health/Coach:belongs_to)')
+      expect(help).not.toContain('strips the namespace')
+    })
+  })
+
+  context('--sti-base-serializer', () => {
+    it('says the summary serializer renders type with Dream 2.36.0 or newer, and only the default one with an older Dream', () => {
+      const help = gResourceHelp()
+
+      expect(help).toContain(
+        "Creates generically typed base serializers (summary and default) that accept a `StiChildClass` parameter. When a `type` column is passed, as in the example below, they render the `type` attribute with an OpenAPI enum of just the STI child's class name, which allows consuming applications to determine the response shape based on the STI type discriminator. With @rvoh/dream 2.36.0 or newer, the summary serializer renders `type` right after `id` and the default serializer inherits it, so responses from the generated `index` action, which renders the summary, carry `type`; with an older Dream, only the default serializer renders `type`, and the summary includes only `id`.",
+      )
+      expect(help).not.toContain('parameter and include the `type` attribute')
     })
   })
 })

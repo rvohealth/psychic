@@ -1,3 +1,4 @@
+import { OpenAPI } from '../../../../src/package-exports/index.js'
 import User from '../models/User.js'
 import ApplicationController from './ApplicationController.js'
 
@@ -40,6 +41,35 @@ export default class ResponseStatusesController extends ApplicationController {
   // 205
   public sendResetContent() {
     this.resetContent('custom content')
+  }
+
+  // this.respond(...) sends the success status the endpoint's OpenAPI
+  // document shows: a 204 for an @OpenAPI() with no model, view model,
+  // serializer or status, which cannot carry data
+  // (spec/unit/scenarios/response-statuses/respond-documented-status.spec.ts)
+  @OpenAPI()
+  public respondDocumentedNoContent() {
+    this.respond()
+  }
+
+  @OpenAPI()
+  public respondDocumentedNoContentWithData() {
+    this.respond({ any: 'data' })
+  }
+
+  @OpenAPI()
+  public respondDocumentedNoContentWithNull() {
+    this.respond(null)
+  }
+
+  // a 201, the only success status `responses` declares
+  @OpenAPI(User, {
+    responses: {
+      201: { type: 'object', properties: { id: 'string' }, required: ['id'] },
+    },
+  })
+  public respondDocumentedCreated() {
+    this.respond({ id: '1' })
   }
 
   // 301

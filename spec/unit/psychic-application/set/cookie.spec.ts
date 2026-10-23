@@ -7,6 +7,20 @@ describe('PsychicApp set("cookie", ...opts)', () => {
     config = new PsychicApp()
   })
 
+  context('when the app never sets cookie', () => {
+    it('leaves cookieOptions undefined', () => {
+      expect(config.cookieOptions).toBeUndefined()
+    })
+  })
+
+  it('types cookieOptions as possibly undefined, so reading a property needs a check', () => {
+    config.set('cookie', { maxAge: { milliseconds: 31 } })
+
+    // @ts-expect-error — cookieOptions is undefined until the app calls psy.set('cookie', …);
+    // the ts-expect-error itself is the compile-time proof
+    expect(config.cookieOptions.maxAge).toEqual(31)
+  })
+
   context('milliseconds unit is passed for maxAge', () => {
     it('sets default cookie maxAge to the provided number of milliseconds', () => {
       config.set('cookie', { maxAge: { milliseconds: 31 } })

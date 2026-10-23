@@ -33,15 +33,15 @@ export const SpeciesTypesEnumValues = [
     await PsychicBin.syncClientEnums(outfile, 'internal')
 
     const contents = (await fs.readFile(outfile)).toString()
-    // the internal spec renders species_types_enum only through a serializer
-    // override subsetting it to ['cat']
+    // the internal spec renders balloon_types_enum only through a serializer
+    // override of the STI type column subsetting it to ['BalloonLatex']
     expect(contents).toEqual(
       expect.stringContaining(`\
-export const SpeciesTypesEnumValues = [
-  'cat'
+export const BalloonTypesEnumValues = [
+  'BalloonLatex'
 ] as const`),
     )
-    expect(contents).not.toEqual(expect.stringContaining('noncat'))
+    expect(contents).not.toEqual(expect.stringContaining('BalloonMylar'))
   })
 
   it('keeps sequential syncs of different specs in one process isolated per outfile', async () => {
@@ -51,8 +51,8 @@ export const SpeciesTypesEnumValues = [
     const internalContents = (await fs.readFile(outfile)).toString()
     const enumTestContents = (await fs.readFile(otherOutfile)).toString()
 
-    expect(internalContents).not.toEqual(expect.stringContaining('noncat'))
-    expect(enumTestContents).toEqual(expect.stringContaining("'noncat'"))
+    expect(internalContents).not.toEqual(expect.stringContaining('BalloonMylar'))
+    expect(enumTestContents).toEqual(expect.stringContaining("'BalloonMylar'"))
     // pet_treats_enum appears in the internal spec but not in the enumTest spec
     expect(internalContents).toEqual(expect.stringContaining('PetTreatsEnumValues'))
     expect(enumTestContents).not.toEqual(expect.stringContaining('PetTreatsEnumValues'))

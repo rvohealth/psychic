@@ -2,23 +2,21 @@ import Koa from 'koa'
 import * as util from 'node:util'
 import HttpError from '../../error/http/index.js'
 import EnvInternal from '../../helpers/EnvInternal.js'
+import errorIsDeliberateHttpError, {
+  errorIsDeliberateKoaHttpError,
+  setKoaHttpErrorHeaders,
+} from '../../helpers/error/errorIsDeliberateHttpError.js'
+import errorIsFromBodyParser, {
+  errorIsBodyDecompressionFailure,
+} from '../../helpers/error/errorIsFromBodyParser.js'
+import errorIsRethrownHookError from '../../helpers/error/errorIsRethrownHookError.js'
+import errorKoaCanHandle from '../../helpers/error/errorKoaCanHandle.js'
+import httpErrorHasBody from '../../helpers/error/httpErrorHasBody.js'
 import renderSerializerBuilders from '../../helpers/renderSerializerBuilders.js'
+import toJson from '../../helpers/toJson.js'
 import PsychicApp from '../../psychic-app/index.js'
 
 export const ERROR_LOGGING_DEPTH = 6
-
-/**
- * @internal
- *
- * Set on `ctx.state` by the router when it processes an error thrown from a
- * controller action (running `server:error` hooks when any are registered,
- * or deliberately re-throwing to Koa when none are). The error boundary
- * passes marked errors through untouched so a single request can never run
- * `server:error` hooks twice, and so the router's deliberate dev/test
- * re-throw behavior reaches Koa exactly as it did before the boundary
- * existed.
- */
-export const psychicRouterProcessedErrorStateKey = '_psychicRouterProcessedError'
 
 /**
  * @internal
@@ -29,11 +27,36 @@ export const psychicRouterProcessedErrorStateKey = '_psychicRouterProcessedError
  * so any error those layers throw (and the router doesn't catch) lands here
  * instead of falling through to Koa's default handler.
  *
- * Errors carrying a 4xx status (e.g. a body-parser 400, or an `HttpError`
- * thrown from custom middleware) already name their response: the boundary
- * renders that status without involving `server:error` hooks. Anything else
- * is a genuine server error: it is logged, given a default 500 response, and
- * escalated to `server:error` hooks, which may reshape the response.
+ * Some errors already name their response. The boundary renders their
+ * status as a handled response, without logging them as server errors or
+ * involving `server:error` hooks:
+ *
+ * - deliberate http errors: a psychic `HttpError` other than 500 (e.g. one
+ *   thrown from custom middleware), or a Koa `ctx.throw` with a 4xx or
+ *   501–510 status, with the headers passed to it (see
+ *   `errorIsDeliberateHttpError`; the router answers these the same way for
+ *   a controller action)
+ * - the body parser's own 4xx errors, e.g. a 400 for malformed JSON or a 413
+ *   for a body over the size limit (see `errorIsFromBodyParser`), and its
+ *   failure to decompress a body that is not valid gzip, deflate or br data,
+ *   answered with a 400 (see `errorIsBodyDecompressionFailure`)
+ *
+ * Anything else is a genuine server error, including a 500 and another
+ * library's error that merely carries a 4xx or 5xx `status`: it is logged,
+ * given a default response of 500 with an empty body, whatever status or
+ * data the error carries (the router gives a server error from a controller
+ * action the same default), and escalated to `server:error` hooks, which
+ * may reshape the response. When the hooks set no response, the default is
+ * sent. A server error's data, e.g. an `HttpStatusInternalServerError`'s,
+ * is logged with it but never sent to the client.
+ *
+ * That holds for an error thrown on a request whose controller action's
+ * server error the router has already answered, e.g. by middleware around
+ * the router after `await next()`. The router itself throws only one error
+ * after answering a server error: in development and test, a failing
+ * `server:error` hook's (see `errorIsRethrownHookError`), which the boundary
+ * passes through to Koa untouched, so the hooks never run a second time for
+ * it.
  */
 export default function errorBoundaryMiddleware(): Koa.Middleware {
   return async function psychicErrorBoundary(ctx, next) {
@@ -42,30 +65,46 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
     } catch (error) {
       const err = error as Error
 
-      // the router already processed this error (see the state key docs
-      // above); let it reach Koa unchanged
-      if (ctx.state[psychicRouterProcessedErrorStateKey]) throw err
+      // a failing server:error hook's error, which the router re-threw in
+      // development and test after answering a controller action's server
+      // error; let it reach Koa unchanged
+      if (errorIsRethrownHookError(err)) throw err
 
       // once headers are out, the response can no longer be shaped; Koa's
       // ctx.onerror knows how to clean up the socket, and the app-level
-      // 'error' listener registered by PsychicServer will log it
-      if (ctx.headerSent) throw err
+      // 'error' listener registered by PsychicServer will log it. It is
+      // handed an error it can mark as `headerSent` (not a frozen one)
+      if (ctx.headerSent) throw errorKoaCanHandle(err)
 
-      const status = statusFromError(err)
+      // Koa sends the answer written below, deliberate or not: middleware
+      // that opted out of Koa's response (`ctx.respond = false`) and failed
+      // before sending anything has given that response up
+      ctx.respond = true
 
-      if (status !== null && status < 500) {
-        // client-shaped errors are a handled response, not a server error;
-        // server:error hooks are never called for them
+      // a body that fails to decompress is the client's fault, though the
+      // error zlib throws for it carries no status
+      const status = statusFromError(err) ?? (errorIsBodyDecompressionFailure(err) ? 400 : null)
+
+      if (
+        status !== null &&
+        (errorIsDeliberateHttpError(err) || (status < 500 && errorIsFromBodyParser(err)))
+      ) {
+        // deliberate http errors and the body parser's own 4xx errors are a
+        // handled response, not a server error; server:error hooks are never
+        // called for them
+        if (errorIsDeliberateKoaHttpError(err)) setKoaHttpErrorHeaders(ctx, err)
         ctx.status = status
-        ctx.body = httpErrorBody(err)
+        writeHandledErrorBody(ctx, err)
         return
       }
 
       PsychicApp.logWithLevel('error', util.inspect(err, { depth: ERROR_LOGGING_DEPTH }))
 
-      // default server-error response; server:error hooks may reshape it
-      ctx.status = status ?? 500
-      ctx.body = httpErrorBody(err)
+      // default server-error response, whatever status or data the error
+      // carries (a server error's data is never sent); server:error hooks
+      // may reshape it
+      ctx.status = 500
+      ctx.body = ''
 
       try {
         for (const hook of PsychicApp.getOrFail().specialHooks.serverError) {
@@ -74,8 +113,9 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
       } catch (hookError) {
         if (EnvInternal.isDevelopmentOrTest) {
           // mirror the router's deliberate dev/test behavior for throwing
-          // server:error hooks: surface the hook error so specs can see it
-          throw hookError
+          // server:error hooks: surface the hook error so specs can see it,
+          // as an error Koa's default error handler can respond to
+          throw errorKoaCanHandle(hookError)
         } else {
           PsychicApp.logWithLevel(
             'error',
@@ -97,7 +137,9 @@ export default function errorBoundaryMiddleware(): Koa.Middleware {
  *
  * Extracts an http response status from an error when the error names one:
  * psychic `HttpError` subclasses, Koa `ctx.throw`/http-errors errors, and
- * body-parser failures all carry a numeric `status`. Guarded property access
+ * most body-parser failures carry a numeric `status`. The body parser's
+ * failure to decompress a request body carries none; the boundary answers it
+ * with a 400 (see `errorIsBodyDecompressionFailure`). Guarded property access
  * because the base `HttpError#status` getter throws.
  */
 function statusFromError(err: unknown): number | null {
@@ -113,10 +155,21 @@ function statusFromError(err: unknown): number | null {
 /**
  * @internal
  *
- * The response body for an error caught by the boundary: an `HttpError`'s
- * data, with serializer builders rendered (there is no controller here, so
- * no serializer passthrough), or an empty body.
+ * Writes the response body for an error the boundary answers as a handled
+ * response (a deliberate http error, or the body parser's own 4xx error): an
+ * `HttpError`'s data as JSON, as a controller action sends it, so a string
+ * is JSON-encoded, never sent as text or HTML, and `0`, `false` and `''` are
+ * sent too; serializer builders are rendered, without serializer
+ * passthrough, since there is no controller here. The body is empty for an
+ * `HttpError` without data (`undefined` or `null`, see `httpErrorHasBody`)
+ * and for any other error; it is never a `null` body, which Koa would answer
+ * with a 204. Never used for a server error, whose data is never sent.
  */
-function httpErrorBody(err: Error) {
-  return err instanceof HttpError && err.data !== undefined ? renderSerializerBuilders(err.data) : ''
+function writeHandledErrorBody(ctx: Koa.Context, err: Error) {
+  if (err instanceof HttpError && httpErrorHasBody(err)) {
+    ctx.type = 'json'
+    ctx.body = toJson(renderSerializerBuilders(err.data))
+  } else {
+    ctx.body = ''
+  }
 }

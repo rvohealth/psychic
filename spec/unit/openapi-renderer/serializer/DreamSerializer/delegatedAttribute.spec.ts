@@ -1,7 +1,19 @@
 import { DreamSerializer } from '@rvoh/dream'
+import { validateObject } from '../../../../../src/helpers/validateOpenApiSchema.js'
 import SerializerOpenapiRenderer from '../../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 import Balloon from '../../../../../test-app/src/app/models/Balloon.js'
 import Pet from '../../../../../test-app/src/app/models/Pet.js'
+import User from '../../../../../test-app/src/app/models/User.js'
+import {
+  BalloonTypesEnum,
+  BalloonTypesEnumValues,
+  SpeciesTypesEnumValues,
+} from '../../../../../test-app/src/types/db.js'
+
+// validates a value against a rendered property schema with the Ajv options Psychic validates with
+function validates(schema: unknown, value: unknown) {
+  return validateObject(value, schema as object).isValid
+}
 
 describe('DreamSerializer delegated attributes', () => {
   it('delegates value and type to the specified target', () => {
@@ -20,18 +32,18 @@ describe('DreamSerializer delegated attributes', () => {
     })
   })
 
-  it('can override with explicitly provided OpenAPI shapes', () => {
+  it('can override a virtual column or plain property target with explicitly provided OpenAPI shapes', () => {
     const MySerializer = (data: Pet) =>
       DreamSerializer(Pet, data)
-        .delegatedAttribute('user', 'name', { openapi: 'string' })
-        .delegatedAttribute('user', 'birthdate', { openapi: 'date' })
+        .delegatedAttribute('user', 'password', { openapi: 'string' })
+        .delegatedAttribute('user', 'openapiVirtualSpecTest3', { openapi: 'date' })
 
     const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
     expect(serializerOpenapiRenderer['renderedOpenapiAttributes']().attributes).toEqual({
-      name: {
+      password: {
         type: 'string',
       },
-      birthdate: {
+      openapiVirtualSpecTest3: {
         type: 'string',
         format: 'date',
       },
@@ -54,7 +66,7 @@ describe('DreamSerializer delegated attributes', () => {
     })
 
     context('when the column is non-nullable', () => {
-      it('wraps the schema in anyOf with null', () => {
+      it('adds null to the type', () => {
         const MySerializer = (data: Pet) =>
           DreamSerializer(Pet, data).delegatedAttribute('user', 'passwordDigest', { optional: true })
 
@@ -68,7 +80,7 @@ describe('DreamSerializer delegated attributes', () => {
     })
 
     context('when the delegated target is a @deco.Virtual column', () => {
-      it('wraps the virtual column schema with null', () => {
+      it('adds null to the type', () => {
         const MySerializer = (data: Pet) =>
           DreamSerializer(Pet, data).delegatedAttribute('user', 'password', { optional: true })
 
@@ -78,6 +90,49 @@ describe('DreamSerializer delegated attributes', () => {
             type: ['string', 'null'],
           },
         })
+      })
+    })
+
+    // the test-app reaches its non-nullable enum columns only through User's HasMany
+    // associations; the type argument delegates through one as through a HasOne, and
+    // the renderer resolves either to the associated model the same way
+    context('when the column is a non-nullable enum', () => {
+      it('adds null to the type and to the enum', () => {
+        const MySerializer = (data: User) =>
+          DreamSerializer(User, data).delegatedAttribute<{ pets: Pet }>('pets', 'nonNullSpecies', {
+            optional: true,
+          })
+
+        const { nonNullSpecies } = new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']()
+          .attributes
+        expect(nonNullSpecies).toEqual({
+          type: ['string', 'null'],
+          enum: [...SpeciesTypesEnumValues, null],
+        })
+        expect(validates(nonNullSpecies, null)).toBe(true)
+        SpeciesTypesEnumValues.forEach(value => expect(validates(nonNullSpecies, value)).toBe(true))
+        expect(validates(nonNullSpecies, 'dog')).toBe(false)
+      })
+    })
+
+    context('when the column is a non-nullable STI type', () => {
+      it('adds null to the type and to the enum', () => {
+        // Balloon declares no `type` property, so the type argument adds it
+        const MySerializer = (data: User) =>
+          DreamSerializer(User, data).delegatedAttribute<{ balloons: Balloon & { type: BalloonTypesEnum } }>(
+            'balloons',
+            'type',
+            { optional: true },
+          )
+
+        const { type } = new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']().attributes
+        expect(type).toEqual({
+          type: ['string', 'null'],
+          enum: [...BalloonTypesEnumValues, null],
+        })
+        expect(validates(type, null)).toBe(true)
+        BalloonTypesEnumValues.forEach(value => expect(validates(type, value)).toBe(true))
+        expect(validates(type, 'BalloonFoil')).toBe(false)
       })
     })
   })
@@ -110,15 +165,15 @@ describe('DreamSerializer delegated attributes', () => {
     it('keeps the key required because the fallback declaration still writes it', () => {
       const MySerializer = (data: Pet) =>
         DreamSerializer(Pet, data)
-          .delegatedAttribute('user', 'name', { openapi: 'string' })
-          .delegatedAttribute('user', 'name', { openapi: 'string', required: false })
+          .delegatedAttribute('user', 'name')
+          .delegatedAttribute('user', 'name', { required: false })
 
       const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
       expect(serializerOpenapiRenderer.renderedOpenapi().openapi).toMatchObject({
         required: ['name'],
         properties: {
           name: {
-            type: 'string',
+            type: ['string', 'null'],
           },
         },
       })
@@ -127,19 +182,15 @@ describe('DreamSerializer delegated attributes', () => {
     it('uses the renamed output key in properties and required when shadowing with as', () => {
       const MySerializer = (data: Pet) =>
         DreamSerializer(Pet, data)
-          .delegatedAttribute('user', 'name', { as: 'displayName', openapi: 'string' })
-          .delegatedAttribute('user', 'name', {
-            as: 'displayName',
-            openapi: 'string',
-            required: false,
-          })
+          .delegatedAttribute('user', 'name', { as: 'displayName' })
+          .delegatedAttribute('user', 'name', { as: 'displayName', required: false })
 
       const serializerOpenapiRenderer = new SerializerOpenapiRenderer(MySerializer)
       expect(serializerOpenapiRenderer.renderedOpenapi().openapi).toMatchObject({
         required: ['displayName'],
         properties: {
           displayName: {
-            type: 'string',
+            type: ['string', 'null'],
           },
         },
       })
@@ -202,6 +253,48 @@ describe('DreamSerializer delegated attributes', () => {
             items: { type: 'string' },
           },
         })
+      })
+    })
+
+    context('when the openapi option is a hand-written non-nullable enum', () => {
+      it('adds null to the type and to the enum', () => {
+        const MySerializer = (data: Balloon) =>
+          DreamSerializer(Balloon, data).delegatedAttribute('user', 'openapiVirtualSpecTest3', {
+            openapi: { type: 'string', enum: ['hashed', 'unhashed'] },
+          })
+
+        const { openapiVirtualSpecTest3 } = new SerializerOpenapiRenderer(MySerializer)[
+          'renderedOpenapiAttributes'
+        ]().attributes
+        expect(openapiVirtualSpecTest3).toEqual({
+          type: ['string', 'null'],
+          enum: ['hashed', 'unhashed', null],
+        })
+        expect(validates(openapiVirtualSpecTest3, null)).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'hashed')).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'unhashed')).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'plain')).toBe(false)
+      })
+    })
+
+    context('when the openapi option is a hand-written nullable enum', () => {
+      it('adds null to the enum without repeating it in the type', () => {
+        const MySerializer = (data: Balloon) =>
+          DreamSerializer(Balloon, data).delegatedAttribute('user', 'openapiVirtualSpecTest3', {
+            openapi: { type: ['string', 'null'], enum: ['Fred', 'Wilma'] },
+          })
+
+        const { openapiVirtualSpecTest3 } = new SerializerOpenapiRenderer(MySerializer)[
+          'renderedOpenapiAttributes'
+        ]().attributes
+        expect(openapiVirtualSpecTest3).toEqual({
+          type: ['string', 'null'],
+          enum: ['Fred', 'Wilma', null],
+        })
+        expect(validates(openapiVirtualSpecTest3, null)).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'Fred')).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'Wilma')).toBe(true)
+        expect(validates(openapiVirtualSpecTest3, 'Barney')).toBe(false)
       })
     })
   })
