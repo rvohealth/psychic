@@ -97,7 +97,7 @@ describe('DreamSerializer rendersOne', () => {
       })
 
       context('when flatten', () => {
-        it('the association is the custom serializer, or an object whose fields, when present, are null', () => {
+        it('the association is an object of the custom serializer’s fields, each accepting null', () => {
           const MySerializer = (data: Balloon) =>
             DreamSerializer(Balloon, data)
               .attribute('color')
@@ -116,17 +116,9 @@ describe('DreamSerializer rendersOne', () => {
                 },
               },
               {
-                anyOf: [
-                  {
-                    $ref: '#/components/schemas/CustomUser',
-                  },
-                  {
-                    type: 'object',
-                    properties: {
-                      name: { type: 'null' },
-                    },
-                  },
-                ],
+                type: 'object',
+                required: ['name'],
+                properties: { name: { type: ['string', 'null'] } },
               },
             ],
             unevaluatedProperties: false,
@@ -207,7 +199,7 @@ describe('DreamSerializer rendersOne', () => {
     })
 
     context('when optional and flatten', () => {
-      it('the association is its serializer, or an object whose fields, when present, are null', () => {
+      it('the association is an object of its serializer’s fields, each accepting null', () => {
         const MySerializer = (data: Pet) =>
           DreamSerializer(Pet, data)
             .attribute('species')
@@ -226,19 +218,13 @@ describe('DreamSerializer rendersOne', () => {
               },
             },
             {
-              anyOf: [
-                {
-                  $ref: '#/components/schemas/User',
-                },
-                {
-                  type: 'object',
-                  properties: {
-                    email: { type: 'null' },
-                    id: { type: 'null' },
-                    name: { type: 'null' },
-                  },
-                },
-              ],
+              type: 'object',
+              required: ['email', 'id', 'name'],
+              properties: {
+                email: { type: ['string', 'null'] },
+                id: { type: ['integer', 'null'] },
+                name: { type: ['string', 'null'] },
+              },
             },
           ],
           unevaluatedProperties: false,

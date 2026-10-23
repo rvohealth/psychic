@@ -1141,7 +1141,7 @@ The following values will be allowed:
         })
 
         context('flatten=true', () => {
-          it('renders flattened serializers the same as regular serializers', () => {
+          it('renders flattened serializers the same as regular serializers, the flattened post’s id over the user’s', () => {
             const renderer = new OpenapiEndpointRenderer(Pet, UsersController, 'howyadoin', {
               serializerKey: 'withFlattenedAssociation',
             })
@@ -1164,13 +1164,8 @@ The following values will be allowed:
               },
               UserWithFlattenedPost: {
                 allOf: [
-                  {
-                    type: 'object',
-                    required: ['id'],
-                    properties: {
-                      id: { type: 'integer' },
-                    },
-                  },
+                  // the user's own `id` is rendered over by the flattened post's
+                  { type: 'object', required: [], properties: {} },
                   {
                     $ref: '#/components/schemas/PostWithComments',
                   },

@@ -38,14 +38,41 @@ import allSerializersToRefsInOpenapi from './helpers/allSerializersToRefsInOpena
 import { dreamColumnOpenapiShape } from './helpers/dreamColumnOpenapiShape.js'
 import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
 import openapiShorthandToOpenapi from './helpers/openapiShorthandToOpenapi.js'
-import serializersAndRefsFromSerializableRef from './helpers/serializersAndRefsFromSerializableRef.js'
 const NULL_OBJECT_OPENAPI: OpenapiSchemaBody = { type: 'null' }
+
+// what a flattened rendersOne or customAttribute spreads into the object, an
+// `allOf` sibling of the serializer's own properties (see
+// SerializerOpenapiRenderer#flattenedSibling)
+interface FlattenedSibling {
+  // the position of the attribute among the serializer's declarations, so a
+  // later declaration of a key it spreads can shadow it
+  attributeIndex: number
+  // a `many` ref, rendered alone: an array spreads nothing
+  opaque?: OpenapiSchemaBodyShorthand
+  // the schema of each key the value may spread, by cased output name
+  properties: Record<string, OpenapiSchemaBodyShorthand>
+  // the keys every value spreads, null where the value does not supply them
+  required: string[]
+  // the ref of the one never-null serializer the value renders with, which
+  // `properties` equals; kept unless a later declaration shadows one of its keys
+  ref?: OpenapiSchemaBodyShorthand
+}
+
+// the keys one shape of a flattened value declares (see
+// SerializerOpenapiRenderer#flattenedShapeKeys)
+interface FlattenedShapeKeys {
+  // the schema of each key, by cased output name
+  schemas: Record<string, OpenapiSchemaBodyShorthand>
+  // the keys the shape renders for certain: a serializer's required attributes
+  certain: Record<string, true>
+}
 
 export default class SerializerOpenapiRenderer {
   private casing: SerializerCasing
   private suppressResponseEnums: boolean
   private enumCollector: OpenapiEnumCollector | undefined
-  private allOfSiblings: OpenapiSchemaBodyShorthand[] = []
+  private flattenedSiblings: FlattenedSibling[] = []
+  private walkingFlattenedSerializers = new Set<DreamModelSerializerType | SimpleObjectSerializerType>()
 
   constructor(
     private serializer: DreamModelSerializerType | SimpleObjectSerializerType,
@@ -101,7 +128,7 @@ export default class SerializerOpenapiRenderer {
       alreadyExtractedDescendantSerializers,
     )
 
-    if (this.allOfSiblings.length) {
+    if (this.flattenedSiblings.length) {
       // This schema's property lock lives only at the `allOf` wrapper (never
       // on the inline branch or the `$ref`'d siblings) so that all branches'
       // properties are visible to `unevaluatedProperties` for the union check.
@@ -113,7 +140,10 @@ export default class SerializerOpenapiRenderer {
         ...referencedSerializersAndOpenapiSchemaBodyShorthand,
         openapi: {
           type: 'object',
-          allOf: [referencedSerializersAndOpenapiSchemaBodyShorthand.openapi, ...this.allOfSiblings],
+          allOf: [
+            referencedSerializersAndOpenapiSchemaBodyShorthand.openapi,
+            ...this.flattenedSiblings.map(flattenedSiblingOpenapi),
+          ],
           unevaluatedProperties: false,
         } as OpenapiSchemaBodyShorthand,
       }
@@ -161,7 +191,9 @@ export default class SerializerOpenapiRenderer {
       referencedSerializers: referencedSerializersAndAttributes.referencedSerializers,
       openapi: {
         type: 'object',
-        required: sort(uniq(requiredProperties.map(property => this.setCase(property)))),
+        required: sort(uniq(requiredProperties.map(property => this.setCase(property)))).filter(
+          property => property in referencedSerializersAndAttributes.attributes,
+        ),
         properties: sortObjectByKey(referencedSerializersAndAttributes.attributes),
         // Property-level locks (`additionalProperties` / `unevaluatedProperties`)
         // are not emitted on leaf schemas: when a leaf is composed via `$ref`
@@ -195,7 +227,11 @@ export default class SerializerOpenapiRenderer {
       schema: OpenapiSchemaBodyShorthand
     }[] = []
 
-    renderedOpenapi = this.serializerBuilder['attributes'].reduce((accumulator, attribute) => {
+    const attributes = this.serializerBuilder['attributes']
+    this.flattenedSiblings = []
+    this.walkingFlattenedSerializers.add(this.serializer)
+
+    renderedOpenapi = attributes.reduce((accumulator, attribute, attributeIndex) => {
       const attributeType = attribute.type
       let newlyReferencedSerializers: (DreamModelSerializerType | SimpleObjectSerializerType)[] = []
 
@@ -211,7 +247,9 @@ export default class SerializerOpenapiRenderer {
             newlyReferencedSerializers = allSerializersFromHandWrittenOpenapi(openapi)
 
             if (attribute.options.flatten) {
-              this.allOfSiblings.push(this.flattenedCustomAttributeOpenapi(attribute, openapi))
+              this.flattenedSiblings.push(
+                this.flattenedCustomAttributeSibling(attributeIndex, attribute, openapi),
+              )
             } else {
               accumulator[outputAttributeName] = allSerializersToRefsInOpenapi(
                 openapiShorthandToOpenapi(openapi as any),
@@ -314,8 +352,8 @@ export default class SerializerOpenapiRenderer {
                 referencedSerializersAndOpenapiSchemaBodyShorthand.referencedSerializers
 
               if (attribute.options.flatten) {
-                this.allOfSiblings.push(
-                  this.flattenedOpenapi(attribute, flattenedAssociationShape(serializers, optional)),
+                this.flattenedSiblings.push(
+                  this.flattenedSibling(attributeIndex, flattenedAssociationShape(serializers, optional)),
                 )
                 //
               } else if (optional) {
@@ -415,6 +453,40 @@ export default class SerializerOpenapiRenderer {
       return accumulator
     }, renderedOpenapi)
 
+    this.walkingFlattenedSerializers.delete(this.serializer)
+
+    // a later declaration of a key wins the render: Dream spreads a flattened
+    // value's keys over the keys rendered before it, and renders a later
+    // attribute over those. So a key a flattened attribute spreads is dropped
+    // from every declaration before it, and a key a later attribute renders is
+    // dropped from the flattened attributes before it. Non-flattened
+    // declarations of one key already replaced one another in the reduce.
+    const claimed = new Set<string>()
+    const claimedByFlattened = new Set<string>()
+    const siblingsByAttribute = new Map(
+      this.flattenedSiblings.map(sibling => [sibling.attributeIndex, sibling]),
+    )
+    for (let attributeIndex = attributes.length - 1; attributeIndex >= 0; attributeIndex--) {
+      const sibling = siblingsByAttribute.get(attributeIndex)
+
+      if (sibling) {
+        for (const key of Object.keys(sibling.properties)) {
+          if (claimed.has(key)) {
+            delete sibling.properties[key]
+            sibling.required = sibling.required.filter(requiredKey => requiredKey !== key)
+            delete sibling.ref
+          } else {
+            claimed.add(key)
+            claimedByFlattened.add(key)
+          }
+        }
+      } else {
+        const key = this.setCase(attributeOutputName(attributes[attributeIndex]!))
+        if (claimedByFlattened.has(key)) delete renderedOpenapi[key]
+        claimed.add(key)
+      }
+    }
+
     const enumCollector = this.enumCollector
     if (enumCollector) {
       for (const pending of pendingEnumCollections) {
@@ -444,27 +516,48 @@ export default class SerializerOpenapiRenderer {
   /**
    * @internal
    *
-   * The `allOf` sibling for a customAttribute with `flatten: true`
+   * The `allOf` sibling for a customAttribute with `flatten: true`. With
+   * `required: false`, its callback may return undefined, which spreads
+   * nothing, so none of its keys is required.
    */
-  private flattenedCustomAttributeOpenapi(
+  private flattenedCustomAttributeSibling(
+    attributeIndex: number,
     attribute: SerializerAttribute,
     openapi: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes,
-  ): OpenapiSchemaBodyShorthand {
+  ): FlattenedSibling {
+    const sibling = this.flattenedCustomAttributeValueSibling(attributeIndex, openapi)
+    if (attribute.type === 'customAttribute' && attribute.options.required === false && !sibling.opaque) {
+      sibling.required = []
+      delete sibling.ref
+    }
+    return sibling
+  }
+
+  private flattenedCustomAttributeValueSibling(
+    attributeIndex: number,
+    openapi: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes,
+  ): FlattenedSibling {
     const serializerRef = openapi as Partial<
       OpenapiSchemaShorthandExpressionSerializerRef & OpenapiSchemaShorthandExpressionSerializableRef
     >
     if (!isObject(openapi) || !(serializerRef.$serializer || serializerRef.$serializable))
-      return this.flattenedOpenapi(attribute, openapi)
+      return this.flattenedSibling(attributeIndex, openapi)
 
     const { many, maybeNull, ...singleSerializerRef } = serializerRef
 
     // flattening an array would spread its indexes into this object, so a
     // flattened `many` has no faithful shape; it renders the ref(s) alone, as
     // it did before `many` was expanded
-    if (many) return allSerializersToRefsInOpenapi(singleSerializerRef as OpenapiSchemaBodyShorthand)
+    if (many)
+      return {
+        attributeIndex,
+        opaque: allSerializersToRefsInOpenapi(singleSerializerRef as OpenapiSchemaBodyShorthand),
+        properties: {},
+        required: [],
+      }
 
-    return this.flattenedOpenapi(
-      attribute,
+    return this.flattenedSibling(
+      attributeIndex,
       (maybeNull
         ? { anyOf: [singleSerializerRef, NULL_OBJECT_OPENAPI] }
         : singleSerializerRef) as OpenapiSchemaBodyShorthand,
@@ -480,208 +573,146 @@ export default class SerializerOpenapiRenderer {
    * customAttribute's is its `openapi`, with `maybeNull` as a `{ type: 'null' }`
    * member).
    *
-   * Flattening spreads the nested value's fields into this object, so the
-   * rendered value is never null itself, and an `anyOf [ref, { type: 'null' }]`
-   * sibling can never match it. Dream renders every key a shape requires
-   * whichever shape it renders, so:
-   * - a null value (a null association, or a callback returning null) renders
-   *   each key `shape` requires as null, so `{ type: 'null' }` becomes an
-   *   object whose properties, when present, are null;
-   * - of several shapes (the children of an STI base, the targets of a
-   *   polymorphic BelongsTo, the members of an `anyOf` or `oneOf`), the
-   *   rendered one renders beside the keys the other shapes require, as null;
-   * - a plain object a callback returns renders as null each key its shape
-   *   requires that it leaves out, so those keys' schemas accept null (see
-   *   `flattenedShapeSchema`).
-   * Listing those keys also lets the `allOf` wrapper's
-   * `unevaluatedProperties: false` accept them. Dream computes them
-   * (`DreamApp.system.nullFlattenedOpenapiKeys` and
-   * `nullFlattenedOpenapiKeysOfOtherVariants`, the walk its renderer uses), so
-   * the document cannot drift from what it renders.
+   * Flattening spreads the nested value's fields into this object, and every
+   * payload carries one fixed key set whichever shape the value takes: Dream
+   * renders every key `shape` requires (`DreamApp.system.nullFlattenedOpenapiKeys`)
+   * as null where the value does not supply it (the value is null, the shape
+   * it took does not declare the key, or a callback's object left it out),
+   * with the value's own keys over that. So the sibling is one object whose
+   * properties are every key any shape of `shape` declares, the shapes
+   * `DreamApp.system.flattenedOpenapiVariants` lists (the children of an STI
+   * base, the targets of a polymorphic BelongsTo, the members of an `anyOf`
+   * or `oneOf`), each with the first schema declared for it; whose required
+   * keys are the keys Dream always renders; and where a required key's schema
+   * accepts null unless every shape is a serializer that renders the key
+   * itself (only a null value, another shape, or a callback leaves a key
+   * out). Dream lists the shapes and computes the keys, so the document
+   * cannot drift from what it renders. The one shape of a never-null
+   * serializer is identical to its ref, which is kept.
    */
-  private flattenedOpenapi(
-    attribute: SerializerAttribute,
+  private flattenedSibling(
+    attributeIndex: number,
     shape: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes,
-  ): OpenapiSchemaBodyShorthand {
-    const variants = flattenedOpenapiVariants(shape)
-    if (variants.length < 2) return this.flattenedVariantOpenapi(attribute, shape, shape, {})
+  ): FlattenedSibling {
+    const listed = DreamApp.system.flattenedOpenapiVariants(shape)
+    const variants = listed.length ? listed : [shape]
+    const maybeNull = variants.some(isNullSchema)
+    const shapes = variants.filter(variant => !isNullSchema(variant))
+    const shapeKeys = shapes.map(variant => this.flattenedShapeKeys(variant))
+    const required = sort(Object.keys(DreamApp.system.nullFlattenedOpenapiKeys(shape, this.nullKeysOptions)))
 
-    return {
-      anyOf: variants.map(variant =>
-        this.flattenedVariantOpenapi(
-          attribute,
-          shape,
-          variant,
-          DreamApp.system.nullFlattenedOpenapiKeysOfOtherVariants(shape, variant, this.nullKeysOptions),
-        ),
-      ),
-    } as OpenapiSchemaBodyShorthand
-  }
-
-  /**
-   * @internal
-   *
-   * One branch of a flattened sibling (see `flattenedOpenapi`): the schema of
-   * `variant`, one shape of `shape`, combined with `filledKeys`, the keys Dream
-   * renders as null beside it. For the `{ type: 'null' }` variant, an object
-   * whose properties, the keys `shape` requires, are null when present.
-   */
-  private flattenedVariantOpenapi(
-    attribute: SerializerAttribute,
-    shape: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes,
-    variant: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes,
-    filledKeys: Record<string, null>,
-  ): OpenapiSchemaBodyShorthand {
-    if (isNullSchema(variant)) {
-      return (
-        this.nullKeysOpenapi(
-          attribute,
-          shape,
-          DreamApp.system.nullFlattenedOpenapiKeys(shape, this.nullKeysOptions),
-        ) ?? ({ type: 'object', properties: {} } as OpenapiSchemaBodyShorthand)
-      )
-    }
-
-    const schema = this.flattenedShapeSchema(
-      allSerializersToRefsInOpenapi(openapiShorthandToOpenapi(variant)),
-      [],
-    )
-    const filled = this.nullKeysOpenapi(attribute, shape, filledKeys)
-    return filled ? ({ allOf: [schema, filled] } as OpenapiSchemaBodyShorthand) : schema
-  }
-
-  /**
-   * @internal
-   *
-   * An object whose properties, when present, are null: `keys`, keys Dream
-   * renders as null for a flattened attribute whose value's shape is `shape`,
-   * less any key another attribute of this serializer declares. Undefined when
-   * no key remains.
-   *
-   * A key two attributes render holds whichever value was rendered last, so
-   * Dream's null for it is overwritten by, or overwrites, the other attribute's
-   * value, depending on which is declared later. The other attribute's schema
-   * describes the key, and listing it as null here would contradict that
-   * schema, rejecting the payload and making fast-json-stringify fail to
-   * compile. A flattened attribute declares every key its own shape declares,
-   * required or not, which Dream reads for it (`nullFlattenedOpenapiKeysOfOtherVariants`
-   * keeps the keys `shape` requires that the other shape does not declare).
-   */
-  private nullKeysOpenapi(
-    attribute: SerializerAttribute,
-    shape: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes,
-    keys: Record<string, null>,
-  ): OpenapiSchemaBodyShorthand | undefined {
-    let remaining = Object.keys(keys)
-
-    for (const otherAttribute of this.serializerBuilder['attributes']) {
-      if (otherAttribute === attribute || !remaining.length) continue
-
-      const otherShape = this.flattenedShape(otherAttribute)
-
-      if (otherShape === undefined) {
-        const otherKey = this.setCase(attributeOutputName(otherAttribute))
-        remaining = remaining.filter(key => key !== otherKey)
-        //
-      } else if (otherShape !== null) {
-        const notDeclaredByOther = DreamApp.system.nullFlattenedOpenapiKeysOfOtherVariants(
-          shape,
-          otherShape,
-          this.nullKeysOptions,
-        )
-        remaining = remaining.filter(key => Object.prototype.hasOwnProperty.call(notDeclaredByOther, key))
+    const properties: Record<string, OpenapiSchemaBodyShorthand> = {}
+    for (const { schemas } of shapeKeys) {
+      for (const [key, schema] of Object.entries(schemas)) {
+        if (!(key in properties)) properties[key] = schema
       }
     }
 
-    if (!remaining.length) return undefined
+    for (const key of required) {
+      const schema = properties[key]
+      if (schema === undefined) continue
+      const certain = !maybeNull && shapeKeys.every(({ certain }) => certain[key])
+      if (!certain && !openapiSchemaAcceptsNull(schema)) properties[key] = openapiSchemaWithNull(schema)
+    }
 
-    return {
-      type: 'object',
-      properties: Object.fromEntries(sort(remaining).map(key => [key, NULL_OBJECT_OPENAPI])),
-    } as OpenapiSchemaBodyShorthand
+    const onlyShape = shapes.length === 1 ? shapes[0] : undefined
+    return onlyShape !== undefined && !maybeNull && isSerializerRef(onlyShape)
+      ? {
+          attributeIndex,
+          properties,
+          required,
+          ref: allSerializersToRefsInOpenapi(openapiShorthandToOpenapi(onlyShape as any)),
+        }
+      : { attributeIndex, properties, required }
   }
 
   /**
    * @internal
    *
-   * The openapi shorthand of the value a flattened attribute spreads into this
-   * object (see `flattenedOpenapi`): undefined for an attribute that is not
-   * flattened, and null for a flattened rendersOne whose serializers cannot be
-   * resolved (the rendersOne case of renderedOpenapiAttributes renders a
-   * placeholder for it), which declares no key.
+   * The keys one shape of a flattened value declares (see `flattenedSibling`):
+   * a serializer's rendered keys, its own and those its flattened attributes
+   * spread, all of which its required attributes render for certain; or a
+   * hand-written shape's `properties`, cased as this serializer's keys are
+   * (Dream cases a flattened plain object's keys with the render), none of
+   * them certain, since a callback's object may leave any of them out, joined
+   * with the keys its `allOf` members declare. A shape with several shapes of
+   * its own (a `$serializable` ref to an STI base, a nested `anyOf` or
+   * `oneOf`) declares the keys any of them declares, and is certain only of a
+   * key all of them are. A `many` ref declares none: a list has no keys to
+   * spread.
    */
-  private flattenedShape(
-    attribute: SerializerAttribute,
-  ): OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | null | undefined {
-    switch (attribute.type) {
-      case 'customAttribute':
-        return attribute.options.flatten ? attribute.options.openapi : undefined
+  private flattenedShapeKeys(
+    shape: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes,
+  ): FlattenedShapeKeys {
+    const keys: FlattenedShapeKeys = { schemas: {}, certain: {} }
+    if (!isObject(shape)) return keys
+    const record = shape as Record<string, any>
+    if (record.many) return keys
 
-      case 'rendersOne': {
-        if (!attribute.options.flatten) return undefined
+    if (record.$serializer) {
+      const renderer = new SerializerOpenapiRenderer(record.$serializer, {
+        casing: this.casing,
+        suppressResponseEnums: this.suppressResponseEnums,
+        enumCollector: this.enumCollector,
+      })
+      keys.schemas = renderer.flattenedKeySchemas(this.walkingFlattenedSerializers)
+      for (const key of Object.keys(DreamApp.system.nullFlattenedOpenapiKeys(shape, this.nullKeysOptions)))
+        keys.certain[key] = true
+      return keys
+    }
 
-        try {
-          const { optional, serializers } = associationSerializers(
-            attribute,
-            this.serializerBuilder['$typeForOpenapi'] as typeof Dream | ViewModelClass | undefined,
-          )
-          return flattenedAssociationShape(serializers, optional)
-        } catch (error) {
-          if (error instanceof CallingSerializersThrewError) return null
-          throw error
+    const alternatives = DreamApp.system.flattenedOpenapiVariants(shape)
+    if (alternatives.length) {
+      const alternativeKeys = alternatives.map(alternative => this.flattenedShapeKeys(alternative))
+      for (const { schemas } of alternativeKeys) {
+        for (const [key, schema] of Object.entries(schemas)) {
+          if (!(key in keys.schemas)) keys.schemas[key] = schema
         }
       }
-
-      default:
-        return undefined
+      for (const key of Object.keys(keys.schemas)) {
+        if (alternativeKeys.every(({ certain }) => certain[key])) keys.certain[key] = true
+      }
+      return keys
     }
+
+    if (isObject(record.properties)) {
+      for (const [key, property] of Object.entries(record.properties as Record<string, any>))
+        keys.schemas[this.setCase(key)] = allSerializersToRefsInOpenapi(openapiShorthandToOpenapi(property))
+    }
+
+    if (Array.isArray(record.allOf)) {
+      for (const member of record.allOf as OpenapiSchemaBodyShorthand[]) {
+        const memberKeys = this.flattenedShapeKeys(member)
+        for (const [key, schema] of Object.entries(memberKeys.schemas)) {
+          if (!(key in keys.schemas)) keys.schemas[key] = schema
+        }
+        Object.assign(keys.certain, memberKeys.certain)
+      }
+    }
+
+    return keys
   }
 
   /**
    * @internal
    *
-   * A hand-written shape as a flattened customAttribute spreads it: its
-   * `properties` keys and `required` names cased as this serializer's keys are
-   * (Dream cases a flattened plain object's keys with the render), and the
-   * schema of each key the shape requires widened to accept null, since Dream
-   * renders as null a required key the callback's object leaves out. A shape's
-   * `required` array also requires a key a member of its `allOf`, `anyOf` or
-   * `oneOf` declares, as Dream reads it. A `$ref` is a serializer's, which
-   * renders every key it declares, so it is left as is, and so is a property's
-   * own schema: a nested value renders as returned.
+   * The schema of every key this serializer renders, its own and those its
+   * flattened attributes spread, by cased output name, for a serializer
+   * flattening it (see `flattenedShapeKeys`). `walking` holds the serializers
+   * being read through their flattened attributes: one reached again adds
+   * nothing, as in Dream's own walk.
    */
-  private flattenedShapeSchema(
-    schema: OpenapiSchemaBodyShorthand,
-    inheritedRequired: string[],
-  ): OpenapiSchemaBodyShorthand {
-    if (!isObject(schema)) return schema
+  private flattenedKeySchemas(
+    walking: Set<DreamModelSerializerType | SimpleObjectSerializerType>,
+  ): Record<string, OpenapiSchemaBodyShorthand> {
+    if (walking.has(this.serializer)) return {}
+    this.walkingFlattenedSerializers = walking
 
-    const schemaRecord = schema as Record<string, any>
-    if (schemaRecord.$ref) return schema
-
-    const ownRequired: string[] = Array.isArray(schemaRecord.required) ? schemaRecord.required : []
-    const required = [...inheritedRequired, ...ownRequired]
-    const flattened: Record<string, any> = { ...schemaRecord }
-
-    if (isObject(schemaRecord.properties)) {
-      flattened.properties = Object.fromEntries(
-        Object.entries(schemaRecord.properties as Record<string, any>).map(([key, property]) => [
-          this.setCase(key),
-          required.includes(key) ? openapiPropertyWithNull(property) : property,
-        ]),
-      )
+    const schemas: Record<string, OpenapiSchemaBodyShorthand> = {
+      ...this.renderedOpenapiAttributes().attributes,
     }
-
-    if (Array.isArray(schemaRecord.required)) flattened.required = ownRequired.map(key => this.setCase(key))
-
-    for (const combinator of ['allOf', 'anyOf', 'oneOf'] as const) {
-      if (Array.isArray(schemaRecord[combinator]))
-        flattened[combinator] = (schemaRecord[combinator] as OpenapiSchemaBodyShorthand[]).map(member =>
-          this.flattenedShapeSchema(member, required),
-        )
-    }
-
-    return flattened as OpenapiSchemaBodyShorthand
+    for (const sibling of this.flattenedSiblings) Object.assign(schemas, sibling.properties)
+    return schemas
   }
 
   private setCase(attr: string) {
@@ -838,45 +869,18 @@ function flattenedAssociationShape(
   return { anyOf: optional ? [...refs, NULL_OBJECT_OPENAPI] : refs } as OpenapiSchemaBodyShorthand
 }
 
-// The shapes a flattened value may take, each one Dream renders in place of the
-// others, with the keys they require as null beside it: a `$serializer` ref to
-// each serializer a `$serializable` ref resolves to (one per child of an STI
-// base), or the members of an `anyOf` or `oneOf`, where a member with several
-// shapes of its own (a nested `anyOf` or `oneOf`, or a `$serializable` ref to
-// an STI base) contributes those in its place, and an `allOf` beside the
-// `anyOf` or `oneOf`, which describes every value, joins each of them. A `many`
-// ref has none: a list has no keys to spread. Any other shape is the one shape
-// its value takes.
-// This mirrors how Dream's renderer reads the shapes a flattened
-// customAttribute's value may take (`openapiVariants` in
-// `src/serializer/helpers/nullFlattenedSerializerKeys.ts`), which Dream does
-// not export.
-function flattenedOpenapiVariants(
-  openapi: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes,
-): OpenapiSchemaBodyShorthand[] {
-  if (!isObject(openapi)) return []
-  const schema = openapi as Record<string, any>
+function flattenedSiblingOpenapi(sibling: FlattenedSibling): OpenapiSchemaBodyShorthand {
+  if (sibling.opaque) return sibling.opaque
+  if (sibling.ref) return sibling.ref
+  return {
+    type: 'object',
+    ...(sibling.required.length ? { required: sibling.required } : {}),
+    properties: sortObjectByKey(sibling.properties),
+  } as OpenapiSchemaBodyShorthand
+}
 
-  if (schema.$serializable) {
-    if (schema.many) return []
-    return serializersAndRefsFromSerializableRef(
-      schema as OpenapiSchemaShorthandExpressionSerializableRef,
-    ).serializers.map(serializer => ({ $serializer: serializer }) as OpenapiSchemaBodyShorthand)
-  }
-
-  const members: OpenapiSchemaBodyShorthand[] = [
-    ...(Array.isArray(schema.anyOf) ? (schema.anyOf as OpenapiSchemaBodyShorthand[]) : []),
-    ...(Array.isArray(schema.oneOf) ? (schema.oneOf as OpenapiSchemaBodyShorthand[]) : []),
-  ]
-  const variants = members.flatMap(member => {
-    const memberVariants = flattenedOpenapiVariants(member)
-    return memberVariants.length > 1 ? memberVariants : [member]
-  })
-
-  const sharedMembers: OpenapiSchemaBodyShorthand[] = Array.isArray(schema.allOf) ? schema.allOf : []
-  return sharedMembers.length
-    ? variants.map(variant => ({ allOf: [...sharedMembers, variant] }) as OpenapiSchemaBodyShorthand)
-    : variants
+function isSerializerRef(openapi: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes): boolean {
+  return isObject(openapi) && !!(openapi as Record<string, unknown>).$serializer
 }
 
 function isNullSchema(openapi: OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes): boolean {
@@ -902,15 +906,6 @@ function attributeOutputName(attribute: SerializerAttribute): string {
       throw new Error(`Unhandled serializer attribute type: ${_never as string}`)
     }
   }
-}
-
-// a hand-written property's schema, shorthand or not, widened to accept null
-function openapiPropertyWithNull(property: unknown): unknown {
-  if (typeof property === 'string') return property === 'null' ? property : [property, 'null']
-  if (Array.isArray(property)) return property // a `[<shorthand>, 'null']` tuple already accepts null
-  if (!isObject(property)) return property
-  const schema = property as OpenapiSchemaBodyShorthand
-  return openapiSchemaAcceptsNull(schema) ? schema : openapiSchemaWithNull(schema)
 }
 
 function descendantSerializers(
