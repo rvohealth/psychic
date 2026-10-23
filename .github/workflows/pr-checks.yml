@@ -30,10 +30,29 @@ jobs:
           # only (our own packages). Any third-party entry is a permanent
           # supply-chain bypass and must be rejected — apply urgent patches via a
           # transient, reverted override instead of a persistent exclude.
-          bad=$(grep -nE '^[[:space:]]*minimumReleaseAgeExclude' .npmrc | grep -vE '=[[:space:]]*@rvoh/' || true)
-          if [ -n "$bad" ]; then
+          #
+          # pnpm 11+ enforces the list it reads from pnpm-workspace.yaml (block or
+          # inline list form) in the root and in client/ (which has its own
+          # lockfile and does not inherit the root settings). pnpm ignores the
+          # setting in .npmrc; .npmrc is still checked so a stale copy cannot
+          # reappear there.
+          bad=$(grep -nE '^[[:space:]]*minimumReleaseAgeExclude' .npmrc | grep -vE '=[[:space:]]*@rvoh/' | sed 's/^/.npmrc:/' || true)
+          bad_yaml=$(awk '
+            FNR == 1 { inblock = 0 }
+            /^minimumReleaseAgeExclude:/ {
+              inblock = 1
+              rest = $0; sub(/^[^:]*:[[:space:]]*/, "", rest)
+              if (rest != "") { n = split(rest, parts, ","); for (i = 1; i <= n; i++) emit(FILENAME, FNR, parts[i]) }
+              next
+            }
+            inblock && /^[^[:space:]#]/ { inblock = 0 }
+            inblock && /^[[:space:]]*-/ { text = $0; sub(/^[[:space:]]*-[[:space:]]*/, "", text); emit(FILENAME, FNR, text) }
+            function emit(file, line, text) { gsub("[^[:alnum:]@/._-]", "", text); if (text != "") print file ":" line ": " text }
+          ' pnpm-workspace.yaml client/pnpm-workspace.yaml | grep -vE '^[^:]+:[0-9]+: @rvoh/' || true)
+          if [ -n "$bad$bad_yaml" ]; then
             echo "::error::Non-@rvoh minimumReleaseAgeExclude entries (cooldown bypass must stay @rvoh/* only):"
-            echo "$bad"
+            [ -n "$bad" ] && echo "$bad"
+            [ -n "$bad_yaml" ] && echo "$bad_yaml"
             exit 1
           fi
 

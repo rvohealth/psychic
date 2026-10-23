@@ -12,7 +12,15 @@ allowBuilds:
   esbuild: false
   puppeteer: false
 
+# SECURITY — supply-chain cooldown: do not install a dependency version until
+# it has been published for 3 days (4320 minutes), the window in which most
+# worm-injected releases are caught and unpublished. Kept under the CVE-patch
+# SLA so routine patching needs no bypass. pnpm 11+ reads this only from
+# pnpm-workspace.yaml (a minimumReleaseAge line in .npmrc is ignored).
+minimumReleaseAge: 4320
+
 # We maintain the @rvoh packages, so a fresh publish of one of them is not an
-# upstream supply-chain risk to wait out.
+# upstream supply-chain risk to wait out. CI (check-cooldown-excludes) rejects
+# any non-@rvoh entry here.
 minimumReleaseAgeExclude:
   - '@rvoh/*'
