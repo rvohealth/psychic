@@ -24,37 +24,59 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: minimumReleaseAgeExclude must be @rvoh/* only
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "26"
+
+      - run: corepack enable
+
+      - name: minimumReleaseAge is set and minimumReleaseAgeExclude is @rvoh/* only
         run: |
           # SECURITY: the minimumReleaseAge cooldown bypass list must stay @rvoh/*
           # only (our own packages). Any third-party entry is a permanent
           # supply-chain bypass and must be rejected — apply urgent patches via a
           # transient, reverted override instead of a persistent exclude.
           #
-          # pnpm 11+ enforces the list it reads from pnpm-workspace.yaml (block or
-          # inline list form) in the root and in client/ (which has its own
-          # lockfile and does not inherit the root settings). pnpm ignores the
-          # setting in .npmrc; .npmrc is still checked so a stale copy cannot
-          # reappear there.
-          bad=$(grep -nE '^[[:space:]]*minimumReleaseAgeExclude' .npmrc | grep -vE '=[[:space:]]*@rvoh/' | sed 's/^/.npmrc:/' || true)
-          bad_yaml=$(awk '
-            FNR == 1 { inblock = 0 }
-            /^minimumReleaseAgeExclude:/ {
-              inblock = 1
-              rest = $0; sub(/^[^:]*:[[:space:]]*/, "", rest)
-              if (rest != "") { n = split(rest, parts, ","); for (i = 1; i <= n; i++) emit(FILENAME, FNR, parts[i]) }
-              next
-            }
-            inblock && /^[^[:space:]#]/ { inblock = 0 }
-            inblock && /^[[:space:]]*-/ { text = $0; sub(/^[[:space:]]*-[[:space:]]*/, "", text); emit(FILENAME, FNR, text) }
-            function emit(file, line, text) { gsub("[^[:alnum:]@/._-]", "", text); if (text != "") print file ":" line ": " text }
-          ' pnpm-workspace.yaml client/pnpm-workspace.yaml | grep -vE '^[^:]+:[0-9]+: @rvoh/' || true)
-          if [ -n "$bad$bad_yaml" ]; then
+          # pnpm 11+ reads both settings only from pnpm-workspace.yaml, in the
+          # root and in client/ (which has its own lockfile and does not inherit
+          # the root settings). Ask the pinned pnpm what it actually resolved
+          # rather than pattern-matching the YAML, so every spelling pnpm accepts
+          # (quoted keys, flow or block lists) is checked, and a file pnpm cannot
+          # parse fails the job. pnpm ignores these settings in .npmrc; .npmrc is
+          # still checked so a stale copy cannot reappear there.
+          status=0
+          for dir in . client; do
+            if ! age=$(cd "$dir" && pnpm config get minimumReleaseAge --json) ||
+              ! exclude=$(cd "$dir" && pnpm config get minimumReleaseAgeExclude --json); then
+              echo "::error::pnpm could not read the configuration in $dir"
+              status=1
+              continue
+            fi
+            DIR="$dir" AGE="$age" EXCLUDE="$exclude" node -e '
+              const { DIR, AGE, EXCLUDE } = process.env
+              const age = JSON.parse(AGE)
+              const exclude = JSON.parse(EXCLUDE) ?? []
+              let ok = true
+              if (!Number.isInteger(age) || age <= 0) {
+                console.log(`::error::${DIR}/pnpm-workspace.yaml must set a positive minimumReleaseAge (pnpm resolved ${AGE})`)
+                ok = false
+              }
+              const entries = Array.isArray(exclude) ? exclude : [exclude]
+              const bad = entries.filter((entry) => typeof entry !== "string" || !entry.startsWith("@rvoh/"))
+              if (bad.length > 0) {
+                console.log(`::error::Non-@rvoh minimumReleaseAgeExclude entries in ${DIR}/pnpm-workspace.yaml (cooldown bypass must stay @rvoh/* only): ${JSON.stringify(bad)}`)
+                ok = false
+              }
+              process.exit(ok ? 0 : 1)
+            ' || status=1
+          done
+          bad_npmrc=$(grep -nE '^[[:space:]]*minimumReleaseAgeExclude' .npmrc | grep -vE '=[[:space:]]*@rvoh/' | sed 's/^/.npmrc:/' || true)
+          if [ -n "$bad_npmrc" ]; then
             echo "::error::Non-@rvoh minimumReleaseAgeExclude entries (cooldown bypass must stay @rvoh/* only):"
-            [ -n "$bad" ] && echo "$bad"
-            [ -n "$bad_yaml" ] && echo "$bad_yaml"
-            exit 1
+            echo "$bad_npmrc"
+            status=1
           fi
+          exit $status
 
   uspec:
     name: Unit tests (Node ${{ matrix.node-version }})
