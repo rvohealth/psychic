@@ -454,8 +454,13 @@ function generateImportStatements(
     ? `import { ${uniq(dreamImports).join(', ')} } from '@rvoh/dream'\n`
     : ''
 
+  // The spec helpers live under the app's `spec` alias, which absoluteDreamPath
+  // does not cover, so this import takes the app's alias prefix (`@` or `#`)
+  // from the same Dream setting the model and factory imports above follow.
+  const importAliasPrefix = DreamApp.getOrFail().importAliasPrefix
+
   return `${cryptoImportLine}${dreamImportLine}${uniq(importStatements).join('\n')}
-import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/${addImportSuffix('authentication.js')}'`
+import { RequestBody, session, SpecRequestType } from '${importAliasPrefix}spec/unit/helpers/${addImportSuffix('authentication.js')}'`
 }
 
 interface TemplateOptions extends GenerateSpecOptions {

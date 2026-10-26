@@ -984,6 +984,43 @@ export default class InternalArticlesController extends InternalAuthedController
     })
   })
 
+  describe('the model import alias prefix', () => {
+    function generateIndexController() {
+      return generateControllerContent({
+        ancestorImportStatement: "import AuthedController from './AuthedController.js'",
+        ancestorName: 'AuthedController',
+        fullyQualifiedControllerName: 'PostsController',
+        fullyQualifiedModelName: 'Post',
+        actions: ['index'],
+        forAdmin: false,
+        singular: false,
+      })
+    }
+
+    // The model import goes through Dream's absoluteDreamPath, which reads the
+    // app's importAliasPrefix, so the generated controller imports the model
+    // with the same alias prefix the app's other generated files use.
+    context("when the app's importAliasPrefix is '#'", () => {
+      beforeEach(() => {
+        vi.spyOn(DreamApp.prototype, 'importAliasPrefix', 'get').mockReturnValue('#')
+      })
+
+      it('imports the model through the # alias', () => {
+        expect(generateIndexController()).toContain("import Post from '#models/Post.js'\n")
+      })
+    })
+
+    context("when the app's importAliasPrefix is '@'", () => {
+      beforeEach(() => {
+        vi.spyOn(DreamApp.prototype, 'importAliasPrefix', 'get').mockReturnValue('@')
+      })
+
+      it('imports the model through the @ alias', () => {
+        expect(generateIndexController()).toContain("import Post from '@models/Post.js'\n")
+      })
+    })
+  })
+
   describe('paramSafeColumnNamesFromCliTokens (R-011 filter)', () => {
     it('omits reserved names, belongs_to FKs, _type, and _id tokens; camelCases survivors', () => {
       const safe = paramSafeColumnNamesFromCliTokens([

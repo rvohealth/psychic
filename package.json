@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "3.16.1",
+  "version": "3.17.0",
   "author": "RVOHealth",
   "publishConfig": {
     "access": "public"
@@ -79,7 +79,7 @@
     "@koa/cors": "^5.0.0",
     "@koa/etag": "^5.0.2",
     "@koa/router": "^15.3.0",
-    "@rvoh/dream": "^2.39.0",
+    "@rvoh/dream": "^2.40.0",
     "@types/koa": "^3.0.1",
     "@types/koa-conditional-get": "^2.0.3",
     "@types/koa__cors": "^5.0.0",
@@ -118,7 +118,7 @@
     "@koa/cors": "^5.0.0",
     "@koa/etag": "^5.0.2",
     "@koa/router": "^15.3.1",
-    "@rvoh/dream": "^2.39.0",
+    "@rvoh/dream": "^2.40.0",
     "@rvoh/dream-spec-helpers": "^2.4.0",
     "@rvoh/psychic-spec-helpers": "3.4.1",
     "@types/koa": "^3.0.1",

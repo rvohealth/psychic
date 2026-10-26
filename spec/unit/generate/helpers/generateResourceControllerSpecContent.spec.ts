@@ -2290,4 +2290,74 @@ import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authen
       })
     })
   })
+
+  context('importAliasPrefix is set on DreamApp', () => {
+    function generateSpec() {
+      return generateResourceControllerSpecContent({
+        fullyQualifiedControllerName: 'V1/PostsController',
+        route: 'v1/posts',
+        fullyQualifiedModelName: 'Post',
+        columnsWithTypes: [],
+        forAdmin: false,
+        forInternal: false,
+        singular: false,
+        actions: [...RESOURCE_ACTIONS],
+      })
+    }
+
+    context('importAliasPrefix=#', () => {
+      beforeEach(() => {
+        vi.spyOn(DreamApp.prototype, 'importAliasPrefix', 'get').mockReturnValue('#')
+      })
+
+      it('writes every alias import, including the spec helpers import, with the # prefix', () => {
+        expect(generateSpec()).toContain(
+          `\
+import Post from '#models/Post.js'
+import User from '#models/User.js'
+import createPost from '#spec/factories/PostFactory.js'
+import createUser from '#spec/factories/UserFactory.js'
+import { RequestBody, session, SpecRequestType } from '#spec/unit/helpers/authentication.js'\
+`,
+        )
+      })
+
+      context('importExtension=none', () => {
+        beforeEach(() => {
+          vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('none')
+          vi.spyOn(DreamApp.prototype, 'importExtension', 'get').mockReturnValue('none')
+        })
+
+        it('applies the prefix and the suffix style together', () => {
+          expect(generateSpec()).toContain(
+            `\
+import Post from '#models/Post'
+import User from '#models/User'
+import createPost from '#spec/factories/PostFactory'
+import createUser from '#spec/factories/UserFactory'
+import { RequestBody, session, SpecRequestType } from '#spec/unit/helpers/authentication'\
+`,
+          )
+        })
+      })
+    })
+
+    context('importAliasPrefix=@', () => {
+      beforeEach(() => {
+        vi.spyOn(DreamApp.prototype, 'importAliasPrefix', 'get').mockReturnValue('@')
+      })
+
+      it('writes every alias import with the @ prefix', () => {
+        expect(generateSpec()).toContain(
+          `\
+import Post from '@models/Post.js'
+import User from '@models/User.js'
+import createPost from '@spec/factories/PostFactory.js'
+import createUser from '@spec/factories/UserFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'\
+`,
+        )
+      })
+    })
+  })
 })
