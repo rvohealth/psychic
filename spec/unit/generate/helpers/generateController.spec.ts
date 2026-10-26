@@ -1,3 +1,4 @@
+import { DreamApp } from '@rvoh/dream'
 import { existsSync } from 'node:fs'
 import * as fs from 'node:fs/promises'
 import * as path from 'node:path'
@@ -233,65 +234,108 @@ describe('generateController', () => {
     })
   })
 
-  context('importExtension is set on PsychicApp', () => {
+  context('importExtension is set on DreamApp', () => {
+    async function generatePostsController() {
+      const controllerFilename = 'PostsController.ts'
+      const controllerPath = path.join(tmpControllersFilepath, controllerFilename)
+      if (existsSync(controllerPath)) await fs.rm(controllerPath)
+
+      await generateController({
+        fullyQualifiedControllerName: 'Posts',
+        actions: [],
+        singular: false,
+      })
+      return (await fs.readFile(controllerPath)).toString()
+    }
+
     context('importExtension=.js', () => {
       beforeEach(() => {
-        vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('.js')
+        vi.spyOn(DreamApp.prototype, 'importExtension', 'get').mockReturnValue('.js')
       })
 
       it('styles all imports to have .js suffix', async () => {
-        const controllerFilename = 'PostsController.ts'
-        const controllerPath = path.join(tmpControllersFilepath, controllerFilename)
-        if (existsSync(controllerPath)) await fs.rm(controllerPath)
-
-        await generateController({
-          fullyQualifiedControllerName: 'Posts',
-          actions: [],
-          singular: false,
-        })
-        const actual = await fs.readFile(controllerPath)
-        expect(actual.toString()).toContain("import AuthedController from './AuthedController.js'")
+        expect(await generatePostsController()).toContain(
+          "import AuthedController from './AuthedController.js'",
+        )
       })
     })
 
     context('importExtension=.ts', () => {
       beforeEach(() => {
-        vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('.ts')
+        vi.spyOn(DreamApp.prototype, 'importExtension', 'get').mockReturnValue('.ts')
       })
 
       it('styles all imports to have .ts suffix', async () => {
-        const controllerFilename = 'PostsController.ts'
-        const controllerPath = path.join(tmpControllersFilepath, controllerFilename)
-        if (existsSync(controllerPath)) await fs.rm(controllerPath)
-
-        await generateController({
-          fullyQualifiedControllerName: 'Posts',
-          actions: [],
-          singular: false,
-        })
-        const actual = await fs.readFile(controllerPath)
-        expect(actual.toString()).toContain("import AuthedController from './AuthedController.ts'")
+        expect(await generatePostsController()).toContain(
+          "import AuthedController from './AuthedController.ts'",
+        )
       })
     })
 
     context('importExtension=none', () => {
       beforeEach(() => {
-        vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('none')
+        vi.spyOn(DreamApp.prototype, 'importExtension', 'get').mockReturnValue('none')
       })
 
       it('styles all imports to have no suffix', async () => {
-        const controllerFilename = 'PostsController.ts'
-        const controllerPath = path.join(tmpControllersFilepath, controllerFilename)
-        if (existsSync(controllerPath)) await fs.rm(controllerPath)
-
-        await generateController({
-          fullyQualifiedControllerName: 'Posts',
-          actions: [],
-          singular: false,
-        })
-        const actual = await fs.readFile(controllerPath)
-        expect(actual.toString()).toContain("import AuthedController from './AuthedController'")
+        expect(await generatePostsController()).toContain("import AuthedController from './AuthedController'")
       })
+
+      context('with a model', () => {
+        it('styles the ancestor controller import and the model import with the same (no) suffix', async () => {
+          const controllerFilename = 'PostsController.ts'
+          const controllerPath = path.join(tmpControllersFilepath, controllerFilename)
+          if (existsSync(controllerPath)) await fs.rm(controllerPath)
+
+          await generateController({
+            fullyQualifiedControllerName: 'Posts',
+            fullyQualifiedModelName: 'Post',
+            actions: ['index'],
+            singular: false,
+          })
+          const actual = (await fs.readFile(controllerPath)).toString()
+          expect(actual).toContain("import AuthedController from './AuthedController'")
+          expect(actual).toContain("import Post from '@models/Post'")
+          expect(actual).not.toContain('.js')
+        })
+      })
+    })
+  })
+
+  context('importExtension is set only on PsychicApp (psy.set in conf/app.ts)', () => {
+    it('forwards the style to Dream, so the ancestor controller import and the model import both carry it', async () => {
+      PsychicApp.getOrFail().set('importExtension', 'none')
+
+      const controllerFilename = 'PostsController.ts'
+      const controllerPath = path.join(tmpControllersFilepath, controllerFilename)
+      if (existsSync(controllerPath)) await fs.rm(controllerPath)
+
+      await generateController({
+        fullyQualifiedControllerName: 'Posts',
+        fullyQualifiedModelName: 'Post',
+        actions: ['index'],
+        singular: false,
+      })
+      const actual = (await fs.readFile(controllerPath)).toString()
+      expect(actual).toContain("import AuthedController from './AuthedController'")
+      expect(actual).toContain("import Post from '@models/Post'")
+      expect(actual).not.toContain('.js')
+    })
+
+    it('does not read a PsychicApp-held value: a mocked PsychicApp getter leaves the Dream style in place', async () => {
+      vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('none')
+
+      const controllerFilename = 'PostsController.ts'
+      const controllerPath = path.join(tmpControllersFilepath, controllerFilename)
+      if (existsSync(controllerPath)) await fs.rm(controllerPath)
+
+      await generateController({
+        fullyQualifiedControllerName: 'Posts',
+        actions: [],
+        singular: false,
+      })
+      const actual = (await fs.readFile(controllerPath)).toString()
+      expect(actual).toContain("import AuthedController from './AuthedController.js'")
     })
   })
 })
