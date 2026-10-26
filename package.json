@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "3.16.0",
+  "version": "3.17.0",
   "author": "RVOHealth",
   "publishConfig": {
     "access": "public"
@@ -79,14 +79,38 @@
     "@koa/cors": "^5.0.0",
     "@koa/etag": "^5.0.2",
     "@koa/router": "^15.3.0",
-    "@rvoh/dream": "^2.39.0",
+    "@rvoh/dream": "^2.40.0",
     "@types/koa": "^3.0.1",
     "@types/koa-conditional-get": "^2.0.3",
     "@types/koa__cors": "^5.0.0",
     "@types/koa__router": "^12.0.5",
+    "commander": "^14.0.3",
+    "dotenv": "*",
     "koa": "^3.1.2",
     "koa-conditional-get": "^3.0.0",
-    "openapi-typescript": "^7.8.0"
+    "openapi-typescript": "^7.8.0",
+    "pluralize-esm": "^9.0.5",
+    "typescript": ">=5.0.0"
+  },
+  "peerDependenciesMeta": {
+    "@types/koa": {
+      "optional": true
+    },
+    "@types/koa-conditional-get": {
+      "optional": true
+    },
+    "@types/koa__cors": {
+      "optional": true
+    },
+    "@types/koa__router": {
+      "optional": true
+    },
+    "openapi-typescript": {
+      "optional": true
+    },
+    "typescript": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@eslint/js": "^10.0.0",
@@ -94,7 +118,7 @@
     "@koa/cors": "^5.0.0",
     "@koa/etag": "^5.0.2",
     "@koa/router": "^15.3.1",
-    "@rvoh/dream": "^2.39.0",
+    "@rvoh/dream": "^2.40.0",
     "@rvoh/dream-spec-helpers": "^2.4.0",
     "@rvoh/psychic-spec-helpers": "3.4.1",
     "@types/koa": "^3.0.1",
@@ -135,5 +159,5 @@
     "vitest": "^4.1.0",
     "winston": "^3.14.2"
   },
-  "packageManager": "pnpm@11.9.0+sha512.bd682d5d03fe525ef7c9fd6780c6884d1e756ac4c9c9fe00c538782824310dcf90e3ddc4f53835f06dfaebd5085e41855e0bcbb3b60de2ac5bbab89e5036f03b"
+  "packageManager": "pnpm@12.14.0+sha512.c18ba6d87993d3d164cb5e8948f32b2c06ee854487e06cd8d86781342fb3e5bb4634367034711e86802baa9c37bea906ce1929ad08d70884c97d801df13389a6"
 }

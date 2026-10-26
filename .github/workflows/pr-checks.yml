@@ -24,18 +24,59 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v7
-      - name: minimumReleaseAgeExclude must be @rvoh/* only
+      - uses: actions/setup-node@v6
+        with:
+          node-version: "26"
+
+      - run: corepack enable
+
+      - name: minimumReleaseAge is set and minimumReleaseAgeExclude is @rvoh/* only
         run: |
           # SECURITY: the minimumReleaseAge cooldown bypass list must stay @rvoh/*
           # only (our own packages). Any third-party entry is a permanent
           # supply-chain bypass and must be rejected — apply urgent patches via a
           # transient, reverted override instead of a persistent exclude.
-          bad=$(grep -nE '^[[:space:]]*minimumReleaseAgeExclude' .npmrc | grep -vE '=[[:space:]]*@rvoh/' || true)
-          if [ -n "$bad" ]; then
+          #
+          # pnpm 11+ reads both settings only from pnpm-workspace.yaml, in the
+          # root and in client/ (which has its own lockfile and does not inherit
+          # the root settings). Ask the pinned pnpm what it actually resolved
+          # rather than pattern-matching the YAML, so every spelling pnpm accepts
+          # (quoted keys, flow or block lists) is checked, and a file pnpm cannot
+          # parse fails the job. pnpm ignores these settings in .npmrc; .npmrc is
+          # still checked so a stale copy cannot reappear there.
+          status=0
+          for dir in . client; do
+            if ! age=$(cd "$dir" && pnpm config get minimumReleaseAge --json) ||
+              ! exclude=$(cd "$dir" && pnpm config get minimumReleaseAgeExclude --json); then
+              echo "::error::pnpm could not read the configuration in $dir"
+              status=1
+              continue
+            fi
+            DIR="$dir" AGE="$age" EXCLUDE="$exclude" node -e '
+              const { DIR, AGE, EXCLUDE } = process.env
+              const age = JSON.parse(AGE)
+              const exclude = JSON.parse(EXCLUDE) ?? []
+              let ok = true
+              if (!Number.isInteger(age) || age <= 0) {
+                console.log(`::error::${DIR}/pnpm-workspace.yaml must set a positive minimumReleaseAge (pnpm resolved ${AGE})`)
+                ok = false
+              }
+              const entries = Array.isArray(exclude) ? exclude : [exclude]
+              const bad = entries.filter((entry) => typeof entry !== "string" || !entry.startsWith("@rvoh/"))
+              if (bad.length > 0) {
+                console.log(`::error::Non-@rvoh minimumReleaseAgeExclude entries in ${DIR}/pnpm-workspace.yaml (cooldown bypass must stay @rvoh/* only): ${JSON.stringify(bad)}`)
+                ok = false
+              }
+              process.exit(ok ? 0 : 1)
+            ' || status=1
+          done
+          bad_npmrc=$(grep -nE '^[[:space:]]*minimumReleaseAgeExclude' .npmrc | grep -vE '=[[:space:]]*@rvoh/' | sed 's/^/.npmrc:/' || true)
+          if [ -n "$bad_npmrc" ]; then
             echo "::error::Non-@rvoh minimumReleaseAgeExclude entries (cooldown bypass must stay @rvoh/* only):"
-            echo "$bad"
-            exit 1
+            echo "$bad_npmrc"
+            status=1
           fi
+          exit $status
 
   uspec:
     name: Unit tests (Node ${{ matrix.node-version }})

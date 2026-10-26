@@ -1,2 +1,7 @@
 allowBuilds:
   esbuild: true
+
+# SECURITY — supply-chain cooldown (3 days, in minutes). This client has its own
+# lockfile and is not a workspace member, so it does not inherit the root
+# pnpm-workspace.yaml settings; it needs its own copy of the cooldown.
+minimumReleaseAge: 4320
