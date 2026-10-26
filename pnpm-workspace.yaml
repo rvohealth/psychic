@@ -20,7 +20,7 @@ allowBuilds:
 minimumReleaseAge: 4320
 
 # We maintain the @rvoh packages, so a fresh publish of one of them is not an
-# upstream supply-chain risk to wait out. CI (check-cooldown-excludes) rejects
-# any non-@rvoh entry here.
+# upstream supply-chain risk to wait out. Keep this list @rvoh/* only
+# (reviewed like any other change).
 minimumReleaseAgeExclude:
   - '@rvoh/*'

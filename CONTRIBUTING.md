@@ -80,7 +80,7 @@ pnpm psy db:migrate   # after pulling new migrations
 | Unit specs                                 | `pnpm uspec`                                              | Unit tests (Node 26, 24, 25)   |
 | Feature specs                              | `pnpm fspec`                                              | Feature tests (Node 24)        |
 | Generated files are committed              | `pnpm psy sync`, then `git diff` must be empty            | Ensure no sync diffs (Node 26) |
-| Cooldown policy                            | see [Dependencies](#dependencies-and-supply-chain-policy) | Cooldown exclude allowlist     |
+| Cooldown policy                            | see [Dependencies](#dependencies-and-supply-chain-policy) | every job, via `pnpm install`  |
 
 Notes:
 
@@ -115,7 +115,7 @@ Then run `pnpm fspec`. It accepts a file or directory like `pnpm uspec`, and `it
 - **Install policy lives in `pnpm-workspace.yaml`.** That covers `minimumReleaseAge: 4320`, the 3-day release-age cooldown, and `minimumReleaseAgeExclude`, which must list only `@rvoh/*`. It also covers `allowBuilds`, the allowlist of dependencies that may run install scripts. Keep that list minimal: each entry re-enables install scripts for that package.
 - **`client/` is a separate pnpm project.** It has its own `package.json`, `pnpm-lock.yaml` and `pnpm-workspace.yaml`, including its own cooldown, because it doesn't inherit the root settings. When dependencies change, regenerate each lockfile with its own manifest.
 - **`.npmrc` pins the registry and nothing else.** pnpm 11 and later ignore release-age settings there.
-- **CI enforces the cooldown policy.** The `check-cooldown-excludes` job asks the pinned pnpm what it resolved in the root and in `client/`. It fails if either one lacks a positive `minimumReleaseAge`, if either exclude list holds anything that isn't `@rvoh/*`, or if `.npmrc` has a non-`@rvoh` exclude.
+- **pnpm enforces the cooldown.** Every install, including CI's `pnpm install --frozen-lockfile`, applies the `minimumReleaseAge` in `pnpm-workspace.yaml`. The `@rvoh/*` exclusion is the only bypass. Changes to `pnpm-workspace.yaml`, `.npmrc`, any pnpmfile or the workflow files are reviewed like any other code change.
 - **Don't add a third-party package to `minimumReleaseAgeExclude`.** [SECURITY.md](SECURITY.md) covers urgent third-party patches: apply a transient override that you revert later. If you add or remove an `overrides` entry, or change the cooldown or `allowBuilds`, say so and say why in the PR description.
 - **`@rvoh/*` versions move together.** `@rvoh/dream`, `@rvoh/dream-spec-helpers` and `@rvoh/psychic-spec-helpers` are devDependencies, and `@rvoh/dream` is also a peer dependency. Check `npm view @rvoh/dream peerDependencies` before bumping, because Dream pins the `kysely` and `commander` majors.
 

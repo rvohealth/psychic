@@ -456,7 +456,8 @@ function generateImportStatements(
 
   // The spec helpers live under the app's `spec` alias, which absoluteDreamPath
   // does not cover, so this import takes the app's alias prefix (`@` or `#`)
-  // from the same Dream setting the model and factory imports above follow.
+  // from the same Dream setting the model and factory imports above follow,
+  // and its suffix (addImportSuffix) from Dream's importExtension likewise.
   const importAliasPrefix = DreamApp.getOrFail().importAliasPrefix
 
   return `${cryptoImportLine}${dreamImportLine}${uniq(importStatements).join('\n')}

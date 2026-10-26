@@ -2202,10 +2202,9 @@ describe('Internal/ArticlesController', () => {
     })
   })
 
-  context('importExtension is set on PsychicApp', () => {
+  context('importExtension is set on DreamApp', () => {
     context('importExtension=.js', () => {
       beforeEach(() => {
-        vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('.js')
         vi.spyOn(DreamApp.prototype, 'importExtension', 'get').mockReturnValue('.js')
       })
 
@@ -2234,7 +2233,6 @@ import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authen
 
     context('importExtension=.ts', () => {
       beforeEach(() => {
-        vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('.ts')
         vi.spyOn(DreamApp.prototype, 'importExtension', 'get').mockReturnValue('.ts')
       })
 
@@ -2263,7 +2261,6 @@ import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authen
 
     context('importExtension=none', () => {
       beforeEach(() => {
-        vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('none')
         vi.spyOn(DreamApp.prototype, 'importExtension', 'get').mockReturnValue('none')
       })
 
@@ -2288,6 +2285,67 @@ import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authen
 `,
         )
       })
+    })
+  })
+
+  context('import style is set only on PsychicApp (psy.set in conf/app.ts)', () => {
+    function generateSpec() {
+      return generateResourceControllerSpecContent({
+        fullyQualifiedControllerName: 'V1/PostsController',
+        route: 'v1/posts',
+        fullyQualifiedModelName: 'Post',
+        columnsWithTypes: [],
+        forAdmin: false,
+        forInternal: false,
+        singular: false,
+        actions: [...RESOURCE_ACTIONS],
+      })
+    }
+
+    context('importExtension=none', () => {
+      it('forwards the style to Dream, so the model, factory and spec-helpers imports all drop the suffix', () => {
+        PsychicApp.getOrFail().set('importExtension', 'none')
+
+        expect(generateSpec()).toContain(
+          `\
+import Post from '@models/Post'
+import User from '@models/User'
+import createPost from '@spec/factories/PostFactory'
+import createUser from '@spec/factories/UserFactory'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication'\
+`,
+        )
+      })
+    })
+
+    context('importAliasPrefix=#', () => {
+      it('forwards the prefix to Dream, so every alias import, including the spec-helpers import, starts with #', () => {
+        PsychicApp.getOrFail().set('importAliasPrefix', '#')
+
+        expect(generateSpec()).toContain(
+          `\
+import Post from '#models/Post.js'
+import User from '#models/User.js'
+import createPost from '#spec/factories/PostFactory.js'
+import createUser from '#spec/factories/UserFactory.js'
+import { RequestBody, session, SpecRequestType } from '#spec/unit/helpers/authentication.js'\
+`,
+        )
+      })
+    })
+
+    it('does not read a PsychicApp-held value: a mocked PsychicApp getter leaves the Dream style in place', () => {
+      vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('none')
+
+      expect(generateSpec()).toContain(
+        `\
+import Post from '@models/Post.js'
+import User from '@models/User.js'
+import createPost from '@spec/factories/PostFactory.js'
+import createUser from '@spec/factories/UserFactory.js'
+import { RequestBody, session, SpecRequestType } from '@spec/unit/helpers/authentication.js'\
+`,
+      )
     })
   })
 
@@ -2324,7 +2382,6 @@ import { RequestBody, session, SpecRequestType } from '#spec/unit/helpers/authen
 
       context('importExtension=none', () => {
         beforeEach(() => {
-          vi.spyOn(PsychicApp.prototype, 'importExtension', 'get').mockReturnValue('none')
           vi.spyOn(DreamApp.prototype, 'importExtension', 'get').mockReturnValue('none')
         })
 

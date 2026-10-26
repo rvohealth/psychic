@@ -433,10 +433,36 @@ Try setting it to something valid, like:
     return this._packageManager
   }
 
-  private _importExtension: GeneratorImportStyle = '.js'
-  public get importExtension() {
-    return this._importExtension
+  /**
+   * The import suffix the CLI generators write (`.js`, `.ts` or `none`).
+   * Declared once, in conf/app.ts with `psy.set('importExtension', …)`;
+   * Psychic forwards it to the Dream app it owns, and the generators read
+   * Dream's value. This getter reads through to Dream, so it reports what the
+   * generators use whether the value came from `psy.set`, from
+   * `dreamApp.set` or from Dream's default. Psychic holds no value of its own.
+   */
+  public get importExtension(): GeneratorImportStyle {
+    return DreamApp.getOrFail().importExtension
   }
+
+  /**
+   * The prefix of the import aliases the CLI generators write (`@` or `#`).
+   * Declared once, in conf/app.ts with `psy.set('importAliasPrefix', …)`, and
+   * read through to Dream exactly as {@link importExtension} is.
+   */
+  public get importAliasPrefix(): GeneratorImportAliasPrefix {
+    return DreamApp.getOrFail().importAliasPrefix
+  }
+
+  // The value Dream held for each generator import setting before this app's
+  // first forward of it in this boot: a check input for the conflict error in
+  // #forwardGeneratorImportSetting, not a stored setting (the getters above
+  // read through). Captured per setting, so a second psy.set of the same
+  // setting in one boot compares against the conf/dream.ts value, never
+  // against Psychic's own earlier forward.
+  private _dreamGeneratorImportValuesBeforeForward: Partial<
+    Record<GeneratorImportSetting, GeneratorImportStyle | GeneratorImportAliasPrefix>
+  > = {}
 
   private _routesCb: (r: PsychicRouter) => void | Promise<void>
   public get routesCb() {
@@ -748,31 +774,33 @@ Try setting it to something valid, like:
                     ? string
                     : Opt extends 'importExtension'
                       ? GeneratorImportStyle
-                      : Opt extends 'sessionCookieName'
-                        ? string
-                        : Opt extends 'json'
-                          ? BodyParserOptions
-                          : Opt extends 'logger'
-                            ? PsychicLogger
-                            : Opt extends 'ssl'
-                              ? PsychicSslCredentials
-                              : Opt extends 'openapi'
-                                ? DefaultPsychicOpenapiOptions
-                                : Opt extends 'paths'
-                                  ? PsychicPathOptions
-                                  : Opt extends 'port'
-                                    ? number
-                                    : Opt extends 'saltRounds'
+                      : Opt extends 'importAliasPrefix'
+                        ? GeneratorImportAliasPrefix
+                        : Opt extends 'sessionCookieName'
+                          ? string
+                          : Opt extends 'json'
+                            ? BodyParserOptions
+                            : Opt extends 'logger'
+                              ? PsychicLogger
+                              : Opt extends 'ssl'
+                                ? PsychicSslCredentials
+                                : Opt extends 'openapi'
+                                  ? DefaultPsychicOpenapiOptions
+                                  : Opt extends 'paths'
+                                    ? PsychicPathOptions
+                                    : Opt extends 'port'
                                       ? number
-                                      : Opt extends 'packageManager'
-                                        ? DreamAppAllowedPackageManagersEnum
-                                        : Opt extends 'inflections'
-                                          ? () => void | Promise<void>
-                                          : Opt extends 'routes'
-                                            ? (r: PsychicRouter) => void | Promise<void>
-                                            : Opt extends 'redirectAllowedHosts'
-                                              ? readonly string[]
-                                              : never,
+                                      : Opt extends 'saltRounds'
+                                        ? number
+                                        : Opt extends 'packageManager'
+                                          ? DreamAppAllowedPackageManagersEnum
+                                          : Opt extends 'inflections'
+                                            ? () => void | Promise<void>
+                                            : Opt extends 'routes'
+                                              ? (r: PsychicRouter) => void | Promise<void>
+                                              : Opt extends 'redirectAllowedHosts'
+                                                ? readonly string[]
+                                                : never,
   ): void
   public set<Opt extends PsychicAppOption>(option: Opt, unknown1: unknown, unknown2?: unknown) {
     const value = unknown2 || unknown1
@@ -795,7 +823,11 @@ Try setting it to something valid, like:
         break
 
       case 'importExtension':
-        this._importExtension = value as GeneratorImportStyle
+        this.forwardGeneratorImportSetting('importExtension', value as GeneratorImportStyle)
+        break
+
+      case 'importAliasPrefix':
+        this.forwardGeneratorImportSetting('importAliasPrefix', value as GeneratorImportAliasPrefix)
         break
 
       case 'defaultResponseHeaders':
@@ -886,6 +918,37 @@ Try setting it to something valid, like:
     }
   }
 
+  /**
+   * Forwards a generator import setting (`importExtension`, `importAliasPrefix`)
+   * to the Dream app, which the generators read. conf/dream.ts has already run
+   * when conf/app.ts calls `psy.set`, so a Dream-side declaration that differs
+   * from the one in conf/app.ts is a conflict, and throws rather than being
+   * silently overridden: the setting is declared once, in conf/app.ts. A
+   * Dream-side value equal to Dream's default cannot be told from no
+   * declaration (Dream records no "was set" flag), so that case forwards.
+   */
+  private forwardGeneratorImportSetting(
+    setting: GeneratorImportSetting,
+    value: GeneratorImportStyle | GeneratorImportAliasPrefix,
+  ) {
+    const dreamApp = DreamApp.getOrFail()
+    const before = this._dreamGeneratorImportValuesBeforeForward
+    const dreamValue = (before[setting] ??= dreamApp[setting])
+
+    if (dreamValue !== DREAM_GENERATOR_IMPORT_DEFAULTS[setting] && dreamValue !== value)
+      throw new PsychicAppConflictingDreamSetting(setting, dreamValue, value)
+
+    switch (setting) {
+      case 'importExtension':
+        dreamApp.set('importExtension', value as GeneratorImportStyle)
+        break
+
+      case 'importAliasPrefix':
+        dreamApp.set('importAliasPrefix', value as GeneratorImportAliasPrefix)
+        break
+    }
+  }
+
   public override<Override extends keyof PsychicAppOverrides>(
     override: Override,
     value: PsychicAppOverrides[Override],
@@ -903,6 +966,7 @@ export type PsychicAppOption =
   | 'apiRoot'
   | 'httpServerOptions'
   | 'importExtension'
+  | 'importAliasPrefix'
   | 'encryption'
   | 'sessionCookieName'
   | 'cookie'
@@ -1356,3 +1420,52 @@ interface SegmentedEncryptionOptions {
 // suffix style can change, and may need to be configured.
 export const GeneratorImportStyles = ['.js', '.ts', 'none'] as const
 export type GeneratorImportStyle = (typeof GeneratorImportStyles)[number]
+
+// The alias prefix (`@` or `#`) the CLI generators write. Dream 2.40.0 does not
+// export the type, so it is derived from the Dream getter Psychic reads through to.
+export type GeneratorImportAliasPrefix = DreamApp['importAliasPrefix']
+
+// The generator import settings an app declares once, in conf/app.ts, which
+// Psychic forwards to Dream.
+export type GeneratorImportSetting = 'importExtension' | 'importAliasPrefix'
+
+// Dream's defaults for the generator import settings. Dream 2.40.0 keeps them
+// private, so they are repeated here for the conflict check in
+// PsychicApp#set; they track Dream's, and move with Dream 3's `#` default.
+const DREAM_GENERATOR_IMPORT_DEFAULTS: Record<
+  GeneratorImportSetting,
+  GeneratorImportStyle | GeneratorImportAliasPrefix
+> = {
+  importExtension: '.js',
+  importAliasPrefix: '@',
+}
+
+/**
+ * Thrown by `psy.set('importExtension', …)` and `psy.set('importAliasPrefix', …)`
+ * when conf/dream.ts set the same setting to a different value: the setting is
+ * declared once, in conf/app.ts, and Psychic forwards it to Dream.
+ */
+export class PsychicAppConflictingDreamSetting extends Error {
+  constructor(
+    private setting: GeneratorImportSetting,
+    private dreamValue: string,
+    private psychicValue: string,
+  ) {
+    super()
+  }
+
+  public override get message() {
+    return `
+conf/dream.ts sets ${this.setting} to '${this.dreamValue}', but conf/app.ts sets it to '${this.psychicValue}'.
+
+${this.setting} is declared once, in conf/app.ts, and Psychic forwards it to Dream:
+
+  // conf/app.ts
+  export default async (psy: PsychicApp) => {
+    psy.set('${this.setting}', '${this.psychicValue}')
+  }
+
+Remove the app.set('${this.setting}', '${this.dreamValue}') call from conf/dream.ts.
+    `
+  }
+}
