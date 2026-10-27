@@ -1071,29 +1071,34 @@ export default class PsychicController {
    * This data is merged with any existing passthrough data and made available
    * to all serializers used in subsequent render operations.
    *
+   * Serializers read passthrough data inside callbacks. What a serializer
+   * declares must not depend on it: Psychic and Dream build serializers
+   * without passthrough data to render OpenAPI and to preload associations,
+   * so a declaration toggled by a passthrough value is missing from the
+   * schema and, under `fastJsonStringify`, dropped from the response.
+   *
    * @param passthrough - Object containing data to pass to serializers
    *
    * @example
    * ```ts
-   * class UsersController extends ApplicationController {
-   *   public index() {
-   *     // Pass current user context to serializers
-   *     this.serializerPassthrough({ currentUser: this.currentUser })
+   * class PlacesController extends ApplicationController {
+   *   \@OpenAPI(Place)
+   *   public async show() {
+   *     // available to every serializer this response renders
+   *     this.serializerPassthrough({ locale: this.header('accept-language') || 'en-US' })
    *
-   *     const users = User.all()
-   *     this.json(users) // Serializers will have access to currentUser
-   *   }
-   *
-   *   public show() {
-   *     this.serializerPassthrough({
-   *       includePrivateData: this.currentUser.isAdmin(),
-   *       requestedAt: new Date()
-   *     })
-   *
-   *     const user = User.find(this.param('id'))
-   *     this.json(user)
+   *     const place = await Place.findOrFail(this.castParam('id', 'bigint'))
+   *     this.respond(place)
    *   }
    * }
+   *
+   * // read passthrough data inside a callback, never to decide what the serializer declares
+   * export const PlaceSerializer = (place: Place, passthrough: { locale: string }) =>
+   *   DreamSerializer(Place, place, passthrough).customAttribute(
+   *     'title',
+   *     () => place.titleIn(passthrough.locale),
+   *     { openapi: 'string' },
+   *   )
    * ```
    */
   public serializerPassthrough(passthrough: SerializerResult) {
