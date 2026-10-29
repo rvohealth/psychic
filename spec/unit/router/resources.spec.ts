@@ -1,9 +1,9 @@
-import { agent as supertest } from 'supertest'
 import PsychicRouter from '../../../src/router/index.js'
 import { ControllerActionRouteConfig } from '../../../src/router/route-manager.js'
 import PsychicServer from '../../../src/server/index.js'
 import PetsController from '../../../test-app/src/app/controllers/PetsController.js'
 import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
+import withLoopbackAgent from '../helpers/withLoopbackAgent.js'
 
 function committedRoutes(router: PsychicRouter) {
   router.commit()
@@ -18,7 +18,7 @@ describe('PsychicRouter', () => {
         const server = new PsychicServer()
         await server.boot()
 
-        const res = await supertest(server.koaApp.callback()).get('/users/3/hello').expect(200)
+        const res = await withLoopbackAgent(server.koaApp, agent => agent.get('/users/3/hello').expect(200))
 
         expect(res.body).toEqual('world 3')
       }, 15000)

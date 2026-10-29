@@ -212,7 +212,7 @@ describe('PsychicCLI setup:sync commands', () => {
         [
           'setup:sync:openapi-zustand',
           '--schema-file=./src/openapi/openapi.json',
-          '--output-dir=../client/app/api/backend',
+          '--output-dir=../client/app/api/backend/generated',
           '--client-config-file=../client/app/api/backend/client.ts',
           '--export-name=backendApi',
           '--overwrite',
@@ -224,7 +224,7 @@ describe('PsychicCLI setup:sync commands', () => {
         {
           exportName: 'backendApi',
           schemaFile: './src/openapi/openapi.json',
-          outputDir: '../client/app/api/backend',
+          outputDir: '../client/app/api/backend/generated',
           clientConfigFile: '../client/app/api/backend/client.ts',
         },
         { overwrite: true },

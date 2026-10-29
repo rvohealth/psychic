@@ -1,11 +1,11 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import { Transform } from 'node:stream'
 import zlib from 'node:zlib'
-import { agent as supertest } from 'supertest'
 import { MockInstance } from 'vitest'
 import PsychicApp, { type BodyParserOptions } from '../../../src/psychic-app/index.js'
 import PsychicServer from '../../../src/server/index.js'
 import User from '../../../test-app/src/app/models/User.js'
+import withLoopbackAgent from '../helpers/withLoopbackAgent.js'
 
 describe('PsychicServer body parsing', () => {
   beforeEach(async () => {
@@ -71,10 +71,9 @@ describe('PsychicServer body parsing', () => {
       const server = new PsychicServer()
       await server.boot()
 
-      return await supertest(server.koaApp.callback())
-        .post('/ping')
-        .set('content-type', 'application/json')
-        .send(body)
+      return await withLoopbackAgent(server.koaApp, agent =>
+        agent.post('/ping').set('content-type', 'application/json').send(body),
+      )
     }
 
     it('boots and parses a JSON body', async () => {
@@ -115,10 +114,9 @@ describe('PsychicServer body parsing', () => {
       const server = new PsychicServer()
       await server.boot()
 
-      return await supertest(server.koaApp.callback())
-        .post('/ping')
-        .set('content-type', contentType)
-        .send(body)
+      return await withLoopbackAgent(server.koaApp, agent =>
+        agent.post('/ping').set('content-type', contentType).send(body),
+      )
     }
 
     it("answers malformed JSON with the parser's 400, without logging it or calling server:error hooks, when the app configures no callback", async () => {
@@ -229,14 +227,16 @@ describe('PsychicServer body parsing', () => {
       const server = new PsychicServer()
       await server.boot()
 
-      return await supertest(server.koaApp.callback())
-        .post('/ping')
-        .set('content-type', 'application/json')
-        .set('content-encoding', contentEncoding)
-        // sends the bytes as they are; superagent would otherwise send a
-        // Buffer as JSON
-        .serialize((data: Buffer | string) => data as string)
-        .send(body as string)
+      return await withLoopbackAgent(server.koaApp, agent =>
+        agent
+          .post('/ping')
+          .set('content-type', 'application/json')
+          .set('content-encoding', contentEncoding)
+          // sends the bytes as they are; superagent would otherwise send a
+          // Buffer as JSON
+          .serialize((data: Buffer | string) => data as string)
+          .send(body as string),
+      )
     }
 
     function expectQuiet400(res: { status: number; text: string }) {

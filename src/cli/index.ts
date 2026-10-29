@@ -417,7 +417,7 @@ ${INDENT}
 ${INDENT}Example:
 ${INDENT}  pnpm psy setup:sync:openapi-zustand \\
 ${INDENT}    --schema-file=./src/openapi/openapi.json \\
-${INDENT}    --output-dir=../client/app/api/backend \\
+${INDENT}    --output-dir=../client/app/api/backend/generated \\
 ${INDENT}    --client-config-file=../client/app/api/backend/client.ts \\
 ${INDENT}    --export-name=backendApi`,
       )
@@ -427,11 +427,11 @@ ${INDENT}    --export-name=backendApi`,
       )
       .option(
         '--output-dir <outputDir>',
-        'directory where @hey-api/openapi-ts will generate typed API functions, types, and schemas, e.g., ../client/app/api/backend',
+        'directory where @hey-api/openapi-ts will generate typed API functions, types, and schemas. openapi-ts deletes this directory on every sync, so it must not contain the client config file, e.g., ../client/app/api/backend/generated',
       )
       .option(
         '--client-config-file <clientConfigFile>',
-        'path to the @hey-api/openapi-ts client configuration file that sets the base URL and credentials, e.g., ../client/app/api/backend/client.ts',
+        'path to the @hey-api/openapi-ts client configuration file that sets the base URL and credentials. Must be outside of --output-dir, e.g., ../client/app/api/backend/client.ts',
       )
       .option(
         '--export-name <exportName>',

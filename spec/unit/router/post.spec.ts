@@ -1,7 +1,7 @@
-import { agent as supertest } from 'supertest'
 import PsychicRouter from '../../../src/router/index.js'
 import PsychicServer from '../../../src/server/index.js'
 import UsersController from '../../../test-app/src/app/controllers/UsersController.js'
+import withLoopbackAgent from '../helpers/withLoopbackAgent.js'
 
 describe('PsychicRouter', () => {
   describe('#post', () => {
@@ -17,7 +17,7 @@ describe('PsychicRouter', () => {
       it('can direct post requests to controller', async () => {
         await server.boot()
 
-        const res = await supertest(server.koaApp.callback()).post('/ping').expect(200)
+        const res = await withLoopbackAgent(server.koaApp, agent => agent.post('/ping').expect(200))
 
         expect(res.body).toEqual('helloworld')
       })

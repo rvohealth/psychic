@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { DreamCLI } from '@rvoh/dream/system'
 import applyConfirmedWriteSet, { ConfirmOverwriteFn } from '../../cli/helpers/applyConfirmedWriteSet.js'
 import PackageManager from '../../cli/helpers/PackageManager.js'
@@ -40,6 +41,7 @@ export default async function generateOpenapiZustandBindings(
   } = {},
 ) {
   const opts = await promptForOptions(options)
+  assertClientConfigFileOutsideOutputDir(opts)
 
   const applied = await applyConfirmedWriteSet([clientConfigFileTarget(opts), initializerTarget(opts)], {
     confirm,
@@ -50,6 +52,28 @@ export default async function generateOpenapiZustandBindings(
   const { command, args } = PackageManager.add(['@hey-api/openapi-ts'], { dev: true })
   await DreamCLI.spawn(command, { args })
   printFinalStepsMessage(opts)
+}
+
+// @hey-api/openapi-ts deletes outputDir on every run, so a clientConfigFile
+// at or under it would be deleted by the next sync
+function assertClientConfigFileOutsideOutputDir({
+  outputDir,
+  clientConfigFile,
+}: Required<OpenapiZustandBindingsOptions>) {
+  const relative = path.relative(path.resolve(outputDir), path.resolve(clientConfigFile))
+  const outside = relative === '..' || relative.startsWith('..' + path.sep) || path.isAbsolute(relative)
+  const nested = relative === '' || !outside
+  if (!nested) return
+
+  throw new Error(`\
+clientConfigFile (${clientConfigFile}) is inside outputDir (${outputDir}).
+
+@hey-api/openapi-ts deletes outputDir on every sync, so the next \`psy sync\`
+would delete your client config file. Choose a clientConfigFile outside of
+outputDir, i.e. generate into a subfolder:
+
+  --output-dir=../client/app/api/backend/generated
+  --client-config-file=../client/app/api/backend/client.ts`)
 }
 
 export interface OpenapiZustandBindingsOptions {
