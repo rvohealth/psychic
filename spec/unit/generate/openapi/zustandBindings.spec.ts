@@ -3,6 +3,7 @@ import fs from 'node:fs/promises'
 import { MockInstance } from 'vitest'
 import { CannotConfirmOverwriteError } from '../../../../src/cli/helpers/confirmOverwrite.js'
 import generateZustandStoreFromSdk from '../../../../src/generate/helpers/zustandBindings/generateStoreFromSdk.js'
+import promptForOptions from '../../../../src/generate/helpers/zustandBindings/promptForOptions.js'
 import generateOpenapiZustandBindings from '../../../../src/generate/openapi/zustandBindings.js'
 
 describe('generateOpenapiZustandBindings', () => {
@@ -14,7 +15,7 @@ describe('generateOpenapiZustandBindings', () => {
   const fullOptions = {
     exportName: 'myApi',
     schemaFile: './src/openapi/openapi.json',
-    outputDir: '../client/app/api/myApi',
+    outputDir: 'test-client/app/api/myApi/generated',
     clientConfigFile: clientConfigPath,
   }
 
@@ -57,7 +58,7 @@ describe('generateOpenapiZustandBindings', () => {
         const contents = (await fs.readFile(clientConfigPath)).toString()
 
         expect(contents).toEqual(`\
-import { client } from './client.gen'
+import { client } from './generated/client.gen'
 
 function baseUrl() {
   // add custom code here for determining your application's baseUrl
@@ -112,6 +113,113 @@ client.setConfig({
     })
   })
 
+  context('the import of the generated client', () => {
+    it('is computed from the config file to <outputDir>/client.gen (default layout)', async () => {
+      await generateOpenapiZustandBindings({ ...fullOptions })
+
+      expect((await fs.readFile(clientConfigPath)).toString()).toContain(
+        "import { client } from './generated/client.gen'",
+      )
+    })
+
+    it('is computed for a custom layout', async () => {
+      const customConfigPath = 'test-client/app/api/config/myApiClient.ts'
+
+      await generateOpenapiZustandBindings({
+        ...fullOptions,
+        outputDir: 'test-client/app/gen/myApi',
+        clientConfigFile: customConfigPath,
+      })
+
+      expect((await fs.readFile(customConfigPath)).toString()).toContain(
+        "import { client } from '../../gen/myApi/client.gen'",
+      )
+    })
+    it('is ./-prefixed for a dot-prefixed outputDir', async () => {
+      const customConfigPath = 'test-client/app/api/myApi/client.ts'
+
+      await generateOpenapiZustandBindings({
+        ...fullOptions,
+        outputDir: 'test-client/app/api/myApi/.generated',
+        clientConfigFile: customConfigPath,
+      })
+
+      expect((await fs.readFile(customConfigPath)).toString()).toContain(
+        "import { client } from './.generated/client.gen'",
+      )
+    })
+  })
+
+  context('defaults', () => {
+    it('generate into a subfolder, keeping the clientConfigFile outside the outputDir that openapi-ts deletes on every sync', async () => {
+      const opts = await promptForOptions({ exportName: 'myApi' })
+
+      expect(opts.outputDir).toEqual('../client/app/api/myApi/generated')
+      expect(opts.clientConfigFile).toEqual('../client/app/api/myApi/client.ts')
+    })
+  })
+
+  context('a clientConfigFile inside the outputDir', () => {
+    const nestedCases: [string, string, string][] = [
+      [
+        'directly inside',
+        'test-client/app/api/myApi/generated/client.ts',
+        'test-client/app/api/myApi/generated',
+      ],
+      [
+        'in a subfolder',
+        'test-client/app/api/myApi/generated/sub/client.ts',
+        'test-client/app/api/myApi/generated',
+      ],
+      [
+        'via .. segments',
+        'test-client/app/api/other/../myApi/generated/client.ts',
+        'test-client/app/api/myApi/generated',
+      ],
+      [
+        'with a trailing slash on outputDir',
+        'test-client/app/api/myApi/generated/client.ts',
+        'test-client/app/api/myApi/generated/',
+      ],
+      [
+        'when it is the outputDir itself',
+        'test-client/app/api/myApi/generated',
+        'test-client/app/api/myApi/generated',
+      ],
+    ]
+    for (const [description, clientConfigFile, outputDir] of nestedCases) {
+      it(`is rejected before anything is written or installed (${description})`, async () => {
+        await expect(
+          generateOpenapiZustandBindings({ ...fullOptions, clientConfigFile, outputDir }),
+        ).rejects.toThrow(/deletes/)
+
+        await expect(fs.access(initializerPath)).rejects.toThrow()
+        await expect(fs.access('test-client')).rejects.toThrow()
+        expect(dreamCliSpy).not.toHaveBeenCalled()
+      })
+    }
+
+    it('does not treat a config file whose name begins with two dots as outside the outputDir', async () => {
+      await expect(
+        generateOpenapiZustandBindings({
+          ...fullOptions,
+          clientConfigFile: 'test-client/app/api/myApi/generated/..cfg.ts',
+          outputDir: 'test-client/app/api/myApi/generated',
+        }),
+      ).rejects.toThrow(/deletes/)
+    })
+
+    it('does not treat a sibling with a shared name prefix as nested', async () => {
+      await generateOpenapiZustandBindings({
+        ...fullOptions,
+        outputDir: 'test-client/app/api/myApi/generated',
+        clientConfigFile: 'test-client/app/api/myApi/generated2/client.ts',
+      })
+
+      await fs.access('test-client/app/api/myApi/generated2/client.ts')
+    })
+  })
+
   context('psychic initializer', () => {
     it('generates a psychic initializer that runs @hey-api/openapi-ts and generates the zustand store on sync', async () => {
       await generateOpenapiZustandBindings({
@@ -131,7 +239,7 @@ export default function initializeMyApi(psy: PsychicApp) {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(\`[myApi] syncing...\`, async () => {
         await DreamCLI.spawn('pnpm', {
-          args: ["exec","openapi-ts","-i","./src/openapi/openapi.json","-o","../client/app/api/myApi"],
+          args: ["exec","openapi-ts","-i","./src/openapi/openapi.json","-o","test-client/app/api/myApi/generated"],
           onStdout: message => {
             DreamCLI.logger.logContinueProgress(\`[myApi]\` + ' ' + message, {
               logPrefixColor: 'green',
@@ -141,7 +249,7 @@ export default function initializeMyApi(psy: PsychicApp) {
       })
 
       await DreamCLI.logger.logProgress(\`[myApi] generating zustand store...\`, async () => {
-        await generateZustandStoreFromSdk('../client/app/api/myApi')
+        await generateZustandStoreFromSdk('test-client/app/api/myApi/generated')
       })
     }
   })
@@ -163,7 +271,7 @@ export default function initializeMyApi(psy: PsychicApp) {
     if (AppEnv.isDevelopmentOrTest) {
       await DreamCLI.logger.logProgress(\`[myApi] syncing...\`, async () => {
         await DreamCLI.spawn('pnpm', {
-          args: ["exec","openapi-ts","-i","./src/openapi/openapi.json","-o","../client/app/api/myApi"],
+          args: ["exec","openapi-ts","-i","./src/openapi/openapi.json","-o","test-client/app/api/myApi/generated"],
           onStdout: message => {
             DreamCLI.logger.logContinueProgress(\`[myApi]\` + ' ' + message, {
               logPrefixColor: 'green',

@@ -34,13 +34,14 @@ of your app, i.e.
   }
 
   if (!options.outputDir) {
-    const defaultVal = `../client/app/api/${camelize(options.exportName)}`
+    const defaultVal = `../client/app/api/${camelize(options.exportName)}/generated`
     const answer = await cliPrompt(`\
 What would you like the outputDir to be?
 
 The outputDir is the directory where @hey-api/openapi-ts will generate the typed
 API functions and types. It will contain files like types.gen.ts and sdk.gen.ts.
-If not provided, it will default to:
+@hey-api/openapi-ts deletes this directory on every sync, so it must not contain
+your clientConfigFile. If not provided, it will default to:
 
   ${defaultVal}
 `)
@@ -61,6 +62,9 @@ to consider how to travel to the desired filepath from within your psychic
 project, i.e.
 
   ${defaultVal}
+
+It must be outside of the outputDir, since @hey-api/openapi-ts deletes the
+outputDir on every sync.
 `)
     options.clientConfigFile = answer || defaultVal
   }

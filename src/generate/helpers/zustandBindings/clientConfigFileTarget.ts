@@ -1,3 +1,4 @@
+import path from 'node:path'
 import { FileWriteTarget } from '../../../cli/helpers/applyConfirmedWriteSet.js'
 
 /**
@@ -7,11 +8,14 @@ import { FileWriteTarget } from '../../../cli/helpers/applyConfirmedWriteSet.js'
  */
 export default function clientConfigFileTarget({
   clientConfigFile,
+  outputDir,
 }: {
   clientConfigFile: string
+  outputDir: string
 }): FileWriteTarget {
+  const clientGenImport = relativeImportPath(clientConfigFile, path.join(outputDir, 'client.gen'))
   const contents = `\
-import { client } from './client.gen'
+import { client } from '${clientGenImport}'
 
 function baseUrl() {
   // add custom code here for determining your application's baseUrl
@@ -36,4 +40,12 @@ client.setConfig({
 })`
 
   return { filePath: clientConfigFile, contents }
+}
+
+function relativeImportPath(fromFile: string, toPath: string) {
+  const relative = path
+    .relative(path.dirname(path.resolve(fromFile)), path.resolve(toPath))
+    .split(path.sep)
+    .join('/')
+  return relative === '..' || relative.startsWith('../') ? relative : `./${relative}`
 }
