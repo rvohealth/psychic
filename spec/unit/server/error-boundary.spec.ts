@@ -2,9 +2,9 @@ import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import Koa from 'koa'
 import { IncomingMessage, ServerResponse } from 'node:http'
 import { Socket } from 'node:net'
-import { agent as supertest } from 'supertest'
 import { PsychicServer } from '../../../src/package-exports/index.js'
 import errorBoundaryMiddleware from '../../../src/server/helpers/errorBoundaryMiddleware.js'
+import withLoopbackAgent from '../helpers/withLoopbackAgent.js'
 
 describe('PsychicServer error boundary', () => {
   beforeEach(async () => {
@@ -42,11 +42,9 @@ describe('PsychicServer error boundary', () => {
       const server = new PsychicServer()
       await server.boot()
 
-      await supertest(server.koaApp.callback())
-        .post('/ping')
-        .set('content-type', 'application/json')
-        .send('this is not json')
-        .expect(400)
+      await withLoopbackAgent(server.koaApp, agent =>
+        agent.post('/ping').set('content-type', 'application/json').send('this is not json').expect(400),
+      )
 
       expect(serverErrorHookCallCount()).toEqual(0)
     })
