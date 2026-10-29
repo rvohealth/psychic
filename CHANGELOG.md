@@ -1,3 +1,7 @@
+## 3.19.1
+
+- Added the internal `PsychicApp.system` accessor (the counterpart of `DreamApp.system`), which hands sibling `@rvoh/psychic-*` packages the framework internals they are built on without adding them to the public package exports. It exists in support of the new `@rvoh/psychic-studio` package (the browser-based console over your application's routes, serializers, and OpenAPI documents — install it as a dev dependency and bind it to your Psychic configuration; see that package for details) and is not for application use. Also exported the types that package needs: `RouteConfig` / `ControllerActionRouteConfig` / `MiddlewareRouteConfig` and `PackageManagerCommand` from `@rvoh/psychic/types`, and `OpenapiEndpointResponsePath`, `OpenapiRenderOpts`, `OpenapiSecurity`, and `OpenapiServer` from `@rvoh/psychic/openapi`.
+
 ## 3.19.0
 
 - Fix overlapping service loads returning before imports and name registration finish. Concurrent callers now share the complete load outcome; failed loads preserve the original error and allow a later retry instead of caching an empty or partial registry.

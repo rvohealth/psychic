@@ -20,3 +20,9 @@ export {
   type OpenapiPathParamOption as OpenapiUriOption,
 } from '../openapi-renderer/endpoint.js'
 export { type DefaultPsychicOpenapiOptions, type NamedPsychicOpenapiOptions } from '../psychic-app/index.js'
+export {
+  type OpenapiEndpointResponsePath,
+  type OpenapiRenderOpts,
+  type OpenapiSecurity,
+  type OpenapiServer,
+} from '../openapi-renderer/endpoint.js'
