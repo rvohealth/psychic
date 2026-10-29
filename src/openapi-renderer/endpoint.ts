@@ -2477,7 +2477,7 @@ function statusDescription(status: HttpStatusCodeNumber | HttpStatusCode) {
   }
 }
 
-function serializersToSchemaObjects(
+export function serializersToSchemaObjects(
   controllerClass: typeof PsychicController,
   actionName: string,
   serializers: (DreamModelSerializerType | SimpleObjectSerializerType)[],
