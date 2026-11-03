@@ -56,3 +56,10 @@ export const UserConflictSerializer = (data: { reason: string; user: User }) =>
   ObjectSerializer(data)
     .attribute('reason', { openapi: 'string' })
     .rendersOne('user', { serializer: UserWithPassthroughSerializer })
+
+// used only as an OpenAPI request body, never by a response, so its component
+// reaches components.schemas only through the request body that references it
+export const UserSignupRequestSerializer = (data: { email: string; name?: string }) =>
+  ObjectSerializer(data)
+    .attribute('email', { openapi: 'string' })
+    .attribute('name', { openapi: 'string', required: false })

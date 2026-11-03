@@ -804,6 +804,30 @@ describe('OpenapiAppRenderer', () => {
         // CustomSchemaObject (test-app conf/app.ts) has no required list
         expect(requestBodyFor('/requestBodyboilerplateSchemaTest')).not.toHaveProperty('required')
       })
+
+      it('resolves a $serializer used only by the request body against its emitted component', () => {
+        // UserSignupRequestSerializer renders `email` without `required: false`
+        expect(requestBodyFor('/requestBodySerializerOpenapiTest').required).toBe(true)
+      })
+    })
+
+    context('a requestBody that references a serializer no response uses', () => {
+      it('emits the serializer’s component, so the requestBody $ref resolves', () => {
+        const openapi = OpenapiAppRenderer.toObject().default!
+        const requestBody = openapi.paths['/requestBodySerializerOpenapiTest']!.post.requestBody
+
+        expect(requestBody.content!['application/json'].schema).toEqual({
+          $ref: '#/components/schemas/UserSignupRequest',
+        })
+        expect(openapi.components.schemas!['UserSignupRequest']).toEqual({
+          type: 'object',
+          required: ['email'],
+          properties: {
+            email: { type: 'string' },
+            name: { type: 'string' },
+          },
+        })
+      })
     })
   })
 })

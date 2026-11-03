@@ -63,7 +63,7 @@ export default class OpenapiPayloadValidator {
       const openapiPathObject = openapiEndpointRenderer['computedRequestBody'](routes, {
         openapiName,
         renderOpts: this.renderOpts,
-      })
+      }).openapi
 
       const requestBodySchema = openapiPathObject?.['content']?.['application/json']?.['schema']
       if (requestBodySchema) {

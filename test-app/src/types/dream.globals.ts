@@ -125,6 +125,7 @@ export const globalTypeConfig = {
     'UserConflictSerializer',
     'UserExtraSerializer',
     'UserSerializer',
+    'UserSignupRequestSerializer',
     'UserSummarySerializer',
     'UserWithFlattenedPostSerializer',
     'UserWithOptionalFlattenedPostSerializer',
