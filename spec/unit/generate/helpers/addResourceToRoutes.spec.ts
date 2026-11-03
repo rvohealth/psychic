@@ -4,6 +4,10 @@ import { MockInstance } from 'vitest'
 import addResourceToRoutes from '../../../../src/generate/helpers/addResourceToRoutes.js'
 import * as psychicPathModule from '../../../../src/helpers/path/psychicPath.js'
 import PsychicApp from '../../../../src/psychic-app/index.js'
+import PsychicRouter from '../../../../src/router/index.js'
+import { ControllerActionRouteConfig } from '../../../../src/router/route-manager.js'
+import PsychicServer from '../../../../src/server/index.js'
+import ApiV1UsersController from '../../../../test-app/src/app/controllers/Api/V1/UsersController.js'
 
 function routesFile(body: string) {
   return `\
@@ -181,6 +185,178 @@ describe('addResourceToRoutes', () => {
     })
   })
 
+  context('when the parent resource of a nested resource is not routed yet', () => {
+    let consoleLogSpy: MockInstance<typeof console.log>
+
+    beforeEach(() => {
+      consoleLogSpy = vi.spyOn(console, 'log').mockImplementation(() => {})
+    })
+
+    afterEach(() => {
+      consoleLogSpy.mockRestore()
+    })
+
+    it('writes the parent with { only: [] } and its namespaces as before', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.resources('pets')
+`),
+        'v1/posts/{}/comments',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('posts', { only: [] }, r => {
+      r.resources('comments')
+    })
+  })
+
+  r.resources('pets')
+`),
+      )
+    })
+
+    it('writes every parent resource missing from the route with { only: [] }', async () => {
+      const routes = await addRoute(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('pets')
+  })
+`),
+        'v1/posts/{}/comments/{}/likes',
+      )
+
+      expect(routes).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('posts', { only: [] }, r => {
+      r.resources('comments', { only: [] }, r => {
+        r.resources('likes')
+      })
+    })
+
+    r.resources('pets')
+  })
+`),
+      )
+    })
+
+    it('prints a notice naming each parent resource it added with no actions', async () => {
+      await addRoute(routesFile(''), 'v1/posts/{}/comments/{}/likes')
+
+      expect(consoleLogSpy).toHaveBeenCalledTimes(1)
+      expect(String(consoleLogSpy.mock.calls[0]?.[0])).toEqual(`
+Added these parent resources to spec/tmp/routes.ts with \`{ only: [] }\`, so that they route none of their own actions, since the routes file did not declare them and this run generated no controller for them:
+  v1/posts
+  v1/posts/{}/comments
+To route a parent's actions once it has a controller, edit its \`only\` list.
+`)
+    })
+
+    const declaredParents: [string, string, string][] = [
+      [
+        'without options',
+        `\
+  r.resources('posts')
+`,
+        `\
+  r.resources('posts', r => {
+    r.resources('comments')
+
+  })
+`,
+      ],
+      [
+        'with options',
+        `\
+  r.resources('posts', { only: ['index'] })
+`,
+        `\
+  r.resources('posts', { only: ['index'] }, r => {
+    r.resources('comments')
+
+  })
+`,
+      ],
+      [
+        'with { only: [] } and a callback',
+        `\
+  r.resources('posts', { only: [] }, r => {
+    r.resources('tags')
+  })
+`,
+        `\
+  r.resources('posts', { only: [] }, r => {
+    r.resources('comments')
+
+    r.resources('tags')
+  })
+`,
+      ],
+    ]
+
+    for (const [description, before, after] of declaredParents) {
+      it(`keeps a parent already declared ${description} as it is and prints no notice`, async () => {
+        expect(await addRoute(routesFile(before), 'posts/{}/comments')).toEqual(routesFile(after))
+        expect(consoleLogSpy).not.toHaveBeenCalled()
+      })
+    }
+
+    it('fills in the actions of the parent in place when the parent is generated later', async () => {
+      await addRoute(routesFile(''), 'v1/posts/{}/comments')
+      await addResourceToRoutes('v1/posts', { singular: false, onlyActions: undefined })
+
+      expect(await readRoutes()).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('posts', r => {
+      r.resources('comments')
+    })
+  })
+
+`),
+      )
+
+      await addResourceToRoutes('v1/posts', { singular: false, onlyActions: ['index', 'show'] })
+
+      expect(await readRoutes()).toEqual(
+        routesFile(`\
+  r.namespace('v1', r => {
+    r.resources('posts', { only: ['index', 'show'] }, r => {
+      r.resources('comments')
+    })
+  })
+
+`),
+      )
+    })
+
+    it('writes routes the router builds without a controller for the parent', async () => {
+      expect(psychicApp.controllers['controllers/Api/V1Controller']).toBeUndefined()
+
+      await addRoute(routesFile(''), 'api/v1/{}/users')
+      const { default: drawRoutes } = (await import(`${tmpRoutesFilepath}?build=${Date.now()}`)) as {
+        default: (r: PsychicRouter) => void
+      }
+
+      const router = new PsychicRouter(new PsychicServer().koaApp)
+      drawRoutes(router)
+      router.commit()
+
+      const routes = router.routes as ControllerActionRouteConfig[]
+      expect(routes.map(route => route.action).sort()).toEqual([
+        'create',
+        'destroy',
+        'index',
+        'show',
+        'update',
+        'update',
+      ])
+      expect(routes.every(route => route.controller === ApiV1UsersController)).toBe(true)
+    })
+  })
+
   context('when the namespace is not the first child of its parent block', () => {
     it('adds the resource inside the existing namespace instead of writing a second one', async () => {
       const routes = await addRoute(
@@ -231,7 +407,7 @@ describe('addResourceToRoutes', () => {
   r.namespace('v1', r => {
     r.resources('pets')
     r.namespace('host', r => {
-      r.resources('places', r => {
+      r.resources('places', { only: [] }, r => {
         r.resources('rooms')
       })
 
@@ -1183,6 +1359,9 @@ ${line}
       })
     })
   })`)
+      expect(warning()).toContain(
+        "Declare a parent resource the file does not have yet with `{ only: [] }`, as in `r.resources('places', { only: [] }, r => {`, so that it routes none of its own actions until it has a controller.",
+      )
     })
 
     it('leaves the file unchanged when the call is split before the name of the parent', async () => {
@@ -1215,6 +1394,7 @@ ${line}
       expect(warning()).toContain(
         "line 4, `r.namespace('v1', router => {`, declares namespace 'v1' in a form the generator does not edit",
       )
+      expect(warning()).not.toContain('{ only: [] }')
     })
 
     it('leaves the file unchanged when a later block with the same name is declared in a form it does not edit', async () => {
