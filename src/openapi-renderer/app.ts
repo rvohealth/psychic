@@ -17,6 +17,7 @@ import {
 } from './endpoint.js'
 import legacyImplicitRequestBodyParamsConfig from './helpers/legacyImplicitRequestBodyParamsConfig.js'
 import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
+import OpenapiPayloadValidator from './helpers/OpenapiPayloadValidator.js'
 import suppressResponseEnumsConfig from './helpers/suppressResponseEnumsConfig.js'
 
 const debugEnabled = debuglog('psychic').enabled
@@ -78,6 +79,7 @@ export default class OpenapiAppRenderer {
     }
 
     const alreadyExtractedDescendantSerializers: Record<string, boolean> = {}
+    const payloadValidators = new Map<unknown, OpenapiPayloadValidator>()
     const renderedSchemasOpenapi: Record<string, OpenapiSchemaBody> = {}
     const psychicApp = PsychicApp.getOrFail()
     const controllers = psychicApp.controllers
@@ -156,6 +158,10 @@ export default class OpenapiAppRenderer {
 
           const finalPathObject = finalOutput.paths[path]
           finalPathObject[method] = endpointPayloadPath[method]
+          payloadValidators.set(
+            endpointPayloadPath[method],
+            new OpenapiPayloadValidator(openapiName, renderer),
+          )
 
           finalPathObject.parameters = this.combineParameters([
             ...finalPathObject.parameters,
@@ -187,10 +193,49 @@ export default class OpenapiAppRenderer {
     const paths = finalOutput.paths ?? {}
     const schemas = components.schemas ?? {}
 
+    this.markRequiredRequestBodies(paths, components, payloadValidators)
+
     finalOutput.paths = sortObjectByKey(paths)
     components.schemas = sortObjectByKey(schemas)
 
     return finalOutput
+  }
+
+  /**
+   * @internal
+   *
+   * Marks each request body that request validation rejects when
+   * the request is sent without one `required: true`. Psychic reads a
+   * request sent without a body as `{}`, so the endpoint's
+   * OpenapiPayloadValidator is asked whether its validator, under
+   * that endpoint's AJV options, rejects `{}`. This runs once the
+   * whole document is built, so a `$ref` in a body's schema resolves
+   * against the same `components` that request validation reads.
+   */
+  private static markRequiredRequestBodies(
+    paths: OpenapiSchema['paths'],
+    components: object,
+    payloadValidators: Map<unknown, OpenapiPayloadValidator>,
+  ) {
+    for (const pathObject of Object.values(paths)) {
+      for (const method of HttpMethods) {
+        const methodObject = pathObject[method]
+        const requestBody = methodObject?.requestBody
+        if (!requestBody) continue
+
+        const payloadValidator = payloadValidators.get(methodObject)
+        if (!payloadValidator) continue
+
+        if (
+          payloadValidator.requestBodyRejectsEmptyObject(
+            requestBody.content?.['application/json']?.schema,
+            components,
+          )
+        ) {
+          methodObject.requestBody = { ...requestBody, required: true }
+        }
+      }
+    }
   }
 
   private static combineParameters(parameters: OpenapiParameterResponse[]): OpenapiParameterResponse[] {

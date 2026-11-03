@@ -2246,8 +2246,18 @@ export interface OpenapiMethodBody {
   summary?: string
   security?: OpenapiSecurity
   description: string
-  requestBody: OpenapiContent
+  requestBody: OpenapiRequestBody
   responses: OpenapiResponses
+}
+
+/**
+ * The `requestBody` of an operation in the rendered OpenAPI document.
+ * `required` is `true` when the body's schema rejects an empty object,
+ * since Psychic reads a request sent without a body as `{}`; it is left
+ * out otherwise.
+ */
+export type OpenapiRequestBody = OpenapiContent & {
+  required?: boolean
 }
 
 /**

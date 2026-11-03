@@ -135,6 +135,7 @@ export default function routes(r: PsychicRouter) {
     OpenapiValidationTestsController,
     'requestBodyboilerplateSchemaTest',
   )
+  r.post('requestBodyForModelOpenapiTest', OpenapiValidationTestsController, 'requestBodyForModelOpenapiTest')
 
   r.post('beforeAction403', OpenapiValidationTestsController, 'beforeAction403')
   r.post('beforeActionParamsAccessed', OpenapiValidationTestsController, 'beforeActionParamsAccessed')

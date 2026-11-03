@@ -1,6 +1,7 @@
 import EnvInternal from '../../../../src/helpers/EnvInternal.js'
 import { BeforeAction, OpenAPI } from '../../../../src/package-exports/index.js'
 import ModelWithoutSerializer from '../models/ModelWithoutSerializer.js'
+import User from '../models/User.js'
 import ApplicationController from './ApplicationController.js'
 
 export default class OpenapiValidationTestsController extends ApplicationController {
@@ -109,6 +110,19 @@ export default class OpenapiValidationTestsController extends ApplicationControl
     },
   })
   public requestBodyboilerplateSchemaTest() {
+    this.noContent()
+  }
+
+  @OpenAPI({
+    fastJsonStringify: true,
+    status: 204,
+    requestBody: {
+      for: User,
+      params: ['email', 'name'],
+      required: ['email'],
+    },
+  })
+  public requestBodyForModelOpenapiTest() {
     this.noContent()
   }
 

@@ -1779,6 +1779,55 @@ export interface paths {
         patch?: never;
         trace?: never;
     };
+    "/requestBodyForModelOpenapiTest": {
+        parameters: {
+            query?: never;
+            header?: {
+                /** @description custom header */
+                "custom-header"?: string;
+            };
+            path?: never;
+            cookie?: never;
+        };
+        get?: never;
+        put?: never;
+        post: {
+            parameters: {
+                query?: never;
+                header?: {
+                    /** @description custom header */
+                    "custom-header"?: string;
+                };
+                path?: never;
+                cookie?: never;
+            };
+            requestBody: {
+                content: {
+                    "application/json": {
+                        email: string;
+                        name?: string | null;
+                    };
+                };
+            };
+            responses: {
+                /** @description Success, no content */
+                204: components["responses"]["NoContent"];
+                400: components["responses"]["BadRequest"];
+                401: components["responses"]["Unauthorized"];
+                403: components["responses"]["Forbidden"];
+                404: components["responses"]["NotFound"];
+                409: components["responses"]["Conflict"];
+                418: components["responses"]["CustomResponse"];
+                490: components["responses"]["CustomResponse"];
+                500: components["responses"]["InternalServerError"];
+            };
+        };
+        delete?: never;
+        options?: never;
+        head?: never;
+        patch?: never;
+        trace?: never;
+    };
     "/requestBodyNestedObjectOpenapiTest": {
         parameters: {
             query?: never;
@@ -1801,7 +1850,7 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: {
+            requestBody: {
                 content: {
                     "application/json": {
                         nested: {
@@ -1859,7 +1908,7 @@ export interface paths {
                 path?: never;
                 cookie?: never;
             };
-            requestBody?: {
+            requestBody: {
                 content: {
                     "application/json": {
                         requiredInt: number;

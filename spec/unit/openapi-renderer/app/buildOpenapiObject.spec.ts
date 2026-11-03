@@ -772,5 +772,38 @@ describe('OpenapiAppRenderer', () => {
         expect(response.admin!.paths['/greeter/justforspecs']).toBeUndefined()
       })
     })
+
+    context('requestBody.required', () => {
+      // Psychic reads a request sent without a body as `{}`, so a body whose
+      // schema rejects `{}` is required, whichever form produced the schema.
+      function requestBodyFor(path: string) {
+        return OpenapiAppRenderer.toObject().default!.paths[path]!.post.requestBody
+      }
+
+      it('is true for an explicit schema with a required list', () => {
+        expect(requestBodyFor('/requestBodyOpenapiTest').required).toBe(true)
+      })
+
+      it('is true for a model-derived schema with a required list', () => {
+        const requestBody = requestBodyFor('/requestBodyForModelOpenapiTest')
+        expect(requestBody.required).toBe(true)
+        expect(requestBody.content!['application/json'].schema).toEqual(
+          expect.objectContaining({ required: ['email'] }),
+        )
+      })
+
+      it('is absent for an explicit schema that accepts {}', () => {
+        expect(requestBodyFor('/invalidRequestBody')).not.toHaveProperty('required')
+      })
+
+      it('is absent for a model-derived schema that accepts {}', () => {
+        expect(requestBodyFor('/users')).not.toHaveProperty('required')
+      })
+
+      it('resolves a $ref against the components of the document', () => {
+        // CustomSchemaObject (test-app conf/app.ts) has no required list
+        expect(requestBodyFor('/requestBodyboilerplateSchemaTest')).not.toHaveProperty('required')
+      })
+    })
   })
 })
