@@ -591,7 +591,7 @@ ${INDENT}Run this after changing: associations, serializers, @OpenAPI decorators
       )
       .option(
         '--ignore-errors',
-        'skip integrity checks (e.g., missing migrations) and continue sync anyway. Useful when bootstrapping or debugging',
+        "skip the integrity checks (model tables against types/dream.ts, and building the routes and OpenAPI caches) when sync first boots, so types can be regenerated while serializers or OpenAPI shapes reference something the current types don't have yet. The post-sync stage still runs these checks",
         false,
       )
       .option(
