@@ -2,6 +2,12 @@ import { DreamApp } from '@rvoh/dream'
 import { hyphenize } from '@rvoh/dream/utils'
 import { existsSync } from 'node:fs'
 import * as fs from 'node:fs/promises'
+import * as path from 'node:path'
+import {
+  differsFromExistingContents,
+  FileWriteTarget,
+  readExistingContents,
+} from '../cli/helpers/applyConfirmedWriteSet.js'
 import UnexpectedUndefined from '../error/UnexpectedUndefined.js'
 import addImportSuffix from '../helpers/path/addImportSuffix.js'
 import psychicFileAndDirPaths from '../helpers/path/psychicFileAndDirPaths.js'
@@ -10,23 +16,77 @@ import generateControllerContent from './helpers/generateControllerContent.js'
 import generateControllerSpecContent from './helpers/generateControllerSpecContent.js'
 import generateResourceControllerSpecContent from './helpers/generateResourceControllerSpecContent.js'
 
-export default async function generateController({
-  fullyQualifiedControllerName,
-  fullyQualifiedModelName,
-  actions,
-  columnsWithTypes = [],
-  resourceSpecs = false,
-  owningModel,
-  singular,
-}: {
+/**
+ * Thrown by `g:controller` and `g:resource`, before anything is written, when
+ * the controller or controller spec they would write already exists with
+ * different content and the run did not ask to replace it.
+ */
+export class ControllerFilesAlreadyExist extends Error {
+  constructor(
+    public readonly controllerName: string,
+    public readonly existingFiles: string[],
+    reRunAdvice: string,
+  ) {
+    super(`\
+Refusing to generate ${controllerName}, because these files already exist with different content:
+${existingFiles.map(file => `  ${file}`).join('\n')}
+
+Nothing was written. ${reRunAdvice}`)
+  }
+}
+
+interface GenerateControllerArgs {
   fullyQualifiedControllerName: string
-  fullyQualifiedModelName?: string
+  fullyQualifiedModelName?: string | undefined
   actions: string[]
   columnsWithTypes?: string[]
   resourceSpecs?: boolean
   owningModel?: string | undefined
   singular: boolean
-}) {
+}
+
+interface ControllerFileTarget extends FileWriteTarget {
+  relFilePath: string
+  description: 'controller' | 'controller spec'
+}
+
+/**
+ * Generates a controller, the namespace `BaseController`s leading to it that do
+ * not exist yet, and its spec. When the controller or its spec already exists
+ * with different content, it writes nothing and throws
+ * {@link ControllerFilesAlreadyExist}, unless `overwrite` is passed. An existing
+ * `BaseController` is never replaced.
+ */
+export default async function generateController({
+  overwrite = false,
+  ...args
+}: GenerateControllerArgs & { overwrite?: boolean }) {
+  const writeControllerFiles = await prepareController(args, {
+    overwrite,
+    reRunAdvice: 'To replace them, re-run with --overwrite.',
+  })
+  await writeControllerFiles()
+}
+
+/**
+ * Builds every file {@link generateController} writes and checks the controller
+ * and its spec against disk, throwing {@link ControllerFilesAlreadyExist} before
+ * anything is written when either exists with different content and `overwrite`
+ * is false. Returns the function that writes them, so that `g:resource` can
+ * refuse before its model files are generated and write the controller after.
+ */
+export async function prepareController(
+  {
+    fullyQualifiedControllerName,
+    fullyQualifiedModelName,
+    actions,
+    columnsWithTypes = [],
+    resourceSpecs = false,
+    owningModel,
+    singular,
+  }: GenerateControllerArgs,
+  { overwrite, reRunAdvice }: { overwrite: boolean; reRunAdvice: string },
+): Promise<() => Promise<void>> {
   fullyQualifiedModelName = fullyQualifiedModelName
     ? DreamApp.system.standardizeFullyQualifiedModelName(fullyQualifiedModelName)
     : fullyQualifiedModelName
@@ -45,9 +105,11 @@ export default async function generateController({
 
   const controllerNameParts: string[] = forAdmin || forInternal ? [allControllerNameParts.shift()!] : []
 
+  const baseControllers: FileWriteTarget[] = []
+
   for (let index = 0; index < allControllerNameParts.length; index++) {
     if (controllerNameParts.length > (forAdmin || forInternal ? 1 : 0)) {
-      // Write the ancestor controller
+      // The ancestor controller
       const [baseAncestorName, baseAncestorImportStatement] = baseAncestorNameAndImport(
         controllerNameParts,
         forAdmin,
@@ -59,34 +121,27 @@ export default async function generateController({
       if (baseAncestorImportStatement === undefined) throw new UnexpectedUndefined()
 
       const baseControllerName = [...controllerNameParts, 'BaseController'].join('/')
-      const { absDirPath, absFilePath } = psychicFileAndDirPaths(
-        psychicPath('controllers'),
-        baseControllerName + `.ts`,
-      )
+      const { absFilePath } = psychicFileAndDirPaths(psychicPath('controllers'), baseControllerName + `.ts`)
 
-      await fs.mkdir(absDirPath, { recursive: true })
-
-      if (!existsSync(absFilePath)) {
-        await fs.writeFile(
-          absFilePath,
-          generateControllerContent({
-            ancestorImportStatement: baseAncestorImportStatement,
-            ancestorName: baseAncestorName,
-            fullyQualifiedControllerName: baseControllerName,
-            omitOpenApi: true,
-            forAdmin,
-            forInternal,
-            singular,
-          }),
-        )
-      }
+      baseControllers.push({
+        filePath: absFilePath,
+        contents: generateControllerContent({
+          ancestorImportStatement: baseAncestorImportStatement,
+          ancestorName: baseAncestorName,
+          fullyQualifiedControllerName: baseControllerName,
+          omitOpenApi: true,
+          forAdmin,
+          forInternal,
+          singular,
+        }),
+      })
     }
 
     const namedPart = allControllerNameParts[index]
     if (namedPart) controllerNameParts.push(namedPart)
   }
 
-  // Write the controller
+  // The controller
   const [ancestorName, ancestorImportStatement] = baseAncestorNameAndImport(
     controllerNameParts,
     forAdmin,
@@ -99,55 +154,86 @@ export default async function generateController({
   if (ancestorName === undefined) throw new UnexpectedUndefined()
   if (ancestorImportStatement === undefined) throw new UnexpectedUndefined()
 
-  const { relFilePath, absDirPath, absFilePath } = psychicFileAndDirPaths(
+  const controllerPaths = psychicFileAndDirPaths(
     psychicPath('controllers'),
     fullyQualifiedControllerName + `.ts`,
   )
-  await fs.mkdir(absDirPath, { recursive: true })
-
-  try {
-    console.log(`generating controller: ${relFilePath}`)
-
-    await fs.writeFile(
-      absFilePath,
-      generateControllerContent({
-        ancestorImportStatement,
-        ancestorName,
-        fullyQualifiedControllerName,
-        fullyQualifiedModelName,
-        actions,
-        owningModel,
-        forAdmin,
-        forInternal,
-        singular,
-        columnsWithTypes,
-      }),
-    )
-  } catch (error) {
-    throw new Error(
-      `
-      Something happened while trying to create the controller file:
-        ${relFilePath}
-
-      Does this file already exist? Here is the error that was raised:
-        ${(error as Error).message}
-    `,
-      { cause: error },
-    )
+  const controller: ControllerFileTarget = {
+    filePath: controllerPaths.absFilePath,
+    relFilePath: controllerPaths.relFilePath,
+    description: 'controller',
+    contents: generateControllerContent({
+      ancestorImportStatement,
+      ancestorName,
+      fullyQualifiedControllerName,
+      fullyQualifiedModelName,
+      actions,
+      owningModel,
+      forAdmin,
+      forInternal,
+      singular,
+      columnsWithTypes,
+    }),
   }
 
-  await generateControllerSpec({
-    fullyQualifiedControllerName,
-    route,
-    fullyQualifiedModelName,
-    columnsWithTypes,
-    resourceSpecs,
-    owningModel,
-    forAdmin,
-    forInternal,
-    singular,
-    actions,
-  })
+  const specPaths = psychicFileAndDirPaths(
+    psychicPath('controllerSpecs'),
+    fullyQualifiedControllerName + `.spec.ts`,
+  )
+  const spec: ControllerFileTarget = {
+    filePath: specPaths.absFilePath,
+    relFilePath: specPaths.relFilePath,
+    description: 'controller spec',
+    contents:
+      resourceSpecs && fullyQualifiedModelName
+        ? generateResourceControllerSpecContent({
+            fullyQualifiedControllerName,
+            route,
+            fullyQualifiedModelName,
+            columnsWithTypes,
+            owningModel,
+            forAdmin,
+            forInternal,
+            singular,
+            actions,
+          })
+        : generateControllerSpecContent(fullyQualifiedControllerName),
+  }
+
+  const differingFiles = (await readExistingContents([controller, spec])).filter(differsFromExistingContents)
+  if (differingFiles.length && !overwrite)
+    throw new ControllerFilesAlreadyExist(
+      fullyQualifiedControllerName,
+      differingFiles.map(file => file.relFilePath),
+      reRunAdvice,
+    )
+
+  return async () => {
+    for (const baseController of baseControllers) {
+      await fs.mkdir(path.dirname(baseController.filePath), { recursive: true })
+      if (!existsSync(baseController.filePath))
+        await fs.writeFile(baseController.filePath, baseController.contents)
+    }
+
+    for (const file of [controller, spec]) {
+      try {
+        console.log(`generating ${file.description}: ${file.relFilePath}`)
+        await fs.mkdir(path.dirname(file.filePath), { recursive: true })
+        await fs.writeFile(file.filePath, file.contents)
+      } catch (error) {
+        throw new Error(
+          `
+      Something happened while trying to write the ${file.description} file:
+        ${file.relFilePath}
+
+      Here is the error that was raised:
+        ${(error as Error).message}
+    `,
+          { cause: error },
+        )
+      }
+    }
+  }
 }
 
 function baseAncestorNameAndImport(
@@ -177,65 +263,4 @@ function baseAncestorNameAndImport(
         maybeAncestorNameForBase,
         `import ${maybeAncestorNameForBase} from '${dotFiles}/${addImportSuffix('BaseController.js')}'`,
       ]
-}
-
-async function generateControllerSpec({
-  fullyQualifiedControllerName,
-  route,
-  fullyQualifiedModelName,
-  columnsWithTypes,
-  resourceSpecs,
-  owningModel,
-  forAdmin,
-  forInternal,
-  singular,
-  actions,
-}: {
-  fullyQualifiedControllerName: string
-  route: string
-  fullyQualifiedModelName: string | undefined
-  columnsWithTypes: string[]
-  resourceSpecs: boolean
-  owningModel: string | undefined
-  forAdmin: boolean
-  forInternal: boolean
-  singular: boolean
-  actions: string[]
-}) {
-  const { relFilePath, absDirPath, absFilePath } = psychicFileAndDirPaths(
-    psychicPath('controllerSpecs'),
-    fullyQualifiedControllerName + `.spec.ts`,
-  )
-
-  try {
-    console.log(`generating controller spec: ${relFilePath}`)
-    await fs.mkdir(absDirPath, { recursive: true })
-    await fs.writeFile(
-      absFilePath,
-      resourceSpecs && fullyQualifiedModelName
-        ? generateResourceControllerSpecContent({
-            fullyQualifiedControllerName,
-            route,
-            fullyQualifiedModelName,
-            columnsWithTypes,
-            owningModel,
-            forAdmin,
-            forInternal,
-            singular,
-            actions,
-          })
-        : generateControllerSpecContent(fullyQualifiedControllerName), //, route, fullyQualifiedModelName, actions),
-    )
-  } catch (error) {
-    throw new Error(
-      `
-      Something happened while trying to create the controller spec file:
-        ${relFilePath}
-
-      Does this file already exist? Here is the error that was raised:
-        ${(error as Error).message}
-    `,
-      { cause: error },
-    )
-  }
 }

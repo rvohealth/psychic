@@ -1,5 +1,5 @@
 import { DreamCLI } from '@rvoh/dream/system'
-import { Command } from 'commander'
+import { Command, Option } from 'commander'
 import PsychicBin, {
   BreakingChangesDetectedInOpenApiSpecError,
   OpenApiSpecDiffToolFailureError,
@@ -9,7 +9,7 @@ import generateSyncEnumsInitializer from '../generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../generate/initializer/syncOpenapiTypescript.js'
 import generateOpenapiReduxBindings from '../generate/openapi/reduxBindings.js'
 import generateOpenapiZustandBindings from '../generate/openapi/zustandBindings.js'
-import generateResource from '../generate/resource.js'
+import generateResource, { GenerateResourceExistingFiles } from '../generate/resource.js'
 import PsychicApp, { PsychicAppInitOptions } from '../psychic-app/index.js'
 import Watcher from '../watcher/Watcher.js'
 import validateOpenapiName from './helpers/validateOpenapiName.js'
@@ -206,6 +206,23 @@ ${INDENT}  # model is named GroupDanceLesson instead of LessonDanceGroup`,
         '--no-soft-delete',
         `skip generating the @SoftDelete() decorator and the corresponding nullable \`deleted_at\` column. By default, generated models use soft-delete semantics (rows are marked deleted via \`deleted_at\` instead of being removed from the database). Pass this flag when you want records to be hard-deleted.`,
       )
+      .option(
+        '--overwrite',
+        `replace the controller and controller spec when they already exist with different content, and also the model, model spec, factory and serializer files when they already exist. An existing create migration for the model is kept, never rewritten or duplicated, since it may already have run; edit it by hand if the columns changed.
+${INDENT}
+${INDENT}Without --overwrite or --overwrite-psychic-only, the generator writes nothing and lists the existing files when the controller or controller spec already exists with different content, or when any of the model's files or its create migration already exists. An existing namespace BaseController is never replaced, with or without a flag.`,
+        false,
+      )
+      .addOption(
+        new Option(
+          '--overwrite-psychic-only',
+          `replace the controller and controller spec when they already exist with different content, but keep the model, model spec, factory, serializer and migration files that already exist and write only the missing ones. No create migration is written when the model file already exists. Use this to regenerate the controller for an existing model. Cannot be combined with --overwrite.
+${INDENT}
+${INDENT}The admin and internal serializers live in the model's serializer file, so a kept serializer file gains none: generating an admin/ or internal/ resource this way for a model whose serializer file exists leaves the generated controller pointing at an admin or internal serializer the model may not have. Add it to the serializer file by hand.`,
+        )
+          .default(false)
+          .conflicts('overwrite'),
+      )
       .argument(
         '<path>',
         `The URL path for this resource's routes, relative to the root domain. Use \`\\{\\}\` as a placeholder for a parent resource's ID parameter when nesting.
@@ -234,13 +251,15 @@ ${INDENT}  Post/Comment                        # src/app/models/Post/Comment.ts,
           columnsWithTypes: string[],
           options: {
             singular: boolean
-            onlyActions?: string
+            only?: string
             stiBaseSerializer: boolean
             owningModel?: string
             connectionName: string
             tableName?: string
             modelName?: string
             softDelete: boolean
+            overwrite: boolean
+            overwritePsychicOnly: boolean
           },
         ) => {
           await initializePsychicApp({
@@ -275,9 +294,14 @@ ${INDENT}  V1/Admin/Reports        # src/app/controllers/V1/Admin/ReportsControl
         '[actions...]',
         `Space-separated list of action method names to generate on the controller (e.g., login logout refresh). Each action gets a method stub in the controller and a describe block in the spec.`,
       )
-      .action(async (controllerName: string, actions: string[]) => {
+      .option(
+        '--overwrite',
+        'replace the controller and its spec when they already exist with different content. Without it, the generator writes nothing and lists those files. An existing namespace BaseController is never replaced, with or without it',
+        false,
+      )
+      .action(async (controllerName: string, actions: string[], { overwrite }: { overwrite: boolean }) => {
         await initializePsychicApp({ bypassDreamIntegrityChecks: true, bypassDbConnectionsDuringInit: true })
-        await PsychicBin.generateController(controllerName, actions)
+        await PsychicBin.generateController(controllerName, actions, { overwrite })
         process.exit()
       })
 
@@ -704,6 +728,7 @@ ${INDENT}  pnpm psy diff:openapi --fail-on-breaking  # exit 1 if breaking change
     resourceSpecs?: boolean
     owningModel?: string | undefined
     singular: boolean
+    overwrite?: boolean
   }) {
     await generateController(opts)
   }
@@ -723,6 +748,7 @@ ${INDENT}  pnpm psy diff:openapi --fail-on-breaking  # exit 1 if breaking change
       tableName?: string
       modelName?: string
       softDelete: boolean
+      existingFiles?: GenerateResourceExistingFiles
     }
     columnsWithTypes: string[]
   }) {
