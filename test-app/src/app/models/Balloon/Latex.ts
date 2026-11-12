@@ -1,5 +1,8 @@
 import { STI } from '@rvoh/dream'
-import LatexSerializer, { LatexSummarySerializer } from '../../serializers/Balloon/LatexSerializer.js'
+import LatexSerializer, {
+  LatexSummarySerializer,
+  LatexWithTypeSerializer,
+} from '../../serializers/Balloon/LatexSerializer.js'
 import { BalloonSummarySerializer } from '../../serializers/BalloonSerializer.js'
 import Balloon from '../Balloon.js'
 
@@ -12,6 +15,7 @@ export default class BalloonLatex extends Balloon {
       default: LatexSerializer,
       summary: LatexSummarySerializer,
       sameForAllSti: BalloonSummarySerializer,
+      withType: LatexWithTypeSerializer,
     }
   }
 }

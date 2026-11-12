@@ -980,6 +980,58 @@ describe('serializer attributes whose openapi is a serializer ref with many and/
       })
     })
 
+    // Each STI child's serializer may declare its own schema for a key every
+    // child renders, as one whose `type` names the one type it renders does.
+    // A payload carries the key from whichever child the value is, so the
+    // flattened object's schema for it accepts any child's.
+    context('a rendersOne with flatten of an STI base model whose children render their own type', () => {
+      const PetSerializer = named(
+        (data: { species: string; balloon: Balloon }) =>
+          ObjectSerializer(data)
+            .attribute('species', { openapi: 'string' })
+            .rendersOne('balloon', { dreamClass: Balloon, serializerKey: 'withType', flatten: true }),
+        'FlattenedTypedBalloonPet',
+      )
+
+      it('renders the key with every child’s values', () => {
+        expect(new SerializerOpenapiRenderer(PetSerializer).renderedOpenapi().openapi).toEqual({
+          type: 'object',
+          allOf: [
+            parentInline,
+            {
+              type: 'object',
+              required: ['color', 'id', 'latexOnlyAttr', 'mylarOnlyAttr', 'type'],
+              properties: {
+                color: balloonColor,
+                id: { type: 'string', format: 'bigint' },
+                latexOnlyAttr: { type: ['string', 'null'] },
+                mylarOnlyAttr: { type: ['string', 'null'] },
+                type: { type: 'string', enum: ['BalloonLatex', 'BalloonMylar'] },
+              },
+            },
+          ],
+          unevaluatedProperties: false,
+        })
+      })
+
+      it('validates and sends every child', async () => {
+        const user = await User.create({ email: 'a@b.c', password: 'howyadoin' })
+        const latex = PetSerializer({
+          species: 'cat',
+          balloon: await BalloonLatex.create({ color: 'red', user }),
+        }).render()
+        const mylar = PetSerializer({
+          species: 'cat',
+          balloon: await BalloonMylar.create({ color: 'blue', user }),
+        }).render()
+
+        expect(latex).toEqual(expect.objectContaining({ type: 'BalloonLatex', mylarOnlyAttr: null }))
+        expect(mylar).toEqual(expect.objectContaining({ type: 'BalloonMylar', latexOnlyAttr: null }))
+
+        expectValidatedAndSerialized(PetSerializer, [latex, mylar])
+      })
+    })
+
     context('beside a flattened customAttribute whose openapi is anyOf serializer refs', () => {
       const AddressSerializer = named(
         (data: { city: string }) => ObjectSerializer(data).attribute('city', { openapi: 'string' }),

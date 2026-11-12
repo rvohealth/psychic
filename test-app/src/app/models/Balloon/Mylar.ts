@@ -1,5 +1,8 @@
 import { STI } from '@rvoh/dream'
-import MylarSerializer, { MylarSummarySerializer } from '../../serializers/Balloon/MylarSerializer.js'
+import MylarSerializer, {
+  MylarSummarySerializer,
+  MylarWithTypeSerializer,
+} from '../../serializers/Balloon/MylarSerializer.js'
 import { BalloonSummarySerializer } from '../../serializers/BalloonSerializer.js'
 import Balloon from '../Balloon.js'
 
@@ -12,6 +15,7 @@ export default class BalloonMylar extends Balloon {
       default: MylarSerializer,
       summary: MylarSummarySerializer,
       sameForAllSti: BalloonSummarySerializer,
+      withType: MylarWithTypeSerializer,
     }
   }
 }
