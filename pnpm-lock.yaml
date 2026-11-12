@@ -202,11 +202,11 @@ importers:
         specifier: ^2.42.0
         version: 2.42.0(@types/node@26.6.3)(@types/pg@8.11.8)(commander@14.0.3)(kysely@0.29.0)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3)
       '@rvoh/dream-spec-helpers':
-        specifier: ^2.4.0
-        version: 2.4.0(@types/node@26.6.3)(@types/pg@8.11.8)(pg@8.12.0)
+        specifier: ^2.5.0
+        version: 2.5.0(@types/node@26.6.3)(@types/pg@8.11.8)(pg@8.12.0)
       '@rvoh/psychic-spec-helpers':
-        specifier: 3.5.0
-        version: 3.5.0(@rvoh/dream@2.42.0(@types/node@26.6.3)(@types/pg@8.11.8)(commander@14.0.3)(kysely@0.29.0)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3))(@types/node@26.6.3)(@types/supertest@6.0.3)(puppeteer@25.8.0(yauzl@2.10.0))(supertest@7.3.0(supports-color@10.2.2))(typescript@5.9.3)
+        specifier: 3.6.0
+        version: 3.6.0(@rvoh/dream@2.42.0(@types/node@26.6.3)(@types/pg@8.11.8)(commander@14.0.3)(kysely@0.29.0)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3))(@types/node@26.6.3)(@types/supertest@6.0.3)(puppeteer@25.8.0(yauzl@2.10.0))(supertest@7.3.0(supports-color@10.2.2))(typescript@5.9.3)
       '@types/koa':
         specifier: ^3.0.1
         version: 3.0.1
@@ -790,8 +790,8 @@ packages:
     cpu: [x64]
     os: [win32]
 
-  '@rvoh/dream-spec-helpers@2.4.0':
-    resolution: {integrity: sha512-AXVSOnUHnR+lh5QIqWCxLJ0f43JVyZG5LEO4n2sj924uyyKukuNoZoybQNh2cS9Hh9wRurs7A8HRx000DLRVWw==}
+  '@rvoh/dream-spec-helpers@2.5.0':
+    resolution: {integrity: sha512-bAquEYFOrt7+5/8oL0tG8dCLmu2KR3Xc8t6VmjDwQaFmYY830TktE8Nqn4cQoj87qbbKoPUY5rWVrK6QLpWzAw==}
     engines: {node: '>=24'}
     peerDependencies:
       '@types/node': '*'
@@ -817,8 +817,8 @@ packages:
       typescript:
         optional: true
 
-  '@rvoh/psychic-spec-helpers@3.5.0':
-    resolution: {integrity: sha512-CHHR+UcqJLd3zH5MbnhRd4hzthj/+Wg/EIL9LsPwWfJCce2YuXuDqLpbQHg9/tUaLwphFLOmCbwtvezVGH9ong==}
+  '@rvoh/psychic-spec-helpers@3.6.0':
+    resolution: {integrity: sha512-lAcji0TqLVK0+66oddKrvs4G73ELeLH0Q54/VbNZmRyuFBAg8KE9prmFr1is/4uIAQVQeiRjavE9y4jLmmXb1w==}
     engines: {node: '>=24'}
     peerDependencies:
       '@rvoh/dream': '*'
@@ -2870,7 +2870,7 @@ snapshots:
   '@rollup/rollup-win32-x64-msvc@4.64.12':
     optional: true
 
-  '@rvoh/dream-spec-helpers@2.4.0(@types/node@26.6.3)(@types/pg@8.11.8)(pg@8.12.0)':
+  '@rvoh/dream-spec-helpers@2.5.0(@types/node@26.6.3)(@types/pg@8.11.8)(pg@8.12.0)':
     dependencies:
       '@types/node': 26.6.3
       '@types/pg': 8.11.8
@@ -2892,7 +2892,7 @@ snapshots:
       '@types/pg': 8.11.8
       typescript: 5.9.3
 
-  '@rvoh/psychic-spec-helpers@3.5.0(@rvoh/dream@2.42.0(@types/node@26.6.3)(@types/pg@8.11.8)(commander@14.0.3)(kysely@0.29.0)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3))(@types/node@26.6.3)(@types/supertest@6.0.3)(puppeteer@25.8.0(yauzl@2.10.0))(supertest@7.3.0(supports-color@10.2.2))(typescript@5.9.3)':
+  '@rvoh/psychic-spec-helpers@3.6.0(@rvoh/dream@2.42.0(@types/node@26.6.3)(@types/pg@8.11.8)(commander@14.0.3)(kysely@0.29.0)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3))(@types/node@26.6.3)(@types/supertest@6.0.3)(puppeteer@25.8.0(yauzl@2.10.0))(supertest@7.3.0(supports-color@10.2.2))(typescript@5.9.3)':
     dependencies:
       '@rvoh/dream': 2.42.0(@types/node@26.6.3)(@types/pg@8.11.8)(commander@14.0.3)(kysely@0.29.0)(pg@8.12.0)(pluralize-esm@9.0.5)(typescript@5.9.3)
       '@types/node': 26.6.3
