@@ -22,6 +22,7 @@ import PsychicAppInitMissingRoutesCallback from '../error/psychic-app/init-missi
 import cookieMaxAgeFromCookieOpts from '../helpers/cookieMaxAgeFromCookieOpts.js'
 import EnvInternal from '../helpers/EnvInternal.js'
 import pascalizeFileName from '../helpers/pascalizeFileName.js'
+import OpenapiAppRenderer from '../openapi-renderer/app.js'
 import { OpenapiValidateTarget } from '../openapi-renderer/defaults.js'
 import {
   OpenapiContent,
@@ -31,9 +32,15 @@ import {
   OpenapiSecuritySchemes,
   OpenapiServer,
   OpenapiValidateOption,
+  serializersToSchemaObjects,
 } from '../openapi-renderer/endpoint.js'
+import legacyImplicitRequestBodyParamsConfig from '../openapi-renderer/helpers/legacyImplicitRequestBodyParamsConfig.js'
+import openapiRoute from '../openapi-renderer/helpers/openapiRoute.js'
+import suppressResponseEnumsConfig from '../openapi-renderer/helpers/suppressResponseEnumsConfig.js'
+import SerializerOpenapiRenderer from '../openapi-renderer/SerializerOpenapiRenderer.js'
 import PsychicRouter from '../router/index.js'
 import { RouteConfig } from '../router/route-manager.js'
+import { HttpMethods } from '../router/types.js'
 import { createPsychicHttpInstance } from '../server/helpers/startPsychicServer.js'
 import PsychicServer from '../server/index.js'
 import { cachePsychicApp, getCachedPsychicAppOrFail } from './cache.js'
@@ -239,6 +246,27 @@ export default class PsychicApp {
   public static lookupClassByGlobalName(name: string) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-return
     return lookupClassByGlobalName(name)
+  }
+
+  /**
+   * @internal
+   *
+   * Framework internals that sibling `@rvoh/psychic-*` packages (such as
+   * `@rvoh/psychic-studio`) are built on. Exposed here, rather than as package
+   * exports, so that they do not become part of the public API. Not for
+   * application use; anything here may change without notice.
+   */
+  public static get system() {
+    return {
+      PackageManager,
+      OpenapiAppRenderer,
+      SerializerOpenapiRenderer,
+      serializersToSchemaObjects,
+      openapiRoute,
+      suppressResponseEnumsConfig,
+      legacyImplicitRequestBodyParamsConfig,
+      HttpMethods,
+    }
   }
 
   /**
