@@ -1,5 +1,6 @@
+import { DreamCLI } from '@rvoh/dream/system'
 import * as fs from 'node:fs'
-import { afterEach, beforeEach, describe, expect, it } from 'vitest'
+import { afterEach, beforeEach, describe, expect, it, vi } from 'vitest'
 import {
   BreakingChangesDetectedInOpenApiSpecError,
   OasDiffConfig,
@@ -167,6 +168,110 @@ describe('OpenApiSpecDiff', () => {
         expect(() => {
           diff.compare(mockConfigs)
         }).not.toThrow(BreakingChangesDetectedInOpenApiSpecError)
+      })
+    })
+
+    context('when the openapi spec is large enough to exceed the default maxBuffer', () => {
+      it('does not produce an ENOBUFS error', { timeout: 30_000 }, () => {
+        const doc = JSON.parse(originalFileContent) as Record<string, unknown>
+        const paths = doc.paths as Record<string, unknown>
+
+        for (let i = 0; i < 5000; i++) {
+          paths[`/api/generated/path_${i}`] = {
+            get: {
+              summary: `Generated endpoint ${i}`,
+              description: `A long description for endpoint ${i}`,
+              operationId: `getGenerated${i}`,
+              parameters: [
+                { in: 'query', name: `param_a_${i}`, schema: { type: 'string' } },
+                { in: 'query', name: `param_b_${i}`, schema: { type: 'integer' } },
+                { in: 'query', name: `param_c_${i}`, schema: { type: 'boolean' } },
+              ],
+              responses: {
+                '200': {
+                  description: 'Success',
+                  content: {
+                    'application/json': {
+                      schema: {
+                        type: 'object',
+                        properties: {
+                          id: { type: 'integer' },
+                          name: { type: 'string' },
+                          data: { type: 'string' },
+                          extra: { type: 'string' },
+                        },
+                      },
+                    },
+                  },
+                },
+              },
+            },
+            post: {
+              summary: `Create endpoint ${i}`,
+              operationId: `postGenerated${i}`,
+              requestBody: {
+                content: {
+                  'application/json': {
+                    schema: {
+                      type: 'object',
+                      properties: { name: { type: 'string' }, data: { type: 'string' } },
+                    },
+                  },
+                },
+              },
+              responses: { '201': { description: 'Created' } },
+            },
+          }
+        }
+
+        fs.writeFileSync('./test-app/src/openapi/openapi.json', JSON.stringify(doc, null, 2))
+
+        const loggedMessages: string[] = []
+        const spy = vi.spyOn(DreamCLI.logger, 'logContinueProgress').mockImplementation((message: string) => {
+          loggedMessages.push(message)
+        })
+
+        try {
+          OpenApiSpecDiff.compare(mockConfigs)
+        } finally {
+          spy.mockRestore()
+        }
+
+        const hasEnobufs = loggedMessages.some(msg => msg.includes('ENOBUFS'))
+        expect(hasEnobufs).toBe(false)
+      })
+    })
+
+    // The head-branch document is read with `git show`, whose output is the
+    // head-branch file, so the buffer must be sized from that file, not from
+    // the (here, much smaller) working-tree file. Shrinking the current spec to
+    // almost nothing makes a buffer sized from the current file far too small.
+    context('when the current openapi spec is far smaller than the head-branch spec', () => {
+      it('reports the removals as breaking changes rather than failing to read the head branch', () => {
+        const doc = JSON.parse(originalFileContent) as Record<string, unknown>
+        const shrunk = {
+          openapi: doc.openapi,
+          info: doc.info,
+          paths: {},
+          components: { schemas: {} },
+        }
+        fs.writeFileSync('./test-app/src/openapi/openapi.json', JSON.stringify(shrunk))
+
+        const loggedMessages: string[] = []
+        const spy = vi.spyOn(DreamCLI.logger, 'logContinueProgress').mockImplementation((message: string) => {
+          loggedMessages.push(message)
+        })
+
+        try {
+          expect(() => {
+            OpenApiSpecDiff.compare(mockConfigs)
+          }).toThrow(BreakingChangesDetectedInOpenApiSpecError)
+        } finally {
+          spy.mockRestore()
+        }
+
+        const hasEnobufs = loggedMessages.some(msg => msg.includes('ENOBUFS'))
+        expect(hasEnobufs).toBe(false)
       })
     })
   })

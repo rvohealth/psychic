@@ -32,6 +32,13 @@ export interface OasDiffConfig {
 export type PsychicOpenapiConfig = DefaultPsychicOpenapiOptions
 
 /**
+ * Floor for the stdout buffer handed to child processes. Node's default
+ * (1 MiB) is too small for large OpenAPI documents and produces ENOBUFS.
+ * The file-size-derived values below only ever raise this, never lower it.
+ */
+const MIN_CHILD_PROCESS_MAX_BUFFER_BYTES = 1024 * 1024 * 50
+
+/**
  * Class-based OpenAPI specification diff tool
  *
  * Compares current OpenAPI specs against the head branch using oasdiff
@@ -174,11 +181,23 @@ export class OpenApiSpecDiff {
       // only via `pnpm psy openapi:spec-diff` (developer / CI invocation), never
       // in a deployed process; `args` are literal subcommand strings plus
       // developer-controlled file paths, not request input. See docs/SECURITY_CVE_CHECKLIST.md R-026.
+      // oasdiff output is prose per change, not a copy of either document, so
+      // its size is not bounded by the inputs. Twice the larger input is a
+      // generous estimate for a full rewrite; the floor keeps the buffer no
+      // smaller than it has historically been for small documents.
+      const mainSize = fs.existsSync(mainPath) ? fs.statSync(mainPath).size : 0
+      const currentSize = fs.existsSync(currentPath) ? fs.statSync(currentPath).size : 0
+      const maxBuffer = Math.max(
+        MIN_CHILD_PROCESS_MAX_BUFFER_BYTES,
+        Math.ceil(Math.max(mainSize, currentSize) * 2),
+      )
+
       const output = cp.execFileSync(this.oasdiffConfig.command, args, {
         shell: true,
         encoding: 'utf8',
         cwd: process.cwd(),
         stdio: 'pipe',
+        maxBuffer,
       })
       return output.trim()
     } catch (error) {
@@ -268,10 +287,24 @@ export class OpenApiSpecDiff {
     // Get relative path from git repo root to the file
     const gitPath = path.relative(gitRepoRoot, absoluteFilePath).replace(/\\/g, '/')
 
+    // `git show <ref>:<path>` writes the blob verbatim, so its exact byte size
+    // is the buffer needed. Size it from the head-branch blob, not the working
+    // tree file: the current branch may have shrunk the document well below
+    // what the head branch holds.
+    const headBlobBytes = Number(
+      cp
+        .execFileSync('git', ['cat-file', '-s', `${branchRef}:${gitPath}`], {
+          encoding: 'utf8',
+          cwd: gitRepoRoot,
+        })
+        .trim(),
+    )
+    const maxBuffer = Math.max(MIN_CHILD_PROCESS_MAX_BUFFER_BYTES, headBlobBytes + 1024)
+
     return cp.execFileSync('git', ['show', `${branchRef}:${gitPath}`], {
       encoding: 'utf8',
       cwd: gitRepoRoot,
-      maxBuffer: 1024 * 1024 * 50,
+      maxBuffer,
     })
   }
 
