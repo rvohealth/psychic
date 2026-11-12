@@ -199,7 +199,7 @@ export const schema = {
     },
   },
   balloons: {
-    serializerKeys: ['default', 'sameForAllSti', 'summary'],
+    serializerKeys: ['default', 'sameForAllSti', 'summary', 'withType'],
     scopes: {
       default: ['dream:STI'],
       named: [],

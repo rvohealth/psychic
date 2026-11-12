@@ -582,7 +582,10 @@ export default class SerializerOpenapiRenderer {
    * properties are every key any shape of `shape` declares, the shapes
    * `DreamApp.system.flattenedOpenapiVariants` lists (the children of an STI
    * base, the targets of a polymorphic BelongsTo, the members of an `anyOf`
-   * or `oneOf`), each with the first schema declared for it; whose required
+   * or `oneOf`), each with the first schema declared for it and the `enum`
+   * values of every shape that declares one (see `flattenedKeySchemaUnion`:
+   * one STI child's `type` is `BalloonLatex`, another's `BalloonMylar`, and
+   * the payload carries either); whose required
    * keys are the keys Dream always renders; and where a required key's schema
    * accepts null unless every shape is a serializer that renders the key
    * itself (only a null value, another shape, or a callback leaves a key
@@ -601,12 +604,7 @@ export default class SerializerOpenapiRenderer {
     const shapeKeys = shapes.map(variant => this.flattenedShapeKeys(variant))
     const required = sort(Object.keys(DreamApp.system.nullFlattenedOpenapiKeys(shape, this.nullKeysOptions)))
 
-    const properties: Record<string, OpenapiSchemaBodyShorthand> = {}
-    for (const { schemas } of shapeKeys) {
-      for (const [key, schema] of Object.entries(schemas)) {
-        if (!(key in properties)) properties[key] = schema
-      }
-    }
+    const properties = flattenedKeySchemaUnion(shapeKeys)
 
     for (const key of required) {
       const schema = properties[key]
@@ -664,11 +662,7 @@ export default class SerializerOpenapiRenderer {
     const alternatives = DreamApp.system.flattenedOpenapiVariants(shape)
     if (alternatives.length) {
       const alternativeKeys = alternatives.map(alternative => this.flattenedShapeKeys(alternative))
-      for (const { schemas } of alternativeKeys) {
-        for (const [key, schema] of Object.entries(schemas)) {
-          if (!(key in keys.schemas)) keys.schemas[key] = schema
-        }
-      }
+      keys.schemas = flattenedKeySchemaUnion(alternativeKeys)
       for (const key of Object.keys(keys.schemas)) {
         if (alternativeKeys.every(({ certain }) => certain[key])) keys.certain[key] = true
       }
@@ -867,6 +861,37 @@ function flattenedAssociationShape(
 
   if (refs.length === 1 && !optional) return refs[0] as OpenapiSchemaBodyShorthand
   return { anyOf: optional ? [...refs, NULL_OBJECT_OPENAPI] : refs } as OpenapiSchemaBodyShorthand
+}
+
+// the schema of each key any of several shapes of a flattened value declares
+// (see SerializerOpenapiRenderer#flattenedSibling): the first shape's schema
+// for the key, with the `enum` values of every shape that declares one. Each
+// STI child's serializer may declare `type` as the one type it renders, and
+// the payload carries whichever child the value is, so every child's value
+// must be in the enum.
+//
+// Deliberately, nothing else is reconciled: do not render `anyOf` (or merge
+// anything but `enum`) when shapes declare one key with different schemas.
+// STI children share one table, so a key backed by a column has one type in
+// every child. Children giving one key different types takes a custom
+// attribute not tied to a column, which is an invented edge case that the
+// application's design should avoid, not one the framework should support.
+function flattenedKeySchemaUnion(
+  shapeKeys: FlattenedShapeKeys[],
+): Record<string, OpenapiSchemaBodyShorthand> {
+  const properties: Record<string, OpenapiSchemaBodyShorthand> = {}
+  for (const { schemas } of shapeKeys) {
+    for (const [key, schema] of Object.entries(schemas)) {
+      const existing = properties[key] as { enum?: unknown } | undefined
+      if (existing === undefined) properties[key] = schema
+      else if (Array.isArray(existing.enum) && Array.isArray((schema as { enum?: unknown }).enum))
+        properties[key] = {
+          ...existing,
+          enum: uniq([...existing.enum, ...(schema as { enum: unknown[] }).enum]),
+        } as OpenapiSchemaBodyShorthand
+    }
+  }
+  return properties
 }
 
 function flattenedSiblingOpenapi(sibling: FlattenedSibling): OpenapiSchemaBodyShorthand {
