@@ -2906,6 +2906,76 @@
         }
       }
     },
+    "/requestBodyForModelOpenapiTest": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "type": "object",
+                "required": [
+                  "email"
+                ],
+                "properties": {
+                  "email": {
+                    "type": "string"
+                  },
+                  "name": {
+                    "type": [
+                      "string",
+                      "null"
+                    ]
+                  }
+                }
+              }
+            }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Success, no content",
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
+          }
+        }
+      }
+    },
     "/requestBodyNestedObjectOpenapiTest": {
       "parameters": [
         {
@@ -2954,7 +3024,8 @@
                 }
               }
             }
-          }
+          },
+          "required": true
         },
         "responses": {
           "200": {
@@ -3019,7 +3090,64 @@
                 }
               }
             }
+          },
+          "required": true
+        },
+        "responses": {
+          "204": {
+            "description": "Success, no content",
+            "$ref": "#/components/responses/NoContent"
+          },
+          "400": {
+            "$ref": "#/components/responses/BadRequest"
+          },
+          "401": {
+            "$ref": "#/components/responses/Unauthorized"
+          },
+          "403": {
+            "$ref": "#/components/responses/Forbidden"
+          },
+          "404": {
+            "$ref": "#/components/responses/NotFound"
+          },
+          "409": {
+            "$ref": "#/components/responses/Conflict"
+          },
+          "418": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "490": {
+            "$ref": "#/components/responses/CustomResponse"
+          },
+          "500": {
+            "$ref": "#/components/responses/InternalServerError"
           }
+        }
+      }
+    },
+    "/requestBodySerializerOpenapiTest": {
+      "parameters": [
+        {
+          "in": "header",
+          "name": "custom-header",
+          "required": false,
+          "description": "custom header",
+          "schema": {
+            "type": "string"
+          }
+        }
+      ],
+      "post": {
+        "tags": [],
+        "requestBody": {
+          "content": {
+            "application/json": {
+              "schema": {
+                "$ref": "#/components/schemas/UserSignupRequest"
+              }
+            }
+          },
+          "required": true
         },
         "responses": {
           "204": {
@@ -7222,6 +7350,20 @@
             "items": {
               "type": "string"
             }
+          }
+        }
+      },
+      "UserSignupRequest": {
+        "type": "object",
+        "required": [
+          "email"
+        ],
+        "properties": {
+          "email": {
+            "type": "string"
+          },
+          "name": {
+            "type": "string"
           }
         }
       },

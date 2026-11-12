@@ -15,6 +15,7 @@ import OpenapiEndpointRenderer, {
   OpenapiRenderOpts,
 } from '../endpoint.js'
 import legacyImplicitRequestBodyParamsConfig from './legacyImplicitRequestBodyParamsConfig.js'
+import schemaRejectsEmptyObject from './schemaRejectsEmptyObject.js'
 import suppressResponseEnumsConfig from './suppressResponseEnumsConfig.js'
 import { cacheValidator, getCachedValidator } from './validator-cache.js'
 
@@ -62,13 +63,32 @@ export default class OpenapiPayloadValidator {
       const openapiPathObject = openapiEndpointRenderer['computedRequestBody'](routes, {
         openapiName,
         renderOpts: this.renderOpts,
-      })
+      }).openapi
 
       const requestBodySchema = openapiPathObject?.['content']?.['application/json']?.['schema']
       if (requestBodySchema) {
         this.validateOrFail(body, requestBodySchema, 'requestBody')
       }
     }
+  }
+
+  /**
+   * @internal
+   *
+   * Whether request body validation for this endpoint rejects a
+   * request sent without a body, which it reads as `{}`. The
+   * schema is compiled under the same AJV options
+   * validateOpenapiRequestBody uses for this endpoint.
+   *
+   * Used while the OpenAPI document is being rendered, so the
+   * schema's `$ref`s resolve against the `components` passed in
+   * rather than the openapi file on disk.
+   *
+   * @param requestBodySchema - the request body schema, as rendered into the OpenAPI document
+   * @param components - the document's `components`
+   */
+  public requestBodyRejectsEmptyObject(requestBodySchema: unknown, components: object): boolean {
+    return schemaRejectsEmptyObject(requestBodySchema, components, this.getAjvOptions('requestBody'))
   }
 
   /**

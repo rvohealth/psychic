@@ -267,7 +267,8 @@ export default class OpenapiEndpointRenderer<
   ): ReferencedSerializersAndOpenapiEndpointResponse {
     const path = this.computedPath(routes)
     const method = this.computedMethod(routes)
-    const requestBody = this.computedRequestBody(routes, { openapiName, renderOpts })
+    const requestBodyAndReferencedSerializers = this.computedRequestBody(routes, { openapiName, renderOpts })
+    const requestBody = requestBodyAndReferencedSerializers.openapi
     const responsesAndReferencedSerializers = this.parseResponses({ openapiName, renderOpts })
 
     const output = {
@@ -305,7 +306,10 @@ export default class OpenapiEndpointRenderer<
     outputPath[method].responses = responsesAndReferencedSerializers.openapi
 
     return {
-      referencedSerializers: responsesAndReferencedSerializers.referencedSerializers,
+      referencedSerializers: [
+        ...requestBodyAndReferencedSerializers.referencedSerializers,
+        ...responsesAndReferencedSerializers.referencedSerializers,
+      ],
       openapi: output,
     }
   }
@@ -590,7 +594,9 @@ export default class OpenapiEndpointRenderer<
   /**
    * @internal
    *
-   * Generates the requestBody portion of the endpoint
+   * Generates the requestBody portion of the endpoint, along with the
+   * serializers its schema references (e.g. `{ $serializer: X }`), so
+   * that their components are emitted the same way a response's are
    */
   private computedRequestBody(
     routes: RouteConfig[],
@@ -601,21 +607,23 @@ export default class OpenapiEndpointRenderer<
       openapiName: string
       renderOpts: OpenapiRenderOpts
     },
-  ): OpenapiContent | undefined {
+  ): ReferencedSerializersAndOpenapiRequestBody {
     const method = this.computedMethod(routes)
-    if (this.requestBody === null) return this.defaultRequestBody()
+    if (this.requestBody === null) return { referencedSerializers: [], openapi: this.defaultRequestBody() }
 
     const httpMethodsThatAllowBody: HttpMethod[] = ['post', 'patch', 'put']
-    if (!httpMethodsThatAllowBody.includes(method)) return this.defaultRequestBody()
+    if (!httpMethodsThatAllowBody.includes(method))
+      return { referencedSerializers: [], openapi: this.defaultRequestBody() }
 
     if (this.shouldAutogenerateBody()) {
       return this.generateRequestBodyForModel({ openapiName, renderOpts })
     }
 
-    let schema = new OpenapiSegmentExpander(this.requestBody as OpenapiSchemaBodyShorthand, {
+    const results = new OpenapiSegmentExpander(this.requestBody as OpenapiSchemaBodyShorthand, {
       renderOpts,
       target: 'request',
-    }).render().openapi
+    }).render()
+    let schema = results.openapi
 
     const bodyPaginationPageParam = (this.paginate as { body: string })?.body
     if (bodyPaginationPageParam) {
@@ -628,12 +636,15 @@ export default class OpenapiEndpointRenderer<
       schema = safelyAttachCursorPaginationParamToRequestBodySegment(bodyCursorPaginationParam, schema)
     }
 
-    if (!schema) return undefined
+    if (!schema) return { referencedSerializers: results.referencedSerializers, openapi: undefined }
 
     return {
-      content: {
-        'application/json': {
-          schema,
+      referencedSerializers: results.referencedSerializers,
+      openapi: {
+        content: {
+          'application/json': {
+            schema,
+          },
         },
       },
     }
@@ -698,11 +709,11 @@ export default class OpenapiEndpointRenderer<
   }: {
     openapiName: string
     renderOpts: OpenapiRenderOpts
-  }): OpenapiContent | undefined {
+  }): ReferencedSerializersAndOpenapiRequestBody {
     const forDreamClass = (this.requestBody as OpenapiSchemaRequestBodyForOption<typeof Dream>)
       ?.for as typeof Dream
     const dreamClass = forDreamClass || this.getSingleDreamModelClass()
-    if (!dreamClass) return this.defaultRequestBody()
+    if (!dreamClass) return { referencedSerializers: [], openapi: this.defaultRequestBody() }
 
     const { params, only, including, required, combining } = (this.requestBody ||
       {}) as OpenapiSchemaRequestBodyForOption<typeof Dream>
@@ -729,14 +740,15 @@ export default class OpenapiEndpointRenderer<
     const shapeProperties = (paramsShape as { properties?: Record<string, unknown> }).properties
     const shapeRequired = (paramsShape as { required?: unknown }).required
     if (Object.keys(shapeProperties ?? {}).length === 0 && !shapeRequired) {
-      return this.defaultRequestBody()
+      return { referencedSerializers: [], openapi: this.defaultRequestBody() }
     }
 
-    let processedSchema = new OpenapiSegmentExpander(paramsShape, {
+    const results = new OpenapiSegmentExpander(paramsShape, {
       renderOpts,
       target: 'request',
       source,
-    }).render().openapi
+    }).render()
+    let processedSchema = results.openapi
 
     const bodyPaginationPageParam = (this.paginate as { body: string })?.body
     if (bodyPaginationPageParam) {
@@ -756,9 +768,12 @@ export default class OpenapiEndpointRenderer<
     }
 
     return {
-      content: {
-        'application/json': {
-          schema: processedSchema,
+      referencedSerializers: results.referencedSerializers,
+      openapi: {
+        content: {
+          'application/json': {
+            schema: processedSchema,
+          },
         },
       },
     }
@@ -2246,8 +2261,18 @@ export interface OpenapiMethodBody {
   summary?: string
   security?: OpenapiSecurity
   description: string
-  requestBody: OpenapiContent
+  requestBody: OpenapiRequestBody
   responses: OpenapiResponses
+}
+
+/**
+ * The `requestBody` of an operation in the rendered OpenAPI document.
+ * `required` is `true` when the body's schema rejects an empty object,
+ * since Psychic reads a request sent without a body as `{}`; it is left
+ * out otherwise.
+ */
+export type OpenapiRequestBody = OpenapiContent & {
+  required?: boolean
 }
 
 /**
@@ -2540,4 +2565,9 @@ function serializersToSchemaObjects(
 export interface ReferencedSerializersAndOpenapiContent {
   referencedSerializers: SerializerArray
   openapi: OpenapiContent
+}
+
+interface ReferencedSerializersAndOpenapiRequestBody {
+  referencedSerializers: SerializerArray
+  openapi: OpenapiContent | undefined
 }

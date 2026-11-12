@@ -14,6 +14,46 @@ export interface FileWriteTarget {
 export type ConfirmOverwriteFn = (filePaths: string[]) => Promise<boolean>
 
 /**
+ * A write target paired with what its destination holds now: `undefined` when
+ * the file does not exist.
+ */
+export type WithExistingContents<Target extends FileWriteTarget> = Target & {
+  existingContents: string | undefined
+}
+
+/**
+ * Reads each target's destination, so a command can compare its whole
+ * candidate write-set against disk before writing any of it.
+ *
+ * Only a missing file (ENOENT) reads as `undefined`: any other read failure
+ * (EACCES, EISDIR, I/O errors) is thrown, so an existing, possibly
+ * user-customized file is never mistaken for a missing one and replaced.
+ */
+export async function readExistingContents<Target extends FileWriteTarget>(
+  targets: Target[],
+): Promise<WithExistingContents<Target>[]> {
+  return await Promise.all(
+    targets.map(async target => {
+      let existingContents: string | undefined
+      try {
+        existingContents = (await fs.readFile(target.filePath)).toString()
+      } catch (error) {
+        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
+      }
+      return { ...target, existingContents }
+    }),
+  )
+}
+
+/**
+ * Whether writing the target would replace an existing file with different
+ * contents. A missing file or a byte-identical one is not replaced.
+ */
+export function differsFromExistingContents(target: WithExistingContents<FileWriteTarget>): boolean {
+  return target.existingContents !== undefined && target.existingContents !== target.contents
+}
+
+/**
  * Applies a command's full candidate write-set with confirm-then-overwrite
  * re-run semantics. The whole set is compared against disk BEFORE anything is
  * written:
@@ -49,25 +89,8 @@ export default async function applyConfirmedWriteSet(
     overwrite?: boolean | undefined
   } = {},
 ): Promise<boolean> {
-  const targetsWithExistingContents = await Promise.all(
-    targets.map(async target => {
-      let existingContents: string | undefined
-      try {
-        existingContents = (await fs.readFile(target.filePath)).toString()
-      } catch (error) {
-        // only a missing file (ENOENT) means "create it": any other read
-        // failure (EACCES, EISDIR, I/O errors) must not be treated as missing,
-        // or an existing — possibly user-customized — file would be
-        // overwritten without the confirmation above
-        if ((error as NodeJS.ErrnoException).code !== 'ENOENT') throw error
-      }
-      return { ...target, existingContents }
-    }),
-  )
-
-  const differingTargets = targetsWithExistingContents.filter(
-    target => target.existingContents !== undefined && target.existingContents !== target.contents,
-  )
+  const targetsWithExistingContents = await readExistingContents(targets)
+  const differingTargets = targetsWithExistingContents.filter(differsFromExistingContents)
 
   if (differingTargets.length && !overwrite) {
     const confirmed = await confirm(differingTargets.map(target => target.filePath))

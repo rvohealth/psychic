@@ -1,16 +1,20 @@
 import { Command } from 'commander'
 import type { MockInstance } from 'vitest'
 import PsychicCLI from '../../../src/cli/index.js'
+import generateController from '../../../src/generate/controller.js'
 import generateSyncEnumsInitializer from '../../../src/generate/initializer/syncEnums.js'
 import generateSyncOpenapiTypescriptInitializer from '../../../src/generate/initializer/syncOpenapiTypescript.js'
 import generateOpenapiReduxBindings from '../../../src/generate/openapi/reduxBindings.js'
 import generateOpenapiZustandBindings from '../../../src/generate/openapi/zustandBindings.js'
+import generateResource from '../../../src/generate/resource.js'
 import PsychicApp from '../../../src/psychic-app/index.js'
 
+vi.mock('../../../src/generate/controller.js')
 vi.mock('../../../src/generate/initializer/syncEnums.js')
 vi.mock('../../../src/generate/initializer/syncOpenapiTypescript.js')
 vi.mock('../../../src/generate/openapi/reduxBindings.js')
 vi.mock('../../../src/generate/openapi/zustandBindings.js')
+vi.mock('../../../src/generate/resource.js')
 
 function buildProgram(): Command {
   const program = new Command()
@@ -320,6 +324,135 @@ describe('PsychicCLI g:resource --help', () => {
         "Creates generically typed base serializers (summary and default) that accept a `StiChildClass` parameter. When a `type` column is passed, as in the example below, they render the `type` attribute with an OpenAPI enum of just the STI child's class name, which allows consuming applications to determine the response shape based on the STI type discriminator. With @rvoh/dream 2.36.0 or newer, the summary serializer renders `type` right after `id` and the default serializer inherits it, so responses from the generated `index` action, which renders the summary, carry `type`; with an older Dream, only the default serializer renders `type`, and the summary includes only `id`.",
       )
       expect(help).not.toContain('parameter and include the `type` attribute')
+    })
+  })
+})
+
+describe('PsychicCLI g:controller and g:resource when files already exist', () => {
+  let processExitSpy: MockInstance
+
+  beforeEach(() => {
+    processExitSpy = vi.spyOn(process, 'exit').mockImplementation(() => undefined as never)
+  })
+
+  afterEach(() => {
+    processExitSpy.mockRestore()
+  })
+
+  function buildThrowingProgram(): Command {
+    const program = new Command()
+    // set before PsychicCLI.provide so the subcommands inherit them: commander then
+    // throws CommanderError instead of calling process.exit, and writes nothing to stderr
+    program.exitOverride()
+    program.configureOutput({ writeErr: () => {} })
+
+    PsychicCLI.provide(program, {
+      initializePsychicApp: () => Promise.resolve(PsychicApp.getOrFail()),
+      seedDb: () => {},
+    })
+
+    return program
+  }
+
+  describe('g:controller', () => {
+    it('passes overwrite: false when --overwrite is not passed, so differing files are refused', async () => {
+      await buildProgram().parseAsync(['g:controller', 'V1/Reports', 'download'], { from: 'user' })
+
+      expect(generateController).toHaveBeenCalledWith({
+        fullyQualifiedControllerName: 'V1/Reports',
+        actions: ['download'],
+        singular: false,
+        overwrite: false,
+      })
+    })
+
+    it('passes --overwrite through', async () => {
+      await buildProgram().parseAsync(['g:controller', '--overwrite', 'V1/Reports', 'download'], {
+        from: 'user',
+      })
+
+      expect(generateController).toHaveBeenCalledWith({
+        fullyQualifiedControllerName: 'V1/Reports',
+        actions: ['download'],
+        singular: false,
+        overwrite: true,
+      })
+    })
+
+    it('does not accept --overwrite-psychic-only, since it never generates model files', async () => {
+      await expect(
+        buildThrowingProgram().parseAsync(['g:controller', '--overwrite-psychic-only', 'V1/Reports'], {
+          from: 'user',
+        }),
+      ).rejects.toMatchObject({ code: 'commander.unknownOption' })
+
+      expect(generateController).not.toHaveBeenCalled()
+    })
+  })
+
+  describe('g:resource', () => {
+    function existingFilesPassed() {
+      expect(generateResource).toHaveBeenCalledTimes(1)
+      return vi.mocked(generateResource).mock.calls[0]?.[0].options.existingFiles
+    }
+
+    it('refuses to replace existing files when neither flag is passed', async () => {
+      await buildProgram().parseAsync(['g:resource', 'v1/posts', 'Post', 'title:string'], { from: 'user' })
+
+      expect(existingFilesPassed()).toEqual('refuse')
+      expect(generateResource).toHaveBeenCalledWith(
+        expect.objectContaining({
+          route: 'v1/posts',
+          fullyQualifiedModelName: 'Post',
+          columnsWithTypes: ['title:string'],
+        }),
+      )
+    })
+
+    it('passes --overwrite through', async () => {
+      await buildProgram().parseAsync(['g:resource', '--overwrite', 'v1/posts', 'Post'], { from: 'user' })
+
+      expect(existingFilesPassed()).toEqual('overwrite')
+    })
+
+    it('passes --overwrite-psychic-only through', async () => {
+      await buildProgram().parseAsync(['g:resource', '--overwrite-psychic-only', 'v1/posts', 'Post'], {
+        from: 'user',
+      })
+
+      expect(existingFilesPassed()).toEqual('overwritePsychicOnly')
+    })
+
+    it('passes the other options through unchanged', async () => {
+      await buildProgram().parseAsync(
+        ['g:resource', '--singular', '--only=show', 'v1/profile', 'User/Profile'],
+        {
+          from: 'user',
+        },
+      )
+
+      expect(vi.mocked(generateResource).mock.calls[0]?.[0].options).toEqual({
+        singular: true,
+        only: 'show',
+        stiBaseSerializer: false,
+        connectionName: 'default',
+        softDelete: true,
+        existingFiles: 'refuse',
+      })
+    })
+
+    it('rejects --overwrite with --overwrite-psychic-only before generating anything', async () => {
+      await expect(
+        buildThrowingProgram().parseAsync(
+          ['g:resource', '--overwrite', '--overwrite-psychic-only', 'v1/posts', 'Post'],
+          { from: 'user' },
+        ),
+      ).rejects.toMatchObject({
+        code: 'commander.conflictingOption',
+        message: "error: option '--overwrite-psychic-only' cannot be used with option '--overwrite'",
+      })
+
+      expect(generateResource).not.toHaveBeenCalled()
     })
   })
 })

@@ -45,6 +45,12 @@ export default async function addResourceToRoutes(
   switch (result.outcome) {
     case 'changed':
       await fs.writeFile(routesFilePath, result.routes)
+      if (result.parentsWithoutActions.length)
+        console.log(`
+Added these parent resources to ${path.relative(psychicApp.apiRoot, routesFilePath)} with \`{ only: [] }\`, so that they route none of their own actions, since the routes file did not declare them and this run generated no controller for them:
+${result.parentsWithoutActions.map(parent => `  ${parent.path}`).join('\n')}
+To route a parent's actions once it has a controller, edit its \`only\` list.
+`)
       break
 
     case 'alreadyDeclared':
@@ -62,13 +68,22 @@ export default async function addResourceToRoutes(
             'Add the route by hand, merging these blocks into any that already exist:',
           ]
 
+      // The blocks are printed as the route declares them, without options, since the generator could not
+      // tell which of them the file already declares, and an existing parent keeps its own options.
+      const parentResource = result.resourceDeclared
+        ? undefined
+        : ancestors.find(ancestor => ancestor.method === 'resources')
+      const parentAdvice = parentResource
+        ? `\n\nDeclare a parent resource the file does not have yet with \`{ only: [] }\`, as in \`${callbackOpener(parentResource, { missing: true })}\`, so that it routes none of its own actions until it has a controller.`
+        : ''
+
       console.warn(`
 ${failure}:
   ${result.reason}
 
 The file was left unchanged. ${instruction}
 
-${routeLines(ancestors, resourceDeclaration.code, 2).join('\n')}
+${routeLines(ancestors, resourceDeclaration.code, 2, { missing: false }).join('\n')}${parentAdvice}
 `)
       break
     }
@@ -78,6 +93,8 @@ ${routeLines(ancestors, resourceDeclaration.code, 2).join('\n')}
 /**
  * Inserts the resource into the deepest block on its route that the routes
  * file already declares, writing only the wrapper blocks that are missing.
+ * A missing parent resource is written with `{ only: [] }`, so it routes none
+ * of its own actions, and is returned in `parentsWithoutActions`.
  *
  * Each segment of the route is looked up among the direct children (the
  * lines indented one level deeper) of its parent's block, so it is found
@@ -166,7 +183,7 @@ function insertResourceIntoRoutes(
         parent.lineIndex,
         1,
         `${spaces(indent)}${parent.code.slice(0, -1)}, r => {`,
-        ...routeLines(missingAncestors, resourceDeclaration.code, indent + 2),
+        ...routeLines(missingAncestors, resourceDeclaration.code, indent + 2, { missing: true }),
         '',
         `${spaces(indent)}})`,
       )
@@ -178,14 +195,19 @@ function insertResourceIntoRoutes(
       lines.splice(
         block.openerIndex + 1,
         0,
-        ...routeLines(missingAncestors, resourceDeclaration.code, block.indent + 2),
+        ...routeLines(missingAncestors, resourceDeclaration.code, block.indent + 2, { missing: true }),
         '',
       )
       break
     }
   }
 
-  return { outcome: 'changed', routes: lines.join('\n') }
+  const writtenAncestors = placement.outcome === 'declared' ? [] : placement.missingAncestors
+  return {
+    outcome: 'changed',
+    routes: lines.join('\n'),
+    parentsWithoutActions: writtenAncestors.filter(ancestor => ancestor.method === 'resources'),
+  }
 }
 
 /**
@@ -290,7 +312,7 @@ function parseRoute(
     if (pathParamRegexp.test(pathPart)) return
     const nextPathPart = pathParts[index + 1]
     const method = nextPathPart && pathParamRegexp.test(nextPathPart) ? 'resources' : 'namespace'
-    ancestors.push({ method, name: pathPart })
+    ancestors.push({ method, name: pathPart, path: pathParts.slice(0, index + 1).join('/') })
   })
 
   const method = singular ? 'resource' : 'resources'
@@ -358,18 +380,35 @@ function sameActions(actions: readonly string[], otherActions: readonly string[]
 
 /**
  * The lines declaring the resource inside the given ancestors, each ancestor
- * written as a callback block, starting at the given indentation.
+ * written as a callback block, starting at the given indentation. `missing`
+ * says the ancestors are blocks the routes file does not declare yet, so a
+ * parent resource among them is written to route none of its own actions.
  */
-function routeLines(ancestors: RouteAncestor[], resourceCode: string, indent: number) {
+function routeLines(
+  ancestors: RouteAncestor[],
+  resourceCode: string,
+  indent: number,
+  { missing }: { missing: boolean },
+) {
   return [
-    ...ancestors.map((ancestor, index) => `${spaces(indent + index * 2)}${callbackOpener(ancestor)}`),
+    ...ancestors.map(
+      (ancestor, index) => `${spaces(indent + index * 2)}${callbackOpener(ancestor, { missing })}`,
+    ),
     `${spaces(indent + ancestors.length * 2)}${resourceCode}`,
     ...ancestors.map((_, index) => `${spaces(indent + index * 2)}})`).reverse(),
   ]
 }
 
-function callbackOpener({ method, name }: RouteAncestor) {
-  return `r.${method}('${name}', r => {`
+/**
+ * A parent resource the routes file does not declare yet is written with
+ * `{ only: [] }`: the run generated a controller for the nested resource
+ * alone, and a parent routing its default actions would make every later boot
+ * look for a controller nobody generated. A `namespace` takes no options.
+ */
+function callbackOpener({ method, name }: RouteAncestor, { missing }: { missing: boolean }) {
+  return method === 'resources' && missing
+    ? `r.${method}('${name}', { only: [] }, r => {`
+    : `r.${method}('${name}', r => {`
 }
 
 /**
@@ -566,6 +605,8 @@ type RouteMethod = 'namespace' | 'resources' | 'resource'
 interface RouteAncestor {
   method: 'namespace' | 'resources'
   name: string
+  /** The route up to and including this block, as given to the generator. */
+  path: string
 }
 
 interface ResourceDeclaration {
@@ -612,4 +653,7 @@ interface Unparseable {
   resourceDeclared?: true
 }
 
-type InsertionResult = { outcome: 'changed'; routes: string } | { outcome: 'alreadyDeclared' } | Unparseable
+type InsertionResult =
+  | { outcome: 'changed'; routes: string; parentsWithoutActions: RouteAncestor[] }
+  | { outcome: 'alreadyDeclared' }
+  | Unparseable

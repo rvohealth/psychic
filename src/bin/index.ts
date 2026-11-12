@@ -22,30 +22,68 @@ export {
 } from './helpers/OpenApiSpecDiff.js'
 
 export default class PsychicBin {
-  public static async generateController(controllerName: string, actions: string[]) {
+  /**
+   * Generates a controller, the namespace `BaseController`s leading to it, and
+   * its spec (`psy g:controller`). When the controller or its spec already
+   * exists with different content, it writes nothing and throws, unless
+   * `overwrite` is true.
+   */
+  public static async generateController(
+    controllerName: string,
+    actions: string[],
+    { overwrite = false }: { overwrite?: boolean } = {},
+  ) {
     await generateController({
       fullyQualifiedControllerName: controllerName,
       actions,
       singular: false,
+      overwrite,
     })
   }
 
+  /**
+   * Generates a resource's model files (through Dream), controller, controller
+   * spec and route (`psy g:resource`). With neither `overwrite` nor
+   * `overwritePsychicOnly`, it writes nothing and throws when the controller or
+   * its spec exists with different content, or when any of the model's files or
+   * its create migration exists. `overwrite` replaces the controller, its spec
+   * and the model's files; `overwritePsychicOnly` replaces the controller and its
+   * spec but keeps the model's existing files, writing only the missing ones.
+   * The two cannot be combined.
+   */
   public static async generateResource(
     route: string,
     fullyQualifiedModelName: string,
     columnsWithTypes: string[],
-    options: {
+    {
+      overwrite = false,
+      overwritePsychicOnly = false,
+      ...options
+    }: {
       singular: boolean
-      onlyActions?: string
+      only?: string
       stiBaseSerializer: boolean
       owningModel?: string
       connectionName: string
       modelName?: string
       tableName?: string
       softDelete: boolean
+      overwrite?: boolean
+      overwritePsychicOnly?: boolean
     },
   ) {
-    await generateResource({ route, fullyQualifiedModelName, columnsWithTypes, options })
+    if (overwrite && overwritePsychicOnly)
+      throw new Error('overwrite and overwritePsychicOnly cannot be combined; pass at most one of them')
+
+    await generateResource({
+      route,
+      fullyQualifiedModelName,
+      columnsWithTypes,
+      options: {
+        ...options,
+        existingFiles: overwrite ? 'overwrite' : overwritePsychicOnly ? 'overwritePsychicOnly' : 'refuse',
+      },
+    })
   }
 
   public static printRoutes() {

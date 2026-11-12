@@ -772,5 +772,62 @@ describe('OpenapiAppRenderer', () => {
         expect(response.admin!.paths['/greeter/justforspecs']).toBeUndefined()
       })
     })
+
+    context('requestBody.required', () => {
+      // Psychic reads a request sent without a body as `{}`, so a body whose
+      // schema rejects `{}` is required, whichever form produced the schema.
+      function requestBodyFor(path: string) {
+        return OpenapiAppRenderer.toObject().default!.paths[path]!.post.requestBody
+      }
+
+      it('is true for an explicit schema with a required list', () => {
+        expect(requestBodyFor('/requestBodyOpenapiTest').required).toBe(true)
+      })
+
+      it('is true for a model-derived schema with a required list', () => {
+        const requestBody = requestBodyFor('/requestBodyForModelOpenapiTest')
+        expect(requestBody.required).toBe(true)
+        expect(requestBody.content!['application/json'].schema).toEqual(
+          expect.objectContaining({ required: ['email'] }),
+        )
+      })
+
+      it('is absent for an explicit schema that accepts {}', () => {
+        expect(requestBodyFor('/invalidRequestBody')).not.toHaveProperty('required')
+      })
+
+      it('is absent for a model-derived schema that accepts {}', () => {
+        expect(requestBodyFor('/users')).not.toHaveProperty('required')
+      })
+
+      it('resolves a $ref against the components of the document', () => {
+        // CustomSchemaObject (test-app conf/app.ts) has no required list
+        expect(requestBodyFor('/requestBodyboilerplateSchemaTest')).not.toHaveProperty('required')
+      })
+
+      it('resolves a $serializer used only by the request body against its emitted component', () => {
+        // UserSignupRequestSerializer renders `email` without `required: false`
+        expect(requestBodyFor('/requestBodySerializerOpenapiTest').required).toBe(true)
+      })
+    })
+
+    context('a requestBody that references a serializer no response uses', () => {
+      it('emits the serializer’s component, so the requestBody $ref resolves', () => {
+        const openapi = OpenapiAppRenderer.toObject().default!
+        const requestBody = openapi.paths['/requestBodySerializerOpenapiTest']!.post.requestBody
+
+        expect(requestBody.content!['application/json'].schema).toEqual({
+          $ref: '#/components/schemas/UserSignupRequest',
+        })
+        expect(openapi.components.schemas!['UserSignupRequest']).toEqual({
+          type: 'object',
+          required: ['email'],
+          properties: {
+            email: { type: 'string' },
+            name: { type: 'string' },
+          },
+        })
+      })
+    })
   })
 })

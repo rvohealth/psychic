@@ -1375,6 +1375,91 @@ The following values will be allowed:
       })
     })
 
+    context('when requestBody includes $serializer refs', () => {
+      // eslint-disable-next-line @typescript-eslint/no-explicit-any
+      function renderedSchemasFor(renderer: OpenapiEndpointRenderer<any, any>) {
+        const routes = PsychicApp.getOrFail().routesCache
+        const pathObjectResponse = renderer.toPathObject(routes, defaultToPathObjectOpts())
+        const toSchemaObjectOpts = defaultToSchemaObjectOpts({
+          serializersAppearingInHandWrittenOpenapi: pathObjectResponse.referencedSerializers,
+        })
+        renderer.toSchemaObject(toSchemaObjectOpts)
+        return toSchemaObjectOpts.renderedSchemasOpenapi
+      }
+
+      const commentTestingDateSchema = {
+        type: 'object',
+        required: ['howyadoin', 'howyadoins'],
+        properties: {
+          howyadoin: { type: 'string', format: 'date' },
+          howyadoins: { type: 'array', items: { type: 'string', format: 'date' } },
+        },
+      }
+
+      it('renders a serializer used only by the request body in components.schemas', () => {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+          requestBody: { $serializer: CommentTestingDateSerializer },
+        })
+
+        expect(renderedSchemasFor(renderer)).toEqual(
+          expect.objectContaining({ CommentTestingDate: commentTestingDateSchema }),
+        )
+      })
+
+      it('renders a serializer nested in a hand-written request body in components.schemas', () => {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+          requestBody: {
+            type: 'object',
+            properties: {
+              comments: { type: 'array', items: { $serializer: CommentTestingDateSerializer } },
+            },
+          },
+        })
+
+        expect(renderedSchemasFor(renderer)).toEqual(
+          expect.objectContaining({ CommentTestingDate: commentTestingDateSchema }),
+        )
+      })
+
+      it('renders a serializer in a model-derived request body’s combining in components.schemas', () => {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+          requestBody: {
+            for: User,
+            params: ['email'],
+            combining: { comment: { $serializer: CommentTestingDateSerializer } },
+          },
+        })
+
+        expect(renderedSchemasFor(renderer)).toEqual(
+          expect.objectContaining({ CommentTestingDate: commentTestingDateSchema }),
+        )
+      })
+
+      it('renders the serializer’s descendant serializers in components.schemas', () => {
+        const renderer = new OpenapiEndpointRenderer(User, UsersController, 'create', {
+          requestBody: { $serializer: CommentTestingBasicArraySerializerRefSerializer },
+        })
+
+        expect(Object.keys(renderedSchemasFor(renderer))).toEqual(
+          expect.arrayContaining(['CommentTestingBasicArraySerializerRef', 'MylarSummary']),
+        )
+      })
+
+      it('renders a serializer the request body shares with a response once, as a response alone renders it', () => {
+        const responseOnly = renderedSchemasFor(
+          new OpenapiEndpointRenderer(CommentTestingDateSerializer, UsersController, 'create', {}),
+        )
+        const shared = renderedSchemasFor(
+          new OpenapiEndpointRenderer(CommentTestingDateSerializer, UsersController, 'create', {
+            requestBody: { $serializer: CommentTestingDateSerializer },
+          }),
+        )
+
+        expect(shared).toEqual(responseOnly)
+        expect(shared['CommentTestingDate']).toEqual(commentTestingDateSchema)
+      })
+    })
+
     context('when a controller contains multiple openapiNames', () => {
       it('renders spec for the given openapiName', () => {
         let renderer = new OpenapiEndpointRenderer(
