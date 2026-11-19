@@ -259,6 +259,26 @@ describe('Params', () => {
             )
           })
         })
+
+        context('when null is supplied', () => {
+          it('rejects null for a column that does not allow null', () => {
+            let error: ParamValidationErrors
+            try {
+              Params.for({ nonNullFavoriteTreats: null }, Pet)
+            } catch (err) {
+              error = err as ParamValidationErrors
+            }
+
+            expect(error!).toBeInstanceOf(ParamValidationErrors)
+            expect(error!.errors).toEqual({ nonNullFavoriteTreats: ['expected an array of enum values'] })
+          })
+
+          context('the column allows null', () => {
+            it('permits null', () => {
+              expect(Params.for({ favoriteTreats: null }, Pet)).toEqual({ favoriteTreats: null })
+            })
+          })
+        })
       })
     })
 

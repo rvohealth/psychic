@@ -1,3 +1,7 @@
+## 3.19.3
+
+- Fix `paramsFor` and `extractParams` answering `null` for a nullable enum array column with a 400. A client clearing such a column, for example `PATCH /pets/:id` with `{ "favoriteTreats": null }`, got `expected an array of enum values`, although the OpenAPI document renders the column as `['array', 'null']` and the generated types allow `null`. `null` now clears a nullable enum array column, as it does every other nullable column. A non-nullable enum array column still answers `null` with that 400, and a bare value that is not an array, such as `"favoriteTreats": "efishy feesh"`, is still rejected with it.
+
 ## 3.19.2
 
 - Fix the OpenAPI for a flattened STI value whose children each declare their own `type` enum keeping only the first child's values. A `rendersOne` with `flatten: true` of an STI base model renders every child's fields in one object (since 3.16.0), and each child's serializer may declare `type` as the one type it renders (`.attribute('type', { openapi: { type: 'string', enum: ['BalloonLatex'] } })`). The object kept the first child's schema for that key, so `type` was `enum: ['BalloonLatex']`: response validation rejected every payload of another child (in an app that validates responses, a 500), and the generated client typed `type` as the first child alone. A flattened key whose shapes each declare an `enum` now holds every shape's values (`enum: ['BalloonLatex', 'BalloonMylar']`). Apps flattening such a value should re-run `psy sync`.

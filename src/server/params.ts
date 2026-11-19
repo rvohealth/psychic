@@ -152,10 +152,16 @@ export default class Params {
         } else if (columnMetadata?.enumValues) {
           const paramValue = params[columnName as keyof typeof params]
 
-          if (columnMetadata.isArray) {
-            // Single-value query arrays are conformed to arrays upstream in
-            // conformQueryArrayParamsToOpenapiShape, so a non-array reaching
-            // here is a real error rather than something to coerce.
+          if (columnMetadata.isArray && paramValue === null && columnMetadata.allowNull) {
+            // A nullable enum[] column is rendered `['array', 'null']` in
+            // OpenAPI, so `null` clears it, as it does for every other
+            // nullable column.
+            returnObj[columnName as keyof typeof returnObj] = null
+          } else if (columnMetadata.isArray) {
+            // Any other non-array is a real error rather than something to
+            // coerce: single-value query arrays are conformed to arrays
+            // upstream in conformQueryArrayParamsToOpenapiShape, and `null`
+            // is accepted above only when the column allows null.
             if (!Array.isArray(paramValue))
               throw new ParamValidationError(columnName.toString(), ['expected an array of enum values'])
 
