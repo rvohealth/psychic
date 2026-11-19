@@ -1,6 +1,7 @@
 import { specRequest as request } from '@rvoh/psychic-spec-helpers'
 import OpenapiEndpointRenderer from '../../../../../src/openapi-renderer/endpoint.js'
 import { PsychicApp, PsychicServer } from '../../../../../src/package-exports/index.js'
+import Pet from '../../../../../test-app/src/app/models/Pet.js'
 import User from '../../../../../test-app/src/app/models/User.js'
 
 describe('openapi validation', () => {
@@ -76,6 +77,25 @@ describe('openapi validation', () => {
               requiredInt: 123,
             },
           })
+        })
+      })
+
+      context('with null for a nullable enum array column', () => {
+        it('clears the column', async () => {
+          const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
+          const pet = await Pet.create({
+            user,
+            species: 'cat',
+            nonNullSpecies: 'cat',
+            favoriteTreats: ['efishy feesh'],
+            nonNullFavoriteTreats: ['efishy feesh'],
+            name: 'aster',
+          })
+
+          await request.patch(`/pets/${pet.id}`, 204, { data: { favoriteTreats: null } })
+
+          await pet.reload()
+          expect(pet.favoriteTreats).toBeNull()
         })
       })
 
@@ -230,6 +250,27 @@ describe('openapi validation', () => {
                 requiredInt: 123,
               },
             })
+          })
+        })
+
+        // With request-body validation off, nothing upstream rejects a null
+        // element, so paramsFor's own check is what keeps it out.
+        context('with a null element in a nullable enum array column', () => {
+          it('denies the request and leaves the column unchanged', async () => {
+            const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
+            const pet = await Pet.create({
+              user,
+              species: 'cat',
+              nonNullSpecies: 'cat',
+              favoriteTreats: ['efishy feesh'],
+              nonNullFavoriteTreats: ['efishy feesh'],
+              name: 'aster',
+            })
+
+            await request.patch(`/pets/${pet.id}`, 400, { data: { favoriteTreats: [null] } })
+
+            await pet.reload()
+            expect(pet.favoriteTreats).toEqual(['efishy feesh'])
           })
         })
       })

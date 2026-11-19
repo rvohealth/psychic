@@ -259,6 +259,52 @@ describe('Params', () => {
             )
           })
         })
+
+        context('when null is supplied', () => {
+          it('rejects null for a column that does not allow null', () => {
+            let error: ParamValidationErrors
+            try {
+              Params.for({ nonNullFavoriteTreats: null }, Pet)
+            } catch (err) {
+              error = err as ParamValidationErrors
+            }
+
+            expect(error!).toBeInstanceOf(ParamValidationErrors)
+            expect(error!.errors).toEqual({ nonNullFavoriteTreats: ['expected an array of enum values'] })
+          })
+
+          context('the column allows null', () => {
+            it('permits null', () => {
+              expect(Params.for({ favoriteTreats: null }, Pet)).toEqual({ favoriteTreats: null })
+            })
+          })
+        })
+
+        // The OpenAPI items schema of an enum array is never nullable, so a
+        // null element is rejected whether or not the column allows null.
+        context('when an element is null', () => {
+          it('rejects a null element for a column that does not allow null', () => {
+            expect(() => Params.for({ nonNullFavoriteTreats: [null] }, Pet)).toThrow(ParamValidationErrors)
+          })
+
+          it('rejects a null element for a column that allows null', () => {
+            let error: ParamValidationErrors
+            try {
+              Params.for({ favoriteTreats: [null] }, Pet)
+            } catch (err) {
+              error = err as ParamValidationErrors
+            }
+
+            expect(error!).toBeInstanceOf(ParamValidationErrors)
+            expect(error!.errors).toEqual({ favoriteTreats: ['expected string'] })
+          })
+
+          it('rejects a null element alongside valid elements', () => {
+            expect(() => Params.for({ favoriteTreats: ['efishy feesh', null] }, Pet)).toThrow(
+              ParamValidationErrors,
+            )
+          })
+        })
       })
     })
 
