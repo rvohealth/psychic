@@ -252,6 +252,27 @@ describe('openapi validation', () => {
             })
           })
         })
+
+        // With request-body validation off, nothing upstream rejects a null
+        // element, so paramsFor's own check is what keeps it out.
+        context('with a null element in a nullable enum array column', () => {
+          it('denies the request and leaves the column unchanged', async () => {
+            const user = await User.create({ email: 'how@yadoin', password: 'howyadoin' })
+            const pet = await Pet.create({
+              user,
+              species: 'cat',
+              nonNullSpecies: 'cat',
+              favoriteTreats: ['efishy feesh'],
+              nonNullFavoriteTreats: ['efishy feesh'],
+              name: 'aster',
+            })
+
+            await request.patch(`/pets/${pet.id}`, 400, { data: { favoriteTreats: [null] } })
+
+            await pet.reload()
+            expect(pet.favoriteTreats).toEqual(['efishy feesh'])
+          })
+        })
       })
     })
   })

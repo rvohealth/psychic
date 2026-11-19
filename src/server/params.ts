@@ -166,8 +166,10 @@ export default class Params {
               throw new ParamValidationError(columnName.toString(), ['expected an array of enum values'])
 
             returnObj[columnName as keyof typeof returnObj] = (paramValue as string[]).map(p => {
+              // An element is never nullable (the OpenAPI items schema is a
+              // non-nullable enum), whether or not the column allows null.
               return new this(params).cast(columnName.toString(), p, 'string', {
-                allowNull: columnMetadata.allowNull,
+                allowNull: false,
                 enum: columnMetadata.enumValues as readonly string[],
               })
             })
