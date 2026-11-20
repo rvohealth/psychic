@@ -2,6 +2,10 @@ import { CalendarDate, ClockTime, ClockTimeTz, DateTime } from '@rvoh/dream'
 import { PsychicParamsDictionary } from '../../../src/controller/index.js'
 import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../../../src/error/controller/ParamValidationErrors.js'
+import type {
+  JSONColumnShapeStatement,
+  VirtualAttributeStatement,
+} from '../../../src/openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import Params from '../../../src/server/params.js'
 import Availability from '../../../test-app/src/app/models/Availability.js'
 import Pet from '../../../test-app/src/app/models/Pet.js'
@@ -9,6 +13,16 @@ import User from '../../../test-app/src/app/models/User.js'
 
 const TestEnumValues = ['hello', 'world'] as const
 type TestEnum = (typeof TestEnumValues)[number]
+
+function paramErrorsFrom(fn: () => unknown) {
+  try {
+    fn()
+  } catch (err) {
+    if (err instanceof ParamValidationErrors) return err.errors
+    throw err
+  }
+  throw new Error('expected ParamValidationErrors to be thrown')
+}
 
 describe('Params', () => {
   describe('.for', () => {
@@ -78,8 +92,253 @@ describe('Params', () => {
         expect(Params.for({ openapiVirtualSpecTest2: ['howdy'] }, User)).toEqual({
           openapiVirtualSpecTest2: ['howdy'],
         })
-        expect(Params.for({ openapiVirtualSpecTest2: 'howdy' }, User)).toEqual({
-          openapiVirtualSpecTest2: ['howdy'],
+      })
+
+      it('rejects a bare value for an array-typed virtual attribute, rather than wrapping it', () => {
+        expect(paramErrorsFrom(() => Params.for({ openapiVirtualSpecTest2: 'howdy' }, User))).toEqual({
+          openapiVirtualSpecTest2: ['expected string array'],
+        })
+      })
+
+      context('declared shapes beyond a primitive', () => {
+        // declared on a subclass, as @deco.Virtual registers them
+        class UserWithShapedVirtuals extends User {}
+        ;(
+          UserWithShapedVirtuals as unknown as { virtualAttributes: VirtualAttributeStatement[] }
+        ).virtualAttributes = [
+          ...(User['virtualAttributes'] as VirtualAttributeStatement[]),
+          {
+            property: 'objectVirtual',
+            type: {
+              type: 'object',
+              properties: { a: 'integer', nested: { type: 'object', properties: { b: 'string' } } },
+              required: ['a'],
+            },
+          },
+          {
+            property: 'nullableObjectVirtual',
+            type: { type: ['object', 'null'], properties: { a: 'integer' } },
+          },
+          {
+            property: 'objectArrayVirtual',
+            type: { type: 'array', items: { type: 'object', properties: { a: 'integer' }, required: ['a'] } },
+          },
+          { property: 'enumVirtual', type: { type: 'string', enum: ['red', 'green'] } },
+          {
+            property: 'enumArrayVirtual',
+            type: { type: 'array', items: { type: 'string', enum: ['red', 'green'] } },
+          },
+          { property: 'booleanVirtual', type: 'boolean' },
+          { property: 'integerVirtual', type: 'integer' },
+          { property: 'jsonVirtual', type: 'json' },
+        ]
+
+        it('returns a matching object as submitted', () => {
+          const objectVirtual = { a: 1, nested: { b: 'x' }, extra: true }
+          const result: Record<string, unknown> = Params.for({ objectVirtual }, UserWithShapedVirtuals)
+          expect(result).toEqual({ objectVirtual })
+          expect(result['objectVirtual']).toBe(objectVirtual)
+        })
+
+        it('rejects an object missing a required property', () => {
+          expect(paramErrorsFrom(() => Params.for({ objectVirtual: {} }, UserWithShapedVirtuals))).toEqual({
+            objectVirtual: ["must have required property 'a'"],
+          })
+        })
+
+        it('rejects a wrong nested type, without coercing it', () => {
+          expect(
+            paramErrorsFrom(() =>
+              Params.for({ objectVirtual: { a: 1, nested: { b: 2 } } }, UserWithShapedVirtuals),
+            ),
+          ).toEqual({ objectVirtual: ['/nested/b must be string'] })
+
+          expect(() => Params.for({ objectVirtual: { a: '1' } }, UserWithShapedVirtuals)).toThrow(
+            ParamValidationErrors,
+          )
+        })
+
+        it('rejects a non-object', () => {
+          expect(() => Params.for({ objectVirtual: '{"a":1}' }, UserWithShapedVirtuals)).toThrow(
+            ParamValidationErrors,
+          )
+          expect(() => Params.for({ objectVirtual: [{ a: 1 }] }, UserWithShapedVirtuals)).toThrow(
+            ParamValidationErrors,
+          )
+        })
+
+        it('permits null only when the declared shape allows it', () => {
+          expect(() => Params.for({ objectVirtual: null }, UserWithShapedVirtuals)).toThrow(
+            ParamValidationErrors,
+          )
+          expect(Params.for({ nullableObjectVirtual: null }, UserWithShapedVirtuals)).toEqual({
+            nullableObjectVirtual: null,
+          })
+        })
+
+        it('checks each element of a declared array of objects', () => {
+          expect(Params.for({ objectArrayVirtual: [{ a: 1 }] }, UserWithShapedVirtuals)).toEqual({
+            objectArrayVirtual: [{ a: 1 }],
+          })
+          expect(() => Params.for({ objectArrayVirtual: [{ a: 1 }, {}] }, UserWithShapedVirtuals)).toThrow(
+            ParamValidationErrors,
+          )
+          expect(() => Params.for({ objectArrayVirtual: { a: 1 } }, UserWithShapedVirtuals)).toThrow(
+            ParamValidationErrors,
+          )
+        })
+
+        it('checks a declared enum after the cast', () => {
+          expect(Params.for({ enumVirtual: 'red' }, UserWithShapedVirtuals)).toEqual({ enumVirtual: 'red' })
+          expect(paramErrorsFrom(() => Params.for({ enumVirtual: 'blue' }, UserWithShapedVirtuals))).toEqual({
+            enumVirtual: ['did not match expected enum values'],
+          })
+        })
+
+        it('checks a declared enum on each element of an array', () => {
+          expect(Params.for({ enumArrayVirtual: ['red', 'green'] }, UserWithShapedVirtuals)).toEqual({
+            enumArrayVirtual: ['red', 'green'],
+          })
+          expect(() => Params.for({ enumArrayVirtual: ['red', 'blue'] }, UserWithShapedVirtuals)).toThrow(
+            ParamValidationErrors,
+          )
+          expect(() => Params.for({ enumArrayVirtual: 'red' }, UserWithShapedVirtuals)).toThrow(
+            ParamValidationErrors,
+          )
+        })
+
+        it('still casts a primitive as before, so query-string values pass', () => {
+          expect(Params.for({ booleanVirtual: 'true', integerVirtual: '5' }, UserWithShapedVirtuals)).toEqual(
+            {
+              booleanVirtual: true,
+              integerVirtual: 5,
+            },
+          )
+          expect(() => Params.for({ integerVirtual: 'five' }, UserWithShapedVirtuals)).toThrow(
+            ParamValidationErrors,
+          )
+        })
+
+        it('accepts any object for a `json` shorthand, and rejects a non-object', () => {
+          expect(Params.for({ jsonVirtual: { anything: [1] } }, UserWithShapedVirtuals)).toEqual({
+            jsonVirtual: { anything: [1] },
+          })
+          expect(() => Params.for({ jsonVirtual: 'abc' }, UserWithShapedVirtuals)).toThrow(
+            ParamValidationErrors,
+          )
+        })
+      })
+    })
+
+    context('a column whose shape the model declares with @deco.JSON', () => {
+      // test-app/src/app/models/User.ts declares requiredJsonbData as
+      // { theme: 'light' | 'dark', fontSize: integer }, and each
+      // element of requiredFavoriteJsonbs as { label: string (required), score: number }
+
+      it('returns a matching value as submitted, extra keys included', () => {
+        const requiredJsonbData = { theme: 'dark', fontSize: 12, extra: 'kept' }
+        const result = Params.for({ requiredJsonbData }, User)
+        expect(result).toEqual({ requiredJsonbData })
+        expect(result.requiredJsonbData).toBe(requiredJsonbData)
+      })
+
+      it('rejects a value missing a required property', () => {
+        expect(paramErrorsFrom(() => Params.for({ requiredFavoriteJsonbs: [{ score: 1 }] }, User))).toEqual({
+          requiredFavoriteJsonbs: ["/0 must have required property 'label'"],
+        })
+      })
+
+      it('rejects a wrong nested type, without coercing it', () => {
+        expect(
+          paramErrorsFrom(() => Params.for({ requiredJsonbData: { theme: 'dark', fontSize: '12' } }, User)),
+        ).toEqual({ requiredJsonbData: ['/fontSize must be integer'] })
+      })
+
+      it('rejects a value outside a declared enum', () => {
+        expect(paramErrorsFrom(() => Params.for({ requiredJsonbData: { theme: 'blue' } }, User))).toEqual({
+          requiredJsonbData: ['/theme must be equal to one of the allowed values'],
+        })
+      })
+
+      it('rejects a value of the wrong type', () => {
+        expect(() => Params.for({ requiredJsonbData: 'dark' }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ requiredJsonbData: [{ theme: 'dark' }] }, User)).toThrow(
+          ParamValidationErrors,
+        )
+      })
+
+      it('rejects null for a column that does not allow null', () => {
+        expect(() => Params.for({ requiredJsonbData: null }, User)).toThrow(ParamValidationErrors)
+        expect(() => Params.for({ requiredFavoriteJsonbs: null }, User)).toThrow(ParamValidationErrors)
+      })
+
+      it('checks each element of an array column against the declared element shape', () => {
+        expect(
+          Params.for({ requiredFavoriteJsonbs: [{ label: 'a' }, { label: 'b', score: 1.5 }] }, User),
+        ).toEqual({
+          requiredFavoriteJsonbs: [{ label: 'a' }, { label: 'b', score: 1.5 }],
+        })
+        expect(
+          paramErrorsFrom(() => Params.for({ requiredFavoriteJsonbs: [{ label: 'a' }, { score: 1 }] }, User)),
+        ).toEqual({ requiredFavoriteJsonbs: ["/1 must have required property 'label'"] })
+      })
+
+      it('rejects a bare element for an array column, rather than wrapping it', () => {
+        expect(() => Params.for({ requiredFavoriteJsonbs: { label: 'a' } }, User)).toThrow(
+          ParamValidationErrors,
+        )
+      })
+
+      it('reports declared-shape errors alongside other invalid params', () => {
+        expect(
+          paramErrorsFrom(() => Params.for({ requiredJsonbData: { fontSize: 1.5 }, email: 123 }, User)),
+        ).toEqual({
+          email: ['expected string'],
+          requiredJsonbData: ['/fontSize must be integer'],
+        })
+      })
+
+      context('declarations the test-app does not make', () => {
+        // declared on a subclass, as @deco.JSON registers them
+        class UserWithMoreJSONColumns extends User {}
+        ;(
+          UserWithMoreJSONColumns as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
+        ).jsonColumnShapes = [
+          { column: 'jsonbData', openapi: { type: 'object', properties: { hello: 'string' } } },
+          { column: 'favoriteJsonbs', openapi: { type: 'object', properties: { hello: 'string' } } },
+          { column: 'jsonData', openapi: 'string' },
+          {
+            column: 'requiredJsonData',
+            // `default` is not in Dream's shorthand types; a declaration that
+            // carries one anyway (via `as`, or plain JavaScript) still gets none injected
+            openapi: {
+              type: 'object',
+              properties: { withDefault: { type: 'string', default: 'injected' } },
+            } as unknown as JSONColumnShapeStatement['openapi'],
+          },
+        ]
+
+        it('permits null for a nullable column', () => {
+          expect(Params.for({ jsonbData: null, favoriteJsonbs: null }, UserWithMoreJSONColumns)).toEqual({
+            jsonbData: null,
+            favoriteJsonbs: null,
+          })
+        })
+
+        it('permits a scalar the declaration allows, which the object-only json cast would reject', () => {
+          expect(Params.for({ jsonData: 'just a string' }, UserWithMoreJSONColumns)).toEqual({
+            jsonData: 'just a string',
+          })
+          expect(() => Params.for({ jsonData: { hello: 'world' } }, UserWithMoreJSONColumns)).toThrow(
+            ParamValidationErrors,
+          )
+        })
+
+        it('injects no declared defaults', () => {
+          const requiredJsonData = {}
+          const result: Record<string, unknown> = Params.for({ requiredJsonData }, UserWithMoreJSONColumns)
+          expect(result['requiredJsonData']).toBe(requiredJsonData)
+          expect(requiredJsonData).toEqual({})
         })
       })
     })
@@ -658,8 +917,37 @@ describe('Params', () => {
       },
     )
 
+    // the test-app declares requiredJsonbData with @deco.JSON, so the
+    // undeclared not-null jsonb path is exercised on a subclass without it
+    class UserWithoutJSONDeclarations extends User {}
+    ;(
+      UserWithoutJSONDeclarations as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
+    ).jsonColumnShapes = []
+
+    context('array columns', () => {
+      it('rejects a bare value, rather than wrapping it into an array', () => {
+        expect(paramErrorsFrom(() => Params.for({ nicknames: 'abc' }, User))).toEqual({
+          nicknames: ['expected string array'],
+        })
+        expect(paramErrorsFrom(() => Params.for({ favoriteIntegers: 1 }, User))).toEqual({
+          favoriteIntegers: ['expected integer or string integer array'],
+        })
+        expect(paramErrorsFrom(() => Params.for({ favoriteJsons: { abc: 123 } }, User))).toEqual({
+          favoriteJsons: ['expected an object array'],
+        })
+      })
+
+      it('leaves Params.cast, which names the array type explicitly, wrapping a bare value', () => {
+        expect(Params.cast({ tags: 'red' }, 'tags', 'string[]')).toEqual(['red'])
+      })
+    })
+
     const jsonScenarios = [
-      { dbType: 'jsonb', allowNull: ['jsonbData', User], notNull: ['requiredJsonbData', User] },
+      {
+        dbType: 'jsonb',
+        allowNull: ['jsonbData', User],
+        notNull: ['requiredJsonbData', UserWithoutJSONDeclarations],
+      },
       { dbType: 'json', allowNull: ['jsonData', User], notNull: ['requiredJsonData', User] },
     ] as const
 

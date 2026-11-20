@@ -1,4 +1,5 @@
 import { CalendarDate, ClockTime, ClockTimeTz, DateTime, Dream } from '@rvoh/dream'
+import { type ValidateFunction } from 'ajv'
 import {
   OpenapiSchemaArray,
   OpenapiSchemaBody,
@@ -29,9 +30,13 @@ import alternateParamName from '../helpers/alternateParamName.js'
 import isArrayParamName from '../helpers/isArrayParamName.js'
 import isObject from '../helpers/isObject.js'
 import isUuid from '../helpers/isUuid.js'
-import { validateObject } from '../helpers/validateOpenApiSchema.js'
+import { createValidator, validateObject } from '../helpers/validateOpenApiSchema.js'
 import { Inc } from '../i18n/conf/types.js'
-import type { VirtualAttributeStatement } from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
+import {
+  declaredJSONColumnShape,
+  dreamColumnOpenapiShape,
+  type VirtualAttributeStatement,
+} from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
 
 export type ExtractedDreamParamSafeAttributes<
@@ -62,6 +67,18 @@ export default class Params {
    * `ParamValidationErrors`, which the router answers with a 400. A single
    * value is never wrapped into an array. (`paramsFor` and `extractParams`
    * read a missing or null `key` as `[]` before calling this.)
+   *
+   * Likewise, a bare value given for an array column or an array-typed
+   * `@deco.Virtual`/`@deco.Encrypted` attribute is rejected, never wrapped.
+   *
+   * A value for a column or attribute whose shape the model declares
+   * (`@deco.JSON`, `@deco.Virtual`, `@deco.Encrypted`) must match that
+   * declaration, whatever the endpoint's OpenAPI says and whether or not
+   * request validation is on: objects, arrays, nested values and enums are
+   * checked against it, and a primitive is cast as any column's is, then
+   * checked against the declared enum. A `@deco.JSON` column accepts `null`
+   * only when the column allows null. A declared value is returned as
+   * submitted.
    */
   public static for<
     T extends typeof Dream,
@@ -122,7 +139,12 @@ export default class Params {
     const paramSafeColumns: string[] = paramNamesForDreamClass(dreamClass, forOpts as any)
 
     for (const columnName of paramSafeColumns) {
-      if (params[columnName as keyof typeof params] === undefined) continue
+      const paramValue = params[columnName as keyof typeof params] as
+        | PsychicParamsPrimitive
+        | PsychicParamsDictionary
+        | PsychicParamsDictionary[]
+        | undefined
+      if (paramValue === undefined) continue
 
       const columnMetadata = columns[columnName as keyof typeof columns] as {
         dbType: string
@@ -134,7 +156,18 @@ export default class Params {
       try {
         const castType = DB_TYPE_TO_CAST_TYPE[columnMetadata?.dbType]
 
-        if (castType) {
+        if (columnMetadata && declaredJSONColumnShape(dreamClass, columnName) !== undefined) {
+          // the `@deco.JSON` declaration (with the column's nullability and,
+          // for an array column, applied to each element) stands in for the
+          // object-only json cast, so a scalar or array the declaration
+          // allows passes
+          returnObj[columnName as keyof typeof returnObj] = validateAgainstDeclaredShape(
+            dreamClass,
+            columnName,
+            paramValue,
+          ) as never
+        } else if (castType) {
+          throwIfBareValueForArrayCast(columnName, paramValue, castType)
           returnObj[columnName as keyof typeof returnObj] = this.cast(
             params,
             columnName.toString(),
@@ -142,16 +175,13 @@ export default class Params {
             { allowNull: columnMetadata.allowNull },
           )
         } else if (dreamClass.isVirtualColumn(columnName)) {
-          const virtualCast = virtualAttributeCast(dreamClass, columnName)
-          returnObj[columnName as keyof typeof returnObj] = this.cast(
+          returnObj[columnName as keyof typeof returnObj] = this.castVirtualAttribute(
             params,
-            columnName.toString(),
-            virtualCast.expectedType,
-            { allowNull: virtualCast.allowNull },
-          )
+            dreamClass,
+            columnName,
+            paramValue,
+          ) as never
         } else if (columnMetadata?.enumValues) {
-          const paramValue = params[columnName as keyof typeof params]
-
           if (columnMetadata.isArray && paramValue === null && columnMetadata.allowNull) {
             // A nullable enum[] column is rendered `['array', 'null']` in
             // OpenAPI, so `null` clears it, as it does for every other
@@ -199,6 +229,44 @@ export default class Params {
     }
 
     return returnObj as ReturnPayload
+  }
+
+  /**
+   * Casts and checks a `@deco.Virtual`/`@deco.Encrypted` attribute against its
+   * declared shape. A primitive (or an array of primitives) is cast as today,
+   * so `'true'` and `"5"` arriving from a query string still pass, and is then
+   * checked against the declared enum; any other shape (an object, an array of
+   * objects, a composition) is validated as submitted, without coercion.
+   */
+  private static castVirtualAttribute(
+    params: object,
+    dreamClass: typeof Dream,
+    columnName: string,
+    paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+  ): unknown {
+    const declaredShape = (dreamClass['virtualAttributes'] as VirtualAttributeStatement[]).find(
+      statement => statement.property === columnName,
+    )?.type
+
+    if (!declaredShape) throw new Error(`Unable to infer params cast type for virtual column: ${columnName}`)
+
+    const primitiveCast = primitiveCastFromOpenapi(declaredShape)
+    if (!primitiveCast) return validateAgainstDeclaredShape(dreamClass, columnName, paramValue)
+
+    throwIfBareValueForArrayCast(columnName, paramValue, primitiveCast.expectedType)
+
+    const castValue: unknown = this.cast(params, columnName, primitiveCast.expectedType, {
+      allowNull: primitiveCast.allowNull,
+    })
+
+    const allowedValues = declaredEnumValues(declaredShapeSchema(dreamClass, columnName))
+    if (allowedValues && castValue !== null && castValue !== undefined) {
+      const castValues: unknown[] = Array.isArray(castValue) ? castValue : [castValue]
+      if (!castValues.every(value => allowedValues.includes(value)))
+        throw new ParamValidationError(columnName, ['did not match expected enum values'])
+    }
+
+    return castValue
   }
 
   /**
@@ -889,22 +957,105 @@ const DB_TYPE_TO_CAST_TYPE: Record<string, PsychicParamsPrimitiveLiteral> = {
   'numeric[]': 'number[]',
 }
 
-function virtualAttributeCast(
+// a declaration does not change after boot, so its schema and validator are
+// built once per model and column
+const declaredShapeSchemas = new WeakMap<typeof Dream, Map<string, OpenapiSchemaBody>>()
+const declaredShapeValidators = new WeakMap<typeof Dream, Map<string, ValidateFunction>>()
+
+function memoizedPerColumn<T>(
+  cache: WeakMap<typeof Dream, Map<string, T>>,
   dreamClass: typeof Dream,
   columnName: string,
-): {
-  expectedType: PsychicParamsPrimitiveLiteral
-  allowNull: boolean
-} {
-  const metadata = (dreamClass['virtualAttributes'] as VirtualAttributeStatement[]).find(
-    statement => statement.property === columnName,
-  )
+  build: () => T,
+): T {
+  let entries = cache.get(dreamClass)
+  if (!entries) {
+    entries = new Map()
+    cache.set(dreamClass, entries)
+  }
 
-  const primitiveCast = primitiveCastFromOpenapi(metadata?.type)
-  if (!primitiveCast) throw new Error(`Unable to infer params cast type for virtual column: ${columnName}`)
-  return primitiveCast
+  if (!entries.has(columnName)) entries.set(columnName, build())
+  return entries.get(columnName)!
 }
 
+/**
+ * The full OpenAPI schema of a column or attribute whose shape the model
+ * declares, read through the shared reader every serializer and request body
+ * uses (no serializer `openapi`, so the model's declaration alone).
+ */
+function declaredShapeSchema(dreamClass: typeof Dream, columnName: string): OpenapiSchemaBody {
+  return memoizedPerColumn(declaredShapeSchemas, dreamClass, columnName, () =>
+    dreamColumnOpenapiShape(`${dreamClass.sanitizedName} Params.for`, dreamClass, columnName as never),
+  )
+}
+
+function declaredShapeValidator(dreamClass: typeof Dream, columnName: string): ValidateFunction {
+  return memoizedPerColumn(declaredShapeValidators, dreamClass, columnName, () =>
+    // no coercion and no defaults: the value must already match, and is
+    // validated (and returned) exactly as submitted
+    createValidator(declaredShapeSchema(dreamClass, columnName), {
+      coerceTypes: false,
+      useDefaults: false,
+      removeAdditional: false,
+    }),
+  )
+}
+
+/**
+ * Validates a value against the shape the model declares for a column or
+ * attribute, returning the value as submitted, or throwing the
+ * `ParamValidationError` the router answers with a 400.
+ */
+function validateAgainstDeclaredShape(
+  dreamClass: typeof Dream,
+  columnName: string,
+  paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+): unknown {
+  const validator = declaredShapeValidator(dreamClass, columnName)
+  if (validator(paramValue)) return paramValue
+
+  throw new ParamValidationError(
+    columnName,
+    (validator.errors ?? []).map(error =>
+      error.instancePath ? `${error.instancePath} ${error.message}` : (error.message ?? 'is invalid'),
+    ),
+  )
+}
+
+/**
+ * The enum a declared primitive (or each element of a declared array of
+ * primitives) is limited to, if it declares one.
+ */
+function declaredEnumValues(schema: OpenapiSchemaBody): readonly unknown[] | null {
+  const schemaRecord = schema as { enum?: unknown; items?: { enum?: unknown } }
+  if (Array.isArray(schemaRecord.enum)) return schemaRecord.enum as unknown[]
+  if (Array.isArray(schemaRecord.items?.enum)) return schemaRecord.items.enum as unknown[]
+  return null
+}
+
+/**
+ * `Params.for` never wraps a bare value into an array: a request body can tell
+ * a single value from a one-element array, and single-value query arrays are
+ * conformed to arrays upstream (`conformQueryArrayParamsToOpenapiShape`), so a
+ * bare value here is a client error. `null` is left to the cast, which accepts
+ * it only when the column or attribute allows null. (`Params.cast` and
+ * `castParam`, which name an array type explicitly, still wrap.)
+ */
+function throwIfBareValueForArrayCast(
+  columnName: string,
+  paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+  castType: PsychicParamsPrimitiveLiteral,
+) {
+  if (!castType.endsWith('[]')) return
+  if (paramValue === null || Array.isArray(paramValue)) return
+  throw new ParamValidationError(columnName, [typeToError(castType)])
+}
+
+/**
+ * The cast for a declared primitive (or array of primitives), or `null` for
+ * any other shape (an object, an array of objects, a composition), which
+ * `Params.for` validates against the declaration instead.
+ */
 function primitiveCastFromOpenapi(
   openapi: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined,
 ): { expectedType: PsychicParamsPrimitiveLiteral; allowNull: boolean } | null {
@@ -955,8 +1106,10 @@ function shorthandToCastType(openapi: string): PsychicParamsPrimitiveLiteral | n
       return 'number'
     case 'decimal[]':
       return 'number[]'
+    // an object shape is validated against the declaration, not cast
     case 'json':
-      return 'json'
+    case 'json[]':
+      return null
     case 'null':
       return 'null'
     default:
@@ -979,8 +1132,6 @@ function openapiTypeToCastType(
       return 'number'
     case 'null':
       return 'null'
-    case 'object':
-      return 'json'
     case 'string':
       switch (format) {
         case 'date':

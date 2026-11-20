@@ -7,15 +7,46 @@ import {
   OpenapiShorthandPrimitiveTypes,
 } from '@rvoh/dream/openapi'
 import { DbTypes } from '@rvoh/dream/types'
+import SerializerOpenapiShapeOnJSONColumn from '../../error/openapi/SerializerOpenapiShapeOnJSONColumn.js'
 import { SerializingPlainPropertyWithoutOpenapiShape } from '../../error/openapi/SerializingPlainPropertyWithoutOpenapiShape.js'
 import UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute from '../../error/openapi/UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute.js'
+import isObject from '../../helpers/isObject.js'
 import OpenapiSegmentExpander from '../body-segment.js'
 import OpenapiEnumCollector from './OpenapiEnumCollector.js'
+import { openapiSchemaWithNull } from './openapiSchemaNullability.js'
 import openapiShorthandToOpenapi from './openapiShorthandToOpenapi.js'
 
 export interface VirtualAttributeStatement {
   property: string
   type: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined
+}
+
+/**
+ * @internal
+ *
+ * An entry of Dream's private static `jsonColumnShapes`, which `@deco.JSON`
+ * fills: the shape declared for a json/jsonb column (for a json[]/jsonb[]
+ * column, the shape of each element).
+ */
+export interface JSONColumnShapeStatement {
+  column: string
+  openapi: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand
+}
+
+/**
+ * @internal
+ *
+ * The shape `@deco.JSON` declares for a json/jsonb column, or `undefined` when
+ * the column has no `@deco.JSON` declaration. Dream keeps the declarations in a
+ * private static, read here through the bracketed back door, as
+ * `virtualAttributes` is.
+ */
+export function declaredJSONColumnShape(
+  dreamClass: typeof Dream,
+  column: string,
+): OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined {
+  const statements = dreamClass['jsonColumnShapes'] as JSONColumnShapeStatement[] | undefined
+  return statements?.find(statement => statement.column === column)?.openapi
 }
 
 interface DreamColumnInfo {
@@ -65,24 +96,19 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
     )
 
     if (metadata?.type) {
-      // the serializer's openapi is layered over the virtual attribute's
-      // declared type, as the column branches below layer it over the column's
-      // shape. TypeScript spreads every pairing of the two unions (a `type`
-      // beside an `anyOf`, say), so the merge is asserted to be a schema, as
-      // it is in those branches
+      // a serializer openapi that carries a shape replaces the declared shape
+      // whole, as a same-key `combining` entry replaces a request-body
+      // property, so none of the declared shape's keywords (a `required`, a
+      // `null`) leak into the override
+      if (openapiCarriesShape(openapi)) return openapiObject
+
+      // a description-only serializer openapi is layered over the virtual
+      // attribute's declared type, as the column branches below layer it over
+      // the column's shape. TypeScript spreads every pairing of the two unions
+      // (a `type` beside an `anyOf`, say), so the merge is asserted to be a
+      // schema, as it is in those branches
       return {
-        ...new OpenapiSegmentExpander(metadata.type, {
-          renderOpts: {
-            casing: 'camel',
-            suppressResponseEnums: false,
-            legacyImplicitRequestBodyParams: false,
-            // a nested `for:` sentinel inside a virtual attribute's `type`
-            // reaches enum-backed columns through this hand-built expander,
-            // so the collector must ride along here as well
-            enumCollector,
-          },
-          target: 'request',
-        }).render().openapi,
+        ...expandModelDeclaredShape(metadata.type, enumCollector),
         ...openapiObject,
       } as OpenapiSchemaBody
     } else if (openapi) {
@@ -100,6 +126,30 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
     if (openapi) return openapiShorthandToOpenapi(openapi as any)
     throw new SerializingPlainPropertyWithoutOpenapiShape(dreamClass, column)
+  }
+
+  const declaredJSONShape = declaredJSONColumnShape(dreamClass, column)
+  if (declaredJSONShape !== undefined) {
+    // the model's `@deco.JSON` declaration is the single source of the
+    // column's shape, so a serializer may describe the column but not reshape
+    // it. Dream's types refuse a shape here; this refuses one that got past
+    // them, when the OpenAPI is rendered at boot
+    if (openapi !== undefined && !openapiIsDescriptionOnly(openapi))
+      throw new SerializerOpenapiShapeOnJSONColumn(source, dreamClass, column)
+
+    // the declaration describes the non-null value (for an array column, each
+    // element); the column itself says whether it may be null
+    const declaredShape = expandModelDeclaredShape(declaredJSONShape, enumCollector)
+    const columnShape = dreamColumnInfo.isArray
+      ? ({
+          type: dreamColumnInfo.allowNull ? ['array', 'null'] : 'array',
+          items: declaredShape,
+        } as OpenapiSchemaBody)
+      : dreamColumnInfo.allowNull
+        ? (openapiSchemaWithNull(declaredShape) as OpenapiSchemaBody)
+        : declaredShape
+
+    return { ...columnShape, ...(openapi as OpenapiDescription | undefined) } as OpenapiSchemaBody
   }
 
   if (!allowGenericJson) {
@@ -152,6 +202,53 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
     if (suppressResponseEnums) delete returnObj['enum']
     return returnObj
   }
+}
+
+/**
+ * Expands a shape declared on the model (`@deco.Virtual`, `@deco.Encrypted`,
+ * `@deco.JSON`) from shorthand into a full OpenAPI schema.
+ */
+function expandModelDeclaredShape(
+  shape: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand,
+  enumCollector: OpenapiEnumCollector | undefined,
+): OpenapiSchemaBody {
+  return new OpenapiSegmentExpander(shape, {
+    renderOpts: {
+      casing: 'camel',
+      suppressResponseEnums: false,
+      legacyImplicitRequestBodyParams: false,
+      // a nested `for:` sentinel inside a declared shape reaches enum-backed
+      // columns through this hand-built expander, so the collector must ride
+      // along here as well
+      enumCollector,
+    },
+    target: 'request',
+  }).render().openapi
+}
+
+const SHAPE_KEYWORDS = ['type', 'anyOf', 'oneOf', 'allOf', '$ref', '$schema', '$serializer', '$serializable']
+
+/**
+ * Whether a serializer attribute's `openapi` carries a shape (a primitive
+ * shorthand, or an object with a `type`, a composition or a reference) rather
+ * than only describing the value.
+ */
+function openapiCarriesShape(
+  openapi: OpenapiDescription | OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
+): boolean {
+  if (openapi === undefined) return false
+  if (!isObject(openapi)) return true
+  return SHAPE_KEYWORDS.some(keyword => (openapi as Record<string, unknown>)[keyword] !== undefined)
+}
+
+/**
+ * Whether a serializer attribute's `openapi` is an `OpenapiDescription`: an
+ * object carrying nothing but a `description`.
+ */
+function openapiIsDescriptionOnly(
+  openapi: OpenapiDescription | OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes,
+): boolean {
+  return isObject(openapi) && Object.keys(openapi).every(key => key === 'description')
 }
 
 function baseDbType(dreamColumnInfo: DreamColumnInfo) {
@@ -292,15 +389,24 @@ export class UseCustomOpenapiForJson extends Error {
   }
 
   public override get message() {
-    return `Use custom OpenAPI declaration (OpenapiSchemaBodyShorthand) to define shape of json and jsonb fields:
-Dream model: ${this.dreamClass.sanitizedName}
+    const modelName = this.dreamClass.sanitizedName
+    return `The OpenAPI shape of a json/jsonb column cannot be inferred from the database:
+Dream model: ${modelName}
 Attribute: ${this.field}
 
-For example:
+Declare the column's shape once on the model with @deco.JSON. Serializer
+attributes, request bodies and Params.for all read that declaration:
 
-export const MySerializer = (data: MyModel) =>
-  DreamSerializer(MyModel, data)
-    .jsonAttribute('myJson', {
+export default class ${modelName} extends ApplicationModel {
+  @deco.JSON({ type: 'object', properties: { hello: 'string' } })
+  public ${this.field}: DreamColumn<${modelName}, '${this.field}'>
+}
+
+Or, for a column without @deco.JSON, pass the shape to this serializer's attribute:
+
+export const MySerializer = (data: ${modelName}) =>
+  DreamSerializer(${modelName}, data)
+    .attribute('${this.field}', {
       openapi: {
         type: 'object', properties: { hello: 'string' },
       },

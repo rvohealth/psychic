@@ -186,6 +186,7 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
     associations: {
       user: {
         type: 'BelongsTo',
@@ -269,6 +270,7 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
     associations: {
       user: {
         type: 'BelongsTo',
@@ -336,6 +338,7 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
     associations: {
       post: {
         type: 'BelongsTo',
@@ -419,6 +422,7 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
     associations: {},
   },
   model_without_serializers: {
@@ -467,6 +471,7 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
     associations: {},
   },
   pets: {
@@ -686,6 +691,7 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
     associations: {
       user: {
         type: 'BelongsTo',
@@ -769,6 +775,7 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
     associations: {
       comments: {
         type: 'HasMany',
@@ -845,6 +852,7 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
     associations: {},
   },
   users: {
@@ -1423,6 +1431,7 @@ export const schema = {
       'password',
       'secret',
     ],
+    jsonDecoratedColumns: ['requiredFavoriteJsonbs', 'requiredJsonbData'],
     associations: {
       balloons: {
         type: 'HasMany',

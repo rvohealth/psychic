@@ -116,7 +116,11 @@ export default class User extends ApplicationModel {
   public favoriteJsons: DreamColumn<User, 'favoriteJsons'>
   public requiredFavoriteJsons: DreamColumn<User, 'requiredFavoriteJsons'>
   public favoriteJsonbs: DreamColumn<User, 'favoriteJsonbs'>
+
+  // a jsonb[] column's @deco.JSON shape describes each element
+  @deco.JSON({ type: 'object', properties: { label: 'string', score: 'number' }, required: ['label'] })
   public requiredFavoriteJsonbs: DreamColumn<User, 'requiredFavoriteJsonbs'>
+
   public favoriteTexts: DreamColumn<User, 'favoriteTexts'>
   public requiredFavoriteTexts: DreamColumn<User, 'requiredFavoriteTexts'>
   public favoriteNumerics: DreamColumn<User, 'favoriteNumerics'>
@@ -136,7 +140,19 @@ export default class User extends ApplicationModel {
   public jsonData: DreamColumn<User, 'jsonData'>
   public requiredJsonData: DreamColumn<User, 'requiredJsonData'>
   public jsonbData: DreamColumn<User, 'jsonbData'>
+
+  // declared once here, and read by serializers, request bodies and Params.for.
+  // The other json/jsonb columns stay undeclared. Nothing is required, so the
+  // column's '{}' default matches the declaration.
+  @deco.JSON({
+    type: 'object',
+    properties: {
+      theme: { type: 'string', enum: ['light', 'dark'] },
+      fontSize: 'integer',
+    },
+  })
   public requiredJsonbData: DreamColumn<User, 'requiredJsonbData'>
+
   public uuid: DreamColumn<User, 'uuid'>
   public optionalUuid: DreamColumn<User, 'optionalUuid'>
 
