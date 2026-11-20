@@ -36,6 +36,7 @@ import isObject from '../helpers/isObject.js'
 import allSerializersFromHandWrittenOpenapi from './helpers/allSerializersFromHandWrittenOpenapi.js'
 import allSerializersToRefsInOpenapi from './helpers/allSerializersToRefsInOpenapi.js'
 import { dreamColumnOpenapiShape } from './helpers/dreamColumnOpenapiShape.js'
+import polymorphicDelegatedAttributeTarget from './helpers/polymorphicDelegatedAttributeTarget.js'
 import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
 import { openapiSchemaAcceptsNull, openapiSchemaWithNull } from './helpers/openapiSchemaNullability.js'
 import openapiShorthandToOpenapi from './helpers/openapiShorthandToOpenapi.js'
@@ -285,9 +286,20 @@ export default class SerializerOpenapiRenderer {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 | undefined = source['getAssociationMetadata'](attribute.targetName)
               const associatedModelOrModels = association?.modelCB()
-              target = Array.isArray(associatedModelOrModels)
-                ? associatedModelOrModels[0]
-                : associatedModelOrModels
+              // a polymorphic association has several target models; a shape
+              // declared on them must be identical across them (or throw)
+              target =
+                Array.isArray(associatedModelOrModels) && associatedModelOrModels.length > 1
+                  ? polymorphicDelegatedAttributeTarget({
+                      source: `Serializer ${this.globalName}`,
+                      attributeName: attribute.name,
+                      associationName: attribute.targetName,
+                      targets: associatedModelOrModels,
+                      openapi,
+                    })
+                  : Array.isArray(associatedModelOrModels)
+                    ? associatedModelOrModels[0]
+                    : associatedModelOrModels
               delegatedAssociationOptional = !!(association as BelongsToStatement<any, any, any, any>)
                 ?.optional
             } else if (attributeType === 'delegatedAttribute') {

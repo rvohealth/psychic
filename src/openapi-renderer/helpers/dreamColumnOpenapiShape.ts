@@ -229,11 +229,13 @@ function expandModelDeclaredShape(
 const SHAPE_KEYWORDS = ['type', 'anyOf', 'oneOf', 'allOf', '$ref', '$schema', '$serializer', '$serializable']
 
 /**
+ * @internal
+ *
  * Whether a serializer attribute's `openapi` carries a shape (a primitive
  * shorthand, or an object with a `type`, a composition or a reference) rather
  * than only describing the value.
  */
-function openapiCarriesShape(
+export function openapiCarriesShape(
   openapi: OpenapiDescription | OpenapiSchemaBodyShorthand | OpenapiShorthandPrimitiveTypes | undefined,
 ): boolean {
   if (openapi === undefined) return false
