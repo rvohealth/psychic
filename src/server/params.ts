@@ -26,6 +26,7 @@ import {
 } from '../controller/index.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
+import DeclaredShapeDoesNotCompile from '../error/openapi/DeclaredShapeDoesNotCompile.js'
 import alternateParamName from '../helpers/alternateParamName.js'
 import isArrayParamName from '../helpers/isArrayParamName.js'
 import isObject from '../helpers/isObject.js'
@@ -35,6 +36,7 @@ import { Inc } from '../i18n/conf/types.js'
 import {
   declaredJSONColumnShape,
   dreamColumnOpenapiShape,
+  type JSONColumnShapeStatement,
   type VirtualAttributeStatement,
 } from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
@@ -991,6 +993,58 @@ function declaredShapeSchema(dreamClass: typeof Dream, columnName: string): Open
   return memoizedPerColumn(declaredShapeSchemas, dreamClass, columnName, () =>
     dreamColumnOpenapiShape(`${dreamClass.sanitizedName} Params.for`, dreamClass, columnName as never),
   )
+}
+
+/**
+ * @internal
+ *
+ * Builds, while `PsychicApp.init` runs, the validator `Params.for` checks each
+ * declared shape with (every `@deco.JSON` column, and every
+ * `@deco.Virtual`/`@deco.Encrypted` attribute whose shape is validated rather
+ * than cast), so a declaration AJV cannot compile is refused at boot rather
+ * than answering every request that submits it with a 500, and a request
+ * reuses the validator built here.
+ */
+export function compileDeclaredShapeValidators(dreamClass: typeof Dream): void {
+  const jsonColumnShapes = (dreamClass['jsonColumnShapes'] as JSONColumnShapeStatement[] | undefined) ?? []
+  for (const { column } of jsonColumnShapes) compileDeclaredShapeValidator(dreamClass, column, '@deco.JSON')
+
+  const encryptedProperties = new Set(
+    ((dreamClass['encryptedAttributes'] as { property: string }[] | undefined) ?? []).map(
+      statement => statement.property,
+    ),
+  )
+  const virtualAttributes = (dreamClass['virtualAttributes'] as VirtualAttributeStatement[] | undefined) ?? []
+  for (const { property, type } of virtualAttributes) {
+    // a primitive is cast rather than validated (see castVirtualAttribute)
+    if (type === undefined || primitiveCastFromOpenapi(type)) continue
+    compileDeclaredShapeValidator(
+      dreamClass,
+      property,
+      encryptedProperties.has(property) ? '@deco.Encrypted' : '@deco.Virtual',
+    )
+  }
+}
+
+function compileDeclaredShapeValidator(
+  dreamClass: typeof Dream,
+  columnName: string,
+  decorator: '@deco.JSON' | '@deco.Virtual' | '@deco.Encrypted',
+) {
+  // an error rendering the shape is already named for the declaration
+  declaredShapeSchema(dreamClass, columnName)
+
+  try {
+    declaredShapeValidator(dreamClass, columnName)
+  } catch (cause) {
+    throw new DeclaredShapeDoesNotCompile(
+      dreamClass,
+      columnName,
+      decorator,
+      cause instanceof Error ? cause.message : String(cause),
+      { cause },
+    )
+  }
 }
 
 function declaredShapeValidator(dreamClass: typeof Dream, columnName: string): ValidateFunction {

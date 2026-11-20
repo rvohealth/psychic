@@ -2,11 +2,13 @@ import { CalendarDate, ClockTime, ClockTimeTz, DateTime } from '@rvoh/dream'
 import { PsychicParamsDictionary } from '../../../src/controller/index.js'
 import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../../../src/error/controller/ParamValidationErrors.js'
+import DeclaredShapeDoesNotCompile from '../../../src/error/openapi/DeclaredShapeDoesNotCompile.js'
+import * as ValidateOpenApiSchemaModule from '../../../src/helpers/validateOpenApiSchema.js'
 import type {
   JSONColumnShapeStatement,
   VirtualAttributeStatement,
 } from '../../../src/openapi-renderer/helpers/dreamColumnOpenapiShape.js'
-import Params from '../../../src/server/params.js'
+import Params, { compileDeclaredShapeValidators } from '../../../src/server/params.js'
 import Availability from '../../../test-app/src/app/models/Availability.js'
 import Pet from '../../../test-app/src/app/models/Pet.js'
 import User from '../../../test-app/src/app/models/User.js'
@@ -374,6 +376,60 @@ describe('Params', () => {
           const result: Record<string, unknown> = Params.for({ requiredJsonData }, UserWithMoreJSONColumns)
           expect(result['requiredJsonData']).toBe(requiredJsonData)
           expect(requiredJsonData).toEqual({})
+        })
+      })
+
+      context('a declared shape AJV cannot compile', () => {
+        // PsychicApp.init calls compileDeclaredShapeValidators for every
+        // model (spec/unit/psychic-application/declaredShapeBootCompile.spec.ts)
+        class UserWithUncompilableShape extends User {}
+        ;(
+          UserWithUncompilableShape as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
+        ).jsonColumnShapes = [
+          {
+            column: 'jsonbData',
+            openapi: {
+              type: 'object',
+              properties: { phone: { type: 'string', pattern: '^\\d{3}\\-\\d{4}$' } },
+            },
+          },
+        ]
+
+        it('is refused by compileDeclaredShapeValidators, naming the model, column and decorator', () => {
+          expect(() => compileDeclaredShapeValidators(UserWithUncompilableShape)).toThrow(
+            DeclaredShapeDoesNotCompile,
+          )
+          expect(() => compileDeclaredShapeValidators(UserWithUncompilableShape)).toThrow(
+            /UserWithUncompilableShape declares a shape for "jsonbData" with\n@deco\.JSON/,
+          )
+        })
+      })
+
+      context('a declared shape compiled at boot', () => {
+        class UserWithBootCompiledShape extends User {}
+        ;(
+          UserWithBootCompiledShape as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
+        ).jsonColumnShapes = [
+          {
+            column: 'jsonbData',
+            openapi: {
+              type: 'object',
+              properties: { phone: { type: 'string', pattern: '^\\d{3}-\\d{4}$' } },
+            },
+          },
+        ]
+
+        it('is validated at a request with the validator built at boot, without compiling another', () => {
+          compileDeclaredShapeValidators(UserWithBootCompiledShape)
+          const createValidatorSpy = vi.spyOn(ValidateOpenApiSchemaModule, 'createValidator')
+
+          expect(Params.for({ jsonbData: { phone: '555-1234' } }, UserWithBootCompiledShape)).toEqual({
+            jsonbData: { phone: '555-1234' },
+          })
+          expect(
+            paramErrorsFrom(() => Params.for({ jsonbData: { phone: '5551234' } }, UserWithBootCompiledShape)),
+          ).toEqual({ jsonbData: ['/phone must match pattern "^\\d{3}-\\d{4}$"'] })
+          expect(createValidatorSpy).not.toHaveBeenCalled()
         })
       })
     })
