@@ -175,6 +175,73 @@ describe('DreamSerializer delegatedAttribute through a polymorphic association',
     })
   })
 
+  context('when the targets declare equal shapes in separate declaration objects', () => {
+    // each call builds a new object, so no two targets share a declaration
+    const labelShape = () => ({ type: 'object', properties: { label: 'string' } })
+    const expandedLabelShape = { type: 'object', properties: { label: { type: 'string' } } }
+
+    const jsonTargets = () =>
+      ['JsonComposer', 'JsonArranger'].map(name =>
+        userTarget(name, { jsonColumnShapes: [{ column: 'requiredJsonbData', openapi: labelShape() }] }),
+      ) as [typeof User, typeof User]
+
+    const virtualTargets = () =>
+      ['VirtualComposer', 'VirtualArranger'].map(name =>
+        userTarget(name, {
+          virtualAttributes: [{ property: 'openapiVirtualSpecTest', type: labelShape() }],
+        }),
+      ) as [typeof User, typeof User]
+
+    // renders `attribute` of `target` directly, without delegating to it
+    function renderOnTarget(target: typeof User, attribute: 'requiredJsonbData' | 'openapiVirtualSpecTest') {
+      const MySerializer = (data: User) =>
+        // eslint-disable-next-line @typescript-eslint/no-explicit-any
+        DreamSerializer(target, data).attribute(attribute as any)
+      return new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']().attributes[attribute]
+    }
+
+    it('renders the @deco.JSON shape on every render, also after rendering a target directly', () => {
+      const [first, second] = jsonTargets()
+      const source = petBelongingTo(first, second)
+
+      expect(renderDelegated(source, 'requiredJsonbData')).toEqual(expandedLabelShape)
+      expect(renderDelegated(source, 'requiredJsonbData')).toEqual(expandedLabelShape)
+      expect(renderOnTarget(second, 'requiredJsonbData')).toEqual(expandedLabelShape)
+      expect(renderDelegated(source, 'requiredJsonbData')).toEqual(expandedLabelShape)
+      expect(renderDelegated(petBelongingTo(second, first), 'requiredJsonbData')).toEqual(expandedLabelShape)
+    })
+
+    it('renders the @deco.Virtual shape on every render, also after rendering a target directly', () => {
+      const [first, second] = virtualTargets()
+      const source = petBelongingTo(first, second)
+
+      expect(renderDelegated(source, 'openapiVirtualSpecTest')).toEqual(expandedLabelShape)
+      expect(renderDelegated(source, 'openapiVirtualSpecTest')).toEqual(expandedLabelShape)
+      expect(renderOnTarget(second, 'openapiVirtualSpecTest')).toEqual(expandedLabelShape)
+      expect(renderDelegated(source, 'openapiVirtualSpecTest')).toEqual(expandedLabelShape)
+      expect(renderDelegated(petBelongingTo(second, first), 'openapiVirtualSpecTest')).toEqual(
+        expandedLabelShape,
+      )
+    })
+
+    it('leaves each target model declaration unchanged', () => {
+      const [jsonFirst, jsonSecond] = jsonTargets()
+      const [virtualFirst, virtualSecond] = virtualTargets()
+
+      renderDelegated(petBelongingTo(jsonFirst, jsonSecond), 'requiredJsonbData')
+      renderOnTarget(jsonSecond, 'requiredJsonbData')
+      renderDelegated(petBelongingTo(virtualFirst, virtualSecond), 'openapiVirtualSpecTest')
+      renderOnTarget(virtualSecond, 'openapiVirtualSpecTest')
+
+      for (const target of [jsonFirst, jsonSecond])
+        expect(target['jsonColumnShapes']).toEqual([{ column: 'requiredJsonbData', openapi: labelShape() }])
+      for (const target of [virtualFirst, virtualSecond])
+        expect(target['virtualAttributes']).toEqual([
+          { property: 'openapiVirtualSpecTest', type: labelShape() },
+        ])
+    })
+  })
+
   context('when the targets declare different @deco.JSON shapes', () => {
     it('throws, naming the serializer attribute, the association and each target model', () => {
       const Composer = userTarget('Composer', {

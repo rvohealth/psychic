@@ -498,16 +498,20 @@ export default class OpenapiSegmentExpander {
 
     let referencedSerializers: SerializerArray = []
     const objectBodySegment = propertySegment as unknown as OpenapiSchemaObjectBase
+    // the expanded properties go into a new object, never back into the
+    // input: the input may be a declaration on a model (`@deco.JSON`,
+    // `@deco.Virtual`, `@deco.Encrypted`) or a serializer, which every later
+    // render reads (and compares) as declared
+    const properties: Record<string, OpenapiSchemaBody> = {}
 
     Object.keys(objectBodySegment || {}).forEach(key => {
       // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
       const results = this.recursivelyParseBody((objectBodySegment as any)[key])
       referencedSerializers = [...referencedSerializers, ...results.referencedSerializers]
-      ;(propertySegment as Record<string, OpenapiSchemaBody | OpenapiSchemaBodyShorthand>)[key] =
-        results.openapi
+      properties[key] = results.openapi
     })
 
-    return { referencedSerializers, openapi: propertySegment as OpenapiSchemaBody }
+    return { referencedSerializers, openapi: properties as unknown as OpenapiSchemaBody }
   }
 
   /**
