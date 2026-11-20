@@ -72,14 +72,17 @@ export default class Params {
    * A value for a column or attribute whose shape the model declares
    * (`@deco.JSON`, `@deco.Virtual`, `@deco.Encrypted`) must match that
    * declaration, whatever the endpoint's OpenAPI says and whether or not
-   * request validation is on: objects, arrays, nested values and enums are
-   * checked against it, and a primitive is cast as any column's is, then
-   * checked against the declared enum. A `@deco.JSON` column, or an
-   * `@deco.Encrypted` attribute, accepts `null` when its column allows null
-   * (or its shape does). A `@deco.JSON` column never accepts a string (nor a
-   * string element of a json[]/jsonb[] column), which Dream would store as raw
-   * JSON text. The check is Dream's, the same one every save runs. A declared
-   * value is returned as submitted.
+   * request validation is on. A `@deco.JSON` value, and a
+   * `@deco.Virtual`/`@deco.Encrypted` value whose shape is an object, an array
+   * of objects or a composition, is checked as submitted with Dream's check,
+   * the same one every save runs, and is returned as submitted. A primitive
+   * `@deco.Virtual`/`@deco.Encrypted` shape (or an array of primitives) is cast
+   * as any column's is and then checked only against the declared enum; its
+   * other constraints (`maxLength`, `pattern`, `minimum` and the like) are not
+   * checked here. A `@deco.JSON` column, or an `@deco.Encrypted` attribute,
+   * accepts `null` when its column allows null (or its shape does). A
+   * `@deco.JSON` column never accepts a string (nor a string element of a
+   * json[]/jsonb[] column), which Dream would store as raw JSON text.
    */
   public static for<
     T extends typeof Dream,
