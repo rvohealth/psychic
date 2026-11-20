@@ -28,18 +28,11 @@ interface DreamWithColumns {
 
 interface EncryptedAttributeStatement {
   property: string
-  encryptedColumnName: string
 }
 
 type ModelDeclaration =
   | { kind: 'virtual'; shape: DeclaredShape | undefined; effectiveShape: OpenapiSchemaBody | undefined }
-  | {
-      kind: 'encrypted'
-      shape: DeclaredShape
-      effectiveShape: OpenapiSchemaBody
-      columnFreeShape: OpenapiSchemaBody
-      allowNull: boolean
-    }
+  | { kind: 'encrypted'; shape: DeclaredShape; effectiveShape: OpenapiSchemaBody }
   | { kind: 'json'; shape: DeclaredShape; dbType: string; isArray: boolean; allowNull: boolean }
 
 /**
@@ -61,10 +54,11 @@ type ModelDeclaration =
  *   array-ness; `@deco.Virtual` and `@deco.Encrypted` declarations (either
  *   decorator) with deeply equal effective shapes, the shape each renders,
  *   `null` from an `@deco.Encrypted` backing column included. Between
- *   `@deco.Encrypted` targets alone, as between json columns, a backing
- *   column's nullability is not compared: a nullable column is preferred, so
- *   the rendered shape is nullable when any target's column is, whatever the
- *   order of the targets
+ *   `@deco.Encrypted` targets alone, as between json columns, nullability is
+ *   not compared, whether it comes from a backing column or is declared in the
+ *   shape: each effective shape is compared widened to accept `null`, and a
+ *   target whose effective shape accepts `null` is preferred, so the rendered
+ *   shape is nullable when any target's is, whatever the order of the targets
  *
  * Anything else throws `PolymorphicDelegatedAttributeShapesDiffer`, when the
  * serializer's OpenAPI is built (at boot, and by sync).
@@ -115,9 +109,25 @@ export default function polymorphicDelegatedAttributeTarget({
     )
 
   const nullableIndex = declarations.findIndex(
-    declaration => declaration?.kind !== 'virtual' && declaration?.allowNull,
+    declaration => declaration !== undefined && acceptsNull(declaration),
   )
   return targets[nullableIndex === -1 ? 0 : nullableIndex]!
+}
+
+// whether the target renders a nullable shape: a json column by its
+// nullability, a `@deco.Virtual`/`@deco.Encrypted` attribute by the shape it
+// renders
+function acceptsNull(declaration: ModelDeclaration): boolean {
+  switch (declaration.kind) {
+    case 'json':
+      return declaration.allowNull
+    case 'encrypted':
+    case 'virtual':
+      return (
+        declaration.effectiveShape !== undefined &&
+        DreamApp.system.openapiSchemaAcceptsNull(declaration.effectiveShape)
+      )
+  }
 }
 
 function modelDeclaration(dreamClass: typeof Dream, attributeName: string): ModelDeclaration | undefined {
@@ -134,17 +144,8 @@ function modelDeclaration(dreamClass: typeof Dream, attributeName: string): Mode
     // added from its backing column
     const effectiveShape = DreamApp.system.declaredShapeSchema(dreamClass, attributeName)
 
-    if (encryptedStatement && statement?.type !== undefined && effectiveShape !== undefined) {
-      const allowNull = columnMetadata(dreamClass, encryptedStatement.encryptedColumnName)?.allowNull ?? false
-      const shape = encryptedDeclaredShape(statement.type, allowNull)
-      return {
-        kind: 'encrypted',
-        shape,
-        effectiveShape,
-        columnFreeShape: DreamApp.system.expandOpenapiShorthand(shape),
-        allowNull,
-      }
-    }
+    if (encryptedStatement && statement?.type !== undefined && effectiveShape !== undefined)
+      return { kind: 'encrypted', shape: statement.type, effectiveShape }
 
     return { kind: 'virtual', shape: statement?.type, effectiveShape }
   }
@@ -163,25 +164,14 @@ function columnMetadata(dreamClass: typeof Dream, column: string): ColumnMetadat
   return dream.schema[dream.table]?.columns[column]
 }
 
-/**
- * The shape an `@deco.Encrypted` attribute declares, apart from its backing
- * column's nullability. A bare `@deco.Encrypted()` registers the shape Dream
- * infers from its column, `['string', 'null']` when the column allows null and
- * `'string'` otherwise; both are `'string'` here, since Dream adds `null` from
- * the column to either (an explicit `['string', 'null']` on a nullable column
- * describes the same values).
- */
-function encryptedDeclaredShape(shape: DeclaredShape, columnAllowsNull: boolean): DeclaredShape {
-  return columnAllowsNull && isDeepStrictEqual(shape, ['string', 'null']) ? 'string' : shape
-}
-
 // what must be identical across targets: a json column's json-vs-jsonb
 // storage does not change the shape, and its nullability is its own fact,
 // unioned into the rendered shape rather than compared. `@deco.Virtual` and
 // `@deco.Encrypted` declarations are compared by shape, not decorator: by the
 // shape each renders when a `@deco.Virtual` target is among them, else (only
-// `@deco.Encrypted` targets) without their backing columns' nullability,
-// which is unioned like a json column's
+// `@deco.Encrypted` targets) by the shape each renders widened to accept
+// `null`, so that nullability, from a backing column or declared, is unioned
+// like a json column's
 function comparableDeclaration(declaration: ModelDeclaration, compareEffectiveShapes: boolean) {
   switch (declaration.kind) {
     case 'json':
@@ -189,11 +179,17 @@ function comparableDeclaration(declaration: ModelDeclaration, compareEffectiveSh
     case 'encrypted':
       return {
         kind: 'attribute',
-        shape: compareEffectiveShapes ? declaration.effectiveShape : declaration.columnFreeShape,
+        shape: compareEffectiveShapes ? declaration.effectiveShape : withNull(declaration.effectiveShape),
       }
     case 'virtual':
       return { kind: 'attribute', shape: declaration.effectiveShape }
   }
+}
+
+function withNull(shape: OpenapiSchemaBody) {
+  return DreamApp.system.openapiSchemaAcceptsNull(shape)
+    ? shape
+    : DreamApp.system.openapiSchemaWithNull(shape)
 }
 
 function describeDeclaration(declaration: ModelDeclaration | undefined, attributeName: string): string {
@@ -205,8 +201,17 @@ function describeDeclaration(declaration: ModelDeclaration | undefined, attribut
       ? '@deco.Virtual with no declared shape'
       : `@deco.Virtual ${JSON.stringify(declaration.shape)}`
 
-  if (declaration.kind === 'encrypted')
-    return `@deco.Encrypted ${JSON.stringify(declaration.shape)} on a ${declaration.allowNull ? 'nullable' : 'non-null'} column`
+  if (declaration.kind === 'encrypted') {
+    // the effective shape differs from the declared one when the backing
+    // column adds `null` to it
+    const rendered = isDeepStrictEqual(
+      declaration.effectiveShape,
+      DreamApp.system.expandOpenapiShorthand(declaration.shape),
+    )
+      ? ''
+      : `, rendered as ${JSON.stringify(declaration.effectiveShape)}`
+    return `@deco.Encrypted ${JSON.stringify(declaration.shape)}${rendered}`
+  }
 
   return `@deco.JSON ${JSON.stringify(declaration.shape)} on a ${declaration.dbType} column`
 }

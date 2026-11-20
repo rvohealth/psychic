@@ -411,6 +411,82 @@ describe('DreamSerializer delegatedAttribute through a polymorphic association',
       })
     })
 
+    context('when the targets describe the same values with null declared on some of them', () => {
+      it('renders an identical ["string", "null"] over a nullable and a non-null column, whatever the order of the targets', () => {
+        const NullableSecretKeeper = secretTarget('NullableSecretKeeper', ['string', 'null'])
+        const NonNullSecretKeeper = secretTarget(
+          'NonNullSecretKeeper',
+          ['string', 'null'],
+          nonNullBackingColumn,
+        )
+
+        for (const source of [
+          petBelongingTo(NullableSecretKeeper, NonNullSecretKeeper),
+          petBelongingTo(NonNullSecretKeeper, NullableSecretKeeper),
+        ]) {
+          expect(renderDelegated(source, 'secret')).toEqual({ type: ['string', 'null'] })
+        }
+      })
+
+      it('renders a declared ["integer", "null"] beside "integer" over nullable columns, whatever the order of the targets', () => {
+        const DeclaredNullSecretKeeper = secretTarget('DeclaredNullSecretKeeper', ['integer', 'null'])
+        const ColumnNullSecretKeeper = secretTarget('ColumnNullSecretKeeper', 'integer')
+
+        for (const source of [
+          petBelongingTo(DeclaredNullSecretKeeper, ColumnNullSecretKeeper),
+          petBelongingTo(ColumnNullSecretKeeper, DeclaredNullSecretKeeper),
+        ]) {
+          expect(renderDelegated(source, 'secret')).toEqual({ type: ['integer', 'null'] })
+        }
+      })
+
+      it('renders a bare @deco.Encrypted() beside an explicit ["string", "null"] over a non-null column, whatever the order of the targets', () => {
+        // User#secret, a bare @deco.Encrypted() over a nullable column
+        const NonNullSecretKeeper = secretTarget(
+          'NonNullSecretKeeper',
+          ['string', 'null'],
+          nonNullBackingColumn,
+        )
+
+        for (const source of [
+          petBelongingTo(User, NonNullSecretKeeper),
+          petBelongingTo(NonNullSecretKeeper, User),
+        ]) {
+          expect(renderDelegated(source, 'secret')).toEqual({ type: ['string', 'null'] })
+        }
+      })
+
+      it('renders an object-form { type: ["integer", "null"] } beside "integer" over a non-null column nullable, whatever the order of the targets', () => {
+        const DeclaredNullSecretKeeper = secretTarget(
+          'DeclaredNullSecretKeeper',
+          { type: ['integer', 'null'] },
+          nonNullBackingColumn,
+        )
+        const NonNullSecretKeeper = secretTarget('NonNullSecretKeeper', 'integer', nonNullBackingColumn)
+
+        for (const source of [
+          petBelongingTo(DeclaredNullSecretKeeper, NonNullSecretKeeper),
+          petBelongingTo(NonNullSecretKeeper, DeclaredNullSecretKeeper),
+        ]) {
+          const rendered = renderDelegated(source, 'secret')
+          expect(rendered).toEqual({ type: ['integer', 'null'] })
+          expect(validates(rendered, null)).toBe(true)
+        }
+      })
+    })
+
+    it('names each target declaration as declared when the shapes differ', () => {
+      const NonNullSecretKeeper = secretTarget(
+        'NonNullSecretKeeper',
+        ['integer', 'null'],
+        nonNullBackingColumn,
+      )
+
+      expect(() => renderDelegated(petBelongingTo(User, NonNullSecretKeeper), 'secret')).toThrow(
+        /\n {2}User: @deco\.Encrypted \["string","null"\]\n {2}NonNullSecretKeeper: @deco\.Encrypted \["integer","null"\]\n/,
+      )
+    })
+
     context('when another target declares the attribute with @deco.Virtual', () => {
       // `secret` as a plain @deco.Virtual: no encrypted attribute, so no
       // backing column adds null to its shape
@@ -449,6 +525,17 @@ describe('DreamSerializer delegatedAttribute through a polymorphic association',
         ]) {
           expect(() => renderDelegated(source, 'secret')).toThrow(PolymorphicDelegatedAttributeShapesDiffer)
         }
+      })
+
+      it('names the null the backing column adds to the @deco.Encrypted shape', () => {
+        const NullableSecretKeeper = secretTarget('NullableSecretKeeper', 'integer')
+        const VirtualSecretKeeper = virtualSecretTarget('VirtualSecretKeeper', 'integer')
+
+        expect(() =>
+          renderDelegated(petBelongingTo(NullableSecretKeeper, VirtualSecretKeeper), 'secret'),
+        ).toThrow(
+          /\n {2}NullableSecretKeeper: @deco\.Encrypted "integer", rendered as {"type":\["integer","null"\]}\n {2}VirtualSecretKeeper: @deco\.Virtual "integer"\n/,
+        )
       })
     })
 
