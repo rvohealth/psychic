@@ -306,7 +306,10 @@ describe('Params', () => {
         ).jsonColumnShapes = [
           { column: 'jsonbData', openapi: { type: 'object', properties: { hello: 'string' } } },
           { column: 'favoriteJsonbs', openapi: { type: 'object', properties: { hello: 'string' } } },
-          { column: 'jsonData', openapi: 'string' },
+          // shapes that admit a string, which Dream refuses at boot; set here
+          // directly, as a declaration that got past that refusal would be
+          { column: 'jsonData', openapi: { anyOf: [{ type: 'object' }, { type: 'string' }] } },
+          { column: 'favoriteJsons', openapi: { anyOf: [{ type: 'object' }, { type: 'string' }] } },
           {
             column: 'requiredJsonData',
             // `default` is not in Dream's shorthand types; a declaration that
@@ -325,13 +328,45 @@ describe('Params', () => {
           })
         })
 
-        it('permits a scalar the declaration allows, which the object-only json cast would reject', () => {
-          expect(Params.for({ jsonData: 'just a string' }, UserWithMoreJSONColumns)).toEqual({
-            jsonData: 'just a string',
+        // Dream stores a string for a json column as raw JSON text, so a
+        // string is refused even when the declaration admits one
+        it.each([
+          ['a string', 'just a string'],
+          ['JSON text', '{"admin":true}'],
+        ])('rejects %s, though the declaration admits a string', (_, jsonData) => {
+          expect(paramErrorsFrom(() => Params.for({ jsonData }, UserWithMoreJSONColumns))).toEqual({
+            jsonData: ['must not be a string (send the JSON value itself, not JSON text)'],
           })
-          expect(() => Params.for({ jsonData: { hello: 'world' } }, UserWithMoreJSONColumns)).toThrow(
-            ParamValidationErrors,
+        })
+
+        it('rejects JSON text where the declaration admits only an object', () => {
+          expect(
+            paramErrorsFrom(() => Params.for({ jsonbData: '{"hello":"world"}' }, UserWithMoreJSONColumns)),
+          ).toEqual({
+            jsonbData: ['must not be a string (send the JSON value itself, not JSON text)'],
+          })
+        })
+
+        it('rejects a string element of an array column, though the declaration admits one', () => {
+          expect(
+            paramErrorsFrom(() =>
+              Params.for({ favoriteJsons: [{ hello: 'a' }, '{"admin":true}'] }, UserWithMoreJSONColumns),
+            ),
+          ).toEqual({
+            favoriteJsons: ['/1 must not be a string (send the JSON value itself, not JSON text)'],
+          })
+        })
+
+        it('returns an object or array of objects as submitted', () => {
+          const jsonData = { admin: true }
+          const favoriteJsons = [{ hello: 'a' }, { hello: 'b' }]
+          const result: Record<string, unknown> = Params.for(
+            { jsonData, favoriteJsons },
+            UserWithMoreJSONColumns,
           )
+          expect(result).toEqual({ jsonData, favoriteJsons })
+          expect(result['jsonData']).toBe(jsonData)
+          expect(result['favoriteJsons']).toBe(favoriteJsons)
         })
 
         it('injects no declared defaults', () => {

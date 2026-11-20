@@ -77,8 +77,9 @@ export default class Params {
    * request validation is on: objects, arrays, nested values and enums are
    * checked against it, and a primitive is cast as any column's is, then
    * checked against the declared enum. A `@deco.JSON` column accepts `null`
-   * only when the column allows null. A declared value is returned as
-   * submitted.
+   * only when the column allows null, and never a string (nor a string element
+   * of a json[]/jsonb[] column), which Dream would store as raw JSON text. A
+   * declared value is returned as submitted.
    */
   public static for<
     T extends typeof Dream,
@@ -160,7 +161,10 @@ export default class Params {
           // the `@deco.JSON` declaration (with the column's nullability and,
           // for an array column, applied to each element) stands in for the
           // object-only json cast, so a scalar or array the declaration
-          // allows passes
+          // allows passes. A string never does, whatever the declaration
+          // says: Dream stores it as raw JSON text rather than as a JSON
+          // string (and refuses a declaration that admits one at boot).
+          throwIfStringForJSONColumn(columnName, paramValue, columnMetadata.isArray)
           returnObj[columnName as keyof typeof returnObj] = validateAgainstDeclaredShape(
             dreamClass,
             columnName,
@@ -1020,6 +1024,27 @@ function validateAgainstDeclaredShape(
       error.instancePath ? `${error.instancePath} ${error.message}` : (error.message ?? 'is invalid'),
     ),
   )
+}
+
+/**
+ * A string for a `@deco.JSON` column (or, for a json[]/jsonb[] column, as an
+ * element) is a client error: Dream's json setter takes a string as
+ * already-encoded JSON text, so `'{"admin":true}'` would be stored as an object
+ * the declared shape never saw, and any other string fails at INSERT. Dream
+ * refuses a declaration that admits a string at boot; this keeps a value from
+ * reaching the setter as text even when a declaration gets past that.
+ */
+function throwIfStringForJSONColumn(
+  columnName: string,
+  paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+  isArrayColumn: boolean,
+) {
+  const message = 'must not be a string (send the JSON value itself, not JSON text)'
+  if (typeof paramValue === 'string') throw new ParamValidationError(columnName, [message])
+  if (!isArrayColumn || !Array.isArray(paramValue)) return
+
+  const stringIndex = (paramValue as unknown[]).findIndex(element => typeof element === 'string')
+  if (stringIndex !== -1) throw new ParamValidationError(columnName, [`/${stringIndex} ${message}`])
 }
 
 /**
