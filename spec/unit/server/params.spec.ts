@@ -130,6 +130,28 @@ describe('Params', () => {
             property: 'enumArrayVirtual',
             type: { type: 'array', items: { type: 'string', enum: ['red', 'green'] } },
           },
+          {
+            property: 'dateEnumVirtual',
+            type: { type: 'string', format: 'date', enum: ['2026-11-19', '2026-11-20'] },
+          },
+          {
+            property: 'dateTimeEnumVirtual',
+            type: { type: 'string', format: 'date-time', enum: ['2026-11-19T10:00:00.000Z'] },
+          },
+          {
+            property: 'dateEnumArrayVirtual',
+            type: {
+              type: 'array',
+              items: { type: 'string', format: 'date', enum: ['2026-11-19', '2026-11-20'] },
+            },
+          },
+          {
+            property: 'dateTimeEnumArrayVirtual',
+            type: {
+              type: 'array',
+              items: { type: 'string', format: 'date-time', enum: ['2026-11-19T10:00:00.000Z'] },
+            },
+          },
           { property: 'booleanVirtual', type: 'boolean' },
           { property: 'integerVirtual', type: 'integer' },
           { property: 'jsonVirtual', type: 'json' },
@@ -207,6 +229,75 @@ describe('Params', () => {
           expect(() => Params.for({ enumArrayVirtual: 'red' }, UserWithShapedVirtuals)).toThrow(
             ParamValidationErrors,
           )
+        })
+
+        // Fixed dates, parsed in UTC (`zone: 'UTC'` in the cast), so these do
+        // not depend on the machine's time zone or today's date.
+        context('a declared enum on a date or date-time', () => {
+          it('checks the submitted string, and returns the hydrated value', () => {
+            const result: Record<string, unknown> = Params.for(
+              { dateEnumVirtual: '2026-11-20', dateTimeEnumVirtual: '2026-11-19T10:00:00.000Z' },
+              UserWithShapedVirtuals,
+            )
+            expect(result['dateEnumVirtual']).toBeInstanceOf(CalendarDate)
+            expect((result['dateEnumVirtual'] as CalendarDate).toISO()).toEqual('2026-11-20')
+            expect(result['dateTimeEnumVirtual']).toBeInstanceOf(DateTime)
+            expect((result['dateTimeEnumVirtual'] as DateTime).toISO()).toEqual('2026-11-19T10:00:00.000000Z')
+          })
+
+          it('rejects a date or date-time outside the enum', () => {
+            expect(
+              paramErrorsFrom(() =>
+                Params.for(
+                  { dateEnumVirtual: '2026-11-21', dateTimeEnumVirtual: '2026-11-19T11:00:00.000Z' },
+                  UserWithShapedVirtuals,
+                ),
+              ),
+            ).toEqual({
+              dateEnumVirtual: ['did not match expected enum values'],
+              dateTimeEnumVirtual: ['did not match expected enum values'],
+            })
+          })
+
+          it('compares the string as submitted, as OpenAPI does, not the instant it names', () => {
+            expect(
+              paramErrorsFrom(() =>
+                Params.for({ dateTimeEnumVirtual: '2026-11-19T10:00:00Z' }, UserWithShapedVirtuals),
+              ),
+            ).toEqual({ dateTimeEnumVirtual: ['did not match expected enum values'] })
+          })
+
+          it('checks each element of an array, and returns the hydrated elements', () => {
+            const result: Record<string, unknown> = Params.for(
+              {
+                dateEnumArrayVirtual: ['2026-11-19', '2026-11-20'],
+                dateTimeEnumArrayVirtual: ['2026-11-19T10:00:00.000Z'],
+              },
+              UserWithShapedVirtuals,
+            )
+            expect((result['dateEnumArrayVirtual'] as CalendarDate[]).map(date => date.toISO())).toEqual([
+              '2026-11-19',
+              '2026-11-20',
+            ])
+            expect(
+              (result['dateTimeEnumArrayVirtual'] as DateTime[]).map(dateTime => dateTime.toISO()),
+            ).toEqual(['2026-11-19T10:00:00.000000Z'])
+
+            expect(
+              paramErrorsFrom(() =>
+                Params.for(
+                  {
+                    dateEnumArrayVirtual: ['2026-11-19', '2026-11-21'],
+                    dateTimeEnumArrayVirtual: ['2026-11-19T10:00:00.000Z', '2026-11-19T11:00:00.000Z'],
+                  },
+                  UserWithShapedVirtuals,
+                ),
+              ),
+            ).toEqual({
+              dateEnumArrayVirtual: ['did not match expected enum values'],
+              dateTimeEnumArrayVirtual: ['did not match expected enum values'],
+            })
+          })
         })
 
         it('still casts a primitive as before, so query-string values pass', () => {

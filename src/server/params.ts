@@ -267,8 +267,18 @@ export default class Params {
 
     const allowedValues = declaredEnumValues(declaredShapeSchema(dreamClass, columnName))
     if (allowedValues && castValue !== null && castValue !== undefined) {
-      const castValues: unknown[] = Array.isArray(castValue) ? castValue : [castValue]
-      if (!castValues.every(value => allowedValues.includes(value)))
+      // A date or date-time is checked as the JSON string it arrives as, as
+      // the OpenAPI enum checks it: the cast hydrates it into a CalendarDate
+      // or DateTime, which never equals a string. Every other primitive is
+      // checked after the cast, so a query-string number or boolean still
+      // matches a numeric or boolean enum.
+      const comparedValue = HYDRATED_DATE_CAST_TYPES.includes(primitiveCast.expectedType)
+        ? jsonPrimitiveForEnumCheck(paramValue)
+        : castValue
+      const comparedValues = (Array.isArray(comparedValue) ? comparedValue : [comparedValue]).filter(
+        value => value !== null && value !== undefined,
+      )
+      if (!comparedValues.every(value => allowedValues.includes(value)))
         throw new ParamValidationError(columnName, ['did not match expected enum values'])
     }
 
@@ -1110,6 +1120,20 @@ function declaredEnumValues(schema: OpenapiSchemaBody): readonly unknown[] | nul
   if (Array.isArray(schemaRecord.enum)) return schemaRecord.enum as unknown[]
   if (Array.isArray(schemaRecord.items?.enum)) return schemaRecord.items.enum as unknown[]
   return null
+}
+
+const HYDRATED_DATE_CAST_TYPES: PsychicParamsPrimitiveLiteral[] = ['date', 'date[]', 'datetime', 'datetime[]']
+
+/**
+ * A submitted date or date-time (or array of them) as the JSON primitive an
+ * enum lists: a string trimmed as the cast trims it, or the JSON form of a
+ * CalendarDate or DateTime passed in directly.
+ */
+function jsonPrimitiveForEnumCheck(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(jsonPrimitiveForEnumCheck)
+  if (typeof value === 'string') return value.trim()
+  if (value instanceof CalendarDate || value instanceof DateTime) return value.toJSON()
+  return value
 }
 
 /**
