@@ -38,8 +38,6 @@ import allSerializersToRefsInOpenapi from './helpers/allSerializersToRefsInOpena
 import { dreamColumnOpenapiShape } from './helpers/dreamColumnOpenapiShape.js'
 import polymorphicDelegatedAttributeTarget from './helpers/polymorphicDelegatedAttributeTarget.js'
 import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
-import { openapiSchemaAcceptsNull, openapiSchemaWithNull } from './helpers/openapiSchemaNullability.js'
-import openapiShorthandToOpenapi from './helpers/openapiShorthandToOpenapi.js'
 const NULL_OBJECT_OPENAPI: OpenapiSchemaBody = { type: 'null' }
 
 // what a flattened rendersOne or customAttribute spreads into the object, an
@@ -254,7 +252,7 @@ export default class SerializerOpenapiRenderer {
               )
             } else {
               accumulator[outputAttributeName] = allSerializersToRefsInOpenapi(
-                openapiShorthandToOpenapi(openapi as any),
+                DreamApp.system.openapiShorthandToOpenapi(openapi as any),
               )
             }
 
@@ -322,7 +320,7 @@ export default class SerializerOpenapiRenderer {
                       enumCollector: declarationEnumCollector,
                     },
                   )
-                : openapiShorthandToOpenapi(openapi as any),
+                : DreamApp.system.openapiShorthandToOpenapi(openapi as any),
             )
 
             const optional =
@@ -330,8 +328,8 @@ export default class SerializerOpenapiRenderer {
               ((attribute.options as { optional?: boolean }).optional ?? delegatedAssociationOptional)
 
             const finalSchema: OpenapiSchemaBodyShorthand =
-              optional && !openapiSchemaAcceptsNull(resolvedSchema)
-                ? openapiSchemaWithNull(resolvedSchema)
+              optional && !DreamApp.system.openapiSchemaAcceptsNull(resolvedSchema)
+                ? DreamApp.system.openapiSchemaWithNull(resolvedSchema)
                 : resolvedSchema
 
             accumulator[outputAttributeName] = finalSchema
@@ -623,7 +621,8 @@ export default class SerializerOpenapiRenderer {
       const schema = properties[key]
       if (schema === undefined) continue
       const certain = !maybeNull && shapeKeys.every(({ certain }) => certain[key])
-      if (!certain && !openapiSchemaAcceptsNull(schema)) properties[key] = openapiSchemaWithNull(schema)
+      if (!certain && !DreamApp.system.openapiSchemaAcceptsNull(schema))
+        properties[key] = DreamApp.system.openapiSchemaWithNull(schema)
     }
 
     const onlyShape = shapes.length === 1 ? shapes[0] : undefined
@@ -632,7 +631,7 @@ export default class SerializerOpenapiRenderer {
           attributeIndex,
           properties,
           required,
-          ref: allSerializersToRefsInOpenapi(openapiShorthandToOpenapi(onlyShape as any)),
+          ref: allSerializersToRefsInOpenapi(DreamApp.system.openapiShorthandToOpenapi(onlyShape as any)),
         }
       : { attributeIndex, properties, required }
   }
@@ -684,7 +683,9 @@ export default class SerializerOpenapiRenderer {
 
     if (isObject(record.properties)) {
       for (const [key, property] of Object.entries(record.properties as Record<string, any>))
-        keys.schemas[this.setCase(key)] = allSerializersToRefsInOpenapi(openapiShorthandToOpenapi(property))
+        keys.schemas[this.setCase(key)] = allSerializersToRefsInOpenapi(
+          DreamApp.system.openapiShorthandToOpenapi(property),
+        )
     }
 
     if (Array.isArray(record.allOf)) {

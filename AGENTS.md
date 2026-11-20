@@ -58,9 +58,12 @@ OpenAPI shape of a serializer attribute) in both of these places:
 - **At boot, with a runtime check in the package that owns the declaration.**
   In Psychic that is `PsychicApp.init`, which builds the routes and renders
   every OpenAPI document with the same renderer `psy sync` uses. Dream checks
-  its own declarations at class decoration or in the decorator-initialization
-  pass of `DreamApp.init`. An invalid declaration must never surface first at
-  sync, at a request or at a save.
+  its own declarations at class decoration, in the decorator-initialization
+  pass of `DreamApp.init`, or, for a check that reads the database schema or
+  compiles a model's declared shape (`@deco.JSON`, `@deco.Virtual`,
+  `@deco.Encrypted`), in `DreamApp#validateApplicationModels`; Psychic calls
+  Dream's check rather than repeating it. An invalid declaration must never
+  surface first at sync, at a request or at a save.
 
 Both halves are needed. Types leak: `as any`, wide-typed values, `as const`
 constants and plain JavaScript all get past them. And a boot failure is caught

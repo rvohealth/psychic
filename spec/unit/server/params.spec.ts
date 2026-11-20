@@ -2,13 +2,11 @@ import { CalendarDate, ClockTime, ClockTimeTz, DateTime } from '@rvoh/dream'
 import { PsychicParamsDictionary } from '../../../src/controller/index.js'
 import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../../../src/error/controller/ParamValidationErrors.js'
-import DeclaredShapeDoesNotCompile from '../../../src/error/openapi/DeclaredShapeDoesNotCompile.js'
-import * as ValidateOpenApiSchemaModule from '../../../src/helpers/validateOpenApiSchema.js'
 import type {
   JSONColumnShapeStatement,
   VirtualAttributeStatement,
 } from '../../../src/openapi-renderer/helpers/dreamColumnOpenapiShape.js'
-import Params, { compileDeclaredShapeValidators } from '../../../src/server/params.js'
+import Params from '../../../src/server/params.js'
 import Availability from '../../../test-app/src/app/models/Availability.js'
 import Pet from '../../../test-app/src/app/models/Pet.js'
 import User from '../../../test-app/src/app/models/User.js'
@@ -470,36 +468,12 @@ describe('Params', () => {
         })
       })
 
-      context('a declared shape AJV cannot compile', () => {
-        // PsychicApp.init calls compileDeclaredShapeValidators for every
-        // model (spec/unit/psychic-application/declaredShapeBootCompile.spec.ts)
-        class UserWithUncompilableShape extends User {}
+      context('a shape Dream compiled at boot', () => {
+        // Dream compiles every declared shape at boot and refuses one it cannot
+        // compile (spec/unit/psychic-application/declaredShapeBootCompile.spec.ts)
+        class UserWithPatternShape extends User {}
         ;(
-          UserWithUncompilableShape as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
-        ).jsonColumnShapes = [
-          {
-            column: 'jsonbData',
-            openapi: {
-              type: 'object',
-              properties: { phone: { type: 'string', pattern: '^\\d{3}\\-\\d{4}$' } },
-            },
-          },
-        ]
-
-        it('is refused by compileDeclaredShapeValidators, naming the model, column and decorator', () => {
-          expect(() => compileDeclaredShapeValidators(UserWithUncompilableShape)).toThrow(
-            DeclaredShapeDoesNotCompile,
-          )
-          expect(() => compileDeclaredShapeValidators(UserWithUncompilableShape)).toThrow(
-            /UserWithUncompilableShape declares a shape for "jsonbData" with\n@deco\.JSON/,
-          )
-        })
-      })
-
-      context('a declared shape compiled at boot', () => {
-        class UserWithBootCompiledShape extends User {}
-        ;(
-          UserWithBootCompiledShape as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
+          UserWithPatternShape as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
         ).jsonColumnShapes = [
           {
             column: 'jsonbData',
@@ -510,17 +484,13 @@ describe('Params', () => {
           },
         ]
 
-        it('is validated at a request with the validator built at boot, without compiling another', () => {
-          compileDeclaredShapeValidators(UserWithBootCompiledShape)
-          const createValidatorSpy = vi.spyOn(ValidateOpenApiSchemaModule, 'createValidator')
-
-          expect(Params.for({ jsonbData: { phone: '555-1234' } }, UserWithBootCompiledShape)).toEqual({
+        it("answers a mismatch with Dream's check, naming where in the value it failed", () => {
+          expect(Params.for({ jsonbData: { phone: '555-1234' } }, UserWithPatternShape)).toEqual({
             jsonbData: { phone: '555-1234' },
           })
           expect(
-            paramErrorsFrom(() => Params.for({ jsonbData: { phone: '5551234' } }, UserWithBootCompiledShape)),
+            paramErrorsFrom(() => Params.for({ jsonbData: { phone: '5551234' } }, UserWithPatternShape)),
           ).toEqual({ jsonbData: ['/phone must match pattern "^\\d{3}-\\d{4}$"'] })
-          expect(createValidatorSpy).not.toHaveBeenCalled()
         })
       })
     })
@@ -540,6 +510,34 @@ describe('Params', () => {
 
       it('does not extract the encrypted backing column', () => {
         expect(Params.for({ encryptedSecret: 'ciphertext' }, User)).toEqual({})
+      })
+
+      context('with a declared shape that omits null, on a nullable backing column', () => {
+        // as `@deco.Encrypted({ openapi: 'integer' })` on User#secret registers
+        // it; its backing column, encrypted_secret, allows null
+        class UserWithEncryptedInteger extends User {}
+        ;(
+          UserWithEncryptedInteger as unknown as { virtualAttributes: VirtualAttributeStatement[] }
+        ).virtualAttributes = [
+          ...(User['virtualAttributes'] as VirtualAttributeStatement[]).filter(
+            statement => statement.property !== 'secret',
+          ),
+          { property: 'secret', type: 'integer' },
+        ]
+
+        it('accepts null, which the backing column allows', () => {
+          expect(Params.for({ secret: null }, UserWithEncryptedInteger)).toEqual({ secret: null })
+        })
+
+        it('still casts a value to the declared primitive', () => {
+          expect(Params.for({ secret: '5' }, UserWithEncryptedInteger)).toEqual({ secret: 5 })
+        })
+
+        it('still rejects a value of another type', () => {
+          expect(paramErrorsFrom(() => Params.for({ secret: 'shh' }, UserWithEncryptedInteger))).toEqual({
+            secret: ['expected integer or string integer'],
+          })
+        })
       })
     })
 

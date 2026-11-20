@@ -1,6 +1,5 @@
+import { DreamApp } from '@rvoh/dream'
 import { type ErrorObject, type JSONSchemaType, type ValidateFunction } from 'ajv'
-import { Ajv2020 } from 'ajv/dist/2020.js'
-import addFormats from 'ajv-formats'
 
 /**
  * @internal
@@ -101,6 +100,13 @@ export function validateObject<T = unknown>(
  *
  * Creates an AJV validator function for validating objects against JSON schemas
  *
+ * The AJV instance is Dream's (`DreamApp.system.createOpenapiAjv`), the one
+ * Dream checks a model's declared shapes with, so the formats a schema names
+ * (`ajv-formats`, `decimal`, `bigint`) and the defaults (no coercion, defaults
+ * applied, `strict: false` with `strictTypes: true`, …) are defined once.
+ * `options` override those defaults, and `options.init` receives the instance
+ * before the schema is compiled, to add a custom format, say.
+ *
  * @param schema - JSON Schema to validate against
  * @param options - Validation options
  * @returns A validator function that can be reused for multiple validations
@@ -109,48 +115,13 @@ export function createValidator<T = unknown>(
   schema: JSONSchemaType<T> | object,
   options: ValidateOpenapiSchemaOptions = {},
 ): ValidateFunction<T> {
-  const ajvOptions = {
-    ...options,
-    init: undefined,
-  }
+  const { init, ...ajvOptions } = options
+  const ajv = DreamApp.system.createOpenapiAjv(ajvOptions)
 
-  const ajv = new Ajv2020({
-    removeAdditional: false,
-    useDefaults: true,
-    strict: false,
-    coerceTypes: false,
-    strictTypes: true,
-    allErrors: false,
-    validateFormats: true, // Enable format validation for date-time, email, etc.
-    ...ajvOptions,
-  })
-
-  // unfortunately, the Node16 resolution does not play
-  // nicely with the addFormats function, since it is
-  // stuck in commonjs. Typescript cannot resolve types
-  // correctly, but after building and being consumed
-  // on the other side of a build, this is the only
-  // way to actually call the addFormats function without
-  // it breaking.
-  ;(addFormats as unknown as (ajv: unknown) => void)(ajv)
-
-  ajv.addFormat('decimal', {
-    type: 'string',
-    validate: data => DECIMAL_REGEX.test(data),
-  })
-
-  ajv.addFormat('bigint', {
-    type: 'string',
-    validate: data => BIGINT_REGEX.test(data),
-  })
-
-  options?.init?.(ajv)
+  init?.(ajv)
 
   return ajv.compile(schema) as ValidateFunction<T>
 }
-
-const DECIMAL_REGEX = /^-?(\d+\.?\d*|\.\d+)$/
-const BIGINT_REGEX = /^-?\d+(\.0*)?$/
 
 /**
  * Formats AJV errors into a more readable format
@@ -179,9 +150,11 @@ export interface ValidationError {
   params?: Record<string, unknown>
 }
 
-export type AjvValidationOpts = ConstructorParameters<typeof Ajv2020>[0]
+// the options and the instance of Dream's AJV, so a custom format added in
+// `init` lands on the instance Psychic compiles with
+export type AjvValidationOpts = NonNullable<Parameters<typeof DreamApp.system.createOpenapiAjv>[0]>
 export type ValidateOpenapiSchemaOptions = AjvValidationOpts & CustomOpenapiValidationOptions
 
 export interface CustomOpenapiValidationOptions {
-  init?: (ajv: Ajv2020) => void
+  init?: (ajv: ReturnType<typeof DreamApp.system.createOpenapiAjv>) => void
 }

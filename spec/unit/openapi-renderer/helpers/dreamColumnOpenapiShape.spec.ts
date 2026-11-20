@@ -1,3 +1,4 @@
+import { DreamSerializer } from '@rvoh/dream'
 import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
 import SerializerOpenapiShapeOnJSONColumn from '../../../../src/error/openapi/SerializerOpenapiShapeOnJSONColumn.js'
 import {
@@ -6,7 +7,9 @@ import {
   UseCustomOpenapiForJson,
   VirtualAttributeStatement,
 } from '../../../../src/openapi-renderer/helpers/dreamColumnOpenapiShape.js'
+import OpenapiSegmentExpander from '../../../../src/openapi-renderer/body-segment.js'
 import OpenapiEnumCollector from '../../../../src/openapi-renderer/helpers/OpenapiEnumCollector.js'
+import SerializerOpenapiRenderer from '../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 import Availability from '../../../../test-app/src/app/models/Availability.js'
 import User from '../../../../test-app/src/app/models/User.js'
 import { PetTreatsEnumValues, SpeciesTypesEnumValues } from '../../../../test-app/src/types/db.js'
@@ -889,6 +892,51 @@ describe('dreamAttributeOpenapiShape', () => {
         required: ['a'],
         description: 'hello',
       })
+    })
+  })
+
+  context('a @deco.Encrypted attribute', () => {
+    // as `@deco.Encrypted({ openapi: 'integer' })` on User#secret registers
+    // it; its backing column, encrypted_secret, allows null
+    class UserWithEncryptedInteger extends User {}
+    ;(
+      UserWithEncryptedInteger as unknown as { virtualAttributes: VirtualAttributeStatement[] }
+    ).virtualAttributes = [
+      ...(User['virtualAttributes'] as VirtualAttributeStatement[]).filter(
+        statement => statement.property !== 'secret',
+      ),
+      { property: 'secret', type: 'integer' },
+    ]
+
+    it('renders a bare @deco.Encrypted() as a string, nullable from its backing column', () => {
+      expect(dreamColumnOpenapiShape('Test', User, 'secret' as 'email')).toEqual({ type: ['string', 'null'] })
+    })
+
+    it('adds null from a nullable backing column to a declared shape without it', () => {
+      expect(dreamColumnOpenapiShape('Test', UserWithEncryptedInteger, 'secret' as 'email')).toEqual({
+        type: ['integer', 'null'],
+      })
+    })
+
+    it('renders the nullable shape as a serializer attribute', () => {
+      const MySerializer = (data: User) => DreamSerializer(UserWithEncryptedInteger, data).attribute('secret')
+
+      expect(
+        new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']().attributes['secret'],
+      ).toEqual({ type: ['integer', 'null'] })
+    })
+
+    it('renders the nullable shape in a model-derived request body', () => {
+      expect(
+        new OpenapiSegmentExpander({ for: UserWithEncryptedInteger, params: ['secret'] } as never, {
+          renderOpts: {
+            casing: 'camel',
+            suppressResponseEnums: false,
+            legacyImplicitRequestBodyParams: false,
+          },
+          target: 'request',
+        }).render().openapi,
+      ).toEqual({ type: 'object', properties: { secret: { type: ['integer', 'null'] } } })
     })
   })
 })

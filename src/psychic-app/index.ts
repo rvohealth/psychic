@@ -43,7 +43,6 @@ import { RouteConfig } from '../router/route-manager.js'
 import { HttpMethods } from '../router/types.js'
 import { createPsychicHttpInstance } from '../server/helpers/startPsychicServer.js'
 import PsychicServer from '../server/index.js'
-import { compileDeclaredShapeValidators } from '../server/params.js'
 import { cachePsychicApp, getCachedPsychicAppOrFail } from './cache.js'
 import importControllers, { getControllersOrFail } from './helpers/import/importControllers.js'
 import importInitializers, { getInitializersOrBlank } from './helpers/import/importInitializers.js'
@@ -141,9 +140,9 @@ export default class PsychicApp {
 
         psychicApp.buildOpenapiCache()
 
-        // build the validators Params.for checks each declared shape with,
-        // so a shape AJV cannot compile is refused here, not at a request
-        for (const dreamClass of Object.values(dreamApp.models)) compileDeclaredShapeValidators(dreamClass)
+        // Dream compiles the validator of every shape a model declares (the
+        // one Params.for checks a request value with) once this returns, in
+        // DreamApp.init, so a shape it cannot compile is refused at boot
       }
     })
 

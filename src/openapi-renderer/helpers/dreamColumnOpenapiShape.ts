@@ -1,4 +1,4 @@
-import { Dream } from '@rvoh/dream'
+import { Dream, DreamApp } from '@rvoh/dream'
 import {
   OpenapiDescription,
   OpenapiSchemaBody,
@@ -11,10 +11,7 @@ import SerializerOpenapiShapeOnJSONColumn from '../../error/openapi/SerializerOp
 import { SerializingPlainPropertyWithoutOpenapiShape } from '../../error/openapi/SerializingPlainPropertyWithoutOpenapiShape.js'
 import UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute from '../../error/openapi/UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute.js'
 import isObject from '../../helpers/isObject.js'
-import OpenapiSegmentExpander from '../body-segment.js'
 import OpenapiEnumCollector from './OpenapiEnumCollector.js'
-import { openapiSchemaWithNull } from './openapiSchemaNullability.js'
-import openapiShorthandToOpenapi from './openapiShorthandToOpenapi.js'
 
 export interface VirtualAttributeStatement {
   property: string
@@ -89,13 +86,14 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
 ): OpenapiSchemaBody {
   if (dreamClass.isVirtualColumn(column)) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-    const openapiObject = openapiShorthandToOpenapi((openapi ?? {}) as any)
+    const openapiObject = DreamApp.system.openapiShorthandToOpenapi((openapi ?? {}) as any)
 
-    const metadata = (dreamClass['virtualAttributes'] as VirtualAttributeStatement[]).find(
-      statement => statement.property === column,
-    )
+    // the `@deco.Virtual` or `@deco.Encrypted` declaration, as Dream checks
+    // it: an `@deco.Encrypted` attribute takes its nullability from its
+    // backing column
+    const declaredShape = modelDeclaredShapeSchema(dreamClass, column)
 
-    if (metadata?.type) {
+    if (declaredShape) {
       // a serializer openapi that carries a shape replaces the declared shape
       // whole, as a same-key `combining` entry replaces a request-body
       // property, so none of the declared shape's keywords (a `required`, a
@@ -108,7 +106,7 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
       // (a `type` beside an `anyOf`, say), so the merge is asserted to be a
       // schema, as it is in those branches
       return {
-        ...expandModelDeclaredShape(metadata.type, enumCollector),
+        ...declaredShape,
         ...openapiObject,
       } as OpenapiSchemaBody
     } else if (openapi) {
@@ -124,12 +122,11 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
   const dreamColumnInfo: DreamColumnInfo = dream.schema[dream.table]?.columns[column]
   if (!dreamColumnInfo) {
     // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-    if (openapi) return openapiShorthandToOpenapi(openapi as any)
+    if (openapi) return DreamApp.system.openapiShorthandToOpenapi(openapi as any)
     throw new SerializingPlainPropertyWithoutOpenapiShape(dreamClass, column)
   }
 
-  const declaredJSONShape = declaredJSONColumnShape(dreamClass, column)
-  if (declaredJSONShape !== undefined) {
+  if (declaredJSONColumnShape(dreamClass, column) !== undefined) {
     // the model's `@deco.JSON` declaration is the single source of the
     // column's shape, so a serializer may describe the column but not reshape
     // it. Dream's types refuse a shape here; this refuses one that got past
@@ -138,16 +135,9 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
       throw new SerializerOpenapiShapeOnJSONColumn(source, dreamClass, column)
 
     // the declaration describes the non-null value (for an array column, each
-    // element); the column itself says whether it may be null
-    const declaredShape = expandModelDeclaredShape(declaredJSONShape, enumCollector)
-    const columnShape = dreamColumnInfo.isArray
-      ? ({
-          type: dreamColumnInfo.allowNull ? ['array', 'null'] : 'array',
-          items: declaredShape,
-        } as OpenapiSchemaBody)
-      : dreamColumnInfo.allowNull
-        ? (openapiSchemaWithNull(declaredShape) as OpenapiSchemaBody)
-        : declaredShape
+    // element); the column itself says whether it may be null. Dream wraps the
+    // declaration by its column, the schema it checks the column's value with
+    const columnShape = modelDeclaredShapeSchema(dreamClass, column)!
 
     return { ...columnShape, ...(openapi as OpenapiDescription | undefined) } as OpenapiSchemaBody
   }
@@ -157,13 +147,13 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
       case 'json':
       case 'jsonb':
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-        if (openapi) return openapiShorthandToOpenapi(openapi as any)
+        if (openapi) return DreamApp.system.openapiShorthandToOpenapi(openapi as any)
         throw new UseCustomOpenapiForJson(dreamClass, column)
     }
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
-  const openapiObject = openapiShorthandToOpenapi((openapi ?? {}) as any)
+  const openapiObject = DreamApp.system.openapiShorthandToOpenapi((openapi ?? {}) as any)
 
   // collect the spec-visible enum values for this column. Collection is
   // upstream of `suppressResponseEnums` (suppressed specs still collect
@@ -205,25 +195,19 @@ export function dreamColumnOpenapiShape<DreamClass extends typeof Dream>(
 }
 
 /**
- * Expands a shape declared on the model (`@deco.Virtual`, `@deco.Encrypted`,
- * `@deco.JSON`) from shorthand into a full OpenAPI schema.
+ * The full OpenAPI schema of the shape the model declares for a property
+ * (`@deco.JSON`, `@deco.Virtual`, `@deco.Encrypted`), read from Dream, which
+ * checks the property's value against this same schema: expanded from
+ * shorthand and, for a `@deco.JSON` column or an `@deco.Encrypted` attribute,
+ * wrapped by its column's array-ness and nullability. `undefined` when the
+ * property declares no shape.
+ *
+ * Dream builds the schema once and shares it, so a render gets its own copy,
+ * which nothing later in the render can change for Dream's check.
  */
-function expandModelDeclaredShape(
-  shape: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand,
-  enumCollector: OpenapiEnumCollector | undefined,
-): OpenapiSchemaBody {
-  return new OpenapiSegmentExpander(shape, {
-    renderOpts: {
-      casing: 'camel',
-      suppressResponseEnums: false,
-      legacyImplicitRequestBodyParams: false,
-      // a nested `for:` sentinel inside a declared shape reaches enum-backed
-      // columns through this hand-built expander, so the collector must ride
-      // along here as well
-      enumCollector,
-    },
-    target: 'request',
-  }).render().openapi
+function modelDeclaredShapeSchema(dreamClass: typeof Dream, property: string): OpenapiSchemaBody | undefined {
+  const schema = DreamApp.system.declaredShapeSchema(dreamClass, property)
+  return schema === undefined ? undefined : structuredClone(schema)
 }
 
 const SHAPE_KEYWORDS = ['type', 'anyOf', 'oneOf', 'allOf', '$ref', '$schema', '$serializer', '$serializable']

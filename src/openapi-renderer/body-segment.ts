@@ -1,38 +1,18 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import { Dream, DreamApp } from '@rvoh/dream'
 import {
-  OpenapiPrimitiveTypes,
-  OpenapiSchemaArray,
-  OpenapiSchemaBase,
   OpenapiSchemaBody,
   OpenapiSchemaBodyShorthand,
-  OpenapiSchemaExpressionAllOf,
-  OpenapiSchemaExpressionAnyOf,
-  OpenapiSchemaExpressionOneOf,
   OpenapiSchemaExpressionRef,
   OpenapiSchemaExpressionRefSchemaShorthand,
-  OpenapiSchemaObject,
-  OpenapiSchemaObjectBase,
-  OpenapiSchemaPrimitiveGeneric,
-  OpenapiSchemaProperties,
-  OpenapiSchemaShorthandExpressionAllOf,
-  OpenapiSchemaShorthandExpressionAnyOf,
-  OpenapiSchemaShorthandExpressionOneOf,
   OpenapiSchemaShorthandExpressionSerializableRef,
   OpenapiSchemaShorthandExpressionSerializerRef,
-  OpenapiShorthandAllTypes,
   OpenapiShorthandPrimitiveTypes,
-  openapiShorthandPrimitiveTypes,
 } from '@rvoh/dream/openapi'
 import { DreamModelSerializerType, SerializerCasing, SimpleObjectSerializerType } from '@rvoh/dream/types'
 import NonSerializerSuppliedToSerializerBodySegment from '../error/openapi/NonSerializerSuppliedToSerializerBodySegment.js'
-import isArrayParamName from '../helpers/isArrayParamName.js'
 import { OpenapiEndpointResponse, OpenapiRenderOpts, OpenapiResponses } from './endpoint.js'
 import buildDreamRequestBodyShape from './helpers/buildDreamRequestBodyShape.js'
-import isBlankDescription from './helpers/isBlankDescription.js'
 import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
-import maybeNullOpenapiShorthandToOpenapiShorthand from './helpers/maybeNullOpenapiShorthandToOpenapiShorthand.js'
-import primitiveOpenapiStatementToOpenapi from './helpers/primitiveOpenapiStatementToOpenapi.js'
 import schemaToRef from './helpers/schemaToRef.js'
 import serializerRefsToOpenapi from './helpers/serializerRefsToOpenapi.js'
 import serializersAndRefsFromSerializableRef from './helpers/serializersAndRefsFromSerializableRef.js'
@@ -50,6 +30,8 @@ export interface OpenapiBodySegmentRendererOpts {
   source?: string
 }
 
+type OpenapiSegmentExpand = (bodySegment: OpenapiBodySegment) => OpenapiSchemaBody
+
 /**
  * @internal
  *
@@ -64,8 +46,14 @@ export interface OpenapiBodySegmentRendererOpts {
  * - Serializable references like `{ $serializable: SomeModel, key: 'summary' }` → resolved serializer reference
  * - Nested model-derived request-body references like `{ for: SomeModel, params, including, required, combining }` → an inline object schema derived from the model's param-safe columns (request-only)
  *
- * The class recursively processes nested structures (objects, arrays, unions) and maintains
- * a collection of referenced serializers that need to be included in the final OpenAPI document.
+ * Dream's shorthand expansion (`DreamApp.system.expandOpenapiShorthand`) walks
+ * the shape, at any depth, and expands every node but the references, which it
+ * hands back to this class: `$serializer`, `$serializable`, `for:`, `$ref` and
+ * `$schema`. So the shapes models declare (`@deco.JSON`, `@deco.Virtual`,
+ * `@deco.Encrypted`), which contain no reference, and every shape Psychic
+ * renders are expanded by one expansion. This class keeps the collection of
+ * referenced serializers that need to be included in the final OpenAPI
+ * document.
  *
  * @example
  * ```typescript
@@ -123,464 +111,41 @@ export default class OpenapiSegmentExpander {
    * to the appropriate openapi shape
    */
   public render(): ReferencedSerializersAndOpenapiSchemaBody {
-    return this.recursivelyParseBody(this.bodySegment)
-  }
+    const referencedSerializers: SerializerArray = []
 
-  /**
-   * @internal
-   *
-   * Recursively expand nested objects and arrays,
-   * as well as primitive types
-   */
-  public recursivelyParseBody(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
-    switch (this.segmentType(bodySegment)) {
-      case 'blank_description':
-        return {
-          referencedSerializers: [],
-          openapi: bodySegment as OpenapiSchemaBody,
-        }
-
-      case 'oneOf':
-        return this.oneOfStatement(bodySegment)
-
-      case 'anyOf':
-        return this.anyOfStatement(bodySegment)
-
-      case 'allOf':
-        return this.allOfStatement(bodySegment)
-
-      case 'object':
-        return this.objectStatement(bodySegment as OpenapiSchemaObject)
-
-      case 'array':
-        return this.arrayStatement(bodySegment as OpenapiSchemaArray)
-
-      case 'openapi_primitive_literal':
-        return {
-          referencedSerializers: [],
-          openapi: this.primitiveLiteralStatement(bodySegment as OpenapiShorthandPrimitiveTypes),
-        }
-
-      case 'openapi_primitive_object':
-        return {
-          referencedSerializers: [],
-          openapi: this.primitiveObjectStatement(bodySegment as OpenapiShorthandPrimitiveTypes),
-        }
-
-      case '$ref':
-        return {
-          referencedSerializers: [],
-          openapi: this.refStatement(bodySegment),
-        }
-
-      case '$schema':
-        return {
-          referencedSerializers: [],
-          openapi: schemaToRef(bodySegment),
-        }
-
-      case '$serializer':
-        return this.serializerStatement(bodySegment)
-
-      case '$serializable':
-        return this.serializableStatement(bodySegment)
-
-      case '$for':
-        return this.forStatement(bodySegment)
-
-      case 'unknown_object':
-        return {
-          referencedSerializers: [],
-          openapi: this.unknownObjectStatement(bodySegment),
-        }
-
-      case undefined:
-        return {
-          referencedSerializers: [],
-          openapi: { type: 'object' },
-        }
-    }
-  }
-
-  /**
-   * @internal
-   *
-   * Returns a type based on analysis of the bodySegment
-   */
-  private segmentType(bodySegment: OpenapiBodySegment) {
-    if (bodySegment === undefined) return undefined
-
-    const objectBodySegment = bodySegment as OpenapiSchemaObject
-    const arrayBodySegment = bodySegment as OpenapiSchemaArray
-    const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
-    const anyOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAnyOf
-    const allOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAllOf
-    const refBodySegment = bodySegment as OpenapiSchemaExpressionRef
-    const schemaRefBodySegment = bodySegment as OpenapiSchemaExpressionRefSchemaShorthand
-    const serializerRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializerRef
-    const serializableRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializableRef
-
-    if (isBlankDescription(bodySegment)) return 'blank_description'
-    if (typeof serializerRefBodySegment.$serializer === 'function') return '$serializer'
-    if (serializableRefBodySegment.$serializable) return '$serializable'
-    if (typeof (bodySegment as { for?: unknown })?.for === 'function') return '$for'
-    if (refBodySegment.$ref) return '$ref'
-    if (schemaRefBodySegment.$schema) return '$schema'
-    if (oneOfBodySegment.oneOf) return 'oneOf'
-    if (anyOfBodySegment.anyOf) return 'anyOf'
-    if (allOfBodySegment.allOf) return 'allOf'
-    if (this.maybeNullTypeToType(objectBodySegment) === 'object') return 'object'
-    else if (this.maybeNullTypeToType(arrayBodySegment) === 'array') return 'array'
-    else {
-      const primitiveString = maybeNullOpenapiShorthandToOpenapiShorthand(
-        bodySegment as OpenapiPrimitiveTypes,
-      )
-      if (typeof primitiveString === 'string' && openapiShorthandPrimitiveTypes.includes(primitiveString))
-        return 'openapi_primitive_literal'
-
-      if (typeof bodySegment === 'object') {
-        if (
-          openapiShorthandPrimitiveTypes.includes(
-            this.maybeNullTypeToType(bodySegment) as (typeof openapiShorthandPrimitiveTypes)[number],
-          )
-        )
-          return 'openapi_primitive_object'
-      }
-
-      if (typeof bodySegment === 'object') return 'unknown_object'
-    }
-  }
-
-  private maybeNullTypeToType(bodySegment: OpenapiBodySegment | OpenapiSchemaObject | OpenapiSchemaArray) {
-    if (bodySegment === undefined) return undefined
-    if (typeof bodySegment === 'string') return bodySegment
-
-    const safeBodySegment = bodySegment as { type: OpenapiShorthandAllTypes }
-    const openapiType = safeBodySegment.type
-
-    if (Array.isArray(openapiType)) {
-      if (openapiType[1] === 'null') return openapiType[0]
-      if (openapiType[0] === 'null') return openapiType[1]
-      return undefined
-    } else {
-      return openapiType
-    }
-  }
-
-  /**
-   * @internal
-   *
-   * recursively expands a oneOf statement
-   */
-  private oneOfStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
-    const oneOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionOneOf
-
-    const referencedSerializersAndOneOfArray = oneOfBodySegment.oneOf.reduce(
-      (
-        acc: {
-          referencedSerializers: SerializerArray
-          oneOf: OpenapiSchemaBody[]
-        },
-        segment,
-      ) => {
-        const results = this.recursivelyParseBody(segment as OpenapiBodySegment)
-        acc.referencedSerializers = [...acc.referencedSerializers, ...results.referencedSerializers]
-        const openapi: OpenapiSchemaBody = results.openapi
-        acc.oneOf = [...acc.oneOf, openapi]
-        return acc
-      },
-      {
-        referencedSerializers: [],
-        oneOf: [],
-      },
-    )
-
-    return {
-      referencedSerializers: referencedSerializersAndOneOfArray.referencedSerializers,
-      openapi: {
-        oneOf: referencedSerializersAndOneOfArray.oneOf,
-        ...this.combinatorDescriptiveFields(bodySegment),
-      },
-    }
-  }
-
-  /**
-   * @internal
-   *
-   * recursively expand an anyOf statement
-   */
-  private anyOfStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
-    const anyOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAnyOf
-
-    const referencedSerializersAndOneOfArray = anyOfBodySegment.anyOf.reduce(
-      (
-        acc: {
-          referencedSerializers: SerializerArray
-          anyOf: OpenapiSchemaBody[]
-        },
-        segment,
-      ) => {
-        const results = this.recursivelyParseBody(segment as OpenapiBodySegment)
-        acc.referencedSerializers = [...acc.referencedSerializers, ...results.referencedSerializers]
-        const openapi: OpenapiSchemaBody = results.openapi
-        acc.anyOf = [...acc.anyOf, openapi]
-        return acc
-      },
-      {
-        referencedSerializers: [],
-        anyOf: [],
-      },
-    )
-
-    return {
-      referencedSerializers: referencedSerializersAndOneOfArray.referencedSerializers,
-      openapi: {
-        anyOf: referencedSerializersAndOneOfArray.anyOf,
-        ...this.combinatorDescriptiveFields(bodySegment),
-      },
-    }
-  }
-
-  /**
-   * @internal
-   *
-   * recursively expand an allOf statement
-   */
-  private allOfStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
-    const allOfBodySegment = bodySegment as OpenapiSchemaShorthandExpressionAllOf
-
-    const referencedSerializersAndOneOfArray = allOfBodySegment.allOf.reduce(
-      (
-        acc: {
-          referencedSerializers: SerializerArray
-          allOf: OpenapiSchemaBody[]
-        },
-        segment,
-      ) => {
-        const results = this.recursivelyParseBody(segment as OpenapiBodySegment)
-        acc.referencedSerializers = [...acc.referencedSerializers, ...results.referencedSerializers]
-        const openapi: OpenapiSchemaBody = results.openapi
-        acc.allOf = [...acc.allOf, openapi]
-        return acc
-      },
-      {
-        referencedSerializers: [],
-        allOf: [],
-      },
-    )
-
-    return {
-      referencedSerializers: referencedSerializersAndOneOfArray.referencedSerializers,
-      openapi: {
-        allOf: referencedSerializersAndOneOfArray.allOf,
-        ...this.combinatorDescriptiveFields(bodySegment),
-      },
-    }
-  }
-
-  /**
-   * @internal
-   *
-   * The keys kept beside an `allOf`, `anyOf` or `oneOf`: `description` and
-   * `summary`, the fields Dream's OpenAPI types allow beside a combinator.
-   * Every other key beside it (`type`, `required`, `additionalProperties`,
-   * `unevaluatedProperties`, …) is dropped, so no schema gains a property lock
-   * here: a flattened serializer's `allOf` wrapper keeps no lock in the
-   * document's components, which stay as open as every other serializer's.
-   * A combinator applies to every value, `null` included, so a nullable `type`
-   * beside one could never admit `null`; a combinator that may be null lists a
-   * `{ type: 'null' }` branch in its `anyOf` or `oneOf` instead.
-   */
-  private combinatorDescriptiveFields(bodySegment: OpenapiBodySegment): {
-    description?: string
-    summary?: string
-  } {
-    const { description, summary } = bodySegment as { description?: string; summary?: string }
-    return {
-      ...(description ? { description } : {}),
-      ...(summary ? { summary } : {}),
-    }
-  }
-
-  /**
-   * @internal
-   *
-   * recursively expand an array statement
-   */
-  private arrayStatement(bodySegment: OpenapiSchemaArray): ReferencedSerializersAndOpenapiSchemaBody {
-    const results = this.recursivelyParseBody(bodySegment.items)
-
-    const data = this.applyCommonFieldsToPayload<OpenapiSchemaArray>({
-      type: bodySegment.type,
-      items: results.openapi,
+    const openapi = DreamApp.system.expandOpenapiShorthand(this.bodySegment, {
+      expandReference: (node, expand) => this.referenceStatement(node, expand, referencedSerializers),
+      // a nullable string enum keeps its enum
+      suppressEnums: this.target === 'response' && this.suppressResponseEnums,
     })
 
-    const description = bodySegment.description
-
-    if (description) {
-      data.description = description
-    }
-
-    return { ...results, openapi: data }
+    return { referencedSerializers, openapi }
   }
 
   /**
    * @internal
    *
-   * recursively expand an object statement
+   * Expands a reference node, collecting the serializers it references, or
+   * returns `undefined` for any other node, which Dream's expansion expands.
    */
-  private objectStatement(bodySegment: OpenapiSchemaObject): ReferencedSerializersAndOpenapiSchemaBody {
-    const objectBodySegment = bodySegment as OpenapiSchemaObjectBase
-    const data: OpenapiSchemaObjectBase = {
-      type: bodySegment.type,
-    }
+  private referenceStatement(
+    node: object,
+    expand: OpenapiSegmentExpand,
+    referencedSerializers: SerializerArray,
+  ): OpenapiSchemaBody | undefined {
+    const serializerRefBodySegment = node as OpenapiSchemaShorthandExpressionSerializerRef
+    const serializableRefBodySegment = node as OpenapiSchemaShorthandExpressionSerializableRef
+    const refBodySegment = node as OpenapiSchemaExpressionRef
+    const schemaRefBodySegment = node as OpenapiSchemaExpressionRefSchemaShorthand
 
-    if (objectBodySegment.description) {
-      data.description = objectBodySegment.description
-    }
-
-    if (objectBodySegment.summary) {
-      data.summary = objectBodySegment.summary
-    }
-
-    if (objectBodySegment.maxProperties) {
-      data.maxProperties = objectBodySegment.maxProperties
-    }
-
-    if (objectBodySegment.minProperties) {
-      data.minProperties = objectBodySegment.minProperties
-    }
-
-    let referencedSerializers: SerializerArray = []
-
-    if (objectBodySegment.additionalProperties === false) {
-      data.additionalProperties = false
-    } else if (objectBodySegment.additionalProperties) {
-      const results = this.recursivelyParseBody(objectBodySegment.additionalProperties)
-      referencedSerializers = [...referencedSerializers, ...results.referencedSerializers]
-      data.additionalProperties = results.openapi as OpenapiSchemaObject
-    }
-
-    if (Array.isArray(objectBodySegment.required)) data.required = objectBodySegment.required
-
-    if (objectBodySegment.properties) {
-      const results = this.parseObjectPropertyStatement(objectBodySegment.properties)
-      referencedSerializers = [...referencedSerializers, ...results.referencedSerializers]
-      data.properties = results.openapi as unknown as OpenapiSchemaProperties
-    }
-
-    return { referencedSerializers, openapi: data }
-  }
-
-  /**
-   * @internal
-   *
-   * expand either the `properties` or `additionalProperties` values
-   * on an object
-   */
-  private parseObjectPropertyStatement(
-    propertySegment:
-      | Record<string, OpenapiSchemaBody | OpenapiSchemaBodyShorthand>
-      | OpenapiSchemaExpressionAllOf
-      | OpenapiSchemaExpressionAnyOf
-      | OpenapiSchemaExpressionOneOf
-      | OpenapiSchemaShorthandExpressionAllOf
-      | OpenapiSchemaShorthandExpressionAnyOf
-      | OpenapiSchemaShorthandExpressionOneOf,
-  ): ReferencedSerializersAndOpenapiSchemaBody {
-    if (
-      (propertySegment as OpenapiSchemaExpressionOneOf).oneOf ||
-      (propertySegment as OpenapiSchemaExpressionAllOf).allOf ||
-      (propertySegment as OpenapiSchemaExpressionAnyOf).anyOf
-    ) {
-      return this.recursivelyParseBody(propertySegment as OpenapiBodySegment)
-    }
-
-    let referencedSerializers: SerializerArray = []
-    const objectBodySegment = propertySegment as unknown as OpenapiSchemaObjectBase
-    // the expanded properties go into a new object, never back into the
-    // input: the input may be a declaration on a model (`@deco.JSON`,
-    // `@deco.Virtual`, `@deco.Encrypted`) or a serializer, which every later
-    // render reads (and compares) as declared
-    const properties: Record<string, OpenapiSchemaBody> = {}
-
-    Object.keys(objectBodySegment || {}).forEach(key => {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-unsafe-member-access
-      const results = this.recursivelyParseBody((objectBodySegment as any)[key])
-      referencedSerializers = [...referencedSerializers, ...results.referencedSerializers]
-      properties[key] = results.openapi
-    })
-
-    return { referencedSerializers, openapi: properties as unknown as OpenapiSchemaBody }
-  }
-
-  /**
-   * @internal
-   *
-   * recursively expand a primitive literal type (i.e. string or boolean[])
-   */
-  private primitiveLiteralStatement(
-    bodySegment: OpenapiShorthandPrimitiveTypes,
-  ): OpenapiSchemaPrimitiveGeneric {
-    return primitiveOpenapiStatementToOpenapi(bodySegment) as OpenapiSchemaPrimitiveGeneric
-  }
-
-  /**
-   * @internal
-   *
-   * recursively expand a primitive object type (i.e. { type: 'string[]' })
-   */
-  private primitiveObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaPrimitiveGeneric {
-    const safeBodySegment = bodySegment as Extract<OpenapiSchemaBase, { type: OpenapiPrimitiveTypes }>
-
-    if (this.typeIsOpenapiArrayPrimitive(safeBodySegment.type)) {
-      return this.applyConfigurationOptions(
-        this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>({
-          ...safeBodySegment,
-          ...primitiveOpenapiStatementToOpenapi(safeBodySegment.type),
-        } as OpenapiSchemaPrimitiveGeneric),
-      )
-    } else {
-      return this.applyConfigurationOptions(
-        this.applyCommonFieldsToPayload<OpenapiSchemaPrimitiveGeneric>({
-          ...safeBodySegment,
-          ...primitiveOpenapiStatementToOpenapi(safeBodySegment.type),
-        } as OpenapiSchemaPrimitiveGeneric),
-      )
-    }
-  }
-
-  private typeIsOpenapiArrayPrimitive(openapiType: OpenapiPrimitiveTypes): boolean {
-    return isArrayParamName(maybeNullOpenapiShorthandToOpenapiShorthand(openapiType))
-  }
-
-  private applyConfigurationOptions<T>(obj: T): T {
-    // eslint-disable-next-line @typescript-eslint/no-unsafe-assignment
-    const anyObj = obj as any
-
-    if (typeof anyObj === 'object') {
-      if (
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        anyObj?.type === 'string' &&
-        this.target === 'response' &&
-        this.suppressResponseEnums
-      ) {
-        // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-        const enums = anyObj.enum as string[] | null
-
-        if (enums?.length) {
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          delete anyObj.enum
-
-          // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-          anyObj.description ||= `
-The following values will be allowed:
-  ${enums.join(',\n  ')}`
-        }
-      }
-    }
-
-    return anyObj as T
+    if (typeof serializerRefBodySegment.$serializer === 'function')
+      return this.serializerStatement(serializerRefBodySegment, referencedSerializers)
+    if (serializableRefBodySegment.$serializable)
+      return this.serializableStatement(serializableRefBodySegment, referencedSerializers)
+    if (typeof (node as { for?: unknown }).for === 'function') return this.forStatement(node, expand)
+    if (refBodySegment.$ref) return this.refStatement(refBodySegment)
+    if (schemaRefBodySegment.$schema) return schemaToRef(schemaRefBodySegment)
+    return undefined
   }
 
   /**
@@ -588,8 +153,7 @@ The following values will be allowed:
    *
    * recursively a $ref statement
    */
-  private refStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaExpressionRef {
-    const refBodySegment = bodySegment as OpenapiSchemaExpressionRef
+  private refStatement(refBodySegment: OpenapiSchemaExpressionRef): OpenapiSchemaExpressionRef {
     return {
       $ref: `#/${refBodySegment.$ref.replace(/^#\//, '')}`,
     }
@@ -600,8 +164,10 @@ The following values will be allowed:
    *
    * recursively a $ref statement
    */
-  private serializerStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
-    const serializerRefBodySegment = bodySegment as OpenapiSchemaShorthandExpressionSerializerRef
+  private serializerStatement(
+    serializerRefBodySegment: OpenapiSchemaShorthandExpressionSerializerRef,
+    referencedSerializers: SerializerArray,
+  ): OpenapiSchemaBody {
     const serializer = serializerRefBodySegment.$serializer
 
     if (!DreamApp.system.isDreamSerializer(serializer))
@@ -613,10 +179,8 @@ The following values will be allowed:
       enumCollector: this.enumCollector,
     }).serializerRef
 
-    return {
-      referencedSerializers: [serializer],
-      openapi: serializerRefsToOpenapi([serializerRef], serializerRefBodySegment),
-    }
+    referencedSerializers.push(serializer)
+    return serializerRefsToOpenapi([serializerRef], serializerRefBodySegment)
   }
 
   /**
@@ -640,7 +204,7 @@ The following values will be allowed:
    * the type system should have prevented this, so reaching here indicates
    * a misuse that bypassed type checking (e.g., via `as any`).
    */
-  private forStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
+  private forStatement(bodySegment: object, expand: OpenapiSegmentExpand): OpenapiSchemaBody {
     if (this.target !== 'request') {
       throw new Error(
         `'for:' sentinel is only valid inside request body shorthand; encountered while expanding a response.`,
@@ -670,11 +234,13 @@ The following values will be allowed:
       this.source,
     )
 
-    return this.recursivelyParseBody(paramsShape)
+    return expand(paramsShape)
   }
 
-  private serializableStatement(bodySegment: OpenapiBodySegment): ReferencedSerializersAndOpenapiSchemaBody {
-    const serializableRef = bodySegment as OpenapiSchemaShorthandExpressionSerializableRef
+  private serializableStatement(
+    serializableRef: OpenapiSchemaShorthandExpressionSerializableRef,
+    referencedSerializers: SerializerArray,
+  ): OpenapiSchemaBody {
     const key = serializableRef.$serializableSerializerKey || serializableRef.key || 'default'
     const { serializers, refs } = serializersAndRefsFromSerializableRef(serializableRef, {
       casing: this.casing,
@@ -688,48 +254,17 @@ The following values will be allowed:
       )
 
     if (serializers.length === 1) {
-      return this.serializerStatement({
-        $serializer: serializers[0],
-        ...serializableRef,
-      })
+      return this.serializerStatement(
+        {
+          $serializer: serializers[0]!,
+          ...serializableRef,
+        } as OpenapiSchemaShorthandExpressionSerializerRef,
+        referencedSerializers,
+      )
     }
 
-    return { referencedSerializers: serializers, openapi: serializerRefsToOpenapi(refs, serializableRef) }
-  }
-
-  /**
-   * @internal
-   *
-   * recursively an unknown_object statement
-   */
-  private unknownObjectStatement(bodySegment: OpenapiBodySegment): OpenapiSchemaBody {
-    return this.applyCommonFieldsToPayload(bodySegment as any) as OpenapiSchemaBody
-  }
-
-  /**
-   * @internal
-   *
-   * binds shared openapi fields to any object
-   */
-  private applyCommonFieldsToPayload<
-    Obj extends OpenapiSchemaBody | OpenapiSchemaObject | OpenapiSchemaArray,
-  >(obj: Obj): Obj {
-    const objectCast = obj as OpenapiSchemaObject
-    const returnObj: Obj = {
-      ...obj,
-    }
-
-    if (objectCast.description) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      ;(returnObj as any).description = objectCast.description
-    }
-
-    if (objectCast.summary) {
-      // eslint-disable-next-line @typescript-eslint/no-unsafe-member-access
-      ;(returnObj as any).summary = objectCast.summary
-    }
-
-    return returnObj
+    referencedSerializers.push(...serializers)
+    return serializerRefsToOpenapi(refs, serializableRef)
   }
 }
 

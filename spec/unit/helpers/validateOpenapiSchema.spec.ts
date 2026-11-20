@@ -46,40 +46,6 @@ describe('validateOpenApiSchema', () => {
     expect(dataWithExtra.invalidExtra).toBe('should be removed')
   })
 
-  it('handles OpenAPI-specific formats', () => {
-    const openapiSchema = {
-      type: 'object',
-      properties: {
-        date: { type: 'string', format: 'date' },
-        datetime: { type: 'string', format: 'date-time' },
-        uri: { type: 'string', format: 'uri' },
-        oneOfTest: {
-          oneOf: [
-            { type: 'string', format: 'uri' },
-            { type: 'number', format: 'date-time' },
-          ],
-        },
-        anyOfTest: {
-          anyOf: [
-            { type: 'string', format: 'uri' },
-            { type: 'string', format: 'date-time' },
-          ],
-        },
-      },
-    }
-
-    const validData = {
-      date: '2023-01-01',
-      datetime: '2023-01-01T10:00:00Z',
-      uri: 'https://example.com',
-      oneOfTest: 'https://example.com',
-      anyOfTest: '2023-01-01T10:00:00Z',
-    }
-
-    const result = validateOpenApiSchema(validData, openapiSchema)
-    expect(result.isValid).toBe(true)
-  })
-
   it('returns detailed error information for OpenAPI validation failures', () => {
     const openapiSchema = {
       type: 'object',

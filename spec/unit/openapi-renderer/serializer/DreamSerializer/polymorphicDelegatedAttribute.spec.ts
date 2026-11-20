@@ -30,10 +30,12 @@ function userTarget(
   {
     jsonColumnShapes,
     virtualAttributes,
+    encryptedAttributes,
     columns,
   }: {
     jsonColumnShapes?: { column: string; openapi: unknown }[]
     virtualAttributes?: { property: string; type: unknown }[]
+    encryptedAttributes?: { property: string; encryptedColumnName: string }[]
     columns?: Record<string, ColumnMetadata>
   } = {},
 ): typeof User {
@@ -41,6 +43,8 @@ function userTarget(
   Object.defineProperty(Target, 'name', { value: name })
   if (jsonColumnShapes) Object.defineProperty(Target, 'jsonColumnShapes', { value: jsonColumnShapes })
   if (virtualAttributes) Object.defineProperty(Target, 'virtualAttributes', { value: virtualAttributes })
+  if (encryptedAttributes)
+    Object.defineProperty(Target, 'encryptedAttributes', { value: encryptedAttributes })
 
   if (columns) {
     const schema = User.prototype.schema
@@ -73,7 +77,7 @@ function petBelongingTo(...targets: (typeof Dream)[]): typeof Pet {
 // renders a serializer delegating `attribute` (with `options`) through Pet's `user`
 function renderDelegated(
   source: typeof Pet,
-  attribute: 'requiredJsonbData' | 'requiredFavoriteJsonbs' | 'openapiVirtualSpecTest' | 'name',
+  attribute: 'requiredJsonbData' | 'requiredFavoriteJsonbs' | 'openapiVirtualSpecTest' | 'secret' | 'name',
   options?: object,
 ) {
   const MySerializer = (data: Pet) =>
@@ -358,6 +362,105 @@ describe('DreamSerializer delegatedAttribute through a polymorphic association',
           openapi: { description: 'a spec virtual' },
         }),
       ).toThrow(PolymorphicDelegatedAttributeShapesDiffer)
+    })
+  })
+
+  context('@deco.Encrypted targets', () => {
+    // User#secret is a bare @deco.Encrypted() over encrypted_secret, which
+    // allows null; these targets declare it over a non-null backing column
+    const nonNullBackingColumn = { encryptedSecret: { ...jsonbColumn({}), dbType: 'text' } }
+
+    function secretTarget(name: string, type: unknown, columns?: Record<string, ColumnMetadata>) {
+      return userTarget(name, {
+        virtualAttributes: [
+          ...(User['virtualAttributes'] as { property: string; type: unknown }[]).filter(
+            statement => statement.property !== 'secret',
+          ),
+          { property: 'secret', type },
+        ],
+        ...(columns ? { columns } : {}),
+      })
+    }
+
+    context('when the targets differ only in the nullability of their backing columns', () => {
+      it('renders a bare @deco.Encrypted() nullable, whatever the order of the targets', () => {
+        // a bare @deco.Encrypted() registers 'string' over a non-null column
+        const NonNullSecretKeeper = secretTarget('NonNullSecretKeeper', 'string', nonNullBackingColumn)
+
+        expect(renderDelegated(petBelongingTo(User, NonNullSecretKeeper), 'secret')).toEqual({
+          type: ['string', 'null'],
+        })
+        expect(renderDelegated(petBelongingTo(NonNullSecretKeeper, User), 'secret')).toEqual({
+          type: ['string', 'null'],
+        })
+      })
+
+      it('renders a declared shape nullable, whatever the order of the targets', () => {
+        const NullableSecretKeeper = secretTarget('NullableSecretKeeper', 'integer')
+        const NonNullSecretKeeper = secretTarget('NonNullSecretKeeper', 'integer', nonNullBackingColumn)
+
+        for (const source of [
+          petBelongingTo(NullableSecretKeeper, NonNullSecretKeeper),
+          petBelongingTo(NonNullSecretKeeper, NullableSecretKeeper),
+        ]) {
+          const rendered = renderDelegated(source, 'secret')
+          expect(rendered).toEqual({ type: ['integer', 'null'] })
+          expect(validates(rendered, null)).toBe(true)
+          expect(validates(rendered, 5)).toBe(true)
+        }
+      })
+    })
+
+    context('when another target declares the attribute with @deco.Virtual', () => {
+      // `secret` as a plain @deco.Virtual: no encrypted attribute, so no
+      // backing column adds null to its shape
+      function virtualSecretTarget(name: string, type: unknown) {
+        return userTarget(name, {
+          virtualAttributes: [
+            ...(User['virtualAttributes'] as { property: string; type: unknown }[]).filter(
+              statement => statement.property !== 'secret',
+            ),
+            { property: 'secret', type },
+          ],
+          encryptedAttributes: [],
+        })
+      }
+
+      it('renders the shape when the effective shapes are identical, whatever the order of the targets', () => {
+        // User#secret, a bare @deco.Encrypted() over a nullable column,
+        // renders ['string', 'null'], as this @deco.Virtual does
+        const VirtualSecretKeeper = virtualSecretTarget('VirtualSecretKeeper', ['string', 'null'])
+
+        for (const source of [
+          petBelongingTo(User, VirtualSecretKeeper),
+          petBelongingTo(VirtualSecretKeeper, User),
+        ]) {
+          expect(renderDelegated(source, 'secret')).toEqual({ type: ['string', 'null'] })
+        }
+      })
+
+      it('throws when the backing column adds null the @deco.Virtual shape lacks', () => {
+        const NullableSecretKeeper = secretTarget('NullableSecretKeeper', 'integer')
+        const VirtualSecretKeeper = virtualSecretTarget('VirtualSecretKeeper', 'integer')
+
+        for (const source of [
+          petBelongingTo(NullableSecretKeeper, VirtualSecretKeeper),
+          petBelongingTo(VirtualSecretKeeper, NullableSecretKeeper),
+        ]) {
+          expect(() => renderDelegated(source, 'secret')).toThrow(PolymorphicDelegatedAttributeShapesDiffer)
+        }
+      })
+    })
+
+    it('throws when the declared shapes differ', () => {
+      const IntegerSecretKeeper = secretTarget('IntegerSecretKeeper', 'integer')
+
+      for (const source of [
+        petBelongingTo(User, IntegerSecretKeeper),
+        petBelongingTo(IntegerSecretKeeper, User),
+      ]) {
+        expect(() => renderDelegated(source, 'secret')).toThrow(PolymorphicDelegatedAttributeShapesDiffer)
+      }
     })
   })
 

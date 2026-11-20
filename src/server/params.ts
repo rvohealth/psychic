@@ -1,5 +1,4 @@
-import { CalendarDate, ClockTime, ClockTimeTz, DateTime, Dream } from '@rvoh/dream'
-import { type ValidateFunction } from 'ajv'
+import { CalendarDate, ClockTime, ClockTimeTz, DateTime, Dream, DreamApp } from '@rvoh/dream'
 import {
   OpenapiSchemaArray,
   OpenapiSchemaBody,
@@ -26,17 +25,14 @@ import {
 } from '../controller/index.js'
 import ParamValidationError from '../error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../error/controller/ParamValidationErrors.js'
-import DeclaredShapeDoesNotCompile from '../error/openapi/DeclaredShapeDoesNotCompile.js'
 import alternateParamName from '../helpers/alternateParamName.js'
 import isArrayParamName from '../helpers/isArrayParamName.js'
 import isObject from '../helpers/isObject.js'
 import isUuid from '../helpers/isUuid.js'
-import { createValidator, validateObject } from '../helpers/validateOpenApiSchema.js'
+import { validateObject } from '../helpers/validateOpenApiSchema.js'
 import { Inc } from '../i18n/conf/types.js'
 import {
   declaredJSONColumnShape,
-  dreamColumnOpenapiShape,
-  type JSONColumnShapeStatement,
   type VirtualAttributeStatement,
 } from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
@@ -78,10 +74,12 @@ export default class Params {
    * declaration, whatever the endpoint's OpenAPI says and whether or not
    * request validation is on: objects, arrays, nested values and enums are
    * checked against it, and a primitive is cast as any column's is, then
-   * checked against the declared enum. A `@deco.JSON` column accepts `null`
-   * only when the column allows null, and never a string (nor a string element
-   * of a json[]/jsonb[] column), which Dream would store as raw JSON text. A
-   * declared value is returned as submitted.
+   * checked against the declared enum. A `@deco.JSON` column, or an
+   * `@deco.Encrypted` attribute, accepts `null` when its column allows null
+   * (or its shape does). A `@deco.JSON` column never accepts a string (nor a
+   * string element of a json[]/jsonb[] column), which Dream would store as raw
+   * JSON text. The check is Dream's, the same one every save runs. A declared
+   * value is returned as submitted.
    */
   public static for<
     T extends typeof Dream,
@@ -242,7 +240,9 @@ export default class Params {
    * declared shape. A primitive (or an array of primitives) is cast as today,
    * so `'true'` and `"5"` arriving from a query string still pass, and is then
    * checked against the declared enum; any other shape (an object, an array of
-   * objects, a composition) is validated as submitted, without coercion.
+   * objects, a composition) is validated as submitted, without coercion. An
+   * `@deco.Encrypted` attribute whose backing column allows null accepts
+   * `null`, as Dream's shape for it does.
    */
   private static castVirtualAttribute(
     params: object,
@@ -261,11 +261,17 @@ export default class Params {
 
     throwIfBareValueForArrayCast(columnName, paramValue, primitiveCast.expectedType)
 
+    // the declared shape as Dream checks it and Psychic renders it: for an
+    // `@deco.Encrypted` attribute, with `null` added when its backing column
+    // allows null. `null` passes when the declaration's own type admits it, as
+    // before, or when that shape accepts it
+    const declaredSchema = DreamApp.system.declaredShapeSchema(dreamClass, columnName)!
+
     const castValue: unknown = this.cast(params, columnName, primitiveCast.expectedType, {
-      allowNull: primitiveCast.allowNull,
+      allowNull: primitiveCast.allowNull || DreamApp.system.openapiSchemaAcceptsNull(declaredSchema),
     })
 
-    const allowedValues = declaredEnumValues(declaredShapeSchema(dreamClass, columnName))
+    const allowedValues = declaredEnumValues(declaredSchema)
     if (allowedValues && castValue !== null && castValue !== undefined) {
       // A date or date-time is checked as the JSON string it arrives as, as
       // the OpenAPI enum checks it: the cast hydrates it into a CalendarDate
@@ -973,105 +979,11 @@ const DB_TYPE_TO_CAST_TYPE: Record<string, PsychicParamsPrimitiveLiteral> = {
   'numeric[]': 'number[]',
 }
 
-// a declaration does not change after boot, so its schema and validator are
-// built once per model and column
-const declaredShapeSchemas = new WeakMap<typeof Dream, Map<string, OpenapiSchemaBody>>()
-const declaredShapeValidators = new WeakMap<typeof Dream, Map<string, ValidateFunction>>()
-
-function memoizedPerColumn<T>(
-  cache: WeakMap<typeof Dream, Map<string, T>>,
-  dreamClass: typeof Dream,
-  columnName: string,
-  build: () => T,
-): T {
-  let entries = cache.get(dreamClass)
-  if (!entries) {
-    entries = new Map()
-    cache.set(dreamClass, entries)
-  }
-
-  if (!entries.has(columnName)) entries.set(columnName, build())
-  return entries.get(columnName)!
-}
-
-/**
- * The full OpenAPI schema of a column or attribute whose shape the model
- * declares, read through the shared reader every serializer and request body
- * uses (no serializer `openapi`, so the model's declaration alone).
- */
-function declaredShapeSchema(dreamClass: typeof Dream, columnName: string): OpenapiSchemaBody {
-  return memoizedPerColumn(declaredShapeSchemas, dreamClass, columnName, () =>
-    dreamColumnOpenapiShape(`${dreamClass.sanitizedName} Params.for`, dreamClass, columnName as never),
-  )
-}
-
-/**
- * @internal
- *
- * Builds, while `PsychicApp.init` runs, the validator `Params.for` checks each
- * declared shape with (every `@deco.JSON` column, and every
- * `@deco.Virtual`/`@deco.Encrypted` attribute whose shape is validated rather
- * than cast), so a declaration AJV cannot compile is refused at boot rather
- * than answering every request that submits it with a 500, and a request
- * reuses the validator built here.
- */
-export function compileDeclaredShapeValidators(dreamClass: typeof Dream): void {
-  const jsonColumnShapes = (dreamClass['jsonColumnShapes'] as JSONColumnShapeStatement[] | undefined) ?? []
-  for (const { column } of jsonColumnShapes) compileDeclaredShapeValidator(dreamClass, column, '@deco.JSON')
-
-  const encryptedProperties = new Set(
-    ((dreamClass['encryptedAttributes'] as { property: string }[] | undefined) ?? []).map(
-      statement => statement.property,
-    ),
-  )
-  const virtualAttributes = (dreamClass['virtualAttributes'] as VirtualAttributeStatement[] | undefined) ?? []
-  for (const { property, type } of virtualAttributes) {
-    // a primitive is cast rather than validated (see castVirtualAttribute)
-    if (type === undefined || primitiveCastFromOpenapi(type)) continue
-    compileDeclaredShapeValidator(
-      dreamClass,
-      property,
-      encryptedProperties.has(property) ? '@deco.Encrypted' : '@deco.Virtual',
-    )
-  }
-}
-
-function compileDeclaredShapeValidator(
-  dreamClass: typeof Dream,
-  columnName: string,
-  decorator: '@deco.JSON' | '@deco.Virtual' | '@deco.Encrypted',
-) {
-  // an error rendering the shape is already named for the declaration
-  declaredShapeSchema(dreamClass, columnName)
-
-  try {
-    declaredShapeValidator(dreamClass, columnName)
-  } catch (cause) {
-    throw new DeclaredShapeDoesNotCompile(
-      dreamClass,
-      columnName,
-      decorator,
-      cause instanceof Error ? cause.message : String(cause),
-      { cause },
-    )
-  }
-}
-
-function declaredShapeValidator(dreamClass: typeof Dream, columnName: string): ValidateFunction {
-  return memoizedPerColumn(declaredShapeValidators, dreamClass, columnName, () =>
-    // no coercion and no defaults: the value must already match, and is
-    // validated (and returned) exactly as submitted
-    createValidator(declaredShapeSchema(dreamClass, columnName), {
-      coerceTypes: false,
-      useDefaults: false,
-      removeAdditional: false,
-    }),
-  )
-}
-
 /**
  * Validates a value against the shape the model declares for a column or
- * attribute, returning the value as submitted, or throwing the
+ * attribute, with Dream's declared-shape check (no coercion and no defaults:
+ * the value must already match, and is validated and returned exactly as
+ * submitted), returning the value as submitted, or throwing the
  * `ParamValidationError` the router answers with a 400.
  */
 function validateAgainstDeclaredShape(
@@ -1079,12 +991,12 @@ function validateAgainstDeclaredShape(
   columnName: string,
   paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
 ): unknown {
-  const validator = declaredShapeValidator(dreamClass, columnName)
-  if (validator(paramValue)) return paramValue
+  const check = DreamApp.system.validateDeclaredShape(dreamClass, columnName, paramValue)
+  if (check.isValid) return paramValue
 
   throw new ParamValidationError(
     columnName,
-    (validator.errors ?? []).map(error =>
+    check.errors.map(error =>
       error.instancePath ? `${error.instancePath} ${error.message}` : (error.message ?? 'is invalid'),
     ),
   )
