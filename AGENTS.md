@@ -114,6 +114,14 @@ pnpm psy db:reset
 ### Sync
 Syncs OpenAPI changes, types, etc. This is automatically performed by `psy db:migrate` and `psy db:reset`, so it's not necessary to run separately if those are already being run.
 
+### Changing the Test-App Schema
+Edit the table's create migration in `test-app/src/db/migrations/` in place
+(add a migration only for a new table), then run `pnpm psy db:reset`. Never add
+an `alterTable` migration to the test-app. The reason: the test-app has no
+deployed database to migrate forward (CI builds it fresh from the migrations on
+every run), so one create migration per table keeps each table's schema readable
+in one place.
+
 ## Build and Code Quality
 
 ### Build
