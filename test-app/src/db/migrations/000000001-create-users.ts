@@ -60,6 +60,7 @@ export async function up(db: Kysely<any>): Promise<void> {
     .addColumn('json_data', 'json')
     .addColumn('required_json_data', 'json', col => col.notNull().defaultTo('{}'))
     .addColumn('encrypted_secret', 'text')
+    .addColumn('encrypted_secret_details', 'text')
     .addColumn('password_digest', 'varchar', col => col.notNull())
 
     .addColumn('collar_count', 'bigint')

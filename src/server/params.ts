@@ -332,8 +332,9 @@ export default class Params {
     >,
     ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
   >(params: object, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
+    const forOpts = { ...(opts ?? {}), only: allowed }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return Params.for(params, dreamClass, { ...(opts ?? {}), only: allowed } as any)
+    return Params.for(params, dreamClass, forOpts as any) as unknown as ReturnPayload
   }
 
   public static restrict<T extends typeof Params>(

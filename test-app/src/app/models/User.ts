@@ -184,8 +184,19 @@ export default class User extends ApplicationModel {
   @deco.Virtual('string[]')
   public openapiVirtualSpecTest2: string | null | undefined
 
+  // sync types each @deco.Encrypted property from its declaration: a bare
+  // @deco.Encrypted() is a string, nullable with its backing column
   @deco.Encrypted()
-  public secret: DreamColumn<User, 'encryptedSecret'>
+  public secret: DreamColumn<User, 'secret'>
+
+  @deco.Encrypted({
+    openapi: {
+      type: 'object',
+      properties: { pin: 'string', tier: { type: 'string', enum: ['basic', 'gold'] } },
+      required: ['pin'],
+    },
+  })
+  public secretDetails: DreamColumn<User, 'secretDetails'>
 
   public openapiVirtualSpecTest3: string | null | undefined
 
