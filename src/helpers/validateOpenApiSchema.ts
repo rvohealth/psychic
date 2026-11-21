@@ -164,11 +164,16 @@ export interface CustomOpenapiValidationOptions {
    * receives the AJV instance before the schema is compiled, to add a custom
    * format with `ajv.addFormat`, say. A format added here is checked only by
    * the request and response validators of the OpenAPI document or `@OpenAPI`
-   * endpoint whose `ajvOptions` set it. `paramsFor`, `extractParams` and
-   * `Params.for`, and `@rvoh/dream`'s save check of a `@deco.JSON` or
-   * `@deco.Encrypted` value, know only Dream's built-in formats (the
-   * `ajv-formats` formats, and `decimal` and `bigint`) and accept any value for
-   * another `format`.
+   * endpoint whose `ajvOptions` set it. The declared-shape check that
+   * `paramsFor`, `extractParams` and `Params.for` run on a `@deco.JSON` value,
+   * or on a `@deco.Virtual` or `@deco.Encrypted` value whose shape is an
+   * object, an array of objects or a composition (the same check `@rvoh/dream`
+   * runs on every save of a `@deco.JSON` or `@deco.Encrypted` value), knows
+   * only Dream's built-in formats (the `ajv-formats` formats, and `decimal` and
+   * `bigint`) and accepts any value for another `format`. Those three methods
+   * check a primitive `@deco.Virtual` or `@deco.Encrypted` shape only by its
+   * cast and its declared enum, so a `date`, `date-time` or `uuid` format is
+   * checked by the cast and any other `format`, `email` included, is not.
    */
   init?: (ajv: ReturnType<typeof DreamApp.system.createOpenapiAjv>) => void
 }
