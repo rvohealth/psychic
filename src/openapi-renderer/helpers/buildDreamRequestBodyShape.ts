@@ -1,8 +1,9 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Dream } from '@rvoh/dream'
 import { OpenapiSchemaBody, OpenapiSchemaObject, OpenapiSchemaProperties } from '@rvoh/dream/openapi'
+import RequestBodyCombiningRedeclaresJSONColumn from '../../error/openapi/RequestBodyCombiningRedeclaresJSONColumn.js'
 import openapiParamNamesForDreamClass from '../../server/helpers/openapiParamNamesForDreamClass.js'
-import { dreamColumnOpenapiShape } from './dreamColumnOpenapiShape.js'
+import { declaredJSONColumnShape, dreamColumnOpenapiShape } from './dreamColumnOpenapiShape.js'
 import OpenapiEnumCollector from './OpenapiEnumCollector.js'
 
 export interface BuildDreamRequestBodyShapeOpts {
@@ -73,6 +74,14 @@ export default function buildDreamRequestBodyShape(
   // below, so the model-derived shape for that key never reaches the final
   // spec — shadowed columns must not contribute collected enum values
   const combiningKeys = new Set(Object.keys(combining || {}))
+
+  // a column whose shape the model declares with `@deco.JSON` has that one
+  // shape everywhere, and `Params.for` enforces it whatever the endpoint's
+  // OpenAPI says, so a same-key `combining` entry may not redeclare it
+  combiningKeys.forEach(key => {
+    if (declaredJSONColumnShape(dreamClass, key) !== undefined)
+      throw new RequestBodyCombiningRedeclaresJSONColumn(source, dreamClass, key)
+  })
 
   paramsShape.properties = paramSafeColumns.reduce(
     (acc, columnName) => {

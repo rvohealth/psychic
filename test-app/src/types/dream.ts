@@ -186,6 +186,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {
       user: {
         type: 'BelongsTo',
@@ -269,6 +271,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {
       user: {
         type: 'BelongsTo',
@@ -336,6 +340,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {
       post: {
         type: 'BelongsTo',
@@ -419,6 +425,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {},
   },
   model_without_serializers: {
@@ -467,6 +475,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {},
   },
   pets: {
@@ -686,6 +696,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {
       user: {
         type: 'BelongsTo',
@@ -769,6 +781,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {
       comments: {
         type: 'HasMany',
@@ -845,6 +859,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {},
   },
   users: {
@@ -872,6 +888,7 @@ export const schema = {
       'createdOn',
       'email',
       'encryptedSecret',
+      'encryptedSecretDetails',
       'favoriteBigint',
       'favoriteBigints',
       'favoriteBooleans',
@@ -994,6 +1011,15 @@ export const schema = {
         isArray: false,
       },
       encryptedSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedSecretDetails: {
         coercedType: {} as string | null,
         enumType: null,
         enumArrayType: null,
@@ -1309,7 +1335,11 @@ export const schema = {
         isArray: true,
       },
       requiredFavoriteJsonbs: {
-        coercedType: {} as Json[],
+        coercedType: {} as {
+          label: string
+          score?: number
+          [key: string]: unknown
+        }[],
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -1363,7 +1393,11 @@ export const schema = {
         isArray: false,
       },
       requiredJsonbData: {
-        coercedType: {} as Json,
+        coercedType: {} as {
+          theme?: 'light' | 'dark'
+          fontSize?: number
+          [key: string]: unknown
+        },
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -1422,7 +1456,27 @@ export const schema = {
       'openapiVirtualSpecTest2',
       'password',
       'secret',
+      'secretDetails',
     ],
+    jsonDecoratedColumns: ['requiredFavoriteJsonbs', 'requiredJsonbData'],
+    encryptedAttributes: {
+      secret: {
+        coercedType: {} as string | null,
+        writeType: {} as string | null,
+      },
+      secretDetails: {
+        coercedType: {} as {
+          pin: string
+          tier?: 'basic' | 'gold'
+          [key: string]: unknown
+        } | null,
+        writeType: {} as {
+          pin: string
+          tier?: 'basic' | 'gold'
+          [key: string]: unknown
+        } | null,
+      },
+    },
     associations: {
       balloons: {
         type: 'HasMany',

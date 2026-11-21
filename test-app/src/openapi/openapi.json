@@ -409,7 +409,18 @@
                   "requiredFavoriteJsonbs": {
                     "type": "array",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "required": [
+                        "label"
+                      ],
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "score": {
+                          "type": "number"
+                        }
+                      }
                     }
                   },
                   "requiredFavoriteJsons": {
@@ -441,7 +452,19 @@
                     "type": "object"
                   },
                   "requiredJsonbData": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "theme": {
+                        "type": "string",
+                        "enum": [
+                          "light",
+                          "dark"
+                        ]
+                      },
+                      "fontSize": {
+                        "type": "integer"
+                      }
+                    }
                   },
                   "requiredNicknames": {
                     "type": "array",
@@ -836,7 +859,18 @@
                   "requiredFavoriteJsonbs": {
                     "type": "array",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "required": [
+                        "label"
+                      ],
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "score": {
+                          "type": "number"
+                        }
+                      }
                     }
                   },
                   "requiredFavoriteJsons": {
@@ -868,7 +902,19 @@
                     "type": "object"
                   },
                   "requiredJsonbData": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "theme": {
+                        "type": "string",
+                        "enum": [
+                          "light",
+                          "dark"
+                        ]
+                      },
+                      "fontSize": {
+                        "type": "integer"
+                      }
+                    }
                   },
                   "requiredNicknames": {
                     "type": "array",
@@ -4186,7 +4232,18 @@
                   "requiredFavoriteJsonbs": {
                     "type": "array",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "required": [
+                        "label"
+                      ],
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "score": {
+                          "type": "number"
+                        }
+                      }
                     }
                   },
                   "requiredFavoriteJsons": {
@@ -4218,7 +4275,19 @@
                     "type": "object"
                   },
                   "requiredJsonbData": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "theme": {
+                        "type": "string",
+                        "enum": [
+                          "light",
+                          "dark"
+                        ]
+                      },
+                      "fontSize": {
+                        "type": "integer"
+                      }
+                    }
                   },
                   "requiredNicknames": {
                     "type": "array",
@@ -4701,7 +4770,18 @@
                   "requiredFavoriteJsonbs": {
                     "type": "array",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "required": [
+                        "label"
+                      ],
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "score": {
+                          "type": "number"
+                        }
+                      }
                     }
                   },
                   "requiredFavoriteJsons": {
@@ -4733,7 +4813,19 @@
                     "type": "object"
                   },
                   "requiredJsonbData": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "theme": {
+                        "type": "string",
+                        "enum": [
+                          "light",
+                          "dark"
+                        ]
+                      },
+                      "fontSize": {
+                        "type": "integer"
+                      }
+                    }
                   },
                   "requiredNicknames": {
                     "type": "array",
@@ -5734,7 +5826,18 @@
                   "requiredFavoriteJsonbs": {
                     "type": "array",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "required": [
+                        "label"
+                      ],
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "score": {
+                          "type": "number"
+                        }
+                      }
                     }
                   },
                   "requiredFavoriteJsons": {
@@ -5766,7 +5869,19 @@
                     "type": "object"
                   },
                   "requiredJsonbData": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "theme": {
+                        "type": "string",
+                        "enum": [
+                          "light",
+                          "dark"
+                        ]
+                      },
+                      "fontSize": {
+                        "type": "integer"
+                      }
+                    }
                   },
                   "requiredNicknames": {
                     "type": "array",
@@ -6269,7 +6384,18 @@
                   "requiredFavoriteJsonbs": {
                     "type": "array",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "required": [
+                        "label"
+                      ],
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "score": {
+                          "type": "number"
+                        }
+                      }
                     }
                   },
                   "requiredFavoriteJsons": {
@@ -6301,7 +6427,19 @@
                     "type": "object"
                   },
                   "requiredJsonbData": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "theme": {
+                        "type": "string",
+                        "enum": [
+                          "light",
+                          "dark"
+                        ]
+                      },
+                      "fontSize": {
+                        "type": "integer"
+                      }
+                    }
                   },
                   "requiredNicknames": {
                     "type": "array",
@@ -6804,7 +6942,18 @@
                   "requiredFavoriteJsonbs": {
                     "type": "array",
                     "items": {
-                      "type": "object"
+                      "type": "object",
+                      "required": [
+                        "label"
+                      ],
+                      "properties": {
+                        "label": {
+                          "type": "string"
+                        },
+                        "score": {
+                          "type": "number"
+                        }
+                      }
                     }
                   },
                   "requiredFavoriteJsons": {
@@ -6836,7 +6985,19 @@
                     "type": "object"
                   },
                   "requiredJsonbData": {
-                    "type": "object"
+                    "type": "object",
+                    "properties": {
+                      "theme": {
+                        "type": "string",
+                        "enum": [
+                          "light",
+                          "dark"
+                        ]
+                      },
+                      "fontSize": {
+                        "type": "integer"
+                      }
+                    }
                   },
                   "requiredNicknames": {
                     "type": "array",
@@ -7307,7 +7468,8 @@
         "required": [
           "howyadoin",
           "id",
-          "nicknames"
+          "nicknames",
+          "requiredJsonbData"
         ],
         "properties": {
           "howyadoin": {
@@ -7349,6 +7511,21 @@
             ],
             "items": {
               "type": "string"
+            }
+          },
+          "requiredJsonbData": {
+            "type": "object",
+            "properties": {
+              "theme": {
+                "type": "string",
+                "enum": [
+                  "light",
+                  "dark"
+                ]
+              },
+              "fontSize": {
+                "type": "integer"
+              }
             }
           }
         }

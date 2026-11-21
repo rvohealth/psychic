@@ -211,6 +211,7 @@ export interface Users {
   createdOn: Generated<Timestamp>
   email: string
   encryptedSecret: string | null
+  encryptedSecretDetails: string | null
   favoriteBigint: Int8 | null
   favoriteBigints: ArrayType<Int8> | null
   favoriteBooleans: boolean[] | null
@@ -245,13 +246,23 @@ export interface Users {
   requiredFavoriteDates: Generated<ArrayType<Timestamp>>
   requiredFavoriteDatetimes: Generated<ArrayType<Timestamp>>
   requiredFavoriteIntegers: Generated<number[]>
-  requiredFavoriteJsonbs: Generated<ArrayType<Json>>
+  requiredFavoriteJsonbs: Generated<
+    {
+      label: string
+      score?: number
+      [key: string]: unknown
+    }[]
+  >
   requiredFavoriteJsons: Generated<ArrayType<Json>>
   requiredFavoriteNumerics: Generated<ArrayType<Numeric>>
   requiredFavoriteTexts: Generated<string[]>
   requiredFavoriteUuids: Generated<string[]>
   requiredJsonData: Generated<Json>
-  requiredJsonbData: Generated<Json>
+  requiredJsonbData: Generated<{
+    theme?: 'light' | 'dark'
+    fontSize?: number
+    [key: string]: unknown
+  }>
   requiredNicknames: Generated<string[]>
   species: SpeciesTypesEnum | null
   updatedAt: Generated<Timestamp>

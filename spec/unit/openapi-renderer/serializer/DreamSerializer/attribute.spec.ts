@@ -169,12 +169,8 @@ describe('DreamSerializer attributes', () => {
             items: { type: 'object', properties: { hello: 'string' } },
           },
         })
-        .attribute('requiredFavoriteJsonbs', {
-          openapi: {
-            type: 'array',
-            items: { type: 'object', properties: { hello: 'string' } },
-          },
-        })
+        // shape declared with @deco.JSON on the model
+        .attribute('requiredFavoriteJsonbs')
         .attribute('favoriteTexts')
         .attribute('requiredFavoriteTexts')
         .attribute('favoriteNumerics')
@@ -196,7 +192,8 @@ describe('DreamSerializer attributes', () => {
         .attribute('jsonbData', {
           openapi: { type: ['object', 'null'], properties: { hello: 'string' } },
         })
-        .attribute('requiredJsonbData', { openapi: { type: 'object', properties: { hello: 'string' } } })
+        // shape declared with @deco.JSON on the model
+        .attribute('requiredJsonbData')
         .attribute('uuid')
         .attribute('optionalUuid')
 
@@ -243,7 +240,14 @@ describe('DreamSerializer attributes', () => {
           type: ['array', 'null'],
           items: { type: 'object', properties: { hello: 'string' } },
         },
-        requiredFavoriteJsonbs: { type: 'array', items: { type: 'object', properties: { hello: 'string' } } },
+        requiredFavoriteJsonbs: {
+          type: 'array',
+          items: {
+            type: 'object',
+            properties: { label: { type: 'string' }, score: { type: 'number' } },
+            required: ['label'],
+          },
+        },
         favoriteTexts: { type: ['array', 'null'], items: { type: 'string' } },
         requiredFavoriteTexts: { type: 'array', items: { type: 'string' } },
         favoriteNumerics: { type: ['array', 'null'], items: { type: 'number', format: 'decimal' } },
@@ -263,7 +267,10 @@ describe('DreamSerializer attributes', () => {
         jsonData: { type: ['object', 'null'], properties: { hello: 'string' } },
         requiredJsonData: { type: 'object', properties: { hello: 'string' } },
         jsonbData: { type: ['object', 'null'], properties: { hello: 'string' } },
-        requiredJsonbData: { type: 'object', properties: { hello: 'string' } },
+        requiredJsonbData: {
+          type: 'object',
+          properties: { theme: { type: 'string', enum: ['light', 'dark'] }, fontSize: { type: 'integer' } },
+        },
         uuid: { type: 'string' },
         optionalUuid: { type: ['string', 'null'] },
 

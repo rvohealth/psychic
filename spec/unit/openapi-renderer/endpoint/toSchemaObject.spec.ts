@@ -76,7 +76,7 @@ describe('OpenapiEndpointRenderer', () => {
       expect(toSchemaObjectOpts.renderedSchemasOpenapi).toEqual({
         UserExtra: {
           type: 'object',
-          required: ['howyadoin', 'id', 'nicknames'],
+          required: ['howyadoin', 'id', 'nicknames', 'requiredJsonbData'],
           properties: {
             id: {
               type: 'integer',
@@ -85,6 +85,14 @@ describe('OpenapiEndpointRenderer', () => {
               type: ['array', 'null'],
               items: {
                 type: 'string',
+              },
+            },
+            // shape declared with @deco.JSON on User
+            requiredJsonbData: {
+              type: 'object',
+              properties: {
+                theme: { type: 'string', enum: ['light', 'dark'] },
+                fontSize: { type: 'integer' },
               },
             },
             howyadoin: {

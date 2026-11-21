@@ -1,9 +1,15 @@
+import { DreamSerializer } from '@rvoh/dream'
 import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
+import SerializerOpenapiShapeOnJSONColumn from '../../../../src/error/openapi/SerializerOpenapiShapeOnJSONColumn.js'
 import {
   dreamColumnOpenapiShape,
+  JSONColumnShapeStatement,
   UseCustomOpenapiForJson,
+  VirtualAttributeStatement,
 } from '../../../../src/openapi-renderer/helpers/dreamColumnOpenapiShape.js'
+import OpenapiSegmentExpander from '../../../../src/openapi-renderer/body-segment.js'
 import OpenapiEnumCollector from '../../../../src/openapi-renderer/helpers/OpenapiEnumCollector.js'
+import SerializerOpenapiRenderer from '../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 import Availability from '../../../../test-app/src/app/models/Availability.js'
 import User from '../../../../test-app/src/app/models/User.js'
 import { PetTreatsEnumValues, SpeciesTypesEnumValues } from '../../../../test-app/src/types/db.js'
@@ -739,6 +745,198 @@ describe('dreamAttributeOpenapiShape', () => {
   context('jsonb[]', () => {
     it('generates the expected Openapi shape', () => {
       expect(() => dreamColumnOpenapiShape('Test', User, 'favoriteJsonbs')).toThrow(UseCustomOpenapiForJson)
+    })
+  })
+
+  context('an undeclared json column', () => {
+    it('still renders a plain object for a request body (allowGenericJson)', () => {
+      expect(
+        dreamColumnOpenapiShape('Test', User, 'jsonbData', undefined, { allowGenericJson: true }),
+      ).toEqual({
+        type: ['object', 'null'],
+      })
+    })
+
+    it('explains @deco.JSON (and no longer the removed jsonAttribute) in UseCustomOpenapiForJson', () => {
+      const message = new UseCustomOpenapiForJson(User, 'jsonbData').message
+      expect(message).toContain("@deco.JSON({ type: 'object', properties: { hello: 'string' } })")
+      expect(message).toContain("public jsonbData: DreamColumn<User, 'jsonbData'>")
+      expect(message).toContain(".attribute('jsonbData', {")
+      expect(message).not.toContain('jsonAttribute')
+    })
+  })
+
+  context('a column whose shape the model declares with @deco.JSON', () => {
+    // the shapes test-app/src/app/models/User.ts declares
+    const requiredJsonbDataShape = {
+      type: 'object',
+      properties: { theme: { type: 'string', enum: ['light', 'dark'] }, fontSize: { type: 'integer' } },
+    }
+    const requiredFavoriteJsonbsElementShape = {
+      type: 'object',
+      properties: { label: { type: 'string' }, score: { type: 'number' } },
+      required: ['label'],
+    }
+
+    // the test-app's declared columns are not nullable, so the nullable
+    // columns are declared on a subclass, as @deco.JSON registers them
+    class UserWithNullableJSONColumns extends User {}
+    ;(
+      UserWithNullableJSONColumns as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
+    ).jsonColumnShapes = [
+      { column: 'jsonbData', openapi: { type: 'object', properties: { hello: 'string' } } },
+      { column: 'favoriteJsonbs', openapi: { type: 'object', properties: { hello: 'string' } } },
+      {
+        column: 'jsonData',
+        openapi: { anyOf: [{ type: 'object', properties: { hello: 'string' } }, { type: 'string' }] },
+      },
+    ]
+
+    it('renders the declared shape', () => {
+      expect(dreamColumnOpenapiShape('Test', User, 'requiredJsonbData')).toEqual(requiredJsonbDataShape)
+    })
+
+    it('renders the declared shape in a request body too (allowGenericJson)', () => {
+      expect(
+        dreamColumnOpenapiShape('Test', User, 'requiredJsonbData', undefined, { allowGenericJson: true }),
+      ).toEqual(requiredJsonbDataShape)
+    })
+
+    it('renders an array column as an array of the declared element shape', () => {
+      expect(dreamColumnOpenapiShape('Test', User, 'requiredFavoriteJsonbs')).toEqual({
+        type: 'array',
+        items: requiredFavoriteJsonbsElementShape,
+      })
+    })
+
+    it('adds null from a nullable column', () => {
+      expect(dreamColumnOpenapiShape('Test', UserWithNullableJSONColumns, 'jsonbData')).toEqual({
+        type: ['object', 'null'],
+        properties: { hello: { type: 'string' } },
+      })
+    })
+
+    it('adds null from a nullable column to a shape without a type', () => {
+      expect(dreamColumnOpenapiShape('Test', UserWithNullableJSONColumns, 'jsonData')).toEqual({
+        anyOf: [
+          { anyOf: [{ type: 'object', properties: { hello: { type: 'string' } } }, { type: 'string' }] },
+          { type: 'null' },
+        ],
+      })
+    })
+
+    it('makes a nullable array column a nullable array of non-null elements', () => {
+      expect(dreamColumnOpenapiShape('Test', UserWithNullableJSONColumns, 'favoriteJsonbs')).toEqual({
+        type: ['array', 'null'],
+        items: { type: 'object', properties: { hello: { type: 'string' } } },
+      })
+    })
+
+    it('layers a description onto the declared shape', () => {
+      expect(
+        dreamColumnOpenapiShape('Test', User, 'requiredJsonbData', { description: 'Display preferences' }),
+      ).toEqual({ ...requiredJsonbDataShape, description: 'Display preferences' })
+    })
+
+    it('refuses an openapi that carries a shape', () => {
+      expect(() =>
+        dreamColumnOpenapiShape('UserSerializer', User, 'requiredJsonbData', {
+          type: 'object',
+          properties: { hello: 'string' },
+        }),
+      ).toThrow(SerializerOpenapiShapeOnJSONColumn)
+
+      expect(() =>
+        dreamColumnOpenapiShape('UserSerializer', User, 'requiredJsonbData', {
+          description: 'Display preferences',
+          maxProperties: 3,
+        } as OpenapiSchemaBody),
+      ).toThrow(SerializerOpenapiShapeOnJSONColumn)
+    })
+
+    it('names the serializer, the column and the fix when refusing a shape', () => {
+      expect(() => dreamColumnOpenapiShape('UserSerializer', User, 'requiredJsonbData', 'json')).toThrow(
+        'UserSerializer passes an OpenAPI shape for User#requiredJsonbData',
+      )
+    })
+  })
+
+  context('a @deco.Virtual attribute', () => {
+    class UserWithObjectVirtual extends User {}
+    ;(
+      UserWithObjectVirtual as unknown as { virtualAttributes: VirtualAttributeStatement[] }
+    ).virtualAttributes = [
+      {
+        property: 'openapiVirtualSpecTest3',
+        type: { type: 'object', properties: { a: 'string' }, required: ['a'] },
+      },
+    ]
+
+    it('replaces the declared shape whole with a serializer openapi that carries a shape', () => {
+      expect(
+        dreamColumnOpenapiShape('Test', UserWithObjectVirtual, 'openapiVirtualSpecTest3' as 'email', {
+          type: ['object', 'null'],
+          properties: { b: 'string' },
+        }),
+      ).toEqual({ type: ['object', 'null'], properties: { b: 'string' } })
+    })
+
+    it('layers a description-only serializer openapi onto the declared shape', () => {
+      expect(
+        dreamColumnOpenapiShape('Test', UserWithObjectVirtual, 'openapiVirtualSpecTest3' as 'email', {
+          description: 'hello',
+        }),
+      ).toEqual({
+        type: 'object',
+        properties: { a: { type: 'string' } },
+        required: ['a'],
+        description: 'hello',
+      })
+    })
+  })
+
+  context('a @deco.Encrypted attribute', () => {
+    // as `@deco.Encrypted({ openapi: 'integer' })` on User#secret registers
+    // it; its backing column, encrypted_secret, allows null
+    class UserWithEncryptedInteger extends User {}
+    ;(
+      UserWithEncryptedInteger as unknown as { virtualAttributes: VirtualAttributeStatement[] }
+    ).virtualAttributes = [
+      ...(User['virtualAttributes'] as VirtualAttributeStatement[]).filter(
+        statement => statement.property !== 'secret',
+      ),
+      { property: 'secret', type: 'integer' },
+    ]
+
+    it('renders a bare @deco.Encrypted() as a string, nullable from its backing column', () => {
+      expect(dreamColumnOpenapiShape('Test', User, 'secret' as 'email')).toEqual({ type: ['string', 'null'] })
+    })
+
+    it('adds null from a nullable backing column to a declared shape without it', () => {
+      expect(dreamColumnOpenapiShape('Test', UserWithEncryptedInteger, 'secret' as 'email')).toEqual({
+        type: ['integer', 'null'],
+      })
+    })
+
+    it('renders the nullable shape as a serializer attribute', () => {
+      const MySerializer = (data: User) => DreamSerializer(UserWithEncryptedInteger, data).attribute('secret')
+
+      expect(
+        new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']().attributes['secret'],
+      ).toEqual({ type: ['integer', 'null'] })
+    })
+
+    it('renders the nullable shape in a model-derived request body', () => {
+      expect(
+        new OpenapiSegmentExpander({ for: UserWithEncryptedInteger, params: ['secret'] } as never, {
+          renderOpts: {
+            casing: 'camel',
+            suppressResponseEnums: false,
+            legacyImplicitRequestBodyParams: false,
+          },
+          target: 'request',
+        }).render().openapi,
+      ).toEqual({ type: 'object', properties: { secret: { type: ['integer', 'null'] } } })
     })
   })
 })

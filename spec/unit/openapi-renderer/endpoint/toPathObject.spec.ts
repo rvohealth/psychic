@@ -4,6 +4,7 @@
 /* eslint-disable @typescript-eslint/no-unsafe-argument */
 /* eslint-disable @typescript-eslint/no-unnecessary-type-assertion */
 import { OpenAPI } from '../../../../src/controller/decorators.js'
+import RequestBodyCombiningRedeclaresJSONColumn from '../../../../src/error/openapi/RequestBodyCombiningRedeclaresJSONColumn.js'
 import OpenapiEndpointRenderer, { ToPathObjectOpts } from '../../../../src/openapi-renderer/endpoint.js'
 import { type OpenapiResponsesOption } from '../../../../src/package-exports/openapi.js'
 import PsychicApp from '../../../../src/psychic-app/index.js'
@@ -1643,6 +1644,134 @@ describe('OpenapiEndpointRenderer', () => {
           })
         })
       })
+
+      context(
+        'a model-derived request body with columns whose shape the model declares with @deco.JSON',
+        () => {
+          // the shapes test-app/src/app/models/User.ts declares
+          const requiredJsonbDataShape = {
+            type: 'object',
+            properties: { theme: { type: 'string', enum: ['light', 'dark'] }, fontSize: { type: 'integer' } },
+          }
+          const requiredFavoriteJsonbsShape = {
+            type: 'array',
+            items: {
+              type: 'object',
+              required: ['label'],
+              properties: { label: { type: 'string' }, score: { type: 'number' } },
+            },
+          }
+
+          it('renders the declared shapes, and an undeclared json column as a plain object', () => {
+            const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
+              requestBody: {
+                for: User,
+                params: ['requiredJsonbData', 'requiredFavoriteJsonbs', 'jsonbData'],
+              },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response['/api/pets']!.post.requestBody).toEqual({
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      requiredJsonbData: requiredJsonbDataShape,
+                      requiredFavoriteJsonbs: requiredFavoriteJsonbsShape,
+                      jsonbData: { type: ['object', 'null'] },
+                    },
+                  },
+                },
+              },
+            })
+          })
+
+          it('renders the declared shape inside a nested `for:`', () => {
+            const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
+              requestBody: {
+                type: 'object',
+                properties: { user: { for: User, params: ['requiredJsonbData'] } },
+              },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response['/api/pets']!.post.requestBody).toEqual({
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: {
+                      user: { type: 'object', properties: { requiredJsonbData: requiredJsonbDataShape } },
+                    },
+                  },
+                },
+              },
+            })
+          })
+
+          it('refuses a same-key `combining` entry', () => {
+            const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
+              requestBody: {
+                for: User,
+                params: ['requiredJsonbData'],
+                combining: { requiredJsonbData: { type: 'object' } },
+              },
+            })
+
+            expect(() => renderer.toPathObject(routes, defaultToPathObjectOpts())).toThrow(
+              RequestBodyCombiningRedeclaresJSONColumn,
+            )
+          })
+
+          it('refuses a same-key `combining` entry inside a nested `for:`', () => {
+            const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
+              requestBody: {
+                type: 'object',
+                properties: {
+                  user: { for: User, params: ['email'], combining: { requiredFavoriteJsonbs: 'string[]' } },
+                },
+              },
+            })
+
+            expect(() => renderer.toPathObject(routes, defaultToPathObjectOpts())).toThrow(
+              RequestBodyCombiningRedeclaresJSONColumn,
+            )
+          })
+
+          it('names the endpoint, the column and the fix when refusing', () => {
+            const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
+              requestBody: { for: User, combining: { requiredJsonbData: { type: 'object' } } },
+            })
+
+            expect(() => renderer.toPathObject(routes, defaultToPathObjectOpts())).toThrow(
+              /Api\/Pets#create has a `combining` entry for\nUser#requiredJsonbData/,
+            )
+          })
+
+          it('still lets a same-key `combining` entry replace an undeclared json column', () => {
+            const renderer = new OpenapiEndpointRenderer(Pet, ApiPetsController, 'create', {
+              requestBody: {
+                for: User,
+                params: ['jsonbData'],
+                combining: { jsonbData: { type: 'object', properties: { hello: 'string' } } },
+              },
+            })
+
+            const response = renderer.toPathObject(routes, defaultToPathObjectOpts()).openapi
+            expect(response['/api/pets']!.post.requestBody).toEqual({
+              content: {
+                'application/json': {
+                  schema: {
+                    type: 'object',
+                    properties: { jsonbData: { type: 'object', properties: { hello: { type: 'string' } } } },
+                  },
+                },
+              },
+            })
+          })
+        },
+      )
 
       context('requestBody is not specified', () => {
         it('does not provide request body', () => {
