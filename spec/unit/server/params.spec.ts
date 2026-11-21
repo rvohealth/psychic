@@ -1,4 +1,5 @@
 import { CalendarDate, ClockTime, ClockTimeTz, DateTime } from '@rvoh/dream'
+import type { OpenapiShorthandPrimitiveTypes } from '@rvoh/dream/openapi'
 import { PsychicParamsDictionary } from '../../../src/controller/index.js'
 import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../../../src/error/controller/ParamValidationErrors.js'
@@ -319,6 +320,156 @@ describe('Params', () => {
           )
         })
       })
+
+      context('a shorthand declared in object form', () => {
+        // every primitive shorthand, its array and their nullable variants,
+        // each declared both as the string (`'decimal'`) and in object form
+        // (`{ type: 'decimal' }`)
+        const shorthands: OpenapiShorthandPrimitiveTypes[] = (
+          ['decimal', 'date', 'date-time', 'integer', 'number', 'string', 'boolean'] as const
+        ).flatMap(primitive => [
+          primitive,
+          `${primitive}[]` as const,
+          [primitive, 'null'] as const,
+          [`${primitive}[]` as const, 'null'] as const,
+        ])
+        const propertyName = (shorthand: OpenapiShorthandPrimitiveTypes, form: 'string' | 'object') =>
+          `${form}Form${JSON.stringify(shorthand).replace(/\W/g, '_')}`
+
+        class UserWithObjectFormShorthands extends User {}
+        ;(
+          UserWithObjectFormShorthands as unknown as { virtualAttributes: VirtualAttributeStatement[] }
+        ).virtualAttributes = [
+          ...(User['virtualAttributes'] as VirtualAttributeStatement[]),
+          ...shorthands.flatMap(shorthand => [
+            { property: propertyName(shorthand, 'string'), type: shorthand },
+            { property: propertyName(shorthand, 'object'), type: { type: shorthand } },
+          ]),
+          { property: 'objectFormDateItems', type: { type: 'array', items: { type: 'date-time' } } },
+        ]
+
+        const submittedValues = [
+          '5.5',
+          5.5,
+          '5',
+          5,
+          'five',
+          '2026-11-20',
+          '2026-11-19T10:00:00.000Z',
+          'true',
+          false,
+          null,
+          {},
+        ]
+
+        // what Params.for answers for one value: the value it returns, with a
+        // CalendarDate or DateTime as its ISO string, or the messages it rejects
+        // the value with
+        function outcome(property: string, value: unknown) {
+          try {
+            const result: Record<string, unknown> = Params.for(
+              { [property]: value } as PsychicParamsDictionary,
+              UserWithObjectFormShorthands,
+            )
+            const comparable = (castValue: unknown): unknown =>
+              Array.isArray(castValue)
+                ? castValue.map(comparable)
+                : castValue instanceof CalendarDate || castValue instanceof DateTime
+                  ? `${castValue.constructor.name}:${castValue.toISO()}`
+                  : castValue
+            return { value: comparable(result[property]) }
+          } catch (err) {
+            if (err instanceof ParamValidationErrors) return { errors: Object.values(err.errors) }
+            throw err
+          }
+        }
+
+        it('casts each value exactly as the string form does', () => {
+          for (const shorthand of shorthands) {
+            for (const scalar of submittedValues) {
+              for (const value of [scalar, [scalar]]) {
+                expect(
+                  outcome(propertyName(shorthand, 'object'), value),
+                  `${JSON.stringify(shorthand)} given ${JSON.stringify(value)}`,
+                ).toEqual(outcome(propertyName(shorthand, 'string'), value))
+              }
+            }
+          }
+        })
+
+        it('returns a CalendarDate or DateTime for `{ type: "date" }` or `{ type: "date-time" }`', () => {
+          const result: Record<string, unknown> = Params.for(
+            {
+              [propertyName('date', 'object')]: '2026-11-20',
+              [propertyName('date-time', 'object')]: '2026-11-19T10:00:00.000Z',
+              [propertyName(['date', 'null'], 'object')]: '2026-11-20',
+              objectFormDateItems: ['2026-11-19T10:00:00.000Z'],
+            },
+            UserWithObjectFormShorthands,
+          )
+          expect(result[propertyName('date', 'object')]).toBeInstanceOf(CalendarDate)
+          expect((result[propertyName('date', 'object')] as CalendarDate).toISO()).toEqual('2026-11-20')
+          expect(result[propertyName('date-time', 'object')]).toBeInstanceOf(DateTime)
+          expect((result[propertyName('date-time', 'object')] as DateTime).toISO()).toEqual(
+            '2026-11-19T10:00:00.000000Z',
+          )
+          expect(result[propertyName(['date', 'null'], 'object')]).toBeInstanceOf(CalendarDate)
+          expect((result['objectFormDateItems'] as DateTime[])[0]).toBeInstanceOf(DateTime)
+        })
+
+        it('casts a string decimal, integer array and nullable variant', () => {
+          expect(
+            Params.for(
+              {
+                [propertyName('decimal', 'object')]: '5.5',
+                [propertyName('integer[]', 'object')]: ['1', '2'],
+                [propertyName(['decimal', 'null'], 'object')]: null,
+              },
+              UserWithObjectFormShorthands,
+            ),
+          ).toEqual({
+            [propertyName('decimal', 'object')]: 5.5,
+            [propertyName('integer[]', 'object')]: [1, 2],
+            [propertyName(['decimal', 'null'], 'object')]: null,
+          })
+        })
+
+        it('rejects a bare value for an array, rather than wrapping it', () => {
+          expect(
+            paramErrorsFrom(() =>
+              Params.for({ [propertyName('integer[]', 'object')]: '1' }, UserWithObjectFormShorthands),
+            ),
+          ).toEqual({ [propertyName('integer[]', 'object')]: ['expected integer or string integer array'] })
+        })
+
+        it('rejects null unless the declaration admits it', () => {
+          expect(() =>
+            Params.for({ [propertyName('date', 'object')]: null }, UserWithObjectFormShorthands),
+          ).toThrow(ParamValidationErrors)
+        })
+      })
+
+      context('a declaration naming a cast type that is not a Dream shorthand', () => {
+        // only an untyped declaration can name `'bigint'`; Dream expands it to
+        // `{ type: 'object' }`, but Params.for casts it as it always has
+        class UserWithBigintVirtual extends User {}
+        ;(
+          UserWithBigintVirtual as unknown as { virtualAttributes: VirtualAttributeStatement[] }
+        ).virtualAttributes = [
+          ...(User['virtualAttributes'] as VirtualAttributeStatement[]),
+          { property: 'bigintVirtual', type: 'bigint' as unknown as VirtualAttributeStatement['type'] },
+        ]
+
+        it('casts a value as before', () => {
+          expect(Params.for({ bigintVirtual: 123 }, UserWithBigintVirtual)).toEqual({ bigintVirtual: '123' })
+        })
+
+        it('still refuses an object', () => {
+          expect(paramErrorsFrom(() => Params.for({ bigintVirtual: {} }, UserWithBigintVirtual))).toEqual({
+            bigintVirtual: ['expected bigint'],
+          })
+        })
+      })
     })
 
     context('a column whose shape the model declares with @deco.JSON', () => {
@@ -536,6 +687,67 @@ describe('Params', () => {
         it('still rejects a value of another type', () => {
           expect(paramErrorsFrom(() => Params.for({ secret: 'shh' }, UserWithEncryptedInteger))).toEqual({
             secret: ['expected integer or string integer'],
+          })
+        })
+      })
+
+      context('with a shorthand declared in object form', () => {
+        // User#secret redeclared, as `@deco.Encrypted({ openapi })` registers
+        // it; its backing column, encrypted_secret, allows null
+        function userWithSecretDeclaredAs(type: VirtualAttributeStatement['type']) {
+          class UserWithDeclaredSecret extends User {}
+          ;(
+            UserWithDeclaredSecret as unknown as { virtualAttributes: VirtualAttributeStatement[] }
+          ).virtualAttributes = [
+            ...(User['virtualAttributes'] as VirtualAttributeStatement[]).filter(
+              statement => statement.property !== 'secret',
+            ),
+            { property: 'secret', type },
+          ]
+          return UserWithDeclaredSecret
+        }
+
+        it('casts `{ type: "date" }` to a CalendarDate', () => {
+          const result: Record<string, unknown> = Params.for(
+            { secret: '2026-11-20' },
+            userWithSecretDeclaredAs({ type: 'date' }),
+          )
+          expect(result['secret']).toBeInstanceOf(CalendarDate)
+          expect((result['secret'] as CalendarDate).toISO()).toEqual('2026-11-20')
+        })
+
+        it('casts `{ type: "date-time" }` to a DateTime', () => {
+          const result: Record<string, unknown> = Params.for(
+            { secret: '2026-11-19T10:00:00.000Z' },
+            userWithSecretDeclaredAs({ type: 'date-time' }),
+          )
+          expect(result['secret']).toBeInstanceOf(DateTime)
+          expect((result['secret'] as DateTime).toISO()).toEqual('2026-11-19T10:00:00.000000Z')
+        })
+
+        it('casts a string decimal for `{ type: "decimal" }`', () => {
+          expect(Params.for({ secret: '5.5' }, userWithSecretDeclaredAs({ type: 'decimal' }))).toEqual({
+            secret: 5.5,
+          })
+        })
+
+        it('casts each element for `{ type: "integer[]" }`, and rejects a bare value', () => {
+          const UserWithIntegerArraySecret = userWithSecretDeclaredAs({ type: 'integer[]' })
+          expect(Params.for({ secret: ['1', '2'] }, UserWithIntegerArraySecret)).toEqual({ secret: [1, 2] })
+          expect(paramErrorsFrom(() => Params.for({ secret: '1' }, UserWithIntegerArraySecret))).toEqual({
+            secret: ['expected integer or string integer array'],
+          })
+        })
+
+        it('casts a nullable `{ type: ["decimal", "null"] }`, and accepts null', () => {
+          const UserWithNullableDecimalSecret = userWithSecretDeclaredAs({ type: ['decimal', 'null'] })
+          expect(Params.for({ secret: '5.5' }, UserWithNullableDecimalSecret)).toEqual({ secret: 5.5 })
+          expect(Params.for({ secret: null }, UserWithNullableDecimalSecret)).toEqual({ secret: null })
+        })
+
+        it('accepts null for `{ type: "date" }`, which the backing column allows', () => {
+          expect(Params.for({ secret: null }, userWithSecretDeclaredAs({ type: 'date' }))).toEqual({
+            secret: null,
           })
         })
       })
