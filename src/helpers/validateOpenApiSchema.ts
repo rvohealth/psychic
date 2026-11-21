@@ -105,7 +105,11 @@ export function validateObject<T = unknown>(
  * (`ajv-formats`, `decimal`, `bigint`) and the defaults (no coercion, defaults
  * applied, `strict: false` with `strictTypes: true`, …) are defined once.
  * `options` override those defaults, and `options.init` receives the instance
- * before the schema is compiled, to add a custom format, say.
+ * before the schema is compiled, to add a custom format, say. Such a format
+ * lands only on this instance, which an endpoint's OpenAPI request and
+ * response validators compile with; Dream's declared-shape check, which
+ * `Params.for` and every save of a `@deco.JSON` or `@deco.Encrypted` value
+ * run, never sees it and accepts any value for it.
  *
  * @param schema - JSON Schema to validate against
  * @param options - Validation options
@@ -156,5 +160,15 @@ export type AjvValidationOpts = NonNullable<Parameters<typeof DreamApp.system.cr
 export type ValidateOpenapiSchemaOptions = AjvValidationOpts & CustomOpenapiValidationOptions
 
 export interface CustomOpenapiValidationOptions {
+  /**
+   * receives the AJV instance before the schema is compiled, to add a custom
+   * format with `ajv.addFormat`, say. A format added here is checked only by
+   * the request and response validators of the OpenAPI document or `@OpenAPI`
+   * endpoint whose `ajvOptions` set it. `paramsFor`, `extractParams` and
+   * `Params.for`, and `@rvoh/dream`'s save check of a `@deco.JSON` or
+   * `@deco.Encrypted` value, know only Dream's built-in formats (the
+   * `ajv-formats` formats, and `decimal` and `bigint`) and accept any value for
+   * another `format`.
+   */
   init?: (ajv: ReturnType<typeof DreamApp.system.createOpenapiAjv>) => void
 }

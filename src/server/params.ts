@@ -79,7 +79,12 @@ export default class Params {
    * `@deco.Virtual`/`@deco.Encrypted` shape (or an array of primitives) is cast
    * as any column's is and then checked only against the declared enum; its
    * other constraints (`maxLength`, `pattern`, `minimum` and the like) are not
-   * checked here. A shorthand is cast the same whether it is declared as a
+   * checked here. Neither path knows a format added through an OpenAPI
+   * document's or an `@OpenAPI` endpoint's `ajvOptions.init`: Dream's check
+   * knows only its built-in formats (the `ajv-formats` formats, such as
+   * `date`, `email` and `uuid`, and `decimal` and `bigint`) and accepts any
+   * value for another `format`. A format added in `init` is checked only by
+   * that endpoint's OpenAPI request and response validators. A shorthand is cast the same whether it is declared as a
    * string or as an object's `type`: `'date'` and `{ type: 'date' }` both
    * return a `CalendarDate`, and `'decimal'` and `{ type: 'decimal' }` both
    * accept `'5.5'`. A `@deco.JSON` column, or an `@deco.Encrypted` attribute,

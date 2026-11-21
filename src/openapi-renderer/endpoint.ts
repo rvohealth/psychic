@@ -1693,7 +1693,20 @@ export type OpenapiValidateOption = {
   /**
    * custom options to provide to the Ajv instance
    * used under the hood to validate the openapi
-   * schema.
+   * schema. `init` receives that instance before
+   * the schema is compiled, so it can add a custom
+   * format with `ajv.addFormat`.
+   *
+   * A format added in `init` is checked only by the
+   * request and response validators of this OpenAPI
+   * document or `@OpenAPI` endpoint. `paramsFor`,
+   * `extractParams` and `Params.for`, and the check
+   * `@rvoh/dream` runs on every save of a
+   * `@deco.JSON` or `@deco.Encrypted` value, know
+   * only Dream's built-in formats (the `ajv-formats`
+   * formats, such as `date`, `email` and `uuid`,
+   * and `decimal` and `bigint`), and accept any
+   * value for another `format`.
    */
   ajvOptions?: ValidateOpenapiSchemaOptions
 }
