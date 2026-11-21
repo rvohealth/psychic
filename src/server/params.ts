@@ -77,14 +77,21 @@ export default class Params {
    * of objects or a composition, is checked as submitted with Dream's check,
    * the same one every save runs, and is returned as submitted. A primitive
    * `@deco.Virtual`/`@deco.Encrypted` shape (or an array of primitives) is cast
-   * as any column's is and then checked only against the declared enum; its
-   * other constraints (`maxLength`, `pattern`, `minimum` and the like) are not
-   * checked here. Neither path knows a format added through an OpenAPI
-   * document's or an `@OpenAPI` endpoint's `ajvOptions.init`: Dream's check
-   * knows only its built-in formats (the `ajv-formats` formats, such as
-   * `date`, `email` and `uuid`, and `decimal` and `bigint`) and accepts any
-   * value for another `format`. A format added in `init` is checked only by
-   * that endpoint's OpenAPI request and response validators. A shorthand is cast the same whether it is declared as a
+   * as any column's is and then checked only against the declared enum. Only
+   * the cast itself checks its format (a `date`, `date-time` or `uuid` value
+   * must be one to be cast); any other format, such as `email`, and the other
+   * constraints (`maxLength`, `pattern`, `minimum` and the like) are not
+   * checked here. A `null` or `undefined` element of a declared array of
+   * primitives is rejected, whichever form declares the array (`'integer[]'`,
+   * `{ type: 'integer[]' }` or `{ type: 'array', items: { type: 'integer' } }`),
+   * since its items schema excludes null; `null` for the whole array is
+   * accepted when the declaration admits it. Neither path knows a format
+   * added through an OpenAPI document's or an `@OpenAPI` endpoint's
+   * `ajvOptions.init`: Dream's check knows only its built-in formats (the
+   * `ajv-formats` formats, such as `date`, `email` and `uuid`, and `decimal`
+   * and `bigint`) and accepts any value for another `format`. A format added
+   * in `init` is checked only by that endpoint's OpenAPI request and response
+   * validators. A shorthand is cast the same whether it is declared as a
    * string or as an object's `type`: `'date'` and `{ type: 'date' }` both
    * return a `CalendarDate`, and `'decimal'` and `{ type: 'decimal' }` both
    * accept `'5.5'`. A `@deco.JSON` column, or an `@deco.Encrypted` attribute,
@@ -250,7 +257,8 @@ export default class Params {
    * Casts and checks a `@deco.Virtual`/`@deco.Encrypted` attribute against its
    * declared shape. A primitive (or an array of primitives) is cast as today,
    * so `'true'` and `"5"` arriving from a query string still pass, and is then
-   * checked against the declared enum; any other shape (an object, an array of
+   * checked against the declared enum (an array with a `null` or `undefined`
+   * element is rejected first); any other shape (an object, an array of
    * objects, a composition) is validated as submitted, without coercion. The
    * cast is read from the declaration as Dream expands it, so a shorthand
    * declared in object form (`{ type: 'date' }`) is cast as its string form
@@ -279,6 +287,7 @@ export default class Params {
     if (!primitiveCast) return validateAgainstDeclaredShape(dreamClass, columnName, paramValue)
 
     throwIfBareValueForArrayCast(columnName, paramValue, primitiveCast.expectedType)
+    throwIfNullElementForArrayCast(columnName, paramValue, primitiveCast.expectedType)
 
     // the declared shape as Dream checks it and Psychic renders it: for an
     // `@deco.Encrypted` attribute, with `null` added when its backing column
@@ -1084,6 +1093,32 @@ function throwIfBareValueForArrayCast(
   if (!castType.endsWith('[]')) return
   if (paramValue === null || Array.isArray(paramValue)) return
   throw new ParamValidationError(columnName, [typeToError(castType)])
+}
+
+/**
+ * A `@deco.Virtual`/`@deco.Encrypted` array of primitives is cast element by
+ * element, and the array cast drops a `null` or `undefined` element. Its items
+ * schema excludes null (items that admit null, as in
+ * `{ type: 'array', items: { type: ['integer', 'null'] } }`, are checked
+ * against the declaration instead of cast), so such an element is a client
+ * error rather than something to drop, in every form the declaration takes:
+ * `'integer[]'`, `{ type: 'integer[]' }` and `{ type: 'array', items: ... }`.
+ * `null` for the whole value is left to the cast, which accepts it when the
+ * declaration admits it. (Array columns and an explicit `Params.cast` or
+ * `castParam` still drop such elements.)
+ */
+function throwIfNullElementForArrayCast(
+  columnName: string,
+  paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+  castType: PsychicParamsPrimitiveLiteral,
+) {
+  if (!castType.endsWith('[]') || castType === 'null[]') return
+  if (!Array.isArray(paramValue)) return
+  // an index loop, so a hole in a sparse array counts as undefined
+  for (let index = 0; index < paramValue.length; index++) {
+    if (paramValue[index] === null || paramValue[index] === undefined)
+      throw new ParamValidationError(columnName, [typeToError(castType)])
+  }
 }
 
 /**

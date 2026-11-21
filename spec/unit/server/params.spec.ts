@@ -449,6 +449,66 @@ describe('Params', () => {
         })
       })
 
+      context('null elements of an array declaration', () => {
+        // the same integer array declared in each form an array declaration
+        // takes, each also with a nullable whole value, and one whose items
+        // admit null
+        class UserWithArrayVirtuals extends User {}
+        ;(
+          UserWithArrayVirtuals as unknown as { virtualAttributes: VirtualAttributeStatement[] }
+        ).virtualAttributes = [
+          ...(User['virtualAttributes'] as VirtualAttributeStatement[]),
+          { property: 'stringForm', type: 'integer[]' },
+          { property: 'objectForm', type: { type: 'integer[]' } },
+          { property: 'itemsForm', type: { type: 'array', items: { type: 'integer' } } },
+          { property: 'nullableStringForm', type: ['integer[]', 'null'] },
+          { property: 'nullableObjectForm', type: { type: ['integer[]', 'null'] } },
+          { property: 'nullableItemsForm', type: { type: ['array', 'null'], items: { type: 'integer' } } },
+          { property: 'nullableItems', type: { type: 'array', items: { type: ['integer', 'null'] } } },
+        ]
+        const forms = [
+          'stringForm',
+          'objectForm',
+          'itemsForm',
+          'nullableStringForm',
+          'nullableObjectForm',
+          'nullableItemsForm',
+        ]
+
+        it('rejects a null or undefined element, which the items schema excludes, in every form', () => {
+          for (const property of forms) {
+            for (const value of [[null], [1, null, 2], [1, undefined]]) {
+              expect(
+                paramErrorsFrom(() =>
+                  Params.for({ [property]: value } as PsychicParamsDictionary, UserWithArrayVirtuals),
+                ),
+                `${property} given ${JSON.stringify(value)}`,
+              ).toEqual({ [property]: ['expected integer or string integer array'] })
+            }
+          }
+        })
+
+        it('still casts an array without null elements', () => {
+          for (const property of forms) {
+            expect(Params.for({ [property]: ['1', 2] }, UserWithArrayVirtuals)).toEqual({
+              [property]: [1, 2],
+            })
+          }
+        })
+
+        it('accepts null for the whole value when the declaration admits it', () => {
+          for (const property of ['nullableStringForm', 'nullableObjectForm', 'nullableItemsForm']) {
+            expect(Params.for({ [property]: null }, UserWithArrayVirtuals)).toEqual({ [property]: null })
+          }
+        })
+
+        it('accepts a null element when the items schema admits one', () => {
+          expect(Params.for({ nullableItems: [1, null] }, UserWithArrayVirtuals)).toEqual({
+            nullableItems: [1, null],
+          })
+        })
+      })
+
       context('a declaration naming a cast type that is not a Dream shorthand', () => {
         // only an untyped declaration can name `'bigint'`; Dream expands it to
         // `{ type: 'object' }`, but Params.for casts it as it always has
@@ -737,6 +797,16 @@ describe('Params', () => {
           expect(paramErrorsFrom(() => Params.for({ secret: '1' }, UserWithIntegerArraySecret))).toEqual({
             secret: ['expected integer or string integer array'],
           })
+        })
+
+        it('rejects a null element for `{ type: "integer[]" }`, and accepts null for the whole value, which the backing column allows', () => {
+          const UserWithIntegerArraySecret = userWithSecretDeclaredAs({ type: 'integer[]' })
+          for (const value of [[null], [1, null, 2]]) {
+            expect(paramErrorsFrom(() => Params.for({ secret: value }, UserWithIntegerArraySecret))).toEqual({
+              secret: ['expected integer or string integer array'],
+            })
+          }
+          expect(Params.for({ secret: null }, UserWithIntegerArraySecret)).toEqual({ secret: null })
         })
 
         it('casts a nullable `{ type: ["decimal", "null"] }`, and accepts null', () => {
