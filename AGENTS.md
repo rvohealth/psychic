@@ -98,6 +98,24 @@ The reason: a request body can tell a single value from a one-element array, so
 converting one there hides a client bug. Only a query string is ambiguous. Do
 not add single-value conversion anywhere else to make a request pass.
 
+## Specs Read Real Declarations From the Test-App
+
+A spec that needs a model to declare something (a `@deco.JSON`,
+`@deco.Virtual` or `@deco.Encrypted` shape, an association, a column of a
+given type or nullability) reads it from a test-app model that declares it
+with the real decorator over a real column. When no model fits, add the model,
+column or declaration to the test-app (see Changing the Test-App Schema).
+
+Never stand in for a decorator: do not write the state it registers onto a
+class (a model's `virtualAttributes`, `jsonColumnShapes` or association
+metadata), patch a model's `schema`, or stub the lookup that reads them.
+
+The reason: the test-app exists so that specs run the real code. A faked
+declaration skips the decorator's own checks and Dream's checks at boot, so a
+spec can pass against a state no app can reach, and its failures are hard to
+debug. A declaration Dream refuses at boot cannot live in the test-app; that
+refusal is specified in Dream.
+
 ## Database Commands
 
 ### Migrate the Database

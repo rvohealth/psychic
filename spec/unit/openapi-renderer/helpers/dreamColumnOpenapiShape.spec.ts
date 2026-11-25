@@ -9,12 +9,9 @@ import OpenapiSegmentExpander from '../../../../src/openapi-renderer/body-segmen
 import OpenapiEnumCollector from '../../../../src/openapi-renderer/helpers/OpenapiEnumCollector.js'
 import SerializerOpenapiRenderer from '../../../../src/openapi-renderer/SerializerOpenapiRenderer.js'
 import Availability from '../../../../test-app/src/app/models/Availability.js'
+import ModelWithDeclaredShapes from '../../../../test-app/src/app/models/ModelWithDeclaredShapes.js'
 import User from '../../../../test-app/src/app/models/User.js'
 import { PetTreatsEnumValues, SpeciesTypesEnumValues } from '../../../../test-app/src/types/db.js'
-import type {
-  JSONColumnShapeStatement,
-  VirtualAttributeStatement,
-} from '../../../helpers/dreamDeclarationStatements.js'
 
 describe('dreamAttributeOpenapiShape', () => {
   context('bigint primaryKey', () => {
@@ -780,19 +777,8 @@ describe('dreamAttributeOpenapiShape', () => {
       required: ['label'],
     }
 
-    // the test-app's declared columns are not nullable, so the nullable
-    // columns are declared on a subclass, as @deco.JSON registers them
-    class UserWithNullableJSONColumns extends User {}
-    ;(
-      UserWithNullableJSONColumns as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
-    ).jsonColumnShapes = [
-      { column: 'jsonbData', openapi: { type: 'object', properties: { hello: 'string' } } },
-      { column: 'favoriteJsonbs', openapi: { type: 'object', properties: { hello: 'string' } } },
-      {
-        column: 'jsonData',
-        openapi: { anyOf: [{ type: 'object', properties: { hello: 'string' } }, { type: 'string' }] },
-      },
-    ]
+    // User's declared columns are not nullable; the nullable ones are declared
+    // in test-app/src/app/models/ModelWithDeclaredShapes.ts
 
     it('renders the declared shape', () => {
       expect(dreamColumnOpenapiShape('Test', User, 'requiredJsonbData')).toEqual(requiredJsonbDataShape)
@@ -812,23 +798,28 @@ describe('dreamAttributeOpenapiShape', () => {
     })
 
     it('adds null from a nullable column', () => {
-      expect(dreamColumnOpenapiShape('Test', UserWithNullableJSONColumns, 'jsonbData')).toEqual({
+      expect(dreamColumnOpenapiShape('Test', ModelWithDeclaredShapes, 'nullableObject')).toEqual({
         type: ['object', 'null'],
         properties: { hello: { type: 'string' } },
       })
     })
 
     it('adds null from a nullable column to a shape without a type', () => {
-      expect(dreamColumnOpenapiShape('Test', UserWithNullableJSONColumns, 'jsonData')).toEqual({
+      expect(dreamColumnOpenapiShape('Test', ModelWithDeclaredShapes, 'nullableComposition')).toEqual({
         anyOf: [
-          { anyOf: [{ type: 'object', properties: { hello: { type: 'string' } } }, { type: 'string' }] },
+          {
+            anyOf: [
+              { type: 'object', properties: { hello: { type: 'string' } }, required: ['hello'] },
+              { type: 'object', properties: { goodbye: { type: 'string' } }, required: ['goodbye'] },
+            ],
+          },
           { type: 'null' },
         ],
       })
     })
 
     it('makes a nullable array column a nullable array of non-null elements', () => {
-      expect(dreamColumnOpenapiShape('Test', UserWithNullableJSONColumns, 'favoriteJsonbs')).toEqual({
+      expect(dreamColumnOpenapiShape('Test', ModelWithDeclaredShapes, 'nullableObjects')).toEqual({
         type: ['array', 'null'],
         items: { type: 'object', properties: { hello: { type: 'string' } } },
       })
@@ -864,19 +855,12 @@ describe('dreamAttributeOpenapiShape', () => {
   })
 
   context('a @deco.Virtual attribute', () => {
-    class UserWithObjectVirtual extends User {}
-    ;(
-      UserWithObjectVirtual as unknown as { virtualAttributes: VirtualAttributeStatement[] }
-    ).virtualAttributes = [
-      {
-        property: 'openapiVirtualSpecTest3',
-        type: { type: 'object', properties: { a: 'string' }, required: ['a'] },
-      },
-    ]
+    // ModelWithDeclaredShapes#objectVirtual declares
+    // { a: integer (required), nested: { b: string } }
 
     it('replaces the declared shape whole with a serializer openapi that carries a shape', () => {
       expect(
-        dreamColumnOpenapiShape('Test', UserWithObjectVirtual, 'openapiVirtualSpecTest3' as 'email', {
+        dreamColumnOpenapiShape('Test', ModelWithDeclaredShapes, 'objectVirtual' as 'id', {
           type: ['object', 'null'],
           properties: { b: 'string' },
         }),
@@ -885,12 +869,15 @@ describe('dreamAttributeOpenapiShape', () => {
 
     it('layers a description-only serializer openapi onto the declared shape', () => {
       expect(
-        dreamColumnOpenapiShape('Test', UserWithObjectVirtual, 'openapiVirtualSpecTest3' as 'email', {
+        dreamColumnOpenapiShape('Test', ModelWithDeclaredShapes, 'objectVirtual' as 'id', {
           description: 'hello',
         }),
       ).toEqual({
         type: 'object',
-        properties: { a: { type: 'string' } },
+        properties: {
+          a: { type: 'integer' },
+          nested: { type: 'object', properties: { b: { type: 'string' } } },
+        },
         required: ['a'],
         description: 'hello',
       })
@@ -898,39 +885,34 @@ describe('dreamAttributeOpenapiShape', () => {
   })
 
   context('a @deco.Encrypted attribute', () => {
-    // as `@deco.Encrypted({ openapi: 'integer' })` on User#secret registers
-    // it; its backing column, encrypted_secret, allows null
-    class UserWithEncryptedInteger extends User {}
-    ;(
-      UserWithEncryptedInteger as unknown as { virtualAttributes: VirtualAttributeStatement[] }
-    ).virtualAttributes = [
-      ...(User['virtualAttributes'] as VirtualAttributeStatement[]).filter(
-        statement => statement.property !== 'secret',
-      ),
-      { property: 'secret', type: 'integer' },
-    ]
+    // ModelWithDeclaredShapes#integerSecret is declared with
+    // `@deco.Encrypted({ openapi: 'integer' })`; its backing column,
+    // encrypted_integer_secret, allows null
 
     it('renders a bare @deco.Encrypted() as a string, nullable from its backing column', () => {
       expect(dreamColumnOpenapiShape('Test', User, 'secret' as 'email')).toEqual({ type: ['string', 'null'] })
     })
 
     it('adds null from a nullable backing column to a declared shape without it', () => {
-      expect(dreamColumnOpenapiShape('Test', UserWithEncryptedInteger, 'secret' as 'email')).toEqual({
+      expect(dreamColumnOpenapiShape('Test', ModelWithDeclaredShapes, 'integerSecret' as 'id')).toEqual({
         type: ['integer', 'null'],
       })
     })
 
     it('renders the nullable shape as a serializer attribute', () => {
-      const MySerializer = (data: User) => DreamSerializer(UserWithEncryptedInteger, data).attribute('secret')
+      const MySerializer = (data: ModelWithDeclaredShapes) =>
+        DreamSerializer(ModelWithDeclaredShapes, data).attribute('integerSecret')
 
       expect(
-        new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']().attributes['secret'],
+        new SerializerOpenapiRenderer(MySerializer)['renderedOpenapiAttributes']().attributes[
+          'integerSecret'
+        ],
       ).toEqual({ type: ['integer', 'null'] })
     })
 
     it('renders the nullable shape in a model-derived request body', () => {
       expect(
-        new OpenapiSegmentExpander({ for: UserWithEncryptedInteger, params: ['secret'] } as never, {
+        new OpenapiSegmentExpander({ for: ModelWithDeclaredShapes, params: ['integerSecret'] } as never, {
           renderOpts: {
             casing: 'camel',
             suppressResponseEnums: false,
@@ -938,7 +920,7 @@ describe('dreamAttributeOpenapiShape', () => {
           },
           target: 'request',
         }).render().openapi,
-      ).toEqual({ type: 'object', properties: { secret: { type: ['integer', 'null'] } } })
+      ).toEqual({ type: 'object', properties: { integerSecret: { type: ['integer', 'null'] } } })
     })
   })
 })

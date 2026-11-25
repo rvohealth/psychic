@@ -154,6 +154,47 @@ export interface HealthUsers {
   updatedAt: Timestamp
 }
 
+export interface ModelsWithDeclaredShapes {
+  createdAt: Timestamp
+  encryptedDateSecret: string | null
+  encryptedDateTimeSecret: string | null
+  encryptedDecimalSecret: string | null
+  encryptedIntegerArraySecret: string | null
+  encryptedIntegerSecret: string | null
+  encryptedNullableDecimalSecret: string | null
+  id: Generated<Int8>
+  nullableComposition:
+    | {
+        hello: string
+        [key: string]: unknown
+      }
+    | {
+        goodbye: string
+        [key: string]: unknown
+      }
+    | null
+  nullableObject: {
+    hello?: string
+    [key: string]: unknown
+  } | null
+  nullableObjects:
+    | {
+        hello?: string
+        [key: string]: unknown
+      }[]
+    | null
+  patterned: {
+    phone?: string
+    [key: string]: unknown
+  } | null
+  undeclaredRequiredJsonb: Generated<Json>
+  updatedAt: Timestamp
+  withDefault: Generated<{
+    withDefault?: string
+    [key: string]: unknown
+  }>
+}
+
 export interface ModelWithoutSerializers {
   createdAt: Timestamp
   id: Generated<Int8>
@@ -182,6 +223,106 @@ export interface Pets {
   species: SpeciesTypesEnum | null
   updatedAt: Timestamp
   userId: number
+}
+
+export interface PolymorphicShapeSources {
+  createdAt: Timestamp
+  id: Generated<Int8>
+  targetId: Int8
+  targetType: string
+  updatedAt: Timestamp
+}
+
+export interface PolymorphicShapeTargetAs {
+  arrayOnB: Generated<{
+    label?: string
+    [key: string]: unknown
+  }>
+  createdAt: Timestamp
+  declaredOnlyOnA: Generated<{
+    label?: string
+    [key: string]: unknown
+  }>
+  differentShape: Generated<{
+    theme?: 'light' | 'dark'
+    fontSize?: number
+    [key: string]: unknown
+  }>
+  encryptedBareSecret: string | null
+  encryptedExplicitNullOnBSecret: string | null
+  encryptedIntegerSecret: string | null
+  encryptedIntegerVirtualOnBSecret: string | null
+  encryptedMismatchedSecret: string | null
+  encryptedNullDeclaredOnASecret: string | null
+  encryptedNullableStringSecret: string | null
+  encryptedObjectFormNullOnASecret: string
+  encryptedVirtualOnBSecret: string | null
+  id: Generated<Int8>
+  identicalElementShape: Generated<
+    {
+      label: string
+      score?: number
+      [key: string]: unknown
+    }[]
+  >
+  identicalShape: Generated<{
+    theme?: 'light' | 'dark'
+    fontSize?: number
+    [key: string]: unknown
+  }>
+  nullableOnB: Generated<{
+    theme?: 'light' | 'dark'
+    fontSize?: number
+    [key: string]: unknown
+  }>
+  onlyOnA: Generated<{
+    label?: string
+    [key: string]: unknown
+  }>
+  plainColumn: string | null
+  updatedAt: Timestamp
+}
+
+export interface PolymorphicShapeTargetBs {
+  arrayOnB: Generated<
+    {
+      label?: string
+      [key: string]: unknown
+    }[]
+  >
+  createdAt: Timestamp
+  declaredOnlyOnA: Generated<Json>
+  differentShape: Generated<{
+    theme?: string
+    [key: string]: unknown
+  }>
+  encryptedBareSecret: string
+  encryptedExplicitNullOnBSecret: string
+  encryptedIntegerSecret: string
+  encryptedMismatchedSecret: string
+  encryptedNullDeclaredOnASecret: string | null
+  encryptedNullableStringSecret: string
+  encryptedObjectFormNullOnASecret: string
+  id: Generated<Int8>
+  identicalElementShape: Generated<
+    {
+      label: string
+      score?: number
+      [key: string]: unknown
+    }[]
+  >
+  identicalShape: Generated<{
+    theme?: 'light' | 'dark'
+    fontSize?: number
+    [key: string]: unknown
+  }>
+  nullableOnB: {
+    theme?: 'light' | 'dark'
+    fontSize?: number
+    [key: string]: unknown
+  } | null
+  plainColumn: Generated<number>
+  updatedAt: Timestamp
 }
 
 export interface Posts {
@@ -276,7 +417,11 @@ export interface DB {
   comments: Comments
   health_users: HealthUsers
   model_without_serializers: ModelWithoutSerializers
+  models_with_declared_shapes: ModelsWithDeclaredShapes
   pets: Pets
+  polymorphic_shape_sources: PolymorphicShapeSources
+  polymorphic_shape_target_as: PolymorphicShapeTargetAs
+  polymorphic_shape_target_bs: PolymorphicShapeTargetBs
   posts: Posts
   simple_serializer_models: SimpleSerializerModels
   users: Users
@@ -288,7 +433,11 @@ export class DBClass {
   comments: Comments
   health_users: HealthUsers
   model_without_serializers: ModelWithoutSerializers
+  models_with_declared_shapes: ModelsWithDeclaredShapes
   pets: Pets
+  polymorphic_shape_sources: PolymorphicShapeSources
+  polymorphic_shape_target_as: PolymorphicShapeTargetAs
+  polymorphic_shape_target_bs: PolymorphicShapeTargetBs
   posts: Posts
   simple_serializer_models: SimpleSerializerModels
   users: Users

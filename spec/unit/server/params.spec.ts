@@ -1,16 +1,12 @@
 import { CalendarDate, ClockTime, ClockTimeTz, DateTime } from '@rvoh/dream'
-import type { OpenapiShorthandPrimitiveTypes } from '@rvoh/dream/openapi'
 import { PsychicParamsDictionary } from '../../../src/controller/index.js'
 import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../../../src/error/controller/ParamValidationErrors.js'
 import Params from '../../../src/server/params.js'
 import Availability from '../../../test-app/src/app/models/Availability.js'
+import ModelWithDeclaredShapes from '../../../test-app/src/app/models/ModelWithDeclaredShapes.js'
 import Pet from '../../../test-app/src/app/models/Pet.js'
 import User from '../../../test-app/src/app/models/User.js'
-import type {
-  JSONColumnShapeStatement,
-  VirtualAttributeStatement,
-} from '../../helpers/dreamDeclarationStatements.js'
 
 const TestEnumValues = ['hello', 'world'] as const
 type TestEnum = (typeof TestEnumValues)[number]
@@ -102,69 +98,18 @@ describe('Params', () => {
       })
 
       context('declared shapes beyond a primitive', () => {
-        // declared on a subclass, as @deco.Virtual registers them
-        class UserWithShapedVirtuals extends User {}
-        ;(
-          UserWithShapedVirtuals as unknown as { virtualAttributes: VirtualAttributeStatement[] }
-        ).virtualAttributes = [
-          ...(User['virtualAttributes'] as VirtualAttributeStatement[]),
-          {
-            property: 'objectVirtual',
-            type: {
-              type: 'object',
-              properties: { a: 'integer', nested: { type: 'object', properties: { b: 'string' } } },
-              required: ['a'],
-            },
-          },
-          {
-            property: 'nullableObjectVirtual',
-            type: { type: ['object', 'null'], properties: { a: 'integer' } },
-          },
-          {
-            property: 'objectArrayVirtual',
-            type: { type: 'array', items: { type: 'object', properties: { a: 'integer' }, required: ['a'] } },
-          },
-          { property: 'enumVirtual', type: { type: 'string', enum: ['red', 'green'] } },
-          {
-            property: 'enumArrayVirtual',
-            type: { type: 'array', items: { type: 'string', enum: ['red', 'green'] } },
-          },
-          {
-            property: 'dateEnumVirtual',
-            type: { type: 'string', format: 'date', enum: ['2026-11-19', '2026-11-20'] },
-          },
-          {
-            property: 'dateTimeEnumVirtual',
-            type: { type: 'string', format: 'date-time', enum: ['2026-11-19T10:00:00.000Z'] },
-          },
-          {
-            property: 'dateEnumArrayVirtual',
-            type: {
-              type: 'array',
-              items: { type: 'string', format: 'date', enum: ['2026-11-19', '2026-11-20'] },
-            },
-          },
-          {
-            property: 'dateTimeEnumArrayVirtual',
-            type: {
-              type: 'array',
-              items: { type: 'string', format: 'date-time', enum: ['2026-11-19T10:00:00.000Z'] },
-            },
-          },
-          { property: 'booleanVirtual', type: 'boolean' },
-          { property: 'integerVirtual', type: 'integer' },
-          { property: 'jsonVirtual', type: 'json' },
-        ]
+        // test-app/src/app/models/ModelWithDeclaredShapes.ts declares each of
+        // these with @deco.Virtual
 
         it('returns a matching object as submitted', () => {
           const objectVirtual = { a: 1, nested: { b: 'x' }, extra: true }
-          const result: Record<string, unknown> = Params.for({ objectVirtual }, UserWithShapedVirtuals)
+          const result: Record<string, unknown> = Params.for({ objectVirtual }, ModelWithDeclaredShapes)
           expect(result).toEqual({ objectVirtual })
           expect(result['objectVirtual']).toBe(objectVirtual)
         })
 
         it('rejects an object missing a required property', () => {
-          expect(paramErrorsFrom(() => Params.for({ objectVirtual: {} }, UserWithShapedVirtuals))).toEqual({
+          expect(paramErrorsFrom(() => Params.for({ objectVirtual: {} }, ModelWithDeclaredShapes))).toEqual({
             objectVirtual: ["must have required property 'a'"],
           })
         })
@@ -172,60 +117,62 @@ describe('Params', () => {
         it('rejects a wrong nested type, without coercing it', () => {
           expect(
             paramErrorsFrom(() =>
-              Params.for({ objectVirtual: { a: 1, nested: { b: 2 } } }, UserWithShapedVirtuals),
+              Params.for({ objectVirtual: { a: 1, nested: { b: 2 } } }, ModelWithDeclaredShapes),
             ),
           ).toEqual({ objectVirtual: ['/nested/b must be string'] })
 
-          expect(() => Params.for({ objectVirtual: { a: '1' } }, UserWithShapedVirtuals)).toThrow(
+          expect(() => Params.for({ objectVirtual: { a: '1' } }, ModelWithDeclaredShapes)).toThrow(
             ParamValidationErrors,
           )
         })
 
         it('rejects a non-object', () => {
-          expect(() => Params.for({ objectVirtual: '{"a":1}' }, UserWithShapedVirtuals)).toThrow(
+          expect(() => Params.for({ objectVirtual: '{"a":1}' }, ModelWithDeclaredShapes)).toThrow(
             ParamValidationErrors,
           )
-          expect(() => Params.for({ objectVirtual: [{ a: 1 }] }, UserWithShapedVirtuals)).toThrow(
+          expect(() => Params.for({ objectVirtual: [{ a: 1 }] }, ModelWithDeclaredShapes)).toThrow(
             ParamValidationErrors,
           )
         })
 
         it('permits null only when the declared shape allows it', () => {
-          expect(() => Params.for({ objectVirtual: null }, UserWithShapedVirtuals)).toThrow(
+          expect(() => Params.for({ objectVirtual: null }, ModelWithDeclaredShapes)).toThrow(
             ParamValidationErrors,
           )
-          expect(Params.for({ nullableObjectVirtual: null }, UserWithShapedVirtuals)).toEqual({
+          expect(Params.for({ nullableObjectVirtual: null }, ModelWithDeclaredShapes)).toEqual({
             nullableObjectVirtual: null,
           })
         })
 
         it('checks each element of a declared array of objects', () => {
-          expect(Params.for({ objectArrayVirtual: [{ a: 1 }] }, UserWithShapedVirtuals)).toEqual({
+          expect(Params.for({ objectArrayVirtual: [{ a: 1 }] }, ModelWithDeclaredShapes)).toEqual({
             objectArrayVirtual: [{ a: 1 }],
           })
-          expect(() => Params.for({ objectArrayVirtual: [{ a: 1 }, {}] }, UserWithShapedVirtuals)).toThrow(
+          expect(() => Params.for({ objectArrayVirtual: [{ a: 1 }, {}] }, ModelWithDeclaredShapes)).toThrow(
             ParamValidationErrors,
           )
-          expect(() => Params.for({ objectArrayVirtual: { a: 1 } }, UserWithShapedVirtuals)).toThrow(
+          expect(() => Params.for({ objectArrayVirtual: { a: 1 } }, ModelWithDeclaredShapes)).toThrow(
             ParamValidationErrors,
           )
         })
 
         it('checks a declared enum after the cast', () => {
-          expect(Params.for({ enumVirtual: 'red' }, UserWithShapedVirtuals)).toEqual({ enumVirtual: 'red' })
-          expect(paramErrorsFrom(() => Params.for({ enumVirtual: 'blue' }, UserWithShapedVirtuals))).toEqual({
-            enumVirtual: ['did not match expected enum values'],
-          })
+          expect(Params.for({ enumVirtual: 'red' }, ModelWithDeclaredShapes)).toEqual({ enumVirtual: 'red' })
+          expect(paramErrorsFrom(() => Params.for({ enumVirtual: 'blue' }, ModelWithDeclaredShapes))).toEqual(
+            {
+              enumVirtual: ['did not match expected enum values'],
+            },
+          )
         })
 
         it('checks a declared enum on each element of an array', () => {
-          expect(Params.for({ enumArrayVirtual: ['red', 'green'] }, UserWithShapedVirtuals)).toEqual({
+          expect(Params.for({ enumArrayVirtual: ['red', 'green'] }, ModelWithDeclaredShapes)).toEqual({
             enumArrayVirtual: ['red', 'green'],
           })
-          expect(() => Params.for({ enumArrayVirtual: ['red', 'blue'] }, UserWithShapedVirtuals)).toThrow(
+          expect(() => Params.for({ enumArrayVirtual: ['red', 'blue'] }, ModelWithDeclaredShapes)).toThrow(
             ParamValidationErrors,
           )
-          expect(() => Params.for({ enumArrayVirtual: 'red' }, UserWithShapedVirtuals)).toThrow(
+          expect(() => Params.for({ enumArrayVirtual: 'red' }, ModelWithDeclaredShapes)).toThrow(
             ParamValidationErrors,
           )
         })
@@ -236,7 +183,7 @@ describe('Params', () => {
           it('checks the submitted string, and returns the hydrated value', () => {
             const result: Record<string, unknown> = Params.for(
               { dateEnumVirtual: '2026-11-20', dateTimeEnumVirtual: '2026-11-19T10:00:00.000Z' },
-              UserWithShapedVirtuals,
+              ModelWithDeclaredShapes,
             )
             expect(result['dateEnumVirtual']).toBeInstanceOf(CalendarDate)
             expect((result['dateEnumVirtual'] as CalendarDate).toISO()).toEqual('2026-11-20')
@@ -249,7 +196,7 @@ describe('Params', () => {
               paramErrorsFrom(() =>
                 Params.for(
                   { dateEnumVirtual: '2026-11-21', dateTimeEnumVirtual: '2026-11-19T11:00:00.000Z' },
-                  UserWithShapedVirtuals,
+                  ModelWithDeclaredShapes,
                 ),
               ),
             ).toEqual({
@@ -261,7 +208,7 @@ describe('Params', () => {
           it('compares the string as submitted, as OpenAPI does, not the instant it names', () => {
             expect(
               paramErrorsFrom(() =>
-                Params.for({ dateTimeEnumVirtual: '2026-11-19T10:00:00Z' }, UserWithShapedVirtuals),
+                Params.for({ dateTimeEnumVirtual: '2026-11-19T10:00:00Z' }, ModelWithDeclaredShapes),
               ),
             ).toEqual({ dateTimeEnumVirtual: ['did not match expected enum values'] })
           })
@@ -272,7 +219,7 @@ describe('Params', () => {
                 dateEnumArrayVirtual: ['2026-11-19', '2026-11-20'],
                 dateTimeEnumArrayVirtual: ['2026-11-19T10:00:00.000Z'],
               },
-              UserWithShapedVirtuals,
+              ModelWithDeclaredShapes,
             )
             expect((result['dateEnumArrayVirtual'] as CalendarDate[]).map(date => date.toISO())).toEqual([
               '2026-11-19',
@@ -289,7 +236,7 @@ describe('Params', () => {
                     dateEnumArrayVirtual: ['2026-11-19', '2026-11-21'],
                     dateTimeEnumArrayVirtual: ['2026-11-19T10:00:00.000Z', '2026-11-19T11:00:00.000Z'],
                   },
-                  UserWithShapedVirtuals,
+                  ModelWithDeclaredShapes,
                 ),
               ),
             ).toEqual({
@@ -300,53 +247,44 @@ describe('Params', () => {
         })
 
         it('still casts a primitive as before, so query-string values pass', () => {
-          expect(Params.for({ booleanVirtual: 'true', integerVirtual: '5' }, UserWithShapedVirtuals)).toEqual(
-            {
-              booleanVirtual: true,
-              integerVirtual: 5,
-            },
-          )
-          expect(() => Params.for({ integerVirtual: 'five' }, UserWithShapedVirtuals)).toThrow(
+          expect(
+            Params.for({ booleanStringForm: 'true', integerStringForm: '5' }, ModelWithDeclaredShapes),
+          ).toEqual({
+            booleanStringForm: true,
+            integerStringForm: 5,
+          })
+          expect(() => Params.for({ integerStringForm: 'five' }, ModelWithDeclaredShapes)).toThrow(
             ParamValidationErrors,
           )
         })
 
         it('accepts any object for a `json` shorthand, and rejects a non-object', () => {
-          expect(Params.for({ jsonVirtual: { anything: [1] } }, UserWithShapedVirtuals)).toEqual({
+          expect(Params.for({ jsonVirtual: { anything: [1] } }, ModelWithDeclaredShapes)).toEqual({
             jsonVirtual: { anything: [1] },
           })
-          expect(() => Params.for({ jsonVirtual: 'abc' }, UserWithShapedVirtuals)).toThrow(
+          expect(() => Params.for({ jsonVirtual: 'abc' }, ModelWithDeclaredShapes)).toThrow(
             ParamValidationErrors,
           )
         })
       })
 
       context('a shorthand declared in object form', () => {
-        // every primitive shorthand, its array and their nullable variants,
-        // each declared both as the string (`'decimal'`) and in object form
-        // (`{ type: 'decimal' }`)
-        const shorthands: OpenapiShorthandPrimitiveTypes[] = (
-          ['decimal', 'date', 'date-time', 'integer', 'number', 'string', 'boolean'] as const
-        ).flatMap(primitive => [
-          primitive,
-          `${primitive}[]` as const,
-          [primitive, 'null'] as const,
-          [`${primitive}[]` as const, 'null'] as const,
-        ])
-        const propertyName = (shorthand: OpenapiShorthandPrimitiveTypes, form: 'string' | 'object') =>
-          `${form}Form${JSON.stringify(shorthand).replace(/\W/g, '_')}`
-
-        class UserWithObjectFormShorthands extends User {}
-        ;(
-          UserWithObjectFormShorthands as unknown as { virtualAttributes: VirtualAttributeStatement[] }
-        ).virtualAttributes = [
-          ...(User['virtualAttributes'] as VirtualAttributeStatement[]),
-          ...shorthands.flatMap(shorthand => [
-            { property: propertyName(shorthand, 'string'), type: shorthand },
-            { property: propertyName(shorthand, 'object'), type: { type: shorthand } },
-          ]),
-          { property: 'objectFormDateItems', type: { type: 'array', items: { type: 'date-time' } } },
-        ]
+        // ModelWithDeclaredShapes declares every primitive shorthand, its array
+        // and their nullable variants, each both as the string (`'decimal'`,
+        // named `decimalStringForm`) and in object form (`{ type: 'decimal' }`,
+        // named `decimalObjectForm`)
+        const shorthands = (
+          ['decimal', 'date', 'dateTime', 'integer', 'number', 'string', 'boolean'] as const
+        ).flatMap(primitive =>
+          [false, true].flatMap(nullable => [false, true].map(array => ({ primitive, nullable, array }))),
+        )
+        const propertyName = (
+          { primitive, nullable, array }: (typeof shorthands)[number],
+          form: 'StringForm' | 'ObjectForm',
+        ) =>
+          (nullable ? `nullable${primitive.charAt(0).toUpperCase()}${primitive.slice(1)}` : primitive) +
+          (array ? 'Array' : '') +
+          form
 
         const submittedValues = [
           '5.5',
@@ -369,7 +307,7 @@ describe('Params', () => {
           try {
             const result: Record<string, unknown> = Params.for(
               { [property]: value } as PsychicParamsDictionary,
-              UserWithObjectFormShorthands,
+              ModelWithDeclaredShapes,
             )
             const comparable = (castValue: unknown): unknown =>
               Array.isArray(castValue)
@@ -386,12 +324,16 @@ describe('Params', () => {
 
         it('casts each value exactly as the string form does', () => {
           for (const shorthand of shorthands) {
+            const stringForm = propertyName(shorthand, 'StringForm')
+            const objectForm = propertyName(shorthand, 'ObjectForm')
+            expect(ModelWithDeclaredShapes.isVirtualColumn(stringForm), stringForm).toBe(true)
+            expect(ModelWithDeclaredShapes.isVirtualColumn(objectForm), objectForm).toBe(true)
+
             for (const scalar of submittedValues) {
               for (const value of [scalar, [scalar]]) {
-                expect(
-                  outcome(propertyName(shorthand, 'object'), value),
-                  `${JSON.stringify(shorthand)} given ${JSON.stringify(value)}`,
-                ).toEqual(outcome(propertyName(shorthand, 'string'), value))
+                expect(outcome(objectForm, value), `${objectForm} given ${JSON.stringify(value)}`).toEqual(
+                  outcome(stringForm, value),
+                )
               }
             }
           }
@@ -400,79 +342,65 @@ describe('Params', () => {
         it('returns a CalendarDate or DateTime for `{ type: "date" }` or `{ type: "date-time" }`', () => {
           const result: Record<string, unknown> = Params.for(
             {
-              [propertyName('date', 'object')]: '2026-11-20',
-              [propertyName('date-time', 'object')]: '2026-11-19T10:00:00.000Z',
-              [propertyName(['date', 'null'], 'object')]: '2026-11-20',
-              objectFormDateItems: ['2026-11-19T10:00:00.000Z'],
+              dateObjectForm: '2026-11-20',
+              dateTimeObjectForm: '2026-11-19T10:00:00.000Z',
+              nullableDateObjectForm: '2026-11-20',
+              dateTimeArrayItemsForm: ['2026-11-19T10:00:00.000Z'],
             },
-            UserWithObjectFormShorthands,
+            ModelWithDeclaredShapes,
           )
-          expect(result[propertyName('date', 'object')]).toBeInstanceOf(CalendarDate)
-          expect((result[propertyName('date', 'object')] as CalendarDate).toISO()).toEqual('2026-11-20')
-          expect(result[propertyName('date-time', 'object')]).toBeInstanceOf(DateTime)
-          expect((result[propertyName('date-time', 'object')] as DateTime).toISO()).toEqual(
-            '2026-11-19T10:00:00.000000Z',
-          )
-          expect(result[propertyName(['date', 'null'], 'object')]).toBeInstanceOf(CalendarDate)
-          expect((result['objectFormDateItems'] as DateTime[])[0]).toBeInstanceOf(DateTime)
+          expect(result['dateObjectForm']).toBeInstanceOf(CalendarDate)
+          expect((result['dateObjectForm'] as CalendarDate).toISO()).toEqual('2026-11-20')
+          expect(result['dateTimeObjectForm']).toBeInstanceOf(DateTime)
+          expect((result['dateTimeObjectForm'] as DateTime).toISO()).toEqual('2026-11-19T10:00:00.000000Z')
+          expect(result['nullableDateObjectForm']).toBeInstanceOf(CalendarDate)
+          expect((result['dateTimeArrayItemsForm'] as DateTime[])[0]).toBeInstanceOf(DateTime)
         })
 
         it('casts a string decimal, integer array and nullable variant', () => {
           expect(
             Params.for(
               {
-                [propertyName('decimal', 'object')]: '5.5',
-                [propertyName('integer[]', 'object')]: ['1', '2'],
-                [propertyName(['decimal', 'null'], 'object')]: null,
+                decimalObjectForm: '5.5',
+                integerArrayObjectForm: ['1', '2'],
+                nullableDecimalObjectForm: null,
               },
-              UserWithObjectFormShorthands,
+              ModelWithDeclaredShapes,
             ),
           ).toEqual({
-            [propertyName('decimal', 'object')]: 5.5,
-            [propertyName('integer[]', 'object')]: [1, 2],
-            [propertyName(['decimal', 'null'], 'object')]: null,
+            decimalObjectForm: 5.5,
+            integerArrayObjectForm: [1, 2],
+            nullableDecimalObjectForm: null,
           })
         })
 
         it('rejects a bare value for an array, rather than wrapping it', () => {
           expect(
-            paramErrorsFrom(() =>
-              Params.for({ [propertyName('integer[]', 'object')]: '1' }, UserWithObjectFormShorthands),
-            ),
-          ).toEqual({ [propertyName('integer[]', 'object')]: ['expected integer or string integer array'] })
+            paramErrorsFrom(() => Params.for({ integerArrayObjectForm: '1' }, ModelWithDeclaredShapes)),
+          ).toEqual({ integerArrayObjectForm: ['expected integer or string integer array'] })
         })
 
         it('rejects null unless the declaration admits it', () => {
-          expect(() =>
-            Params.for({ [propertyName('date', 'object')]: null }, UserWithObjectFormShorthands),
-          ).toThrow(ParamValidationErrors)
+          expect(() => Params.for({ dateObjectForm: null }, ModelWithDeclaredShapes)).toThrow(
+            ParamValidationErrors,
+          )
         })
       })
 
       context('null elements of an array declaration', () => {
-        // the same integer array declared in each form an array declaration
-        // takes, each also with a nullable whole value, and one whose items
-        // admit null
-        class UserWithArrayVirtuals extends User {}
-        ;(
-          UserWithArrayVirtuals as unknown as { virtualAttributes: VirtualAttributeStatement[] }
-        ).virtualAttributes = [
-          ...(User['virtualAttributes'] as VirtualAttributeStatement[]),
-          { property: 'stringForm', type: 'integer[]' },
-          { property: 'objectForm', type: { type: 'integer[]' } },
-          { property: 'itemsForm', type: { type: 'array', items: { type: 'integer' } } },
-          { property: 'nullableStringForm', type: ['integer[]', 'null'] },
-          { property: 'nullableObjectForm', type: { type: ['integer[]', 'null'] } },
-          { property: 'nullableItemsForm', type: { type: ['array', 'null'], items: { type: 'integer' } } },
-          { property: 'nullableItems', type: { type: 'array', items: { type: ['integer', 'null'] } } },
+        // ModelWithDeclaredShapes declares the same integer array in each form
+        // an array declaration takes, each also with a nullable whole value,
+        // and one whose items admit null
+        const nullableForms = [
+          'nullableIntegerArrayStringForm',
+          'nullableIntegerArrayObjectForm',
+          'nullableIntegerArrayItemsForm',
         ]
         const forms = [
-          'stringForm',
-          'objectForm',
-          'itemsForm',
-          'nullableStringForm',
-          'nullableObjectForm',
-          'nullableItemsForm',
+          'integerArrayStringForm',
+          'integerArrayObjectForm',
+          'integerArrayItemsForm',
+          ...nullableForms,
         ]
 
         it('rejects a null or undefined element, which the items schema excludes, in every form', () => {
@@ -480,7 +408,7 @@ describe('Params', () => {
             for (const value of [[null], [1, null, 2], [1, undefined]]) {
               expect(
                 paramErrorsFrom(() =>
-                  Params.for({ [property]: value } as PsychicParamsDictionary, UserWithArrayVirtuals),
+                  Params.for({ [property]: value } as PsychicParamsDictionary, ModelWithDeclaredShapes),
                 ),
                 `${property} given ${JSON.stringify(value)}`,
               ).toEqual({ [property]: ['expected integer or string integer array'] })
@@ -490,42 +418,38 @@ describe('Params', () => {
 
         it('still casts an array without null elements', () => {
           for (const property of forms) {
-            expect(Params.for({ [property]: ['1', 2] }, UserWithArrayVirtuals)).toEqual({
+            expect(Params.for({ [property]: ['1', 2] }, ModelWithDeclaredShapes)).toEqual({
               [property]: [1, 2],
             })
           }
         })
 
         it('accepts null for the whole value when the declaration admits it', () => {
-          for (const property of ['nullableStringForm', 'nullableObjectForm', 'nullableItemsForm']) {
-            expect(Params.for({ [property]: null }, UserWithArrayVirtuals)).toEqual({ [property]: null })
+          for (const property of nullableForms) {
+            expect(Params.for({ [property]: null }, ModelWithDeclaredShapes)).toEqual({ [property]: null })
           }
         })
 
         it('accepts a null element when the items schema admits one', () => {
-          expect(Params.for({ nullableItems: [1, null] }, UserWithArrayVirtuals)).toEqual({
-            nullableItems: [1, null],
+          expect(Params.for({ integerArrayOfNullableItems: [1, null] }, ModelWithDeclaredShapes)).toEqual({
+            integerArrayOfNullableItems: [1, null],
           })
         })
       })
 
       context('a declaration naming a cast type that is not a Dream shorthand', () => {
-        // only an untyped declaration can name `'bigint'`; Dream expands it to
+        // only a declaration that got past the types can name `'bigint'`, as
+        // ModelWithDeclaredShapes#bigintVirtual does; Dream expands it to
         // `{ type: 'object' }`, but Params.for casts it as it always has
-        class UserWithBigintVirtual extends User {}
-        ;(
-          UserWithBigintVirtual as unknown as { virtualAttributes: VirtualAttributeStatement[] }
-        ).virtualAttributes = [
-          ...(User['virtualAttributes'] as VirtualAttributeStatement[]),
-          { property: 'bigintVirtual', type: 'bigint' as unknown as VirtualAttributeStatement['type'] },
-        ]
 
         it('casts a value as before', () => {
-          expect(Params.for({ bigintVirtual: 123 }, UserWithBigintVirtual)).toEqual({ bigintVirtual: '123' })
+          expect(Params.for({ bigintVirtual: 123 }, ModelWithDeclaredShapes)).toEqual({
+            bigintVirtual: '123',
+          })
         })
 
         it('still refuses an object', () => {
-          expect(paramErrorsFrom(() => Params.for({ bigintVirtual: {} }, UserWithBigintVirtual))).toEqual({
+          expect(paramErrorsFrom(() => Params.for({ bigintVirtual: {} }, ModelWithDeclaredShapes))).toEqual({
             bigintVirtual: ['expected bigint'],
           })
         })
@@ -600,108 +524,72 @@ describe('Params', () => {
         })
       })
 
-      context('declarations the test-app does not make', () => {
-        // declared on a subclass, as @deco.JSON registers them
-        class UserWithMoreJSONColumns extends User {}
-        ;(
-          UserWithMoreJSONColumns as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
-        ).jsonColumnShapes = [
-          { column: 'jsonbData', openapi: { type: 'object', properties: { hello: 'string' } } },
-          { column: 'favoriteJsonbs', openapi: { type: 'object', properties: { hello: 'string' } } },
-          // shapes that admit a string, which Dream refuses at boot; set here
-          // directly, as a declaration that got past that refusal would be
-          { column: 'jsonData', openapi: { anyOf: [{ type: 'object' }, { type: 'string' }] } },
-          { column: 'favoriteJsons', openapi: { anyOf: [{ type: 'object' }, { type: 'string' }] } },
-          {
-            column: 'requiredJsonData',
-            // `default` is not in Dream's shorthand types; a declaration that
-            // carries one anyway (via `as`, or plain JavaScript) still gets none injected
-            openapi: {
-              type: 'object',
-              properties: { withDefault: { type: 'string', default: 'injected' } },
-            } as unknown as JSONColumnShapeStatement['openapi'],
-          },
-        ]
+      context('a nullable column', () => {
+        // test-app/src/app/models/ModelWithDeclaredShapes.ts declares
+        // nullableObject (jsonb), and each element of nullableObjects
+        // (jsonb[]), as { hello: string }
 
-        it('permits null for a nullable column', () => {
-          expect(Params.for({ jsonbData: null, favoriteJsonbs: null }, UserWithMoreJSONColumns)).toEqual({
-            jsonbData: null,
-            favoriteJsonbs: null,
-          })
+        it('permits null', () => {
+          expect(
+            Params.for({ nullableObject: null, nullableObjects: null }, ModelWithDeclaredShapes),
+          ).toEqual({ nullableObject: null, nullableObjects: null })
         })
 
         // Dream stores a string for a json column as raw JSON text, so a
-        // string is refused even when the declaration admits one
+        // string is refused with a message of its own
         it.each([
           ['a string', 'just a string'],
-          ['JSON text', '{"admin":true}'],
-        ])('rejects %s, though the declaration admits a string', (_, jsonData) => {
-          expect(paramErrorsFrom(() => Params.for({ jsonData }, UserWithMoreJSONColumns))).toEqual({
-            jsonData: ['must not be a string (send the JSON value itself, not JSON text)'],
+          ['JSON text', '{"hello":"world"}'],
+        ])('rejects %s', (_, nullableObject) => {
+          expect(paramErrorsFrom(() => Params.for({ nullableObject }, ModelWithDeclaredShapes))).toEqual({
+            nullableObject: ['must not be a string (send the JSON value itself, not JSON text)'],
           })
         })
 
-        it('rejects JSON text where the declaration admits only an object', () => {
-          expect(
-            paramErrorsFrom(() => Params.for({ jsonbData: '{"hello":"world"}' }, UserWithMoreJSONColumns)),
-          ).toEqual({
-            jsonbData: ['must not be a string (send the JSON value itself, not JSON text)'],
-          })
-        })
-
-        it('rejects a string element of an array column, though the declaration admits one', () => {
+        it('rejects a string element of an array column', () => {
           expect(
             paramErrorsFrom(() =>
-              Params.for({ favoriteJsons: [{ hello: 'a' }, '{"admin":true}'] }, UserWithMoreJSONColumns),
+              Params.for({ nullableObjects: [{ hello: 'a' }, '{"admin":true}'] }, ModelWithDeclaredShapes),
             ),
           ).toEqual({
-            favoriteJsons: ['/1 must not be a string (send the JSON value itself, not JSON text)'],
+            nullableObjects: ['/1 must not be a string (send the JSON value itself, not JSON text)'],
           })
         })
 
         it('returns an object or array of objects as submitted', () => {
-          const jsonData = { admin: true }
-          const favoriteJsons = [{ hello: 'a' }, { hello: 'b' }]
+          const nullableObject = { admin: true }
+          const nullableObjects = [{ hello: 'a' }, { hello: 'b' }]
           const result: Record<string, unknown> = Params.for(
-            { jsonData, favoriteJsons },
-            UserWithMoreJSONColumns,
+            { nullableObject, nullableObjects },
+            ModelWithDeclaredShapes,
           )
-          expect(result).toEqual({ jsonData, favoriteJsons })
-          expect(result['jsonData']).toBe(jsonData)
-          expect(result['favoriteJsons']).toBe(favoriteJsons)
-        })
-
-        it('injects no declared defaults', () => {
-          const requiredJsonData = {}
-          const result: Record<string, unknown> = Params.for({ requiredJsonData }, UserWithMoreJSONColumns)
-          expect(result['requiredJsonData']).toBe(requiredJsonData)
-          expect(requiredJsonData).toEqual({})
+          expect(result).toEqual({ nullableObject, nullableObjects })
+          expect(result['nullableObject']).toBe(nullableObject)
+          expect(result['nullableObjects']).toBe(nullableObjects)
         })
       })
 
+      it('injects no declared defaults', () => {
+        // ModelWithDeclaredShapes#withDefault declares a property with a
+        // `default`, which only a declaration that got past Dream's shorthand
+        // types can carry
+        const withDefault = {}
+        const result: Record<string, unknown> = Params.for({ withDefault }, ModelWithDeclaredShapes)
+        expect(result['withDefault']).toBe(withDefault)
+        expect(withDefault).toEqual({})
+      })
+
       context('a shape Dream compiled at boot', () => {
-        // Dream compiles every declared shape at boot and refuses one it cannot
-        // compile (spec/unit/psychic-application/declaredShapeBootCompile.spec.ts)
-        class UserWithPatternShape extends User {}
-        ;(
-          UserWithPatternShape as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
-        ).jsonColumnShapes = [
-          {
-            column: 'jsonbData',
-            openapi: {
-              type: 'object',
-              properties: { phone: { type: 'string', pattern: '^\\d{3}-\\d{4}$' } },
-            },
-          },
-        ]
+        // ModelWithDeclaredShapes#patterned declares a `pattern`. Dream
+        // compiled it, with every other declared shape, when the app booted
 
         it("answers a mismatch with Dream's check, naming where in the value it failed", () => {
-          expect(Params.for({ jsonbData: { phone: '555-1234' } }, UserWithPatternShape)).toEqual({
-            jsonbData: { phone: '555-1234' },
+          expect(Params.for({ patterned: { phone: '555-1234' } }, ModelWithDeclaredShapes)).toEqual({
+            patterned: { phone: '555-1234' },
           })
           expect(
-            paramErrorsFrom(() => Params.for({ jsonbData: { phone: '5551234' } }, UserWithPatternShape)),
-          ).toEqual({ jsonbData: ['/phone must match pattern "^\\d{3}-\\d{4}$"'] })
+            paramErrorsFrom(() => Params.for({ patterned: { phone: '5551234' } }, ModelWithDeclaredShapes)),
+          ).toEqual({ patterned: ['/phone must match pattern "^\\d{3}-\\d{4}$"'] })
         })
       })
     })
@@ -724,101 +612,86 @@ describe('Params', () => {
       })
 
       context('with a declared shape that omits null, on a nullable backing column', () => {
-        // as `@deco.Encrypted({ openapi: 'integer' })` on User#secret registers
-        // it; its backing column, encrypted_secret, allows null
-        class UserWithEncryptedInteger extends User {}
-        ;(
-          UserWithEncryptedInteger as unknown as { virtualAttributes: VirtualAttributeStatement[] }
-        ).virtualAttributes = [
-          ...(User['virtualAttributes'] as VirtualAttributeStatement[]).filter(
-            statement => statement.property !== 'secret',
-          ),
-          { property: 'secret', type: 'integer' },
-        ]
+        // ModelWithDeclaredShapes#integerSecret is declared with
+        // `@deco.Encrypted({ openapi: 'integer' })`; its backing column,
+        // encrypted_integer_secret, allows null
 
         it('accepts null, which the backing column allows', () => {
-          expect(Params.for({ secret: null }, UserWithEncryptedInteger)).toEqual({ secret: null })
+          expect(Params.for({ integerSecret: null }, ModelWithDeclaredShapes)).toEqual({
+            integerSecret: null,
+          })
         })
 
         it('still casts a value to the declared primitive', () => {
-          expect(Params.for({ secret: '5' }, UserWithEncryptedInteger)).toEqual({ secret: 5 })
+          expect(Params.for({ integerSecret: '5' }, ModelWithDeclaredShapes)).toEqual({ integerSecret: 5 })
         })
 
         it('still rejects a value of another type', () => {
-          expect(paramErrorsFrom(() => Params.for({ secret: 'shh' }, UserWithEncryptedInteger))).toEqual({
-            secret: ['expected integer or string integer'],
-          })
+          expect(
+            paramErrorsFrom(() => Params.for({ integerSecret: 'shh' }, ModelWithDeclaredShapes)),
+          ).toEqual({ integerSecret: ['expected integer or string integer'] })
         })
       })
 
       context('with a shorthand declared in object form', () => {
-        // User#secret redeclared, as `@deco.Encrypted({ openapi })` registers
-        // it; its backing column, encrypted_secret, allows null
-        function userWithSecretDeclaredAs(type: VirtualAttributeStatement['type']) {
-          class UserWithDeclaredSecret extends User {}
-          ;(
-            UserWithDeclaredSecret as unknown as { virtualAttributes: VirtualAttributeStatement[] }
-          ).virtualAttributes = [
-            ...(User['virtualAttributes'] as VirtualAttributeStatement[]).filter(
-              statement => statement.property !== 'secret',
-            ),
-            { property: 'secret', type },
-          ]
-          return UserWithDeclaredSecret
-        }
+        // ModelWithDeclaredShapes declares each of these with
+        // `@deco.Encrypted({ openapi })`, over a backing column that allows null
 
         it('casts `{ type: "date" }` to a CalendarDate', () => {
           const result: Record<string, unknown> = Params.for(
-            { secret: '2026-11-20' },
-            userWithSecretDeclaredAs({ type: 'date' }),
+            { dateSecret: '2026-11-20' },
+            ModelWithDeclaredShapes,
           )
-          expect(result['secret']).toBeInstanceOf(CalendarDate)
-          expect((result['secret'] as CalendarDate).toISO()).toEqual('2026-11-20')
+          expect(result['dateSecret']).toBeInstanceOf(CalendarDate)
+          expect((result['dateSecret'] as CalendarDate).toISO()).toEqual('2026-11-20')
         })
 
         it('casts `{ type: "date-time" }` to a DateTime', () => {
           const result: Record<string, unknown> = Params.for(
-            { secret: '2026-11-19T10:00:00.000Z' },
-            userWithSecretDeclaredAs({ type: 'date-time' }),
+            { dateTimeSecret: '2026-11-19T10:00:00.000Z' },
+            ModelWithDeclaredShapes,
           )
-          expect(result['secret']).toBeInstanceOf(DateTime)
-          expect((result['secret'] as DateTime).toISO()).toEqual('2026-11-19T10:00:00.000000Z')
+          expect(result['dateTimeSecret']).toBeInstanceOf(DateTime)
+          expect((result['dateTimeSecret'] as DateTime).toISO()).toEqual('2026-11-19T10:00:00.000000Z')
         })
 
         it('casts a string decimal for `{ type: "decimal" }`', () => {
-          expect(Params.for({ secret: '5.5' }, userWithSecretDeclaredAs({ type: 'decimal' }))).toEqual({
-            secret: 5.5,
+          expect(Params.for({ decimalSecret: '5.5' }, ModelWithDeclaredShapes)).toEqual({
+            decimalSecret: 5.5,
           })
         })
 
         it('casts each element for `{ type: "integer[]" }`, and rejects a bare value', () => {
-          const UserWithIntegerArraySecret = userWithSecretDeclaredAs({ type: 'integer[]' })
-          expect(Params.for({ secret: ['1', '2'] }, UserWithIntegerArraySecret)).toEqual({ secret: [1, 2] })
-          expect(paramErrorsFrom(() => Params.for({ secret: '1' }, UserWithIntegerArraySecret))).toEqual({
-            secret: ['expected integer or string integer array'],
+          expect(Params.for({ integerArraySecret: ['1', '2'] }, ModelWithDeclaredShapes)).toEqual({
+            integerArraySecret: [1, 2],
           })
+          expect(
+            paramErrorsFrom(() => Params.for({ integerArraySecret: '1' }, ModelWithDeclaredShapes)),
+          ).toEqual({ integerArraySecret: ['expected integer or string integer array'] })
         })
 
         it('rejects a null element for `{ type: "integer[]" }`, and accepts null for the whole value, which the backing column allows', () => {
-          const UserWithIntegerArraySecret = userWithSecretDeclaredAs({ type: 'integer[]' })
           for (const value of [[null], [1, null, 2]]) {
-            expect(paramErrorsFrom(() => Params.for({ secret: value }, UserWithIntegerArraySecret))).toEqual({
-              secret: ['expected integer or string integer array'],
-            })
+            expect(
+              paramErrorsFrom(() => Params.for({ integerArraySecret: value }, ModelWithDeclaredShapes)),
+            ).toEqual({ integerArraySecret: ['expected integer or string integer array'] })
           }
-          expect(Params.for({ secret: null }, UserWithIntegerArraySecret)).toEqual({ secret: null })
+          expect(Params.for({ integerArraySecret: null }, ModelWithDeclaredShapes)).toEqual({
+            integerArraySecret: null,
+          })
         })
 
         it('casts a nullable `{ type: ["decimal", "null"] }`, and accepts null', () => {
-          const UserWithNullableDecimalSecret = userWithSecretDeclaredAs({ type: ['decimal', 'null'] })
-          expect(Params.for({ secret: '5.5' }, UserWithNullableDecimalSecret)).toEqual({ secret: 5.5 })
-          expect(Params.for({ secret: null }, UserWithNullableDecimalSecret)).toEqual({ secret: null })
+          expect(Params.for({ nullableDecimalSecret: '5.5' }, ModelWithDeclaredShapes)).toEqual({
+            nullableDecimalSecret: 5.5,
+          })
+          expect(Params.for({ nullableDecimalSecret: null }, ModelWithDeclaredShapes)).toEqual({
+            nullableDecimalSecret: null,
+          })
         })
 
         it('accepts null for `{ type: "date" }`, which the backing column allows', () => {
-          expect(Params.for({ secret: null }, userWithSecretDeclaredAs({ type: 'date' }))).toEqual({
-            secret: null,
-          })
+          expect(Params.for({ dateSecret: null }, ModelWithDeclaredShapes)).toEqual({ dateSecret: null })
         })
       })
     })
@@ -1379,13 +1252,6 @@ describe('Params', () => {
       },
     )
 
-    // the test-app declares requiredJsonbData with @deco.JSON, so the
-    // undeclared not-null jsonb path is exercised on a subclass without it
-    class UserWithoutJSONDeclarations extends User {}
-    ;(
-      UserWithoutJSONDeclarations as unknown as { jsonColumnShapes: JSONColumnShapeStatement[] }
-    ).jsonColumnShapes = []
-
     context('array columns', () => {
       it('rejects a bare value, rather than wrapping it into an array', () => {
         expect(paramErrorsFrom(() => Params.for({ nicknames: 'abc' }, User))).toEqual({
@@ -1408,7 +1274,9 @@ describe('Params', () => {
       {
         dbType: 'jsonb',
         allowNull: ['jsonbData', User],
-        notNull: ['requiredJsonbData', UserWithoutJSONDeclarations],
+        // User declares requiredJsonbData with @deco.JSON, so the undeclared
+        // not-null jsonb column is ModelWithDeclaredShapes#undeclaredRequiredJsonb
+        notNull: ['undeclaredRequiredJsonb', ModelWithDeclaredShapes],
       },
       { dbType: 'json', allowNull: ['jsonData', User], notNull: ['requiredJsonData', User] },
     ] as const
