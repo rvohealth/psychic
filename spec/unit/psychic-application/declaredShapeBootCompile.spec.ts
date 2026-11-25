@@ -1,9 +1,9 @@
 import { DreamApp } from '@rvoh/dream'
 import ParamValidationErrors from '../../../src/error/controller/ParamValidationErrors.js'
-import type { JSONColumnShapeStatement } from '../../../src/openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import Params from '../../../src/server/params.js'
 import User from '../../../test-app/src/app/models/User.js'
 import initializePsychicApp from '../../../test-app/src/cli/helpers/initializePsychicApp.js'
+import type { JSONColumnShapeStatement } from '../../helpers/dreamDeclarationStatements.js'
 
 // A declared shape that renders as OpenAPI but that AJV cannot compile into
 // the validator Dream checks the value with, and Params.for checks a request

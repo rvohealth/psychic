@@ -13,37 +13,19 @@ import UnrecognizedDbTypeFoundWhileComputingOpenapiAttribute from '../../error/o
 import isObject from '../../helpers/isObject.js'
 import OpenapiEnumCollector from './OpenapiEnumCollector.js'
 
-export interface VirtualAttributeStatement {
-  property: string
-  type: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined
-}
-
 /**
  * @internal
  *
- * An entry of Dream's private static `jsonColumnShapes`, which `@deco.JSON`
- * fills: the shape declared for a json/jsonb column (for a json[]/jsonb[]
- * column, the shape of each element).
- */
-export interface JSONColumnShapeStatement {
-  column: string
-  openapi: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand
-}
-
-/**
- * @internal
- *
- * The shape `@deco.JSON` declares for a json/jsonb column, or `undefined` when
- * the column has no `@deco.JSON` declaration. Dream keeps the declarations in a
- * private static, read here through the bracketed back door, as
- * `virtualAttributes` is.
+ * The shape `@deco.JSON` declares for a json/jsonb column (for a json[]/jsonb[]
+ * column, the shape of each element), as Dream reports it, or `undefined` when
+ * the column has no `@deco.JSON` declaration.
  */
 export function declaredJSONColumnShape(
   dreamClass: typeof Dream,
   column: string,
 ): OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined {
-  const statements = dreamClass['jsonColumnShapes'] as JSONColumnShapeStatement[] | undefined
-  return statements?.find(statement => statement.column === column)?.openapi
+  const declaration = DreamApp.system.modelDeclaredShape(dreamClass, column)
+  return declaration?.decorator === '@deco.JSON' ? declaration.shape : undefined
 }
 
 interface DreamColumnInfo {

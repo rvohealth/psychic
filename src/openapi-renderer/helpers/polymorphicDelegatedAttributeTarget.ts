@@ -7,11 +7,7 @@ import {
 } from '@rvoh/dream/openapi'
 import { isDeepStrictEqual } from 'node:util'
 import PolymorphicDelegatedAttributeShapesDiffer from '../../error/openapi/PolymorphicDelegatedAttributeShapesDiffer.js'
-import {
-  declaredJSONColumnShape,
-  openapiCarriesShape,
-  VirtualAttributeStatement,
-} from './dreamColumnOpenapiShape.js'
+import { openapiCarriesShape } from './dreamColumnOpenapiShape.js'
 
 type DeclaredShape = OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand
 
@@ -24,10 +20,6 @@ interface ColumnMetadata {
 interface DreamWithColumns {
   table: string
   schema: Record<string, { columns: Record<string, ColumnMetadata> }>
-}
-
-interface EncryptedAttributeStatement {
-  property: string
 }
 
 type ModelDeclaration =
@@ -131,32 +123,35 @@ function acceptsNull(declaration: ModelDeclaration): boolean {
 }
 
 function modelDeclaration(dreamClass: typeof Dream, attributeName: string): ModelDeclaration | undefined {
-  if (dreamClass.isVirtualColumn(attributeName)) {
-    const statement = (dreamClass['virtualAttributes'] as VirtualAttributeStatement[]).find(
-      virtualAttribute => virtualAttribute.property === attributeName,
-    )
+  const declaration = DreamApp.system.modelDeclaredShape(dreamClass, attributeName)
 
-    const encryptedStatement = (
-      dreamClass['encryptedAttributes'] as EncryptedAttributeStatement[] | undefined
-    )?.find(encryptedAttribute => encryptedAttribute.property === attributeName)
+  // a `@deco.Virtual` attribute may declare no shape
+  if (declaration === undefined)
+    return dreamClass.isVirtualColumn(attributeName)
+      ? { kind: 'virtual', shape: undefined, effectiveShape: undefined }
+      : undefined
 
-    // the shape the attribute renders: for `@deco.Encrypted`, with `null`
-    // added from its backing column
-    const effectiveShape = DreamApp.system.declaredShapeSchema(dreamClass, attributeName)
+  const { shape } = declaration
 
-    if (encryptedStatement && statement?.type !== undefined && effectiveShape !== undefined)
-      return { kind: 'encrypted', shape: statement.type, effectiveShape }
-
-    return { kind: 'virtual', shape: statement?.type, effectiveShape }
+  if (declaration.decorator === '@deco.JSON') {
+    // `@deco.JSON` refuses at boot a property that is not a json/jsonb column,
+    // so a declared shape always has its column
+    const column = columnMetadata(dreamClass, attributeName)!
+    return {
+      kind: 'json',
+      shape,
+      dbType: column.dbType,
+      isArray: column.isArray,
+      allowNull: column.allowNull,
+    }
   }
 
-  const shape = declaredJSONColumnShape(dreamClass, attributeName)
-  if (shape === undefined) return undefined
-
-  // `@deco.JSON` refuses at boot a property that is not a json/jsonb column,
-  // so a declared shape always has its column
-  const column = columnMetadata(dreamClass, attributeName)!
-  return { kind: 'json', shape, dbType: column.dbType, isArray: column.isArray, allowNull: column.allowNull }
+  // the shape the attribute renders: for `@deco.Encrypted`, with `null`
+  // added from its backing column
+  const effectiveShape = DreamApp.system.declaredShapeSchema(dreamClass, attributeName)!
+  return declaration.decorator === '@deco.Encrypted'
+    ? { kind: 'encrypted', shape, effectiveShape }
+    : { kind: 'virtual', shape, effectiveShape }
 }
 
 function columnMetadata(dreamClass: typeof Dream, column: string): ColumnMetadata | undefined {

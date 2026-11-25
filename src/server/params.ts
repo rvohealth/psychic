@@ -31,10 +31,7 @@ import isObject from '../helpers/isObject.js'
 import isUuid from '../helpers/isUuid.js'
 import { validateObject } from '../helpers/validateOpenApiSchema.js'
 import { Inc } from '../i18n/conf/types.js'
-import {
-  declaredJSONColumnShape,
-  type VirtualAttributeStatement,
-} from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
+import { declaredJSONColumnShape } from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
 
 export type ExtractedDreamParamSafeAttributes<
@@ -272,9 +269,7 @@ export default class Params {
     columnName: string,
     paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
   ): unknown {
-    const declaredShape = (dreamClass['virtualAttributes'] as VirtualAttributeStatement[]).find(
-      statement => statement.property === columnName,
-    )?.type
+    const declaredShape = DreamApp.system.modelDeclaredShape(dreamClass, columnName)?.shape
 
     if (!declaredShape) throw new Error(`Unable to infer params cast type for virtual column: ${columnName}`)
 

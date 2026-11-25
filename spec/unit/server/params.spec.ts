@@ -3,14 +3,14 @@ import type { OpenapiShorthandPrimitiveTypes } from '@rvoh/dream/openapi'
 import { PsychicParamsDictionary } from '../../../src/controller/index.js'
 import ParamValidationError from '../../../src/error/controller/ParamValidationError.js'
 import ParamValidationErrors from '../../../src/error/controller/ParamValidationErrors.js'
-import type {
-  JSONColumnShapeStatement,
-  VirtualAttributeStatement,
-} from '../../../src/openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import Params from '../../../src/server/params.js'
 import Availability from '../../../test-app/src/app/models/Availability.js'
 import Pet from '../../../test-app/src/app/models/Pet.js'
 import User from '../../../test-app/src/app/models/User.js'
+import type {
+  JSONColumnShapeStatement,
+  VirtualAttributeStatement,
+} from '../../helpers/dreamDeclarationStatements.js'
 
 const TestEnumValues = ['hello', 'world'] as const
 type TestEnum = (typeof TestEnumValues)[number]

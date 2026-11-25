@@ -3,9 +3,7 @@ import { OpenapiSchemaBody } from '@rvoh/dream/openapi'
 import SerializerOpenapiShapeOnJSONColumn from '../../../../src/error/openapi/SerializerOpenapiShapeOnJSONColumn.js'
 import {
   dreamColumnOpenapiShape,
-  JSONColumnShapeStatement,
   UseCustomOpenapiForJson,
-  VirtualAttributeStatement,
 } from '../../../../src/openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import OpenapiSegmentExpander from '../../../../src/openapi-renderer/body-segment.js'
 import OpenapiEnumCollector from '../../../../src/openapi-renderer/helpers/OpenapiEnumCollector.js'
@@ -13,6 +11,10 @@ import SerializerOpenapiRenderer from '../../../../src/openapi-renderer/Serializ
 import Availability from '../../../../test-app/src/app/models/Availability.js'
 import User from '../../../../test-app/src/app/models/User.js'
 import { PetTreatsEnumValues, SpeciesTypesEnumValues } from '../../../../test-app/src/types/db.js'
+import type {
+  JSONColumnShapeStatement,
+  VirtualAttributeStatement,
+} from '../../../helpers/dreamDeclarationStatements.js'
 
 describe('dreamAttributeOpenapiShape', () => {
   context('bigint primaryKey', () => {
