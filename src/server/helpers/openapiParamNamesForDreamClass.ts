@@ -1,11 +1,10 @@
-import { Dream } from '@rvoh/dream'
+import { Dream, DreamApp } from '@rvoh/dream'
 import {
   DreamParamSafeAttributes,
   DreamParamSafeColumnNames,
   StrictInterface,
   UpdateableProperties,
 } from '@rvoh/dream/types'
-import type { VirtualAttributeStatement } from '../../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import type {
   ExtractedDreamParamSafeAttributes,
   OpenAPIDreamModelRequestBodyModifications,
@@ -56,13 +55,9 @@ export default function openapiParamNamesForDreamClass<
     paramSafeColumns = [
       ...(paramSafeColumns as string[]),
 
-      // TODO: add a method to dream which can extrapolate
-      // all of these fields from the model
       ...[
         ...dreamClass.columns(),
-        ...(dreamClass['virtualAttributes'] as VirtualAttributeStatement[]).map(
-          statement => statement.property,
-        ),
+        ...DreamApp.system.virtualAttributeNames(dreamClass),
         // eslint-disable-next-line @typescript-eslint/no-unsafe-argument, @typescript-eslint/no-explicit-any
       ].filter(columnName => including.includes(columnName as any)),
     ] as RetArray

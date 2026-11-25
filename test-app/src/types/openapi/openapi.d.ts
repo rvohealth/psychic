@@ -167,13 +167,20 @@ export interface paths {
                         requiredFavoriteDates?: string[];
                         requiredFavoriteDatetimes?: string[];
                         requiredFavoriteIntegers?: number[];
-                        requiredFavoriteJsonbs?: Record<string, never>[];
+                        requiredFavoriteJsonbs?: {
+                            label: string;
+                            score?: number;
+                        }[];
                         requiredFavoriteJsons?: Record<string, never>[];
                         requiredFavoriteNumerics?: number[];
                         requiredFavoriteTexts?: string[];
                         requiredFavoriteUuids?: string[];
                         requiredJsonData?: Record<string, never>;
-                        requiredJsonbData?: Record<string, never>;
+                        requiredJsonbData?: {
+                            /** @enum {string} */
+                            theme?: "light" | "dark";
+                            fontSize?: number;
+                        };
                         requiredNicknames?: string[];
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
@@ -287,13 +294,20 @@ export interface paths {
                         requiredFavoriteDates?: string[];
                         requiredFavoriteDatetimes?: string[];
                         requiredFavoriteIntegers?: number[];
-                        requiredFavoriteJsonbs?: Record<string, never>[];
+                        requiredFavoriteJsonbs?: {
+                            label: string;
+                            score?: number;
+                        }[];
                         requiredFavoriteJsons?: Record<string, never>[];
                         requiredFavoriteNumerics?: number[];
                         requiredFavoriteTexts?: string[];
                         requiredFavoriteUuids?: string[];
                         requiredJsonData?: Record<string, never>;
-                        requiredJsonbData?: Record<string, never>;
+                        requiredJsonbData?: {
+                            /** @enum {string} */
+                            theme?: "light" | "dark";
+                            fontSize?: number;
+                        };
                         requiredNicknames?: string[];
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
@@ -2735,13 +2749,20 @@ export interface paths {
                         requiredFavoriteDates?: string[];
                         requiredFavoriteDatetimes?: string[];
                         requiredFavoriteIntegers?: number[];
-                        requiredFavoriteJsonbs?: Record<string, never>[];
+                        requiredFavoriteJsonbs?: {
+                            label: string;
+                            score?: number;
+                        }[];
                         requiredFavoriteJsons?: Record<string, never>[];
                         requiredFavoriteNumerics?: number[];
                         requiredFavoriteTexts?: string[];
                         requiredFavoriteUuids?: string[];
                         requiredJsonData?: Record<string, never>;
-                        requiredJsonbData?: Record<string, never>;
+                        requiredJsonbData?: {
+                            /** @enum {string} */
+                            theme?: "light" | "dark";
+                            fontSize?: number;
+                        };
                         requiredNicknames?: string[];
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
@@ -2928,13 +2949,20 @@ export interface paths {
                         requiredFavoriteDates?: string[];
                         requiredFavoriteDatetimes?: string[];
                         requiredFavoriteIntegers?: number[];
-                        requiredFavoriteJsonbs?: Record<string, never>[];
+                        requiredFavoriteJsonbs?: {
+                            label: string;
+                            score?: number;
+                        }[];
                         requiredFavoriteJsons?: Record<string, never>[];
                         requiredFavoriteNumerics?: number[];
                         requiredFavoriteTexts?: string[];
                         requiredFavoriteUuids?: string[];
                         requiredJsonData?: Record<string, never>;
-                        requiredJsonbData?: Record<string, never>;
+                        requiredJsonbData?: {
+                            /** @enum {string} */
+                            theme?: "light" | "dark";
+                            fontSize?: number;
+                        };
                         requiredNicknames?: string[];
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
@@ -3548,13 +3576,20 @@ export interface paths {
                         requiredFavoriteDates?: string[];
                         requiredFavoriteDatetimes?: string[];
                         requiredFavoriteIntegers?: number[];
-                        requiredFavoriteJsonbs?: Record<string, never>[];
+                        requiredFavoriteJsonbs?: {
+                            label: string;
+                            score?: number;
+                        }[];
                         requiredFavoriteJsons?: Record<string, never>[];
                         requiredFavoriteNumerics?: number[];
                         requiredFavoriteTexts?: string[];
                         requiredFavoriteUuids?: string[];
                         requiredJsonData?: Record<string, never>;
-                        requiredJsonbData?: Record<string, never>;
+                        requiredJsonbData?: {
+                            /** @enum {string} */
+                            theme?: "light" | "dark";
+                            fontSize?: number;
+                        };
                         requiredNicknames?: string[];
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
@@ -3732,13 +3767,20 @@ export interface paths {
                         requiredFavoriteDates?: string[];
                         requiredFavoriteDatetimes?: string[];
                         requiredFavoriteIntegers?: number[];
-                        requiredFavoriteJsonbs?: Record<string, never>[];
+                        requiredFavoriteJsonbs?: {
+                            label: string;
+                            score?: number;
+                        }[];
                         requiredFavoriteJsons?: Record<string, never>[];
                         requiredFavoriteNumerics?: number[];
                         requiredFavoriteTexts?: string[];
                         requiredFavoriteUuids?: string[];
                         requiredJsonData?: Record<string, never>;
-                        requiredJsonbData?: Record<string, never>;
+                        requiredJsonbData?: {
+                            /** @enum {string} */
+                            theme?: "light" | "dark";
+                            fontSize?: number;
+                        };
                         requiredNicknames?: string[];
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
@@ -3916,13 +3958,20 @@ export interface paths {
                         requiredFavoriteDates?: string[];
                         requiredFavoriteDatetimes?: string[];
                         requiredFavoriteIntegers?: number[];
-                        requiredFavoriteJsonbs?: Record<string, never>[];
+                        requiredFavoriteJsonbs?: {
+                            label: string;
+                            score?: number;
+                        }[];
                         requiredFavoriteJsons?: Record<string, never>[];
                         requiredFavoriteNumerics?: number[];
                         requiredFavoriteTexts?: string[];
                         requiredFavoriteUuids?: string[];
                         requiredJsonData?: Record<string, never>;
-                        requiredJsonbData?: Record<string, never>;
+                        requiredJsonbData?: {
+                            /** @enum {string} */
+                            theme?: "light" | "dark";
+                            fontSize?: number;
+                        };
                         requiredNicknames?: string[];
                         /** @enum {string|null} */
                         species?: "cat" | "noncat" | null;
@@ -4060,6 +4109,11 @@ export interface components {
             };
             id: number;
             nicknames: string[] | null;
+            requiredJsonbData: {
+                /** @enum {string} */
+                theme?: "light" | "dark";
+                fontSize?: number;
+            };
         };
         UserSignupRequest: {
             email: string;

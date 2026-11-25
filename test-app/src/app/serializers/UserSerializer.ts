@@ -9,10 +9,12 @@ export const UserSummarySerializer = (data: User, passthrough?: { howyadoin: str
 export default (data: User, passthrough?: { howyadoin: string }) =>
   UserSummarySerializer(data, passthrough).attribute('email').attribute('name')
 
-// UserExtraSerializer: id, nicknames, howyadoin (complex object)
+// UserExtraSerializer: id, nicknames, requiredJsonbData (shape declared with
+// @deco.JSON on the model), howyadoin (complex object)
 export const UserExtraSerializer = (data: User, passthrough?: { howyadoin: string }) =>
   UserSummarySerializer(data, passthrough)
     .attribute('nicknames')
+    .attribute('requiredJsonbData')
     .customAttribute('howyadoin', () => null, {
       openapi: {
         type: 'object',

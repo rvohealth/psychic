@@ -139,6 +139,10 @@ export default class PsychicApp {
         await psychicApp.buildRoutesCache()
 
         psychicApp.buildOpenapiCache()
+
+        // Dream compiles the validator of every shape a model declares (the
+        // one Params.for checks a request value with) once this returns, in
+        // DreamApp.init, so a shape it cannot compile is refused at boot
       }
     })
 

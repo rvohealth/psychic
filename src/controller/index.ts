@@ -630,7 +630,7 @@ export default class PsychicController {
   >(this: PsychicController, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
     const source = this.paramsSourceFor('extractParams', opts)
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return Params.extract(source, dreamClass, allowed as any, opts as any)
+    return Params.extract(source, dreamClass, allowed as any, opts as any) as unknown as ReturnPayload
   }
 
   /**

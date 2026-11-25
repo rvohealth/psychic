@@ -186,6 +186,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {
       user: {
         type: 'BelongsTo',
@@ -269,6 +271,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {
       user: {
         type: 'BelongsTo',
@@ -336,6 +340,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {
       post: {
         type: 'BelongsTo',
@@ -419,6 +425,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {},
   },
   model_without_serializers: {
@@ -467,6 +475,263 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
+    associations: {},
+  },
+  models_with_declared_shapes: {
+    serializerKeys: [],
+    scopes: {
+      default: [],
+      named: [],
+    },
+    nonJsonColumnNames: [
+      'createdAt',
+      'encryptedDateSecret',
+      'encryptedDateTimeSecret',
+      'encryptedDecimalSecret',
+      'encryptedIntegerArraySecret',
+      'encryptedIntegerSecret',
+      'encryptedNullableDecimalSecret',
+      'id',
+      'updatedAt',
+    ],
+    columns: {
+      createdAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+      encryptedDateSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedDateTimeSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedDecimalSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedIntegerArraySecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedIntegerSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedNullableDecimalSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      id: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+      nullableComposition: {
+        coercedType: {} as
+          | {
+              hello: string
+              [key: string]: unknown
+            }
+          | {
+              goodbye: string
+              [key: string]: unknown
+            }
+          | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'json',
+        allowNull: true,
+        isArray: false,
+      },
+      nullableObject: {
+        coercedType: {} as {
+          hello?: string
+          [key: string]: unknown
+        } | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: true,
+        isArray: false,
+      },
+      nullableObjects: {
+        coercedType: {} as
+          | {
+              hello?: string
+              [key: string]: unknown
+            }[]
+          | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb[]',
+        allowNull: true,
+        isArray: true,
+      },
+      patterned: {
+        coercedType: {} as {
+          phone?: string
+          [key: string]: unknown
+        } | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: true,
+        isArray: false,
+      },
+      undeclaredRequiredJsonb: {
+        coercedType: {} as Json,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: false,
+        isArray: false,
+      },
+      updatedAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+      withDefault: {
+        coercedType: {} as {
+          withDefault?: string
+          [key: string]: unknown
+        },
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: false,
+        isArray: false,
+      },
+    },
+    virtualColumns: [
+      'bigintVirtual',
+      'booleanObjectForm',
+      'booleanStringForm',
+      'dateEnumArrayVirtual',
+      'dateEnumVirtual',
+      'dateObjectForm',
+      'dateSecret',
+      'dateStringForm',
+      'dateTimeArrayItemsForm',
+      'dateTimeEnumArrayVirtual',
+      'dateTimeEnumVirtual',
+      'dateTimeObjectForm',
+      'dateTimeSecret',
+      'dateTimeStringForm',
+      'decimalObjectForm',
+      'decimalSecret',
+      'decimalStringForm',
+      'enumArrayVirtual',
+      'enumVirtual',
+      'integerArrayItemsForm',
+      'integerArrayObjectForm',
+      'integerArrayOfNullableItems',
+      'integerArraySecret',
+      'integerArrayStringForm',
+      'integerObjectForm',
+      'integerSecret',
+      'integerStringForm',
+      'jsonVirtual',
+      'nullableDecimalSecret',
+      'nullableIntegerArrayItemsForm',
+      'nullableIntegerArrayObjectForm',
+      'nullableIntegerArrayStringForm',
+      'nullableIntegerObjectForm',
+      'nullableIntegerStringForm',
+      'nullableObjectVirtual',
+      'numberObjectForm',
+      'numberStringForm',
+      'objectArrayVirtual',
+      'objectVirtual',
+      'stringObjectForm',
+      'stringStringForm',
+    ],
+    jsonDecoratedColumns: [
+      'nullableComposition',
+      'nullableObject',
+      'nullableObjects',
+      'patterned',
+      'withDefault',
+    ],
+    encryptedAttributes: {
+      dateSecret: {
+        coercedType: {} as string | null,
+        writeType: {} as string | CalendarDate | null,
+      },
+      dateTimeSecret: {
+        coercedType: {} as string | null,
+        writeType: {} as string | DateTime | null,
+      },
+      decimalSecret: {
+        coercedType: {} as number | null,
+        writeType: {} as number | null,
+      },
+      integerArraySecret: {
+        coercedType: {} as number[] | null,
+        writeType: {} as number[] | null,
+      },
+      integerSecret: {
+        coercedType: {} as number | null,
+        writeType: {} as number | null,
+      },
+      nullableDecimalSecret: {
+        coercedType: {} as number | null,
+        writeType: {} as number | null,
+      },
+    },
     associations: {},
   },
   pets: {
@@ -686,6 +951,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {
       user: {
         type: 'BelongsTo',
@@ -697,6 +964,627 @@ export const schema = {
         passthroughAndClauses: null,
       },
     },
+  },
+  polymorphic_shape_sources: {
+    serializerKeys: [],
+    scopes: {
+      default: [],
+      named: [],
+    },
+    nonJsonColumnNames: [
+      'createdAt',
+      'id',
+      'targetId',
+      'targetType',
+      'updatedAt',
+    ],
+    columns: {
+      createdAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+      id: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+      targetId: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+      targetType: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'character varying',
+        allowNull: false,
+        isArray: false,
+      },
+      updatedAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+    },
+    virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
+    associations: {
+      target: {
+        type: 'BelongsTo',
+        foreignKey: 'targetId',
+        foreignKeyTypeColumn: 'targetType',
+        tables: ['polymorphic_shape_target_as', 'polymorphic_shape_target_bs'],
+        optional: false,
+        requiredAndClauses: null,
+        passthroughAndClauses: null,
+      },
+      targetInReverseOrder: {
+        type: 'BelongsTo',
+        foreignKey: 'targetId',
+        foreignKeyTypeColumn: 'targetType',
+        tables: ['polymorphic_shape_target_as', 'polymorphic_shape_target_bs'],
+        optional: false,
+        requiredAndClauses: null,
+        passthroughAndClauses: null,
+      },
+    },
+  },
+  polymorphic_shape_target_as: {
+    serializerKeys: [],
+    scopes: {
+      default: [],
+      named: [],
+    },
+    nonJsonColumnNames: [
+      'createdAt',
+      'encryptedBareSecret',
+      'encryptedExplicitNullOnBSecret',
+      'encryptedIntegerSecret',
+      'encryptedIntegerVirtualOnBSecret',
+      'encryptedMismatchedSecret',
+      'encryptedNullDeclaredOnASecret',
+      'encryptedNullableStringSecret',
+      'encryptedObjectFormNullOnASecret',
+      'encryptedVirtualOnBSecret',
+      'id',
+      'plainColumn',
+      'updatedAt',
+    ],
+    columns: {
+      arrayOnB: {
+        coercedType: {} as {
+          label?: string
+          [key: string]: unknown
+        },
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: false,
+        isArray: false,
+      },
+      createdAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+      declaredOnlyOnA: {
+        coercedType: {} as {
+          label?: string
+          [key: string]: unknown
+        },
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: false,
+        isArray: false,
+      },
+      differentShape: {
+        coercedType: {} as {
+          theme?: 'light' | 'dark'
+          fontSize?: number
+          [key: string]: unknown
+        },
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: false,
+        isArray: false,
+      },
+      encryptedBareSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedExplicitNullOnBSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedIntegerSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedIntegerVirtualOnBSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedMismatchedSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedNullDeclaredOnASecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedNullableStringSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedObjectFormNullOnASecret: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: false,
+        isArray: false,
+      },
+      encryptedVirtualOnBSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      id: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+      identicalElementShape: {
+        coercedType: {} as {
+          label: string
+          score?: number
+          [key: string]: unknown
+        }[],
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb[]',
+        allowNull: false,
+        isArray: true,
+      },
+      identicalShape: {
+        coercedType: {} as {
+          theme?: 'light' | 'dark'
+          fontSize?: number
+          [key: string]: unknown
+        },
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: false,
+        isArray: false,
+      },
+      nullableOnB: {
+        coercedType: {} as {
+          theme?: 'light' | 'dark'
+          fontSize?: number
+          [key: string]: unknown
+        },
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: false,
+        isArray: false,
+      },
+      onlyOnA: {
+        coercedType: {} as {
+          label?: string
+          [key: string]: unknown
+        },
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: false,
+        isArray: false,
+      },
+      plainColumn: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'character varying',
+        allowNull: true,
+        isArray: false,
+      },
+      updatedAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+    },
+    virtualColumns: [
+      'bareSecret',
+      'differentVirtual',
+      'explicitNullOnBSecret',
+      'identicalObjectVirtual',
+      'identicalVirtual',
+      'integerSecret',
+      'integerVirtualOnBSecret',
+      'mismatchedSecret',
+      'nullDeclaredOnASecret',
+      'nullableStringSecret',
+      'objectFormNullOnASecret',
+      'virtualOnBSecret',
+      'virtualOnlyOnA',
+    ],
+    jsonDecoratedColumns: [
+      'arrayOnB',
+      'declaredOnlyOnA',
+      'differentShape',
+      'identicalElementShape',
+      'identicalShape',
+      'nullableOnB',
+      'onlyOnA',
+    ],
+    encryptedAttributes: {
+      bareSecret: {
+        coercedType: {} as string | null,
+        writeType: {} as string | null,
+      },
+      explicitNullOnBSecret: {
+        coercedType: {} as string | null,
+        writeType: {} as string | null,
+      },
+      integerSecret: {
+        coercedType: {} as number | null,
+        writeType: {} as number | null,
+      },
+      integerVirtualOnBSecret: {
+        coercedType: {} as number | null,
+        writeType: {} as number | null,
+      },
+      mismatchedSecret: {
+        coercedType: {} as string | null,
+        writeType: {} as string | null,
+      },
+      nullDeclaredOnASecret: {
+        coercedType: {} as number | null,
+        writeType: {} as number | null,
+      },
+      nullableStringSecret: {
+        coercedType: {} as string | null,
+        writeType: {} as string | null,
+      },
+      objectFormNullOnASecret: {
+        coercedType: {} as number | null,
+        writeType: {} as number | null,
+      },
+      virtualOnBSecret: {
+        coercedType: {} as string | null,
+        writeType: {} as string | null,
+      },
+    },
+    associations: {},
+  },
+  polymorphic_shape_target_bs: {
+    serializerKeys: [],
+    scopes: {
+      default: [],
+      named: [],
+    },
+    nonJsonColumnNames: [
+      'createdAt',
+      'encryptedBareSecret',
+      'encryptedExplicitNullOnBSecret',
+      'encryptedIntegerSecret',
+      'encryptedMismatchedSecret',
+      'encryptedNullDeclaredOnASecret',
+      'encryptedNullableStringSecret',
+      'encryptedObjectFormNullOnASecret',
+      'id',
+      'plainColumn',
+      'updatedAt',
+    ],
+    columns: {
+      arrayOnB: {
+        coercedType: {} as {
+          label?: string
+          [key: string]: unknown
+        }[],
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb[]',
+        allowNull: false,
+        isArray: true,
+      },
+      createdAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+      declaredOnlyOnA: {
+        coercedType: {} as Json,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: false,
+        isArray: false,
+      },
+      differentShape: {
+        coercedType: {} as {
+          theme?: string
+          [key: string]: unknown
+        },
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: false,
+        isArray: false,
+      },
+      encryptedBareSecret: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: false,
+        isArray: false,
+      },
+      encryptedExplicitNullOnBSecret: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: false,
+        isArray: false,
+      },
+      encryptedIntegerSecret: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: false,
+        isArray: false,
+      },
+      encryptedMismatchedSecret: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: false,
+        isArray: false,
+      },
+      encryptedNullDeclaredOnASecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedNullableStringSecret: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: false,
+        isArray: false,
+      },
+      encryptedObjectFormNullOnASecret: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: false,
+        isArray: false,
+      },
+      id: {
+        coercedType: {} as string,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'bigint',
+        allowNull: false,
+        isArray: false,
+      },
+      identicalElementShape: {
+        coercedType: {} as {
+          label: string
+          score?: number
+          [key: string]: unknown
+        }[],
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb[]',
+        allowNull: false,
+        isArray: true,
+      },
+      identicalShape: {
+        coercedType: {} as {
+          theme?: 'light' | 'dark'
+          fontSize?: number
+          [key: string]: unknown
+        },
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: false,
+        isArray: false,
+      },
+      nullableOnB: {
+        coercedType: {} as {
+          theme?: 'light' | 'dark'
+          fontSize?: number
+          [key: string]: unknown
+        } | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'jsonb',
+        allowNull: true,
+        isArray: false,
+      },
+      plainColumn: {
+        coercedType: {} as number,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'integer',
+        allowNull: false,
+        isArray: false,
+      },
+      updatedAt: {
+        coercedType: {} as DateTime,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'timestamp without time zone',
+        allowNull: false,
+        isArray: false,
+      },
+    },
+    virtualColumns: [
+      'bareSecret',
+      'differentVirtual',
+      'explicitNullOnBSecret',
+      'identicalObjectVirtual',
+      'identicalVirtual',
+      'integerSecret',
+      'integerVirtualOnBSecret',
+      'mismatchedSecret',
+      'nullDeclaredOnASecret',
+      'nullableStringSecret',
+      'objectFormNullOnASecret',
+      'virtualOnBSecret',
+    ],
+    jsonDecoratedColumns: [
+      'arrayOnB',
+      'differentShape',
+      'identicalElementShape',
+      'identicalShape',
+      'nullableOnB',
+    ],
+    encryptedAttributes: {
+      bareSecret: {
+        coercedType: {} as string,
+        writeType: {} as string,
+      },
+      explicitNullOnBSecret: {
+        coercedType: {} as string | null,
+        writeType: {} as string | null,
+      },
+      integerSecret: {
+        coercedType: {} as number,
+        writeType: {} as number,
+      },
+      mismatchedSecret: {
+        coercedType: {} as number | null,
+        writeType: {} as number | null,
+      },
+      nullDeclaredOnASecret: {
+        coercedType: {} as number | null,
+        writeType: {} as number | null,
+      },
+      nullableStringSecret: {
+        coercedType: {} as string | null,
+        writeType: {} as string | null,
+      },
+      objectFormNullOnASecret: {
+        coercedType: {} as number,
+        writeType: {} as number,
+      },
+    },
+    associations: {},
   },
   posts: {
     serializerKeys: ['default', 'summary', 'withComments', 'withRecentComment'],
@@ -769,6 +1657,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {
       comments: {
         type: 'HasMany',
@@ -845,6 +1735,8 @@ export const schema = {
       },
     },
     virtualColumns: [],
+    jsonDecoratedColumns: [],
+    encryptedAttributes: {},
     associations: {},
   },
   users: {
@@ -872,6 +1764,7 @@ export const schema = {
       'createdOn',
       'email',
       'encryptedSecret',
+      'encryptedSecretDetails',
       'favoriteBigint',
       'favoriteBigints',
       'favoriteBooleans',
@@ -994,6 +1887,15 @@ export const schema = {
         isArray: false,
       },
       encryptedSecret: {
+        coercedType: {} as string | null,
+        enumType: null,
+        enumArrayType: null,
+        enumValues: null,
+        dbType: 'text',
+        allowNull: true,
+        isArray: false,
+      },
+      encryptedSecretDetails: {
         coercedType: {} as string | null,
         enumType: null,
         enumArrayType: null,
@@ -1309,7 +2211,11 @@ export const schema = {
         isArray: true,
       },
       requiredFavoriteJsonbs: {
-        coercedType: {} as Json[],
+        coercedType: {} as {
+          label: string
+          score?: number
+          [key: string]: unknown
+        }[],
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -1363,7 +2269,11 @@ export const schema = {
         isArray: false,
       },
       requiredJsonbData: {
-        coercedType: {} as Json,
+        coercedType: {} as {
+          theme?: 'light' | 'dark'
+          fontSize?: number
+          [key: string]: unknown
+        },
         enumType: null,
         enumArrayType: null,
         enumValues: null,
@@ -1422,7 +2332,27 @@ export const schema = {
       'openapiVirtualSpecTest2',
       'password',
       'secret',
+      'secretDetails',
     ],
+    jsonDecoratedColumns: ['requiredFavoriteJsonbs', 'requiredJsonbData'],
+    encryptedAttributes: {
+      secret: {
+        coercedType: {} as string | null,
+        writeType: {} as string | null,
+      },
+      secretDetails: {
+        coercedType: {} as {
+          pin: string
+          tier?: 'basic' | 'gold'
+          [key: string]: unknown
+        } | null,
+        writeType: {} as {
+          pin: string
+          tier?: 'basic' | 'gold'
+          [key: string]: unknown
+        } | null,
+      },
+    },
     associations: {
       balloons: {
         type: 'HasMany',
@@ -1475,8 +2405,12 @@ export const connectionTypeConfig = {
       'Balloon/Mylar': 'balloons',
       Comment: 'comments',
       'Health/User': 'health_users',
+      ModelWithDeclaredShapes: 'models_with_declared_shapes',
       ModelWithoutSerializer: 'model_without_serializers',
       Pet: 'pets',
+      PolymorphicShapeSource: 'polymorphic_shape_sources',
+      PolymorphicShapeTargetA: 'polymorphic_shape_target_as',
+      PolymorphicShapeTargetB: 'polymorphic_shape_target_bs',
       Post: 'posts',
       SimpleSerializerModel: 'simple_serializer_models',
       User: 'users',

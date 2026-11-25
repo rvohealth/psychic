@@ -2,7 +2,7 @@
   "type": "module",
   "name": "@rvoh/psychic",
   "description": "Typescript web framework",
-  "version": "3.19.3",
+  "version": "3.20.0",
   "author": "RVOHealth",
   "publishConfig": {
     "access": "public"
@@ -70,7 +70,6 @@
   },
   "dependencies": {
     "ajv": "^8.19.0",
-    "ajv-formats": "^3.0.1",
     "fast-json-stringify": "^6.4.0",
     "yoctocolors": "^2.1.1"
   },

@@ -36,8 +36,8 @@ import isObject from '../helpers/isObject.js'
 import allSerializersFromHandWrittenOpenapi from './helpers/allSerializersFromHandWrittenOpenapi.js'
 import allSerializersToRefsInOpenapi from './helpers/allSerializersToRefsInOpenapi.js'
 import { dreamColumnOpenapiShape } from './helpers/dreamColumnOpenapiShape.js'
+import polymorphicDelegatedAttributeTarget from './helpers/polymorphicDelegatedAttributeTarget.js'
 import OpenapiEnumCollector from './helpers/OpenapiEnumCollector.js'
-import openapiShorthandToOpenapi from './helpers/openapiShorthandToOpenapi.js'
 const NULL_OBJECT_OPENAPI: OpenapiSchemaBody = { type: 'null' }
 
 // what a flattened rendersOne or customAttribute spreads into the object, an
@@ -252,7 +252,7 @@ export default class SerializerOpenapiRenderer {
               )
             } else {
               accumulator[outputAttributeName] = allSerializersToRefsInOpenapi(
-                openapiShorthandToOpenapi(openapi as any),
+                DreamApp.system.openapiShorthandToOpenapi(openapi as any),
               )
             }
 
@@ -284,9 +284,20 @@ export default class SerializerOpenapiRenderer {
                 // eslint-disable-next-line @typescript-eslint/no-unsafe-call
                 | undefined = source['getAssociationMetadata'](attribute.targetName)
               const associatedModelOrModels = association?.modelCB()
-              target = Array.isArray(associatedModelOrModels)
-                ? associatedModelOrModels[0]
-                : associatedModelOrModels
+              // a polymorphic association has several target models; a shape
+              // declared on them must be identical across them (or throw)
+              target =
+                Array.isArray(associatedModelOrModels) && associatedModelOrModels.length > 1
+                  ? polymorphicDelegatedAttributeTarget({
+                      source: `Serializer ${this.globalName}`,
+                      attributeName: attribute.name,
+                      associationName: attribute.targetName,
+                      targets: associatedModelOrModels,
+                      openapi,
+                    })
+                  : Array.isArray(associatedModelOrModels)
+                    ? associatedModelOrModels[0]
+                    : associatedModelOrModels
               delegatedAssociationOptional = !!(association as BelongsToStatement<any, any, any, any>)
                 ?.optional
             } else if (attributeType === 'delegatedAttribute') {
@@ -309,7 +320,7 @@ export default class SerializerOpenapiRenderer {
                       enumCollector: declarationEnumCollector,
                     },
                   )
-                : openapiShorthandToOpenapi(openapi as any),
+                : DreamApp.system.openapiShorthandToOpenapi(openapi as any),
             )
 
             const optional =
@@ -317,8 +328,8 @@ export default class SerializerOpenapiRenderer {
               ((attribute.options as { optional?: boolean }).optional ?? delegatedAssociationOptional)
 
             const finalSchema: OpenapiSchemaBodyShorthand =
-              optional && !openapiSchemaAcceptsNull(resolvedSchema)
-                ? openapiSchemaWithNull(resolvedSchema)
+              optional && !DreamApp.system.openapiSchemaAcceptsNull(resolvedSchema)
+                ? DreamApp.system.openapiSchemaWithNull(resolvedSchema)
                 : resolvedSchema
 
             accumulator[outputAttributeName] = finalSchema
@@ -610,7 +621,8 @@ export default class SerializerOpenapiRenderer {
       const schema = properties[key]
       if (schema === undefined) continue
       const certain = !maybeNull && shapeKeys.every(({ certain }) => certain[key])
-      if (!certain && !openapiSchemaAcceptsNull(schema)) properties[key] = openapiSchemaWithNull(schema)
+      if (!certain && !DreamApp.system.openapiSchemaAcceptsNull(schema))
+        properties[key] = DreamApp.system.openapiSchemaWithNull(schema)
     }
 
     const onlyShape = shapes.length === 1 ? shapes[0] : undefined
@@ -619,7 +631,7 @@ export default class SerializerOpenapiRenderer {
           attributeIndex,
           properties,
           required,
-          ref: allSerializersToRefsInOpenapi(openapiShorthandToOpenapi(onlyShape as any)),
+          ref: allSerializersToRefsInOpenapi(DreamApp.system.openapiShorthandToOpenapi(onlyShape as any)),
         }
       : { attributeIndex, properties, required }
   }
@@ -671,7 +683,9 @@ export default class SerializerOpenapiRenderer {
 
     if (isObject(record.properties)) {
       for (const [key, property] of Object.entries(record.properties as Record<string, any>))
-        keys.schemas[this.setCase(key)] = allSerializersToRefsInOpenapi(openapiShorthandToOpenapi(property))
+        keys.schemas[this.setCase(key)] = allSerializersToRefsInOpenapi(
+          DreamApp.system.openapiShorthandToOpenapi(property),
+        )
     }
 
     if (Array.isArray(record.allOf)) {
@@ -975,72 +989,4 @@ interface ReferencedSerializersAndOpenapiSchemaBodyShorthand {
 interface ReferencedSerializersAndAttributes {
   referencedSerializers: (DreamModelSerializerType | SimpleObjectSerializerType)[]
   attributes: Record<string, OpenapiSchemaBodyShorthand>
-}
-
-// root keywords that apply a subschema to the value itself; any of them can
-// still reject null after the schema's own `type` admits it
-const SUBSCHEMA_APPLICATORS = ['allOf', 'anyOf', 'oneOf', 'not', 'if', '$ref'] as const
-
-function hasSubschemaApplicator(schemaRecord: Record<string, unknown>): boolean {
-  return SUBSCHEMA_APPLICATORS.some(keyword => schemaRecord[keyword] !== undefined)
-}
-
-function openapiTypeIncludesNull(type: unknown): boolean {
-  return type === 'null' || (Array.isArray(type) && type.includes('null'))
-}
-
-/**
- * Whether the schema is known to accept null: its `type`, `enum` and `const`
- * all admit null and no subschema applied beside them can reject it, or, with
- * no `type`, a root `anyOf` has a branch that accepts null. A schema this cannot
- * prove accepts null (a `$ref`, for one) answers false.
- */
-function openapiSchemaAcceptsNull(schema: OpenapiSchemaBodyShorthand): boolean {
-  if (typeof schema !== 'object' || schema === null) return false
-
-  const schemaRecord = schema as Record<string, unknown>
-
-  if (Array.isArray(schemaRecord.enum) && !schemaRecord.enum.includes(null)) return false
-  if ('const' in schemaRecord && schemaRecord.const !== null) return false
-
-  if (schemaRecord.type !== undefined)
-    return openapiTypeIncludesNull(schemaRecord.type) && !hasSubschemaApplicator(schemaRecord)
-
-  return (
-    Array.isArray(schemaRecord.anyOf) &&
-    schemaRecord.anyOf.some(member => openapiSchemaAcceptsNull(member as OpenapiSchemaBodyShorthand)) &&
-    !hasSubschemaApplicator({ ...schemaRecord, anyOf: undefined })
-  )
-}
-
-/**
- * Widens a schema to also accept null. When its `type`, `enum` and `const` are
- * the only keywords that can reject null, null is added to each in place
- * (a `const` becomes an `enum` of its value and null), matching how a nullable
- * enum column renders. Otherwise (no `type`, a subschema applied beside it, or
- * both an `enum` and a `const`) the result is `anyOf` the schema or null.
- */
-function openapiSchemaWithNull(schema: OpenapiSchemaBodyShorthand): OpenapiSchemaBodyShorthand {
-  const schemaRecord = schema as Record<string, unknown>
-  const { type } = schemaRecord
-  const hasConst = 'const' in schemaRecord
-
-  if (
-    type === undefined ||
-    hasSubschemaApplicator(schemaRecord) ||
-    (hasConst && schemaRecord.enum !== undefined)
-  )
-    return { anyOf: [schema, NULL_OBJECT_OPENAPI] }
-
-  const { const: constValue, ...schemaWithoutConst } = schemaRecord
-  const types = Array.isArray(type) ? (type as unknown[]) : [type]
-  const allowedValues = hasConst ? [constValue] : schemaRecord.enum
-
-  return {
-    ...schemaWithoutConst,
-    type: openapiTypeIncludesNull(type) ? type : [...types, 'null'],
-    ...(Array.isArray(allowedValues)
-      ? { enum: allowedValues.includes(null) ? allowedValues : [...(allowedValues as unknown[]), null] }
-      : {}),
-  } as OpenapiSchemaBodyShorthand
 }

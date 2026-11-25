@@ -1,4 +1,4 @@
-import { CalendarDate, ClockTime, ClockTimeTz, DateTime, Dream } from '@rvoh/dream'
+import { CalendarDate, ClockTime, ClockTimeTz, DateTime, Dream, DreamApp } from '@rvoh/dream'
 import {
   OpenapiSchemaArray,
   OpenapiSchemaBody,
@@ -31,7 +31,7 @@ import isObject from '../helpers/isObject.js'
 import isUuid from '../helpers/isUuid.js'
 import { validateObject } from '../helpers/validateOpenApiSchema.js'
 import { Inc } from '../i18n/conf/types.js'
-import type { VirtualAttributeStatement } from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
+import { declaredJSONColumnShape } from '../openapi-renderer/helpers/dreamColumnOpenapiShape.js'
 import paramNamesForDreamClass from './helpers/paramNamesForDreamClass.js'
 
 export type ExtractedDreamParamSafeAttributes<
@@ -62,6 +62,39 @@ export default class Params {
    * `ParamValidationErrors`, which the router answers with a 400. A single
    * value is never wrapped into an array. (`paramsFor` and `extractParams`
    * read a missing or null `key` as `[]` before calling this.)
+   *
+   * Likewise, a bare value given for an array column or an array-typed
+   * `@deco.Virtual`/`@deco.Encrypted` attribute is rejected, never wrapped.
+   *
+   * A value for a column or attribute whose shape the model declares
+   * (`@deco.JSON`, `@deco.Virtual`, `@deco.Encrypted`) must match that
+   * declaration, whatever the endpoint's OpenAPI says and whether or not
+   * request validation is on. A `@deco.JSON` value, and a
+   * `@deco.Virtual`/`@deco.Encrypted` value whose shape is an object, an array
+   * of objects or a composition, is checked as submitted with Dream's check,
+   * the same one every save runs, and is returned as submitted. A primitive
+   * `@deco.Virtual`/`@deco.Encrypted` shape (or an array of primitives) is cast
+   * as any column's is and then checked only against the declared enum. Only
+   * the cast itself checks its format (a `date`, `date-time` or `uuid` value
+   * must be one to be cast); any other format, such as `email`, and the other
+   * constraints (`maxLength`, `pattern`, `minimum` and the like) are not
+   * checked here. A `null` or `undefined` element of a declared array of
+   * primitives is rejected, whichever form declares the array (`'integer[]'`,
+   * `{ type: 'integer[]' }` or `{ type: 'array', items: { type: 'integer' } }`),
+   * since its items schema excludes null; `null` for the whole array is
+   * accepted when the declaration admits it. Neither path knows a format
+   * added through an OpenAPI document's or an `@OpenAPI` endpoint's
+   * `ajvOptions.init`: Dream's check knows only its built-in formats (the
+   * `ajv-formats` formats, such as `date`, `email` and `uuid`, and `decimal`
+   * and `bigint`) and accepts any value for another `format`. A format added
+   * in `init` is checked only by that endpoint's OpenAPI request and response
+   * validators. A shorthand is cast the same whether it is declared as a
+   * string or as an object's `type`: `'date'` and `{ type: 'date' }` both
+   * return a `CalendarDate`, and `'decimal'` and `{ type: 'decimal' }` both
+   * accept `'5.5'`. A `@deco.JSON` column, or an `@deco.Encrypted` attribute,
+   * accepts `null` when its column allows null (or its shape does). A
+   * `@deco.JSON` column never accepts a string (nor a string element of a
+   * json[]/jsonb[] column), which Dream would store as raw JSON text.
    */
   public static for<
     T extends typeof Dream,
@@ -122,7 +155,12 @@ export default class Params {
     const paramSafeColumns: string[] = paramNamesForDreamClass(dreamClass, forOpts as any)
 
     for (const columnName of paramSafeColumns) {
-      if (params[columnName as keyof typeof params] === undefined) continue
+      const paramValue = params[columnName as keyof typeof params] as
+        | PsychicParamsPrimitive
+        | PsychicParamsDictionary
+        | PsychicParamsDictionary[]
+        | undefined
+      if (paramValue === undefined) continue
 
       const columnMetadata = columns[columnName as keyof typeof columns] as {
         dbType: string
@@ -134,7 +172,21 @@ export default class Params {
       try {
         const castType = DB_TYPE_TO_CAST_TYPE[columnMetadata?.dbType]
 
-        if (castType) {
+        if (columnMetadata && declaredJSONColumnShape(dreamClass, columnName) !== undefined) {
+          // the `@deco.JSON` declaration (with the column's nullability and,
+          // for an array column, applied to each element) stands in for the
+          // object-only json cast, so a scalar or array the declaration
+          // allows passes. A string never does, whatever the declaration
+          // says: Dream stores it as raw JSON text rather than as a JSON
+          // string (and refuses a declaration that admits one at boot).
+          throwIfStringForJSONColumn(columnName, paramValue, columnMetadata.isArray)
+          returnObj[columnName as keyof typeof returnObj] = validateAgainstDeclaredShape(
+            dreamClass,
+            columnName,
+            paramValue,
+          ) as never
+        } else if (castType) {
+          throwIfBareValueForArrayCast(columnName, paramValue, castType)
           returnObj[columnName as keyof typeof returnObj] = this.cast(
             params,
             columnName.toString(),
@@ -142,16 +194,13 @@ export default class Params {
             { allowNull: columnMetadata.allowNull },
           )
         } else if (dreamClass.isVirtualColumn(columnName)) {
-          const virtualCast = virtualAttributeCast(dreamClass, columnName)
-          returnObj[columnName as keyof typeof returnObj] = this.cast(
+          returnObj[columnName as keyof typeof returnObj] = this.castVirtualAttribute(
             params,
-            columnName.toString(),
-            virtualCast.expectedType,
-            { allowNull: virtualCast.allowNull },
-          )
+            dreamClass,
+            columnName,
+            paramValue,
+          ) as never
         } else if (columnMetadata?.enumValues) {
-          const paramValue = params[columnName as keyof typeof params]
-
           if (columnMetadata.isArray && paramValue === null && columnMetadata.allowNull) {
             // A nullable enum[] column is rendered `['array', 'null']` in
             // OpenAPI, so `null` clears it, as it does for every other
@@ -202,6 +251,70 @@ export default class Params {
   }
 
   /**
+   * Casts and checks a `@deco.Virtual`/`@deco.Encrypted` attribute against its
+   * declared shape. A primitive (or an array of primitives) is cast as today,
+   * so `'true'` and `"5"` arriving from a query string still pass, and is then
+   * checked against the declared enum (an array with a `null` or `undefined`
+   * element is rejected first); any other shape (an object, an array of
+   * objects, a composition) is validated as submitted, without coercion. The
+   * cast is read from the declaration as Dream expands it, so a shorthand
+   * declared in object form (`{ type: 'date' }`) is cast as its string form
+   * (`'date'`) is. An
+   * `@deco.Encrypted` attribute whose backing column allows null accepts
+   * `null`, as Dream's shape for it does.
+   */
+  private static castVirtualAttribute(
+    params: object,
+    dreamClass: typeof Dream,
+    columnName: string,
+    paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+  ): unknown {
+    const declaredShape = DreamApp.system.modelDeclaredShape(dreamClass, columnName)?.shape
+
+    if (!declaredShape) throw new Error(`Unable to infer params cast type for virtual column: ${columnName}`)
+
+    // cast from the declaration as Dream expands it, so a shorthand declared
+    // in object form (`{ type: 'decimal' }`) is cast as its string form
+    // (`'decimal'`) is
+    const primitiveCast =
+      primitiveCastFromOpenapi(DreamApp.system.expandOpenapiShorthand(declaredShape)) ??
+      castOfNonShorthandDeclaration(declaredShape)
+    if (!primitiveCast) return validateAgainstDeclaredShape(dreamClass, columnName, paramValue)
+
+    throwIfBareValueForArrayCast(columnName, paramValue, primitiveCast.expectedType)
+    throwIfNullElementForArrayCast(columnName, paramValue, primitiveCast.expectedType)
+
+    // the declared shape as Dream checks it and Psychic renders it: for an
+    // `@deco.Encrypted` attribute, with `null` added when its backing column
+    // allows null. `null` passes when the declaration's own type admits it, as
+    // before, or when that shape accepts it
+    const declaredSchema = DreamApp.system.declaredShapeSchema(dreamClass, columnName)!
+
+    const castValue: unknown = this.cast(params, columnName, primitiveCast.expectedType, {
+      allowNull: primitiveCast.allowNull || DreamApp.system.openapiSchemaAcceptsNull(declaredSchema),
+    })
+
+    const allowedValues = declaredEnumValues(declaredSchema)
+    if (allowedValues && castValue !== null && castValue !== undefined) {
+      // A date or date-time is checked as the JSON string it arrives as, as
+      // the OpenAPI enum checks it: the cast hydrates it into a CalendarDate
+      // or DateTime, which never equals a string. Every other primitive is
+      // checked after the cast, so a query-string number or boolean still
+      // matches a numeric or boolean enum.
+      const comparedValue = HYDRATED_DATE_CAST_TYPES.includes(primitiveCast.expectedType)
+        ? jsonPrimitiveForEnumCheck(paramValue)
+        : castValue
+      const comparedValues = (Array.isArray(comparedValue) ? comparedValue : [comparedValue]).filter(
+        value => value !== null && value !== undefined,
+      )
+      if (!comparedValues.every(value => allowedValues.includes(value)))
+        throw new ParamValidationError(columnName, ['did not match expected enum values'])
+    }
+
+    return castValue
+  }
+
+  /**
    * ### .extract
    *
    * Typed + runtime-enforced allowlist extraction. Equivalent to
@@ -228,8 +341,9 @@ export default class Params {
     >,
     ReturnPayload extends OptsType['array'] extends true ? ReturnPartial[] : ReturnPartial,
   >(params: object, dreamClass: T, allowed: AllowedArray, opts?: OptsType): ReturnPayload {
+    const forOpts = { ...(opts ?? {}), only: allowed }
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
-    return Params.for(params, dreamClass, { ...(opts ?? {}), only: allowed } as any)
+    return Params.for(params, dreamClass, forOpts as any) as unknown as ReturnPayload
   }
 
   public static restrict<T extends typeof Params>(
@@ -889,41 +1003,130 @@ const DB_TYPE_TO_CAST_TYPE: Record<string, PsychicParamsPrimitiveLiteral> = {
   'numeric[]': 'number[]',
 }
 
-function virtualAttributeCast(
+/**
+ * Validates a value against the shape the model declares for a column or
+ * attribute, with Dream's declared-shape check (no coercion and no defaults:
+ * the value must already match, and is validated and returned exactly as
+ * submitted), returning the value as submitted, or throwing the
+ * `ParamValidationError` the router answers with a 400.
+ */
+function validateAgainstDeclaredShape(
   dreamClass: typeof Dream,
   columnName: string,
-): {
-  expectedType: PsychicParamsPrimitiveLiteral
-  allowNull: boolean
-} {
-  const metadata = (dreamClass['virtualAttributes'] as VirtualAttributeStatement[]).find(
-    statement => statement.property === columnName,
-  )
+  paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+): unknown {
+  const check = DreamApp.system.validateDeclaredShape(dreamClass, columnName, paramValue)
+  if (check.isValid) return paramValue
 
-  const primitiveCast = primitiveCastFromOpenapi(metadata?.type)
-  if (!primitiveCast) throw new Error(`Unable to infer params cast type for virtual column: ${columnName}`)
-  return primitiveCast
+  throw new ParamValidationError(
+    columnName,
+    check.errors.map(error =>
+      error.instancePath ? `${error.instancePath} ${error.message}` : (error.message ?? 'is invalid'),
+    ),
+  )
 }
 
+/**
+ * A string for a `@deco.JSON` column (or, for a json[]/jsonb[] column, as an
+ * element) is a client error: Dream's json setter takes a string as
+ * already-encoded JSON text, so `'{"admin":true}'` would be stored as an object
+ * the declared shape never saw, and any other string fails at INSERT. Dream
+ * refuses a declaration that admits a string at boot; this keeps a value from
+ * reaching the setter as text even when a declaration gets past that.
+ */
+function throwIfStringForJSONColumn(
+  columnName: string,
+  paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+  isArrayColumn: boolean,
+) {
+  const message = 'must not be a string (send the JSON value itself, not JSON text)'
+  if (typeof paramValue === 'string') throw new ParamValidationError(columnName, [message])
+  if (!isArrayColumn || !Array.isArray(paramValue)) return
+
+  const stringIndex = (paramValue as unknown[]).findIndex(element => typeof element === 'string')
+  if (stringIndex !== -1) throw new ParamValidationError(columnName, [`/${stringIndex} ${message}`])
+}
+
+/**
+ * The enum a declared primitive (or each element of a declared array of
+ * primitives) is limited to, if it declares one.
+ */
+function declaredEnumValues(schema: OpenapiSchemaBody): readonly unknown[] | null {
+  const schemaRecord = schema as { enum?: unknown; items?: { enum?: unknown } }
+  if (Array.isArray(schemaRecord.enum)) return schemaRecord.enum as unknown[]
+  if (Array.isArray(schemaRecord.items?.enum)) return schemaRecord.items.enum as unknown[]
+  return null
+}
+
+const HYDRATED_DATE_CAST_TYPES: PsychicParamsPrimitiveLiteral[] = ['date', 'date[]', 'datetime', 'datetime[]']
+
+/**
+ * A submitted date or date-time (or array of them) as the JSON primitive an
+ * enum lists: a string trimmed as the cast trims it, or the JSON form of a
+ * CalendarDate or DateTime passed in directly.
+ */
+function jsonPrimitiveForEnumCheck(value: unknown): unknown {
+  if (Array.isArray(value)) return value.map(jsonPrimitiveForEnumCheck)
+  if (typeof value === 'string') return value.trim()
+  if (value instanceof CalendarDate || value instanceof DateTime) return value.toJSON()
+  return value
+}
+
+/**
+ * `Params.for` never wraps a bare value into an array: a request body can tell
+ * a single value from a one-element array, and single-value query arrays are
+ * conformed to arrays upstream (`conformQueryArrayParamsToOpenapiShape`), so a
+ * bare value here is a client error. `null` is left to the cast, which accepts
+ * it only when the column or attribute allows null. (`Params.cast` and
+ * `castParam`, which name an array type explicitly, still wrap.)
+ */
+function throwIfBareValueForArrayCast(
+  columnName: string,
+  paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+  castType: PsychicParamsPrimitiveLiteral,
+) {
+  if (!castType.endsWith('[]')) return
+  if (paramValue === null || Array.isArray(paramValue)) return
+  throw new ParamValidationError(columnName, [typeToError(castType)])
+}
+
+/**
+ * A `@deco.Virtual`/`@deco.Encrypted` array of primitives is cast element by
+ * element, and the array cast drops a `null` or `undefined` element. Its items
+ * schema excludes null (items that admit null, as in
+ * `{ type: 'array', items: { type: ['integer', 'null'] } }`, are checked
+ * against the declaration instead of cast), so such an element is a client
+ * error rather than something to drop, in every form the declaration takes:
+ * `'integer[]'`, `{ type: 'integer[]' }` and `{ type: 'array', items: ... }`.
+ * `null` for the whole value is left to the cast, which accepts it when the
+ * declaration admits it. (Array columns and an explicit `Params.cast` or
+ * `castParam` still drop such elements.)
+ */
+function throwIfNullElementForArrayCast(
+  columnName: string,
+  paramValue: PsychicParamsPrimitive | PsychicParamsDictionary | PsychicParamsDictionary[],
+  castType: PsychicParamsPrimitiveLiteral,
+) {
+  if (!castType.endsWith('[]') || castType === 'null[]') return
+  if (!Array.isArray(paramValue)) return
+  // an index loop, so a hole in a sparse array counts as undefined
+  for (let index = 0; index < paramValue.length; index++) {
+    if (paramValue[index] === null || paramValue[index] === undefined)
+      throw new ParamValidationError(columnName, [typeToError(castType)])
+  }
+}
+
+/**
+ * The cast for a declared primitive (or array of primitives), or `null` for
+ * any other shape (an object, an array of objects, a composition), which
+ * `Params.for` validates against the declaration instead. Takes the expanded
+ * declaration (`DreamApp.system.expandOpenapiShorthand`), so a shorthand
+ * written as a string (`'decimal'`) or as an object's `type`
+ * (`{ type: 'decimal' }`) is read from the same schema.
+ */
 function primitiveCastFromOpenapi(
-  openapi: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined,
+  openapi: OpenapiSchemaBody,
 ): { expectedType: PsychicParamsPrimitiveLiteral; allowNull: boolean } | null {
-  if (!openapi) return null
-
-  if (Array.isArray(openapi)) {
-    const nonNullOpenapi = openapi.find(type => type !== 'null')
-    const primitiveCast = primitiveCastFromOpenapi(
-      nonNullOpenapi as OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand | undefined,
-    )
-    if (!primitiveCast) return null
-    return { ...primitiveCast, allowNull: true }
-  }
-
-  if (typeof openapi === 'string') {
-    const expectedType = shorthandToCastType(openapi)
-    return expectedType ? { expectedType, allowNull: false } : null
-  }
-
   if (!('type' in openapi)) return null
 
   const openapiType = openapi.type
@@ -945,25 +1148,27 @@ function primitiveCastFromOpenapi(
   return expectedType ? { expectedType, allowNull } : null
 }
 
-function shorthandToCastType(openapi: string): PsychicParamsPrimitiveLiteral | null {
-  switch (openapi) {
-    case 'date-time':
-      return 'datetime'
-    case 'date-time[]':
-      return 'datetime[]'
-    case 'decimal':
-      return 'number'
-    case 'decimal[]':
-      return 'number[]'
-    case 'json':
-      return 'json'
-    case 'null':
-      return 'null'
-    default:
-      return PARAM_CAST_TYPES.includes(openapi as PsychicParamsPrimitiveLiteral)
-        ? (openapi as PsychicParamsPrimitiveLiteral)
-        : null
+/**
+ * The cast for a declaration naming a cast type that is not a Dream shorthand
+ * (`'bigint'`, `'uuid'`, `'time'`, `'datetime'`, alone or with `'null'`),
+ * which only an untyped declaration can name. Dream expands such a string to
+ * `{ type: 'object' }`, which accepts any object, so it is cast as it always
+ * has been, which refuses an object.
+ */
+function castOfNonShorthandDeclaration(
+  declaration: OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand,
+): { expectedType: PsychicParamsPrimitiveLiteral; allowNull: boolean } | null {
+  if (Array.isArray(declaration)) {
+    const nonNullDeclaration = declaration.find(type => type !== 'null')
+    const cast = castOfNonShorthandDeclaration(
+      nonNullDeclaration as OpenapiShorthandPrimitiveTypes | OpenapiSchemaBodyShorthand,
+    )
+    return cast ? { ...cast, allowNull: true } : null
   }
+
+  return typeof declaration === 'string' && NON_SHORTHAND_CAST_TYPES.includes(declaration)
+    ? { expectedType: declaration as PsychicParamsPrimitiveLiteral, allowNull: false }
+    : null
 }
 
 function openapiTypeToCastType(
@@ -979,8 +1184,6 @@ function openapiTypeToCastType(
       return 'number'
     case 'null':
       return 'null'
-    case 'object':
-      return 'json'
     case 'string':
       switch (format) {
         case 'date':
@@ -997,32 +1200,21 @@ function openapiTypeToCastType(
   }
 }
 
-const PARAM_CAST_TYPES: PsychicParamsPrimitiveLiteral[] = [
+// the cast types a declaration can name that are not Dream shorthands; every
+// Dream shorthand is cast from its expansion
+const NON_SHORTHAND_CAST_TYPES: string[] = [
   'bigint',
   'bigint[]',
-  'boolean',
-  'boolean[]',
-  'date',
-  'date[]',
   'datetime',
   'datetime[]',
-  'integer',
-  'integer[]',
-  'json',
-  'json[]',
-  'null',
   'null[]',
-  'number',
-  'number[]',
-  'string',
-  'string[]',
   'time',
   'time[]',
   'timetz',
   'timetz[]',
   'uuid',
   'uuid[]',
-]
+] satisfies PsychicParamsPrimitiveLiteral[]
 
 const typeToErrorMap: Record<PsychicParamsPrimitiveLiteral, string> = {
   bigint: 'expected bigint',

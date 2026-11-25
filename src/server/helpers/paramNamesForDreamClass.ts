@@ -1,4 +1,4 @@
-import { Dream } from '@rvoh/dream'
+import { Dream, DreamApp } from '@rvoh/dream'
 import { DreamParamSafeAttributes, DreamParamSafeColumnNames, StrictInterface } from '@rvoh/dream/types'
 import type { ExtractedDreamParamSafeAttributes, ParamsForOpts } from '../params.js'
 
@@ -24,15 +24,7 @@ export default function paramNamesForDreamClass<
       >,
   RetArray = (keyof ReturnPartialType)[],
 >(dreamClass: T, { only }: ForOpts = {} as ForOpts): RetArray {
-  // `paramSafeColumnsOrFallback` is a Dream internal, reached through the bracketed
-  // back-door (the same escape hatch psychic uses for `virtualAttributes`). Dream
-  // declares it `private static`, which TypeScript erases to an untyped member in
-  // `Dream.d.ts`, so the member is cast to a concrete signature here to keep the
-  // return shape checked instead of degrading to `any`. `.call` preserves `this`,
-  // which the Dream implementation relies on.
-  const paramSafeColumns = (
-    dreamClass['paramSafeColumnsOrFallback'] as unknown as (this: T) => string[]
-  ).call(dreamClass)
+  const paramSafeColumns = DreamApp.system.paramSafeColumnNames(dreamClass)
 
   return Array.isArray(only)
     ? (paramSafeColumns.filter(column =>
