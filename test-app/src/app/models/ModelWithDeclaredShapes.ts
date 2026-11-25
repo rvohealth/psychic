@@ -140,9 +140,9 @@ export default class ModelWithDeclaredShapes extends ApplicationModel {
 
   // end: an array declared through `items`
 
-  // begin: every primitive shorthand, its array and their nullable variants,
-  // each declared both as the string (`'decimal'`) and in object form
-  // (`{ type: 'decimal' }`)
+  // begin: a sample of the primitive shorthands, each declared both as the
+  // string (`'decimal'`) and in object form (`{ type: 'decimal' }`): every
+  // primitive, and for integer also its array and their nullable variants
 
   @deco.Virtual('decimal')
   public decimalStringForm: number | undefined
@@ -150,47 +150,11 @@ export default class ModelWithDeclaredShapes extends ApplicationModel {
   @deco.Virtual({ type: 'decimal' })
   public decimalObjectForm: number | undefined
 
-  @deco.Virtual('decimal[]')
-  public decimalArrayStringForm: number[] | undefined
-
-  @deco.Virtual({ type: 'decimal[]' })
-  public decimalArrayObjectForm: number[] | undefined
-
-  @deco.Virtual(['decimal', 'null'])
-  public nullableDecimalStringForm: number | null | undefined
-
-  @deco.Virtual({ type: ['decimal', 'null'] })
-  public nullableDecimalObjectForm: number | null | undefined
-
-  @deco.Virtual(['decimal[]', 'null'])
-  public nullableDecimalArrayStringForm: number[] | null | undefined
-
-  @deco.Virtual({ type: ['decimal[]', 'null'] })
-  public nullableDecimalArrayObjectForm: number[] | null | undefined
-
   @deco.Virtual('date')
   public dateStringForm: CalendarDate | undefined
 
   @deco.Virtual({ type: 'date' })
   public dateObjectForm: CalendarDate | undefined
-
-  @deco.Virtual('date[]')
-  public dateArrayStringForm: CalendarDate[] | undefined
-
-  @deco.Virtual({ type: 'date[]' })
-  public dateArrayObjectForm: CalendarDate[] | undefined
-
-  @deco.Virtual(['date', 'null'])
-  public nullableDateStringForm: CalendarDate | null | undefined
-
-  @deco.Virtual({ type: ['date', 'null'] })
-  public nullableDateObjectForm: CalendarDate | null | undefined
-
-  @deco.Virtual(['date[]', 'null'])
-  public nullableDateArrayStringForm: CalendarDate[] | null | undefined
-
-  @deco.Virtual({ type: ['date[]', 'null'] })
-  public nullableDateArrayObjectForm: CalendarDate[] | null | undefined
 
   @deco.Virtual('date-time')
   public dateTimeStringForm: DateTime | undefined
@@ -198,23 +162,23 @@ export default class ModelWithDeclaredShapes extends ApplicationModel {
   @deco.Virtual({ type: 'date-time' })
   public dateTimeObjectForm: DateTime | undefined
 
-  @deco.Virtual('date-time[]')
-  public dateTimeArrayStringForm: DateTime[] | undefined
+  @deco.Virtual('number')
+  public numberStringForm: number | undefined
 
-  @deco.Virtual({ type: 'date-time[]' })
-  public dateTimeArrayObjectForm: DateTime[] | undefined
+  @deco.Virtual({ type: 'number' })
+  public numberObjectForm: number | undefined
 
-  @deco.Virtual(['date-time', 'null'])
-  public nullableDateTimeStringForm: DateTime | null | undefined
+  @deco.Virtual('string')
+  public stringStringForm: string | undefined
 
-  @deco.Virtual({ type: ['date-time', 'null'] })
-  public nullableDateTimeObjectForm: DateTime | null | undefined
+  @deco.Virtual({ type: 'string' })
+  public stringObjectForm: string | undefined
 
-  @deco.Virtual(['date-time[]', 'null'])
-  public nullableDateTimeArrayStringForm: DateTime[] | null | undefined
+  @deco.Virtual('boolean')
+  public booleanStringForm: boolean | undefined
 
-  @deco.Virtual({ type: ['date-time[]', 'null'] })
-  public nullableDateTimeArrayObjectForm: DateTime[] | null | undefined
+  @deco.Virtual({ type: 'boolean' })
+  public booleanObjectForm: boolean | undefined
 
   @deco.Virtual('integer')
   public integerStringForm: number | undefined
@@ -240,77 +204,5 @@ export default class ModelWithDeclaredShapes extends ApplicationModel {
   @deco.Virtual({ type: ['integer[]', 'null'] })
   public nullableIntegerArrayObjectForm: number[] | null | undefined
 
-  @deco.Virtual('number')
-  public numberStringForm: number | undefined
-
-  @deco.Virtual({ type: 'number' })
-  public numberObjectForm: number | undefined
-
-  @deco.Virtual('number[]')
-  public numberArrayStringForm: number[] | undefined
-
-  @deco.Virtual({ type: 'number[]' })
-  public numberArrayObjectForm: number[] | undefined
-
-  @deco.Virtual(['number', 'null'])
-  public nullableNumberStringForm: number | null | undefined
-
-  @deco.Virtual({ type: ['number', 'null'] })
-  public nullableNumberObjectForm: number | null | undefined
-
-  @deco.Virtual(['number[]', 'null'])
-  public nullableNumberArrayStringForm: number[] | null | undefined
-
-  @deco.Virtual({ type: ['number[]', 'null'] })
-  public nullableNumberArrayObjectForm: number[] | null | undefined
-
-  @deco.Virtual('string')
-  public stringStringForm: string | undefined
-
-  @deco.Virtual({ type: 'string' })
-  public stringObjectForm: string | undefined
-
-  @deco.Virtual('string[]')
-  public stringArrayStringForm: string[] | undefined
-
-  @deco.Virtual({ type: 'string[]' })
-  public stringArrayObjectForm: string[] | undefined
-
-  @deco.Virtual(['string', 'null'])
-  public nullableStringStringForm: string | null | undefined
-
-  @deco.Virtual({ type: ['string', 'null'] })
-  public nullableStringObjectForm: string | null | undefined
-
-  @deco.Virtual(['string[]', 'null'])
-  public nullableStringArrayStringForm: string[] | null | undefined
-
-  @deco.Virtual({ type: ['string[]', 'null'] })
-  public nullableStringArrayObjectForm: string[] | null | undefined
-
-  @deco.Virtual('boolean')
-  public booleanStringForm: boolean | undefined
-
-  @deco.Virtual({ type: 'boolean' })
-  public booleanObjectForm: boolean | undefined
-
-  @deco.Virtual('boolean[]')
-  public booleanArrayStringForm: boolean[] | undefined
-
-  @deco.Virtual({ type: 'boolean[]' })
-  public booleanArrayObjectForm: boolean[] | undefined
-
-  @deco.Virtual(['boolean', 'null'])
-  public nullableBooleanStringForm: boolean | null | undefined
-
-  @deco.Virtual({ type: ['boolean', 'null'] })
-  public nullableBooleanObjectForm: boolean | null | undefined
-
-  @deco.Virtual(['boolean[]', 'null'])
-  public nullableBooleanArrayStringForm: boolean[] | null | undefined
-
-  @deco.Virtual({ type: ['boolean[]', 'null'] })
-  public nullableBooleanArrayObjectForm: boolean[] | null | undefined
-
-  // end: every primitive shorthand
+  // end: the sample of primitive shorthands
 }

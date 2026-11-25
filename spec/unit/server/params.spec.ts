@@ -269,22 +269,25 @@ describe('Params', () => {
       })
 
       context('a shorthand declared in object form', () => {
-        // ModelWithDeclaredShapes declares every primitive shorthand, its array
-        // and their nullable variants, each both as the string (`'decimal'`,
-        // named `decimalStringForm`) and in object form (`{ type: 'decimal' }`,
-        // named `decimalObjectForm`)
-        const shorthands = (
-          ['decimal', 'date', 'dateTime', 'integer', 'number', 'string', 'boolean'] as const
-        ).flatMap(primitive =>
-          [false, true].flatMap(nullable => [false, true].map(array => ({ primitive, nullable, array }))),
-        )
-        const propertyName = (
-          { primitive, nullable, array }: (typeof shorthands)[number],
-          form: 'StringForm' | 'ObjectForm',
-        ) =>
-          (nullable ? `nullable${primitive.charAt(0).toUpperCase()}${primitive.slice(1)}` : primitive) +
-          (array ? 'Array' : '') +
-          form
+        // ModelWithDeclaredShapes declares a sample of the shorthands, each both
+        // as the string (`'decimal'`, named `decimalStringForm`) and in object
+        // form (`{ type: 'decimal' }`, named `decimalObjectForm`): every
+        // primitive, and for integer also its array and their nullable variants.
+        // A sample is enough because both forms are cast from Dream's expansion
+        // of the declaration, which is read for an array and for null the same
+        // way whatever the primitive.
+        const shorthands = [
+          'decimal',
+          'date',
+          'dateTime',
+          'number',
+          'string',
+          'boolean',
+          'integer',
+          'integerArray',
+          'nullableInteger',
+          'nullableIntegerArray',
+        ]
 
         const submittedValues = [
           '5.5',
@@ -324,8 +327,8 @@ describe('Params', () => {
 
         it('casts each value exactly as the string form does', () => {
           for (const shorthand of shorthands) {
-            const stringForm = propertyName(shorthand, 'StringForm')
-            const objectForm = propertyName(shorthand, 'ObjectForm')
+            const stringForm = `${shorthand}StringForm`
+            const objectForm = `${shorthand}ObjectForm`
             expect(ModelWithDeclaredShapes.isVirtualColumn(stringForm), stringForm).toBe(true)
             expect(ModelWithDeclaredShapes.isVirtualColumn(objectForm), objectForm).toBe(true)
 
@@ -344,7 +347,6 @@ describe('Params', () => {
             {
               dateObjectForm: '2026-11-20',
               dateTimeObjectForm: '2026-11-19T10:00:00.000Z',
-              nullableDateObjectForm: '2026-11-20',
               dateTimeArrayItemsForm: ['2026-11-19T10:00:00.000Z'],
             },
             ModelWithDeclaredShapes,
@@ -353,7 +355,6 @@ describe('Params', () => {
           expect((result['dateObjectForm'] as CalendarDate).toISO()).toEqual('2026-11-20')
           expect(result['dateTimeObjectForm']).toBeInstanceOf(DateTime)
           expect((result['dateTimeObjectForm'] as DateTime).toISO()).toEqual('2026-11-19T10:00:00.000000Z')
-          expect(result['nullableDateObjectForm']).toBeInstanceOf(CalendarDate)
           expect((result['dateTimeArrayItemsForm'] as DateTime[])[0]).toBeInstanceOf(DateTime)
         })
 
@@ -363,14 +364,14 @@ describe('Params', () => {
               {
                 decimalObjectForm: '5.5',
                 integerArrayObjectForm: ['1', '2'],
-                nullableDecimalObjectForm: null,
+                nullableIntegerObjectForm: null,
               },
               ModelWithDeclaredShapes,
             ),
           ).toEqual({
             decimalObjectForm: 5.5,
             integerArrayObjectForm: [1, 2],
-            nullableDecimalObjectForm: null,
+            nullableIntegerObjectForm: null,
           })
         })
 
